@@ -47,11 +47,11 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 200;
+  size_t maxIt = 150;
   double eps = 1e-12;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(4 * hmax * hmax);
+  auto alpha = ScalarCoefficient(2 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -89,6 +89,7 @@ int main(int, char**)
     solver.solve(hilbert);
 
     // Save mesh
+    u.save("u.gf");
     theta.save("theta.gf");
     Omega.save("Omega.mesh");
 
@@ -127,6 +128,8 @@ int main(int, char**)
     // Convert back to Rodin data type
     Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
+    // Save mesh
+    // Omega.save("Omega.mesh");
 
     // Test for convergence
     if ((obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps))

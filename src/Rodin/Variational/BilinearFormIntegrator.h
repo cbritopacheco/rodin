@@ -13,11 +13,15 @@ namespace Rodin::Variational
    class BilinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
+         virtual ~BilinearFormIntegratorBase() = default;
+
          virtual const std::set<int>& getAttributes() const = 0;
 
          virtual void buildMFEMBilinearFormIntegrator() = 0;
 
          virtual mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() = 0;
+
+         virtual IntegratorRegion getIntegratorRegion() const = 0;
 
          /**
           * @internal
@@ -38,6 +42,11 @@ namespace Rodin::Variational
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Domain;
+         }
+
          virtual BilinearFormDomainIntegrator& over(int attr) = 0;
 
          virtual BilinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;

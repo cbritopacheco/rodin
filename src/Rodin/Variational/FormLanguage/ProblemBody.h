@@ -34,6 +34,8 @@ namespace Rodin::Variational::FormLanguage
 
          ProblemBody(const BilinearFormIntegratorBase& bfi);
 
+         ProblemBody(const BilinearFormIntegratorSum& bfi);
+
          ProblemBody(const ProblemBody& other);
 
          BCList& getDirichletBCList();

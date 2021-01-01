@@ -40,13 +40,13 @@ namespace Rodin::Variational
           * build the bilinear form.
           */
          virtual BilinearFormBase& from(
-               const BilinearFormDomainIntegrator& bfi) = 0;
+               const BilinearFormIntegratorBase& bfi) = 0;
 
          /**
           * @brief Adds a BilinearFormDomainIntegrator to the bilinear form.
           */
          virtual BilinearFormBase& add(
-               const BilinearFormDomainIntegrator& bfi) = 0;
+               const BilinearFormIntegratorBase& bfi) = 0;
 
          /**
           * @brief Reflects the changes in the mesh.
@@ -78,6 +78,8 @@ namespace Rodin::Variational
    class BilinearForm : public BilinearFormBase
    {
       public:
+         using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
+
          /**
           * @brief Constructs a bilinear form defined on some finite element
           * space.
@@ -104,22 +106,15 @@ namespace Rodin::Variational
           * BilinearFormIntegratorBase.
           * @param[in] bfi Bilinear form integrator
           */
-         template <class T>
-         std::enable_if_t<
-            std::is_base_of_v<BilinearFormIntegratorBase, T>, BilinearForm<FEC>&>
-         operator=(const T& bfi)
-         {
-            from(bfi).assemble();
-            return *this;
-         }
+         BilinearForm<FEC>& operator=(const BilinearFormIntegratorBase& bfi);
 
          void assemble() override;
 
          void update() override;
 
-         BilinearForm<FEC>& add(const BilinearFormDomainIntegrator& bfi) override;
+         BilinearForm<FEC>& add(const BilinearFormIntegratorBase& bfi) override;
 
-         BilinearForm<FEC>& from(const BilinearFormDomainIntegrator& bfi) override;
+         BilinearForm<FEC>& from(const BilinearFormIntegratorBase& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {
@@ -134,7 +129,7 @@ namespace Rodin::Variational
       private:
          FiniteElementSpace<FEC>& m_fes;
          std::unique_ptr<mfem::BilinearForm> m_bf;
-         FormLanguage::ProblemBody::BFIList m_bfiDomainList;
+         BFIList m_bfiDomainList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
 }

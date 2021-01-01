@@ -36,8 +36,9 @@ int main(int, char**)
   // Optimization parameters
   size_t maxIt = 30;
   double eps = 1e-6;
+  double hmax = 0.1;
   auto ell = ScalarCoefficient(5);
-  auto alpha = ScalarCoefficient(0.1);
+  auto alpha = ScalarCoefficient(hmax);
 
   std::vector<double> obj;
 
@@ -80,9 +81,6 @@ int main(int, char**)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);
 
-    Omega.save("Omega0.mesh");
-    theta.save("theta.gf");
-
     // Update objective
     obj.push_back(compliance(u) + ell.getValue() * Omega.getVolume());
 
@@ -93,20 +91,20 @@ int main(int, char**)
       break;
 
     // Make the displacement
-    double t = Omega.getMaximumDisplacement(theta);
-    if (t < 1e-4)
+    double dt = Omega.getMaximumDisplacement(theta);
+    if (dt < 1e-4)
     {
       // If the maximum displacement is too small the mesh will degenerate
       break;
     }
     else
     {
-      theta *= 0.1 * t;
+      theta *= hmax * dt;
       Omega.displace(theta);
 
       // Refine the mesh using MMG
       auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-      MMG::MeshOptimizer2D().optimize(mmgMesh);
+      MMG::MeshOptimizer2D().setHMax(hmax).optimize(mmgMesh);
       Omega = Cast(mmgMesh).to<Mesh>();
     }
 

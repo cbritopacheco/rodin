@@ -3,6 +3,9 @@
 
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
+#include "ForwardDecls.h"
+#include "BilinearFormIntegratorSum.h"
+
 namespace Rodin::Variational::FormLanguage
 {
    namespace Internal
@@ -28,7 +31,32 @@ namespace Rodin::Variational::FormLanguage
       };
    }
 
-   class BilinearFormIntegratorUnaryMinus : public BilinearFormIntegratorBase
+   /**
+    * @internal
+    */
+   template <>
+   class BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorSum>
+      : public BilinearFormIntegratorSum
+   {
+      public:
+         BilinearFormIntegratorUnaryMinus(const BilinearFormIntegratorSum& lfi);
+
+         BilinearFormIntegratorUnaryMinus(const BilinearFormIntegratorUnaryMinus& other);
+
+         BilinearFormIntegratorUnaryMinus(BilinearFormIntegratorUnaryMinus&&) = default;
+
+         BilinearFormIntegratorUnaryMinus* copy() const noexcept override
+         {
+            return new BilinearFormIntegratorUnaryMinus(*this);
+         }
+
+      private:
+         std::unique_ptr<BilinearFormIntegratorSum> m_lfi;
+   };
+
+   template <>
+   class BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>
+      : public BilinearFormIntegratorBase
    {
       public:
          BilinearFormIntegratorUnaryMinus(const BilinearFormIntegratorBase& lfi);
@@ -42,6 +70,11 @@ namespace Rodin::Variational::FormLanguage
          {
             assert(m_bfi);
             return *m_bfi;
+         }
+
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return getBFI().getIntegratorRegion();
          }
 
          const std::set<int>& getAttributes() const override
@@ -65,8 +98,11 @@ namespace Rodin::Variational::FormLanguage
          std::unique_ptr<Internal::BFIUnaryMinus> m_mfemBFI;
    };
 
-   BilinearFormIntegratorUnaryMinus operator-(
+   BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase> operator-(
          const BilinearFormIntegratorBase& bfi);
+
+   BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorSum> operator-(
+         const BilinearFormIntegratorSum& lfi);
 }
 
 #endif

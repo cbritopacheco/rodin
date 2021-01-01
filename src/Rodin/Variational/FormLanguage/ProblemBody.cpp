@@ -11,6 +11,18 @@
 
 namespace Rodin::Variational::FormLanguage
 {
+   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
+   {
+      m_bfiDomainList.emplace_back(bfi.copy());
+   }
+
+   ProblemBody::ProblemBody(const BilinearFormIntegratorSum& bsum)
+   {
+      m_bfiDomainList.reserve(bsum.getBilinearFormDomainIntegratorList().size());
+      for (const auto& p : bsum.getBilinearFormDomainIntegratorList())
+         m_bfiDomainList.emplace_back(p->copy());
+   }
+
    ProblemBody::ProblemBody(const ProblemBody& other)
    {
       m_nbcs.reserve(other.m_nbcs.size());
@@ -29,11 +41,6 @@ namespace Rodin::Variational::FormLanguage
          m_lfiDomainList.emplace_back(v->copy());
       for (const auto& v : other.m_lfiBoundaryList)
          m_lfiBoundaryList.emplace_back(v->copy());
-   }
-
-   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
-   {
-      m_bfiDomainList.emplace_back(bfi.copy());
    }
 
    ProblemBody::BCList& ProblemBody::getNeumannBCList()

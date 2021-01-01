@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATORSUM_H
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATORSUM_H
 
@@ -10,87 +16,70 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   namespace Internal
-   {
-      class BilinearFormIntegratorSum : public mfem::BilinearFormIntegrator
-      {
-         public:
-            BilinearFormIntegratorSum(
-                  mfem::BilinearFormIntegrator& a, mfem::BilinearFormIntegrator& b)
-               : m_a(a), m_b(b)
-            {}
-
-            void AssembleElementMatrix(
-                  const mfem::FiniteElement& el,
-                  mfem::ElementTransformation& Trans,
-                  mfem::DenseMatrix& elmat)
-            {
-               m_a.AssembleElementMatrix(el, Trans, elmat);
-               mfem::DenseMatrix tmp;
-               m_b.AssembleElementMatrix(el, Trans, tmp);
-               elmat.Add(1.0, tmp);
-            }
-
-         private:
-            mfem::BilinearFormIntegrator& m_a;
-            mfem::BilinearFormIntegrator& m_b;
-      };
-   }
-
-   class BilinearFormIntegratorSum : public BilinearFormIntegratorBase
+   class BilinearFormIntegratorSum : public FormLanguage::Base
    {
       public:
+         using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
+
          BilinearFormIntegratorSum(
                const BilinearFormIntegratorBase& lhs,
                const BilinearFormIntegratorBase& rhs);
 
+         BilinearFormIntegratorSum(
+               const BilinearFormIntegratorSum& lhs,
+               const BilinearFormIntegratorBase& rhs);
+
+         BilinearFormIntegratorSum(
+               const BilinearFormIntegratorSum& lhs,
+               const BilinearFormIntegratorSum& rhs);
+
+         BilinearFormIntegratorSum(BilinearFormIntegratorSum&& other) = default;
+
          BilinearFormIntegratorSum(const BilinearFormIntegratorSum& other);
 
-         BilinearFormIntegratorBase& getLHS();
-
-         const BilinearFormIntegratorBase& getLHS() const
+         BFIList& getBilinearFormDomainIntegratorList()
          {
-            assert(m_lhs);
-            return *m_lhs;
+            return m_bfiDomainList;
          }
 
-         BilinearFormIntegratorBase& getRHS();
-
-         const BilinearFormIntegratorBase& getRHS() const
+         const BFIList& getBilinearFormDomainIntegratorList() const
          {
-            assert(m_rhs);
-            return *m_rhs;
+            return m_bfiDomainList;
          }
 
-         const std::set<int>& getAttributes() const override
-         {
-            return getLHS().getAttributes();
-         }
-
-         void buildMFEMBilinearFormIntegrator() override;
-
-         mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;
-
-         mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() override;
-
-         virtual BilinearFormIntegratorSum* copy() const noexcept override
+         BilinearFormIntegratorSum* copy() const noexcept override
          {
             return new BilinearFormIntegratorSum(*this);
          }
 
       private:
-         std::unique_ptr<BilinearFormIntegratorBase> m_lhs;
-         std::unique_ptr<BilinearFormIntegratorBase> m_rhs;
-         std::unique_ptr<Internal::BilinearFormIntegratorSum> m_mfemBFI;
+         BFIList m_bfiDomainList;
    };
 
    BilinearFormIntegratorSum operator+(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs);
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs);
+
+   BilinearFormIntegratorSum operator+(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorBase& rhs);
+
+   BilinearFormIntegratorSum operator+(
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorSum& rhs);
+
+   BilinearFormIntegratorSum operator+(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorSum& rhs);
 
    BilinearFormIntegratorSum operator-(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs);
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs);
+
+   BilinearFormIntegratorSum operator-(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorBase& rhs);
+
+   BilinearFormIntegratorSum operator-(
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorSum& rhs);
+
+   BilinearFormIntegratorSum operator-(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorSum& rhs);
+
 }
 
 #endif

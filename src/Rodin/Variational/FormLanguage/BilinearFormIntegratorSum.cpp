@@ -1,69 +1,122 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include "Rodin/Alert.h"
 #include "BilinearFormIntegratorUnaryMinus.h"
 
 #include "BilinearFormIntegratorSum.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   BilinearFormIntegratorSum
-   ::BilinearFormIntegratorSum(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs)
-      : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-   {}
-
-   BilinearFormIntegratorSum
-   ::BilinearFormIntegratorSum(const BilinearFormIntegratorSum& other)
-      : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+   BilinearFormIntegratorSum::BilinearFormIntegratorSum(
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs)
    {
-      assert(std::equal(
-               m_lhs->getAttributes().begin(), m_lhs->getAttributes().end(),
-               m_rhs->getAttributes().begin()
-               ));
+      switch (lhs.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+            m_bfiDomainList.emplace_back(lhs.copy());
+            break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
+      switch (rhs.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+            m_bfiDomainList.emplace_back(rhs.copy());
+            break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
    }
 
-   BilinearFormIntegratorBase& BilinearFormIntegratorSum::getLHS()
+   BilinearFormIntegratorSum::BilinearFormIntegratorSum(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorBase& rhs)
    {
-      return *m_lhs;
+      m_bfiDomainList.reserve(lhs.m_bfiDomainList.size() + 1);
+      for (const auto& p : lhs.m_bfiDomainList)
+         m_bfiDomainList.emplace_back(p->copy());
+      switch (rhs.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+            m_bfiDomainList.emplace_back(rhs.copy());
+            break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
+
    }
 
-   BilinearFormIntegratorBase& BilinearFormIntegratorSum::getRHS()
+   BilinearFormIntegratorSum::BilinearFormIntegratorSum(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorSum& rhs)
    {
-      return *m_rhs;
+      m_bfiDomainList.reserve(lhs.m_bfiDomainList.size() + rhs.m_bfiDomainList.size());
+      for (const auto& p : lhs.m_bfiDomainList)
+         m_bfiDomainList.emplace_back(p->copy());
+      for (const auto& p : rhs.m_bfiDomainList)
+         m_bfiDomainList.emplace_back(p->copy());
    }
 
-   void BilinearFormIntegratorSum::buildMFEMBilinearFormIntegrator()
+   BilinearFormIntegratorSum::BilinearFormIntegratorSum(
+         const BilinearFormIntegratorSum& other)
    {
-      m_lhs->buildMFEMBilinearFormIntegrator();
-      m_rhs->buildMFEMBilinearFormIntegrator();
-      m_mfemBFI = std::make_unique<Internal::BilinearFormIntegratorSum>(
-            m_lhs->getMFEMBilinearFormIntegrator(),
-            m_rhs->getMFEMBilinearFormIntegrator());
-   }
-
-   mfem::BilinearFormIntegrator&
-   BilinearFormIntegratorSum::getMFEMBilinearFormIntegrator()
-   {
-      assert(m_mfemBFI);
-      return *m_mfemBFI;
-   }
-
-   mfem::BilinearFormIntegrator*
-   BilinearFormIntegratorSum::releaseMFEMBilinearFormIntegrator()
-   {
-      return m_mfemBFI.release();
+      m_bfiDomainList.reserve(other.m_bfiDomainList.size());
+      for (const auto& p : other.m_bfiDomainList)
+         m_bfiDomainList.emplace_back(p->copy());
    }
 
    BilinearFormIntegratorSum operator+(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs)
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs)
+   {
+      return BilinearFormIntegratorSum(lhs, rhs);
+   }
+
+   BilinearFormIntegratorSum operator+(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorBase& rhs)
+   {
+      return BilinearFormIntegratorSum(lhs, rhs);
+   }
+
+   BilinearFormIntegratorSum operator+(
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorSum& rhs)
+   {
+      return BilinearFormIntegratorSum(rhs, lhs);
+   }
+
+   BilinearFormIntegratorSum operator+(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorSum& rhs)
    {
       return BilinearFormIntegratorSum(lhs, rhs);
    }
 
    BilinearFormIntegratorSum operator-(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs)
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs)
    {
-      return BilinearFormIntegratorSum(lhs, BilinearFormIntegratorUnaryMinus(rhs));
+      return BilinearFormIntegratorSum(
+            lhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>(rhs));
+   }
+
+   BilinearFormIntegratorSum operator-(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorBase& rhs)
+   {
+      return BilinearFormIntegratorSum(
+            lhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>(rhs));
+   }
+
+   BilinearFormIntegratorSum operator-(
+         const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorSum& rhs)
+   {
+      return BilinearFormIntegratorSum(
+            rhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>(lhs));
+   }
+
+   BilinearFormIntegratorSum operator-(
+         const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorSum& rhs)
+   {
+      return BilinearFormIntegratorSum(
+            lhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorSum>(rhs));
    }
 }
+

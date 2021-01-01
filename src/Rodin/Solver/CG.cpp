@@ -56,7 +56,8 @@ namespace Rodin::Solver
 
       // Solve
       mfem::GSSmoother smoother(A);
-      mfem::PCG(A, smoother, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
+      // mfem::PCG(A, smoother, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
+      mfem::CG(A, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
 
       a.getHandle()
        .RecoverFEMSolution(X, b.getHandle(), u.getHandle());
