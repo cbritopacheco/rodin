@@ -59,24 +59,13 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
-<pre class="m-code"><span class="n">LinearFormExpr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">LinearFormExpr</span><span class="w"></span></pre>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_linear_form_expr.html" class="m-doc">LinearFormExpr&lt;LinearFormExprSum&lt;Lhs, Rhs&gt;&gt;</a>
-            </dt>
-            <dd>Represents an expression of bilinear forms.</dd>
-          </dl>
-        </section>
+<pre class="m-code">LinearFormExpr + LinearFormExpr</pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -149,7 +138,7 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_form_language_1_1_linear_form_expr_sum.html" class="m-doc">LinearFormExprSum</a>&amp; Rodin::<wbr />Variational::<wbr />FormLanguage::<wbr />LinearFormExprSum&lt;Lhs, Rhs&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae754edca923e595c60938b4d9fee57e8" class="m-doc-self">toggleSign</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Toggles the sign that is in front of the sum.</p>
-<p>This function has the semantic operation to toggle the sign of the whole expression. That is, it will apply the distributive operation of the minus operator so that the evaluation satisfies:</p><pre class="m-code"><span class="n">Eval</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">lhs</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rhs</span><span class="p">)]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Eval</span><span class="p">[(</span><span class="o">-</span><span class="n">lhs</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="n">rhs</span><span class="p">)]</span><span class="w"></span></pre>
+<p>This function has the semantic operation to toggle the sign of the whole expression. That is, it will apply the distributive operation of the minus operator so that the evaluation satisfies:</p><pre class="m-code">Eval[-(lhs + rhs)] = Eval[(-lhs) + (-rhs)]</pre>
           </div></section>
         </section>
       </div>
@@ -196,7 +185,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.13 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

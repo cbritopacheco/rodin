@@ -53,10 +53,10 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational_1_1_form_language.html">FormLanguage</a>::<wbr/></span>BilinearFormExpr <span class="m-thin">class</span>
         </h1>
         <p>Represents an expression of bilinear forms.</p>
-<pre class="m-code"><span class="n">BilinearFormExpr</span><span class="w"> </span><span class="o">::=</span><span class="w"> </span><span class="n">BilinearFormIntegrator</span><span class="w"></span>
-<span class="w">                   </span><span class="o">|</span><span class="w"> </span><span class="n">BilinearFormExpr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">BilinearFormExpr</span><span class="w"></span>
-<span class="w">                   </span><span class="o">|</span><span class="w"> </span><span class="n">BilinearFormExpr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">BilinearFormExpr</span><span class="w"></span>
-<span class="w">                   </span><span class="o">|</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">BilinearFormExpr</span><span class="w"></span></pre>
+<pre class="m-code">BilinearFormExpr ::= BilinearFormIntegrator
+                   | BilinearFormExpr + BilinearFormExpr
+                   | BilinearFormExpr - BilinearFormExpr
+                   | - BilinearFormExpr</pre>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -111,7 +111,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.13 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>
