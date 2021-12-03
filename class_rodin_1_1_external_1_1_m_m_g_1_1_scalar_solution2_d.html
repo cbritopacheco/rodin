@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::External::MMG::ScalarSolution2D class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>ScalarSolution2D <span class="m-thin">class</span>
+        </h1>
+        <p>Scalar solution supported on a 2D mesh.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<p>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> represents a function</p><div class="m-math"><svg style="width: 8.535em; height: 1.291em;" viewBox="153.305 -12.3971 81.932 12.3971">
+<title>
+\[ f : \Omega \subset \mathbb{R}^2 \rightarrow \mathbb{R} \]
+</title>
+<defs>
+<path d='M3.20399 -3.75392H3.63437L5.42765 -0.980324C5.5472 -0.789041 5.83412 -0.32279 5.96563 -0.143462C6.04932 0 6.08518 0 6.36015 0H8.00996C8.22516 0 8.40448 0 8.40448 -0.215193C8.40448 -0.310834 8.33275 -0.394521 8.22516 -0.418431C7.78281 -0.514072 7.19701 -1.30311 6.91009 -1.68568C6.8264 -1.80523 6.22864 -2.59427 5.42765 -3.88543C6.49166 -4.07671 7.5198 -4.53101 7.5198 -5.95367C7.5198 -7.61544 5.76239 -8.18929 4.35168 -8.18929H0.597758C0.382565 -8.18929 0.191283 -8.18929 0.191283 -7.9741C0.191283 -7.77086 0.418431 -7.77086 0.514072 -7.77086C1.19552 -7.77086 1.25529 -7.68717 1.25529 -7.08941V-1.09988C1.25529 -0.502117 1.19552 -0.418431 0.514072 -0.418431C0.418431 -0.418431 0.191283 -0.418431 0.191283 -0.215193C0.191283 0 0.382565 0 0.597758 0H3.87347C4.08867 0 4.268 0 4.268 -0.215193C4.268 -0.418431 4.06476 -0.418431 3.93325 -0.418431C3.25181 -0.418431 3.20399 -0.514072 3.20399 -1.09988V-3.75392ZM5.51133 -4.33973C5.84608 -4.78207 5.88194 -5.41569 5.88194 -5.94172C5.88194 -6.51557 5.81021 -7.14919 5.42765 -7.63935C5.91781 -7.53176 7.10137 -7.16115 7.10137 -5.95367C7.10137 -5.17659 6.74271 -4.56687 5.51133 -4.33973ZM3.20399 -7.12528C3.20399 -7.37634 3.20399 -7.77086 3.94521 -7.77086C4.96139 -7.77086 5.46351 -7.35243 5.46351 -5.94172C5.46351 -4.3995 5.0929 -4.17235 3.20399 -4.17235V-7.12528ZM1.57808 -0.418431C1.67372 -0.633624 1.67372 -0.968369 1.67372 -1.07597V-7.11333C1.67372 -7.23288 1.67372 -7.55567 1.57808 -7.77086H2.94097C2.78555 -7.57958 2.78555 -7.34047 2.78555 -7.16115V-1.07597C2.78555 -0.956413 2.78555 -0.633624 2.8812 -0.418431H1.57808ZM4.12453 -3.75392C4.20822 -3.76588 4.25604 -3.77783 4.35168 -3.77783C4.53101 -3.77783 4.79402 -3.80174 4.97335 -3.82565C5.15268 -3.53873 6.44384 -1.41071 7.43611 -0.418431H6.27646L4.12453 -3.75392Z' id='eq1-g0-82'/>
+<path d='M7.87846 -5.97758C8.08169 -5.97758 8.29689 -5.97758 8.29689 -6.21669S8.08169 -6.45579 7.87846 -6.45579H4.66252C2.61818 -6.45579 0.992279 -4.90162 0.992279 -2.98879S2.61818 0.478207 4.66252 0.478207H7.87846C8.08169 0.478207 8.29689 0.478207 8.29689 0.239103S8.08169 0 7.87846 0H4.68643C2.82142 0 1.47049 -1.3868 1.47049 -2.98879S2.82142 -5.97758 4.68643 -5.97758H7.87846Z' id='eq1-g1-26'/>
+<path d='M9.97061 -2.74969C9.31308 -2.24757 8.99029 -1.75741 8.89465 -1.60199C8.35666 -0.777086 8.26102 -0.0239103 8.26102 -0.0119552C8.26102 0.131507 8.40448 0.131507 8.50012 0.131507C8.70336 0.131507 8.71532 0.107597 8.76314 -0.107597C9.03811 -1.2792 9.74346 -2.28344 11.0944 -2.83337C11.2379 -2.8812 11.2737 -2.90511 11.2737 -2.98879S11.202 -3.10834 11.1781 -3.1203C10.6521 -3.32354 9.20548 -3.9213 8.75118 -5.92976C8.71532 -6.07323 8.70336 -6.10909 8.50012 -6.10909C8.40448 -6.10909 8.26102 -6.10909 8.26102 -5.96563C8.26102 -5.94172 8.36862 -5.18854 8.87073 -4.38755C9.10984 -4.02889 9.45654 -3.61046 9.97061 -3.2279H1.08792C0.872727 -3.2279 0.657534 -3.2279 0.657534 -2.98879S0.872727 -2.74969 1.08792 -2.74969H9.97061Z' id='eq1-g1-33'/>
+<path d='M7.91432 -1.86501H7.65131C7.59153 -1.55417 7.53176 -1.24334 7.43611 -0.992279C7.37634 -0.800996 7.34047 -0.705355 6.64707 -0.705355H5.70262C5.84608 -1.37484 6.19278 -1.94869 6.68294 -2.68991C7.24483 -3.56264 7.79477 -4.43537 7.79477 -5.42765C7.79477 -7.07746 6.21669 -8.41644 4.22017 -8.41644C2.21171 -8.41644 0.645579 -7.0655 0.645579 -5.42765C0.645579 -4.44732 1.18356 -3.58655 1.74545 -2.71382C2.24757 -1.93674 2.60623 -1.37484 2.73773 -0.705355H1.79328C1.09988 -0.705355 1.06401 -0.800996 1.00423 -0.980324C0.908593 -1.23138 0.848817 -1.57808 0.789041 -1.86501H0.526027L0.908593 0H2.76164C3.02466 0 3.04857 0 3.04857 -0.215193C3.04857 -1.06401 2.666 -2.10411 2.4269 -2.71382C2.0802 -3.65828 1.75741 -4.53101 1.75741 -5.4396C1.75741 -7.2807 3.03661 -8.17733 4.22017 -8.17733S6.68294 -7.2807 6.68294 -5.4396C6.68294 -4.53101 6.34819 -3.63437 6.01345 -2.74969C5.81021 -2.17584 5.39178 -1.07597 5.39178 -0.227148C5.39178 0 5.42765 0 5.69066 0H7.53176L7.91432 -1.86501Z' id='eq1-g4-10'/>
+<path d='M2.19975 -4.57883C2.19975 -4.90162 1.92478 -5.15268 1.6259 -5.15268C1.2792 -5.15268 1.0401 -4.87771 1.0401 -4.57883C1.0401 -4.22017 1.33898 -3.99303 1.61395 -3.99303C1.93674 -3.99303 2.19975 -4.24408 2.19975 -4.57883ZM2.19975 -0.585803C2.19975 -0.908593 1.92478 -1.15965 1.6259 -1.15965C1.2792 -1.15965 1.0401 -0.884682 1.0401 -0.585803C1.0401 -0.227148 1.33898 0 1.61395 0C1.93674 0 2.19975 -0.251059 2.19975 -0.585803Z' id='eq1-g4-58'/>
+<path d='M5.332 -4.80598C5.57111 -4.80598 5.66675 -4.80598 5.66675 -5.03313C5.66675 -5.15268 5.57111 -5.15268 5.35592 -5.15268H4.38755C4.61469 -6.38406 4.78207 -7.23288 4.87771 -7.61544C4.94944 -7.90237 5.2005 -8.17733 5.51133 -8.17733C5.76239 -8.17733 6.01345 -8.06974 6.133 -7.96214C5.66675 -7.91432 5.52329 -7.56762 5.52329 -7.36438C5.52329 -7.12528 5.70262 -6.98182 5.92976 -6.98182C6.16887 -6.98182 6.52752 -7.18506 6.52752 -7.63935C6.52752 -8.14147 6.0254 -8.41644 5.49938 -8.41644C4.98531 -8.41644 4.48319 -8.03387 4.24408 -7.56762C4.02889 -7.14919 3.90934 -6.7188 3.63437 -5.15268H2.83337C2.60623 -5.15268 2.48667 -5.15268 2.48667 -4.93748C2.48667 -4.80598 2.55841 -4.80598 2.79751 -4.80598H3.56264C3.34745 -3.69415 2.85729 -0.992279 2.58232 0.286924C2.37908 1.32702 2.19975 2.19975 1.60199 2.19975C1.56613 2.19975 1.21943 2.19975 1.00423 1.9726C1.61395 1.92478 1.61395 1.39875 1.61395 1.3868C1.61395 1.1477 1.43462 1.00423 1.20747 1.00423C0.968369 1.00423 0.609714 1.20747 0.609714 1.66177C0.609714 2.17584 1.13574 2.43885 1.60199 2.43885C2.82142 2.43885 3.32354 0.251059 3.45504 -0.3467C3.67024 -1.26725 4.25604 -4.44732 4.31582 -4.80598H5.332Z' id='eq1-g2-102'/>
+<path d='M2.24757 -1.6259C2.37509 -1.74545 2.70984 -2.00847 2.83736 -2.12005C3.33151 -2.57435 3.80174 -3.0127 3.80174 -3.73798C3.80174 -4.68643 3.00473 -5.30012 2.00847 -5.30012C1.05205 -5.30012 0.422416 -4.57484 0.422416 -3.8655C0.422416 -3.47497 0.73325 -3.41918 0.844832 -3.41918C1.0122 -3.41918 1.25928 -3.53873 1.25928 -3.84159C1.25928 -4.25604 0.860772 -4.25604 0.765131 -4.25604C0.996264 -4.83786 1.53026 -5.03711 1.9208 -5.03711C2.66202 -5.03711 3.04458 -4.40747 3.04458 -3.73798C3.04458 -2.90909 2.46276 -2.30336 1.52229 -1.33898L0.518057 -0.302864C0.422416 -0.215193 0.422416 -0.199253 0.422416 0H3.57061L3.80174 -1.42665H3.55467C3.53076 -1.26725 3.467 -0.868742 3.37136 -0.71731C3.32354 -0.653549 2.71781 -0.653549 2.59029 -0.653549H1.17161L2.24757 -1.6259Z' id='eq1-g3-50'/>
+</defs>
+<g id='eq1-page1'>
+<use x='153.305' xlink:href='#eq1-g2-102' y='-2.3246'/>
+<use x='163.673' xlink:href='#eq1-g4-58' y='-2.3246'/>
+<use x='170.245' xlink:href='#eq1-g4-10' y='-2.3246'/>
+<use x='182.02' xlink:href='#eq1-g1-26' y='-2.3246'/>
+<use x='194.64' xlink:href='#eq1-g0-82' y='-2.3246'/>
+<use x='203.274' xlink:href='#eq1-g3-50' y='-7.26078'/>
+<use x='211.327' xlink:href='#eq1-g1-33' y='-2.3246'/>
+<use x='226.603' xlink:href='#eq1-g0-82' y='-2.3246'/>
+</g>
+</svg></div><p>whose known values are given on vertices of some mesh <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.16937 8.45432 8.16937">
+<title>
+$ \Omega $
+</title>
+<defs>
+<path d='M7.91432 -1.86501H7.65131C7.59153 -1.55417 7.53176 -1.24334 7.43611 -0.992279C7.37634 -0.800996 7.34047 -0.705355 6.64707 -0.705355H5.70262C5.84608 -1.37484 6.19278 -1.94869 6.68294 -2.68991C7.24483 -3.56264 7.79477 -4.43537 7.79477 -5.42765C7.79477 -7.07746 6.21669 -8.41644 4.22017 -8.41644C2.21171 -8.41644 0.645579 -7.0655 0.645579 -5.42765C0.645579 -4.44732 1.18356 -3.58655 1.74545 -2.71382C2.24757 -1.93674 2.60623 -1.37484 2.73773 -0.705355H1.79328C1.09988 -0.705355 1.06401 -0.800996 1.00423 -0.980324C0.908593 -1.23138 0.848817 -1.57808 0.789041 -1.86501H0.526027L0.908593 0H2.76164C3.02466 0 3.04857 0 3.04857 -0.215193C3.04857 -1.06401 2.666 -2.10411 2.4269 -2.71382C2.0802 -3.65828 1.75741 -4.53101 1.75741 -5.4396C1.75741 -7.2807 3.03661 -8.17733 4.22017 -8.17733S6.68294 -7.2807 6.68294 -5.4396C6.68294 -4.53101 6.34819 -3.63437 6.01345 -2.74969C5.81021 -2.17584 5.39178 -1.07597 5.39178 -0.227148C5.39178 0 5.42765 0 5.69066 0H7.53176L7.91432 -1.86501Z' id='eq2-g0-10'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' xlink:href='#eq2-g0-10' y='0'/>
+</g>
+</svg>.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;int Dimension, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution.html" class="m-doc">ScalarSolution&lt;2, ScalarSolution2D&gt;</a>
+            </dt>
+            <dd>Scalar solution supported on a mesh.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a10688ca564d38f7943c70f7805e67646" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::string&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">IncompleteScalarSolution2D</a></span>
+            </dt>
+            <dd>Reads the solution text file.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#add8889e30fa9786b80796337635ea859" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span>
+            </dt>
+            <dd>Initializes the object with no data.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a691d1f52ea88dbd04ef0cf32733250ae" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Performs a move construction from the <code>other</code> solution object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6e378ccabab1ccfad39ffe4d9aa2a320" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other)</span>
+            </dt>
+            <dd>Performs a deep copy of the <code>other</code> solution object.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span>
+            </dt>
+            <dd>Write the solution to a text file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e66d6696c7f2b6a837f618269471cd0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;</span>
+            </dt>
+            <dd>Move assigns the <code>other</code> solution object to this object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#add6aa3932c91e817ad814cb3b2fe5bbb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;</span>
+            </dt>
+            <dd>Copy assigns the <code>other</code> solution object to this object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ace567706860b90543efc27b76b2a7c97" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;</span>
+            </dt>
+            <dd>Sets the associated mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c9df6d6a63372a0131dd413d7afa2d8" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp;</span>
+            </dt>
+            <dd>Gets the constant reference to the underlying mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e2c15c517007b91c37b2aa68bf2484a" class="m-doc">count</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
+            </dt>
+            <dd>Gets the number of points on which the scalar solution is given.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a10688ca564d38f7943c70f7805e67646"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">IncompleteScalarSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10688ca564d38f7943c70f7805e67646" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
+            </h3>
+            <p>Reads the solution text file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to read.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The file is read using MMGv2 format.</p>
+          </div></section>
+          <section class="m-doc-details" id="add8889e30fa9786b80796337635ea859"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add8889e30fa9786b80796337635ea859" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Initializes the object with no data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to the underlying mesh.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a691d1f52ea88dbd04ef0cf32733250ae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a691d1f52ea88dbd04ef0cf32733250ae" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Performs a move construction from the <code>other</code> solution object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Object to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6e378ccabab1ccfad39ffe4d9aa2a320"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e378ccabab1ccfad39ffe4d9aa2a320" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other)</span></span>
+            </h3>
+            <p>Performs a deep copy of the <code>other</code> solution object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Object to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2c027edbcd25b820dc6e21a9a3ad0496"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
+            </h3>
+            <p>Write the solution to a text file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to write.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The file is written using MMGv2 format.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4e66d6696c7f2b6a837f618269471cd0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e66d6696c7f2b6a837f618269471cd0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move assigns the <code>other</code> solution object to this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Object to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="add6aa3932c91e817ad814cb3b2fe5bbb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add6aa3932c91e817ad814cb3b2fe5bbb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assigns the <code>other</code> solution object to this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Object to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ace567706860b90543efc27b76b2a7c97"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace567706860b90543efc27b76b2a7c97" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Sets the associated mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to mesh.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining).</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>The method does not check to see if the mesh is compatible with the current data in the solution. In general, it is up to the user to ensure that the number of points are the same, keep track of the modifications to the underlying mesh, etc.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1c9df6d6a63372a0131dd413d7afa2d8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c9df6d6a63372a0131dd413d7afa2d8" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the constant reference to the underlying mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the underlying mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0e2c15c517007b91c37b2aa68bf2484a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e2c15c517007b91c37b2aa68bf2484a" class="m-doc-self">count</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the number of points on which the scalar solution is given.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of points on which the scalar solution is given.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>In general one should not assume that the condition <code class="m-code"><span class="n">sol</span><span class="p">.</span><span class="n">getMesh</span><span class="p">().</span><span class="n">count</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">sol</span><span class="p">.</span><span class="n">count</span><span class="p">()</span><span class="w"></span></code> is satisfied since the underlying mesh might have been modified.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.13 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
