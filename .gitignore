@@ -147,3 +147,12 @@ build
 # ----> ccls
 .ccls-cache
 
+third-party
+src
+doc
+cmake
+examples
+package
+resources
+.travis.yml
+
