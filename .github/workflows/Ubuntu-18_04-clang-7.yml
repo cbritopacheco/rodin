@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
 jobs:
   Build-Rodin:
     runs-on: ubuntu-18.04
@@ -39,7 +44,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build
   Generate-Badge:
-      if: ${{ always() }}
+      if: ${{ always() && github.ref == 'refs/heads/master' }}
       needs: Build-Rodin
       runs-on: ubuntu-latest
       steps:
