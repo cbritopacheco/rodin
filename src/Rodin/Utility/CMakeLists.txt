@@ -1,13 +1,9 @@
-#[[
-         Copyright Carlos BRITO PACHECO 2021 - 2022.
-Distributed under the Boost Software License, Version 1.0.
-      (See accompanying file LICENSE or copy at
-         https://www.boost.org/LICENSE_1_0.txt)
-]]
 set(RodinUtility_HEADERS
   Overloaded.h
   IsSpecialization.h
   )
+
+set(RodinUtility_SRCS )
 
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)
