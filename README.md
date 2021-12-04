@@ -1,6 +1,6 @@
 # Rodin
 
-[![License](https://img.shields.io/github/license/cbritopacheco/rodin)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
 [![Documentation](https://img.shields.io/badge/documentation-master-blue)](https://cbritopacheco.github.io/rodin/)
 
 
