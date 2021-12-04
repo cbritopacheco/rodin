@@ -1,0 +1,10 @@
+/**
+  @page examples-mmg-index Examples utilizing MMG
+  @brief Showcases the usage of the Rodin::External::MMG integration with Rodin
+
+  - @subpage examples-mmg-simple_io
+  - @subpage examples-mmg-mesh_optimization
+  - @subpage examples-mmg-mesh_adaptation
+  - @subpage examples-mmg-casting
+
+  */

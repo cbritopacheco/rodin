@@ -1,0 +1,21 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_UTILITY_ISSPECIALIZATION_H
+#define RODIN_UTILITY_ISSPECIALIZATION_H
+
+#include <type_traits>
+
+namespace Rodin::Utility
+{
+   template <typename Test, template<typename...> class Ref>
+   struct IsSpecialization : std::false_type {};
+
+   template<template<typename...> class Ref, typename... Args>
+   struct IsSpecialization<Ref<Args...>, Ref>: std::true_type {};
+}
+
+#endif

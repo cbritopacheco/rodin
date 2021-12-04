@@ -1,0 +1,62 @@
+/**
+  @dir rodin/src/Rodin
+  @brief Namespace @ref Rodin
+ */
+
+/**
+  @namespace Rodin
+  @brief The Rodin library for Shape and Topology Optimization
+ */
+
+/**
+  @dir Rodin/Variational
+  @brief Namespace @ref Rodin::Variational
+ */
+
+/**
+  @namespace Rodin::Variational
+  @brief Module for implementing variational methods
+ */
+
+/**
+  @dir Rodin/Variational/FormLanguage
+  @brief Namespace @ref Rodin::Variational::FormLanguage
+ */
+
+/**
+  @namespace Rodin::Variational::FormLanguage
+  @brief Module for implementing variational methods
+ */
+
+
+/**
+  @dir Rodin/Solver
+  @brief Namespace @ref Rodin::Solver
+ */
+
+/**
+  @namespace Rodin::Solver
+  @brief Module for solving variational problems constructed with the
+  Variational module.
+ */
+
+/**
+  @dir rodin/src/RodinExternal
+  @brief Namespace @ref Rodin::External
+ */
+
+/**
+  @namespace Rodin::External
+  @brief Third-party library integrations with Rodin
+ */
+
+/**
+  @dir RodinExternal/MMG
+  @brief Namespace @ref Rodin::External::MMG
+ */
+
+/**
+  @namespace Rodin::External::MMG
+  @brief MMG integration with Rodin
+ */
+

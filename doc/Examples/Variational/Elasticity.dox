@@ -1,0 +1,34 @@
+/**
+  @page examples-variational-elasticity Solving the elasticity equation
+  @brief Showcases the resolution of the elasticity system
+
+  @m_keywords{Elasticity}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  In this example we solve the following elasticity system:
+  @f[
+  \left\{
+    \begin{aligned}
+      - \nabla \cdot \sigma (u) &= 0 && \mathrm{in} \ \Omega \\
+      u &= 0 && \mathrm{on} \ \Gamma_D \\
+      \sigma(u) \cdot n &= 0 && \mathrm{on} \ \Gamma_0 \\
+      \sigma(u) \cdot n &= f && \mathrm{on} \ \Gamma_N
+    \end{aligned}
+   \right.
+  @f]
+  where
+  @f[
+    \sigma(u) := \lambda \nabla \cdot u I + \mu (\nabla u + \nabla u^T)
+  @f]
+  and @f$ \Omega @f$ is a domain with boundary @f$ \partial \Omega :=
+  \Gamma_D \cup \Gamma_N \cup \Gamma_0 @f$.
+
+
+  The full source code may be found below:
+  -   @ref Variational/Elasticity.cpp "Elasticity.cpp"
+
+  @example Variational/Elasticity.cpp @m_examplenavigation{examples-variational-elasticity,Variational/} @m_footernavigation
+  */

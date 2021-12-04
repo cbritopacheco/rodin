@@ -1,0 +1,38 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_VARIATIONAL_H
+#define RODIN_VARIATIONAL_H
+
+/**
+ * @file
+ * @brief Top level include for the Rodin::Variational namespace.
+ */
+
+#include "Variational/ForwardDecls.h"
+
+// ---- Finite elements ------------------------------------------------------
+#include "Variational/GridFunction.h"
+#include "Variational/H1.h"
+
+// ---- FormLanguage ---------------------------------------------------------
+#include "Variational/FormLanguage.h"
+#include "Variational/Problem.h"
+#include "Variational/ScalarCoefficient.h"
+#include "Variational/VectorCoefficient.h"
+
+// ---- Bilinear form integrators --------------------------------------------
+#include "Variational/DiffusionIntegrator.h"
+#include "Variational/ElasticityIntegrator.h"
+
+// ---- Linear form integrators ----------------------------------------------
+#include "Variational/DomainLFIntegrator.h"
+
+// ---- Boundary conditions --------------------------------------------------
+#include "Variational/DirichletBC.h"
+#include "Variational/NeumannBC.h"
+
+#endif
