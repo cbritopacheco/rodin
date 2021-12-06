@@ -16,9 +16,13 @@ namespace Rodin::Alert
       public:
          Exception() = default;
 
+         Exception(const Exception& other) = default;
+
          Exception(const std::string& what);
 
          virtual void raise() override;
+
+         virtual Exception& operator<<(const std::string& ss) override;
    };
 }
 

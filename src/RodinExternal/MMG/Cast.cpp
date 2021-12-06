@@ -201,9 +201,9 @@ namespace Rodin::Cast
          pt->v[2] = pt->v[1];
          pt->v[1] = tmp;
          reorientedCount++;
-         auto& warning = Alert::Warning()
-           << "Bad orientation in element " << std::to_string(i) << ". "
-           << "Number of elements reoriented: " << std::to_string(reorientedCount);
+         auto warning = Alert::Warning()
+                      << "Bad orientation in element " << std::to_string(i) << ". "
+                      << "Number of elements reoriented: " << std::to_string(reorientedCount);
          warning.raise();
       }
     }

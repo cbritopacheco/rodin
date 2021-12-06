@@ -24,5 +24,10 @@ namespace Rodin::Alert
                 << what()
                 << std::endl;
    }
+
+   Warning& Warning::operator<<(const std::string& ss)
+   {
+      return static_cast<Warning&>(Alert::operator<<(ss));
+   }
 }
 

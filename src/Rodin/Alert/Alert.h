@@ -19,11 +19,16 @@ namespace Rodin::Alert
 
          Alert(const std::string& what);
 
-         virtual void raise() = 0;
+         Alert(const Alert& other);
+
+         virtual ~Alert() = default;
 
          std::string what() const;
 
-         Alert& operator<<(const std::string& ss);
+
+         virtual void raise() = 0;
+
+         virtual Alert& operator<<(const std::string& ss);
 
       private:
          std::stringstream m_what;

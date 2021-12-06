@@ -18,7 +18,11 @@ namespace Rodin::Alert
 
          Warning(const std::string& what);
 
+         Warning(const Warning& other) = default;
+
          virtual void raise() override;
+
+         virtual Warning& operator<<(const std::string& ss) override;
    };
 }
 

@@ -15,6 +15,11 @@ namespace Rodin::Alert
       m_what << what;
    }
 
+   Alert::Alert(const Alert& other)
+   {
+      m_what << other.m_what.rdbuf();
+   }
+
    std::string Alert::what() const
    {
       return m_what.str();
