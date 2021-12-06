@@ -3,8 +3,8 @@
 #include <Rodin/Mesh.h>
 #include <RodinExternal/MMG.h>
 
+using namespace Rodin;
 using namespace Rodin::External;
-using namespace Rodin::Cast;
 
 int main(int argc, char** argv)
 {

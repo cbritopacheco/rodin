@@ -20,7 +20,7 @@
 #include "Cast.h"
 
 
-namespace Rodin::Cast
+namespace Rodin
 {
   using namespace External;
 

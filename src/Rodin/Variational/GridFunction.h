@@ -87,9 +87,10 @@ namespace Rodin::Variational
           */
          GridFunction& setData(std::unique_ptr<double[]> data, int size)
          {
-            assert(!m_gf.OwnsData());
+            assert(data.get());
             m_data = std::move(data);
             m_gf.SetDataAndSize(m_data.get(), size);
+            return *this;
          }
 
          mfem::GridFunction& getHandle() override

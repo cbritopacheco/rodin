@@ -16,7 +16,7 @@
 
 #include "Mesh2D.h"
 
-namespace Rodin::Cast
+namespace Rodin
 {
    /**
     * @brief Specialization for converting from External::MMG::Mesh2D to Rodin::Mesh.
