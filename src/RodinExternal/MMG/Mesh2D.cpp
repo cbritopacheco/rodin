@@ -22,7 +22,7 @@ namespace Rodin::External::MMG
       Mesh2D mesh;
       if (!MMG2D_loadMesh(mesh.getHandle(), filename.c_str()))
       {
-         Alert::Exception("Failed to open file for reading: " + filename)();
+         Alert::Exception("Failed to open file for reading: " + filename).raise();
       }
       return mesh;
    }
@@ -31,7 +31,7 @@ namespace Rodin::External::MMG
    {
       if (!MMG2D_saveMesh(getHandle(), filename.c_str()))
       {
-         Alert::Exception("Failed to open file for writing: " + filename)();
+         Alert::Exception("Failed to open file for writing: " + filename).raise();
       }
    }
 
@@ -49,7 +49,7 @@ namespace Rodin::External::MMG
          };
 
       if (!calloc())
-         Alert::Exception("Failed to allocate memory for the mesh")();
+         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
       m_mesh->dim   = 2;
       m_mesh->ver   = 2;

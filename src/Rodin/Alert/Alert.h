@@ -8,20 +8,25 @@
 #define RODIN_ALERT_ALERT_H
 
 #include <string>
+#include <sstream>
 
 namespace Rodin::Alert
 {
    class Alert
    {
       public:
+         Alert() = default;
+
          Alert(const std::string& what);
 
-         virtual void operator()() = 0;
+         virtual void raise() = 0;
 
          std::string what() const;
 
+         Alert& operator<<(const std::string& ss);
+
       private:
-         std::string m_what;
+         std::stringstream m_what;
    };
 }
 

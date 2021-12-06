@@ -37,7 +37,7 @@ namespace Rodin::External::MMG
     ScalarSolution2D metric(mesh);
     if (mesh.count<Mesh2D::Vertex>() == 0)
     {
-       Alert::Exception("Mesh vertex count is zero. Nothing to optimize.")();
+       Alert::Exception("Mesh vertex count is zero. Nothing to optimize.").raise();
     }
     else
     {

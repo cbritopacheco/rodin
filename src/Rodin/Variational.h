@@ -15,8 +15,9 @@
 #include "Variational/ForwardDecls.h"
 
 // ---- Finite elements ------------------------------------------------------
-#include "Variational/GridFunction.h"
+#include "Variational/FiniteElementSpace.h"
 #include "Variational/H1.h"
+#include "Variational/GridFunction.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"

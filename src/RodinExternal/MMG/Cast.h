@@ -12,20 +12,22 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Mesh.h"
+#include "Rodin/Variational.h"
 
 #include "Mesh2D.h"
 
-namespace Rodin
+namespace Rodin::Cast
 {
    /**
     * @brief Specialization for converting from External::MMG::Mesh2D to Rodin::Mesh.
     *
-    * @warning This is a lossy cast. Data from the Mesh2D object
-    * that has no correspondence will not be present in the new Rodin::Mesh
-    * object.
+    * @note This is a lossy cast. Data from the old object that has no direct
+    * correspondence will not be present in the new object.
+    *
+    * @todo Which fields are not compatible?
     */
    template <>
-   struct Cast<External::MMG::Mesh2D, Rodin::Mesh>
+   class Cast<External::MMG::Mesh2D, Rodin::Mesh>
    {
       public:
          /**
@@ -41,12 +43,13 @@ namespace Rodin
     * @brief Specialization for converting from Rodin::Mesh to
     * External::MMG:Mesh2D.
     *
-    * @warning This is a lossy cast. Data from the Rodin::Mesh object
-    * that has no correspondence will not be present in the new Mesh2D
-    * object.
+    * @note This is a lossy cast. Data from the old object that has no direct
+    * correspondence will not be present in the new object.
+    *
+    * @todo Which fields are not compatible?
     */
    template <>
-   struct Cast<Rodin::Mesh, External::MMG::Mesh2D>
+   class Cast<Rodin::Mesh, External::MMG::Mesh2D>
    {
       public:
          /**
@@ -58,24 +61,35 @@ namespace Rodin
 
    /**
     * @brief Specialization for converting from External::MMG::ScalarSolution2D to
-    * Rodin::GridFunction.
+    * Rodin::Variational::GridFunction.
     *
-    * @warning This is a lossy cast. Data from the Rodin::Mesh object
-    * that has no correspondence will not be present in the new Mesh2D
-    * object.
+    * @tparam FEC Finite element collection to which the
+    * Variational::GridFunction will belong to.
+    *
+    * @note This is a lossy cast. Data from the old object that has no direct
+    * correspondence will not be present in the new object.
+    *
+    * @todo Which fields are not compatible?
     */
-   // template <>
-   // struct Cast<External::MMG::ScalarSolution2D, Rodin::GridFunction>
-   // {
-   //    public:
-   //       /**
-   //        * @brief Performs the cast from External::MMG::ScalarSolution2D to
-   //        * Rodin::GridFunction
-   //        *
-   //        * @returns External::MMG::ScalarSolution2D object
-   //        */
-   //       Rodin::GridFunction cast(const External::MMG::ScalarSolution2D& sol) const;
-   // };
+   template <class FEC>
+   class Cast<External::MMG::ScalarSolution2D, Variational::GridFunction<FEC>>
+   {
+      public:
+         Cast(Variational::FiniteElementSpace<FEC>& fes);
+
+         /**
+          * @brief Performs the cast from External::MMG::ScalarSolution2D to
+          * Rodin::GridFunction
+          *
+          * @returns External::MMG::ScalarSolution2D object
+          */
+         Variational::GridFunction<FEC>
+         cast(const External::MMG::ScalarSolution2D& sol) const;
+      private:
+         Variational::FiniteElementSpace<FEC>& m_fes;
+   };
 }
+
+#include "Cast.hpp"
 
 #endif

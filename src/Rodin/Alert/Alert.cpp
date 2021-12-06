@@ -11,11 +11,18 @@
 namespace Rodin::Alert
 {
    Alert::Alert(const std::string& what)
-      : m_what(what)
-   {}
+   {
+      m_what << what;
+   }
 
    std::string Alert::what() const
    {
-      return m_what;
+      return m_what.str();
+   }
+
+   Alert& Alert::operator<<(const std::string& ss)
+   {
+      m_what << ss;
+      return *this;
    }
 }

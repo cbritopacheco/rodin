@@ -38,7 +38,7 @@ namespace Rodin::Variational
 
       // Check everything is fine
       if (m_bilinearForm.getHandle().GetDBFI()->Size() == 0)
-         Alert::Exception("The number of bilinear form integrators is zero.")();
+         Alert::Exception("The number of bilinear form integrators is zero.").raise();
 
       return *this;
    }

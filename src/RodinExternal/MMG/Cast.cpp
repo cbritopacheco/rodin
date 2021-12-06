@@ -15,11 +15,12 @@
 #undef I
 
 #include "Rodin/Alert.h"
+#include "Rodin/Variational.h"
 
 #include "Cast.h"
 
 
-namespace Rodin
+namespace Rodin::Cast
 {
   using namespace External;
 
@@ -38,7 +39,7 @@ namespace Rodin
 
      if (mmgMesh->nt == 0)
         Alert::Exception("Converting from a non-triangular MMG::Mesh2D to a"
-              " mfem::Mesh is currently not supported ")();
+              " Rodin::Mesh is currently not supported ").raise();
 
      bool shiftAttr = false;
      for (int i = 1; i <= mmgMesh->nt; i++)
@@ -46,7 +47,8 @@ namespace Rodin
        if (mmgMesh->tria[i].ref == 0)
          shiftAttr = true;
        if (mmgMesh->tria[i].ref < 0)
-         Alert::Exception("Negative element attributes (references) are not supported")();
+         Alert::Exception(
+             "Negative element attributes are not supported").raise();
      }
 
      bool shiftBdrAttr = false;
@@ -56,18 +58,18 @@ namespace Rodin
          shiftBdrAttr = true;
        if (mmgMesh->edge[i].ref < 0)
          Alert::Exception(
-             "Negative boundary element attributes (references) are not supported")();
+             "Negative boundary element attributes are not supported").raise();
      }
 
      if (shiftAttr)
        Alert::Warning(
            "Element attribute equal to 0 is not supported. "
-           "All element attributes will be incremented by 1")();
+           "All element attributes will be incremented by 1").raise();
 
      if (shiftBdrAttr)
        Alert::Warning(
            "Boundary element attribute equal to 0 is not supported. "
-           "All boundary element attributes will be incremented by 1")();
+           "All boundary element attributes will be incremented by 1").raise();
 
      /* So for some reason mmg types are 1 indexed. So when accessing the
       * arrays make sure to start at 1 and not 0. I don't know why this is the
@@ -112,12 +114,12 @@ namespace Rodin
     auto& mfemMesh = mesh.getHandle();
 
     if (mfemMesh.GetNE() == 0)
-      Alert::Exception("Converting from an empty mesh is not supported")();
+      Alert::Exception("Converting from an empty mesh is not supported").raise();
 
     if (mfemMesh.NURBSext)
        Alert::Exception(
              "Converting from a NURBS mfem::Mesh to MMG::Mesh2D is not"
-             " currently supported")();
+             " currently supported").raise();
 
     mfem::Array<mfem::Geometry::Type> geoms;
     mfemMesh.GetGeometries(2, geoms);
@@ -129,7 +131,7 @@ namespace Rodin
     {
       Alert::Exception(
             "Converting from a non-triangular mfem::Mesh to MMG::Mesh2D is not"
-            " currently supported")();
+            " currently supported").raise();
     }
 
     /*
@@ -150,7 +152,7 @@ namespace Rodin
 
     MMG2D_Set_commonFunc();
     if (!MMG2D_zaldy(mmgMesh))
-       Alert::Exception("Memory allocation for the MMG mesh failed")();
+       Alert::Exception("Memory allocation for the MMG mesh failed").raise();
 
     // Copy points
     for (int i = 1; i <= mmgMesh->np; i++)
@@ -199,22 +201,12 @@ namespace Rodin
          pt->v[2] = pt->v[1];
          pt->v[1] = tmp;
          reorientedCount++;
-         Alert::Warning(
-            "Bad orientation in element " + std::to_string(i) + ". "
-            + "Number of elements reoriented: " + std::to_string(reorientedCount))();
+         auto& warning = Alert::Warning()
+           << "Bad orientation in element " << std::to_string(i) << ". "
+           << "Number of elements reoriented: " << std::to_string(reorientedCount);
+         warning.raise();
       }
     }
     return res;
   }
-
-  // ---- <MMG::ScalarSolution2D, Rodin::GridFunction> -----------------------
-  // Rodin::GridFunction
-  // Cast<MMG::ScalarSolution2D, Rodin::GridFunction>
-  // ::cast(const MMG::ScalarSolution2D& sol)
-  // const
-  // {
-  //   Rodin::GridFunction res;
-
-  //   return res;
-  // }
 }

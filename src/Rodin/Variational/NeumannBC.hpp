@@ -44,7 +44,8 @@ namespace Rodin::Variational
                                  ->bdr_attributes.Max();
 
       if (m_bdrAttr > maxBdrAttr)
-         Rodin::Alert::Exception("NeumannBC boundary attribute is out of range.")();
+         Rodin::Alert::Exception(
+               "NeumannBC boundary attribute is out of range.").raise();
 
       m_nbcBdr = mfem::Array<int>(maxBdrAttr);
       m_nbcBdr = 0;
@@ -104,7 +105,8 @@ namespace Rodin::Variational
                                  ->bdr_attributes.Max();
 
       if (m_bdrAttr > maxBdrAttr)
-         Rodin::Alert::Exception("NeumannBC boundary attribute is out of range.")();
+         Rodin::Alert::Exception(
+               "NeumannBC boundary attribute is out of range.").raise();
 
       m_nbcBdr = mfem::Array<int>(maxBdrAttr);
       m_nbcBdr = 0;

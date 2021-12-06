@@ -46,7 +46,7 @@ namespace Rodin::Variational
                                  ->bdr_attributes.Max();
 
       if (m_bdrAttr > maxBdrAttr)
-         Rodin::Alert::Exception("DirichletBC boundary attribute is out of range.")();
+         Rodin::Alert::Exception("DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
       m_essBdr = mfem::Array<int>(maxBdrAttr);
@@ -111,7 +111,8 @@ namespace Rodin::Variational
                                  ->bdr_attributes.Max();
 
       if (m_bdrAttr > maxBdrAttr)
-         Rodin::Alert::Exception("DirichletBC boundary attribute is out of range.")();
+         Rodin::Alert::Exception(
+               "DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
       m_essBdr = mfem::Array<int>(maxBdrAttr);

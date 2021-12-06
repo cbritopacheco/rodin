@@ -1,9 +1,10 @@
 #include <iostream>
 
-#include "Rodin/Mesh.h"
-#include "RodinExternal/MMG.h"
+#include <Rodin/Mesh.h>
+#include <RodinExternal/MMG.h>
 
 using namespace Rodin::External;
+using namespace Rodin::Cast;
 
 int main(int argc, char** argv)
 {
@@ -15,7 +16,7 @@ int main(int argc, char** argv)
 
   MMG::Mesh2D mmgMesh = MMG::Mesh2D::load(argv[1]);
 
-  Rodin::Mesh rodinMesh = Rodin::Cast<MMG::Mesh2D, Rodin::Mesh>().cast(mmgMesh);
+  Rodin::Mesh rodinMesh = Cast<MMG::Mesh2D, Rodin::Mesh>().cast(mmgMesh);
 
   rodinMesh.save("rodin.mesh");
 

@@ -43,8 +43,12 @@ namespace Rodin::Variational
           */
          GridFunction(FiniteElementSpace<FEC>& fes)
             :  m_fes(fes),
-               m_gf(&fes.getFES())
-         {}
+               m_gf(&fes.getFES()),
+               m_size(m_gf.Size()),
+               m_data(m_gf.StealData())
+         {
+            assert(!m_gf.OwnsData());
+         }
 
          /**
           * @brief Copies the grid function.
@@ -65,6 +69,29 @@ namespace Rodin::Variational
             return m_fes;
          }
 
+         /**
+          * @brief Saves the grid function in MFEMv1.0 format.
+          */
+         void save(const std::string& filename)
+         {
+            m_gf.Save(filename.c_str());
+         }
+
+         /**
+          * @brief Sets the data of the grid function and assumes ownership.
+          *
+          * @param[in] data Data array
+          * @param[in] size Size of the data array
+          *
+          * @returns Reference to self (for method chaining)
+          */
+         GridFunction& setData(std::unique_ptr<double[]> data, int size)
+         {
+            assert(!m_gf.OwnsData());
+            m_data = std::move(data);
+            m_gf.SetDataAndSize(m_data.get(), size);
+         }
+
          mfem::GridFunction& getHandle() override
          {
             return m_gf;
@@ -74,15 +101,11 @@ namespace Rodin::Variational
          {
             return m_gf;
          }
-
-         void save(const std::string& filename)
-         {
-            m_gf.Save(filename.c_str());
-         }
-
       private:
          std::reference_wrapper<FiniteElementSpace<FEC>> m_fes;
          mfem::GridFunction m_gf;
+         std::unique_ptr<double[]> m_data;
+         int m_size;
    };
 }
 

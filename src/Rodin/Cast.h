@@ -9,7 +9,7 @@
 
 #include <utility>
 
-namespace Rodin
+namespace Rodin::Cast
 {
    template <class From, class To>
    class Cast

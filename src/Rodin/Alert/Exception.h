@@ -14,9 +14,11 @@ namespace Rodin::Alert
    class Exception : public Alert
    {
       public:
+         Exception() = default;
+
          Exception(const std::string& what);
 
-         virtual void operator()() override;
+         virtual void raise() override;
    };
 }
 

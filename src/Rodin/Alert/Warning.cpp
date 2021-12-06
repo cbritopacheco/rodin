@@ -16,7 +16,7 @@ namespace Rodin::Alert
       : Alert(what)
    {}
 
-   void Warning::operator()()
+   void Warning::raise()
    {
       std::cerr << rang::fg::yellow
                 << "[WARNING]: "

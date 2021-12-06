@@ -30,7 +30,7 @@ namespace Rodin::External::MMG
          };
 
       if (!calloc())
-         Alert::Exception("Failed to allocate memory for the mesh")();
+         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
       m_sol->dim  = 2; // Supported on 2D mesh
       m_sol->ver  = 2;
@@ -96,13 +96,13 @@ namespace Rodin::External::MMG
             fclose(inm);
             MMG5_SAFE_FREE(type);
             Alert::Exception(
-                  "Failed to load solution. Invalid data.")();
+                  "Failed to load solution. Invalid data.").raise();
             break;
          case 0:
             fclose(inm);
             MMG5_SAFE_FREE(type);
             Alert::Exception(
-                  "Failed to load solution. File not found: " + filename)();
+                  "Failed to load solution. File not found: " + filename).raise();
             break;
          case 1:
             // Success
@@ -111,7 +111,7 @@ namespace Rodin::External::MMG
             fclose(inm);
             MMG5_SAFE_FREE(type);
             Alert::Exception(
-                  "Failed to load solution. Invalid error code returned.")();
+                  "Failed to load solution. Invalid error code returned.").raise();
       }
 
       if (nsols != 1)
@@ -119,7 +119,7 @@ namespace Rodin::External::MMG
          fclose(inm);
          MMG5_SAFE_FREE(type);
          Alert::Exception(
-               "Failed to load solution. Multiple solutions not supported.")();
+               "Failed to load solution. Multiple solutions not supported.").raise();
       }
 
       sol->type = type[0];
@@ -136,7 +136,7 @@ namespace Rodin::External::MMG
             break;
          default:
             Alert::Exception(
-                  "Failed to load solution. Unknown solution type.")();
+                  "Failed to load solution. Unknown solution type.").raise();
       }
 
       assert(!sol->m);
@@ -178,12 +178,13 @@ namespace Rodin::External::MMG
    {
       if (!m_sol->np || !m_sol->m)
       {
-         Alert::Exception("Failed to write to scalar solution to file. No data!")();
+         Alert::Exception(
+               "Failed to write to scalar solution to file. No data!").raise();
       }
 
       if (!MMG2D_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
       {
-         Alert::Exception("Failed to open file for writing: " + filename)();
+         Alert::Exception("Failed to open file for writing: " + filename).raise();
       }
    }
 
@@ -203,7 +204,7 @@ namespace Rodin::External::MMG
          };
 
       if (!calloc())
-         Alert::Exception("Failed to allocate memory for the mesh")();
+         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
       // Copy the fields
       m_sol->dim  = 2; // Supported on 2D mesh
@@ -269,7 +270,7 @@ namespace Rodin::External::MMG
    ScalarSolution2D& ScalarSolution2D::setMesh(Mesh2D& mesh)
    {
       if (mesh.count() != count())
-         Alert::Exception("mesh.count() != count()")();
+         Alert::Exception("mesh.count() != count()").raise();
       m_mesh = mesh;
       return *this;
    }
@@ -327,7 +328,7 @@ namespace Rodin::External::MMG
          };
 
       if (!calloc())
-         Alert::Exception("Failed to allocate memory for the mesh")();
+         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
       m_sol->dim  = 2; // Supported on 2D mesh
       m_sol->ver  = 2;

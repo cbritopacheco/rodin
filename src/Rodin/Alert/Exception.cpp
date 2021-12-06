@@ -16,7 +16,7 @@ namespace Rodin::Alert
       : Alert(what)
    {}
 
-   void Exception::operator()()
+   void Exception::raise()
    {
       std::cerr << rang::fg::red
                 << "[ERROR]: "
