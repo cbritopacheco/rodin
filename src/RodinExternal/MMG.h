@@ -10,6 +10,7 @@
 #include "MMG/Cast.h"
 
 #include "MMG/Mesh2D.h"
+#include "MMG/ScalarSolution2D.h"
 #include "MMG/MeshAdaptor2D.h"
 #include "MMG/MeshOptimizer2D.h"
 

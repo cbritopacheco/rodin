@@ -14,17 +14,17 @@
 
 namespace Rodin
 {
-  // ---- <MMG::ScalarSolution2D, Rodin::GridFunction> -----------------------
-  template <class FEC>
-  Cast<External::MMG::ScalarSolution2D, Variational::GridFunction<FEC>>
+  // ---- Cast<MMG::ScalarSolution2D, Rodin::GridFunction> -------------------
+  template <class FEC, bool HasMesh>
+  Cast<External::MMG::ScalarSolution2D<HasMesh>, Variational::GridFunction<FEC>>
   ::Cast(Variational::FiniteElementSpace<FEC>& fes)
     : m_fes(fes)
   {}
 
-  template <class FEC>
+  template <class FEC, bool HasMesh>
   Variational::GridFunction<FEC>
-  Cast<External::MMG::ScalarSolution2D, Variational::GridFunction<FEC>>
-  ::cast(const External::MMG::ScalarSolution2D& sol)
+  Cast<External::MMG::ScalarSolution2D<HasMesh>, Variational::GridFunction<FEC>>
+  ::cast(const External::MMG::ScalarSolution2D<HasMesh>& sol)
   const
   {
     MMG5_pSol mmgSol = sol.getHandle();
@@ -38,6 +38,15 @@ namespace Rodin
 
     return res;
   }
+
+  // ---- Cast<Rodin::GridFunction, MMG::ScalarSolution2D> -------------------
+  // template <class FEC>
+  // External::MMG::ScalarSolution2D
+  // Cast<Variational::GridFunction<FEC>, External::MMG::ScalarSolution2D>
+  // ::cast(const Variational::GridFunction<FEC>& gf)
+  // const
+  // {
+  // }
 }
 
 #endif

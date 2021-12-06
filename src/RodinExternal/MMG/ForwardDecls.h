@@ -17,7 +17,14 @@ namespace Rodin::External::MMG
    template <int Dimension, class Derived>
    class ScalarSolution;
 
+   template <bool HasMesh = true>
    class ScalarSolution2D;
+
+   template <>
+   class ScalarSolution2D<true>;
+
+   template <>
+   class ScalarSolution2D<false>;
 
    template <class MeshType, class Derived>
    class MeshAdaptor;

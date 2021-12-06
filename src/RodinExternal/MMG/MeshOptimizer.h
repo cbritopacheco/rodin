@@ -15,7 +15,7 @@ namespace Rodin::External::MMG
   class MeshOptimizer
   {
     public:
-      ScalarSolution2D optimize(MeshType& mesh)
+      ScalarSolution2D<> optimize(MeshType& mesh)
       {
         return Derived::optimize(mesh);
       }

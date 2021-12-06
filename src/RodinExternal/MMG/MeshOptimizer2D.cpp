@@ -32,9 +32,9 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ScalarSolution2D MeshOptimizer2D::optimize(Mesh2D& mesh)
+  ScalarSolution2D<> MeshOptimizer2D::optimize(Mesh2D& mesh)
   {
-    ScalarSolution2D metric(mesh);
+    ScalarSolution2D<> metric(mesh);
     if (mesh.count<Mesh2D::Vertex>() == 0)
     {
        Alert::Exception("Mesh vertex count is zero. Nothing to optimize.").raise();

@@ -22,8 +22,6 @@
 
 namespace Rodin::External::MMG
 {
-
-   class IncompleteScalarSolution2D;
    /**
     * @brief Scalar solution supported on a 2D mesh.
     *
@@ -33,8 +31,9 @@ namespace Rodin::External::MMG
     * @f]
     * whose known values are given on vertices of some mesh @f$ \Omega @f$.
     */
-   class ScalarSolution2D
-      :  public ScalarSolution<2, ScalarSolution2D>
+   template <>
+   class ScalarSolution2D<true>
+      :  public ScalarSolution<2, ScalarSolution2D<true>>
    {
       public:
          class Iterator
@@ -90,7 +89,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to read.
           */
-         static IncompleteScalarSolution2D load(const std::string& filename);
+         static ScalarSolution2D<false> load(const std::string& filename);
 
          /**
           * @brief Write the solution to a text file.
@@ -188,25 +187,26 @@ namespace Rodin::External::MMG
    /**
     * @brief A scalar solution which does not have a mesh assigned to it.
     *
-    * We may obtain an object of type ScalarSolution2D via a call to the
+    * To unlock the full functionality of the class you must call the
     * @ref setMesh(Mesh2D&) method. For example, when loading it from file:
     *
     * @code{.cpp}
     * ScalarSolution2D sol = ScalarSolution2D::load(filename).setMesh(mesh);
     * @endcode
     */
-   class IncompleteScalarSolution2D
+   template <>
+   class ScalarSolution2D<false>
    {
       public:
-         IncompleteScalarSolution2D();
+         ScalarSolution2D();
 
          /**
-          * Sets the associated mesh.
+          * @brief Sets the associated mesh.
           *
           * @param[in] mesh Reference to mesh.
           *
           * @returns An object of type ScalarSolution2D which represents the
-          * now complete solution.
+          * object with all its functionality.
           *
           * @note The method does not incur any significant performance since
           * no data is copied.
@@ -216,7 +216,7 @@ namespace Rodin::External::MMG
           * user to ensure that the number of points are the same, keep track
           * of the modifications to the underlying mesh, etc.
           */
-         ScalarSolution2D setMesh(Mesh2D& mesh) const;
+         ScalarSolution2D<true> setMesh(Mesh2D& mesh) const;
 
          MMG5_pSol& getHandle();
          const MMG5_pSol& getHandle() const;

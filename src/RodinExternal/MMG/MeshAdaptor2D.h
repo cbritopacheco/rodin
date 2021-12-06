@@ -138,7 +138,7 @@ namespace Rodin::External::MMG
        * function defined at the mesh vertices.  At each vertex, it associates
        * the desired size of the surrounding elements of the mesh.
        */
-      MeshAdaptor2D& setMetric(const ScalarSolution2D& metric);
+      MeshAdaptor2D& setMetric(const ScalarSolution2D<>& metric);
 
       /**
        * @brief Adapts the mesh given the previously set parameters.
@@ -155,7 +155,7 @@ namespace Rodin::External::MMG
                             m_hgrad,
                             m_hausd;
 
-      std::optional<std::variant<ScalarSolution2D>> m_metric;
+      std::optional<std::variant<ScalarSolution2D<>>> m_metric;
   };
 }
 

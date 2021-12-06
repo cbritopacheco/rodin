@@ -31,9 +31,9 @@ namespace Rodin
    {
       public:
          /**
-          * @brief Performs the cast from External::MMG::Mesh2D to Rodin::Mesh
+          * @brief Performs the cast.
           *
-          * @returns Rodin::Mesh object
+          * @returns New object.
           */
          Rodin::Mesh cast(const External::MMG::Mesh2D& mesh) const;
    };
@@ -53,8 +53,9 @@ namespace Rodin
    {
       public:
          /**
-          * @brief Performs the cat from Rodin::Mesh to MMG::Mesh2D
-          * @returns External::MMG::Mesh2D object
+          * @brief Performs the cast.
+          *
+          * @returns New object.
           */
          External::MMG::Mesh2D cast(const Rodin::Mesh& mesh) const;
    };
@@ -71,41 +72,47 @@ namespace Rodin
     *
     * @todo Which fields are not compatible?
     */
-   template <class FEC>
-   class Cast<External::MMG::ScalarSolution2D, Variational::GridFunction<FEC>>
+   template <class FEC, bool HasMesh>
+   class Cast<External::MMG::ScalarSolution2D<HasMesh>,
+         Variational::GridFunction<FEC>>
    {
       public:
+         /**
+          * @brief Initializes the cast object with the finite element space
+          * which is required to construct the grid function.
+          * @param[in] fes Finite element space which the grid function will
+          * lie in.
+          */
          Cast(Variational::FiniteElementSpace<FEC>& fes);
 
          /**
-          * @brief Performs the cast from External::MMG::ScalarSolution2D to
-          * Rodin::GridFunction
+          * @brief Performs the cast.
           *
-          * @returns External::MMG::ScalarSolution2D object
+          * @returns New object.
           */
          Variational::GridFunction<FEC>
-         cast(const External::MMG::ScalarSolution2D& sol) const;
+         cast(const External::MMG::ScalarSolution2D<HasMesh>& sol) const;
+
       private:
          Variational::FiniteElementSpace<FEC>& m_fes;
    };
 
-   template <class FEC>
-   class Cast<Variational::GridFunction<FEC>, External::MMG::ScalarSolution2D>
-   {
-      public:
-         Cast(Variational::FiniteElementSpace<FEC>& fes);
-
-         /**
-          * @brief Performs the cast from External::MMG::ScalarSolution2D to
-          * Rodin::GridFunction
-          *
-          * @returns External::MMG::ScalarSolution2D object
-          */
-         Variational::GridFunction<FEC>
-         cast(const External::MMG::ScalarSolution2D& sol) const;
-      private:
-         Variational::FiniteElementSpace<FEC>& m_fes;
-   };
+   // /**
+   //  * @brief Specialization for converting from
+   //  * Rodin::Variational::GridFunction to External::MMG::ScalarSolution2D.
+   //  */
+   // template <class FEC>
+   // class Cast<Variational::GridFunction<FEC>, External::MMG::ScalarSolution2D>
+   // {
+   //    public:
+   //       /**
+   //        * @brief Performs the cast.
+   //        *
+   //        * @returns New object.
+   //        */
+   //       External::MMG::ScalarSolution2D
+   //       cast(const Variational::GridFunction<FEC>& gf) const;
+   // };
 }
 
 #include "Cast.hpp"
