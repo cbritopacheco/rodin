@@ -7,9 +7,10 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
-#include <mfem.hpp>
-
+#include <utility>
 #include <functional>
+
+#include <mfem.hpp>
 
 #include "ForwardDecls.h"
 
@@ -91,6 +92,11 @@ namespace Rodin::Variational
             m_data = std::move(data);
             m_gf.SetDataAndSize(m_data.get(), size);
             return *this;
+         }
+
+         std::pair<const double*, int> getData() const
+         {
+            return {m_data.get(), m_size};
          }
 
          mfem::GridFunction& getHandle() override
