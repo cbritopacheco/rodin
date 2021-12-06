@@ -6,6 +6,7 @@
 
 using namespace Rodin;
 using namespace Rodin::External;
+using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
@@ -18,20 +19,17 @@ int main(int argc, char** argv)
   }
 
   // Load MMG mesh and solution
-  MMG::Mesh2D mesh = MMG::Mesh2D::load(argv[1]);
-  MMG::ScalarSolution2D sol =
-    MMG::ScalarSolution2D::load(argv[2]).setMesh(mesh);
+  auto mmgMesh = MMG::Mesh2D::load(argv[1]);
+  auto mmgSol  = MMG::ScalarSolution2D::load(argv[2]).setMesh(mmgMesh);
 
   // Convert the MMG mesh to Rodin
-  auto rodinMesh = Cast<MMG::Mesh2D, Rodin::Mesh>().cast(mesh);
+  auto rodinMesh = Cast<MMG::Mesh2D, Rodin::Mesh>().cast(mmgMesh);
 
   // Build finite element space
-  Variational::H1             Vh(rodinMesh);
+  H1 Vh(rodinMesh);
 
   // Perform the cast using the finite element space we just built
-  auto gf = Cast<
-    MMG::ScalarSolution2D,
-    Variational::GridFunction<Variational::H1>>(Vh).cast(sol);
+  auto gf = Cast<MMG::ScalarSolution2D, GridFunction<H1>>(Vh).cast(mmgSol);
 
   rodinMesh.save("multi-mat.mesh");
   gf.save("multi-mat.gf");

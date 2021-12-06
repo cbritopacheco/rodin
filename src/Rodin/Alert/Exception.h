@@ -22,7 +22,11 @@ namespace Rodin::Alert
 
          virtual void raise() override;
 
-         virtual Exception& operator<<(const std::string& ss) override;
+         template <class T>
+         Exception& operator<<(T&& v)
+         {
+            return static_cast<Exception&>(Alert::operator<<(std::forward<T>(v)));
+         }
    };
 }
 

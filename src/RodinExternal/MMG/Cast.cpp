@@ -58,18 +58,18 @@ namespace Rodin
          shiftBdrAttr = true;
        if (mmgMesh->edge[i].ref < 0)
          Alert::Exception(
-             "Negative boundary element attributes are not supported").raise();
+             "Negative boundary element attributes are not supported.").raise();
      }
 
      if (shiftAttr)
        Alert::Warning(
            "Element attribute equal to 0 is not supported. "
-           "All element attributes will be incremented by 1").raise();
+           "All element attributes will be incremented by 1.").raise();
 
      if (shiftBdrAttr)
        Alert::Warning(
            "Boundary element attribute equal to 0 is not supported. "
-           "All boundary element attributes will be incremented by 1").raise();
+           "All boundary element attributes will be incremented by 1.").raise();
 
      /* So for some reason mmg types are 1 indexed. So when accessing the
       * arrays make sure to start at 1 and not 0. I don't know why this is the
@@ -114,12 +114,12 @@ namespace Rodin
     auto& mfemMesh = mesh.getHandle();
 
     if (mfemMesh.GetNE() == 0)
-      Alert::Exception("Converting from an empty mesh is not supported").raise();
+      Alert::Exception("Converting from an empty mesh is not supported.").raise();
 
     if (mfemMesh.NURBSext)
        Alert::Exception(
              "Converting from a NURBS mfem::Mesh to MMG::Mesh2D is not"
-             " currently supported").raise();
+             " currently supported.").raise();
 
     mfem::Array<mfem::Geometry::Type> geoms;
     mfemMesh.GetGeometries(2, geoms);
@@ -131,7 +131,7 @@ namespace Rodin
     {
       Alert::Exception(
             "Converting from a non-triangular mfem::Mesh to MMG::Mesh2D is not"
-            " currently supported").raise();
+            " currently supported.").raise();
     }
 
     /*
@@ -152,7 +152,7 @@ namespace Rodin
 
     MMG2D_Set_commonFunc();
     if (!MMG2D_zaldy(mmgMesh))
-       Alert::Exception("Memory allocation for the MMG mesh failed").raise();
+       Alert::Exception("Memory allocation for the MMG mesh failed.").raise();
 
     // Copy points
     for (int i = 1; i <= mmgMesh->np; i++)
@@ -201,9 +201,10 @@ namespace Rodin
          pt->v[2] = pt->v[1];
          pt->v[1] = tmp;
          reorientedCount++;
-         auto warning = Alert::Warning()
-                      << "Bad orientation in element " << std::to_string(i) << ". "
-                      << "Number of elements reoriented: " << std::to_string(reorientedCount);
+         auto warning =
+           Alert::Warning()
+            << "Bad orientation in element " << i << ". "
+            << "Number of elements reoriented: " << std::to_string(reorientedCount);
          warning.raise();
       }
     }

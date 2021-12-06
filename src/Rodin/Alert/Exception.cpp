@@ -25,10 +25,5 @@ namespace Rodin::Alert
                 << std::endl;
       std::abort();
    }
-
-   Exception& Exception::operator<<(const std::string& ss)
-   {
-      return static_cast<Exception&>(Alert::operator<<(ss));
-   }
 }
 

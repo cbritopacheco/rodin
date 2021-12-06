@@ -28,7 +28,12 @@ namespace Rodin::Alert
 
          virtual void raise() = 0;
 
-         virtual Alert& operator<<(const std::string& ss);
+         template <class T>
+         Alert& operator<<(T&& v)
+         {
+            m_what << std::forward<T>(v);
+            return *this;
+         }
 
       private:
          std::stringstream m_what;

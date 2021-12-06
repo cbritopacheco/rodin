@@ -24,10 +24,4 @@ namespace Rodin::Alert
    {
       return m_what.str();
    }
-
-   Alert& Alert::operator<<(const std::string& ss)
-   {
-      m_what << ss;
-      return *this;
-   }
 }

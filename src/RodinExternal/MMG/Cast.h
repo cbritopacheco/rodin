@@ -88,6 +88,24 @@ namespace Rodin
       private:
          Variational::FiniteElementSpace<FEC>& m_fes;
    };
+
+   template <class FEC>
+   class Cast<Variational::GridFunction<FEC>, External::MMG::ScalarSolution2D>
+   {
+      public:
+         Cast(Variational::FiniteElementSpace<FEC>& fes);
+
+         /**
+          * @brief Performs the cast from External::MMG::ScalarSolution2D to
+          * Rodin::GridFunction
+          *
+          * @returns External::MMG::ScalarSolution2D object
+          */
+         Variational::GridFunction<FEC>
+         cast(const External::MMG::ScalarSolution2D& sol) const;
+      private:
+         Variational::FiniteElementSpace<FEC>& m_fes;
+   };
 }
 
 #include "Cast.hpp"

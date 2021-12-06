@@ -22,7 +22,11 @@ namespace Rodin::Alert
 
          virtual void raise() override;
 
-         virtual Warning& operator<<(const std::string& ss) override;
+         template <class T>
+         Warning& operator<<(T&& v)
+         {
+            return static_cast<Warning&>(Alert::operator<<(std::forward<T>(v)));
+         }
    };
 }
 

@@ -22,7 +22,8 @@ namespace Rodin::External::MMG
       Mesh2D mesh;
       if (!MMG2D_loadMesh(mesh.getHandle(), filename.c_str()))
       {
-         Alert::Exception("Failed to open file for reading: " + filename).raise();
+         Alert::Exception(
+               "Failed to open file for reading: " + filename).raise();
       }
       return mesh;
    }
@@ -31,7 +32,8 @@ namespace Rodin::External::MMG
    {
       if (!MMG2D_saveMesh(getHandle(), filename.c_str()))
       {
-         Alert::Exception("Failed to open file for writing: " + filename).raise();
+         Alert::Exception(
+               "Failed to open file for writing: " + filename).raise();
       }
    }
 
