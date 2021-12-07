@@ -12,10 +12,11 @@ endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 project(Rodin CXX)
 
 # ---- Options ---------------------------------------------------------------
-option(RODIN_BUILD_SRC "Build the Rodin source code" ON)
-option(RODIN_BUILD_EXAMPLES "Build the Rodin examples" ON)
-option(RODIN_BUILD_DOC "Build the Rodin documentation" OFF)
-option(RODIN_USE_MCSS "Use m.css style documentation" OFF)
+option(RODIN_BUILD_SRC          "Build the Rodin source code"     ON)
+option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"        ON)
+option(RODIN_BUILD_DOC          "Build the Rodin documentation"   OFF)
+option(RODIN_USE_MCSS           "Use m.css style documentation"   OFF)
+option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"    OFF)
 
 # ---- Configuration ---------------------------
 include("${PROJECT_SOURCE_DIR}/cmake/configuration.cmake")
@@ -77,31 +78,33 @@ if (RODIN_BUILD_SRC)
   find_package(Corrade REQUIRED Utility)
   set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-  # ---- Magnum ----
-  message(STATUS "Configuring Magnum...")
-  set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/magnum EXCLUDE_FROM_ALL)
-  find_package(Magnum REQUIRED GL Shaders Sdl2Application)
-  set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+  if (RODIN_WITH_PLOT)
+    # ---- Magnum ----
+    message(STATUS "Configuring Magnum...")
+    set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)
+    add_subdirectory(third-party/magnum EXCLUDE_FROM_ALL)
+    find_package(Magnum REQUIRED GL Shaders Sdl2Application)
+    set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-  # ---- Eigen ----
-  message(STATUS "Configuring Eigen...")
-  set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
-  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/eigen)
-  unset(BUILD_TESTING)
+    # ---- Eigen ----
+    message(STATUS "Configuring Eigen...")
+    set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    add_subdirectory(third-party/eigen)
+    unset(BUILD_TESTING)
 
-  find_package (Eigen3 3.3 REQUIRED NO_MODULE
-    HINTS
-    "${PROJECT_SOURCE_DIR}/third-party/eigen")
+    find_package (Eigen3 3.3 REQUIRED NO_MODULE
+      HINTS
+      "${PROJECT_SOURCE_DIR}/third-party/eigen")
 
-  # ---- Magnum-Eigen integration ----
-  message(STATUS "Configuring Magnum-Eigen integration...")
-  set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third-party/eigen)
-  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
-  set(WITH_EIGEN ON CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/magnum-integration EXCLUDE_FROM_ALL)
-  find_package(MagnumIntegration REQUIRED Eigen)
+    # ---- Magnum-Eigen integration ----
+    message(STATUS "Configuring Magnum-Eigen integration...")
+    set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third-party/eigen)
+    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
+    set(WITH_EIGEN ON CACHE BOOL "" FORCE)
+    add_subdirectory(third-party/magnum-integration EXCLUDE_FROM_ALL)
+    find_package(MagnumIntegration REQUIRED Eigen)
+  endif()
 
   add_subdirectory(src)
 

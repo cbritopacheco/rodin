@@ -12,12 +12,15 @@ add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
 target_sources(Rodin INTERFACE ${Rodin_HEADERS})
 
-# The Plot module is currently broken. So we don't add it to the build list.
-# It is a dependency issue with Magnum + mfem which causes the build to fail on
-# some systems. Also I might have modified a little the includes so that you
-# will get a file not found error during compilation, which should be easy to
-# fix.
+if (RODIN_WITH_PLOT)
+# The Plot module is currently broken and barely has any code. So we don't add
+# it to the build list.  It is a dependency issue with Magnum + mfem which
+# causes the build to fail on some systems. Also I might have modified a little
+# the includes so that you will get a file not found error during compilation,
+# which should be easy to fix.
+
 # add_subdirectory(Plot)
+endif()
 add_subdirectory(Core)
 add_subdirectory(Test)
 add_subdirectory(Alert)
