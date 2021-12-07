@@ -20,14 +20,14 @@ namespace Rodin::Variational
     *
     * Represents the integration of the bilinear forms
     *
-    * @f$ \int_{\Omega} c_{ijkl} \nabla u_j \cdot \nabla v_i \ dx @f$
-    *
+    * @f[
+    *    \int_{\Omega} c_{ijkl} \nabla u_j \cdot \nabla v_i \ dx
+    * @f]
     * where:
-    * @f$ c_{ijkl} := \lambda \delta_{ik} \delta_{jl} + \mu (\delta_{ij}
-    * \delta_{kl} + \delta_{il} \delta_{jk}) @f$
-    *
-    * for @f$ 1 \leq i, j, k, l \leq d @f$.
-    *
+    * @f[
+    *    c_{ijkl} := \lambda \delta_{ik} \delta_{jl} + \mu (\delta_{ij}
+    *    \delta_{kl} + \delta_{il} \delta_{jk}), \quad 1 \leq i, j, k, l \leq d
+    * @f]
     *
     * ----
     *
@@ -38,13 +38,13 @@ namespace Rodin::Variational
     * |  @f$ \mu @f$          | Scalar                                       |
     * |  @f$ \lambda @f$      | Scalar                                       |
     *
-    * ----
-    *
     * where:
     *
     * @f[
     *   \sigma(u) := \lambda (\nabla \cdot u) I + \mu (\nabla u + {\nabla u}^T)
     * @f]
+    *
+    * ----
     *
     */
    template <class L, class M>

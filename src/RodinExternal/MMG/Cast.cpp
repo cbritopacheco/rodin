@@ -17,6 +17,8 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Variational.h"
 
+#include "ScalarSolution2D.h"
+
 #include "Cast.h"
 
 
@@ -240,4 +242,63 @@ namespace Rodin
       return res;
     }
   }
+
+   template<>
+   template <>
+   Variational::GridFunction<>
+   Cast<External::MMG::ScalarSolution2D<true>>
+   ::to<Variational::GridFunction<>>() const
+   {
+     auto& sol = from();
+     MMG5_pSol mmgSol = sol.getHandle();
+     assert(mmgSol->type == MMG5_Scalar);
+     Variational::GridFunction<> res;
+     double* data = new double[mmgSol->np];
+     // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
+     // + np + 1.
+     std::copy(mmgSol->m + 1, mmgSol->m + mmgSol->np + 1, data);
+     res.getHandle().SetDataAndSize(data, mmgSol->np);
+     res.getHandle().MakeDataOwner();
+     return res;
+   }
+
+   template <>
+   template <>
+   Variational::GridFunction<>
+   Cast<External::MMG::ScalarSolution2D<false>>
+   ::to<Variational::GridFunction<>>() const
+   {
+     auto& sol = from();
+     MMG5_pSol mmgSol = sol.getHandle();
+     assert(mmgSol->type == MMG5_Scalar);
+     Variational::GridFunction<> res;
+     double* data = new double[mmgSol->np];
+     // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
+     // + np + 1.
+     std::copy(mmgSol->m + 1, mmgSol->m + mmgSol->np + 1, data);
+     res.getHandle().SetDataAndSize(data, mmgSol->np);
+     res.getHandle().MakeDataOwner();
+     return res;
+   }
+
+   template <>
+   template <>
+   External::MMG::ScalarSolution2D<false>
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::ScalarSolution2D<false>>()
+   const
+   {
+     auto& gf = from();
+     auto [data, size] = gf.getData();
+     if (!size)
+       return External::MMG::ScalarSolution2D<false>();
+     else
+     {
+       External::MMG::ScalarSolution2D<false> res(size);
+       // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
+       // m + size + 1.
+       std::copy(data, data + size, res.getHandle()->m + 1);
+       return res;
+     }
+   }
 }
