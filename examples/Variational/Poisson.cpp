@@ -5,7 +5,7 @@
 using namespace Rodin;
 using namespace Rodin::Variational;
 
-int main(int argc, char** argv)
+int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/star.mesh";
 

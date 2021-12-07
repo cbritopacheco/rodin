@@ -24,6 +24,17 @@ namespace Rodin::Variational
          virtual const mfem::GridFunction& getHandle() const = 0;
    };
 
+   /*
+    * Needed for inference of arguments.
+    */
+   template <class ... Ts>
+   class GridFunction
+   {
+      public:
+         GridFunction(const Ts&...)
+         {}
+   };
+
 
    /**
     * @brief Represents a grid function which does not yet have an associated
@@ -111,6 +122,7 @@ namespace Rodin::Variational
                m_data(m_gf.StealData())
          {
             assert(!m_gf.OwnsData());
+            m_gf.SetDataAndSize(m_data.get(), m_size);
          }
 
          /**
@@ -119,8 +131,17 @@ namespace Rodin::Variational
           */
          GridFunction(const GridFunction& other)
             :  m_fes(other.m_fes),
-               m_gf(other.m_gf)
-         {}
+               m_gf(other.m_gf),
+               m_size(other.m_size)
+         {
+            assert(!m_gf.OwnsData());
+            m_data = std::unique_ptr<double[]>(new double[other.m_size]);
+            std::copy(
+                  other.m_data.get(), other.m_data.get() + other.m_size,
+                  m_data.get()
+                  );
+            m_gf.SetDataAndSize(m_data.get(), m_size);
+         }
 
          /**
           * @brief Returns the finite element space to which the function
@@ -179,8 +200,8 @@ namespace Rodin::Variational
       private:
          std::reference_wrapper<FiniteElementSpace<FEC>> m_fes;
          mfem::GridFunction m_gf;
-         std::unique_ptr<double[]> m_data;
          int m_size;
+         std::unique_ptr<double[]> m_data;
    };
 }
 

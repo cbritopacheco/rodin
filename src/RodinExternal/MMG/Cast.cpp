@@ -41,7 +41,7 @@ namespace Rodin
 
     if (mmgMesh->nt == 0)
        Alert::Exception("Converting from a non-triangular MMG::Mesh2D to a"
-             " Rodin::Mesh is currently not supported ").raise();
+             " Rodin::Mesh is not supported ").raise();
 
     bool shiftAttr = false;
     for (int i = 1; i <= mmgMesh->nt; i++)
@@ -117,13 +117,16 @@ namespace Rodin
     auto& mesh = from();
     auto& mfemMesh = mesh.getHandle();
 
+    if (mesh.getDimension() != 2)
+      Alert::Exception("Mesh must be two dimensional.").raise();
+
     if (mfemMesh.GetNE() == 0)
       Alert::Exception("Converting from an empty mesh is not supported.").raise();
 
     if (mfemMesh.NURBSext)
        Alert::Exception(
-             "Converting from a NURBS mfem::Mesh to MMG::Mesh2D is not"
-             " currently supported.").raise();
+             "Converting from a NURBS mfem::Mesh to MMG::Mesh2D is"
+             " not supported.").raise();
 
     mfem::Array<mfem::Geometry::Type> geoms;
     mfemMesh.GetGeometries(2, geoms);
@@ -135,7 +138,7 @@ namespace Rodin
     {
       Alert::Exception(
             "Converting from a non-triangular mfem::Mesh to MMG::Mesh2D is not"
-            " currently supported.").raise();
+            " not supported.").raise();
     }
 
     /*
