@@ -14,7 +14,6 @@ int main(int argc, char** argv)
 
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
-  Omega.getHandle().UniformRefinement();
 
   // Functions
   H1 Vh(Omega);
