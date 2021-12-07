@@ -24,93 +24,97 @@ namespace Rodin
 {
   using namespace External;
 
-  // ---- <MMG::Mesh2D, Rodin::GridFunction> ---------------------------------
+  // ---- <MMG::Mesh2D, Rodin::Mesh> -----------------------------------------
+  template <>
+  template <>
   Rodin::Mesh
-  Cast<MMG::Mesh2D, Rodin::Mesh>
-  ::cast(const MMG::Mesh2D& mesh)
+  Cast<MMG::Mesh2D>::to<Rodin::Mesh>()
   const
   {
-     mfem::Mesh res(
-          2,
-          mesh.count<MMG::Mesh2D::Entity::Vertex>(),
-          mesh.count<MMG::Mesh2D::Entity::Triangle>());
+    auto& mesh = from();
+    mfem::Mesh res(
+         2,
+         mesh.count<MMG::Mesh2D::Entity::Vertex>(),
+         mesh.count<MMG::Mesh2D::Entity::Triangle>());
 
-     auto& mmgMesh = mesh.getHandle();
+    auto& mmgMesh = mesh.getHandle();
 
-     if (mmgMesh->nt == 0)
-        Alert::Exception("Converting from a non-triangular MMG::Mesh2D to a"
-              " Rodin::Mesh is currently not supported ").raise();
+    if (mmgMesh->nt == 0)
+       Alert::Exception("Converting from a non-triangular MMG::Mesh2D to a"
+             " Rodin::Mesh is currently not supported ").raise();
 
-     bool shiftAttr = false;
-     for (int i = 1; i <= mmgMesh->nt; i++)
-     {
-       if (mmgMesh->tria[i].ref == 0)
-         shiftAttr = true;
-       if (mmgMesh->tria[i].ref < 0)
-         Alert::Exception(
-             "Negative element attributes are not supported").raise();
-     }
+    bool shiftAttr = false;
+    for (int i = 1; i <= mmgMesh->nt; i++)
+    {
+      if (mmgMesh->tria[i].ref == 0)
+        shiftAttr = true;
+      if (mmgMesh->tria[i].ref < 0)
+        Alert::Exception(
+            "Negative element attributes are not supported").raise();
+    }
 
-     bool shiftBdrAttr = false;
-     for (int i = 1; i <= mmgMesh->na; i++)
-     {
-       if (mmgMesh->tria[i].ref == 0)
-         shiftBdrAttr = true;
-       if (mmgMesh->edge[i].ref < 0)
-         Alert::Exception(
-             "Negative boundary element attributes are not supported.").raise();
-     }
+    bool shiftBdrAttr = false;
+    for (int i = 1; i <= mmgMesh->na; i++)
+    {
+      if (mmgMesh->tria[i].ref == 0)
+        shiftBdrAttr = true;
+      if (mmgMesh->edge[i].ref < 0)
+        Alert::Exception(
+            "Negative boundary element attributes are not supported.").raise();
+    }
 
-     if (shiftAttr)
-       Alert::Warning(
-           "Element attribute equal to 0 is not supported. "
-           "All element attributes will be incremented by 1.").raise();
+    if (shiftAttr)
+      Alert::Warning(
+          "Element attribute equal to 0 is not supported. "
+          "All element attributes will be incremented by 1.").raise();
 
-     if (shiftBdrAttr)
-       Alert::Warning(
-           "Boundary element attribute equal to 0 is not supported. "
-           "All boundary element attributes will be incremented by 1.").raise();
+    if (shiftBdrAttr)
+      Alert::Warning(
+          "Boundary element attribute equal to 0 is not supported. "
+          "All boundary element attributes will be incremented by 1.").raise();
 
-     /* So for some reason mmg types are 1 indexed. So when accessing the
-      * arrays make sure to start at 1 and not 0. I don't know why this is the
-      * case and I'm not sure if it's for every array in the library.
-      */
-     for (int i = 1; i <= mesh.getHandle()->np; i++)
-     {
-       res.AddVertex(
-           mmgMesh->point[i].c[0],
-           mmgMesh->point[i].c[1]
-           );
-     }
+    /* So for some reason mmg types are 1 indexed. So when accessing the
+     * arrays make sure to start at 1 and not 0. I don't know why this is the
+     * case and I'm not sure if it's for every array in the library.
+     */
+    for (int i = 1; i <= mesh.getHandle()->np; i++)
+    {
+      res.AddVertex(
+          mmgMesh->point[i].c[0],
+          mmgMesh->point[i].c[1]
+          );
+    }
 
-     for (int i = 1; i <= mmgMesh->nt; i++)
-     {
-       res.AddTriangle(
-           mmgMesh->tria[i].v[0] - 1,
-           mmgMesh->tria[i].v[1] - 1,
-           mmgMesh->tria[i].v[2] - 1,
-           mmgMesh->tria[i].ref + shiftAttr
-           );
-     }
-     for (int i = 1; i <= mmgMesh->na; i++)
-     {
-        res.AddBdrSegment(
-              mmgMesh->edge[i].a - 1,
-              mmgMesh->edge[i].b - 1,
-              mmgMesh->edge[i].ref + shiftBdrAttr
-              );
-     }
-     res.FinalizeMesh(true, true);
+    for (int i = 1; i <= mmgMesh->nt; i++)
+    {
+      res.AddTriangle(
+          mmgMesh->tria[i].v[0] - 1,
+          mmgMesh->tria[i].v[1] - 1,
+          mmgMesh->tria[i].v[2] - 1,
+          mmgMesh->tria[i].ref + shiftAttr
+          );
+    }
+    for (int i = 1; i <= mmgMesh->na; i++)
+    {
+       res.AddBdrSegment(
+             mmgMesh->edge[i].a - 1,
+             mmgMesh->edge[i].b - 1,
+             mmgMesh->edge[i].ref + shiftBdrAttr
+             );
+    }
+    res.FinalizeMesh(true, true);
 
-     return Rodin::Mesh(res);
+    return Rodin::Mesh(res);
   }
 
-  // ---- <Rodin::GridFunction, MMG::Mesh2D> ---------------------------------
+  // ---- From: Rodin::Mesh - To: MMG::Mesh2D> -------------------------------
+  template <>
+  template <>
   MMG::Mesh2D
-  Cast<Rodin::Mesh, MMG::Mesh2D>
-  ::cast(const Rodin::Mesh& mesh)
+  Cast<Rodin::Mesh>::to<MMG::Mesh2D>()
   const
   {
+    auto& mesh = from();
     auto& mfemMesh = mesh.getHandle();
 
     if (mfemMesh.GetNE() == 0)
@@ -209,5 +213,28 @@ namespace Rodin
       }
     }
     return res;
+  }
+
+  // ---- From: Rodin::GridFunction - To: MMG::ScalarSolution2D<false>> ------
+  template <>
+  template <>
+  External::MMG::ScalarSolution2D<false>
+  Cast<Variational::GridFunction<>>
+  ::to<External::MMG::ScalarSolution2D<false>>()
+  const
+  {
+    auto& gf = from();
+    int size = gf.getHandle().Size();
+    const double* data = gf.getHandle().GetData();
+
+    if (!size)
+      return External::MMG::ScalarSolution2D<false>();
+    else
+    {
+      External::MMG::ScalarSolution2D<false> res(size);
+      // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m + size + 1.
+      std::copy(data, data + size, res.getHandle()->m + 1);
+      return res;
+    }
   }
 }

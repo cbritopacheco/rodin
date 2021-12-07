@@ -11,9 +11,28 @@
 
 namespace Rodin
 {
-   template <class From, class To>
+   template <class From>
    class Cast
-   {};
+   {
+      public:
+         Cast(const From& from)
+            : m_from(from)
+         {}
+
+         const From& from() const
+         {
+            return m_from;
+         }
+
+         template <class To>
+         To to() const
+         {
+            return static_cast<To>(from());
+         }
+
+      private:
+         const From& m_from;
+   };
 }
 
 #endif

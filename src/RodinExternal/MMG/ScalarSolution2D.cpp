@@ -38,6 +38,21 @@ namespace Rodin::External::MMG
       m_sol->type = 1;
    }
 
+   ScalarSolution2D<true>::~ScalarSolution2D()
+   {
+      if (m_sol)
+      {
+         if (m_sol->m)
+            MMG5_SAFE_FREE(m_sol->m);
+         if (m_sol->namein)
+            MMG5_SAFE_FREE(m_sol->namein);
+         if (m_sol->nameout)
+            MMG5_SAFE_FREE(m_sol->nameout);
+
+         MMG5_SAFE_FREE(m_sol);
+      }
+   }
+
    ScalarSolution2D<true>::ScalarSolution2D(ScalarSolution2D&& other)
       :  m_mesh(other.m_mesh),
          m_sol(other.m_sol)
@@ -164,7 +179,7 @@ namespace Rodin::External::MMG
         {
            auto read = [&inm, &dbuf] () { MMG_FSCANF(inm, "%lf", &dbuf); return 1; };
            if (read() < 0)
-              Alert::Exception("Failed to load mesh. Error while reading.");
+              Alert::Exception("Failed to load mesh. Error while reading.").raise();
             sol->m[sol->size * k + i] = dbuf;
         }
       }
@@ -319,6 +334,7 @@ namespace Rodin::External::MMG
 
    // ---- ScalarSolution2D<false> -------------------------------------------
    ScalarSolution2D<false>::ScalarSolution2D()
+      : m_isOwner(true)
    {
       auto calloc =
          [this]()
@@ -338,10 +354,42 @@ namespace Rodin::External::MMG
       m_sol->type = 1;
    }
 
-   ScalarSolution2D<true> ScalarSolution2D<false>::setMesh(Mesh2D& mesh) const
+   ScalarSolution2D<false>::ScalarSolution2D(int size)
+      : ScalarSolution2D()
+   {
+      if (size)
+      {
+         m_sol->np  = size;
+         m_sol->npi = size;
+         m_sol->npmax = std::max(static_cast<int>(1.5 * m_sol->np), MMG2D_NPMAX);
+         MMG5_SAFE_CALLOC(
+               m_sol->m, (m_sol->size * (m_sol->npmax + 1)), double, /* No op */);
+      }
+   }
+
+   ScalarSolution2D<false>::~ScalarSolution2D()
+   {
+      if (m_isOwner)
+      {
+         if (m_sol)
+         {
+            if (m_sol->m)
+               MMG5_SAFE_FREE(m_sol->m);
+            if (m_sol->namein)
+               MMG5_SAFE_FREE(m_sol->namein);
+            if (m_sol->nameout)
+               MMG5_SAFE_FREE(m_sol->nameout);
+
+            MMG5_SAFE_FREE(m_sol);
+         }
+      }
+   }
+
+   ScalarSolution2D<true> ScalarSolution2D<false>::setMesh(Mesh2D& mesh)
    {
       ScalarSolution2D<true> res(mesh);
       res.getHandle() = m_sol;
+      m_isOwner = false;
       return res;
    }
 

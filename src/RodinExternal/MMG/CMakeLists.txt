@@ -27,7 +27,6 @@ set(RodinExternalMMG_HEADERS
 
 set(RodinExternalMMG_SRCS
   Cast.cpp
-  Cast.hpp
   Mesh2D.cpp
   MeshAdaptor2D.cpp
   MeshOptimizer2D.cpp

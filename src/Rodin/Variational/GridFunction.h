@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <utility>
+#include <fstream>
 #include <functional>
 
 #include <mfem.hpp>
@@ -23,9 +24,70 @@ namespace Rodin::Variational
          virtual const mfem::GridFunction& getHandle() const = 0;
    };
 
+
    /**
-    * @brief A grid function is a function which is defined on an unstructured
-    * grid, i.e. a triangular mesh.
+    * @brief Represents a grid function which does not yet have an associated
+    * finite element space.
+    *
+    * To obtain the full functionality of the GridFunction class one must call
+    * the setFiniteElementSpace(FiniteElementSpace&) method.
+    */
+   template <>
+   class GridFunction<> : public GridFunctionBase
+   {
+      public:
+         /**
+          * @brief Constructs an empty grid function with no associated finite
+          * element space.
+          */
+         GridFunction() = default;
+
+         /**
+          * @brief Associates a finite element space to the function.
+          * @param[in] fes Finite element space to which the function belongs
+          * to.
+          * @tparam FEC Finite element collection associated to the finite
+          * element space.
+          */
+         template <class FEC>
+         GridFunction<FEC> setFiniteElementSpace(FiniteElementSpace<FEC>& fes)
+         {
+            GridFunction<FEC> res(fes);
+            int size = m_gf.Size();
+            res.getHandle().SetDataAndSize(m_gf.StealData(), size);
+            return res;
+         }
+
+         /**
+          * @brief Loads the grid function without assigning a finite element
+          * space.
+          * @param[in] filename Name of file to which the grid function will be
+          * written to.
+          */
+         static GridFunction load(const std::string& filename)
+         {
+            std::ifstream in(filename);
+            GridFunction res;
+            res.getHandle().Load(in);
+            return res;
+         }
+
+         mfem::GridFunction& getHandle() override
+         {
+            return m_gf;
+         }
+
+         const mfem::GridFunction& getHandle() const override
+         {
+            return m_gf;
+         }
+
+      private:
+         mfem::GridFunction m_gf;
+   };
+
+   /**
+    * @brief Represents a grid function belonging to some finite element space.
     *
     * @tparam FEC Finite element collection to which the function belongs.
     *
@@ -34,7 +96,7 @@ namespace Rodin::Variational
     * specify it.
     */
    template <class FEC>
-   class GridFunction : public GridFunctionBase
+   class GridFunction<FEC> : public GridFunctionBase
    {
       public:
          /**
@@ -72,6 +134,8 @@ namespace Rodin::Variational
 
          /**
           * @brief Saves the grid function in MFEMv1.0 format.
+          * @param[in] filename Name of file to which the solution file will be
+          * written.
           */
          void save(const std::string& filename)
          {
@@ -94,6 +158,10 @@ namespace Rodin::Variational
             return *this;
          }
 
+         /**
+          * @brief Gets the raw data and its size of the grid function.
+          * @returns `std::pair{data, size}`
+          */
          std::pair<const double*, int> getData() const
          {
             return {m_data.get(), m_size};

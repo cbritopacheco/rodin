@@ -24,8 +24,14 @@ namespace Rodin::Variational
    // ---- GridFunction ------------------------------------------------------
    class GridFunctionBase;
 
-   template <class FEC>
+   template <class ...>
    class GridFunction;
+
+   template <>
+   class GridFunction<>;
+
+   template <class FEC>
+   class GridFunction<FEC>;
 
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;

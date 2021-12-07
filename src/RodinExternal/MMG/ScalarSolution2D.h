@@ -122,6 +122,11 @@ namespace Rodin::External::MMG
          ScalarSolution2D(const ScalarSolution2D& other);
 
          /**
+          * @brief Frees the data.
+          */
+         ~ScalarSolution2D();
+
+         /**
           * @brief Move assigns the `other` solution object to this object.
           *
           * @param[in] other Object to move.
@@ -198,10 +203,26 @@ namespace Rodin::External::MMG
    class ScalarSolution2D<false>
    {
       public:
+         /**
+          * @brief Constructs an empty scalar solution object without a mesh.
+          */
          ScalarSolution2D();
 
          /**
-          * @brief Sets the associated mesh.
+          * @brief Constructs a scalar solution with `n` unitialized entries.
+          * @param[in] n Number of entries that the solution has.
+          */
+         ScalarSolution2D(int n);
+
+         /**
+          * @brief Frees the data if it still owns the data, i.e. the
+          * setMesh(Mesh2D&) method has not been called.
+          */
+         ~ScalarSolution2D();
+
+         /**
+          * @brief Sets the associated mesh and moves ownership to the new
+          * object.
           *
           * @param[in] mesh Reference to mesh.
           *
@@ -216,13 +237,14 @@ namespace Rodin::External::MMG
           * user to ensure that the number of points are the same, keep track
           * of the modifications to the underlying mesh, etc.
           */
-         ScalarSolution2D<true> setMesh(Mesh2D& mesh) const;
+         ScalarSolution2D<true> setMesh(Mesh2D& mesh);
 
          MMG5_pSol& getHandle();
          const MMG5_pSol& getHandle() const;
 
       private:
          MMG5_pSol m_sol;
+         bool m_isOwner;
    };
 }
 #endif
