@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Cast&lt;Rodin::Mesh, External::MMG::Mesh2D&gt; struct | Rodin</title>
+  <title>Rodin::External::MMG::ScalarSolution2D&lt;false&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,48 +51,96 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast&lt;Rodin::Mesh, External::MMG::Mesh2D&gt; <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>ScalarSolution2D&lt;false&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Specialization for converting from <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> to <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">External::<wbr />MMG</a>:Mesh2D.</p>
+        <p>A scalar solution which does not have a mesh assigned to it.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
-<aside class="m-note m-danger"><h4>Warning</h4><p>This is a lossy cast. Data from the <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> object that has no correspondence will not be present in the new Mesh2D object.</p></aside>
+<p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01false_01_4.html#a92d27fba041632efa5018e078c42f0b2" class="m-doc">setMesh(Mesh2D&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="n">ScalarSolution2D</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarSolution2D</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="abc392236796af63a7280b715b271b8f3">
+              <span class="m-doc-wrap-bumper"><a href="#abc392236796af63a7280b715b271b8f3" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs an empty scalar solution object without a mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a119923c02760a2ed0efcfeb72ea38b78" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap">int n)</span>
+            </dt>
+            <dd>Constructs a scalar solution with <code>n</code> unitialized entries.</dd>
+            <dt id="ade050ac4a950d742207ed7a9faaf141f">
+              <span class="m-doc-wrap-bumper"><a href="#ade050ac4a950d742207ed7a9faaf141f" class="m-doc-self">~ScalarSolution2D</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Frees the data if it still owns the data, i.e. the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01false_01_4.html#a92d27fba041632efa5018e078c42f0b2" class="m-doc">setMesh(Mesh2D&amp;)</a> method has not been called.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0cfdb687de32115dee24af27be6cd759" class="m-doc">cast</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>&amp; mesh) const -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a92d27fba041632efa5018e078c42f0b2" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&lt;true&gt;</span>
             </dt>
-            <dd>Performs the cat from <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> to MMG::Mesh2D.</dd>
+            <dd>Sets the associated mesh and moves ownership to the new object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0cfdb687de32115dee24af27be6cd759"><div>
+          <section class="m-doc-details" id="a119923c02760a2ed0efcfeb72ea38b78"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> Rodin::<wbr />Cast&lt;Rodin::<wbr />Mesh, External::<wbr />MMG::<wbr />Mesh2D&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cfdb687de32115dee24af27be6cd759" class="m-doc-self">cast</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>&amp; mesh) const</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;false&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a119923c02760a2ed0efcfeb72ea38b78" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap">int n)</span></span>
             </h3>
-            <p>Performs the cat from <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> to MMG::Mesh2D.</p>
+            <p>Constructs a scalar solution with <code>n</code> unitialized entries.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of entries that the solution has.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a92d27fba041632efa5018e078c42f0b2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&lt;true&gt; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;false&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92d27fba041632efa5018e078c42f0b2" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Sets the associated mesh and moves ownership to the new object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference to mesh.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> object</td>
+                  <th>Returns</th>
+                  <td>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> which represents the object with all its functionality.</td>
                 </tr>
               </tfoot>
             </table>
+<aside class="m-note m-info"><h4>Note</h4><p>The method does not incur any significant performance since no data is copied.</p><p>The method does not check to see if the mesh is compatible with the current data in the solution. In general, it is up to the user to ensure that the number of points are the same, keep track of the modifications to the underlying mesh, etc.</p></aside>
           </div></section>
         </section>
       </div>

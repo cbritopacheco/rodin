@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::IncompleteScalarSolution2D class | Rodin</title>
+  <title>Rodin::Cast&lt;Variational::GridFunction&lt;FEC&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,56 +50,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>IncompleteScalarSolution2D <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class FEC&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast&lt;Variational::GridFunction&lt;FEC&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>A scalar solution which does not have a mesh assigned to it.</p>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-<p>We may obtain an object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> via a call to the setMesh(Mesh2D&amp;) method. For example, when loading it from file:</p><pre class="m-code"><span class="n">ScalarSolution2D</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarSolution2D</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1b98154105d2535c1e690af6935eb9b8" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) const -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a></span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a1b98154105d2535c1e690af6935eb9b8"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b98154105d2535c1e690af6935eb9b8" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) const</span></span>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference to mesh.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> which represents the now complete solution.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Sets the associated mesh.</p><aside class="m-note m-info"><h4>Note</h4><p>The method does not incur any significant performance since no data is copied.</p><p>The method does not check to see if the mesh is compatible with the current data in the solution. In general, it is up to the user to ensure that the number of points are the same, keep track of the modifications to the underlying mesh, etc.</p></aside>
-          </div></section>
-        </section>
+        <p>Specialization for converting from <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_c_01_4.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;</a> to <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01false_01_4.html" class="m-doc">External::<wbr />MMG::<wbr />ScalarSolution2D&lt;false&gt;</a>.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This is a lossy cast. Data from the old object that has no direct correspondence will not be present in the new object.</p></aside><aside class="m-note m-dim"><h4><a href="todo.html#_todo000009" class="m-doc">Todo</a></h4><p>Which fields are not compatible?</p></aside>
       </div>
     </div>
   </div>

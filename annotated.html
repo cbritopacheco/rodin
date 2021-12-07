@@ -60,12 +60,12 @@
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> <span class="m-doc"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
                     <ul class="m-doc">
-                      <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">IncompleteScalarSolution2D</a> <span class="m-doc">A scalar solution which does not have a mesh assigned to it.</span></li>
                       <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> <span class="m-doc">Represents a 2D mesh.</span></li>
                       <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_adaptor2_d.html" class="m-doc">MeshAdaptor2D</a> <span class="m-doc">Adapts a <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object according to some given metric.</span></li>
                       <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a> <span class="m-doc">Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</span></li>
                       <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution.html" class="m-doc">ScalarSolution</a> <span class="m-doc">Scalar solution supported on a mesh.</span></li>
-                      <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> <span class="m-doc">Scalar solution supported on a 2D mesh.</span></li>
+                      <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01false_01_4.html" class="m-doc">ScalarSolution2D&lt;false&gt;</a> <span class="m-doc">A scalar solution which does not have a mesh assigned to it.</span></li>
+                      <li>class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01true_01_4.html" class="m-doc">ScalarSolution2D&lt;true&gt;</a> <span class="m-doc">Scalar solution supported on a 2D mesh.</span></li>
                     </ul>
                   </li>
                 </ul>
@@ -95,7 +95,8 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_domain_l_f_integrator.html" class="m-doc">DomainLFIntegrator</a> <span class="m-doc">Object used to integrate a coefficient against a fixed coefficient.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_elasticity_integrator.html" class="m-doc">ElasticityIntegrator</a> <span class="m-doc">Object used to integrate the typical elasticity operator.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a> <span class="m-doc">Base type for the finite element spaces.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> <span class="m-doc">A grid function is a function which is defined on an unstructured grid, i.e. a triangular mesh.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_c_01_4.html" class="m-doc">GridFunction&lt;FEC&gt;</a> <span class="m-doc">Represents a grid function belonging to some finite element space.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_4.html" class="m-doc">GridFunction&lt;&gt;</a> <span class="m-doc">Represents a grid function which does not yet have an associated finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <span class="m-doc">Arbitrary order H1-conforming (continuous) finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Represents a linear form on some finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_neumann_b_c.html" class="m-doc">NeumannBC</a> <span class="m-doc">Represents a Neumann boundary condition.</span></li>
@@ -105,8 +106,8 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_3_01_t_00_01std_1_1enable__if__t_3_01std_1_1i58340c52e1f9cd1352ece76f5fcd1694.html" class="m-doc">ScalarCoefficient&lt;T, std::enable_if_t&lt;std::is_base_of_v&lt;mfem::Coefficient, T&gt;&gt;&gt;</a> <span class="m-doc"></span></li>
                 </ul>
               </li>
-              <li>struct <a href="struct_rodin_1_1_cast_3_01_external_1_1_m_m_g_1_1_mesh2_d_00_01_rodin_1_1_mesh_01_4.html" class="m-doc">Cast&lt;External::MMG::Mesh2D, Rodin::Mesh&gt;</a> <span class="m-doc">Specialization for converting from <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>.</span></li>
-              <li>struct <a href="struct_rodin_1_1_cast_3_01_rodin_1_1_mesh_00_01_external_1_1_m_m_g_1_1_mesh2_d_01_4.html" class="m-doc">Cast&lt;Rodin::Mesh, External::MMG::Mesh2D&gt;</a> <span class="m-doc">Specialization for converting from <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> to <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">External::<wbr />MMG</a>:Mesh2D.</span></li>
+              <li>class <a href="class_rodin_1_1_cast_3_01_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01_has_mesh_01_4_01_4.html" class="m-doc">Cast&lt;External::MMG::ScalarSolution2D&lt;HasMesh&gt;&gt;</a> <span class="m-doc">Specialization for converting from <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">External::<wbr />MMG::<wbr />ScalarSolution2D</a> to <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a>.</span></li>
+              <li>class <a href="class_rodin_1_1_cast_3_01_variational_1_1_grid_function_3_01_f_e_c_01_4_01_4.html" class="m-doc">Cast&lt;Variational::GridFunction&lt;FEC&gt;&gt;</a> <span class="m-doc">Specialization for converting from <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_c_01_4.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;</a> to <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01false_01_4.html" class="m-doc">External::<wbr />MMG::<wbr />ScalarSolution2D&lt;false&gt;</a>.</span></li>
             </ul>
           </li>
         </ul>

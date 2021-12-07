@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Cast&lt;External::MMG::Mesh2D, Rodin::Mesh&gt; struct | Rodin</title>
+  <title>Rodin::Cast&lt;External::MMG::ScalarSolution2D&lt;HasMesh&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,51 +50,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast&lt;External::MMG::Mesh2D, Rodin::Mesh&gt; <span class="m-thin">struct</span>
+          <div class="m-doc-template">template&lt;bool HasMesh&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast&lt;External::MMG::ScalarSolution2D&lt;HasMesh&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Specialization for converting from <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>.</p>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-<aside class="m-note m-danger"><h4>Warning</h4><p>This is a lossy cast. Data from the Mesh2D object that has no correspondence will not be present in the new <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> object.</p></aside>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a48cdad748e7e2674c20d17e6ddb1e65b" class="m-doc">cast</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a>&amp; mesh) const -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a></span>
-            </dt>
-            <dd>Performs the cast from <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a48cdad748e7e2674c20d17e6ddb1e65b"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> Rodin::<wbr />Cast&lt;External::<wbr />MMG::<wbr />Mesh2D, Rodin::<wbr />Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48cdad748e7e2674c20d17e6ddb1e65b" class="m-doc-self">cast</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a>&amp; mesh) const</span></span>
-            </h3>
-            <p>Performs the cast from <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> object</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-        </section>
+        <p>Specialization for converting from <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">External::<wbr />MMG::<wbr />ScalarSolution2D</a> to <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a>.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This is a lossy cast. Data from the old object that has no direct correspondence will not be present in the new object.</p></aside><aside class="m-note m-dim"><h4><a href="todo.html#_todo000008" class="m-doc">Todo</a></h4><p>Which fields are not compatible?</p></aside>
       </div>
     </div>
   </div>

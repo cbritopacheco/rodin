@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::GridFunction class | Rodin</title>
+  <title>Rodin::Variational::GridFunction&lt;FEC&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,9 +51,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class FEC&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction&lt;FEC&gt; <span class="m-thin">class</span>
         </h1>
-        <p>A grid function is a function which is defined on an unstructured grid, i.e. a triangular mesh.</p>
+        <p>Represents a grid function belonging to some finite element space.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -98,6 +98,19 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a216ce18023a2fa563fc1d011095ae871" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp;</span>
             </dt>
             <dd>Returns the finite element space to which the function belongs to.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span>
+            </dt>
+            <dd>Saves the grid function in MFEMv1.0 format.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1432682a44dfd1c771441dc70d5e6b8f" class="m-doc">setData</a>(</span><span class="m-doc-wrap">std::unique_ptr&lt;double[]&gt; data,
+              int size) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+            </dt>
+            <dd>Sets the data of the grid function and assumes ownership.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac083a09500d43f30a1fc8d0d1ac5960c" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;const double*, int&gt;</span>
+            </dt>
+            <dd>Gets the raw data and its size of the grid function.</dd>
           </dl>
         </section>
         <section>
@@ -107,7 +120,7 @@
               <div class="m-doc-template">
                 template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef52907255b26e2c5c11a359839b8ec6" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; fes)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef52907255b26e2c5c11a359839b8ec6" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; fes)</span></span>
             </h3>
             <p>Constructs a grid function on a finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -127,7 +140,7 @@
               <div class="m-doc-template">
                 template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span></span>
             </h3>
             <p>Copies the grid function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -147,7 +160,7 @@
               <div class="m-doc-template">
                 template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a216ce18023a2fa563fc1d011095ae871" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a216ce18023a2fa563fc1d011095ae871" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Returns the finite element space to which the function belongs to.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -155,6 +168,74 @@
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Finite element space to which the function belongs to.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2c027edbcd25b820dc6e21a9a3ad0496"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
+            </h3>
+            <p>Saves the grid function in MFEMv1.0 format.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to which the solution file will be written.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1432682a44dfd1c771441dc70d5e6b8f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1432682a44dfd1c771441dc70d5e6b8f" class="m-doc-self">setData</a>(</span><span class="m-doc-wrap">std::unique_ptr&lt;double[]&gt; data,
+              int size)</span></span>
+            </h3>
+            <p>Sets the data of the grid function and assumes ownership.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">data&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Data array</td>
+                </tr>
+                <tr>
+                  <td>size&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Size of the data array</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac083a09500d43f30a1fc8d0d1ac5960c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::pair&lt;const double*, int&gt; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac083a09500d43f30a1fc8d0d1ac5960c" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the raw data and its size of the grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><code>std::pair{data, size}</code></td>
                 </tr>
               </tfoot>
             </table>
