@@ -52,34 +52,97 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh2D <span class="m-thin">class</span>
         </h1>
-        <p>Represents a 2D mesh.</p>
+        <p>Represents a mesh of a 2D domain.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
+<p>The <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> class is used to manipulate the mesh of</p>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a92334c81423e196513d28976f74f15d6" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::string&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a></span>
+            </dt>
+            <dd>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object from a text file, assuming it is in the <code>medit2</code> file format.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6ae5ff480d87d8c063be2cc13d248f6e" class="m-doc">Mesh2D</a>(</span><span class="m-doc-wrap">)</span>
+            <dt id="a6ae5ff480d87d8c063be2cc13d248f6e">
+              <span class="m-doc-wrap-bumper"><a href="#a6ae5ff480d87d8c063be2cc13d248f6e" class="m-doc-self">Mesh2D</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd></dd>
+            <dd>Creates an empty mesh.</dd>
+            <dt id="ab9dc3a8d8f2fe74d06ac9897a8d9ebf8">
+              <span class="m-doc-wrap-bumper"><a href="#ab9dc3a8d8f2fe74d06ac9897a8d9ebf8" class="m-doc-self">Mesh2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Moves constructs the data of another <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object, while invalidating the latter.</dd>
+            <dt id="aa8eafb8aacad652ee621a3199cb315cd">
+              <span class="m-doc-wrap-bumper"><a href="#aa8eafb8aacad652ee621a3199cb315cd" class="m-doc-self">~Mesh2D</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Destructs the object.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span>
+            </dt>
+            <dd>Writes the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object to file using the <code>medit2</code> file format.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a6ae5ff480d87d8c063be2cc13d248f6e"><div>
+          <section class="m-doc-details" id="a92334c81423e196513d28976f74f15d6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ae5ff480d87d8c063be2cc13d248f6e" class="m-doc-self">Mesh2D</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92334c81423e196513d28976f74f15d6" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
             </h3>
-<p>Creates an empty mesh</p>
+            <p>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object from a text file, assuming it is in the <code>medit2</code> file format.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file where the mesh will be read from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object containing the mesh data in the file.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2c027edbcd25b820dc6e21a9a3ad0496"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
+            </h3>
+            <p>Writes the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object to file using the <code>medit2</code> file format.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file where the mesh will be written to.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
       </div>
