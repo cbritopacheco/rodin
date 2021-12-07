@@ -52,6 +52,10 @@ namespace Rodin::Variational
       :  public FormLanguage::BilinearFormExpr<ElasticityIntegrator<L, M>>
    {
       public:
+         /**
+          * @brief Creates an ElasticityIntegrator with the given Lamé
+          * coefficients @f$ \lambda @f$ and @f$ \mu @f$.
+          */
          ElasticityIntegrator(const L& lambda, const M& mu);
 
          ElasticityIntegrator(const ElasticityIntegrator& other);

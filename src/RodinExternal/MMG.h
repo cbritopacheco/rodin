@@ -8,7 +8,6 @@
 #define RODIN_EXTERNAL_MMG_H
 
 #include "MMG/Cast.h"
-
 #include "MMG/Mesh2D.h"
 #include "MMG/ScalarSolution2D.h"
 #include "MMG/MeshAdaptor2D.h"

@@ -58,5 +58,10 @@
 /**
   @namespace Rodin::External::MMG
   @brief MMG integration with Rodin
+
+  The Rodin::External::MMG module has a wide variety of uses which ranges from
+  optimization of the mesh, to implicit domain meshing. It provides many C++
+  wrappers to execute the functionality of the [Mmg
+  Platform](https://www.mmgtools.org/).
  */
 

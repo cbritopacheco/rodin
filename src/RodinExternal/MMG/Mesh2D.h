@@ -20,7 +20,9 @@
 namespace Rodin::External::MMG
 {
    /**
-    * @brief Represents a 2D mesh.
+    * @brief Represents a mesh of a 2D domain.
+    *
+    * The Mesh2D class is used to manipulate the mesh of 
     */
    class Mesh2D : public Mesh<2, Mesh2D>
    {
@@ -60,16 +62,37 @@ namespace Rodin::External::MMG
             Triangle = MMG5_Triangle
          };
 
+         /**
+          * @brief Loads the Mesh2D object from a text file, assuming it is in
+          * the `medit2` file format.
+          *
+          * @param[in] filename Name of file where the mesh will be read from.
+          * @returns A Mesh2D object containing the mesh data in the file.
+          */
          static Mesh2D load(const std::string& filename);
+
+         /**
+          * @brief Writes the Mesh2D object to file using the `medit2` file
+          * format.
+          *
+          * @param[in] filename Name of file where the mesh will be written to.
+          */
          void save(const std::string& filename);
 
          /**
-          * Creates an empty mesh
+          * @brief Creates an empty mesh.
           */
          Mesh2D();
 
+         /**
+          * @brief Moves constructs the data of another Mesh2D object, while
+          * invalidating the latter.
+          */
          Mesh2D(Mesh2D&& other);
 
+         /**
+          * @brief Destructs the object.
+          */
          ~Mesh2D();
 
          template <Entity e = Vertex>
