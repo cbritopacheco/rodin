@@ -16,33 +16,37 @@ namespace Rodin::Variational
 {
    /**
     *
-    * @brief Object used to integrate the typical elasticity operator.
+    * @brief Object used to integrate the linear elasticity form.
     *
-    * Represents the integration of the bilinear forms
+    * Represents the integration of the bilinear form
     *
     * @f[
-    *    \int_{\Omega} c_{ijkl} \nabla u_j \cdot \nabla v_i \ dx
+    *    a(\vec{u}, \vec{v}) = \int_\Omega A e(\vec{u}) \colon e(\vec{v}) \ dx
+    *    .
     * @f]
-    * where:
+    * The stress tensor @f$ \sigma(\vec{u}) @f$ is related to the strain tensor
+    * @f$ e(\vec{u}) := \frac{1}{2} \left( \nabla \vec{u} + \nabla \vec{u}^T
+    * \right) @f$ via Hooke's law:
     * @f[
-    *    c_{ijkl} := \lambda \delta_{ik} \delta_{jl} + \mu (\delta_{ij}
-    *    \delta_{kl} + \delta_{il} \delta_{jk}), \quad 1 \leq i, j, k, l \leq d
+    *    \sigma(\vec{u}) = A e(\vec{u}),
     * @f]
+    * where for any @f$ e @f$ in the set of real symmetric @f$ d \times d @f$
+    * matrices,
+    * @f[
+    *   Ae = 2\mu e + \lambda \mathrm{tr}(e)I,
+    * @f]
+    * @f$ I @f$ is the identity @f$ d \times d @f$ matrix, @f$ \lambda @f$ and
+    * @f$ \mu @f$ are the Lamé parameters of the constituent material,
+    * satisfying @f$ \mu > 0 @f$ and @f$ \lambda + 2 \mu / d > 0 @f$.
     *
     * ----
     *
     * | Detail                | Description                                  |
     * |-----------------------|----------------------------------------------|
     * |  Dimensions supported | 1D, 2D, 3D                                   |
-    * |  Continuous operator  | @f$ - \nabla \cdot \sigma (u) @f$            |
+    * |  Continuous operator  | @f$ - \nabla \cdot \sigma (\vec{u}) @f$      |
     * |  @f$ \mu @f$          | Scalar                                       |
     * |  @f$ \lambda @f$      | Scalar                                       |
-    *
-    * where:
-    *
-    * @f[
-    *   \sigma(u) := \lambda (\nabla \cdot u) I + \mu (\nabla u + {\nabla u}^T)
-    * @f]
     *
     * ----
     *
