@@ -37,10 +37,12 @@ namespace Rodin::Variational
    template <class T>
    void DomainLFIntegrator<T>::eval()
    {
-      m_f.eval();
+      m_f.buildMFEMCoefficient();
       m_lf->get()
          .getHandle()
-         .AddDomainIntegrator(new mfem::DomainLFIntegrator(m_f.coeff()));
+         .AddDomainIntegrator(
+               new mfem::DomainLFIntegrator(
+                  m_f.getMFEMCoefficient()));
    }
 
    template <class T>

@@ -24,6 +24,7 @@
 #include "Variational/Problem.h"
 #include "Variational/ScalarCoefficient.h"
 #include "Variational/VectorCoefficient.h"
+#include "Variational/MatrixCoefficient.h"
 
 // ---- Bilinear form integrators --------------------------------------------
 #include "Variational/DiffusionIntegrator.h"

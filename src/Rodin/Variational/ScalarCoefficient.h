@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_COEFF_H
-#define RODIN_VARIATIONAL_COEFF_H
+#ifndef RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
+#define RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
 
 #include <memory>
 #include <type_traits>
@@ -17,13 +17,50 @@
 
 namespace Rodin::Variational
 {
-   class ScalarCoefficientBase : public FormLanguage::RodinBase
+   class ScalarCoefficientBase
    {
       public:
+         /**
+          * @internal
+          * @brief Toggles the sign of the coefficient.
+          *
+          * If @f$ S @f$ is the scalar coefficient then this method applies the
+          * following rule:
+          *
+          * @f[
+          *    S \leftarrow - S
+          * @f]
+          *
+          * @returns Reference to self (for method chaining)
+          */
          virtual ScalarCoefficientBase& toggleSign() = 0;
-         virtual mfem::Coefficient& coeff() = 0;
+
+         /**
+          * @internal
+          * @brief Builds the underlying mfem::Coefficient object.
+          */
+         virtual void buildMFEMCoefficient() = 0;
+
+         /**
+          * @internal
+          * @brief Returns the underlying mfem::Coefficient object.
+          * @note Typically one should only call this after one has called
+          * buildMFEMCoefficient().
+          */
+         virtual mfem::Coefficient& getMFEMCoefficient() = 0;
+
+         /**
+          * @internal
+          * @brief Builds a copy of the object and returns a non-owning
+          * pointer to the new object.
+          */
+         virtual ScalarCoefficientBase* copy() const noexcept = 0;
    };
 
+   /**
+    * @brief A ScalarCoefficient represents the continuous functions that
+    * represent the scalar coefficients in a PDE.
+    */
    template <class T, class Enable>
    class ScalarCoefficient
    {
@@ -36,7 +73,7 @@ namespace Rodin::Variational
    };
 
    /**
-    * Represents a coefficient of arithmetic type `T`.
+    * @brief Represents a scalar coefficient of arithmetic type `T`.
     *
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
@@ -48,10 +85,10 @@ namespace Rodin::Variational
          ScalarCoefficient(const T& x);
          ScalarCoefficient(const ScalarCoefficient& other);
 
-         void eval() override;
+         void buildMFEMCoefficient() override;
 
          bool isEvaluated() const;
-         mfem::Coefficient& coeff() override;
+         mfem::Coefficient& getMFEMCoefficient() override;
          ScalarCoefficient& toggleSign() override;
 
          template <class ... Args>
@@ -63,41 +100,6 @@ namespace Rodin::Variational
 
       private:
          T m_x;
-         std::unique_ptr<mfem::Coefficient> m_coeff;
-   };
-
-   /**
-    * Represents a coefficient which can be constructed from derived types of
-    * `mfem::Coefficient`.
-    *
-    * @see [mfem::Coefficient](https://mfem.github.io/doxygen/html/classmfem_1_1Coefficient.html)
-    */
-   template <class T>
-   class ScalarCoefficient<T,
-         std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>
-      : public ScalarCoefficientBase
-   {
-      public:
-         ScalarCoefficient(const T& coeff);
-         ScalarCoefficient(const ScalarCoefficient& other);
-
-         void eval() override;
-         bool isEvaluated() const;
-         mfem::Coefficient& coeff() override;
-
-         ScalarCoefficient& toggleSign() override;
-
-         template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept;
-
-         virtual ScalarCoefficient* copy() const noexcept override;
-
-      protected:
-         void track(mfem::Coefficient* ptr);
-
-      private:
-         bool m_sign;
-         std::unique_ptr<mfem::Coefficient> m_copy;
          std::unique_ptr<mfem::Coefficient> m_coeff;
    };
 
@@ -116,14 +118,9 @@ namespace Rodin::Variational
          ScalarCoefficient(const ScalarCoefficient& other);
          ScalarCoefficient(ScalarCoefficient&&) = default;
 
-         /**
-          * Evaluates the coefficient into an `mfem::Coefficient`.
-          *
-          * @returns The evaluated mfem::Coefficient reference.
-          */
-         void eval() override;
+         void buildMFEMCoefficient() override;
          bool isEvaluated() const;
-         mfem::Coefficient& coeff() override;
+         mfem::Coefficient& getMFEMCoefficient() override;
          ScalarCoefficient& toggleSign() override;
 
          template <class ... Args>
@@ -144,8 +141,8 @@ namespace Rodin::Variational
          ScalarCoefficient(const ScalarCoefficient& other);
          ScalarCoefficient(ScalarCoefficient&&) = default;
 
-         void eval() override;
-         mfem::Coefficient& coeff() override;
+         void buildMFEMCoefficient() override;
+         mfem::Coefficient& getMFEMCoefficient() override;
 
          ScalarCoefficient& toggleSign() override;
 
@@ -177,8 +174,8 @@ namespace Rodin::Variational
          ScalarCoefficient(const ScalarCoefficient& other);
          ScalarCoefficient(ScalarCoefficient&&) = default;
 
-         void eval() override;
-         mfem::Coefficient& coeff() override;
+         void buildMFEMCoefficient() override;
+         mfem::Coefficient& getMFEMCoefficient() override;
 
          ScalarCoefficient& toggleSign() override;
 
@@ -191,10 +188,6 @@ namespace Rodin::Variational
 
       private:
          std::unique_ptr<FormLanguage::ScalarCoefficientUnaryMinus<T>> m_expr;
-
-         std::unique_ptr<ScalarCoefficient<T>> m_v;
-
-         std::unique_ptr<mfem::Coefficient> m_coeff;
    };
 }
 

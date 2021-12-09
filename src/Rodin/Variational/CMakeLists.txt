@@ -18,13 +18,14 @@ set(RodinVariational_HEADERS
 
 set(RodinVariational_SRCS
   DiffusionIntegrator.hpp
-  DirichletBC.hpp
   DomainLFIntegrator.hpp
   ElasticityIntegrator.hpp
-  NeumannBC.hpp
   Problem.hpp
   ScalarCoefficient.hpp
   VectorCoefficient.hpp
+  NeumannBC.cpp
+  DirichletBC.cpp
+  VectorCoefficient.cpp
   )
 
 # target_sources() does not resolve relative paths before 3.13

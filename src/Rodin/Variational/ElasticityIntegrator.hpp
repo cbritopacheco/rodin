@@ -35,13 +35,15 @@ namespace Rodin::Variational
    template <class L, class M>
    void ElasticityIntegrator<L, M>::eval()
    {
-      m_lambda.eval();
-      m_mu.eval();
+      m_lambda.buildMFEMCoefficient();
+      m_mu.buildMFEMCoefficient();
 
       m_bf->get()
          .getHandle()
          .AddDomainIntegrator(
-               new mfem::ElasticityIntegrator(m_lambda.coeff(), m_mu.coeff()));
+               new mfem::ElasticityIntegrator(
+                  m_lambda.getMFEMCoefficient(),
+                  m_mu.getMFEMCoefficient()));
    }
 
    template <class L, class M>

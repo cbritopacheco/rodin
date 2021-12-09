@@ -25,19 +25,12 @@
 
 namespace Rodin::Variational
 {
-   // template <class T>
-   // struct FormLanguage::TypeTraits<NeumannBC<T>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = FormLanguage::BCExpr<NeumannBC<T>>;
-   // };
-
    /**
     * @brief Represents a Neumann boundary condition.
     *
     * The usage of this class assumes the proper coefficients are present
     * in the boundary conditions of the equation. In particular, when utilized
-    * in a @ref Problem declaration, it will add a term of the form:
+    * in a @ref Problem construction, it will add a term of the form:
     * @f[
     *    \int_{\Gamma_N} g v \ dx
     * @f]
@@ -48,56 +41,59 @@ namespace Rodin::Variational
     * |  Spaces supported     | L2, H1                                       |
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     *
-    * @note This class is meant to be instanced as a part of a @ref
-    * Variational::FormLanguage expression.
-    *
-    * Example
-    * -------
-    *  Take the simple heat conduction equation:
-    * @f[
-    * \left\{
-    *  \begin{aligned}
-    *    - \nabla \cdot (\lambda \nabla u) &= f && \mathrm{in} \ \Omega \\
-    *    u &= 0 && \mathrm{on} \ \Gamma_D \\
-    *    \lambda \partial_n u &= g && \mathrm{on} \ \Gamma_N
-    *  \end{aligned}
-    * \right.
-    * @f]
-    *
-    * Integrating by parts we arrive at the variational formulation.
-    * @f[
-    * \text{Find } u \in H^1_{\Gamma_D}(\Omega) \text{ s.t. }
-    * \forall v \in H^1_0(\Omega), \quad
-    *    \int_{\Omega} \lambda \nabla u \cdot \nabla v \ dx - \int_{\Omega} fv
-    *    \ dx = \int_{\Gamma_N} \underbrace{g}_{\lambda \partial_n u} v \ dx
-    * @f]
-    *
-    * In code this will look like:
-    *
-    * @code{.cpp}
-    * Problem poisson(u, v);
-    * poisson = DiffusionIntegrator(lambda)
-    *         - DomainLFIntegrator(f)
-    *         + DirichletBC(GammaD, 0.0)
-    *         + NeumannBC(GammaN, g);
-    * @endcode
-    *
     */
-   template <class T>
    class NeumannBC
-      :  public FormLanguage::BCExpr<NeumannBC<T>>
+      :  public FormLanguage::BCExpr<NeumannBC>
    {
       public:
+         /**
+          * @brief Constructs a Dirichlet boundary condition on the part of the
+          * boundary specified by the boundary attribute.
+          *
+          * @param[in] bdrAttr Attribute corresponding to the segment
+          * @f$ \Gamma_D @f$ where the Dirichlet boundary condition is imposed.
+          *
+          * @param[in] value Scalar value of the trial function @f$ u @f$ at
+          * the boundary @f$ \Gamma_D @f$.
+          */
+         template <class T>
+         explicit
+         NeumannBC(int bdrAttr, const T& value)
+            :  m_bdrAttr(bdrAttr),
+               m_value(std::make_unique<ScalarCoefficient<T>>(value))
+         {}
+
          /**
           * @brief Constructs a Neumann boundary condition on the part of the
           * boundary specified by the boundary attribute.
           *
-          * @param[in] bdrAttr Attribute corresponding to the segment @f$
-          * \Gamma_N @f$ where the Neumann boundary condition is imposed.
-          * @param[in] value Value of the normal derivative at the
-          * boundary @f$ \Gamma_N @f$ specified by `bdrAttr`.
+          * @param[in] bdrAttr Attribute corresponding to the segment
+          * @f$ \Gamma_D @f$ where the Neumann boundary condition is imposed.
+          *
+          * @param[in] value Scalar value of the trial function @f$ u @f$ on
+          * the boundary @f$ \Gamma_D @f$.
           */
-         NeumannBC(int bdrAttr, const T& value);
+         template <class T>
+         explicit
+         NeumannBC(int bdrAttr, const ScalarCoefficient<T>& value)
+            :  m_bdrAttr(bdrAttr),
+               m_value(std::unique_ptr<ScalarCoefficient<T>>(value.copy()))
+         {}
+
+         /**
+          * @brief Constructs a Neumann boundary condition on the part of the
+          * boundary specified by the boundary attribute.
+          *
+          * @param[in] bdrAttr Attribute corresponding to the segment
+          * @f$ \Gamma_D @f$ where the Neumann boundary condition is imposed.
+          *
+          * @param[in] value Vector value of the trial function @f$ u @f$ on
+          * the boundary @f$ \Gamma_D @f$.
+          */
+         template <>
+         explicit
+         NeumannBC(int bdrAttr, const VectorCoefficient& value);
+
          NeumannBC(const NeumannBC& other);
 
          NeumannBC& setProblem(ProblemBase& problem) override;
@@ -105,40 +101,22 @@ namespace Rodin::Variational
          void eval() override;
 
          template <class ... Args>
-         static NeumannBC* create(Args&&... args) noexcept;
+         static NeumannBC* create(Args&&... args) noexcept
+         {
+            return new NeumannBC(std::forward<Args>(args)...);
+         }
+
          virtual NeumannBC* copy() const noexcept override;
 
       private:
          int m_bdrAttr;
-         ScalarCoefficient<T> m_value;
-         mfem::Array<int> m_nbcBdr;
+         std::variant<
+            std::unique_ptr<ScalarCoefficientBase>,
+            std::unique_ptr<VectorCoefficientBase>
+            > m_value;
          std::optional<std::reference_wrapper<ProblemBase>> m_problem;
-   };
-
-   template <class ... Values>
-   class NeumannBC<VectorCoefficient<Values...>>
-      :  public FormLanguage::BCExpr<NeumannBC<VectorCoefficient<Values...>>>
-   {
-      public:
-         NeumannBC(int bdrAttr, const VectorCoefficient<Values...>& value);
-         NeumannBC(const NeumannBC& other);
-
-         NeumannBC& setProblem(ProblemBase& problem) override;
-
-         void eval() override;
-
-         template <class ... Args>
-         static NeumannBC* create(Args&&... args) noexcept;
-         virtual NeumannBC* copy() const noexcept override;
-
-      private:
-         int m_bdrAttr;
-         VectorCoefficient<Values...> m_value;
          mfem::Array<int> m_nbcBdr;
-         std::optional<std::reference_wrapper<ProblemBase>> m_problem;
    };
 }
-
-#include "NeumannBC.hpp"
 
 #endif

@@ -35,11 +35,11 @@ namespace Rodin::Variational
    void DiffusionIntegrator<T>::eval()
    {
       assert(m_bf);
-      m_lambda.eval();
+      m_lambda.buildMFEMCoefficient();
       m_bf->get()
            .getHandle()
            .AddDomainIntegrator(
-                 new mfem::DiffusionIntegrator(m_lambda.coeff()));
+                 new mfem::DiffusionIntegrator(m_lambda.getMFEMCoefficient()));
    }
 
    template <class T>

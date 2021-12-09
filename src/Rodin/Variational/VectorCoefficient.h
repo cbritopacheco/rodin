@@ -19,66 +19,112 @@
 
 namespace Rodin::Variational
 {
-   template <class ... Values>
-   class VectorCoefficient : public FormLanguage::RodinBase
+   /**
+    * @internal
+    * @brief Abstract base class for VectorCoefficient objects.
+    */
+   class VectorCoefficientBase
    {
       public:
+         /**
+          * @brief Gets the dimension of the vector object.
+          * @returns Dimension of vector.
+          */
+         virtual size_t getDimension() const = 0;
+
+         /**
+          * @internal
+          * @brief Toggles the sign of the coefficient.
+          *
+          * If @f$ V @f$ is the vector coefficient then this method applies the
+          * following rule:
+          *
+          * @f[
+          *    V \leftarrow - V
+          * @f]
+          *
+          * @returns Reference to self (for method chaining)
+          */
+         virtual VectorCoefficientBase& toggleSign() = 0;
+
+         /**
+          * @internal
+          * @brief Builds the underlying mfem::VectorCoefficient object.
+          */
+         virtual void buildMFEMVectorCoefficient() = 0;
+
+         /**
+          * @internal
+          * @brief Returns the underlying mfem::VectorCoefficient object.
+          * @note Typically one should only call this after one has called
+          * buildMFEMVectorCoefficient().
+          */
+         virtual mfem::VectorCoefficient& getMFEMVectorCoefficient() = 0;
+
+         /**
+          * @internal
+          * @brief Builds a copy of the object and returns a non-owning
+          * pointer to the new object.
+          */
+         virtual VectorCoefficientBase* copy() const noexcept = 0;
+   };
+
+   /**
+    * @brief Represents a vector valued coefficient.
+    */
+   class VectorCoefficient : public VectorCoefficientBase
+   {
+      public:
+         /**
+          * @brief Constructs a VectorCoefficient from a set of values.
+          */
+         template <class ... Values>
          VectorCoefficient(const Values&... values);
 
          /**
-          * Copy constructor
+          * @brief Copies the data.
           *
           * @param other Other coefficient to copy
           */
          VectorCoefficient(const VectorCoefficient& other);
 
          /**
-          * Evaluates the coefficient. After this you may obtain the value with
-          * the coeff() function.
-          *
-          * @see coeff()
-          */
-         void eval() override;
-
-         size_t dimension() const
-         {
-            return sizeof...(Values);
-         }
-
-         mfem::VectorCoefficient& coeff();
-
-         /**
-          * Toggles the sign of the coefficient
-          *
-          * @returns Reference to self (for method chaining)
-          */
-         VectorCoefficient& toggleSign();
-
-         /**
-          * @param args Arguments to pass to the Coeff constructor
-          * @returns Non-owning pointer to the new Coeff object
+          * @internal
+          * @brief Creates a new object of type VectorCoefficient and returns a
+          * non-owning pointer to the new object.
+          * @param args Parameters which will be forwarded to the
+          * VectorCoefficient constructor.
+          * @returns Non-owning pointer to the new object.
           */
          template <class ... Args>
          static VectorCoefficient* create(Args&&... args) noexcept;
 
-         /**
-          * @returns Non-owning pointer to the copy of the Coeff object
-          */
+         size_t getDimension() const override
+         {
+            return m_dimension;
+         }
+
+         VectorCoefficient& toggleSign() override;
+
+         void buildMFEMVectorCoefficient() override;
+
          virtual VectorCoefficient* copy() const noexcept override;
 
-      private:
-         template<std::size_t I = 0, typename... Tp>
-         typename std::enable_if_t<I == sizeof...(Tp)>
-         setCoefficients(std::tuple<Tp...>& t);
+         mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
 
-         template<std::size_t I = 0, typename... Tp>
+      private:
+         template<std::size_t I = 0, class ... Tp>
+         typename std::enable_if_t<I == sizeof...(Tp)>
+         makeCoefficientsFromTuple(const std::tuple<Tp...>&);
+
+         template<std::size_t I = 0, class ... Tp>
          typename std::enable_if_t<I < sizeof...(Tp)>
-         setCoefficients(std::tuple<Tp...>& t);
+         makeCoefficientsFromTuple(const std::tuple<Tp...>& t);
 
          bool m_sign;
-         std::tuple<Values...> m_values;
-         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_coeffs;
-         mfem::VectorArrayCoefficient m_coeff;
+         size_t m_dimension;
+         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_values;
+         mfem::VectorArrayCoefficient m_mfemVectorArrayCoefficient;
    };
 }
 

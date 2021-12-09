@@ -13,71 +13,39 @@ namespace Rodin::Variational
 {
    // ---- ... Values (Variadic vector) --------------------------------------
    template <class ... Values>
-   VectorCoefficient<Values...>::VectorCoefficient(const Values&... values)
-      :  m_values(values...),
-         m_sign(false),
-         m_coeff(sizeof...(Values))
-   {}
-
-   template <class ... Values>
-   VectorCoefficient<Values...>::VectorCoefficient(const VectorCoefficient& other)
-      : m_values(other.m_values), m_sign(other.m_sign), m_coeff(other.m_coeff)
-   {}
-
-   template <class ... Values>
-   void VectorCoefficient<Values...>::eval()
+   VectorCoefficient::VectorCoefficient(const Values&... values)
+      :  m_sign(false),
+         m_dimension(sizeof...(Values)),
+         m_mfemVectorArrayCoefficient(m_dimension)
    {
-      setCoefficients(m_values);
+      m_values.reserve(sizeof...(Values));
+      makeCoefficientsFromTuple(std::forward_as_tuple(values...));
    }
 
-   template <class ... Values>
-   mfem::VectorCoefficient& VectorCoefficient<Values...>::coeff()
-   {
-      return m_coeff;
-   }
-
-   template <class ... Values>
-   template<std::size_t I, typename... Tp>
+   template<std::size_t I, class ... Tp>
    typename std::enable_if_t<I == sizeof...(Tp)>
-   VectorCoefficient<Values...>::setCoefficients(std::tuple<Tp...>&)
+   VectorCoefficient::makeCoefficientsFromTuple(const std::tuple<Tp...>&)
    {}
 
-   template <class ... Values>
-   template<std::size_t I, typename... Tp>
+   template<std::size_t I, class ... Tp>
    typename std::enable_if_t<I < sizeof...(Tp)>
-   VectorCoefficient<Values...>::setCoefficients(std::tuple<Tp...>& t)
+   VectorCoefficient::makeCoefficientsFromTuple(const std::tuple<Tp...>& t)
    {
-      auto& coeff = m_coeffs.emplace_back(new ScalarCoefficient(std::get<I>(t)));
+      auto& coeff = m_values.emplace_back(new ScalarCoefficient(std::get<I>(t)));
       if (m_sign)
-         coeff->toggleSign().eval();
+         coeff->toggleSign().buildMFEMCoefficient();
       else
-         coeff->eval();
-      m_coeff.Set(I, &coeff->coeff(), false);
-      setCoefficients<I + 1, Tp...>(t);
+         coeff->buildMFEMCoefficient();
+      m_mfemVectorArrayCoefficient.Set(I, &coeff->getMFEMCoefficient(), false);
+      makeCoefficientsFromTuple<I + 1, Tp...>(t);
    }
 
-   template <class ... Values>
-   VectorCoefficient<Values...>& VectorCoefficient<Values...>::toggleSign()
-   {
-      m_sign = !m_sign;
-      return *this;
-   }
-
-   template <class ... Values>
    template <class ... Args>
-   VectorCoefficient<Values...>*
-   VectorCoefficient<Values...>::create(Args&&... args) noexcept
+   VectorCoefficient*
+   VectorCoefficient::create(Args&&... args) noexcept
    {
       return new VectorCoefficient(std::forward<Args>(args)...);
    }
-
-   template <class ... Values>
-   VectorCoefficient<Values...>*
-   VectorCoefficient<Values...>::copy() const noexcept
-   {
-      return new VectorCoefficient(*this);
-   }
-
 }
 
 #endif

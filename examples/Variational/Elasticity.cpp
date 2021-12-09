@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
   // Define problem
   Problem elasticity(u, v);
-  elasticity  = ElasticityIntegrator(mu, lambda)
+  elasticity = ElasticityIntegrator(mu, lambda)
              + DirichletBC(GammaD, VectorCoefficient{0, 0})
              + NeumannBC(GammaN, VectorCoefficient{0, -1});
 

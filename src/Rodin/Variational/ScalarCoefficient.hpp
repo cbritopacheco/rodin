@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_COEFF_HPP
-#define RODIN_VARIATIONAL_COEFF_HPP
+#ifndef RODIN_VARIATIONAL_SCALARCOEFFICIENT_HPP
+#define RODIN_VARIATIONAL_SCALARCOEFFICIENT_HPP
 
 #include "ScalarCoefficient.h"
 
@@ -43,14 +43,14 @@ namespace Rodin::Variational
 
    template <class T>
    void
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::eval()
+   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::buildMFEMCoefficient()
    {
       track(new mfem::ConstantCoefficient(m_x));
    }
 
    template <class T>
    mfem::Coefficient&
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::coeff()
+   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::getMFEMCoefficient()
    {
       assert(m_coeff);
       return *m_coeff;
@@ -81,81 +81,6 @@ namespace Rodin::Variational
       return new ScalarCoefficient(std::forward<Args>(args)...);
    }
 
-   // ---- T (mfem::Coefficient) ---------------------------------------------
-   // ------------------------------------------------------------------------
-   template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>
-   ::ScalarCoefficient(const T& coeff)
-      :  m_copy(new T(coeff)),
-         m_sign(false)
-   {}
-
-   template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>
-   ::ScalarCoefficient(const ScalarCoefficient& other)
-      : m_copy(new T(*other.m_coeff))
-   {}
-
-   template <class T>
-   void
-   ScalarCoefficient<T, std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>::eval()
-   {
-      if (m_sign)
-         track(new mfem::ProductCoefficient(-1, *m_copy));
-      else
-         track(new T(*m_copy));
-   }
-
-   template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>&
-   ScalarCoefficient<T, std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>::toggleSign()
-   {
-      m_sign = !m_sign;
-   }
-
-   template <class T>
-   mfem::Coefficient&
-   ScalarCoefficient<T, std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>::coeff()
-   {
-      assert(m_coeff);
-      return *m_coeff;
-   }
-
-   template <class T>
-   bool
-   ScalarCoefficient<T,std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>::isEvaluated()
-   const
-   {
-      return static_cast<bool>(m_coeff);
-   }
-
-   template <class T>
-   void
-   ScalarCoefficient<T,std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>::track(
-         mfem::Coefficient* ptr)
-   {
-      m_coeff = std::unique_ptr<mfem::Coefficient>(ptr);
-   }
-
-   template <class T>
-   template <class ... Args>
-   ScalarCoefficient<T,std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>*
-   ScalarCoefficient<T,std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>
-   ::create(Args&&... args)
-   noexcept
-   {
-      return new ScalarCoefficient(std::forward<Args>(args)...);
-   }
-
-   template <class T>
-   ScalarCoefficient<T,std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>*
-   ScalarCoefficient<T,std::enable_if_t<std::is_base_of_v<mfem::Coefficient, T>>>
-   ::copy()
-   const noexcept
-   {
-      return new ScalarCoefficient(*this);
-   }
-
    // ---- ScalarCoefficient<T> ----------------------------------------------------------
    // ------------------------------------------------------------------------
    template <class T>
@@ -171,14 +96,14 @@ namespace Rodin::Variational
    {}
 
    template <class T>
-   void ScalarCoefficient<ScalarCoefficient<T>>::eval()
+   void ScalarCoefficient<ScalarCoefficient<T>>::buildMFEMCoefficient()
    {
       m_nested->eval();
    }
 
    template <class T>
    mfem::Coefficient&
-   ScalarCoefficient<ScalarCoefficient<T>>::coeff()
+   ScalarCoefficient<ScalarCoefficient<T>>::getMFEMCoefficient()
    {
       return m_nested->coeff();
    }
@@ -233,7 +158,7 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    void
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::eval()
+   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::buildMFEMCoefficient()
    {
       m_lhs = std::make_unique<ScalarCoefficient<Lhs>>(m_expr->lhs());
       m_rhs = std::make_unique<ScalarCoefficient<Rhs>>(m_expr->rhs());
@@ -246,7 +171,7 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    mfem::Coefficient&
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::coeff()
+   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::getMFEMCoefficient()
    {
       assert(m_coeff);
       return *m_coeff;
@@ -301,25 +226,24 @@ namespace Rodin::Variational
 
    template <class T>
    void
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::eval()
+   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::buildMFEMCoefficient()
    {
-      m_v->toggleSign().eval();
+      m_expr->toggleSign().eval();
    }
 
    template <class T>
    ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>&
    ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::toggleSign()
    {
-      m_v->toggleSign();
+      m_expr->toggleSign();
       return *this;
    }
 
    template <class T>
    mfem::Coefficient&
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::coeff()
+   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::getMFEMCoefficient()
    {
-      assert(m_coeff);
-      return *m_coeff;
+      return m_expr->coeff();
    }
 
    template <class T>
@@ -327,7 +251,7 @@ namespace Rodin::Variational
    ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::isEvaluated()
    const
    {
-      return static_cast<bool>(m_coeff);
+      return m_expr->isEvaluated();
    }
 
    template <class T>

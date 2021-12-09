@@ -55,17 +55,18 @@ namespace Rodin::Variational
    class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------
-   template <class T>
    class DirichletBC;
 
-   template <class T>
    class NeumannBC;
 
    // ---- Coefficients ------------------------------------------------------
+   class ScalarCoefficientBase;
+
    template <class T, class Enable = void>
    class ScalarCoefficient;
 
-   template <class ... Values>
+   class VectorCoefficientBase;
+
    class VectorCoefficient;
 }
 
