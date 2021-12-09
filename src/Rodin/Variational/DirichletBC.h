@@ -32,10 +32,10 @@ namespace Rodin::Variational
     * | Spaces supported     | L2, H1                                        |
     * | Dimensions supported | 1D, 2D, 3D                                    |
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
-    * | @f$ g @f$            | ScalarCoefficient if @f$ u @f$ is scalar valued,
-    otherwise VectorCoefficient with the same dimension as @f$ u @f$.
+    * | @f$ g @f$            | ScalarCoefficient if @f$ u @f$ is scalar valued, otherwise VectorCoefficient with the same dimension as @f$ u @f$.
+    * |                      |                                               |
     *
-    * @see @ref examples-poisson
+    * @see @ref examples-variational-poisson
     *
     */
    class DirichletBC
