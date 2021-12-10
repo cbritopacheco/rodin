@@ -27,7 +27,7 @@ namespace Rodin::Variational
     * of @f$ \Omega @f$, instances of this class will represent the space
     * @f[
     *    V_h := \left\{ v \in H^1(\Omega)^d \mid v_{|\tau} \in \mathcal{P},
-    *    \quad \forall \tau \in \mathcal{T}_h \right\}
+    *    \ \forall \tau \in \mathcal{T}_h \right\}
     * @f]
     * where @f$ \mathcal{P} @f$ denotes a vector space of functions from
     * @f$ \tau @f$ to @f$ \mathbb{R}^d @f$.

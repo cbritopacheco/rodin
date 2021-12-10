@@ -25,7 +25,7 @@
 
 /**
   @namespace Rodin::Variational::FormLanguage
-  @brief Module for implementing variational methods
+  @brief Module for writing variational expressions in C++
  */
 
 
