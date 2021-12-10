@@ -20,7 +20,18 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Arbitrary order H1-conforming (continuous) finite element space.
+    * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ conforming (continuous) finite
+    * element space supported on the domain @f$ \Omega @f$.
+    *
+    * Given some discretization @f$ \mathcal{T}_h @f$ (e.g. a triangulation)
+    * of @f$ \Omega @f$, instances of this class will represent the space
+    * @f[
+    *    V_h := \left\{ v \in H^1(\Omega)^d \mid v_{|\tau} \in \mathcal{P},
+    *    \quad \forall \tau \in \mathcal{T}_h \right\}
+    * @f]
+    * where @f$ \mathcal{P} @f$ denotes a vector space of functions from
+    * @f$ \tau @f$ to @f$ \mathbb{R}^d @f$.
+    *
     */
    class H1 : public FiniteElementSpace<H1>
    {
@@ -102,8 +113,10 @@ namespace Rodin::Variational
           * on the given mesh.
           *
           * @param[in] mesh Reference to mesh.
+          * @param[in] dim Dimension @f$ d @f$ of the range.
           * @param[in] order Order of approximation. Must be greater than or
           * equal to 1.
+          * @param[in] basis Type of basis to use.
           */
          H1(Mesh& mesh, const int dim=1, const int order=1, Basis basis = GaussLobato)
             :  m_mesh(mesh),
@@ -131,11 +144,29 @@ namespace Rodin::Variational
             return m_mesh;
          }
 
+         /**
+          * @brief Gets dimension of the range space.
+          */
+         int getDimension() const
+         {
+            return m_fes.GetVDim();
+         }
+
+         /**
+          * @internal
+          * @brief Returns the underlying mfem::H1_FECollection object.
+          * @returns Reference to the underlying mfem::H1_FECollection.
+          */
          mfem::H1_FECollection& getFEC()
          {
             return m_fec;
          }
 
+         /**
+          * @internal
+          * @brief Returns the underlying mfem::FiniteElementSpace object.
+          * @returns Reference to the underlying mfem::FiniteElementSpace.
+          */
          mfem::FiniteElementSpace& getFES()
          {
             return m_fes;

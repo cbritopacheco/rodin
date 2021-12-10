@@ -17,15 +17,32 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @internal
+    * @brief Abstract class for GridFunction objects.
+    */
    class GridFunctionBase
    {
       public:
+         /**
+          * @internal
+          * @brief Gets the underlying handle to the mfem::GridFunction object.
+          * @returns Reference to the underlying object.
+          */
          virtual mfem::GridFunction& getHandle() = 0;
+
+         /**
+          * @internal
+          * @brief Gets the underlying handle to the mfem::GridFunction object.
+          * @returns Constant reference to the underlying object.
+          */
          virtual const mfem::GridFunction& getHandle() const = 0;
    };
 
    /*
-    * Needed for inference of arguments.
+    * @internal
+    * @brief Empty GridFunction class, needed for the automatic inference of
+    * the specialization arguments.
     */
    template <class ... Ts>
    class GridFunction

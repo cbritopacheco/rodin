@@ -45,8 +45,8 @@ namespace Rodin::Variational
     * |-----------------------|----------------------------------------------|
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     * |  Continuous operator  | @f$ - \nabla \cdot \sigma (\vec{u}) @f$      |
-    * |  @f$ \mu @f$          | Scalar                                       |
-    * |  @f$ \lambda @f$      | Scalar                                       |
+    * |  @f$ \mu @f$          | ScalarCoefficient                            |
+    * |  @f$ \lambda @f$      | ScalarCoefficient                            |
     *
     * ----
     *
