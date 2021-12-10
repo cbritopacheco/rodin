@@ -10,20 +10,12 @@
 #include <memory>
 #include <utility>
 
-#include "TypeTraits.h"
 #include "ForwardDecls.h"
 
 #include "../ScalarCoefficient.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class Lhs, class Rhs>
-   // struct FormLanguage::TypeTraits<ScalarCoefficientSum<Lhs, Rhs>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = ScalarCoefficient<ScalarCoefficientSum<Lhs, Rhs>>;
-   // };
-
    template <class Lhs, class Rhs>
    class ScalarCoefficientSum : public ScalarCoefficient<ScalarCoefficientSum<Lhs, Rhs>>
    {
@@ -75,30 +67,6 @@ namespace Rodin::Variational::FormLanguage
    auto operator+(const ScalarCoefficient<Lhs>& lhs, const ScalarCoefficient<Rhs>& rhs)
    {
       return ScalarCoefficientSum(lhs, rhs);
-   }
-}
-
-/* Hijack the mfem namespace to add the syntactic sugar for mfem::Coefficient
- * If you are getting errors related to the operator+ maybe you want to check
- * here.
- */
-namespace mfem
-{
-   template <class Lhs, class Rhs>
-   std::enable_if_t<
-      std::is_base_of_v<mfem::Coefficient, Lhs>
-      && std::is_base_of_v<mfem::Coefficient, Rhs>,
-      Rodin::Variational::FormLanguage::ScalarCoefficientSum<
-         Rodin::Variational::ScalarCoefficient<Lhs>,
-         Rodin::Variational::ScalarCoefficient<Rhs>
-            >>
-   operator+(const Lhs& lhs, const Rhs& rhs)
-   {
-      return
-         Rodin::Variational::FormLanguage::ScalarCoefficientSum<
-            Rodin::Variational::ScalarCoefficient<Lhs>,
-            Rodin::Variational::ScalarCoefficient<Rhs>
-               >(lhs, rhs);
    }
 }
 

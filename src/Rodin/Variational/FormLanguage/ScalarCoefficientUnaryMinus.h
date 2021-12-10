@@ -7,22 +7,12 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_COEFFUNARYMINUS_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_COEFFUNARYMINUS_H
 
-#include <mfem.hpp>
-
-#include "TypeTraits.h"
 #include "ForwardDecls.h"
 
 #include "../ScalarCoefficient.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class T>
-   // struct FormLanguage::TypeTraits<ScalarCoefficientUnaryMinus<T>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = ScalarCoefficient<ScalarCoefficientUnaryMinus<T>>;
-   // };
-
    template <class T>
    class ScalarCoefficientUnaryMinus
       : public ScalarCoefficient<ScalarCoefficientUnaryMinus<T>>
