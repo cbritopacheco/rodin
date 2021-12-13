@@ -15,20 +15,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class Head>
-   // struct TypeTraits<BCExprListCons<Head>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = BCExprList<BCExprListCons<Head>>;
-   // };
-
-   // template <class Head, class Tail>
-   // struct TypeTraits<BCExprListCons<Head, Tail>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = BCExprList<BCExprListCons<Head, Tail>>;
-   // };
-
    template <class Head>
    class BCExprListCons<Head, void>
       : public BCExprList<BCExprListCons<Head, void>>
@@ -62,12 +48,6 @@ namespace Rodin::Variational::FormLanguage
          {
             assert(m_head);
             return *m_head;
-         }
-
-         template <class ... Args>
-         static BCExprListCons* create(Args&&... args) noexcept
-         {
-            return new BCExprListCons(std::forward<Args>(args)...);
          }
 
          virtual BCExprListCons* copy() const noexcept override
@@ -123,12 +103,6 @@ namespace Rodin::Variational::FormLanguage
             m_head->setProblem(problem);
             m_tail->setProblem(problem);
             return *this;
-         }
-
-         template <class ... Args>
-         static BCExprListCons* create(Args&&... args) noexcept
-         {
-            return new BCExprListCons(std::forward<Args>(args)...);
          }
 
          virtual BCExprListCons* copy() const noexcept override

@@ -7,14 +7,12 @@ set(RodinVariationalFormLanguage_HEADERS
   BilinearFormExpr.h
   BilinearFormExprSum.h
   BilinearFormExprUnaryMinus.h
-  CMakeLists.txt
   FormExprBCExprSum.h
   ForwardDecls.h
   LinearFormExpr.h
   LinearFormExprSum.h
   LinearFormExprUnaryMinus.h
   ProblemBody.h
-  RodinBase.h
   ScalarCoefficientSum.h
   ScalarCoefficientUnaryMinus.h
   TypeTraits.h

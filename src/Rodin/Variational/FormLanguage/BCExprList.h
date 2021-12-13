@@ -13,19 +13,12 @@
 #include "TypeTraits.h"
 #include "ForwardDecls.h"
 
-#include "RodinBase.h"
+#include "Base.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class DerivedType>
-   // struct TypeTraits<BCExprList<DerivedType>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Rule;
-   //    using Derived = DerivedType;
-   // };
-
    template <class Derived>
-   class BCExprList : public RodinBase
+   class BCExprList : public Base
    {
       public:
          BCExprList() = default;
@@ -39,15 +32,9 @@ namespace Rodin::Variational::FormLanguage
             return static_cast<Derived*>(this)->setProblem(problem);
          }
 
-         virtual void eval() override
+         virtual void eval()
          {
             static_cast<Derived*>(this)->eval();
-         }
-
-         template <class ... Args>
-         static BCExprList* create(Args&&... args) noexcept
-         {
-            return Derived::create(std::forward<Args>(args)...);
          }
 
          virtual BCExprList* copy() const noexcept override

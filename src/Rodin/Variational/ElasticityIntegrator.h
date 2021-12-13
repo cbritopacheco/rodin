@@ -74,12 +74,6 @@ namespace Rodin::Variational
 
          ElasticityIntegrator& toggleSign() override;
 
-         template <class ... Args>
-         static ElasticityIntegrator* create(Args&&... args) noexcept
-         {
-            return new ElasticityIntegrator(std::forward<Args>(args)...);
-         }
-
          virtual ElasticityIntegrator* copy() const noexcept override;
 
       private:

@@ -21,7 +21,7 @@ namespace Rodin::Variational
 {
    /**
     * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ conforming (continuous) finite
-    * element space supported on the domain @f$ \Omega @f$.
+    * element space.
     *
     * Given some discretization @f$ \mathcal{T}_h @f$ (e.g. a triangulation)
     * of @f$ \Omega @f$, instances of this class will represent the space

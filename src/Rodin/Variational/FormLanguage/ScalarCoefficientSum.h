@@ -27,12 +27,6 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getRHS();
 
-         template <class ... Args>
-         static ScalarCoefficientSum* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficientSum(std::forward<Args>(args)...);
-         }
-
          virtual ScalarCoefficientSum* copy() const noexcept override
          {
             return new ScalarCoefficientSum(*this);

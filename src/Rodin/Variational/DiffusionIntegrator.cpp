@@ -36,11 +36,5 @@ namespace Rodin::Variational
       m_lambda.reset(new ScalarCoefficient(-(*m_lambda)));
       return *this;
    }
-
-   DiffusionIntegrator*
-   DiffusionIntegrator::copy() const noexcept
-   {
-      return new DiffusionIntegrator(*this);
-   }
 }
 

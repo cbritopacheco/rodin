@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H
 #define RODIN_VARIATIONAL_DERIVATIVE_H
 
@@ -5,6 +11,7 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
+#include "ScalarCoefficient.h"
 
 namespace Rodin::Variational
 {
@@ -24,16 +31,33 @@ namespace Rodin::Variational
     *    \dfrac{\partial u_i}{\partial x_j}
     * @f]
     *
-    * @tparam i Index of the function component
-    * @tparam j Index of the variable
+    * @tparam ComponentIndex Index of the function component @f$ u @f$
+    * @tparam VariableIndex Index of the variable argument @f$ x @f$
     */
-   template <size_t i, size_t j>
-   class Derivative
+   template <int ComponentIndex, int VariableIndex>
+   class Derivative : public ScalarCoefficientBase
    {
+      static_assert(ComponentIndex >= 0 && VariableIndex >= 0,
+            "ComponentIndex and VariableIndex must both be non-negative.");
+
+      public:
+
+         Derivative(GridFunctionBase& u);
+
+         void buildMFEMCoefficient() override;
+
+         mfem::Coefficient& getMFEMCoefficient() override;
+
+         Derivative* copy() const noexcept override
+         {
+            return new Derivative(*this);
+         }
+
       private:
          GridFunctionBase& m_u;
-         mfem::GridFunctionCoefficient m_mfemCoefficient;
    };
 }
+
+#include "Derivative.hpp"
 
 #endif

@@ -76,12 +76,6 @@ namespace Rodin::Variational
 
          void eval() override;
 
-         template <class ... Args>
-         static NeumannBC* create(Args&&... args) noexcept
-         {
-            return new NeumannBC(std::forward<Args>(args)...);
-         }
-
          virtual NeumannBC* copy() const noexcept override;
 
       private:

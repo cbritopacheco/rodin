@@ -70,13 +70,10 @@ namespace Rodin::Variational
 
          DiffusionIntegrator& toggleSign() override;
 
-         template <class ... Args>
-         static DiffusionIntegrator* create(Args&&... args) noexcept
+         virtual DiffusionIntegrator* copy() const noexcept override
          {
-            return new DiffusionIntegrator(std::forward<Args>(args)...);
+            return new DiffusionIntegrator(*this);
          }
-
-         virtual DiffusionIntegrator* copy() const noexcept override;
 
       private:
          std::unique_ptr<ScalarCoefficientBase> m_lambda;

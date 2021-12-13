@@ -35,13 +35,6 @@ namespace Rodin::Variational
       m_mfemVectorArrayCoefficient.Set(I, &s->getMFEMCoefficient(), false);
       makeCoefficientsFromTuple<I + 1, Tp...>(t);
    }
-
-   template <class ... Args>
-   VectorCoefficient*
-   VectorCoefficient::create(Args&&... args) noexcept
-   {
-      return new VectorCoefficient(std::forward<Args>(args)...);
-   }
 }
 
 #endif

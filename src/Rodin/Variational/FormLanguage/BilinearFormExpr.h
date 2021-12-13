@@ -16,13 +16,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class DerivedType>
-   // struct TypeTraits<BilinearFormExpr<DerivedType>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Rule;
-   //    using Derived = DerivedType;
-   // };
-
    /**
     * @brief Represents an expression of bilinear forms.
     *
@@ -49,7 +42,7 @@ namespace Rodin::Variational::FormLanguage
             return *this;
          }
 
-         virtual void eval() override
+         virtual void eval()
          {
             static_cast<Derived*>(this)->eval();
          }
@@ -58,12 +51,6 @@ namespace Rodin::Variational::FormLanguage
          {
             static_cast<Derived*>(this)->toggleSign();
             return *this;
-         }
-
-         template <class ... Args>
-         static BilinearFormExpr* create(Args&&... args) noexcept
-         {
-            return Derived::create(std::forward<Args>(args)...);
          }
 
          virtual BilinearFormExpr* copy() const noexcept override

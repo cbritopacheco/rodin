@@ -16,13 +16,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class Lhs, class Rhs>
-   // struct TypeTraits<BFExprLFExprSum<Lhs, Rhs>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = ProblemBody<BFExprLFExprSum<Lhs, Rhs>>;
-   // };
-
    template <class Lhs, class Rhs>
    class BFExprLFExprSum
       : public ProblemBody<BFExprLFExprSum<Lhs, Rhs>>
@@ -71,12 +64,6 @@ namespace Rodin::Variational::FormLanguage
          const Rhs& rhs() const
          {
             return *m_rhs;
-         }
-
-         template <class ... Args>
-         static BFExprLFExprSum* create(Args&&... args) noexcept
-         {
-            return new BFExprLFExprSum(std::forward<Args>(args)...);
          }
 
          virtual BFExprLFExprSum* copy() const noexcept override

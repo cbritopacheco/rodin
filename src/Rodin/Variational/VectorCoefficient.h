@@ -13,7 +13,7 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
-#include "FormLanguage/RodinBase.h"
+#include "FormLanguage/Base.h"
 
 #include "ScalarCoefficient.h"
 
@@ -23,7 +23,7 @@ namespace Rodin::Variational
     * @internal
     * @brief Abstract base class for VectorCoefficient objects.
     */
-   class VectorCoefficientBase
+   class VectorCoefficientBase : public FormLanguage::Base
    {
       public:
          /**
@@ -51,7 +51,7 @@ namespace Rodin::Variational
           * @brief Builds a copy of the object and returns a non-owning
           * pointer to the new object.
           */
-         virtual VectorCoefficientBase* copy() const noexcept = 0;
+         virtual VectorCoefficientBase* copy() const noexcept override = 0;
    };
 
    /**
@@ -72,17 +72,6 @@ namespace Rodin::Variational
           * @param other Other coefficient to copy
           */
          VectorCoefficient(const VectorCoefficient& other);
-
-         /**
-          * @internal
-          * @brief Creates a new object of type VectorCoefficient and returns a
-          * non-owning pointer to the new object.
-          * @param args Parameters which will be forwarded to the
-          * VectorCoefficient constructor.
-          * @returns Non-owning pointer to the new object.
-          */
-         template <class ... Args>
-         static VectorCoefficient* create(Args&&... args) noexcept;
 
          size_t getDimension() const override
          {

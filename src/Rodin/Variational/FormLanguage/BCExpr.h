@@ -17,13 +17,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class DerivedType>
-   // struct TypeTraits<BCExpr<DerivedType>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Rule;
-   //    using Derived = DerivedType;
-   // };
-
    template <class Derived>
    class BCExpr : public BCExprList<BCExpr<Derived>>
    {
@@ -42,12 +35,6 @@ namespace Rodin::Variational::FormLanguage
          virtual void eval() override
          {
             static_cast<Derived*>(this)->eval();
-         }
-
-         template <class ... Args>
-         static BCExpr* create(Args&&... args) noexcept
-         {
-            return Derived::create(std::forward<Args>(args)...);
          }
 
          virtual BCExpr* copy() const noexcept override

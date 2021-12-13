@@ -77,12 +77,6 @@ namespace Rodin::Variational
 
          void eval() override;
 
-         template <class ... Args>
-         static DirichletBC* create(Args&&... args) noexcept
-         {
-            return new DirichletBC(std::forward<Args>(args)...);
-         }
-
          virtual DirichletBC* copy() const noexcept override;
 
       private:

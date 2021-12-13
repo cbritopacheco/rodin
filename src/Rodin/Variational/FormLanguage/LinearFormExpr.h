@@ -14,17 +14,10 @@
 
 #include "ProblemBody.h"
 
-#include "RodinBase.h"
+#include "Base.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class DerivedType>
-   // struct TypeTraits<LinearFormExpr<DerivedType>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Rule;
-   //    using Derived = DerivedType;
-   // };
-
    /**
     * @brief Represents an expression of bilinear forms.
     *
@@ -36,7 +29,7 @@ namespace Rodin::Variational::FormLanguage
     * @endcode
     */
    template <class Derived>
-   class LinearFormExpr : public RodinBase
+   class LinearFormExpr : public Base
    {
       public:
          LinearFormExpr() = default;
@@ -51,7 +44,7 @@ namespace Rodin::Variational::FormLanguage
             return *this;
          }
 
-         virtual void eval() override
+         virtual void eval()
          {
             static_cast<Derived*>(this)->eval();
          }
@@ -60,12 +53,6 @@ namespace Rodin::Variational::FormLanguage
          {
             static_cast<Derived*>(this)->toggleSign();
             return *this;
-         }
-
-         template <class ... Args>
-         static LinearFormExpr* create(Args&&... args) noexcept
-         {
-            return Derived::create(std::forward<Args>(args)...);
          }
 
          virtual LinearFormExpr* copy() const noexcept override

@@ -51,12 +51,6 @@ namespace Rodin::Variational::FormLanguage
             return *m_v;
          }
 
-         template <class ... Args>
-         static BilinearFormExprUnaryMinus* create(Args&&... args) noexcept
-         {
-            return new BilinearFormExprUnaryMinus(std::forward<Args>(args)...);
-         }
-
          virtual BilinearFormExprUnaryMinus* copy() const noexcept override
          {
             return new BilinearFormExprUnaryMinus(*this);

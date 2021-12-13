@@ -60,12 +60,6 @@ namespace Rodin::Variational
 
          DomainLFIntegrator& toggleSign() override;
 
-         template <class ... Args>
-         static DomainLFIntegrator* create(Args&&... args) noexcept
-         {
-            return new DomainLFIntegrator(std::forward<Args>(args)...);
-         }
-
          virtual DomainLFIntegrator* copy() const noexcept override;
 
       private:

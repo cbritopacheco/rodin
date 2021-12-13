@@ -22,7 +22,7 @@ namespace Rodin::Variational
          m_essBdr(u.getFiniteElementSpace()
                    .getMesh().getHandle().bdr_attributes.Max())
    {
-      // assert(u.getFiniteElementSpace() == v.getFiniteElementSpace());
+      assert(u.getFiniteElementSpace() == v.getFiniteElementSpace());
       m_essBdr = 0;
    }
 

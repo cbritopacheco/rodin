@@ -26,12 +26,6 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getScalarCoefficient();
 
-         template <class ... Args>
-         static ScalarCoefficientUnaryMinus* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficientUnaryMinus(std::forward<Args>(args)...);
-         }
-
          virtual ScalarCoefficientUnaryMinus* copy() const noexcept override
          {
             return new ScalarCoefficientUnaryMinus(*this);

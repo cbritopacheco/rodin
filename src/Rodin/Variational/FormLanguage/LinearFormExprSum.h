@@ -16,13 +16,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class Lhs, class Rhs>
-   // struct TypeTraits<LinearFormExprSum<Lhs, Rhs>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = LinearFormExpr<LinearFormExprSum<Lhs, Rhs>>;
-   // };
-
    /**
     * @brief Represents an expression between two objects of type
     * LinearFormExpr.
@@ -111,12 +104,6 @@ namespace Rodin::Variational::FormLanguage
          const Rhs& rhs() const
          {
             return *m_rhs;
-         }
-
-         template <class ... Args>
-         static LinearFormExprSum* create(Args&&... args) noexcept
-         {
-            return new LinearFormExprSum(std::forward<Args>(args)...);
          }
 
          virtual LinearFormExprSum* copy() const noexcept override

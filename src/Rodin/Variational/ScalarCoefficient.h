@@ -78,12 +78,6 @@ namespace Rodin::Variational
 
          mfem::Coefficient& getMFEMCoefficient() override;
 
-         template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficient(std::forward<Args>(args)...);
-         }
-
          virtual ScalarCoefficient* copy() const noexcept override
          {
             return new ScalarCoefficient(*this);
@@ -106,12 +100,6 @@ namespace Rodin::Variational
          void buildMFEMCoefficient() override;
 
          mfem::Coefficient& getMFEMCoefficient() override;
-
-         template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficient(std::forward<Args>(args)...);
-         }
 
          virtual ScalarCoefficient* copy() const noexcept override
          {
@@ -141,12 +129,6 @@ namespace Rodin::Variational
          void buildMFEMCoefficient() override;
          mfem::Coefficient& getMFEMCoefficient() override;
 
-         template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficient(std::forward<Args>(args)...);
-         }
-
          virtual ScalarCoefficient* copy() const noexcept override
          {
             return new ScalarCoefficient(*this);
@@ -173,12 +155,6 @@ namespace Rodin::Variational
          void buildMFEMCoefficient() override;
          mfem::Coefficient& getMFEMCoefficient() override;
 
-         template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficient(std::forward<Args>(args)...);
-         }
-
          virtual ScalarCoefficient* copy() const noexcept override
          {
             return new ScalarCoefficient(*this);
@@ -204,12 +180,6 @@ namespace Rodin::Variational
 
          void buildMFEMCoefficient() override;
          mfem::Coefficient& getMFEMCoefficient() override;
-
-         template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept
-         {
-            return new ScalarCoefficient(std::forward<Args>(args)...);
-         }
 
          virtual ScalarCoefficient* copy() const noexcept override
          {

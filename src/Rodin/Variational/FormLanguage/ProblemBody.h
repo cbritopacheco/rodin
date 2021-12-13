@@ -12,21 +12,16 @@
 #include "TypeTraits.h"
 #include "ForwardDecls.h"
 
-#include "RodinBase.h"
+#include "Base.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class DerivedType>
-   // struct TypeTraits<ProblemBody<DerivedType>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Rule;
-   //    using Derived = DerivedType;
-   // };
-
-   class ProblemBodyBase : public RodinBase
+   class ProblemBodyBase : public Base
    {
       public:
          virtual ProblemBodyBase& setProblem(ProblemBase& problem) = 0;
+         virtual void eval() = 0;
+         virtual ProblemBodyBase* copy() const noexcept = 0;
    };
 
    /**
@@ -55,15 +50,9 @@ namespace Rodin::Variational::FormLanguage
             return *this;
          }
 
-         virtual void eval() override
+         virtual void eval()
          {
             static_cast<Derived*>(this)->eval();
-         }
-
-         template <class ... Args>
-         static ProblemBody* create(Args&&... args) noexcept
-         {
-            return Derived::create(std::forward<Args>(args)...);
          }
 
          virtual ProblemBody* copy() const noexcept override

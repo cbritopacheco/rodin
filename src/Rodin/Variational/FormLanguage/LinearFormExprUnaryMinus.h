@@ -16,13 +16,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class T>
-   // struct TypeTraits<LinearFormExprUnaryMinus<T>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = LinearFormExpr<LinearFormExprUnaryMinus<T>>;
-   // };
-
    template <class T>
    class LinearFormExprUnaryMinus
       : public LinearFormExpr<LinearFormExprUnaryMinus<T>>
@@ -58,12 +51,6 @@ namespace Rodin::Variational::FormLanguage
          {
             assert(m_v);
             return *m_v;
-         }
-
-         template <class ... Args>
-         static LinearFormExprUnaryMinus* create(Args&&... args) noexcept
-         {
-            return new LinearFormExprUnaryMinus(std::forward<Args>(args)...);
          }
 
          virtual LinearFormExprUnaryMinus* copy() const noexcept override

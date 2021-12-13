@@ -4,13 +4,13 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
-#include "FormLanguage/RodinBase.h"
+#include "FormLanguage/Base.h"
 
 #include "VectorCoefficient.h"
 
 namespace Rodin::Variational
 {
-   class MatrixCoefficientBase
+   class MatrixCoefficientBase : public FormLanguage::Base
    {
       public:
          virtual ~MatrixCoefficientBase() = default;
@@ -18,7 +18,7 @@ namespace Rodin::Variational
          virtual int getDimension() const = 0;
          virtual void buildMFEMMatrixCoefficient() = 0;
          virtual mfem::MatrixCoefficient& getMFEMMatrixCoefficient() = 0;
-         virtual MatrixCoefficientBase* copy() const noexcept = 0;
+         virtual MatrixCoefficientBase* copy() const noexcept override = 0;
          virtual ScalarCoefficientBase& operator()(int i, int j) = 0;
    };
 
