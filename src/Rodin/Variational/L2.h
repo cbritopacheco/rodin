@@ -12,6 +12,7 @@
 namespace Rodin::Variational
 {
    /**
+    * @todo Implement this class
     * @brief Arbitrary order @f$ L^2(\Omega)^d @f$ conforming (discontinuous)
     * finite element space.
     *

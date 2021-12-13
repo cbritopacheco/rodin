@@ -82,33 +82,6 @@ namespace Rodin::Variational
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;
    }
-
-   // ---- ScalarCoefficient<T> ----------------------------------------------
-   // ------------------------------------------------------------------------
-   template <class T>
-   ScalarCoefficient<ScalarCoefficient<T>>
-   ::ScalarCoefficient(const ScalarCoefficient<T>& nested)
-      : m_nested(nested.copy())
-   {}
-
-   template <class T>
-   ScalarCoefficient<ScalarCoefficient<T>>
-   ::ScalarCoefficient(const ScalarCoefficient& other)
-      : m_nested(other.m_nested->copy())
-   {}
-
-   template <class T>
-   void ScalarCoefficient<ScalarCoefficient<T>>::buildMFEMCoefficient()
-   {
-      m_nested->buildMFEMCoefficient();
-   }
-
-   template <class T>
-   mfem::Coefficient&
-   ScalarCoefficient<ScalarCoefficient<T>>::getMFEMCoefficient()
-   {
-      return m_nested->getMFEMCoefficient();
-   }
 }
 
 #endif

@@ -137,7 +137,8 @@ namespace Rodin::Variational
          }
 
          /**
-          * @brief Returns the reference to the mesh.
+          * @brief Returns the reference to the mesh on which the space is
+          * supported.
           */
          Mesh& getMesh()
          {
@@ -145,7 +146,7 @@ namespace Rodin::Variational
          }
 
          /**
-          * @brief Gets dimension of the range space.
+          * @brief Gets the dimension @f$ d @f$ of the range space.
           */
          int getDimension() const
          {

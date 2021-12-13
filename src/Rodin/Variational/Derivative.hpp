@@ -7,23 +7,31 @@
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_HPP
 #define RODIN_VARIATIONAL_DERIVATIVE_HPP
 
+#include "GridFunction.h"
+
 #include "Derivative.h"
 
 namespace Rodin::Variational
 {
-   template <int ComponentIndex, int VariableIndex>
-   Derivative<ComponentIndex, VariableIndex>::Derivative(GridFunctionBase& u)
+   template <int DirectionIndex, int ComponentIndex>
+   Derivative<DirectionIndex, ComponentIndex>::Derivative(GridFunctionBase& u)
       : m_u(u)
    {}
 
-   template <int ComponentIndex, int VariableIndex>
-   void Derivative<ComponentIndex, VariableIndex>::buildMFEMCoefficient()
+   template <int DirectionIndex, int ComponentIndex>
+   void Derivative<DirectionIndex, ComponentIndex>::buildMFEMCoefficient()
    {
+      m_mfemGridFunction.emplace(m_u.getHandle().FESpace());
+      m_u.getHandle().GetDerivative(
+            ComponentIndex, DirectionIndex - 1, *m_mfemGridFunction);
+      m_mfemCoefficient.emplace(&(*m_mfemGridFunction));
    }
 
-   template <int ComponentIndex, int VariableIndex>
-   mfem::Coefficient& Derivative<ComponentIndex, VariableIndex>::getMFEMCoefficient()
+   template <int DirectionIndex, int ComponentIndex>
+   mfem::Coefficient& Derivative<DirectionIndex, ComponentIndex>::getMFEMCoefficient()
    {
+      assert(m_mfemCoefficient);
+      return *m_mfemCoefficient;
    }
 }
 

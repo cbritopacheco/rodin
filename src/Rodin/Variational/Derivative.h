@@ -16,32 +16,33 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Represents the partial derivative with respect to the i-th
-    * component and the j-th variable of the function
-    * @f$ u \colon \mathbb{R}^n \rightarrow \mathbb{R}^m @f$.
+    * @brief Represents the partial derivative @f$ \frac{\partial u_i}{\partial
+    * x_j} @f$ of the function @f$ u @f$.
     *
-    * Denote
+    * Denote the value of @f$ u \colon \mathbb{R}^n \rightarrow \mathbb{R}^m
+    * @f$ at @f$ x = (x_1, \ldots, x_n) @f$ by
     * @f[
     *    u(x) = (u_1(x), \ldots, u_m(x))
     * @f]
-    * the value of @f$ u @f$ at @f$ x = (x_1, \ldots, x_n) @f$. This class
-    * represents the partial derivative with respect to the i-th component and
-    * the j-th variable
+    * This class represents the partial derivative with respect to the i-th
+    * component and the j-th variable
     * @f[
     *    \dfrac{\partial u_i}{\partial x_j}
     * @f]
     *
-    * @tparam ComponentIndex Index of the function component @f$ u @f$
-    * @tparam VariableIndex Index of the variable argument @f$ x @f$
+    * @tparam DirectionIndex Index of the direction
+    * @tparam ComponentIndex Index of the function component
     */
-   template <int ComponentIndex, int VariableIndex>
+   template <int DirectionIndex, int ComponentIndex = 1>
    class Derivative : public ScalarCoefficientBase
    {
-      static_assert(ComponentIndex >= 0 && VariableIndex >= 0,
-            "ComponentIndex and VariableIndex must both be non-negative.");
-
+      static_assert(ComponentIndex >= 1 && DirectionIndex >= 1,
+            "ComponentIndex and VariableIndex must both be greater than 1.");
       public:
-
+         /**
+          * @brief Constructs the Derivative object.
+          * @param[in] u Grid function to be differentiated.
+          */
          Derivative(GridFunctionBase& u);
 
          void buildMFEMCoefficient() override;
@@ -55,7 +56,69 @@ namespace Rodin::Variational
 
       private:
          GridFunctionBase& m_u;
+         std::optional<mfem::GridFunction> m_mfemGridFunction;
+         std::optional<mfem::GridFunctionCoefficient> m_mfemCoefficient;
    };
+
+   /**
+    * @brief Represents the partial derivative in the @f$ x @f$ direction of
+    * the j-th component.
+    * @tparam ComponentIndex Index of the function component
+    *
+    * In other words, this function returns the Derivative object representing
+    * the partial derivative:
+    * @f[
+    *    \dfrac{\partial u_j}{\partial x_1}
+    * @f]
+    *
+    * @returns Derivative object with respect to the j-th component in the
+    * 1st direction.
+    */
+   template <int ComponentIndex = 1>
+   Derivative<1, ComponentIndex> Dx(GridFunctionBase& u)
+   {
+      return Derivative<1, ComponentIndex>(u);
+   }
+
+   /**
+    * @brief Represents the partial derivative in the @f$ y @f$ direction of
+    * the j-th component.
+    * @tparam ComponentIndex Index of the function component
+    *
+    * In other words, this function returns the Derivative object representing
+    * the partial derivative:
+    * @f[
+    *    \dfrac{\partial u_j}{\partial x_2}
+    * @f]
+    *
+    * @returns Derivative object with respect to the j-th component in the
+    * 2nd direction.
+    */
+   template <int ComponentIndex = 1>
+   Derivative<2, ComponentIndex> Dy(GridFunctionBase& u)
+   {
+      return Derivative<2, ComponentIndex>(u);
+   }
+
+   /**
+    * @brief Represents the partial derivative in the @f$ x @f$ direction of
+    * the j-th component.
+    * @tparam ComponentIndex Index of the function component
+    *
+    * In other words, this function returns the Derivative object representing
+    * the partial derivative:
+    * @f[
+    *    \dfrac{\partial u_j}{\partial x_3}
+    * @f]
+    *
+    * @returns Derivative object with respect to the j-th component in the
+    * 3rd direction.
+    */
+   template <int ComponentIndex = 1>
+   Derivative<3, ComponentIndex> Dz(GridFunctionBase& u)
+   {
+      return Derivative<3, ComponentIndex>(u);
+   }
 }
 
 #include "Derivative.hpp"

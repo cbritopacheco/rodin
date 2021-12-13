@@ -113,33 +113,6 @@ namespace Rodin::Variational
 
    /**
     * @internal
-    * @brief Represents the construction of a ScalarCoefficient within another
-    * ScalarCoefficient.
-    *
-    */
-   template <class T>
-   class ScalarCoefficient<ScalarCoefficient<T>>
-      : public ScalarCoefficientBase
-   {
-      public:
-         ScalarCoefficient(const ScalarCoefficient<T>& nested);
-         ScalarCoefficient(const ScalarCoefficient& other);
-         ScalarCoefficient(ScalarCoefficient&&) = default;
-
-         void buildMFEMCoefficient() override;
-         mfem::Coefficient& getMFEMCoefficient() override;
-
-         virtual ScalarCoefficient* copy() const noexcept override
-         {
-            return new ScalarCoefficient(*this);
-         }
-
-      private:
-         std::unique_ptr<ScalarCoefficient<T>> m_nested;
-   };
-
-   /**
-    * @internal
     * @brief Represents the sum of two ScalarCoefficient objects, which itself
     * is a ScalarCoefficient
     */

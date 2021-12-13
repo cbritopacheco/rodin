@@ -61,7 +61,7 @@ namespace Rodin::Variational
     * the setFiniteElementSpace(FiniteElementSpace&) method.
     */
    template <>
-   class GridFunction<> : public GridFunctionBase
+   class GridFunction<>
    {
       public:
          /**
@@ -100,12 +100,12 @@ namespace Rodin::Variational
             return res;
          }
 
-         mfem::GridFunction& getHandle() override
+         mfem::GridFunction& getHandle()
          {
             return m_gf;
          }
 
-         const mfem::GridFunction& getHandle() const override
+         const mfem::GridFunction& getHandle() const
          {
             return m_gf;
          }
