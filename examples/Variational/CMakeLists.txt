@@ -13,3 +13,11 @@ target_link_libraries(Elasticity
   Rodin::Solver
   Rodin::Variational
   )
+
+add_executable(Compliance Compliance.cpp)
+target_link_libraries(Compliance
+  PUBLIC
+  Rodin::Mesh
+  Rodin::Solver
+  Rodin::Variational
+  )

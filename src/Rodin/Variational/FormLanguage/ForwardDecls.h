@@ -11,6 +11,8 @@
 
 namespace Rodin::Variational::FormLanguage
 {
+   class Base;
+
    // ---- FormExprBCExprSum -------------------------------------------------
    template <class Derived>
    class ProblemBody;
@@ -57,13 +59,9 @@ namespace Rodin::Variational::FormLanguage
    template <class Lhs, class Rhs>
    class FormBCExprSum;
 
-   template <class Derived>
-   class CoeffExpr;
-
    template <class Lhs, class Rhs>
    class ScalarCoefficientSum;
 
-   template <class T>
    class ScalarCoefficientUnaryMinus;
 }
 

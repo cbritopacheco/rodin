@@ -16,13 +16,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   // template <class T>
-   // struct TypeTraits<BilinearFormExprUnaryMinus<T>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = BilinearFormExpr<BilinearFormExprUnaryMinus<T>>;
-   // };
-
    template <class T>
    class BilinearFormExprUnaryMinus
       : public BilinearFormExpr<BilinearFormExprUnaryMinus<T>>

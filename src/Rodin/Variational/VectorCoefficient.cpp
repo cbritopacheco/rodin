@@ -3,8 +3,7 @@
 namespace Rodin::Variational
 {
    VectorCoefficient::VectorCoefficient(const VectorCoefficient& other)
-      :  m_sign(other.m_sign),
-         m_dimension(other.m_dimension),
+      :  m_dimension(other.m_dimension),
          m_mfemVectorArrayCoefficient(other.m_mfemVectorArrayCoefficient)
    {
       m_values.reserve(other.m_dimension);
@@ -20,10 +19,7 @@ namespace Rodin::Variational
    {
       for (size_t i = 0; i < m_dimension; i++)
       {
-         if (m_sign)
-            m_values[i]->toggleSign().buildMFEMCoefficient();
-         else
-            m_values[i]->buildMFEMCoefficient();
+         m_values[i]->buildMFEMCoefficient();
          m_mfemVectorArrayCoefficient.Set(i, &m_values[i]->getMFEMCoefficient(), false);
       }
    }
@@ -31,12 +27,6 @@ namespace Rodin::Variational
    mfem::VectorCoefficient& VectorCoefficient::getMFEMVectorCoefficient()
    {
       return m_mfemVectorArrayCoefficient;
-   }
-
-   VectorCoefficient& VectorCoefficient::toggleSign()
-   {
-      m_sign = !m_sign;
-      return *this;
    }
 
    VectorCoefficient*

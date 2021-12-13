@@ -19,8 +19,8 @@ int main(int argc, char** argv)
   GridFunction u(Vh), v(Vh);
 
   // Lamé coefficients
-  double mu = 0.3846,
-         lambda = 0.5769;
+  auto mu     = ScalarCoefficient(0.3846),
+       lambda = ScalarCoefficient(0.5769);
 
   // Define problem
   Problem elasticity(u, v);

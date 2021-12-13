@@ -7,34 +7,23 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_COEFFUNARYMINUS_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_COEFFUNARYMINUS_H
 
-#include "ForwardDecls.h"
+#include <memory>
+#include <utility>
 
-#include "../ScalarCoefficient.h"
+#include "ForwardDecls.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   template <class T>
    class ScalarCoefficientUnaryMinus
-      : public ScalarCoefficient<ScalarCoefficientUnaryMinus<T>>
    {
       public:
-         ScalarCoefficientUnaryMinus(const T& v)
-         {
-            m_v = std::unique_ptr<T>(v.copy());
-         }
+         ScalarCoefficientUnaryMinus(const ScalarCoefficientBase& s);
 
-         ScalarCoefficientUnaryMinus(const ScalarCoefficientUnaryMinus& other)
-         {
-            assert(other.m_v);
-            m_v = std::unique_ptr<T>(other.m_v->copy());
-         }
+         ScalarCoefficientUnaryMinus(const ScalarCoefficientUnaryMinus& other);
 
          ScalarCoefficientUnaryMinus(ScalarCoefficientUnaryMinus&&) = default;
 
-         const T& v() const
-         {
-            return *m_v;
-         }
+         ScalarCoefficientBase& getScalarCoefficient();
 
          template <class ... Args>
          static ScalarCoefficientUnaryMinus* create(Args&&... args) noexcept
@@ -42,20 +31,16 @@ namespace Rodin::Variational::FormLanguage
             return new ScalarCoefficientUnaryMinus(std::forward<Args>(args)...);
          }
 
-         virtual ScalarCoefficientUnaryMinus* copy() const noexcept override
+         virtual ScalarCoefficientUnaryMinus* copy() const noexcept
          {
             return new ScalarCoefficientUnaryMinus(*this);
          }
 
       private:
-         std::unique_ptr<T> m_v;
+         std::unique_ptr<ScalarCoefficientBase> m_s;
    };
 
-   template <class T>
-   auto operator-(const CoeffExpr<T>& v)
-   {
-      return ScalarCoefficientUnaryMinus(v);
-   }
+   ScalarCoefficientUnaryMinus operator-(const ScalarCoefficientBase& s);
 
    template <class Lhs, class Rhs>
    auto operator-(const ScalarCoefficient<Lhs>& lhs, const ScalarCoefficient<Rhs>& rhs)

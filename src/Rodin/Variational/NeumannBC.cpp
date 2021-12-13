@@ -13,7 +13,6 @@
 
 namespace Rodin::Variational
 {
-   template <>
    NeumannBC::NeumannBC(int bdrAttr, const VectorCoefficient& value)
       :  m_bdrAttr(bdrAttr),
          m_value(std::unique_ptr<VectorCoefficient>(value.copy()))

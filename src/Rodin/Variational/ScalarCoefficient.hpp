@@ -7,9 +7,12 @@
 #ifndef RODIN_VARIATIONAL_SCALARCOEFFICIENT_HPP
 #define RODIN_VARIATIONAL_SCALARCOEFFICIENT_HPP
 
+#include "Rodin/Alert.h"
+
 #include "ScalarCoefficient.h"
 
 #include "FormLanguage/ScalarCoefficientSum.h"
+#include "FormLanguage/ScalarCoefficientUnaryMinus.h"
 
 namespace Rodin::Variational
 {
@@ -24,64 +27,63 @@ namespace Rodin::Variational
    template <class T>
    ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>
    ::ScalarCoefficient(const ScalarCoefficient& other)
-      : m_x(other.m_x)
+      :  m_x(other.m_x),
+         m_mfemCoefficient(other.m_mfemCoefficient)
    {}
-
-   template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>&
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::toggleSign()
-   {
-      m_x = -m_x;
-      return *this;
-   }
-
-   template <class T>
-   bool ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::isEvaluated() const
-   {
-      return static_cast<bool>(m_coeff);
-   }
 
    template <class T>
    void
    ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::buildMFEMCoefficient()
    {
-      track(new mfem::ConstantCoefficient(m_x));
+      m_mfemCoefficient.emplace(m_x);
    }
 
    template <class T>
    mfem::Coefficient&
    ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::getMFEMCoefficient()
    {
-      assert(m_coeff);
-      return *m_coeff;
+      assert(m_mfemCoefficient);
+      return *m_mfemCoefficient;
    }
 
-   template <class T>
+   // ---- GridFunction<FEC> -------------------------------------------------
+   // ------------------------------------------------------------------------
+   template <class FEC>
+   ScalarCoefficient<GridFunction<FEC>>
+   ::ScalarCoefficient(GridFunction<FEC>& u)
+      : m_u(u)
+   {
+      if (u.getFiniteElementSpace().getDimension() != 1)
+      {
+         (Alert::Exception() << "ScalarCoefficient can only be initialized "
+                             << "with a scalar valued GridFunction").raise();
+
+      }
+   }
+
+   template <class FEC>
+   ScalarCoefficient<GridFunction<FEC>>
+   ::ScalarCoefficient(const ScalarCoefficient& other)
+      :  m_u(other.m_u),
+         m_mfemCoefficient(other.m_mfemCoefficient)
+   {}
+
+
+   template <class FEC>
    void
-   ScalarCoefficient<T,
-      std::enable_if_t<std::is_arithmetic_v<T>>>::track(mfem::Coefficient* ptr)
+   ScalarCoefficient<GridFunction<FEC>>::buildMFEMCoefficient()
    {
-      m_coeff = std::unique_ptr<mfem::Coefficient>(ptr);
+      m_mfemCoefficient.emplace(m_u);
    }
 
-   template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>*
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::copy()
-   const noexcept
+   template <class FEC>
+   mfem::Coefficient& ScalarCoefficient<GridFunction<FEC>>::getMFEMCoefficient()
    {
-      return new ScalarCoefficient(*this);
+      assert(m_mfemCoefficient);
+      return *m_mfemCoefficient;
    }
 
-   template <class T>
-   template <class ... Args>
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>*
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::create(Args&&... args)
-   noexcept
-   {
-      return new ScalarCoefficient(std::forward<Args>(args)...);
-   }
-
-   // ---- ScalarCoefficient<T> ----------------------------------------------------------
+   // ---- ScalarCoefficient<T> ----------------------------------------------
    // ------------------------------------------------------------------------
    template <class T>
    ScalarCoefficient<ScalarCoefficient<T>>
@@ -98,45 +100,17 @@ namespace Rodin::Variational
    template <class T>
    void ScalarCoefficient<ScalarCoefficient<T>>::buildMFEMCoefficient()
    {
-      m_nested->eval();
+      m_nested->buildMFEMCoefficient();
    }
 
    template <class T>
    mfem::Coefficient&
    ScalarCoefficient<ScalarCoefficient<T>>::getMFEMCoefficient()
    {
-      return m_nested->coeff();
+      return m_nested->getMFEMCoefficient();
    }
 
-   template <class T>
-   ScalarCoefficient<ScalarCoefficient<T>>&
-   ScalarCoefficient<ScalarCoefficient<T>>::toggleSign()
-   {
-      m_nested->toggleSign();
-      return *this;
-   }
-
-   template <class T>
-   bool ScalarCoefficient<ScalarCoefficient<T>>::isEvaluated() const
-   {
-      return m_nested->isEvaluated();
-   }
-
-   template <class T>
-   template <class ... Args>
-   ScalarCoefficient<ScalarCoefficient<T>>*
-   ScalarCoefficient<ScalarCoefficient<T>>::create(Args&&... args) noexcept
-   {
-      return new ScalarCoefficient(std::forward<Args>(args)...);
-   }
-
-   template <class T>
-   ScalarCoefficient<ScalarCoefficient<T>>* ScalarCoefficient<ScalarCoefficient<T>>::copy() const noexcept
-   {
-      return new ScalarCoefficient(*this);
-   }
-
-   // ---- FormLanguage::CoeffSum<Lhs, Rhs> ----------------------------------
+   // ---- FormLanguage::ScalarCoefficientSum<Lhs, Rhs> ----------------------
    // ------------------------------------------------------------------------
    template <class Lhs, class Rhs>
    ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>
@@ -147,127 +121,28 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>
    ::ScalarCoefficient(const ScalarCoefficient& other)
-      :  m_expr(other.m_expr->copy())
+      :  m_expr(other.m_expr->copy()),
+         m_mfemCoefficient(other.m_mfemCoefficient)
    {}
-
-   template <class Lhs, class Rhs>
-   bool ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::isEvaluated() const
-   {
-      return static_cast<bool>(m_coeff);
-   }
 
    template <class Lhs, class Rhs>
    void
    ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::buildMFEMCoefficient()
    {
-      m_lhs = std::make_unique<ScalarCoefficient<Lhs>>(m_expr->lhs());
-      m_rhs = std::make_unique<ScalarCoefficient<Rhs>>(m_expr->rhs());
+      m_expr->getLHS().buildMFEMCoefficient();
+      m_expr->getRHS().buildMFEMCoefficient();
 
-      m_lhs->eval();
-      m_rhs->eval();
-
-      track(new mfem::SumCoefficient(m_lhs->coeff(), m_rhs->coeff()));
+      m_mfemCoefficient.emplace(
+            m_expr->getLHS().getMFEMCoefficient(),
+            m_expr->getRHS().getMFEMCoefficient());
    }
 
    template <class Lhs, class Rhs>
    mfem::Coefficient&
    ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::getMFEMCoefficient()
    {
-      assert(m_coeff);
-      return *m_coeff;
-   }
-
-   template <class Lhs, class Rhs>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>&
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::toggleSign()
-   {
-      m_lhs->toggleSign();
-      m_rhs->toggleSign();
-      return *this;
-   }
-
-   template <class Lhs, class Rhs>
-   void
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::track(mfem::Coefficient* ptr)
-   {
-      m_coeff = std::unique_ptr<mfem::Coefficient>(ptr);
-   }
-
-   template <class Lhs, class Rhs>
-   template <class ... Args>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>*
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::create(Args&&... args)
-   noexcept
-   {
-      return new ScalarCoefficient(std::forward<Args>(args)...);
-   }
-
-   template <class Lhs, class Rhs>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>*
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::copy()
-   const noexcept
-   {
-      return new ScalarCoefficient(*this);
-   }
-
-   // ---- CoeffUnaryMinus<T> ------------------------------------------------
-   // ------------------------------------------------------------------------
-   template <class T>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>
-   ::ScalarCoefficient(const FormLanguage::ScalarCoefficientUnaryMinus<T>& expr)
-      : m_expr(expr.copy())
-   {}
-
-   template <class T>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>
-   ::ScalarCoefficient(const ScalarCoefficient& other)
-      : m_expr(other.m_expr->copy())
-   {}
-
-   template <class T>
-   void
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::buildMFEMCoefficient()
-   {
-      m_expr->toggleSign().eval();
-   }
-
-   template <class T>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>&
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::toggleSign()
-   {
-      m_expr->toggleSign();
-      return *this;
-   }
-
-   template <class T>
-   mfem::Coefficient&
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::getMFEMCoefficient()
-   {
-      return m_expr->coeff();
-   }
-
-   template <class T>
-   bool
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::isEvaluated()
-   const
-   {
-      return m_expr->isEvaluated();
-   }
-
-   template <class T>
-   template <class ... Args>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>*
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::create(Args&&... args) noexcept
-   {
-      return new ScalarCoefficient(std::forward<Args>(args)...);
-   }
-
-   template <class T>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>*
-   ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>::copy()
-   const noexcept
-   {
-      return new ScalarCoefficient(*this);
+      assert(m_mfemCoefficient);
+      return *m_mfemCoefficient;
    }
 }
 

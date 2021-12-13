@@ -16,7 +16,7 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Base type for the finite element spaces.
+    * @brief Base type for finite element spaces.
     *
     * @tparam Derived Subclass which derives from FiniteElementSpace.
     */
@@ -24,22 +24,40 @@ namespace Rodin::Variational
    class FiniteElementSpace
    {
       public:
+         /**
+          * @brief Gets the mesh that is associated to the finite element
+          * space.
+          */
          Mesh& getMesh()
          {
             return static_cast<Derived*>(this)->getMesh();
          }
 
+         /**
+          * @brief Gets the dimension of the range space.
+          */
+         int getDimension() const
+         {
+            return static_cast<const Derived*>(this)->getDimension();
+         }
+
+         /**
+          * @internal
+          */
          mfem::FiniteElementCollection& getFEC()
          {
             return static_cast<Derived*>(this)->getFEC();
          }
 
+         /**
+          * @internal
+          */
          mfem::FiniteElementSpace& getFES()
          {
             return static_cast<Derived*>(this)->getFES();
          }
 
-         bool operator=(const FiniteElementSpace& other)
+         bool operator==(const FiniteElementSpace& other)
          {
             return this == &other;
          }

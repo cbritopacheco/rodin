@@ -39,7 +39,6 @@ namespace Rodin::Variational
    template <class FEC>
    class LinearForm;
 
-   template <class T>
    class DomainLFIntegrator;
 
    // ---- BilinearForm ------------------------------------------------------
@@ -48,10 +47,8 @@ namespace Rodin::Variational
    template <class FEC>
    class BilinearForm;
 
-   template <class T>
    class DiffusionIntegrator;
 
-   template <class L, class M>
    class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------

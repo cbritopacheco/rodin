@@ -14,8 +14,7 @@ namespace Rodin::Variational
    // ---- ... Values (Variadic vector) --------------------------------------
    template <class ... Values>
    VectorCoefficient::VectorCoefficient(const Values&... values)
-      :  m_sign(false),
-         m_dimension(sizeof...(Values)),
+      :  m_dimension(sizeof...(Values)),
          m_mfemVectorArrayCoefficient(m_dimension)
    {
       m_values.reserve(sizeof...(Values));
@@ -31,12 +30,9 @@ namespace Rodin::Variational
    typename std::enable_if_t<I < sizeof...(Tp)>
    VectorCoefficient::makeCoefficientsFromTuple(const std::tuple<Tp...>& t)
    {
-      auto& coeff = m_values.emplace_back(new ScalarCoefficient(std::get<I>(t)));
-      if (m_sign)
-         coeff->toggleSign().buildMFEMCoefficient();
-      else
-         coeff->buildMFEMCoefficient();
-      m_mfemVectorArrayCoefficient.Set(I, &coeff->getMFEMCoefficient(), false);
+      auto& s = m_values.emplace_back(new ScalarCoefficient(std::get<I>(t)));
+      s->buildMFEMCoefficient();
+      m_mfemVectorArrayCoefficient.Set(I, &s->getMFEMCoefficient(), false);
       makeCoefficientsFromTuple<I + 1, Tp...>(t);
    }
 

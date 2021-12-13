@@ -20,28 +20,22 @@ namespace Rodin::Variational::FormLanguage
    class ScalarCoefficientSum : public ScalarCoefficient<ScalarCoefficientSum<Lhs, Rhs>>
    {
       public:
-         ScalarCoefficientSum(const Lhs& lhs, const Rhs& rhs)
-         {
-            m_lhs = std::unique_ptr<Lhs>(lhs.copy());
-            m_rhs = std::unique_ptr<Rhs>(rhs.copy());
-         }
+         ScalarCoefficientSum(
+               const ScalarCoefficient<Lhs>& lhs, const ScalarCoefficient<Rhs>& rhs)
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+         {}
 
          ScalarCoefficientSum(const ScalarCoefficientSum& other)
-         {
-            assert(other.m_lhs);
-            m_lhs = std::unique_ptr<Lhs>(other.m_lhs->copy());
+            : m_lhs(other.m_lhs.copy()), m_rhs(other.m_rhs.copy())
+         {}
 
-            assert(other.m_rhs);
-            m_rhs = std::unique_ptr<Rhs>(other.m_rhs->copy());
-         }
-
-         const Lhs& lhs() const
+         const ScalarCoefficient<Lhs>& getLHS() const
          {
             assert(m_lhs);
             return *m_lhs;
          }
 
-         const Rhs& rhs() const
+         const ScalarCoefficient<Rhs>& getRHS() const
          {
             assert(m_rhs);
             return *m_rhs;
@@ -59,8 +53,8 @@ namespace Rodin::Variational::FormLanguage
          }
 
       private:
-         std::unique_ptr<Lhs> m_lhs;
-         std::unique_ptr<Rhs> m_rhs;
+         std::unique_ptr<ScalarCoefficient<Lhs>> m_lhs;
+         std::unique_ptr<ScalarCoefficient<Rhs>> m_rhs;
    };
 
    template <class Lhs, class Rhs>

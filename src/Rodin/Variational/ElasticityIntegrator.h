@@ -11,6 +11,7 @@
 
 #include "ForwardDecls.h"
 #include "ScalarCoefficient.h"
+#include "FormLanguage/BilinearFormExpr.h"
 
 namespace Rodin::Variational
 {
@@ -51,16 +52,19 @@ namespace Rodin::Variational
     * ----
     *
     */
-   template <class L, class M>
    class ElasticityIntegrator
-      :  public FormLanguage::BilinearFormExpr<ElasticityIntegrator<L, M>>
+      :  public FormLanguage::BilinearFormExpr<ElasticityIntegrator>
    {
       public:
          /**
           * @brief Creates an ElasticityIntegrator with the given Lamé
           * coefficients @f$ \lambda @f$ and @f$ \mu @f$.
           */
-         ElasticityIntegrator(const L& lambda, const M& mu);
+         template <class L, class M>
+         ElasticityIntegrator(
+               const ScalarCoefficient<L>& lambda, const ScalarCoefficient<M>& mu)
+            : m_lambda(lambda.copy()), m_mu(mu.copy())
+         {}
 
          ElasticityIntegrator(const ElasticityIntegrator& other);
 
@@ -71,18 +75,19 @@ namespace Rodin::Variational
          ElasticityIntegrator& toggleSign() override;
 
          template <class ... Args>
-         static ElasticityIntegrator* create(Args&&... args) noexcept;
+         static ElasticityIntegrator* create(Args&&... args) noexcept
+         {
+            return new ElasticityIntegrator(std::forward<Args>(args)...);
+         }
 
          virtual ElasticityIntegrator* copy() const noexcept override;
 
       private:
-         ScalarCoefficient<L> m_lambda;
-         ScalarCoefficient<M> m_mu;
+         std::unique_ptr<ScalarCoefficientBase> m_lambda;
+         std::unique_ptr<ScalarCoefficientBase> m_mu;
 
          std::optional<std::reference_wrapper<BilinearFormBase>> m_bf;
    };
 }
-
-#include "ElasticityIntegrator.hpp"
 
 #endif

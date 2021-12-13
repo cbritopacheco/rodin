@@ -197,7 +197,7 @@ namespace Rodin::Variational
          }
 
          /**
-          * @brief Gets the raw data and its size of the grid function.
+          * @brief Gets the raw data and size of the grid function.
           * @returns `std::pair{data, size}`
           */
          std::pair<const double*, int> getData() const

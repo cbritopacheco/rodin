@@ -12,6 +12,7 @@ add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
 target_sources(Rodin INTERFACE ${Rodin_HEADERS})
 
+
 if (RODIN_WITH_PLOT)
 # The Plot module is currently broken and barely has any code. So we don't add
 # it to the build list.  It is a dependency issue with Magnum + mfem which

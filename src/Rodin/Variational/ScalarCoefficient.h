@@ -8,33 +8,21 @@
 #define RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
 
 #include <memory>
+#include <optional>
 #include <type_traits>
 
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
-#include "FormLanguage/RodinBase.h"
+
+#include "FormLanguage/Base.h"
+#include "FormLanguage/ForwardDecls.h"
 
 namespace Rodin::Variational
 {
-   class ScalarCoefficientBase
+   class ScalarCoefficientBase : public FormLanguage::Base
    {
       public:
-         /**
-          * @internal
-          * @brief Toggles the sign of the coefficient.
-          *
-          * If @f$ S @f$ is the scalar coefficient then this method applies the
-          * following rule:
-          *
-          * @f[
-          *    S \leftarrow - S
-          * @f]
-          *
-          * @returns Reference to self (for method chaining)
-          */
-         virtual ScalarCoefficientBase& toggleSign() = 0;
-
          /**
           * @internal
           * @brief Builds the underlying mfem::Coefficient object.
@@ -54,10 +42,11 @@ namespace Rodin::Variational
           * @brief Builds a copy of the object and returns a non-owning
           * pointer to the new object.
           */
-         virtual ScalarCoefficientBase* copy() const noexcept = 0;
+         virtual ScalarCoefficientBase* copy() const noexcept override = 0;
    };
 
    /**
+    * @internal
     * @brief A ScalarCoefficient represents the continuous functions that
     * represent the scalar coefficients in a PDE.
     */
@@ -87,26 +76,57 @@ namespace Rodin::Variational
 
          void buildMFEMCoefficient() override;
 
-         bool isEvaluated() const;
          mfem::Coefficient& getMFEMCoefficient() override;
-         ScalarCoefficient& toggleSign() override;
 
          template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept;
-         virtual ScalarCoefficient* copy() const noexcept override;
+         static ScalarCoefficient* create(Args&&... args) noexcept
+         {
+            return new ScalarCoefficient(std::forward<Args>(args)...);
+         }
 
-      protected:
-         void track(mfem::Coefficient* ptr);
+         virtual ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
 
       private:
          T m_x;
-         std::unique_ptr<mfem::Coefficient> m_coeff;
+         std::optional<mfem::ConstantCoefficient> m_mfemCoefficient;
+   };
+
+   template <class FEC>
+   class ScalarCoefficient<GridFunction<FEC>>
+      : public ScalarCoefficientBase
+   {
+      public:
+         ScalarCoefficient(GridFunction<FEC>& u);
+
+         ScalarCoefficient(const ScalarCoefficient& other);
+
+         void buildMFEMCoefficient() override;
+
+         mfem::Coefficient& getMFEMCoefficient() override;
+
+         template <class ... Args>
+         static ScalarCoefficient* create(Args&&... args) noexcept
+         {
+            return new ScalarCoefficient(std::forward<Args>(args)...);
+         }
+
+         virtual ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
+
+      private:
+         GridFunction<FEC>& m_u;
+         std::optional<mfem::GridFunctionCoefficient>    m_mfemCoefficient;
    };
 
    /**
-    * Represents the construction from another `Coeff`. The evaluation
-    * behaviour is to the copy the nested coefficient and return its
-    * evaluation.
+    * @internal
+    * @brief Represents the construction of a ScalarCoefficient within another
+    * ScalarCoefficient.
     *
     */
    template <class T>
@@ -119,19 +139,28 @@ namespace Rodin::Variational
          ScalarCoefficient(ScalarCoefficient&&) = default;
 
          void buildMFEMCoefficient() override;
-         bool isEvaluated() const;
          mfem::Coefficient& getMFEMCoefficient() override;
-         ScalarCoefficient& toggleSign() override;
 
          template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept;
+         static ScalarCoefficient* create(Args&&... args) noexcept
+         {
+            return new ScalarCoefficient(std::forward<Args>(args)...);
+         }
 
-         virtual ScalarCoefficient* copy() const noexcept override;
+         virtual ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
 
       private:
          std::unique_ptr<ScalarCoefficient<T>> m_nested;
    };
 
+   /**
+    * @internal
+    * @brief Represents the sum of two ScalarCoefficient objects, which itself
+    * is a ScalarCoefficient
+    */
    template <class Lhs, class Rhs>
    class ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>
       : public ScalarCoefficientBase
@@ -144,50 +173,52 @@ namespace Rodin::Variational
          void buildMFEMCoefficient() override;
          mfem::Coefficient& getMFEMCoefficient() override;
 
-         ScalarCoefficient& toggleSign() override;
-
-         bool isEvaluated() const;
-
          template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept;
+         static ScalarCoefficient* create(Args&&... args) noexcept
+         {
+            return new ScalarCoefficient(std::forward<Args>(args)...);
+         }
 
-         virtual ScalarCoefficient* copy() const noexcept override;
-
-      protected:
-         void track(mfem::Coefficient* ptr);
+         virtual ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
 
       private:
          std::unique_ptr<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>> m_expr;
-
-         std::unique_ptr<ScalarCoefficient<Lhs>> m_lhs;
-         std::unique_ptr<ScalarCoefficient<Rhs>> m_rhs;
-
-         std::unique_ptr<mfem::Coefficient> m_coeff;
+         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 
-   template <class T>
-   class ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus<T>>
+   /**
+    * @internal
+    * @brief Represents the negation of the scalar coefficient.
+    */
+   template <>
+   class ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus>
       : public ScalarCoefficientBase
    {
       public:
-         ScalarCoefficient(const FormLanguage::ScalarCoefficientUnaryMinus<T>& expr);
+         ScalarCoefficient(const FormLanguage::ScalarCoefficientUnaryMinus& expr);
          ScalarCoefficient(const ScalarCoefficient& other);
          ScalarCoefficient(ScalarCoefficient&&) = default;
 
          void buildMFEMCoefficient() override;
          mfem::Coefficient& getMFEMCoefficient() override;
 
-         ScalarCoefficient& toggleSign() override;
-
-         bool isEvaluated() const;
-
          template <class ... Args>
-         static ScalarCoefficient* create(Args&&... args) noexcept;
+         static ScalarCoefficient* create(Args&&... args) noexcept
+         {
+            return new ScalarCoefficient(std::forward<Args>(args)...);
+         }
 
-         virtual ScalarCoefficient* copy() const noexcept override;
+         virtual ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
 
       private:
-         std::unique_ptr<FormLanguage::ScalarCoefficientUnaryMinus<T>> m_expr;
+         std::unique_ptr<FormLanguage::ScalarCoefficientUnaryMinus> m_expr;
+         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 }
 

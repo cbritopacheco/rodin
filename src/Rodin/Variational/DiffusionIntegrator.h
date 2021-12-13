@@ -13,6 +13,8 @@
 #include "ForwardDecls.h"
 #include "ScalarCoefficient.h"
 
+#include "FormLanguage/BilinearFormExpr.h"
+
 namespace Rodin::Variational
 {
 
@@ -32,23 +34,33 @@ namespace Rodin::Variational
     * |  Spaces supported     | H1                                           |
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     * |  Continuous operator  | @f$ - \nabla \cdot (\lambda \nabla u) @f$    |
-    * |  @f$ \lambda @f$      | Scalar                                       |
+    * |  @f$ \lambda @f$      | ScalarCoefficient                            |
     *
     * ----
     *
     */
-   template <class T = double>
    class DiffusionIntegrator
-      :  public FormLanguage::BilinearFormExpr<DiffusionIntegrator<T>>
+      :  public FormLanguage::BilinearFormExpr<DiffusionIntegrator>
    {
       public:
          /**
-          * @brief Constructs a DiffusionIntegrator with scalar coefficient @f$
-          * \lambda @f$.
+          * @brief Constructs a DiffusionIntegrator with a scalar coefficient
+          * @f$ \lambda = 1@f$.
+          */
+         DiffusionIntegrator()
+            : m_lambda(new ScalarCoefficient(1.0))
+         {}
+
+         /**
+          * @brief Constructs a DiffusionIntegrator with a scalar coefficient
+          * @f$ \lambda @f$.
           *
           * @param[in] lambda Diffusion coefficient
           */
-         DiffusionIntegrator(const T& lambda = 1.0);
+         template <class T>
+         DiffusionIntegrator(const ScalarCoefficient<T>& lambda)
+            : m_lambda(lambda)
+         {}
 
          DiffusionIntegrator(const DiffusionIntegrator& other);
 
@@ -59,16 +71,17 @@ namespace Rodin::Variational
          DiffusionIntegrator& toggleSign() override;
 
          template <class ... Args>
-         static DiffusionIntegrator* create(Args&&... args) noexcept;
+         static DiffusionIntegrator* create(Args&&... args) noexcept
+         {
+            return new DiffusionIntegrator(std::forward<Args>(args)...);
+         }
 
          virtual DiffusionIntegrator* copy() const noexcept override;
 
       private:
-         ScalarCoefficient<T> m_lambda;
+         std::unique_ptr<ScalarCoefficientBase> m_lambda;
          std::optional<std::reference_wrapper<BilinearFormBase>> m_bf;
    };
 }
-
-#include "DiffusionIntegrator.hpp"
 
 #endif

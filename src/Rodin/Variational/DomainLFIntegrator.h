@@ -16,13 +16,6 @@
 
 namespace Rodin::Variational
 {
-   // template <class T>
-   // struct FormLanguage::TypeTraits<DomainLFIntegrator<T>>
-   // {
-   //    static constexpr SyntacticConstruct Syntax = Constructor;
-   //    using Rule = FormLanguage::LinearFormExpr<DiffusionIntegrator<T>>;
-   // };
-
    /**
     *
     * @brief Object used to integrate a coefficient against a fixed coefficient.
@@ -40,22 +33,24 @@ namespace Rodin::Variational
     * |  Spaces supported     | L2, H1                                       |
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     * |  Continuous operator  | @f$ f @f$                                    |
-    * |  @f$ \lambda @f$      | Scalar                                       |
+    * |  @f$ f @f$            | ScalarCoefficient                            |
     *
     * ----
     */
-   template <class T = double>
    class DomainLFIntegrator
-      :  public FormLanguage::LinearFormExpr<DomainLFIntegrator<T>>
+      :  public FormLanguage::LinearFormExpr<DomainLFIntegrator>
    {
       public:
          /**
           * @brief Constructs a DomainLFIntegrator with scalar coefficient
-          * `f`.
+          * @f$ f @f$.
           *
           * @param[in] f Coefficient to integrate.
           */
-         DomainLFIntegrator(const T& f = 1.0);
+         template <class T>
+         DomainLFIntegrator(const ScalarCoefficient<T>& f)
+            : m_f(new ScalarCoefficient(-f))
+         {}
 
          DomainLFIntegrator(const DomainLFIntegrator& other);
 
@@ -66,17 +61,18 @@ namespace Rodin::Variational
          DomainLFIntegrator& toggleSign() override;
 
          template <class ... Args>
-         static DomainLFIntegrator* create(Args&&... args) noexcept;
+         static DomainLFIntegrator* create(Args&&... args) noexcept
+         {
+            return new DomainLFIntegrator(std::forward<Args>(args)...);
+         }
 
          virtual DomainLFIntegrator* copy() const noexcept override;
 
       private:
-         ScalarCoefficient<T> m_f;
+         std::unique_ptr<ScalarCoefficientBase> m_f;
          std::optional<std::reference_wrapper<LinearFormBase>> m_lf;
    };
 }
-
-#include "DomainLFIntegrator.hpp"
 
 #endif
 

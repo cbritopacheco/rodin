@@ -21,8 +21,8 @@ int main(int, char**)
 
   // Define problem
   Problem poisson(u, v);
-  poisson = DiffusionIntegrator(1.0)
-          - DomainLFIntegrator(1.0)
+  poisson = DiffusionIntegrator()
+          - DomainLFIntegrator(ScalarCoefficient(1.0))
           + DirichletBC(Gamma, 0.0);
 
   // Solve problem

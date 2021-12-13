@@ -34,21 +34,6 @@ namespace Rodin::Variational
 
          /**
           * @internal
-          * @brief Toggles the sign of the coefficient.
-          *
-          * If @f$ V @f$ is the vector coefficient then this method applies the
-          * following rule:
-          *
-          * @f[
-          *    V \leftarrow - V
-          * @f]
-          *
-          * @returns Reference to self (for method chaining)
-          */
-         virtual VectorCoefficientBase& toggleSign() = 0;
-
-         /**
-          * @internal
           * @brief Builds the underlying mfem::VectorCoefficient object.
           */
          virtual void buildMFEMVectorCoefficient() = 0;
@@ -104,8 +89,6 @@ namespace Rodin::Variational
             return m_dimension;
          }
 
-         VectorCoefficient& toggleSign() override;
-
          void buildMFEMVectorCoefficient() override;
 
          virtual VectorCoefficient* copy() const noexcept override;
@@ -121,7 +104,6 @@ namespace Rodin::Variational
          typename std::enable_if_t<I < sizeof...(Tp)>
          makeCoefficientsFromTuple(const std::tuple<Tp...>& t);
 
-         bool m_sign;
          size_t m_dimension;
          std::vector<std::unique_ptr<ScalarCoefficientBase>> m_values;
          mfem::VectorArrayCoefficient m_mfemVectorArrayCoefficient;
