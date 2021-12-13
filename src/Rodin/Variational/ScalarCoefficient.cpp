@@ -29,4 +29,35 @@ namespace Rodin::Variational
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;
    }
+
+   // ---- FormLanguage::ScalarCoefficientSum --------------------------------
+   // ------------------------------------------------------------------------
+   ScalarCoefficient<FormLanguage::ScalarCoefficientSum>
+   ::ScalarCoefficient(const FormLanguage::ScalarCoefficientSum& expr)
+      : m_expr(expr.copy())
+   {}
+
+   ScalarCoefficient<FormLanguage::ScalarCoefficientSum>
+   ::ScalarCoefficient(const ScalarCoefficient& other)
+      :  m_expr(other.m_expr->copy()),
+         m_mfemCoefficient(other.m_mfemCoefficient)
+   {}
+
+   void
+   ScalarCoefficient<FormLanguage::ScalarCoefficientSum>::buildMFEMCoefficient()
+   {
+      m_expr->getLHS().buildMFEMCoefficient();
+      m_expr->getRHS().buildMFEMCoefficient();
+
+      m_mfemCoefficient.emplace(
+            m_expr->getLHS().getMFEMCoefficient(),
+            m_expr->getRHS().getMFEMCoefficient());
+   }
+
+   mfem::Coefficient&
+   ScalarCoefficient<FormLanguage::ScalarCoefficientSum>::getMFEMCoefficient()
+   {
+      assert(m_mfemCoefficient);
+      return *m_mfemCoefficient;
+   }
 }

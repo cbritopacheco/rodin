@@ -120,7 +120,7 @@ namespace Rodin::Variational
 
       private:
          GridFunction<FEC>& m_u;
-         std::optional<mfem::GridFunctionCoefficient>    m_mfemCoefficient;
+         std::optional<mfem::GridFunctionCoefficient> m_mfemCoefficient;
    };
 
    /**
@@ -161,12 +161,12 @@ namespace Rodin::Variational
     * @brief Represents the sum of two ScalarCoefficient objects, which itself
     * is a ScalarCoefficient
     */
-   template <class Lhs, class Rhs>
-   class ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>
+   template <>
+   class ScalarCoefficient<FormLanguage::ScalarCoefficientSum>
       : public ScalarCoefficientBase
    {
       public:
-         ScalarCoefficient(const FormLanguage::ScalarCoefficientSum<Lhs, Rhs>& expr);
+         ScalarCoefficient(const FormLanguage::ScalarCoefficientSum& expr);
          ScalarCoefficient(const ScalarCoefficient& other);
          ScalarCoefficient(ScalarCoefficient&&) = default;
 
@@ -185,7 +185,7 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>> m_expr;
+         std::unique_ptr<FormLanguage::ScalarCoefficientSum> m_expr;
          std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 

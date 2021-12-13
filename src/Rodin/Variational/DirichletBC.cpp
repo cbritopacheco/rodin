@@ -13,7 +13,11 @@
 
 namespace Rodin::Variational
 {
-   template <>
+   DirichletBC::DirichletBC(int bdrAttr, const ScalarCoefficientBase& value)
+      :  m_bdrAttr(bdrAttr),
+         m_value(std::unique_ptr<ScalarCoefficientBase>(value.copy()))
+   {}
+
    DirichletBC::DirichletBC(int bdrAttr, const VectorCoefficient& value)
       :  m_bdrAttr(bdrAttr),
          m_value(std::unique_ptr<VectorCoefficient>(value.copy()))

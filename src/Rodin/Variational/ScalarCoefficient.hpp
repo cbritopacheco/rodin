@@ -109,41 +109,6 @@ namespace Rodin::Variational
    {
       return m_nested->getMFEMCoefficient();
    }
-
-   // ---- FormLanguage::ScalarCoefficientSum<Lhs, Rhs> ----------------------
-   // ------------------------------------------------------------------------
-   template <class Lhs, class Rhs>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>
-   ::ScalarCoefficient(const FormLanguage::ScalarCoefficientSum<Lhs, Rhs>& expr)
-      : m_expr(expr.copy())
-   {}
-
-   template <class Lhs, class Rhs>
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>
-   ::ScalarCoefficient(const ScalarCoefficient& other)
-      :  m_expr(other.m_expr->copy()),
-         m_mfemCoefficient(other.m_mfemCoefficient)
-   {}
-
-   template <class Lhs, class Rhs>
-   void
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::buildMFEMCoefficient()
-   {
-      m_expr->getLHS().buildMFEMCoefficient();
-      m_expr->getRHS().buildMFEMCoefficient();
-
-      m_mfemCoefficient.emplace(
-            m_expr->getLHS().getMFEMCoefficient(),
-            m_expr->getRHS().getMFEMCoefficient());
-   }
-
-   template <class Lhs, class Rhs>
-   mfem::Coefficient&
-   ScalarCoefficient<FormLanguage::ScalarCoefficientSum<Lhs, Rhs>>::getMFEMCoefficient()
-   {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
-   }
 }
 
 #endif

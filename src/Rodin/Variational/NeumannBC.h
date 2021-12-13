@@ -56,12 +56,7 @@ namespace Rodin::Variational
           * @param[in] value Scalar value of the trial function @f$ u @f$ on
           * the boundary @f$ \Gamma_D @f$.
           */
-         template <class T>
-         explicit
-         NeumannBC(int bdrAttr, const ScalarCoefficient<T>& value)
-            :  m_bdrAttr(bdrAttr),
-               m_value(value.copy())
-         {}
+         NeumannBC(int bdrAttr, const ScalarCoefficientBase& value);
 
          /**
           * @brief Constructs a Neumann boundary condition on the part of the
@@ -73,7 +68,6 @@ namespace Rodin::Variational
           * @param[in] value Vector value of the trial function @f$ u @f$ on
           * the boundary @f$ \Gamma_D @f$.
           */
-         explicit
          NeumannBC(int bdrAttr, const VectorCoefficient& value);
 
          NeumannBC(const NeumannBC& other);

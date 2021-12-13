@@ -49,32 +49,10 @@ namespace Rodin::Variational
           * @param[in] bdrAttr Attribute corresponding to the segment
           * @f$ \Gamma_D @f$ where the Dirichlet boundary condition is imposed.
           *
-          * @param[in] value Scalar value of the trial function @f$ u @f$ at
-          * the boundary @f$ \Gamma_D @f$.
-          */
-         template <class T>
-         explicit
-         DirichletBC(int bdrAttr, const T& value)
-            :  m_bdrAttr(bdrAttr),
-               m_value(std::make_unique<ScalarCoefficient<T>>(value))
-         {}
-
-         /**
-          * @brief Constructs a Dirichlet boundary condition on the part of the
-          * boundary specified by the boundary attribute.
-          *
-          * @param[in] bdrAttr Attribute corresponding to the segment
-          * @f$ \Gamma_D @f$ where the Dirichlet boundary condition is imposed.
-          *
           * @param[in] value Scalar value of the trial function @f$ u @f$ on
           * the boundary @f$ \Gamma_D @f$.
           */
-         template <class T>
-         explicit
-         DirichletBC(int bdrAttr, const ScalarCoefficient<T>& value)
-            :  m_bdrAttr(bdrAttr),
-               m_value(std::unique_ptr<ScalarCoefficient<T>>(value.copy()))
-         {}
+         DirichletBC(int bdrAttr, const ScalarCoefficientBase& value);
 
          /**
           * @brief Constructs a Dirichlet boundary condition on the part of the
@@ -86,10 +64,11 @@ namespace Rodin::Variational
           * @param[in] value Vector value of the trial function @f$ u @f$ on
           * the boundary @f$ \Gamma_D @f$.
           */
-         template <>
-         explicit
          DirichletBC(int bdrAttr, const VectorCoefficient& value);
 
+         /**
+          * @internal
+          */
          DirichletBC(const DirichletBC& other);
 
          virtual ~DirichletBC() = default;

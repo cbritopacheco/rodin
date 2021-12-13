@@ -59,9 +59,7 @@ namespace Rodin::Variational::FormLanguage
    template <class Lhs, class Rhs>
    class FormBCExprSum;
 
-   template <class Lhs, class Rhs>
    class ScalarCoefficientSum;
-
    class ScalarCoefficientUnaryMinus;
 }
 

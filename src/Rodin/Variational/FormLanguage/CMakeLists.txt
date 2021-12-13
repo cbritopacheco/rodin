@@ -22,6 +22,7 @@ set(RodinVariationalFormLanguage_HEADERS
 
 set(RodinVariationalFormLanguage_SRCS
   ScalarCoefficientUnaryMinus.cpp
+  ScalarCoefficientSum.cpp
   )
 
 add_library(RodinVariationalFormLanguage

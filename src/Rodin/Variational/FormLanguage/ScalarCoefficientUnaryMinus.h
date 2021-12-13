@@ -11,10 +11,11 @@
 #include <utility>
 
 #include "ForwardDecls.h"
+#include "Base.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   class ScalarCoefficientUnaryMinus
+   class ScalarCoefficientUnaryMinus : public Base
    {
       public:
          ScalarCoefficientUnaryMinus(const ScalarCoefficientBase& s);
@@ -31,7 +32,7 @@ namespace Rodin::Variational::FormLanguage
             return new ScalarCoefficientUnaryMinus(std::forward<Args>(args)...);
          }
 
-         virtual ScalarCoefficientUnaryMinus* copy() const noexcept
+         virtual ScalarCoefficientUnaryMinus* copy() const noexcept override
          {
             return new ScalarCoefficientUnaryMinus(*this);
          }
@@ -42,11 +43,8 @@ namespace Rodin::Variational::FormLanguage
 
    ScalarCoefficientUnaryMinus operator-(const ScalarCoefficientBase& s);
 
-   template <class Lhs, class Rhs>
-   auto operator-(const ScalarCoefficient<Lhs>& lhs, const ScalarCoefficient<Rhs>& rhs)
-   {
-      return ScalarCoefficientSum(lhs, ScalarCoefficientUnaryMinus(rhs));
-   }
+   ScalarCoefficientSum
+      operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 }
 
 #endif
