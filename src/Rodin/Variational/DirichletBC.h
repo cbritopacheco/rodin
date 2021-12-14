@@ -64,7 +64,7 @@ namespace Rodin::Variational
           * @param[in] value Vector value of the trial function @f$ u @f$ on
           * the boundary @f$ \Gamma_D @f$.
           */
-         DirichletBC(int bdrAttr, const VectorCoefficient& value);
+         DirichletBC(int bdrAttr, const VectorCoefficientBase& value);
 
          /**
           * @internal

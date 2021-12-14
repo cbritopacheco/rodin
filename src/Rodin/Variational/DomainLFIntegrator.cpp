@@ -26,7 +26,7 @@ namespace Rodin::Variational
 
    DomainLFIntegrator& DomainLFIntegrator::toggleSign()
    {
-      m_f.reset(new ScalarCoefficient(-(*m_f)));
+      m_f.reset(new FormLanguage::ScalarCoefficientUnaryMinus(*m_f));
       return *this;
    }
 

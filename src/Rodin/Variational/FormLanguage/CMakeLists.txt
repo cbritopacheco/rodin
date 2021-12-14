@@ -15,12 +15,14 @@ set(RodinVariationalFormLanguage_HEADERS
   ProblemBody.h
   ScalarCoefficientSum.h
   ScalarCoefficientUnaryMinus.h
+  MatrixCoefficientSum.h
   TypeTraits.h
   )
 
 set(RodinVariationalFormLanguage_SRCS
   ScalarCoefficientUnaryMinus.cpp
   ScalarCoefficientSum.cpp
+  MatrixCoefficientSum.cpp
   )
 
 add_library(RodinVariationalFormLanguage

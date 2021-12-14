@@ -46,9 +46,8 @@ namespace Rodin::Variational
    };
 
    /**
-    * @internal
-    * @brief A ScalarCoefficient represents the continuous functions that
-    * represent the scalar coefficients in a PDE.
+    * @brief A ScalarCoefficient represents a continuous function that
+    * represent some scalar coefficient in a PDE.
     */
    template <class T, class Enable>
    class ScalarCoefficient
@@ -62,8 +61,9 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a scalar coefficient of arithmetic type `T`.
+    * @brief Represents a ScalarCoefficient of arithmetic type `T`.
     *
+    * @tparam T Arithmetic type
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class T>
@@ -71,14 +71,20 @@ namespace Rodin::Variational
       : public ScalarCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs a ScalarCoefficient from an arithmetic value.
+          * @param[in] x Arithmetic value
+          */
          ScalarCoefficient(const T& x);
+
+         /**
+          * @internal
+          */
          ScalarCoefficient(const ScalarCoefficient& other);
 
          void buildMFEMCoefficient() override;
-
          mfem::Coefficient& getMFEMCoefficient() override;
-
-         virtual ScalarCoefficient* copy() const noexcept override
+         ScalarCoefficient* copy() const noexcept override
          {
             return new ScalarCoefficient(*this);
          }
@@ -88,20 +94,32 @@ namespace Rodin::Variational
          std::optional<mfem::ConstantCoefficient> m_mfemCoefficient;
    };
 
+   /**
+    * @brief Represents a scalar coefficient which is built from a
+    * GridFunction.
+    *
+    * @tparam FEC Finite element collection
+    */
    template <class FEC>
    class ScalarCoefficient<GridFunction<FEC>>
       : public ScalarCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs a ScalarCoefficient from a GridFunction u
+          * @param[in] u GridFunction which belongs to the finite element
+          * collection FEC
+          */
          ScalarCoefficient(GridFunction<FEC>& u);
 
+         /**
+          * @internal
+          */
          ScalarCoefficient(const ScalarCoefficient& other);
 
          void buildMFEMCoefficient() override;
-
          mfem::Coefficient& getMFEMCoefficient() override;
-
-         virtual ScalarCoefficient* copy() const noexcept override
+         ScalarCoefficient* copy() const noexcept override
          {
             return new ScalarCoefficient(*this);
          }
@@ -109,59 +127,6 @@ namespace Rodin::Variational
       private:
          GridFunction<FEC>& m_u;
          std::optional<mfem::GridFunctionCoefficient> m_mfemCoefficient;
-   };
-
-   /**
-    * @internal
-    * @brief Represents the sum of two ScalarCoefficient objects, which itself
-    * is a ScalarCoefficient
-    */
-   template <>
-   class ScalarCoefficient<FormLanguage::ScalarCoefficientSum>
-      : public ScalarCoefficientBase
-   {
-      public:
-         ScalarCoefficient(const FormLanguage::ScalarCoefficientSum& expr);
-         ScalarCoefficient(const ScalarCoefficient& other);
-         ScalarCoefficient(ScalarCoefficient&&) = default;
-
-         void buildMFEMCoefficient() override;
-         mfem::Coefficient& getMFEMCoefficient() override;
-
-         virtual ScalarCoefficient* copy() const noexcept override
-         {
-            return new ScalarCoefficient(*this);
-         }
-
-      private:
-         std::unique_ptr<FormLanguage::ScalarCoefficientSum> m_expr;
-         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
-   };
-
-   /**
-    * @internal
-    * @brief Represents the negation of the scalar coefficient.
-    */
-   template <>
-   class ScalarCoefficient<FormLanguage::ScalarCoefficientUnaryMinus>
-      : public ScalarCoefficientBase
-   {
-      public:
-         ScalarCoefficient(const FormLanguage::ScalarCoefficientUnaryMinus& expr);
-         ScalarCoefficient(const ScalarCoefficient& other);
-         ScalarCoefficient(ScalarCoefficient&&) = default;
-
-         void buildMFEMCoefficient() override;
-         mfem::Coefficient& getMFEMCoefficient() override;
-
-         virtual ScalarCoefficient* copy() const noexcept override
-         {
-            return new ScalarCoefficient(*this);
-         }
-
-      private:
-         std::unique_ptr<FormLanguage::ScalarCoefficientUnaryMinus> m_expr;
-         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 }
 

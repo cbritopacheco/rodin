@@ -65,6 +65,16 @@ namespace Rodin::Variational
    class VectorCoefficientBase;
 
    class VectorCoefficient;
+
+   class MatrixCoefficientBase;
+   class MatrixCoefficient;
+
+   class Gradient;
+
+   template <int DirectionIndex, int ComponentIndex = 1>
+   class Derivative;
+
+   class Transpose;
 }
 
 #endif

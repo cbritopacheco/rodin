@@ -10,12 +10,13 @@
 #include <memory>
 #include <utility>
 
+#include "Rodin/Variational/ScalarCoefficient.h"
+
 #include "ForwardDecls.h"
-#include "Base.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   class ScalarCoefficientSum : public Base
+   class ScalarCoefficientSum : public ScalarCoefficientBase
    {
       public:
          ScalarCoefficientSum(
@@ -27,6 +28,10 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getRHS();
 
+         void buildMFEMCoefficient() override;
+
+         mfem::Coefficient& getMFEMCoefficient() override;
+
          virtual ScalarCoefficientSum* copy() const noexcept override
          {
             return new ScalarCoefficientSum(*this);
@@ -35,6 +40,7 @@ namespace Rodin::Variational::FormLanguage
       private:
          std::unique_ptr<ScalarCoefficientBase> m_lhs;
          std::unique_ptr<ScalarCoefficientBase> m_rhs;
+         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 
    ScalarCoefficientSum

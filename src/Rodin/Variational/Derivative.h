@@ -33,7 +33,7 @@ namespace Rodin::Variational
     * @tparam DirectionIndex Index of the direction
     * @tparam ComponentIndex Index of the function component
     */
-   template <int DirectionIndex, int ComponentIndex = 1>
+   template <int DirectionIndex, int ComponentIndex>
    class Derivative : public ScalarCoefficientBase
    {
       static_assert(ComponentIndex >= 1 && DirectionIndex >= 1,

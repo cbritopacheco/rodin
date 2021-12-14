@@ -11,7 +11,9 @@
 namespace Rodin::Variational
 {
    ElasticityIntegrator::ElasticityIntegrator(const ElasticityIntegrator& other)
-      : m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy()), m_bf(other.m_bf)
+      :  m_lambda(other.m_lambda->copy()),
+         m_mu(other.m_mu->copy()),
+         m_bf(other.m_bf)
    {}
 
    ElasticityIntegrator&
@@ -27,8 +29,8 @@ namespace Rodin::Variational
       m_mu->buildMFEMCoefficient();
 
       m_bf->get()
-         .getHandle()
-         .AddDomainIntegrator(
+          .getHandle()
+          .AddDomainIntegrator(
                new mfem::ElasticityIntegrator(
                   m_lambda->getMFEMCoefficient(),
                   m_mu->getMFEMCoefficient()));
@@ -36,8 +38,10 @@ namespace Rodin::Variational
 
    ElasticityIntegrator& ElasticityIntegrator::toggleSign()
    {
-      m_lambda.reset(new ScalarCoefficient(-(*m_lambda)));
-      m_mu.reset(new ScalarCoefficient(-(*m_mu)));
+      m_lambda.reset(
+            new FormLanguage::ScalarCoefficientUnaryMinus(*m_lambda));
+      m_mu.reset(
+            new FormLanguage::ScalarCoefficientUnaryMinus(*m_mu));
       return *this;
    }
 

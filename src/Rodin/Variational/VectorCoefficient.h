@@ -73,10 +73,7 @@ namespace Rodin::Variational
           */
          VectorCoefficient(const VectorCoefficient& other);
 
-         size_t getDimension() const override
-         {
-            return m_dimension;
-         }
+         size_t getDimension() const override;
 
          void buildMFEMVectorCoefficient() override;
 

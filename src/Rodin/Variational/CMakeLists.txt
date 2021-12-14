@@ -1,5 +1,6 @@
 set(RodinVariational_HEADERS
   BilinearForm.h
+  Derivative.h
   DiffusionIntegrator.h
   DirichletBC.h
   DomainLFIntegrator.h
@@ -7,26 +8,33 @@ set(RodinVariational_HEADERS
   FiniteElementSpace.h
   FormLanguage.h
   ForwardDecls.h
+  Gradient.h
   GridFunction.h
   H1.h
+  L2.h
   LinearForm.h
+  MatrixCoefficient.h
   NeumannBC.h
   Problem.h
   ScalarCoefficient.h
+  Transpose.h
   VectorCoefficient.h
   )
 
 set(RodinVariational_SRCS
+  Derivative.hpp
   Problem.hpp
   ScalarCoefficient.hpp
-  ScalarCoefficient.cpp
-  NeumannBC.cpp
-  DirichletBC.cpp
   VectorCoefficient.hpp
-  VectorCoefficient.cpp
-  DomainLFIntegrator.cpp
   DiffusionIntegrator.cpp
+  DirichletBC.cpp
+  DomainLFIntegrator.cpp
   ElasticityIntegrator.cpp
+  NeumannBC.cpp
+  Transpose.cpp
+  VectorCoefficient.cpp
+  MatrixCoefficient.cpp
+  Gradient.cpp
   )
 
 add_library(RodinVariational

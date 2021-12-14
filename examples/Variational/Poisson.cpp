@@ -20,10 +20,13 @@ int main(int, char**)
   GridFunction u(Vh), v(Vh);
 
   // Define problem
+  auto f = ScalarCoefficient(1.0);
+  auto g = ScalarCoefficient(0.0);
+
   Problem poisson(u, v);
   poisson = DiffusionIntegrator()
-          - DomainLFIntegrator(ScalarCoefficient(1.0))
-          + DirichletBC(Gamma, 0.0);
+          - DomainLFIntegrator(f)
+          + DirichletBC(Gamma, g);
 
   // Solve problem
   Solver::PCG().setMaxIterations(200)

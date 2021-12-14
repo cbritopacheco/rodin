@@ -21,6 +21,7 @@
 
 #include "Variational/Gradient.h"
 #include "Variational/Derivative.h"
+#include "Variational/Transpose.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"

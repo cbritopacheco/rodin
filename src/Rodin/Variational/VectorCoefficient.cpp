@@ -29,6 +29,11 @@ namespace Rodin::Variational
       return m_mfemVectorArrayCoefficient;
    }
 
+   size_t VectorCoefficient::getDimension() const
+   {
+      return m_dimension;
+   }
+
    VectorCoefficient*
    VectorCoefficient::copy() const noexcept
    {

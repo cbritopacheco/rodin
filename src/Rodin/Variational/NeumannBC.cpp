@@ -18,9 +18,9 @@ namespace Rodin::Variational
          m_value(std::unique_ptr<ScalarCoefficientBase>(value.copy()))
    {}
 
-   NeumannBC::NeumannBC(int bdrAttr, const VectorCoefficient& value)
+   NeumannBC::NeumannBC(int bdrAttr, const VectorCoefficientBase& value)
       :  m_bdrAttr(bdrAttr),
-         m_value(std::unique_ptr<VectorCoefficient>(value.copy()))
+         m_value(std::unique_ptr<VectorCoefficientBase>(value.copy()))
    {}
 
    NeumannBC::NeumannBC(const NeumannBC& other)

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_MATRIXCOEFFICIENT_H
 #define RODIN_VARIATIONAL_MATRIXCOEFFICIENT_H
 
@@ -14,12 +20,13 @@ namespace Rodin::Variational
    {
       public:
          virtual ~MatrixCoefficientBase() = default;
+         virtual Transpose T() const;
 
-         virtual int getDimension() const = 0;
+         virtual int getRows() const = 0;
+         virtual int getColumns() const = 0;
          virtual void buildMFEMMatrixCoefficient() = 0;
          virtual mfem::MatrixCoefficient& getMFEMMatrixCoefficient() = 0;
          virtual MatrixCoefficientBase* copy() const noexcept override = 0;
-         virtual ScalarCoefficientBase& operator()(int i, int j) = 0;
    };
 
    class MatrixCoefficient : public MatrixCoefficientBase
@@ -37,7 +44,12 @@ namespace Rodin::Variational
 
          virtual ~MatrixCoefficient() = default;
 
-         int getDimension() const override
+         int getRows() const override
+         {
+            return m_dimension;
+         }
+
+         int getColumns() const override
          {
             return m_dimension;
          }
@@ -68,7 +80,7 @@ namespace Rodin::Variational
             return new MatrixCoefficient(*this);
          }
 
-         virtual ScalarCoefficientBase& operator()(int i, int j) override
+         virtual ScalarCoefficientBase& operator()(int i, int j)
          {
             return *m_scalarCoefficients[i * m_dimension + j];
          }

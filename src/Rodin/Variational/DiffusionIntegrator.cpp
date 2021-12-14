@@ -33,7 +33,7 @@ namespace Rodin::Variational
 
    DiffusionIntegrator& DiffusionIntegrator::toggleSign()
    {
-      m_lambda.reset(new ScalarCoefficient(-(*m_lambda)));
+      m_lambda.reset(new FormLanguage::ScalarCoefficientUnaryMinus(*m_lambda));
       return *this;
    }
 }

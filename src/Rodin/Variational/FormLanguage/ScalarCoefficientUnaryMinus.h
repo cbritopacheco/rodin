@@ -8,14 +8,15 @@
 #define RODIN_VARIATIONAL_FORMLANGUAGE_COEFFUNARYMINUS_H
 
 #include <memory>
-#include <utility>
+#include <optional>
+
+#include "Rodin/Variational/ScalarCoefficient.h"
 
 #include "ForwardDecls.h"
-#include "Base.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   class ScalarCoefficientUnaryMinus : public Base
+   class ScalarCoefficientUnaryMinus : public ScalarCoefficientBase
    {
       public:
          ScalarCoefficientUnaryMinus(const ScalarCoefficientBase& s);
@@ -26,6 +27,10 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getScalarCoefficient();
 
+         void buildMFEMCoefficient() override;
+
+         mfem::Coefficient& getMFEMCoefficient() override;
+
          virtual ScalarCoefficientUnaryMinus* copy() const noexcept override
          {
             return new ScalarCoefficientUnaryMinus(*this);
@@ -33,6 +38,7 @@ namespace Rodin::Variational::FormLanguage
 
       private:
          std::unique_ptr<ScalarCoefficientBase> m_s;
+         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 
    ScalarCoefficientUnaryMinus operator-(const ScalarCoefficientBase& s);

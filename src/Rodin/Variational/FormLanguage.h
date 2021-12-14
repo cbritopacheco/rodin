@@ -31,4 +31,6 @@
 #include "FormLanguage/ScalarCoefficientSum.h"
 #include "FormLanguage/ScalarCoefficientUnaryMinus.h"
 
+#include "FormLanguage/MatrixCoefficientSum.h"
+
 #endif

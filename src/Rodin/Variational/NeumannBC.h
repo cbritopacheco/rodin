@@ -68,7 +68,7 @@ namespace Rodin::Variational
           * @param[in] value Vector value of the trial function @f$ u @f$ on
           * the boundary @f$ \Gamma_D @f$.
           */
-         NeumannBC(int bdrAttr, const VectorCoefficient& value);
+         NeumannBC(int bdrAttr, const VectorCoefficientBase& value);
 
          NeumannBC(const NeumannBC& other);
 

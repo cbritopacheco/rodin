@@ -49,7 +49,7 @@ namespace Rodin::Variational
           */
          template <class T>
          DomainLFIntegrator(const ScalarCoefficient<T>& f)
-            : m_f(new ScalarCoefficient(-f))
+            : m_f((-f).copy())
          {}
 
          DomainLFIntegrator(const DomainLFIntegrator& other);

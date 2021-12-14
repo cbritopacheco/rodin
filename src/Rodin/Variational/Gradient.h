@@ -9,25 +9,55 @@
 
 #include "VectorCoefficient.h"
 #include "MatrixCoefficient.h"
+#include "GridFunction.h"
 
 namespace Rodin::Variational
 {
-   class GradientBase : public MatrixCoefficientBase
+   namespace Internal
    {
-      public:
-         virtual void buildMFEMMatrixCoefficient() override = 0;
-         virtual GradientBase* copy() const noexcept = 0;
-   };
+      class VectorGradientCoefficient : public mfem::MatrixCoefficient
+      {
+         public:
+            VectorGradientCoefficient(mfem::GridFunction& u)
+               :  mfem::MatrixCoefficient(
+                     u.FESpace()->GetVDim(), u.FESpace()->GetMesh()->Dimension()),
+                  m_u(u)
+            {}
 
-   class Gradient : public GradientBase
+            virtual void Eval(
+                  mfem::DenseMatrix& grad,
+                  mfem::ElementTransformation& T,
+                  const mfem::IntegrationPoint& ip) override
+            {
+               T.SetIntPoint(&ip);
+               m_u.GetVectorGradient(T, grad);
+            }
+
+         private:
+            mfem::GridFunction& m_u;
+      };
+   }
+
+   class Gradient : public MatrixCoefficientBase
    {
       public:
-         Gradient(GridFunctionBase& u)
-            : m_u(u)
-         {}
+         Gradient(GridFunction<H1>& u);
+
+         Gradient(const Gradient& other);
+
+         int getRows() const override;
+         int getColumns() const override;
+         void buildMFEMMatrixCoefficient() override;
+         mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
+
+         Gradient* copy() const noexcept override
+         {
+            return new Gradient(*this);
+         }
 
       private:
-         GridFunctionBase& m_u;
+         GridFunction<H1>& m_u;
+         std::optional<Internal::VectorGradientCoefficient> m_mfemMatrixCoefficient;
    };
 }
 

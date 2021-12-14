@@ -18,9 +18,9 @@ namespace Rodin::Variational
          m_value(std::unique_ptr<ScalarCoefficientBase>(value.copy()))
    {}
 
-   DirichletBC::DirichletBC(int bdrAttr, const VectorCoefficient& value)
+   DirichletBC::DirichletBC(int bdrAttr, const VectorCoefficientBase& value)
       :  m_bdrAttr(bdrAttr),
-         m_value(std::unique_ptr<VectorCoefficient>(value.copy()))
+         m_value(std::unique_ptr<VectorCoefficientBase>(value.copy()))
    {}
 
    DirichletBC::DirichletBC(const DirichletBC& other)
