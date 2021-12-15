@@ -45,7 +45,7 @@ namespace Rodin::Variational
     *
     * The trace of an @f$ n \times n @f$ matrix @f$ A @f$ is defined as
     * @f[
-    *    \mathrm{tr}(A) = \sum_{i = 1}^n [A]_{ii}
+    *    \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii}
     * @f]
     */
    class Trace : public ScalarCoefficientBase

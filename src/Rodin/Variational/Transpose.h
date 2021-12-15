@@ -17,7 +17,7 @@ namespace Rodin::Variational
     * For some @f$ n \times m @f$ matrix @f$ A @f$, the transpose matrix @f$
     * A^T @f$ is an @f$ m \times n @f$ matrix defined by
     * @f[
-    *    [A^T]_{ij} = [A]_{ji}
+    *    {A^T}_{ij} = A_{ji}
     * @f]
     */
    class Transpose : public MatrixCoefficientBase
