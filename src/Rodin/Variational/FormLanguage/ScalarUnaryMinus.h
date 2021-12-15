@@ -43,7 +43,7 @@ namespace Rodin::Variational::FormLanguage
 
    ScalarCoefficientUnaryMinus operator-(const ScalarCoefficientBase& s);
 
-   ScalarCoefficientSum
+   ScalarSum
       operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 }
 

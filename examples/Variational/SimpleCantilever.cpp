@@ -5,7 +5,7 @@
 using namespace Rodin;
 using namespace Rodin::Variational;
 
-int main(int argc, char** argv)
+int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/holes.mesh";
 
@@ -15,19 +15,28 @@ int main(int argc, char** argv)
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
 
-  // Functions
+  // Build finite element space
   H1 Vh(Omega, 2);
-  GridFunction u(Vh);
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
-  // Define problem
+  // Displacement
+  GridFunction u(Vh);
+
+  // Shape gradient
+  GridFunction g(Vh);
+
+  // Elasticity equation
   Problem elasticity(u);
   elasticity = ElasticityIntegrator(mu, lambda)
              + DirichletBC(GammaD, VectorCoefficient{0, 0})
              + NeumannBC(GammaN, VectorCoefficient{0, -1});
+
+  // Hilbert regularization
+  Problem hilbert(g);
+  auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
 
   // Solve problem
   Solver::PCG().setMaxIterations(200)
@@ -35,9 +44,8 @@ int main(int argc, char** argv)
                .printIterations(true)
                .solve(elasticity);
 
-  // Save solution
-  u.save("sol.gf");
-  Omega.save("mesh.mesh");
+  Omega.save("Omega.mesh");
+  u.save("u.gf");
 
   return 0;
 }

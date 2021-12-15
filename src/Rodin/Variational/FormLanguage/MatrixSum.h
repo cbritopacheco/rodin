@@ -17,12 +17,13 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   class MatrixCoefficientSum : public MatrixCoefficientBase
+   class MatrixSum : public MatrixCoefficientBase
    {
       public:
-         MatrixCoefficientSum(
+         MatrixSum(
                const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs);
-         MatrixCoefficientSum(const MatrixCoefficientSum& other);
+
+         MatrixSum(const MatrixSum& other);
 
          MatrixCoefficientBase& getLHS();
          MatrixCoefficientBase& getRHS();
@@ -35,9 +36,9 @@ namespace Rodin::Variational::FormLanguage
 
          mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
 
-         virtual MatrixCoefficientSum* copy() const noexcept override
+         virtual MatrixSum* copy() const noexcept override
          {
-            return new MatrixCoefficientSum(*this);
+            return new MatrixSum(*this);
          }
 
       private:
@@ -47,7 +48,7 @@ namespace Rodin::Variational::FormLanguage
          std::optional<mfem::MatrixSumCoefficient> m_mfemMatrixCoefficient;
    };
 
-   MatrixCoefficientSum
+   MatrixSum
    operator+(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs);
 }
 

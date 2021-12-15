@@ -1,31 +1,31 @@
 #include "Rodin/Variational/ScalarCoefficient.h"
 
-#include "ScalarCoefficientSum.h"
+#include "ScalarSum.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   ScalarCoefficientSum::ScalarCoefficientSum(
+   ScalarSum::ScalarSum(
          const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
       : m_lhs(lhs.copy()), m_rhs(rhs.copy())
    {}
 
-   ScalarCoefficientSum::ScalarCoefficientSum(const ScalarCoefficientSum& other)
+   ScalarSum::ScalarSum(const ScalarSum& other)
       : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
    {}
 
-   ScalarCoefficientBase& ScalarCoefficientSum::getLHS()
+   ScalarCoefficientBase& ScalarSum::getLHS()
    {
       assert(m_lhs);
       return *m_lhs;
    }
 
-   ScalarCoefficientBase& ScalarCoefficientSum::getRHS()
+   ScalarCoefficientBase& ScalarSum::getRHS()
    {
       assert(m_rhs);
       return *m_rhs;
    }
 
-   void ScalarCoefficientSum::buildMFEMCoefficient()
+   void ScalarSum::buildMFEMCoefficient()
    {
       m_lhs->buildMFEMCoefficient();
       m_rhs->buildMFEMCoefficient();
@@ -34,16 +34,16 @@ namespace Rodin::Variational::FormLanguage
             m_rhs->getMFEMCoefficient());
    }
 
-   mfem::Coefficient& ScalarCoefficientSum::getMFEMCoefficient()
+   mfem::Coefficient& ScalarSum::getMFEMCoefficient()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;
    }
 
-   ScalarCoefficientSum
+   ScalarSum
       operator+(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
    {
-      return ScalarCoefficientSum(lhs, rhs);
+      return ScalarSum(lhs, rhs);
    }
 }
 

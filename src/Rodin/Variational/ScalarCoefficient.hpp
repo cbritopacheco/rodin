@@ -11,9 +11,6 @@
 
 #include "ScalarCoefficient.h"
 
-#include "FormLanguage/ScalarCoefficientSum.h"
-#include "FormLanguage/ScalarCoefficientUnaryMinus.h"
-
 namespace Rodin::Variational
 {
    // ---- T (Arithmetic type) -----------------------------------------------

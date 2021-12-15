@@ -1,8 +1,8 @@
 #include "Rodin/Variational/ScalarCoefficient.h"
 
-#include "ScalarCoefficientSum.h"
+#include "ScalarSum.h"
 
-#include "ScalarCoefficientUnaryMinus.h"
+#include "ScalarUnaryMinus.h"
 
 namespace Rodin::Variational::FormLanguage
 {
@@ -39,10 +39,10 @@ namespace Rodin::Variational::FormLanguage
       return ScalarCoefficientUnaryMinus(s);
    }
 
-   ScalarCoefficientSum
+   ScalarSum
       operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
    {
-      return ScalarCoefficientSum(
+      return ScalarSum(
             lhs, ScalarCoefficientUnaryMinus(rhs));
    }
 }

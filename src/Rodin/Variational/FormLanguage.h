@@ -28,9 +28,10 @@
 #include "FormLanguage/BCExprList.h"
 #include "FormLanguage/BCExprListCons.h"
 
-#include "FormLanguage/ScalarCoefficientSum.h"
-#include "FormLanguage/ScalarCoefficientUnaryMinus.h"
+#include "FormLanguage/ScalarSum.h"
+#include "FormLanguage/ScalarUnaryMinus.h"
 
-#include "FormLanguage/MatrixCoefficientSum.h"
+#include "FormLanguage/MatrixSum.h"
+#include "FormLanguage/ScalarMatrixProduct.h"
 
 #endif

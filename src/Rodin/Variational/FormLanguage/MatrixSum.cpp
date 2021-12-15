@@ -1,10 +1,10 @@
 #include "Rodin/Variational/MatrixCoefficient.h"
 
-#include "MatrixCoefficientSum.h"
+#include "MatrixSum.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   MatrixCoefficientSum::MatrixCoefficientSum(
+   MatrixSum::MatrixSum(
          const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
       : m_lhs(lhs.copy()), m_rhs(rhs.copy())
    {
@@ -12,31 +12,31 @@ namespace Rodin::Variational::FormLanguage
       assert(lhs.getColumns() == rhs.getColumns());
    }
 
-   MatrixCoefficientSum::MatrixCoefficientSum(const MatrixCoefficientSum& other)
+   MatrixSum::MatrixSum(const MatrixSum& other)
       : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
    {}
 
-   MatrixCoefficientBase& MatrixCoefficientSum::getLHS()
+   MatrixCoefficientBase& MatrixSum::getLHS()
    {
       return *m_lhs;
    }
 
-   MatrixCoefficientBase& MatrixCoefficientSum::getRHS()
+   MatrixCoefficientBase& MatrixSum::getRHS()
    {
       return *m_rhs;
    }
 
-   int MatrixCoefficientSum::getRows() const
+   int MatrixSum::getRows() const
    {
       return m_lhs->getRows();
    }
 
-   int MatrixCoefficientSum::getColumns() const
+   int MatrixSum::getColumns() const
    {
       return m_lhs->getColumns();
    }
 
-   void MatrixCoefficientSum::buildMFEMMatrixCoefficient()
+   void MatrixSum::buildMFEMMatrixCoefficient()
    {
       m_lhs->buildMFEMMatrixCoefficient();
       m_rhs->buildMFEMMatrixCoefficient();
@@ -45,15 +45,15 @@ namespace Rodin::Variational::FormLanguage
             m_lhs->getMFEMMatrixCoefficient(), m_rhs->getMFEMMatrixCoefficient());
    }
 
-   mfem::MatrixCoefficient& MatrixCoefficientSum::getMFEMMatrixCoefficient()
+   mfem::MatrixCoefficient& MatrixSum::getMFEMMatrixCoefficient()
    {
       assert(m_mfemMatrixCoefficient);
       return *m_mfemMatrixCoefficient;
    }
 
-   MatrixCoefficientSum
+   MatrixSum
    operator+(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
    {
-      return MatrixCoefficientSum(lhs, rhs);
+      return MatrixSum(lhs, rhs);
    }
 }

@@ -14,8 +14,8 @@ target_link_libraries(Elasticity
   Rodin::Variational
   )
 
-add_executable(Compliance Compliance.cpp)
-target_link_libraries(Compliance
+add_executable(SimpleCantilever SimpleCantilever.cpp)
+target_link_libraries(SimpleCantilever
   PUBLIC
   Rodin::Mesh
   Rodin::Solver

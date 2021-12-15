@@ -16,13 +16,13 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   class ScalarCoefficientSum : public ScalarCoefficientBase
+   class ScalarSum : public ScalarCoefficientBase
    {
       public:
-         ScalarCoefficientSum(
+         ScalarSum(
                const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 
-         ScalarCoefficientSum(const ScalarCoefficientSum& other);
+         ScalarSum(const ScalarSum& other);
 
          ScalarCoefficientBase& getLHS();
 
@@ -32,9 +32,9 @@ namespace Rodin::Variational::FormLanguage
 
          mfem::Coefficient& getMFEMCoefficient() override;
 
-         virtual ScalarCoefficientSum* copy() const noexcept override
+         virtual ScalarSum* copy() const noexcept override
          {
-            return new ScalarCoefficientSum(*this);
+            return new ScalarSum(*this);
          }
 
       private:
@@ -43,7 +43,7 @@ namespace Rodin::Variational::FormLanguage
          std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 
-   ScalarCoefficientSum
+   ScalarSum
       operator+(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 }
 
