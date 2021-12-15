@@ -17,13 +17,13 @@ int main(int, char**)
 
   // Functions
   H1 Vh(Omega);
-  GridFunction u(Vh), v(Vh);
+  GridFunction u(Vh);
 
   // Define problem
   auto f = ScalarCoefficient(1.0);
   auto g = ScalarCoefficient(0.0);
 
-  Problem poisson(u, v);
+  Problem poisson(u);
   poisson = DiffusionIntegrator()
           - DomainLFIntegrator(f)
           + DirichletBC(Gamma, g);

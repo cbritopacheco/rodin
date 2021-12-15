@@ -23,7 +23,7 @@ int main(int argc, char** argv)
        lambda = ScalarCoefficient(0.5769);
 
   // Define problem
-  Problem elasticity(u, v);
+  Problem elasticity(u);
   elasticity = ElasticityIntegrator(mu, lambda)
              + DirichletBC(GammaD, VectorCoefficient{0, 0})
              + NeumannBC(GammaN, VectorCoefficient{0, -1});

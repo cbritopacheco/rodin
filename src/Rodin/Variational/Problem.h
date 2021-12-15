@@ -69,7 +69,7 @@ namespace Rodin::Variational
           * @param[in,out] v Test function @f$ u @f$ belonging to a suitable
           * finite element space.
           */
-         Problem(GridFunction<FEC>& u, GridFunction<FEC>& v);
+         Problem(GridFunction<FEC>& u);
 
          /**
           * @brief Builds the problem using the FormLanguage::ProblemBody
@@ -90,7 +90,6 @@ namespace Rodin::Variational
 
       private:
          std::reference_wrapper<GridFunction<FEC>>          m_solution;
-         std::reference_wrapper<GridFunction<FEC>>          m_adjoint;
 
          BilinearForm<FEC> m_bilinearForm;
          LinearForm<FEC>   m_linearForm;

@@ -14,15 +14,13 @@
 namespace Rodin::Variational
 {
    template <class FEC>
-   Problem<FEC>::Problem(GridFunction<FEC>& u, GridFunction<FEC>& v)
+   Problem<FEC>::Problem(GridFunction<FEC>& u)
       :  m_solution(u),
-         m_adjoint(v),
          m_bilinearForm(u.getFiniteElementSpace()),
          m_linearForm(u.getFiniteElementSpace()),
          m_essBdr(u.getFiniteElementSpace()
                    .getMesh().getHandle().bdr_attributes.Max())
    {
-      assert(u.getFiniteElementSpace() == v.getFiniteElementSpace());
       m_essBdr = 0;
    }
 
