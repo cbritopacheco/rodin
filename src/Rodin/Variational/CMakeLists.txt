@@ -8,7 +8,7 @@ set(RodinVariational_HEADERS
   FiniteElementSpace.h
   FormLanguage.h
   ForwardDecls.h
-  Gradient.h
+  Jacobian.h
   GridFunction.h
   H1.h
   L2.h
@@ -19,6 +19,8 @@ set(RodinVariational_HEADERS
   ScalarCoefficient.h
   Transpose.h
   VectorCoefficient.h
+  Dot.h
+  Trace.h
   )
 
 set(RodinVariational_SRCS
@@ -26,6 +28,7 @@ set(RodinVariational_SRCS
   Problem.hpp
   ScalarCoefficient.hpp
   VectorCoefficient.hpp
+  Dot.hpp
   DiffusionIntegrator.cpp
   DirichletBC.cpp
   DomainLFIntegrator.cpp
@@ -34,6 +37,8 @@ set(RodinVariational_SRCS
   Transpose.cpp
   VectorCoefficient.cpp
   MatrixCoefficient.cpp
+  Jacobian.cpp
+  Trace.cpp
   Gradient.cpp
   )
 

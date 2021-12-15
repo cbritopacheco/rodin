@@ -34,9 +34,19 @@ int main(int argc, char** argv)
                .printIterations(true)
                .solve(elasticity);
 
+  H1 Sh(Omega);
+  GridFunction strain(Sh);
+
+  auto e = Jacobian(u) + Jacobian(u).T();
+  auto d = Dot(e, e);
+  d.buildMFEMCoefficient();
+
+  strain.getHandle().ProjectCoefficient(d.getMFEMCoefficient());
+
   // Save solution
   u.save("sol.gf");
   Omega.save("mesh.mesh");
+  strain.save("strain.gf");
 
   return 0;
 }

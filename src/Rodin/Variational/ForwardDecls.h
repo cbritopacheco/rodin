@@ -69,12 +69,15 @@ namespace Rodin::Variational
    class MatrixCoefficientBase;
    class MatrixCoefficient;
 
-   class Gradient;
+   class Jacobian;
 
    template <int DirectionIndex, int ComponentIndex = 1>
    class Derivative;
 
    class Transpose;
+
+   template <class A, class B, class Enable = void>
+   class Dot;
 }
 
 #endif

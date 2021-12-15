@@ -6,36 +6,34 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/star.mesh";
+  const char* meshFile = "../resources/mfem/meshes/square-disc.mesh";
 
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
+  Omega.getHandle().UniformRefinement();
 
   // Build finite element space
-  H1 Vh(Omega, 2);
+  H1 Vh(Omega);
+  H1 Gh(Omega, 2);
 
   // Build a grid function
   GridFunction u(Vh);
+  auto c = mfem::FunctionCoefficient(
+      [](const mfem::Vector& v)
+      {
+        return v[0] * v[0] * v[0] + v[1] * v[1];
+      });
+  u.getHandle().ProjectCoefficient(c);
 
-  // mfem::FunctionCoefficient f([](const mfem::Vector& v){ return v[0] * v[0]; });
-  // u.getHandle().ProjectCoefficient(f);
+  GridFunction g(Gh);
+  Gradient grad(u);
+  grad.buildMFEMVectorCoefficient();
 
-  // auto tmp = Dy(u);
-  // tmp.buildMFEMCoefficient();
-
-  // GridFunction du(Vh);
-  // du.getHandle().ProjectCoefficient(tmp.getMFEMCoefficient());
-  auto sum = ScalarCoefficient(1.0) + ScalarCoefficient(2.);
-  sum.buildMFEMCoefficient();
-  auto e = Gradient(u) + Gradient(u).T();
-  e.buildMFEMMatrixCoefficient();
-
-  u.getHandle().ProjectCoefficient(sum.getMFEMCoefficient());
-
+  g.getHandle().ProjectCoefficient(grad.getMFEMVectorCoefficient());
 
   Omega.save("Omega.mesh");
-  u.save("test.gf");
-
+  g.save("grad.gf");
+  u.save("u.gf");
 
   return 0;
 }

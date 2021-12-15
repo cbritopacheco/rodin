@@ -8,56 +8,28 @@
 #define RODIN_VARIATIONAL_GRADIENT_H
 
 #include "VectorCoefficient.h"
-#include "MatrixCoefficient.h"
-#include "GridFunction.h"
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      class VectorGradientCoefficient : public mfem::MatrixCoefficient
-      {
-         public:
-            VectorGradientCoefficient(mfem::GridFunction& u)
-               :  mfem::MatrixCoefficient(
-                     u.FESpace()->GetVDim(), u.FESpace()->GetMesh()->Dimension()),
-                  m_u(u)
-            {}
-
-            virtual void Eval(
-                  mfem::DenseMatrix& grad,
-                  mfem::ElementTransformation& T,
-                  const mfem::IntegrationPoint& ip) override
-            {
-               T.SetIntPoint(&ip);
-               m_u.GetVectorGradient(T, grad);
-            }
-
-         private:
-            mfem::GridFunction& m_u;
-      };
-   }
-
-   class Gradient : public MatrixCoefficientBase
+   class Gradient : public VectorCoefficientBase
    {
       public:
          Gradient(GridFunction<H1>& u);
 
-         Gradient(const Gradient& other);
+         size_t getDimension() const override;
 
-         int getRows() const override;
-         int getColumns() const override;
-         void buildMFEMMatrixCoefficient() override;
-         mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
+         void buildMFEMVectorCoefficient() override;
 
-         Gradient* copy() const noexcept override
+         mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
+
+         VectorCoefficientBase* copy() const noexcept override
          {
             return new Gradient(*this);
          }
 
       private:
          GridFunction<H1>& m_u;
-         std::optional<Internal::VectorGradientCoefficient> m_mfemMatrixCoefficient;
+         std::optional<mfem::GradientGridFunctionCoefficient> m_mfemVectorCoefficient;
    };
 }
 

@@ -1,35 +1,28 @@
-#include "H1.h"
-
 #include "Gradient.h"
+
+#include "GridFunction.h"
+#include "H1.h"
 
 namespace Rodin::Variational
 {
    Gradient::Gradient(GridFunction<H1>& u)
-      :  m_u(u)
+      : m_u(u)
    {}
 
-   Gradient::Gradient(const Gradient& other)
-      : m_u(other.m_u)
-   {}
-
-   int Gradient::getRows() const
-   {
-      return m_u.getFiniteElementSpace().getDimension();
-   }
-
-   int Gradient::getColumns() const
+   size_t Gradient::getDimension() const
    {
       return m_u.getFiniteElementSpace().getMesh().getDimension();
    }
 
-   void Gradient::buildMFEMMatrixCoefficient()
+   void Gradient::buildMFEMVectorCoefficient()
    {
-      m_mfemMatrixCoefficient.emplace(m_u.getHandle());
+      m_mfemVectorCoefficient.emplace(&m_u.getHandle());
    }
 
-   mfem::MatrixCoefficient& Gradient::getMFEMMatrixCoefficient()
+   mfem::VectorCoefficient& Gradient::getMFEMVectorCoefficient()
    {
-      assert(m_mfemMatrixCoefficient);
-      return *m_mfemMatrixCoefficient;
+      assert(m_mfemVectorCoefficient);
+      return *m_mfemVectorCoefficient;
    }
 }
+

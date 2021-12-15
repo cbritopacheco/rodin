@@ -19,9 +19,11 @@
 #include "Variational/H1.h"
 #include "Variational/GridFunction.h"
 
+#include "Variational/Jacobian.h"
 #include "Variational/Gradient.h"
 #include "Variational/Derivative.h"
 #include "Variational/Transpose.h"
+#include "Variational/Dot.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"
