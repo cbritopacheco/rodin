@@ -50,7 +50,6 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class T = double&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DiffusionIntegrator <span class="m-thin">class</span>
         </h1>
         <p>Object used to integrate the typical diffusion operator.</p>
@@ -148,13 +147,13 @@ $ \lambda $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-21'/>
 </g>
-</svg></td><td>Scalar</td></tr></tbody></table><hr/>
+</svg></td><td><a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a></td></tr></tbody></table><hr/>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_expr.html" class="m-doc">BilinearFormExpr&lt;DiffusionIntegrator&lt;double&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_expr.html" class="m-doc">BilinearFormExpr&lt;DiffusionIntegrator&gt;</a>
             </dt>
             <dd>Represents an expression of bilinear forms.</dd>
           </dl>
@@ -162,40 +161,59 @@ $ \lambda $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af69733f637685fac8bc2137df5ef3583" class="m-doc">DiffusionIntegrator</a>(</span><span class="m-doc-wrap">const T&amp; lambda = 1.0)</span>
+            <dt id="a85dbb4b24d7b0d5f6de4fd23035e35b5">
+              <span class="m-doc-wrap-bumper"><a href="#a85dbb4b24d7b0d5f6de4fd23035e35b5" class="m-doc-self">DiffusionIntegrator</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_diffusion_integrator.html" class="m-doc">DiffusionIntegrator</a> with scalar coefficient <svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
+            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_diffusion_integrator.html" class="m-doc">DiffusionIntegrator</a> with a scalar coefficient <svg class="m-math" style="width: 2.961em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.427789 8.302191">
 <title>
-$ \lambda $
+$ \lambda = 1$
 </title>
 <defs>
+<path id='eq5-g1-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+<path id='eq5-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
 <path id='eq5-g0-21' d='M3.694147-7.44807C3.395268-8.296887 2.450809-8.296887 2.295392-8.296887C2.223661-8.296887 2.092154-8.296887 2.092154-8.177335C2.092154-8.081694 2.163885-8.069738 2.223661-8.057783C2.402989-8.033873 2.546451-8.009963 2.737733-7.663263C2.857285-7.436115 4.088667-3.861519 4.088667-3.837609C4.088667-3.825654 4.076712-3.813699 3.981071-3.718057L.872727-.573848C.729265-.430386 .633624-.334745 .633624-.179328C.633624-.011955 .777086 .131507 .968369 .131507C1.016189 .131507 1.147696 .107597 1.219427 .035866C1.41071-.143462 3.120299-2.235616 4.208219-3.526775C4.519054-2.594271 4.901619-1.494396 5.272229-.490162C5.332005-.310834 5.391781-.143462 5.559153 .011955C5.678705 .119552 5.702615 .119552 6.03736 .119552H6.264508C6.312329 .119552 6.396015 .119552 6.396015 .02391C6.396015-.02391 6.38406-.035866 6.336239-.083686C6.228643-.215193 6.144956-.430386 6.097136-.573848L3.694147-7.44807Z'/>
 </defs>
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-21'/>
+<use x='10.149318' y='0' xlink:href='#eq5-g1-61'/>
+<use x='22.574799' y='0' xlink:href='#eq5-g1-49'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#aad34d40669dbcf9e3dbb8abb40da5041" class="m-doc">DiffusionIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a>&lt;T&gt;&amp; lambda)</span>
+            </dt>
+            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_diffusion_integrator.html" class="m-doc">DiffusionIntegrator</a> with a scalar coefficient <svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
+<title>
+$ \lambda $
+</title>
+<defs>
+<path id='eq6-g0-21' d='M3.694147-7.44807C3.395268-8.296887 2.450809-8.296887 2.295392-8.296887C2.223661-8.296887 2.092154-8.296887 2.092154-8.177335C2.092154-8.081694 2.163885-8.069738 2.223661-8.057783C2.402989-8.033873 2.546451-8.009963 2.737733-7.663263C2.857285-7.436115 4.088667-3.861519 4.088667-3.837609C4.088667-3.825654 4.076712-3.813699 3.981071-3.718057L.872727-.573848C.729265-.430386 .633624-.334745 .633624-.179328C.633624-.011955 .777086 .131507 .968369 .131507C1.016189 .131507 1.147696 .107597 1.219427 .035866C1.41071-.143462 3.120299-2.235616 4.208219-3.526775C4.519054-2.594271 4.901619-1.494396 5.272229-.490162C5.332005-.310834 5.391781-.143462 5.559153 .011955C5.678705 .119552 5.702615 .119552 6.03736 .119552H6.264508C6.312329 .119552 6.396015 .119552 6.396015 .02391C6.396015-.02391 6.38406-.035866 6.336239-.083686C6.228643-.215193 6.144956-.430386 6.097136-.573848L3.694147-7.44807Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-21'/>
 </g>
 </svg>.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af69733f637685fac8bc2137df5ef3583"><div>
+          <section class="m-doc-details" id="aad34d40669dbcf9e3dbb8abb40da5041"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DiffusionIntegrator&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af69733f637685fac8bc2137df5ef3583" class="m-doc-self">DiffusionIntegrator</a>(</span><span class="m-doc-wrap">const T&amp; lambda = 1.0)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DiffusionIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad34d40669dbcf9e3dbb8abb40da5041" class="m-doc-self">DiffusionIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a>&lt;T&gt;&amp; lambda)</span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_variational_1_1_diffusion_integrator.html" class="m-doc">DiffusionIntegrator</a> with scalar coefficient <svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
+            <p>Constructs a <a href="class_rodin_1_1_variational_1_1_diffusion_integrator.html" class="m-doc">DiffusionIntegrator</a> with a scalar coefficient <svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
 <title>
 $ \lambda $
 </title>
 <defs>
-<path id='eq5-g0-21' d='M3.694147-7.44807C3.395268-8.296887 2.450809-8.296887 2.295392-8.296887C2.223661-8.296887 2.092154-8.296887 2.092154-8.177335C2.092154-8.081694 2.163885-8.069738 2.223661-8.057783C2.402989-8.033873 2.546451-8.009963 2.737733-7.663263C2.857285-7.436115 4.088667-3.861519 4.088667-3.837609C4.088667-3.825654 4.076712-3.813699 3.981071-3.718057L.872727-.573848C.729265-.430386 .633624-.334745 .633624-.179328C.633624-.011955 .777086 .131507 .968369 .131507C1.016189 .131507 1.147696 .107597 1.219427 .035866C1.41071-.143462 3.120299-2.235616 4.208219-3.526775C4.519054-2.594271 4.901619-1.494396 5.272229-.490162C5.332005-.310834 5.391781-.143462 5.559153 .011955C5.678705 .119552 5.702615 .119552 6.03736 .119552H6.264508C6.312329 .119552 6.396015 .119552 6.396015 .02391C6.396015-.02391 6.38406-.035866 6.336239-.083686C6.228643-.215193 6.144956-.430386 6.097136-.573848L3.694147-7.44807Z'/>
+<path id='eq6-g0-21' d='M3.694147-7.44807C3.395268-8.296887 2.450809-8.296887 2.295392-8.296887C2.223661-8.296887 2.092154-8.296887 2.092154-8.177335C2.092154-8.081694 2.163885-8.069738 2.223661-8.057783C2.402989-8.033873 2.546451-8.009963 2.737733-7.663263C2.857285-7.436115 4.088667-3.861519 4.088667-3.837609C4.088667-3.825654 4.076712-3.813699 3.981071-3.718057L.872727-.573848C.729265-.430386 .633624-.334745 .633624-.179328C.633624-.011955 .777086 .131507 .968369 .131507C1.016189 .131507 1.147696 .107597 1.219427 .035866C1.41071-.143462 3.120299-2.235616 4.208219-3.526775C4.519054-2.594271 4.901619-1.494396 5.272229-.490162C5.332005-.310834 5.391781-.143462 5.559153 .011955C5.678705 .119552 5.702615 .119552 6.03736 .119552H6.264508C6.312329 .119552 6.396015 .119552 6.396015 .02391C6.396015-.02391 6.38406-.035866 6.336239-.083686C6.228643-.215193 6.144956-.430386 6.097136-.573848L3.694147-7.44807Z'/>
 </defs>
-<g id='eq5-page1'>
-<use x='0' y='0' xlink:href='#eq5-g0-21'/>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-21'/>
 </g>
 </svg>.</p>
             <table class="m-table m-fullwidth m-flat">

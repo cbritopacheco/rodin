@@ -77,12 +77,12 @@
 <span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Lamé coefficients</span>
-<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">mu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.3846</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5769</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">mu</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.3846</span><span class="p">),</span><span class="w"></span>
+<span class="w">       </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.5769</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Define problem</span>
 <span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">elasticity</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="n">elasticity</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">ElasticityIntegrator</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">elasticity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ElasticityIntegrator</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="p">)</span><span class="w"></span>
 <span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">GammaD</span><span class="p">,</span><span class="w"> </span><span class="n">VectorCoefficient</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">})</span><span class="w"></span>
 <span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">NeumannBC</span><span class="p">(</span><span class="n">GammaN</span><span class="p">,</span><span class="w"> </span><span class="n">VectorCoefficient</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">});</span><span class="w"></span>
 
@@ -92,9 +92,19 @@
 <span class="w">               </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"></span>
 <span class="w">               </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">elasticity</span><span class="p">);</span><span class="w"></span>
 
+<span class="w">  </span><span class="n">H1</span><span class="w"> </span><span class="n">Sh</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">strain</span><span class="p">(</span><span class="n">Sh</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">T</span><span class="p">();</span><span class="w"></span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dot</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">d</span><span class="p">.</span><span class="n">buildMFEMCoefficient</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">strain</span><span class="p">.</span><span class="n">getHandle</span><span class="p">().</span><span class="n">ProjectCoefficient</span><span class="p">(</span><span class="n">d</span><span class="p">.</span><span class="n">getMFEMCoefficient</span><span class="p">());</span><span class="w"></span>
+
 <span class="w">  </span><span class="c1">// Save solution</span>
 <span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;sol.gf&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;mesh.mesh&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">strain</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;strain.gf&quot;</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span></pre>

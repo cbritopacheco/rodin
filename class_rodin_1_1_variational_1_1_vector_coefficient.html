@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::ScalarCoefficient&lt;T, std::enable_if_t&lt;std::is_base_of_v&lt;mfem::Coefficient, T&gt;&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::VectorCoefficient class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,10 +50,78 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class T&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ScalarCoefficient&lt;T, std::enable_if_t&lt;std::is_base_of_v&lt;mfem::Coefficient, T&gt;&gt;&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorCoefficient <span class="m-thin">class</span>
         </h1>
-<p>Represents a coefficient which can be constructed from derived types of <code>mfem::Coefficient</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="https://mfem.github.io/doxygen/html/classmfem_1_1Coefficient.html">mfem::<wbr />Coefficient</a></p></aside>
+        <p>Represents a vector valued coefficient.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a80fb633cb86e01a704926558c4673752">
+              <div class="m-doc-template">template&lt;class ... Values&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a80fb633cb86e01a704926558c4673752" class="m-doc-self">VectorCoefficient</a>(</span><span class="m-doc-wrap">const Values&amp;... values)</span>
+            </dt>
+            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a> from a set of values.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2f994536d30228c11af84094f1a07eeb" class="m-doc">VectorCoefficient</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a>&amp; other)</span>
+            </dt>
+            <dd>Copies the data.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the dimension of the vector object.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2f994536d30228c11af84094f1a07eeb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorCoefficient::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f994536d30228c11af84094f1a07eeb" class="m-doc-self">VectorCoefficient</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a>&amp; other)</span></span>
+            </h3>
+            <p>Copies the data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other coefficient to copy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6f7b22045efba4c92b80c545b2100c1f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />VectorCoefficient::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the dimension of the vector object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dimension of vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>
