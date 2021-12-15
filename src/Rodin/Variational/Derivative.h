@@ -40,7 +40,8 @@ namespace Rodin::Variational
             "ComponentIndex and VariableIndex must both be greater than 1.");
       public:
          /**
-          * @brief Constructs the Derivative object.
+          * @brief Constructs the Derivative of an @f$ H^1 @f$ function
+          * @f$ u @f$.
           * @param[in] u Grid function to be differentiated.
           */
          Derivative(GridFunctionBase& u);

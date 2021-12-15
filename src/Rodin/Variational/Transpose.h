@@ -11,9 +11,21 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the transpose matrix @f$ A^T @f$ of some matrix @f$ A @f$.
+    *
+    * For some @f$ n \times m @f$ matrix @f$ A @f$, the transpose matrix @f$
+    * A^T @f$ is an @f$ m \times n @f$ matrix defined by
+    * @f[
+    *    [A^T]_{ij} = [A]_{ji}
+    * @f]
+    */
    class Transpose : public MatrixCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs the Transpose matrix of the given matrix.
+          */
          Transpose(const MatrixCoefficientBase& m);
 
          Transpose(const Transpose& other);

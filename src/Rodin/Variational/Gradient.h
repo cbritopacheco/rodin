@@ -11,9 +11,29 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the gradient @f$ \nabla u @f$ of the scalar function
+    * @f$ u @f$.
+    *
+    * For @f$ u : \mathbb{R}^n \rightarrow \mathbb{R} @f$, the gradient
+    * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ at the point
+    * @f$ x = (x_1, \ldots, x_n) @f$ is defined by
+    * @f[
+    *    \nabla u (x) =
+    *    \left[
+    *       \dfrac{\partial u}{\partial x_1}(x), \ldots,
+    *       \dfrac{\partial u}{\partial x_n}(x)
+    *    \right]^T
+    * @f]
+    */
    class Gradient : public VectorCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs the Gradient of an @f$ H^1 @f$ function
+          * @f$ u @f$.
+          * @param[in] u Grid function to be differentiated
+          */
          Gradient(GridFunction<H1>& u);
 
          size_t getDimension() const override;

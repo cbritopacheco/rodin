@@ -15,6 +15,9 @@ namespace Rodin::Variational
 {
    namespace Internal
    {
+      /**
+       * @internal
+       */
       class TraceCoefficient : public mfem::Coefficient
       {
          public:
@@ -36,9 +39,22 @@ namespace Rodin::Variational
       };
    }
 
+   /**
+    * @brief Represents the trace @f$ \mathrm{tr}(A) @f$ of some square matrix
+    * @f$ A @f$.
+    *
+    * The trace of an @f$ n \times n @f$ matrix @f$ A @f$ is defined as
+    * @f[
+    *    \mathrm{tr}(A) = \sum_{i = 1}^n [A]_{ii}
+    * @f]
+    */
    class Trace : public ScalarCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs the Trace of the given matrix
+          * @param[in] m Square matrix
+          */
          Trace(const MatrixCoefficientBase& m);
 
          Trace(const Trace& other);
