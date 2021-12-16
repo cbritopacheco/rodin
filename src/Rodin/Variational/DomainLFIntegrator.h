@@ -26,8 +26,6 @@ namespace Rodin::Variational
     * @f]
     * where @f$ f @f$ is a scalar coefficient.
     *
-    * ----
-    *
     * | Detail                | Description                                  |
     * |-----------------------|----------------------------------------------|
     * |  Spaces supported     | L2, H1                                       |
@@ -35,7 +33,6 @@ namespace Rodin::Variational
     * |  Continuous operator  | @f$ f @f$                                    |
     * |  @f$ f @f$            | ScalarCoefficient                            |
     *
-    * ----
     */
    class DomainLFIntegrator
       :  public FormLanguage::LinearFormExpr<DomainLFIntegrator>
@@ -47,10 +44,7 @@ namespace Rodin::Variational
           *
           * @param[in] f Coefficient to integrate.
           */
-         template <class T>
-         DomainLFIntegrator(const ScalarCoefficient<T>& f)
-            : m_f((-f).copy())
-         {}
+         DomainLFIntegrator(const ScalarCoefficientBase& f);
 
          DomainLFIntegrator(const DomainLFIntegrator& other);
 

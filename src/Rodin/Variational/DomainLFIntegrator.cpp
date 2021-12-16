@@ -12,6 +12,10 @@
 
 namespace Rodin::Variational
 {
+   DomainLFIntegrator::DomainLFIntegrator(const ScalarCoefficientBase& f)
+      : m_f((-f).copy())
+   {}
+
    DomainLFIntegrator::DomainLFIntegrator(const DomainLFIntegrator& other)
       : m_f(other.m_f->copy()), m_lf(other.m_lf)
    {}
