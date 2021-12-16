@@ -17,7 +17,7 @@ namespace Rodin::Variational
 
    void Trace::buildMFEMCoefficient()
    {
-      m_matrix->getMFEMMatrixCoefficient();
+      m_matrix->buildMFEMMatrixCoefficient();
       m_mfemCoefficient.emplace(m_matrix->getMFEMMatrixCoefficient());
    }
 
