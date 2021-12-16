@@ -16,7 +16,8 @@ int main(int, char**)
   Mesh Omega = Mesh::load(meshFile);
 
   // Build finite element space
-  H1 Vh(Omega, 2);
+  int d = 2;
+  H1 Vh(Omega, d);
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
@@ -37,6 +38,8 @@ int main(int, char**)
   // Hilbert regularization
   Problem hilbert(g);
   auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
+  auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+  auto Compliance = Dot(Ae, e);
 
   // Solve problem
   Solver::PCG().setMaxIterations(200)

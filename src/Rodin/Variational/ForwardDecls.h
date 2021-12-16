@@ -76,7 +76,7 @@ namespace Rodin::Variational
 
    class Transpose;
 
-   template <class A, class Enable = void>
+   template <class A, class B, class Enable = void>
    class Dot;
 }
 

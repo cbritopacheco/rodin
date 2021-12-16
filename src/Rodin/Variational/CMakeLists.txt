@@ -21,6 +21,7 @@ set(RodinVariational_HEADERS
   VectorCoefficient.h
   Dot.h
   Trace.h
+  IdentityMatrix.h
   )
 
 set(RodinVariational_SRCS
@@ -40,6 +41,7 @@ set(RodinVariational_SRCS
   Jacobian.cpp
   Trace.cpp
   Gradient.cpp
+  IdentityMatrix.cpp
   )
 
 add_library(RodinVariational

@@ -18,6 +18,7 @@ set(RodinVariationalFormLanguage_HEADERS
   MatrixSum.h
   TypeTraits.h
   ScalarMatrixProduct.h
+  ScalarProduct.h
   )
 
 set(RodinVariationalFormLanguage_SRCS
@@ -25,6 +26,7 @@ set(RodinVariationalFormLanguage_SRCS
   ScalarSum.cpp
   MatrixSum.cpp
   ScalarMatrixProduct.cpp
+  ScalarProduct.cpp
   )
 
 add_library(RodinVariationalFormLanguage

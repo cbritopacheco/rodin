@@ -23,7 +23,9 @@
 #include "Variational/Gradient.h"
 #include "Variational/Derivative.h"
 #include "Variational/Transpose.h"
+#include "Variational/Trace.h"
 #include "Variational/Dot.h"
+#include "Variational/IdentityMatrix.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"
