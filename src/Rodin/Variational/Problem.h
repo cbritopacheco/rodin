@@ -81,12 +81,12 @@ namespace Rodin::Variational
          template <class Derived>
          Problem& operator=(const FormLanguage::ProblemBody<Derived>& rhs);
 
-         GridFunction<FEC>& getSolution();
+         GridFunction<FEC>& getSolution() override;
 
-         mfem::Array<int>& getEssentialBoundary();
+         mfem::Array<int>& getEssentialBoundary() override;
 
-         BilinearForm<FEC>& getBilinearForm();
-         LinearForm<FEC>& getLinearForm();
+         BilinearForm<FEC>& getBilinearForm() override;
+         LinearForm<FEC>& getLinearForm() override;
 
       private:
          std::reference_wrapper<GridFunction<FEC>>          m_solution;
