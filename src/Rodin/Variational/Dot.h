@@ -48,11 +48,11 @@ namespace Rodin::Variational
     *
     * See the available specializations for the supported types.
     */
-   template <class A, class Enable>
+   template <class A, class B, class Enable>
    class Dot
    {
       public:
-         Dot(const A&, const A&);
+         Dot(const A&, const B&);
    };
 
    /**
@@ -65,11 +65,13 @@ namespace Rodin::Variational
     * @f]
     *
     * @tparam A Derived type from MatrixCoefficientBase
+    * @tparam B Derived type from MatrixCoefficientBase
     */
-   template <class A>
-   class Dot<A,
+   template <class A, class B>
+   class Dot<A, B,
          std::enable_if_t<
-            std::is_base_of_v<MatrixCoefficientBase, A>>>
+            std::is_base_of_v<MatrixCoefficientBase, A> &&
+            std::is_base_of_v<MatrixCoefficientBase, B>>>
       : public ScalarCoefficientBase
    {
       public:
@@ -78,7 +80,7 @@ namespace Rodin::Variational
           * @param[in] a Derived instance of MatrixCoefficientBase
           * @param[in] b Derived instance of MatrixCoefficientBase
           */
-         Dot(const A& a, const A& b);
+         Dot(const A& a, const B& b);
 
          Dot(const Dot& other);
 
