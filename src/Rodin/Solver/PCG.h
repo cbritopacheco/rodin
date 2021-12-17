@@ -18,17 +18,50 @@
 
 namespace Rodin::Solver
 {
+   /**
+    * @brief Preconditioned Conjugate Gradient
+    */
    class PCG : public Solver
    {
       public:
+         /**
+          * @brief Constructs the PCG object with default parameters.
+          */
          PCG() = default;
+
          ~PCG() = default;
 
+         /**
+          * @brief Sets whether some information will be printed at each
+          * iteration.
+          * @param[in] printIterations If set to true, will print the
+          * iterations. Otherwise, no information will be printed to the
+          * screen.
+          * @returns Reference to self (for method chaining)
+          */
          PCG& printIterations(bool printIterations);
+
+         /**
+          * @brief Sets the maximum amount of iterations the solver will
+          * perform.
+          * @param[in] maxIterations Maximum amount of iterations
+          * @returns Reference to self (for method chaining)
+          */
          PCG& setMaxIterations(int maxIterations);
+
+         /**
+          * @brief Sets the relative tolerance of the solver.
+          * @param[in] rtol Relative tolerance
+          * @returns Reference to self (for method chaining)
+          */
          PCG& setRelativeTolerance(double rtol);
+
+         /**
+          * @brief Sets the absolute tolerance of the solver.
+          * @param[in] atol Absolute tolerance
+          * @returns Reference to self (for method chaining)
+          */
          PCG& setAbsoluteTolerance(double atol);
-         PCG& setSmoother(mfem::Solver& smoother);
 
          void solve(Variational::ProblemBase& problem) const override;
 

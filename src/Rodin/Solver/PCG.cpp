@@ -55,16 +55,8 @@ namespace Rodin::Solver
       a.getHandle()
        .FormLinearSystem(essTrueDofList, u.getHandle(), b.getHandle(), A, X, B);
 
-      if (m_smoother)
-      {
-         mfem::PCG(A, m_smoother->get(), B, X,
-               m_printIterations, m_maxIterations, m_rtol, m_atol);
-      }
-      else
-      {
-         mfem::GSSmoother M(A);
-         mfem::PCG(A, M, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
-      }
+      mfem::GSSmoother M(A);
+      mfem::PCG(A, M, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
 
       a.getHandle()
        .RecoverFEMSolution(X, b.getHandle(), u.getHandle());

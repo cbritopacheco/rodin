@@ -24,8 +24,7 @@ namespace Rodin::Solver
          virtual ~Solver() = default;
 
          /**
-          * Solves the specified Variational::Problem.
-          *
+          * @brief Solves the specified Variational::Problem.
           * @param[in,out] problem Variational problem to solve.
           */
          virtual void solve(Variational::ProblemBase& problem) const = 0;

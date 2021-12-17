@@ -41,6 +41,27 @@
  */
 
 /**
+  @namespace Rodin::Test
+  @brief Module containing various utilities and classes for writing tests
+ */
+
+/**
+  @dir Rodin/Test
+  @brief Namespace @ref Rodin::Test
+ */
+
+/**
+  @namespace Rodin::Utility
+  @brief Module containing general purpose and language support utility
+  classes.
+ */
+
+/**
+  @dir Rodin/Utility
+  @brief Namespace @ref Rodin::Utility
+ */
+
+/**
   @dir rodin/src/RodinExternal
   @brief Namespace @ref Rodin::External
  */

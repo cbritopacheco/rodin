@@ -23,9 +23,16 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Base class for Variational::Problem.
+    */
    class ProblemBase
    {
       public:
+         /**
+          * @brief Gets a reference to the solution.
+          * @returns Reference to the solution.
+          */
          virtual GridFunctionBase& getSolution() = 0;
 
          virtual mfem::Array<int>& getEssentialBoundary() = 0;

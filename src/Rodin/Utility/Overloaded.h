@@ -9,6 +9,9 @@
 
 namespace Rodin::Utility
 {
+   /**
+    * @brief Helper type for use with visitor pattern.
+    */
    template <class... Ts>
    struct Overloaded : Ts...
    {
