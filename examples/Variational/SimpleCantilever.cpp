@@ -31,15 +31,19 @@ int main(int, char**)
 
   // Elasticity equation
   Problem elasticity(u);
-  elasticity = ElasticityIntegrator(mu, lambda)
+  elasticity = ElasticityIntegrator(lambda, mu)
              + DirichletBC(GammaD, VectorCoefficient{0, 0})
              + NeumannBC(GammaN, VectorCoefficient{0, -1});
 
   // Hilbert regularization
-  Problem hilbert(g);
   auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
   auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-  auto Compliance = Dot(Ae, e);
+
+  H1 Sh(Omega);
+  GridFunction one(Sh);
+  GridFunction c(Sh);
+  one.getHandle() = 1.0;
+
 
   // Solve problem
   Solver::PCG().setMaxIterations(200)
@@ -47,8 +51,23 @@ int main(int, char**)
                .printIterations(true)
                .solve(elasticity);
 
+  LinearForm lf(Sh);
+  DomainLFIntegrator Compliance(Dot(Ae, e));
+  Compliance.setLinearForm(lf);
+  Compliance.eval();
+
+  BilinearForm bf(Vh);
+  ElasticityIntegrator elas(lambda, mu);
+  elas.setBilinearForm(bf);
+  elas.eval();
+
+  std::cout << lf(one) << std::endl;
+  std::cout << bf(u, u) << std::endl;
+
+
   Omega.save("Omega.mesh");
   u.save("u.gf");
+  c.save("c.gf");
 
   return 0;
 }

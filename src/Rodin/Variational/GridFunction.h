@@ -14,6 +14,9 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
+#include "ScalarCoefficient.h"
+#include "VectorCoefficient.h"
+#include "MatrixCoefficient.h"
 
 namespace Rodin::Variational
 {
@@ -58,7 +61,7 @@ namespace Rodin::Variational
     * finite element space.
     *
     * To obtain the full functionality of the GridFunction class one must call
-    * the setFiniteElementSpace(FiniteElementSpace&) method.
+    * the @ref setFiniteElementSpace(FiniteElementSpace&) method.
     */
    template <>
    class GridFunction<>
@@ -115,13 +118,13 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a grid function belonging to some finite element space.
+    * @brief Represents a grid function which belongs to some finite element space.
     *
     * @tparam FEC Finite element collection to which the function belongs.
     *
     * @note Note that the FEC template parameter is typically inferred when
-    * initializing the grid function, hence it is not necessary to explicitly
-    * specify it.
+    * initializing the grid function, hence it is not necessary to make it
+    * explicit.
     */
    template <class FEC>
    class GridFunction<FEC> : public GridFunctionBase
@@ -203,6 +206,36 @@ namespace Rodin::Variational
          std::pair<const double*, int> getData() const
          {
             return {m_data.get(), m_size};
+         }
+
+         /**
+          * @brief Projects a scalar coefficient on the given GridFunction.
+          * @note The GridFunction must be scalar valued.
+          * @param[in] s Scalar coefficient to project
+          * @returns Reference to self
+          */
+         GridFunction<FEC>& operator=(const ScalarCoefficientBase& s)
+         {
+            assert(getFiniteElementSpace().getDimension() == 1);
+            std::unique_ptr<ScalarCoefficientBase> sCopy(s.copy());
+            sCopy->buildMFEMCoefficient();
+            getHandle().ProjectCoefficient(sCopy->getMFEMCoefficient());
+            return *this;
+         }
+
+         /**
+          * @brief Projects a scalar coefficient on the given GridFunction.
+          * @note The GridFunction must be vector valued.
+          * @param[in] s Scalar coefficient to project
+          * @returns Reference to self
+          */
+         GridFunction<FEC>& operator=(const VectorCoefficientBase& v)
+         {
+            assert(getFiniteElementSpace().getDimension() == v.getDimension());
+            std::unique_ptr<VectorCoefficientBase> vCopy(v.copy());
+            vCopy->buildMFEMVectorCoefficient();
+            getHandle().ProjectCoefficient(vCopy->getMFEMVectorCoefficient());
+            return *this;
          }
 
          mfem::GridFunction& getHandle() override

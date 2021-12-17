@@ -66,8 +66,6 @@ namespace Rodin::Variational
           *
           * @param[in,out] u Trial function @f$ u @f$ belonging to a suitable
           * finite element space.
-          * @param[in,out] v Test function @f$ u @f$ belonging to a suitable
-          * finite element space.
           */
          Problem(GridFunction<FEC>& u);
 

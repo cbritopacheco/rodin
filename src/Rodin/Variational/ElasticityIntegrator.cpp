@@ -36,6 +36,7 @@ namespace Rodin::Variational
                new mfem::ElasticityIntegrator(
                   m_lambda->getMFEMCoefficient(),
                   m_mu->getMFEMCoefficient()));
+      m_bf->get().getHandle().Assemble();
    }
 
    ElasticityIntegrator& ElasticityIntegrator::toggleSign()

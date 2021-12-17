@@ -61,7 +61,7 @@ namespace Rodin::Variational
                const GridFunction<FEC>& u, const GridFunction<FEC>& v)
             const
          {
-            return m_bf(u.getHandle(), v.getHandle());
+            return m_bf.InnerProduct(u.getHandle(), v.getHandle());
          }
 
          mfem::BilinearForm& getHandle() override

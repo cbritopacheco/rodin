@@ -34,6 +34,7 @@ namespace Rodin::Variational
          .AddDomainIntegrator(
                new mfem::DomainLFIntegrator(
                   m_f->getMFEMCoefficient()));
+      m_lf->get().getHandle().Assemble();
    }
 
    DomainLFIntegrator& DomainLFIntegrator::toggleSign()

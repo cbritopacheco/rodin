@@ -56,7 +56,7 @@ namespace Rodin::Variational
           */
          double operator()(const GridFunction<FEC>& u) const
          {
-            return m_lf(u.getHandle());
+            return m_lf * u.getHandle();
          }
 
          mfem::LinearForm& getHandle() override
