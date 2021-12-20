@@ -7,7 +7,9 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include "FiniteElementSpace.h"
+#include <mfem.hpp>
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Variational
 {
@@ -16,6 +18,8 @@ namespace Rodin::Variational
       public:
          virtual mfem::BilinearForm& getHandle() = 0;
          virtual const mfem::BilinearForm& getHandle() const = 0;
+         virtual BilinearFormBase& operator=(
+               const BilinearFormIntegratorBase& bfi) = 0;
    };
 
    /**
@@ -43,9 +47,7 @@ namespace Rodin::Variational
           *
           * @param[in] fes Reference to the finite element space
           */
-         BilinearForm(FiniteElementSpace<FEC>& fes)
-            : m_bf(&fes.getFES())
-         {}
+         BilinearForm(FiniteElementSpace<FEC>& fes);
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -58,26 +60,28 @@ namespace Rodin::Variational
           * v @f$).
           */
          double operator()(
-               const GridFunction<FEC>& u, const GridFunction<FEC>& v)
-            const
-         {
-            return m_bf.InnerProduct(u.getHandle(), v.getHandle());
-         }
+               const GridFunction<FEC>& u, const GridFunction<FEC>& v) const;
+
+         BilinearFormBase& operator=(const BilinearFormIntegratorBase& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {
-            return m_bf;
+            return *m_bf;
          }
 
          const mfem::BilinearForm& getHandle() const override
          {
-            return m_bf;
+            return *m_bf;
          }
 
       private:
-         mfem::BilinearForm m_bf;
+         FiniteElementSpace<FEC>& m_fes;
+         std::unique_ptr<mfem::BilinearForm> m_bf;
+         std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
    };
 }
+
+#include "BilinearForm.hpp"
 
 #endif
 

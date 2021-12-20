@@ -38,10 +38,6 @@ namespace Rodin::Solver
       auto& b = problem.getLinearForm();
       auto& u = problem.getSolution();
 
-      // Now we can assemble the linear forms
-      problem.getBilinearForm().getHandle().Assemble();
-      problem.getLinearForm().getHandle().Assemble();
-
       // Compute essential true degrees of freedom
       mfem::Array<int> essTrueDofList;
       u.getHandle()

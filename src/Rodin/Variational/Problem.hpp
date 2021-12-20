@@ -9,6 +9,9 @@
 
 #include "GridFunction.h"
 
+#include "FormLanguage/ProblemBody.h"
+#include "FormLanguage/LinearFormIntegratorUnaryMinus.h"
+
 #include "Problem.h"
 
 namespace Rodin::Variational
@@ -25,19 +28,22 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   template <class Derived>
-   Problem<FEC>& Problem<FEC>::operator=(
-         const FormLanguage::ProblemBody<Derived>& rhs)
+   Problem<FEC>& Problem<FEC>::operator=(const FormLanguage::ProblemBody& rhs)
    {
-      m_ast = std::unique_ptr<FormLanguage::ProblemBodyBase>(rhs.copy());
+      m_pb.reset(rhs.copy());
 
-      // We first need to evaluate the problem body to build the problem
-      m_ast->setProblem(*this).eval();
+      auto& bfi = m_pb->getBilinearFormIntegrator();
+      m_bilinearForm = bfi;
 
-      // Check everything is fine
-      if (m_bilinearForm.getHandle().GetDBFI()->Size() == 0)
-         Alert::Exception("The number of bilinear form integrators is zero.").raise();
+      if (auto lfi = m_pb->getLinearFormIntegrator())
+         m_linearForm = -(*lfi); // Make negative because we want it on the LHS
 
+      for (const auto& bc : m_pb->getBoundaryConditionList())
+      {
+         bc.imposeOn(*this);
+      }
+
+      assert(m_bilinearForm.getHandle().GetDBFI()->Size() > 0);
       return *this;
    }
 

@@ -7,7 +7,9 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
-#include "FiniteElementSpace.h"
+#include <mfem.hpp>
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Variational
 {
@@ -16,7 +18,6 @@ namespace Rodin::Variational
       public:
          virtual mfem::LinearForm& getHandle() = 0;
          virtual const mfem::LinearForm& getHandle() const = 0;
-         // virtual double operator()(const GridFunctionBase& u) = 0;
    };
 
    /**
@@ -42,9 +43,9 @@ namespace Rodin::Variational
           * space
           * @param[in] fes Reference to the finite element space
           */
-         LinearForm(FiniteElementSpace<FEC>& fes)
-            : m_lf(&fes.getFES())
-         {}
+         LinearForm(FiniteElementSpace<FEC>& fes);
+
+         LinearForm<FEC>& operator=(const LinearFormIntegratorBase& lfi);
 
          /**
           * @brief Evaluates the linear form at the function @f$ u @f$.
@@ -54,24 +55,25 @@ namespace Rodin::Variational
           *
           * @returns The value which the linear form takes at @f$ u @f$.
           */
-         double operator()(const GridFunction<FEC>& u) const
-         {
-            return m_lf * u.getHandle();
-         }
+         double operator()(const GridFunction<FEC>& u) const;
 
          mfem::LinearForm& getHandle() override
          {
-            return m_lf;
+            return *m_lf;
          }
 
          const mfem::LinearForm& getHandle() const override
          {
-            return m_lf;
+            return *m_lf;
          }
 
       private:
-         mfem::LinearForm m_lf;
+         FiniteElementSpace<FEC>& m_fes;
+         std::unique_ptr<mfem::LinearForm> m_lf;
+         std::unique_ptr<LinearFormIntegratorBase> m_lfi;
    };
 }
+
+#include "LinearForm.hpp"
 
 #endif

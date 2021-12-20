@@ -16,6 +16,9 @@
 
 namespace Rodin::Variational::FormLanguage
 {
+   /**
+    * @internal
+    */
    class ScalarCoefficientUnaryMinus : public ScalarCoefficientBase
    {
       public:

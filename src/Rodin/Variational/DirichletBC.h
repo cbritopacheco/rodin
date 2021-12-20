@@ -7,12 +7,13 @@
 #ifndef RODIN_VARIATIONAL_DIRICHLETBC_H
 #define RODIN_VARIATIONAL_DIRICHLETBC_H
 
-#include <functional>
+#include <variant>
 
-#include "FormLanguage/TypeTraits.h"
-#include "FormLanguage/BCExpr.h"
+#include "ForwardDecls.h"
 
-#include "Problem.h"
+#include "ScalarCoefficient.h"
+
+#include "BoundaryCondition.h"
 
 namespace Rodin::Variational
 {
@@ -38,8 +39,7 @@ namespace Rodin::Variational
     * @see @ref examples-variational-poisson
     *
     */
-   class DirichletBC
-      :  public FormLanguage::BCExpr<DirichletBC>
+   class DirichletBC : public BoundaryConditionBase
    {
       public:
          /**
@@ -73,11 +73,14 @@ namespace Rodin::Variational
 
          virtual ~DirichletBC() = default;
 
-         DirichletBC& setProblem(ProblemBase& problem) override;
+         int getBoundaryAttribute() const override;
 
-         void eval() override;
+         void imposeOn(ProblemBase& pb) const override;
 
-         virtual DirichletBC* copy() const noexcept override;
+         DirichletBC* copy() const noexcept override
+         {
+            return new DirichletBC(*this);
+         }
 
       private:
          int m_bdrAttr;
@@ -85,8 +88,6 @@ namespace Rodin::Variational
             std::unique_ptr<ScalarCoefficientBase>,
             std::unique_ptr<VectorCoefficientBase>
             > m_value;
-         std::optional<std::reference_wrapper<ProblemBase>> m_problem;
-         mfem::Array<int> m_essBdr;
    };
 }
 

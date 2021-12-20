@@ -13,54 +13,19 @@ namespace Rodin::Variational::FormLanguage
 {
    class Base;
 
-   // ---- FormExprBCExprSum -------------------------------------------------
-   template <class Derived>
    class ProblemBody;
 
-   template <class Lhs, class Rhs>
-   class BFExprLFExprSum;
+   class BilinearFormIntegratorSum;
 
-   template <class Lhs, class Rhs>
-   class BFExprBCExprSum;
+   class BilinearFormIntegratorUnaryMinus;
 
-   template <class Lhs, class Rhs>
-   class FormExprBCExprSum;
+   class LinearFormIntegratorSum;
 
-   // ---- BilinearFormExpr --------------------------------------------------
-   template <class Derived>
-   class BilinearFormExpr;
-
-   template <class Lhs, class Rhs>
-   class BilinearFormExprSum;
-
-   template <class T>
-   class BilinearFormExprUnaryMinus;
-
-   // ---- LinearFormExpr ----------------------------------------------------
-   template <class Derived>
-   class LinearFormExpr;
-
-   template <class Lhs, class Rhs>
-   class LinearFormExprSum;
-
-   template <class T>
-   class LinearFormExprUnaryMinus;
-
-   // ---- BCExpr ------------------------------------------------------------
-   template <class Derived>
-   class BCExpr;
-
-   template <class Derived>
-   class BCExprList;
-
-   template <class HeadNested, class Tail = void>
-   class BCExprListCons;
-
-   template <class Lhs, class Rhs>
-   class FormBCExprSum;
+   class LinearFormIntegratorUnaryMinus;
 
    class ScalarSum;
-   class ScalarCoefficientUnaryMinus;
+
+   class BoundaryConditionList;
 }
 
 #endif

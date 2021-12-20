@@ -6,6 +6,7 @@
  */
 #include "Rodin/Alert.h"
 
+#include "Problem.h"
 #include "ScalarCoefficient.h"
 #include "VectorCoefficient.h"
 
@@ -24,8 +25,7 @@ namespace Rodin::Variational
    {}
 
    DirichletBC::DirichletBC(const DirichletBC& other)
-      :  m_bdrAttr(other.m_bdrAttr),
-         m_problem(other.m_problem)
+      :  m_bdrAttr(other.m_bdrAttr)
    {
       std::visit(
          [this](auto&& arg)
@@ -42,60 +42,51 @@ namespace Rodin::Variational
          }, other.m_value);
    }
 
-   DirichletBC& DirichletBC::setProblem(ProblemBase& problem)
+   int DirichletBC::getBoundaryAttribute() const
    {
-      m_problem.emplace(problem);
-      return *this;
+      return m_bdrAttr;
    }
 
-   void DirichletBC::eval()
+   void DirichletBC::imposeOn(ProblemBase& pb) const
    {
-      assert(m_problem);
-
-      int maxBdrAttr = m_problem->get()
-                                 .getSolution()
-                                 .getHandle()
-                                 .FESpace()
-                                 ->GetMesh()
-                                 ->bdr_attributes.Max();
+      int maxBdrAttr = pb.getSolution()
+                         .getHandle()
+                         .FESpace()
+                         ->GetMesh()
+                         ->bdr_attributes.Max();
 
       if (m_bdrAttr > maxBdrAttr)
          Rodin::Alert::Exception(
                "DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
-      m_essBdr = mfem::Array<int>(maxBdrAttr);
-      m_essBdr = 0;
-      m_essBdr[m_bdrAttr - 1] = 1;
+      mfem::Array<int> essBdr(maxBdrAttr);
+      essBdr = 0;
+      essBdr[m_bdrAttr - 1] = 1;
 
       std::visit(
-         [this](auto&& arg)
+         [&pb, &essBdr](auto&& arg)
          {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
             {
                arg->buildMFEMVectorCoefficient();
-               m_problem->get().getSolution()
-                               .getHandle()
-                               .ProjectBdrCoefficient(
-                                     arg->getMFEMVectorCoefficient(), m_essBdr);
+               pb.getSolution()
+                 .getHandle()
+                 .ProjectBdrCoefficient(
+                       arg->getMFEMVectorCoefficient(), essBdr);
             }
             else
             {
                arg->buildMFEMCoefficient();
-               m_problem->get().getSolution()
-                               .getHandle()
-                               .ProjectBdrCoefficient(
-                                     arg->getMFEMCoefficient(), m_essBdr);
+               pb.getSolution()
+                 .getHandle()
+                 .ProjectBdrCoefficient(
+                       arg->getMFEMCoefficient(), essBdr);
             }
          }, m_value);
 
       // Keep track of the boundary attributes that have been projected
-      m_problem->get().getEssentialBoundary()[m_bdrAttr - 1] = 1;
-   }
-
-   DirichletBC* DirichletBC::copy() const noexcept
-   {
-      return new DirichletBC(*this);
+      pb.getEssentialBoundary()[m_bdrAttr - 1] = 1;
    }
 }

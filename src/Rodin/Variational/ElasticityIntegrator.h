@@ -11,7 +11,7 @@
 
 #include "ForwardDecls.h"
 #include "ScalarCoefficient.h"
-#include "FormLanguage/BilinearFormExpr.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
@@ -22,14 +22,14 @@ namespace Rodin::Variational
     * Represents the integration of the bilinear form
     *
     * @f[
-    *    a(\vec{u}, \vec{v}) = \int_\Omega A e(\vec{u}) \colon e(\vec{v}) \ dx
+    *    a(u, v) = \int_\Omega A e(u) \colon e(v) \ dx
     *    .
     * @f]
-    * The stress tensor @f$ \sigma(\vec{u}) @f$ is related to the strain tensor
-    * @f$ e(\vec{u}) := \frac{1}{2} \left( \nabla \vec{u} + \nabla \vec{u}^T
-    * \right) @f$ via Hooke's law:
+    * The stress tensor @f$ \sigma(u) @f$ is related to the strain tensor
+    * @f$ e(u) := \frac{1}{2} \left( \nabla u + \nabla u^T \right) @f$ via
+    * Hooke's law:
     * @f[
-    *    \sigma(\vec{u}) = A e(\vec{u}),
+    *    \sigma(u) = A e(u),
     * @f]
     * where for any @f$ e @f$ in the set of real symmetric @f$ d \times d @f$
     * matrices,
@@ -45,42 +45,40 @@ namespace Rodin::Variational
     * | Detail                | Description                                  |
     * |-----------------------|----------------------------------------------|
     * |  Dimensions supported | 1D, 2D, 3D                                   |
-    * |  Continuous operator  | @f$ - \nabla \cdot \sigma (\vec{u}) @f$      |
+    * |  Continuous operator  | @f$ - \nabla \cdot \sigma (u) @f$            |
     * |  @f$ \mu @f$          | ScalarCoefficient                            |
     * |  @f$ \lambda @f$      | ScalarCoefficient                            |
     *
     * ----
     *
     */
-   class ElasticityIntegrator
-      :  public FormLanguage::BilinearFormExpr<ElasticityIntegrator>
+   class ElasticityIntegrator : public BilinearFormIntegratorBase
    {
       public:
          /**
           * @brief Creates an ElasticityIntegrator with the given Lamé
           * coefficients @f$ \lambda @f$ and @f$ \mu @f$.
           */
-         template <class L, class M>
          ElasticityIntegrator(
-               const ScalarCoefficient<L>& lambda, const ScalarCoefficient<M>& mu)
-            : m_lambda(lambda.copy()), m_mu(mu.copy())
-         {}
+            const ScalarCoefficientBase& lambda, const ScalarCoefficientBase& mu);
 
          ElasticityIntegrator(const ElasticityIntegrator& other);
 
-         virtual ElasticityIntegrator& setBilinearForm(BilinearFormBase& bf) override;
+         void buildMFEMBilinearFormIntegrator() override;
 
-         void eval() override;
+         mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;
 
-         ElasticityIntegrator& toggleSign() override;
+         mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() override;
 
-         virtual ElasticityIntegrator* copy() const noexcept override;
+         ElasticityIntegrator* copy() const noexcept override
+         {
+            return new ElasticityIntegrator(*this);
+         }
 
       private:
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
          std::unique_ptr<ScalarCoefficientBase> m_mu;
-
-         std::optional<std::reference_wrapper<BilinearFormBase>> m_bf;
+         std::unique_ptr<mfem::ElasticityIntegrator> m_bfi;
    };
 }
 

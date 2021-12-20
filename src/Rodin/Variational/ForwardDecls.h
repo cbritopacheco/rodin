@@ -39,6 +39,8 @@ namespace Rodin::Variational
    template <class FEC>
    class LinearForm;
 
+   class LinearFormIntegratorBase;
+
    class DomainLFIntegrator;
 
    // ---- BilinearForm ------------------------------------------------------
@@ -47,11 +49,15 @@ namespace Rodin::Variational
    template <class FEC>
    class BilinearForm;
 
+   class BilinearFormIntegratorBase;
+
    class DiffusionIntegrator;
 
    class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------
+   class BoundaryConditionBase;
+
    class DirichletBC;
 
    class NeumannBC;
@@ -67,6 +73,7 @@ namespace Rodin::Variational
    class VectorCoefficient;
 
    class MatrixCoefficientBase;
+
    class MatrixCoefficient;
 
    class Jacobian;

@@ -12,45 +12,35 @@
 
 namespace Rodin::Variational
 {
-   ElasticityIntegrator::ElasticityIntegrator(const ElasticityIntegrator& other)
-      :  m_lambda(other.m_lambda->copy()),
-         m_mu(other.m_mu->copy()),
-         m_bf(other.m_bf)
+
+   ElasticityIntegrator::ElasticityIntegrator(
+         const ScalarCoefficientBase& lambda, const ScalarCoefficientBase& mu)
+      : m_lambda(lambda.copy()), m_mu(mu.copy())
    {}
 
-   ElasticityIntegrator&
-   ElasticityIntegrator::setBilinearForm(BilinearFormBase& bf)
-   {
-      m_bf.emplace(bf);
-      return *this;
-   }
+   ElasticityIntegrator::ElasticityIntegrator(const ElasticityIntegrator& other)
+      :  m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy())
+   {}
 
-   void ElasticityIntegrator::eval()
+   void ElasticityIntegrator::buildMFEMBilinearFormIntegrator()
    {
       m_lambda->buildMFEMCoefficient();
       m_mu->buildMFEMCoefficient();
-
-      m_bf->get()
-          .getHandle()
-          .AddDomainIntegrator(
-               new mfem::ElasticityIntegrator(
-                  m_lambda->getMFEMCoefficient(),
-                  m_mu->getMFEMCoefficient()));
-      m_bf->get().getHandle().Assemble();
+      m_bfi = std::make_unique<mfem::ElasticityIntegrator>(
+            m_lambda->getMFEMCoefficient(), m_mu->getMFEMCoefficient());
    }
 
-   ElasticityIntegrator& ElasticityIntegrator::toggleSign()
+   mfem::BilinearFormIntegrator&
+   ElasticityIntegrator::getMFEMBilinearFormIntegrator()
    {
-      m_lambda.reset(
-            new FormLanguage::ScalarCoefficientUnaryMinus(*m_lambda));
-      m_mu.reset(
-            new FormLanguage::ScalarCoefficientUnaryMinus(*m_mu));
-      return *this;
+      assert(m_bfi);
+      return *m_bfi;
    }
 
-   ElasticityIntegrator* ElasticityIntegrator::copy() const noexcept
+   mfem::BilinearFormIntegrator*
+   ElasticityIntegrator::releaseMFEMBilinearFormIntegrator()
    {
-      return new ElasticityIntegrator(*this);
+      return m_bfi.release();
    }
 }
 

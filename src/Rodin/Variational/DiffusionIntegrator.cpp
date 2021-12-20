@@ -12,31 +12,36 @@
 
 namespace Rodin::Variational
 {
-   DiffusionIntegrator::DiffusionIntegrator(const DiffusionIntegrator& other)
-      : m_lambda(other.m_lambda->copy()), m_bf(other.m_bf)
+   DiffusionIntegrator::DiffusionIntegrator()
+      : DiffusionIntegrator(ScalarCoefficient(1.0))
    {}
 
-   DiffusionIntegrator&
-   DiffusionIntegrator::setBilinearForm(BilinearFormBase& bf)
-   {
-      m_bf.emplace(bf);
-      return *this;
-   }
+   DiffusionIntegrator::DiffusionIntegrator(const ScalarCoefficientBase& lambda)
+      : m_lambda(lambda.copy())
+   {}
 
-   void DiffusionIntegrator::eval()
+   DiffusionIntegrator::DiffusionIntegrator(const DiffusionIntegrator& other)
+      : m_lambda(other.m_lambda->copy())
+   {}
+
+   void DiffusionIntegrator::buildMFEMBilinearFormIntegrator()
    {
-      assert(m_bf);
       m_lambda->buildMFEMCoefficient();
-      m_bf->get()
-           .getHandle()
-           .AddDomainIntegrator(
-                 new mfem::DiffusionIntegrator(m_lambda->getMFEMCoefficient()));
+      m_bfi = std::make_unique<mfem::DiffusionIntegrator>(
+            m_lambda->getMFEMCoefficient());
    }
 
-   DiffusionIntegrator& DiffusionIntegrator::toggleSign()
+   mfem::BilinearFormIntegrator&
+   DiffusionIntegrator::getMFEMBilinearFormIntegrator()
    {
-      m_lambda.reset(new FormLanguage::ScalarCoefficientUnaryMinus(*m_lambda));
-      return *this;
+      assert(m_bfi);
+      return *m_bfi;
+   }
+
+   mfem::BilinearFormIntegrator*
+   DiffusionIntegrator::releaseMFEMBilinearFormIntegrator()
+   {
+      return m_bfi.release();
    }
 }
 

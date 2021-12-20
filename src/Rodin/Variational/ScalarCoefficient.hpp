@@ -24,8 +24,7 @@ namespace Rodin::Variational
    template <class T>
    ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>
    ::ScalarCoefficient(const ScalarCoefficient& other)
-      :  m_x(other.m_x),
-         m_mfemCoefficient(other.m_mfemCoefficient)
+      :  m_x(other.m_x)
    {}
 
    template <class T>
@@ -61,8 +60,7 @@ namespace Rodin::Variational
    template <class FEC>
    ScalarCoefficient<GridFunction<FEC>>
    ::ScalarCoefficient(const ScalarCoefficient& other)
-      :  m_u(other.m_u),
-         m_mfemCoefficient(other.m_mfemCoefficient)
+      :  m_u(other.m_u)
    {}
 
 

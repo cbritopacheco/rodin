@@ -7,12 +7,9 @@
 #ifndef RODIN_VARIATIONAL_DOMAINLFINTEGRATOR_H
 #define RODIN_VARIATIONAL_DOMAINLFINTEGRATOR_H
 
-#include <functional>
-
 #include "ForwardDecls.h"
 #include "ScalarCoefficient.h"
-
-#include "FormLanguage/LinearFormExpr.h"
+#include "LinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
@@ -34,8 +31,7 @@ namespace Rodin::Variational
     * |  @f$ f @f$            | ScalarCoefficient                            |
     *
     */
-   class DomainLFIntegrator
-      :  public FormLanguage::LinearFormExpr<DomainLFIntegrator>
+   class DomainLFIntegrator : public LinearFormIntegratorBase
    {
       public:
          /**
@@ -48,17 +44,16 @@ namespace Rodin::Variational
 
          DomainLFIntegrator(const DomainLFIntegrator& other);
 
-         virtual DomainLFIntegrator& setLinearForm(LinearFormBase& lf) override;
+         void buildMFEMLinearFormIntegrator() override;
 
-         void eval() override;
+         mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
+         mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() override;
 
-         DomainLFIntegrator& toggleSign() override;
-
-         virtual DomainLFIntegrator* copy() const noexcept override;
+         DomainLFIntegrator* copy() const noexcept override;
 
       private:
          std::unique_ptr<ScalarCoefficientBase> m_f;
-         std::optional<std::reference_wrapper<LinearFormBase>> m_lf;
+         std::unique_ptr<mfem::DomainLFIntegrator> m_mfemLFI;
    };
 }
 

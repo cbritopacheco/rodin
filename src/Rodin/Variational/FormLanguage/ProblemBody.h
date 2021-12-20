@@ -7,59 +7,71 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_PROBLEMBODY_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_PROBLEMBODY_H
 
-#include <variant>
+#include <memory>
+#include <optional>
 
-#include "TypeTraits.h"
+#include "Rodin/Utility/OptionalReference.h"
+
 #include "ForwardDecls.h"
 
 #include "Base.h"
+#include "BoundaryConditionList.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   class ProblemBodyBase : public Base
-   {
-      public:
-         virtual ProblemBodyBase& setProblem(ProblemBase& problem) = 0;
-         virtual void eval() = 0;
-         virtual ProblemBodyBase* copy() const noexcept = 0;
-   };
-
    /**
     * @brief Represents the body of a variational problem.
-    *
-    * @code{.unparsed}
-    *    ProblemBody ::= BilinearFormExpr
-    *                  | BilinearFormExpr [+/-] LinearFormExpr
-    *                  | BilinearFormExpr   +   BCExpr
-    *                  | BilinearFormExpr [+/-] LinearFormExpr + BCExpr
-    * @endcode
     */
-   template <class Derived>
-   class ProblemBody : public ProblemBodyBase
+   class ProblemBody : public Base
    {
       public:
-         ProblemBody() = default;
-         virtual ~ProblemBody() = default;
+         ProblemBody(
+               const BilinearFormIntegratorBase& bfi);
 
-         ProblemBody(const ProblemBody&) = delete;
-         void operator=(const ProblemBody& other) = delete;
+         ProblemBody(
+               const BilinearFormIntegratorBase& bfi,
+               const LinearFormIntegratorBase& lfi);
 
-         virtual ProblemBody& setProblem(ProblemBase& problem) override
-         {
-            static_cast<Derived*>(this)->setProblem(problem);
-            return *this;
-         }
+         ProblemBody(
+               const BilinearFormIntegratorBase& bfi,
+               const BoundaryConditionList& bcs);
 
-         virtual void eval()
-         {
-            static_cast<Derived*>(this)->eval();
-         }
+         ProblemBody(
+               const BilinearFormIntegratorBase& bfi,
+               const LinearFormIntegratorBase& lfi,
+               const BoundaryConditionList& bcs);
+
+         ProblemBody(const ProblemBody& other);
+
+         BilinearFormIntegratorBase& getBilinearFormIntegrator();
+
+         Utility::OptionalReference<LinearFormIntegratorBase>
+         getLinearFormIntegrator();
+
+         BoundaryConditionList& getBoundaryConditionList();
 
          virtual ProblemBody* copy() const noexcept override
          {
-            return static_cast<const Derived*>(this)->copy();
+            return new ProblemBody(*this);
          }
+
+      private:
+         std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
+         std::unique_ptr<LinearFormIntegratorBase> m_lfi;
+         std::unique_ptr<BoundaryConditionList> m_bcs;
    };
+
+   ProblemBody operator+(
+         const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi);
+
+   ProblemBody operator-(
+         const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi);
+
+   ProblemBody operator+(
+         const BilinearFormIntegratorBase& bfi, const BoundaryConditionList& bcs);
+
+   ProblemBody operator+(
+         const ProblemBody& pb, const BoundaryConditionList& bcs);
 }
 
 #endif

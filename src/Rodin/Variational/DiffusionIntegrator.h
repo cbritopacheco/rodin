@@ -13,7 +13,7 @@
 #include "ForwardDecls.h"
 #include "ScalarCoefficient.h"
 
-#include "FormLanguage/BilinearFormExpr.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
@@ -39,45 +39,39 @@ namespace Rodin::Variational
     * ----
     *
     */
-   class DiffusionIntegrator
-      :  public FormLanguage::BilinearFormExpr<DiffusionIntegrator>
+   class DiffusionIntegrator : public BilinearFormIntegratorBase
    {
       public:
          /**
           * @brief Constructs a DiffusionIntegrator with a scalar coefficient
           * @f$ \lambda = 1@f$.
           */
-         DiffusionIntegrator()
-            : m_lambda(new ScalarCoefficient(1.0))
-         {}
+         DiffusionIntegrator();
 
          /**
-          * @brief Constructs a DiffusionIntegrator with a scalar coefficient
+          * @brief Constructs a DiffusionIntegrator with scalar coefficient
           * @f$ \lambda @f$.
           *
           * @param[in] lambda Diffusion coefficient
           */
-         template <class T>
-         DiffusionIntegrator(const ScalarCoefficient<T>& lambda)
-            : m_lambda(lambda)
-         {}
+         DiffusionIntegrator(const ScalarCoefficientBase& lambda);
 
          DiffusionIntegrator(const DiffusionIntegrator& other);
 
-         virtual DiffusionIntegrator& setBilinearForm(BilinearFormBase& bf) override;
+         void buildMFEMBilinearFormIntegrator() override;
 
-         void eval() override;
+         mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;
 
-         DiffusionIntegrator& toggleSign() override;
+         mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() override;
 
-         virtual DiffusionIntegrator* copy() const noexcept override
+         DiffusionIntegrator* copy() const noexcept override
          {
             return new DiffusionIntegrator(*this);
          }
 
       private:
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
-         std::optional<std::reference_wrapper<BilinearFormBase>> m_bf;
+         std::unique_ptr<mfem::DiffusionIntegrator> m_bfi;
    };
 }
 

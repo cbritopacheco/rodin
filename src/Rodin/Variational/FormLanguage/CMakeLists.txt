@@ -1,32 +1,31 @@
 set(RodinVariationalFormLanguage_HEADERS
-  BCExpr.h
-  BCExprList.h
-  BCExprListCons.h
-  BFExprBCExprSum.h
-  BFExprLFExprSum.h
-  BilinearFormExpr.h
-  BilinearFormExprSum.h
-  BilinearFormExprUnaryMinus.h
-  FormExprBCExprSum.h
+  Base.h
+  BilinearFormIntegratorSum.h
+  BilinearFormIntegratorUnaryMinus.h
+  BoundaryConditionList.h
   ForwardDecls.h
-  LinearFormExpr.h
-  LinearFormExprSum.h
-  LinearFormExprUnaryMinus.h
-  ProblemBody.h
-  ScalarSum.h
-  ScalarUnaryMinus.h
+  LinearFormIntegratorSum.h
+  LinearFormIntegratorUnaryMinus.h
   MatrixSum.h
-  TypeTraits.h
+  ProblemBody.h
   ScalarMatrixProduct.h
   ScalarProduct.h
+  ScalarSum.h
+  ScalarUnaryMinus.h
   )
 
 set(RodinVariationalFormLanguage_SRCS
-  ScalarUnaryMinus.cpp
-  ScalarSum.cpp
+  BilinearFormIntegratorSum.cpp
+  BilinearFormIntegratorUnaryMinus.cpp
+  BoundaryConditionList.cpp
+  LinearFormIntegratorSum.cpp
+  LinearFormIntegratorUnaryMinus.cpp
   MatrixSum.cpp
+  ProblemBody.cpp
   ScalarMatrixProduct.cpp
   ScalarProduct.cpp
+  ScalarSum.cpp
+  ScalarUnaryMinus.cpp
   )
 
 add_library(RodinVariationalFormLanguage

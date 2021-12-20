@@ -17,11 +17,8 @@
 
 #include "ForwardDecls.h"
 
-#include "FormLanguage/TypeTraits.h"
-#include "FormLanguage/BCExpr.h"
-
-#include "Problem.h"
 #include "ScalarCoefficient.h"
+#include "BoundaryCondition.h"
 
 namespace Rodin::Variational
 {
@@ -42,8 +39,7 @@ namespace Rodin::Variational
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     *
     */
-   class NeumannBC
-      :  public FormLanguage::BCExpr<NeumannBC>
+   class NeumannBC : public BoundaryConditionBase
    {
       public:
          /**
@@ -72,11 +68,14 @@ namespace Rodin::Variational
 
          NeumannBC(const NeumannBC& other);
 
-         NeumannBC& setProblem(ProblemBase& problem) override;
+         int getBoundaryAttribute() const override;
 
-         void eval() override;
+         NeumannBC* copy() const noexcept override
+         {
+            return new NeumannBC(*this);
+         }
 
-         virtual NeumannBC* copy() const noexcept override;
+         void imposeOn(ProblemBase& pb) const override;
 
       private:
          int m_bdrAttr;
@@ -84,8 +83,6 @@ namespace Rodin::Variational
             std::unique_ptr<ScalarCoefficientBase>,
             std::unique_ptr<VectorCoefficientBase>
             > m_value;
-         std::optional<std::reference_wrapper<ProblemBase>> m_problem;
-         mfem::Array<int> m_nbcBdr;
    };
 }
 

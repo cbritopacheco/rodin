@@ -6,6 +6,7 @@
  */
 #include "Rodin/Alert.h"
 
+#include "Problem.h"
 #include "ScalarCoefficient.h"
 #include "VectorCoefficient.h"
 
@@ -24,8 +25,7 @@ namespace Rodin::Variational
    {}
 
    NeumannBC::NeumannBC(const NeumannBC& other)
-      :  m_bdrAttr(other.m_bdrAttr),
-         m_problem(other.m_problem)
+      :  m_bdrAttr(other.m_bdrAttr)
    {
       std::visit(
          [this](auto&& arg)
@@ -42,61 +42,51 @@ namespace Rodin::Variational
          }, other.m_value);
    }
 
-   NeumannBC& NeumannBC::setProblem(ProblemBase& problem)
+   int NeumannBC::getBoundaryAttribute() const
    {
-      m_problem.emplace(problem);
-      return *this;
+      return m_bdrAttr;
    }
 
-   void NeumannBC::eval()
+   void NeumannBC::imposeOn(ProblemBase& pb) const
    {
-      assert(m_problem);
-
-      int maxBdrAttr = m_problem->get()
-                                 .getSolution()
-                                 .getHandle()
-                                 .FESpace()
-                                 ->GetMesh()
-                                 ->bdr_attributes.Max();
+      int maxBdrAttr = pb.getSolution()
+                         .getHandle()
+                         .FESpace()
+                         ->GetMesh()
+                         ->bdr_attributes.Max();
 
       if (m_bdrAttr > maxBdrAttr)
          Rodin::Alert::Exception(
                "NeumannBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
-      m_nbcBdr = mfem::Array<int>(maxBdrAttr);
-      m_nbcBdr = 0;
-      m_nbcBdr[m_bdrAttr - 1] = 1;
+      mfem::Array<int> nbcBdr(maxBdrAttr);
+      nbcBdr = 0;
+      nbcBdr[m_bdrAttr - 1] = 1;
 
       std::visit(
-         [this](auto&& arg)
+         [&pb, &nbcBdr](auto&& arg)
          {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
             {
                arg->buildMFEMVectorCoefficient();
-               m_problem->get()
-                        .getLinearForm()
-                        .getHandle()
-                        .AddBoundaryIntegrator(
-                              new mfem::VectorBoundaryLFIntegrator(
-                                 arg->getMFEMVectorCoefficient()), m_nbcBdr);
+               pb.getLinearForm()
+                  .getHandle()
+                  .AddBoundaryIntegrator(
+                        new mfem::VectorBoundaryLFIntegrator(
+                           arg->getMFEMVectorCoefficient()), nbcBdr);
             }
             else
             {
                arg->buildMFEMCoefficient();
-               m_problem->get()
-                        .getLinearForm()
-                        .getHandle()
-                        .AddBoundaryIntegrator(
-                              new mfem::BoundaryLFIntegrator(
-                                 arg->getMFEMCoefficient()), m_nbcBdr);
+               pb.getLinearForm()
+                 .getHandle()
+                 .AddBoundaryIntegrator(
+                       new mfem::BoundaryLFIntegrator(
+                          arg->getMFEMCoefficient()), nbcBdr);
             }
          }, m_value);
-   }
-
-   NeumannBC* NeumannBC::copy() const noexcept
-   {
-      return new NeumannBC(*this);
+      pb.getLinearForm().getHandle().Assemble();
    }
 }

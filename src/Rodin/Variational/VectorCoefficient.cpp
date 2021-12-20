@@ -4,14 +4,13 @@ namespace Rodin::Variational
 {
    VectorCoefficient::VectorCoefficient(const VectorCoefficient& other)
       :  m_dimension(other.m_dimension),
-         m_mfemVectorArrayCoefficient(other.m_mfemVectorArrayCoefficient)
+         m_mfemVectorArrayCoefficient(other.m_dimension)
    {
       m_values.reserve(other.m_dimension);
       for (size_t i = 0; i < m_dimension; i++)
       {
          m_values.push_back(
-               std::unique_ptr<ScalarCoefficientBase>(
-                  other.m_values[i]->copy()));
+               std::unique_ptr<ScalarCoefficientBase>(other.m_values[i]->copy()));
       }
    }
 
@@ -20,7 +19,8 @@ namespace Rodin::Variational
       for (size_t i = 0; i < m_dimension; i++)
       {
          m_values[i]->buildMFEMCoefficient();
-         m_mfemVectorArrayCoefficient.Set(i, &m_values[i]->getMFEMCoefficient(), false);
+         m_mfemVectorArrayCoefficient.Set(
+               i, &m_values[i]->getMFEMCoefficient(), false);
       }
    }
 

@@ -14,12 +14,12 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Mesh.h"
 
-#include "FormLanguage/ProblemBody.h"
+#include "FormLanguage/ForwardDecls.h"
 
+#include "ForwardDecls.h"
 #include "BilinearForm.h"
 #include "LinearForm.h"
 
-#include "ForwardDecls.h"
 
 namespace Rodin::Variational
 {
@@ -40,6 +40,15 @@ namespace Rodin::Variational
          virtual BilinearFormBase& getBilinearForm() = 0;
 
          virtual LinearFormBase& getLinearForm() = 0;
+
+         /**
+          * @brief Builds the problem using the FormLanguage::ProblemBody
+          * object.
+          *
+          * @param[in] rhs Problem body constructed using expressions from the
+          * Variational::FormLanguage.
+          */
+         virtual ProblemBase& operator=(const FormLanguage::ProblemBody& rhs) = 0;
    };
 
    /**
@@ -76,32 +85,22 @@ namespace Rodin::Variational
           */
          Problem(GridFunction<FEC>& u);
 
-         /**
-          * @brief Builds the problem using the FormLanguage::ProblemBody
-          * object.
-          *
-          * @param[in] rhs Problem body constructed using expressions from the
-          * Variational::FormLanguage.
-          */
-         template <class Derived>
-         Problem& operator=(const FormLanguage::ProblemBody<Derived>& rhs);
+         Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
 
          GridFunction<FEC>& getSolution() override;
-
-         mfem::Array<int>& getEssentialBoundary() override;
-
-         BilinearForm<FEC>& getBilinearForm() override;
          LinearForm<FEC>& getLinearForm() override;
+         BilinearForm<FEC>& getBilinearForm() override;
+         mfem::Array<int>& getEssentialBoundary() override;
 
       private:
          std::reference_wrapper<GridFunction<FEC>>          m_solution;
 
-         BilinearForm<FEC> m_bilinearForm;
-         LinearForm<FEC>   m_linearForm;
+         BilinearForm<FEC>    m_bilinearForm;
+         LinearForm<FEC>      m_linearForm;
 
          mfem::Array<int> m_essBdr;
 
-         std::unique_ptr<FormLanguage::ProblemBodyBase> m_ast;
+         std::unique_ptr<FormLanguage::ProblemBody> m_pb;
    };
 }
 

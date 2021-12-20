@@ -7,26 +7,15 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_H
 
-#include "FormLanguage/TypeTraits.h"
-
 #include "FormLanguage/ProblemBody.h"
-#include "FormLanguage/BFExprLFExprSum.h"
-#include "FormLanguage/BFExprBCExprSum.h"
-#include "FormLanguage/FormExprBCExprSum.h"
 
-#include "FormLanguage/LinearFormExpr.h"
-#include "FormLanguage/LinearFormExprSum.h"
-#include "FormLanguage/LinearFormExprUnaryMinus.h"
+#include "FormLanguage/LinearFormIntegratorSum.h"
+#include "FormLanguage/LinearFormIntegratorUnaryMinus.h"
 
-#include "FormLanguage/BilinearFormExpr.h"
-#include "FormLanguage/BilinearFormExprSum.h"
-#include "FormLanguage/BilinearFormExprUnaryMinus.h"
+#include "FormLanguage/BilinearFormIntegratorSum.h"
+#include "FormLanguage/BilinearFormIntegratorUnaryMinus.h"
 
-#include "FormLanguage/BFExprLFExprSum.h"
-
-#include "FormLanguage/BCExpr.h"
-#include "FormLanguage/BCExprList.h"
-#include "FormLanguage/BCExprListCons.h"
+#include "FormLanguage/BoundaryConditionList.h"
 
 #include "FormLanguage/ScalarSum.h"
 #include "FormLanguage/ScalarProduct.h"

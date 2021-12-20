@@ -36,8 +36,8 @@ int main(int argc, char** argv)
                .solve(elasticity);
 
   // Save solution
-  u.save("sol.gf");
-  Omega.save("mesh.mesh");
+  u.save("u.gf");
+  Omega.save("Omega.mesh");
 
   return 0;
 }
