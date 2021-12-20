@@ -61,6 +61,7 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -101,6 +102,19 @@
               const <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; value)</span>
             </dt>
             <dd>Constructs a Neumann boundary condition on the part of the boundary specified by the boundary attribute.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a1b7b989ea84ac2629e13b23573fd0b12">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1b7b989ea84ac2629e13b23573fd0b12" class="m-doc-self">getBoundaryAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the boundary attribute where the boundary condition will be imposed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8ca8c759ece07d1170c60c997be7a7b8" class="m-doc">imposeOn</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; pb) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Imposes the boundary condition on the given problem.</dd>
           </dl>
         </section>
         <section>
@@ -213,6 +227,23 @@ $ \Gamma_D $
 <use x='7.314174' y='1.793263' xlink:href='#eq7-g0-68'/>
 </g>
 </svg>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ca8c759ece07d1170c60c997be7a7b8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />NeumannBC::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ca8c759ece07d1170c60c997be7a7b8" class="m-doc-self">imposeOn</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; pb) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Imposes the boundary condition on the given problem.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pb&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> where the boundary condition will be imposed.</td>
                 </tr>
               </tbody>
             </table>

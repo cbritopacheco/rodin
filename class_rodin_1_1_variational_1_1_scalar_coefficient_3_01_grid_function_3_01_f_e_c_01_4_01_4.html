@@ -72,6 +72,7 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -83,6 +84,23 @@
               <span class="m-doc-wrap-bumper"><a href="#a09f2fbf7894633175bf004c928c0f5a4" class="m-doc">ScalarCoefficient</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u)</span>
             </dt>
             <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> u.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad222f362619cfbc4befd90920e1cd107">
+              <span class="m-doc-wrap-bumper">void <a href="#ad222f362619cfbc4befd90920e1cd107" class="m-doc-self">buildMFEMCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Builds the underlying mfem::Coefficient object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a508adaa3d7c4d6163012ef85849d453c" class="m-doc">getMFEMCoefficient</a>(</span><span class="m-doc-wrap">) -&gt; mfem::Coefficient&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the underlying mfem::Coefficient object.</dd>
+            <dt id="a7873bada8e3e7c3121696ce6b457e0bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7873bada8e3e7c3121696ce6b457e0bf" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Builds a copy of the object and returns a non-owning pointer to the new object.</dd>
           </dl>
         </section>
         <section>
@@ -106,6 +124,16 @@
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a508adaa3d7c4d6163012ef85849d453c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">mfem::Coefficient&amp; Rodin::<wbr />Variational::<wbr />ScalarCoefficient&lt;GridFunction&lt;FEC&gt;&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a508adaa3d7c4d6163012ef85849d453c" class="m-doc-self">getMFEMCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the underlying mfem::Coefficient object.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>Typically one should only call this after one has called <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_3_01_grid_function_3_01_f_e_c_01_4_01_4.html#ad222f362619cfbc4befd90920e1cd107" class="m-doc">buildMFEMCoefficient()</a>.</p></aside>
           </div></section>
         </section>
       </div>

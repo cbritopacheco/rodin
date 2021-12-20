@@ -88,6 +88,7 @@ $ A $
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -158,6 +159,23 @@ $ A $
             <dd>Constructs the <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> of the given matrix.</dd>
           </dl>
         </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad222f362619cfbc4befd90920e1cd107">
+              <span class="m-doc-wrap-bumper">void <a href="#ad222f362619cfbc4befd90920e1cd107" class="m-doc-self">buildMFEMCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Builds the underlying mfem::Coefficient object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a508adaa3d7c4d6163012ef85849d453c" class="m-doc">getMFEMCoefficient</a>(</span><span class="m-doc-wrap">) -&gt; mfem::Coefficient&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the underlying mfem::Coefficient object.</dd>
+            <dt id="a53571ae6c49b24618b94ab6a0a927f82">
+              <span class="m-doc-wrap-bumper">auto <a href="#a53571ae6c49b24618b94ab6a0a927f82" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Builds a copy of the object and returns a non-owning pointer to the new object.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a9192dafb1ecda00587fc332f8f3d8554"><div>
@@ -176,6 +194,13 @@ $ A $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a508adaa3d7c4d6163012ef85849d453c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">mfem::Coefficient&amp; Rodin::<wbr />Variational::<wbr />Trace::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a508adaa3d7c4d6163012ef85849d453c" class="m-doc-self">getMFEMCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the underlying mfem::Coefficient object.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>Typically one should only call this after one has called <a href="class_rodin_1_1_variational_1_1_trace.html#ad222f362619cfbc4befd90920e1cd107" class="m-doc">buildMFEMCoefficient()</a>.</p></aside>
           </div></section>
         </section>
       </div>

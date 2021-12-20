@@ -73,7 +73,15 @@
               <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Module for solving variational problems constructed with the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module.</span>
                 <ul class="m-doc">
+                  <li>class <a href="class_rodin_1_1_solver_1_1_p_c_g.html" class="m-doc">PCG</a> <span class="m-doc">Preconditioned Conjugate Gradient.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Base class for solving variational problems represented by a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a> instance.</span></li>
+                </ul>
+              </li>
+              <li>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> <span class="m-doc">Module containing various utilities and classes for writing tests.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> <span class="m-doc">Module containing general purpose and language support utility classes.</span>
+                <ul class="m-doc">
+                  <li>struct <a href="struct_rodin_1_1_utility_1_1_overloaded.html" class="m-doc">Overloaded</a> <span class="m-doc">Helper type for use with visitor pattern.</span></li>
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
@@ -82,10 +90,6 @@
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing variational expressions in C++.</span>
                     <ul class="m-doc">
-                      <li>class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_expr.html" class="m-doc">BilinearFormExpr</a> <span class="m-doc">Represents an expression of bilinear forms.</span></li>
-                      <li>class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_expr_sum.html" class="m-doc">BilinearFormExprSum</a> <span class="m-doc">Represents an expression between two objects of type <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_expr.html" class="m-doc">BilinearFormExpr</a>.</span></li>
-                      <li>class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_linear_form_expr.html" class="m-doc">LinearFormExpr</a> <span class="m-doc">Represents an expression of bilinear forms.</span></li>
-                      <li>class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_linear_form_expr_sum.html" class="m-doc">LinearFormExprSum</a> <span class="m-doc">Represents an expression between two objects of type <a href="class_rodin_1_1_variational_1_1_form_language_1_1_linear_form_expr.html" class="m-doc">LinearFormExpr</a>.</span></li>
                       <li>class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">ProblemBody</a> <span class="m-doc">Represents the body of a variational problem.</span></li>
                     </ul>
                   </li>
@@ -125,7 +129,7 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a> <span class="m-doc">Represents a Dirichlet boundary condition.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_domain_l_f_integrator.html" class="m-doc">DomainLFIntegrator</a> <span class="m-doc">Object used to integrate a coefficient against a fixed coefficient.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> <span class="m-doc">Represents the scalar product on Euclidean spaces.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_dot_3_01_a_00_01std_1_1enable__if__t_3_01std_1_1is__base__of__v_480500750d8b40055c57c4ee456c668a.html" class="m-doc">Dot&lt;A, std::enable_if_t&lt;std::is_base_of_v&lt;MatrixCoefficientBase, A&gt;&gt;&gt;</a> <span class="m-doc">Represents the double-dot product between two matrices.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_dot_3_01_a_00_01_b_00_01std_1_1enable__if__t_3_01std_1_1is__base13c8e66e12fe29c70e039fdffafb1ffa.html" class="m-doc">Dot&lt;A, B, std::enable_if_t&lt;std::is_base_of_v&lt;MatrixCoefficientBase, A&gt; &amp;&amp; std::is_base_of_v&lt;MatrixCoefficientBase, B&gt;&gt;&gt;</a> <span class="m-doc">Represents the double-dot product between two matrices.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_elasticity_integrator.html" class="m-doc">ElasticityIntegrator</a> <span class="m-doc">Object used to integrate the linear elasticity form.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a> <span class="m-doc">Base type for finite element spaces.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_gradient.html" class="m-doc">Gradient</a> <span class="m-doc">Represents the gradient <svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
@@ -151,7 +155,7 @@
         <use x='0' y='0' xlink:href='#eq6-g0-117'/>
         </g>
         </svg>.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_c_01_4.html" class="m-doc">GridFunction&lt;FEC&gt;</a> <span class="m-doc">Represents a grid function belonging to some finite element space.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_c_01_4.html" class="m-doc">GridFunction&lt;FEC&gt;</a> <span class="m-doc">Represents a grid function which belongs to some finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_4.html" class="m-doc">GridFunction&lt;&gt;</a> <span class="m-doc">Represents a grid function which does not yet have an associated finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <span class="m-doc">Arbitrary order <svg class="m-math" style="width: 3.882em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 37.271213 12.86203">
         <title>
@@ -221,6 +225,7 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Represents a linear form on some finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_neumann_b_c.html" class="m-doc">NeumannBC</a> <span class="m-doc">Represents a Neumann boundary condition.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> <span class="m-doc">Represents a variational problem to be solved.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> <span class="m-doc">Base class for <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> <span class="m-doc">A <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> represents a continuous function that represent some scalar coefficient in a PDE.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_3_01_grid_function_3_01_f_e_c_01_4_01_4.html" class="m-doc">ScalarCoefficient&lt;GridFunction&lt;FEC&gt;&gt;</a> <span class="m-doc">Represents a scalar coefficient which is built from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_3_01_t_00_01std_1_1enable__if__t_3_01std_1_1i380fa564cc2d2a72919f03dc48a0341b.html" class="m-doc">ScalarCoefficient&lt;T, std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt;&gt;</a> <span class="m-doc">Represents a <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> of arithmetic type <code>T</code>.</span></li>

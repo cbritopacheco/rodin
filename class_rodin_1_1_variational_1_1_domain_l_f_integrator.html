@@ -59,8 +59,8 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -104,7 +104,7 @@ $ f $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-102'/>
 </g>
-</svg> is a scalar coefficient.</p><hr/><table class="m-table"><thead><tr><th>Detail</th><th>Description</th></tr></thead><tbody><tr><td>Spaces supported</td><td><a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a></td></tr><tr><td>Dimensions supported</td><td>1D, 2D, 3D</td></tr><tr><td>Continuous operator</td><td><svg class="m-math" style="width: 0.734em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 7.046437 10.626798">
+</svg> is a scalar coefficient.</p><table class="m-table"><thead><tr><th>Detail</th><th>Description</th></tr></thead><tbody><tr><td>Spaces supported</td><td><a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a></td></tr><tr><td>Dimensions supported</td><td>1D, 2D, 3D</td></tr><tr><td>Continuous operator</td><td><svg class="m-math" style="width: 0.734em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 7.046437 10.626798">
 <title>
 $ f $
 </title>
@@ -124,23 +124,12 @@ $ f $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-102'/>
 </g>
-</svg></td><td><a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a></td></tr></tbody></table><hr/>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_linear_form_expr.html" class="m-doc">LinearFormExpr&lt;DomainLFIntegrator&gt;</a>
-            </dt>
-            <dd>Represents an expression of bilinear forms.</dd>
-          </dl>
-        </section>
+</svg></td><td><a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a></td></tr></tbody></table>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a17152adfe556cda808a2b6faacf9671b" class="m-doc">DomainLFIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a>&lt;T&gt;&amp; f)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aa0a66051d451f4aaf4b0d72a9234901a" class="m-doc">DomainLFIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&amp; f)</span>
             </dt>
             <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_domain_l_f_integrator.html" class="m-doc">DomainLFIntegrator</a> with scalar coefficient <svg class="m-math" style="width: 0.734em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 7.046437 10.626798">
 <title>
@@ -155,14 +144,20 @@ $ f $
 </svg>.</dd>
           </dl>
         </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0740e380417ed858368da2c9e68399e" class="m-doc">releaseMFEMLinearFormIntegrator</a>(</span><span class="m-doc-wrap">) -&gt; mfem::LinearFormIntegrator* <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Releases ownership of the mfem::LinearFormIntegrator.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a17152adfe556cda808a2b6faacf9671b"><div>
+          <section class="m-doc-details" id="aa0a66051d451f4aaf4b0d72a9234901a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DomainLFIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17152adfe556cda808a2b6faacf9671b" class="m-doc-self">DomainLFIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a>&lt;T&gt;&amp; f)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DomainLFIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0a66051d451f4aaf4b0d72a9234901a" class="m-doc-self">DomainLFIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&amp; f)</span></span>
             </h3>
             <p>Constructs a <a href="class_rodin_1_1_variational_1_1_domain_l_f_integrator.html" class="m-doc">DomainLFIntegrator</a> with scalar coefficient <svg class="m-math" style="width: 0.734em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 7.046437 10.626798">
 <title>
@@ -186,6 +181,13 @@ $ f $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ab0740e380417ed858368da2c9e68399e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">mfem::LinearFormIntegrator* Rodin::<wbr />Variational::<wbr />DomainLFIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0740e380417ed858368da2c9e68399e" class="m-doc-self">releaseMFEMLinearFormIntegrator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Releases ownership of the mfem::LinearFormIntegrator.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>After this call, calling</p></aside><aside class="m-note m-default"><h4>See also</h4><p>getMFEMLinearFormIntegrator() will result in undefined behaviour.</p></aside><aside class="m-note m-danger"><h4>Warning</h4><p>The <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance must still be kept in memory since it might contain objects which the mfem::LinearFormIntegrator instance refers to.</p></aside>
           </div></section>
         </section>
       </div>

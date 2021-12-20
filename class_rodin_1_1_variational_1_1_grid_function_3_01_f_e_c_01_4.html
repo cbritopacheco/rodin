@@ -53,7 +53,7 @@
           <div class="m-doc-template">template&lt;class FEC&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction&lt;FEC&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Represents a grid function belonging to some finite element space.</p>
+        <p>Represents a grid function which belongs to some finite element space.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -77,7 +77,7 @@
             </li>
           </ul>
         </div>
-<aside class="m-note m-info"><h4>Note</h4><p>Note that the FEC template parameter is typically inferred when initializing the grid function, hence it is not necessary to explicitly specify it.</p></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>Note that the FEC template parameter is typically inferred when initializing the grid function, hence it is not necessary to make it explicit.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -111,6 +111,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ac083a09500d43f30a1fc8d0d1ac5960c" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;const double*, int&gt;</span>
             </dt>
             <dd>Gets the raw data and size of the grid function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad79179aa40daef7a01241a72b077e4ac" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&amp; s) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp;</span>
+            </dt>
+            <dd>Projects a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac4cd75adf80b502a60033c0d29a1b709" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; v) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp;</span>
+            </dt>
+            <dd>Projects a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
           </dl>
         </section>
         <section>
@@ -239,6 +247,51 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ad79179aa40daef7a01241a72b077e4ac"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad79179aa40daef7a01241a72b077e4ac" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&amp; s)</span></span>
+            </h3>
+            <p>Projects a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">s&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar coefficient to project</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>The <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> must be scalar valued.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac4cd75adf80b502a60033c0d29a1b709"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4cd75adf80b502a60033c0d29a1b709" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; v)</span></span>
+            </h3>
+            <p>Projects a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>The <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> must be vector valued.</p></aside>
           </div></section>
         </section>
       </div>

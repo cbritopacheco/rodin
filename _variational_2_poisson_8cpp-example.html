@@ -75,13 +75,13 @@
 
 <span class="w">  </span><span class="c1">// Functions</span>
 <span class="w">  </span><span class="n">H1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Define problem</span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DiffusionIntegrator</span><span class="p">()</span><span class="w"></span>
 <span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">DomainLFIntegrator</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="w"></span>
 <span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span><span class="w"></span>
@@ -93,8 +93,8 @@
 <span class="w">               </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">poisson</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Save solution</span>
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;sol.gf&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;mesh.mesh&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span></pre>

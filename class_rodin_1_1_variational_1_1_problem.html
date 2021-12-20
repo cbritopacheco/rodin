@@ -75,8 +75,7 @@
             </dt>
             <dd>Deleted copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a15974a2daa67831395a5cab363f0a311" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; v)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a09715bb361367b406139efdb4895b2b3" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u)</span>
             </dt>
             <dd>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -108,22 +107,16 @@ $ v $
               <span class="m-doc-wrap-bumper">void <a href="#a3c51b5afefc53f6a75e6fcac51b80fba" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Deleted copy assignment operator.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6cb7910cefe02c5fd0b1f74b2f3ecb83" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a>&lt;Derived&gt;&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
-            </dt>
-            <dd>Builds the problem using the <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a> object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a15974a2daa67831395a5cab363f0a311"><div>
+          <section class="m-doc-details" id="a09715bb361367b406139efdb4895b2b3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15974a2daa67831395a5cab363f0a311" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09715bb361367b406139efdb4895b2b3" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u)</span></span>
             </h3>
             <p>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -164,41 +157,6 @@ $ u $
 <use x='0' y='0' xlink:href='#eq3-g0-117'/>
 </g>
 </svg> belonging to a suitable finite element space.</td>
-                </tr>
-                <tr>
-                  <td>v&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Test function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
-<title>
-$ u $
-</title>
-<defs>
-<path id='eq4-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
-</defs>
-<g id='eq4-page1'>
-<use x='0' y='0' xlink:href='#eq4-g0-117'/>
-</g>
-</svg> belonging to a suitable finite element space.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a6cb7910cefe02c5fd0b1f74b2f3ecb83"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FEC&gt;
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cb7910cefe02c5fd0b1f74b2f3ecb83" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a>&lt;Derived&gt;&amp; rhs)</span></span>
-            </h3>
-            <p>Builds the problem using the <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a> object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> body constructed using expressions from the <a href="namespace_rodin_1_1_variational_1_1_form_language.html" class="m-doc">Variational::<wbr />FormLanguage</a>.</td>
                 </tr>
               </tbody>
             </table>

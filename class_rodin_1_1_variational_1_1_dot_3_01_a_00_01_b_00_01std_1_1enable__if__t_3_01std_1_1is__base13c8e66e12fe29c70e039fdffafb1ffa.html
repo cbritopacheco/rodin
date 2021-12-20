@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Dot&lt;A, std::enable_if_t&lt;std::is_base_of_v&lt;MatrixCoefficientBase, A&gt;&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::Dot&lt;A, B, std::enable_if_t&lt;std::is_base_of_v&lt;MatrixCoefficientBase, A&gt; &amp;&amp; std::is_base_of_v&lt;MatrixCoefficientBase, B&gt;&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,8 +50,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class A&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Dot&lt;A, std::enable_if_t&lt;std::is_base_of_v&lt;MatrixCoefficientBase, A&gt;&gt;&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class A, class B&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Dot&lt;A, B, std::enable_if_t&lt;std::is_base_of_v&lt;MatrixCoefficientBase, A&gt; &amp;&amp; std::is_base_of_v&lt;MatrixCoefficientBase, B&gt;&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents the double-dot product between two matrices.</p>
         <table class="m-table m-fullwidth m-flat">
@@ -63,6 +63,10 @@
               <td style="width: 1%">A</td>
               <td>Derived type from <a href="class_rodin_1_1_variational_1_1_matrix_coefficient_base.html" class="m-doc">MatrixCoefficientBase</a></td>
             </tr>
+            <tr>
+              <td>B</td>
+              <td>Derived type from <a href="class_rodin_1_1_variational_1_1_matrix_coefficient_base.html" class="m-doc">MatrixCoefficientBase</a></td>
+            </tr>
           </tbody>
         </table>
         <div class="m-block m-default">
@@ -72,6 +76,7 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -181,21 +186,38 @@ $ A \colon B $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a413705039d602d18596e7ecf321ef124" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">const A&amp; a,
-              const A&amp; b)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aa0e895ffbaf1e15c4c94f4d63228503c" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">const A&amp; a,
+              const B&amp; b)</span>
             </dt>
             <dd>Constructs the <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between two given matrices.</dd>
           </dl>
         </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad222f362619cfbc4befd90920e1cd107">
+              <span class="m-doc-wrap-bumper">void <a href="#ad222f362619cfbc4befd90920e1cd107" class="m-doc-self">buildMFEMCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Builds the underlying mfem::Coefficient object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a508adaa3d7c4d6163012ef85849d453c" class="m-doc">getMFEMCoefficient</a>(</span><span class="m-doc-wrap">) -&gt; mfem::Coefficient&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the underlying mfem::Coefficient object.</dd>
+            <dt id="ad5c6ff9f7650b8a6ba1cc591e190b81e">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5c6ff9f7650b8a6ba1cc591e190b81e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Builds a copy of the object and returns a non-owning pointer to the new object.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a413705039d602d18596e7ecf321ef124"><div>
+          <section class="m-doc-details" id="aa0e895ffbaf1e15c4c94f4d63228503c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class A&gt;
+                template&lt;class A, class B&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Dot&lt;A, std::<wbr />enable_if_t&lt;std::<wbr />is_base_of_v&lt;MatrixCoefficientBase, A&gt;&gt;&gt;&lt;A&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a413705039d602d18596e7ecf321ef124" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const A&amp; a,
-              const A&amp; b)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Dot&lt;A, B, std::<wbr />enable_if_t&lt;std::<wbr />is_base_of_v&lt;MatrixCoefficientBase, A&gt; &amp;&amp; std::<wbr />is_base_of_v&lt;MatrixCoefficientBase, B&gt;&gt;&gt;&lt;A, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0e895ffbaf1e15c4c94f4d63228503c" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const A&amp; a,
+              const B&amp; b)</span></span>
             </h3>
             <p>Constructs the <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between two given matrices.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -213,6 +235,16 @@ $ A \colon B $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a508adaa3d7c4d6163012ef85849d453c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class A, class B&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">mfem::Coefficient&amp; Rodin::<wbr />Variational::<wbr />Dot&lt;A, B, std::<wbr />enable_if_t&lt;std::<wbr />is_base_of_v&lt;MatrixCoefficientBase, A&gt; &amp;&amp; std::<wbr />is_base_of_v&lt;MatrixCoefficientBase, B&gt;&gt;&gt;&lt;A, B&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a508adaa3d7c4d6163012ef85849d453c" class="m-doc-self">getMFEMCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the underlying mfem::Coefficient object.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>Typically one should only call this after one has called <a href="class_rodin_1_1_variational_1_1_dot_3_01_a_00_01_b_00_01std_1_1enable__if__t_3_01std_1_1is__base13c8e66e12fe29c70e039fdffafb1ffa.html#ad222f362619cfbc4befd90920e1cd107" class="m-doc">buildMFEMCoefficient()</a>.</p></aside>
           </div></section>
         </section>
       </div>
