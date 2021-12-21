@@ -20,6 +20,8 @@ namespace Rodin::Variational
          virtual const mfem::BilinearForm& getHandle() const = 0;
          virtual BilinearFormBase& operator=(
                const BilinearFormIntegratorBase& bfi) = 0;
+         virtual BilinearFormBase& from(const BilinearFormIntegratorBase& bfi) = 0;
+         virtual void assemble() = 0;
    };
 
    /**
@@ -62,7 +64,11 @@ namespace Rodin::Variational
          double operator()(
                const GridFunction<FEC>& u, const GridFunction<FEC>& v) const;
 
-         BilinearFormBase& operator=(const BilinearFormIntegratorBase& bfi) override;
+         void assemble() override;
+
+         BilinearForm<FEC>& from(const BilinearFormIntegratorBase& bfi) override;
+
+         BilinearForm<FEC>& operator=(const BilinearFormIntegratorBase& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {

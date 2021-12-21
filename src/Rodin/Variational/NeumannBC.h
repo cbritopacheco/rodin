@@ -75,10 +75,11 @@ namespace Rodin::Variational
             return new NeumannBC(*this);
          }
 
-         void imposeOn(ProblemBase& pb) const override;
+         void imposeOn(ProblemBase& pb) override;
 
       private:
          int m_bdrAttr;
+         mfem::Array<int> m_nbcBdr;
          std::variant<
             std::unique_ptr<ScalarCoefficientBase>,
             std::unique_ptr<VectorCoefficientBase>

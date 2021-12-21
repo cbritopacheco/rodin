@@ -23,12 +23,7 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::operator=(const LinearFormIntegratorBase& lfi)
    {
-      m_lfi.reset(lfi.copy());
-      m_lfi->buildMFEMLinearFormIntegrator();
-      m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
-      // TODO: Choose whether to add a Domain, Boundary, Face, etc. integrator
-      m_lf->AddDomainIntegrator(m_lfi->releaseMFEMLinearFormIntegrator());
-      m_lf->Assemble();
+      from(lfi).assemble();
       return *this;
    }
 
@@ -36,6 +31,23 @@ namespace Rodin::Variational
    double LinearForm<FEC>::operator()(const GridFunction<FEC>& u) const
    {
       return *m_lf * u.getHandle();
+   }
+
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormIntegratorBase& lfi)
+   {
+      m_lfi.reset(lfi.copy());
+      m_lfi->buildMFEMLinearFormIntegrator();
+      m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+      // TODO: Choose whether to add a Domain, Boundary, Face, etc. integrator
+      m_lf->AddDomainIntegrator(m_lfi->releaseMFEMLinearFormIntegrator());
+      return *this;
+   }
+
+   template <class FEC>
+   void LinearForm<FEC>::assemble()
+   {
+      m_lf->Assemble();
    }
 }
 

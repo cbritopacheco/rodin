@@ -21,7 +21,7 @@ namespace Rodin::Variational
           * @param[in, out] pb Problem where the boundary condition will be
           * imposed.
           */
-         virtual void imposeOn(ProblemBase& pb) const = 0;
+         virtual void imposeOn(ProblemBase& pb) = 0;
 
          virtual BoundaryConditionBase* copy() const noexcept override = 0;
    };

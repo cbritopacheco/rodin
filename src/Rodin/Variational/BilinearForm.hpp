@@ -28,16 +28,28 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   BilinearFormBase& BilinearForm<FEC>::operator=(
+   BilinearForm<FEC>& BilinearForm<FEC>::operator=(
          const BilinearFormIntegratorBase& bfi)
+   {
+      from(bfi).assemble();
+      return *this;
+   }
+
+   template <class FEC>
+   BilinearForm<FEC>& BilinearForm<FEC>::from(const BilinearFormIntegratorBase& bfi)
    {
       m_bfi.reset(bfi.copy());
       m_bfi->buildMFEMBilinearFormIntegrator();
       m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
       // TODO: Choose whether to add a Domain, Boundary, Face, etc. integrator
       m_bf->AddDomainIntegrator(m_bfi->releaseMFEMBilinearFormIntegrator());
-      m_bf->Assemble();
       return *this;
+   }
+
+   template <class FEC>
+   void BilinearForm<FEC>::assemble()
+   {
+      m_bf->Assemble();
    }
 }
 

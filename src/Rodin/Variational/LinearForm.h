@@ -18,6 +18,9 @@ namespace Rodin::Variational
       public:
          virtual mfem::LinearForm& getHandle() = 0;
          virtual const mfem::LinearForm& getHandle() const = 0;
+         virtual LinearFormBase& operator=(const LinearFormIntegratorBase& lfi) = 0;
+         virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
+         virtual void assemble() = 0;
    };
 
    /**
@@ -45,7 +48,11 @@ namespace Rodin::Variational
           */
          LinearForm(FiniteElementSpace<FEC>& fes);
 
-         LinearForm<FEC>& operator=(const LinearFormIntegratorBase& lfi);
+         void assemble() override;
+
+         LinearForm<FEC>& from(const LinearFormIntegratorBase& lfi) override;
+
+         LinearForm<FEC>& operator=(const LinearFormIntegratorBase& lfi) override;
 
          /**
           * @brief Evaluates the linear form at the function @f$ u @f$.

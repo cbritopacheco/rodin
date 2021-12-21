@@ -75,7 +75,7 @@ namespace Rodin::Variational
 
          int getBoundaryAttribute() const override;
 
-         void imposeOn(ProblemBase& pb) const override;
+         void imposeOn(ProblemBase& pb) override;
 
          DirichletBC* copy() const noexcept override
          {
@@ -84,6 +84,7 @@ namespace Rodin::Variational
 
       private:
          int m_bdrAttr;
+         mfem::Array<int> m_essBdr;
          std::variant<
             std::unique_ptr<ScalarCoefficientBase>,
             std::unique_ptr<VectorCoefficientBase>

@@ -16,7 +16,8 @@ int main(int argc, char** argv)
   Mesh Omega = Mesh::load(meshFile);
 
   // Functions
-  H1 Vh(Omega, 2);
+  int d = 2;
+  H1 Vh(Omega, d);
   GridFunction u(Vh);
 
   // Lamé coefficients

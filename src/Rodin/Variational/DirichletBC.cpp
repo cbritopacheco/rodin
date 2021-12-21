@@ -47,7 +47,7 @@ namespace Rodin::Variational
       return m_bdrAttr;
    }
 
-   void DirichletBC::imposeOn(ProblemBase& pb) const
+   void DirichletBC::imposeOn(ProblemBase& pb)
    {
       int maxBdrAttr = pb.getSolution()
                          .getHandle()
@@ -60,12 +60,12 @@ namespace Rodin::Variational
                "DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
-      mfem::Array<int> essBdr(maxBdrAttr);
-      essBdr = 0;
-      essBdr[m_bdrAttr - 1] = 1;
+      m_essBdr = mfem::Array<int>(maxBdrAttr);
+      m_essBdr = 0;
+      m_essBdr[m_bdrAttr - 1] = 1;
 
       std::visit(
-         [&pb, &essBdr](auto&& arg)
+         [&pb, this](auto&& arg)
          {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
@@ -74,7 +74,7 @@ namespace Rodin::Variational
                pb.getSolution()
                  .getHandle()
                  .ProjectBdrCoefficient(
-                       arg->getMFEMVectorCoefficient(), essBdr);
+                       arg->getMFEMVectorCoefficient(), m_essBdr);
             }
             else
             {
@@ -82,7 +82,7 @@ namespace Rodin::Variational
                pb.getSolution()
                  .getHandle()
                  .ProjectBdrCoefficient(
-                       arg->getMFEMCoefficient(), essBdr);
+                       arg->getMFEMCoefficient(), m_essBdr);
             }
          }, m_value);
 

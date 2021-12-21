@@ -33,17 +33,16 @@ namespace Rodin::Variational
       m_pb.reset(rhs.copy());
 
       auto& bfi = m_pb->getBilinearFormIntegrator();
-      m_bilinearForm = bfi;
+      m_bilinearForm.from(bfi);
 
       if (auto lfi = m_pb->getLinearFormIntegrator())
-         m_linearForm = -(*lfi); // Make negative because we want it on the LHS
+         m_linearForm.from(-(*lfi)); // Negative because we want it on the LHS
 
-      for (const auto& bc : m_pb->getBoundaryConditionList())
-      {
+      for (auto& bc : m_pb->getBoundaryConditionList())
          bc.imposeOn(*this);
-      }
 
-      assert(m_bilinearForm.getHandle().GetDBFI()->Size() > 0);
+      assemble();
+
       return *this;
    }
 

@@ -49,6 +49,12 @@ namespace Rodin::Variational
           * Variational::FormLanguage.
           */
          virtual ProblemBase& operator=(const FormLanguage::ProblemBody& rhs) = 0;
+
+         virtual void assemble()
+         {
+            getLinearForm().assemble();
+            getBilinearForm().assemble();
+         }
    };
 
    /**
@@ -94,6 +100,8 @@ namespace Rodin::Variational
 
       private:
          std::reference_wrapper<GridFunction<FEC>>          m_solution;
+
+         std::vector<mfem::Array<int>> m_bdr;
 
          BilinearForm<FEC>    m_bilinearForm;
          LinearForm<FEC>      m_linearForm;
