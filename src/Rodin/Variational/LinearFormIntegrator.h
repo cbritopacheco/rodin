@@ -17,9 +17,12 @@ namespace Rodin::Variational
          virtual mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() = 0;
 
          /**
+          * @internal
           * @brief Releases ownership of the mfem::LinearFormIntegrator.
-          * @note After this call, calling @see getMFEMLinearFormIntegrator()
-          * will result in undefined behaviour.
+          *
+          * @note After this call, calling getMFEMLinearFormIntegrator() will
+          * result in undefined behaviour.
+          *
           * @warning The LinearFormIntegratorBase instance must still be kept
           * in memory since it might contain objects which the
           * mfem::LinearFormIntegrator instance refers to.

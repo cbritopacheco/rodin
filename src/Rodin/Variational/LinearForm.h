@@ -31,8 +31,8 @@ namespace Rodin::Variational
     *        v &\mapsto L(v)
     * \end{aligned}
     * @f]
-    * where $V$ is a finite element space. A linear form can be specified by
-    * from one or more linear integrators (e.g. DomainLFIntegrator).
+    * where @f$ V @f$ is a finite element space. A linear form can be specified
+    * by from one or more linear integrators (e.g. DomainLFIntegrator).
     */
    template <class FEC>
    class LinearForm : public LinearFormBase

@@ -44,9 +44,6 @@ int main(int, char**)
   GridFunction one(Sh);
   one = ScalarCoefficient{1.0};
 
-  GridFunction ones(Vh);
-  ones = VectorCoefficient{1.0, 1.0};
-
   // Solve problem
   Solver::PCG().setMaxIterations(200)
                .setRelativeTolerance(1e-12)
@@ -54,16 +51,13 @@ int main(int, char**)
                .solve(elasticity);
 
   LinearForm lf(Sh);
-  lf = DomainLFIntegrator(Dot(Ae, e)) - DomainLFIntegrator(ScalarCoefficient{1.0});
+  lf = DomainLFIntegrator(Dot(Ae, e));
 
   BilinearForm bf(Vh);
   bf = ElasticityIntegrator(lambda, mu);
 
-  NeumannBC neumann(1, ScalarCoefficient{1.0});
-  DirichletBC dirichlet(1, ScalarCoefficient{1.0});
-
   std::cout << lf(one) << std::endl;
-  std::cout << bf(ones, ones) << std::endl;
+  std::cout << bf(u, u) << std::endl;
 
   Omega.save("Omega.mesh");
   u.save("u.gf");

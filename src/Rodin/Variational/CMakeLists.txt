@@ -11,7 +11,6 @@ set(RodinVariational_HEADERS
   Jacobian.h
   GridFunction.h
   H1.h
-  L2.h
   LinearForm.h
   MatrixCoefficient.h
   NeumannBC.h

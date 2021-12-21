@@ -16,8 +16,10 @@ namespace Rodin::Variational
          virtual mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() = 0;
          /**
           * @brief Releases ownership of the mfem::BilinearFormIntegrator.
-          * @note After this call, calling @see getMFEMBilinearFormIntegrator()
+          *
+          * @note After this call, calling getMFEMBilinearFormIntegrator()
           * will result in undefined behaviour.
+          *
           * @warning The BilinearFormIntegratorBase instance must still be kept
           * in memory since it might contain objects which the
           * mfem::BilinearFormIntegrator instance refers to.
