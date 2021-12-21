@@ -16,34 +16,40 @@
   @f[
   \left\{
     \begin{aligned}
-      - \Delta u &= 1 && \mathrm{in} \ \Omega \\
-      u &= 0 && \mathrm{on} \ \Gamma
+      - \Delta u &= f && \mathrm{in} \ \Omega \\
+      u &= g && \mathrm{on} \ \Gamma
     \end{aligned}
    \right.
   @f]
-  where @f$ \Omega @f$ is a domain with boundary @f$ \Gamma := \partial \Omega @f$.
+  where @f$ \Omega @f$ is a domain with boundary @f$ \Gamma := \partial \Omega
+  @f$. To make matters easier we will set @f$ f = 1 @f$ and @f$ g = 0 @f$.
 
   In general, when solving an equation like this we usually utilize its
   variational formulation. Multiplying by a test function @f$ v @f$ and
-  integrating by parts we arrive at the classical variational formulation:
+  integrating by parts we may write the variational formulation
   @f[
   \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
   \forall v \in H^1_0(\Omega), \quad
-     \int_{\Omega} \lambda \nabla u \cdot \nabla v \ dx - \int_{\Omega} v
-     \ dx = 0
+     \int_{\Omega} \lambda \nabla u \cdot \nabla v \ dx = \int_{\Omega} f v
+     \ dx
   @f]
+  Obtaining the variational (or weak) formulation of a partial differential
+  equation is a very standard procedure in the
+  [Finite Element Method](https://en.wikipedia.org/wiki/Finite_element_method)
+  literature. Hence we won't go into specifics. Rather, we deem it best to show
+  how to implement said weak formulation and solve it.
 
   @section examples-variational-poisson-preamble Includes and Namespaces
 
   In order to start using Rodin we first need to include the relevant parts
   which will aid us in the resolution of our equation. If you are familiar with
-  the Finite Element Method then you will know that in particular we will need
-  three main components:
+  finite elements then you will know that in particular we will need three main
+components:
   - A mesh approximating our domain @f$ \Omega @f$.
   - A solver object that allows us to solve the problem
   - A way to specify the problem
 
-  In the code we just that:
+  Hence we import the required modules in Rodin:
 
   @code{.cpp}
     #include "Rodin/Mesh.h"
@@ -60,7 +66,7 @@
   - Rodin::Solver
   - Rodin::Variational
 
-  While the second part will simply introduce all the objects inside the the
+  While the second part will simply introduce all the objects inside the
   Rodin and Rodin::Variational namespaces to the global scope, so we don't have
   to write their namespace again.
 
@@ -79,60 +85,62 @@
   One of the first things you usually do is to keep track of the segment of the
   boundary where we impose the boundary conditions. In this case, we have
   homogenous Dirichlet boundary conditions on the boundary elements with
-  attribute equal to `1`. Additionally, the mesh is loaded from some file by
-  passing its filename:
+  attribute equal to `1`. Additionally, we load the mesh from some file given
+  its filename:
 
   @code{.cpp}
     int Gamma = 1;
     Mesh Omega = Mesh::load(filename);
   @endcode
 
-  With mesh loaded, we are now in a position to declare our discrete finite
-  element space @f$ V_h @f$ and create some functions belonging to it. For our
-  purposes, we need that our space contains functions belonging to the @f$ H^1
-  (\Omega) @f$ collection of functions. After creating this space, we construct
-  a trial function @f$ u @f$ and a test function @f$ v @f$ as shown below:
+  With the mesh loaded, we can build our finite element space @f$ V_h @f$ and
+  create some functions belonging to it. For our purposes, we need that our
+  space contains functions belonging to the @f$ H^1 (\Omega) @f$ collection of
+  functions. This is achieved by the following line of code:
 
   @code{.cpp}
     H1 Vh(Omega);
-    GridFunction u(Vh), v(Vh);
   @endcode
 
-  Having created our finite element space and our functions, we can now define
-  the variational problem using Rodin's Problem class. In general, this class
-  expects that you write your variational formulation in the following form:
-
-  @f[
-    a(u, v) - l(v) = 0
-  @f]
-
-  More specifically Rodin is able to parse at compile-time your expression by
-  utilizing the following grammar:
-
-  @code{.unparsed}
-    ProblemBody ::= BilinearFormExpr
-                  | BilinearFormExpr ( '+' | '-' ) LinearFormExpr
-                  | BilinearFormExpr ( '+' | '-' ) LinearFormExpr '+' BCExpr
-  @endcode
-
-  The details of how Rodin manages to do this are not important for the user
-  and in general one only needs to know how to construct these objects and
-  their meaning. With this in mind, the code to define the problem is:
+  After creating this space, we construct a trial function @f$ u @f$ which will
+  represent our solution:
 
   @code{.cpp}
-    Problem poisson(u, v);
+    GridFunction u(Vh);
+  @endcode
+
+  Having built our finite element space and declared our trial function, we can
+  start implementing the weak formulation associated to the Poisson equation.
+  In general, Rodin expects that you write you specify the weak formulation by
+  moving all terms to the left hand side of the equation. In symbols, this
+  would look like:
+
+  @f[
+  \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
+  \forall v \in H^1_0(\Omega), \quad
+     a(u, v) - l(v) = 0
+  @f]
+
+  The left hand side is then used to define the variational problem which we
+  want to solve. In the code this is achieved by the following declaration:
+
+  @code{.cpp}
+    auto f = ScalarCoefficient(1.0);
+    auto g = ScalarCoefficient(0.0);
+
+    Problem poisson(u);
     poisson = DiffusionIntegrator()
-            - DomainLFIntegrator(1.0)
-            + DirichletBC(Gamma, 0);
+            - DomainLFIntegrator(f)
+            + DirichletBC(Gamma, g);
   @endcode
 
   In this case the `DiffusionIntegrator()` object represents the bilinear term
   @f[
     \int_\Omega \nabla u \cdot \nabla v \ dx \ ,
   @f]
-  while the `DomainLFIntegrator(1.0)` object represents the linear term
+  while the `DomainLFIntegrator(f)` object represents the linear term
   @f[
-    \int_\Omega v \ dx .
+    \int_\Omega f v \ dx .
   @f]
   Lastly, the `DirichletBC(Gamma, 0)` object specifies that the solution will
   satisfy the homogenous Dirichlet condition:
@@ -140,15 +148,14 @@
     u = 0 \quad \text{on} \quad \Gamma .
   @f]
 
-  @note If at any point the developer does not know what an integrator
-  represents, he/she is referred to the documentation page where the full
-  information is available.
+  Generally, it is somewhat tedious to remember what each integrator
+  represents so the developer is encouraged to use search the documentation
+  with the integrator term to know what the integrator represents.
 
-  With the problem defined, we now need to solve it using a `Solver` object,
-  i.e. solve the underlying linear system given by the associated stiffness
-  matrix.
-  There are many different types of solvers in Rodin. However, here we utilize
-  the Preconditioned Conjugate Gradient (PCG) solver:
+  With the problem defined, we now need to solve the underlying linear system
+  given by the associated stiffness matrix.
+  There are many different types of solvers in Rodin but for this example we
+  will utilize the Preconditioned Conjugate Gradient (PCG) solver:
 
   @code{.cpp}
     Solver::PCG().setMaxIterations(200)
@@ -157,14 +164,21 @@
                  .solve(poisson);
   @endcode
 
-  This will solve the `poisson` problem while printing the iterations.
+  This piece of code creates a PCG object and sets some parameters before
+  solving the problem we just defined.
 
-  Finally, we can save the solution and mesh in separate text files.
+  Finally, we will typically want to visualize our solution. We can do this by
+  saving both the solution and mesh objects to file, and then employing some
+  visualizer like [GLVis](https://glvis.org/) to view the results.
 
   @code{.cpp}
-    u.save("sol.gf");
-    Omega.save("mesh.mesh");
+    u.save("u.gf");
+    Omega.save("Omega.mesh");
   @endcode
+
+  Note that Rodin is built on
+  top of [mfem](https://mfem.org/) so the solution and mesh will utilize the
+  [MFEM mesh v1.0](https://mfem.org/mesh-format-v1.0/).
 
   The full source code may be found below:
   -   @ref Variational/Poisson.cpp "Poisson.cpp"
