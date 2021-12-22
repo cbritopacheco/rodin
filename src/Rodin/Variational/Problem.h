@@ -50,11 +50,7 @@ namespace Rodin::Variational
           */
          virtual ProblemBase& operator=(const FormLanguage::ProblemBody& rhs) = 0;
 
-         virtual void assemble()
-         {
-            getLinearForm().assemble();
-            getBilinearForm().assemble();
-         }
+         virtual void assemble() = 0;
    };
 
    /**
@@ -92,6 +88,8 @@ namespace Rodin::Variational
          Problem(GridFunction<FEC>& u);
 
          Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
+
+         void assemble() override;
 
          GridFunction<FEC>& getSolution() override;
          LinearForm<FEC>& getLinearForm() override;

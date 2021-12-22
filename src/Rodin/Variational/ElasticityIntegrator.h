@@ -52,7 +52,7 @@ namespace Rodin::Variational
     * ----
     *
     */
-   class ElasticityIntegrator : public BilinearFormIntegratorBase
+   class ElasticityIntegrator : public BilinearFormDomainIntegrator
    {
       public:
          /**

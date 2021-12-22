@@ -28,21 +28,13 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   BilinearForm<FEC>& BilinearForm<FEC>::operator=(
-         const BilinearFormIntegratorBase& bfi)
+   BilinearForm<FEC>& BilinearForm<FEC>::from(const BilinearFormDomainIntegrator& bfi)
    {
-      from(bfi).assemble();
-      return *this;
-   }
-
-   template <class FEC>
-   BilinearForm<FEC>& BilinearForm<FEC>::from(const BilinearFormIntegratorBase& bfi)
-   {
-      m_bfi.reset(bfi.copy());
-      m_bfi->buildMFEMBilinearFormIntegrator();
+      m_bfiDomainList = FormLanguage::List<BilinearFormDomainIntegrator>(bfi);
+      (*m_bfiDomainList.begin()).buildMFEMBilinearFormIntegrator();
       m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
-      // TODO: Choose whether to add a Domain, Boundary, Face, etc. integrator
-      m_bf->AddDomainIntegrator(m_bfi->releaseMFEMBilinearFormIntegrator());
+      m_bf->AddDomainIntegrator(
+            (*m_bfiDomainList.begin()).releaseMFEMBilinearFormIntegrator());
       return *this;
    }
 
@@ -50,6 +42,17 @@ namespace Rodin::Variational
    void BilinearForm<FEC>::assemble()
    {
       m_bf->Assemble();
+   }
+
+   template <class FEC>
+   BilinearForm<FEC>& BilinearForm<FEC>::add(
+         const BilinearFormDomainIntegrator& bfi)
+   {
+      m_bfiDomainList.add(bfi);
+      m_bfiDomainList.back().buildMFEMBilinearFormIntegrator();
+      m_bf->AddDomainIntegrator(
+            m_bfiDomainList.back().releaseMFEMBilinearFormIntegrator());
+      return *this;
    }
 }
 

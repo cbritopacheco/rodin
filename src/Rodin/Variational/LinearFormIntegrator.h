@@ -31,6 +31,19 @@ namespace Rodin::Variational
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
    };
+
+   class LinearFormDomainIntegrator : public LinearFormIntegratorBase
+   {
+      public:
+         virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
+   };
+
+   class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
+   {
+      public:
+         virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
+   };
+
 }
 
 #endif

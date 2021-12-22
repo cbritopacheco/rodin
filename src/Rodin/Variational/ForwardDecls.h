@@ -41,6 +41,10 @@ namespace Rodin::Variational
 
    class LinearFormIntegratorBase;
 
+   class LinearFormDomainIntegrator;
+
+   class LinearFormBoundaryIntegrator;
+
    class DomainLFIntegrator;
 
    // ---- BilinearForm ------------------------------------------------------
@@ -50,6 +54,8 @@ namespace Rodin::Variational
    class BilinearForm;
 
    class BilinearFormIntegratorBase;
+
+   class BilinearFormDomainIntegrator;
 
    class DiffusionIntegrator;
 

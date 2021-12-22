@@ -9,92 +9,96 @@
 #include "Rodin/Variational/BoundaryCondition.h"
 
 #include "LinearFormIntegratorUnaryMinus.h"
+#include "BilinearFormIntegratorUnaryMinus.h"
 
 #include "ProblemBody.h"
 
 namespace Rodin::Variational::FormLanguage
 {
-   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
-      :  m_bfi(bfi.copy()),
-         m_bcs(std::make_unique<BoundaryConditionList>())
+   ProblemBody::ProblemBody(const BilinearFormDomainIntegrator& bfi)
+      : m_bfiDomainList(bfi)
    {}
 
-   ProblemBody::ProblemBody(
-         const BilinearFormIntegratorBase& bfi,
-         const LinearFormIntegratorBase& lfi)
-      :  m_bfi(bfi.copy()),
-         m_lfi(lfi.copy()),
-         m_bcs(std::make_unique<BoundaryConditionList>())
-   {}
-
-   ProblemBody::ProblemBody(
-         const BilinearFormIntegratorBase& bfi,
-         const BoundaryConditionList& bcs)
-      :  m_bfi(bfi.copy()),
-         m_bcs(bcs.copy())
-   {}
-
-   ProblemBody::ProblemBody(
-         const BilinearFormIntegratorBase& bfi,
-         const LinearFormIntegratorBase& lfi,
-         const BoundaryConditionList& bcs)
-      :  m_bfi(bfi.copy()),
-         m_lfi(lfi.copy()),
-         m_bcs(bcs.copy())
-   {}
-
-   ProblemBody::ProblemBody(const ProblemBody& other)
-      :  m_bfi(other.m_bfi->copy()),
-         m_bcs(other.m_bcs->copy())
+   List<BoundaryConditionBase>&
+   ProblemBody::getBoundaryConditionList()
    {
-      if (other.m_lfi)
-         m_lfi = std::unique_ptr<LinearFormIntegratorBase>(other.m_lfi->copy());
+      return m_bcList;
    }
 
-   BilinearFormIntegratorBase& ProblemBody::getBilinearFormIntegrator()
+   List<LinearFormIntegratorBase>&
+   ProblemBody::getLinearFormDomainIntegratorList()
    {
-      assert(m_bfi);
-      return *m_bfi;
+      return m_lfiDomainList;
    }
 
-   Utility::OptionalReference<LinearFormIntegratorBase>
-   ProblemBody::getLinearFormIntegrator()
+   List<LinearFormIntegratorBase>&
+   ProblemBody::getLinearFormBoundaryIntegratorList()
    {
-      if (m_lfi)
-         return *m_lfi;
-      else
-         return {};
+      return m_lfiBoundaryList;
    }
 
-   BoundaryConditionList& ProblemBody::getBoundaryConditionList()
+   List<BilinearFormIntegratorBase>&
+   ProblemBody::getBilinearFormDomainIntegratorList()
    {
-      assert(m_bcs);
-      return *m_bcs;
+      return m_bfiDomainList;
    }
 
-   ProblemBody operator+(
-         const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
-   {
-      return ProblemBody(bfi, lfi);
-   }
-
-   ProblemBody operator-(
-         const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
-   {
-      return ProblemBody(bfi, LinearFormIntegratorUnaryMinus(lfi));
-   }
-
-   ProblemBody operator+(
-         const BilinearFormIntegratorBase& bfi, const BoundaryConditionList& bcs)
-   {
-      return ProblemBody(bfi, bcs);
-   }
-
-   ProblemBody operator+(
-         const ProblemBody& pb, const BoundaryConditionList& bcs)
+   ProblemBody operator+(const ProblemBody& pb, const List<BoundaryConditionBase>& bcs)
    {
       ProblemBody res(pb);
       res.getBoundaryConditionList() += bcs;
+      return res;
+   }
+
+   ProblemBody operator+(
+         const ProblemBody& pb, const BilinearFormDomainIntegrator& bfi)
+   {
+      ProblemBody res(pb);
+      res.getBilinearFormDomainIntegratorList() += bfi;
+      return res;
+   }
+
+   ProblemBody operator-(
+         const ProblemBody& pb, const BilinearFormDomainIntegrator& bfi)
+   {
+      ProblemBody res(pb);
+      res.getBilinearFormDomainIntegratorList() += -bfi;
+      return res;
+   }
+
+   ProblemBody operator+(
+         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi)
+   {
+      ProblemBody res(pb);
+      // Sign is opposite because we want the LinearFormIntegrator on the LHS
+      res.getLinearFormDomainIntegratorList() += -lfi;
+      return res;
+   }
+
+   ProblemBody operator-(
+         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi)
+   {
+      ProblemBody res(pb);
+      // Sign is opposite because we want the LinearFormIntegrator on the LHS
+      res.getLinearFormDomainIntegratorList() += lfi;
+      return res;
+   }
+
+   ProblemBody operator+(
+         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi)
+   {
+      ProblemBody res(pb);
+      // Sign is opposite because we want the LinearFormIntegrator on the LHS
+      res.getLinearFormBoundaryIntegratorList() += -lfi;
+      return res;
+   }
+
+   ProblemBody operator-(
+         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi)
+   {
+      ProblemBody res(pb);
+      // Sign is opposite because we want the LinearFormIntegrator on the LHS
+      res.getLinearFormBoundaryIntegratorList() += lfi;
       return res;
    }
 }

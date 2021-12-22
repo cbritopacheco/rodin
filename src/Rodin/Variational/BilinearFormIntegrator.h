@@ -14,6 +14,7 @@ namespace Rodin::Variational
       public:
          virtual void buildMFEMBilinearFormIntegrator() = 0;
          virtual mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() = 0;
+
          /**
           * @brief Releases ownership of the mfem::BilinearFormIntegrator.
           *
@@ -25,7 +26,14 @@ namespace Rodin::Variational
           * mfem::BilinearFormIntegrator instance refers to.
           */
          virtual mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() = 0;
-         virtual BilinearFormIntegratorBase* copy() const noexcept = 0;
+
+         virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
+   };
+
+   class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
+   {
+      public:
+         virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
    };
 }
 

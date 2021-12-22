@@ -24,8 +24,6 @@ namespace Rodin::Variational::FormLanguage
    class LinearFormIntegratorUnaryMinus;
 
    class ScalarSum;
-
-   class BoundaryConditionList;
 }
 
 #endif

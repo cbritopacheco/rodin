@@ -10,12 +10,15 @@
 #include <memory>
 #include <optional>
 
-#include "Rodin/Utility/OptionalReference.h"
+#include "Rodin/Variational/BoundaryCondition.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
+#include "Rodin/Variational/BilinearFormIntegrator.h"
 
 #include "ForwardDecls.h"
 
 #include "Base.h"
-#include "BoundaryConditionList.h"
+#include "List.h"
+
 
 namespace Rodin::Variational::FormLanguage
 {
@@ -25,30 +28,14 @@ namespace Rodin::Variational::FormLanguage
    class ProblemBody : public Base
    {
       public:
-         ProblemBody(
-               const BilinearFormIntegratorBase& bfi);
+         ProblemBody(const BilinearFormDomainIntegrator& bfi);
 
-         ProblemBody(
-               const BilinearFormIntegratorBase& bfi,
-               const LinearFormIntegratorBase& lfi);
+         ProblemBody(const ProblemBody& other) = default;
 
-         ProblemBody(
-               const BilinearFormIntegratorBase& bfi,
-               const BoundaryConditionList& bcs);
-
-         ProblemBody(
-               const BilinearFormIntegratorBase& bfi,
-               const LinearFormIntegratorBase& lfi,
-               const BoundaryConditionList& bcs);
-
-         ProblemBody(const ProblemBody& other);
-
-         BilinearFormIntegratorBase& getBilinearFormIntegrator();
-
-         Utility::OptionalReference<LinearFormIntegratorBase>
-         getLinearFormIntegrator();
-
-         BoundaryConditionList& getBoundaryConditionList();
+         List<BoundaryConditionBase>& getBoundaryConditionList();
+         List<LinearFormIntegratorBase>& getLinearFormDomainIntegratorList();
+         List<LinearFormIntegratorBase>& getLinearFormBoundaryIntegratorList();
+         List<BilinearFormIntegratorBase>& getBilinearFormDomainIntegratorList();
 
          virtual ProblemBody* copy() const noexcept override
          {
@@ -56,22 +43,32 @@ namespace Rodin::Variational::FormLanguage
          }
 
       private:
-         std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
-         std::unique_ptr<LinearFormIntegratorBase> m_lfi;
-         std::unique_ptr<BoundaryConditionList> m_bcs;
+         List<BoundaryConditionBase> m_bcList;
+         List<BilinearFormIntegratorBase> m_bfiDomainList;
+         List<LinearFormIntegratorBase> m_lfiDomainList;
+         List<LinearFormIntegratorBase> m_lfiBoundaryList;
    };
 
    ProblemBody operator+(
-         const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi);
+         const ProblemBody& pb, const BilinearFormDomainIntegrator& bfi);
 
    ProblemBody operator-(
-         const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi);
+         const ProblemBody& pb, const BilinearFormDomainIntegrator& lfi);
 
    ProblemBody operator+(
-         const BilinearFormIntegratorBase& bfi, const BoundaryConditionList& bcs);
+         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi);
+
+   ProblemBody operator-(
+         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi);
 
    ProblemBody operator+(
-         const ProblemBody& pb, const BoundaryConditionList& bcs);
+         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi);
+
+   ProblemBody operator-(
+         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi);
+
+   ProblemBody operator+(
+         const ProblemBody& pb, const List<BoundaryConditionBase>& bcs);
 }
 
 #endif

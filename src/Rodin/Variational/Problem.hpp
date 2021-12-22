@@ -11,6 +11,7 @@
 
 #include "FormLanguage/ProblemBody.h"
 #include "FormLanguage/LinearFormIntegratorUnaryMinus.h"
+#include "BoundaryCondition.h"
 
 #include "Problem.h"
 
@@ -32,11 +33,14 @@ namespace Rodin::Variational
    {
       m_pb.reset(rhs.copy());
 
-      auto& bfi = m_pb->getBilinearFormIntegrator();
-      m_bilinearForm.from(bfi);
+      for (auto& bfi : m_pb->getBilinearFormDomainIntegratorList())
+         m_bilinearForm.add(static_cast<BilinearFormDomainIntegrator&>(bfi));
 
-      if (auto lfi = m_pb->getLinearFormIntegrator())
-         m_linearForm.from(-(*lfi)); // Negative because we want it on the LHS
+      // The LinearFormIntegrator instances have already been moved to the LHS
+      for (auto& lfi : m_pb->getLinearFormDomainIntegratorList())
+         m_linearForm.add(static_cast<LinearFormDomainIntegrator&>(lfi));
+      for (auto& lfi : m_pb->getLinearFormBoundaryIntegratorList())
+         m_linearForm.add(static_cast<LinearFormBoundaryIntegrator&>(lfi));
 
       for (auto& bc : m_pb->getBoundaryConditionList())
          bc.imposeOn(*this);
@@ -44,6 +48,13 @@ namespace Rodin::Variational
       assemble();
 
       return *this;
+   }
+
+   template <class FEC>
+   void Problem<FEC>::assemble()
+   {
+      m_linearForm.assemble();
+      m_bilinearForm.assemble();
    }
 
    template <class FEC>

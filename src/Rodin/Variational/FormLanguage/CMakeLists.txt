@@ -2,7 +2,6 @@ set(RodinVariationalFormLanguage_HEADERS
   Base.h
   BilinearFormIntegratorSum.h
   BilinearFormIntegratorUnaryMinus.h
-  BoundaryConditionList.h
   ForwardDecls.h
   LinearFormIntegratorSum.h
   LinearFormIntegratorUnaryMinus.h
@@ -17,7 +16,6 @@ set(RodinVariationalFormLanguage_HEADERS
 set(RodinVariationalFormLanguage_SRCS
   BilinearFormIntegratorSum.cpp
   BilinearFormIntegratorUnaryMinus.cpp
-  BoundaryConditionList.cpp
   LinearFormIntegratorSum.cpp
   LinearFormIntegratorUnaryMinus.cpp
   MatrixSum.cpp

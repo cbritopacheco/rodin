@@ -1,27 +1,20 @@
-/*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
- * Distributed under the Boost Software License, Version 1.0.
- *       (See accompanying file LICENSE or copy at
- *          https://www.boost.org/LICENSE_1_0.txt)
- */
-#ifndef RODIN_VARIATIONAL_DOMAINLFINTEGRATOR_H
-#define RODIN_VARIATIONAL_DOMAINLFINTEGRATOR_H
+#ifndef RODIN_VARIATIONAL_VECTORBOUNDARYFLUXLFINTEGRATOR_H
+#define RODIN_VARIATIONAL_VECTORBOUNDARYFLUXLFINTEGRATOR_H
 
-#include "ForwardDecls.h"
-#include "ScalarCoefficient.h"
 #include "LinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
    /**
     *
-    * @brief Object used to integrate a coefficient against a fixed coefficient.
+    * @brief 
     *
     * Represents the integration of the linear form
     * @f[
-    *    L(v) = \int_{\Omega} f v \ dx
+    *    L(v) = \int_{\Gamma} f v \cdot n \ dx
     * @f]
-    * where @f$ f @f$ is a scalar coefficient.
+    * where @f$ f @f$ is a scalar coefficient and @f$ \Gamma @f$ is a segment
+    * of the boundary.
     *
     * | Detail                | Description                                  |
     * |-----------------------|----------------------------------------------|
@@ -31,31 +24,34 @@ namespace Rodin::Variational
     * |  @f$ f @f$            | ScalarCoefficient                            |
     *
     */
-   class DomainLFIntegrator : public LinearFormDomainIntegrator
+   class VectorBoundaryFluxLFIntegrator : public LinearFormIntegratorBase
    {
       public:
          /**
-          * @brief Constructs a DomainLFIntegrator with scalar coefficient
+          * @brief Constructs a VectorBoundaryFluxLFIntegrator with scalar coefficient
           * @f$ f @f$.
           *
           * @param[in] f Coefficient to integrate.
           */
-         DomainLFIntegrator(const ScalarCoefficientBase& f);
+         VectorBoundaryFluxLFIntegrator(const ScalarCoefficientBase& f);
 
-         DomainLFIntegrator(const DomainLFIntegrator& other);
+         VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other);
 
          void buildMFEMLinearFormIntegrator() override;
 
          mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
          mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() override;
 
-         DomainLFIntegrator* copy() const noexcept override;
+         VectorBoundaryFluxLFIntegrator* copy() const noexcept override
+         {
+            return new VectorBoundaryFluxLFIntegrator(*this);
+         }
 
       private:
          std::unique_ptr<ScalarCoefficientBase> m_f;
-         std::unique_ptr<mfem::DomainLFIntegrator> m_mfemLFI;
+         std::unique_ptr<mfem::VectorBoundaryFluxLFIntegrator> m_mfemLFI;
    };
+
 }
 
 #endif
-

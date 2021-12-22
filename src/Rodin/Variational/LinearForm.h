@@ -9,7 +9,10 @@
 
 #include <mfem.hpp>
 
+#include "FormLanguage/List.h"
+
 #include "ForwardDecls.h"
+#include "LinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
@@ -18,8 +21,19 @@ namespace Rodin::Variational
       public:
          virtual mfem::LinearForm& getHandle() = 0;
          virtual const mfem::LinearForm& getHandle() const = 0;
-         virtual LinearFormBase& operator=(const LinearFormIntegratorBase& lfi) = 0;
-         virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
+
+         virtual LinearFormBase& from(
+               const LinearFormDomainIntegrator& lfi) = 0;
+
+         virtual LinearFormBase& add(
+               const LinearFormDomainIntegrator& lfi) = 0;
+
+         virtual LinearFormBase& from(
+               const LinearFormBoundaryIntegrator& lfi) = 0;
+
+         virtual LinearFormBase& add(
+               const LinearFormBoundaryIntegrator& lfi) = 0;
+
          virtual void assemble() = 0;
    };
 
@@ -48,11 +62,20 @@ namespace Rodin::Variational
           */
          LinearForm(FiniteElementSpace<FEC>& fes);
 
+         template <class T>
+         std::enable_if_t<
+            std::is_base_of_v<LinearFormIntegratorBase, T>, LinearForm<FEC>&>
+         operator=(const T& lfi)
+         {
+            from(lfi).assemble();
+            return *this;
+         }
+
          void assemble() override;
-
-         LinearForm<FEC>& from(const LinearFormIntegratorBase& lfi) override;
-
-         LinearForm<FEC>& operator=(const LinearFormIntegratorBase& lfi) override;
+         LinearForm<FEC>& add(const LinearFormDomainIntegrator& lfi) override;
+         LinearForm<FEC>& from(const LinearFormDomainIntegrator& lfi) override;
+         LinearForm<FEC>& add(const LinearFormBoundaryIntegrator& lfi) override;
+         LinearForm<FEC>& from(const LinearFormBoundaryIntegrator& lfi) override;
 
          /**
           * @brief Evaluates the linear form at the function @f$ u @f$.
@@ -77,7 +100,8 @@ namespace Rodin::Variational
       private:
          FiniteElementSpace<FEC>& m_fes;
          std::unique_ptr<mfem::LinearForm> m_lf;
-         std::unique_ptr<LinearFormIntegratorBase> m_lfi;
+         FormLanguage::List<LinearFormIntegratorBase> m_lfiDomainList;
+         FormLanguage::List<LinearFormIntegratorBase> m_lfiBoundaryList;
    };
 }
 

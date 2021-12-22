@@ -39,7 +39,7 @@ namespace Rodin::Variational
     * ----
     *
     */
-   class DiffusionIntegrator : public BilinearFormIntegratorBase
+   class DiffusionIntegrator : public BilinearFormDomainIntegrator
    {
       public:
          /**

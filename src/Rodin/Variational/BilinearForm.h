@@ -9,7 +9,11 @@
 
 #include <mfem.hpp>
 
+
+#include "FormLanguage/List.h"
+
 #include "ForwardDecls.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
@@ -18,9 +22,13 @@ namespace Rodin::Variational
       public:
          virtual mfem::BilinearForm& getHandle() = 0;
          virtual const mfem::BilinearForm& getHandle() const = 0;
-         virtual BilinearFormBase& operator=(
-               const BilinearFormIntegratorBase& bfi) = 0;
-         virtual BilinearFormBase& from(const BilinearFormIntegratorBase& bfi) = 0;
+
+         virtual BilinearFormBase& from(
+               const BilinearFormDomainIntegrator& bfi) = 0;
+
+         virtual BilinearFormBase& add(
+               const BilinearFormDomainIntegrator& bfi) = 0;
+
          virtual void assemble() = 0;
    };
 
@@ -58,17 +66,26 @@ namespace Rodin::Variational
           * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
           * compute the action of the bilinear mapping @f$ a(u, v) @f$.
           *
-          * @returns The value which the bilinear form takes at (@f$ u @f$, @f$
-          * v @f$).
+          * @returns The value which the bilinear form takes at
+          * @f$ ( u, v ) @f$.
           */
          double operator()(
                const GridFunction<FEC>& u, const GridFunction<FEC>& v) const;
 
+         template <class T>
+         std::enable_if_t<
+            std::is_base_of_v<BilinearFormIntegratorBase, T>, BilinearForm<FEC>&>
+         operator=(const T& bfi)
+         {
+            from(bfi).assemble();
+            return *this;
+         }
+
          void assemble() override;
 
-         BilinearForm<FEC>& from(const BilinearFormIntegratorBase& bfi) override;
+         BilinearForm<FEC>& add(const BilinearFormDomainIntegrator& bfi) override;
 
-         BilinearForm<FEC>& operator=(const BilinearFormIntegratorBase& bfi) override;
+         BilinearForm<FEC>& from(const BilinearFormDomainIntegrator& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {
@@ -83,7 +100,7 @@ namespace Rodin::Variational
       private:
          FiniteElementSpace<FEC>& m_fes;
          std::unique_ptr<mfem::BilinearForm> m_bf;
-         std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
+         FormLanguage::List<BilinearFormDomainIntegrator> m_bfiDomainList;
    };
 }
 

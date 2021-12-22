@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_LINEARFORM_HPP
 
 #include "FiniteElementSpace.h"
-#include "LinearFormIntegrator.h"
 
 #include "LinearForm.h"
 
@@ -21,26 +20,50 @@ namespace Rodin::Variational
    {}
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::operator=(const LinearFormIntegratorBase& lfi)
-   {
-      from(lfi).assemble();
-      return *this;
-   }
-
-   template <class FEC>
    double LinearForm<FEC>::operator()(const GridFunction<FEC>& u) const
    {
       return *m_lf * u.getHandle();
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormIntegratorBase& lfi)
+   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormDomainIntegrator& lfi)
    {
-      m_lfi.reset(lfi.copy());
-      m_lfi->buildMFEMLinearFormIntegrator();
+      m_lfiDomainList.add(lfi);
+      m_lfiDomainList.back().buildMFEMLinearFormIntegrator();
+      m_lf->AddDomainIntegrator(
+            m_lfiDomainList.back().releaseMFEMLinearFormIntegrator());
+      return *this;
+   }
+
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormBoundaryIntegrator& lfi)
+   {
+      m_lfiDomainList.add(lfi);
+      m_lfiDomainList.back().buildMFEMLinearFormIntegrator();
+      m_lf->AddBoundaryIntegrator(
+            m_lfiDomainList.back().releaseMFEMLinearFormIntegrator());
+      return *this;
+   }
+
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormDomainIntegrator& lfi)
+   {
+      m_lfiDomainList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
+      (*m_lfiDomainList.begin()).buildMFEMLinearFormIntegrator();
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
-      // TODO: Choose whether to add a Domain, Boundary, Face, etc. integrator
-      m_lf->AddDomainIntegrator(m_lfi->releaseMFEMLinearFormIntegrator());
+      m_lf->AddDomainIntegrator(
+            (*m_lfiDomainList.begin()).releaseMFEMLinearFormIntegrator());
+      return *this;
+   }
+
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormBoundaryIntegrator& lfi)
+   {
+      m_lfiDomainList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
+      (*m_lfiDomainList.begin()).buildMFEMLinearFormIntegrator();
+      m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+      m_lf->AddBoundaryIntegrator(
+            (*m_lfiDomainList.begin()).releaseMFEMLinearFormIntegrator());
       return *this;
    }
 

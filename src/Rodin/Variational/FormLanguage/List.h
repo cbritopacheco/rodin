@@ -4,13 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_BOUNDARYCONDITIONLIST_H
-#define RODIN_VARIATIONAL_FORMLANGUAGE_BOUNDARYCONDITIONLIST_H
+#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_LIST_H
+#define RODIN_VARIATIONAL_FORMLANGUAGE_LIST_H
 
 #include <memory>
 #include <vector>
-
-#include "Rodin/Variational/BoundaryCondition.h"
 
 #include "ForwardDecls.h"
 
@@ -18,8 +16,11 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   class BoundaryConditionList : public Base
+   template <class T>
+   class List : public Base
    {
+      static_assert(std::is_base_of_v<Base, T>,
+            "T must be derived from FormLanguage::Base");
       public:
          class Iterator
          {
@@ -27,17 +28,13 @@ namespace Rodin::Variational::FormLanguage
                using iterator_category
                   = std::input_iterator_tag;
                using pointer
-                  = std::vector<std::unique_ptr<BoundaryConditionBase>>::iterator;
-               using value_type
-                  = BoundaryConditionBase&;
-               using reference
-                  = BoundaryConditionBase&;
+                  = typename std::vector<std::unique_ptr<T>>::iterator;
+               using value_type = T&;
+               using reference = T&;
 
                Iterator(pointer it) : m_ptr(it) {}
 
                reference operator*() const { return *(*m_ptr); }
-
-               pointer operator->() { return m_ptr; }
 
                Iterator& operator++() { m_ptr++; return *this; }
 
@@ -70,17 +67,13 @@ namespace Rodin::Variational::FormLanguage
                using iterator_category
                   = std::input_iterator_tag;
                using const_pointer
-                  = std::vector<std::unique_ptr<BoundaryConditionBase>>::const_iterator;
-               using value_type
-                  = BoundaryConditionBase&;
-               using const_reference
-                  = BoundaryConditionBase&;
+                  = typename std::vector<std::unique_ptr<T>>::const_iterator;
+               using value_type = T&;
+               using const_reference = const T&;
 
                ConstIterator(const_pointer it) : m_ptr(it) {}
 
                const_reference operator*() const { return *(*m_ptr); }
-
-               const_pointer operator->() { return m_ptr; }
 
                ConstIterator& operator++() { m_ptr++; return *this; }
 
@@ -107,35 +100,66 @@ namespace Rodin::Variational::FormLanguage
                const_pointer m_ptr;
          };
 
-         BoundaryConditionList() = default;
+         List() = default;
 
-         BoundaryConditionList(const BoundaryConditionBase& bc);
+         virtual ~List() = default;
 
-         BoundaryConditionList(const BoundaryConditionList& other);
+         List(const T& bc);
 
-         BoundaryConditionList& operator+=(const BoundaryConditionList& other);
+         List(const List& other);
+
+         List(List&& other) = default;
+
+         List& operator=(const List& other)
+         {
+            if (this != &other)
+            {
+               List tmp(other);
+               m_list.swap(tmp.m_list);
+            }
+            return *this;
+         }
+
+         List& operator+=(const List& other);
+
+         List& add(const T& v);
 
          size_t size() const;
 
          Iterator begin();
          Iterator end();
 
+         T& front()
+         {
+            return *(*m_list.begin());
+         }
+
+         T& back()
+         {
+            assert(size() >= 1);
+            return *(*(m_list.end() - 1));
+         }
+
+         void clear() noexcept
+         {
+            m_list.clear();
+         }
+
          ConstIterator begin() const;
          ConstIterator end() const;
 
          friend
-         BoundaryConditionList operator+(
-               const BoundaryConditionList& a, const BoundaryConditionList& b);
+         List operator+(const List& a, const List& b);
 
-         BoundaryConditionList* copy() const noexcept override
+         List* copy() const noexcept override
          {
-            return new BoundaryConditionList(*this);
+            return new List(*this);
          }
       private:
-         std::vector<std::unique_ptr<BoundaryConditionBase>> m_bcList;
+         std::vector<std::unique_ptr<T>> m_list;
    };
-
 }
 
-#endif
+#include "List.hpp"
 
+#endif
