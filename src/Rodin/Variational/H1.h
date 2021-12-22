@@ -118,7 +118,8 @@ namespace Rodin::Variational
           * equal to 1.
           * @param[in] basis Type of basis to use.
           */
-         H1(Mesh& mesh, const int dim=1, const int order=1, Basis basis = GaussLobato)
+         H1(Mesh& mesh,
+               const int dim = 1, const int order = 1, Basis basis = GaussLobato)
             :  m_mesh(mesh),
                m_fec(order, m_mesh.get().getDimension()),
                m_fes(&m_mesh.get().getHandle(), &m_fec, dim),

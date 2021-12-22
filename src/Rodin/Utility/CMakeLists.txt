@@ -1,6 +1,7 @@
 set(RodinUtility_HEADERS
-  Overloaded.h
   IsSpecialization.h
+  OptionalReference.h
+  Overloaded.h
   )
 
 set(RodinUtility_SRCS )

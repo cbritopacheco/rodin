@@ -5,6 +5,37 @@
 using namespace Rodin;
 using namespace Rodin::Variational;
 
+template <class M, class L>
+class Compliance
+{
+  public:
+    Compliance(Mesh& mesh,
+        const ScalarCoefficient<M>& mu, const ScalarCoefficient<L>& lambda)
+      : m_mesh(mesh), m_fes(m_mesh), m_d(m_mesh.getDimension()),
+        m_mu(mu), m_lambda(lambda),
+        m_one(m_fes)
+    {
+      m_one = ScalarCoefficient{1.0};
+    };
+
+    double operator()(GridFunction<H1>& v)
+    {
+      LinearForm lf(m_fes);
+      auto e = ScalarCoefficient(0.5) * (Jacobian(v) + Jacobian(v).T());
+      auto Ae = ScalarCoefficient(2.0) * m_mu * e + m_lambda * Trace(e) * IdentityMatrix(m_d);
+      lf = DomainLFIntegrator(Dot(Ae, e));
+      return lf(m_one);
+    }
+
+  private:
+    Mesh&                 m_mesh;
+    H1                    m_fes;
+    int                   m_d;
+    ScalarCoefficient<M>  m_mu;
+    ScalarCoefficient<L>  m_lambda;
+    GridFunction<H1>      m_one;
+};
+
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/holes.mesh";
@@ -15,52 +46,61 @@ int main(int, char**)
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
 
-  // Build finite element space
+  // Build finite element spaces
   int d = 2;
   H1 Vh(Omega, d);
-
-  H1 Sh(Omega); // Scalar
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
-  // Displacement
-  GridFunction u(Vh);
-
-  // Shape gradient
-  GridFunction g(Vh);
+  // Compliance
+  Compliance compliance(Omega, mu, lambda);
 
   // Elasticity equation
+  GridFunction u(Vh);
+  auto g = VectorCoefficient{0, -1};
   Problem elasticity(u);
   elasticity = ElasticityIntegrator(lambda, mu)
              + DirichletBC(GammaD, VectorCoefficient{0, 0})
-             + NeumannBC(GammaN, VectorCoefficient{0, -1});
+             + NeumannBC(GammaN, g);
 
-  // Hilbert regularization
+  // Hilbert extension-regularization
+  GridFunction theta(Vh);
+  auto alpha = ScalarCoefficient(0.001);
   auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
   auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
 
-  GridFunction one(Sh);
-  one = ScalarCoefficient{1.0};
+  Problem hilbert(theta);
+  hilbert = VectorDiffusionIntegrator(alpha)
+          + VectorMassIntegrator()
+          + VectorBoundaryFluxLFIntegrator(Dot(Ae, e))
+          - VectorDomainLFIntegrator(VectorCoefficient{0, 0})
+          + DirichletBC(GammaD, VectorCoefficient{0, 0});
 
-  // Solve problem
+  // Solve both problems with the same solver
   Solver::PCG().setMaxIterations(200)
                .setRelativeTolerance(1e-12)
                .printIterations(true)
+               .solve(hilbert);
+
+  Solver::PCG().setMaxIterations(200)
+               .setRelativeTolerance(1e-12)
                .solve(elasticity);
 
-  LinearForm lf(Sh);
-  lf = DomainLFIntegrator(Dot(Ae, e));
+  LinearForm lf(Vh);
+  lf = VectorBoundaryFluxLFIntegrator(Dot(Ae, e));
 
   BilinearForm bf(Vh);
   bf = ElasticityIntegrator(lambda, mu);
 
-  std::cout << lf(one) << std::endl;
+  std::cout << lf(u) << std::endl;
+  std::cout << compliance(u) << std::endl;
   std::cout << bf(u, u) << std::endl;
 
   Omega.save("Omega.mesh");
   u.save("u.gf");
+  theta.save("theta.gf");
 
   return 0;
 }

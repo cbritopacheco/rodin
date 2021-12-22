@@ -5,6 +5,7 @@ set(RodinVariationalFormLanguage_HEADERS
   ForwardDecls.h
   LinearFormIntegratorSum.h
   LinearFormIntegratorUnaryMinus.h
+  List.h
   MatrixSum.h
   ProblemBody.h
   ScalarMatrixProduct.h
@@ -24,6 +25,7 @@ set(RodinVariationalFormLanguage_SRCS
   ScalarProduct.cpp
   ScalarSum.cpp
   ScalarUnaryMinus.cpp
+  List.hpp
   )
 
 add_library(RodinVariationalFormLanguage

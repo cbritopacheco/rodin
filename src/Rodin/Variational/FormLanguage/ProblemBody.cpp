@@ -15,7 +15,7 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   ProblemBody::ProblemBody(const BilinearFormDomainIntegrator& bfi)
+   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
       : m_bfiDomainList(bfi)
    {}
 
@@ -47,22 +47,6 @@ namespace Rodin::Variational::FormLanguage
    {
       ProblemBody res(pb);
       res.getBoundaryConditionList() += bcs;
-      return res;
-   }
-
-   ProblemBody operator+(
-         const ProblemBody& pb, const BilinearFormDomainIntegrator& bfi)
-   {
-      ProblemBody res(pb);
-      res.getBilinearFormDomainIntegratorList() += bfi;
-      return res;
-   }
-
-   ProblemBody operator-(
-         const ProblemBody& pb, const BilinearFormDomainIntegrator& bfi)
-   {
-      ProblemBody res(pb);
-      res.getBilinearFormDomainIntegratorList() += -bfi;
       return res;
    }
 

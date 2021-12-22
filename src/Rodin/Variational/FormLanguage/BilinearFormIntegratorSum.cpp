@@ -5,6 +5,13 @@
 namespace Rodin::Variational::FormLanguage
 {
    BilinearFormIntegratorSum
+   ::BilinearFormIntegratorSum(
+         const BilinearFormIntegratorBase& lhs,
+         const BilinearFormIntegratorBase& rhs)
+      : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+   {}
+
+   BilinearFormIntegratorSum
    ::BilinearFormIntegratorSum(const BilinearFormIntegratorSum& other)
       : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
    {}

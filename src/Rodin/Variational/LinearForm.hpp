@@ -38,10 +38,10 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormBoundaryIntegrator& lfi)
    {
-      m_lfiDomainList.add(lfi);
-      m_lfiDomainList.back().buildMFEMLinearFormIntegrator();
+      m_lfiBoundaryList.add(lfi);
+      m_lfiBoundaryList.back().buildMFEMLinearFormIntegrator();
       m_lf->AddBoundaryIntegrator(
-            m_lfiDomainList.back().releaseMFEMLinearFormIntegrator());
+            m_lfiBoundaryList.back().releaseMFEMLinearFormIntegrator());
       return *this;
    }
 
@@ -59,11 +59,11 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormBoundaryIntegrator& lfi)
    {
-      m_lfiDomainList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
-      (*m_lfiDomainList.begin()).buildMFEMLinearFormIntegrator();
+      m_lfiBoundaryList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
+      (*m_lfiBoundaryList.begin()).buildMFEMLinearFormIntegrator();
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
       m_lf->AddBoundaryIntegrator(
-            (*m_lfiDomainList.begin()).releaseMFEMLinearFormIntegrator());
+            (*m_lfiBoundaryList.begin()).releaseMFEMLinearFormIntegrator());
       return *this;
    }
 

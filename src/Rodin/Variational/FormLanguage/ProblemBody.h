@@ -28,7 +28,7 @@ namespace Rodin::Variational::FormLanguage
    class ProblemBody : public Base
    {
       public:
-         ProblemBody(const BilinearFormDomainIntegrator& bfi);
+         ProblemBody(const BilinearFormIntegratorBase& bfi);
 
          ProblemBody(const ProblemBody& other) = default;
 
@@ -48,12 +48,6 @@ namespace Rodin::Variational::FormLanguage
          List<LinearFormIntegratorBase> m_lfiDomainList;
          List<LinearFormIntegratorBase> m_lfiBoundaryList;
    };
-
-   ProblemBody operator+(
-         const ProblemBody& pb, const BilinearFormDomainIntegrator& bfi);
-
-   ProblemBody operator-(
-         const ProblemBody& pb, const BilinearFormDomainIntegrator& lfi);
 
    ProblemBody operator+(
          const ProblemBody& pb, const LinearFormDomainIntegrator& lfi);
