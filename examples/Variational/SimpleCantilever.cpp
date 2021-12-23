@@ -84,16 +84,11 @@ int main(int, char**)
 
   Solver::PCG().setMaxIterations(200)
                .setRelativeTolerance(1e-12)
-               .printIterations(true)
                .solve(hilbert);
-
-  LinearForm lf(Vh);
-  lf = VectorBoundaryFluxLFIntegrator(Dot(Ae, e));
 
   BilinearForm bf(Vh);
   bf = ElasticityIntegrator(lambda, mu);
 
-  std::cout << lf(u) << std::endl;
   std::cout << compliance(u) << std::endl;
   std::cout << bf(u, u) << std::endl;
 
