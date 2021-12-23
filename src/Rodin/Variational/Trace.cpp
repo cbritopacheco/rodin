@@ -11,8 +11,7 @@ namespace Rodin::Variational
    }
 
    Trace::Trace(const Trace& other)
-      :  m_matrix(other.m_matrix->copy()),
-         m_mfemCoefficient(other.m_mfemCoefficient)
+      :  m_matrix(other.m_matrix->copy())
    {}
 
    void Trace::buildMFEMCoefficient()

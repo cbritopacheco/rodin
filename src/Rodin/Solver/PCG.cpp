@@ -34,6 +34,8 @@ namespace Rodin::Solver
 
    void PCG::solve(Variational::ProblemBase& problem) const
    {
+      problem.assemble();
+
       auto& a = problem.getBilinearForm();
       auto& b = problem.getLinearForm();
       auto& u = problem.getSolution();

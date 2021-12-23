@@ -226,7 +226,7 @@ namespace Rodin::Variational
          /**
           * @brief Projects a scalar coefficient on the given GridFunction.
           * @note The GridFunction must be vector valued.
-          * @param[in] s Scalar coefficient to project
+          * @param[in] v Scalar coefficient to project
           * @returns Reference to self
           */
          GridFunction<FEC>& operator=(const VectorCoefficientBase& v)

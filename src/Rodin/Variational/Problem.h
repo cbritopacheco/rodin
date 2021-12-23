@@ -50,6 +50,12 @@ namespace Rodin::Variational
           */
          virtual ProblemBase& operator=(const FormLanguage::ProblemBody& rhs) = 0;
 
+         /**
+          * @brief Assembles the underlying linear system to solve.
+          *
+          * @note This is typically the first thing that is done when calling
+          * the @ref Solver::solve() method.
+          */
          virtual void assemble() = 0;
    };
 
@@ -57,12 +63,14 @@ namespace Rodin::Variational
     * @brief Represents a variational problem to be solved.
     *
     * The problem may be specified via the overloaded operator
-    * @ref Variational::Problem::operator=(const FormLanguage::ProblemBody&).
+    * @ref Variational::Problem::operator=().
     *
     * The problem may then be solved by utilizing any derived instance Solver
     * class in the Rodin::Solver namespace.
     *
-    * @see FormLanguage::ProblemBody
+    * @note The underlying linear system is only assembled until the
+    * @ref assemble() method is called. This is typically the first thing that
+    * is done when calling the @ref Solver::solve() method.
     */
    template <class FEC>
    class Problem : public ProblemBase

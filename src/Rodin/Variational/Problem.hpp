@@ -45,8 +45,6 @@ namespace Rodin::Variational
       for (auto& bc : m_pb->getBoundaryConditionList())
          bc.imposeOn(*this);
 
-      assemble();
-
       return *this;
    }
 

@@ -13,8 +13,7 @@ namespace Rodin::Variational
    {}
 
    Transpose::Transpose(const Transpose& other)
-      :  m_matrix(other.m_matrix->copy()),
-         m_mfemMatrixCoefficient(other.m_mfemMatrixCoefficient)
+      :  m_matrix(other.m_matrix->copy())
    {}
 
    int Transpose::getRows() const

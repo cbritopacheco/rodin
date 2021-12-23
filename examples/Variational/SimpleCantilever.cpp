@@ -75,18 +75,17 @@ int main(int, char**)
   hilbert = VectorDiffusionIntegrator(alpha)
           + VectorMassIntegrator()
           + VectorBoundaryFluxLFIntegrator(Dot(Ae, e))
-          - VectorDomainLFIntegrator(VectorCoefficient{0, 0})
           + DirichletBC(GammaD, VectorCoefficient{0, 0});
 
-  // Solve both problems with the same solver
+  // Solve both problems
+  Solver::PCG().setMaxIterations(200)
+               .setRelativeTolerance(1e-12)
+               .solve(elasticity);
+
   Solver::PCG().setMaxIterations(200)
                .setRelativeTolerance(1e-12)
                .printIterations(true)
                .solve(hilbert);
-
-  Solver::PCG().setMaxIterations(200)
-               .setRelativeTolerance(1e-12)
-               .solve(elasticity);
 
   LinearForm lf(Vh);
   lf = VectorBoundaryFluxLFIntegrator(Dot(Ae, e));

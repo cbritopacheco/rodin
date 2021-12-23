@@ -7,7 +7,7 @@ namespace Rodin::Variational
    {}
 
    IdentityMatrix::IdentityMatrix(const IdentityMatrix& other)
-      : m_n(other.m_n), m_mfemMatrixCoefficient(other.m_mfemMatrixCoefficient)
+      : m_n(other.m_n)
    {}
 
    int IdentityMatrix::getRows() const

@@ -30,8 +30,7 @@ namespace Rodin::Variational
             std::is_base_of_v<MatrixCoefficientBase, A> &&
             std::is_base_of_v<MatrixCoefficientBase, B>>>
    ::Dot(const Dot& other)
-      :  m_a(other.m_a->copy()), m_b(other.m_b->copy()),
-         m_mfemCoefficient(other.m_mfemCoefficient)
+      :  m_a(other.m_a->copy()), m_b(other.m_b->copy())
    {}
 
    template <class A, class B>
