@@ -63,14 +63,15 @@ namespace Rodin::Variational
     * @brief Represents a variational problem to be solved.
     *
     * The problem may be specified via the overloaded operator
-    * @ref Variational::Problem::operator=().
+    * @ref Variational::Problem::operator=(const FormLanguage::ProblemBody&).
     *
     * The problem may then be solved by utilizing any derived instance Solver
     * class in the Rodin::Solver namespace.
     *
     * @note The underlying linear system is only assembled until the
-    * @ref assemble() method is called. This is typically the first thing that
-    * is done when calling the @ref Solver::solve() method.
+    * @ref assemble() method is called. It is usually the responsibility of
+    * the derived @ref Solver object to assemble the problem when solving it
+    * via the @ref solve(Problem&) method.
     */
    template <class FEC>
    class Problem : public ProblemBase
