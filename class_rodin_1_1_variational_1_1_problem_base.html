@@ -75,6 +75,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a8752768ac9294e0b9d0bffd0ce9604f7" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Builds the problem using the <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a> object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Assembles the underlying linear system to solve.</dd>
           </dl>
         </section>
         <section>
@@ -109,6 +113,13 @@
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Assembles the underlying linear system to solve.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>This is typically the first thing that is done when calling the Solver::solve() method.</p></aside>
           </div></section>
         </section>
       </div>

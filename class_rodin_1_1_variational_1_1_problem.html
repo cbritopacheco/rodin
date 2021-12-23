@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<p>The problem may be specified via the overloaded operator Variational::Problem::operator=(const FormLanguage::ProblemBody&amp;).</p><p>The problem may then be solved by utilizing any derived instance <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> class in the <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a> namespace.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a></p></aside>
+<p>The problem may be specified via the overloaded operator Variational::Problem::operator=(const FormLanguage::ProblemBody&amp;).</p><p>The problem may then be solved by utilizing any derived instance <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> class in the <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a> namespace.</p><aside class="m-note m-info"><h4>Note</h4><p>The underlying linear system is only assembled until the assemble() method is called. It is usually the responsibility of the derived <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> object to assemble the problem when solving it via the solve(Problem&amp;) method.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
