@@ -11,7 +11,7 @@ set(RodinExternalMMG_HEADERS
   Cast.h
   Edge.h
   ForwardDecls.h
-  Macros.h
+  Configure.h
   Mesh.h
   Mesh2D.h
   MeshAdaptor.h
