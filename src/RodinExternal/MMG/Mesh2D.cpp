@@ -74,7 +74,7 @@ namespace Rodin::External::MMG
             getHandle(),
             nullptr,
             MMG2D_IPARAM_verbose,
-            RODIN_MMG_DEBUG_VERBOSITY_LEVEL);
+            RODIN_MMG_VERBOSITY_LEVEL);
 #endif
 
    }

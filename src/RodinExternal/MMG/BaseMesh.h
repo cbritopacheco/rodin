@@ -10,7 +10,7 @@
 #include <cassert>
 #include <mmg/libmmg.h>
 
-#include "Macros.h"
+#include "Configure.h"
 
 namespace Rodin::External::MMG
 {

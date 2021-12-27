@@ -21,7 +21,6 @@
 namespace Rodin::Variational
 {
    /**
-    * @internal
     * @brief Abstract base class for VectorCoefficient objects.
     */
    class VectorCoefficientBase : public FormLanguage::Base
@@ -34,13 +33,11 @@ namespace Rodin::Variational
          virtual size_t getDimension() const = 0;
 
          /**
-          * @internal
           * @brief Builds the underlying mfem::VectorCoefficient object.
           */
          virtual void buildMFEMVectorCoefficient() = 0;
 
          /**
-          * @internal
           * @brief Returns the underlying mfem::VectorCoefficient object.
           * @note Typically one should only call this after one has called
           * buildMFEMVectorCoefficient().
@@ -48,7 +45,6 @@ namespace Rodin::Variational
          virtual mfem::VectorCoefficient& getMFEMVectorCoefficient() = 0;
 
          /**
-          * @internal
           * @brief Builds a copy of the object and returns a non-owning
           * pointer to the new object.
           */
@@ -112,16 +108,12 @@ namespace Rodin::Variational
    {
       public:
          /**
-          * @brief Constructs a VectorCoefficient from an initializer list
+          * @brief Constructs a VectorCoefficient from a vector valued grid
+          * function.
           */
          constexpr
          VectorCoefficient(GridFunction<FEC>& u);
 
-         /**
-          * @brief Copies the data.
-          *
-          * @param other Other coefficient to copy
-          */
          constexpr
          VectorCoefficient(const VectorCoefficient& other);
 

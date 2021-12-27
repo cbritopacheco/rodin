@@ -102,7 +102,7 @@ namespace Rodin::External::MMG
       ier =  MMG5_loadSolHeader(
             filename.c_str(), meshDim,
             &inm, &ver, &bin, &iswp, &np, &dim, &nsols, &type, &posnp,
-            RODIN_MMG_DEBUG_VERBOSITY_LEVEL);
+            RODIN_MMG_VERBOSITY_LEVEL);
 #endif
 
       switch (ier)

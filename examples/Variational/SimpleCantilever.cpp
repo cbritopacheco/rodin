@@ -55,20 +55,20 @@ int main(int, char**)
   auto pcg = Solver::PCG().setMaxIterations(500)
                           .setRelativeTolerance(1e-12);
 
-  size_t maxIt = 300;
+  size_t maxIt = 30;
   double eps = 1e-6;
   double coef = 0.1;
   double meshsize = 0.1;
   double oldObj, newObj;
 
-  // Finite element spaces
-  int d = 2;
-  H1 Vh(Omega, d);
-  H1 Sh(Omega);
-
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
+    // Finite element spaces
+    int d = 2;
+    H1 Vh(Omega, d);
+    H1 Sh(Omega);
+
     // Compliance
     Compliance compliance(Vh, mu, lambda);
 
@@ -118,12 +118,17 @@ int main(int, char**)
     else
     {
       Omega.displace(theta);
+
+      // Refine the mesh using MMG
+      auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+      MMG::MeshOptimizer2D().optimize(mmgMesh);
+      Omega = Cast(mmgMesh).to<Mesh>();
     }
     coef = std::max(0.05, 1.02 * coef);
+
+    Omega.save("Omega.mesh");
   }
 
-  // Save the final mesh
-  Omega.save("Omega.mesh");
   std::cout << "Saved final mesh to Omega.mesh" << std::endl;
 
   return 0;

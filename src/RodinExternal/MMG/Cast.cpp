@@ -12,7 +12,9 @@
  * code (i.e. table.hpp) where the I variable is defined and causes all sorts
  * of nasty errors.
  */
+#ifdef I
 #undef I
+#endif
 
 #include "Rodin/Alert.h"
 #include "Rodin/Variational.h"
