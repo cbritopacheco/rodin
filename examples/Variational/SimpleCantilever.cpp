@@ -23,6 +23,7 @@ int main(int, char**)
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
   Omega.save("Omega0.mesh");
+  std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
@@ -35,8 +36,6 @@ int main(int, char**)
   // Optimization parameters
   size_t maxIt = 30;
   double eps = 1e-6;
-  double coef = 0.1;
-  double meshsize = 0.1;
   double oldObj, newObj;
   auto ell = ScalarCoefficient(5);
   auto alpha = ScalarCoefficient(0.1);
@@ -47,7 +46,6 @@ int main(int, char**)
     // Finite element spaces
     int d = 2;
     H1 Vh(Omega, d);
-    H1 Sh(Omega);
 
     // Compliance
     auto compliance = [&](GridFunction<H1>& v)
@@ -88,20 +86,15 @@ int main(int, char**)
       break;
 
     // Make the displacement
-    GridFunction normGrad(Sh);
-    normGrad = Magnitude(theta);
-    double ngMax = normGrad.max();
-    double step = coef * meshsize / (eps * eps + ngMax);
-    theta *= step;
     double t = Omega.getMaximumDisplacement(theta);
-    if (t < 1e-2)
+    if (t < 1e-4)
     {
-      // If the max displacement is too small reject the iteration
-      coef /= 2;
-      continue;
+      // If the maximum displacement is too small the mesh will degenerate
+      break;
     }
     else
     {
+      theta *= 0.1 * t;
       Omega.displace(theta);
 
       // Refine the mesh using MMG
@@ -109,7 +102,6 @@ int main(int, char**)
       MMG::MeshOptimizer2D().optimize(mmgMesh);
       Omega = Cast(mmgMesh).to<Mesh>();
     }
-    coef = std::max(0.05, 1.02 * coef);
 
     Omega.save("Omega.mesh");
   }
