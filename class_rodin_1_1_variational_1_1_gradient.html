@@ -81,6 +81,7 @@ $ u $
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -211,11 +212,20 @@ $ x = (x_1, \ldots, x_n) $
 <use x='271.267446' y='-25.537839' xlink:href='#eq6-g2-84'/>
 </g>
 </svg></div>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>
+            </dt>
+            <dd>Abstract base class for <a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a> objects.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#abaa4a94af1f9f1c7cc0483ecbcf47d0a" class="m-doc">Gradient</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&gt;&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a79efcbf81b56441c6cf8ce9c4142e563" class="m-doc">Gradient</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&gt;&amp; u) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the <a href="class_rodin_1_1_variational_1_1_gradient.html" class="m-doc">Gradient</a> of an <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
@@ -249,13 +259,25 @@ $ u $
               <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension of the vector object.</dd>
+            <dt id="a5afeeb74df5cd59eef1d61d4c229bdb2">
+              <span class="m-doc-wrap-bumper">void <a href="#a5afeeb74df5cd59eef1d61d4c229bdb2" class="m-doc-self">buildMFEMVectorCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Builds the underlying mfem::VectorCoefficient object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6b96abb2352e107df4420dd117873918" class="m-doc">getMFEMVectorCoefficient</a>(</span><span class="m-doc-wrap">) -&gt; mfem::VectorCoefficient&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the underlying mfem::VectorCoefficient object.</dd>
+            <dt id="ae989b6f2e11fee135ef6d3b216d64288">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae989b6f2e11fee135ef6d3b216d64288" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Builds a copy of the object and returns a non-owning pointer to the new object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="abaa4a94af1f9f1c7cc0483ecbcf47d0a"><div>
+          <section class="m-doc-details" id="a79efcbf81b56441c6cf8ce9c4142e563"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Gradient::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abaa4a94af1f9f1c7cc0483ecbcf47d0a" class="m-doc-self">Gradient</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&gt;&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Gradient::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79efcbf81b56441c6cf8ce9c4142e563" class="m-doc-self">Gradient</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&gt;&amp; u) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs the <a href="class_rodin_1_1_variational_1_1_gradient.html" class="m-doc">Gradient</a> of an <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
@@ -305,6 +327,13 @@ $ u $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a6b96abb2352e107df4420dd117873918"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">mfem::VectorCoefficient&amp; Rodin::<wbr />Variational::<wbr />Gradient::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b96abb2352e107df4420dd117873918" class="m-doc-self">getMFEMVectorCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the underlying mfem::VectorCoefficient object.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>Typically one should only call this after one has called <a href="class_rodin_1_1_variational_1_1_gradient.html#a5afeeb74df5cd59eef1d61d4c229bdb2" class="m-doc">buildMFEMVectorCoefficient()</a>.</p></aside>
           </div></section>
         </section>
       </div>

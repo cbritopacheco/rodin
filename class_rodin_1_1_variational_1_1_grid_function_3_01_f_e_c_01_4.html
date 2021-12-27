@@ -95,9 +95,13 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a216ce18023a2fa563fc1d011095ae871" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af68217823fa6f7fd6b345a83ebc7275b" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Returns the finite element space to which the function belongs to.</dd>
+            <dd>Gets the finite element space to which the function belongs to.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae39f18834c8153c9763217201895f42d" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the finite element space to which the function belongs to.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span>
             </dt>
@@ -163,19 +167,36 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a216ce18023a2fa563fc1d011095ae871"><div>
+          <section class="m-doc-details" id="af68217823fa6f7fd6b345a83ebc7275b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a216ce18023a2fa563fc1d011095ae871" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af68217823fa6f7fd6b345a83ebc7275b" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Returns the finite element space to which the function belongs to.</p>
+            <p>Gets the finite element space to which the function belongs to.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Finite element space to which the function belongs to.</td>
+                  <td>Reference to finite element space to which the function belongs to.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae39f18834c8153c9763217201895f42d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae39f18834c8153c9763217201895f42d" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the finite element space to which the function belongs to.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to finite element space to which the function belongs to.</td>
                 </tr>
               </tfoot>
             </table>
