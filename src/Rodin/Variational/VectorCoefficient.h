@@ -63,7 +63,7 @@ namespace Rodin::Variational
          constexpr
          VectorCoefficient(Args&&... values)
             :  m_dimension(sizeof...(Args)),
-               m_values(std::forward_as_tuple(values...))
+               m_values(std::forward<Args>(values)...)
          {}
 
          constexpr
