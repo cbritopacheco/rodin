@@ -55,15 +55,13 @@ namespace Rodin::Variational
    VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
 
    template <class ... Values>
-   class VectorCoefficient
-      : public VectorCoefficientBase
+   class VectorCoefficient : public VectorCoefficientBase
    {
       public:
-         template <class ... Args>
          constexpr
-         VectorCoefficient(Args&&... values)
-            :  m_dimension(sizeof...(Args)),
-               m_values(std::forward<Args>(values)...)
+         VectorCoefficient(Values... values)
+            :  m_dimension(sizeof...(Values)),
+               m_values(std::forward_as_tuple(values...))
          {}
 
          constexpr
