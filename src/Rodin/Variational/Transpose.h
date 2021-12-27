@@ -26,9 +26,13 @@ namespace Rodin::Variational
          /**
           * @brief Constructs the Transpose matrix of the given matrix.
           */
-         Transpose(const MatrixCoefficientBase& m);
+         Transpose(const MatrixCoefficientBase& m)
+            : m_matrix(m.copy())
+         {}
 
-         Transpose(const Transpose& other);
+         Transpose(const Transpose& other)
+            :  m_matrix(other.m_matrix->copy())
+         {}
 
          int getRows() const override;
 

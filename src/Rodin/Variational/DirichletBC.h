@@ -12,6 +12,7 @@
 #include "ForwardDecls.h"
 
 #include "ScalarCoefficient.h"
+#include "VectorCoefficient.h"
 
 #include "BoundaryCondition.h"
 
@@ -39,41 +40,20 @@ namespace Rodin::Variational
     * @see @ref examples-variational-poisson
     *
     */
-   class DirichletBC : public BoundaryConditionBase
+   template <class T>
+   class DirichletBC;
+
+   DirichletBC(int, const ScalarCoefficientBase&)
+      -> DirichletBC<ScalarCoefficientBase>;
+
+   template <>
+   class DirichletBC<ScalarCoefficientBase>
+      : public BoundaryCondition<ScalarCoefficientBase>
    {
       public:
-         /**
-          * @brief Constructs a Dirichlet boundary condition on the part of the
-          * boundary specified by the boundary attribute.
-          *
-          * @param[in] bdrAttr Attribute corresponding to the segment
-          * @f$ \Gamma_D @f$ where the Dirichlet boundary condition is imposed.
-          *
-          * @param[in] value Scalar value of the trial function @f$ u @f$ on
-          * the boundary @f$ \Gamma_D @f$.
-          */
-         DirichletBC(int bdrAttr, const ScalarCoefficientBase& value);
-
-         /**
-          * @brief Constructs a Dirichlet boundary condition on the part of the
-          * boundary specified by the boundary attribute.
-          *
-          * @param[in] bdrAttr Attribute corresponding to the segment
-          * @f$ \Gamma_D @f$ where the Dirichlet boundary condition is imposed.
-          *
-          * @param[in] value Vector value of the trial function @f$ u @f$ on
-          * the boundary @f$ \Gamma_D @f$.
-          */
-         DirichletBC(int bdrAttr, const VectorCoefficientBase& value);
-
-         /**
-          * @internal
-          */
-         DirichletBC(const DirichletBC& other);
-
-         virtual ~DirichletBC() = default;
-
-         int getBoundaryAttribute() const override;
+         DirichletBC(int bdrAtr, const ScalarCoefficientBase& v)
+            : BoundaryCondition<ScalarCoefficientBase>(bdrAtr, v)
+         {}
 
          void imposeOn(ProblemBase& pb) override;
 
@@ -81,14 +61,30 @@ namespace Rodin::Variational
          {
             return new DirichletBC(*this);
          }
-
       private:
-         int m_bdrAttr;
          mfem::Array<int> m_essBdr;
-         std::variant<
-            std::unique_ptr<ScalarCoefficientBase>,
-            std::unique_ptr<VectorCoefficientBase>
-            > m_value;
+   };
+
+   DirichletBC(int, const VectorCoefficientBase&)
+      -> DirichletBC<VectorCoefficientBase>;
+
+   template <>
+   class DirichletBC<VectorCoefficientBase>
+      : public BoundaryCondition<VectorCoefficientBase>
+   {
+      public:
+         DirichletBC(int bdrAtr, const VectorCoefficientBase& v)
+            : BoundaryCondition<VectorCoefficientBase>(bdrAtr, v)
+         {}
+
+         void imposeOn(ProblemBase& pb) override;
+
+         DirichletBC* copy() const noexcept override
+         {
+            return new DirichletBC(*this);
+         }
+      private:
+         mfem::Array<int> m_essBdr;
    };
 }
 

@@ -7,11 +7,16 @@
 #ifndef RODIN_VARIATIONAL_PROBLEM_HPP
 #define RODIN_VARIATIONAL_PROBLEM_HPP
 
-#include "GridFunction.h"
+
+#include "Rodin/Utility.h"
 
 #include "FormLanguage/ProblemBody.h"
 #include "FormLanguage/LinearFormIntegratorUnaryMinus.h"
+
 #include "BoundaryCondition.h"
+#include "GridFunction.h"
+#include "DirichletBC.h"
+#include "NeumannBC.h"
 
 #include "Problem.h"
 
@@ -42,8 +47,9 @@ namespace Rodin::Variational
       for (auto& lfi : m_pb->getLinearFormBoundaryIntegratorList())
          m_linearForm.add(static_cast<LinearFormBoundaryIntegrator&>(lfi));
 
-      for (auto& bc : m_pb->getBoundaryConditionList())
-         bc.imposeOn(*this);
+      // Neumann boundary conditions are imposed instantly
+      for (auto& nbc : m_pb->getNeumannBCList())
+         nbc.imposeOn(*this);
 
       return *this;
    }
@@ -53,6 +59,18 @@ namespace Rodin::Variational
    {
       m_linearForm.assemble();
       m_bilinearForm.assemble();
+   }
+
+   template <class FEC>
+   void Problem<FEC>::update()
+   {
+      m_solution.getFiniteElementSpace().update();
+      m_solution.update();
+      m_linearForm.update();
+      m_bilinearForm.update();
+
+      for (auto& dbc : m_pb->getDirichletBCList())
+         dbc.imposeOn(*this);
    }
 
    template <class FEC>

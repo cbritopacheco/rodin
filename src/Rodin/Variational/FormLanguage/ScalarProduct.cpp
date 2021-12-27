@@ -8,8 +8,7 @@ namespace Rodin::Variational::FormLanguage
    {}
 
    ScalarProduct::ScalarProduct(const ScalarProduct& other)
-      :  m_a(other.m_a->copy()), m_b(other.m_b->copy()),
-         m_mfemCoefficient(other.m_mfemCoefficient)
+      :  m_a(other.m_a->copy()), m_b(other.m_b->copy())
    {}
 
    void ScalarProduct::buildMFEMCoefficient()

@@ -4,6 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Variational/GridFunction.h"
+#include "Variational/FiniteElementSpace.h"
+
 #include "Mesh.h"
 
 namespace Rodin
@@ -26,9 +29,32 @@ namespace Rodin
       : m_mesh(other.m_mesh)
    {}
 
+   Mesh& Mesh::displace(const Variational::GridFunctionBase& u)
+   {
+      assert(u.getFiniteElementSpace().getDimension() == getDimension());
+      m_mesh.MoveNodes(u.getHandle());
+      return *this;
+   }
+
+   double
+   Mesh::getMaximumDisplacement(const Variational::GridFunctionBase& u)
+   {
+      double res;
+      m_mesh.CheckDisplacements(u.getHandle(), res);
+      return res;
+   }
+
    int Mesh::getDimension() const
    {
       return m_mesh.Dimension();
+   }
+
+   double Mesh::getVolume()
+   {
+      double totalVolume = 0;
+      for (int i = 0; i < m_mesh.GetNE(); i++)
+         totalVolume += m_mesh.GetElementVolume(i);
+      return totalVolume;
    }
 
    mfem::Mesh& Mesh::getHandle()

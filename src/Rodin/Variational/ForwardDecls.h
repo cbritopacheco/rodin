@@ -16,6 +16,8 @@ namespace Rodin::Variational
    class Problem;
 
    // ---- FiniteElementSpace ------------------------------------------------
+   class FiniteElementSpaceBase;
+
    template <class Derived>
    class FiniteElementSpace;
 
@@ -64,18 +66,24 @@ namespace Rodin::Variational
    // ---- Boundary Conditions -----------------------------------------------
    class BoundaryConditionBase;
 
+   template <class T>
+   class BoundaryCondition;
+
+   template <class T>
    class DirichletBC;
 
+   template <class T>
    class NeumannBC;
 
    // ---- Coefficients ------------------------------------------------------
    class ScalarCoefficientBase;
 
-   template <class T, class Enable = void>
+   template <class T>
    class ScalarCoefficient;
 
    class VectorCoefficientBase;
 
+   template <class T>
    class VectorCoefficient;
 
    class MatrixCoefficientBase;

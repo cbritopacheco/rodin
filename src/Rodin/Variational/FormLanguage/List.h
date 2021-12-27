@@ -122,7 +122,7 @@ namespace Rodin::Variational::FormLanguage
 
          List& operator+=(const List& other);
 
-         List& add(const T& v);
+         T& append(const T& v);
 
          size_t size() const;
 

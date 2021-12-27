@@ -8,14 +8,6 @@
 
 namespace Rodin::Variational
 {
-   Transpose::Transpose(const MatrixCoefficientBase& m)
-      : m_matrix(m.copy())
-   {}
-
-   Transpose::Transpose(const Transpose& other)
-      :  m_matrix(other.m_matrix->copy())
-   {}
-
    int Transpose::getRows() const
    {
       return m_matrix->getColumns();

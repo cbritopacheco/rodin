@@ -12,6 +12,8 @@ namespace Rodin::Variational
    class LinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
+         virtual ~LinearFormIntegratorBase() = default;
+
          virtual void buildMFEMLinearFormIntegrator() = 0;
 
          virtual mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() = 0;
@@ -41,7 +43,26 @@ namespace Rodin::Variational
    class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
    {
       public:
+         LinearFormBoundaryIntegrator(const std::vector<int>& bdrAttrs)
+            : m_bdrAttrs(bdrAttrs)
+         {}
+
+         LinearFormBoundaryIntegrator(
+               const LinearFormBoundaryIntegrator&) = default;
+
+         LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
+
+         virtual ~LinearFormBoundaryIntegrator() = default;
+
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
+
+         virtual const std::vector<int>& getBoundaryAttributes() const
+         {
+            return m_bdrAttrs;
+         }
+
+      private:
+         std::vector<int> m_bdrAttrs;
    };
 
 }

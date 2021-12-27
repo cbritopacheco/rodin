@@ -34,6 +34,7 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
+         constexpr
          Gradient(GridFunction<H1>& u);
 
          size_t getDimension() const override;

@@ -43,17 +43,8 @@ namespace Rodin::Variational
       };
    }
 
-   /**
-    * @brief Represents the scalar product on Euclidean spaces.
-    *
-    * See the available specializations for the supported types.
-    */
-   template <class A, class B, class Enable>
-   class Dot
-   {
-      public:
-         Dot(const A&, const B&);
-   };
+   template <class A, class B>
+   Dot(const A&, const B&) -> Dot<A, B>;
 
    /**
     * @brief Represents the double-dot product between two matrices.
@@ -68,20 +59,23 @@ namespace Rodin::Variational
     * @tparam B Derived type from MatrixCoefficientBase
     */
    template <class A, class B>
-   class Dot<A, B,
-         std::enable_if_t<
-            std::is_base_of_v<MatrixCoefficientBase, A> &&
-            std::is_base_of_v<MatrixCoefficientBase, B>>>
-      : public ScalarCoefficientBase
+   class Dot<A, B> : public ScalarCoefficientBase
    {
+      static_assert(
+            std::is_base_of_v<MatrixCoefficientBase, A> &&
+            std::is_base_of_v<MatrixCoefficientBase, B>
+            );
+
       public:
          /**
           * @brief Constructs the Dot product between two given matrices.
           * @param[in] a Derived instance of MatrixCoefficientBase
           * @param[in] b Derived instance of MatrixCoefficientBase
           */
+         constexpr
          Dot(const A& a, const B& b);
 
+         constexpr
          Dot(const Dot& other);
 
          void buildMFEMCoefficient() override;

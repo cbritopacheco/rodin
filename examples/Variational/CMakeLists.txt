@@ -20,4 +20,5 @@ target_link_libraries(SimpleCantilever
   Rodin::Mesh
   Rodin::Solver
   Rodin::Variational
+  Rodin::External::MMG
   )

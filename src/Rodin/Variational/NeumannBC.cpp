@@ -14,78 +14,51 @@
 
 namespace Rodin::Variational
 {
-   NeumannBC::NeumannBC(int bdrAttr, const ScalarCoefficientBase& value)
-      :  m_bdrAttr(bdrAttr),
-         m_value(std::unique_ptr<ScalarCoefficientBase>(value.copy()))
-   {}
-
-   NeumannBC::NeumannBC(int bdrAttr, const VectorCoefficientBase& value)
-      :  m_bdrAttr(bdrAttr),
-         m_value(std::unique_ptr<VectorCoefficientBase>(value.copy()))
-   {}
-
-   NeumannBC::NeumannBC(const NeumannBC& other)
-      :  m_bdrAttr(other.m_bdrAttr)
-   {
-      std::visit(
-         [this](auto&& arg)
-         {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
-            {
-               m_value = std::unique_ptr<VectorCoefficientBase>(arg->copy());
-            }
-            else
-            {
-               m_value = std::unique_ptr<ScalarCoefficientBase>(arg->copy());
-            }
-         }, other.m_value);
-   }
-
-   int NeumannBC::getBoundaryAttribute() const
-   {
-      return m_bdrAttr;
-   }
-
-   void NeumannBC::imposeOn(ProblemBase& pb)
+   void NeumannBC<ScalarCoefficientBase>::imposeOn(ProblemBase& pb)
    {
       int maxBdrAttr = pb.getSolution()
-                         .getHandle()
-                         .FESpace()
-                         ->GetMesh()
-                         ->bdr_attributes.Max();
+                         .getFiniteElementSpace()
+                         .getMesh()
+                         .getHandle().bdr_attributes.Max();
 
-      if (m_bdrAttr > maxBdrAttr)
+      if (getBoundaryAttribute() > maxBdrAttr)
          Alert::Exception(
                "NeumannBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
       m_nbcBdr = mfem::Array<int>(maxBdrAttr);
       m_nbcBdr = 0;
-      m_nbcBdr[m_bdrAttr - 1] = 1;
+      m_nbcBdr[getBoundaryAttribute() - 1] = 1;
 
-      std::visit(
-         [&pb, this](auto&& arg)
-         {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
-            {
-               arg->buildMFEMVectorCoefficient();
-               pb.getLinearForm()
-                 .getHandle()
-                 .AddBoundaryIntegrator(
-                       new mfem::VectorBoundaryLFIntegrator(
-                          arg->getMFEMVectorCoefficient()), m_nbcBdr);
-            }
-            else
-            {
-               arg->buildMFEMCoefficient();
-               pb.getLinearForm()
-                 .getHandle()
-                 .AddBoundaryIntegrator(
-                       new mfem::BoundaryLFIntegrator(
-                          arg->getMFEMCoefficient()), m_nbcBdr);
-            }
-         }, m_value);
+      getValue().buildMFEMCoefficient();
+      pb.getLinearForm()
+        .getHandle()
+        .AddBoundaryIntegrator(
+              new mfem::BoundaryLFIntegrator(
+                 getValue().getMFEMCoefficient()), m_nbcBdr);
+   }
+
+   void NeumannBC<VectorCoefficientBase>::imposeOn(ProblemBase& pb)
+   {
+      int maxBdrAttr = pb.getSolution()
+                         .getFiniteElementSpace()
+                         .getMesh()
+                         .getHandle().bdr_attributes.Max();
+
+      if (getBoundaryAttribute() > maxBdrAttr)
+         Alert::Exception(
+               "NeumannBC boundary attribute is out of range.").raise();
+
+      // Project the coefficient onto the boundary
+      m_nbcBdr = mfem::Array<int>(maxBdrAttr);
+      m_nbcBdr = 0;
+      m_nbcBdr[getBoundaryAttribute() - 1] = 1;
+
+      getValue().buildMFEMVectorCoefficient();
+      pb.getLinearForm()
+        .getHandle()
+        .AddBoundaryIntegrator(
+              new mfem::VectorBoundaryLFIntegrator(
+                 getValue().getMFEMVectorCoefficient()), m_nbcBdr);
    }
 }

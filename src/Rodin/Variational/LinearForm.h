@@ -35,6 +35,7 @@ namespace Rodin::Variational
                const LinearFormBoundaryIntegrator& lfi) = 0;
 
          virtual void assemble() = 0;
+         virtual void update() = 0;
    };
 
    /**
@@ -71,9 +72,12 @@ namespace Rodin::Variational
             return *this;
          }
 
+         void update() override;
          void assemble() override;
+
          LinearForm<FEC>& add(const LinearFormDomainIntegrator& lfi) override;
          LinearForm<FEC>& from(const LinearFormDomainIntegrator& lfi) override;
+
          LinearForm<FEC>& add(const LinearFormBoundaryIntegrator& lfi) override;
          LinearForm<FEC>& from(const LinearFormBoundaryIntegrator& lfi) override;
 
@@ -102,6 +106,7 @@ namespace Rodin::Variational
          std::unique_ptr<mfem::LinearForm> m_lf;
          FormLanguage::List<LinearFormIntegratorBase> m_lfiDomainList;
          FormLanguage::List<LinearFormIntegratorBase> m_lfiBoundaryList;
+         std::vector<mfem::Array<int>> m_bdrAttrMarkers;
    };
 }
 

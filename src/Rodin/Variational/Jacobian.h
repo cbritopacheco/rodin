@@ -65,9 +65,15 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Jacobian(GridFunction<H1>& u);
+         constexpr
+         Jacobian(GridFunction<H1>& u)
+            :  m_u(u)
+         {}
 
-         Jacobian(const Jacobian& other);
+         constexpr
+         Jacobian(const Jacobian& other)
+            : m_u(other.m_u)
+         {}
 
          int getRows() const override;
          int getColumns() const override;

@@ -66,10 +66,9 @@ namespace Rodin::Variational::FormLanguage
    }
 
    template <class T>
-   List<T>& List<T>::add(const T& v)
+   T& List<T>::append(const T& v)
    {
-      m_list.emplace_back(v.copy());
-      return *this;
+      return *m_list.emplace_back(v.copy());
    }
 
    template <class T>

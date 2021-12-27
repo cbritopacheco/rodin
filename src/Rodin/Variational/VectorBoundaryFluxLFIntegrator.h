@@ -38,6 +38,10 @@ namespace Rodin::Variational
           */
          VectorBoundaryFluxLFIntegrator(const ScalarCoefficientBase& lambda);
 
+         VectorBoundaryFluxLFIntegrator(
+               const std::vector<int>& bdrAttrs,
+               const ScalarCoefficientBase& lambda);
+
          VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other);
 
          void buildMFEMLinearFormIntegrator() override;

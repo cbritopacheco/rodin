@@ -11,5 +11,6 @@ namespace Rodin::Solver {}
 
 #include "Solver/Solver.h"
 #include "Solver/PCG.h"
+#include "Solver/CG.h"
 
 #endif

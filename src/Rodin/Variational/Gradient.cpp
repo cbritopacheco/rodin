@@ -5,6 +5,7 @@
 
 namespace Rodin::Variational
 {
+   constexpr
    Gradient::Gradient(GridFunction<H1>& u)
       : m_u(u)
    {}

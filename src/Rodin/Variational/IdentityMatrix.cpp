@@ -2,14 +2,6 @@
 
 namespace Rodin::Variational
 {
-   IdentityMatrix::IdentityMatrix(int n)
-      : m_n(n)
-   {}
-
-   IdentityMatrix::IdentityMatrix(const IdentityMatrix& other)
-      : m_n(other.m_n)
-   {}
-
    int IdentityMatrix::getRows() const
    {
       return m_n;

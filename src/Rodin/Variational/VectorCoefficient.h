@@ -8,7 +8,8 @@
 #define RODIN_VARIATIONAL_VECTORCOEFFICIENT_H
 
 #include <memory>
-#include <tuple>
+#include <optional>
+#include <type_traits>
 
 #include <mfem.hpp>
 
@@ -54,45 +55,86 @@ namespace Rodin::Variational
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
    };
 
-   /**
-    * @brief Represents a vector valued coefficient.
-    */
-   class VectorCoefficient : public VectorCoefficientBase
+   template <class T>
+   VectorCoefficient(std::initializer_list<T>)
+      -> VectorCoefficient<std::initializer_list<T>>;
+
+   template <class T>
+   class VectorCoefficient<std::initializer_list<T>>
+      : public VectorCoefficientBase
    {
+      static_assert(std::is_convertible_v<T, ScalarCoefficient<T>>);
+
       public:
          /**
-          * @brief Constructs a VectorCoefficient from a set of values.
+          * @brief Constructs a VectorCoefficient from an initializer list
           */
-         template <class ... Values>
-         VectorCoefficient(const Values&... values);
+         constexpr
+         VectorCoefficient(std::initializer_list<T> values);
 
          /**
           * @brief Copies the data.
           *
           * @param other Other coefficient to copy
           */
+         constexpr
          VectorCoefficient(const VectorCoefficient& other);
 
          size_t getDimension() const override;
 
          void buildMFEMVectorCoefficient() override;
 
-         virtual VectorCoefficient* copy() const noexcept override;
+         mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
+
+         VectorCoefficient* copy() const noexcept override
+         {
+            return new VectorCoefficient(*this);
+         }
+
+      private:
+         size_t m_dimension;
+         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_values;
+         std::optional<mfem::VectorArrayCoefficient> m_mfemVectorCoefficient;
+   };
+
+   template <class FEC>
+   VectorCoefficient(GridFunction<FEC>&)
+      -> VectorCoefficient<GridFunction<FEC>>;
+
+   template <class FEC>
+   class VectorCoefficient<GridFunction<FEC>>
+      : public VectorCoefficientBase
+   {
+      public:
+         /**
+          * @brief Constructs a VectorCoefficient from an initializer list
+          */
+         constexpr
+         VectorCoefficient(GridFunction<FEC>& u);
+
+         /**
+          * @brief Copies the data.
+          *
+          * @param other Other coefficient to copy
+          */
+         constexpr
+         VectorCoefficient(const VectorCoefficient& other);
+
+         size_t getDimension() const override;
+
+         void buildMFEMVectorCoefficient() override;
 
          mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
 
+         VectorCoefficient* copy() const noexcept override
+         {
+            return new VectorCoefficient(*this);
+         }
+
       private:
-         template<std::size_t I = 0, class ... Tp>
-         typename std::enable_if_t<I == sizeof...(Tp)>
-         makeCoefficientsFromTuple(const std::tuple<Tp...>&);
-
-         template<std::size_t I = 0, class ... Tp>
-         typename std::enable_if_t<I < sizeof...(Tp)>
-         makeCoefficientsFromTuple(const std::tuple<Tp...>& t);
-
          size_t m_dimension;
-         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_values;
-         mfem::VectorArrayCoefficient m_mfemVectorArrayCoefficient;
+         GridFunction<FEC>& m_u;
+         std::optional<mfem::VectorGridFunctionCoefficient> m_mfemVectorCoefficient;
    };
 }
 

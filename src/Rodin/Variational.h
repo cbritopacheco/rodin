@@ -26,6 +26,7 @@
 #include "Variational/Trace.h"
 #include "Variational/Dot.h"
 #include "Variational/IdentityMatrix.h"
+#include "Variational/Magnitude.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"

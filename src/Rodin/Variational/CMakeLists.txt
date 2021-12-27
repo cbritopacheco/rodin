@@ -50,6 +50,7 @@ set(RodinVariational_SRCS
   VectorMassIntegrator.cpp
   VectorDiffusionIntegrator.cpp
   VectorDomainLFIntegrator.cpp
+  ScalarCoefficient.cpp
   BilinearForm.hpp
   Derivative.hpp
   Dot.hpp

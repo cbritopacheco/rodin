@@ -10,9 +10,10 @@
 #include <memory>
 #include <optional>
 
-#include "Rodin/Variational/BoundaryCondition.h"
-#include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
+#include "Rodin/Variational/DirichletBC.h"
+#include "Rodin/Variational/NeumannBC.h"
 
 #include "ForwardDecls.h"
 
@@ -32,7 +33,10 @@ namespace Rodin::Variational::FormLanguage
 
          ProblemBody(const ProblemBody& other) = default;
 
-         List<BoundaryConditionBase>& getBoundaryConditionList();
+         List<BoundaryConditionBase>& getDirichletBCList();
+
+         List<BoundaryConditionBase>& getNeumannBCList();
+
          List<LinearFormIntegratorBase>& getLinearFormDomainIntegratorList();
          List<LinearFormIntegratorBase>& getLinearFormBoundaryIntegratorList();
          List<BilinearFormIntegratorBase>& getBilinearFormDomainIntegratorList();
@@ -47,6 +51,10 @@ namespace Rodin::Variational::FormLanguage
          List<BilinearFormIntegratorBase> m_bfiDomainList;
          List<LinearFormIntegratorBase> m_lfiDomainList;
          List<LinearFormIntegratorBase> m_lfiBoundaryList;
+
+         List<BoundaryConditionBase> m_dbcs;
+
+         List<BoundaryConditionBase> m_nbcs;
    };
 
    ProblemBody operator+(
@@ -61,8 +69,23 @@ namespace Rodin::Variational::FormLanguage
    ProblemBody operator-(
          const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi);
 
+   template <class T>
    ProblemBody operator+(
-         const ProblemBody& pb, const List<BoundaryConditionBase>& bcs);
+         const ProblemBody& pb, const DirichletBC<T>& bc)
+   {
+      ProblemBody res(pb);
+      res.getDirichletBCList().append(bc);
+      return res;
+   }
+
+   template <class T>
+   ProblemBody operator+(
+         const ProblemBody& pb, const NeumannBC<T>& bc)
+   {
+      ProblemBody res(pb);
+      res.getNeumannBCList().append(bc);
+      return res;
+   }
 }
 
 #endif

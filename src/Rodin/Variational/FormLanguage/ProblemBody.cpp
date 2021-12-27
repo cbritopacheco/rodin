@@ -4,10 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Variational/BilinearFormIntegrator.h"
-#include "Rodin/Variational/LinearFormIntegrator.h"
-#include "Rodin/Variational/BoundaryCondition.h"
-
 #include "LinearFormIntegratorUnaryMinus.h"
 #include "BilinearFormIntegratorUnaryMinus.h"
 
@@ -19,10 +15,14 @@ namespace Rodin::Variational::FormLanguage
       : m_bfiDomainList(bfi)
    {}
 
-   List<BoundaryConditionBase>&
-   ProblemBody::getBoundaryConditionList()
+   List<BoundaryConditionBase>& ProblemBody::getNeumannBCList()
    {
-      return m_bcList;
+      return m_nbcs;
+   }
+
+   List<BoundaryConditionBase>& ProblemBody::getDirichletBCList()
+   {
+      return m_dbcs;
    }
 
    List<LinearFormIntegratorBase>&
@@ -41,13 +41,6 @@ namespace Rodin::Variational::FormLanguage
    ProblemBody::getBilinearFormDomainIntegratorList()
    {
       return m_bfiDomainList;
-   }
-
-   ProblemBody operator+(const ProblemBody& pb, const List<BoundaryConditionBase>& bcs)
-   {
-      ProblemBody res(pb);
-      res.getBoundaryConditionList() += bcs;
-      return res;
    }
 
    ProblemBody operator+(

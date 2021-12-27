@@ -29,6 +29,7 @@ namespace Rodin::Variational
          virtual BilinearFormBase& add(
                const BilinearFormDomainIntegrator& bfi) = 0;
 
+         virtual void update() = 0;
          virtual void assemble() = 0;
    };
 
@@ -82,6 +83,7 @@ namespace Rodin::Variational
          }
 
          void assemble() override;
+         void update() override;
 
          BilinearForm<FEC>& add(const BilinearFormDomainIntegrator& bfi) override;
 

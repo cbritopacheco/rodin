@@ -14,32 +14,20 @@
 namespace Rodin::Variational
 {
    // ---- Dot<MatrixCoefficientBase> ----------------------------------------
-   // ------------------------------------------------------------------------
    template <class A, class B>
-   Dot<A, B,
-         std::enable_if_t<
-            std::is_base_of_v<MatrixCoefficientBase, A> &&
-            std::is_base_of_v<MatrixCoefficientBase, B>>>
-   ::Dot(const A& a, const B& b)
+   constexpr
+   Dot<A, B>::Dot(const A& a, const B& b)
       : m_a(a.copy()), m_b(b.copy())
    {}
 
    template <class A, class B>
-   Dot<A, B,
-         std::enable_if_t<
-            std::is_base_of_v<MatrixCoefficientBase, A> &&
-            std::is_base_of_v<MatrixCoefficientBase, B>>>
-   ::Dot(const Dot& other)
+   constexpr
+   Dot<A, B>::Dot(const Dot& other)
       :  m_a(other.m_a->copy()), m_b(other.m_b->copy())
    {}
 
    template <class A, class B>
-   void
-   Dot<A, B,
-         std::enable_if_t<
-            std::is_base_of_v<MatrixCoefficientBase, A> &&
-            std::is_base_of_v<MatrixCoefficientBase, B>>>
-   ::buildMFEMCoefficient()
+   void Dot<A, B>::buildMFEMCoefficient()
    {
       m_a->buildMFEMMatrixCoefficient();
       m_b->buildMFEMMatrixCoefficient();
@@ -49,12 +37,7 @@ namespace Rodin::Variational
    }
 
    template <class A, class B>
-   mfem::Coefficient&
-   Dot<A, B,
-         std::enable_if_t<
-            std::is_base_of_v<MatrixCoefficientBase, A> &&
-            std::is_base_of_v<MatrixCoefficientBase, B>>>
-   ::getMFEMCoefficient()
+   mfem::Coefficient& Dot<A, B>::getMFEMCoefficient()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;

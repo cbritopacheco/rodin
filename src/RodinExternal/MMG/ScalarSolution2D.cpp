@@ -249,13 +249,19 @@ namespace Rodin::External::MMG
       m_sol->umin = other.m_sol->umin;
       m_sol->umax = other.m_sol->umax;
 
-      auto nameInLength = std::strlen(other.m_sol->namein);
-      m_sol->namein = (char*) std::malloc(nameInLength + 1);
-      std::memcpy(m_sol->namein, other.m_sol->namein, nameInLength + 1);
+      if (other.m_sol->namein)
+      {
+         auto nameInLength = std::strlen(other.m_sol->namein);
+         m_sol->namein = (char*) std::malloc(nameInLength + 1);
+         std::memcpy(m_sol->namein, other.m_sol->namein, nameInLength + 1);
+      }
 
-      auto nameOutLength = std::strlen(other.m_sol->namein);
-      m_sol->namein = (char*) std::malloc(nameOutLength + 1);
-      std::memcpy(m_sol->namein, other.m_sol->namein, nameOutLength + 1);
+      if (other.m_sol->nameout)
+      {
+         auto nameOutLength = std::strlen(other.m_sol->namein);
+         m_sol->namein = (char*) std::malloc(nameOutLength + 1);
+         std::memcpy(m_sol->namein, other.m_sol->namein, nameOutLength + 1);
+      }
    }
 
    ScalarSolution2D<true>&

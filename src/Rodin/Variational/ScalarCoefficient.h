@@ -13,8 +13,6 @@
 
 #include <mfem.hpp>
 
-#include "ForwardDecls.h"
-
 #include "FormLanguage/Base.h"
 #include "FormLanguage/ForwardDecls.h"
 
@@ -42,20 +40,9 @@ namespace Rodin::Variational
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
    };
 
-   /**
-    * @brief A ScalarCoefficient represents a continuous function that
-    * represent some scalar coefficient in a PDE.
-    */
-   template <class T, class Enable>
-   class ScalarCoefficient
-   {
-      public:
-         ScalarCoefficient(T&)
-         {}
-
-         ScalarCoefficient(const T&)
-         {}
-   };
+   template <class T>
+   ScalarCoefficient(const T&)
+      -> ScalarCoefficient<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
 
    /**
     * @brief Represents a ScalarCoefficient of arithmetic type `T`.
@@ -64,7 +51,7 @@ namespace Rodin::Variational
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class T>
-   class ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>
+   class ScalarCoefficient
       : public ScalarCoefficientBase
    {
       public:
@@ -72,12 +59,25 @@ namespace Rodin::Variational
           * @brief Constructs a ScalarCoefficient from an arithmetic value.
           * @param[in] x Arithmetic value
           */
-         ScalarCoefficient(const T& x);
+         constexpr
+         ScalarCoefficient(const T& x)
+            : m_x(x)
+         {}
 
-         /**
-          * @internal
-          */
-         ScalarCoefficient(const ScalarCoefficient& other);
+         constexpr
+         ScalarCoefficient(const ScalarCoefficient& other)
+            : m_x(other.m_x)
+         {}
+
+         constexpr
+         ScalarCoefficient(ScalarCoefficient&& other)
+            : m_x(std::move(other.m_x))
+         {}
+
+         T value() const
+         {
+            return m_x;
+         }
 
          void buildMFEMCoefficient() override;
          mfem::Coefficient& getMFEMCoefficient() override;
@@ -90,6 +90,10 @@ namespace Rodin::Variational
          T m_x;
          std::optional<mfem::ConstantCoefficient> m_mfemCoefficient;
    };
+
+   template <class FEC>
+   ScalarCoefficient(const GridFunction<FEC>&)
+      -> ScalarCoefficient<GridFunction<FEC>>;
 
    /**
     * @brief Represents a scalar coefficient which is built from a
@@ -107,11 +111,10 @@ namespace Rodin::Variational
           * @param[in] u GridFunction which belongs to the finite element
           * collection FEC
           */
+         constexpr
          ScalarCoefficient(GridFunction<FEC>& u);
 
-         /**
-          * @internal
-          */
+         constexpr
          ScalarCoefficient(const ScalarCoefficient& other);
 
          void buildMFEMCoefficient() override;
@@ -126,6 +129,36 @@ namespace Rodin::Variational
       private:
          GridFunction<FEC>& m_u;
          std::optional<mfem::GridFunctionCoefficient> m_mfemCoefficient;
+   };
+
+   ScalarCoefficient(std::function<double(const double*)>)
+      -> ScalarCoefficient<std::function<double(const double*)>>;
+
+   template <>
+   class ScalarCoefficient<std::function<double(const double*)>>
+      : public ScalarCoefficientBase
+   {
+      public:
+         ScalarCoefficient(std::function<double(const double*)> f)
+            : m_f(f)
+         {}
+
+         ScalarCoefficient(const ScalarCoefficient& other)
+            : m_f(other.m_f)
+         {}
+
+         void buildMFEMCoefficient() override;
+
+         mfem::Coefficient& getMFEMCoefficient() override;
+
+         ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
+
+      private:
+         std::function<double(double*)> m_f;
+         std::optional<mfem::FunctionCoefficient> m_mfemCoefficient;
    };
 }
 

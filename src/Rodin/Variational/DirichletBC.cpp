@@ -7,86 +7,60 @@
 #include "Rodin/Alert.h"
 
 #include "Problem.h"
-#include "ScalarCoefficient.h"
-#include "VectorCoefficient.h"
 
 #include "DirichletBC.h"
 
 namespace Rodin::Variational
 {
-   DirichletBC::DirichletBC(int bdrAttr, const ScalarCoefficientBase& value)
-      :  m_bdrAttr(bdrAttr),
-         m_value(std::unique_ptr<ScalarCoefficientBase>(value.copy()))
-   {}
-
-   DirichletBC::DirichletBC(int bdrAttr, const VectorCoefficientBase& value)
-      :  m_bdrAttr(bdrAttr),
-         m_value(std::unique_ptr<VectorCoefficientBase>(value.copy()))
-   {}
-
-   DirichletBC::DirichletBC(const DirichletBC& other)
-      :  m_bdrAttr(other.m_bdrAttr)
-   {
-      std::visit(
-         [this](auto&& arg)
-         {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
-            {
-               m_value = std::unique_ptr<VectorCoefficientBase>(arg->copy());
-            }
-            else
-            {
-               m_value = std::unique_ptr<ScalarCoefficientBase>(arg->copy());
-            }
-         }, other.m_value);
-   }
-
-   int DirichletBC::getBoundaryAttribute() const
-   {
-      return m_bdrAttr;
-   }
-
-   void DirichletBC::imposeOn(ProblemBase& pb)
+   void DirichletBC<ScalarCoefficientBase>::imposeOn(ProblemBase& pb)
    {
       int maxBdrAttr = pb.getSolution()
-                         .getHandle()
-                         .FESpace()
-                         ->GetMesh()
-                         ->bdr_attributes.Max();
+                         .getFiniteElementSpace()
+                         .getMesh()
+                         .getHandle().bdr_attributes.Max();
 
-      if (m_bdrAttr > maxBdrAttr)
+      if (getBoundaryAttribute() > maxBdrAttr)
          Rodin::Alert::Exception(
                "DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
       m_essBdr = mfem::Array<int>(maxBdrAttr);
       m_essBdr = 0;
-      m_essBdr[m_bdrAttr - 1] = 1;
+      m_essBdr[getBoundaryAttribute() - 1] = 1;
 
-      std::visit(
-         [&pb, this](auto&& arg)
-         {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::unique_ptr<VectorCoefficientBase>>)
-            {
-               arg->buildMFEMVectorCoefficient();
-               pb.getSolution()
-                 .getHandle()
-                 .ProjectBdrCoefficient(
-                       arg->getMFEMVectorCoefficient(), m_essBdr);
-            }
-            else
-            {
-               arg->buildMFEMCoefficient();
-               pb.getSolution()
-                 .getHandle()
-                 .ProjectBdrCoefficient(
-                       arg->getMFEMCoefficient(), m_essBdr);
-            }
-         }, m_value);
+      getValue().buildMFEMCoefficient();
+      pb.getSolution()
+        .getHandle()
+        .ProjectBdrCoefficient(
+              getValue().getMFEMCoefficient(), m_essBdr);
 
       // Keep track of the boundary attributes that have been projected
-      pb.getEssentialBoundary()[m_bdrAttr - 1] = 1;
+      pb.getEssentialBoundary()[getBoundaryAttribute() - 1] = 1;
+   }
+
+   void DirichletBC<VectorCoefficientBase>::imposeOn(ProblemBase& pb)
+   {
+      int maxBdrAttr = pb.getSolution()
+                         .getFiniteElementSpace()
+                         .getMesh()
+                         .getHandle().bdr_attributes.Max();
+
+      if (getBoundaryAttribute() > maxBdrAttr)
+         Rodin::Alert::Exception(
+               "DirichletBC boundary attribute is out of range.").raise();
+
+      // Project the coefficient onto the boundary
+      m_essBdr = mfem::Array<int>(maxBdrAttr);
+      m_essBdr = 0;
+      m_essBdr[getBoundaryAttribute() - 1] = 1;
+
+      getValue().buildMFEMVectorCoefficient();
+      pb.getSolution()
+        .getHandle()
+        .ProjectBdrCoefficient(
+              getValue().getMFEMVectorCoefficient(), m_essBdr);
+
+      // Keep track of the boundary attributes that have been projected
+      pb.getEssentialBoundary()[getBoundaryAttribute() - 1] = 1;
    }
 }

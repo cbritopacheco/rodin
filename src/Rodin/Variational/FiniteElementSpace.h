@@ -15,20 +15,28 @@
 
 namespace Rodin::Variational
 {
+   class FiniteElementSpaceBase
+   {
+      public:
+         virtual Mesh& getMesh() = 0;
+         virtual int getDimension() const = 0;
+         virtual void update() = 0;
+   };
+
    /**
     * @brief Base type for finite element spaces.
     *
     * @tparam Derived Subclass which derives from FiniteElementSpace.
     */
    template <class Derived>
-   class FiniteElementSpace
+   class FiniteElementSpace : public FiniteElementSpaceBase
    {
       public:
          /**
           * @brief Gets the mesh that is associated to the finite element
           * space.
           */
-         Mesh& getMesh()
+         Mesh& getMesh() override
          {
             return static_cast<Derived*>(this)->getMesh();
          }
@@ -36,7 +44,7 @@ namespace Rodin::Variational
          /**
           * @brief Gets the dimension of the range space.
           */
-         int getDimension() const
+         int getDimension() const override
          {
             return static_cast<const Derived*>(this)->getDimension();
          }

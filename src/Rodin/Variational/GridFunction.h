@@ -40,21 +40,17 @@ namespace Rodin::Variational
           * @returns Constant reference to the underlying object.
           */
          virtual const mfem::GridFunction& getHandle() const = 0;
+
+         virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
+         virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
+         virtual void update() = 0;
+         virtual GridFunctionBase& operator*=(double t) = 0;
+         virtual GridFunctionBase& operator/=(double t) = 0;
+         virtual double max() const = 0;
+         virtual double min() const = 0;
    };
 
-   /*
-    * @internal
-    * @brief Empty GridFunction class, needed for the automatic inference of
-    * the specialization arguments.
-    */
-   template <class ... Ts>
-   class GridFunction
-   {
-      public:
-         GridFunction(const Ts&...)
-         {}
-   };
-
+   GridFunction() -> GridFunction<>;
 
    /**
     * @brief Represents a grid function which does not yet have an associated
@@ -117,6 +113,9 @@ namespace Rodin::Variational
          mfem::GridFunction m_gf;
    };
 
+   template <class FEC>
+   GridFunction(FiniteElementSpace<FEC>&) -> GridFunction<FEC>;
+
    /**
     * @brief Represents a grid function which belongs to some finite element space.
     *
@@ -143,6 +142,7 @@ namespace Rodin::Variational
          {
             assert(!m_gf.OwnsData());
             m_gf.SetDataAndSize(m_data.get(), m_size);
+            m_gf = 0.0;
          }
 
          /**
@@ -164,11 +164,23 @@ namespace Rodin::Variational
          }
 
          /**
-          * @brief Returns the finite element space to which the function
+          * @brief Gets the finite element space to which the function
           * belongs to.
-          * @returns Finite element space to which the function belongs to.
+          * @returns Reference to finite element space to which the function
+          * belongs to.
           */
-         FiniteElementSpace<FEC>& getFiniteElementSpace()
+         FiniteElementSpace<FEC>& getFiniteElementSpace() override
+         {
+            return m_fes;
+         }
+
+         /**
+          * @brief Gets the finite element space to which the function
+          * belongs to.
+          * @returns Constant reference to finite element space to which the
+          * function belongs to.
+          */
+         const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
          {
             return m_fes;
          }
@@ -236,6 +248,33 @@ namespace Rodin::Variational
             vCopy->buildMFEMVectorCoefficient();
             getHandle().ProjectCoefficient(vCopy->getMFEMVectorCoefficient());
             return *this;
+         }
+
+         GridFunction<FEC>& operator*=(double t) override
+         {
+            m_gf *= t;
+            return *this;
+         }
+
+         GridFunction<FEC>& operator/=(double t) override
+         {
+            m_gf /= t;
+            return *this;
+         }
+
+         void update() override
+         {
+            return m_gf.Update();
+         }
+
+         double max() const override
+         {
+            return m_gf.Max();
+         }
+
+         double min() const override
+         {
+            return m_gf.Min();
          }
 
          mfem::GridFunction& getHandle() override

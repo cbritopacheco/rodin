@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_PROBLEM_H
 #define RODIN_VARIATIONAL_PROBLEM_H
 
+#include <variant>
 #include <functional>
 
 #include <mfem.hpp>
@@ -57,6 +58,8 @@ namespace Rodin::Variational
           * the @ref Solver::solve() method.
           */
          virtual void assemble() = 0;
+
+         virtual void update() = 0;
    };
 
    /**
@@ -99,6 +102,7 @@ namespace Rodin::Variational
          Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
 
          void assemble() override;
+         void update() override;
 
          GridFunction<FEC>& getSolution() override;
          LinearForm<FEC>& getLinearForm() override;
@@ -106,12 +110,12 @@ namespace Rodin::Variational
          mfem::Array<int>& getEssentialBoundary() override;
 
       private:
-         std::reference_wrapper<GridFunction<FEC>>          m_solution;
+         GridFunction<FEC>&   m_solution;
 
          std::vector<mfem::Array<int>> m_bdr;
 
-         BilinearForm<FEC>    m_bilinearForm;
          LinearForm<FEC>      m_linearForm;
+         BilinearForm<FEC>    m_bilinearForm;
 
          mfem::Array<int> m_essBdr;
 

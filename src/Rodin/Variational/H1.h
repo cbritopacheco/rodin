@@ -141,7 +141,7 @@ namespace Rodin::Variational
           * @brief Returns the reference to the mesh on which the space is
           * supported.
           */
-         Mesh& getMesh()
+         Mesh& getMesh() override
          {
             return m_mesh;
          }
@@ -149,9 +149,14 @@ namespace Rodin::Variational
          /**
           * @brief Gets the dimension @f$ d @f$ of the range space.
           */
-         int getDimension() const
+         int getDimension() const override
          {
             return m_fes.GetVDim();
+         }
+
+         void update() override
+         {
+            m_fes.Update();
          }
 
          /**

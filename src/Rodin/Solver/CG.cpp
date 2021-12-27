@@ -4,35 +4,35 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "PCG.h"
+#include "CG.h"
 
 namespace Rodin::Solver
 {
-   PCG& PCG::printIterations(bool printIterations)
+   CG& CG::printIterations(bool printIterations)
    {
       m_printIterations = printIterations;
       return *this;
    }
 
-   PCG& PCG::setMaxIterations(int maxIterations)
+   CG& CG::setMaxIterations(int maxIterations)
    {
       m_maxIterations = maxIterations;
       return *this;
    }
 
-   PCG& PCG::setRelativeTolerance(double rtol)
+   CG& CG::setRelativeTolerance(double rtol)
    {
       m_rtol = rtol;
       return *this;
    }
 
-   PCG& PCG::setAbsoluteTolerance(double atol)
+   CG& CG::setAbsoluteTolerance(double atol)
    {
       m_atol = atol;
       return *this;
    }
 
-   void PCG::solve(Variational::ProblemBase& problem) const
+   void CG::solve(Variational::ProblemBase& problem) const
    {
       problem.update();
       problem.assemble();
@@ -54,10 +54,10 @@ namespace Rodin::Solver
       a.getHandle()
        .FormLinearSystem(essTrueDofList, u.getHandle(), b.getHandle(), A, X, B);
 
-      mfem::GSSmoother M(A);
-      mfem::PCG(A, M, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
+      mfem::CG(A, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
 
       a.getHandle()
        .RecoverFEMSolution(X, b.getHandle(), u.getHandle());
    }
 }
+

@@ -8,9 +8,15 @@ namespace Rodin::Variational
    class IdentityMatrix : public MatrixCoefficientBase
    {
       public:
-         IdentityMatrix(int n);
+         constexpr
+         IdentityMatrix(int n)
+            : m_n(n)
+         {}
 
-         IdentityMatrix(const IdentityMatrix& other);
+         constexpr
+         IdentityMatrix(const IdentityMatrix& other)
+            : m_n(other.m_n)
+         {}
 
          int getRows() const override;
 

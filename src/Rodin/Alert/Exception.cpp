@@ -19,7 +19,7 @@ namespace Rodin::Alert
    void Exception::raise()
    {
       std::cerr << rang::fg::red
-                << "[ERROR]: "
+                << "Error: "
                 << rang::fg::reset
                 << what()
                 << std::endl;

@@ -39,51 +39,51 @@ namespace Rodin::Variational
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     *
     */
-   class NeumannBC : public BoundaryConditionBase
+   template <class T>
+   class NeumannBC;
+
+   NeumannBC(int, const ScalarCoefficientBase&)
+      -> NeumannBC<ScalarCoefficientBase>;
+
+   template <>
+   class NeumannBC<ScalarCoefficientBase>
+      : public BoundaryCondition<ScalarCoefficientBase>
    {
       public:
-         /**
-          * @brief Constructs a Neumann boundary condition on the part of the
-          * boundary specified by the boundary attribute.
-          *
-          * @param[in] bdrAttr Attribute corresponding to the segment
-          * @f$ \Gamma_D @f$ where the Neumann boundary condition is imposed.
-          *
-          * @param[in] value Scalar value of the trial function @f$ u @f$ on
-          * the boundary @f$ \Gamma_D @f$.
-          */
-         NeumannBC(int bdrAttr, const ScalarCoefficientBase& value);
+         NeumannBC(int bdrAtr, const ScalarCoefficientBase& v)
+            : BoundaryCondition<ScalarCoefficientBase>(bdrAtr, v)
+         {}
 
-         /**
-          * @brief Constructs a Neumann boundary condition on the part of the
-          * boundary specified by the boundary attribute.
-          *
-          * @param[in] bdrAttr Attribute corresponding to the segment
-          * @f$ \Gamma_D @f$ where the Neumann boundary condition is imposed.
-          *
-          * @param[in] value Vector value of the trial function @f$ u @f$ on
-          * the boundary @f$ \Gamma_D @f$.
-          */
-         NeumannBC(int bdrAttr, const VectorCoefficientBase& value);
-
-         NeumannBC(const NeumannBC& other);
-
-         int getBoundaryAttribute() const override;
+         void imposeOn(ProblemBase& pb) override;
 
          NeumannBC* copy() const noexcept override
          {
             return new NeumannBC(*this);
          }
+      private:
+         mfem::Array<int> m_nbcBdr;
+   };
+
+   NeumannBC(int, const VectorCoefficientBase&)
+      -> NeumannBC<VectorCoefficientBase>;
+
+   template <>
+   class NeumannBC<VectorCoefficientBase>
+      : public BoundaryCondition<VectorCoefficientBase>
+   {
+      public:
+         NeumannBC(int bdrAtr, const VectorCoefficientBase& v)
+            : BoundaryCondition<VectorCoefficientBase>(bdrAtr, v)
+         {}
 
          void imposeOn(ProblemBase& pb) override;
 
+         NeumannBC* copy() const noexcept override
+         {
+            return new NeumannBC(*this);
+         }
       private:
-         int m_bdrAttr;
          mfem::Array<int> m_nbcBdr;
-         std::variant<
-            std::unique_ptr<ScalarCoefficientBase>,
-            std::unique_ptr<VectorCoefficientBase>
-            > m_value;
    };
 }
 

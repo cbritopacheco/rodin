@@ -16,27 +16,15 @@ namespace Rodin::Variational
    // ---- T (Arithmetic type) -----------------------------------------------
    // ------------------------------------------------------------------------
    template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>
-   ::ScalarCoefficient(const T& x)
-      : m_x(x)
-   {}
-
-   template <class T>
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>
-   ::ScalarCoefficient(const ScalarCoefficient& other)
-      :  m_x(other.m_x)
-   {}
-
-   template <class T>
    void
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::buildMFEMCoefficient()
+   ScalarCoefficient<T>::buildMFEMCoefficient()
    {
       m_mfemCoefficient.emplace(m_x);
    }
 
    template <class T>
    mfem::Coefficient&
-   ScalarCoefficient<T, std::enable_if_t<std::is_arithmetic_v<T>>>::getMFEMCoefficient()
+   ScalarCoefficient<T>::getMFEMCoefficient()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;
@@ -45,19 +33,16 @@ namespace Rodin::Variational
    // ---- GridFunction<FEC> -------------------------------------------------
    // ------------------------------------------------------------------------
    template <class FEC>
+   constexpr
    ScalarCoefficient<GridFunction<FEC>>
    ::ScalarCoefficient(GridFunction<FEC>& u)
       : m_u(u)
    {
-      if (u.getFiniteElementSpace().getDimension() != 1)
-      {
-         (Alert::Exception() << "ScalarCoefficient can only be initialized "
-                             << "with a scalar valued GridFunction").raise();
-
-      }
+      assert(u.getFiniteElementSpace().getDimension() != 1);
    }
 
    template <class FEC>
+   constexpr
    ScalarCoefficient<GridFunction<FEC>>
    ::ScalarCoefficient(const ScalarCoefficient& other)
       :  m_u(other.m_u)
@@ -68,7 +53,7 @@ namespace Rodin::Variational
    void
    ScalarCoefficient<GridFunction<FEC>>::buildMFEMCoefficient()
    {
-      m_mfemCoefficient.emplace(m_u);
+      m_mfemCoefficient.emplace(&m_u.getHandle());
    }
 
    template <class FEC>

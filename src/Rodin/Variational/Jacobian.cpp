@@ -4,14 +4,6 @@
 
 namespace Rodin::Variational
 {
-   Jacobian::Jacobian(GridFunction<H1>& u)
-      :  m_u(u)
-   {}
-
-   Jacobian::Jacobian(const Jacobian& other)
-      : m_u(other.m_u)
-   {}
-
    int Jacobian::getRows() const
    {
       return m_u.getFiniteElementSpace().getDimension();

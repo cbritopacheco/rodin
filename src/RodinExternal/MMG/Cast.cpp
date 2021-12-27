@@ -104,7 +104,7 @@ namespace Rodin
              mmgMesh->edge[i].ref + shiftBdrAttr
              );
     }
-    res.FinalizeMesh(true, true);
+    res.FinalizeMesh(0, true);
 
     return Rodin::Mesh(res);
   }

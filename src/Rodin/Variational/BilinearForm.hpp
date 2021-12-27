@@ -48,11 +48,17 @@ namespace Rodin::Variational
    BilinearForm<FEC>& BilinearForm<FEC>::add(
          const BilinearFormDomainIntegrator& bfi)
    {
-      m_bfiDomainList.add(bfi);
+      m_bfiDomainList.append(bfi);
       m_bfiDomainList.back().buildMFEMBilinearFormIntegrator();
       m_bf->AddDomainIntegrator(
             m_bfiDomainList.back().releaseMFEMBilinearFormIntegrator());
       return *this;
+   }
+
+   template <class FEC>
+   void BilinearForm<FEC>::update()
+   {
+      m_bf->Update();
    }
 }
 

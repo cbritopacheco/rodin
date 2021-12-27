@@ -22,7 +22,7 @@ namespace Rodin::Alert
 #if RODIN_SILENCE_WARNINGS
 #else
       std::cerr << rang::fg::yellow
-                << "[WARNING]: "
+                << "Warning: "
                 << rang::fg::reset
                 << what()
                 << std::endl;

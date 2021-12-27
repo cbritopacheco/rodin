@@ -1,39 +1,37 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <Rodin/Mesh.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
+#include <RodinExternal/MMG.h>
 
 using namespace Rodin;
+using namespace Rodin::External;
 using namespace Rodin::Variational;
 
 template <class M, class L>
 class Compliance
 {
   public:
-    Compliance(Mesh& mesh,
+    Compliance(H1& vh,
         const ScalarCoefficient<M>& mu, const ScalarCoefficient<L>& lambda)
-      : m_mesh(mesh), m_fes(m_mesh), m_d(m_mesh.getDimension()),
-        m_mu(mu), m_lambda(lambda),
-        m_one(m_fes)
-    {
-      m_one = ScalarCoefficient{1.0};
-    };
+      : m_bf(vh), m_mu(mu), m_lambda(lambda)
+    {};
 
     double operator()(GridFunction<H1>& v)
     {
-      LinearForm lf(m_fes);
-      auto e = ScalarCoefficient(0.5) * (Jacobian(v) + Jacobian(v).T());
-      auto Ae = ScalarCoefficient(2.0) * m_mu * e + m_lambda * Trace(e) * IdentityMatrix(m_d);
-      lf = DomainLFIntegrator(Dot(Ae, e));
-      return lf(m_one);
+      m_bf = ElasticityIntegrator(m_lambda, m_mu);
+      return m_bf(v, v);
     }
 
   private:
-    Mesh&                 m_mesh;
-    H1                    m_fes;
-    int                   m_d;
+    BilinearForm<H1>      m_bf;
     ScalarCoefficient<M>  m_mu;
     ScalarCoefficient<L>  m_lambda;
-    GridFunction<H1>      m_one;
 };
 
 int main(int, char**)
@@ -46,55 +44,87 @@ int main(int, char**)
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
 
-  // Build finite element spaces
-  int d = 2;
-  H1 Vh(Omega, d);
-
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
-  // Compliance
-  Compliance compliance(Omega, mu, lambda);
+  auto ell = ScalarCoefficient(5);
+  auto alpha = ScalarCoefficient(0.1);
 
-  // Elasticity equation
-  GridFunction u(Vh);
-  auto g = VectorCoefficient{0, -1};
-  Problem elasticity(u);
-  elasticity = ElasticityIntegrator(lambda, mu)
-             + DirichletBC(GammaD, VectorCoefficient{0, 0})
-             + NeumannBC(GammaN, g);
+  // Preconditioned Conjugate Gradient solver
+  auto pcg = Solver::PCG().setMaxIterations(500)
+                          .setRelativeTolerance(1e-12);
 
-  // Hilbert extension-regularization
-  GridFunction theta(Vh);
-  auto alpha = ScalarCoefficient(0.001);
-  auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
-  auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+  size_t maxIt = 300;
+  double eps = 1e-6;
+  double coef = 0.1;
+  double meshsize = 0.1;
+  double oldObj, newObj;
 
-  Problem hilbert(theta);
-  hilbert = VectorDiffusionIntegrator(alpha)
-          + VectorMassIntegrator()
-          + VectorBoundaryFluxLFIntegrator(Dot(Ae, e))
-          + DirichletBC(GammaD, VectorCoefficient{0, 0});
+  // Finite element spaces
+  int d = 2;
+  H1 Vh(Omega, d);
+  H1 Sh(Omega);
 
-  // Solve both problems
-  Solver::PCG().setMaxIterations(200)
-               .setRelativeTolerance(1e-12)
-               .solve(elasticity);
+  // Optimization loop
+  for (size_t i = 0; i < maxIt; i++)
+  {
+    // Compliance
+    Compliance compliance(Vh, mu, lambda);
 
-  Solver::PCG().setMaxIterations(200)
-               .setRelativeTolerance(1e-12)
-               .solve(hilbert);
+    // Elasticity equation
+    GridFunction u(Vh);
+    Problem elasticity(u);
+    elasticity = ElasticityIntegrator(lambda, mu)
+               + DirichletBC(GammaD, VectorCoefficient{0, 0})
+               + NeumannBC(GammaN, VectorCoefficient{0, -1});
+    pcg.solve(elasticity);
 
-  BilinearForm bf(Vh);
-  bf = ElasticityIntegrator(lambda, mu);
+    // Hilbert extension-regularization procedure
+    GridFunction theta(Vh);
+    auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
+    auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+    Problem hilbert(theta);
+    hilbert = VectorDiffusionIntegrator(alpha)
+            + VectorMassIntegrator()
+            - VectorBoundaryFluxLFIntegrator({ Gamma0 }, Dot(Ae, e) - ell)
+            + DirichletBC(GammaD, VectorCoefficient{0, 0})
+            + DirichletBC(GammaN, VectorCoefficient{0, 0});
+    pcg.solve(hilbert);
 
-  std::cout << compliance(u) << std::endl;
-  std::cout << bf(u, u) << std::endl;
+    // Update objective
+    oldObj = newObj;
+    newObj = compliance(u) + ell.value() * Omega.getVolume();
 
+    std::cout << "[" << i << "] Objective: " << newObj << std::endl;
+
+    // Test for convergence
+    if (i > 0 && abs(oldObj - newObj) < eps)
+      break;
+
+    // Make the displacement
+    GridFunction normGrad(Sh);
+    normGrad = Magnitude(theta);
+    double ngMax = normGrad.max();
+    double step = coef * meshsize / (eps * eps + ngMax);
+    theta *= step;
+    double t = Omega.getMaximumDisplacement(theta);
+    if (t < 1e-2)
+    {
+      // If the max displacement is too small reject the iteration
+      coef /= 2;
+      continue;
+    }
+    else
+    {
+      Omega.displace(theta);
+    }
+    coef = std::max(0.05, 1.02 * coef);
+  }
+
+  // Save the final mesh
   Omega.save("Omega.mesh");
-  u.save("u.gf");
-  theta.save("theta.gf");
+  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
 
   return 0;
 }
