@@ -4,10 +4,12 @@
 
   @tableofcontents
 
+  @subsection examples-index-getting_started Getting started
+
   @subsection examples-index-variational Utilizing the Variational module
 
-  The Rodin::Variational module is mostly used to solve variational problems of
-  the form:
+  The Rodin::Variational module is mostly used when dealing with to variational
+  problems of the form:
 
   @f[
     \text{Find} \quad u \in U \quad \text{ s.t. } \quad a(u, v) = b(v) \quad
@@ -15,6 +17,7 @@
   @f]
 
   For the complete list of examples go to the link below:
+
   - @subpage examples-variational-index
 
   @subsection examples-index-mesh Utilizing the Solver module
