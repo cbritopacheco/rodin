@@ -74,7 +74,6 @@ int main(int, char**)
 
     // Elasticity equation
     GridFunction u(Vh);
-    VectorCoefficient tmp{u, 0};
     Problem elasticity(u);
     elasticity = ElasticityIntegrator(lambda, mu)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
