@@ -83,7 +83,7 @@ namespace Rodin::Variational
 
    class VectorCoefficientBase;
 
-   template <class T>
+   template <class ... Values>
    class VectorCoefficient;
 
    class MatrixCoefficientBase;

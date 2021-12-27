@@ -55,30 +55,26 @@ namespace Rodin::Variational
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
    };
 
-   template <class T>
-   VectorCoefficient(std::initializer_list<T>)
-      -> VectorCoefficient<std::initializer_list<T>>;
+   template <class ... Values>
+   VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
 
-   template <class T>
-   class VectorCoefficient<std::initializer_list<T>>
+   template <class ... Values>
+   class VectorCoefficient
       : public VectorCoefficientBase
    {
-      static_assert(std::is_convertible_v<T, ScalarCoefficient<T>>);
-
       public:
-         /**
-          * @brief Constructs a VectorCoefficient from an initializer list
-          */
+         template <class ... Args>
          constexpr
-         VectorCoefficient(std::initializer_list<T> values);
+         VectorCoefficient(Args&&... values)
+            :  m_dimension(sizeof...(Args)),
+               m_values(std::forward_as_tuple(values...))
+         {}
 
-         /**
-          * @brief Copies the data.
-          *
-          * @param other Other coefficient to copy
-          */
          constexpr
-         VectorCoefficient(const VectorCoefficient& other);
+         VectorCoefficient(const VectorCoefficient& other)
+            :  m_dimension(other.m_dimension),
+               m_values(other.m_values)
+         {}
 
          size_t getDimension() const override;
 
@@ -92,8 +88,17 @@ namespace Rodin::Variational
          }
 
       private:
+         template<std::size_t I = 0, class ... Tp>
+         typename std::enable_if_t<I == sizeof...(Tp)>
+         makeCoefficientsFromTuple(const std::tuple<Tp...>&);
+
+         template<std::size_t I = 0, class ... Tp>
+         typename std::enable_if_t<I < sizeof...(Tp)>
+         makeCoefficientsFromTuple(const std::tuple<Tp...>& t);
+
          size_t m_dimension;
-         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_values;
+         std::tuple<Values...> m_values;
+         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_mfemCoefficients;
          std::optional<mfem::VectorArrayCoefficient> m_mfemVectorCoefficient;
    };
 
