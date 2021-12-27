@@ -71,27 +71,6 @@
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">External</span><span class="p">;</span><span class="w"></span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">M</span><span class="p">,</span><span class="w"> </span><span class="k">class</span> <span class="nc">L</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span> <span class="nc">Compliance</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">Compliance</span><span class="p">(</span><span class="n">H1</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vh</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="o">&lt;</span><span class="n">M</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mu</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="o">&lt;</span><span class="n">L</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">lambda</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">m_bf</span><span class="p">(</span><span class="n">vh</span><span class="p">),</span><span class="w"> </span><span class="n">m_mu</span><span class="p">(</span><span class="n">mu</span><span class="p">),</span><span class="w"> </span><span class="n">m_lambda</span><span class="p">(</span><span class="n">lambda</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="p">{};</span><span class="w"></span>
-
-<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="nf">operator</span><span class="p">()(</span><span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">H1</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="n">m_bf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ElasticityIntegrator</span><span class="p">(</span><span class="n">m_lambda</span><span class="p">,</span><span class="w"> </span><span class="n">m_mu</span><span class="p">);</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">m_bf</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-
-<span class="w">  </span><span class="k">private</span><span class="o">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">BilinearForm</span><span class="o">&lt;</span><span class="n">H1</span><span class="o">&gt;</span><span class="w">      </span><span class="n">m_bf</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">ScalarCoefficient</span><span class="o">&lt;</span><span class="n">M</span><span class="o">&gt;</span><span class="w">  </span><span class="n">m_mu</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">ScalarCoefficient</span><span class="o">&lt;</span><span class="n">L</span><span class="o">&gt;</span><span class="w">  </span><span class="n">m_lambda</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
-
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;../resources/mfem/meshes/holes.mesh&quot;</span><span class="p">;</span><span class="w"></span>
@@ -101,23 +80,24 @@
 
 <span class="w">  </span><span class="c1">// Load mesh</span>
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mesh</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">meshFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega0.mesh&quot;</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Lamé coefficients</span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">mu</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.3846</span><span class="p">),</span><span class="w"></span>
 <span class="w">       </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.5769</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">ell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span><span class="w"></span>
-
 <span class="w">  </span><span class="c1">// Preconditioned Conjugate Gradient solver</span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">pcg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solver</span><span class="o">::</span><span class="n">PCG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span><span class="w"></span>
 <span class="w">                          </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">);</span><span class="w"></span>
 
+<span class="w">  </span><span class="c1">// Optimization parameters</span>
 <span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxIt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">eps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">coef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">meshsize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">oldObj</span><span class="p">,</span><span class="w"> </span><span class="n">newObj</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">ell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarCoefficient</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Optimization loop</span>
 <span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">maxIt</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
@@ -128,7 +108,12 @@
 <span class="w">    </span><span class="n">H1</span><span class="w"> </span><span class="n">Sh</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Compliance</span>
-<span class="w">    </span><span class="n">Compliance</span><span class="w"> </span><span class="n">compliance</span><span class="p">(</span><span class="n">Vh</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">compliance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">H1</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">BilinearForm</span><span class="w"> </span><span class="n">bf</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">bf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ElasticityIntegrator</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">bf</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Elasticity equation</span>
 <span class="w">    </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
@@ -152,7 +137,7 @@
 
 <span class="w">    </span><span class="c1">// Update objective</span>
 <span class="w">    </span><span class="n">oldObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newObj</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">newObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compliance</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ell</span><span class="p">.</span><span class="n">value</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Omega</span><span class="p">.</span><span class="n">getVolume</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">newObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compliance</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ell</span><span class="p">.</span><span class="n">getValue</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Omega</span><span class="p">.</span><span class="n">getVolume</span><span class="p">();</span><span class="w"></span>
 
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;[&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;] Objective: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">newObj</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
