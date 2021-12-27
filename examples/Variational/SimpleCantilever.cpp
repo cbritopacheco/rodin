@@ -13,27 +13,6 @@ using namespace Rodin;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
-template <class M, class L>
-class Compliance
-{
-  public:
-    Compliance(H1& vh,
-        const ScalarCoefficient<M>& mu, const ScalarCoefficient<L>& lambda)
-      : m_bf(vh), m_mu(mu), m_lambda(lambda)
-    {};
-
-    double operator()(GridFunction<H1>& v)
-    {
-      m_bf = ElasticityIntegrator(m_lambda, m_mu);
-      return m_bf(v, v);
-    }
-
-  private:
-    BilinearForm<H1>      m_bf;
-    ScalarCoefficient<M>  m_mu;
-    ScalarCoefficient<L>  m_lambda;
-};
-
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/holes.mesh";
@@ -43,23 +22,24 @@ int main(int, char**)
 
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
+  Omega.save("Omega0.mesh");
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
-  auto ell = ScalarCoefficient(5);
-  auto alpha = ScalarCoefficient(0.1);
-
   // Preconditioned Conjugate Gradient solver
   auto pcg = Solver::PCG().setMaxIterations(500)
                           .setRelativeTolerance(1e-12);
 
+  // Optimization parameters
   size_t maxIt = 30;
   double eps = 1e-6;
   double coef = 0.1;
   double meshsize = 0.1;
   double oldObj, newObj;
+  auto ell = ScalarCoefficient(5);
+  auto alpha = ScalarCoefficient(0.1);
 
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
@@ -70,7 +50,12 @@ int main(int, char**)
     H1 Sh(Omega);
 
     // Compliance
-    Compliance compliance(Vh, mu, lambda);
+    auto compliance = [&](GridFunction<H1>& v)
+    {
+      BilinearForm bf(Vh);
+      bf = ElasticityIntegrator(lambda, mu);
+      return bf(v, v);
+    };
 
     // Elasticity equation
     GridFunction u(Vh);
@@ -94,7 +79,7 @@ int main(int, char**)
 
     // Update objective
     oldObj = newObj;
-    newObj = compliance(u) + ell.value() * Omega.getVolume();
+    newObj = compliance(u) + ell.getValue() * Omega.getVolume();
 
     std::cout << "[" << i << "] Objective: " << newObj << std::endl;
 

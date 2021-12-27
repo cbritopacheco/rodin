@@ -74,7 +74,7 @@ namespace Rodin::Variational
             : m_x(std::move(other.m_x))
          {}
 
-         T value() const
+         T getValue() const
          {
             return m_x;
          }
@@ -117,6 +117,11 @@ namespace Rodin::Variational
          constexpr
          ScalarCoefficient(const ScalarCoefficient& other);
 
+         const GridFunction<FEC>& getValue() const
+         {
+            return m_u;
+         }
+
          void buildMFEMCoefficient() override;
 
          mfem::Coefficient& getMFEMCoefficient() override;
@@ -147,6 +152,11 @@ namespace Rodin::Variational
             : m_f(other.m_f)
          {}
 
+         std::function<double(const double*)> getValue() const
+         {
+            return m_f;
+         }
+
          void buildMFEMCoefficient() override;
 
          mfem::Coefficient& getMFEMCoefficient() override;
@@ -157,7 +167,7 @@ namespace Rodin::Variational
          }
 
       private:
-         std::function<double(double*)> m_f;
+         std::function<double(const double*)> m_f;
          std::optional<mfem::FunctionCoefficient> m_mfemCoefficient;
    };
 }
