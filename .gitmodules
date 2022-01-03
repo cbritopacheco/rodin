@@ -22,3 +22,6 @@
 [submodule "third-party/m.css"]
 	path = third-party/m.css
 	url = https://github.com/cbritopacheco/m.css
+[submodule "third-party/Mshdist"]
+	path = third-party/Mshdist
+	url = https://github.com/ISCDtoolbox/Mshdist
