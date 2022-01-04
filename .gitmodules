@@ -24,7 +24,7 @@
 	url = https://github.com/cbritopacheco/m.css
 [submodule "third-party/Mshdist"]
 	path = third-party/ISCD/Mshdist
-	url = https://github.com/ISCDtoolbox/Mshdist
+	url = https://github.com/cbritopacheco/Mshdist
 [submodule "third-party/ISCD/Commons"]
 	path = third-party/ISCD/Commons
 	url = https://github.com/ISCDtoolbox/Commons
