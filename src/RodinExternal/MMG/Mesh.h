@@ -10,14 +10,26 @@
 #include <cassert>
 #include <mmg/libmmg.h>
 
-#include "BaseMesh.h"
+#include "Configure.h"
 
 namespace Rodin::External::MMG
 {
    template <int Dimension, class Derived>
-   class Mesh : public BaseMesh<Mesh<Dimension, Derived>>
+   class Mesh
    {
       public:
+         virtual ~Mesh() = default;
+
+         size_t getMaximumMemory() const
+         {
+            return getHandle()->memMax;
+         }
+
+         size_t getCurrentMemory() const
+         {
+            return getHandle()->memCur;
+         }
+
          constexpr int getDimension() const
          {
             return Dimension;
@@ -25,12 +37,12 @@ namespace Rodin::External::MMG
 
          MMG5_pMesh& getHandle()
          {
-            return Derived::getHandle();
+            return static_cast<Derived*>(this)->getHandle();
          }
 
          const MMG5_pMesh& getHandle() const
          {
-            return Derived::getHandle();
+            return static_cast<const Derived*>(this)->getHandle();
          }
    };
 }

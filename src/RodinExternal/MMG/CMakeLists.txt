@@ -7,7 +7,6 @@ Distributed under the Boost Software License, Version 1.0.
 
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
-  BaseMesh.h
   Cast.h
   Edge.h
   ForwardDecls.h
@@ -34,7 +33,8 @@ set(RodinExternalMMG_SRCS
   Vertex2D.cpp
   )
 
-add_library(RodinExternalMMG ${RodinExternalMMG_HEADERS} ${RodinExternalMMG_SRCS})
+add_library(RodinExternalMMG
+  ${RodinExternalMMG_HEADERS} ${RodinExternalMMG_SRCS})
 add_library(Rodin::External::MMG ALIAS RodinExternalMMG)
 
 # ---- MMG ----
@@ -64,5 +64,23 @@ target_link_libraries(RodinExternalMMG
   RodinAlert
   RodinMesh
   RodinVariational
+  )
+
+# ---- ISCD Commons Library ----
+include(ExternalProject)
+ExternalProject_Add(RodinExternalISCDCommons
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons
+  BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Commons
+  INSTALL_COMMAND ""
+  COMMENT "ISCD Commons Library"
+  )
+
+# ---- ISCD Mshdist ----
+ExternalProject_Add(RodinExternalISCDMshdist
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Mshdist
+  BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist
+  INSTALL_COMMAND ""
+  COMMENT "ISCD Mshdist"
+  DEPENDS RodinExternalISCDCommons
   )
 
