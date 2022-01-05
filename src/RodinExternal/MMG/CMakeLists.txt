@@ -72,7 +72,6 @@ ExternalProject_Add(RodinExternalISCDCommons
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons
   BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Commons
   INSTALL_COMMAND ""
-  BUILD_IN_SOURCE FALSE
   COMMENT "ISCD Commons Library"
   )
 
@@ -82,7 +81,6 @@ ExternalProject_Add(RodinExternalISCDMshdist
   BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist
   CMAKE_ARGS -DCommons_LIB_DIR:STRING="${PROJECT_BINARY_DIR}/third-party/ISCD/Commons/"
   INSTALL_COMMAND ""
-  BUILD_IN_SOURCE FALSE
   COMMENT "ISCD Mshdist"
   DEPENDS RodinExternalISCDCommons
   )
