@@ -79,7 +79,8 @@ ExternalProject_Add(RodinExternalISCDCommons
 ExternalProject_Add(RodinExternalISCDMshdist
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Mshdist
   BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist
-  CMAKE_ARGS -DCommons_LIB_DIR:STRING="${PROJECT_BINARY_DIR}/third-party/ISCD/Commons/"
+  CMAKE_ARGS -DISCD_COMMONS_LIBRARY:STRING=${PROJECT_BINARY_DIR}/third-party/ISCD/Commons/
+  CMAKE_ARGS -DISCD_COMMONS_INCLUDE_DIR:STRING=${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons/sources
   INSTALL_COMMAND ""
   COMMENT "ISCD Mshdist"
   DEPENDS RodinExternalISCDCommons
