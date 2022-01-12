@@ -106,8 +106,8 @@ $ \Omega $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;int Dimension, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution.html" class="m-doc">ScalarSolution&lt;2, ScalarSolution2D&lt;true&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;int Dimension&gt;</div>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution.html" class="m-doc">ScalarSolution&lt;2&gt;</a>
             </dt>
             <dd>Scalar solution supported on a mesh.</dd>
           </dl>
@@ -116,7 +116,7 @@ $ \Omega $
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a3e12aab689d4edb54dcb172c58e7d3c7" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::string&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&lt;false&gt;</span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a10cc61401fd8d8dea730a9b9608893b5" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&lt;false&gt;</span>
             </dt>
             <dd>Reads the solution text file.</dd>
           </dl>
@@ -137,7 +137,7 @@ $ \Omega $
             </dt>
             <dd>Performs a deep copy of the <code>other</code> solution object.</dd>
             <dt id="ade050ac4a950d742207ed7a9faaf141f">
-              <span class="m-doc-wrap-bumper"><a href="#ade050ac4a950d742207ed7a9faaf141f" class="m-doc-self">~ScalarSolution2D</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ade050ac4a950d742207ed7a9faaf141f" class="m-doc-self">~ScalarSolution2D</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Frees the data.</dd>
           </dl>
@@ -146,7 +146,7 @@ $ \Omega $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span>
             </dt>
             <dd>Write the solution to a text file.</dd>
             <dt>
@@ -162,7 +162,7 @@ $ \Omega $
             </dt>
             <dd>Sets the associated mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c9df6d6a63372a0131dd413d7afa2d8" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a70b2888f962dd424e5ef03cf8d7269d7" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp;</span>
             </dt>
             <dd>Gets the constant reference to the underlying mesh.</dd>
             <dt>
@@ -173,12 +173,12 @@ $ \Omega $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a3e12aab689d4edb54dcb172c58e7d3c7"><div>
+          <section class="m-doc-details" id="a10cc61401fd8d8dea730a9b9608893b5"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&lt;false&gt; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;true&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e12aab689d4edb54dcb172c58e7d3c7" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&lt;false&gt; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;true&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10cc61401fd8d8dea730a9b9608893b5" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
             </h3>
             <p>Reads the solution text file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -254,12 +254,12 @@ $ \Omega $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a2c027edbcd25b820dc6e21a9a3ad0496"><div>
+          <section class="m-doc-details" id="ae6a4b6d08fec0d25e321ea7250ee8973"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;true&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c027edbcd25b820dc6e21a9a3ad0496" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::string&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;true&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
             </h3>
             <p>Write the solution to a text file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -342,12 +342,12 @@ $ \Omega $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>The method does not check to see if the mesh is compatible with the current data in the solution. In general, it is up to the user to ensure that the number of points are the same, keep track of the modifications to the underlying mesh, etc.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a1c9df6d6a63372a0131dd413d7afa2d8"><div>
+          <section class="m-doc-details" id="a70b2888f962dd424e5ef03cf8d7269d7"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;true&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c9df6d6a63372a0131dd413d7afa2d8" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D&lt;true&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70b2888f962dd424e5ef03cf8d7269d7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the constant reference to the underlying mesh.</p>
             <table class="m-table m-fullwidth m-flat">
