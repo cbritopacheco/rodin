@@ -8,14 +8,14 @@ Distributed under the Boost Software License, Version 1.0.
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
   Cast.h
-  Edge.h
   ForwardDecls.h
   Configure.h
+  MshdistProcess.h
+  Distancer2D.h
+  Redistancer2D.h
   Mesh.h
   Mesh2D.h
-  MeshAdaptor.h
   MeshAdaptor2D.h
-  MeshOptimizer.h
   MeshOptimizer2D.h
   ScalarSolution.h
   ScalarSolution2D.h
@@ -26,6 +26,9 @@ set(RodinExternalMMG_HEADERS
 
 set(RodinExternalMMG_SRCS
   Cast.cpp
+  MshdistProcess.cpp
+  Distancer2D.cpp
+  Redistancer2D.cpp
   Mesh2D.cpp
   MeshAdaptor2D.cpp
   MeshOptimizer2D.cpp
@@ -50,22 +53,6 @@ add_subdirectory(
 # - Mmg::libmmg3d_a
 # - Mmg::libmmgs_a
 
-target_include_directories(RodinExternalMMG
-  PRIVATE
-  ${PROJECT_SOURCE_DIR}/third-party/mmg/src
-  ${PROJECT_SOURCE_DIR}/third-party/mmg/include
-  )
-target_link_libraries(RodinExternalMMG
-  PUBLIC
-  Mmg::libmmg_a
-  Mmg::libmmg2d_a
-  Mmg::libmmg3d_a
-  Mmg::libmmgs_a
-  RodinAlert
-  RodinMesh
-  RodinVariational
-  )
-
 # ---- ISCD Commons Library ----
 include(ExternalProject)
 ExternalProject_Add(RodinExternalISCDCommons
@@ -86,3 +73,30 @@ ExternalProject_Add(RodinExternalISCDMshdist
   DEPENDS RodinExternalISCDCommons
   )
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(RODIN_MMG_VERBOSITY_LEVEL 1)
+else()
+  set(RODIN_MMG_VERBOSITY_LEVEL -1)
+endif()
+
+set(RODIN_MSHDIST_EXECUTABLE
+  ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist/mshdist)
+configure_file(Configure.h.in Configure.h @ONLY)
+
+target_include_directories(RodinExternalMMG
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/third-party/mmg/src
+  ${PROJECT_SOURCE_DIR}/third-party/mmg/include
+  )
+target_link_libraries(RodinExternalMMG
+  PUBLIC
+  Mmg::libmmg_a
+  Mmg::libmmg2d_a
+  Mmg::libmmg3d_a
+  Mmg::libmmgs_a
+  RodinAlert
+  RodinMesh
+  RodinVariational
+  )

@@ -25,13 +25,13 @@ namespace Rodin
           * @brief Loads a mesh mfem text format from file.
           * @param[in] filename Name of file to read
           */
-         static Mesh load(const std::string& filename);
+         static Mesh load(const std::filesystem::path& filename);
 
          /**
           * @brief Saves the mesh to file in mfem text format.
           * @param[in] filename Name of file to write
           */
-         void save(const std::string& filename);
+         void save(const std::filesystem::path& filename);
 
          /**
           * @brief Constructs an empty mesh (no elements).

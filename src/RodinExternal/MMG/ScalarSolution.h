@@ -20,24 +20,10 @@ namespace Rodin::External::MMG
     * @brief Scalar solution supported on a mesh.
     *
     * @tparam Dimension Dimension of the solution support
-    * @tparam Derived Type which subclasses ScalarSolution
     */
-   template <int Dimension, class Derived>
-   class ScalarSolution
-      : public
-        Solution<Dimension, double, ScalarSolution<Dimension, Derived>>
-   {
-      public:
-         MMG5_pSol& getHandle()
-         {
-            return static_cast<Derived*>(this)->getHandle();
-         }
-
-         const MMG5_pSol& getHandle() const
-         {
-            return static_cast<const Derived*>(this)->getHandle();
-         }
-   };
+   template <int Dimension>
+   class ScalarSolution : public Solution<Dimension, double>
+   {};
 }
 
 #endif

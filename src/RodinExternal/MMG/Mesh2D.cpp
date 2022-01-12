@@ -17,23 +17,23 @@
 
 namespace Rodin::External::MMG
 {
-   Mesh2D Mesh2D::load(const std::string& filename)
+   Mesh2D Mesh2D::load(const std::filesystem::path& filename)
    {
       Mesh2D mesh;
       if (!MMG2D_loadMesh(mesh.getHandle(), filename.c_str()))
       {
          Alert::Exception(
-               "Failed to open file for reading: " + filename).raise();
+               "Failed to open file for reading: " + filename.string()).raise();
       }
       return mesh;
    }
 
-   void Mesh2D::save(const std::string& filename)
+   void Mesh2D::save(const std::filesystem::path& filename)
    {
       if (!MMG2D_saveMesh(getHandle(), filename.c_str()))
       {
          Alert::Exception(
-               "Failed to open file for writing: " + filename).raise();
+               "Failed to open file for writing: " + filename.string()).raise();
       }
    }
 

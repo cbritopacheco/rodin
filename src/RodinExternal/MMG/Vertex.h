@@ -11,19 +11,12 @@
 
 namespace Rodin::External::MMG
 {
-   template <int Dimension, class Derived>
+   template <int Dimension>
    class Vertex
    {
       public:
-         MMG5_pPoint& getHandle()
-         {
-            return Derived::getHandle();
-         }
-
-         const MMG5_pPoint& getHandle() const
-         {
-            return Derived::getHandle();
-         }
+         virtual MMG5_pPoint& getHandle() = 0;
+         virtual const MMG5_pPoint& getHandle() const = 0;
    };
 }
 

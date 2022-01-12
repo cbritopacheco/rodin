@@ -9,12 +9,16 @@
 
 namespace Rodin::External::MMG
 {
-   template <int Dimension, class Derived>
+   template <int Dimension>
    class Mesh;
 
    class Mesh2D;
 
-   template <int Dimension, class Derived>
+   class MeshAdaptor2D;
+
+   class MeshOptimizer2D;
+
+   template <int Dimension>
    class ScalarSolution;
 
    template <bool HasMesh = true>
@@ -26,15 +30,8 @@ namespace Rodin::External::MMG
    template <>
    class ScalarSolution2D<false>;
 
-   template <class MeshType, class Derived>
-   class MeshAdaptor;
-
-   class MeshAdaptor2D;
-
-   template <class MeshType, class Derived>
-   class MeshOptimizer;
-
-   class MeshOptimizer2D;
+   class Distancer2D;
+   class Redistancer2D;
 }
 
 #endif

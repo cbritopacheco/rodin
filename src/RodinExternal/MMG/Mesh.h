@@ -14,7 +14,7 @@
 
 namespace Rodin::External::MMG
 {
-   template <int Dimension, class Derived>
+   template <int Dimension>
    class Mesh
    {
       public:
@@ -35,15 +35,9 @@ namespace Rodin::External::MMG
             return Dimension;
          }
 
-         MMG5_pMesh& getHandle()
-         {
-            return static_cast<Derived*>(this)->getHandle();
-         }
+         virtual MMG5_pMesh& getHandle() = 0;
 
-         const MMG5_pMesh& getHandle() const
-         {
-            return static_cast<const Derived*>(this)->getHandle();
-         }
+         virtual const MMG5_pMesh& getHandle() const = 0;
    };
 }
 

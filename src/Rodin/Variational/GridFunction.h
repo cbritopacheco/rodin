@@ -10,6 +10,7 @@
 #include <utility>
 #include <fstream>
 #include <functional>
+#include <filesystem>
 
 #include <mfem.hpp>
 
@@ -91,7 +92,7 @@ namespace Rodin::Variational
           * @param[in] filename Name of file to which the grid function will be
           * written to.
           */
-         static GridFunction load(const std::string& filename)
+         static GridFunction load(const std::filesystem::path& filename)
          {
             std::ifstream in(filename);
             GridFunction res;
@@ -190,9 +191,9 @@ namespace Rodin::Variational
           * @param[in] filename Name of file to which the solution file will be
           * written.
           */
-         void save(const std::string& filename)
+         void save(const std::filesystem::path& filename)
          {
-            m_gf.Save(filename.c_str());
+            m_gf.Save(filename.string().c_str());
          }
 
          /**

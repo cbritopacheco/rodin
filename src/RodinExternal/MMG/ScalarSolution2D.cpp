@@ -68,7 +68,7 @@ namespace Rodin::External::MMG
       return *this;
    }
 
-   ScalarSolution2D<false> ScalarSolution2D<true>::load(const std::string& filename)
+   ScalarSolution2D<false> ScalarSolution2D<true>::load(const std::filesystem::path& filename)
    {
       ScalarSolution2D<false> res;
       MMG5_pSol sol = res.getHandle();
@@ -115,9 +115,10 @@ namespace Rodin::External::MMG
             break;
          case 0:
             fclose(inm);
-            MMG5_SAFE_FREE(type);
+            if (type)
+               MMG5_SAFE_FREE(type);
             Alert::Exception(
-                  "Failed to load solution. File not found: " + filename).raise();
+                  "Failed to load solution. File not found: " + filename.string()).raise();
             break;
          case 1:
             // Success
@@ -189,7 +190,7 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   void ScalarSolution2D<true>::save(const std::string& filename)
+   void ScalarSolution2D<true>::save(const std::filesystem::path& filename)
    {
       if (!m_sol->np || !m_sol->m)
       {
@@ -199,7 +200,7 @@ namespace Rodin::External::MMG
 
       if (!MMG2D_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
       {
-         Alert::Exception("Failed to open file for writing: " + filename).raise();
+         Alert::Exception("Failed to open file for writing: " + filename.string()).raise();
       }
    }
 
@@ -299,6 +300,11 @@ namespace Rodin::External::MMG
    }
 
    const Mesh2D& ScalarSolution2D<true>::getMesh() const
+   {
+      return m_mesh;
+   }
+
+   Mesh2D& ScalarSolution2D<true>::getMesh()
    {
       return m_mesh;
    }

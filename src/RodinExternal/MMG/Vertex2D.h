@@ -15,7 +15,7 @@
 
 namespace Rodin::External::MMG
 {
-   class Vertex2D : public Vertex<2, Vertex2D>
+   class Vertex2D : public Vertex<2>
    {
       public:
          Vertex2D(MMG5_pPoint point);
@@ -46,8 +46,8 @@ namespace Rodin::External::MMG
 
          bool isRequired() const;
 
-         MMG5_pPoint& getHandle();
-         const MMG5_pPoint& getHandle() const;
+         MMG5_pPoint& getHandle() override;
+         const MMG5_pPoint& getHandle() const override;
 
          friend std::ostream& operator<<(std::ostream& os, const Vertex2D& obj);
 

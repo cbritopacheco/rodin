@@ -12,5 +12,7 @@
 #include "MMG/ScalarSolution2D.h"
 #include "MMG/MeshAdaptor2D.h"
 #include "MMG/MeshOptimizer2D.h"
+#include "MMG/Distancer2D.h"
+#include "MMG/Redistancer2D.h"
 
 #endif

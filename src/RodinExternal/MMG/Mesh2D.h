@@ -11,6 +11,7 @@
 #include <vector>
 #include <variant>
 #include <optional>
+#include <filesystem>
 
 #include <mmg/mmg2d/libmmg2d.h>
 
@@ -24,7 +25,7 @@ namespace Rodin::External::MMG
     *
     * The Mesh2D class is used to manipulate the mesh of 
     */
-   class Mesh2D : public Mesh<2, Mesh2D>
+   class Mesh2D : public Mesh<2>
    {
       public:
          class VertexIterator
@@ -69,7 +70,7 @@ namespace Rodin::External::MMG
           * @param[in] filename Name of file where the mesh will be read from.
           * @returns A Mesh2D object containing the mesh data in the file.
           */
-         static Mesh2D load(const std::string& filename);
+         static Mesh2D load(const std::filesystem::path& filename);
 
          /**
           * @brief Writes the Mesh2D object to file using the `medit2` file
@@ -77,7 +78,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file where the mesh will be written to.
           */
-         void save(const std::string& filename);
+         void save(const std::filesystem::path& filename);
 
          /**
           * @brief Creates an empty mesh.
@@ -98,9 +99,9 @@ namespace Rodin::External::MMG
          template <Entity e = Vertex>
          int count() const;
 
-         MMG5_pMesh& getHandle();
+         MMG5_pMesh& getHandle() override;
 
-         const MMG5_pMesh& getHandle() const;
+         const MMG5_pMesh& getHandle() const override;
 
       private:
          MMG5_pMesh  m_mesh;

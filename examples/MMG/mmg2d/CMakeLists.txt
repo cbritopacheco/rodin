@@ -13,3 +13,9 @@ target_link_libraries(CastRodinMesh2D PUBLIC Rodin::External::MMG)
 
 add_executable(CastScalarSolution2D CastScalarSolution2D.cpp)
 target_link_libraries(CastScalarSolution2D PUBLIC Rodin::External::MMG)
+
+add_executable(Distancing Distancing.cpp)
+target_link_libraries(Distancing PUBLIC Rodin::External::MMG)
+
+add_executable(Redistancing Redistancing.cpp)
+target_link_libraries(Redistancing PUBLIC Rodin::External::MMG)

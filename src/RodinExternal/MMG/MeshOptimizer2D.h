@@ -14,14 +14,12 @@
 #include "Mesh2D.h"
 #include "ScalarSolution2D.h"
 
-#include "MeshOptimizer.h"
-
 namespace Rodin::External::MMG
 {
   /**
    * @brief Improves the mesh quality, mantaining the mean edge lenghts of the mesh.
    */
-  class MeshOptimizer2D : public MeshOptimizer<Mesh2D, MeshOptimizer2D>
+  class MeshOptimizer2D
   {
     public:
       /**

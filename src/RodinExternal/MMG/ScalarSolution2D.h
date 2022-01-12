@@ -32,8 +32,7 @@ namespace Rodin::External::MMG
     * whose known values are given on vertices of some mesh @f$ \Omega @f$.
     */
    template <>
-   class ScalarSolution2D<true>
-      :  public ScalarSolution<2, ScalarSolution2D<true>>
+   class ScalarSolution2D<true> :  public ScalarSolution<2>
    {
       public:
          class Iterator
@@ -89,7 +88,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to read.
           */
-         static ScalarSolution2D<false> load(const std::string& filename);
+         static ScalarSolution2D<false> load(const std::filesystem::path& filename);
 
          /**
           * @brief Write the solution to a text file.
@@ -98,7 +97,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to write.
           */
-         void save(const std::string& filename);
+         void save(const std::filesystem::path& filename);
 
          /**
           * @brief Initializes the object with no data
@@ -124,7 +123,7 @@ namespace Rodin::External::MMG
          /**
           * @brief Frees the data.
           */
-         ~ScalarSolution2D();
+         virtual ~ScalarSolution2D();
 
          /**
           * @brief Move assigns the `other` solution object to this object.
@@ -161,6 +160,8 @@ namespace Rodin::External::MMG
           */
          const Mesh2D& getMesh() const;
 
+         Mesh2D& getMesh();
+
          /**
           * @brief Gets the number of points on which the scalar solution is
           * given.
@@ -181,8 +182,8 @@ namespace Rodin::External::MMG
          ConstIterator begin() const;
          ConstIterator end() const;
 
-         MMG5_pSol& getHandle();
-         const MMG5_pSol& getHandle() const;
+         virtual MMG5_pSol& getHandle() override;
+         virtual const MMG5_pSol& getHandle() const override;
 
       private:
          std::reference_wrapper<Mesh2D> m_mesh;
@@ -218,7 +219,7 @@ namespace Rodin::External::MMG
           * @brief Frees the data if it still owns the data, i.e. the
           * setMesh(Mesh2D&) method has not been called.
           */
-         ~ScalarSolution2D();
+         virtual ~ScalarSolution2D();
 
          /**
           * @brief Sets the associated mesh and moves ownership to the new

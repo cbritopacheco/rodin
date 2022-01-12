@@ -17,23 +17,18 @@ namespace Rodin::External::MMG
    class BaseSolution
    {
       public:
+         virtual ~BaseSolution() = default;
          virtual MMG5_pSol& getHandle() = 0;
          virtual const MMG5_pSol& getHandle() const = 0;
    };
 
-   template <int Dimension, class T, class Derived>
+   template <int Dimension, class T>
    class Solution : public BaseSolution
    {
       public:
-         MMG5_pSol& getHandle() override
-         {
-            return static_cast<Derived*>(this)->getHandle();
-         }
-
-         const MMG5_pSol& getHandle() const override
-         {
-            return static_cast<const Derived*>(this)->getHandle();
-         }
+         virtual ~Solution() = default;
+         virtual MMG5_pSol& getHandle() = 0;
+         virtual const MMG5_pSol& getHandle() const = 0;
 
          int getDimension() const
          {

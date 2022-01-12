@@ -9,7 +9,6 @@
 
 #include <memory>
 
-#include "MeshAdaptor.h"
 #include "Mesh2D.h"
 #include "Solution.h"
 #include "ScalarSolution2D.h"
@@ -26,7 +25,7 @@ namespace Rodin::External::MMG
    *
    * @see [Mesh adaptation to a solution](https://www.mmgtools.org/mmg-remesher-try-mmg/mmg-remesher-tutorials/mmg-remesher-mmg2d/mesh-adaptation-to-a-solution)
    */
-  class MeshAdaptor2D : public MeshAdaptor<Mesh2D, MeshAdaptor2D>
+  class MeshAdaptor2D
   {
     public:
       /**

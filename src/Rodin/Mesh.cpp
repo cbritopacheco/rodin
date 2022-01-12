@@ -11,12 +11,12 @@
 
 namespace Rodin
 {
-   Mesh Mesh::load(const std::string& filename)
+   Mesh Mesh::load(const std::filesystem::path& filename)
    {
       return Mesh(mfem::Mesh::LoadFromFile(filename.c_str()));
    }
 
-   void Mesh::save(const std::string& filename)
+   void Mesh::save(const std::filesystem::path& filename)
    {
       getHandle().Save(filename.c_str());
    }
