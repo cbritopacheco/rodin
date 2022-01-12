@@ -12,6 +12,13 @@ namespace Rodin::Variational
    {}
 
    VectorBoundaryFluxLFIntegrator
+   ::VectorBoundaryFluxLFIntegrator(
+         int bdrAttr,
+         const ScalarCoefficientBase& lambda)
+      : VectorBoundaryFluxLFIntegrator(std::vector<int>{bdrAttr}, lambda)
+   {}
+
+   VectorBoundaryFluxLFIntegrator
    ::VectorBoundaryFluxLFIntegrator(const ScalarCoefficientBase& f)
       : VectorBoundaryFluxLFIntegrator({}, f)
    {}
