@@ -1,4 +1,4 @@
-name: Ubuntu 18.04 GCC 7
+name: Ubuntu 18.04 GCC 8
 on:
   push:
     branches:
@@ -18,10 +18,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Setup gcc-7
+      - name: Setup gcc-8
         uses: egor-tensin/setup-gcc@v1
         with:
-            version: 7
+            version: 8
             platform: x64
       - name: Install dependencies
         run: >-
@@ -52,7 +52,7 @@ jobs:
           if: needs.Build-Rodin.result == 'success'
           uses: RubbaBoy/BYOB@v1.2.1
           with:
-            NAME: Ubuntu-18_04-gcc-7-build_badge
+            NAME: Ubuntu-18_04-gcc-8-build_badge
             LABEL: 'build'
             STATUS: 'success'
             COLOR: 50C828
@@ -61,7 +61,7 @@ jobs:
           if: needs.Build-Rodin.result == 'failure'
           uses: RubbaBoy/BYOB@v1.2.1
           with:
-            NAME: Ubuntu-18_04-gcc-7-build_badge
+            NAME: Ubuntu-18_04-gcc-8-build_badge
             LABEL: 'build'
             STATUS: 'failure'
             COLOR: red
@@ -70,7 +70,7 @@ jobs:
           if: needs.Build-Rodin.result == 'cancelled'
           uses: RubbaBoy/BYOB@v1.2.1
           with:
-            NAME: Ubuntu-18_04-gcc-7-build_badge
+            NAME: Ubuntu-18_04-gcc-8-build_badge
             LABEL: 'build'
             STATUS: 'cancelled'
             COLOR: 9B9B9B
@@ -79,7 +79,7 @@ jobs:
           if: needs.Build-Rodin.result == 'skipped'
           uses: RubbaBoy/BYOB@v1.2.1
           with:
-            NAME: Ubuntu-18_04-gcc-7-build_badge
+            NAME: Ubuntu-18_04-gcc-8-build_badge
             LABEL: 'build'
             STATUS: 'skipped'
             COLOR: D9AE2D
