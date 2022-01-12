@@ -8,6 +8,8 @@
 #define RODIN_MESH_MESH_H
 
 #include <string>
+#include <filesystem>
+
 #include <mfem.hpp>
 
 #include "Variational/ForwardDecls.h"
