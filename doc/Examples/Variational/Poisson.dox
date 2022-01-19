@@ -168,17 +168,19 @@ components:
   solving the problem we just defined.
 
   Finally, we will typically want to visualize our solution. We can do this by
-  saving both the solution and mesh objects to file, and then employing some
-  visualizer like [GLVis](https://glvis.org/) to view the results.
+  saving both the solution and mesh objects to file, and then using
+  [GLVis](https://glvis.org/) to view the results.
 
   @code{.cpp}
     u.save("u.gf");
     Omega.save("Omega.mesh");
   @endcode
 
-  Note that Rodin is built on
-  top of [mfem](https://mfem.org/) so the solution and mesh will utilize the
-  [MFEM mesh v1.0](https://mfem.org/mesh-format-v1.0/).
+  To visualize the results, we can call GLVis from the command line:
+
+  @code{.bash}
+    glvis -m Omega.mesh -g u.gf
+  @endcode
 
   The full source code may be found below:
   -   @ref Variational/Poisson.cpp "Poisson.cpp"

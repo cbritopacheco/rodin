@@ -26,7 +26,6 @@
   and @f$ \Omega @f$ is a domain with boundary @f$ \partial \Omega :=
   \Gamma_D \cup \Gamma_N \cup \Gamma_0 @f$.
 
-
   The full source code may be found below:
   -   @ref Variational/Elasticity.cpp "Elasticity.cpp"
 
