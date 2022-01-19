@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <thread>
+#include "Configure.h"
+
 #include "MshdistProcess.h"
 
 namespace Rodin::External::MMG
@@ -38,9 +40,9 @@ namespace Rodin::External::MMG
 
     // Run command
     std::stringstream command;
-    command << RODIN_MSHDIST_EXECUTABLE
+    command << MSHDIST_EXECUTABLE
             << strArgs
-            << " -v " << RODIN_MMG_VERBOSITY_LEVEL
+            << " -v " << VERBOSITY_LEVEL
             << " -ncpu " << getCPUs();
     return std::system(command.str().c_str());
   }

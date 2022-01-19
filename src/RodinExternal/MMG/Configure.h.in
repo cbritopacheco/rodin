@@ -7,7 +7,21 @@
 #ifndef RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
 #define RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
 
-#define RODIN_MSHDIST_EXECUTABLE "@RODIN_MSHDIST_EXECUTABLE@"
-#define RODIN_MMG_VERBOSITY_LEVEL @RODIN_MMG_VERBOSITY_LEVEL@
+namespace Rodin::External::MMG
+{
+
+/**
+ * @internal
+ * @brief Path to the ISCD Mshdist executable.
+ */
+static constexpr const char* MSHDIST_EXECUTABLE = "@RODIN_MSHDIST_EXECUTABLE@";
+
+/**
+ * @brief Verbosity level for MMG console output.
+ *
+ * Ranges from -1 to INT_MAX. A higher number means more verbose output.
+ */
+static constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
+}
 
 #endif

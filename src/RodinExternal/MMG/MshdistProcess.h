@@ -12,8 +12,6 @@
 #include <sstream>
 #include <filesystem>
 
-#include "Configure.h"
-
 namespace Rodin::External::MMG
 {
   class MshdistProcess

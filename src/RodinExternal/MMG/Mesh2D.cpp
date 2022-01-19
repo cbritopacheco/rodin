@@ -61,22 +61,12 @@ namespace Rodin::External::MMG
       MMG2D_Init_parameters(m_mesh);
       MMG2D_Init_fileNames(m_mesh, NULL);
 
-#ifdef NDEBUG
-      // Disable any messages when not in Debug mode
-      MMG2D_Set_iparameter(
-            getHandle(),
-            nullptr,
-            MMG2D_IPARAM_verbose,
-            -1);
-#else
       // Verbosity is high when in Debug
       MMG2D_Set_iparameter(
             getHandle(),
             nullptr,
             MMG2D_IPARAM_verbose,
-            RODIN_MMG_VERBOSITY_LEVEL);
-#endif
-
+            VERBOSITY_LEVEL);
    }
 
    Mesh2D::~Mesh2D()

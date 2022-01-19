@@ -91,19 +91,11 @@ namespace Rodin::External::MMG
       // Read header
       meshDim = 2;
 
-#ifdef NDEBUG
-      // Disable any messages when not in Debug mode
-      ier =  MMG5_loadSolHeader(
-            filename.c_str(), meshDim,
-            &inm, &ver, &bin, &iswp, &np, &dim, &nsols, &type, &posnp,
-            -1);
-#else
       // Verbosity is high when in Debug
       ier =  MMG5_loadSolHeader(
             filename.c_str(), meshDim,
             &inm, &ver, &bin, &iswp, &np, &dim, &nsols, &type, &posnp,
-            RODIN_MMG_VERBOSITY_LEVEL);
-#endif
+            VERBOSITY_LEVEL);
 
       switch (ier)
       {
