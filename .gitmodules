@@ -28,3 +28,6 @@
 [submodule "third-party/ISCD/Commons"]
 	path = third-party/ISCD/Commons
 	url = https://github.com/ISCDtoolbox/Commons
+[submodule "third-party/ISCD/Advection"]
+	path = third-party/ISCD/Advection
+	url = https://github.com/cbritopacheco/Advection/
