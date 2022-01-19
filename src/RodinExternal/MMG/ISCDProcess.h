@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_EXTERNAL_MMG_MSHDISTPROCESS_H
-#define RODIN_EXTERNAL_MMG_MSHDISTPROCESS_H
+#ifndef RODIN_EXTERNAL_MMG_ISCDPROCESS_H
+#define RODIN_EXTERNAL_MMG_ISCDPROCESS_H
 
 #include <random>
 #include <vector>
@@ -14,12 +14,12 @@
 
 namespace Rodin::External::MMG
 {
-  class MshdistProcess
+  class ISCDProcess
   {
     public:
-      MshdistProcess();
+      ISCDProcess(const char* executable);
 
-      MshdistProcess setCPUs(unsigned int ncpu);
+      ISCDProcess setCPUs(unsigned int ncpu);
 
       unsigned int getCPUs() const;
 
@@ -45,8 +45,11 @@ namespace Rodin::External::MMG
       static std::mt19937 s_rng;
       static std::uniform_int_distribution<std::mt19937::result_type> s_dist;
 
+      const char* m_executable;
       unsigned int m_ncpu;
   };
 }
 
 #endif
+
+

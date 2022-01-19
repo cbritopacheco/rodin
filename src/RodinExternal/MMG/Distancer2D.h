@@ -7,9 +7,9 @@
 #ifndef RODIN_EXTERNAL_MMG_DISTANCER2D_H
 #define RODIN_EXTERNAL_MMG_DISTANCER2D_H
 
+#include "Configure.h"
 #include "ForwardDecls.h"
-
-#include "MshdistProcess.h"
+#include "ISCDProcess.h"
 
 namespace Rodin::External::MMG
 {
@@ -19,6 +19,10 @@ namespace Rodin::External::MMG
   class Distancer2D
   {
     public:
+      Distancer2D()
+        : m_mshdist(MSHDIST_EXECUTABLE)
+      {}
+
       /**
        * @brief Computes a signed distance function from a given bounding box
        * and contour.
@@ -36,7 +40,7 @@ namespace Rodin::External::MMG
       ScalarSolution2D<> distance(Mesh2D& box, Mesh2D& contour) const;
 
     private:
-      MshdistProcess m_mshdist;
+      ISCDProcess m_mshdist;
   };
 }
 

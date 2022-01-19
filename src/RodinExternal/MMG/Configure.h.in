@@ -14,7 +14,15 @@ namespace Rodin::External::MMG
  * @internal
  * @brief Path to the ISCD Mshdist executable.
  */
-static constexpr const char* MSHDIST_EXECUTABLE = "@RODIN_MSHDIST_EXECUTABLE@";
+static constexpr const char* MSHDIST_EXECUTABLE =
+  "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
+
+/**
+ * @internal
+ * @brief Path to the ISCD Mshdist executable.
+ */
+static constexpr const char* ADVECTION_EXECUTABLE =
+  "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 
 /**
  * @brief Verbosity level for MMG console output.

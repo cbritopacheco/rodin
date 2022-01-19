@@ -7,31 +7,32 @@
 #include <thread>
 #include "Configure.h"
 
-#include "MshdistProcess.h"
+#include "ISCDProcess.h"
 
 namespace Rodin::External::MMG
 {
-  std::filesystem::path MshdistProcess::s_tmpDirPath = std::filesystem::temp_directory_path();
-  std::random_device MshdistProcess::s_randomDevice;
-  std::mt19937 MshdistProcess::s_rng(MshdistProcess::s_randomDevice());
-  std::uniform_int_distribution<std::mt19937::result_type> MshdistProcess::s_dist;
+  std::filesystem::path ISCDProcess::s_tmpDirPath = std::filesystem::temp_directory_path();
+  std::random_device ISCDProcess::s_randomDevice;
+  std::mt19937 ISCDProcess::s_rng(ISCDProcess::s_randomDevice());
+  std::uniform_int_distribution<std::mt19937::result_type> ISCDProcess::s_dist;
 
-  MshdistProcess::MshdistProcess()
-    : m_ncpu(std::thread::hardware_concurrency())
+  ISCDProcess::ISCDProcess(const char* executable)
+    : m_executable(executable),
+      m_ncpu(std::thread::hardware_concurrency())
   {}
 
-  MshdistProcess MshdistProcess::setCPUs(unsigned int ncpu)
+  ISCDProcess ISCDProcess::setCPUs(unsigned int ncpu)
   {
     m_ncpu = ncpu;
     return *this;
   }
 
-  unsigned int MshdistProcess::getCPUs() const
+  unsigned int ISCDProcess::getCPUs() const
   {
     return m_ncpu;
   }
 
-  int MshdistProcess::run(const std::vector<std::string>& args) const
+  int ISCDProcess::run(const std::vector<std::string>& args) const
   {
     // Accumulate args
     std::string strArgs;
@@ -40,14 +41,14 @@ namespace Rodin::External::MMG
 
     // Run command
     std::stringstream command;
-    command << MSHDIST_EXECUTABLE
+    command << m_executable
             << strArgs
             << " -v " << VERBOSITY_LEVEL
             << " -ncpu " << getCPUs();
     return std::system(command.str().c_str());
   }
 
-  std::filesystem::path MshdistProcess::tmpnam(
+  std::filesystem::path ISCDProcess::tmpnam(
       const std::filesystem::path& extension,
       const std::filesystem::path& prefix)
   {

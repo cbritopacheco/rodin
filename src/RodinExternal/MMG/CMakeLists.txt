@@ -10,7 +10,7 @@ set(RodinExternalMMG_HEADERS
   Cast.h
   ForwardDecls.h
   Configure.h
-  MshdistProcess.h
+  ISCDProcess.h
   Distancer2D.h
   Redistancer2D.h
   Mesh.h
@@ -26,9 +26,9 @@ set(RodinExternalMMG_HEADERS
 
 set(RodinExternalMMG_SRCS
   Cast.cpp
-  MshdistProcess.cpp
   Distancer2D.cpp
   Redistancer2D.cpp
+  ISCDProcess.cpp
   Mesh2D.cpp
   MeshAdaptor2D.cpp
   MeshOptimizer2D.cpp
@@ -73,14 +73,27 @@ ExternalProject_Add(RodinExternalISCDMshdist
   DEPENDS RodinExternalISCDCommons
   )
 
+# ---- ISCD Advection ----
+ExternalProject_Add(RodinExternalISCDAdvection
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/third-party/ISCD/Advection
+  BINARY_DIR ${PROJECT_BINARY_DIR}/third-party/ISCD/Advection
+  CMAKE_ARGS -DISCD_COMMONS_LIBRARY:STRING=${PROJECT_BINARY_DIR}/third-party/ISCD/Commons/
+  CMAKE_ARGS -DISCD_COMMONS_INCLUDE_DIR:STRING=${PROJECT_SOURCE_DIR}/third-party/ISCD/Commons/sources
+  INSTALL_COMMAND ""
+  COMMENT "ISCD Advection"
+  DEPENDS RodinExternalISCDCommons
+  )
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(RODIN_MMG_VERBOSITY_LEVEL 1)
 else()
   set(RODIN_MMG_VERBOSITY_LEVEL -1)
 endif()
 
-set(RODIN_MSHDIST_EXECUTABLE
+set(RODIN_ISCD_MSHDIST_EXECUTABLE
   ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist/mshdist)
+set(RODIN_ISCD_ADVECTION_EXECUTABLE
+  ${PROJECT_BINARY_DIR}/third-party/ISCD/Advection/Advection)
 configure_file(Configure.h.in Configure.h @ONLY)
 
 target_include_directories(RodinExternalMMG

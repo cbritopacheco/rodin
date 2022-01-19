@@ -7,9 +7,9 @@
 #ifndef RODIN_EXTERNAL_MMG_REDISTANCER2D_H
 #define RODIN_EXTERNAL_MMG_REDISTANCER2D_H
 
+#include "Configure.h"
 #include "ForwardDecls.h"
-
-#include "MshdistProcess.h"
+#include "ISCDProcess.h"
 
 namespace Rodin::External::MMG
 {
@@ -19,6 +19,10 @@ namespace Rodin::External::MMG
   class Redistancer2D
   {
     public:
+      Redistancer2D()
+        : m_mshdist(MSHDIST_EXECUTABLE)
+      {}
+
       /**
        * @brief Redistances a level set function.
        *
@@ -32,7 +36,7 @@ namespace Rodin::External::MMG
       void redistance(ScalarSolution2D<>& sol) const;
 
     private:
-      MshdistProcess m_mshdist;
+      ISCDProcess m_mshdist;
   };
 }
 
