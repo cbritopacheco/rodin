@@ -21,7 +21,7 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Abstract base class for VectorCoefficient objects.
+    * @brief Abstract base class for objects representing vector coefficients.
     */
    class VectorCoefficientBase : public FormLanguage::Base
    {
@@ -33,11 +33,13 @@ namespace Rodin::Variational
          virtual size_t getDimension() const = 0;
 
          /**
+          * @internal
           * @brief Builds the underlying mfem::VectorCoefficient object.
           */
          virtual void buildMFEMVectorCoefficient() = 0;
 
          /**
+          * @internal
           * @brief Returns the underlying mfem::VectorCoefficient object.
           * @note Typically one should only call this after one has called
           * buildMFEMVectorCoefficient().
@@ -45,6 +47,7 @@ namespace Rodin::Variational
          virtual mfem::VectorCoefficient& getMFEMVectorCoefficient() = 0;
 
          /**
+          * @internal
           * @brief Builds a copy of the object and returns a non-owning
           * pointer to the new object.
           */
@@ -54,10 +57,19 @@ namespace Rodin::Variational
    template <class ... Values>
    VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
 
+   /**
+    * @brief Variadic vector of values
+    * Represents a vector which may be constructed from values which can be
+    * converted to objects of type ScalarCoefficient.
+    */
    template <class ... Values>
    class VectorCoefficient : public VectorCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs a vector with the given values.
+          * @param[in] values Parameter pack of values
+          */
          constexpr
          VectorCoefficient(Values... values)
             :  m_dimension(sizeof...(Values)),
@@ -100,6 +112,13 @@ namespace Rodin::Variational
    VectorCoefficient(GridFunction<FEC>&)
       -> VectorCoefficient<GridFunction<FEC>>;
 
+   /**
+    * @brief Vector which can be constructed from a GridFunction with vector
+    * values.
+    *
+    * Represents a vector which may be constructed from a GridFunction which
+    * takes on vector values at the mesh vertices.
+    */
    template <class FEC>
    class VectorCoefficient<GridFunction<FEC>>
       : public VectorCoefficientBase

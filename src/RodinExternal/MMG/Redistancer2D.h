@@ -13,9 +13,22 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Class which performs the "redistancing" of a level set function.
+   */
   class Redistancer2D
   {
     public:
+      /**
+       * @brief Redistances a level set function.
+       *
+       * Given a level set function defined on the vertices of a bounding box
+       * @f$ D @f$, this method will regenerate the signed distance function
+       * associated to the the subdomain @f$ \Omega \subset D @f$ which the
+       * level set function represents.
+       *
+       * @param[in,out] sol Level set function
+       */
       void redistance(ScalarSolution2D<>& sol) const;
 
     private:

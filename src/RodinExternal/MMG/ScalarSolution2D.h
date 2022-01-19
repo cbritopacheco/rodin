@@ -197,7 +197,7 @@ namespace Rodin::External::MMG
     * @ref setMesh(Mesh2D&) method. For example, when loading it from file:
     *
     * @code{.cpp}
-    * ScalarSolution2D sol = ScalarSolution2D::load(filename).setMesh(mesh);
+    * auto sol = ScalarSolution2D<>::load(filename).setMesh(mesh);
     * @endcode
     */
    template <>
@@ -230,13 +230,13 @@ namespace Rodin::External::MMG
           * @returns An object of type ScalarSolution2D which represents the
           * object with all its functionality.
           *
-          * @note The method does not incur any significant performance since
-          * no data is copied.
+          * @note The method does not incur any significant performance penalty
+          * since no data is copied.
           *
-          * @note The method does not check to see if the mesh is compatible
+          * @warning The method does not check to see if the mesh is compatible
           * with the current data in the solution. In general, it is up to the
-          * user to ensure that the number of points are the same, keep track
-          * of the modifications to the underlying mesh, etc.
+          * user to ensure that the number of points are the same and keep
+          * track of the modifications to the underlying mesh.
           */
          ScalarSolution2D<true> setMesh(Mesh2D& mesh);
 

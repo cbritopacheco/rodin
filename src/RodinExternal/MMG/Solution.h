@@ -27,9 +27,22 @@ namespace Rodin::External::MMG
    {
       public:
          virtual ~Solution() = default;
+
+         /**
+          * @internal
+          * @returns Reference to underlying solution handle.
+          */
          virtual MMG5_pSol& getHandle() = 0;
+
+         /**
+          * @internal
+          * @returns Constant reference to underlying solution handle.
+          */
          virtual const MMG5_pSol& getHandle() const = 0;
 
+         /**
+          * @brief Gets the dimension of the solution support.
+          */
          int getDimension() const
          {
             assert(getHandle()->dim == Dimension);

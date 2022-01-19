@@ -15,9 +15,6 @@ namespace Rodin::Variational
 {
    namespace Internal
    {
-      /**
-       * @internal
-       */
       class VectorGradientCoefficient : public mfem::MatrixCoefficient
       {
          public:

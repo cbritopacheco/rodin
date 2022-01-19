@@ -18,15 +18,20 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Abstract base class for objects representing scalar coefficients.
+    */
    class ScalarCoefficientBase : public FormLanguage::Base
    {
       public:
          /**
+          * @internal
           * @brief Builds the underlying mfem::Coefficient object.
           */
          virtual void buildMFEMCoefficient() = 0;
 
          /**
+          * @internal
           * @brief Returns the underlying mfem::Coefficient object.
           * @note Typically one should only call this after one has called
           * buildMFEMCoefficient().
@@ -34,6 +39,7 @@ namespace Rodin::Variational
          virtual mfem::Coefficient& getMFEMCoefficient() = 0;
 
          /**
+          * @internal
           * @brief Builds a copy of the object and returns a non-owning
           * pointer to the new object.
           */
