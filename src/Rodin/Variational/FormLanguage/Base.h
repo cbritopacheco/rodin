@@ -7,6 +7,12 @@ namespace Rodin::Variational::FormLanguage
    {
       public:
          virtual ~Base() = default;
+
+         /**
+          * @brief Copies the object and returns a non-owning pointer to the
+          * copied object.
+          * @returns Non-owning pointer to the copied object.
+          */
          virtual Base* copy() const noexcept = 0;
    };
 }

@@ -12,12 +12,30 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Abstract class for objects representing a boundary condition.
+    */
    class BoundaryConditionBase : public FormLanguage::Base
    {
       public:
+         /**
+          * @returns Boundary attribute where the boundary condition is
+          * imposed.
+          */
          virtual int getBoundaryAttribute() const = 0;
+
+         /**
+          * @returns Returns reference to the value of the boundary condition
+          * at the boundary
+          */
          virtual FormLanguage::Base& getValue() = 0;
+
+         /**
+          * @brief Imposes the boundary condition on the given ProblemBase
+          * instance.
+          */
          virtual void imposeOn(ProblemBase& pb) = 0;
+
          virtual BoundaryConditionBase* copy() const noexcept override = 0;
    };
 
@@ -28,6 +46,9 @@ namespace Rodin::Variational
    class BoundaryCondition<ScalarCoefficientBase> : public BoundaryConditionBase
    {
       public:
+         /**
+          * Constructs a boundary condition
+          */
          BoundaryCondition(int bdrAttr, const ScalarCoefficientBase& value)
             : m_bdrAttr(bdrAttr), m_value(value.copy())
          {}
@@ -38,10 +59,6 @@ namespace Rodin::Variational
 
          virtual ~BoundaryCondition() = default;
 
-         /**
-          * @brief Gets the boundary attribute where the boundary condition
-          * will be imposed
-          */
          virtual int getBoundaryAttribute() const override
          {
             return m_bdrAttr;

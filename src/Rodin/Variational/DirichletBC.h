@@ -18,6 +18,12 @@
 
 namespace Rodin::Variational
 {
+   template <class T>
+   class DirichletBC;
+
+   DirichletBC(int, const ScalarCoefficientBase&)
+      -> DirichletBC<ScalarCoefficientBase>;
+
    /**
     * @brief Represents a Dirichlet boundary condition.
     *
@@ -34,23 +40,21 @@ namespace Rodin::Variational
     * | Spaces supported     | L2, H1                                        |
     * | Dimensions supported | 1D, 2D, 3D                                    |
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
-    * | @f$ g @f$            | ScalarCoefficient if @f$ u @f$ is scalar valued, otherwise VectorCoefficient with the same dimension as @f$ u @f$.
-    * |                      |                                               |
+    * | @f$ g @f$            | ScalarCoefficient                             |
     *
     * @see @ref examples-variational-poisson
     *
     */
-   template <class T>
-   class DirichletBC;
-
-   DirichletBC(int, const ScalarCoefficientBase&)
-      -> DirichletBC<ScalarCoefficientBase>;
-
    template <>
    class DirichletBC<ScalarCoefficientBase>
       : public BoundaryCondition<ScalarCoefficientBase>
    {
       public:
+         /**
+          * @brief Constructs a DirichletBC with a scalar valued coefficient
+          * @param[in] bdrAttr Attribute where the condition will be imposed.
+          * @param[in] v Derived instance of ScalarCoefficientBase
+          */
          DirichletBC(int bdrAtr, const ScalarCoefficientBase& v)
             : BoundaryCondition<ScalarCoefficientBase>(bdrAtr, v)
          {}
@@ -68,11 +72,37 @@ namespace Rodin::Variational
    DirichletBC(int, const VectorCoefficientBase&)
       -> DirichletBC<VectorCoefficientBase>;
 
+   /**
+    * @brief Represents a Dirichlet boundary condition.
+    *
+    * When utilized in a Problem construction, it will impose the Dirichlet
+    * condition
+    * @f[
+    *    u = g \text{ on } \Gamma_D
+    * @f]
+    * on the segment of the boundary @f$ \Gamma_D \subset \partial \Omega @f$
+    * specified by the boundary attribute.
+    *
+    * | Detail               | Description                                   |
+    * |----------------------|-----------------------------------------------|
+    * | Spaces supported     | L2, H1                                        |
+    * | Dimensions supported | 1D, 2D, 3D                                    |
+    * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
+    * | @f$ g @f$            | VectorCoefficient                             |
+    *
+    * @see @ref examples-variational-poisson
+    *
+    */
    template <>
    class DirichletBC<VectorCoefficientBase>
       : public BoundaryCondition<VectorCoefficientBase>
    {
       public:
+         /**
+          * @brief Constructs a DirichletBC with a vector valued coefficient.
+          * @param[in] bdrAttr Attribute where the condition will be imposed.
+          * @param[in] v Derived instance of VectorCoefficientBase
+          */
          DirichletBC(int bdrAtr, const VectorCoefficientBase& v)
             : BoundaryCondition<VectorCoefficientBase>(bdrAtr, v)
          {}
