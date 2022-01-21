@@ -31,8 +31,7 @@ namespace Rodin::External::MMG
     * @f]
     * whose known values are given on vertices of some mesh @f$ \Omega @f$.
     */
-   template <>
-   class ScalarSolution2D<true> :  public ScalarSolution<2>
+   class ScalarSolution2D :  public ScalarSolution<2>
    {
       public:
          class Iterator
@@ -88,7 +87,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to read.
           */
-         static ScalarSolution2D<false> load(const std::filesystem::path& filename);
+         static IncompleteScalarSolution2D load(const std::filesystem::path& filename);
 
          /**
           * @brief Write the solution to a text file.
@@ -197,29 +196,28 @@ namespace Rodin::External::MMG
     * @ref setMesh(Mesh2D&) method. For example, when loading it from file:
     *
     * @code{.cpp}
-    * auto sol = ScalarSolution2D<>::load(filename).setMesh(mesh);
+    * auto sol = ScalarSolution2D::load(filename).setMesh(mesh);
     * @endcode
     */
-   template <>
-   class ScalarSolution2D<false>
+   class IncompleteScalarSolution2D
    {
       public:
          /**
           * @brief Constructs an empty scalar solution object without a mesh.
           */
-         ScalarSolution2D();
+         IncompleteScalarSolution2D();
 
          /**
           * @brief Constructs a scalar solution with `n` unitialized entries.
           * @param[in] n Number of entries that the solution has.
           */
-         ScalarSolution2D(int n);
+         IncompleteScalarSolution2D(int n);
 
          /**
           * @brief Frees the data if it still owns the data, i.e. the
           * setMesh(Mesh2D&) method has not been called.
           */
-         virtual ~ScalarSolution2D();
+         virtual ~IncompleteScalarSolution2D();
 
          /**
           * @brief Sets the associated mesh and moves ownership to the new
@@ -238,7 +236,7 @@ namespace Rodin::External::MMG
           * user to ensure that the number of points are the same and keep
           * track of the modifications to the underlying mesh.
           */
-         ScalarSolution2D<true> setMesh(Mesh2D& mesh);
+         ScalarSolution2D setMesh(Mesh2D& mesh);
 
          MMG5_pSol& getHandle();
          const MMG5_pSol& getHandle() const;

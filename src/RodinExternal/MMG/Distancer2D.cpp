@@ -10,7 +10,7 @@
 
 namespace Rodin::External::MMG
 {
-  ScalarSolution2D<> Distancer2D::distance(Mesh2D& box, Mesh2D& contour) const
+  ScalarSolution2D Distancer2D::distance(Mesh2D& box, Mesh2D& contour) const
   {
     auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     box.save(boxp);
@@ -20,7 +20,7 @@ namespace Rodin::External::MMG
 
     m_mshdist.run({ boxp.string(), contourp.string() });
 
-    auto res = ScalarSolution2D<>::load(boxp.replace_extension(".sol")).setMesh(box);
+    auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
   }
 }

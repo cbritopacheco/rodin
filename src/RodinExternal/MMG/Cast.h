@@ -56,9 +56,9 @@ namespace Rodin
     */
    template <>
    template <>
-   Variational::GridFunction<>
-   Cast<External::MMG::ScalarSolution2D<true>>
-   ::to<Variational::GridFunction<>>() const;
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::ScalarSolution2D>
+   ::to<Variational::IncompleteGridFunction>() const;
 
    /**
     * @brief Specialization for converting from External::MMG::ScalarSolution2D to
@@ -71,14 +71,14 @@ namespace Rodin
     */
    template <>
    template <>
-   Variational::GridFunction<>
-   Cast<External::MMG::ScalarSolution2D<false>>
-   ::to<Variational::GridFunction<>>() const;
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::IncompleteScalarSolution2D>
+   ::to<Variational::IncompleteGridFunction>() const;
 
    /**
     * @brief Specialization for converting from
     * Rodin::Variational::GridFunction<H1> to
-    * External::MMG::ScalarSolution2D<false>.
+    * External::MMG::IncompleteScalarSolution2D.
     *
     * @note This is a lossy cast. Data from the old object that has no direct
     * correspondence will not be present in the new object.
@@ -87,14 +87,14 @@ namespace Rodin
     */
    template <>
    template <>
-   External::MMG::ScalarSolution2D<false>
+   External::MMG::IncompleteScalarSolution2D
    Cast<Variational::GridFunction<Variational::H1>>
-   ::to<External::MMG::ScalarSolution2D<false>>() const;
+   ::to<External::MMG::IncompleteScalarSolution2D>() const;
 
    /**
     * @brief Specialization for converting from
-    * Rodin::Variational::GridFunction<> to
-    * External::MMG::ScalarSolution2D<false>.
+    * Rodin::Variational::IncompleteGridFunction to
+    * External::MMG::IncompleteScalarSolution2D.
     *
     * @note This is a lossy cast. Data from the old object that has no direct
     * correspondence will not be present in the new object.
@@ -103,9 +103,9 @@ namespace Rodin
     */
    template <>
    template <>
-   External::MMG::ScalarSolution2D<false>
-   Cast<Variational::GridFunction<>>
-   ::to<External::MMG::ScalarSolution2D<false>>() const;
+   External::MMG::IncompleteScalarSolution2D
+   Cast<Variational::IncompleteGridFunction>
+   ::to<External::MMG::IncompleteScalarSolution2D>() const;
 }
 
 

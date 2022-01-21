@@ -35,7 +35,7 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  MeshAdaptor2D& MeshAdaptor2D::setMetric(const ScalarSolution2D<>& metric)
+  MeshAdaptor2D& MeshAdaptor2D::setMetric(const ScalarSolution2D& metric)
   {
     m_metric = metric;
     return *this;

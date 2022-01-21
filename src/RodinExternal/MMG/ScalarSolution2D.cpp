@@ -17,7 +17,7 @@
 namespace Rodin::External::MMG
 {
    // ---- ScalarSolution2D --------------------------------------------------
-   ScalarSolution2D<true>::ScalarSolution2D(Mesh2D& mesh)
+   ScalarSolution2D::ScalarSolution2D(Mesh2D& mesh)
       : m_mesh(mesh)
    {
       auto calloc =
@@ -38,7 +38,7 @@ namespace Rodin::External::MMG
       m_sol->type = 1;
    }
 
-   ScalarSolution2D<true>::~ScalarSolution2D()
+   ScalarSolution2D::~ScalarSolution2D()
    {
       if (m_sol)
       {
@@ -53,14 +53,14 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution2D<true>::ScalarSolution2D(ScalarSolution2D&& other)
+   ScalarSolution2D::ScalarSolution2D(ScalarSolution2D&& other)
       :  m_mesh(other.m_mesh),
          m_sol(other.m_sol)
    {
       other.m_sol = nullptr;
    }
 
-   ScalarSolution2D<true>& ScalarSolution2D<true>::operator=(ScalarSolution2D&& other)
+   ScalarSolution2D& ScalarSolution2D::operator=(ScalarSolution2D&& other)
    {
       m_mesh = other.m_mesh;
       m_sol = other.m_sol;
@@ -68,9 +68,10 @@ namespace Rodin::External::MMG
       return *this;
    }
 
-   ScalarSolution2D<false> ScalarSolution2D<true>::load(const std::filesystem::path& filename)
+   IncompleteScalarSolution2D ScalarSolution2D::load(
+         const std::filesystem::path& filename)
    {
-      ScalarSolution2D<false> res;
+      IncompleteScalarSolution2D res;
       MMG5_pSol sol = res.getHandle();
 
       /*
@@ -182,7 +183,7 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   void ScalarSolution2D<true>::save(const std::filesystem::path& filename)
+   void ScalarSolution2D::save(const std::filesystem::path& filename)
    {
       if (!m_sol->np || !m_sol->m)
       {
@@ -196,7 +197,7 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution2D<true>::ScalarSolution2D(const ScalarSolution2D& other)
+   ScalarSolution2D::ScalarSolution2D(const ScalarSolution2D& other)
       : m_mesh(other.m_mesh)
    {
       assert(other.m_sol);
@@ -257,8 +258,8 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution2D<true>&
-   ScalarSolution2D<true>::operator=(const ScalarSolution2D& other)
+   ScalarSolution2D&
+   ScalarSolution2D::operator=(const ScalarSolution2D& other)
    {
       if (this != &other)
       {
@@ -282,8 +283,8 @@ namespace Rodin::External::MMG
       return *this;
    }
 
-   ScalarSolution2D<true>&
-   ScalarSolution2D<true>::setMesh(Mesh2D& mesh)
+   ScalarSolution2D&
+   ScalarSolution2D::setMesh(Mesh2D& mesh)
    {
       if (mesh.count() != count())
          Alert::Exception("mesh.count() != count()").raise();
@@ -291,53 +292,53 @@ namespace Rodin::External::MMG
       return *this;
    }
 
-   const Mesh2D& ScalarSolution2D<true>::getMesh() const
+   const Mesh2D& ScalarSolution2D::getMesh() const
    {
       return m_mesh;
    }
 
-   Mesh2D& ScalarSolution2D<true>::getMesh()
+   Mesh2D& ScalarSolution2D::getMesh()
    {
       return m_mesh;
    }
 
-   int ScalarSolution2D<true>::count() const
+   int ScalarSolution2D::count() const
    {
       return m_sol->np;
    }
 
-   ScalarSolution2D<true>::Iterator ScalarSolution2D<true>::begin()
+   ScalarSolution2D::Iterator ScalarSolution2D::begin()
    {
       return Iterator(&m_sol->m[1]);
    }
 
-   ScalarSolution2D<true>::Iterator ScalarSolution2D<true>::end()
+   ScalarSolution2D::Iterator ScalarSolution2D::end()
    {
       return Iterator(&m_sol->m[count() + 1]);
    }
 
-   ScalarSolution2D<true>::ConstIterator ScalarSolution2D<true>::begin() const
+   ScalarSolution2D::ConstIterator ScalarSolution2D::begin() const
    {
       return ConstIterator(&m_sol->m[1]);
    }
 
-   ScalarSolution2D<true>::ConstIterator ScalarSolution2D<true>::end() const
+   ScalarSolution2D::ConstIterator ScalarSolution2D::end() const
    {
       return ConstIterator(&m_sol->m[count() + 1]);
    }
 
-   MMG5_pSol& ScalarSolution2D<true>::getHandle()
+   MMG5_pSol& ScalarSolution2D::getHandle()
    {
       return m_sol;
    }
 
-   const MMG5_pSol& ScalarSolution2D<true>::getHandle() const
+   const MMG5_pSol& ScalarSolution2D::getHandle() const
    {
       return m_sol;
    }
 
-   // ---- ScalarSolution2D<false> -------------------------------------------
-   ScalarSolution2D<false>::ScalarSolution2D()
+   // ---- IncompleteScalarSolution2D -------------------------------------------
+   IncompleteScalarSolution2D::IncompleteScalarSolution2D()
       : m_isOwner(true)
    {
       auto calloc =
@@ -358,8 +359,8 @@ namespace Rodin::External::MMG
       m_sol->type = 1;
    }
 
-   ScalarSolution2D<false>::ScalarSolution2D(int size)
-      : ScalarSolution2D()
+   IncompleteScalarSolution2D::IncompleteScalarSolution2D(int size)
+      : IncompleteScalarSolution2D()
    {
       if (size)
       {
@@ -371,7 +372,7 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution2D<false>::~ScalarSolution2D()
+   IncompleteScalarSolution2D::~IncompleteScalarSolution2D()
    {
       if (m_isOwner)
       {
@@ -389,51 +390,51 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution2D<true> ScalarSolution2D<false>::setMesh(Mesh2D& mesh)
+   ScalarSolution2D IncompleteScalarSolution2D::setMesh(Mesh2D& mesh)
    {
-      ScalarSolution2D<true> res(mesh);
+      ScalarSolution2D res(mesh);
       res.getHandle() = m_sol;
       m_isOwner = false;
       return res;
    }
 
-   MMG5_pSol& ScalarSolution2D<false>::getHandle()
+   MMG5_pSol& IncompleteScalarSolution2D::getHandle()
    {
       return m_sol;
    }
 
-   const MMG5_pSol& ScalarSolution2D<false>::getHandle() const
+   const MMG5_pSol& IncompleteScalarSolution2D::getHandle() const
    {
       return m_sol;
    }
 
    // ---- Iterator implementation -------------------------------------------
-   ScalarSolution2D<true>::Iterator::Iterator(pointer ptr)
+   ScalarSolution2D::Iterator::Iterator(pointer ptr)
       : m_ptr(ptr)
    {}
 
-   ScalarSolution2D<true>::Iterator::reference
-   ScalarSolution2D<true>::Iterator::operator*()
+   ScalarSolution2D::Iterator::reference
+   ScalarSolution2D::Iterator::operator*()
    const
    {
       return *m_ptr;
    }
 
-   ScalarSolution2D<true>::Iterator::pointer
-   ScalarSolution2D<true>::Iterator::operator->()
+   ScalarSolution2D::Iterator::pointer
+   ScalarSolution2D::Iterator::operator->()
    {
       return m_ptr;
    }
 
-   ScalarSolution2D<true>::Iterator&
-   ScalarSolution2D<true>::Iterator::operator++()
+   ScalarSolution2D::Iterator&
+   ScalarSolution2D::Iterator::operator++()
    {
       m_ptr++;
       return *this;
    }
 
-   ScalarSolution2D<true>::Iterator
-   ScalarSolution2D<true>::Iterator::operator++(int)
+   ScalarSolution2D::Iterator
+   ScalarSolution2D::Iterator::operator++(int)
    {
       Iterator tmp = *this;
       ++(*this);
@@ -441,45 +442,45 @@ namespace Rodin::External::MMG
    }
 
    bool operator==(
-         const ScalarSolution2D<true>::Iterator& a,
-         const ScalarSolution2D<true>::Iterator& b)
+         const ScalarSolution2D::Iterator& a,
+         const ScalarSolution2D::Iterator& b)
    {
       return a.m_ptr == b.m_ptr;
    };
 
    bool operator!=(
-         const ScalarSolution2D<true>::Iterator& a,
-         const ScalarSolution2D<true>::Iterator& b)
+         const ScalarSolution2D::Iterator& a,
+         const ScalarSolution2D::Iterator& b)
    {
       return a.m_ptr != b.m_ptr;
    };
 
    // ---- ConstIterator implementation --------------------------------------
-   ScalarSolution2D<true>::ConstIterator::ConstIterator(pointer ptr)
+   ScalarSolution2D::ConstIterator::ConstIterator(pointer ptr)
       : m_ptr(ptr)
    {}
 
-   ScalarSolution2D<true>::ConstIterator::const_reference
-   ScalarSolution2D<true>::ConstIterator::operator*() const
+   ScalarSolution2D::ConstIterator::const_reference
+   ScalarSolution2D::ConstIterator::operator*() const
    {
       return *m_ptr;
    }
 
-   ScalarSolution2D<true>::ConstIterator::pointer
-   ScalarSolution2D<true>::ConstIterator::operator->()
+   ScalarSolution2D::ConstIterator::pointer
+   ScalarSolution2D::ConstIterator::operator->()
    {
       return m_ptr;
    }
 
-   ScalarSolution2D<true>::ConstIterator&
-   ScalarSolution2D<true>::ConstIterator::operator++()
+   ScalarSolution2D::ConstIterator&
+   ScalarSolution2D::ConstIterator::operator++()
    {
       m_ptr++;
       return *this;
    }
 
-   ScalarSolution2D<true>::ConstIterator
-   ScalarSolution2D<true>::ConstIterator::operator++(int)
+   ScalarSolution2D::ConstIterator
+   ScalarSolution2D::ConstIterator::operator++(int)
    {
       ConstIterator tmp = *this;
       ++(*this);
@@ -488,16 +489,16 @@ namespace Rodin::External::MMG
 
    bool
    operator==(
-         const ScalarSolution2D<true>::ConstIterator& a,
-         const ScalarSolution2D<true>::ConstIterator& b)
+         const ScalarSolution2D::ConstIterator& a,
+         const ScalarSolution2D::ConstIterator& b)
    {
       return a.m_ptr == b.m_ptr;
    };
 
    bool
    operator!=(
-         const ScalarSolution2D<true>::ConstIterator& a,
-         const ScalarSolution2D<true>::ConstIterator& b)
+         const ScalarSolution2D::ConstIterator& a,
+         const ScalarSolution2D::ConstIterator& b)
    {
       return a.m_ptr != b.m_ptr;
    };

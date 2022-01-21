@@ -9,7 +9,7 @@
 
 namespace Rodin::External::MMG
 {
-  void Redistancer2D::redistance(ScalarSolution2D<>& ls) const
+  void Redistancer2D::redistance(ScalarSolution2D& ls) const
   {
     auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     ls.getMesh().save(meshp);
@@ -20,7 +20,7 @@ namespace Rodin::External::MMG
 
     m_mshdist.run({ solp });
 
-    auto res = ScalarSolution2D<>::load(solp).setMesh(ls.getMesh());
+    auto res = ScalarSolution2D::load(solp).setMesh(ls.getMesh());
     ls = std::move(res);
   }
 }

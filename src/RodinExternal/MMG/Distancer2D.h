@@ -37,7 +37,7 @@ namespace Rodin::External::MMG
        * @note The contour mesh is allowed to contain a volume part, in which
        * case only the edge (2D) or triangle (3D) information will be retained.
        */
-      ScalarSolution2D<> distance(Mesh2D& box, Mesh2D& contour) const;
+      ScalarSolution2D distance(Mesh2D& box, Mesh2D& contour) const;
 
     private:
       ISCDProcess m_mshdist;

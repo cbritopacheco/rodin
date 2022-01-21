@@ -225,9 +225,9 @@ namespace Rodin
   // ---- From: Rodin::GridFunction - To: MMG::ScalarSolution2D<false>> ------
   template <>
   template <>
-  External::MMG::ScalarSolution2D<false>
-  Cast<Variational::GridFunction<>>
-  ::to<External::MMG::ScalarSolution2D<false>>()
+  External::MMG::IncompleteScalarSolution2D
+  Cast<Variational::IncompleteGridFunction>
+  ::to<External::MMG::IncompleteScalarSolution2D>()
   const
   {
     auto& gf = from();
@@ -235,10 +235,10 @@ namespace Rodin
     const double* data = gf.getHandle().GetData();
 
     if (!size)
-      return External::MMG::ScalarSolution2D<false>();
+      return External::MMG::IncompleteScalarSolution2D();
     else
     {
-      External::MMG::ScalarSolution2D<false> res(size);
+      External::MMG::IncompleteScalarSolution2D res(size);
       // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m + size + 1.
       std::copy(data, data + size, res.getHandle()->m + 1);
       return res;
@@ -247,14 +247,14 @@ namespace Rodin
 
    template<>
    template <>
-   Variational::GridFunction<>
-   Cast<External::MMG::ScalarSolution2D<true>>
-   ::to<Variational::GridFunction<>>() const
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::ScalarSolution2D>
+   ::to<Variational::IncompleteGridFunction>() const
    {
      auto& sol = from();
      MMG5_pSol mmgSol = sol.getHandle();
      assert(mmgSol->type == MMG5_Scalar);
-     Variational::GridFunction<> res;
+     Variational::IncompleteGridFunction res;
      double* data = new double[mmgSol->np];
      // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
      // + np + 1.
@@ -266,14 +266,14 @@ namespace Rodin
 
    template <>
    template <>
-   Variational::GridFunction<>
-   Cast<External::MMG::ScalarSolution2D<false>>
-   ::to<Variational::GridFunction<>>() const
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::IncompleteScalarSolution2D>
+   ::to<Variational::IncompleteGridFunction>() const
    {
      auto& sol = from();
      MMG5_pSol mmgSol = sol.getHandle();
      assert(mmgSol->type == MMG5_Scalar);
-     Variational::GridFunction<> res;
+     Variational::IncompleteGridFunction res;
      double* data = new double[mmgSol->np];
      // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
      // + np + 1.
@@ -285,18 +285,18 @@ namespace Rodin
 
    template <>
    template <>
-   External::MMG::ScalarSolution2D<false>
+   External::MMG::IncompleteScalarSolution2D
    Cast<Variational::GridFunction<Variational::H1>>
-   ::to<External::MMG::ScalarSolution2D<false>>()
+   ::to<External::MMG::IncompleteScalarSolution2D>()
    const
    {
      auto& gf = from();
      auto [data, size] = gf.getData();
      if (!size)
-       return External::MMG::ScalarSolution2D<false>();
+       return External::MMG::IncompleteScalarSolution2D();
      else
      {
-       External::MMG::ScalarSolution2D<false> res(size);
+       External::MMG::IncompleteScalarSolution2D res(size);
        // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
        // m + size + 1.
        std::copy(data, data + size, res.getHandle()->m + 1);

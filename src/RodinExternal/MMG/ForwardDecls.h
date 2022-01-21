@@ -21,14 +21,9 @@ namespace Rodin::External::MMG
    template <int Dimension>
    class ScalarSolution;
 
-   template <bool HasMesh = true>
    class ScalarSolution2D;
 
-   template <>
-   class ScalarSolution2D<true>;
-
-   template <>
-   class ScalarSolution2D<false>;
+   class IncompleteScalarSolution2D;
 
    class Distancer2D;
    class Redistancer2D;

@@ -122,7 +122,7 @@ namespace Rodin::External::MMG
        * Hence, if the edges passing through a vertex have very different
        * sizes, the resulting mesh may be very different from the initial one.
        */
-      ScalarSolution2D<> optimize(Mesh2D& mesh);
+      ScalarSolution2D optimize(Mesh2D& mesh);
 
     private:
       std::optional<double> m_hmin,

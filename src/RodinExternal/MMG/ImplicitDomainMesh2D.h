@@ -4,13 +4,18 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_H
-#define RODIN_MESH_H
+#ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESH2D_H
+#define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESH2D_H
 
-/**
- * @file
- * @brief Top level include for the Rodin mesh utilities.
- */
-#include "Mesh/Mesh.h"
+#include <utility>
+
+#include "ForwardDecls.h"
+
+namespace Rodin::External::MMG
+{
+  class ImplicitDomainMesh2D
+  {
+  };
+}
 
 #endif

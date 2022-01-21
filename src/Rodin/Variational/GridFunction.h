@@ -51,8 +51,6 @@ namespace Rodin::Variational
          virtual double min() const = 0;
    };
 
-   GridFunction() -> GridFunction<>;
-
    /**
     * @brief Represents a grid function which does not yet have an associated
     * finite element space.
@@ -60,15 +58,14 @@ namespace Rodin::Variational
     * To obtain the full functionality of the GridFunction class one must call
     * the @ref setFiniteElementSpace(FiniteElementSpace&) method.
     */
-   template <>
-   class GridFunction<>
+   class IncompleteGridFunction
    {
       public:
          /**
           * @brief Constructs an empty grid function with no associated finite
           * element space.
           */
-         GridFunction() = default;
+         IncompleteGridFunction() = default;
 
          /**
           * @brief Associates a finite element space to the function.
@@ -86,20 +83,6 @@ namespace Rodin::Variational
             return res;
          }
 
-         /**
-          * @brief Loads the grid function without assigning a finite element
-          * space.
-          * @param[in] filename Name of file to which the grid function will be
-          * written to.
-          */
-         static GridFunction load(const std::filesystem::path& filename)
-         {
-            std::ifstream in(filename);
-            GridFunction res;
-            res.getHandle().Load(in);
-            return res;
-         }
-
          mfem::GridFunction& getHandle()
          {
             return m_gf;
@@ -114,9 +97,6 @@ namespace Rodin::Variational
          mfem::GridFunction m_gf;
    };
 
-   template <class FEC>
-   GridFunction(FiniteElementSpace<FEC>&) -> GridFunction<FEC>;
-
    /**
     * @brief Represents a grid function which belongs to some finite element space.
     *
@@ -127,7 +107,7 @@ namespace Rodin::Variational
     * explicit.
     */
    template <class FEC>
-   class GridFunction<FEC> : public GridFunctionBase
+   class GridFunction : public GridFunctionBase
    {
       public:
          /**
@@ -184,6 +164,20 @@ namespace Rodin::Variational
          const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
          {
             return m_fes;
+         }
+
+         /**
+          * @brief Loads the grid function without assigning a finite element
+          * space.
+          * @param[in] filename Name of file to which the grid function will be
+          * written to.
+          */
+         static IncompleteGridFunction load(const std::filesystem::path& filename)
+         {
+            std::ifstream in(filename);
+            IncompleteGridFunction res;
+            res.getHandle().Load(in);
+            return res;
          }
 
          /**

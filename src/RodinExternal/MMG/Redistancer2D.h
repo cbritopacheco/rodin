@@ -33,7 +33,7 @@ namespace Rodin::External::MMG
        *
        * @param[in,out] sol Level set function
        */
-      void redistance(ScalarSolution2D<>& sol) const;
+      void redistance(ScalarSolution2D& sol) const;
 
     private:
       ISCDProcess m_mshdist;
