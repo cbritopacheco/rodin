@@ -149,7 +149,7 @@ namespace Rodin::Variational
          /**
           * @brief Gets the dimension @f$ d @f$ of the range space.
           */
-         int getDimension() const override
+         int getRangeDimension() const override
          {
             return m_fes.GetVDim();
          }

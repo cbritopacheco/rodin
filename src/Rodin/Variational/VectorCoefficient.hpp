@@ -71,7 +71,7 @@ namespace Rodin::Variational
    constexpr
    VectorCoefficient<GridFunction<FEC>>
    ::VectorCoefficient(GridFunction<FEC>& u)
-      :  m_dimension(u.getFiniteElementSpace().getDimension()),
+      :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
          m_u(u)
    {}
 

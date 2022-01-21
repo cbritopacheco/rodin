@@ -22,3 +22,12 @@ target_link_libraries(SimpleCantilever
   Rodin::Variational
   Rodin::External::MMG
   )
+
+add_executable(LevelSetCantilever LevelSetCantilever.cpp)
+target_link_libraries(LevelSetCantilever
+  PUBLIC
+  Rodin::Mesh
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::External::MMG
+  )

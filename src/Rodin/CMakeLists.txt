@@ -23,6 +23,7 @@ if (RODIN_WITH_PLOT)
 # add_subdirectory(Plot)
 endif()
 add_subdirectory(Core)
+add_subdirectory(Mesh)
 add_subdirectory(Test)
 add_subdirectory(Alert)
 add_subdirectory(Solver)
@@ -34,21 +35,3 @@ target_include_directories(Rodin
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_BINARY_DIR}/src
   )
-
-# TODO: Maybe move the Mesh code into its own submodule?
-set(RodinMesh_HEADERS
-  Mesh.h
-  )
-
-set(RodinMesh_SRCS
-  Mesh.cpp
-  )
-add_library(RodinMesh ${RodinMesh_SRCS} ${RodinMesh_HEADERS})
-add_library(Rodin::Mesh ALIAS RodinMesh)
-target_link_libraries(RodinMesh
-  PUBLIC
-  Rodin::Alert
-  PRIVATE
-  mfem)
-target_include_directories(RodinMesh PRIVATE ${MFEM_INCLUDE_DIRS})
-

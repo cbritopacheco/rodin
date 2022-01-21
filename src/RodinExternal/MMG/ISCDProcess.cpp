@@ -16,7 +16,7 @@ namespace Rodin::External::MMG
   std::mt19937 ISCDProcess::s_rng(ISCDProcess::s_randomDevice());
   std::uniform_int_distribution<std::mt19937::result_type> ISCDProcess::s_dist;
 
-  ISCDProcess::ISCDProcess(const char* executable)
+  ISCDProcess::ISCDProcess(const std::filesystem::path& executable)
     : m_executable(executable),
       m_ncpu(std::thread::hardware_concurrency())
   {}

@@ -4,14 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_H
-#define RODIN_MESH_H
+#ifndef RODIN_MESH_FORWARDDECLS_H
+#define RODIN_MESH_FORWARDDECLS_H
 
-/**
- * @file
- * @brief Top level include for the Rodin mesh utilities.
- */
-#include "Mesh/Mesh.h"
-#include "Mesh/ElementList.h"
+namespace Rodin
+{
+   class Mesh;
+}
 
 #endif

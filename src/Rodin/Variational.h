@@ -14,6 +14,9 @@
 
 #include "Variational/ForwardDecls.h"
 
+// ---- Utility --------------------------------------------------------------
+#include "Variational/Advect.h"
+
 // ---- Finite elements ------------------------------------------------------
 #include "Variational/FiniteElementSpace.h"
 #include "Variational/H1.h"

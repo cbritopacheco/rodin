@@ -17,7 +17,7 @@ namespace Rodin::External::MMG
   class ISCDProcess
   {
     public:
-      ISCDProcess(const char* executable);
+      ISCDProcess(const std::filesystem::path& executable);
 
       ISCDProcess setCPUs(unsigned int ncpu);
 
@@ -45,7 +45,7 @@ namespace Rodin::External::MMG
       static std::mt19937 s_rng;
       static std::uniform_int_distribution<std::mt19937::result_type> s_dist;
 
-      const char* m_executable;
+      std::filesystem::path m_executable;
       unsigned int m_ncpu;
   };
 }

@@ -19,7 +19,7 @@ namespace Rodin::Variational
    {
       public:
          virtual Mesh& getMesh() = 0;
-         virtual int getDimension() const = 0;
+         virtual int getRangeDimension() const = 0;
          virtual void update() = 0;
    };
 
@@ -44,9 +44,9 @@ namespace Rodin::Variational
          /**
           * @brief Gets the dimension of the range space.
           */
-         int getDimension() const override
+         int getRangeDimension() const override
          {
-            return static_cast<const Derived*>(this)->getDimension();
+            return static_cast<const Derived*>(this)->getRangeDimension();
          }
 
          /**

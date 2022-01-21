@@ -6,7 +6,7 @@ namespace Rodin::Variational
 {
    int Jacobian::getRows() const
    {
-      return m_u.getFiniteElementSpace().getDimension();
+      return m_u.getFiniteElementSpace().getRangeDimension();
    }
 
    int Jacobian::getColumns() const
