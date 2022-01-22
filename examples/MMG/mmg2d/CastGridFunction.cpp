@@ -20,13 +20,13 @@ int main(int argc, char** argv)
 
   // Load Rodin mesh and solution
   auto rodinMesh = Mesh::load(argv[1]);
-  auto gf = GridFunction<>::load(argv[2]);
+  auto gf = GridFunction<H1>::load(argv[2]);
 
   // Convert the Rodin mesh to MMG
   auto mmgMesh = Cast(rodinMesh).to<MMG::Mesh2D>();
 
   // Perform the cast and set the mesh we just casted
-  auto sol = Cast(gf).to<MMG::ScalarSolution2D<false>>().setMesh(mmgMesh);
+  auto sol = Cast(gf).to<MMG::IncompleteScalarSolution2D>().setMesh(mmgMesh);
 
   // Save mesh and solution
   mmgMesh.save("multi-mat.mesh");
