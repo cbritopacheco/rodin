@@ -11,9 +11,11 @@ set(RodinExternalMMG_HEADERS
   ForwardDecls.h
   Configure.h
   ISCDProcess.h
+  ImplicitDomainMesher2D.h
   Distancer2D.h
   Redistancer2D.h
   Mesh.h
+  MMG2D.h
   Mesh2D.h
   MeshAdaptor2D.h
   MeshOptimizer2D.h
@@ -28,6 +30,7 @@ set(RodinExternalMMG_SRCS
   Cast.cpp
   Distancer2D.cpp
   Redistancer2D.cpp
+  ImplicitDomainMesher2D.cpp
   ISCDProcess.cpp
   Mesh2D.cpp
   MeshAdaptor2D.cpp

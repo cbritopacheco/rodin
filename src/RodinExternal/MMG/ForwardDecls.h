@@ -12,6 +12,8 @@ namespace Rodin::External::MMG
    template <int Dimension>
    class Mesh;
 
+   class MMG2D;
+
    class Mesh2D;
 
    class MeshAdaptor2D;

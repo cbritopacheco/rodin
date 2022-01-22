@@ -75,7 +75,7 @@ namespace Rodin::External::MMG
         }
         MMG2D_mmg2dlib(mesh.getHandle(), metric.getHandle());
         }
-      }, m_metric ? *m_metric : ScalarSolution2D<>(mesh));
+      }, m_metric ? *m_metric : ScalarSolution2D(mesh));
     }
   }
 }

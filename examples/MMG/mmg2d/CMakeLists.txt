@@ -19,3 +19,6 @@ target_link_libraries(Distancing PUBLIC Rodin::External::MMG)
 
 add_executable(Redistancing Redistancing.cpp)
 target_link_libraries(Redistancing PUBLIC Rodin::External::MMG)
+
+add_executable(ImplicitDomainMeshing2D ImplicitDomainMeshing2D.cpp)
+target_link_libraries(ImplicitDomainMeshing2D PUBLIC Rodin::External::MMG)

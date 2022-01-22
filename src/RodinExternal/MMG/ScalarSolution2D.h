@@ -113,9 +113,11 @@ namespace Rodin::External::MMG
          ScalarSolution2D(ScalarSolution2D&& other);
 
          /**
-          * @brief Performs a deep copy of the `other` solution object.
+          * @brief Performs a copy of the `other` solution object.
           *
           * @param[in] other Object to copy.
+          * @note It does not perform a copy the mesh. Instead the new object
+          * will have a reference to the original mesh.
           */
          ScalarSolution2D(const ScalarSolution2D& other);
 

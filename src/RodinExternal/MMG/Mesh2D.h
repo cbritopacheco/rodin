@@ -86,6 +86,11 @@ namespace Rodin::External::MMG
          Mesh2D();
 
          /**
+          * @brief Copies the mesh.
+          */
+         Mesh2D(const Mesh2D& other);
+
+         /**
           * @brief Moves constructs the data of another Mesh2D object, while
           * invalidating the latter.
           */

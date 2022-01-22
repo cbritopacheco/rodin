@@ -9,27 +9,26 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @internal
+   * @brief Path to the ISCD Mshdist executable.
+   */
+  static constexpr const char* MSHDIST_EXECUTABLE =
+    "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
-/**
- * @internal
- * @brief Path to the ISCD Mshdist executable.
- */
-static constexpr const char* MSHDIST_EXECUTABLE =
-  "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
+  /**
+   * @internal
+   * @brief Path to the ISCD Mshdist executable.
+   */
+  static constexpr const char* ADVECTION_EXECUTABLE =
+    "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 
-/**
- * @internal
- * @brief Path to the ISCD Mshdist executable.
- */
-static constexpr const char* ADVECTION_EXECUTABLE =
-  "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
-
-/**
- * @brief Verbosity level for MMG console output.
- *
- * Ranges from -1 to INT_MAX. A higher number means more verbose output.
- */
-static constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
+  /**
+   * @brief Verbosity level for MMG console output.
+   *
+   * Ranges from -1 to INT_MAX. A higher number means more verbose output.
+   */
+  static constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
 }
 
 #endif

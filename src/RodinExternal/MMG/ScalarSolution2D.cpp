@@ -236,7 +236,7 @@ namespace Rodin::External::MMG
           * MMG5_ADD_MEM(
           *      mesh, (m_sol->size * (m_sol->npmax + 1)) * sizeof(double),"", ;);
           */
-         m_sol->m = (double*) std::malloc(m_sol->size * (m_sol->npmax + 1));
+         MMG5_SAFE_CALLOC(m_sol->m, m_sol->npmax + 1, double, /* No op */);
          std::memcpy(m_sol->m, other.m_sol->m, m_sol->size * (m_sol->npmax + 1));
       }
 
@@ -246,14 +246,14 @@ namespace Rodin::External::MMG
       if (other.m_sol->namein)
       {
          auto nameInLength = std::strlen(other.m_sol->namein);
-         m_sol->namein = (char*) std::malloc(nameInLength + 1);
+         MMG5_SAFE_CALLOC(m_sol->namein, nameInLength, char, /* No op */);
          std::memcpy(m_sol->namein, other.m_sol->namein, nameInLength + 1);
       }
 
       if (other.m_sol->nameout)
       {
          auto nameOutLength = std::strlen(other.m_sol->namein);
-         m_sol->namein = (char*) std::malloc(nameOutLength + 1);
+         MMG5_SAFE_CALLOC(m_sol->nameout, nameOutLength, char, /* No op */);
          std::memcpy(m_sol->namein, other.m_sol->namein, nameOutLength + 1);
       }
    }
