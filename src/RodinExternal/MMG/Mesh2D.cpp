@@ -4,8 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <fstream>
 #include <limits>
+#include <cstring>
+#include <fstream>
 
 #include <libmmgcommon.h>
 #include <mmg2d/mmg2d.h>
