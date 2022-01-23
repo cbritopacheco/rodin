@@ -12,6 +12,11 @@
 
 namespace Rodin::Alert
 {
+   struct RaiseT
+   {};
+
+   static constexpr RaiseT Raise;
+
    class Alert
    {
       public:

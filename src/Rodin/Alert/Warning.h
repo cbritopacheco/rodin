@@ -22,6 +22,11 @@ namespace Rodin::Alert
 
          virtual void raise() override;
 
+         void operator<<(const RaiseT&)
+         {
+            this->raise();
+         }
+
          template <class T>
          Warning& operator<<(T&& v)
          {
