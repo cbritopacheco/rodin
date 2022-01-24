@@ -29,10 +29,10 @@ int main(int, char**)
           + DirichletBC(Gamma, g);
 
   // Solve problem
-  Solver::PCG().setMaxIterations(200)
-               .setRelativeTolerance(1e-12)
-               .printIterations(true)
-               .solve(poisson);
+  Solver::CG().setMaxIterations(200)
+              .setRelativeTolerance(1e-12)
+              .printIterations(true)
+              .solve(poisson);
 
   // Save solution
   u.save("u.gf");

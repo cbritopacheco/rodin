@@ -37,10 +37,10 @@ int main(int argc, char** argv)
              + NeumannBC(GammaN, VectorCoefficient{0, -1});
 
   // Solve problem
-  Solver::PCG().setMaxIterations(200)
-               .setRelativeTolerance(1e-12)
-               .printIterations(true)
-               .solve(elasticity);
+  Solver::CG().setMaxIterations(200)
+              .setRelativeTolerance(1e-12)
+              .printIterations(true)
+              .solve(elasticity);
 
   // Save solution
   u.save("u.gf");

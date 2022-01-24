@@ -29,9 +29,9 @@ int main(int, char**)
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
-  // Preconditioned Conjugate Gradient solver
-  auto pcg = Solver::PCG().setMaxIterations(500)
-                          .setRelativeTolerance(1e-12);
+  // Conjugate Gradient solver
+  auto cg = Solver::CG().setMaxIterations(500)
+                        .setRelativeTolerance(1e-12);
 
   // Optimization parameters
   size_t maxIt = 30;
@@ -61,7 +61,7 @@ int main(int, char**)
     elasticity = ElasticityIntegrator(lambda, mu)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
-    pcg.solve(elasticity);
+    cg.solve(elasticity);
 
     // Hilbert extension-regularization procedure
     GridFunction theta(Vh);
@@ -73,7 +73,7 @@ int main(int, char**)
             - VectorBoundaryFluxLFIntegrator(Gamma0, Dot(Ae, e) - ell)
             + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
-    pcg.solve(hilbert);
+    cg.solve(hilbert);
 
     Advect(u, theta).step(0.1);
 

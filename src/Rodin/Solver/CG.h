@@ -19,7 +19,7 @@
 namespace Rodin::Solver
 {
    /**
-    * @brief Preconditioned Conjugate Gradient
+    * @brief Conjugate Gradient
     */
    class CG : public Solver
    {

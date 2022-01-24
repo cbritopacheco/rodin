@@ -1,11 +1,9 @@
 set(RodinSolver_HEADERS
   Solver.h
-  PCG.h
   CG.h
   )
 
 set(RodinSolver_SRCS
-  PCG.cpp
   CG.cpp
   )
 
