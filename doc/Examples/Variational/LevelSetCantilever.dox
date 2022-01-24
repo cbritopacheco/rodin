@@ -1,0 +1,17 @@
+/**
+  @page examples-variational-levelset_cantilever Shape optimization of a cantilever via the level set method
+  @brief Body-fitted optimization of a cantilever via the level set method
+
+  @m_keywords{Cantilever, Levelset}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  The full source code may be found below:
+  -   @ref Variational/LevelSetCantilever.cpp "LevelSetCantilever.cpp"
+
+  @example Variational/LevelSetCantilever.cpp
+  @m_examplenavigation{examples-variational-levelset_cantilever,Variational/}
+  @m_footernavigation
+  */

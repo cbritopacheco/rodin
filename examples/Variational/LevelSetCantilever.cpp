@@ -17,6 +17,9 @@ int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/holes.mesh";
 
+  // Define interior and exterior labels
+  int Interior = 1, Exterior = 2;
+
   // Define boundary attributes
   int Gamma0 = 1, GammaD = 2, GammaN = 3;
 
@@ -43,7 +46,7 @@ int main(int, char**)
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
-    // Finite element spaces
+    // Finite element space
     int d = 2;
     H1 Vh(Omega, d);
 
@@ -74,8 +77,6 @@ int main(int, char**)
             + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);
-
-    Advect(u, theta).step(0.1);
 
     // Update objective
     oldObj = newObj;
