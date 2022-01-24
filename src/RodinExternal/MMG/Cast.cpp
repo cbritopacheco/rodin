@@ -60,7 +60,7 @@ namespace Rodin
     bool shiftBdrAttr = false;
     for (int i = 1; i <= mmgMesh->na; i++)
     {
-      if (mmgMesh->tria[i].ref == 0)
+      if (mmgMesh->edge[i].ref == 0)
         shiftBdrAttr = true;
       if (mmgMesh->edge[i].ref < 0)
         Alert::Exception(
@@ -69,12 +69,12 @@ namespace Rodin
 
     if (shiftAttr)
       Alert::Warning(
-          "Element attribute equal to 0 is not supported. "
+          "Elements with attribute equal to 0 are not supported. "
           "All element attributes will be incremented by 1.").raise();
 
     if (shiftBdrAttr)
       Alert::Warning(
-          "Boundary element attribute equal to 0 is not supported. "
+          "Boundary elements with attribute equal to 0 are not supported. "
           "All boundary element attributes will be incremented by 1.").raise();
 
     /* So for some reason mmg types are 1 indexed. So when accessing the
@@ -208,15 +208,14 @@ namespace Rodin
 
       if(orientation < 0)
       {
-         int tmp = pt->v[2];
-         pt->v[2] = pt->v[1];
-         pt->v[1] = tmp;
-         reorientedCount++;
-         auto warning =
-           Alert::Warning()
-            << "Bad orientation in element " << i << ". "
-            << "Number of elements reoriented: " << std::to_string(reorientedCount);
-         warning.raise();
+        int tmp = pt->v[2];
+        pt->v[2] = pt->v[1];
+        pt->v[1] = tmp;
+        reorientedCount++;
+        Alert::Warning()
+          << "Bad orientation in element " << i << ". "
+          << "Number of elements reoriented: " << std::to_string(reorientedCount)
+          << Alert::Raise;
       }
     }
     return res;
