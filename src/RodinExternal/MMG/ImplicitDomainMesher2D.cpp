@@ -21,6 +21,13 @@ namespace Rodin::External::MMG
     return *this;
   }
 
+  ImplicitDomainMesher2D& ImplicitDomainMesher2D::setBoundaryReference(
+      const MaterialReference& ref)
+  {
+    m_isoref = ref;
+    return *this;
+  }
+
   ImplicitDomainMesher2D::Discretization
   ImplicitDomainMesher2D::discretize(ScalarSolution2D& ls)
   {
@@ -90,6 +97,11 @@ namespace Rodin::External::MMG
             }
           }, split);
         }
+      }
+      if (m_isoref)
+      {
+        MMG2D_Set_iparameter(mesh.getHandle(), sol.getHandle(),
+            MMG2D_IPARAM_isoref, *m_isoref);
       }
       MMG2D_Set_iparameter(mesh.getHandle(), sol.getHandle(),
           MMG2D_IPARAM_iso, 1);

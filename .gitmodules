@@ -1,6 +1,6 @@
 [submodule "third-party/mmg"]
 	path = third-party/mmg
-	url = https://github.com/MmgTools/mmg
+	url = https://github.com/cbritopacheco/mmg
 [submodule "third-party/mfem"]
 	path = third-party/mfem
 	url = https://github.com/mfem/mfem/

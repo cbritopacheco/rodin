@@ -60,11 +60,24 @@ namespace Rodin::External::MMG
        * exterior domains.
        *
        * This map specifies for each input material reference the values of the
-       * 2 new domains created by the level-set splitting.
+       * 2 new domains created by the level-set splitting. By default, the
+       * material references of the interior and exterior, are 2 and 3
+       * respectively.
        *
        * @returns Reference to self (for method chaining)
        */
       ImplicitDomainMesher2D& setSplit(const SplitMap& split);
+
+      /**
+       * @brief Sets the material reference for the discretized boundary
+       * @f$ \partial \Omega @f$
+       *
+       * Specifies what the label for the boundary @f$ \partial \Omega @f$ will
+       * be. By default, the value is 10.
+       *
+       * @returns Reference to self (for method chaining)
+       */
+      ImplicitDomainMesher2D& setBoundaryReference(const MaterialReference& ref);
 
       /**
        * @brief Gets the split map
@@ -91,6 +104,9 @@ namespace Rodin::External::MMG
       /**
        * @brief Discretizes and optimizes an implicitly defined surface defined
        * by a level set function.
+       *
+       * The material reference of the level set (edge) boundary will be 10.
+       *
        * @param[in] ls Level set function
        * @returns Discretization
        */
@@ -109,6 +125,7 @@ namespace Rodin::External::MMG
                             m_hgrad,
                             m_hausd,
                             m_rmc;
+      std::optional<MaterialReference> m_isoref;
 
   };
 }
