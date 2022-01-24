@@ -14,13 +14,33 @@ using namespace Rodin::External::MMG;
 
 int main(int argc, char** argv)
 {
-  auto box = Mesh2D::load(argv[1]);
-  auto contour = Mesh2D::load(argv[2]);
+  if (argc == 2)
+  {
+    // Generation of distance function to a subdomain
+    int Interior = 1;
 
-  auto ls = Distancer2D().distance(box, contour);
+    auto box = Mesh2D::load(argv[1]);
+    auto ls = Distancer2D().setInteriorDomains({ Interior }).distance(box);
 
-  ls.save("ls.sol");
-  box.save("ls.sol.mesh");
+    ls.save("ls.sol");
+    box.save("ls.sol.mesh");
+  }
+  else if (argc == 3)
+  {
+    // Generation of distance function with explicit contour
+    auto box = Mesh2D::load(argv[1]);
+    auto contour = Mesh2D::load(argv[2]);
+    auto ls = Distancer2D().distance(box, contour);
+
+    ls.save("ls.sol");
+    box.save("ls.sol.mesh");
+  }
+  else
+  {
+    Alert::Exception() << "Incorrect number of parameters.\n"
+                       << "Usage: " << argv[0] << " box.mesh [contour.mesh]"
+                       << Alert::Raise;
+  }
 
   return 0;
 }

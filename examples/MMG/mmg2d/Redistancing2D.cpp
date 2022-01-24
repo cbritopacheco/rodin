@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   auto box = Mesh2D::load(argv[1]);
   auto ls  = ScalarSolution2D::load(argv[2]).setMesh(box);
 
-  Redistancer2D().redistance(ls);
+  Distancer2D().redistance(ls);
 
   ls.save("ls.sol");
   box.save("ls.sol.mesh");
