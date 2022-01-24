@@ -57,6 +57,17 @@ namespace Rodin
       return totalVolume;
    }
 
+   double Mesh::getVolume(int attr)
+   {
+      double totalVolume = 0;
+      for (int i = 0; i < m_mesh.GetNE(); i++)
+      {
+         if (m_mesh.GetAttribute(i) == attr)
+            totalVolume += m_mesh.GetElementVolume(i);
+      }
+      return totalVolume;
+   }
+
    mfem::Mesh& Mesh::getHandle()
    {
       return m_mesh;

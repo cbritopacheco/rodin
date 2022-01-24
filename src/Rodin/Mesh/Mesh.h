@@ -26,19 +26,19 @@ namespace Rodin
    {
       public:
          /**
-          * @brief Loads a mesh mfem text format from file.
+          * @brief Loads a mesh from file.
           * @param[in] filename Name of file to read
           */
          static Mesh load(const std::filesystem::path& filename);
 
          /**
-          * @brief Saves the mesh to file in mfem text format.
+          * @brief Saves the mesh to file.
           * @param[in] filename Name of file to write
           */
          void save(const std::filesystem::path& filename);
 
          /**
-          * @brief Constructs an empty mesh (no elements).
+          * @brief Constructs an empty mesh with no elements.
           */
          Mesh() = default;
 
@@ -91,10 +91,29 @@ namespace Rodin
           */
          double getMaximumDisplacement(const Variational::GridFunctionBase& u);
 
+         /**
+          * @brief Gets the total volume of the mesh.
+          */
          double getVolume();
 
+         /**
+          * @brief Gets the sum of the volumes of the elements given by the
+          * specified attribute.
+          * @param[in] attr Attribute of elements
+          * @returns Sum of element volumes
+          * @note If the element attribute does not exist then this function
+          * will return 0 as the volume.
+          */
+         double getVolume(int attr);
+
+         /**
+          * @internal
+          */
          mfem::Mesh& getHandle();
 
+         /**
+          * @internal
+          */
          const mfem::Mesh& getHandle() const;
 
          /**
