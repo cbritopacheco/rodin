@@ -18,15 +18,16 @@ int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/holes.mesh";
 
-  // Define interior and exterior labels
-  int Interior = 1, Exterior = 2;
+  // Define interior, exterior and boundary references for the level set
+  // discretization
+  int Interior = 1, Exterior = 2, Boundary = 3;
 
   // Define boundary attributes
   int Gamma0 = 1, GammaD = 2, GammaN = 3;
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
-  Omega.save("Omega0.mesh");
+  Mesh D = Mesh::load(meshFile);
+  D.save("Omega0.mesh");
   std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
 
   // Lamé coefficients
@@ -49,20 +50,20 @@ int main(int, char**)
   {
     // Finite element space
     int d = 2;
-    H1 Vh(Omega, d);
+    H1 Vh(D, d);
 
     // Compliance
     auto compliance = [&](GridFunction<H1>& v)
     {
       BilinearForm bf(Vh);
-      bf = ElasticityIntegrator(lambda, mu);
+      bf = ElasticityIntegrator(lambda, mu).over(Interior);
       return bf(v, v);
     };
 
     // Elasticity equation
     GridFunction u(Vh);
     Problem elasticity(u);
-    elasticity = ElasticityIntegrator(lambda, mu)
+    elasticity = ElasticityIntegrator(lambda, mu).over(Interior)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     cg.solve(elasticity);
@@ -74,13 +75,13 @@ int main(int, char**)
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
-            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
+            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Boundary)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);
 
     // Update objective
     oldObj = newObj;
-    newObj = compliance(u) + ell.getValue() * Omega.getVolume(Interior);
+    newObj = compliance(u) + ell.getValue() * D.getVolume(Interior);
 
     std::cout << "[" << i << "] Objective: " << newObj << std::endl;
 
@@ -88,7 +89,20 @@ int main(int, char**)
     if (i > 0 && abs(oldObj - newObj) < eps)
       break;
 
-    Omega.save("Omega.mesh");
+    // Advection step
+    auto mmgMesh = Cast(D).to<MMG::Mesh2D>();
+    auto mmgDisp = Cast(theta).to<MMG::VectorSolution2D>();
+    auto ls =
+      MMG::Distancer2D().setInteriorDomains({ Interior }).distance(mmgMesh);
+    // TODO: Advect here
+
+    auto [mmgImplicit, _] =
+      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
+                                   .setBoundaryReference(Boundary)
+                                   .discretize(ls);
+    D = Cast(mmgImplicit).to<Rodin::Mesh>();
+
+    D.save("Omega.mesh");
   }
 
   std::cout << "Saved final mesh to Omega.mesh" << std::endl;
