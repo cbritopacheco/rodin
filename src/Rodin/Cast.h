@@ -82,6 +82,4 @@ namespace Rodin
    };
 }
 
-#include "DefaultCasts.h"
-
 #endif
