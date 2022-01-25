@@ -4,32 +4,20 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CAST_H
-#define RODIN_CAST_H
+#ifndef RODIN_DEFAULTCASTS_H
+#define RODIN_DEFAULTCASTS_H
 
-#include <variant>
-#include <utility>
+#include <vector>
+#include <mfem.hpp>
 
-#include "Rodin/Alert.h"
-#include "Rodin/Utility/Overloaded.h"
+#include "Cast.h"
 
 namespace Rodin
 {
-   template <class From, bool Owner = false>
-   class Cast;
-
-   template <class From>
-   using MutableCast = Cast<From, true>;
-
-   template <class From>
-   Cast(From&) -> Cast<From, false>;
-
-   template <class From>
-   Cast(const From&) -> Cast<From, false>;
-
-   template <class From>
-   class Cast<From, false>
+   template <class T>
+   class Cast<std::vector<T>, false>
    {
+      using From = std::vector<T>;
       public:
          Cast(const From& from)
             : m_from(from)
@@ -41,47 +29,50 @@ namespace Rodin
          }
 
          template <class To>
-         To to() const
-         {
-            return static_cast<To>(from());
-         }
+         To to() const;
 
+         template <>
+         mfem::Array<T> to<mfem::Array<T>>() const
+         {
+            mfem::Array res(from().size());
+            std::copy(from().begin(), from().end(), res.begin());
+            return res;
+         }
       private:
          const From& m_from;
    };
 
-   template <class From>
-   Cast(From&&) -> Cast<From, true>;
-
-   template <class From>
-   class Cast<From, true>
+   template <class T>
+   class Cast<std::vector<T>, true>
    {
+      using From = std::vector<T>;
       public:
          Cast(From&& from)
             : m_from(std::move(from))
          {}
-
-         const From& from() const
-         {
-            return m_from;
-         }
 
          From& from()
          {
             return m_from;
          }
 
-         template <class To>
-         To to() const
+         const From& from() const
          {
-            return static_cast<To>(from());
+            return m_from;
          }
 
+         template <class To>
+         To to();
+
+         template <>
+         mfem::Array<T> to<mfem::Array<T>>()
+         {
+            int asize = from().size();
+            return mfem::Array{from().data(), asize};
+         }
       private:
          From m_from;
    };
 }
-
-#include "DefaultCasts.h"
 
 #endif

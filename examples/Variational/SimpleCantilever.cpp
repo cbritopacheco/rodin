@@ -70,7 +70,7 @@ int main(int, char**)
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
-            - VectorBoundaryFluxLFIntegrator(Gamma0, Dot(Ae, e) - ell)
+            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
             + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);

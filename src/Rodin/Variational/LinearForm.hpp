@@ -28,10 +28,33 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormDomainIntegrator& lfi)
    {
-      m_lfiDomainList.append(lfi);
-      m_lfiDomainList.back().buildMFEMLinearFormIntegrator();
-      m_lf->AddDomainIntegrator(
-            m_lfiDomainList.back().releaseMFEMLinearFormIntegrator());
+      auto& l = m_lfiBoundaryList.append(lfi);
+      const auto& domAttrs = lfi.getAttributes();
+
+      l.buildMFEMLinearFormIntegrator();
+      if (domAttrs.size() == 0)
+      {
+         m_lf->AddDomainIntegrator(l.releaseMFEMLinearFormIntegrator());
+      }
+      else
+      {
+         int size = m_fes.getMesh().getHandle().attributes.Max();
+         int* data = new int[size];
+         std::fill(data, data + size, 0);
+         for (size_t i = 0; i < domAttrs.size(); i++)
+         {
+            assert(domAttrs[i] < size);
+            // All domain attributes are one-indexed.
+            data[domAttrs[i] - 1] = 1;
+         }
+
+         auto& arr = m_domAttrMarkers.emplace_back(data, size);
+         arr.MakeDataOwner();
+         m_lf->AddDomainIntegrator(
+               l.releaseMFEMLinearFormIntegrator(),
+               m_domAttrMarkers.back()
+               );
+      }
       return *this;
    }
 
@@ -39,7 +62,7 @@ namespace Rodin::Variational
    LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormBoundaryIntegrator& lfi)
    {
       auto& l = m_lfiBoundaryList.append(lfi);
-      const auto& bdrAttrs = lfi.getBoundaryAttributes();
+      const auto& bdrAttrs = lfi.getAttributes();
 
       l.buildMFEMLinearFormIntegrator();
       if (bdrAttrs.empty())
@@ -72,10 +95,9 @@ namespace Rodin::Variational
    LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormDomainIntegrator& lfi)
    {
       m_lfiDomainList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
-      (*m_lfiDomainList.begin()).buildMFEMLinearFormIntegrator();
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
-      m_lf->AddDomainIntegrator(
-            (*m_lfiDomainList.begin()).releaseMFEMLinearFormIntegrator());
+      m_domAttrMarkers.clear();
+      add(lfi);
       return *this;
    }
 

@@ -12,10 +12,28 @@ namespace Rodin::Variational
    class BilinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
+         BilinearFormIntegratorBase& over(int attr)
+         {
+            return over(std::vector{ attr });
+         }
+
+         BilinearFormIntegratorBase& over(const std::vector<int>& attrs)
+         {
+            m_attrs = attrs;
+            return *this;
+         }
+
+         const std::vector<int>& getAttributes() const
+         {
+            return m_attrs;
+         }
+
          virtual void buildMFEMBilinearFormIntegrator() = 0;
+
          virtual mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() = 0;
 
          /**
+          * @internal
           * @brief Releases ownership of the mfem::BilinearFormIntegrator.
           *
           * @note After this call, calling getMFEMBilinearFormIntegrator()
@@ -28,6 +46,9 @@ namespace Rodin::Variational
          virtual mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
+
+      private:
+         std::vector<int> m_attrs;
    };
 
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase

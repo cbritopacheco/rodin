@@ -13,6 +13,7 @@ using namespace Rodin;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
+
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/holes.mesh";
@@ -73,38 +74,19 @@ int main(int, char**)
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
-            - VectorBoundaryFluxLFIntegrator(Gamma0, Dot(Ae, e) - ell)
-            + DirichletBC(GammaD, VectorCoefficient{0, 0})
+            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);
 
     // Update objective
     oldObj = newObj;
-    newObj = compliance(u) + ell.getValue() * Omega.getVolume();
+    newObj = compliance(u) + ell.getValue() * Omega.getVolume(Interior);
 
     std::cout << "[" << i << "] Objective: " << newObj << std::endl;
 
     // Test for convergence
     if (i > 0 && abs(oldObj - newObj) < eps)
       break;
-
-    // Make the displacement
-    double t = Omega.getMaximumDisplacement(theta);
-    if (t < 1e-4)
-    {
-      // If the maximum displacement is too small the mesh will degenerate
-      break;
-    }
-    else
-    {
-      theta *= 0.1 * t;
-      Omega.displace(theta);
-
-      // Refine the mesh using MMG
-      auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-      MMG::MeshOptimizer2D().optimize(mmgMesh);
-      Omega = Cast(mmgMesh).to<Mesh>();
-    }
 
     Omega.save("Omega.mesh");
   }

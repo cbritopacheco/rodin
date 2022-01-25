@@ -19,8 +19,6 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Variational.h"
 
-#include "ScalarSolution2D.h"
-
 #include "Cast.h"
 
 

@@ -14,6 +14,7 @@
 #include "Rodin/Mesh.h"
 #include "Rodin/Variational.h"
 
+#include "ScalarSolution2D.h"
 #include "Mesh2D.h"
 
 namespace Rodin

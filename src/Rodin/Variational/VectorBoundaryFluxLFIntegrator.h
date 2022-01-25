@@ -24,7 +24,7 @@ namespace Rodin::Variational
     * |  Spaces supported     | L2, H1                                       |
     * |  Dimensions supported | 1D, 2D, 3D                                   |
     * |  Continuous operator  | @f$ f @f$                                    |
-    * |  @f$ \lambda @f$            | ScalarCoefficient                      |
+    * |  @f$ \lambda @f$      | ScalarCoefficient                            |
     *
     */
    class VectorBoundaryFluxLFIntegrator : public LinearFormBoundaryIntegrator
@@ -37,14 +37,6 @@ namespace Rodin::Variational
           * @param[in] lambda Coefficient to integrate.
           */
          VectorBoundaryFluxLFIntegrator(const ScalarCoefficientBase& lambda);
-
-         VectorBoundaryFluxLFIntegrator(
-               int bdrAttr,
-               const ScalarCoefficientBase& lambda);
-
-         VectorBoundaryFluxLFIntegrator(
-               const std::vector<int>& bdrAttrs,
-               const ScalarCoefficientBase& lambda);
 
          VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other);
 

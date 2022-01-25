@@ -107,6 +107,7 @@ namespace Rodin::Variational
          FormLanguage::List<LinearFormIntegratorBase> m_lfiDomainList;
          FormLanguage::List<LinearFormIntegratorBase> m_lfiBoundaryList;
          std::vector<mfem::Array<int>> m_bdrAttrMarkers;
+         std::vector<mfem::Array<int>> m_domAttrMarkers;
    };
 }
 

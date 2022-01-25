@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_HPP
 #define RODIN_VARIATIONAL_BILINEARFORM_HPP
 
+#include <cassert>
+
 #include "FiniteElementSpace.h"
 #include "BilinearFormIntegrator.h"
 
@@ -30,11 +32,10 @@ namespace Rodin::Variational
    template <class FEC>
    BilinearForm<FEC>& BilinearForm<FEC>::from(const BilinearFormDomainIntegrator& bfi)
    {
-      m_bfiDomainList = FormLanguage::List<BilinearFormDomainIntegrator>(bfi);
-      (*m_bfiDomainList.begin()).buildMFEMBilinearFormIntegrator();
+      m_bfiDomainList = FormLanguage::List<BilinearFormIntegratorBase>(bfi);
       m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
-      m_bf->AddDomainIntegrator(
-            (*m_bfiDomainList.begin()).releaseMFEMBilinearFormIntegrator());
+      m_domAttrMarkers.clear();
+      add(bfi);
       return *this;
    }
 
@@ -48,10 +49,33 @@ namespace Rodin::Variational
    BilinearForm<FEC>& BilinearForm<FEC>::add(
          const BilinearFormDomainIntegrator& bfi)
    {
-      m_bfiDomainList.append(bfi);
-      m_bfiDomainList.back().buildMFEMBilinearFormIntegrator();
-      m_bf->AddDomainIntegrator(
-            m_bfiDomainList.back().releaseMFEMBilinearFormIntegrator());
+      auto& l = m_bfiDomainList.append(bfi);
+      const auto& domAttrs = bfi.getAttributes();
+
+      l.buildMFEMBilinearFormIntegrator();
+      if (domAttrs.size() == 0)
+      {
+         m_bf->AddDomainIntegrator(l.releaseMFEMBilinearFormIntegrator());
+      }
+      else
+      {
+         int size = m_fes.getMesh().getHandle().attributes.Max();
+         int* data = new int[size];
+         std::fill(data, data + size, 0);
+         for (size_t i = 0; i < domAttrs.size(); i++)
+         {
+            assert(domAttrs[i] < size);
+            // All domain attributes are one-indexed.
+            data[domAttrs[i] - 1] = 1;
+         }
+
+         auto& arr = m_domAttrMarkers.emplace_back(data, size);
+         arr.MakeDataOwner();
+         m_bf->AddDomainIntegrator(
+               l.releaseMFEMBilinearFormIntegrator(),
+               m_domAttrMarkers.back()
+               );
+      }
       return *this;
    }
 

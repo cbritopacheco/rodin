@@ -1,6 +1,8 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
+#include <vector>
+#include <optional>
 #include <mfem.hpp>
 
 #include "FormLanguage/Base.h"
@@ -13,6 +15,22 @@ namespace Rodin::Variational
    {
       public:
          virtual ~LinearFormIntegratorBase() = default;
+
+         virtual LinearFormIntegratorBase& over(int attr)
+         {
+            return over(std::vector<int>{attr});
+         }
+
+         virtual LinearFormIntegratorBase& over(const std::vector<int>& attrs)
+         {
+            m_attrs = attrs;
+            return *this;
+         }
+
+         const std::vector<int>& getAttributes() const
+         {
+            return m_attrs;
+         }
 
          virtual void buildMFEMLinearFormIntegrator() = 0;
 
@@ -32,37 +50,52 @@ namespace Rodin::Variational
          virtual mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
+
+      private:
+         std::vector<int> m_attrs;
    };
 
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
+         LinearFormDomainIntegrator& over(int attr) override
+         {
+            return LinearFormDomainIntegrator::over(std::vector<int>{attr});
+         }
+
+         LinearFormDomainIntegrator& over(const std::vector<int>& attrs) override
+         {
+            return static_cast<LinearFormDomainIntegrator&>(
+                  LinearFormIntegratorBase::over(attrs));
+         }
+
          virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
    };
 
    class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
    {
       public:
-         LinearFormBoundaryIntegrator(const std::vector<int>& bdrAttrs)
-            : m_bdrAttrs(bdrAttrs)
-         {}
+         LinearFormBoundaryIntegrator() = default;
 
          LinearFormBoundaryIntegrator(
                const LinearFormBoundaryIntegrator&) = default;
 
          LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
 
+         LinearFormBoundaryIntegrator& over(int attr) override
+         {
+            return LinearFormBoundaryIntegrator::over(std::vector<int>{attr});
+         }
+
+         LinearFormBoundaryIntegrator& over(const std::vector<int>& attrs) override
+         {
+            return static_cast<LinearFormBoundaryIntegrator&>(
+                  LinearFormIntegratorBase::over(attrs));
+         }
+
          virtual ~LinearFormBoundaryIntegrator() = default;
 
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
-
-         virtual const std::vector<int>& getBoundaryAttributes() const
-         {
-            return m_bdrAttrs;
-         }
-
-      private:
-         std::vector<int> m_bdrAttrs;
    };
 
 }
