@@ -12,12 +12,12 @@ namespace Rodin::Variational
    class BilinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
-         BilinearFormIntegratorBase& over(int attr)
+         virtual BilinearFormIntegratorBase& over(int attr)
          {
             return over(std::vector{ attr });
          }
 
-         BilinearFormIntegratorBase& over(const std::vector<int>& attrs)
+         virtual BilinearFormIntegratorBase& over(const std::vector<int>& attrs)
          {
             m_attrs = attrs;
             return *this;
@@ -54,6 +54,27 @@ namespace Rodin::Variational
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
+         /**
+          * @brief Specifies the attribute of the elements where the
+          * integration should be done
+          * @param[in] attrs Element attributes
+          */
+         BilinearFormDomainIntegrator& over(int attr) override
+         {
+            return BilinearFormDomainIntegrator::over(std::vector<int>{attr});
+         }
+
+         /**
+          * @brief Specifies the attributes of the elements where the
+          * integration should be done.
+          * @param[in] attrs Element attributes
+          */
+         BilinearFormDomainIntegrator& over(const std::vector<int>& attrs) override
+         {
+            return static_cast<BilinearFormDomainIntegrator&>(
+                  BilinearFormIntegratorBase::over(attrs));
+         }
+
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
    };
 }

@@ -58,11 +58,21 @@ namespace Rodin::Variational
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
+         /**
+          * @brief Specifies the attribute of the elements where the
+          * integration should be done
+          * @param[in] attrs Element attributes
+          */
          LinearFormDomainIntegrator& over(int attr) override
          {
             return LinearFormDomainIntegrator::over(std::vector<int>{attr});
          }
 
+         /**
+          * @brief Specifies the attributes of the elements where the
+          * integration should be done.
+          * @param[in] attrs Element attributes
+          */
          LinearFormDomainIntegrator& over(const std::vector<int>& attrs) override
          {
             return static_cast<LinearFormDomainIntegrator&>(
