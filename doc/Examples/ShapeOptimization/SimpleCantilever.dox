@@ -1,0 +1,17 @@
+/**
+  @page examples-shapeoptimization-simple_cantilever Shape optimization of a cantilever
+  @brief Shows how to optimize the shape of a cantilever
+
+  @m_keywords{Cantilever}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  The full source code may be found below:
+  -   @ref ShapeOptimization/SimpleCantilever.cpp "SimpleCantilever.cpp"
+
+  @example ShapeOptimization/SimpleCantilever.cpp
+  @m_examplenavigation{examples-shapeoptimization-simple_cantilever,ShapeOptimization/}
+  @m_footernavigation
+  */

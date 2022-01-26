@@ -1,0 +1,17 @@
+/**
+  @page examples-shapeoptimization-levelset_cantilever Shape optimization of a cantilever via the level set method
+  @brief Body-fitted optimization of a cantilever via the level set method
+
+  @m_keywords{Cantilever, Levelset}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  The full source code may be found below:
+  -   @ref ShapeOptimization/LevelSetCantilever.cpp "LevelSetCantilever.cpp"
+
+  @example ShapeOptimization/LevelSetCantilever.cpp
+  @m_examplenavigation{examples-shapeoptimization-levelset_cantilever,ShapeOptimization/}
+  @m_footernavigation
+  */

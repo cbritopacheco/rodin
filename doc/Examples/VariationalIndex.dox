@@ -4,7 +4,5 @@
 
   - @subpage examples-variational-poisson
   - @subpage examples-variational-elasticity
-  - @subpage examples-variational-simple_cantilever
-  - @subpage examples-variational-levelset_cantilever
 
   */

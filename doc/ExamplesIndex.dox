@@ -6,7 +6,7 @@
 
   @subsection examples-index-getting_started Getting started
 
-  @subsection examples-index-variational Utilizing the Variational module
+  @subsection examples-index-variational Utilizing the variational methods module
 
   The Rodin::Variational module is mostly used when dealing with to variational
   problems of the form:
@@ -20,11 +20,15 @@
 
   - @subpage examples-variational-index
 
-  @subsection examples-index-mesh Utilizing the Solver module
+  @subsection examples-index-solver Utilizing the linear algebra solver module
+
+  Rodin::Solver
 
   In progress.
 
-  @subsection examples-index-mesh Utilizing the Mesh module
+  @subsection examples-index-mesh Utilizing the mesh module
+
+  Rodin::Mesh
 
   In progress.
 
@@ -38,5 +42,9 @@
   For the complete list of examples go to the link below:
 
   - @subpage examples-mmg-index
+
+  @subsection examples-index-shapeoptimization Shape optimization examples
+
+  - @subpage examples-shapeoptimization-index
 
   */
