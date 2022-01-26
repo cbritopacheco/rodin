@@ -25,8 +25,8 @@ int main(int, char**)
   int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
   // Load mesh
-  Mesh D = Mesh::load(meshFile);
-  D.save("Omega0.mesh");
+  Mesh Omega = Mesh::load(meshFile);
+  Omega.save("Omega0.mesh");
   std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
 
   // Lamé coefficients
@@ -49,7 +49,7 @@ int main(int, char**)
   {
     // Finite element space
     int d = 2;
-    H1 Vh(D, d);
+    H1 Vh(Omega, d);
 
     // Compliance
     auto compliance = [&](GridFunction<H1>& v)
@@ -80,7 +80,7 @@ int main(int, char**)
 
     // Update objective
     oldObj = newObj;
-    newObj = compliance(u) + ell.getValue() * D.getVolume(Interior);
+    newObj = compliance(u) + ell.getValue() * Omega.getVolume(Interior);
 
     std::cout << "[" << i << "] Objective: " << newObj << std::endl;
 
@@ -89,15 +89,15 @@ int main(int, char**)
       break;
 
     // Convert data types to mmg types
-    auto mmgMesh = Cast(D).to<MMG::Mesh2D>();
-    auto mmgDisp = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
     auto ls =
       MMG::Distancer2D().setInteriorDomains({ Interior }).distance(mmgMesh);
 
     // Advect the level set function
-    MMG::Advect2D(ls, mmgDisp).step(0.01);
+    MMG::Advect2D(ls, mmgVel).step(0.01);
 
     // Recover the implicit domain
     auto [mmgImplicit, _] =
@@ -106,10 +106,10 @@ int main(int, char**)
                                    .discretize(ls);
 
     // Convert back to Rodin data type
-    D = Cast(mmgImplicit).to<Rodin::Mesh>();
+    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
     // Save current mesh
-    D.save("Omega.mesh");
+    Omega.save("Omega.mesh");
   }
 
   std::cout << "Saved final mesh to Omega.mesh" << std::endl;
