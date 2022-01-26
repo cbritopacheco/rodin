@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <thread>
 #include <fstream>
 #include <utility>
 #include "Distancer2D.h"
@@ -11,7 +12,13 @@
 
 namespace Rodin::External::MMG
 {
-  Distancer2D& Distancer2D::setInteriorDomains(const std::vector<MaterialReference>& refs)
+  Distancer2D::Distancer2D()
+    : m_ncpu(std::thread::hardware_concurrency()),
+      m_mshdist(MSHDIST_EXECUTABLE)
+  {}
+
+  Distancer2D& Distancer2D::setInteriorDomains(
+      const std::vector<MaterialReference>& refs)
   {
     m_interiorDomains = refs;
     return *this;
@@ -33,7 +40,7 @@ namespace Rodin::External::MMG
         paramf << ref << "\n";
     }
 
-    m_mshdist.run({ boxp.string(), "-dom" });
+    m_mshdist.run(boxp, "-dom", "-ncpu", m_ncpu, "-v", VERBOSITY_LEVEL);
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -47,7 +54,7 @@ namespace Rodin::External::MMG
     auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     contour.save(contourp);
 
-    m_mshdist.run({ boxp.string(), contourp.string() });
+    m_mshdist.run(boxp, contourp, "-ncpu", m_ncpu, "-v", VERBOSITY_LEVEL);
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -62,9 +69,20 @@ namespace Rodin::External::MMG
     solp.replace_extension(".sol");
     ls.save(solp);
 
-    m_mshdist.run({ solp });
+    m_mshdist.run(solp , "-ncpu", m_ncpu, "-v", VERBOSITY_LEVEL);
 
     auto res = ScalarSolution2D::load(solp).setMesh(ls.getMesh());
     ls = std::move(res);
+  }
+
+  Distancer2D Distancer2D::setCPUs(unsigned int ncpu)
+  {
+    m_ncpu = ncpu;
+    return *this;
+  }
+
+  unsigned int Distancer2D::getCPUs() const
+  {
+    return m_ncpu;
   }
 }

@@ -7,6 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
+  Advect2D.h
   Cast.h
   ForwardDecls.h
   Configure.h
@@ -28,6 +29,7 @@ set(RodinExternalMMG_HEADERS
   )
 
 set(RodinExternalMMG_SRCS
+  Advect2D.cpp
   Cast.cpp
   Distancer2D.cpp
   ImplicitDomainMesher2D.cpp

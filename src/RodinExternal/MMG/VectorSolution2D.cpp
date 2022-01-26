@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include <mmg2d/mmg2d.h>
 #include <libmmgcommon.h>
 #include <common/mmgcommon.h>

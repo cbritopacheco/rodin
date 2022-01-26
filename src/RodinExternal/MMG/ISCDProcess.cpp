@@ -4,9 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <thread>
-#include "Configure.h"
-
 #include "ISCDProcess.h"
 
 namespace Rodin::External::MMG
@@ -17,36 +14,8 @@ namespace Rodin::External::MMG
   std::uniform_int_distribution<std::mt19937::result_type> ISCDProcess::s_dist;
 
   ISCDProcess::ISCDProcess(const std::filesystem::path& executable)
-    : m_executable(executable),
-      m_ncpu(std::thread::hardware_concurrency())
+    : m_executable(executable)
   {}
-
-  ISCDProcess ISCDProcess::setCPUs(unsigned int ncpu)
-  {
-    m_ncpu = ncpu;
-    return *this;
-  }
-
-  unsigned int ISCDProcess::getCPUs() const
-  {
-    return m_ncpu;
-  }
-
-  int ISCDProcess::run(const std::vector<std::string>& args) const
-  {
-    // Accumulate args
-    std::string strArgs;
-    for (const auto& a : args)
-      strArgs += " " + a;
-
-    // Run command
-    std::stringstream command;
-    command << m_executable
-            << strArgs
-            << " -v " << VERBOSITY_LEVEL
-            << " -ncpu " << getCPUs();
-    return std::system(command.str().c_str());
-  }
 
   std::filesystem::path ISCDProcess::tmpnam(
       const std::filesystem::path& extension,

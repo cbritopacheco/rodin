@@ -16,7 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "Omega.mesh";
+  const char* meshFile = "rodin.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -66,6 +66,14 @@ int main(int, char**)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     cg.solve(elasticity);
+
+    u.save("u.gf");
+
+    auto mm = Cast(D).to<MMG::Mesh2D>();
+    auto md = Cast(u).to<MMG::IncompleteVectorSolution2D>().setMesh(mm);
+    mm.save("disp.sol.mesh");
+    md.save("disp.sol");
+    std::exit(1);
 
     // Hilbert extension-regularization procedure
     GridFunction theta(Vh);

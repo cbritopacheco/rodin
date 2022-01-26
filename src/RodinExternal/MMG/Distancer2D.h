@@ -42,9 +42,7 @@ namespace Rodin::External::MMG
       /**
        * @brief Creates a Distancer2D object with default values.
        */
-      Distancer2D()
-        : m_mshdist(MSHDIST_EXECUTABLE)
-      {}
+      Distancer2D();
 
       /**
        * @brief Computes a signed distance function to a subdomain.
@@ -104,9 +102,14 @@ namespace Rodin::External::MMG
        */
       Distancer2D& setInteriorDomains(const std::vector<MaterialReference>& refs);
 
+      Distancer2D setCPUs(unsigned int ncpu);
+
+      unsigned int getCPUs() const;
+
     private:
-      std::optional<std::vector<MaterialReference>> m_interiorDomains;
+      unsigned int m_ncpu;
       ISCDProcess m_mshdist;
+      std::optional<std::vector<MaterialReference>> m_interiorDomains;
   };
 }
 

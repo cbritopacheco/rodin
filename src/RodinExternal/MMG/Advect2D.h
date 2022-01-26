@@ -35,16 +35,16 @@ namespace Rodin::External::MMG
   class Advect2D
   {
     public:
-      Advect2D(ScalarSolution2D& ls, VectorSolution2D& disp)
-        : m_ls(ls),
-          m_disp(disp),
-          m_advect(ADVECTION_EXECUTABLE)
-      {}
+      Advect2D(ScalarSolution2D& ls, VectorSolution2D& disp);
 
-      void step(double dt)
-      {}
+      Advect2D& setCFL(bool cfl);
+      Advect2D& setExtrapolation(bool ex);
+
+      void step(double dt);
 
     private:
+      double m_t;
+      bool m_cfl, m_ex;
       ScalarSolution2D& m_ls;
       VectorSolution2D& m_disp;
       ISCDProcess m_advect;
