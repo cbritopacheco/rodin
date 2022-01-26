@@ -9,7 +9,7 @@
 
 /*
  * We have to undef the I macro (from complex.h) since it clashes with mfem
- * code (i.e. table.hpp) where the I variable is defined and causes all sorts
+ * code (e.g. table.hpp) where the I variable is defined and causes all sorts
  * of nasty errors.
  */
 #ifdef I
@@ -287,6 +287,7 @@ namespace Rodin
    ::to<External::MMG::IncompleteScalarSolution2D>()
    const
    {
+     assert(from().getFiniteElementSpace().getRangeDimension() == 1);
      auto& gf = from();
      auto [data, size] = gf.getData();
      if (!size)
@@ -297,6 +298,40 @@ namespace Rodin
        // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
        // m + size + 1.
        std::copy(data, data + size, res.getHandle()->m + 1);
+       return res;
+     }
+   }
+
+   template <>
+   template <>
+   External::MMG::IncompleteVectorSolution2D
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteVectorSolution2D>() const
+   {
+     assert(from().getFiniteElementSpace().getRangeDimension() == 2);
+     auto& gf = from();
+     auto [data, size] = gf.getData();
+     if (!size)
+       return External::MMG::IncompleteVectorSolution2D();
+     else
+     {
+       assert(size % 2 == 0);
+       size_t n = size / 2;
+       External::MMG::IncompleteVectorSolution2D res(n);
+       switch (from().getFiniteElementSpace().getFES().GetOrdering())
+       {
+         case mfem::Ordering::byNODES:
+           for (size_t i = 0; i < n; i++)
+           {
+             res.getHandle()->m[(i + 1) * res.getHandle()->size] = data[i];
+             res.getHandle()->m[(i + 1) * res.getHandle()->size + 1] = data[i + n];
+           }
+           break;
+         case mfem::Ordering::byVDIM:
+           std::copy(
+               data, data + size, res.getHandle()->m + res.getHandle()->size);
+           break;
+       }
        return res;
      }
    }

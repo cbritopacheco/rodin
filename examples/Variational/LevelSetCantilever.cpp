@@ -16,14 +16,13 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/holes.mesh";
+  const char* meshFile = "Omega.mesh";
 
-  // Define interior, exterior and boundary references for the level set
-  // discretization
-  int Interior = 1, Exterior = 2, Boundary = 3;
+  // Define interior and exterior for level set discretization
+  int Interior = 1, Exterior = 2;
 
   // Define boundary attributes
-  int Gamma0 = 1, GammaD = 2, GammaN = 3;
+  int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
   // Load mesh
   Mesh D = Mesh::load(meshFile);
@@ -75,7 +74,7 @@ int main(int, char**)
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
-            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Boundary)
+            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);
 
@@ -89,19 +88,27 @@ int main(int, char**)
     if (i > 0 && abs(oldObj - newObj) < eps)
       break;
 
-    // Advection step
+    // Convert data types to mmg types
     auto mmgMesh = Cast(D).to<MMG::Mesh2D>();
-    auto mmgDisp = Cast(theta).to<MMG::VectorSolution2D>();
+    auto mmgDisp = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+
+    // Generate signed distance function
     auto ls =
       MMG::Distancer2D().setInteriorDomains({ Interior }).distance(mmgMesh);
-    // TODO: Advect here
 
+    // Advect the level set function
+    MMG::Advect2D(ls, mmgDisp).step(0.01);
+
+    // Recover the implicit domain
     auto [mmgImplicit, _] =
       MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                   .setBoundaryReference(Boundary)
+                                   .setBoundaryReference(Gamma)
                                    .discretize(ls);
+
+    // Convert back to Rodin data type
     D = Cast(mmgImplicit).to<Rodin::Mesh>();
 
+    // Save current mesh
     D.save("Omega.mesh");
   }
 

@@ -57,12 +57,25 @@ namespace Rodin::Variational
             return static_cast<Derived*>(this)->getFEC();
          }
 
+         const mfem::FiniteElementCollection& getFEC() const
+         {
+            return static_cast<const Derived*>(this)->getFEC();
+         }
+
          /**
           * @internal
           */
          mfem::FiniteElementSpace& getFES()
          {
             return static_cast<Derived*>(this)->getFES();
+         }
+
+         /**
+          * @internal
+          */
+         const mfem::FiniteElementSpace& getFES() const
+         {
+            return static_cast<const Derived*>(this)->getFES();
          }
 
          bool operator==(const FiniteElementSpace& other)

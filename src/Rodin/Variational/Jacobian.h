@@ -29,8 +29,18 @@ namespace Rodin::Variational
                   mfem::ElementTransformation& T,
                   const mfem::IntegrationPoint& ip) override
             {
-               T.SetIntPoint(&ip);
-               m_u.GetVectorGradient(T, grad);
+               if (T.ElementType == mfem::ElementTransformation::BDR_ELEMENT
+                     && T.mesh->FaceIsInterior((T.mesh->GetBdrFace(T.ElementNo))))
+               {
+                  assert(false);
+                  // There is a segfault here because it is not defined how to
+                  // exactly compute the vector gradient of an interior
+                  // boundary element. Maybe some kind of averaging will
+                  // suffice.
+                  m_u.GetVectorGradient(T, grad);
+               }
+               else
+                  m_u.GetVectorGradient(T, grad);
             }
 
          private:

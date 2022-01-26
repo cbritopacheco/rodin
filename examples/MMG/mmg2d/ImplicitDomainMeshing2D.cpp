@@ -16,11 +16,12 @@ int main(int argc, char** argv)
 {
   int Omega = 0;
   int Interior = 1, Exterior = 2;
-  int Boundary = 42;
+  int Boundary = 4;
 
   auto box = Mesh2D::load(argv[1]);
   auto ls  = ScalarSolution2D::load(argv[2]).setMesh(box);
   auto [mesh, _] = ImplicitDomainMesher2D().split(Omega, {Interior, Exterior})
+                                           .setRMC()
                                            .setBoundaryReference(Boundary)
                                            .discretize(ls);
   mesh.save("Omega.mesh");

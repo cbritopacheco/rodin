@@ -10,9 +10,11 @@
 #include "MMG/Cast.h"
 #include "MMG/Mesh2D.h"
 #include "MMG/ScalarSolution2D.h"
+#include "MMG/VectorSolution2D.h"
 #include "MMG/MeshAdaptor2D.h"
 #include "MMG/MeshOptimizer2D.h"
 #include "MMG/Distancer2D.h"
+#include "MMG/Advect2D.h"
 #include "MMG/ImplicitDomainMesher2D.h"
 
 #endif

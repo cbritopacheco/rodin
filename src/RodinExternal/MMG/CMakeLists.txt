@@ -20,6 +20,8 @@ set(RodinExternalMMG_HEADERS
   MeshOptimizer2D.h
   ScalarSolution.h
   ScalarSolution2D.h
+  VectorSolution.h
+  VectorSolution2D.h
   Solution.h
   Vertex.h
   Vertex2D.h
@@ -34,6 +36,7 @@ set(RodinExternalMMG_SRCS
   MeshAdaptor2D.cpp
   MeshOptimizer2D.cpp
   ScalarSolution2D.cpp
+  VectorSolution2D.cpp
   Vertex2D.cpp
   )
 

@@ -24,11 +24,18 @@ namespace Rodin::External::MMG
    class ScalarSolution;
 
    class ScalarSolution2D;
-
    class IncompleteScalarSolution2D;
+
+   template <int Dimension>
+   class VectorSolution;
+
+   class VectorSolution2D;
+   class IncompleteVectorSolution2D;
 
    class Distancer2D;
    class Redistancer2D;
+
+   class Advect2D;
 }
 
 #endif

@@ -15,6 +15,7 @@
 #include "Rodin/Variational.h"
 
 #include "ScalarSolution2D.h"
+#include "VectorSolution2D.h"
 #include "Mesh2D.h"
 
 namespace Rodin
@@ -107,6 +108,22 @@ namespace Rodin
    External::MMG::IncompleteScalarSolution2D
    Cast<Variational::IncompleteGridFunction>
    ::to<External::MMG::IncompleteScalarSolution2D>() const;
+
+   /**
+    * @brief Specialization for converting from
+    * Rodin::Variational::GridFunction to
+    * External::MMG::IncompleteVectorSolution2D.
+    *
+    * @note This is a lossy cast. Data from the old object that has no direct
+    * correspondence will not be present in the new object.
+    *
+    * @todo Which fields are not compatible?
+    */
+   template <>
+   template <>
+   External::MMG::IncompleteVectorSolution2D
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteVectorSolution2D>() const;
 }
 
 

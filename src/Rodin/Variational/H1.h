@@ -169,12 +169,22 @@ namespace Rodin::Variational
             return m_fec;
          }
 
+         const mfem::H1_FECollection& getFEC() const
+         {
+            return m_fec;
+         }
+
          /**
           * @internal
           * @brief Returns the underlying mfem::FiniteElementSpace object.
           * @returns Reference to the underlying mfem::FiniteElementSpace.
           */
          mfem::FiniteElementSpace& getFES()
+         {
+            return m_fes;
+         }
+
+         const mfem::FiniteElementSpace& getFES() const
          {
             return m_fes;
          }

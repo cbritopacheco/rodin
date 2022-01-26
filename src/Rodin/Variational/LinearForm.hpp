@@ -28,7 +28,7 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormDomainIntegrator& lfi)
    {
-      auto& l = m_lfiBoundaryList.append(lfi);
+      auto& l = m_lfiDomainList.append(lfi);
       const auto& domAttrs = lfi.getAttributes();
 
       l.buildMFEMLinearFormIntegrator();
@@ -43,8 +43,8 @@ namespace Rodin::Variational
          std::fill(data, data + size, 0);
          for (size_t i = 0; i < domAttrs.size(); i++)
          {
-            assert(domAttrs[i] < size);
             // All domain attributes are one-indexed.
+            assert(domAttrs[i] - 1 < size);
             data[domAttrs[i] - 1] = 1;
          }
 
@@ -76,8 +76,8 @@ namespace Rodin::Variational
          std::fill(data, data + size, 0);
          for (size_t i = 0; i < bdrAttrs.size(); i++)
          {
-            assert(bdrAttrs[i] < size);
             // All boundary attributes are one-indexed.
+            assert(bdrAttrs[i] - 1 < size);
             data[bdrAttrs[i] - 1] = 1;
          }
 

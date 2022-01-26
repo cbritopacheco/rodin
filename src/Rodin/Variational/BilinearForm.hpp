@@ -64,7 +64,7 @@ namespace Rodin::Variational
          std::fill(data, data + size, 0);
          for (size_t i = 0; i < domAttrs.size(); i++)
          {
-            assert(domAttrs[i] < size);
+            assert(domAttrs[i] - 1 < size);
             // All domain attributes are one-indexed.
             data[domAttrs[i] - 1] = 1;
          }

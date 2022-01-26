@@ -35,7 +35,7 @@ namespace Rodin::External::MMG
       m_sol->dim  = 2; // Supported on 2D mesh
       m_sol->ver  = 2;
       m_sol->size = 1; // Scalar solution
-      m_sol->type = 1;
+      m_sol->type = MMG5_Scalar;
    }
 
    ScalarSolution2D::~ScalarSolution2D()
@@ -139,9 +139,13 @@ namespace Rodin::External::MMG
             break;
          case MMG5_Vector:
             sol->size = 2;
+            Alert::Exception(
+                  "Failed to load solution. Expected sol->size == 1, got 2.").raise();
             break;
          case MMG5_Tensor:
             sol->size = 3;
+            Alert::Exception(
+                  "Failed to load solution. Expected sol->size == 1, got 3.").raise();
             break;
          default:
             Alert::Exception(
@@ -302,11 +306,6 @@ namespace Rodin::External::MMG
       return m_mesh;
    }
 
-   int ScalarSolution2D::count() const
-   {
-      return m_sol->np;
-   }
-
    ScalarSolution2D::Iterator ScalarSolution2D::begin()
    {
       return Iterator(&m_sol->m[1]);
@@ -356,7 +355,7 @@ namespace Rodin::External::MMG
       m_sol->dim  = 2; // Supported on 2D mesh
       m_sol->ver  = 2;
       m_sol->size = 1; // Scalar solution
-      m_sol->type = 1;
+      m_sol->type = MMG5_Scalar;
    }
 
    IncompleteScalarSolution2D::IncompleteScalarSolution2D(int size)
