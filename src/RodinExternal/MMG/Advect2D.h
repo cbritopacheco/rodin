@@ -35,11 +35,36 @@ namespace Rodin::External::MMG
   class Advect2D
   {
     public:
+      /**
+       * @brief Constructs an Advect2D object
+       * @param[in, out] ls Function to advect
+       * @param[in] disp Displacement velocity field
+       */
       Advect2D(ScalarSolution2D& ls, VectorSolution2D& disp);
 
-      Advect2D& setCFL(bool cfl);
-      Advect2D& setExtrapolation(bool ex);
+      /**
+       * @brief Specifies whether to enable or disable truncation of time in the CFL condition.
+       *
+       * If true, avoids truncation of the time period for advection due to
+       * the CFL condition. Otherwise, no action is taken.
+       * By default it is set to false.
+       */
+      Advect2D& avoidTimeTruncation(bool cfl);
 
+      /**
+       * @brief Specifies whether to extrapolate characteristic lines or not.
+       *
+       * If true, characteristic lines are extrapolated outside the domain when
+       * the input velocity field causes them to do so. Otherwise, no action is
+       * taken.
+       * By default it is set to true.
+       */
+      Advect2D& enableExtrapolation(bool ex = true);
+
+      /**
+       * @brief Advances the level set function by the time step `dt`.
+       * @param[in] dt Advection timestep
+       */
       void step(double dt);
 
     private:
