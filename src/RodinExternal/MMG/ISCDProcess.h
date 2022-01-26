@@ -67,7 +67,8 @@ namespace Rodin::External::MMG
       int run(Ts... args) const
       {
         // Accumulate args
-        std::string strArgs = ParameterPack(std::forward<Ts>(args)...).toString();
+        ParameterPack ps(std::forward<Ts>(args)...);
+        std::string strArgs = ps.toString();
 
         // Run command
         return std::system((m_executable.string() + " " + strArgs).c_str());
