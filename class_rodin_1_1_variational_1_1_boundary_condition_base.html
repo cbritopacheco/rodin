@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Examples and Tutorials &raquo; Examples utilizing the variational methods module | Rodin</title>
+  <title>Rodin::Variational::BoundaryConditionBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,11 +50,66 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="examples-index.html">Examples and Tutorials</a> &raquo;</span>
-          Examples utilizing the variational methods module
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BoundaryConditionBase <span class="m-thin">class</span>
         </h1>
-        <p>Showcases the usage of the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a> module.</p>
-<ul><li><a href="examples-variational-poisson.html" class="m-doc">Solving the Poisson equation</a></li><li><a href="examples-variational-elasticity.html" class="m-doc">Solving the elasticity equation</a></li></ul>
+        <p>Abstract class for objects representing a boundary condition.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a266c73c9d392bb17f8ad0d75f54e2d2c" class="m-doc">getBoundaryAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af2c67bb3e9e2dfb8036f9ced076d4a30" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt id="a29722137b5d70f5a39854e098f091d1d">
+              <span class="m-doc-wrap-bumper">void <a href="#a29722137b5d70f5a39854e098f091d1d" class="m-doc-self">imposeOn</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; pb) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Imposes the boundary condition on the given <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a266c73c9d392bb17f8ad0d75f54e2d2c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />BoundaryConditionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a266c73c9d392bb17f8ad0d75f54e2d2c" class="m-doc-self">getBoundaryAttribute</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Boundary attribute where the boundary condition is imposed.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af2c67bb3e9e2dfb8036f9ced076d4a30"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BoundaryConditionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2c67bb3e9e2dfb8036f9ced076d4a30" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Returns reference to the value of the boundary condition at the boundary</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

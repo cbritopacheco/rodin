@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::DirichletBC class | Rodin</title>
+  <title>Rodin::Variational::DirichletBC&lt;VectorCoefficientBase&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,10 +50,22 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class T&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBC <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBC&lt;VectorCoefficientBase&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents a Dirichlet boundary condition.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
 <p>When utilized in a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> construction, it will impose the Dirichlet condition</p><div class="m-math"><svg style="width: 6.341em; height: 1.093em;" viewBox="163.586152 -10.493961 60.872531 10.493973">
 <title>
 \[ u = g \text{ on } \Gamma_D \]
@@ -126,27 +138,54 @@ $ g $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-103'/>
 </g>
-</svg></td><td><a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> if <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
-<title>
-$ u $
-</title>
-<defs>
-<path id='eq5-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
-</defs>
-<g id='eq5-page1'>
-<use x='0' y='0' xlink:href='#eq5-g0-117'/>
-</g>
-</svg> is scalar valued, otherwise <a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a> with the same dimension as <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
-<title>
-$ u $
-</title>
-<defs>
-<path id='eq6-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
-</defs>
-<g id='eq6-page1'>
-<use x='0' y='0' xlink:href='#eq6-g0-117'/>
-</g>
-</svg>.</td></tr><tr><td></td><td></td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-variational-poisson.html" class="m-doc">Solving the Poisson equation</a></p></aside>
+</svg></td><td><a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a></td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-variational-poisson.html" class="m-doc">Solving the Poisson equation</a></p></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a02ab4ebafdd69e9ce9e9a8e9be179fcd" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap">int bdrAtr,
+              const <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; v)</span>
+            </dt>
+            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a> with a vector valued coefficient.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="aec0dff436c2a35019fa6dbfad84ecf8f">
+              <span class="m-doc-wrap-bumper">void <a href="#aec0dff436c2a35019fa6dbfad84ecf8f" class="m-doc-self">imposeOn</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; pb) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Imposes the boundary condition on the given <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a02ab4ebafdd69e9ce9e9a8e9be179fcd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;VectorCoefficientBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02ab4ebafdd69e9ce9e9a8e9be179fcd" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap">int bdrAtr,
+              const <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; v)</span></span>
+            </h3>
+            <p>Constructs a <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a> with a vector valued coefficient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">bdrAtr</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Derived instance of <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

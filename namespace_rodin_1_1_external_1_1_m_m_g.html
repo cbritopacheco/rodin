@@ -60,6 +60,8 @@
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#var-members">Variables</a></li>
               </ul>
             </li>
           </ul>
@@ -68,6 +70,26 @@
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a>
+            </dt>
+            <dd>Advection of a level set function by a velocity field.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>
+            </dt>
+            <dd>Class which generates the signed distance function of a domain.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher2_d.html" class="m-doc">ImplicitDomainMesher2D</a>
+            </dt>
+            <dd>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">IncompleteScalarSolution2D</a>
+            </dt>
+            <dd>A scalar solution which does not have a mesh assigned to it.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html" class="m-doc">IncompleteVectorSolution2D</a>
+            </dt>
+            <dd>A vector solution which does not have a mesh assigned to it.</dd>
             <dt>
               class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>
             </dt>
@@ -81,20 +103,53 @@
             </dt>
             <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
             <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>
+            </dt>
+            <dd>Base class for <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a> operations.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>
+            </dt>
+            <dd>Empty class tag to specify that a material reference should not be splitted.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;int Dimension&gt;</div>
               class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution.html" class="m-doc">ScalarSolution</a>
             </dt>
             <dd>Scalar solution supported on a mesh.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01false_01_4.html" class="m-doc">ScalarSolution2D&lt;false&gt;</a>
-            </dt>
-            <dd>A scalar solution which does not have a mesh assigned to it.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d_3_01true_01_4.html" class="m-doc">ScalarSolution2D&lt;true&gt;</a>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>
             </dt>
             <dd>Scalar solution supported on a 2D mesh.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>
+            </dt>
+            <dd>Class to specify the interior and exterior material references.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;int Dimension&gt;</div>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution.html" class="m-doc">VectorSolution</a>
+            </dt>
+            <dd>Vector solution supported on a mesh.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt id="a077152ee876d6e213437cf61fba97e90">
+              using <a href="#a077152ee876d6e213437cf61fba97e90" class="m-doc-self">MaterialReference</a> = int
+            </dt>
+            <dd>Material reference for each element.</dd>
+            <dt id="ac72151e3771f28bd1282a1aa79bb23f7">
+              using <a href="#ac72151e3771f28bd1282a1aa79bb23f7" class="m-doc-self">SplitMap</a> = std::map&lt;<a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a077152ee876d6e213437cf61fba97e90" class="m-doc">MaterialReference</a>, std::variant&lt;<a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>, <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>&gt;&gt;
+            </dt>
+            <dd>Map indicating how a material reference should be split into exterior and interior material references.</dd>
+          </dl>
+        </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt id="aedca4332ab915213f5f99c61b951ab12">
+              static <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc-self">NoSplit</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of the empty struct tag <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>.</dd>
           </dl>
         </section>
       </div>

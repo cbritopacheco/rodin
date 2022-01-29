@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <link rel="prev" href="_variational_2_elasticity_8cpp-example.html" />
-  <link rel="next" href="_variational_2_simple_cantilever_8cpp-example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -88,10 +87,10 @@
 <span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Solve problem</span>
-<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">PCG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w"></span>
-<span class="w">               </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span><span class="w"></span>
-<span class="w">               </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"></span>
-<span class="w">               </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">poisson</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">poisson</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Save solution</span>
 <span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span><span class="w"></span>
@@ -99,7 +98,7 @@
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span></pre>
-        <div class="m-note m-dim m-thin m-text-center"><a href="_variational_2_elasticity_8cpp-example.html" class="m-doc">&laquo; Elasticity.cpp</a> | <a href="examples-variational-poisson.html" class="m-doc">Solving the Poisson equation</a> | <a href="_variational_2_simple_cantilever_8cpp-example.html" class="m-doc">SimpleCantilever.cpp &raquo;</a></div>
+        <div class="m-note m-dim m-thin m-text-center"><a href="_variational_2_elasticity_8cpp-example.html" class="m-doc">&laquo; Elasticity.cpp</a> | <a href="examples-variational-poisson.html" class="m-doc">Solving the Poisson equation</a></div>
       </div>
     </div>
   </div>

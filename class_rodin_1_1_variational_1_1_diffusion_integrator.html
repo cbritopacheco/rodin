@@ -60,7 +60,6 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -185,15 +184,6 @@ $ \lambda $
 </svg>.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9227aeb9f7cb1d1d29cc5e6272995ae4" class="m-doc">releaseMFEMBilinearFormIntegrator</a>(</span><span class="m-doc-wrap">) -&gt; mfem::BilinearFormIntegrator* <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Releases ownership of the mfem::BilinearFormIntegrator.</dd>
-          </dl>
-        </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a6b7fd146804a2751e25e6b7e0db28d5c"><div>
@@ -222,13 +212,6 @@ $ \lambda $
                 </tr>
               </tbody>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="a9227aeb9f7cb1d1d29cc5e6272995ae4"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">mfem::BilinearFormIntegrator* Rodin::<wbr />Variational::<wbr />DiffusionIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9227aeb9f7cb1d1d29cc5e6272995ae4" class="m-doc-self">releaseMFEMBilinearFormIntegrator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Releases ownership of the mfem::BilinearFormIntegrator.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>After this call, calling getMFEMBilinearFormIntegrator() will result in undefined behaviour.</p></aside><aside class="m-note m-danger"><h4>Warning</h4><p>The <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a> instance must still be kept in memory since it might contain objects which the mfem::BilinearFormIntegrator instance refers to.</p></aside>
           </div></section>
         </section>
       </div>

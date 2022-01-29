@@ -72,7 +72,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#ab0331688889874690e9001e78ccab824" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a></span>
             </dt>
-            <dd>Loads a mesh mfem text format from file.</dd>
+            <dd>Loads a mesh from file.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -81,7 +81,7 @@
             <dt id="a51021126098595338e367d7ee42aa24c">
               <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Constructs an empty mesh (no elements).</dd>
+            <dd>Constructs an empty mesh with no elements.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -90,7 +90,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span>
             </dt>
-            <dd>Saves the mesh to file in mfem text format.</dd>
+            <dd>Saves the mesh to file.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>
@@ -133,6 +133,14 @@ $ u $
 <use x='0' y='0' xlink:href='#eq7-g0-117'/>
 </g>
 </svg>.</dd>
+            <dt id="a6bed02f060b6becbc52d12095d40a38f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6bed02f060b6becbc52d12095d40a38f" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) -&gt; double</span>
+            </dt>
+            <dd>Gets the total volume of the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5cb8b51a30edeebcd8b0cf7b9ef3e539" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">int attr) -&gt; double</span>
+            </dt>
+            <dd>Gets the sum of the volumes of the elements given by the specified attribute.</dd>
           </dl>
         </section>
         <section>
@@ -141,7 +149,7 @@ $ u $
             <h3>
               <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0331688889874690e9001e78ccab824" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
             </h3>
-            <p>Loads a mesh mfem text format from file.</p>
+            <p>Loads a mesh from file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -158,7 +166,7 @@ $ u $
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
             </h3>
-            <p>Saves the mesh to file in mfem text format.</p>
+            <p>Saves the mesh to file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -362,6 +370,30 @@ $ u $
 <use x='0' y='0' xlink:href='#eq10-g0-117'/>
 </g>
 </svg> must be equal to the mesh dimension.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a5cb8b51a30edeebcd8b0cf7b9ef3e539"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cb8b51a30edeebcd8b0cf7b9ef3e539" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">int attr)</span></span>
+            </h3>
+            <p>Gets the sum of the volumes of the elements given by the specified attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute of elements</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of element volumes</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the volume.</p></aside>
           </div></section>
         </section>
       </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::MeshOptimizer2D class | Rodin</title>
+  <title>Rodin::External::MMG::MMG2D class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,84 +50,64 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>MeshOptimizer2D <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>MMG2D <span class="m-thin">class</span>
         </h1>
-        <p>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</p>
+        <p>Base class for <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a> operations.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher2_d.html" class="m-doc">ImplicitDomainMesher2D</a>
             </dt>
-            <dd>Base class for <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a> operations.</dd>
+            <dd>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_adaptor2_d.html" class="m-doc">MeshAdaptor2D</a>
+            </dt>
+            <dd>Adapts a <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object according to some given metric.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>
+            </dt>
+            <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acd1eac28c64796c5a61830d78d6eb38e" class="m-doc">optimize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a></span>
-            </dt>
-            <dd>Performs the optimization of the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae2241f0d01bcdf80dba38ae37460d2a5" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5b2c6a76a86ce17e02e788980d5e05bc" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the minimal edge size.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6f95e2b6c445b46ce266e82f678a0fbc" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab57628fd61edaaa79c241ba47b230acd" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the maximal edge size parameter.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a372d8db9e7f331209f39479caa49033f" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aabcd1bc35a4d31d3f99f426fec4ab39b" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the Hausdorff parameter.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a738e42a41651cd5d6ee8cf0ffd565e7a" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7ace22c6fd0cb285b0ce849a9440960" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the gradation parameter.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="acd1eac28c64796c5a61830d78d6eb38e"><div>
+          <section class="m-doc-details" id="a5b2c6a76a86ce17e02e788980d5e05bc"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />MeshOptimizer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd1eac28c64796c5a61830d78d6eb38e" class="m-doc-self">optimize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
-            </h3>
-            <p>Performs the optimization of the mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to optimize</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The sizemap computed to preserve edge sizes</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>The mean of the edge lengths is preserved at the vertices. Hence, if the edges passing through a vertex have very different sizes, the resulting mesh may be very different from the initial one.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="ae2241f0d01bcdf80dba38ae37460d2a5"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MeshOptimizer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2241f0d01bcdf80dba38ae37460d2a5" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b2c6a76a86ce17e02e788980d5e05bc" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the minimal edge size.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -147,11 +127,11 @@
                 </tr>
               </tfoot>
             </table>
-<p>The <code>hmin</code> option allows to truncate the edge sizes to be lower than the <code>hmax</code> one.</p><p>The default values for this parameters are computed from the mesh bounding box or, if provided, from the given metric.</p><ul><li>Without metric, the minimal edge size is set to 0.01 of the bounding box size.</li><li>With metric, the minimal edge size is set to 0.1 of the smallest prescribed size.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html#a6f95e2b6c445b46ce266e82f678a0fbc" class="m-doc">setHMax(double)</a></p><p><a href="https://www.mmgtools.org/mmg-remesher-try-mmg/mmg-remesher-options/hmin-hmax">EXTERNAL: -hmin / -hmax</a></p></aside>
+<p>The <code>hmin</code> option allows to truncate the edge sizes to be lower than the <code>hmax</code> one.</p><p>The default values for this parameters are computed from the mesh bounding box or, if provided, from the given metric.</p><ul><li>Without metric, the minimal edge size is set to 0.01 of the bounding box size.</li><li>With metric, the minimal edge size is set to 0.1 of the smallest prescribed size.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html#ab57628fd61edaaa79c241ba47b230acd" class="m-doc">setHMax(double)</a></p><p><a href="https://www.mmgtools.org/mmg-remesher-try-mmg/mmg-remesher-options/hmin-hmax">EXTERNAL: -hmin / -hmax</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a6f95e2b6c445b46ce266e82f678a0fbc"><div>
+          <section class="m-doc-details" id="ab57628fd61edaaa79c241ba47b230acd"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MeshOptimizer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f95e2b6c445b46ce266e82f678a0fbc" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab57628fd61edaaa79c241ba47b230acd" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the maximal edge size parameter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -171,11 +151,11 @@
                 </tr>
               </tfoot>
             </table>
-<p>The <code>hmax</code> option allows to truncate the edge sizes to be greater than the <code>hmin</code> parameter.</p><p>The default values for this parameters are computed from the mesh bounding box or, if provided, from the given metric.</p><ul><li>Without metric, the maximal edge size is set to two times the bounding box size.</li><li>With metric, the maximal one is set to 10 times the maximal prescribed size.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html#ae2241f0d01bcdf80dba38ae37460d2a5" class="m-doc">setHMin(double)</a></p><p><a href="https://www.mmgtools.org/mmg-remesher-try-mmg/mmg-remesher-options/hmin-hmax">EXTERNAL: -hmin / -hmax</a></p></aside>
+<p>The <code>hmax</code> option allows to truncate the edge sizes to be greater than the <code>hmin</code> parameter.</p><p>The default values for this parameters are computed from the mesh bounding box or, if provided, from the given metric.</p><ul><li>Without metric, the maximal edge size is set to two times the bounding box size.</li><li>With metric, the maximal one is set to 10 times the maximal prescribed size.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html#a5b2c6a76a86ce17e02e788980d5e05bc" class="m-doc">setHMin(double)</a></p><p><a href="https://www.mmgtools.org/mmg-remesher-try-mmg/mmg-remesher-options/hmin-hmax">EXTERNAL: -hmin / -hmax</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a372d8db9e7f331209f39479caa49033f"><div>
+          <section class="m-doc-details" id="aabcd1bc35a4d31d3f99f426fec4ab39b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MeshOptimizer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a372d8db9e7f331209f39479caa49033f" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabcd1bc35a4d31d3f99f426fec4ab39b" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the Hausdorff parameter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -197,9 +177,9 @@
             </table>
 <p>The Hausdorff parameter controls the boundary approximation. It imposes the maximal distance between the piecewise linear representation of the boundary and the reconstructed ideal boundary. Thus, a low Hausdorff parameter leads to the refinement of high curvature areas.</p><p>By default, the Hausdorff value is set to 0.01, which is a suitable value for an object of size 1 in each direction. For smaller (resp. larger) objects, you may need to decrease (resp. increase) the Hausdorff parameter.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.mmgtools.org/mmg-remesher-try-mmg/mmg-remesher-options/mmg-remesher-option-hausd">EXTERNAL: -hausd</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a738e42a41651cd5d6ee8cf0ffd565e7a"><div>
+          <section class="m-doc-details" id="ab7ace22c6fd0cb285b0ce849a9440960"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer2_d.html" class="m-doc">MeshOptimizer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MeshOptimizer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a738e42a41651cd5d6ee8cf0ffd565e7a" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g2_d.html" class="m-doc">MMG2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7ace22c6fd0cb285b0ce849a9440960" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the gradation parameter.</p>
             <table class="m-table m-fullwidth m-flat">

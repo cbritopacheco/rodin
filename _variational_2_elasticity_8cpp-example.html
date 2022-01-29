@@ -95,10 +95,10 @@
 <span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="n">NeumannBC</span><span class="p">(</span><span class="n">GammaN</span><span class="p">,</span><span class="w"> </span><span class="n">VectorCoefficient</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">});</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Solve problem</span>
-<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">PCG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w"></span>
-<span class="w">               </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span><span class="w"></span>
-<span class="w">               </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"></span>
-<span class="w">               </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">elasticity</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">elasticity</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Save solution</span>
 <span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span><span class="w"></span>

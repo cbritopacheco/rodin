@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Examples and Tutorials &raquo; Examples utilizing the variational methods module | Rodin</title>
+  <title>Rodin::Variational::IncompleteGridFunction class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,11 +50,73 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="examples-index.html">Examples and Tutorials</a> &raquo;</span>
-          Examples utilizing the variational methods module
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>IncompleteGridFunction <span class="m-thin">class</span>
         </h1>
-        <p>Showcases the usage of the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a> module.</p>
-<ul><li><a href="examples-variational-poisson.html" class="m-doc">Solving the Poisson equation</a></li><li><a href="examples-variational-elasticity.html" class="m-doc">Solving the elasticity equation</a></li></ul>
+        <p>Represents a grid function which does not yet have an associated finite element space.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<p>To obtain the full functionality of the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> class one must call the setFiniteElementSpace(FiniteElementSpace&amp;) method.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a626fc543e4af0d93556f89305cfb0012">
+              <span class="m-doc-wrap-bumper"><a href="#a626fc543e4af0d93556f89305cfb0012" class="m-doc-self">IncompleteGridFunction</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Constructs an empty grid function with no associated finite element space.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FEC&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a566873a56c4dc05077807e389d527b4b" class="m-doc">setFiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; fes) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;</span>
+            </dt>
+            <dd>Associates a finite element space to the function.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a566873a56c4dc05077807e389d527b4b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt; Rodin::<wbr />Variational::<wbr />IncompleteGridFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a566873a56c4dc05077807e389d527b4b" class="m-doc-self">setFiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;FEC&gt;&amp; fes)</span></span>
+            </h3>
+            <p>Associates a finite element space to the function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">FEC</td>
+                  <td>Finite element collection associated to the finite element space.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>fes&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Finite element space to which the function belongs to.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

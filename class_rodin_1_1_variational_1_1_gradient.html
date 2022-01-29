@@ -218,7 +218,7 @@ $ x = (x_1, \ldots, x_n) $
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>
             </dt>
-            <dd>Abstract base class for <a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a> objects.</dd>
+            <dd>Abstract base class for objects representing vector coefficients.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -259,18 +259,6 @@ $ u $
               <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension of the vector object.</dd>
-            <dt id="a5afeeb74df5cd59eef1d61d4c229bdb2">
-              <span class="m-doc-wrap-bumper">void <a href="#a5afeeb74df5cd59eef1d61d4c229bdb2" class="m-doc-self">buildMFEMVectorCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Builds the underlying mfem::VectorCoefficient object.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6b96abb2352e107df4420dd117873918" class="m-doc">getMFEMVectorCoefficient</a>(</span><span class="m-doc-wrap">) -&gt; mfem::VectorCoefficient&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Returns the underlying mfem::VectorCoefficient object.</dd>
-            <dt id="ae989b6f2e11fee135ef6d3b216d64288">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae989b6f2e11fee135ef6d3b216d64288" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Builds a copy of the object and returns a non-owning pointer to the new object.</dd>
           </dl>
         </section>
         <section>
@@ -327,13 +315,6 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="a6b96abb2352e107df4420dd117873918"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">mfem::VectorCoefficient&amp; Rodin::<wbr />Variational::<wbr />Gradient::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b96abb2352e107df4420dd117873918" class="m-doc-self">getMFEMVectorCoefficient</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Returns the underlying mfem::VectorCoefficient object.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>Typically one should only call this after one has called <a href="class_rodin_1_1_variational_1_1_gradient.html#a5afeeb74df5cd59eef1d61d4c229bdb2" class="m-doc">buildMFEMVectorCoefficient()</a>.</p></aside>
           </div></section>
         </section>
       </div>
