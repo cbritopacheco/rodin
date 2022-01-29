@@ -1,8 +1,5 @@
-/**
-  * @file
-  * @brief Generates a box in medit format with different boundary conditions.
-  */
 load "medit"
+load "distance"
 
 // Borders
 int Gamma0 = 1;
@@ -41,5 +38,15 @@ mesh Omega = buildmesh(
     );
 Omega = adaptmesh(Omega, 1. / 75, IsMetric=1, nbvx=100000);
 
-savemesh(Omega, "box.mesh");
+include "tools.idp"
+
+fespace Vh(Omega, P1);
+
+Vh phio, phi;
+
+phio = holes(4, 4);
+distance(Omega, phio, phi[]);
+
+savemesh(Omega, "ls.sol.mesh");
+savesol("ls.sol", Omega, phi);
 

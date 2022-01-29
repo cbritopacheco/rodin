@@ -16,7 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "rodin.mesh";
+  const char* meshFile = "Omega.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -35,10 +35,10 @@ int main(int, char**)
 
   // Conjugate Gradient solver
   auto cg = Solver::CG().setMaxIterations(500)
-                        .setRelativeTolerance(1e-12);
+                        .setRelativeTolerance(1e-6);
 
   // Optimization parameters
-  size_t maxIt = 30;
+  size_t maxIt = 2000;
   double eps = 1e-6;
   double oldObj, newObj;
   auto ell = ScalarCoefficient(5);
@@ -93,22 +93,24 @@ int main(int, char**)
     auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
-    auto ls =
+    auto mmgLs =
       MMG::Distancer2D().setInteriorDomains({ Interior }).distance(mmgMesh);
 
     // Advect the level set function
-    MMG::Advect2D(ls, mmgVel).step(0.01);
+    MMG::Advect2D(mmgLs, mmgVel).step(0.01);
 
     // Recover the implicit domain
     auto [mmgImplicit, _] =
       MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
+                                   .split(Exterior, {Interior, Exterior})
+                                   .setRMC()
+                                   .setHMax(0.05)
                                    .setBoundaryReference(Gamma)
-                                   .discretize(ls);
+                                   .discretize(mmgLs);
 
     // Convert back to Rodin data type
     Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
-    // Save current mesh
     Omega.save("Omega.mesh");
   }
 

@@ -1,0 +1,26 @@
+/**
+  * @file
+  * @brief
+  */
+func real holes(int nw, int nh) {
+  real d, dd, r, hspace, vspace;
+  real cx = 0, cy = 0;
+  d = 1.0;
+  r = 0.05;
+  vspace = 0.2;
+  hspace = 0.2;
+  cy = vspace;
+  cx = hspace;
+
+  for (int i = 0; i < nh; i++)
+  {
+    for (int j = 0; j < nw; j++)
+    {
+      dd = ((x - (hspace * j + cx))^2 + (y - (vspace * i + cy))^2 - r^2);
+      d = min(d, dd);
+    }
+  }
+
+  return -d;
+}
+

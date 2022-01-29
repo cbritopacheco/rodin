@@ -21,6 +21,7 @@ int main(int argc, char** argv)
   auto box = Mesh2D::load(argv[1]);
   auto ls  = ScalarSolution2D::load(argv[2]).setMesh(box);
   auto [mesh, _] = ImplicitDomainMesher2D().split(Omega, {Interior, Exterior})
+                                           .setHMax(0.01)
                                            .setRMC()
                                            .setBoundaryReference(Boundary)
                                            .discretize(ls);

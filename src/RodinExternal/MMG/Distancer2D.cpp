@@ -40,7 +40,7 @@ namespace Rodin::External::MMG
         paramf << ref << "\n";
     }
 
-    m_mshdist.run(boxp, "-dom", "-ncpu", m_ncpu, "-v", VERBOSITY_LEVEL);
+    m_mshdist.run(boxp, "-dom", "-ncpu", m_ncpu, "-v 0");
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -54,7 +54,7 @@ namespace Rodin::External::MMG
     auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     contour.save(contourp);
 
-    m_mshdist.run(boxp, contourp, "-ncpu", m_ncpu, "-v", VERBOSITY_LEVEL);
+    m_mshdist.run(boxp, contourp, "-ncpu", m_ncpu, "-v 0");
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -69,7 +69,7 @@ namespace Rodin::External::MMG
     solp.replace_extension(".sol");
     ls.save(solp);
 
-    m_mshdist.run(solp , "-ncpu", m_ncpu, "-v", VERBOSITY_LEVEL);
+    m_mshdist.run(solp , "-ncpu", m_ncpu, "-v 0");
 
     auto res = ScalarSolution2D::load(solp).setMesh(ls.getMesh());
     ls = std::move(res);

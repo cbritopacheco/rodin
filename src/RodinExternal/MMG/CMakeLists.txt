@@ -78,6 +78,7 @@ ExternalProject_Add(RodinExternalISCDMshdist
   COMMENT "ISCD Mshdist"
   DEPENDS RodinExternalISCDCommons
   )
+add_dependencies(RodinExternalMMG RodinExternalISCDMshdist)
 
 # ---- ISCD Advection ----
 ExternalProject_Add(RodinExternalISCDAdvection
@@ -89,6 +90,7 @@ ExternalProject_Add(RodinExternalISCDAdvection
   COMMENT "ISCD Advection"
   DEPENDS RodinExternalISCDCommons
   )
+add_dependencies(RodinExternalMMG RodinExternalISCDAdvection)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(RODIN_MMG_VERBOSITY_LEVEL 1)

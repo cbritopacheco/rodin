@@ -223,7 +223,7 @@ namespace Rodin::Variational
           */
          GridFunction<FEC>& operator=(const ScalarCoefficientBase& s)
          {
-            assert(getFiniteElementSpace().getDimension() == 1);
+            assert(getFiniteElementSpace().getRangeDimension() == 1);
             std::unique_ptr<ScalarCoefficientBase> sCopy(s.copy());
             sCopy->buildMFEMCoefficient();
             getHandle().ProjectCoefficient(sCopy->getMFEMCoefficient());
@@ -238,7 +238,7 @@ namespace Rodin::Variational
           */
          GridFunction<FEC>& operator=(const VectorCoefficientBase& v)
          {
-            assert(getFiniteElementSpace().getDimension() == v.getDimension());
+            assert(getFiniteElementSpace().getRangeDimension() == v.getDimension());
             std::unique_ptr<VectorCoefficientBase> vCopy(v.copy());
             vCopy->buildMFEMVectorCoefficient();
             getHandle().ProjectCoefficient(vCopy->getMFEMVectorCoefficient());

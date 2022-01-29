@@ -192,7 +192,7 @@ namespace Rodin::External::MMG
       if (!m_sol->np || !m_sol->m)
       {
          Alert::Exception(
-               "Failed to write to scalar solution to file. No data!").raise();
+               "Failed to write ScalarSolution2D to file. No data!").raise();
       }
 
       if (!MMG2D_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
@@ -241,7 +241,8 @@ namespace Rodin::External::MMG
           *      mesh, (m_sol->size * (m_sol->npmax + 1)) * sizeof(double),"", ;);
           */
          MMG5_SAFE_CALLOC(m_sol->m, m_sol->npmax + 1, double, /* No op */);
-         std::memcpy(m_sol->m, other.m_sol->m, m_sol->size * (m_sol->npmax + 1));
+         std::copy(other.m_sol->m, other.m_sol->m + other.m_sol->np + 1,
+               m_sol->m);
       }
 
       m_sol->umin = other.m_sol->umin;
@@ -290,8 +291,6 @@ namespace Rodin::External::MMG
    ScalarSolution2D&
    ScalarSolution2D::setMesh(Mesh2D& mesh)
    {
-      if (mesh.count() != count())
-         Alert::Exception("mesh.count() != count()").raise();
       m_mesh = mesh;
       return *this;
    }

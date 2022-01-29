@@ -46,7 +46,8 @@ namespace Rodin::External::MMG
       "-dt", std::to_string(dt),
       "-c", solp,
       "-s", dispp,
-      "-o", outp
+      "-o", outp,
+      "-v"
     };
     if (m_cfl)
       args.push_back("-nocfl");
