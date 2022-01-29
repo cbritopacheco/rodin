@@ -148,3 +148,5 @@ build
 .ccls-cache
 
 docs
+
+*.vim
