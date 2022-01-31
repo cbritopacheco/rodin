@@ -19,6 +19,7 @@ namespace Rodin::Variational
    {
       public:
          virtual Mesh& getMesh() = 0;
+         virtual const Mesh& getMesh() const = 0;
          virtual int getRangeDimension() const = 0;
          virtual void update() = 0;
    };
@@ -39,6 +40,11 @@ namespace Rodin::Variational
          Mesh& getMesh() override
          {
             return static_cast<Derived*>(this)->getMesh();
+         }
+
+         const Mesh& getMesh() const override
+         {
+            return static_cast<const Derived*>(this)->getMesh();
          }
 
          /**

@@ -121,7 +121,7 @@ namespace Rodin::Variational
          H1(Mesh& mesh,
                const int dim = 1, const int order = 1, Basis basis = GaussLobato)
             :  m_mesh(mesh),
-               m_fec(order, m_mesh.get().getDimension()),
+               m_fec(order, m_mesh.get().getDimension(), basis),
                m_fes(&m_mesh.get().getHandle(), &m_fec, dim),
                m_basis(basis)
          {
@@ -142,6 +142,15 @@ namespace Rodin::Variational
           * supported.
           */
          Mesh& getMesh() override
+         {
+            return m_mesh;
+         }
+
+         /**
+          * @brief Returns a constant reference to the mesh on which the space is
+          * supported.
+          */
+         const Mesh& getMesh() const override
          {
             return m_mesh;
          }

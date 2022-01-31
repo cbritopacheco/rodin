@@ -35,7 +35,9 @@ namespace Rodin::Variational
           * @param[in] u Grid function to be differentiated
           */
          constexpr
-         Gradient(GridFunction<H1>& u);
+         Gradient(const GridFunction<H1>& u)
+            : m_u(u)
+         {}
 
          size_t getDimension() const override;
 
@@ -49,7 +51,7 @@ namespace Rodin::Variational
          }
 
       private:
-         GridFunction<H1>& m_u;
+         const GridFunction<H1>& m_u;
          std::optional<mfem::GradientGridFunctionCoefficient> m_mfemVectorCoefficient;
    };
 }

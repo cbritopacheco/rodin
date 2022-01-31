@@ -5,11 +5,6 @@
 
 namespace Rodin::Variational
 {
-   constexpr
-   Gradient::Gradient(GridFunction<H1>& u)
-      : m_u(u)
-   {}
-
    size_t Gradient::getDimension() const
    {
       return m_u.getFiniteElementSpace().getMesh().getDimension();
