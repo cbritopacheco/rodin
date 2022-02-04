@@ -16,7 +16,7 @@ namespace Rodin::Variational::FormLanguage
    {}
 
    LinearFormIntegratorSum::LinearFormIntegratorSum(const LinearFormIntegratorSum& other)
-      :  m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+      : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
    {}
 
    LinearFormIntegratorBase& LinearFormIntegratorSum::getLHS()

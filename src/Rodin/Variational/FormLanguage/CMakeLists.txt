@@ -5,7 +5,6 @@ set(RodinVariationalFormLanguage_HEADERS
   ForwardDecls.h
   LinearFormIntegratorSum.h
   LinearFormIntegratorUnaryMinus.h
-  List.h
   MatrixSum.h
   ProblemBody.h
   ScalarMatrixProduct.h

@@ -21,7 +21,8 @@ namespace Rodin::Variational
    {}
 
    DiffusionIntegrator::DiffusionIntegrator(const DiffusionIntegrator& other)
-      : m_lambda(other.m_lambda->copy())
+      :  m_attr(other.m_attr),
+         m_lambda(other.m_lambda->copy())
    {}
 
    void DiffusionIntegrator::buildMFEMBilinearFormIntegrator()

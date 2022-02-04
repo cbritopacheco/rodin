@@ -46,6 +46,17 @@ namespace Rodin::Variational::FormLanguage
 
          LinearFormIntegratorBase& getLFI();
 
+         const LinearFormIntegratorBase& getLFI() const
+         {
+            assert(m_lfi);
+            return *m_lfi;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return getLFI().getAttributes();
+         }
+
          void buildMFEMLinearFormIntegrator() override;
 
          mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;

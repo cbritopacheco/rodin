@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "ScalarSolution2D.h"
 #include "VectorSolution2D.h"
 
@@ -7,16 +9,16 @@ namespace Rodin::External::MMG
 {
   Advect2D::Advect2D(ScalarSolution2D& ls, VectorSolution2D& disp)
     : m_t(0),
-      m_cfl(false),
+      m_avoidTrunc(false),
       m_ex(true),
       m_ls(ls),
       m_disp(disp),
       m_advect(ADVECTION_EXECUTABLE)
   {}
 
-  Advect2D& Advect2D::avoidTimeTruncation(bool cfl)
+  Advect2D& Advect2D::avoidTimeTruncation(bool avoidTrunc)
   {
-    m_cfl = cfl;
+    m_avoidTrunc = avoidTrunc;
     return *this;
   }
 
@@ -28,6 +30,8 @@ namespace Rodin::External::MMG
 
   void Advect2D::step(double dt)
   {
+    assert(!std::isnan(dt) && !std::isinf(dt));
+
     auto& mesh = m_ls.getMesh();
 
     auto meshp = m_advect.tmpnam(".mesh", "RodinMMG");
@@ -44,15 +48,13 @@ namespace Rodin::External::MMG
     std::vector<std::string> args{
       meshp,
       "-dt", std::to_string(dt),
+      m_avoidTrunc ? "-nocfl" : "",
+      m_ex ? "" : "-noex",
       "-c", solp,
       "-s", dispp,
       "-o", outp,
       "-v"
     };
-    if (m_cfl)
-      args.push_back("-nocfl");
-    if (!m_ex)
-      args.push_back("-noex");
 
     m_advect.run(args);
 

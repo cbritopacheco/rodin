@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_PROBLEMBODY_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_PROBLEMBODY_H
 
+#include <vector>
 #include <memory>
 #include <optional>
 
@@ -18,8 +19,6 @@
 #include "ForwardDecls.h"
 
 #include "Base.h"
-#include "List.h"
-
 
 namespace Rodin::Variational::FormLanguage
 {
@@ -29,17 +28,21 @@ namespace Rodin::Variational::FormLanguage
    class ProblemBody : public Base
    {
       public:
+         using BCList = std::vector<std::unique_ptr<BoundaryConditionBase>>;
+         using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
+         using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
+
          ProblemBody(const BilinearFormIntegratorBase& bfi);
 
-         ProblemBody(const ProblemBody& other) = default;
+         ProblemBody(const ProblemBody& other);
 
-         List<BoundaryConditionBase>& getDirichletBCList();
+         BCList& getDirichletBCList();
 
-         List<BoundaryConditionBase>& getNeumannBCList();
+         BCList& getNeumannBCList();
 
-         List<LinearFormIntegratorBase>& getLinearFormDomainIntegratorList();
-         List<LinearFormIntegratorBase>& getLinearFormBoundaryIntegratorList();
-         List<BilinearFormIntegratorBase>& getBilinearFormDomainIntegratorList();
+         LFIList& getLinearFormDomainIntegratorList();
+         LFIList& getLinearFormBoundaryIntegratorList();
+         BFIList& getBilinearFormDomainIntegratorList();
 
          virtual ProblemBody* copy() const noexcept override
          {
@@ -47,14 +50,12 @@ namespace Rodin::Variational::FormLanguage
          }
 
       private:
-         List<BoundaryConditionBase> m_bcList;
-         List<BilinearFormIntegratorBase> m_bfiDomainList;
-         List<LinearFormIntegratorBase> m_lfiDomainList;
-         List<LinearFormIntegratorBase> m_lfiBoundaryList;
+         BFIList m_bfiDomainList;
+         LFIList m_lfiDomainList;
+         LFIList m_lfiBoundaryList;
 
-         List<BoundaryConditionBase> m_dbcs;
-
-         List<BoundaryConditionBase> m_nbcs;
+         BCList m_dbcs;
+         BCList m_nbcs;
    };
 
    ProblemBody operator+(
@@ -74,7 +75,7 @@ namespace Rodin::Variational::FormLanguage
          const ProblemBody& pb, const DirichletBC<T>& bc)
    {
       ProblemBody res(pb);
-      res.getDirichletBCList().append(bc);
+      res.getDirichletBCList().emplace_back(bc.copy());
       return res;
    }
 
@@ -83,7 +84,7 @@ namespace Rodin::Variational::FormLanguage
          const ProblemBody& pb, const NeumannBC<T>& bc)
    {
       ProblemBody res(pb);
-      res.getNeumannBCList().append(bc);
+      res.getNeumannBCList().emplace_back(bc.copy());
       return res;
    }
 }

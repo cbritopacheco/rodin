@@ -47,9 +47,10 @@ namespace Rodin::External::MMG
        *
        * If true, avoids truncation of the time period for advection due to
        * the CFL condition. Otherwise, no action is taken.
+       *
        * By default it is set to false.
        */
-      Advect2D& avoidTimeTruncation(bool cfl);
+      Advect2D& avoidTimeTruncation(bool avoidTrunc = true);
 
       /**
        * @brief Specifies whether to extrapolate characteristic lines or not.
@@ -57,6 +58,7 @@ namespace Rodin::External::MMG
        * If true, characteristic lines are extrapolated outside the domain when
        * the input velocity field causes them to do so. Otherwise, no action is
        * taken.
+       *
        * By default it is set to true.
        */
       Advect2D& enableExtrapolation(bool ex = true);
@@ -69,7 +71,7 @@ namespace Rodin::External::MMG
 
     private:
       double m_t;
-      bool m_cfl, m_ex;
+      bool m_avoidTrunc, m_ex;
       ScalarSolution2D& m_ls;
       VectorSolution2D& m_disp;
       ISCDProcess m_advect;

@@ -7,6 +7,7 @@ set(RodinVariational_HEADERS
   DiffusionIntegrator.h
   DirichletBC.h
   DomainLFIntegrator.h
+  DivergenceIntegrator.h
   Dot.h
   ElasticityIntegrator.h
   FiniteElementSpace.h
@@ -37,6 +38,7 @@ set(RodinVariational_SRCS
   Advect.cpp
   DiffusionIntegrator.cpp
   DirichletBC.cpp
+  DivergenceIntegrator.cpp
   DomainLFIntegrator.cpp
   ElasticityIntegrator.cpp
   Gradient.cpp

@@ -17,7 +17,8 @@ namespace Rodin::Variational
    {}
 
    VectorDomainLFIntegrator::VectorDomainLFIntegrator(const VectorDomainLFIntegrator& other)
-      : m_f(other.m_f->copy())
+      :  m_attr(other.m_attr),
+         m_f(other.m_f->copy())
    {}
 
    void VectorDomainLFIntegrator::buildMFEMLinearFormIntegrator()

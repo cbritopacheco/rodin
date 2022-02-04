@@ -31,6 +31,18 @@ namespace Rodin::Variational
 
    class IncompleteGridFunction;
 
+   enum IntegratorRegion
+   {
+      Domain,
+      Boundary
+   };
+
+   enum IntegratorType
+   {
+      Linear,
+      Bilinear
+   };
+
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 

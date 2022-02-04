@@ -38,6 +38,17 @@ namespace Rodin::Variational::FormLanguage
 
          BilinearFormIntegratorBase& getBFI();
 
+         const BilinearFormIntegratorBase& getBFI() const
+         {
+            assert(m_bfi);
+            return *m_bfi;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return getBFI().getAttributes();
+         }
+
          void buildMFEMBilinearFormIntegrator() override;
 
          mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;

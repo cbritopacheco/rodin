@@ -1,6 +1,7 @@
-#ifndef RODIN_VARIATIONAL_BIlinearFORMINTEGRATOR_H
-#define RODIN_VARIATIONAL_BIlinearFORMINTEGRATOR_H
+#ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
+#define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
+#include <set>
 #include <mfem.hpp>
 
 #include "FormLanguage/Base.h"
@@ -12,21 +13,7 @@ namespace Rodin::Variational
    class BilinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
-         virtual BilinearFormIntegratorBase& over(int attr)
-         {
-            return over(std::vector{ attr });
-         }
-
-         virtual BilinearFormIntegratorBase& over(const std::vector<int>& attrs)
-         {
-            m_attrs = attrs;
-            return *this;
-         }
-
-         const std::vector<int>& getAttributes() const
-         {
-            return m_attrs;
-         }
+         virtual const std::set<int>& getAttributes() const = 0;
 
          virtual void buildMFEMBilinearFormIntegrator() = 0;
 
@@ -46,34 +33,14 @@ namespace Rodin::Variational
          virtual mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
-
-      private:
-         std::vector<int> m_attrs;
    };
 
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
-         /**
-          * @brief Specifies the attribute of the elements where the
-          * integration should be done
-          * @param[in] attrs Element attributes
-          */
-         BilinearFormDomainIntegrator& over(int attr) override
-         {
-            return BilinearFormDomainIntegrator::over(std::vector<int>{attr});
-         }
+         virtual BilinearFormDomainIntegrator& over(int attr) = 0;
 
-         /**
-          * @brief Specifies the attributes of the elements where the
-          * integration should be done.
-          * @param[in] attrs Element attributes
-          */
-         BilinearFormDomainIntegrator& over(const std::vector<int>& attrs) override
-         {
-            return static_cast<BilinearFormDomainIntegrator&>(
-                  BilinearFormIntegratorBase::over(attrs));
-         }
+         virtual BilinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;
 
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
    };

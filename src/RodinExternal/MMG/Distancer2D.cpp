@@ -13,7 +13,8 @@
 namespace Rodin::External::MMG
 {
   Distancer2D::Distancer2D()
-    : m_ncpu(std::thread::hardware_concurrency()),
+    : m_scale(true),
+      m_ncpu(std::thread::hardware_concurrency()),
       m_mshdist(MSHDIST_EXECUTABLE)
   {}
 
@@ -54,7 +55,10 @@ namespace Rodin::External::MMG
     auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     contour.save(contourp);
 
-    m_mshdist.run(boxp, contourp, "-ncpu", m_ncpu, "-v 0");
+    if (m_scale)
+      m_mshdist.run(boxp, contourp, "-ncpu", m_ncpu, "-v 0");
+    else
+      m_mshdist.run(boxp, contourp, "-noscale", "-ncpu", m_ncpu, "-v 0");
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -75,9 +79,15 @@ namespace Rodin::External::MMG
     ls = std::move(res);
   }
 
-  Distancer2D Distancer2D::setCPUs(unsigned int ncpu)
+  Distancer2D& Distancer2D::setCPUs(unsigned int ncpu)
   {
     m_ncpu = ncpu;
+    return *this;
+  }
+
+  Distancer2D& Distancer2D::enableScaling(bool b)
+  {
+    m_scale = b;
     return *this;
   }
 

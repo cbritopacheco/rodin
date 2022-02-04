@@ -39,17 +39,17 @@ namespace Rodin::Variational
       m_pb.reset(rhs.copy());
 
       for (auto& bfi : m_pb->getBilinearFormDomainIntegratorList())
-         m_bilinearForm.add(static_cast<BilinearFormDomainIntegrator&>(bfi));
+         m_bilinearForm.add(static_cast<BilinearFormDomainIntegrator&>(*bfi));
 
       // The LinearFormIntegrator instances have already been moved to the LHS
       for (auto& lfi : m_pb->getLinearFormDomainIntegratorList())
-         m_linearForm.add(static_cast<LinearFormDomainIntegrator&>(lfi));
+         m_linearForm.add(static_cast<LinearFormDomainIntegrator&>(*lfi));
       for (auto& lfi : m_pb->getLinearFormBoundaryIntegratorList())
-         m_linearForm.add(static_cast<LinearFormBoundaryIntegrator&>(lfi));
+         m_linearForm.add(static_cast<LinearFormBoundaryIntegrator&>(*lfi));
 
       // Neumann boundary conditions are imposed instantly
       for (auto& nbc : m_pb->getNeumannBCList())
-         nbc.imposeOn(*this);
+         nbc->imposeOn(*this);
 
       return *this;
    }
@@ -68,9 +68,8 @@ namespace Rodin::Variational
       m_solution.update();
       m_linearForm.update();
       m_bilinearForm.update();
-
       for (auto& dbc : m_pb->getDirichletBCList())
-         dbc.imposeOn(*this);
+         dbc->imposeOn(*this);
    }
 
    template <class FEC>

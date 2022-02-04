@@ -45,6 +45,22 @@ namespace Rodin::Variational
 
          MassIntegrator(const MassIntegrator& other);
 
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attr;
+         }
+
+         MassIntegrator& over(int attr) override
+         {
+            return over(std::set<int>{attr});
+         }
+
+         MassIntegrator& over(const std::set<int>& attrs) override
+         {
+            m_attr = attrs;
+            return *this;
+         }
+
          void buildMFEMBilinearFormIntegrator() override;
 
          mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;
@@ -56,6 +72,7 @@ namespace Rodin::Variational
          }
 
       private:
+         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
          std::unique_ptr<mfem::MassIntegrator> m_mfemBFI;
    };

@@ -48,7 +48,24 @@ namespace Rodin::Variational::FormLanguage
 
          BilinearFormIntegratorBase& getLHS();
 
+         const BilinearFormIntegratorBase& getLHS() const
+         {
+            assert(m_lhs);
+            return *m_lhs;
+         }
+
          BilinearFormIntegratorBase& getRHS();
+
+         const BilinearFormIntegratorBase& getRHS() const
+         {
+            assert(m_rhs);
+            return *m_rhs;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return getLHS().getAttributes();
+         }
 
          void buildMFEMBilinearFormIntegrator() override;
 

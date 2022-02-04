@@ -1,8 +1,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
-#include <vector>
-#include <optional>
+#include <set>
 #include <mfem.hpp>
 
 #include "FormLanguage/Base.h"
@@ -16,21 +15,7 @@ namespace Rodin::Variational
       public:
          virtual ~LinearFormIntegratorBase() = default;
 
-         virtual LinearFormIntegratorBase& over(int attr)
-         {
-            return over(std::vector<int>{attr});
-         }
-
-         virtual LinearFormIntegratorBase& over(const std::vector<int>& attrs)
-         {
-            m_attrs = attrs;
-            return *this;
-         }
-
-         const std::vector<int>& getAttributes() const
-         {
-            return m_attrs;
-         }
+         virtual const std::set<int>& getAttributes() const = 0;
 
          virtual void buildMFEMLinearFormIntegrator() = 0;
 
@@ -50,34 +35,14 @@ namespace Rodin::Variational
          virtual mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
-
-      private:
-         std::vector<int> m_attrs;
    };
 
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
-         /**
-          * @brief Specifies the attribute of the elements where the
-          * integration should be done
-          * @param[in] attrs Element attributes
-          */
-         LinearFormDomainIntegrator& over(int attr) override
-         {
-            return LinearFormDomainIntegrator::over(std::vector<int>{attr});
-         }
+         virtual LinearFormDomainIntegrator& over(int attr) = 0;
 
-         /**
-          * @brief Specifies the attributes of the elements where the
-          * integration should be done.
-          * @param[in] attrs Element attributes
-          */
-         LinearFormDomainIntegrator& over(const std::vector<int>& attrs) override
-         {
-            return static_cast<LinearFormDomainIntegrator&>(
-                  LinearFormIntegratorBase::over(attrs));
-         }
+         virtual LinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;
 
          virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
    };
@@ -85,25 +50,9 @@ namespace Rodin::Variational
    class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
    {
       public:
-         LinearFormBoundaryIntegrator() = default;
+         virtual LinearFormBoundaryIntegrator& over(int attr) = 0;
 
-         LinearFormBoundaryIntegrator(
-               const LinearFormBoundaryIntegrator&) = default;
-
-         LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
-
-         LinearFormBoundaryIntegrator& over(int attr) override
-         {
-            return LinearFormBoundaryIntegrator::over(std::vector<int>{attr});
-         }
-
-         LinearFormBoundaryIntegrator& over(const std::vector<int>& attrs) override
-         {
-            return static_cast<LinearFormBoundaryIntegrator&>(
-                  LinearFormIntegratorBase::over(attrs));
-         }
-
-         virtual ~LinearFormBoundaryIntegrator() = default;
+         virtual LinearFormBoundaryIntegrator& over(const std::set<int>& attrs) = 0;
 
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
    };

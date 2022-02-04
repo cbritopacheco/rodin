@@ -18,10 +18,17 @@ namespace Rodin::Variational
             });
    }
 
-   mfem::Coefficient&
-   ScalarCoefficient<std::function<double(const double*)>>::getMFEMCoefficient()
+   void ScalarCoefficient<std::map<int, double>>::buildMFEMCoefficient()
    {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
+      int maxAttr = m_pieces.rbegin()->first;
+      m_mfemCoefficient.emplace(maxAttr);
+      for (int i = 1; i <= maxAttr; i++)
+      {
+         auto v = m_pieces.find(i);
+         if (v != m_pieces.end())
+            (*m_mfemCoefficient)(i) = v->second;
+         else
+            (*m_mfemCoefficient)(i) = 0.0;
+      }
    }
 }

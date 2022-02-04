@@ -32,7 +32,9 @@ namespace Rodin::Variational
    template <class FEC>
    BilinearForm<FEC>& BilinearForm<FEC>::from(const BilinearFormDomainIntegrator& bfi)
    {
-      m_bfiDomainList = FormLanguage::List<BilinearFormIntegratorBase>(bfi);
+      FormLanguage::ProblemBody::BFIList newList;
+      newList.emplace_back(bfi.copy());
+      m_bfiDomainList = std::move(newList);
       m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
       m_domAttrMarkers.clear();
       add(bfi);
@@ -49,32 +51,28 @@ namespace Rodin::Variational
    BilinearForm<FEC>& BilinearForm<FEC>::add(
          const BilinearFormDomainIntegrator& bfi)
    {
-      auto& l = m_bfiDomainList.append(bfi);
+      auto& l = m_bfiDomainList.emplace_back(bfi.copy());
       const auto& domAttrs = bfi.getAttributes();
 
-      l.buildMFEMBilinearFormIntegrator();
+      l->buildMFEMBilinearFormIntegrator();
       if (domAttrs.size() == 0)
       {
-         m_bf->AddDomainIntegrator(l.releaseMFEMBilinearFormIntegrator());
+         m_bf->AddDomainIntegrator(l->releaseMFEMBilinearFormIntegrator());
       }
       else
       {
          int size = m_fes.getMesh().getHandle().attributes.Max();
-         int* data = new int[size];
-         std::fill(data, data + size, 0);
-         for (size_t i = 0; i < domAttrs.size(); i++)
+         auto data = std::make_unique<mfem::Array<int>>(size);
+         *data = 0;
+         for (const auto& b : domAttrs)
          {
-            assert(domAttrs[i] - 1 < size);
             // All domain attributes are one-indexed.
-            data[domAttrs[i] - 1] = 1;
+            assert(b - 1 < size);
+            (*data)[b - 1] = 1;
          }
-
-         auto& arr = m_domAttrMarkers.emplace_back(data, size);
-         arr.MakeDataOwner();
          m_bf->AddDomainIntegrator(
-               l.releaseMFEMBilinearFormIntegrator(),
-               m_domAttrMarkers.back()
-               );
+               l->releaseMFEMBilinearFormIntegrator(),
+               *m_domAttrMarkers.emplace_back(std::move(data)));
       }
       return *this;
    }

@@ -13,7 +13,8 @@ namespace Rodin::Variational
    {}
 
    VectorMassIntegrator::VectorMassIntegrator(const VectorMassIntegrator& other)
-      : m_lambda(other.m_lambda->copy())
+      :  m_attr(other.m_attr),
+         m_lambda(other.m_lambda->copy())
    {}
 
    void VectorMassIntegrator::buildMFEMBilinearFormIntegrator()

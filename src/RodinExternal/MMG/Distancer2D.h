@@ -102,11 +102,14 @@ namespace Rodin::External::MMG
        */
       Distancer2D& setInteriorDomains(const std::vector<MaterialReference>& refs);
 
-      Distancer2D setCPUs(unsigned int ncpu);
+      Distancer2D& enableScaling(bool b = true);
+
+      Distancer2D& setCPUs(unsigned int ncpu);
 
       unsigned int getCPUs() const;
 
     private:
+      bool m_scale;
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
       std::optional<std::vector<MaterialReference>> m_interiorDomains;

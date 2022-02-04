@@ -28,32 +28,28 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormDomainIntegrator& lfi)
    {
-      auto& l = m_lfiDomainList.append(lfi);
+      auto& l = m_lfiDomainList.emplace_back(lfi.copy());
       const auto& domAttrs = lfi.getAttributes();
 
-      l.buildMFEMLinearFormIntegrator();
+      l->buildMFEMLinearFormIntegrator();
       if (domAttrs.size() == 0)
       {
-         m_lf->AddDomainIntegrator(l.releaseMFEMLinearFormIntegrator());
+         m_lf->AddDomainIntegrator(l->releaseMFEMLinearFormIntegrator());
       }
       else
       {
          int size = m_fes.getMesh().getHandle().attributes.Max();
-         int* data = new int[size];
-         std::fill(data, data + size, 0);
-         for (size_t i = 0; i < domAttrs.size(); i++)
+         auto data = std::make_unique<mfem::Array<int>>(size);
+         *data = 0;
+         for (const auto& b : domAttrs)
          {
             // All domain attributes are one-indexed.
-            assert(domAttrs[i] - 1 < size);
-            data[domAttrs[i] - 1] = 1;
+            assert(b - 1 < size);
+            (*data)[b - 1] = 1;
          }
-
-         auto& arr = m_domAttrMarkers.emplace_back(data, size);
-         arr.MakeDataOwner();
          m_lf->AddDomainIntegrator(
-               l.releaseMFEMLinearFormIntegrator(),
-               m_domAttrMarkers.back()
-               );
+               l->releaseMFEMLinearFormIntegrator(),
+               *m_domAttrMarkers.emplace_back(std::move(data)));
       }
       return *this;
    }
@@ -61,32 +57,28 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormBoundaryIntegrator& lfi)
    {
-      auto& l = m_lfiBoundaryList.append(lfi);
+      auto& l = m_lfiBoundaryList.emplace_back(lfi.copy());
       const auto& bdrAttrs = lfi.getAttributes();
 
-      l.buildMFEMLinearFormIntegrator();
-      if (bdrAttrs.empty())
+      l->buildMFEMLinearFormIntegrator();
+      if (bdrAttrs.size() == 0)
       {
-         m_lf->AddBoundaryIntegrator(l.releaseMFEMLinearFormIntegrator());
+         m_lf->AddBoundaryIntegrator(l->releaseMFEMLinearFormIntegrator());
       }
       else
       {
          int size = m_fes.getMesh().getHandle().bdr_attributes.Max();
-         int* data = new int[size];
-         std::fill(data, data + size, 0);
-         for (size_t i = 0; i < bdrAttrs.size(); i++)
+         auto data = std::make_unique<mfem::Array<int>>(size);
+         *data = 0;
+         for (const auto& b : bdrAttrs)
          {
-            // All boundary attributes are one-indexed.
-            assert(bdrAttrs[i] - 1 < size);
-            data[bdrAttrs[i] - 1] = 1;
+            // All domain attributes are one-indexed.
+            assert(b - 1 < size);
+            (*data)[b - 1] = 1;
          }
-
-         auto& arr = m_bdrAttrMarkers.emplace_back(data, size);
-         arr.MakeDataOwner();
          m_lf->AddBoundaryIntegrator(
-               l.releaseMFEMLinearFormIntegrator(),
-               m_bdrAttrMarkers.back()
-               );
+               l->releaseMFEMLinearFormIntegrator(),
+               *m_bdrAttrMarkers.emplace_back(std::move(data)));
       }
       return *this;
    }
@@ -94,7 +86,9 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormDomainIntegrator& lfi)
    {
-      m_lfiDomainList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
+      FormLanguage::ProblemBody::LFIList newList;
+      newList.emplace_back(lfi.copy());
+      m_lfiDomainList = std::move(newList);
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
       m_domAttrMarkers.clear();
       add(lfi);
@@ -104,7 +98,9 @@ namespace Rodin::Variational
    template <class FEC>
    LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormBoundaryIntegrator& lfi)
    {
-      m_lfiBoundaryList = FormLanguage::List<LinearFormIntegratorBase>(lfi);
+      FormLanguage::ProblemBody::LFIList newList;
+      newList.emplace_back(lfi.copy());
+      m_lfiBoundaryList = std::move(newList);
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
       m_bdrAttrMarkers.clear();
       add(lfi);

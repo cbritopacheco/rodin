@@ -215,6 +215,12 @@ namespace Rodin::Variational
             return {m_data.get(), m_size};
          }
 
+         GridFunction<FEC>& operator=(double v)
+         {
+            getHandle() = v;
+            return *this;
+         }
+
          /**
           * @brief Projects a scalar coefficient on the given GridFunction.
           * @note The GridFunction must be scalar valued.

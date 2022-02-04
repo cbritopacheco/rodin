@@ -40,6 +40,8 @@
 #include "Variational/VectorCoefficient.h"
 #include "Variational/MatrixCoefficient.h"
 
+#include "Variational/DivergenceIntegrator.h"
+
 // ---- Bilinear form integrators --------------------------------------------
 #include "Variational/MassIntegrator.h"
 #include "Variational/DiffusionIntegrator.h"

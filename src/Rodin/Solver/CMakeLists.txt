@@ -1,10 +1,12 @@
 set(RodinSolver_HEADERS
   Solver.h
   CG.h
+  UMFPack.h
   )
 
 set(RodinSolver_SRCS
   CG.cpp
+  UMFPack.cpp
   )
 
 add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})

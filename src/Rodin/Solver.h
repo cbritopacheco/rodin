@@ -9,5 +9,6 @@
 
 #include "Solver/Solver.h"
 #include "Solver/CG.h"
+#include "Solver/UMFPack.h"
 
 #endif

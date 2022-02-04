@@ -39,6 +39,21 @@ namespace Rodin::Variational
          VectorBoundaryFluxLFIntegrator(const ScalarCoefficientBase& lambda);
 
          VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other);
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attr;
+         }
+
+         VectorBoundaryFluxLFIntegrator& over(int attr) override
+         {
+            return over(std::set<int>{attr});
+         }
+
+         VectorBoundaryFluxLFIntegrator& over(const std::set<int>& attrs) override
+         {
+            m_attr = attrs;
+            return *this;
+         }
 
          void buildMFEMLinearFormIntegrator() override;
 
@@ -51,6 +66,7 @@ namespace Rodin::Variational
          }
 
       private:
+         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_f;
          std::unique_ptr<mfem::VectorBoundaryFluxLFIntegrator> m_mfemLFI;
    };

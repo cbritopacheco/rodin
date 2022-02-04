@@ -11,8 +11,8 @@ namespace Rodin::Variational
 
    VectorBoundaryFluxLFIntegrator
    ::VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other)
-      :  LinearFormBoundaryIntegrator(other),
-         m_f(other.m_f->copy())
+      : m_attr(other.m_attr),
+        m_f(other.m_f->copy())
    {}
 
    void VectorBoundaryFluxLFIntegrator

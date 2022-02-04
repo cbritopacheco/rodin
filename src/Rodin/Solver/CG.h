@@ -63,7 +63,7 @@ namespace Rodin::Solver
           */
          CG& setAbsoluteTolerance(double atol);
 
-         void solve(Variational::ProblemBase& problem) const override;
+         void solve(Variational::ProblemBase& problem) override;
 
       private:
          bool m_printIterations;

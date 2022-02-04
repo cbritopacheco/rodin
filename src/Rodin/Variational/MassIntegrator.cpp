@@ -13,7 +13,8 @@ namespace Rodin::Variational
    {}
 
    MassIntegrator::MassIntegrator(const MassIntegrator& other)
-      : m_lambda(other.m_lambda->copy())
+      :  m_attr(other.m_attr),
+         m_lambda(other.m_lambda->copy())
    {}
 
    void MassIntegrator::buildMFEMBilinearFormIntegrator()

@@ -9,10 +9,9 @@
 
 #include <mfem.hpp>
 
-#include "FormLanguage/List.h"
-
 #include "ForwardDecls.h"
 #include "BilinearFormIntegrator.h"
+#include "FormLanguage/ProblemBody.h"
 
 namespace Rodin::Variational
 {
@@ -135,8 +134,8 @@ namespace Rodin::Variational
       private:
          FiniteElementSpace<FEC>& m_fes;
          std::unique_ptr<mfem::BilinearForm> m_bf;
-         FormLanguage::List<BilinearFormIntegratorBase> m_bfiDomainList;
-         std::vector<mfem::Array<int>> m_domAttrMarkers;
+         FormLanguage::ProblemBody::BFIList m_bfiDomainList;
+         std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
 }
 

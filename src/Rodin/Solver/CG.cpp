@@ -32,14 +32,14 @@ namespace Rodin::Solver
       return *this;
    }
 
-   void CG::solve(Variational::ProblemBase& problem) const
+   void CG::solve(Variational::ProblemBase& problem)
    {
-      problem.update();
-      problem.assemble();
-
       auto& a = problem.getBilinearForm();
       auto& b = problem.getLinearForm();
       auto& u = problem.getSolution();
+
+      problem.update();
+      problem.assemble();
 
       // Compute essential true degrees of freedom
       mfem::Array<int> essTrueDofList;
@@ -54,6 +54,7 @@ namespace Rodin::Solver
       a.getHandle()
        .FormLinearSystem(essTrueDofList, u.getHandle(), b.getHandle(), A, X, B);
 
+      // Solve
       mfem::GSSmoother smoother(A);
       mfem::PCG(A, smoother, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
 

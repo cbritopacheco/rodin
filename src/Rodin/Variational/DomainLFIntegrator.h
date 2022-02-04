@@ -44,6 +44,22 @@ namespace Rodin::Variational
 
          DomainLFIntegrator(const DomainLFIntegrator& other);
 
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attr;
+         }
+
+         DomainLFIntegrator& over(int attr) override
+         {
+            return over(std::set{attr});
+         }
+
+         DomainLFIntegrator& over(const std::set<int>& attrs) override
+         {
+            m_attr = attrs;
+            return *this;
+         }
+
          void buildMFEMLinearFormIntegrator() override;
 
          mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
@@ -52,6 +68,7 @@ namespace Rodin::Variational
          DomainLFIntegrator* copy() const noexcept override;
 
       private:
+         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_f;
          std::unique_ptr<mfem::DomainLFIntegrator> m_mfemLFI;
    };

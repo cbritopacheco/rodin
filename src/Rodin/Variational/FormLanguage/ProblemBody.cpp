@@ -11,33 +11,54 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
-      : m_bfiDomainList(bfi)
-   {}
+   ProblemBody::ProblemBody(const ProblemBody& other)
+   {
+      m_nbcs.reserve(other.m_nbcs.size());
+      m_dbcs.reserve(other.m_dbcs.size());
+      m_bfiDomainList.reserve(other.m_bfiDomainList.size());
+      m_lfiDomainList.reserve(other.m_lfiDomainList.size());
+      m_lfiBoundaryList.reserve(other.m_lfiBoundaryList.size());
 
-   List<BoundaryConditionBase>& ProblemBody::getNeumannBCList()
+      for (const auto& v : other.m_nbcs)
+         m_nbcs.emplace_back(v->copy());
+      for (const auto& v : other.m_dbcs)
+         m_dbcs.emplace_back(v->copy());
+      for (const auto& v : other.m_bfiDomainList)
+         m_bfiDomainList.emplace_back(v->copy());
+      for (const auto& v : other.m_lfiDomainList)
+         m_lfiDomainList.emplace_back(v->copy());
+      for (const auto& v : other.m_lfiBoundaryList)
+         m_lfiBoundaryList.emplace_back(v->copy());
+   }
+
+   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
+   {
+      m_bfiDomainList.emplace_back(bfi.copy());
+   }
+
+   ProblemBody::BCList& ProblemBody::getNeumannBCList()
    {
       return m_nbcs;
    }
 
-   List<BoundaryConditionBase>& ProblemBody::getDirichletBCList()
+   ProblemBody::BCList& ProblemBody::getDirichletBCList()
    {
       return m_dbcs;
    }
 
-   List<LinearFormIntegratorBase>&
+   ProblemBody::LFIList&
    ProblemBody::getLinearFormDomainIntegratorList()
    {
       return m_lfiDomainList;
    }
 
-   List<LinearFormIntegratorBase>&
+   ProblemBody::LFIList&
    ProblemBody::getLinearFormBoundaryIntegratorList()
    {
       return m_lfiBoundaryList;
    }
 
-   List<BilinearFormIntegratorBase>&
+   ProblemBody::BFIList&
    ProblemBody::getBilinearFormDomainIntegratorList()
    {
       return m_bfiDomainList;
@@ -48,7 +69,8 @@ namespace Rodin::Variational::FormLanguage
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormDomainIntegratorList() += -lfi;
+      res.getLinearFormDomainIntegratorList().emplace_back(
+            new LinearFormIntegratorUnaryMinus(lfi));
       return res;
    }
 
@@ -57,7 +79,7 @@ namespace Rodin::Variational::FormLanguage
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormDomainIntegratorList() += lfi;
+      res.getLinearFormDomainIntegratorList().emplace_back(lfi.copy());
       return res;
    }
 
@@ -66,7 +88,8 @@ namespace Rodin::Variational::FormLanguage
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormBoundaryIntegratorList() += -lfi;
+      res.getLinearFormBoundaryIntegratorList().emplace_back(
+            new LinearFormIntegratorUnaryMinus(lfi));
       return res;
    }
 
@@ -75,7 +98,7 @@ namespace Rodin::Variational::FormLanguage
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormBoundaryIntegratorList() += lfi;
+      res.getLinearFormBoundaryIntegratorList().emplace_back(lfi.copy());
       return res;
    }
 }

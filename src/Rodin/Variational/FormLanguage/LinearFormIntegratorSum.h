@@ -47,13 +47,31 @@ namespace Rodin::Variational::FormLanguage
    {
       public:
          LinearFormIntegratorSum(
-               const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs);
+               const LinearFormIntegratorBase& lhs,
+               const LinearFormIntegratorBase& rhs);
 
          LinearFormIntegratorSum(const LinearFormIntegratorSum& other);
 
          LinearFormIntegratorBase& getLHS();
 
+         const LinearFormIntegratorBase& getLHS() const
+         {
+            assert(m_lhs);
+            return *m_lhs;
+         }
+
          LinearFormIntegratorBase& getRHS();
+
+         const LinearFormIntegratorBase& getRHS() const
+         {
+            assert(m_rhs);
+            return *m_rhs;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return getLHS().getAttributes();
+         }
 
          void buildMFEMLinearFormIntegrator() override;
 

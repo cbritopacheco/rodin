@@ -27,7 +27,7 @@ namespace Rodin::Solver
           * @brief Solves the specified Variational::Problem.
           * @param[in,out] problem Variational problem to solve.
           */
-         virtual void solve(Variational::ProblemBase& problem) const = 0;
+         virtual void solve(Variational::ProblemBase& problem) = 0;
    };
 }
 

@@ -35,8 +35,7 @@ namespace Rodin::Variational
                   assert(false);
                   // There is a segfault here because it is not defined how to
                   // exactly compute the vector gradient of an interior
-                  // boundary element. Maybe some kind of averaging will
-                  // suffice.
+                  // boundary element. See mfem#2789.
                   m_u.GetVectorGradient(T, grad);
                }
                else

@@ -36,9 +36,10 @@ int main(int, char**)
   // Optimization parameters
   size_t maxIt = 30;
   double eps = 1e-6;
-  double oldObj, newObj;
   auto ell = ScalarCoefficient(5);
   auto alpha = ScalarCoefficient(0.1);
+
+  std::vector<double> obj;
 
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
@@ -67,6 +68,10 @@ int main(int, char**)
     GridFunction theta(Vh);
     auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
     auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+
+    H1 Ph(Omega);
+    GridFunction strain(Ph);
+    strain = Dot(Ae, e);
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
@@ -75,14 +80,16 @@ int main(int, char**)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     cg.solve(hilbert);
 
-    // Update objective
-    oldObj = newObj;
-    newObj = compliance(u) + ell.getValue() * Omega.getVolume();
+    Omega.save("Omega0.mesh");
+    theta.save("theta.gf");
 
-    std::cout << "[" << i << "] Objective: " << newObj << std::endl;
+    // Update objective
+    obj.push_back(compliance(u) + ell.getValue() * Omega.getVolume());
+
+    std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
 
     // Test for convergence
-    if (i > 0 && abs(oldObj - newObj) < eps)
+    if (i > 0 && abs(obj[i] - obj[i - 1]) < eps)
       break;
 
     // Make the displacement
@@ -107,6 +114,12 @@ int main(int, char**)
   }
 
   std::cout << "Saved final mesh to Omega.mesh" << std::endl;
+
+  std::ofstream plt("obj.txt");
+  for (size_t i = 0; i < obj.size(); i++)
+    plt << obj[i] << "\n";
+
+  std::cout << "Saved objective history to obj.txt" << std::endl;
 
   return 0;
 }

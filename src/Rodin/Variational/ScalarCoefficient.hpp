@@ -38,7 +38,7 @@ namespace Rodin::Variational
    ::ScalarCoefficient(GridFunction<FEC>& u)
       : m_u(u)
    {
-      assert(u.getFiniteElementSpace().getDimension() == 1);
+      assert(u.getFiniteElementSpace().getRangeDimension() == 1);
    }
 
    template <class FEC>

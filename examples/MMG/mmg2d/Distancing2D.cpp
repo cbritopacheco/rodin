@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     // Generation of distance function with explicit contour
     auto box = Mesh2D::load(argv[1]);
     auto contour = Mesh2D::load(argv[2]);
-    auto ls = Distancer2D().distance(box, contour);
+    auto ls = Distancer2D().enableScaling(false).distance(box, contour);
 
     ls.save("ls.sol");
     box.save("ls.sol.mesh");

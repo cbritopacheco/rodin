@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
 #define RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -165,7 +166,11 @@ namespace Rodin::Variational
 
          void buildMFEMCoefficient() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& getMFEMCoefficient() override
+         {
+            assert(m_mfemCoefficient);
+            return *m_mfemCoefficient;
+         }
 
          ScalarCoefficient* copy() const noexcept override
          {
@@ -175,6 +180,49 @@ namespace Rodin::Variational
       private:
          std::function<double(const double*)> m_f;
          std::optional<mfem::FunctionCoefficient> m_mfemCoefficient;
+   };
+
+
+   ScalarCoefficient(const std::map<int, double>&)
+      -> ScalarCoefficient<std::map<int, double>>;
+
+   ScalarCoefficient(std::initializer_list<std::pair<int, double>>&)
+      -> ScalarCoefficient<std::map<int, double>>;
+
+   template <>
+   class ScalarCoefficient<std::map<int, double>>
+      : public ScalarCoefficientBase
+   {
+      public:
+         ScalarCoefficient(const std::map<int, double>& pieces)
+            : m_pieces(pieces)
+         {}
+
+         ScalarCoefficient(const ScalarCoefficient& other)
+            : m_pieces(other.m_pieces)
+         {}
+
+         const std::map<int, double>& getValue() const
+         {
+            return m_pieces;
+         }
+
+         void buildMFEMCoefficient() override;
+
+         mfem::Coefficient& getMFEMCoefficient() override
+         {
+            assert(m_mfemCoefficient);
+            return *m_mfemCoefficient;
+         }
+
+         ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
+
+      private:
+         std::map<int, double> m_pieces;
+         std::optional<mfem::PWConstCoefficient> m_mfemCoefficient;
    };
 }
 
