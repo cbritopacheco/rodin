@@ -188,7 +188,7 @@ $ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab475632b97d8debf759ebc591728cfc5" class="m-doc">avoidTimeTruncation</a>(</span><span class="m-doc-wrap">bool cfl) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0bba8c3eadbfe2c075bada6215bea629" class="m-doc">avoidTimeTruncation</a>(</span><span class="m-doc-wrap">bool avoidTrunc = true) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a>&amp;</span>
             </dt>
             <dd>Specifies whether to enable or disable truncation of time in the CFL condition.</dd>
             <dt>
@@ -225,19 +225,19 @@ $ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab475632b97d8debf759ebc591728cfc5"><div>
+          <section class="m-doc-details" id="a0bba8c3eadbfe2c075bada6215bea629"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Advect2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab475632b97d8debf759ebc591728cfc5" class="m-doc-self">avoidTimeTruncation</a>(</span><span class="m-doc-wrap">bool cfl)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Advect2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0bba8c3eadbfe2c075bada6215bea629" class="m-doc-self">avoidTimeTruncation</a>(</span><span class="m-doc-wrap">bool avoidTrunc = true)</span></span>
             </h3>
             <p>Specifies whether to enable or disable truncation of time in the CFL condition.</p>
-<p>If true, avoids truncation of the time period for advection due to the CFL condition. Otherwise, no action is taken. By default it is set to false.</p>
+<p>If true, avoids truncation of the time period for advection due to the CFL condition. Otherwise, no action is taken.</p><p>By default it is set to false.</p>
           </div></section>
           <section class="m-doc-details" id="a770fb942bbf47248344cf1ca75ab0248"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Advect2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a770fb942bbf47248344cf1ca75ab0248" class="m-doc-self">enableExtrapolation</a>(</span><span class="m-doc-wrap">bool ex = true)</span></span>
             </h3>
             <p>Specifies whether to extrapolate characteristic lines or not.</p>
-<p>If true, characteristic lines are extrapolated outside the domain when the input velocity field causes them to do so. Otherwise, no action is taken. By default it is set to true.</p>
+<p>If true, characteristic lines are extrapolated outside the domain when the input velocity field causes them to do so. Otherwise, no action is taken.</p><p>By default it is set to true.</p>
           </div></section>
           <section class="m-doc-details" id="aa709dd09b9ade0bb3b305d546e7360af"><div>
             <h3>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solver::CG class | Rodin</title>
+  <title>Rodin::Solver::UMFPack class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,9 +50,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>CG <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>UMFPack <span class="m-thin">class</span>
         </h1>
-        <p>Conjugate Gradient.</p>
+        <p><a href="class_rodin_1_1_solver_1_1_u_m_f_pack.html" class="m-doc">UMFPack</a>.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -78,31 +78,15 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a016360662f94a96933dd4b1471961fe1">
-              <span class="m-doc-wrap-bumper"><a href="#a016360662f94a96933dd4b1471961fe1" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="ab481921984938d163ae8a429392e96ea">
+              <span class="m-doc-wrap-bumper"><a href="#ab481921984938d163ae8a429392e96ea" class="m-doc-self">UMFPack</a>(</span><span class="m-doc-wrap">bool useLongInts = false)</span>
             </dt>
-            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> object with default parameters.</dd>
+            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_u_m_f_pack.html" class="m-doc">UMFPack</a> object with default parameters.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dddaaf493a5673655e73949d2870497" class="m-doc">printIterations</a>(</span><span class="m-doc-wrap">bool printIterations) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
-            </dt>
-            <dd>Sets whether some information will be printed at each iteration.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f0910f2012fac204bf1218ac23540cc" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">int maxIterations) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
-            </dt>
-            <dd>Sets the maximum amount of iterations the solver will perform.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a152477d649595cea745400b8b0ebe00b" class="m-doc">setRelativeTolerance</a>(</span><span class="m-doc-wrap">double rtol) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
-            </dt>
-            <dd>Sets the relative tolerance of the solver.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acf7bb4b431ac845a94ccf74fd160b2e0" class="m-doc">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap">double atol) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
-            </dt>
-            <dd>Sets the absolute tolerance of the solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a244a5612b63ab7c3cc41dd9fce77cdbf" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&amp; problem) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -111,101 +95,9 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0dddaaf493a5673655e73949d2870497"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dddaaf493a5673655e73949d2870497" class="m-doc-self">printIterations</a>(</span><span class="m-doc-wrap">bool printIterations)</span></span>
-            </h3>
-            <p>Sets whether some information will be printed at each iteration.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">printIterations&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>If set to true, will print the iterations. Otherwise, no information will be printed to the screen.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a4f0910f2012fac204bf1218ac23540cc"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f0910f2012fac204bf1218ac23540cc" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">int maxIterations)</span></span>
-            </h3>
-            <p>Sets the maximum amount of iterations the solver will perform.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">maxIterations&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Maximum amount of iterations</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a152477d649595cea745400b8b0ebe00b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a152477d649595cea745400b8b0ebe00b" class="m-doc-self">setRelativeTolerance</a>(</span><span class="m-doc-wrap">double rtol)</span></span>
-            </h3>
-            <p>Sets the relative tolerance of the solver.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">rtol&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Relative tolerance</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="acf7bb4b431ac845a94ccf74fd160b2e0"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf7bb4b431ac845a94ccf74fd160b2e0" class="m-doc-self">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap">double atol)</span></span>
-            </h3>
-            <p>Sets the absolute tolerance of the solver.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">atol&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Absolute tolerance</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a244a5612b63ab7c3cc41dd9fce77cdbf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />CG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a244a5612b63ab7c3cc41dd9fce77cdbf" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&amp; problem) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />UMFPack::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a244a5612b63ab7c3cc41dd9fce77cdbf" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&amp; problem) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the specified <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>.</p>
             <table class="m-table m-fullwidth m-flat">
