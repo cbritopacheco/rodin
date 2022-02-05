@@ -15,7 +15,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/holes.mesh";
+  const char* meshFile = "../resources/mfem/meshes/simple-cantilever-example.mesh";
 
   // Define boundary attributes
   int Gamma0 = 1, GammaD = 2, GammaN = 3;
