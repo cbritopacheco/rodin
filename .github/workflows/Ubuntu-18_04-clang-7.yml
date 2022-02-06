@@ -32,6 +32,7 @@ jobs:
           libglfw3-dev
           libopenal-dev
           libvulkan-dev
+          libsuitesparse-dev
       - name: Configure CMake
         run: >
           cmake

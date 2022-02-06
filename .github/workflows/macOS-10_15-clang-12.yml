@@ -28,6 +28,7 @@ jobs:
           openal-soft
           vulkan-headers
           molten-vk
+          suitesparse
       - name: Configure CMake
         run: >
           cmake

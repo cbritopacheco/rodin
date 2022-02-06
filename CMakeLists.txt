@@ -17,6 +17,7 @@ option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"        ON)
 option(RODIN_BUILD_DOC          "Build the Rodin documentation"   OFF)
 option(RODIN_USE_MCSS           "Use m.css style documentation"   OFF)
 option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"    OFF)
+option(RODIN_USE_SUITESPARSE    "Build SuiteSparse integrations"  ON)
 
 # ---- Configuration ---------------------------
 include("${PROJECT_SOURCE_DIR}/cmake/configuration.cmake")
@@ -60,6 +61,10 @@ endif()
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
   # ---- MFEM ----
+  if (RODIN_USE_SUITESPARSE)
+    set(MFEM_USE_SUITESPARSE ON)
+  endif()
+
   set(BUILD_DOC OFF CACHE BOOL "" FORCE)
   message(STATUS "Configuring mfem ...")
   add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)

@@ -1,16 +1,26 @@
 set(RodinSolver_HEADERS
   Solver.h
   CG.h
-  UMFPack.h
   )
 
 set(RodinSolver_SRCS
   CG.cpp
-  UMFPack.cpp
   )
 
+# ---- Set targets -----------------------------------------------------------
 add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
 add_library(Rodin::Solver ALIAS RodinSolver)
+
+# ---- SuiteSparse -----------------------------------------------------------
+if (RODIN_USE_SUITESPARSE)
+  target_compile_definitions(RodinSolver PUBLIC RODIN_SOLVER_SUITESPARSE)
+
+  target_sources(RodinSolver PRIVATE
+    UMFPack.h
+    UMFPack.cpp
+    )
+endif()
+
 
 
 # ---- Link targets ----------------------------------------------------------
