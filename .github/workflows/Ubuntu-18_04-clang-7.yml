@@ -33,6 +33,7 @@ jobs:
           libopenal-dev
           libvulkan-dev
           libsuitesparse-dev
+          libmetis-dev
       - name: Configure CMake
         run: >
           cmake
