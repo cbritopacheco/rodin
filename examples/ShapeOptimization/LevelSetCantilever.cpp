@@ -16,8 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
-  const char* meshFile = "Omega.mesh";
+  const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -87,9 +86,6 @@ int main(int, char**)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
-
-    Omega.save("Omegai.mesh");
-    theta.save("theta.gf");
 
     if (i == 0)
     {
