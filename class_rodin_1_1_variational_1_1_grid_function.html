@@ -122,13 +122,17 @@
             </dt>
             <dd>Sets the data of the grid function and assumes ownership.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac083a09500d43f30a1fc8d0d1ac5960c" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;const double*, int&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ddc3316196868eddf55b149643d3c04" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;const double*, int&gt; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the raw data and size of the grid function.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad79179aa40daef7a01241a72b077e4ac" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&amp; s) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp;</span>
             </dt>
             <dd>Projects a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8dfe4b80e85c0a30857fba9478c0243" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&gt;&amp; s) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp;</span>
+            </dt>
+            <dd>Projects the restriction of a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac4cd75adf80b502a60033c0d29a1b709" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; v) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp;</span>
             </dt>
@@ -282,12 +286,12 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ac083a09500d43f30a1fc8d0d1ac5960c"><div>
+          <section class="m-doc-details" id="a2ddc3316196868eddf55b149643d3c04"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::pair&lt;const double*, int&gt; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac083a09500d43f30a1fc8d0d1ac5960c" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">std::pair&lt;const double*, int&gt; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ddc3316196868eddf55b149643d3c04" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the raw data and size of the grid function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -307,6 +311,33 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad79179aa40daef7a01241a72b077e4ac" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&amp; s)</span></span>
             </h3>
             <p>Projects a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">s&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar coefficient to project</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>The <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> must be scalar valued.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab8dfe4b80e85c0a30857fba9478c0243"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8dfe4b80e85c0a30857fba9478c0243" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a>&gt;&amp; s)</span></span>
+            </h3>
+            <p>Projects the restriction of a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
