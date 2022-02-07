@@ -26,10 +26,16 @@ namespace Rodin::Variational
    // ---- GridFunction ------------------------------------------------------
    class GridFunctionBase;
 
+   class GridFunctionIndexBase;
+
+   template <class T>
+   class GridFunctionIndex;
+
    template <class FEC>
    class GridFunction;
 
    class IncompleteGridFunction;
+
 
    enum IntegratorRegion
    {
@@ -107,6 +113,11 @@ namespace Rodin::Variational
 
    template <class A, class B, class Enable = void>
    class Dot;
+
+   class RestrictionBase;
+
+   template <class T>
+   class Restriction;
 }
 
 #endif

@@ -27,9 +27,9 @@ target_include_directories(RodinCore
   INTERFACE
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   )
-target_link_libraries(RodinCore
-  INTERFACE
-  Eigen3::Eigen
-  )
+# target_link_libraries(RodinCore
+#   INTERFACE
+#   Eigen3::Eigen
+#   )
 
 

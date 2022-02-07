@@ -4,10 +4,23 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Restriction.h"
+
 #include "ScalarCoefficient.h"
 
 namespace Rodin::Variational
 {
+   Restriction<ScalarCoefficientBase> ScalarCoefficientBase::restrictedTo(int attr)
+   {
+      return restrictedTo(std::set<int>{attr});
+   }
+
+   Restriction<ScalarCoefficientBase> ScalarCoefficientBase::restrictedTo(
+         const std::set<int>& attrs)
+   {
+      return Restriction<ScalarCoefficientBase>(*this).to(attrs);
+   }
+
    void
    ScalarCoefficient<std::function<double(const double*)>>::buildMFEMCoefficient()
    {

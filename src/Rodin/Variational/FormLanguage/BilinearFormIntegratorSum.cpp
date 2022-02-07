@@ -14,7 +14,12 @@ namespace Rodin::Variational::FormLanguage
    BilinearFormIntegratorSum
    ::BilinearFormIntegratorSum(const BilinearFormIntegratorSum& other)
       : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-   {}
+   {
+      assert(std::equal(
+               lhs.getAttributes().begin(), lhs.getAttributes().end(),
+               rhs.getAttributes().begin()
+               ));
+   }
 
    BilinearFormIntegratorBase& BilinearFormIntegratorSum::getLHS()
    {

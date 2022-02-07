@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
+#include <cmath>
 #include <utility>
 #include <fstream>
 #include <functional>
@@ -14,10 +15,15 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Core.h"
+
 #include "ForwardDecls.h"
+#include "Restriction.h"
 #include "ScalarCoefficient.h"
 #include "VectorCoefficient.h"
 #include "MatrixCoefficient.h"
+#include "GridFunctionView.h"
+#include "GridFunctionIndex.h"
 
 namespace Rodin::Variational
 {
@@ -49,6 +55,8 @@ namespace Rodin::Variational
          virtual GridFunctionBase& operator/=(double t) = 0;
          virtual double max() const = 0;
          virtual double min() const = 0;
+
+         virtual std::pair<const double*, int> getData() const = 0;
    };
 
    /**
@@ -210,7 +218,7 @@ namespace Rodin::Variational
           * @brief Gets the raw data and size of the grid function.
           * @returns `std::pair{data, size}`
           */
-         std::pair<const double*, int> getData() const
+         std::pair<const double*, int> getData() const override
          {
             return {m_data.get(), m_size};
          }
@@ -219,6 +227,16 @@ namespace Rodin::Variational
          {
             getHandle() = v;
             return *this;
+         }
+
+         template <class T>
+         std::enable_if_t<
+           std::is_base_of_v<GridFunctionIndexBase, T>, GridFunctionView>
+         operator[](T&& idx)
+         {
+            GridFunctionView res(*this);
+            res.setIndex(std::forward<T>(idx));
+            return res;
          }
 
          /**
@@ -233,6 +251,38 @@ namespace Rodin::Variational
             std::unique_ptr<ScalarCoefficientBase> sCopy(s.copy());
             sCopy->buildMFEMCoefficient();
             getHandle().ProjectCoefficient(sCopy->getMFEMCoefficient());
+            return *this;
+         }
+
+         /**
+          * @brief Projects the restriction of a scalar coefficient on the given GridFunction.
+          * @note The GridFunction must be scalar valued.
+          * @param[in] s Scalar coefficient to project
+          * @returns Reference to self
+          */
+         GridFunction<FEC>& operator=(const Restriction<ScalarCoefficientBase>& s)
+         {
+            assert(getFiniteElementSpace().getRangeDimension() == 1);
+            std::unique_ptr<ScalarCoefficientBase> sCopy(
+                  s.getScalarCoefficient().copy());
+            sCopy->buildMFEMCoefficient();
+            getHandle() = NAN;
+            mfem::Array<int> vdofs;
+            mfem::Vector vals;
+            const auto& fes = getFiniteElementSpace().getFES();
+            const auto& attrs = s.getAttributes();
+            for (int i = 0; i < fes.GetNE(); i++)
+            {
+               if (attrs.count(fes.GetAttribute(i)) > 0)
+               {
+                  fes.GetElementVDofs(i, vdofs);
+                  vals.SetSize(vdofs.Size());
+                  fes.GetFE(i)->Project(
+                        sCopy->getMFEMCoefficient(),
+                        *fes.GetElementTransformation(i), vals);
+                  getHandle().SetSubVector(vdofs, vals);
+               }
+            }
             return *this;
          }
 

@@ -54,11 +54,6 @@ namespace Rodin::Variational
             return over(std::set<int>{attr});
          }
 
-         VectorDomainLFIntegrator meow(int attr)
-         {
-            return over(std::set<int>{attr});
-         }
-
          VectorDomainLFIntegrator& over(const std::set<int>& attrs) override
          {
             m_attr = attrs;

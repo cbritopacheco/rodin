@@ -7,36 +7,42 @@
 #ifndef RODIN_CORE_COMMON_H
 #define RODIN_CORE_COMMON_H
 
-#include <map>
-#include <vector>
 #include <cmath>
-#include <limits>
-#include <optional>
 #include <type_traits>
 
-#include <Eigen/Core>
-
-namespace Rodin::Core
+namespace Rodin
 {
-  /*
-   * Removed the definition because we don't need it right now and I
-   * don't want Magnum as part of the Rodin::Core module.
-   */
   template <class T>
-  class Rad;
-  // using Rad = Magnum::Math::Rad<T>;
+  constexpr
+  std::enable_if_t<!std::is_void_v<decltype(std::abs(std::declval<T>()))>, T>
+  abs(const T& x)
+  {
+    return std::abs(x);
+  }
 
   template <class T>
-  inline
   constexpr
-  T abs(const T& x);
+  std::enable_if_t<!std::is_void_v<decltype(std::sqrt(std::declval<T>()))>, T>
+  sqrt(const T& x)
+  {
+    return std::sqrt(x);
+  }
 
   template <class T>
-  inline
   constexpr
-  T sqrt(const T& x);
+  std::enable_if_t<!std::is_void_v<decltype(std::isnan(std::declval<T>()))>, bool>
+  isNaN(const T& x)
+  {
+    return std::isnan(x);
+  }
+
+  template <class T>
+  constexpr
+  std::enable_if_t<!std::is_void_v<decltype(std::isinf(std::declval<T>()))>, bool>
+  isInf(const T& x)
+  {
+    return std::isinf(x);
+  }
 }
-
-#include "Common.hpp"
 
 #endif

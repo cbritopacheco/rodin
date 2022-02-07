@@ -83,11 +83,6 @@ namespace Rodin::Variational
             return over(std::set{attr});
          }
 
-         DivergenceIntegrator meow(int attr)
-         {
-            return over(std::set{attr});
-         }
-
          DivergenceIntegrator& over(const std::set<int>& attrs) override
          {
             m_attr = attrs;

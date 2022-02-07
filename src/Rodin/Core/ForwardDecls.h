@@ -9,26 +9,26 @@
 
 namespace Rodin::Core
 {
-  namespace Geometry
-  {
-    template <class T, class Derived>
-    class Geometry;
+  // namespace Geometry
+  // {
+  //   template <class T, class Derived>
+  //   class Geometry;
 
-    template <class T>
-    class Point2D;
+  //   template <class T>
+  //   class Point2D;
 
-    template <class T>
-    class Line2D;
+  //   template <class T>
+  //   class Line2D;
 
-    template <class T>
-    class Line3D;
+  //   template <class T>
+  //   class Line3D;
 
-    template <class T>
-    class Circle;
+  //   template <class T>
+  //   class Circle;
 
-    template <class T>
-    class LineSegment2D;
-  }
+  //   template <class T>
+  //   class LineSegment2D;
+  // }
 }
 
 #endif

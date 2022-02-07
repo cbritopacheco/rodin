@@ -16,7 +16,8 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
+  // const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
+  const char* meshFile = "Omega.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -25,15 +26,16 @@ int main(int, char**)
   int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
   // Lamé coefficients
-  double ersatz = 0.01;
-  auto mu     = ScalarCoefficient({{Interior, 0.3846}, {Exterior, ersatz}}),
-       lambda = ScalarCoefficient({{Interior, 0.5769}, {Exterior, ersatz}});
+  auto mu     = ScalarCoefficient(0.3846),
+       lambda = ScalarCoefficient(0.5769);
 
   // Compliance
   auto compliance = [&](GridFunction<H1>& v)
   {
     BilinearForm bf(v.getFiniteElementSpace());
-    bf = ElasticityIntegrator(lambda, mu);
+    bf = ElasticityIntegrator(lambda, mu).over(Interior);
+    // Set to zero where the function might not defined
+    v[Rodin::isNaN(v) || Rodin::isInf(v)] = 0.0;
     return bf(v, v);
   };
 
@@ -48,17 +50,15 @@ int main(int, char**)
   // Optimization parameters
   size_t maxIt = 200;
   double eps = 1e-6;
-  double hmax = 0.02;
-  auto ell = ScalarCoefficient(5);
-  auto alpha = ScalarCoefficient(hmax);
+  double hmax = 0.05;
+  auto ell = ScalarCoefficient(0.5);
+  auto alpha = ScalarCoefficient(hmax * hmax);
 
   std::vector<double> obj;
 
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
-    Omega.save("Omega.mesh");
-
     // Finite element space
     int d = 2;
     H1 Vh(Omega, d);
@@ -66,16 +66,10 @@ int main(int, char**)
     // Elasticity equation
     GridFunction u(Vh);
     Problem elasticity(u);
-    elasticity = ElasticityIntegrator(lambda, mu)
+    elasticity = ElasticityIntegrator(lambda, mu).over(Interior)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     solver.solve(elasticity);
-
-    if (i == 0)
-    {
-      obj.push_back(
-          compliance(u) + ell.getValue() * Omega.getVolume(Interior));
-    }
 
     // Hilbert extension-regularization procedure
     GridFunction theta(Vh);
@@ -84,7 +78,7 @@ int main(int, char**)
 
     H1 Ph(Omega);
     GridFunction w(Ph);
-    w = Dot(Ae, e) - ell;
+    w = (Dot(Ae, e) - ell).restrictedTo(Interior);
 
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
@@ -94,6 +88,16 @@ int main(int, char**)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
+    Omega.save("Omegai.mesh");
+    theta.save("theta.gf");
+
+    if (i == 0)
+    {
+      obj.push_back(
+          compliance(u) + ell.getValue() * Omega.getVolume(Interior));
+    }
+
+    // Linear search
     int maxSearchIt = 5;
     int searchIt = 0;
 
@@ -103,7 +107,7 @@ int main(int, char**)
     double dt = hmax / linf;
     while (searchIt++ < maxSearchIt)
     {
-      double newObj = obj[i], oldObj;
+      double newObj = obj.back(), oldObj;
       Mesh OmegaCandidate(Omega);
 
       // Convert data types to mmg types
@@ -116,13 +120,13 @@ int main(int, char**)
 
       // Advect the level set function
       MMG::Advect2D advect(mmgLs, mmgVel);
-      advect.step(dt);
+      advect.enableExtrapolation(false).step(dt);
 
       // Recover the implicit domain
       auto [mmgImplicit, _] =
         MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
                                      .split(Exterior, {Interior, Exterior})
-                                     .setRMC(1e-5)
+                                     .setRMC(1e-3)
                                      .setHMax(hmax)
                                      .setBoundaryReference(Gamma)
                                      .discretize(mmgLs);
@@ -134,7 +138,7 @@ int main(int, char**)
       H1 Ch(OmegaCandidate, d);
       GridFunction uc(Ch);
       Problem elasticityc(uc);
-      elasticityc = ElasticityIntegrator(lambda, mu)
+      elasticityc = ElasticityIntegrator(lambda, mu).over(Interior)
                   + DirichletBC(GammaD, VectorCoefficient{0, 0})
                   + NeumannBC(GammaN, VectorCoefficient{0, -1});
       solver.solve(elasticityc);
@@ -153,15 +157,16 @@ int main(int, char**)
 
         // Update objective
         obj.push_back(newObj);
-        std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
+        std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
         std::cout << "dt = " << dt << std::endl;
         break;
       }
     }
 
+    Omega.save("Omega.mesh");
 
     // Test for convergence
-    if ((i > 0 && abs(obj[i] - obj[i - 1]) < eps) || obj.size() < i)
+    if ((i > 0 && abs(obj[i] - obj[i - 1]) < eps))
     {
       std::cout << "Convergence!" << std::endl;
       break;

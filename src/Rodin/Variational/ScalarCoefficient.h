@@ -8,11 +8,14 @@
 #define RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
 
 #include <map>
+#include <set>
 #include <memory>
 #include <optional>
 #include <type_traits>
 
 #include <mfem.hpp>
+
+#include "ForwardDecls.h"
 
 #include "FormLanguage/Base.h"
 #include "FormLanguage/ForwardDecls.h"
@@ -45,6 +48,11 @@ namespace Rodin::Variational
           * pointer to the new object.
           */
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
+
+         virtual Restriction<ScalarCoefficientBase> restrictedTo(int attr);
+
+         virtual Restriction<ScalarCoefficientBase> restrictedTo(
+               const std::set<int>& attrs);
    };
 
    template <class T>
@@ -58,8 +66,7 @@ namespace Rodin::Variational
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class T>
-   class ScalarCoefficient
-      : public ScalarCoefficientBase
+   class ScalarCoefficient : public ScalarCoefficientBase
    {
       public:
          /**

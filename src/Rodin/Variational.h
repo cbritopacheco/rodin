@@ -36,6 +36,7 @@
 #include "Variational/Problem.h"
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
+#include "Variational/Restriction.h"
 #include "Variational/ScalarCoefficient.h"
 #include "Variational/VectorCoefficient.h"
 #include "Variational/MatrixCoefficient.h"

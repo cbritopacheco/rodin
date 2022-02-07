@@ -15,6 +15,8 @@ set(RodinVariational_HEADERS
   ForwardDecls.h
   Gradient.h
   GridFunction.h
+  GridFunctionIndex.h
+  GridFunctionView.h
   H1.h
   IdentityMatrix.h
   Jacobian.h
@@ -26,6 +28,7 @@ set(RodinVariational_HEADERS
   ScalarCoefficient.h
   Trace.h
   Transpose.h
+  Restriction.h
   VectorBoundaryFluxLFIntegrator.h
   VectorCoefficient.h
   MassIntegrator.h
@@ -42,6 +45,8 @@ set(RodinVariational_SRCS
   DomainLFIntegrator.cpp
   ElasticityIntegrator.cpp
   Gradient.cpp
+  GridFunctionIndex.cpp
+  GridFunctionView.cpp
   IdentityMatrix.cpp
   Jacobian.cpp
   MatrixCoefficient.cpp
@@ -55,6 +60,7 @@ set(RodinVariational_SRCS
   VectorDiffusionIntegrator.cpp
   VectorDomainLFIntegrator.cpp
   ScalarCoefficient.cpp
+  Restriction.cpp
   BilinearForm.hpp
   Derivative.hpp
   Dot.hpp
