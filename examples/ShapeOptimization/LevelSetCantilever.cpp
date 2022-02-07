@@ -120,7 +120,7 @@ int main(int, char**)
 
       // Advect the level set function
       MMG::Advect2D advect(mmgLs, mmgVel);
-      advect.enableExtrapolation(false).step(dt);
+      advect.step(dt);
 
       // Recover the implicit domain
       auto [mmgImplicit, _] =
