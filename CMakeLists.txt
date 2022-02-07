@@ -62,7 +62,7 @@ if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
   # ---- MFEM ----
   if (RODIN_USE_SUITESPARSE)
-    set(MFEM_USE_SUITESPARSE ON FORCE)
+    set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
   endif()
 
   set(BUILD_DOC OFF CACHE BOOL "" FORCE)
