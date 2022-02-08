@@ -16,8 +16,8 @@ namespace Rodin::Variational::FormLanguage
       : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
    {
       assert(std::equal(
-               lhs.getAttributes().begin(), lhs.getAttributes().end(),
-               rhs.getAttributes().begin()
+               m_lhs->getAttributes().begin(), m_lhs->getAttributes().end(),
+               m_rhs->getAttributes().begin()
                ));
    }
 
