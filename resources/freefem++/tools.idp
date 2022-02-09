@@ -12,19 +12,19 @@ func real holes(int nw, int nh) {
   cy = 0.25;
   cx = 0;
 
-  if (y < 0.05 || y > 0.95)
-  {
-    dd = 1.0;
-    d = min(d, dd);
-    return d;
-  }
+  // if (y < 0.05 || y > 0.95)
+  // {
+  //   dd = 1.0;
+  //   d = min(d, dd);
+  //   return d;
+  // }
 
-  if (x > 1.95 && (y < 0.45 || y > 0.55))
-  {
-    dd = 1.0;
-    d = min(d, dd);
-    return d;
-  }
+  // if (x > 1.95 && (y < 0.45 || y > 0.55))
+  // {
+  //   dd = 1.0;
+  //   d = min(d, dd);
+  //   return d;
+  // }
 
   for (int i = 0; i < nh; i++)
   {

@@ -7,7 +7,7 @@
 #ifndef RODIN_EXTERNAL_MMG_DISTANCER2D_H
 #define RODIN_EXTERNAL_MMG_DISTANCER2D_H
 
-#include <vector>
+#include <set>
 #include <optional>
 
 #include "Common.h"
@@ -100,7 +100,11 @@ namespace Rodin::External::MMG
        *
        * @see distance(Mesh2D&) const
        */
-      Distancer2D& setInteriorDomains(const std::vector<MaterialReference>& refs);
+      Distancer2D& setInteriorDomains(const std::set<MaterialReference>& refs);
+
+      Distancer2D& setActiveBorders(const std::set<MaterialReference>& refs);
+
+      Distancer2D& enableActiveBorder(bool b = true);
 
       Distancer2D& enableScaling(bool b = true);
 
@@ -109,10 +113,12 @@ namespace Rodin::External::MMG
       unsigned int getCPUs() const;
 
     private:
-      bool m_scale;
+      bool m_scale,
+           m_activeBorder;
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
-      std::optional<std::vector<MaterialReference>> m_interiorDomains;
+      std::optional<std::set<MaterialReference>> m_interiorDomains;
+      std::optional<std::set<MaterialReference>> m_activeBorders;
   };
 }
 

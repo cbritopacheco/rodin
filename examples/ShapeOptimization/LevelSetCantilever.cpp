@@ -48,10 +48,10 @@ int main(int, char**)
 
   // Optimization parameters
   size_t maxIt = 200;
-  double eps = 1e-6;
+  double eps = 1e-12;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(0.5);
-  auto alpha = ScalarCoefficient(hmax * hmax);
+  auto ell = ScalarCoefficient(1);
+  auto alpha = ScalarCoefficient(hmax);
 
   std::vector<double> obj;
 
@@ -84,85 +84,50 @@ int main(int, char**)
             + VectorMassIntegrator()
             - DivergenceIntegrator<Domain, Linear>(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
+            + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
-    if (i == 0)
-    {
-      obj.push_back(
-          compliance(u) + ell.getValue() * Omega.getVolume(Interior));
-    }
-
-    // Linear search
-    int maxSearchIt = 5;
-    int searchIt = 0;
+    // Update objective
+    obj.push_back(
+        compliance(u) + ell.getValue() * Omega.getVolume(Interior));
+    std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
     double min = theta.min(),
            max = theta.max();
     double linf = abs(min) > max ? abs(min) : max;
     double dt = hmax / linf;
-    while (searchIt++ < maxSearchIt)
-    {
-      double newObj = obj.back(), oldObj;
-      Mesh OmegaCandidate(Omega);
 
-      // Convert data types to mmg types
-      auto mmgMesh = Cast(OmegaCandidate).to<MMG::Mesh2D>();
-      auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+    // Convert data types to mmg types
+    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
-      // Generate signed distance function
-      auto mmgLs =
-        MMG::Distancer2D().setInteriorDomains({ Interior }).distance(mmgMesh);
+    // Generate signed distance function
+    auto mmgLs = MMG::Distancer2D().setInteriorDomains({ Interior })
+                                   .setActiveBorders({ Gamma0 })
+                                   .distance(mmgMesh);
 
-      // Advect the level set function
-      MMG::Advect2D advect(mmgLs, mmgVel);
-      advect.step(dt);
+    // Advect the level set function
+    MMG::Advect2D advect(mmgLs, mmgVel);
+    advect.step(dt);
 
-      // Recover the implicit domain
-      auto [mmgImplicit, _] =
-        MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                     .split(Exterior, {Interior, Exterior})
-                                     .setRMC(1e-3)
-                                     .setHMax(hmax)
-                                     .setBoundaryReference(Gamma)
-                                     .discretize(mmgLs);
+    // Recover the implicit domain
+    auto [mmgImplicit, _] =
+      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
+                                   .split(Exterior, {Interior, Exterior})
+                                   .setRMC(1e-5)
+                                   .setHMax(hmax)
+                                   .setBoundaryReference(Gamma)
+                                   .discretize(mmgLs);
 
-      // Convert back to Rodin data type
-      OmegaCandidate = Cast(mmgImplicit).to<Rodin::Mesh>();
+    // Convert back to Rodin data type
+    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
-      // Compute new objective
-      H1 Ch(OmegaCandidate, d);
-      GridFunction uc(Ch);
-      Problem elasticityc(uc);
-      elasticityc = ElasticityIntegrator(lambda, mu).over(Interior)
-                  + DirichletBC(GammaD, VectorCoefficient{0, 0})
-                  + NeumannBC(GammaN, VectorCoefficient{0, -1});
-      solver.solve(elasticityc);
-
-      oldObj = newObj;
-      newObj = compliance(uc) + ell.getValue() * OmegaCandidate.getVolume(Interior);
-
-      if (oldObj < newObj)
-      {
-        // Reject iteration
-        dt /= 2.0;
-      } else
-      {
-        // Accept iteration
-        Omega = std::move(OmegaCandidate);
-
-        // Update objective
-        obj.push_back(newObj);
-        std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
-        std::cout << "dt = " << dt << std::endl;
-        break;
-      }
-    }
-
+    // Save mesh
     Omega.save("Omega.mesh");
 
     // Test for convergence
-    if ((i > 0 && abs(obj[i] - obj[i - 1]) < eps))
+    if ((obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps))
     {
       std::cout << "Convergence!" << std::endl;
       break;

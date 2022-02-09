@@ -13,7 +13,7 @@ border rightMiddle(t=0.45,0.55){x=2;y=t;label=GammaN;};
 border rightTop(t=0.55,1){x=2;y=t;label=Gamma0;};
 border top(t=2,0){x=t;y=1;label=Gamma0;};
 border leftBottom(t=1,0.85){x=0;y=t;label=GammaD;};
-border leftMiddle(t=0.85,0.15){x=0;y=t;label=GammaD;};
+border leftMiddle(t=0.85,0.15){x=0;y=t;label=Gamma0;};
 border leftTop(t=0.15,0){x=0;y=t;label=GammaD;};
 
 // Mesh

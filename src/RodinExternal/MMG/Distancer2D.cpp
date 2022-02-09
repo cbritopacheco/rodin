@@ -14,14 +14,23 @@ namespace Rodin::External::MMG
 {
   Distancer2D::Distancer2D()
     : m_scale(true),
+      m_activeBorder(false),
       m_ncpu(std::thread::hardware_concurrency()),
       m_mshdist(MSHDIST_EXECUTABLE)
   {}
 
   Distancer2D& Distancer2D::setInteriorDomains(
-      const std::vector<MaterialReference>& refs)
+      const std::set<MaterialReference>& refs)
   {
     m_interiorDomains = refs;
+    return *this;
+  }
+
+  Distancer2D& Distancer2D::setActiveBorders(const std::set<MaterialReference>& refs)
+  {
+    assert(refs.size() > 0);
+    m_activeBorders = refs;
+    m_activeBorder = true;
     return *this;
   }
 
@@ -39,9 +48,18 @@ namespace Rodin::External::MMG
              << m_interiorDomains->size() << "\n\n";
       for (const auto& ref : *m_interiorDomains)
         paramf << ref << "\n";
+      paramf << "ActiveBorders\n"
+             << m_activeBorders->size() << "\n\n";
+      for (const auto& ref : *m_activeBorders)
+        paramf << ref << "\n";
     }
 
-    m_mshdist.run(boxp, "-dom", "-ncpu", m_ncpu, "-v 0");
+    m_mshdist.run(
+        boxp,
+        "-dom",
+        m_activeBorder ? "-activeBorder" : "",
+        "-ncpu", m_ncpu,
+        "-v 0");
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -82,6 +100,12 @@ namespace Rodin::External::MMG
   Distancer2D& Distancer2D::setCPUs(unsigned int ncpu)
   {
     m_ncpu = ncpu;
+    return *this;
+  }
+
+  Distancer2D& Distancer2D::enableActiveBorder(bool b)
+  {
+    m_activeBorder = b;
     return *this;
   }
 
