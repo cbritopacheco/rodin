@@ -8,6 +8,8 @@
 
   @m_footernavigation
 
+  @image html LevelSetCantilever.png width=410px
+
   The full source code may be found below:
   -   @ref ShapeOptimization/LevelSetCantilever.cpp "LevelSetCantilever.cpp"
 

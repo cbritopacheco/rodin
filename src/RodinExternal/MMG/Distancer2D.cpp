@@ -44,14 +44,20 @@ namespace Rodin::External::MMG
       auto paramp(boxp);
       paramp.replace_extension(".mshdist");
       std::ofstream paramf(paramp, std::ios::trunc);
-      paramf << "InteriorDomains\n"
-             << m_interiorDomains->size() << "\n\n";
-      for (const auto& ref : *m_interiorDomains)
-        paramf << ref << "\n";
-      paramf << "ActiveBorders\n"
-             << m_activeBorders->size() << "\n\n";
-      for (const auto& ref : *m_activeBorders)
-        paramf << ref << "\n";
+      if (m_interiorDomains->size() > 0)
+      {
+        paramf << "InteriorDomains\n"
+               << m_interiorDomains->size() << "\n\n";
+        for (const auto& ref : *m_interiorDomains)
+          paramf << ref << "\n";
+      }
+      if (m_activeBorder && m_activeBorders->size() > 0)
+      {
+        paramf << "ActiveBorders\n"
+               << m_activeBorders->size() << "\n\n";
+        for (const auto& ref : *m_activeBorders)
+          paramf << ref << "\n";
+      }
     }
 
     m_mshdist.run(
