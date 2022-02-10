@@ -65,40 +65,64 @@ namespace Rodin::Variational::FormLanguage
    }
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi)
+         const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormDomainIntegratorList().emplace_back(
-            new LinearFormIntegratorUnaryMinus(lfi));
+      switch (lfi.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+         res.getLinearFormDomainIntegratorList().emplace_back(
+               new LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(lfi));
+         break;
+         case IntegratorRegion::Boundary:
+         res.getLinearFormBoundaryIntegratorList().emplace_back(
+               new LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(lfi));
+         break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
       return res;
    }
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi)
+         const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormDomainIntegratorList().emplace_back(lfi.copy());
+      switch (lfi.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+         res.getLinearFormDomainIntegratorList().emplace_back(lfi.copy());
+         break;
+         case IntegratorRegion::Boundary:
+         res.getLinearFormBoundaryIntegratorList().emplace_back(lfi.copy());
+         break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
       return res;
    }
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi)
+         const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
    {
       ProblemBody res(pb);
-      // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormBoundaryIntegratorList().emplace_back(
-            new LinearFormIntegratorUnaryMinus(lfi));
+      for (const auto& p : lfi.getLinearFormDomainIntegratorList())
+         res.getLinearFormDomainIntegratorList().emplace_back(p->copy());
+      for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
+         res.getLinearFormBoundaryIntegratorList().emplace_back(p->copy());
       return res;
    }
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi)
+         const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
    {
       ProblemBody res(pb);
-      // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      res.getLinearFormBoundaryIntegratorList().emplace_back(lfi.copy());
+      for (const auto& p : lfi.getLinearFormDomainIntegratorList())
+         res.getLinearFormDomainIntegratorList().emplace_back(p->copy());
+      for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
+         res.getLinearFormBoundaryIntegratorList().emplace_back(p->copy());
       return res;
    }
 }

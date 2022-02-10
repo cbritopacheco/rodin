@@ -51,7 +51,7 @@ int main(int, char**)
   double eps = 1e-12;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(hmax);
+  auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -88,6 +88,10 @@ int main(int, char**)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
+    // Save mesh
+    theta.save("theta.gf");
+    Omega.save("Omega.mesh");
+
     // Update objective
     obj.push_back(
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
@@ -123,8 +127,6 @@ int main(int, char**)
     // Convert back to Rodin data type
     Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
-    // Save mesh
-    Omega.save("Omega.mesh");
 
     // Test for convergence
     if ((obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps))

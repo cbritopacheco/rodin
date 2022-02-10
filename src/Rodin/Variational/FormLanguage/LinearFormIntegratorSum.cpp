@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Alert.h"
 #include "LinearFormIntegratorUnaryMinus.h"
 
 #include "LinearFormIntegratorSum.h"
@@ -12,48 +13,78 @@ namespace Rodin::Variational::FormLanguage
 {
    LinearFormIntegratorSum::LinearFormIntegratorSum(
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs)
-      : m_lhs(lhs.copy()), m_rhs(rhs.copy())
    {
-      assert(std::equal(
-               lhs.getAttributes().begin(), lhs.getAttributes().end(),
-               rhs.getAttributes().begin()
-               ));
+      switch (lhs.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+            m_lfiDomainList.emplace_back(lhs.copy());
+            break;
+         case IntegratorRegion::Boundary:
+            m_lfiBoundaryList.emplace_back(lhs.copy());
+            break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
+      switch (rhs.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+            m_lfiDomainList.emplace_back(rhs.copy());
+            break;
+         case IntegratorRegion::Boundary:
+            m_lfiBoundaryList.emplace_back(rhs.copy());
+            break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
    }
 
-   LinearFormIntegratorSum::LinearFormIntegratorSum(const LinearFormIntegratorSum& other)
-      : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-   {}
-
-   LinearFormIntegratorBase& LinearFormIntegratorSum::getLHS()
+   LinearFormIntegratorSum::LinearFormIntegratorSum(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorBase& rhs)
    {
-      return *m_lhs;
+      m_lfiDomainList.reserve(lhs.m_lfiDomainList.size() + 1);
+      for (const auto& p : lhs.m_lfiDomainList)
+         m_lfiDomainList.emplace_back(p->copy());
+      m_lfiBoundaryList.reserve(lhs.m_lfiBoundaryList.size() + 1);
+      for (const auto& p : lhs.m_lfiBoundaryList)
+         m_lfiBoundaryList.emplace_back(p->copy());
+      switch (rhs.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+            m_lfiDomainList.emplace_back(rhs.copy());
+            break;
+         case IntegratorRegion::Boundary:
+            m_lfiBoundaryList.emplace_back(rhs.copy());
+            break;
+         default:
+            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
+      }
+
    }
 
-   LinearFormIntegratorBase& LinearFormIntegratorSum::getRHS()
+   LinearFormIntegratorSum::LinearFormIntegratorSum(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorSum& rhs)
    {
-      return *m_rhs;
+      m_lfiDomainList.reserve(lhs.m_lfiDomainList.size() + rhs.m_lfiDomainList.size());
+      for (const auto& p : lhs.m_lfiDomainList)
+         m_lfiDomainList.emplace_back(p->copy());
+      for (const auto& p : rhs.m_lfiDomainList)
+         m_lfiDomainList.emplace_back(p->copy());
+      m_lfiBoundaryList.reserve(lhs.m_lfiBoundaryList.size() + rhs.m_lfiBoundaryList.size());
+      for (const auto& p : lhs.m_lfiBoundaryList)
+         m_lfiBoundaryList.emplace_back(p->copy());
+      for (const auto& p : rhs.m_lfiBoundaryList)
+         m_lfiBoundaryList.emplace_back(p->copy());
    }
 
-   void LinearFormIntegratorSum::buildMFEMLinearFormIntegrator()
+   LinearFormIntegratorSum::LinearFormIntegratorSum(
+         const LinearFormIntegratorSum& other)
    {
-      m_lhs->buildMFEMLinearFormIntegrator();
-      m_rhs->buildMFEMLinearFormIntegrator();
-      m_mfemLFI = std::make_unique<Internal::LinearFormIntegratorSum>(
-            m_lhs->getMFEMLinearFormIntegrator(), m_rhs->getMFEMLinearFormIntegrator());
-   }
-
-   mfem::LinearFormIntegrator*
-   LinearFormIntegratorSum::releaseMFEMLinearFormIntegrator()
-   {
-      assert(m_mfemLFI);
-      return m_mfemLFI.release();
-   }
-
-   mfem::LinearFormIntegrator&
-   LinearFormIntegratorSum::getMFEMLinearFormIntegrator()
-   {
-      assert(m_mfemLFI);
-      return *m_mfemLFI;
+      m_lfiDomainList.reserve(other.m_lfiDomainList.size());
+      for (const auto& p : other.m_lfiDomainList)
+         m_lfiDomainList.emplace_back(p->copy());
+      m_lfiBoundaryList.reserve(other.m_lfiBoundaryList.size());
+      for (const auto& p : other.m_lfiBoundaryList)
+         m_lfiBoundaryList.emplace_back(p->copy());
    }
 
    LinearFormIntegratorSum operator+(
@@ -62,10 +93,50 @@ namespace Rodin::Variational::FormLanguage
       return LinearFormIntegratorSum(lhs, rhs);
    }
 
+   LinearFormIntegratorSum operator+(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorBase& rhs)
+   {
+      return LinearFormIntegratorSum(lhs, rhs);
+   }
+
+   LinearFormIntegratorSum operator+(
+         const LinearFormIntegratorBase& lhs, const LinearFormIntegratorSum& rhs)
+   {
+      return LinearFormIntegratorSum(rhs, lhs);
+   }
+
+   LinearFormIntegratorSum operator+(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorSum& rhs)
+   {
+      return LinearFormIntegratorSum(lhs, rhs);
+   }
+
    LinearFormIntegratorSum operator-(
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs)
    {
-      return LinearFormIntegratorSum(lhs, LinearFormIntegratorUnaryMinus(rhs));
+      return LinearFormIntegratorSum(
+            lhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(rhs));
+   }
+
+   LinearFormIntegratorSum operator-(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorBase& rhs)
+   {
+      return LinearFormIntegratorSum(
+            lhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(rhs));
+   }
+
+   LinearFormIntegratorSum operator-(
+         const LinearFormIntegratorBase& lhs, const LinearFormIntegratorSum& rhs)
+   {
+      return LinearFormIntegratorSum(
+            rhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(lhs));
+   }
+
+   LinearFormIntegratorSum operator-(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorSum& rhs)
+   {
+      return LinearFormIntegratorSum(
+            lhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorSum>(rhs));
    }
 }
 

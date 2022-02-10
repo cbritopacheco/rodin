@@ -36,7 +36,6 @@ namespace Rodin::Variational
 
    class IncompleteGridFunction;
 
-
    enum IntegratorRegion
    {
       Domain,

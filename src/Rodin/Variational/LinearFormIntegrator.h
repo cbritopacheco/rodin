@@ -21,6 +21,8 @@ namespace Rodin::Variational
 
          virtual mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() = 0;
 
+         virtual IntegratorRegion getIntegratorRegion() const = 0;
+
          /**
           * @internal
           * @brief Releases ownership of the mfem::LinearFormIntegrator.
@@ -40,6 +42,11 @@ namespace Rodin::Variational
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Domain;
+         }
+
          virtual LinearFormDomainIntegrator& over(int attr) = 0;
 
          virtual LinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;
@@ -50,6 +57,11 @@ namespace Rodin::Variational
    class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
    {
       public:
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Boundary;
+         }
+
          virtual LinearFormBoundaryIntegrator& over(int attr) = 0;
 
          virtual LinearFormBoundaryIntegrator& over(const std::set<int>& attrs) = 0;

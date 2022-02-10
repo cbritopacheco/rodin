@@ -9,6 +9,9 @@
 
 #include "Rodin/Variational/LinearFormIntegrator.h"
 
+#include "ForwardDecls.h"
+#include "LinearFormIntegratorSum.h"
+
 namespace Rodin::Variational::FormLanguage
 {
    namespace Internal
@@ -37,7 +40,32 @@ namespace Rodin::Variational::FormLanguage
    /**
     * @internal
     */
-   class LinearFormIntegratorUnaryMinus : public LinearFormIntegratorBase
+   template <>
+   class LinearFormIntegratorUnaryMinus<LinearFormIntegratorSum>
+      : public LinearFormIntegratorSum
+   {
+      public:
+         LinearFormIntegratorUnaryMinus(const LinearFormIntegratorSum& lfi);
+
+         LinearFormIntegratorUnaryMinus(const LinearFormIntegratorUnaryMinus& other);
+
+         LinearFormIntegratorUnaryMinus(LinearFormIntegratorUnaryMinus&&) = default;
+
+         LinearFormIntegratorUnaryMinus* copy() const noexcept override
+         {
+            return new LinearFormIntegratorUnaryMinus(*this);
+         }
+
+      private:
+         std::unique_ptr<LinearFormIntegratorSum> m_lfi;
+   };
+
+   /**
+    * @internal
+    */
+   template <>
+   class LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
+      : public LinearFormIntegratorBase
    {
       public:
          LinearFormIntegratorUnaryMinus(const LinearFormIntegratorBase& lfi);
@@ -57,6 +85,11 @@ namespace Rodin::Variational::FormLanguage
             return getLFI().getAttributes();
          }
 
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return getLFI().getIntegratorRegion();
+         }
+
          void buildMFEMLinearFormIntegrator() override;
 
          mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
@@ -73,7 +106,11 @@ namespace Rodin::Variational::FormLanguage
          std::unique_ptr<Internal::LFIUnaryMinus> m_mfemLFI;
    };
 
-   LinearFormIntegratorUnaryMinus operator-(const LinearFormIntegratorBase& lfi);
+   LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
+   operator-(const LinearFormIntegratorBase& lfi);
+
+   LinearFormIntegratorUnaryMinus<LinearFormIntegratorSum>
+   operator-(const LinearFormIntegratorSum& lfi);
 }
 
 #endif

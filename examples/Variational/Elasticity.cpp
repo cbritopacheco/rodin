@@ -13,10 +13,10 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
-  const char* meshFile = "../resources/mfem/meshes/holes.mesh";
+  const char* meshFile = "../resources/mfem/meshes/elasticity-example.mesh";
 
   // Define boundary attributes
-  int Gamma0 = 1, GammaD = 2, GammaN = 3;
+  int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
 
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);

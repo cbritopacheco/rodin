@@ -16,68 +16,46 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   namespace Internal
-   {
-      class LinearFormIntegratorSum : public mfem::LinearFormIntegrator
-      {
-         public:
-            LinearFormIntegratorSum(
-                  mfem::LinearFormIntegrator& a, mfem::LinearFormIntegrator& b)
-               : m_a(a), m_b(b)
-            {}
-
-            void AssembleRHSElementVect(
-                  const mfem::FiniteElement& el,
-                  mfem::ElementTransformation& Tr,
-                  mfem::Vector& elvect)
-            {
-               m_a.AssembleRHSElementVect(el, Tr, elvect);
-               mfem::Vector tmp;
-               m_b.AssembleRHSElementVect(el, Tr, tmp);
-               elvect.Add(1.0, tmp);
-            }
-
-         private:
-            mfem::LinearFormIntegrator& m_a;
-            mfem::LinearFormIntegrator& m_b;
-      };
-   }
-
-   class LinearFormIntegratorSum : public LinearFormIntegratorBase
+   class LinearFormIntegratorSum : public FormLanguage::Base
    {
       public:
+         using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
+
          LinearFormIntegratorSum(
                const LinearFormIntegratorBase& lhs,
                const LinearFormIntegratorBase& rhs);
 
+         LinearFormIntegratorSum(
+               const LinearFormIntegratorSum& lhs,
+               const LinearFormIntegratorBase& rhs);
+
+         LinearFormIntegratorSum(
+               const LinearFormIntegratorSum& lhs,
+               const LinearFormIntegratorSum& rhs);
+
+         LinearFormIntegratorSum(LinearFormIntegratorSum&& other) = default;
+
          LinearFormIntegratorSum(const LinearFormIntegratorSum& other);
 
-         LinearFormIntegratorBase& getLHS();
-
-         const LinearFormIntegratorBase& getLHS() const
+         LFIList& getLinearFormDomainIntegratorList()
          {
-            assert(m_lhs);
-            return *m_lhs;
+            return m_lfiDomainList;
          }
 
-         LinearFormIntegratorBase& getRHS();
-
-         const LinearFormIntegratorBase& getRHS() const
+         LFIList& getLinearFormBoundaryIntegratorList()
          {
-            assert(m_rhs);
-            return *m_rhs;
+            return m_lfiBoundaryList;
          }
 
-         const std::set<int>& getAttributes() const override
+         const LFIList& getLinearFormDomainIntegratorList() const
          {
-            return getLHS().getAttributes();
+            return m_lfiDomainList;
          }
 
-         void buildMFEMLinearFormIntegrator() override;
-
-         mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
-
-         mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() override;
+         const LFIList& getLinearFormBoundaryIntegratorList() const
+         {
+            return m_lfiBoundaryList;
+         }
 
          LinearFormIntegratorSum* copy() const noexcept override
          {
@@ -85,16 +63,34 @@ namespace Rodin::Variational::FormLanguage
          }
 
       private:
-         std::unique_ptr<LinearFormIntegratorBase> m_lhs;
-         std::unique_ptr<LinearFormIntegratorBase> m_rhs;
-         std::unique_ptr<Internal::LinearFormIntegratorSum> m_mfemLFI;
+         std::vector<std::unique_ptr<LinearFormIntegratorBase>> m_lfiDomainList;
+         std::vector<std::unique_ptr<LinearFormIntegratorBase>> m_lfiBoundaryList;
    };
 
    LinearFormIntegratorSum operator+(
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs);
 
+   LinearFormIntegratorSum operator+(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorBase& rhs);
+
+   LinearFormIntegratorSum operator+(
+         const LinearFormIntegratorBase& lhs, const LinearFormIntegratorSum& rhs);
+
+   LinearFormIntegratorSum operator+(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorSum& rhs);
+
    LinearFormIntegratorSum operator-(
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs);
+
+   LinearFormIntegratorSum operator-(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorBase& rhs);
+
+   LinearFormIntegratorSum operator-(
+         const LinearFormIntegratorBase& lhs, const LinearFormIntegratorSum& rhs);
+
+   LinearFormIntegratorSum operator-(
+         const LinearFormIntegratorSum& lhs, const LinearFormIntegratorSum& rhs);
+
 }
 
 #endif

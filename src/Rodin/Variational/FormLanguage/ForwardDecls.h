@@ -21,6 +21,7 @@ namespace Rodin::Variational::FormLanguage
 
    class LinearFormIntegratorSum;
 
+   template <class T>
    class LinearFormIntegratorUnaryMinus;
 
    class ScalarSum;

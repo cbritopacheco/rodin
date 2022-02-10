@@ -59,16 +59,16 @@ namespace Rodin::Variational::FormLanguage
    };
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi);
+         const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormDomainIntegrator& lfi);
+         const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi);
+         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormBoundaryIntegrator& lfi);
+         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
 
    template <class T>
    ProblemBody operator+(

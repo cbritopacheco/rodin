@@ -12,6 +12,7 @@
 #include "ForwardDecls.h"
 #include "LinearFormIntegrator.h"
 #include "FormLanguage/ProblemBody.h"
+#include "FormLanguage/LinearFormIntegratorSum.h"
 
 namespace Rodin::Variational
 {
@@ -21,17 +22,11 @@ namespace Rodin::Variational
          virtual mfem::LinearForm& getHandle() = 0;
          virtual const mfem::LinearForm& getHandle() const = 0;
 
-         virtual LinearFormBase& from(
-               const LinearFormDomainIntegrator& lfi) = 0;
+         virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
+         virtual LinearFormBase& from(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
 
-         virtual LinearFormBase& add(
-               const LinearFormDomainIntegrator& lfi) = 0;
-
-         virtual LinearFormBase& from(
-               const LinearFormBoundaryIntegrator& lfi) = 0;
-
-         virtual LinearFormBase& add(
-               const LinearFormBoundaryIntegrator& lfi) = 0;
+         virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi) = 0;
+         virtual LinearFormBase& add(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
 
          virtual void assemble() = 0;
          virtual void update() = 0;
@@ -55,6 +50,8 @@ namespace Rodin::Variational
    class LinearForm : public LinearFormBase
    {
       public:
+         using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
+
          /**
           * @brief Constructs a linear form defined on some finite element
           * space
@@ -62,23 +59,8 @@ namespace Rodin::Variational
           */
          LinearForm(FiniteElementSpace<FEC>& fes);
 
-         template <class T>
-         std::enable_if_t<
-            std::is_base_of_v<LinearFormIntegratorBase, T>, LinearForm<FEC>&>
-         operator=(const T& lfi)
-         {
-            from(lfi).assemble();
-            return *this;
-         }
-
-         void update() override;
-         void assemble() override;
-
-         LinearForm<FEC>& add(const LinearFormDomainIntegrator& lfi) override;
-         LinearForm<FEC>& from(const LinearFormDomainIntegrator& lfi) override;
-
-         LinearForm<FEC>& add(const LinearFormBoundaryIntegrator& lfi) override;
-         LinearForm<FEC>& from(const LinearFormBoundaryIntegrator& lfi) override;
+         LinearForm<FEC>& operator=(const LinearFormIntegratorBase& lfi);
+         LinearForm<FEC>& operator=(const FormLanguage::LinearFormIntegratorSum& lsum);
 
          /**
           * @brief Evaluates the linear form at the function @f$ u @f$.
@@ -89,6 +71,16 @@ namespace Rodin::Variational
           * @returns The value which the linear form takes at @f$ u @f$.
           */
          double operator()(const GridFunction<FEC>& u) const;
+
+         void update() override;
+
+         void assemble() override;
+
+         LinearForm<FEC>& add(const LinearFormIntegratorBase& lfi) override;
+         LinearForm<FEC>& add(const FormLanguage::LinearFormIntegratorSum& lsum) override;
+
+         LinearForm<FEC>& from(const LinearFormIntegratorBase& lfi) override;
+         LinearForm<FEC>& from(const FormLanguage::LinearFormIntegratorSum& lsum) override;
 
          mfem::LinearForm& getHandle() override
          {
@@ -103,8 +95,8 @@ namespace Rodin::Variational
       private:
          FiniteElementSpace<FEC>& m_fes;
          std::unique_ptr<mfem::LinearForm> m_lf;
-         FormLanguage::ProblemBody::LFIList m_lfiDomainList;
-         FormLanguage::ProblemBody::LFIList m_lfiBoundaryList;
+         LFIList m_lfiDomainList;
+         LFIList m_lfiBoundaryList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_bdrAttrMarkers;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };

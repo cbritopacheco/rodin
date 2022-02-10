@@ -20,90 +20,137 @@ namespace Rodin::Variational
    {}
 
    template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::operator=(const LinearFormIntegratorBase& lfi)
+   {
+      from(lfi).assemble();
+      return *this;
+   }
+
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::operator=(
+         const FormLanguage::LinearFormIntegratorSum& lsum)
+   {
+      from(lsum).assemble();
+      return *this;
+   }
+
+   template <class FEC>
    double LinearForm<FEC>::operator()(const GridFunction<FEC>& u) const
    {
       return *m_lf * u.getHandle();
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormDomainIntegrator& lfi)
+   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormIntegratorBase& lfi)
    {
-      auto& l = m_lfiDomainList.emplace_back(lfi.copy());
-      const auto& domAttrs = lfi.getAttributes();
-
-      l->buildMFEMLinearFormIntegrator();
-      if (domAttrs.size() == 0)
+      switch (lfi.getIntegratorRegion())
       {
-         m_lf->AddDomainIntegrator(l->releaseMFEMLinearFormIntegrator());
-      }
-      else
-      {
-         int size = m_fes.getMesh().getHandle().attributes.Max();
-         auto data = std::make_unique<mfem::Array<int>>(size);
-         *data = 0;
-         for (const auto& b : domAttrs)
+         case IntegratorRegion::Domain:
          {
-            // All domain attributes are one-indexed.
-            assert(b - 1 < size);
-            (*data)[b - 1] = 1;
+            auto& l = m_lfiDomainList.emplace_back(lfi.copy());
+            const auto& domAttrs = lfi.getAttributes();
+
+            l->buildMFEMLinearFormIntegrator();
+            if (domAttrs.size() == 0)
+            {
+               m_lf->AddDomainIntegrator(l->releaseMFEMLinearFormIntegrator());
+            }
+            else
+            {
+               int size = m_fes.getMesh().getHandle().attributes.Max();
+               auto data = std::make_unique<mfem::Array<int>>(size);
+               *data = 0;
+               for (const auto& b : domAttrs)
+               {
+                  // All domain attributes are one-indexed.
+                  assert(b - 1 < size);
+                  (*data)[b - 1] = 1;
+               }
+               m_lf->AddDomainIntegrator(
+                     l->releaseMFEMLinearFormIntegrator(),
+                     *m_domAttrMarkers.emplace_back(std::move(data)));
+            }
+            break;
          }
-         m_lf->AddDomainIntegrator(
-               l->releaseMFEMLinearFormIntegrator(),
-               *m_domAttrMarkers.emplace_back(std::move(data)));
+         case IntegratorRegion::Boundary:
+         {
+            auto& l = m_lfiBoundaryList.emplace_back(lfi.copy());
+            const auto& bdrAttrs = lfi.getAttributes();
+
+            l->buildMFEMLinearFormIntegrator();
+            if (bdrAttrs.size() == 0)
+            {
+               m_lf->AddBoundaryIntegrator(l->releaseMFEMLinearFormIntegrator());
+            }
+            else
+            {
+               int size = m_fes.getMesh().getHandle().bdr_attributes.Max();
+               auto data = std::make_unique<mfem::Array<int>>(size);
+               *data = 0;
+               for (const auto& b : bdrAttrs)
+               {
+                  // All domain attributes are one-indexed.
+                  assert(b - 1 < size);
+                  (*data)[b - 1] = 1;
+               }
+               m_lf->AddBoundaryIntegrator(
+                     l->releaseMFEMLinearFormIntegrator(),
+                     *m_bdrAttrMarkers.emplace_back(std::move(data)));
+            }
+            break;
+         }
+         default:
+            Alert::Exception() << "IntegratorRegion not supported." << Alert::Raise;
       }
       return *this;
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormBoundaryIntegrator& lfi)
+   LinearForm<FEC>&
+   LinearForm<FEC>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
-      auto& l = m_lfiBoundaryList.emplace_back(lfi.copy());
-      const auto& bdrAttrs = lfi.getAttributes();
-
-      l->buildMFEMLinearFormIntegrator();
-      if (bdrAttrs.size() == 0)
-      {
-         m_lf->AddBoundaryIntegrator(l->releaseMFEMLinearFormIntegrator());
-      }
-      else
-      {
-         int size = m_fes.getMesh().getHandle().bdr_attributes.Max();
-         auto data = std::make_unique<mfem::Array<int>>(size);
-         *data = 0;
-         for (const auto& b : bdrAttrs)
-         {
-            // All domain attributes are one-indexed.
-            assert(b - 1 < size);
-            (*data)[b - 1] = 1;
-         }
-         m_lf->AddBoundaryIntegrator(
-               l->releaseMFEMLinearFormIntegrator(),
-               *m_bdrAttrMarkers.emplace_back(std::move(data)));
-      }
+      for (const auto& p : lsum.getLinearFormDomainIntegratorList())
+         add(*p);
+      for (const auto& p : lsum.getLinearFormBoundaryIntegratorList())
+         add(*p);
       return *this;
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormDomainIntegrator& lfi)
+   LinearForm<FEC>&
+   LinearForm<FEC>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
-      FormLanguage::ProblemBody::LFIList newList;
-      newList.emplace_back(lfi.copy());
-      m_lfiDomainList = std::move(newList);
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+      m_lfiDomainList.clear();
+      m_lfiBoundaryList.clear();
       m_domAttrMarkers.clear();
-      add(lfi);
+      m_bdrAttrMarkers.clear();
+      add(lsum);
       return *this;
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormBoundaryIntegrator& lfi)
+   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormIntegratorBase& lfi)
    {
-      FormLanguage::ProblemBody::LFIList newList;
-      newList.emplace_back(lfi.copy());
-      m_lfiBoundaryList = std::move(newList);
-      m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
-      m_bdrAttrMarkers.clear();
-      add(lfi);
+      switch (lfi.getIntegratorRegion())
+      {
+         case IntegratorRegion::Domain:
+         {
+            m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+            m_lfiDomainList.clear();
+            m_domAttrMarkers.clear();
+            add(lfi);
+            break;
+         }
+         case IntegratorRegion::Boundary:
+         {
+            m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+            m_lfiBoundaryList.clear();
+            m_bdrAttrMarkers.clear();
+            add(lfi);
+            break;
+         }
+      }
       return *this;
    }
 
