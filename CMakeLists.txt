@@ -92,15 +92,15 @@ if (RODIN_BUILD_SRC)
     set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
     # ---- Eigen ----
-    message(STATUS "Configuring Eigen...")
-    set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-    add_subdirectory(third-party/eigen)
-    unset(BUILD_TESTING)
+    # message(STATUS "Configuring Eigen...")
+    # set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+    # set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    # add_subdirectory(third-party/eigen)
+    # unset(BUILD_TESTING)
 
-    find_package (Eigen3 3.3 REQUIRED NO_MODULE
-      HINTS
-      "${PROJECT_SOURCE_DIR}/third-party/eigen")
+    # find_package (Eigen3 3.3 REQUIRED NO_MODULE
+    #   HINTS
+    #   "${PROJECT_SOURCE_DIR}/third-party/eigen")
 
     # ---- Magnum-Eigen integration ----
     message(STATUS "Configuring Magnum-Eigen integration...")

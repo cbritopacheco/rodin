@@ -16,9 +16,6 @@
 [submodule "third-party/magnum-integration"]
 	path = third-party/magnum-integration
 	url = https://github.com/mosra/magnum-integration
-[submodule "third-party/eigen"]
-	path = third-party/eigen
-	url = https://gitlab.com/libeigen/eigen.git
 [submodule "third-party/m.css"]
 	path = third-party/m.css
 	url = https://github.com/cbritopacheco/m.css
