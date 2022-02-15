@@ -1,5 +1,5 @@
-#ifndef RODIN_VARIATIONAL_DIVERGENCEINTEGRATOR_H
-#define RODIN_VARIATIONAL_DIVERGENCEINTEGRATOR_H
+#ifndef RODIN_VARIATIONAL_VECTORDOMAINLFDIVINTEGRATOR_H
+#define RODIN_VARIATIONAL_VECTORDOMAINLFDIVINTEGRATOR_H
 
 #include "ForwardDecls.h"
 
@@ -61,29 +61,25 @@ namespace Rodin::Variational
       };
    }
 
-   template <IntegratorRegion Region, IntegratorType Type>
-   class DivergenceIntegrator;
-
-   template <>
-   class DivergenceIntegrator<Domain, Linear>
+   class VectorDomainLFDivIntegrator
       : public LinearFormDomainIntegrator
    {
       public:
-         DivergenceIntegrator(const ScalarCoefficientBase& f);
+         VectorDomainLFDivIntegrator(const ScalarCoefficientBase& f);
 
-         DivergenceIntegrator(const DivergenceIntegrator& other);
+         VectorDomainLFDivIntegrator(const VectorDomainLFDivIntegrator& other);
 
          const std::set<int>& getAttributes() const override
          {
             return m_attr;
          }
 
-         DivergenceIntegrator& over(int attr) override
+         VectorDomainLFDivIntegrator& over(int attr) override
          {
             return over(std::set{attr});
          }
 
-         DivergenceIntegrator& over(const std::set<int>& attrs) override
+         VectorDomainLFDivIntegrator& over(const std::set<int>& attrs) override
          {
             m_attr = attrs;
             return *this;
@@ -94,9 +90,9 @@ namespace Rodin::Variational
          mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
          mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() override;
 
-         DivergenceIntegrator* copy() const noexcept override
+         VectorDomainLFDivIntegrator* copy() const noexcept override
          {
-            return new DivergenceIntegrator(*this);
+            return new VectorDomainLFDivIntegrator(*this);
          }
       private:
          std::set<int> m_attr;

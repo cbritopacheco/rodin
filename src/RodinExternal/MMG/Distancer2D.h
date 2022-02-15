@@ -91,25 +91,63 @@ namespace Rodin::External::MMG
       /**
        * @brief Specifies which material references are to be understood as
        * the interior domains.
+       * @param[in] refs Interior material references
+       * @returns Reference to self (for method chaining)
        *
        * By default, the interior elements are assumed to have the material
        * reference 3.
-       *
-       * @param[in] refs Interior material references
-       * @returns Reference to self (for method chaining)
        *
        * @see distance(Mesh2D&) const
        */
       Distancer2D& setInteriorDomains(const std::set<MaterialReference>& refs);
 
+      /**
+       * @brief Specifies the active borders of the mesh.
+       * @returns Reference to self (for method chaining)
+       *
+       * An active border (in 2D) is a subset of the bounding box boundary
+       * where the level set function will be equal to zero.
+       *
+       * This implicitly enables active border mode.
+       *
+       * By default, all the bounding box boundary is inactive.
+       *
+       * @see distance(Mesh2D&) const
+       */
       Distancer2D& setActiveBorders(const std::set<MaterialReference>& refs);
 
-      Distancer2D& enableActiveBorder(bool b = true);
+      /**
+       * @brief Specifies that the whole bounding box boundary will be active.
+       *
+       * @see distance(Mesh2D&) const
+       * @see setActiveBorders(const std::set<MaterialReference>&) const
+       */
+      Distancer2D& setActiveBorders();
 
+      /**
+       * @brief Specifies whether to enable the scaling of the contour mesh.
+       *
+       * Specifies whether the contour mesh should be scaled down so that the
+       * contour's bounding box is 95% of the enclosing bounding box.
+       *
+       * By default, it is enabled.
+       *
+       * @see distance(Mesh2D&, Mesh2D&)
+       */
       Distancer2D& enableScaling(bool b = true);
 
+      /**
+       * @brief Specifies how many CPUs to use when distancing in parallel.
+       * @param[in] ncpu Number of CPUs to use
+       *
+       * By default, it will utilize `std::thread::hardware_concurrency()`.
+       */
       Distancer2D& setCPUs(unsigned int ncpu);
 
+      /**
+       * @returns Number of CPUs which will be used when performing the
+       * distancing.
+       */
       unsigned int getCPUs() const;
 
     private:

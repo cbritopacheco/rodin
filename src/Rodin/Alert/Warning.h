@@ -28,14 +28,14 @@ namespace Rodin::Alert
 
          /**
           * @brief Constructs a Warning with the given message.
+          * @param[in] what Description or reason for the Warning being raised.
           */
          Warning(const std::string& what);
 
          /**
           * @brief Copies the Warning message.
-          * @param[in] what Description or reason for the Warning being raised.
           */
-         Warning(const Warning& other) = default;
+         Warning(const Warning&) = default;
 
          /**
           * @brief Raises the warning to the user.

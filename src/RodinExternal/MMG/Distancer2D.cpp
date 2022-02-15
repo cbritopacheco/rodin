@@ -26,6 +26,12 @@ namespace Rodin::External::MMG
     return *this;
   }
 
+  Distancer2D& Distancer2D::setActiveBorders()
+  {
+    m_activeBorder = true;
+    return *this;
+  }
+
   Distancer2D& Distancer2D::setActiveBorders(const std::set<MaterialReference>& refs)
   {
     assert(refs.size() > 0);
@@ -106,12 +112,6 @@ namespace Rodin::External::MMG
   Distancer2D& Distancer2D::setCPUs(unsigned int ncpu)
   {
     m_ncpu = ncpu;
-    return *this;
-  }
-
-  Distancer2D& Distancer2D::enableActiveBorder(bool b)
-  {
-    m_activeBorder = b;
     return *this;
   }
 

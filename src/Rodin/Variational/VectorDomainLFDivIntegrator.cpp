@@ -1,21 +1,21 @@
 #include "ScalarCoefficient.h"
 
-#include "DivergenceIntegrator.h"
+#include "VectorDomainLFDivIntegrator.h"
 
 namespace Rodin::Variational
 {
-   DivergenceIntegrator<Domain, Linear>
-   ::DivergenceIntegrator(const ScalarCoefficientBase& f)
+   VectorDomainLFDivIntegrator
+   ::VectorDomainLFDivIntegrator(const ScalarCoefficientBase& f)
       : m_f(f.copy())
    {}
 
-   DivergenceIntegrator<Domain, Linear>
-   ::DivergenceIntegrator(const DivergenceIntegrator& other)
+   VectorDomainLFDivIntegrator
+   ::VectorDomainLFDivIntegrator(const VectorDomainLFDivIntegrator& other)
       :  m_attr(other.m_attr),
          m_f(other.m_f->copy())
    {}
 
-   void DivergenceIntegrator<Domain, Linear>::buildMFEMLinearFormIntegrator()
+   void VectorDomainLFDivIntegrator::buildMFEMLinearFormIntegrator()
    {
       m_f->buildMFEMCoefficient();
       m_mfemLFI
@@ -24,14 +24,14 @@ namespace Rodin::Variational
    }
 
    mfem::LinearFormIntegrator&
-   DivergenceIntegrator<Domain, Linear>::getMFEMLinearFormIntegrator()
+   VectorDomainLFDivIntegrator::getMFEMLinearFormIntegrator()
    {
       assert(m_mfemLFI);
       return *m_mfemLFI;
    }
 
    mfem::LinearFormIntegrator*
-   DivergenceIntegrator<Domain, Linear>::releaseMFEMLinearFormIntegrator()
+   VectorDomainLFDivIntegrator::releaseMFEMLinearFormIntegrator()
    {
       return m_mfemLFI.release();
    }

@@ -82,7 +82,7 @@ int main(int, char**)
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
-            - DivergenceIntegrator<Domain, Linear>(Dot(Ae, e) - ell).over(Interior)
+            - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
             + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});

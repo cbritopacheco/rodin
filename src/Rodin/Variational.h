@@ -38,7 +38,7 @@
 #include "Variational/VectorCoefficient.h"
 #include "Variational/MatrixCoefficient.h"
 
-#include "Variational/DivergenceIntegrator.h"
+#include "Variational/VectorDomainLFDivIntegrator.h"
 
 // ---- Bilinear form integrators --------------------------------------------
 #include "Variational/MassIntegrator.h"

@@ -15,12 +15,24 @@ namespace Rodin::Variational
       public:
          virtual ~BilinearFormIntegratorBase() = default;
 
+         /**
+          * @brief Gets the attributes of the elements being integrated.
+          */
          virtual const std::set<int>& getAttributes() const = 0;
 
+         /**
+          * @internal
+          */
          virtual void buildMFEMBilinearFormIntegrator() = 0;
 
+         /**
+          * @internal
+          */
          virtual mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() = 0;
 
+         /**
+          * @brief Gets the integration region.
+          */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
          /**
@@ -47,8 +59,22 @@ namespace Rodin::Variational
             return IntegratorRegion::Domain;
          }
 
+         /**
+          * @brief Specifies the material reference over which to integrate.
+          * @returns Reference to self (for method chaining)
+          *
+          * Specifies the material reference over which the integration should
+          * take place.
+          */
          virtual BilinearFormDomainIntegrator& over(int attr) = 0;
 
+         /**
+          * @brief Specifies the material references over which to integrate.
+          * @returns Reference to self (for method chaining)
+          *
+          * Specifies the material references over which the integration should
+          * take place.
+          */
          virtual BilinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;
 
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;

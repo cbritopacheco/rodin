@@ -36,7 +36,7 @@ namespace Rodin::Alert
          /**
           * @brief Copies the Exception message.
           */
-         Exception(const Exception& other) = default;
+         Exception(const Exception&) = default;
 
          /**
           * @brief Raises the exception to the user.

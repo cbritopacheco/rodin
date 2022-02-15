@@ -3,9 +3,15 @@
 
 namespace Rodin::Variational::FormLanguage
 {
+   /**
+    * @brief Base class for all classes which are part of Variational::FormLanguage.
+    */
    class Base
    {
       public:
+         /**
+          * @brief Virtual destructor.
+          */
          virtual ~Base() = default;
 
          /**

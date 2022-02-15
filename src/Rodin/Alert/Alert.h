@@ -43,7 +43,7 @@ namespace Rodin::Alert
     *    - Any combination of the above.
     *
     * Every Alert has a message containing its description or reason for being
-    * raised, which may be obtained by the @ref what()const method.
+    * raised, which may be obtained by the @ref what() method.
     * Furthermore, an Alert may be raised via its @ref raise() method.
     */
    class Alert
@@ -62,6 +62,7 @@ namespace Rodin::Alert
 
          /**
           * @brief Performs a copy of the Alert's message.
+          * @param[in] other Object to copy.
           */
          Alert(const Alert& other);
 
