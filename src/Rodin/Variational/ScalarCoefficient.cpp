@@ -10,12 +10,12 @@
 
 namespace Rodin::Variational
 {
-   Restriction<ScalarCoefficientBase> ScalarCoefficientBase::restrictedTo(int attr)
+   Restriction<ScalarCoefficientBase> ScalarCoefficientBase::restrictTo(int attr)
    {
-      return restrictedTo(std::set<int>{attr});
+      return restrictTo(std::set<int>{attr});
    }
 
-   Restriction<ScalarCoefficientBase> ScalarCoefficientBase::restrictedTo(
+   Restriction<ScalarCoefficientBase> ScalarCoefficientBase::restrictTo(
          const std::set<int>& attrs)
    {
       return Restriction<ScalarCoefficientBase>(*this).to(attrs);

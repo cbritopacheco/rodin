@@ -49,9 +49,9 @@ namespace Rodin::Variational
           */
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
 
-         virtual Restriction<ScalarCoefficientBase> restrictedTo(int attr);
+         virtual Restriction<ScalarCoefficientBase> restrictTo(int attr);
 
-         virtual Restriction<ScalarCoefficientBase> restrictedTo(
+         virtual Restriction<ScalarCoefficientBase> restrictTo(
                const std::set<int>& attrs);
    };
 

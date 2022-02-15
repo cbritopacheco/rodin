@@ -47,7 +47,7 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 150;
+  size_t maxIt = 200;
   double eps = 1e-12;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
@@ -77,7 +77,7 @@ int main(int, char**)
 
     H1 Ph(Omega);
     GridFunction w(Ph);
-    w = (Dot(Ae, e) - ell).restrictedTo(Interior);
+    w = (Dot(Ae, e) - ell).restrictTo(Interior);
 
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)

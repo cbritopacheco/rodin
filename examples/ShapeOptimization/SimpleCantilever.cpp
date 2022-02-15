@@ -31,7 +31,7 @@ int main(int, char**)
 
   // Conjugate Gradient solver
   auto cg = Solver::CG().setMaxIterations(500)
-                        .setRelativeTolerance(1e-12);
+                        .setRelativeTolerance(1e-6);
 
   // Optimization parameters
   size_t maxIt = 30;
@@ -70,9 +70,6 @@ int main(int, char**)
     auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
     auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
 
-    H1 Ph(Omega);
-    GridFunction strain(Ph);
-    strain = Dot(Ae, e);
     Problem hilbert(theta);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
@@ -108,6 +105,7 @@ int main(int, char**)
       Omega = Cast(mmgMesh).to<Mesh>();
     }
 
+    // Save mesh
     Omega.save("Omega.mesh");
   }
 
