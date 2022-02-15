@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Core::Geometry namespace | Rodin</title>
+  <title>Rodin::Alert::Exception class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,34 +50,84 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_core.html">Core</a>::<wbr/></span>Geometry <span class="m-thin">namespace</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Exception <span class="m-thin">class</span>
         </h1>
+        <p>Derived <a href="class_rodin_1_1_alert_1_1_alert.html" class="m-doc">Alert</a> class representing an exception.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_core_1_1_geometry.html" class="m-doc">Rodin::<wbr />Core::<wbr />Geometry</a> module contains various classes to help when dealing with geometric objects such as points, lines, circles, etc. The main goal is to facilitate the computation of distances, intersections and line segments connecting all these objects. Every geometric object is derived from the <a href="class_rodin_1_1_core_1_1_geometry_1_1_geometry.html" class="m-doc">Rodin::<wbr />Core::<wbr />Geometry::<wbr />Geometry</a> class.</p>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+<p>Represents an alert which, when raised, will terminate the program after outputting a message with the reason why.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_core_1_1_geometry_1_1_circle.html" class="m-doc">Circle</a>
+              class <a href="class_rodin_1_1_alert_1_1_alert.html" class="m-doc">Alert</a>
             </dt>
-            <dd></dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_core_1_1_geometry_1_1_line2_d.html" class="m-doc">Line2D</a>
-            </dt>
-            <dd></dd>
+            <dd>Base class for objects which represents alerts.</dd>
           </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a2d9ec3e6a20d5535bd549fb065bbb497">
+              <span class="m-doc-wrap-bumper"><a href="#a2d9ec3e6a20d5535bd549fb065bbb497" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with an empty message.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae835ca52798f53003b5589bd0f19a409" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">const std::string&amp; what)</span>
+            </dt>
+            <dd>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with the given message.</dd>
+            <dt id="af48f2cb1aebc48cff2f83494d71f0b38">
+              <span class="m-doc-wrap-bumper"><a href="#af48f2cb1aebc48cff2f83494d71f0b38" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copies the <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> message.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a45bcbd1002c732d881c60eedc725ecb4" class="m-doc">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Raises the exception to the user.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae835ca52798f53003b5589bd0f19a409"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae835ca52798f53003b5589bd0f19a409" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">const std::string&amp; what)</span></span>
+            </h3>
+            <p>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with the given message.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">what&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Description or reason for the <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> being raised.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a45bcbd1002c732d881c60eedc725ecb4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45bcbd1002c732d881c60eedc725ecb4" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Raises the exception to the user.</p>
+<p>Default behaviour is to output a formatted error message and call std::abort.</p>
+          </div></section>
         </section>
       </div>
     </div>

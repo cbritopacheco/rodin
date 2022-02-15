@@ -82,6 +82,14 @@
               <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Constructs an empty mesh with no elements.</dd>
+            <dt id="ae742cf54ce51fc6aaaa0fc6fbd16a638">
+              <span class="m-doc-wrap-bumper"><a href="#ae742cf54ce51fc6aaaa0fc6fbd16a638" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructs the mesh from another mesh.</dd>
+            <dt id="a41e370009465e8495509f5063ff4b656">
+              <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other)</span>
+            </dt>
+            <dd>Performs a deep copy of another mesh.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -91,6 +99,10 @@
               <span class="m-doc-wrap-bumper">void <a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span>
             </dt>
             <dd>Saves the mesh to file.</dd>
+            <dt id="ac3462215a38fbd687febccc809ef1776">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac3462215a38fbd687febccc809ef1776" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assigns the mesh from another mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>

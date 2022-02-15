@@ -256,6 +256,26 @@ $ \phi : D \rightarrow \mathbb{R} $
               <span class="m-doc-wrap-bumper">auto <a href="#a64d0f8c04858f6de7b67a6e8a9936219" class="m-doc">setInteriorDomains</a>(</span><span class="m-doc-wrap">const std::set&lt;<a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a077152ee876d6e213437cf61fba97e90" class="m-doc">MaterialReference</a>&gt;&amp; refs) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp;</span>
             </dt>
             <dd>Specifies which material references are to be understood as the interior domains.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac46fcca38d689066f508b63281e9ea94" class="m-doc">setActiveBorders</a>(</span><span class="m-doc-wrap">const std::set&lt;<a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a077152ee876d6e213437cf61fba97e90" class="m-doc">MaterialReference</a>&gt;&amp; refs) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp;</span>
+            </dt>
+            <dd>Specifies the active borders of the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a79c813a2adc1c42dd2e45d7e92fa6e65" class="m-doc">setActiveBorders</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp;</span>
+            </dt>
+            <dd>Specifies that the whole bounding box boundary will be active.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8e82edf16b483f898b46ff108aebcd9" class="m-doc">enableScaling</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp;</span>
+            </dt>
+            <dd>Specifies whether to enable the scaling of the contour mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35d9def578468fcc633476435baaef8e" class="m-doc">setCPUs</a>(</span><span class="m-doc-wrap">unsigned int ncpu) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp;</span>
+            </dt>
+            <dd>Specifies how many CPUs to use when distancing in parallel.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af8a03320301cb6f947032fdd6b4f631f" class="m-doc">getCPUs</a>(</span><span class="m-doc-wrap">) const -&gt; unsigned int</span>
+            </dt>
+            <dd></dd>
           </dl>
         </section>
         <section>
@@ -536,6 +556,66 @@ $ \Omega \subset D $
               </tfoot>
             </table>
 <p>By default, the interior elements are assumed to have the material reference 3.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html#a1efa6de221a17f87063a092b6efb03a3" class="m-doc">distance(Mesh2D&amp;) const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac46fcca38d689066f508b63281e9ea94"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac46fcca38d689066f508b63281e9ea94" class="m-doc-self">setActiveBorders</a>(</span><span class="m-doc-wrap">const std::set&lt;<a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a077152ee876d6e213437cf61fba97e90" class="m-doc">MaterialReference</a>&gt;&amp; refs)</span></span>
+            </h3>
+            <p>Specifies the active borders of the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>An active border (in 2D) is a subset of the bounding box boundary where the level set function will be equal to zero.</p><p>This implicitly enables active border mode.</p><p>By default, all the bounding box boundary is inactive.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html#a1efa6de221a17f87063a092b6efb03a3" class="m-doc">distance(Mesh2D&amp;) const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a79c813a2adc1c42dd2e45d7e92fa6e65"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79c813a2adc1c42dd2e45d7e92fa6e65" class="m-doc-self">setActiveBorders</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Specifies that the whole bounding box boundary will be active.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html#a1efa6de221a17f87063a092b6efb03a3" class="m-doc">distance(Mesh2D&amp;) const</a></p><p>setActiveBorders(const std::set&lt;MaterialReference&gt;&amp;) const</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac8e82edf16b483f898b46ff108aebcd9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8e82edf16b483f898b46ff108aebcd9" class="m-doc-self">enableScaling</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
+            </h3>
+            <p>Specifies whether to enable the scaling of the contour mesh.</p>
+<p>Specifies whether the contour mesh should be scaled down so that the contour&#x27;s bounding box is 95% of the enclosing bounding box.</p><p>By default, it is enabled.</p><aside class="m-note m-default"><h4>See also</h4><p>distance(Mesh2D&amp;, Mesh2D&amp;)</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a35d9def578468fcc633476435baaef8e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer2_d.html" class="m-doc">Distancer2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35d9def578468fcc633476435baaef8e" class="m-doc-self">setCPUs</a>(</span><span class="m-doc-wrap">unsigned int ncpu)</span></span>
+            </h3>
+            <p>Specifies how many CPUs to use when distancing in parallel.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ncpu&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of CPUs to use</td>
+                </tr>
+              </tbody>
+            </table>
+<p>By default, it will utilize <code>std::thread::hardware_concurrency()</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="af8a03320301cb6f947032fdd6b4f631f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">unsigned int Rodin::<wbr />External::<wbr />MMG::<wbr />Distancer2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8a03320301cb6f947032fdd6b4f631f" class="m-doc-self">getCPUs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of CPUs which will be used when performing the distancing.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

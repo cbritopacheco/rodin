@@ -59,6 +59,8 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -66,7 +68,27 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> class is used to manipulate the mesh of</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;int Dimension&gt;</div>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh&lt;2&gt;</a>
+            </dt>
+            <dd>Base class for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> mesh objects.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a2228f5f8d54732b2077779d47c6f5ffb">
+              <span class="m-doc-wrap-bumper">enum <a href="#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc-self">Entity</a> { </span><span class="m-doc-wrap"><a href="#a2228f5f8d54732b2077779d47c6f5ffbad013c4439c3e09308d6b2eef2a4025ae" class="m-doc">Vertex</a> = MMG5_Vertex,
+              <a href="#a2228f5f8d54732b2077779d47c6f5ffba7f0bc3a17ff45e6a7c3fe52b35db1888" class="m-doc">Edge</a> = MMG5_Edg,
+              <a href="#a2228f5f8d54732b2077779d47c6f5ffba773e9be14af3bc697c412f3e6c5c509e" class="m-doc">Triangle</a> = MMG5_Triangle }</span>
+            </dt>
+            <dd>Enumeration describing possible mesh entities.</dd>
+          </dl>
+        </section>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -104,6 +126,10 @@
               <span class="m-doc-wrap-bumper">void <a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span>
             </dt>
             <dd>Writes the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object to file using the <code>medit2</code> file format.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acbfd936573c7fe635bda23727298849c" class="m-doc">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh2D::<wbr />Entity</a> e) const -&gt; int</span>
+            </dt>
+            <dd>Gets a count of the specified entities in the mesh.</dd>
           </dl>
         </section>
         <section>
@@ -146,6 +172,29 @@
                   <td>Name of file where the mesh will be written to.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acbfd936573c7fe635bda23727298849c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbfd936573c7fe635bda23727298849c" class="m-doc-self">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh2D::<wbr />Entity</a> e) const</span></span>
+            </h3>
+            <p>Gets a count of the specified entities in the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">e&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Type of entity to count.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of entities of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh2D::<wbr />Entity</a>.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>

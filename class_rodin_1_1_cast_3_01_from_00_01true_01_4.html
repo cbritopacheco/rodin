@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::BoundaryConditionBase class | Rodin</title>
+  <title>Rodin::Cast&lt;From, true&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,71 +50,140 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BoundaryConditionBase <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class From&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast&lt;From, true&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Abstract class for objects representing a boundary condition.</p>
+        <p>Specialization representing an immutable cast.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">From</td>
+              <td>Type to be converted/cast</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+<p>An immutable cast is that which is not allowed to mutate the underlying casted object. This class should be initialized with l-values of type From.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
+              <span class="m-doc-wrap-bumper"><a href="#a7dca7c80022d88c19d318b25b650a064" class="m-doc">Cast</a>(</span><span class="m-doc-wrap">From&amp;&amp; from)</span>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of <a href="namespace_rodin_1_1_variational_1_1_form_language.html" class="m-doc">Variational::<wbr />FormLanguage</a>.</dd>
+            <dd>Constructs a <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> instance with the object to be casted.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a266c73c9d392bb17f8ad0d75f54e2d2c" class="m-doc">getBoundaryAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3720a98ad3db7cc5505ab9cfbd983e44" class="m-doc">from</a>(</span><span class="m-doc-wrap">) const -&gt; const From&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Gets the constant reference to the object which will be casted.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af2c67bb3e9e2dfb8036f9ced076d4a30" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5e370fcc501d033333124ca499976ae5" class="m-doc">from</a>(</span><span class="m-doc-wrap">) -&gt; From&amp;</span>
             </dt>
-            <dd></dd>
-            <dt id="a29722137b5d70f5a39854e098f091d1d">
-              <span class="m-doc-wrap-bumper">void <a href="#a29722137b5d70f5a39854e098f091d1d" class="m-doc-self">imposeOn</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; pb) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dd>Gets the reference to the object which will be casted.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class To&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c753bda243542d603cf8deff3121579" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; To</span>
             </dt>
-            <dd>Imposes the boundary condition on the given <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance.</dd>
+            <dd>Perform cast to type To.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a266c73c9d392bb17f8ad0d75f54e2d2c"><div>
+          <section class="m-doc-details" id="a7dca7c80022d88c19d318b25b650a064"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />BoundaryConditionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a266c73c9d392bb17f8ad0d75f54e2d2c" class="m-doc-self">getBoundaryAttribute</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Cast&lt;From, true&gt;&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7dca7c80022d88c19d318b25b650a064" class="m-doc-self">Cast</a>(</span><span class="m-doc-wrap">From&amp;&amp; from)</span></span>
             </h3>
+            <p>Constructs a <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> instance with the object to be casted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">from&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Object to be casted.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3720a98ad3db7cc5505ab9cfbd983e44"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const From&amp; Rodin::<wbr />Cast&lt;From, true&gt;&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3720a98ad3db7cc5505ab9cfbd983e44" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the constant reference to the object which will be casted.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Boundary attribute where the boundary condition is imposed.</td>
+                  <td>Constant reference to the object which will be casted.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="af2c67bb3e9e2dfb8036f9ced076d4a30"><div>
+          <section class="m-doc-details" id="a5e370fcc501d033333124ca499976ae5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BoundaryConditionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2c67bb3e9e2dfb8036f9ced076d4a30" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">From&amp; Rodin::<wbr />Cast&lt;From, true&gt;&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e370fcc501d033333124ca499976ae5" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
+            <p>Gets the reference to the object which will be casted.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Returns reference to the value of the boundary condition at the boundary</td>
+                  <td>Reference to the object which will be casted.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3c753bda243542d603cf8deff3121579"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+                template&lt;class To&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">To Rodin::<wbr />Cast&lt;From, true&gt;&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c753bda243542d603cf8deff3121579" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Perform cast to type To.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">To</td>
+                  <td>Target type, to which the object will be casted.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of type To.</td>
                 </tr>
               </tfoot>
             </table>
