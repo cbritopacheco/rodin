@@ -7,31 +7,44 @@
 #ifndef RODIN_ALERT_EXCEPTION_H
 #define RODIN_ALERT_EXCEPTION_H
 
+#include <exception>
+
 #include "Alert.h"
 
 namespace Rodin::Alert
 {
+   /**
+    * @brief Derived Alert class representing an exception.
+    *
+    * Represents an alert which, when raised, will terminate the program after
+    * outputting a message with the reason why.
+    */
    class Exception : public Alert
    {
       public:
+         /**
+          * @brief Constructs an Exception with an empty message.
+          */
          Exception() = default;
 
-         Exception(const Exception& other) = default;
-
+         /**
+          * @brief Constructs an Exception with the given message.
+          * @param[in] what Description or reason for the Exception being raised.
+          */
          Exception(const std::string& what);
 
-         virtual void raise() override;
+         /**
+          * @brief Copies the Exception message.
+          */
+         Exception(const Exception& other) = default;
 
-         void operator<<(const RaiseT&)
-         {
-            this->raise();
-         }
-
-         template <class T>
-         Exception& operator<<(T&& v)
-         {
-            return static_cast<Exception&>(Alert::operator<<(std::forward<T>(v)));
-         }
+         /**
+          * @brief Raises the exception to the user.
+          *
+          * Default behaviour is to output a formatted error message and call
+          * std::abort.
+          */
+         virtual void raise() const noexcept override;
    };
 }
 

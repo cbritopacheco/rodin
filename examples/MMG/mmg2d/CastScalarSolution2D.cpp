@@ -12,10 +12,10 @@ int main(int argc, char** argv)
 {
   if (argc != 3)
   {
-    auto ex = Rodin::Alert::Exception()
+    Alert::Exception()
       << "Bad parameters.\nUsage:\n\t"
-      << argv[0] << " <filename>.mesh" << " <filename>.sol";
-    ex.raise();
+      << argv[0] << " <filename>.mesh" << " <filename>.sol"
+      << Alert::Raise;
   }
 
   // Load MMG mesh and solution

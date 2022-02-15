@@ -33,8 +33,8 @@ namespace Rodin::External::MMG
    */
   struct Split
   {
-    MaterialReference interior, /// Reference for the interior domain
-                      exterior; /// Reference for exterior domain
+    MaterialReference     interior; /// Reference for the interior domain
+     MaterialReference    exterior; /// Reference for exterior domain
   };
 
   /**

@@ -17,7 +17,7 @@ namespace Rodin::Alert
       : Alert(what)
    {}
 
-   void Warning::raise()
+   void Warning::raise() const noexcept
    {
 #if RODIN_SILENCE_WARNINGS
 #else

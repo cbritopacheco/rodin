@@ -16,12 +16,12 @@ namespace Rodin::Alert
       : Alert(what)
    {}
 
-   void Exception::raise()
+   void Exception::raise() const noexcept
    {
       std::cerr << rang::fg::red
                 << "Error: "
                 << rang::fg::reset
-                << what()
+                << Alert::what()
                 << std::endl;
       std::abort();
    }

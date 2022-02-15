@@ -20,7 +20,7 @@ namespace Rodin::Alert
       m_what << other.m_what.rdbuf();
    }
 
-   std::string Alert::what() const
+   std::string Alert::what() const noexcept
    {
       return m_what.str();
    }
