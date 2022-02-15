@@ -2,6 +2,8 @@
   @page examples-variational-poisson Solving the Poisson equation
   @brief Resolution of the Poisson equation using Rodin
 
+  @image html Poisson.png width=410px
+
   @m_keywords{Poisson}
 
   @tableofcontents

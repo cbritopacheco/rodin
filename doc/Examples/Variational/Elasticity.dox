@@ -2,6 +2,8 @@
   @page examples-variational-elasticity Solving the elasticity equation
   @brief Showcases the resolution of the elasticity system
 
+  @image html Elasticity.png width=410px
+
   @m_keywords{Elasticity}
 
   @tableofcontents
