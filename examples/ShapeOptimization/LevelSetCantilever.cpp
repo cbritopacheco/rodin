@@ -88,11 +88,6 @@ int main(int, char**)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
-    // Save mesh
-    u.save("u.gf");
-    theta.save("theta.gf");
-    Omega.save("Omega.mesh");
-
     // Update objective
     obj.push_back(
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
@@ -129,7 +124,7 @@ int main(int, char**)
     Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
     // Save mesh
-    // Omega.save("Omega.mesh");
+    Omega.save("Omega.mesh");
 
     // Test for convergence
     if ((obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps))
