@@ -1,5 +1,4 @@
 set(RodinVariational_HEADERS
-  Advect.h
   BilinearForm.h
   BilinearFormIntegrator.h
   BoundaryCondition.h
@@ -38,7 +37,6 @@ set(RodinVariational_HEADERS
   )
 
 set(RodinVariational_SRCS
-  Advect.cpp
   DiffusionIntegrator.cpp
   DirichletBC.cpp
   DivergenceIntegrator.cpp
