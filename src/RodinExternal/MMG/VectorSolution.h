@@ -22,7 +22,7 @@ namespace Rodin::External::MMG
     * @tparam Dimension Mesh dimension
     */
    template <int Dimension>
-   class VectorSolution : public Solution<Dimension, double>
+   class VectorSolution : public Solution<Dimension>
    {};
 }
 

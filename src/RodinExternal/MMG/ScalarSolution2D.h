@@ -34,6 +34,9 @@ namespace Rodin::External::MMG
    class ScalarSolution2D :  public ScalarSolution<2>
    {
       public:
+         /**
+          * @internal
+          */
          class Iterator
          {
             public:
@@ -55,6 +58,9 @@ namespace Rodin::External::MMG
                  pointer m_ptr;
          };
 
+         /**
+          * @internal
+          */
          class ConstIterator
          {
             public:
@@ -168,10 +174,24 @@ namespace Rodin::External::MMG
           */
          Mesh2D& getMesh();
 
+         /**
+          * @returns Iterator to the beginning.
+          */
          Iterator begin();
+
+         /**
+          * @returns Iterator to the end.
+          */
          Iterator end();
 
+         /**
+          * @returns ConstIterator to the beginning.
+          */
          ConstIterator begin() const;
+
+         /**
+          * @returns ConstIterator to the end.
+          */
          ConstIterator end() const;
 
          virtual MMG5_pSol& getHandle() override;
@@ -231,7 +251,16 @@ namespace Rodin::External::MMG
           */
          ScalarSolution2D setMesh(Mesh2D& mesh);
 
+         /**
+          * @internal
+          * @returns Reference to underlying solution handle.
+          */
          MMG5_pSol& getHandle();
+
+         /**
+          * @internal
+          * @returns Constant reference to underlying solution handle.
+          */
          const MMG5_pSol& getHandle() const;
 
       private:

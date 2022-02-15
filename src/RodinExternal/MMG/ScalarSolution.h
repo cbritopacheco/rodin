@@ -22,7 +22,7 @@ namespace Rodin::External::MMG
     * @tparam Dimension Dimension of the solution support
     */
    template <int Dimension>
-   class ScalarSolution : public Solution<Dimension, double>
+   class ScalarSolution : public Solution<Dimension>
    {};
 }
 

@@ -22,11 +22,6 @@ namespace Rodin
 {
    /**
     * @brief Specialization for converting from External::MMG::Mesh2D to Rodin::Mesh.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
     */
    template <>
    template <>
@@ -36,11 +31,6 @@ namespace Rodin
    /**
     * @brief Specialization for converting from Rodin::Mesh to
     * External::MMG:Mesh2D.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
     */
    template <>
    template <>
@@ -50,11 +40,6 @@ namespace Rodin
    /**
     * @brief Specialization for converting from External::MMG::ScalarSolution2D to
     * Rodin::Variational::GridFunction.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
     */
    template <>
    template <>
@@ -65,11 +50,6 @@ namespace Rodin
    /**
     * @brief Specialization for converting from External::MMG::ScalarSolution2D to
     * Rodin::Variational::GridFunction.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
     */
    template <>
    template <>
@@ -81,11 +61,6 @@ namespace Rodin
     * @brief Specialization for converting from
     * Rodin::Variational::GridFunction<H1> to
     * External::MMG::IncompleteScalarSolution2D.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
     */
    template <>
    template <>
@@ -97,11 +72,6 @@ namespace Rodin
     * @brief Specialization for converting from
     * Rodin::Variational::IncompleteGridFunction to
     * External::MMG::IncompleteScalarSolution2D.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
     */
    template <>
    template <>

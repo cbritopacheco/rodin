@@ -42,10 +42,19 @@ namespace Rodin
           */
          Mesh() = default;
 
+         /**
+          * @brief Move constructs the mesh from another mesh.
+          */
          Mesh(Mesh&& other) = default;
 
+         /**
+          * @brief Performs a deep copy of another mesh.
+          */
          Mesh(const Mesh& other);
 
+         /**
+          * @brief Move assigns the mesh from another mesh.
+          */
          Mesh& operator=(Mesh&& other) = default;
 
          /**
@@ -108,19 +117,24 @@ namespace Rodin
 
          /**
           * @internal
+          * @brief Gets the underlying handle for the internal mesh.
+          * @returns Reference to the underlying mfem::Mesh.
           */
          mfem::Mesh& getHandle();
 
          /**
           * @internal
+          * @brief Gets the underlying handle for the internal mesh.
+          * @returns Constant reference to the underlying mfem::Mesh.
           */
          const mfem::Mesh& getHandle() const;
 
          /**
           * @internal
+          * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
           */
          explicit
-         Mesh(const mfem::Mesh& mesh);
+         Mesh(mfem::Mesh&& mesh);
 
       private:
          mfem::Mesh m_mesh;

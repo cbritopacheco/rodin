@@ -21,8 +21,8 @@ namespace Rodin
       getHandle().Save(filename.c_str());
    }
 
-   Mesh::Mesh(const mfem::Mesh& mesh)
-      : m_mesh(mesh)
+   Mesh::Mesh(mfem::Mesh&& mesh)
+      : m_mesh(std::move(mesh))
    {}
 
    Mesh::Mesh(const Mesh& other)

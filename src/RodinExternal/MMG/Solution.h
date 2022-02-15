@@ -14,16 +14,14 @@
 
 namespace Rodin::External::MMG
 {
-   class BaseSolution
-   {
-      public:
-         virtual ~BaseSolution() = default;
-         virtual MMG5_pSol& getHandle() = 0;
-         virtual const MMG5_pSol& getHandle() const = 0;
-   };
-
-   template <int Dimension, class T>
-   class Solution : public BaseSolution
+   /**
+    * @brief Base class for MMG solution objects.
+    * @tparam Dimension Mesh dimension
+    *
+    * This class wraps the functionality of the type MMG5_Sol.
+    */
+   template <int Dimension>
+   class Solution
    {
       public:
          virtual ~Solution() = default;

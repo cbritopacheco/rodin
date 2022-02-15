@@ -43,7 +43,7 @@ namespace Rodin::External::MMG
 
   void MeshAdaptor2D::adapt(Mesh2D& mesh) const
   {
-    if (mesh.count<Mesh2D::Vertex>() == 0)
+    if (mesh.count(Mesh2D::Entity::Vertex) == 0)
     {
        Alert::Exception("Mesh vertex count is zero. Nothing to optimize.").raise();
     }

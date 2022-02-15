@@ -18,33 +18,20 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @internal
+   * @brief Represents a process of the ISCD Toolbox.
+   *
+   * This class provides utilities to deal with ISCD processes, such as getting
+   * temporary filenames, running commands, passing command line arguments,
+   * etc.
+   */
   class ISCDProcess
   {
     public:
       template <class ... Ts>
       class ParameterPack
       {
-        template<std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if<I == sizeof...(Tp), void>::type
-        concatTuple(const std::tuple<Tp...>&)
-        {}
-
-        template<std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if<I < sizeof...(Tp), void>::type
-        concatTuple(const std::tuple<Tp...>& t)
-        {
-          if constexpr (
-              std::is_convertible_v<decltype(std::get<I>(t)), std::string>)
-          {
-            m_str += " " + static_cast<std::string>(std::get<I>(t));
-          }
-          else
-          {
-            m_str += " " + std::to_string(std::get<I>(t));
-          }
-          concatTuple<I + 1, Tp...>(t);
-        }
-
         public:
           ParameterPack(Ts... ts)
             : m_str("")
@@ -58,6 +45,27 @@ namespace Rodin::External::MMG
           }
 
         private:
+          template<std::size_t I = 0, typename... Tp>
+          inline typename std::enable_if<I == sizeof...(Tp), void>::type
+          concatTuple(const std::tuple<Tp...>&)
+          {}
+
+          template<std::size_t I = 0, typename... Tp>
+          inline typename std::enable_if<I < sizeof...(Tp), void>::type
+          concatTuple(const std::tuple<Tp...>& t)
+          {
+            if constexpr (
+                std::is_convertible_v<decltype(std::get<I>(t)), std::string>)
+            {
+              m_str += " " + static_cast<std::string>(std::get<I>(t));
+            }
+            else
+            {
+              m_str += " " + std::to_string(std::get<I>(t));
+            }
+            concatTuple<I + 1, Tp...>(t);
+          }
+
           std::string m_str;
       };
 

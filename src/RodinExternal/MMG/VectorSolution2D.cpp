@@ -284,8 +284,7 @@ namespace Rodin::External::MMG
 
   VectorSolution2D& VectorSolution2D::setMesh(Mesh2D& mesh)
   {
-     if (mesh.count() != count())
-        Alert::Exception("mesh.count() != count()").raise();
+     assert(mesh.count(Mesh2D::Entity::Vertex) == count());
      m_mesh = mesh;
      return *this;
   }

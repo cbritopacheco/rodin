@@ -37,6 +37,7 @@ namespace Rodin
 
    /**
     * @internal
+    * @tparam From Type to be converted/cast
     * @brief Deduction guide to aid in the construction of a mutable cast
     * instances, from l-values.
     */
@@ -45,6 +46,7 @@ namespace Rodin
 
    /**
     * @internal
+    * @tparam From Type to be converted/cast
     * @brief Deduction guide to aid in the construction of a mutable cast
     * instances, from const l-values.
     */
@@ -110,6 +112,7 @@ namespace Rodin
     * @internal
     * @brief Deduction guide to aid in the construction of a mutable cast
     * instances, from r-values or moved objects.
+    * @tparam From Type to be converted/cast
     */
    template <class From>
    Cast(From&&) -> Cast<From, true>;
@@ -126,20 +129,38 @@ namespace Rodin
    class Cast<From, true>
    {
       public:
+         /**
+          * @brief Constructs a Cast instance with the object to be casted.
+          * @param[in] from Object to be casted.
+          */
          Cast(From&& from)
             : m_from(std::move(from))
          {}
 
+         /**
+          * @brief Gets the constant reference to the object which will be
+          * casted.
+          * @returns Constant reference to the object which will be casted.
+          */
          const From& from() const
          {
             return m_from;
          }
 
+         /**
+          * @brief Gets the reference to the object which will be casted.
+          * @returns Reference to the object which will be casted.
+          */
          From& from()
          {
             return m_from;
          }
 
+         /**
+          * @brief Perform cast to type To.
+          * @tparam To Target type, to which the object will be casted.
+          * @returns Value of type To.
+          */
          template <class To>
          To to() const
          {

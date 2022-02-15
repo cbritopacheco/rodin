@@ -24,8 +24,6 @@ set(RodinExternalMMG_HEADERS
   VectorSolution.h
   VectorSolution2D.h
   Solution.h
-  Vertex.h
-  Vertex2D.h
   )
 
 set(RodinExternalMMG_SRCS
@@ -39,7 +37,6 @@ set(RodinExternalMMG_SRCS
   MeshOptimizer2D.cpp
   ScalarSolution2D.cpp
   VectorSolution2D.cpp
-  Vertex2D.cpp
   )
 
 add_library(RodinExternalMMG

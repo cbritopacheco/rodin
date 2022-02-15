@@ -14,29 +14,52 @@
 
 namespace Rodin::External::MMG
 {
+   /**
+    * @brief Base class for MMG mesh objects.
+    * @tparam Dimension Mesh dimension
+    *
+    * This class wraps the functionality of the type MMG5_Mesh.
+    */
    template <int Dimension>
    class Mesh
    {
       public:
          virtual ~Mesh() = default;
 
+         /**
+          * @brief Gets the maximum memory available to the mesh.
+          */
          size_t getMaximumMemory() const
          {
             return getHandle()->memMax;
          }
 
+         /**
+          * @brief Gets the current memory usage of the mesh.
+          */
          size_t getCurrentMemory() const
          {
             return getHandle()->memCur;
          }
 
+         /**
+          * @returns Dimension of the mesh.
+          */
          constexpr int getDimension() const
          {
             return Dimension;
          }
 
+         /**
+          * @internal
+          * @returns Reference to underlying mesh handle.
+          */
          virtual MMG5_pMesh& getHandle() = 0;
 
+         /**
+          * @internal
+          * @returns Reference to underlying mesh handle.
+          */
          virtual const MMG5_pMesh& getHandle() const = 0;
    };
 }

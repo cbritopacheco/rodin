@@ -7,7 +7,6 @@
 #ifndef RODIN_CORE_H
 #define RODIN_CORE_H
 
-#include "Core/ForwardDecls.h"
 #include "Core/Common.h"
 
 #endif

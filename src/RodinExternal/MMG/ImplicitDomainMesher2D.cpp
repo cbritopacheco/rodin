@@ -34,7 +34,7 @@ namespace Rodin::External::MMG
     Mesh2D mesh(ls.getMesh());
     auto sol = ScalarSolution2D(ls).setMesh(mesh);
 
-    if (mesh.count<Mesh2D::Vertex>() == 0)
+    if (mesh.count(Mesh2D::Entity::Vertex) == 0)
     {
        Alert::Exception("Mesh vertex count is zero. Nothing to optimize.").raise();
     }

@@ -16,46 +16,18 @@
 #include <mmg/mmg2d/libmmg2d.h>
 
 #include "Mesh.h"
-#include "Vertex2D.h"
 
 namespace Rodin::External::MMG
 {
    /**
     * @brief Represents a mesh of a 2D domain.
-    *
-    * The Mesh2D class is used to manipulate the mesh of 
     */
    class Mesh2D : public Mesh<2>
    {
       public:
-         class VertexIterator
-         {
-            public:
-               using iterator_category = std::forward_iterator_tag;
-               using difference_type   = std::ptrdiff_t;
-               using value_type        = Vertex2D;
-               using pointer           = Vertex2D*;
-
-               VertexIterator(Mesh2D& mesh);
-
-               Vertex2D& operator*() const;
-               Vertex2D* operator->() const;
-               VertexIterator& operator++();
-               VertexIterator operator++(int);
-               VertexIterator operator+(size_t n);
-               VertexIterator& operator+=(size_t n);
-               friend bool operator==(const VertexIterator& a, const VertexIterator& b);
-               friend bool operator!=(const VertexIterator& a, const VertexIterator& b);
-
-            private:
-               std::vector<Vertex2D> m_vertices;
-               std::vector<Vertex2D>::iterator m_it;
-               size_t m_offset;
-         };
-
-         class EdgeIterator;
-         class TriangleIterator;
-
+         /**
+          * @brief Enumeration describing possible mesh entities.
+          */
          enum Entity
          {
             Vertex = MMG5_Vertex,
@@ -101,8 +73,12 @@ namespace Rodin::External::MMG
           */
          ~Mesh2D();
 
-         template <Entity e = Vertex>
-         int count() const;
+         /**
+          * @brief Gets a count of the specified entities in the mesh.
+          * @param[in] e Type of entity to count.
+          * @return Number of entities of type Mesh2D::Entity.
+          */
+         int count(Mesh2D::Entity e) const;
 
          MMG5_pMesh& getHandle() override;
 
@@ -111,15 +87,6 @@ namespace Rodin::External::MMG
       private:
          MMG5_pMesh  m_mesh;
    };
-
-   template <>
-   int Mesh2D::count<Mesh2D::Vertex>() const;
-
-   template <>
-   int Mesh2D::count<Mesh2D::Edge>() const;
-
-   template <>
-   int Mesh2D::count<Mesh2D::Triangle>() const;
 }
 
 #endif

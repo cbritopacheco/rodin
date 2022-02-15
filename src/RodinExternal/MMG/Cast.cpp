@@ -36,8 +36,8 @@ namespace Rodin
     auto& mesh = from();
     mfem::Mesh res(
          2,
-         mesh.count<MMG::Mesh2D::Entity::Vertex>(),
-         mesh.count<MMG::Mesh2D::Entity::Triangle>());
+         mesh.count(MMG::Mesh2D::Entity::Vertex),
+         mesh.count(MMG::Mesh2D::Entity::Triangle));
 
     auto& mmgMesh = mesh.getHandle();
 
@@ -106,7 +106,7 @@ namespace Rodin
     }
     res.FinalizeMesh(0, true);
 
-    return Rodin::Mesh(res);
+    return Rodin::Mesh(std::move(res));
   }
 
   // ---- From: Rodin::Mesh - To: MMG::Mesh2D> -------------------------------

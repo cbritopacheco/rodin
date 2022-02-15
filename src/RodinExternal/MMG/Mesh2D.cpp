@@ -198,22 +198,19 @@ namespace Rodin::External::MMG
     other.m_mesh = nullptr;
   }
 
-  template <>
-  int Mesh2D::count<Mesh2D::Entity::Vertex>() const
+  int Mesh2D::count(Mesh2D::Entity e) const
   {
-    return getHandle()->np;
-  }
-
-  template <>
-  int Mesh2D::count<Mesh2D::Entity::Edge>() const
-  {
-    return getHandle()->na;
-  }
-
-  template <>
-  int Mesh2D::count<Mesh2D::Entity::Triangle>() const
-  {
-    return getHandle()->nt;
+    switch (e)
+    {
+      case Entity::Vertex:
+        return getHandle()->np;
+      case Entity::Edge:
+        return getHandle()->na;
+      case Entity::Triangle:
+        return getHandle()->nt;
+      default:
+        Alert::Exception("Unknown Mesh2D::Entity").raise();
+    }
   }
 
   MMG5_pMesh& Mesh2D::getHandle()
@@ -224,65 +221,5 @@ namespace Rodin::External::MMG
   const MMG5_pMesh& Mesh2D::getHandle() const
   {
     return m_mesh;
-  }
-
-  Mesh2D::VertexIterator::VertexIterator(Mesh2D& mesh)
-     : m_offset(0)
-  {
-    m_vertices.reserve(mesh.count<Vertex>());
-    // MMG types used 1-indexed arrays !
-    for (int i = 1; i <= mesh.count<Vertex>(); i++)
-       m_vertices.push_back(Vertex2D(&mesh.getHandle()->point[i]));
-    m_it = m_vertices.begin();
-  }
-
-  Vertex2D& Mesh2D::VertexIterator::operator*() const
-  {
-    return *m_it;
-  }
-
-  Vertex2D* Mesh2D::VertexIterator::operator->() const
-  {
-    return m_it.operator->();
-  }
-
-  Mesh2D::VertexIterator& Mesh2D::VertexIterator::operator++()
-  {
-    m_it++;
-    m_offset++;
-    return *this;
-  }
-
-  Mesh2D::VertexIterator Mesh2D::VertexIterator::operator++(int)
-  {
-    VertexIterator tmp = *this;
-    ++m_it;
-    ++m_offset;
-    return tmp;
-  }
-
-  Mesh2D::VertexIterator& Mesh2D::VertexIterator::operator+=(size_t n)
-  {
-    m_it += n;
-    m_offset += n;
-    return *this;
-  }
-
-  Mesh2D::VertexIterator Mesh2D::VertexIterator::operator+(size_t n)
-  {
-    VertexIterator tmp = *this;
-    tmp.m_it += n;
-    tmp.m_offset += n;
-    return tmp;
-  }
-
-  bool operator==(const Mesh2D::VertexIterator& a, const Mesh2D::VertexIterator& b)
-  {
-    return a.m_offset == b.m_offset;
-  }
-
-  bool operator!=(const Mesh2D::VertexIterator& a, const Mesh2D::VertexIterator& b)
-  {
-    return a.m_offset != b.m_offset;
   }
 }
