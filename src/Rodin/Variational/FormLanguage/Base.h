@@ -1,6 +1,8 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_BASE_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_BASE_H
 
+#include <cassert>
+
 namespace Rodin::Variational::FormLanguage
 {
    /**
@@ -21,6 +23,21 @@ namespace Rodin::Variational::FormLanguage
           * @returns Non-owning pointer to the copied object.
           */
          virtual Base* copy() const noexcept = 0;
+   };
+
+   template <class InternalValue>
+   class Buildable : public Base
+   {
+      public:
+         virtual void build() = 0;
+
+         virtual InternalValue& get() = 0;
+
+         virtual InternalValue* release()
+         {
+            assert(false); // Unimplemented method
+            return nullptr;
+         }
    };
 }
 

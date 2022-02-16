@@ -30,9 +30,9 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getScalarCoefficient();
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          virtual ScalarCoefficientUnaryMinus* copy() const noexcept override
          {

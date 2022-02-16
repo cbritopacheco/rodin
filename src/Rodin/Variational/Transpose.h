@@ -38,9 +38,9 @@ namespace Rodin::Variational
 
          int getColumns() const override;
 
-         void buildMFEMMatrixCoefficient() override;
+         void build() override;
 
-         mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
+         mfem::MatrixCoefficient& get() override;
 
          Transpose* copy() const noexcept override
          {

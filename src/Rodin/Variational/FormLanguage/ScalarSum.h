@@ -28,9 +28,9 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getRHS();
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          virtual ScalarSum* copy() const noexcept override
          {

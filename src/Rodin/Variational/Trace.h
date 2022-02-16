@@ -59,9 +59,9 @@ namespace Rodin::Variational
 
          Trace(const Trace& other);
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          Trace* copy() const noexcept override
          {

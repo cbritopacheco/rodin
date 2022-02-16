@@ -36,8 +36,10 @@ namespace Rodin::Variational
    template <int DirectionIndex, int ComponentIndex>
    class Derivative : public ScalarCoefficientBase
    {
-      static_assert(ComponentIndex >= 1 && DirectionIndex >= 1,
-            "ComponentIndex and VariableIndex must both be greater than 1.");
+      static_assert(ComponentIndex >= 1,
+            "ComponentIndex must be greater than or equal to 1.");
+      static_assert(DirectionIndex >= 1,
+            "DirectionIndex must be greater than or equal to 1.");
       public:
          /**
           * @brief Constructs the Derivative of an @f$ H^1 @f$ function
@@ -46,9 +48,9 @@ namespace Rodin::Variational
           */
          Derivative(GridFunctionBase& u);
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          Derivative* copy() const noexcept override
          {

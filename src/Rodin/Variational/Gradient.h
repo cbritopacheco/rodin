@@ -41,9 +41,9 @@ namespace Rodin::Variational
 
          size_t getDimension() const override;
 
-         void buildMFEMVectorCoefficient() override;
+         void build() override;
 
-         mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
+         mfem::VectorCoefficient& get() override;
 
          VectorCoefficientBase* copy() const noexcept override
          {

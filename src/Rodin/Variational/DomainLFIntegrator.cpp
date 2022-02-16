@@ -21,20 +21,19 @@ namespace Rodin::Variational
          m_f(other.m_f->copy())
    {}
 
-   void DomainLFIntegrator::buildMFEMLinearFormIntegrator()
+   void DomainLFIntegrator::build()
    {
-      m_f->buildMFEMCoefficient();
-      m_mfemLFI = std::make_unique<mfem::DomainLFIntegrator>(
-            m_f->getMFEMCoefficient());
+      m_f->build();
+      m_mfemLFI = std::make_unique<mfem::DomainLFIntegrator>(m_f->get());
    }
 
-   mfem::LinearFormIntegrator& DomainLFIntegrator::getMFEMLinearFormIntegrator()
+   mfem::LinearFormIntegrator& DomainLFIntegrator::get()
    {
       assert(m_mfemLFI);
       return *m_mfemLFI;
    }
 
-   mfem::LinearFormIntegrator* DomainLFIntegrator::releaseMFEMLinearFormIntegrator()
+   mfem::LinearFormIntegrator* DomainLFIntegrator::release()
    {
       return m_mfemLFI.release();
    }

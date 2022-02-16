@@ -17,22 +17,22 @@ namespace Rodin::Variational
          m_lambda(other.m_lambda->copy())
    {}
 
-   void MassIntegrator::buildMFEMBilinearFormIntegrator()
+   void MassIntegrator::build()
    {
-      m_lambda->buildMFEMCoefficient();
+      m_lambda->build();
       m_mfemBFI
          = std::make_unique<mfem::MassIntegrator>(
-               m_lambda->getMFEMCoefficient());
+               m_lambda->get());
    }
 
    mfem::BilinearFormIntegrator&
-   MassIntegrator::getMFEMBilinearFormIntegrator()
+   MassIntegrator::get()
    {
       assert(m_mfemBFI);
       return *m_mfemBFI;
    }
 
-   mfem::BilinearFormIntegrator* MassIntegrator::releaseMFEMBilinearFormIntegrator()
+   mfem::BilinearFormIntegrator* MassIntegrator::release()
    {
       return m_mfemBFI.release();
    }

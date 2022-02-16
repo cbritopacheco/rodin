@@ -24,15 +24,15 @@ namespace Rodin::Variational::FormLanguage
       return m_matrix->getColumns();
    }
 
-   void ScalarMatrixProduct::buildMFEMMatrixCoefficient()
+   void ScalarMatrixProduct::build()
    {
-      m_scalar->buildMFEMCoefficient();
-      m_matrix->buildMFEMMatrixCoefficient();
+      m_scalar->build();
+      m_matrix->build();
       m_mfemMatrixCoefficient.emplace(
-            m_scalar->getMFEMCoefficient(), m_matrix->getMFEMMatrixCoefficient());
+            m_scalar->get(), m_matrix->get());
    }
 
-   mfem::MatrixCoefficient& ScalarMatrixProduct::getMFEMMatrixCoefficient()
+   mfem::MatrixCoefficient& ScalarMatrixProduct::get()
    {
       assert(m_mfemMatrixCoefficient);
       return *m_mfemMatrixCoefficient;

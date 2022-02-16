@@ -10,7 +10,8 @@
 
 namespace Rodin::Variational
 {
-   class LinearFormIntegratorBase : public FormLanguage::Base
+   class LinearFormIntegratorBase
+      : public FormLanguage::Buildable<mfem::LinearFormIntegrator>
    {
       public:
          virtual ~LinearFormIntegratorBase() = default;
@@ -28,25 +29,24 @@ namespace Rodin::Variational
          /**
           * @internal
           */
-         virtual void buildMFEMLinearFormIntegrator() = 0;
+         virtual void build() override = 0;
 
          /**
           * @internal
           */
-         virtual mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() = 0;
+         virtual mfem::LinearFormIntegrator& get() override = 0;
 
          /**
           * @internal
           * @brief Releases ownership of the mfem::LinearFormIntegrator.
           *
-          * @note After this call, calling getMFEMLinearFormIntegrator() will
-          * result in undefined behaviour.
+          * @note After this call, calling get() will result in undefined behaviour.
           *
           * @warning The LinearFormIntegratorBase instance must still be kept
           * in memory since it might contain objects which the
           * mfem::LinearFormIntegrator instance refers to.
           */
-         virtual mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() = 0;
+         virtual mfem::LinearFormIntegrator* release() override = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
    };

@@ -78,9 +78,9 @@ namespace Rodin::Variational
          constexpr
          Dot(const Dot& other);
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          Dot* copy() const noexcept override
          {

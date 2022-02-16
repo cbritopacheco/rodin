@@ -50,9 +50,9 @@ namespace Rodin::Variational::FormLanguage
 
          int getColumns() const override;
 
-         void buildMFEMMatrixCoefficient() override;
+         void build() override;
 
-         mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
+         mfem::MatrixCoefficient& get() override;
 
          MatrixCoefficientBase* copy() const noexcept override
          {

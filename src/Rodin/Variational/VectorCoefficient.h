@@ -23,7 +23,8 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for objects representing vector coefficients.
     */
-   class VectorCoefficientBase : public FormLanguage::Base
+   class VectorCoefficientBase
+      : public FormLanguage::Buildable<mfem::VectorCoefficient>
    {
       public:
          /**
@@ -36,15 +37,14 @@ namespace Rodin::Variational
           * @internal
           * @brief Builds the underlying mfem::VectorCoefficient object.
           */
-         virtual void buildMFEMVectorCoefficient() = 0;
+         virtual void build() override = 0;
 
          /**
           * @internal
           * @brief Returns the underlying mfem::VectorCoefficient object.
-          * @note Typically one should only call this after one has called
-          * buildMFEMVectorCoefficient().
+          * @note Typically one should only call this function after build().
           */
-         virtual mfem::VectorCoefficient& getMFEMVectorCoefficient() = 0;
+         virtual mfem::VectorCoefficient& get() override = 0;
 
          /**
           * @internal
@@ -84,9 +84,9 @@ namespace Rodin::Variational
 
          size_t getDimension() const override;
 
-         void buildMFEMVectorCoefficient() override;
+         void build() override;
 
-         mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
+         mfem::VectorCoefficient& get() override;
 
          VectorCoefficient* copy() const noexcept override
          {
@@ -136,9 +136,9 @@ namespace Rodin::Variational
 
          size_t getDimension() const override;
 
-         void buildMFEMVectorCoefficient() override;
+         void build() override;
 
-         mfem::VectorCoefficient& getMFEMVectorCoefficient() override;
+         mfem::VectorCoefficient& get() override;
 
          VectorCoefficient* copy() const noexcept override
          {

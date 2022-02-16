@@ -249,8 +249,8 @@ namespace Rodin::Variational
          {
             assert(getFiniteElementSpace().getRangeDimension() == 1);
             std::unique_ptr<ScalarCoefficientBase> sCopy(s.copy());
-            sCopy->buildMFEMCoefficient();
-            getHandle().ProjectCoefficient(sCopy->getMFEMCoefficient());
+            sCopy->build();
+            getHandle().ProjectCoefficient(sCopy->get());
             return *this;
          }
 
@@ -265,7 +265,7 @@ namespace Rodin::Variational
             assert(getFiniteElementSpace().getRangeDimension() == 1);
             std::unique_ptr<ScalarCoefficientBase> sCopy(
                   s.getScalarCoefficient().copy());
-            sCopy->buildMFEMCoefficient();
+            sCopy->build();
             getHandle() = NAN;
             mfem::Array<int> vdofs;
             mfem::Vector vals;
@@ -278,7 +278,7 @@ namespace Rodin::Variational
                   fes.GetElementVDofs(i, vdofs);
                   vals.SetSize(vdofs.Size());
                   fes.GetFE(i)->Project(
-                        sCopy->getMFEMCoefficient(),
+                        sCopy->get(),
                         *fes.GetElementTransformation(i), vals);
                   getHandle().SetSubVector(vdofs, vals);
                }
@@ -296,8 +296,8 @@ namespace Rodin::Variational
          {
             assert(getFiniteElementSpace().getRangeDimension() == v.getDimension());
             std::unique_ptr<VectorCoefficientBase> vCopy(v.copy());
-            vCopy->buildMFEMVectorCoefficient();
-            getHandle().ProjectCoefficient(vCopy->getMFEMVectorCoefficient());
+            vCopy->build();
+            getHandle().ProjectCoefficient(vCopy->get());
             return *this;
          }
 

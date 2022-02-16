@@ -22,7 +22,7 @@ namespace Rodin::Variational
    template <class ... Values>
    void
    VectorCoefficient<Values...>
-   ::buildMFEMVectorCoefficient()
+   ::build()
    {
       m_mfemCoefficients.reserve(m_dimension);
       m_mfemVectorCoefficient.emplace(m_dimension);
@@ -31,16 +31,16 @@ namespace Rodin::Variational
 
       for (size_t i = 0; i < m_dimension; i++)
       {
-         m_mfemCoefficients[i]->buildMFEMCoefficient();
+         m_mfemCoefficients[i]->build();
          m_mfemVectorCoefficient->Set(
-               i, &m_mfemCoefficients[i]->getMFEMCoefficient(), false);
+               i, &m_mfemCoefficients[i]->get(), false);
       }
    }
 
    template <class ... Values>
    mfem::VectorCoefficient&
    VectorCoefficient<Values...>
-   ::getMFEMVectorCoefficient()
+   ::get()
    {
       assert(m_mfemVectorCoefficient);
       return *m_mfemVectorCoefficient;
@@ -61,8 +61,8 @@ namespace Rodin::Variational
    {
       assert(m_mfemVectorCoefficient);
       auto& s = m_mfemCoefficients.emplace_back(new ScalarCoefficient(std::get<I>(t)));
-      s->buildMFEMCoefficient();
-      m_mfemVectorCoefficient->Set(I, &s->getMFEMCoefficient(), false);
+      s->build();
+      m_mfemVectorCoefficient->Set(I, &s->get(), false);
       makeCoefficientsFromTuple<I + 1, Tp...>(t);
    }
 
@@ -92,14 +92,14 @@ namespace Rodin::Variational
 
    template <class FEC>
    void
-   VectorCoefficient<GridFunction<FEC>>::buildMFEMVectorCoefficient()
+   VectorCoefficient<GridFunction<FEC>>::build()
    {
       m_mfemVectorCoefficient.emplace(&m_u.getHandle());
    }
 
    template <class FEC>
    mfem::VectorCoefficient&
-   VectorCoefficient<GridFunction<FEC>>::getMFEMVectorCoefficient()
+   VectorCoefficient<GridFunction<FEC>>::get()
    {
       assert(m_mfemVectorCoefficient);
       return *m_mfemVectorCoefficient;

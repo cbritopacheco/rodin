@@ -12,9 +12,9 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarProduct(const ScalarProduct& other);
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          ScalarProduct* copy() const noexcept override
          {

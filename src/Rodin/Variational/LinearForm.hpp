@@ -50,10 +50,10 @@ namespace Rodin::Variational
             auto& l = m_lfiDomainList.emplace_back(lfi.copy());
             const auto& domAttrs = lfi.getAttributes();
 
-            l->buildMFEMLinearFormIntegrator();
+            l->build();
             if (domAttrs.size() == 0)
             {
-               m_lf->AddDomainIntegrator(l->releaseMFEMLinearFormIntegrator());
+               m_lf->AddDomainIntegrator(l->release());
             }
             else
             {
@@ -67,7 +67,7 @@ namespace Rodin::Variational
                   (*data)[b - 1] = 1;
                }
                m_lf->AddDomainIntegrator(
-                     l->releaseMFEMLinearFormIntegrator(),
+                     l->release(),
                      *m_domAttrMarkers.emplace_back(std::move(data)));
             }
             break;
@@ -77,10 +77,10 @@ namespace Rodin::Variational
             auto& l = m_lfiBoundaryList.emplace_back(lfi.copy());
             const auto& bdrAttrs = lfi.getAttributes();
 
-            l->buildMFEMLinearFormIntegrator();
+            l->build();
             if (bdrAttrs.size() == 0)
             {
-               m_lf->AddBoundaryIntegrator(l->releaseMFEMLinearFormIntegrator());
+               m_lf->AddBoundaryIntegrator(l->release());
             }
             else
             {
@@ -94,7 +94,7 @@ namespace Rodin::Variational
                   (*data)[b - 1] = 1;
                }
                m_lf->AddBoundaryIntegrator(
-                     l->releaseMFEMLinearFormIntegrator(),
+                     l->release(),
                      *m_bdrAttrMarkers.emplace_back(std::move(data)));
             }
             break;

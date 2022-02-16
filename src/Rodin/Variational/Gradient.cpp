@@ -10,12 +10,12 @@ namespace Rodin::Variational
       return m_u.getFiniteElementSpace().getMesh().getDimension();
    }
 
-   void Gradient::buildMFEMVectorCoefficient()
+   void Gradient::build()
    {
       m_mfemVectorCoefficient.emplace(&m_u.getHandle());
    }
 
-   mfem::VectorCoefficient& Gradient::getMFEMVectorCoefficient()
+   mfem::VectorCoefficient& Gradient::get()
    {
       assert(m_mfemVectorCoefficient);
       return *m_mfemVectorCoefficient;

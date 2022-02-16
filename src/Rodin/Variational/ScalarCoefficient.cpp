@@ -22,7 +22,7 @@ namespace Rodin::Variational
    }
 
    void
-   ScalarCoefficient<std::function<double(const double*)>>::buildMFEMCoefficient()
+   ScalarCoefficient<std::function<double(const double*)>>::build()
    {
       m_mfemCoefficient.emplace(
             [this](const mfem::Vector& v)
@@ -31,7 +31,7 @@ namespace Rodin::Variational
             });
    }
 
-   void ScalarCoefficient<std::map<int, double>>::buildMFEMCoefficient()
+   void ScalarCoefficient<std::map<int, double>>::build()
    {
       int maxAttr = m_pieces.rbegin()->first;
       m_mfemCoefficient.emplace(maxAttr);

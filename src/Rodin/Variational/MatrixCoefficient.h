@@ -16,7 +16,8 @@
 
 namespace Rodin::Variational
 {
-   class MatrixCoefficientBase : public FormLanguage::Base
+   class MatrixCoefficientBase
+      : public FormLanguage::Buildable<mfem::MatrixCoefficient>
    {
       public:
          virtual ~MatrixCoefficientBase() = default;
@@ -24,71 +25,9 @@ namespace Rodin::Variational
 
          virtual int getRows() const = 0;
          virtual int getColumns() const = 0;
-         virtual void buildMFEMMatrixCoefficient() = 0;
-         virtual mfem::MatrixCoefficient& getMFEMMatrixCoefficient() = 0;
+         virtual void build() override = 0;
+         virtual mfem::MatrixCoefficient& get() override = 0;
          virtual MatrixCoefficientBase* copy() const noexcept override = 0;
-   };
-
-   class MatrixCoefficient : public MatrixCoefficientBase
-   {
-      public:
-         MatrixCoefficient(int dimension)
-            :  m_dimension(dimension),
-               m_mfemMatrixCoefficient(dimension)
-         {}
-
-         MatrixCoefficient(const MatrixCoefficient& other)
-            :  m_dimension(other.m_dimension),
-               m_mfemMatrixCoefficient(other.m_mfemMatrixCoefficient)
-         {}
-
-         virtual ~MatrixCoefficient() = default;
-
-         int getRows() const override
-         {
-            return m_dimension;
-         }
-
-         int getColumns() const override
-         {
-            return m_dimension;
-         }
-
-         virtual void buildMFEMMatrixCoefficient() override
-         {
-            for (int i = 0; i < m_dimension; i++)
-            {
-               for (int j = 0; j < m_dimension; j++)
-               {
-                  auto& s = m_scalarCoefficients[i * m_dimension + j];
-                  s->buildMFEMCoefficient();
-                  m_mfemMatrixCoefficient.Set(
-                        i, j, &s->getMFEMCoefficient(),
-                        false // Do not own the data
-                        );
-               }
-            }
-         }
-
-         virtual mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override
-         {
-            return m_mfemMatrixCoefficient;
-         }
-
-         virtual MatrixCoefficient* copy() const noexcept override
-         {
-            return new MatrixCoefficient(*this);
-         }
-
-         virtual ScalarCoefficientBase& operator()(int i, int j)
-         {
-            return *m_scalarCoefficients[i * m_dimension + j];
-         }
-
-      private:
-         int m_dimension;
-         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_scalarCoefficients;
-         mfem::MatrixArrayCoefficient m_mfemMatrixCoefficient;
    };
 }
 

@@ -30,12 +30,10 @@ namespace Rodin::Variational
       m_nbcBdr = 0;
       m_nbcBdr[getBoundaryAttribute() - 1] = 1;
 
-      getValue().buildMFEMCoefficient();
+      getValue().build();
       pb.getLinearForm()
         .getHandle()
-        .AddBoundaryIntegrator(
-              new mfem::BoundaryLFIntegrator(
-                 getValue().getMFEMCoefficient()), m_nbcBdr);
+        .AddBoundaryIntegrator(new mfem::BoundaryLFIntegrator(getValue().get()), m_nbcBdr);
    }
 
    void NeumannBC<VectorCoefficientBase>::imposeOn(ProblemBase& pb)
@@ -54,11 +52,11 @@ namespace Rodin::Variational
       m_nbcBdr = 0;
       m_nbcBdr[getBoundaryAttribute() - 1] = 1;
 
-      getValue().buildMFEMVectorCoefficient();
+      getValue().build();
       pb.getLinearForm()
         .getHandle()
         .AddBoundaryIntegrator(
               new mfem::VectorBoundaryLFIntegrator(
-                 getValue().getMFEMVectorCoefficient()), m_nbcBdr);
+                 getValue().get()), m_nbcBdr);
    }
 }

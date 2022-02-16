@@ -19,7 +19,7 @@ namespace Rodin::Variational
    {}
 
    template <int DirectionIndex, int ComponentIndex>
-   void Derivative<DirectionIndex, ComponentIndex>::buildMFEMCoefficient()
+   void Derivative<DirectionIndex, ComponentIndex>::build()
    {
       m_mfemGridFunction.emplace(m_u.getHandle().FESpace());
       m_u.getHandle().GetDerivative(
@@ -28,7 +28,7 @@ namespace Rodin::Variational
    }
 
    template <int DirectionIndex, int ComponentIndex>
-   mfem::Coefficient& Derivative<DirectionIndex, ComponentIndex>::getMFEMCoefficient()
+   mfem::Coefficient& Derivative<DirectionIndex, ComponentIndex>::get()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;

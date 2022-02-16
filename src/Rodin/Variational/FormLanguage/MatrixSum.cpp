@@ -36,16 +36,16 @@ namespace Rodin::Variational::FormLanguage
       return m_lhs->getColumns();
    }
 
-   void MatrixSum::buildMFEMMatrixCoefficient()
+   void MatrixSum::build()
    {
-      m_lhs->buildMFEMMatrixCoefficient();
-      m_rhs->buildMFEMMatrixCoefficient();
+      m_lhs->build();
+      m_rhs->build();
 
       m_mfemMatrixCoefficient.emplace(
-            m_lhs->getMFEMMatrixCoefficient(), m_rhs->getMFEMMatrixCoefficient());
+            m_lhs->get(), m_rhs->get());
    }
 
-   mfem::MatrixCoefficient& MatrixSum::getMFEMMatrixCoefficient()
+   mfem::MatrixCoefficient& MatrixSum::get()
    {
       assert(m_mfemMatrixCoefficient);
       return *m_mfemMatrixCoefficient;

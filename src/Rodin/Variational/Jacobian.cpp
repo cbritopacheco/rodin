@@ -14,12 +14,12 @@ namespace Rodin::Variational
       return m_u.getFiniteElementSpace().getMesh().getDimension();
    }
 
-   void Jacobian::buildMFEMMatrixCoefficient()
+   void Jacobian::build()
    {
       m_mfemMatrixCoefficient.emplace(m_u.getHandle());
    }
 
-   mfem::MatrixCoefficient& Jacobian::getMFEMMatrixCoefficient()
+   mfem::MatrixCoefficient& Jacobian::get()
    {
       assert(m_mfemMatrixCoefficient);
       return *m_mfemMatrixCoefficient;

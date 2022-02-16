@@ -14,13 +14,13 @@ namespace Rodin::Variational
       :  m_matrix(other.m_matrix->copy())
    {}
 
-   void Trace::buildMFEMCoefficient()
+   void Trace::build()
    {
-      m_matrix->buildMFEMMatrixCoefficient();
-      m_mfemCoefficient.emplace(m_matrix->getMFEMMatrixCoefficient());
+      m_matrix->build();
+      m_mfemCoefficient.emplace(m_matrix->get());
    }
 
-   mfem::Coefficient& Trace::getMFEMCoefficient()
+   mfem::Coefficient& Trace::get()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;

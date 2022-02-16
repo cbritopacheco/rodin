@@ -12,12 +12,12 @@ namespace Rodin::Variational
       return m_n;
    }
 
-   void IdentityMatrix::buildMFEMMatrixCoefficient()
+   void IdentityMatrix::build()
    {
       m_mfemMatrixCoefficient.emplace(m_n);
    }
 
-   mfem::MatrixCoefficient& IdentityMatrix::getMFEMMatrixCoefficient()
+   mfem::MatrixCoefficient& IdentityMatrix::get()
    {
       assert(m_mfemMatrixCoefficient);
       return *m_mfemMatrixCoefficient;

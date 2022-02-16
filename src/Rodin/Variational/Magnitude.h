@@ -67,13 +67,13 @@ namespace Rodin::Variational
             : m_v(other.m_v->copy())
          {}
 
-         void buildMFEMCoefficient() override
+         void build() override
          {
-            m_v->buildMFEMVectorCoefficient();
-            m_mfemCoefficient.emplace(m_v->getMFEMVectorCoefficient());
+            m_v->build();
+            m_mfemCoefficient.emplace(m_v->get());
          }
 
-         mfem::Coefficient& getMFEMCoefficient() override
+         mfem::Coefficient& get() override
          {
             assert(m_mfemCoefficient);
             return *m_mfemCoefficient;

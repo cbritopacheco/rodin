@@ -17,14 +17,14 @@ namespace Rodin::Variational
    // ------------------------------------------------------------------------
    template <class T>
    void
-   ScalarCoefficient<T>::buildMFEMCoefficient()
+   ScalarCoefficient<T>::build()
    {
       m_mfemCoefficient.emplace(m_x);
    }
 
    template <class T>
    mfem::Coefficient&
-   ScalarCoefficient<T>::getMFEMCoefficient()
+   ScalarCoefficient<T>::get()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;
@@ -51,13 +51,13 @@ namespace Rodin::Variational
 
    template <class FEC>
    void
-   ScalarCoefficient<GridFunction<FEC>>::buildMFEMCoefficient()
+   ScalarCoefficient<GridFunction<FEC>>::build()
    {
       m_mfemCoefficient.emplace(&m_u.getHandle());
    }
 
    template <class FEC>
-   mfem::Coefficient& ScalarCoefficient<GridFunction<FEC>>::getMFEMCoefficient()
+   mfem::Coefficient& ScalarCoefficient<GridFunction<FEC>>::get()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;

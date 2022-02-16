@@ -27,17 +27,17 @@ namespace Rodin::Variational
    {}
 
    template <class A, class B>
-   void Dot<A, B>::buildMFEMCoefficient()
+   void Dot<A, B>::build()
    {
-      m_a->buildMFEMMatrixCoefficient();
-      m_b->buildMFEMMatrixCoefficient();
+      m_a->build();
+      m_b->build();
 
       m_mfemCoefficient.emplace(
-            m_a->getMFEMMatrixCoefficient(), m_b->getMFEMMatrixCoefficient());
+            m_a->get(), m_b->get());
    }
 
    template <class A, class B>
-   mfem::Coefficient& Dot<A, B>::getMFEMCoefficient()
+   mfem::Coefficient& Dot<A, B>::get()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;

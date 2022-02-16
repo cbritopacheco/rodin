@@ -36,16 +36,15 @@ namespace Rodin::Variational::FormLanguage
 
    void
    LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
-   ::buildMFEMLinearFormIntegrator()
+   ::build()
    {
-      m_lfi->buildMFEMLinearFormIntegrator();
-      m_mfemLFI = std::make_unique<Internal::LFIUnaryMinus>(
-            m_lfi->getMFEMLinearFormIntegrator());
+      m_lfi->build();
+      m_mfemLFI = std::make_unique<Internal::LFIUnaryMinus>(m_lfi->get());
    }
 
    mfem::LinearFormIntegrator&
    LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
-   ::getMFEMLinearFormIntegrator()
+   ::get()
    {
       assert(m_mfemLFI);
       return *m_mfemLFI;
@@ -53,7 +52,7 @@ namespace Rodin::Variational::FormLanguage
 
    mfem::LinearFormIntegrator*
    LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
-   ::releaseMFEMLinearFormIntegrator()
+   ::release()
    {
       return m_mfemLFI.release();
    }

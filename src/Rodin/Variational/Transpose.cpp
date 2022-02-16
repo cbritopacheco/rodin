@@ -18,13 +18,13 @@ namespace Rodin::Variational
       return m_matrix->getRows();
    }
 
-   void Transpose::buildMFEMMatrixCoefficient()
+   void Transpose::build()
    {
-      m_matrix->buildMFEMMatrixCoefficient();
-      m_mfemMatrixCoefficient.emplace(m_matrix->getMFEMMatrixCoefficient());
+      m_matrix->build();
+      m_mfemMatrixCoefficient.emplace(m_matrix->get());
    }
 
-   mfem::MatrixCoefficient& Transpose::getMFEMMatrixCoefficient()
+   mfem::MatrixCoefficient& Transpose::get()
    {
       assert(m_mfemMatrixCoefficient);
       return *m_mfemMatrixCoefficient;

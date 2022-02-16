@@ -74,11 +74,11 @@ namespace Rodin::Variational
             return *this;
          }
 
-         void buildMFEMBilinearFormIntegrator() override;
+         void build() override;
 
-         mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;
+         mfem::BilinearFormIntegrator& get() override;
 
-         mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() override;
+         mfem::BilinearFormIntegrator* release() override;
 
          DiffusionIntegrator* copy() const noexcept override
          {

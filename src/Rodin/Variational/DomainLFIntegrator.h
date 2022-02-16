@@ -60,10 +60,10 @@ namespace Rodin::Variational
             return *this;
          }
 
-         void buildMFEMLinearFormIntegrator() override;
+         void build() override;
 
-         mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
-         mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() override;
+         mfem::LinearFormIntegrator& get() override;
+         mfem::LinearFormIntegrator* release() override;
 
          DomainLFIntegrator* copy() const noexcept override;
 

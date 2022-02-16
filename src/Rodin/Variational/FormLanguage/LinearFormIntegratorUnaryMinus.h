@@ -90,11 +90,11 @@ namespace Rodin::Variational::FormLanguage
             return getLFI().getIntegratorRegion();
          }
 
-         void buildMFEMLinearFormIntegrator() override;
+         void build() override;
 
-         mfem::LinearFormIntegrator& getMFEMLinearFormIntegrator() override;
+         mfem::LinearFormIntegrator& get() override;
 
-         mfem::LinearFormIntegrator* releaseMFEMLinearFormIntegrator() override;
+         mfem::LinearFormIntegrator* release() override;
 
          LinearFormIntegratorUnaryMinus* copy() const noexcept override
          {

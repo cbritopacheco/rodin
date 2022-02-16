@@ -25,22 +25,27 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for objects representing scalar coefficients.
     */
-   class ScalarCoefficientBase : public FormLanguage::Base
+   class ScalarCoefficientBase
+      : public FormLanguage::Buildable<mfem::Coefficient>
    {
       public:
+         virtual Restriction<ScalarCoefficientBase> restrictTo(int attr);
+
+         virtual Restriction<ScalarCoefficientBase> restrictTo(
+               const std::set<int>& attrs);
+
          /**
           * @internal
           * @brief Builds the underlying mfem::Coefficient object.
           */
-         virtual void buildMFEMCoefficient() = 0;
+         virtual void build() override = 0;
 
          /**
           * @internal
           * @brief Returns the underlying mfem::Coefficient object.
-          * @note Typically one should only call this after one has called
-          * buildMFEMCoefficient().
+          * @note Typically one should only call this function after build().
           */
-         virtual mfem::Coefficient& getMFEMCoefficient() = 0;
+         virtual mfem::Coefficient& get() override = 0;
 
          /**
           * @internal
@@ -48,11 +53,6 @@ namespace Rodin::Variational
           * pointer to the new object.
           */
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
-
-         virtual Restriction<ScalarCoefficientBase> restrictTo(int attr);
-
-         virtual Restriction<ScalarCoefficientBase> restrictTo(
-               const std::set<int>& attrs);
    };
 
    template <class T>
@@ -93,8 +93,10 @@ namespace Rodin::Variational
             return m_x;
          }
 
-         void buildMFEMCoefficient() override;
-         mfem::Coefficient& getMFEMCoefficient() override;
+         void build() override;
+
+         mfem::Coefficient& get() override;
+
          ScalarCoefficient* copy() const noexcept override
          {
             return new ScalarCoefficient(*this);
@@ -136,9 +138,9 @@ namespace Rodin::Variational
             return m_u;
          }
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override;
+         mfem::Coefficient& get() override;
 
          ScalarCoefficient* copy() const noexcept override
          {
@@ -171,9 +173,9 @@ namespace Rodin::Variational
             return m_f;
          }
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override
+         mfem::Coefficient& get() override
          {
             assert(m_mfemCoefficient);
             return *m_mfemCoefficient;
@@ -214,9 +216,9 @@ namespace Rodin::Variational
             return m_pieces;
          }
 
-         void buildMFEMCoefficient() override;
+         void build() override;
 
-         mfem::Coefficient& getMFEMCoefficient() override
+         mfem::Coefficient& get() override
          {
             assert(m_mfemCoefficient);
             return *m_mfemCoefficient;

@@ -72,10 +72,10 @@ namespace Rodin::Variational
             auto& l = m_bfiDomainList.emplace_back(bfi.copy());
             const auto& domAttrs = bfi.getAttributes();
 
-            l->buildMFEMBilinearFormIntegrator();
+            l->build();
             if (domAttrs.size() == 0)
             {
-               m_bf->AddDomainIntegrator(l->releaseMFEMBilinearFormIntegrator());
+               m_bf->AddDomainIntegrator(l->release());
             }
             else
             {
@@ -89,7 +89,7 @@ namespace Rodin::Variational
                   (*data)[b - 1] = 1;
                }
                m_bf->AddDomainIntegrator(
-                     l->releaseMFEMBilinearFormIntegrator(),
+                     l->release(),
                      *m_domAttrMarkers.emplace_back(std::move(data)));
             }
             break;

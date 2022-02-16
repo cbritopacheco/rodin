@@ -25,22 +25,21 @@ namespace Rodin::Variational
          m_lambda(other.m_lambda->copy())
    {}
 
-   void DiffusionIntegrator::buildMFEMBilinearFormIntegrator()
+   void DiffusionIntegrator::build()
    {
-      m_lambda->buildMFEMCoefficient();
-      m_bfi = std::make_unique<mfem::DiffusionIntegrator>(
-            m_lambda->getMFEMCoefficient());
+      m_lambda->build();
+      m_bfi = std::make_unique<mfem::DiffusionIntegrator>(m_lambda->get());
    }
 
    mfem::BilinearFormIntegrator&
-   DiffusionIntegrator::getMFEMBilinearFormIntegrator()
+   DiffusionIntegrator::get()
    {
       assert(m_bfi);
       return *m_bfi;
    }
 
    mfem::BilinearFormIntegrator*
-   DiffusionIntegrator::releaseMFEMBilinearFormIntegrator()
+   DiffusionIntegrator::release()
    {
       return m_bfi.release();
    }

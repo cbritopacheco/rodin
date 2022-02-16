@@ -22,13 +22,13 @@ namespace Rodin::Variational::FormLanguage
       return *m_s;
    }
 
-   void ScalarCoefficientUnaryMinus::buildMFEMCoefficient()
+   void ScalarCoefficientUnaryMinus::build()
    {
-      m_s->buildMFEMCoefficient();
-      m_mfemCoefficient.emplace(0, m_s->getMFEMCoefficient(), 0, -1.0);
+      m_s->build();
+      m_mfemCoefficient.emplace(0, m_s->get(), 0, -1.0);
    }
 
-   mfem::Coefficient& ScalarCoefficientUnaryMinus::getMFEMCoefficient()
+   mfem::Coefficient& ScalarCoefficientUnaryMinus::get()
    {
       assert(m_mfemCoefficient);
       return *m_mfemCoefficient;

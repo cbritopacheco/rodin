@@ -23,23 +23,22 @@ namespace Rodin::Variational
          m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy())
    {}
 
-   void ElasticityIntegrator::buildMFEMBilinearFormIntegrator()
+   void ElasticityIntegrator::build()
    {
-      m_lambda->buildMFEMCoefficient();
-      m_mu->buildMFEMCoefficient();
-      m_bfi = std::make_unique<mfem::ElasticityIntegrator>(
-            m_lambda->getMFEMCoefficient(), m_mu->getMFEMCoefficient());
+      m_lambda->build();
+      m_mu->build();
+      m_bfi = std::make_unique<mfem::ElasticityIntegrator>(m_lambda->get(), m_mu->get());
    }
 
    mfem::BilinearFormIntegrator&
-   ElasticityIntegrator::getMFEMBilinearFormIntegrator()
+   ElasticityIntegrator::get()
    {
       assert(m_bfi);
       return *m_bfi;
    }
 
    mfem::BilinearFormIntegrator*
-   ElasticityIntegrator::releaseMFEMBilinearFormIntegrator()
+   ElasticityIntegrator::release()
    {
       return m_bfi.release();
    }

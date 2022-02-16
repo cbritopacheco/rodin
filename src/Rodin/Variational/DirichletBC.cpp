@@ -28,11 +28,10 @@ namespace Rodin::Variational
       m_essBdr = 0;
       m_essBdr[getBoundaryAttribute() - 1] = 1;
 
-      getValue().buildMFEMCoefficient();
+      getValue().build();
       pb.getSolution()
         .getHandle()
-        .ProjectBdrCoefficient(
-              getValue().getMFEMCoefficient(), m_essBdr);
+        .ProjectBdrCoefficient(getValue().get(), m_essBdr);
 
       // Keep track of the boundary attributes that have been projected
       pb.getEssentialBoundary()[getBoundaryAttribute() - 1] = 1;
@@ -54,11 +53,10 @@ namespace Rodin::Variational
       m_essBdr = 0;
       m_essBdr[getBoundaryAttribute() - 1] = 1;
 
-      getValue().buildMFEMVectorCoefficient();
+      getValue().build();
       pb.getSolution()
         .getHandle()
-        .ProjectBdrCoefficient(
-              getValue().getMFEMVectorCoefficient(), m_essBdr);
+        .ProjectBdrCoefficient(getValue().get(), m_essBdr);
 
       // Keep track of the boundary attributes that have been projected
       pb.getEssentialBoundary()[getBoundaryAttribute() - 1] = 1;

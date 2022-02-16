@@ -32,9 +32,9 @@ namespace Rodin::Variational::FormLanguage
 
          int getColumns() const override;
 
-         void buildMFEMMatrixCoefficient() override;
+         void build() override;
 
-         mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
+         mfem::MatrixCoefficient& get() override;
 
          virtual MatrixSum* copy() const noexcept override
          {

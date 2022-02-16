@@ -83,8 +83,8 @@ namespace Rodin::Variational
 
          int getRows() const override;
          int getColumns() const override;
-         void buildMFEMMatrixCoefficient() override;
-         mfem::MatrixCoefficient& getMFEMMatrixCoefficient() override;
+         void build() override;
+         mfem::MatrixCoefficient& get() override;
 
          Jacobian* copy() const noexcept override
          {

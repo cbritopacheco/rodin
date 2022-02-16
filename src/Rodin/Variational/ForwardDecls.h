@@ -36,6 +36,12 @@ namespace Rodin::Variational
 
    class IncompleteGridFunction;
 
+   template <class FEC>
+   class TrialFunction;
+
+   template <class FEC>
+   class TestFunction;
+
    /**
     * @brief Where the integration takes place.
     */

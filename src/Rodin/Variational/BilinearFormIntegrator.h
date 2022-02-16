@@ -10,7 +10,39 @@
 
 namespace Rodin::Variational
 {
-   class BilinearFormIntegratorBase : public FormLanguage::Base
+   namespace Internal
+   {
+      class BilinearFormIntegrator : public mfem::BilinearFormIntegrator
+      {
+         public:
+            virtual void AssembleElementMatrix(
+                  const mfem::FiniteElement& fe,
+                  mfem::ElementTransformation& Trans,
+                  mfem::DenseMatrix& elmat) = 0;
+      };
+
+      class MixedBilinearFormIntegrator : public mfem::BilinearFormIntegrator
+      {
+         public:
+            virtual void AssembleMixedElementMatrix(
+                  const mfem::FiniteElement& trial_fe,
+                  const mfem::FiniteElement& test_fe,
+                  mfem::ElementTransformation& Trans,
+                  mfem::DenseMatrix& elmat) = 0;
+
+            void AssembleElementMatrix2(
+                  const mfem::FiniteElement& trial_fe,
+                  const mfem::FiniteElement& test_fe,
+                  mfem::ElementTransformation& Trans,
+                  mfem::DenseMatrix& elmat) override
+            {
+               AssembleMixedElementMatrix(trial_fe, test_fe, Trans, elmat);
+            }
+      };
+   }
+
+   class BilinearFormIntegratorBase
+      : public FormLanguage::Buildable<mfem::BilinearFormIntegrator>
    {
       public:
          virtual ~BilinearFormIntegratorBase() = default;
@@ -23,12 +55,12 @@ namespace Rodin::Variational
          /**
           * @internal
           */
-         virtual void buildMFEMBilinearFormIntegrator() = 0;
+         virtual void build() override = 0;
 
          /**
           * @internal
           */
-         virtual mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() = 0;
+         virtual mfem::BilinearFormIntegrator& get() override = 0;
 
          /**
           * @brief Gets the integration region.
@@ -39,14 +71,13 @@ namespace Rodin::Variational
           * @internal
           * @brief Releases ownership of the mfem::BilinearFormIntegrator.
           *
-          * @note After this call, calling getMFEMBilinearFormIntegrator()
-          * will result in undefined behaviour.
+          * @note After this call, calling get() will result in undefined behaviour.
           *
           * @warning The BilinearFormIntegratorBase instance must still be kept
           * in memory since it might contain objects which the
           * mfem::BilinearFormIntegrator instance refers to.
           */
-         virtual mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() = 0;
+         virtual mfem::BilinearFormIntegrator* release() override = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
    };

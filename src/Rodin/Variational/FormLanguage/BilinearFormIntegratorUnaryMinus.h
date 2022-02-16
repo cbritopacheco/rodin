@@ -82,11 +82,11 @@ namespace Rodin::Variational::FormLanguage
             return getBFI().getAttributes();
          }
 
-         void buildMFEMBilinearFormIntegrator() override;
+         void build() override;
 
-         mfem::BilinearFormIntegrator& getMFEMBilinearFormIntegrator() override;
+         mfem::BilinearFormIntegrator& get() override;
 
-         mfem::BilinearFormIntegrator* releaseMFEMBilinearFormIntegrator() override;
+         mfem::BilinearFormIntegrator* release() override;
 
          BilinearFormIntegratorUnaryMinus* copy() const noexcept override
          {

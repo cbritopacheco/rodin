@@ -16,23 +16,23 @@ namespace Rodin::Variational
    {}
 
    void VectorBoundaryFluxLFIntegrator
-   ::buildMFEMLinearFormIntegrator()
+   ::build()
    {
-      m_f->buildMFEMCoefficient();
+      m_f->build();
       m_mfemLFI
          = std::make_unique<mfem::VectorBoundaryFluxLFIntegrator>(
-               m_f->getMFEMCoefficient());
+               m_f->get());
    }
 
    mfem::LinearFormIntegrator&
-   VectorBoundaryFluxLFIntegrator::getMFEMLinearFormIntegrator()
+   VectorBoundaryFluxLFIntegrator::get()
    {
       assert(m_mfemLFI);
       return *m_mfemLFI;
    }
 
    mfem::LinearFormIntegrator*
-   VectorBoundaryFluxLFIntegrator::releaseMFEMLinearFormIntegrator()
+   VectorBoundaryFluxLFIntegrator::release()
    {
       return m_mfemLFI.release();
    }
