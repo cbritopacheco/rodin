@@ -12,5 +12,6 @@
  * @brief Top level include for the Rodin mesh utilities.
  */
 #include "Mesh/Mesh.h"
+#include "Mesh/SubMesh.h"
 
 #endif

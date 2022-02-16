@@ -7,6 +7,7 @@
 #ifndef RODIN_MESH_MESH_H
 #define RODIN_MESH_MESH_H
 
+#include <set>
 #include <string>
 #include <filesystem>
 
@@ -114,6 +115,15 @@ namespace Rodin
           * will return 0 as the volume.
           */
          double getVolume(int attr);
+
+         SubMesh trim(int attr, int bdrLabel);
+
+         SubMesh trim(const std::set<int>& attrs, int bdrLabel);
+
+         virtual bool isSubMesh() const
+         {
+            return false;
+         }
 
          /**
           * @internal

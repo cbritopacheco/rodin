@@ -16,7 +16,8 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
+  // const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
+  const char* meshFile = "Omega.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -33,8 +34,6 @@ int main(int, char**)
   {
     BilinearForm bf(v.getFiniteElementSpace());
     bf = ElasticityIntegrator(lambda, mu).over(Interior);
-    // Set to zero where the function might not defined
-    v[Rodin::isNaN(v) || Rodin::isInf(v)] = 0.0;
     return bf(v, v);
   };
 
@@ -58,22 +57,36 @@ int main(int, char**)
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
-    // Finite element space
+    // Vector field finite element space over the whole domain
     int d = 2;
     H1 Vh(Omega, d);
 
+    // Trim the exterior part of the mesh to solve the elasticity system
+    SubMesh trimmed = Omega.trim(Exterior, Gamma);
+
+    // Build a finite element space over the trimmed mesh
+    H1 VhInt(trimmed, d);
+
     // Elasticity equation
-    GridFunction u(Vh);
-    Problem elasticity(u);
+    GridFunction uInt(VhInt);
+    Problem elasticity(uInt);
     elasticity = ElasticityIntegrator(lambda, mu).over(Interior)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     solver.solve(elasticity);
 
+    // Transfer solution back to extended domain
+    GridFunction u(Vh);
+    uInt.transfer(u);
+
     // Hilbert extension-regularization procedure
     GridFunction theta(Vh);
     auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
     auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+
+    u.save("u.gf");
+    theta.save("theta.gf");
+    Omega.save("Omega.mesh");
 
     H1 Ph(Omega);
     GridFunction w(Ph);
@@ -103,8 +116,8 @@ int main(int, char**)
     auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
-    auto mmgLs = MMG::Distancer2D().setInteriorDomains({ Interior })
-                                   .setActiveBorders({ Gamma0 })
+    auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior)
+                                   .setActiveBorder(Gamma0)
                                    .distance(mmgMesh);
 
     // Advect the level set function

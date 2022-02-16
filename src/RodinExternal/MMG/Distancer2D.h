@@ -89,6 +89,22 @@ namespace Rodin::External::MMG
       void redistance(ScalarSolution2D& sol) const;
 
       /**
+       * @brief Specifies which material reference is to be understood as
+       * the interior domains.
+       * @param[in] ref Interior material reference
+       * @returns Reference to self (for method chaining)
+       *
+       * By default, the interior elements are assumed to have the material
+       * reference 3.
+       *
+       * @see distance(Mesh2D&) const
+       */
+      Distancer2D& setInteriorDomain(const MaterialReference& ref)
+      {
+        return setInteriorDomain(std::set<MaterialReference>{ref});
+      }
+
+      /**
        * @brief Specifies which material references are to be understood as
        * the interior domains.
        * @param[in] refs Interior material references
@@ -99,7 +115,25 @@ namespace Rodin::External::MMG
        *
        * @see distance(Mesh2D&) const
        */
-      Distancer2D& setInteriorDomains(const std::set<MaterialReference>& refs);
+      Distancer2D& setInteriorDomain(const std::set<MaterialReference>& refs);
+
+      /**
+       * @brief Specifies the active border of the mesh.
+       * @returns Reference to self (for method chaining)
+       *
+       * An active border (in 2D) is a subset of the bounding box boundary
+       * where the level set function will be equal to zero.
+       *
+       * This implicitly enables active border mode.
+       *
+       * By default, all the bounding box boundary is inactive.
+       *
+       * @see distance(Mesh2D&) const
+       */
+      Distancer2D& setActiveBorder(const MaterialReference& ref)
+      {
+        return setActiveBorder(std::set<MaterialReference>{ref});
+      }
 
       /**
        * @brief Specifies the active borders of the mesh.
@@ -114,7 +148,7 @@ namespace Rodin::External::MMG
        *
        * @see distance(Mesh2D&) const
        */
-      Distancer2D& setActiveBorders(const std::set<MaterialReference>& refs);
+      Distancer2D& setActiveBorder(const std::set<MaterialReference>& refs);
 
       /**
        * @brief Specifies that the whole bounding box boundary will be active.

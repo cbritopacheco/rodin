@@ -19,7 +19,7 @@ namespace Rodin::External::MMG
       m_mshdist(MSHDIST_EXECUTABLE)
   {}
 
-  Distancer2D& Distancer2D::setInteriorDomains(
+  Distancer2D& Distancer2D::setInteriorDomain(
       const std::set<MaterialReference>& refs)
   {
     m_interiorDomains = refs;
@@ -32,7 +32,7 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  Distancer2D& Distancer2D::setActiveBorders(const std::set<MaterialReference>& refs)
+  Distancer2D& Distancer2D::setActiveBorder(const std::set<MaterialReference>& refs)
   {
     assert(refs.size() > 0);
     m_activeBorders = refs;
