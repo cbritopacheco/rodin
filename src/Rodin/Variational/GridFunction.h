@@ -302,15 +302,22 @@ namespace Rodin::Variational
             return *this;
          }
 
+         /**
+          * @brief Transfers the grid function from one finite element space to
+          * another.
+          */
          template <class OtherFEC>
          void transfer(GridFunction<OtherFEC>& other)
          {
             assert(getFiniteElementSpace().getRangeDimension() ==
                   other.getFiniteElementSpace().getRangeDimension());
-            assert(getFiniteElementSpace().getFES().GetOrdering() ==
-                  getFiniteElementSpace().getFES().GetOrdering());
             if (getFiniteElementSpace().getMesh().isSubMesh())
             {
+               // If we are here the this means that we are in a submesh of the
+               // underlying target finite element space.
+               // Hence we should seek out to copy the grid function at the
+               // corresponding nodes given by the vertex map given by the
+               // Submesh object.
                auto& submesh = static_cast<SubMesh&>(getFiniteElementSpace().getMesh());
                if (&submesh.getParent() == &other.getFiniteElementSpace().getMesh())
                {
@@ -326,6 +333,9 @@ namespace Rodin::Variational
                   {
                      int nv = getFiniteElementSpace().getFES().GetNV();
                      int pnv = other.getFiniteElementSpace().getFES().GetNV();
+
+                     assert(getFiniteElementSpace().getFES().GetOrdering() ==
+                              getFiniteElementSpace().getFES().GetOrdering());
                      switch(getFiniteElementSpace().getFES().GetOrdering())
                      {
                         case mfem::Ordering::byNODES:
@@ -348,7 +358,12 @@ namespace Rodin::Variational
             }
             else
             {
-               Alert::Exception("Unhandled case").raise();
+               Alert::Exception("Unimplemented. Sorry.").raise();
+               // If the meshes are equal or where obtained from refinements
+               // one could use the mfem functionality to make a GridTransfer.
+               // Alternatively, if the mesh is equal but the finite element
+               // spaces are not, mfem also contains the TransferOperator class
+               // which can come in useful.
             }
          }
 
