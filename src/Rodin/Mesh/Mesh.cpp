@@ -76,6 +76,8 @@ namespace Rodin
 
    SubMesh Mesh::trim(const std::set<int>& attrs, int bdrLabel)
    {
+      assert(attrs.size() > 0);
+
       // Count the number of elements in the trimmed mesh
       int ne = 0;
       for (int i = 0; i < getHandle().GetNE(); i++)
