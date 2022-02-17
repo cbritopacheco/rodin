@@ -45,14 +45,12 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 600;
-  size_t maxSearchIt = 5;
-  size_t activeBorderIt = 5;
-  double stepTolerance = 1e-4;
-  double eps = 1e-12;
+  size_t maxIt = 300;
+  size_t activeBorderIt = 10;
+  double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(2 * hmax * hmax);
+  auto alpha = ScalarCoefficient(hmax * hmax);
 
   std::vector<double> obj;
 
@@ -77,7 +75,7 @@ int main(int, char**)
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     solver.solve(elasticity);
 
-    // Transfer solution back to extended domain
+    // Transfer solution back to original domain
     GridFunction u(Vh);
     uInt.transfer(u);
 
@@ -103,67 +101,31 @@ int main(int, char**)
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    size_t searchIt = 0;
+    // Convert data types to mmg types
+    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+
+    // Generate signed distance function
+    auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
+    if (i < activeBorderIt)
+      dist.setActiveBorder(Gamma0);
+    auto mmgLs = dist.distance(mmgMesh);
+
+    // Advect the level set function
     double dt = Omega.getMaximumDisplacement(theta);
-    double newObj, oldObj;
-    while(searchIt++ < maxSearchIt)
-    {
-      Mesh OmegaCandidate(Omega);
+    MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
-      // Convert data types to mmg types
-      auto mmgMesh = Cast(OmegaCandidate).to<MMG::Mesh2D>();
-      auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+    // Recover the implicit domain
+    auto [mmgImplicit, _] =
+      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
+                                   .split(Exterior, {Interior, Exterior})
+                                   .setRMC(1e-3)
+                                   .setHMax(hmax)
+                                   .setBoundaryReference(Gamma)
+                                   .discretize(mmgLs);
 
-      // Generate signed distance function
-      auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
-      if (i < activeBorderIt)
-        dist.setActiveBorder(Gamma0);
-      auto mmgLs = dist.distance(mmgMesh);
-
-      // Advect the level set function
-      MMG::Advect2D advect(mmgLs, mmgVel);
-      advect.step(dt);
-
-      // Recover the implicit domain
-      auto [mmgImplicit, _] =
-        MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                     .split(Exterior, {Interior, Exterior})
-                                     .setRMC(1e-3)
-                                     .setHMax(hmax)
-                                     .setBoundaryReference(Gamma)
-                                     .discretize(mmgLs);
-
-        // Convert back to Rodin data type
-        OmegaCandidate = Cast(mmgImplicit).to<Rodin::Mesh>();
-
-        // Build a finite element space over the trimmed mesh
-        H1 VhInt(trimmed, d);
-
-        // Elasticity equation
-        GridFunction uInt(VhInt);
-        Problem elasticity(uInt);
-        elasticity = ElasticityIntegrator(lambda, mu)
-                   + DirichletBC(GammaD, VectorCoefficient{0, 0})
-                   + NeumannBC(GammaN, VectorCoefficient{0, -1});
-        solver.solve(elasticity);
-
-        GridFunction uc(Vh);
-        uInt.transfer(uc);
-
-        oldObj = newObj;
-        newObj =  compliance(uc) + ell.getValue() * OmegaCandidate.getVolume(Interior);
-
-        if (newObj < oldObj + stepTolerance / (i + 1) * abs(obj[i]))
-        {
-          Omega = std::move(OmegaCandidate);
-          break;
-        }
-        else
-        {
-          dt /= 2.0;
-          continue;
-        }
-      }
+    // Convert back to Rodin data type
+    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
     // Save mesh
     Omega.save("Omega.mesh");
