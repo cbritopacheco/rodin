@@ -45,11 +45,14 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 1000;
+  size_t maxIt = 600;
+  size_t maxSearchIt = 5;
+  size_t activeBorderIt = 5;
+  double stepTolerance = 1e-4;
   double eps = 1e-12;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(hmax * hmax);
+  auto alpha = ScalarCoefficient(2 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -92,7 +95,6 @@ int main(int, char**)
             + VectorMassIntegrator()
             - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
-            + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
@@ -101,15 +103,9 @@ int main(int, char**)
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    double min = theta.min(),
-           max = theta.max();
-    double linf = abs(min) > max ? abs(min) : max;
-    double dt = hmax / linf;
-
-    int maxSearchIt = 5;
-    int searchIt = 0;
+    size_t searchIt = 0;
+    double dt = Omega.getMaximumDisplacement(theta);
     double newObj, oldObj;
-
     while(searchIt++ < maxSearchIt)
     {
       Mesh OmegaCandidate(Omega);
@@ -120,7 +116,7 @@ int main(int, char**)
 
       // Generate signed distance function
       auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
-      if (i < 5)
+      if (i < activeBorderIt)
         dist.setActiveBorder(Gamma0);
       auto mmgLs = dist.distance(mmgMesh);
 
@@ -157,7 +153,7 @@ int main(int, char**)
         oldObj = newObj;
         newObj =  compliance(uc) + ell.getValue() * OmegaCandidate.getVolume(Interior);
 
-        if (newObj < oldObj)
+        if (newObj < oldObj + stepTolerance / (i + 1) * abs(obj[i]))
         {
           Omega = std::move(OmegaCandidate);
           break;
@@ -173,7 +169,7 @@ int main(int, char**)
     Omega.save("Omega.mesh");
 
     // Test for convergence
-    if ((obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps))
+    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
       std::cout << "Convergence!" << std::endl;
       break;
