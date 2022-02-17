@@ -7,6 +7,7 @@
 #ifndef RODIN_MESH_MESH_H
 #define RODIN_MESH_MESH_H
 
+#include <set>
 #include <string>
 #include <filesystem>
 
@@ -114,6 +115,36 @@ namespace Rodin
           * will return 0 as the volume.
           */
          double getVolume(int attr);
+
+         /**
+          * @brief Trims the elements with the given material reference.
+          *
+          * This function will trim the current mesh and return a Submesh
+          * object containing the elements which were not trimmed from the
+          * original mesh.
+          */
+         SubMesh trim(int attr, int bdrLabel);
+
+         /**
+          * @brief Trims the elements with the given material references.
+          *
+          * This function will trim the current mesh and return a Submesh
+          * object containing the elements which were not trimmed from the
+          * original mesh.
+          */
+         SubMesh trim(const std::set<int>& attrs, int bdrLabel);
+
+         /**
+          * @brief Indicates whether the mesh is a submesh or not.
+          * @returns True if mesh is a submesh, false otherwise.
+          *
+          * A Mesh which is also a Submesh may be casted into down to access
+          * the Submesh functionality.
+          */
+         virtual bool isSubMesh() const
+         {
+            return false;
+         }
 
          /**
           * @internal

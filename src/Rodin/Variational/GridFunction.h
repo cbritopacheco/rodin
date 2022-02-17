@@ -16,6 +16,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Core.h"
+#include "Rodin/Mesh/SubMesh.h"
 
 #include "ForwardDecls.h"
 #include "Restriction.h"
@@ -223,7 +224,7 @@ namespace Rodin::Variational
             return {m_data.get(), m_size};
          }
 
-         GridFunction<FEC>& operator=(double v)
+         GridFunction& operator=(double v)
          {
             getHandle() = v;
             return *this;
@@ -245,7 +246,7 @@ namespace Rodin::Variational
           * @param[in] s Scalar coefficient to project
           * @returns Reference to self
           */
-         GridFunction<FEC>& operator=(const ScalarCoefficientBase& s)
+         GridFunction& operator=(const ScalarCoefficientBase& s)
          {
             assert(getFiniteElementSpace().getRangeDimension() == 1);
             std::unique_ptr<ScalarCoefficientBase> sCopy(s.copy());
@@ -260,7 +261,7 @@ namespace Rodin::Variational
           * @param[in] s Scalar coefficient to project
           * @returns Reference to self
           */
-         GridFunction<FEC>& operator=(const Restriction<ScalarCoefficientBase>& s)
+         GridFunction& operator=(const Restriction<ScalarCoefficientBase>& s)
          {
             assert(getFiniteElementSpace().getRangeDimension() == 1);
             std::unique_ptr<ScalarCoefficientBase> sCopy(
@@ -292,7 +293,7 @@ namespace Rodin::Variational
           * @param[in] v Scalar coefficient to project
           * @returns Reference to self
           */
-         GridFunction<FEC>& operator=(const VectorCoefficientBase& v)
+         GridFunction& operator=(const VectorCoefficientBase& v)
          {
             assert(getFiniteElementSpace().getRangeDimension() == v.getDimension());
             std::unique_ptr<VectorCoefficientBase> vCopy(v.copy());
@@ -301,13 +302,78 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction<FEC>& operator*=(double t) override
+         /**
+          * @brief Transfers the grid function from one finite element space to
+          * another.
+          */
+         template <class OtherFEC>
+         void transfer(GridFunction<OtherFEC>& other)
+         {
+            assert(getFiniteElementSpace().getRangeDimension() ==
+                  other.getFiniteElementSpace().getRangeDimension());
+            if (getFiniteElementSpace().getMesh().isSubMesh())
+            {
+               // If we are here the this means that we are in a submesh of the
+               // underlying target finite element space.
+               // Hence we should seek out to copy the grid function at the
+               // corresponding nodes given by the vertex map given by the
+               // Submesh object.
+               auto& submesh = static_cast<SubMesh&>(getFiniteElementSpace().getMesh());
+               if (&submesh.getParent() == &other.getFiniteElementSpace().getMesh())
+               {
+                  int vdim = getFiniteElementSpace().getRangeDimension();
+                  const auto& s2pv = submesh.getVertexMap();
+                  if (vdim == 1)
+                  {
+                     int size = getHandle().Size();
+                     for (int i = 0; i < size; i++)
+                        other.getHandle()[i] = getHandle()[s2pv.at(i)];
+                  }
+                  else
+                  {
+                     int nv = getFiniteElementSpace().getFES().GetNV();
+                     int pnv = other.getFiniteElementSpace().getFES().GetNV();
+
+                     assert(getFiniteElementSpace().getFES().GetOrdering() ==
+                              getFiniteElementSpace().getFES().GetOrdering());
+                     switch(getFiniteElementSpace().getFES().GetOrdering())
+                     {
+                        case mfem::Ordering::byNODES:
+                        {
+                           for (int i = 0; i < vdim; i++)
+                              for (int j = 0; j < nv; j++)
+                                 other.getHandle()[s2pv.at(j) + i * pnv] = getHandle()[j + i * nv];
+                           return;
+                        }
+                        case mfem::Ordering::byVDIM:
+                        {
+                           for (int i = 0; i < nv; i++)
+                              for (int j = 0; j < vdim; j++)
+                                 other.getHandle()[s2pv.at(i) * vdim + j] = getHandle()[i * vdim + j];
+                           return;
+                        }
+                     }
+                  }
+               }
+            }
+            else
+            {
+               Alert::Exception("Unimplemented. Sorry.").raise();
+               // If the meshes are equal or where obtained from refinements
+               // one could use the mfem functionality to make a GridTransfer.
+               // Alternatively, if the mesh is equal but the finite element
+               // spaces are not, mfem also contains the TransferOperator class
+               // which can come in useful.
+            }
+         }
+
+         GridFunction& operator*=(double t) override
          {
             m_gf *= t;
             return *this;
          }
 
-         GridFunction<FEC>& operator/=(double t) override
+         GridFunction& operator/=(double t) override
          {
             m_gf /= t;
             return *this;

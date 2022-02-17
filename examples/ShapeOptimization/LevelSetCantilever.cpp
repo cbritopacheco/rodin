@@ -33,8 +33,6 @@ int main(int, char**)
   {
     BilinearForm bf(v.getFiniteElementSpace());
     bf = ElasticityIntegrator(lambda, mu).over(Interior);
-    // Set to zero where the function might not defined
-    v[Rodin::isNaN(v) || Rodin::isInf(v)] = 0.0;
     return bf(v, v);
   };
 
@@ -47,28 +45,38 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 200;
+  size_t maxIt = 1000;
   double eps = 1e-12;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(4 * hmax * hmax);
+  auto alpha = ScalarCoefficient(hmax * hmax);
 
   std::vector<double> obj;
 
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
-    // Finite element space
+    // Vector field finite element space over the whole domain
     int d = 2;
     H1 Vh(Omega, d);
 
+    // Trim the exterior part of the mesh to solve the elasticity system
+    SubMesh trimmed = Omega.trim(Exterior, Gamma);
+
+    // Build a finite element space over the trimmed mesh
+    H1 VhInt(trimmed, d);
+
     // Elasticity equation
-    GridFunction u(Vh);
-    Problem elasticity(u);
-    elasticity = ElasticityIntegrator(lambda, mu).over(Interior)
+    GridFunction uInt(VhInt);
+    Problem elasticity(uInt);
+    elasticity = ElasticityIntegrator(lambda, mu)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     solver.solve(elasticity);
+
+    // Transfer solution back to extended domain
+    GridFunction u(Vh);
+    uInt.transfer(u);
 
     // Hilbert extension-regularization procedure
     GridFunction theta(Vh);
@@ -98,30 +106,68 @@ int main(int, char**)
     double linf = abs(min) > max ? abs(min) : max;
     double dt = hmax / linf;
 
-    // Convert data types to mmg types
-    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+    int maxSearchIt = 5;
+    int searchIt = 0;
+    double newObj, oldObj;
 
-    // Generate signed distance function
-    auto mmgLs = MMG::Distancer2D().setInteriorDomains({ Interior })
-                                   .setActiveBorders({ Gamma0 })
-                                   .distance(mmgMesh);
+    while(searchIt++ < maxSearchIt)
+    {
+      Mesh OmegaCandidate(Omega);
 
-    // Advect the level set function
-    MMG::Advect2D advect(mmgLs, mmgVel);
-    advect.step(dt);
+      // Convert data types to mmg types
+      auto mmgMesh = Cast(OmegaCandidate).to<MMG::Mesh2D>();
+      auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
-    // Recover the implicit domain
-    auto [mmgImplicit, _] =
-      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                   .split(Exterior, {Interior, Exterior})
-                                   .setRMC(1e-5)
-                                   .setHMax(hmax)
-                                   .setBoundaryReference(Gamma)
-                                   .discretize(mmgLs);
+      // Generate signed distance function
+      auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
+      if (i < 5)
+        dist.setActiveBorder(Gamma0);
+      auto mmgLs = dist.distance(mmgMesh);
 
-    // Convert back to Rodin data type
-    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
+      // Advect the level set function
+      MMG::Advect2D advect(mmgLs, mmgVel);
+      advect.step(dt);
+
+      // Recover the implicit domain
+      auto [mmgImplicit, _] =
+        MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
+                                     .split(Exterior, {Interior, Exterior})
+                                     .setRMC(1e-3)
+                                     .setHMax(hmax)
+                                     .setBoundaryReference(Gamma)
+                                     .discretize(mmgLs);
+
+        // Convert back to Rodin data type
+        OmegaCandidate = Cast(mmgImplicit).to<Rodin::Mesh>();
+
+        // Build a finite element space over the trimmed mesh
+        H1 VhInt(trimmed, d);
+
+        // Elasticity equation
+        GridFunction uInt(VhInt);
+        Problem elasticity(uInt);
+        elasticity = ElasticityIntegrator(lambda, mu)
+                   + DirichletBC(GammaD, VectorCoefficient{0, 0})
+                   + NeumannBC(GammaN, VectorCoefficient{0, -1});
+        solver.solve(elasticity);
+
+        GridFunction uc(Vh);
+        uInt.transfer(uc);
+
+        oldObj = newObj;
+        newObj =  compliance(uc) + ell.getValue() * OmegaCandidate.getVolume(Interior);
+
+        if (newObj < oldObj)
+        {
+          Omega = std::move(OmegaCandidate);
+          break;
+        }
+        else
+        {
+          dt /= 2.0;
+          continue;
+        }
+      }
 
     // Save mesh
     Omega.save("Omega.mesh");

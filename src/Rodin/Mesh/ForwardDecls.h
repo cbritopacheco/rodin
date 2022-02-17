@@ -10,6 +10,7 @@
 namespace Rodin
 {
    class Mesh;
+   class SubMesh;
 }
 
 #endif

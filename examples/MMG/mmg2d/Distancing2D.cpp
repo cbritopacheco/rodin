@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     int Interior = 1;
 
     auto box = Mesh2D::load(argv[1]);
-    auto ls = Distancer2D().setInteriorDomains({ Interior }).distance(box);
+    auto ls = Distancer2D().setInteriorDomain({ Interior }).distance(box);
 
     ls.save("ls.sol");
     box.save("ls.sol.mesh");
