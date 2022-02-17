@@ -136,16 +136,20 @@ components:
             + DirichletBC(Gamma, g);
   @endcode
 
-  In this case the `DiffusionIntegrator()` object represents the bilinear term
+  In this case the @ref Rodin::Variational::DiffusionIntegrator() "DiffusionIntegrator()"
+  object represents the bilinear term
   @f[
     \int_\Omega \nabla u \cdot \nabla v \ dx \ ,
   @f]
-  while the `DomainLFIntegrator(f)` object represents the linear term
+  while the @ref Rodin::Variational::DomainLFIntegrator() "DomainLFIntegrator()"
+  object represents the linear term
   @f[
     \int_\Omega f v \ dx .
   @f]
-  Lastly, the `DirichletBC(Gamma, 0)` object specifies that the solution will
-  satisfy the homogenous Dirichlet condition:
+  Lastly, the
+  @ref Rodin::Variational::DirichletBC<ScalarCoefficientBase>(int, const ScalarCoefficientBase&)
+  "DirichletBC(Gamma, g)" object specifies that the solution will satisfy the
+  homogenous Dirichlet condition:
   @f[
     u = 0 \quad \text{on} \quad \Gamma .
   @f]
