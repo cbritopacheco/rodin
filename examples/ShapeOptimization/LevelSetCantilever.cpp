@@ -45,8 +45,9 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 1000;
-  double eps = 1e-12;
+  size_t maxIt = 300;
+  size_t activeBorderIt = 10;
+  double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
   auto alpha = ScalarCoefficient(hmax * hmax);
@@ -74,7 +75,7 @@ int main(int, char**)
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     solver.solve(elasticity);
 
-    // Transfer solution back to extended domain
+    // Transfer solution back to original domain
     GridFunction u(Vh);
     uInt.transfer(u);
 
@@ -92,7 +93,6 @@ int main(int, char**)
             + VectorMassIntegrator()
             - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
-            + DirichletBC(GammaD, VectorCoefficient{0, 0})
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
@@ -101,79 +101,37 @@ int main(int, char**)
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    double min = theta.min(),
-           max = theta.max();
-    double linf = abs(min) > max ? abs(min) : max;
-    double dt = hmax / linf;
+    // Convert data types to mmg types
+    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
-    int maxSearchIt = 5;
-    int searchIt = 0;
-    double newObj, oldObj;
+    // Generate signed distance function
+    auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
+    if (i < activeBorderIt)
+      dist.setActiveBorder(Gamma0);
+    auto mmgLs = dist.distance(mmgMesh);
 
-    while(searchIt++ < maxSearchIt)
-    {
-      Mesh OmegaCandidate(Omega);
+    // Advect the level set function
+    double dt = Omega.getMaximumDisplacement(theta);
+    MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
-      // Convert data types to mmg types
-      auto mmgMesh = Cast(OmegaCandidate).to<MMG::Mesh2D>();
-      auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+    // Recover the implicit domain
+    auto [mmgImplicit, _] =
+      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
+                                   .split(Exterior, {Interior, Exterior})
+                                   .setRMC(1e-3)
+                                   .setHMax(hmax)
+                                   .setBoundaryReference(Gamma)
+                                   .discretize(mmgLs);
 
-      // Generate signed distance function
-      auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
-      if (i < 5)
-        dist.setActiveBorder(Gamma0);
-      auto mmgLs = dist.distance(mmgMesh);
-
-      // Advect the level set function
-      MMG::Advect2D advect(mmgLs, mmgVel);
-      advect.step(dt);
-
-      // Recover the implicit domain
-      auto [mmgImplicit, _] =
-        MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                     .split(Exterior, {Interior, Exterior})
-                                     .setRMC(1e-3)
-                                     .setHMax(hmax)
-                                     .setBoundaryReference(Gamma)
-                                     .discretize(mmgLs);
-
-        // Convert back to Rodin data type
-        OmegaCandidate = Cast(mmgImplicit).to<Rodin::Mesh>();
-
-        // Build a finite element space over the trimmed mesh
-        H1 VhInt(trimmed, d);
-
-        // Elasticity equation
-        GridFunction uInt(VhInt);
-        Problem elasticity(uInt);
-        elasticity = ElasticityIntegrator(lambda, mu)
-                   + DirichletBC(GammaD, VectorCoefficient{0, 0})
-                   + NeumannBC(GammaN, VectorCoefficient{0, -1});
-        solver.solve(elasticity);
-
-        GridFunction uc(Vh);
-        uInt.transfer(uc);
-
-        oldObj = newObj;
-        newObj =  compliance(uc) + ell.getValue() * OmegaCandidate.getVolume(Interior);
-
-        if (newObj < oldObj)
-        {
-          Omega = std::move(OmegaCandidate);
-          break;
-        }
-        else
-        {
-          dt /= 2.0;
-          continue;
-        }
-      }
+    // Convert back to Rodin data type
+    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
 
     // Save mesh
     Omega.save("Omega.mesh");
 
     // Test for convergence
-    if ((obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps))
+    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
       std::cout << "Convergence!" << std::endl;
       break;

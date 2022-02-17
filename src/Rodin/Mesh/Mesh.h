@@ -138,8 +138,16 @@ namespace Rodin
           * @brief Indicates whether the mesh is a submesh or not.
           * @returns True if mesh is a submesh, false otherwise.
           *
-          * A Mesh which is also a Submesh may be casted into down to access
-          * the Submesh functionality.
+          * A Mesh which is also a SubMesh may be casted into down to access
+          * the SubMesh functionality. For example:
+          * @code{.cpp}
+          * if (mesh.isSubMesh())
+          * {
+          *    // Cast is well defined
+          *    auto& submesh = static_cast<SubMesh&>(mesh);
+          * }
+          * @endcode
+          *
           */
          virtual bool isSubMesh() const
          {
