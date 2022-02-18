@@ -42,8 +42,6 @@ namespace Rodin::Variational
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
     * | @f$ g @f$            | ScalarCoefficient                             |
     *
-    * @see @ref examples-variational-poisson
-    *
     */
    template <>
    class DirichletBC<ScalarCoefficientBase>

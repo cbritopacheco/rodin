@@ -147,9 +147,9 @@ components:
     \int_\Omega f v \ dx .
   @f]
   Lastly, the
-  @ref Rodin::Variational::DirichletBC<ScalarCoefficientBase>(int, const ScalarCoefficientBase&)
-  "DirichletBC(Gamma, g)" object specifies that the solution will satisfy the
-  homogenous Dirichlet condition:
+  @ref Rodin::Variational::DirichletBC<ScalarCoefficientBase>() "DirichletBC(Gamma, g)"
+  object specifies that the solution will satisfy the homogenous Dirichlet
+  condition:
   @f[
     u = 0 \quad \text{on} \quad \Gamma .
   @f]
