@@ -12,7 +12,7 @@ namespace Rodin::Variational
             const mfem::FiniteElement& fe,
             mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
       {
-         m_bfi->getElementMatrix(fe, trans, mat);
+         m_bfi->getElementMatrix(fe, fe, trans, mat);
       }
 
       void BilinearFormIntegrator::AssembleElementMatrix2(

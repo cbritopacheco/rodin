@@ -75,10 +75,10 @@ namespace Rodin::Variational
          }
 
          virtual void getElementMatrix(
-               const mfem::FiniteElement& trial,
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            m_bfi.AssembleElementMatrix(trial, trans, mat);
+            m_bfi.AssembleElementMatrix2(trial, test, trans, mat);
          }
 
          DiffusionIntegrator* copy() const noexcept override

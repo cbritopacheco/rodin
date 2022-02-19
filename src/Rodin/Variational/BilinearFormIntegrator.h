@@ -47,19 +47,8 @@ namespace Rodin::Variational
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
          virtual void getElementMatrix(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
-         {
-            assert(false);
-         }
-
-
-         virtual void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
-         {
-            assert(false);
-         }
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) = 0;
 
          std::unique_ptr<Internal::BilinearFormIntegrator> build() const override
          {

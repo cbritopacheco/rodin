@@ -81,9 +81,10 @@ namespace Rodin::Variational
          }
 
          void getElementMatrix(
-               const mfem::FiniteElement& trial,
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
+            assert(&trial == &test);
             m_bfi.AssembleElementMatrix(trial, trans, mat);
          }
 

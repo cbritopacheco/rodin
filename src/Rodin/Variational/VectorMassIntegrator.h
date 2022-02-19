@@ -62,10 +62,10 @@ namespace Rodin::Variational
          }
 
          void getElementMatrix(
-               const mfem::FiniteElement& trial,
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            m_mfemBFI.AssembleElementMatrix(trial, trans, mat);
+            m_mfemBFI.AssembleElementMatrix2(trial, test, trans, mat);
          }
 
          VectorMassIntegrator* copy() const noexcept override
