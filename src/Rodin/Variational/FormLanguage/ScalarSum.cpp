@@ -25,19 +25,10 @@ namespace Rodin::Variational::FormLanguage
       return *m_rhs;
    }
 
-   void ScalarSum::build()
+   double ScalarSum::getValue(
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) 
    {
-      m_lhs->build();
-      m_rhs->build();
-      m_mfemCoefficient.emplace(
-            m_lhs->get(),
-            m_rhs->get());
-   }
-
-   mfem::Coefficient& ScalarSum::get()
-   {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
+      return m_lhs->getValue(trans, ip) + m_rhs->getValue(trans, ip);
    }
 
    ScalarSum

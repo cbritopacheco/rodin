@@ -14,29 +14,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   namespace Internal
-   {
-      class LFIUnaryMinus : public mfem::LinearFormIntegrator
-      {
-         public:
-            LFIUnaryMinus(mfem::LinearFormIntegrator& lfi)
-               : m_lfi(lfi)
-            {}
-
-            void AssembleRHSElementVect(
-                  const mfem::FiniteElement& el,
-                  mfem::ElementTransformation& Tr,
-                  mfem::Vector& elvect)
-            {
-               m_lfi.AssembleRHSElementVect(el, Tr, elvect);
-               elvect.Neg();
-            }
-
-         private:
-            mfem::LinearFormIntegrator& m_lfi;
-      };
-   }
-
    /**
     * @internal
     */
@@ -90,11 +67,14 @@ namespace Rodin::Variational::FormLanguage
             return getLFI().getIntegratorRegion();
          }
 
-         void build() override;
-
-         mfem::LinearFormIntegrator& get() override;
-
-         mfem::LinearFormIntegrator* release() override;
+         void getElementVector(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               mfem::Vector& vec) override
+         {
+            m_lfi->getElementVector(fe, trans, vec);
+            vec *= -1.0;
+         }
 
          LinearFormIntegratorUnaryMinus* copy() const noexcept override
          {
@@ -103,7 +83,6 @@ namespace Rodin::Variational::FormLanguage
 
       private:
          std::unique_ptr<LinearFormIntegratorBase> m_lfi;
-         std::unique_ptr<Internal::LFIUnaryMinus> m_mfemLFI;
    };
 
    LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>

@@ -9,33 +9,17 @@ namespace Rodin::Variational
    {}
 
    VectorMassIntegrator::VectorMassIntegrator(const ScalarCoefficientBase& lambda)
-      : m_lambda(lambda.copy())
+      : m_lambda(lambda.copy()),
+        m_mfemLambda(lambda.build()),
+        m_mfemBFI(*m_mfemLambda)
    {}
 
    VectorMassIntegrator::VectorMassIntegrator(const VectorMassIntegrator& other)
       :  m_attr(other.m_attr),
-         m_lambda(other.m_lambda->copy())
+         m_lambda(other.m_lambda->copy()),
+         m_mfemLambda(m_lambda->build()),
+         m_mfemBFI(*m_mfemLambda)
    {}
-
-   void VectorMassIntegrator::build()
-   {
-      m_lambda->build();
-      m_mfemBFI
-         = std::make_unique<mfem::VectorMassIntegrator>(
-               m_lambda->get());
-   }
-
-   mfem::BilinearFormIntegrator&
-   VectorMassIntegrator::get()
-   {
-      assert(m_mfemBFI);
-      return *m_mfemBFI;
-   }
-
-   mfem::BilinearFormIntegrator* VectorMassIntegrator::release()
-   {
-      return m_mfemBFI.release();
-   }
 }
 
 

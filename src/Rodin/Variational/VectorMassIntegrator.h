@@ -61,11 +61,12 @@ namespace Rodin::Variational
             return *this;
          }
 
-         void build() override;
-
-         mfem::BilinearFormIntegrator& get() override;
-
-         mfem::BilinearFormIntegrator* release() override;
+         void getElementMatrix(
+               const mfem::FiniteElement& trial,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+         {
+            m_mfemBFI.AssembleElementMatrix(trial, trans, mat);
+         }
 
          VectorMassIntegrator* copy() const noexcept override
          {
@@ -75,7 +76,9 @@ namespace Rodin::Variational
       private:
          std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
-         std::unique_ptr<mfem::VectorMassIntegrator> m_mfemBFI;
+
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemLambda;
+         mfem::VectorMassIntegrator m_mfemBFI;
    };
 
 }

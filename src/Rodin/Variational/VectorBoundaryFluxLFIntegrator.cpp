@@ -6,34 +6,16 @@ namespace Rodin::Variational
 {
    VectorBoundaryFluxLFIntegrator::VectorBoundaryFluxLFIntegrator(
          const ScalarCoefficientBase& f)
-      :  m_f(f.copy())
+      :  m_f(f.copy()),
+         m_mfemScalar(m_f->build()),
+         m_mfemLFI(*m_mfemScalar)
    {}
 
    VectorBoundaryFluxLFIntegrator
    ::VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other)
       : m_attr(other.m_attr),
-        m_f(other.m_f->copy())
+        m_f(other.m_f->copy()),
+        m_mfemScalar(m_f->build()),
+        m_mfemLFI(*m_mfemScalar)
    {}
-
-   void VectorBoundaryFluxLFIntegrator
-   ::build()
-   {
-      m_f->build();
-      m_mfemLFI
-         = std::make_unique<mfem::VectorBoundaryFluxLFIntegrator>(
-               m_f->get());
-   }
-
-   mfem::LinearFormIntegrator&
-   VectorBoundaryFluxLFIntegrator::get()
-   {
-      assert(m_mfemLFI);
-      return *m_mfemLFI;
-   }
-
-   mfem::LinearFormIntegrator*
-   VectorBoundaryFluxLFIntegrator::release()
-   {
-      return m_mfemLFI.release();
-   }
 }

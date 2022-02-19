@@ -38,7 +38,7 @@ int main(int, char**)
   double eps = 1e-6;
   double hmax = 0.1;
   auto ell = ScalarCoefficient(5);
-  auto alpha = ScalarCoefficient(hmax);
+  auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
 

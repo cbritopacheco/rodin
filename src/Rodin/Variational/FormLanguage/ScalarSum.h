@@ -28,9 +28,8 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getRHS();
 
-         void build() override;
-
-         mfem::Coefficient& get() override;
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          virtual ScalarSum* copy() const noexcept override
          {
@@ -40,7 +39,6 @@ namespace Rodin::Variational::FormLanguage
       private:
          std::unique_ptr<ScalarCoefficientBase> m_lhs;
          std::unique_ptr<ScalarCoefficientBase> m_rhs;
-         std::optional<mfem::SumCoefficient> m_mfemCoefficient;
    };
 
    ScalarSum

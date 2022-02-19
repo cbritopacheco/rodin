@@ -38,9 +38,13 @@ namespace Rodin::Variational
 
          int getColumns() const override;
 
-         void build() override;
-
-         mfem::MatrixCoefficient& get() override;
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         {
+            m_matrix->getValue(value, trans, ip);
+            value.Transpose();
+         }
 
          Transpose* copy() const noexcept override
          {
@@ -49,7 +53,6 @@ namespace Rodin::Variational
 
       private:
          std::unique_ptr<MatrixCoefficientBase> m_matrix;
-         std::optional<mfem::TransposeMatrixCoefficient> m_mfemMatrixCoefficient;
    };
 }
 

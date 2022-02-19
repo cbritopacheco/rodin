@@ -17,31 +17,16 @@ namespace Rodin::Variational
    {}
 
    DiffusionIntegrator::DiffusionIntegrator(const ScalarCoefficientBase& lambda)
-      : m_lambda(lambda.copy())
+      :  m_lambda(lambda.copy()),
+         m_mfemLambda(m_lambda->build()),
+         m_bfi(*m_mfemLambda)
    {}
 
    DiffusionIntegrator::DiffusionIntegrator(const DiffusionIntegrator& other)
       :  m_attr(other.m_attr),
-         m_lambda(other.m_lambda->copy())
+         m_lambda(other.m_lambda->copy()),
+         m_mfemLambda(other.m_lambda->build()),
+         m_bfi(*m_mfemLambda)
    {}
-
-   void DiffusionIntegrator::build()
-   {
-      m_lambda->build();
-      m_bfi = std::make_unique<mfem::DiffusionIntegrator>(m_lambda->get());
-   }
-
-   mfem::BilinearFormIntegrator&
-   DiffusionIntegrator::get()
-   {
-      assert(m_bfi);
-      return *m_bfi;
-   }
-
-   mfem::BilinearFormIntegrator*
-   DiffusionIntegrator::release()
-   {
-      return m_bfi.release();
-   }
 }
 

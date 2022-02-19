@@ -8,23 +8,26 @@ namespace Rodin::Variational
    class IdentityMatrix : public MatrixCoefficientBase
    {
       public:
-         constexpr
          IdentityMatrix(int n)
-            : m_n(n)
+            : m_n(n),
+              m_mfemMatrixCoefficient(m_n)
          {}
 
-         constexpr
          IdentityMatrix(const IdentityMatrix& other)
-            : m_n(other.m_n)
+            : m_n(other.m_n),
+              m_mfemMatrixCoefficient(other.m_n)
          {}
 
          int getRows() const override;
 
          int getColumns() const override;
 
-         void build() override;
-
-         mfem::MatrixCoefficient& get() override;
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         {
+            m_mfemMatrixCoefficient.Eval(value, trans, ip);
+         }
 
          IdentityMatrix* copy() const noexcept override
          {
@@ -33,7 +36,7 @@ namespace Rodin::Variational
 
       private:
          int m_n;
-         std::optional<mfem::IdentityMatrixCoefficient> m_mfemMatrixCoefficient;
+         mfem::IdentityMatrixCoefficient m_mfemMatrixCoefficient;
    };
 }
 

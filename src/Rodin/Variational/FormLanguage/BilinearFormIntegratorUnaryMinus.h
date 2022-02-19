@@ -8,32 +8,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   namespace Internal
-   {
-      class BFIUnaryMinus : public mfem::BilinearFormIntegrator
-      {
-         public:
-            BFIUnaryMinus(mfem::BilinearFormIntegrator& bfi)
-               : m_bfi(bfi)
-            {}
-
-            void AssembleElementMatrix(
-                  const mfem::FiniteElement& el,
-                  mfem::ElementTransformation& Trans,
-                  mfem::DenseMatrix& elmat)
-            {
-               m_bfi.AssembleElementMatrix(el, Trans, elmat);
-               elmat.Neg();
-            }
-
-         private:
-            mfem::BilinearFormIntegrator& m_bfi;
-      };
-   }
-
-   /**
-    * @internal
-    */
    template <>
    class BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorSum>
       : public BilinearFormIntegratorSum
@@ -64,8 +38,6 @@ namespace Rodin::Variational::FormLanguage
          BilinearFormIntegratorUnaryMinus(
                const BilinearFormIntegratorUnaryMinus& other);
 
-         BilinearFormIntegratorBase& getBFI();
-
          const BilinearFormIntegratorBase& getBFI() const
          {
             assert(m_bfi);
@@ -82,11 +54,13 @@ namespace Rodin::Variational::FormLanguage
             return getBFI().getAttributes();
          }
 
-         void build() override;
-
-         mfem::BilinearFormIntegrator& get() override;
-
-         mfem::BilinearFormIntegrator* release() override;
+         void getElementMatrix(
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+         {
+            m_bfi->getElementMatrix(trial, test, trans, mat);
+            mat *= -1.0;
+         }
 
          BilinearFormIntegratorUnaryMinus* copy() const noexcept override
          {
@@ -95,7 +69,6 @@ namespace Rodin::Variational::FormLanguage
 
       private:
          std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
-         std::unique_ptr<Internal::BFIUnaryMinus> m_mfemBFI;
    };
 
    BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase> operator-(

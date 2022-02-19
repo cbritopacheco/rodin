@@ -15,32 +15,16 @@ namespace Rodin::Variational
 
    ElasticityIntegrator::ElasticityIntegrator(
          const ScalarCoefficientBase& lambda, const ScalarCoefficientBase& mu)
-      : m_lambda(lambda.copy()), m_mu(mu.copy())
+      : m_lambda(lambda.copy()), m_mu(mu.copy()),
+        m_mfemLambda(m_lambda->build()), m_mfemMu(m_mu->build()),
+        m_bfi(*m_mfemLambda, *m_mfemMu)
    {}
 
    ElasticityIntegrator::ElasticityIntegrator(const ElasticityIntegrator& other)
       :  m_attr(other.m_attr),
-         m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy())
+         m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy()),
+         m_mfemLambda(m_lambda->build()), m_mfemMu(m_mu->build()),
+         m_bfi(*m_mfemLambda, *m_mfemMu)
    {}
-
-   void ElasticityIntegrator::build()
-   {
-      m_lambda->build();
-      m_mu->build();
-      m_bfi = std::make_unique<mfem::ElasticityIntegrator>(m_lambda->get(), m_mu->get());
-   }
-
-   mfem::BilinearFormIntegrator&
-   ElasticityIntegrator::get()
-   {
-      assert(m_bfi);
-      return *m_bfi;
-   }
-
-   mfem::BilinearFormIntegrator*
-   ElasticityIntegrator::release()
-   {
-      return m_bfi.release();
-   }
 }
 

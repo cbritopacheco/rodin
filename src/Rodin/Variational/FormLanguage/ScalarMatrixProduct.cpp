@@ -1,3 +1,5 @@
+#include "../ScalarCoefficient.h"
+
 #include "ScalarMatrixProduct.h"
 
 namespace Rodin::Variational::FormLanguage
@@ -10,8 +12,7 @@ namespace Rodin::Variational::FormLanguage
 
    ScalarMatrixProduct::ScalarMatrixProduct(const ScalarMatrixProduct& other)
       :  m_scalar(other.m_scalar->copy()),
-         m_matrix(other.m_matrix->copy()),
-         m_mfemMatrixCoefficient(other.m_mfemMatrixCoefficient)
+         m_matrix(other.m_matrix->copy())
    {}
 
    int ScalarMatrixProduct::getRows() const
@@ -24,18 +25,12 @@ namespace Rodin::Variational::FormLanguage
       return m_matrix->getColumns();
    }
 
-   void ScalarMatrixProduct::build()
+   void ScalarMatrixProduct::getValue(
+         mfem::DenseMatrix& value,
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    {
-      m_scalar->build();
-      m_matrix->build();
-      m_mfemMatrixCoefficient.emplace(
-            m_scalar->get(), m_matrix->get());
-   }
-
-   mfem::MatrixCoefficient& ScalarMatrixProduct::get()
-   {
-      assert(m_mfemMatrixCoefficient);
-      return *m_mfemMatrixCoefficient;
+      m_matrix->getValue(value, trans, ip);
+      value *= m_scalar->getValue(trans, ip);
    }
 
    ScalarMatrixProduct

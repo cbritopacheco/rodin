@@ -1,17 +1,69 @@
 #ifndef RODIN_VARIATIONAL_TESTFUNCTION_H
 #define RODIN_VARIATIONAL_TESTFUNCTION_H
 
-#include "ForwardDecls.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
-   template <class FEC>
-   class TestFunction : public GridFunction<FEC>
+   class TestFunctionBase : public ShapeFunction
    {
-      private:
+      public:
+         virtual SpaceType getSpaceType() const override
+         {
+            return Test;
+         }
+
+         virtual TestFunctionBase* copy() const noexcept override = 0;
+   };
+
+   template <class FEC>
+   class TestFunction : public TestFunctionBase
+   {
+      public:
          TestFunction(FiniteElementSpace<FEC>& fes)
-            : GridFunction<FEC>(fes)
+            : m_fes(fes)
          {}
+
+         TestFunction(const TestFunction& other)
+            : m_fes(other.m_fes)
+         {}
+
+         const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
+         {
+            return m_fes;
+         }
+
+         ShapeFunction::ValueType getValueType() const override
+         {
+            if (getFiniteElementSpace().getRangeDimension() == 1)
+               return ShapeFunction::Scalar;
+            else
+               return ShapeFunction::Vector;
+         }
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               ScalarShape& values) const override
+         {
+            fe.CalcPhysShape(trans, values);
+         }
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               VectorShape& values) const override
+         {
+            fe.CalcPhysVShape(trans, values);
+         }
+
+         TestFunction* copy() const noexcept override
+         {
+            return new TrialFunction(*this);
+         }
+
+      private:
+         FiniteElementSpace<FEC>& m_fes;
    };
 }
 #endif

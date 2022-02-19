@@ -3,15 +3,40 @@
 
 #include <mfem.hpp>
 
-#include "ForwardDecls.h"
+#include "FormLanguage/ForwardDecls.h"
 
-#include "LinearForm.h"
-#include "BilinearForm.h"
+#include "ForwardDecls.h"
+#include "LinearFormIntegrator.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
-   template <IntegratorRegion Region, class T>
+   template <class T>
    class Integral;
+
+   template <>
+   class Integral<FormLanguage::TrialTestProduct> : public BilinearFormIntegratorBase
+   {
+      public:
+         Integral(const FormLanguage::TrialTestProduct& prod);
+
+         Integral(const Integral& other);
+
+         const std::set<int>& getAttributes() const override;
+
+         IntegratorRegion getIntegratorRegion() const override;
+
+         void build() override;
+
+         mfem::BilinearFormIntegrator& get() override;
+
+         mfem::BilinearFormIntegrator* release() override;
+
+         Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
+   };
 }
 
 #endif

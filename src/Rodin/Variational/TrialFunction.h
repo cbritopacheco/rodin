@@ -1,41 +1,69 @@
 #ifndef RODIN_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
-#include <memory>
-
-#include "Rodin/Alert.h"
-#include "ForwardDecls.h"
-#include "FiniteElementSpace.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
-   class TrialFunctionExpr
+   class TrialFunctionBase : public ShapeFunction
    {
       public:
-         virtual int getDimension() const = 0;
+         virtual SpaceType getSpaceType() const override
+         {
+            return Trial;
+         }
+
+         virtual TrialFunctionBase* copy() const noexcept override = 0;
    };
 
    template <class FEC>
-   class TrialFunction : public TrialFunctionExpr
+   class TrialFunction : public TrialFunctionBase
    {
       public:
          TrialFunction(FiniteElementSpace<FEC>& fes)
             : m_fes(fes)
          {}
 
-         const FiniteElementSpace<FEC>& getFiniteElementSpace() const
+         TrialFunction(const TrialFunction& other)
+            : m_fes(other.m_fes)
+         {}
+
+         const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
          {
             return m_fes;
          }
 
-         int getDimension() const override
+         ShapeFunction::ValueType getValueType() const override
          {
-            return m_fes.getRangeDimension();
+            if (getFiniteElementSpace().getRangeDimension() == 1)
+               return ShapeFunction::Scalar;
+            else
+               return ShapeFunction::Vector;
+         }
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               ScalarShape& values) const override
+         {
+            fe.CalcPhysShape(trans, values);
+         }
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               VectorShape& values) const override
+         {
+            fe.CalcPhysVShape(trans, values);
+         }
+
+         TrialFunction* copy() const noexcept override
+         {
+            return new TrialFunction(*this);
          }
 
       private:
          FiniteElementSpace<FEC>& m_fes;
-         std::unique_ptr<GridFunction<FEC>> m_gf;
    };
 }
 #endif

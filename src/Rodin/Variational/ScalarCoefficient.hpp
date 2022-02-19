@@ -13,55 +13,6 @@
 
 namespace Rodin::Variational
 {
-   // ---- T (Arithmetic type) -----------------------------------------------
-   // ------------------------------------------------------------------------
-   template <class T>
-   void
-   ScalarCoefficient<T>::build()
-   {
-      m_mfemCoefficient.emplace(m_x);
-   }
-
-   template <class T>
-   mfem::Coefficient&
-   ScalarCoefficient<T>::get()
-   {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
-   }
-
-   // ---- GridFunction<FEC> -------------------------------------------------
-   // ------------------------------------------------------------------------
-   template <class FEC>
-   constexpr
-   ScalarCoefficient<GridFunction<FEC>>
-   ::ScalarCoefficient(GridFunction<FEC>& u)
-      : m_u(u)
-   {
-      assert(u.getFiniteElementSpace().getRangeDimension() == 1);
-   }
-
-   template <class FEC>
-   constexpr
-   ScalarCoefficient<GridFunction<FEC>>
-   ::ScalarCoefficient(const ScalarCoefficient& other)
-      :  m_u(other.m_u)
-   {}
-
-
-   template <class FEC>
-   void
-   ScalarCoefficient<GridFunction<FEC>>::build()
-   {
-      m_mfemCoefficient.emplace(&m_u.getHandle());
-   }
-
-   template <class FEC>
-   mfem::Coefficient& ScalarCoefficient<GridFunction<FEC>>::get()
-   {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
-   }
 }
 
 #endif

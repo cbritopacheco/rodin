@@ -85,10 +85,13 @@ namespace Rodin::Variational
             return *this;
          }
 
-         void build() override;
-
-         mfem::LinearFormIntegrator& get() override;
-         mfem::LinearFormIntegrator* release() override;
+         void getElementVector(
+                  const mfem::FiniteElement& el,
+                  mfem::ElementTransformation& trans,
+                  mfem::Vector& vec) override
+         {
+            m_mfemLFI.AssembleRHSElementVect(el, trans, vec);
+         }
 
          VectorDomainLFDivIntegrator* copy() const noexcept override
          {
@@ -97,7 +100,8 @@ namespace Rodin::Variational
       private:
          std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_f;
-         std::unique_ptr<Internal::VectorDomainLFDivIntegrator> m_mfemLFI;
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
+         Internal::VectorDomainLFDivIntegrator m_mfemLFI;
    };
 }
 

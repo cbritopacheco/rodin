@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
 #include <set>
+#include <memory>
 #include <mfem.hpp>
 
 #include "FormLanguage/Base.h"
@@ -15,34 +16,22 @@ namespace Rodin::Variational
       class BilinearFormIntegrator : public mfem::BilinearFormIntegrator
       {
          public:
-            virtual void AssembleElementMatrix(
-                  const mfem::FiniteElement& fe,
-                  mfem::ElementTransformation& Trans,
-                  mfem::DenseMatrix& elmat) = 0;
-      };
+            BilinearFormIntegrator(const BilinearFormIntegratorBase& bfi);
 
-      class MixedBilinearFormIntegrator : public mfem::BilinearFormIntegrator
-      {
-         public:
-            virtual void AssembleMixedElementMatrix(
-                  const mfem::FiniteElement& trial_fe,
-                  const mfem::FiniteElement& test_fe,
-                  mfem::ElementTransformation& Trans,
-                  mfem::DenseMatrix& elmat) = 0;
+            void AssembleElementMatrix(
+                  const mfem::FiniteElement& fe,
+                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
 
             void AssembleElementMatrix2(
-                  const mfem::FiniteElement& trial_fe,
-                  const mfem::FiniteElement& test_fe,
-                  mfem::ElementTransformation& Trans,
-                  mfem::DenseMatrix& elmat) override
-            {
-               AssembleMixedElementMatrix(trial_fe, test_fe, Trans, elmat);
-            }
+                  const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
+         private:
+            std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
       };
    }
 
    class BilinearFormIntegratorBase
-      : public FormLanguage::Buildable<mfem::BilinearFormIntegrator>
+      : public FormLanguage::Buildable<Internal::BilinearFormIntegrator>
    {
       public:
          virtual ~BilinearFormIntegratorBase() = default;
@@ -53,31 +42,29 @@ namespace Rodin::Variational
          virtual const std::set<int>& getAttributes() const = 0;
 
          /**
-          * @internal
-          */
-         virtual void build() override = 0;
-
-         /**
-          * @internal
-          */
-         virtual mfem::BilinearFormIntegrator& get() override = 0;
-
-         /**
           * @brief Gets the integration region.
           */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
-         /**
-          * @internal
-          * @brief Releases ownership of the mfem::BilinearFormIntegrator.
-          *
-          * @note After this call, calling get() will result in undefined behaviour.
-          *
-          * @warning The BilinearFormIntegratorBase instance must still be kept
-          * in memory since it might contain objects which the
-          * mfem::BilinearFormIntegrator instance refers to.
-          */
-         virtual mfem::BilinearFormIntegrator* release() override = 0;
+         virtual void getElementMatrix(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
+         {
+            assert(false);
+         }
+
+
+         virtual void getElementMatrix(
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
+         {
+            assert(false);
+         }
+
+         std::unique_ptr<Internal::BilinearFormIntegrator> build() const override
+         {
+            return std::make_unique<Internal::BilinearFormIntegrator>(*this);
+         }
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
    };

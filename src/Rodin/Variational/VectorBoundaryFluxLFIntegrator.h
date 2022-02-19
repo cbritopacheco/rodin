@@ -39,6 +39,7 @@ namespace Rodin::Variational
          VectorBoundaryFluxLFIntegrator(const ScalarCoefficientBase& lambda);
 
          VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other);
+
          const std::set<int>& getAttributes() const override
          {
             return m_attr;
@@ -55,9 +56,12 @@ namespace Rodin::Variational
             return *this;
          }
 
-         void build() override;
-         mfem::LinearFormIntegrator& get() override;
-         mfem::LinearFormIntegrator* release() override;
+         void getElementVector(
+               const mfem::FiniteElement& fe, mfem::ElementTransformation&
+               trans, mfem::Vector& vec) override
+         {
+            m_mfemLFI.AssembleRHSElementVect(fe, trans, vec);
+         }
 
          VectorBoundaryFluxLFIntegrator* copy() const noexcept override
          {
@@ -67,7 +71,9 @@ namespace Rodin::Variational
       private:
          std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_f;
-         std::unique_ptr<mfem::VectorBoundaryFluxLFIntegrator> m_mfemLFI;
+
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
+         mfem::VectorBoundaryFluxLFIntegrator m_mfemLFI;
    };
 
 }

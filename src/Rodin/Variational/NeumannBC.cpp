@@ -33,7 +33,7 @@ namespace Rodin::Variational
       getValue().build();
       pb.getLinearForm()
         .getHandle()
-        .AddBoundaryIntegrator(new mfem::BoundaryLFIntegrator(getValue().get()), m_nbcBdr);
+        .AddBoundaryIntegrator(new mfem::BoundaryLFIntegrator(*m_mfemScalar), m_nbcBdr);
    }
 
    void NeumannBC<VectorCoefficientBase>::imposeOn(ProblemBase& pb)
@@ -56,7 +56,6 @@ namespace Rodin::Variational
       pb.getLinearForm()
         .getHandle()
         .AddBoundaryIntegrator(
-              new mfem::VectorBoundaryLFIntegrator(
-                 getValue().get()), m_nbcBdr);
+              new mfem::VectorBoundaryLFIntegrator(*m_mfemVector), m_nbcBdr);
    }
 }

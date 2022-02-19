@@ -13,32 +13,6 @@
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      /**
-       * @internal
-       */
-      class TraceCoefficient : public mfem::Coefficient
-      {
-         public:
-            TraceCoefficient(mfem::MatrixCoefficient& matrix)
-               : m_matrix(matrix)
-            {}
-
-            virtual double Eval(
-                  mfem::ElementTransformation& T,
-                  const mfem::IntegrationPoint& ip) override
-            {
-               mfem::DenseMatrix mat;
-               m_matrix.Eval(mat, T, ip);
-               return mat.Trace();
-            }
-
-         private:
-            mfem::MatrixCoefficient& m_matrix;
-      };
-   }
-
    /**
     * @brief Represents the trace @f$ \mathrm{tr}(A) @f$ of some square matrix
     * @f$ A @f$.
@@ -59,9 +33,7 @@ namespace Rodin::Variational
 
          Trace(const Trace& other);
 
-         void build() override;
-
-         mfem::Coefficient& get() override;
+         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          Trace* copy() const noexcept override
          {
@@ -69,7 +41,6 @@ namespace Rodin::Variational
          }
       private:
          std::unique_ptr<MatrixCoefficientBase> m_matrix;
-         std::optional<Internal::TraceCoefficient> m_mfemCoefficient;
    };
 }
 

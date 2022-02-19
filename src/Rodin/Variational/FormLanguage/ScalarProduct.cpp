@@ -11,17 +11,10 @@ namespace Rodin::Variational::FormLanguage
       :  m_a(other.m_a->copy()), m_b(other.m_b->copy())
    {}
 
-   void ScalarProduct::build()
+   double ScalarProduct::getValue(
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    {
-      m_a->build();
-      m_b->build();
-      m_mfemCoefficient.emplace(m_a->get(), m_b->get());
-   }
-
-   mfem::Coefficient& ScalarProduct::get()
-   {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
+      return m_a->getValue(trans, ip) * m_b->getValue(trans, ip);
    }
 
    ScalarProduct

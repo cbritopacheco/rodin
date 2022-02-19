@@ -16,6 +16,16 @@ namespace Rodin::Variational::FormLanguage
       : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
    {}
 
+   void MatrixSum::getValue(
+         mfem::DenseMatrix& value,
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   {
+      mfem::DenseMatrix m;
+      m_lhs->getValue(m, trans, ip);
+      m_rhs->getValue(value, trans, ip);
+      value += m;
+   }
+
    MatrixCoefficientBase& MatrixSum::getLHS()
    {
       return *m_lhs;
@@ -34,21 +44,6 @@ namespace Rodin::Variational::FormLanguage
    int MatrixSum::getColumns() const
    {
       return m_lhs->getColumns();
-   }
-
-   void MatrixSum::build()
-   {
-      m_lhs->build();
-      m_rhs->build();
-
-      m_mfemMatrixCoefficient.emplace(
-            m_lhs->get(), m_rhs->get());
-   }
-
-   mfem::MatrixCoefficient& MatrixSum::get()
-   {
-      assert(m_mfemMatrixCoefficient);
-      return *m_mfemMatrixCoefficient;
    }
 
    MatrixSum

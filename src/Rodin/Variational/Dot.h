@@ -14,38 +14,6 @@
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      /**
-       * @internal
-       */
-      class MatrixDotProductCoefficient : public mfem::Coefficient
-      {
-         public:
-            MatrixDotProductCoefficient(
-                  mfem::MatrixCoefficient& a, mfem::MatrixCoefficient& b)
-               : m_a(a), m_b(b)
-            {}
-
-            virtual double Eval(
-                  mfem::ElementTransformation& T,
-                  const mfem::IntegrationPoint& ip) override
-            {
-               mfem::DenseMatrix ma, mb;
-               m_a.Eval(ma, T, ip);
-               m_b.Eval(mb, T, ip);
-               return ma * mb;
-            }
-
-         private:
-            mfem::MatrixCoefficient& m_a;
-            mfem::MatrixCoefficient& m_b;
-      };
-   }
-
-   template <class A, class B>
-   Dot(const A&, const B&) -> Dot<A, B>;
-
    /**
     * @brief Represents the double-dot product between two matrices.
     *
@@ -58,29 +26,21 @@ namespace Rodin::Variational
     * @tparam A Derived type from MatrixCoefficientBase
     * @tparam B Derived type from MatrixCoefficientBase
     */
-   template <class A, class B>
-   class Dot<A, B> : public ScalarCoefficientBase
+   template <>
+   class Dot<MatrixCoefficientBase> : public ScalarCoefficientBase
    {
-      static_assert(
-            std::is_base_of_v<MatrixCoefficientBase, A> &&
-            std::is_base_of_v<MatrixCoefficientBase, B>
-            );
-
       public:
          /**
           * @brief Constructs the Dot product between two given matrices.
           * @param[in] a Derived instance of MatrixCoefficientBase
           * @param[in] b Derived instance of MatrixCoefficientBase
           */
-         constexpr
-         Dot(const A& a, const B& b);
+         Dot(const MatrixCoefficientBase& a, const MatrixCoefficientBase& b);
 
-         constexpr
          Dot(const Dot& other);
 
-         void build() override;
-
-         mfem::Coefficient& get() override;
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          Dot* copy() const noexcept override
          {
@@ -88,10 +48,9 @@ namespace Rodin::Variational
          }
       private:
          std::unique_ptr<MatrixCoefficientBase> m_a, m_b;
-         std::optional<Internal::MatrixDotProductCoefficient> m_mfemCoefficient;
    };
-}
 
-#include "Dot.hpp"
+   Dot(const MatrixCoefficientBase&, const MatrixCoefficientBase&) -> Dot<MatrixCoefficientBase>;
+}
 
 #endif

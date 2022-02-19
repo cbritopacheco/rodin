@@ -30,9 +30,8 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarCoefficientBase& getScalarCoefficient();
 
-         void build() override;
-
-         mfem::Coefficient& get() override;
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          virtual ScalarCoefficientUnaryMinus* copy() const noexcept override
          {
