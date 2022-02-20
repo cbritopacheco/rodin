@@ -21,7 +21,7 @@ namespace Rodin::Variational
    {}
 
    ElasticityIntegrator::ElasticityIntegrator(const ElasticityIntegrator& other)
-      :  m_attr(other.m_attr),
+      :  BilinearFormDomainIntegrator(other),
          m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy()),
          m_mfemLambda(m_lambda->build()), m_mfemMu(m_mu->build()),
          m_bfi(*m_mfemLambda, *m_mfemMu)

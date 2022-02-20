@@ -19,7 +19,7 @@ namespace Rodin::Variational
    {}
 
    DomainLFIntegrator::DomainLFIntegrator(const DomainLFIntegrator& other)
-      :  m_attr(other.m_attr),
+      :  LinearFormDomainIntegrator(other),
          m_f(other.m_f->copy()),
          m_mfemScalar(other.m_f->build()),
          m_mfemLFI(*m_mfemScalar)

@@ -58,19 +58,21 @@ int main(int, char**)
     };
 
     // Elasticity equation
-    GridFunction u(Vh);
-    Problem elasticity(u);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+    Problem elasticity(u, v);
     elasticity = ElasticityIntegrator(lambda, mu)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
     cg.solve(elasticity);
 
     // Hilbert extension-regularization procedure
-    GridFunction theta(Vh);
+    TrialFunction g(Vh);
+    TestFunction  w(Vh);
     auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
     auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
 
-    Problem hilbert(theta);
+    Problem hilbert(g, w);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
             - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
@@ -88,7 +90,7 @@ int main(int, char**)
       break;
 
     // Make the displacement
-    double dt = Omega.getMaximumDisplacement(theta);
+    double dt = Omega.getMaximumDisplacement(g);
     if (dt < 1e-4)
     {
       // If the maximum displacement is too small the mesh will degenerate
@@ -96,8 +98,8 @@ int main(int, char**)
     }
     else
     {
-      theta *= hmax * dt;
-      Omega.displace(theta);
+      g *= hmax * dt;
+      Omega.displace(g);
 
       // Refine the mesh using MMG
       auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();

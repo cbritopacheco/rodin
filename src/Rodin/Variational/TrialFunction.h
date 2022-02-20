@@ -2,6 +2,8 @@
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
 #include "ShapeFunction.h"
+#include "GridFunction.h"
+#include "FiniteElementSpace.h"
 
 namespace Rodin::Variational
 {
@@ -17,20 +19,31 @@ namespace Rodin::Variational
    };
 
    template <class FEC>
-   class TrialFunction : public TrialFunctionBase
+   class TrialFunction : public GridFunction<FEC>, public TrialFunctionBase
    {
       public:
          TrialFunction(FiniteElementSpace<FEC>& fes)
-            : m_fes(fes)
+            :  GridFunction<FEC>(fes)
          {}
 
-         TrialFunction(const TrialFunction& other)
-            : m_fes(other.m_fes)
-         {}
+         TrialFunction(const TrialFunction& other) = default;
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               ScalarShape& values) const override
+         {
+            fe.CalcPhysShape(trans, values);
+         }
+
+         FiniteElementSpace<FEC>& getFiniteElementSpace() override
+         {
+            return GridFunction<FEC>::getFiniteElementSpace();
+         }
 
          const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
          {
-            return m_fes;
+            return GridFunction<FEC>::getFiniteElementSpace();
          }
 
          ShapeFunction::ValueType getValueType() const override
@@ -41,29 +54,10 @@ namespace Rodin::Variational
                return ShapeFunction::Vector;
          }
 
-         void getValue(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               ScalarShape& values) const override
-         {
-            fe.CalcPhysShape(trans, values);
-         }
-
-         void getValue(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               VectorShape& values) const override
-         {
-            fe.CalcPhysVShape(trans, values);
-         }
-
          TrialFunction* copy() const noexcept override
          {
             return new TrialFunction(*this);
          }
-
-      private:
-         FiniteElementSpace<FEC>& m_fes;
    };
 }
 #endif

@@ -13,7 +13,7 @@ namespace Rodin::Variational
 
    VectorBoundaryFluxLFIntegrator
    ::VectorBoundaryFluxLFIntegrator(const VectorBoundaryFluxLFIntegrator& other)
-      : m_attr(other.m_attr),
+      : LinearFormBoundaryIntegrator(other),
         m_f(other.m_f->copy()),
         m_mfemScalar(m_f->build()),
         m_mfemLFI(*m_mfemScalar)

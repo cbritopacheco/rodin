@@ -76,7 +76,7 @@ namespace Rodin::Variational
     * the derived @ref Solver object to assemble the problem when solving it
     * via the @ref solve(Problem&) method.
     */
-   template <class FEC>
+   template <class TrialFEC, class TestFEC>
    class Problem : public ProblemBase
    {
       public:
@@ -97,25 +97,25 @@ namespace Rodin::Variational
           * @param[in,out] u Trial function @f$ u @f$ belonging to a suitable
           * finite element space.
           */
-         Problem(GridFunction<FEC>& u);
+         Problem(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>& v);
 
          Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
 
          void assemble() override;
          void update() override;
 
-         GridFunction<FEC>& getSolution() override;
-         LinearForm<FEC>& getLinearForm() override;
-         BilinearForm<FEC>& getBilinearForm() override;
+         TrialFunction<TrialFEC>& getSolution() override;
+         LinearForm<TrialFEC>& getLinearForm() override;
+         BilinearForm<TrialFEC>& getBilinearForm() override;
          mfem::Array<int>& getEssentialBoundary() override;
 
       private:
-         GridFunction<FEC>&   m_solution;
+         TrialFunction<TrialFEC>&   m_solution;
 
          std::vector<mfem::Array<int>> m_bdr;
 
-         LinearForm<FEC>      m_linearForm;
-         BilinearForm<FEC>    m_bilinearForm;
+         LinearForm<TrialFEC>      m_linearForm;
+         BilinearForm<TrialFEC>    m_bilinearForm;
 
          mfem::Array<int> m_essBdr;
 

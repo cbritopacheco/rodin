@@ -22,8 +22,8 @@
 
 namespace Rodin::Variational
 {
-   template <class FEC>
-   Problem<FEC>::Problem(GridFunction<FEC>& u)
+   template <class TrialFEC, class TestFEC>
+   Problem<TrialFEC, TestFEC>::Problem(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>&)
       :  m_solution(u),
          m_bilinearForm(u.getFiniteElementSpace()),
          m_linearForm(u.getFiniteElementSpace()),
@@ -33,8 +33,8 @@ namespace Rodin::Variational
       m_essBdr = 0;
    }
 
-   template <class FEC>
-   Problem<FEC>& Problem<FEC>::operator=(const FormLanguage::ProblemBody& rhs)
+   template <class TrialFEC, class TestFEC>
+   Problem<TrialFEC, TestFEC>& Problem<TrialFEC, TestFEC>::operator=(const FormLanguage::ProblemBody& rhs)
    {
       m_pb.reset(rhs.copy());
 
@@ -54,15 +54,15 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   void Problem<FEC>::assemble()
+   template <class TrialFEC, class TestFEC>
+   void Problem<TrialFEC, TestFEC>::assemble()
    {
       m_linearForm.assemble();
       m_bilinearForm.assemble();
    }
 
-   template <class FEC>
-   void Problem<FEC>::update()
+   template <class TrialFEC, class TestFEC>
+   void Problem<TrialFEC, TestFEC>::update()
    {
       m_solution.getFiniteElementSpace().update();
       m_solution.update();
@@ -72,26 +72,26 @@ namespace Rodin::Variational
          dbc->imposeOn(*this);
    }
 
-   template <class FEC>
-   GridFunction<FEC>& Problem<FEC>::getSolution()
+   template <class TrialFEC, class TestFEC>
+   TrialFunction<TrialFEC>& Problem<TrialFEC, TestFEC>::getSolution()
    {
       return m_solution;
    }
 
-   template <class FEC>
-   mfem::Array<int>& Problem<FEC>::getEssentialBoundary()
+   template <class TrialFEC, class TestFEC>
+   mfem::Array<int>& Problem<TrialFEC, TestFEC>::getEssentialBoundary()
    {
       return m_essBdr;
    }
 
-   template <class FEC>
-   BilinearForm<FEC>& Problem<FEC>::getBilinearForm()
+   template <class TrialFEC, class TestFEC>
+   BilinearForm<TrialFEC>& Problem<TrialFEC, TestFEC>::getBilinearForm()
    {
       return m_bilinearForm;
    }
 
-   template <class FEC>
-   LinearForm<FEC>& Problem<FEC>::getLinearForm()
+   template <class TrialFEC, class TestFEC>
+   LinearForm<TrialFEC>& Problem<TrialFEC, TestFEC>::getLinearForm()
    {
       return m_linearForm;
    }

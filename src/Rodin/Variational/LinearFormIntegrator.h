@@ -59,35 +59,20 @@ namespace Rodin::Variational
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
-         /**
-          * @brief Specifies the material reference over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material reference over which the integration should
-          * take place.
-          */
-         virtual LinearFormDomainIntegrator& over(int attr) = 0;
-
-         /**
-          * @brief Specifies the material references over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material references over which the integration should
-          * take place.
-          */
-         virtual LinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;
+         LinearFormDomainIntegrator() = default;
+         LinearFormDomainIntegrator(const LinearFormDomainIntegrator&) = default;
+         LinearFormDomainIntegrator(LinearFormDomainIntegrator&&) = default;
 
          IntegratorRegion getIntegratorRegion() const override
          {
             return IntegratorRegion::Domain;
          }
 
-         virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
-   };
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attrs;
+         }
 
-   class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
-   {
-      public:
          /**
           * @brief Specifies the material reference over which to integrate.
           * @returns Reference to self (for method chaining)
@@ -95,7 +80,10 @@ namespace Rodin::Variational
           * Specifies the material reference over which the integration should
           * take place.
           */
-         virtual LinearFormBoundaryIntegrator& over(int attr) = 0;
+         LinearFormDomainIntegrator& over(int attr)
+         {
+            return over(std::set<int>{attr});
+         }
 
          /**
           * @brief Specifies the material references over which to integrate.
@@ -104,14 +92,65 @@ namespace Rodin::Variational
           * Specifies the material references over which the integration should
           * take place.
           */
-         virtual LinearFormBoundaryIntegrator& over(const std::set<int>& attrs) = 0;
+         LinearFormDomainIntegrator& over(const std::set<int>& attrs)
+         {
+            assert(attrs.size() > 0);
+            m_attrs = attrs;
+            return *this;
+         }
+
+         virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
+      private:
+         std::set<int> m_attrs;
+   };
+
+   class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
+   {
+      public:
+         LinearFormBoundaryIntegrator() = default;
+         LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator&) = default;
+         LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
 
          IntegratorRegion getIntegratorRegion() const override
          {
             return IntegratorRegion::Boundary;
          }
 
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attrs;
+         }
+
+         /**
+          * @brief Specifies the material reference over which to integrate.
+          * @returns Reference to self (for method chaining)
+          *
+          * Specifies the material reference over which the integration should
+          * take place.
+          */
+         LinearFormBoundaryIntegrator& over(int attr)
+         {
+            return over(std::set<int>{attr});
+         }
+
+         /**
+          * @brief Specifies the material references over which to integrate.
+          * @returns Reference to self (for method chaining)
+          *
+          * Specifies the material references over which the integration should
+          * take place.
+          */
+         LinearFormBoundaryIntegrator& over(const std::set<int>& attrs)
+         {
+            assert(attrs.size() > 0);
+            m_attrs = attrs;
+            return *this;
+         }
+
+
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
+      private:
+         std::set<int> m_attrs;
    };
 
 }

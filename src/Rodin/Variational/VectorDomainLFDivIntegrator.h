@@ -25,8 +25,6 @@ namespace Rodin::Variational
                int dof = el.GetDof();
 
                m_dshape.SetSize(dof, dim);
-               m_gshape.SetSize(dof, dim);
-               m_Jadj.SetSize(dim);
                m_divshape.SetSize(dof * dim);
 
                elvect.SetSize(dof * dim);
@@ -42,12 +40,10 @@ namespace Rodin::Variational
                for (int i = 0; i < ir->GetNPoints(); i++)
                {
                   const mfem::IntegrationPoint &ip = ir->IntPoint(i);
-                  el.CalcDShape(ip, m_dshape);
                   Tr.SetIntPoint(&ip);
-                  double val = ip.weight * m_q.Eval(Tr, ip);
-                  CalcAdjugate(Tr.Jacobian(), m_Jadj);
-                  Mult(m_dshape, m_Jadj, m_gshape);
-                  m_gshape.GradToDiv(m_divshape);
+                  el.CalcPhysDShape(Tr, m_dshape);
+                  double val = ip.weight * Tr.Weight() * m_q.Eval(Tr, ip);
+                  m_dshape.GradToDiv(m_divshape);
                   elvect.Add(val, m_divshape);
                }
             }
@@ -55,8 +51,6 @@ namespace Rodin::Variational
          private:
             mfem::Vector m_divshape;
             mfem::DenseMatrix m_dshape;
-            mfem::DenseMatrix m_gshape;
-            mfem::DenseMatrix m_Jadj;
             mfem::Coefficient& m_q;
       };
    }
@@ -68,22 +62,6 @@ namespace Rodin::Variational
          VectorDomainLFDivIntegrator(const ScalarCoefficientBase& f);
 
          VectorDomainLFDivIntegrator(const VectorDomainLFDivIntegrator& other);
-
-         const std::set<int>& getAttributes() const override
-         {
-            return m_attr;
-         }
-
-         VectorDomainLFDivIntegrator& over(int attr) override
-         {
-            return over(std::set{attr});
-         }
-
-         VectorDomainLFDivIntegrator& over(const std::set<int>& attrs) override
-         {
-            m_attr = attrs;
-            return *this;
-         }
 
          void getElementVector(
                   const mfem::FiniteElement& el,
@@ -98,7 +76,6 @@ namespace Rodin::Variational
             return new VectorDomainLFDivIntegrator(*this);
          }
       private:
-         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_f;
          std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
          Internal::VectorDomainLFDivIntegrator m_mfemLFI;

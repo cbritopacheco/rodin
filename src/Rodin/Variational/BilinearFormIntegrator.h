@@ -61,6 +61,12 @@ namespace Rodin::Variational
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
+         BilinearFormDomainIntegrator() = default;
+
+         BilinearFormDomainIntegrator(const BilinearFormDomainIntegrator&) = default;
+
+         BilinearFormDomainIntegrator(BilinearFormDomainIntegrator&&) = default;
+
          IntegratorRegion getIntegratorRegion() const override
          {
             return IntegratorRegion::Domain;
@@ -73,7 +79,10 @@ namespace Rodin::Variational
           * Specifies the material reference over which the integration should
           * take place.
           */
-         virtual BilinearFormDomainIntegrator& over(int attr) = 0;
+         BilinearFormDomainIntegrator& over(int attr)
+         {
+            return over(std::set<int>{attr});
+         }
 
          /**
           * @brief Specifies the material references over which to integrate.
@@ -82,9 +91,22 @@ namespace Rodin::Variational
           * Specifies the material references over which the integration should
           * take place.
           */
-         virtual BilinearFormDomainIntegrator& over(const std::set<int>& attrs) = 0;
+         BilinearFormDomainIntegrator& over(const std::set<int>& attrs)
+         {
+            assert(attrs.size() > 0);
+            m_attrs = attrs;
+            return *this;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attrs;
+         }
 
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
+
+      private:
+         std::set<int> m_attrs;
    };
 }
 

@@ -59,7 +59,7 @@ namespace Rodin::Variational
 
          TestFunction* copy() const noexcept override
          {
-            return new TrialFunction(*this);
+            return new TestFunction(*this);
          }
 
       private:

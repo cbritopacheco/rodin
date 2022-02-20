@@ -26,6 +26,11 @@
 #include "Variational/Dot.h"
 #include "Variational/IdentityMatrix.h"
 
+#include "Variational/TrialFunction.h"
+#include "Variational/TestFunction.h"
+
+#include "Variational/Integral.h"
+
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"
 #include "Variational/Problem.h"
@@ -39,8 +44,6 @@
 #include "Variational/VectorDomainLFDivIntegrator.h"
 
 // ---- Bilinear form integrators --------------------------------------------
-#include "Variational/MassIntegrator.h"
-#include "Variational/DiffusionIntegrator.h"
 #include "Variational/VectorMassIntegrator.h"
 #include "Variational/VectorDiffusionIntegrator.h"
 #include "Variational/ElasticityIntegrator.h"

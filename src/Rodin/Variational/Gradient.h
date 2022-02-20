@@ -77,9 +77,14 @@ namespace Rodin::Variational
 
          const FiniteElementSpaceBase& getFiniteElementSpace() const override;
 
+         Gradient* copy() const noexcept override
+         {
+            return new Gradient(*this);
+         }
       private:
          const TrialFunction<H1>& m_u;
    };
+   Gradient(const TrialFunction<H1>&) -> Gradient<TrialFunction<H1>>;
 
    template <>
    class Gradient<TestFunction<H1>> : public TestFunctionBase
@@ -97,9 +102,14 @@ namespace Rodin::Variational
 
          const FiniteElementSpaceBase& getFiniteElementSpace() const override;
 
+         Gradient* copy() const noexcept override
+         {
+            return new Gradient(*this);
+         }
       private:
          const TestFunction<H1>& m_v;
    };
+   Gradient(const TestFunction<H1>&) -> Gradient<TestFunction<H1>>;
 }
 
 #endif

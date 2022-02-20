@@ -12,7 +12,7 @@ namespace Rodin::Variational
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class FEC>
+   template <class TrialFEC, class TestFEC>
    class Problem;
 
    // ---- FiniteElementSpace ------------------------------------------------

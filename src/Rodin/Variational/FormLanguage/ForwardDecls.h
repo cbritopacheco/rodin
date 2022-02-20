@@ -30,7 +30,8 @@ namespace Rodin::Variational::FormLanguage
 
    class ScalarSum;
 
-   class TrialTestProduct;
+   template <class Lhs, class Rhs>
+   class Product;
 }
 
 #endif

@@ -64,22 +64,6 @@ namespace Rodin::Variational
 
          ElasticityIntegrator(const ElasticityIntegrator& other);
 
-         const std::set<int>& getAttributes() const override
-         {
-            return m_attr;
-         }
-
-         ElasticityIntegrator& over(int attr) override
-         {
-            return over(std::set{attr});
-         }
-
-         ElasticityIntegrator& over(const std::set<int>& attrs) override
-         {
-            m_attr = attrs;
-            return *this;
-         }
-
          void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
@@ -94,7 +78,6 @@ namespace Rodin::Variational
          }
 
       private:
-         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
          std::unique_ptr<ScalarCoefficientBase> m_mu;
 
