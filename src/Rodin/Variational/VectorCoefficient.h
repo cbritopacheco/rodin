@@ -20,42 +20,73 @@
 
 namespace Rodin::Variational
 {
+   namespace Internal
+   {
+      class VectorCoefficient : public mfem::VectorCoefficient
+      {
+         public:
+            VectorCoefficient(const VectorCoefficientBase& v);
+
+            void Eval(mfem::Vector& value, mfem::ElementTransformation& trans,
+                  const mfem::IntegrationPoint& ip) override;
+
+         private:
+            std::unique_ptr<VectorCoefficientBase> m_v;
+      };
+   }
+
    /**
     * @brief Abstract base class for objects representing vector coefficients.
     */
    class VectorCoefficientBase
-      : public FormLanguage::Buildable<mfem::VectorCoefficient>
+      : public FormLanguage::Buildable<Internal::VectorCoefficient>
    {
       public:
+         constexpr
+         VectorCoefficientBase() = default;
+
+         constexpr
+         VectorCoefficientBase(const VectorCoefficientBase&) = default;
+
+         virtual ~VectorCoefficientBase() = default;
+
+         constexpr
+         VectorCoefficientBase& setTraceDomain(int domain)
+         {
+            m_traceDomain = domain;
+            return *this;
+         }
+
+         constexpr
+         std::optional<int> getTraceDomain() const
+         {
+            return m_traceDomain;
+         }
+
+         virtual void getValueOnInteriorBoundary(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip);
+
+         virtual void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) = 0;
+
          /**
           * @brief Gets the dimension of the vector object.
           * @returns Dimension of vector.
           */
          virtual size_t getDimension() const = 0;
 
-         /**
-          * @internal
-          * @brief Builds the underlying mfem::VectorCoefficient object.
-          */
-         virtual void build() override = 0;
+         std::unique_ptr<Internal::VectorCoefficient> build() const override
+         {
+            return std::make_unique<Internal::VectorCoefficient>(*this);
+         }
 
-         /**
-          * @internal
-          * @brief Returns the underlying mfem::VectorCoefficient object.
-          * @note Typically one should only call this function after build().
-          */
-         virtual mfem::VectorCoefficient& get() override = 0;
-
-         /**
-          * @internal
-          * @brief Builds a copy of the object and returns a non-owning
-          * pointer to the new object.
-          */
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
-   };
 
-   template <class ... Values>
-   VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
+      private:
+         std::optional<int> m_traceDomain;
+   };
 
    /**
     * @brief Variadic vector of values
@@ -73,20 +104,44 @@ namespace Rodin::Variational
          constexpr
          VectorCoefficient(Values... values)
             :  m_dimension(sizeof...(Values)),
-               m_values(std::forward_as_tuple(values...))
-         {}
+               m_values(std::forward_as_tuple(values...)),
+               m_mfemVectorCoefficient(m_dimension)
+         {
+            m_mfemCoefficients.reserve(m_dimension);
+            makeCoefficientsFromTuple(m_values);
+            for (size_t i = 0; i < m_dimension; i++)
+            {
+               m_mfemVectorCoefficient.Set(
+                     i, m_mfemCoefficients[i]->build().release(), false);
+            }
+         }
 
          constexpr
          VectorCoefficient(const VectorCoefficient& other)
-            :  m_dimension(other.m_dimension),
-               m_values(other.m_values)
-         {}
+            : m_dimension(other.m_dimension),
+              m_values(other.m_values),
+              m_mfemVectorCoefficient(m_dimension)
+         {
+            m_mfemCoefficients.reserve(m_dimension);
+            makeCoefficientsFromTuple(m_values);
+            for (size_t i = 0; i < m_dimension; i++)
+            {
+               m_mfemVectorCoefficient.Set(
+                     i, m_mfemCoefficients[i]->build().release(), true);
+            }
+         }
 
-         size_t getDimension() const override;
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         {
+            m_mfemVectorCoefficient.Eval(value, trans, ip);
+         }
 
-         void build() override;
-
-         mfem::VectorCoefficient& get() override;
+         size_t getDimension() const override
+         {
+            return m_dimension;
+         }
 
          VectorCoefficient* copy() const noexcept override
          {
@@ -102,15 +157,13 @@ namespace Rodin::Variational
          typename std::enable_if_t<I < sizeof...(Tp)>
          makeCoefficientsFromTuple(const std::tuple<Tp...>& t);
 
-         size_t m_dimension;
+         const size_t m_dimension;
          std::tuple<Values...> m_values;
          std::vector<std::unique_ptr<ScalarCoefficientBase>> m_mfemCoefficients;
-         std::optional<mfem::VectorArrayCoefficient> m_mfemVectorCoefficient;
+         mfem::VectorArrayCoefficient m_mfemVectorCoefficient;
    };
-
-   template <class FEC>
-   VectorCoefficient(GridFunction<FEC>&)
-      -> VectorCoefficient<GridFunction<FEC>>;
+   template <class ... Values>
+   VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
 
    /**
     * @brief Vector which can be constructed from a GridFunction with vector
@@ -136,20 +189,19 @@ namespace Rodin::Variational
 
          size_t getDimension() const override;
 
-         void build() override;
-
-         mfem::VectorCoefficient& get() override;
-
          VectorCoefficient* copy() const noexcept override
          {
             return new VectorCoefficient(*this);
          }
 
       private:
-         size_t m_dimension;
+         const size_t m_dimension;
          GridFunction<FEC>& m_u;
-         std::optional<mfem::VectorGridFunctionCoefficient> m_mfemVectorCoefficient;
+         mfem::VectorGridFunctionCoefficient m_mfemVectorCoefficient;
    };
+   template <class FEC>
+   VectorCoefficient(GridFunction<FEC>&)
+      -> VectorCoefficient<GridFunction<FEC>>;
 }
 
 #include "VectorCoefficient.hpp"

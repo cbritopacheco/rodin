@@ -44,33 +44,22 @@ namespace Rodin::Variational
 
          DomainLFIntegrator(const DomainLFIntegrator& other);
 
-         const std::set<int>& getAttributes() const override
+         void getElementVector(
+               const mfem::FiniteElement& fe, mfem::ElementTransformation&
+               trans, mfem::Vector& vec) override
          {
-            return m_attr;
+            m_mfemLFI.AssembleRHSElementVect(fe, trans, vec);
          }
 
-         DomainLFIntegrator& over(int attr) override
+         DomainLFIntegrator* copy() const noexcept override
          {
-            return over(std::set{attr});
+            return new DomainLFIntegrator(*this);
          }
-
-         DomainLFIntegrator& over(const std::set<int>& attrs) override
-         {
-            m_attr = attrs;
-            return *this;
-         }
-
-         void build() override;
-
-         mfem::LinearFormIntegrator& get() override;
-         mfem::LinearFormIntegrator* release() override;
-
-         DomainLFIntegrator* copy() const noexcept override;
 
       private:
-         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_f;
-         std::unique_ptr<mfem::DomainLFIntegrator> m_mfemLFI;
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
+         mfem::DomainLFIntegrator m_mfemLFI;
    };
 }
 

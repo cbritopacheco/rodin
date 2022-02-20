@@ -28,37 +28,6 @@ namespace Rodin::Variational::FormLanguage
       : m_bfi(other.copy())
    {}
 
-   BilinearFormIntegratorBase& 
-   BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>
-   ::getBFI()
-   {
-      return *m_bfi;
-   }
-
-   void
-   BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>
-   ::build()
-   {
-      m_bfi->build();
-      m_mfemBFI = std::make_unique<Internal::BFIUnaryMinus>(
-            m_bfi->get());
-   }
-
-   mfem::BilinearFormIntegrator&
-   BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>
-   ::get()
-   {
-      assert(m_mfemBFI);
-      return *m_mfemBFI;
-   }
-
-   mfem::BilinearFormIntegrator*
-   BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>
-   ::release()
-   {
-      return m_mfemBFI.release();
-   }
-
    BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>
    operator-(const BilinearFormIntegratorBase& bfi)
    {

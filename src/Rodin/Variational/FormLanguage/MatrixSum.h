@@ -32,9 +32,9 @@ namespace Rodin::Variational::FormLanguage
 
          int getColumns() const override;
 
-         void build() override;
-
-         mfem::MatrixCoefficient& get() override;
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          virtual MatrixSum* copy() const noexcept override
          {
@@ -44,8 +44,6 @@ namespace Rodin::Variational::FormLanguage
       private:
          std::unique_ptr<MatrixCoefficientBase> m_lhs;
          std::unique_ptr<MatrixCoefficientBase> m_rhs;
-
-         std::optional<mfem::MatrixSumCoefficient> m_mfemMatrixCoefficient;
    };
 
    MatrixSum

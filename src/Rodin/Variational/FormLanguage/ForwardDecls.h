@@ -13,6 +13,9 @@ namespace Rodin::Variational::FormLanguage
 {
    class Base;
 
+   template <class InternalValue>
+   class Buildable;
+
    class ProblemBody;
 
    class BilinearFormIntegratorSum;
@@ -26,6 +29,9 @@ namespace Rodin::Variational::FormLanguage
    class LinearFormIntegratorUnaryMinus;
 
    class ScalarSum;
+
+   template <class Lhs, class Rhs>
+   class Product;
 }
 
 #endif

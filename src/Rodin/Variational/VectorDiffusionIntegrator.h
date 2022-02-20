@@ -58,27 +58,13 @@ namespace Rodin::Variational
 
          VectorDiffusionIntegrator(const VectorDiffusionIntegrator& other);
 
-         const std::set<int>& getAttributes() const override
+         void getElementMatrix(
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            return m_attr;
+            assert(&trial == &test);
+            m_bfi.AssembleElementMatrix(trial, trans, mat);
          }
-
-         VectorDiffusionIntegrator& over(int attr) override
-         {
-            return over(std::set<int>{attr});
-         }
-
-         VectorDiffusionIntegrator& over(const std::set<int>& attrs) override
-         {
-            m_attr = attrs;
-            return *this;
-         }
-
-         void build() override;
-
-         mfem::BilinearFormIntegrator& get() override;
-
-         mfem::BilinearFormIntegrator* release() override;
 
          VectorDiffusionIntegrator* copy() const noexcept override
          {
@@ -88,7 +74,9 @@ namespace Rodin::Variational
       private:
          std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
-         std::unique_ptr<mfem::VectorDiffusionIntegrator> m_bfi;
+
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemLambda;
+         mfem::VectorDiffusionIntegrator m_bfi;
    };
 }
 

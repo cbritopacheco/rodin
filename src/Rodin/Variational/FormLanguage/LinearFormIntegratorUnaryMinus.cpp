@@ -34,29 +34,6 @@ namespace Rodin::Variational::FormLanguage
       return *m_lfi;
    }
 
-   void
-   LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
-   ::build()
-   {
-      m_lfi->build();
-      m_mfemLFI = std::make_unique<Internal::LFIUnaryMinus>(m_lfi->get());
-   }
-
-   mfem::LinearFormIntegrator&
-   LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
-   ::get()
-   {
-      assert(m_mfemLFI);
-      return *m_mfemLFI;
-   }
-
-   mfem::LinearFormIntegrator*
-   LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
-   ::release()
-   {
-      return m_mfemLFI.release();
-   }
-
    LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>
    operator-(const LinearFormIntegratorBase& lfi)
    {

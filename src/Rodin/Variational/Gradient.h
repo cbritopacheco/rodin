@@ -7,6 +7,10 @@
 #ifndef RODIN_VARIATIONAL_GRADIENT_H
 #define RODIN_VARIATIONAL_GRADIENT_H
 
+#include "ForwardDecls.h"
+
+#include "TrialFunction.h"
+#include "TestFunction.h"
 #include "VectorCoefficient.h"
 
 namespace Rodin::Variational
@@ -26,7 +30,8 @@ namespace Rodin::Variational
     *    \right]^T
     * @f]
     */
-   class Gradient : public VectorCoefficientBase
+   template <>
+   class Gradient<GridFunction<H1>> : public VectorCoefficientBase
    {
       public:
          /**
@@ -34,16 +39,16 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         constexpr
-         Gradient(const GridFunction<H1>& u)
-            : m_u(u)
-         {}
+         Gradient(const GridFunction<H1>& u);
 
          size_t getDimension() const override;
 
-         void build() override;
-
-         mfem::VectorCoefficient& get() override;
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         {
+            m_mfemVectorCoefficient.Eval(value, trans, ip);
+         }
 
          VectorCoefficientBase* copy() const noexcept override
          {
@@ -52,8 +57,59 @@ namespace Rodin::Variational
 
       private:
          const GridFunction<H1>& m_u;
-         std::optional<mfem::GradientGridFunctionCoefficient> m_mfemVectorCoefficient;
+         mfem::GradientGridFunctionCoefficient m_mfemVectorCoefficient;
    };
+   Gradient(const GridFunction<H1>&) -> Gradient<GridFunction<H1>>;
+
+   template <>
+   class Gradient<TrialFunction<H1>> : public TrialFunctionBase
+   {
+      public:
+         Gradient(const TrialFunction<H1>& u);
+
+         ValueType getValueType() const override;
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               VectorShape& values
+               ) const override;
+
+         const FiniteElementSpaceBase& getFiniteElementSpace() const override;
+
+         Gradient* copy() const noexcept override
+         {
+            return new Gradient(*this);
+         }
+      private:
+         const TrialFunction<H1>& m_u;
+   };
+   Gradient(const TrialFunction<H1>&) -> Gradient<TrialFunction<H1>>;
+
+   template <>
+   class Gradient<TestFunction<H1>> : public TestFunctionBase
+   {
+      public:
+         Gradient(const TestFunction<H1>& v);
+
+         ValueType getValueType() const override;
+
+         void getValue(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               VectorShape& values
+               ) const override;
+
+         const FiniteElementSpaceBase& getFiniteElementSpace() const override;
+
+         Gradient* copy() const noexcept override
+         {
+            return new Gradient(*this);
+         }
+      private:
+         const TestFunction<H1>& m_v;
+   };
+   Gradient(const TestFunction<H1>&) -> Gradient<TestFunction<H1>>;
 }
 
 #endif

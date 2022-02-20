@@ -21,12 +21,15 @@
 
 #include "Variational/Jacobian.h"
 #include "Variational/Gradient.h"
-#include "Variational/Derivative.h"
 #include "Variational/Transpose.h"
 #include "Variational/Trace.h"
 #include "Variational/Dot.h"
 #include "Variational/IdentityMatrix.h"
-#include "Variational/Magnitude.h"
+
+#include "Variational/TrialFunction.h"
+#include "Variational/TestFunction.h"
+
+#include "Variational/Integral.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"
@@ -41,8 +44,6 @@
 #include "Variational/VectorDomainLFDivIntegrator.h"
 
 // ---- Bilinear form integrators --------------------------------------------
-#include "Variational/MassIntegrator.h"
-#include "Variational/DiffusionIntegrator.h"
 #include "Variational/VectorMassIntegrator.h"
 #include "Variational/VectorDiffusionIntegrator.h"
 #include "Variational/ElasticityIntegrator.h"

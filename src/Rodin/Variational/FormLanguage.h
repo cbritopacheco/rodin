@@ -23,4 +23,6 @@
 
 #include "FormLanguage/ScalarMatrixProduct.h"
 
+#include "FormLanguage/Product.h"
+
 #endif

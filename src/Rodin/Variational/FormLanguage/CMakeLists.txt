@@ -11,6 +11,7 @@ set(RodinVariationalFormLanguage_HEADERS
   ScalarProduct.h
   ScalarSum.h
   ScalarUnaryMinus.h
+  Product.h
   )
 
 set(RodinVariationalFormLanguage_SRCS
@@ -24,7 +25,7 @@ set(RodinVariationalFormLanguage_SRCS
   ScalarProduct.cpp
   ScalarSum.cpp
   ScalarUnaryMinus.cpp
-  List.hpp
+  Product.cpp
   )
 
 add_library(RodinVariationalFormLanguage

@@ -24,16 +24,12 @@ namespace Rodin::Variational
                "DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
+      pb.getSolution().projectOnBoundary(getValue(), getBoundaryAttribute());
+
+      // Keep track of the boundary attributes that have been projected
       m_essBdr = mfem::Array<int>(maxBdrAttr);
       m_essBdr = 0;
       m_essBdr[getBoundaryAttribute() - 1] = 1;
-
-      getValue().build();
-      pb.getSolution()
-        .getHandle()
-        .ProjectBdrCoefficient(getValue().get(), m_essBdr);
-
-      // Keep track of the boundary attributes that have been projected
       pb.getEssentialBoundary()[getBoundaryAttribute() - 1] = 1;
    }
 
@@ -49,16 +45,12 @@ namespace Rodin::Variational
                "DirichletBC boundary attribute is out of range.").raise();
 
       // Project the coefficient onto the boundary
+      pb.getSolution().projectOnBoundary(getValue(), getBoundaryAttribute());
+
+      // Keep track of the boundary attributes that have been projected
       m_essBdr = mfem::Array<int>(maxBdrAttr);
       m_essBdr = 0;
       m_essBdr[getBoundaryAttribute() - 1] = 1;
-
-      getValue().build();
-      pb.getSolution()
-        .getHandle()
-        .ProjectBdrCoefficient(getValue().get(), m_essBdr);
-
-      // Keep track of the boundary attributes that have been projected
       pb.getEssentialBoundary()[getBoundaryAttribute() - 1] = 1;
    }
 }

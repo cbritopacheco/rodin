@@ -11,33 +11,6 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   namespace Internal
-   {
-      class ScalarMatrixProductCoefficient : public mfem::MatrixCoefficient
-      {
-         public:
-            ScalarMatrixProductCoefficient(
-                  mfem::Coefficient& s, mfem::MatrixCoefficient& m)
-               :  mfem::MatrixCoefficient(m.GetHeight(), m.GetWidth()),
-                  m_scalar(s),
-                  m_matrix(m)
-            {}
-
-            virtual void Eval(
-                  mfem::DenseMatrix& K,
-                  mfem::ElementTransformation& T,
-                  const mfem::IntegrationPoint& ip) override
-            {
-               m_matrix.Eval(K, T, ip);
-               K *= m_scalar.Eval(T, ip);
-            }
-
-         private:
-            mfem::Coefficient& m_scalar;
-            mfem::MatrixCoefficient& m_matrix;
-      };
-   }
-
    class ScalarMatrixProduct : public MatrixCoefficientBase
    {
       public:
@@ -50,9 +23,9 @@ namespace Rodin::Variational::FormLanguage
 
          int getColumns() const override;
 
-         void build() override;
-
-         mfem::MatrixCoefficient& get() override;
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          MatrixCoefficientBase* copy() const noexcept override
          {
@@ -61,7 +34,6 @@ namespace Rodin::Variational::FormLanguage
       private:
          std::unique_ptr<ScalarCoefficientBase> m_scalar;
          std::unique_ptr<MatrixCoefficientBase> m_matrix;
-         std::optional<Internal::ScalarMatrixProductCoefficient> m_mfemMatrixCoefficient;
    };
 
    ScalarMatrixProduct

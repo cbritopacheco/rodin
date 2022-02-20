@@ -2,8 +2,6 @@ set(RodinVariational_HEADERS
   BilinearForm.h
   BilinearFormIntegrator.h
   BoundaryCondition.h
-  Derivative.h
-  DiffusionIntegrator.h
   DirichletBC.h
   DomainLFIntegrator.h
   VectorDomainLFDivIntegrator.h
@@ -14,10 +12,14 @@ set(RodinVariational_HEADERS
   ForwardDecls.h
   Gradient.h
   GridFunction.h
+  ShapeFunction.h
+  TrialFunction.h
+  TestFunction.h
   GridFunctionIndex.h
   GridFunctionView.h
   H1.h
   IdentityMatrix.h
+  Integral.h
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
@@ -30,22 +32,24 @@ set(RodinVariational_HEADERS
   Restriction.h
   VectorBoundaryFluxLFIntegrator.h
   VectorCoefficient.h
-  MassIntegrator.h
   VectorMassIntegrator.h
   VectorDiffusionIntegrator.h
   VectorDomainLFIntegrator.h
   )
 
 set(RodinVariational_SRCS
-  DiffusionIntegrator.cpp
   DirichletBC.cpp
   VectorDomainLFDivIntegrator.cpp
   DomainLFIntegrator.cpp
   ElasticityIntegrator.cpp
+  LinearFormIntegrator.cpp
+  BilinearFormIntegrator.cpp
   Gradient.cpp
+  ShapeFunction.cpp
   GridFunctionIndex.cpp
   GridFunctionView.cpp
   IdentityMatrix.cpp
+  Integral.cpp
   Jacobian.cpp
   MatrixCoefficient.cpp
   NeumannBC.cpp
@@ -53,15 +57,13 @@ set(RodinVariational_SRCS
   Transpose.cpp
   VectorBoundaryFluxLFIntegrator.cpp
   VectorCoefficient.cpp
-  MassIntegrator.cpp
   VectorMassIntegrator.cpp
   VectorDiffusionIntegrator.cpp
   VectorDomainLFIntegrator.cpp
   ScalarCoefficient.cpp
   Restriction.cpp
   BilinearForm.hpp
-  Derivative.hpp
-  Dot.hpp
+  Dot.cpp
   LinearForm.hpp
   Problem.hpp
   ScalarCoefficient.hpp

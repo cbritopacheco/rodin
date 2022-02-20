@@ -13,33 +13,15 @@
 namespace Rodin::Variational
 {
    DomainLFIntegrator::DomainLFIntegrator(const ScalarCoefficientBase& f)
-      : m_f(f.copy())
+      : m_f(f.copy()),
+        m_mfemScalar(m_f->build()),
+        m_mfemLFI(*m_mfemScalar)
    {}
 
    DomainLFIntegrator::DomainLFIntegrator(const DomainLFIntegrator& other)
-      :  m_attr(other.m_attr),
-         m_f(other.m_f->copy())
+      :  LinearFormDomainIntegrator(other),
+         m_f(other.m_f->copy()),
+         m_mfemScalar(other.m_f->build()),
+         m_mfemLFI(*m_mfemScalar)
    {}
-
-   void DomainLFIntegrator::build()
-   {
-      m_f->build();
-      m_mfemLFI = std::make_unique<mfem::DomainLFIntegrator>(m_f->get());
-   }
-
-   mfem::LinearFormIntegrator& DomainLFIntegrator::get()
-   {
-      assert(m_mfemLFI);
-      return *m_mfemLFI;
-   }
-
-   mfem::LinearFormIntegrator* DomainLFIntegrator::release()
-   {
-      return m_mfemLFI.release();
-   }
-
-   DomainLFIntegrator* DomainLFIntegrator::copy() const noexcept
-   {
-      return new DomainLFIntegrator(*this);
-   }
 }

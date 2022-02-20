@@ -28,7 +28,7 @@ namespace Rodin::Variational
           * @returns Returns reference to the value of the boundary condition
           * at the boundary
           */
-         virtual FormLanguage::Base& getValue() = 0;
+         virtual const FormLanguage::Base& getValue() const = 0;
 
          /**
           * @brief Imposes the boundary condition on the given ProblemBase
@@ -64,7 +64,7 @@ namespace Rodin::Variational
             return m_bdrAttr;
          }
 
-         virtual ScalarCoefficientBase& getValue() override
+         virtual const ScalarCoefficientBase& getValue() const override
          {
             return *m_value;
          }
@@ -102,7 +102,7 @@ namespace Rodin::Variational
             return m_bdrAttr;
          }
 
-         virtual VectorCoefficientBase& getValue() override
+         virtual VectorCoefficientBase& getValue() const override
          {
             return *m_value;
          }

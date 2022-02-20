@@ -51,7 +51,14 @@ namespace Rodin::Variational
    {
       public:
          NeumannBC(int bdrAtr, const ScalarCoefficientBase& v)
-            : BoundaryCondition<ScalarCoefficientBase>(bdrAtr, v)
+            : BoundaryCondition<ScalarCoefficientBase>(bdrAtr, v),
+              m_mfemScalar(v.build())
+         {}
+
+         NeumannBC(const NeumannBC& other)
+            : BoundaryCondition<ScalarCoefficientBase>(other),
+              m_nbcBdr(other.m_nbcBdr),
+              m_mfemScalar(other.getValue().build())
          {}
 
          void imposeOn(ProblemBase& pb) override;
@@ -62,6 +69,7 @@ namespace Rodin::Variational
          }
       private:
          mfem::Array<int> m_nbcBdr;
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
    };
 
    NeumannBC(int, const VectorCoefficientBase&)
@@ -73,7 +81,14 @@ namespace Rodin::Variational
    {
       public:
          NeumannBC(int bdrAtr, const VectorCoefficientBase& v)
-            : BoundaryCondition<VectorCoefficientBase>(bdrAtr, v)
+            : BoundaryCondition<VectorCoefficientBase>(bdrAtr, v),
+              m_mfemVector(v.build())
+         {}
+
+         NeumannBC(const NeumannBC& other)
+            : BoundaryCondition<VectorCoefficientBase>(other),
+              m_nbcBdr(other.m_nbcBdr),
+              m_mfemVector(other.getValue().build())
          {}
 
          void imposeOn(ProblemBase& pb) override;
@@ -84,6 +99,7 @@ namespace Rodin::Variational
          }
       private:
          mfem::Array<int> m_nbcBdr;
+         std::unique_ptr<Internal::VectorCoefficient> m_mfemVector;
    };
 }
 

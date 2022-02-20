@@ -68,8 +68,9 @@ int main(int, char**)
     H1 VhInt(trimmed, d);
 
     // Elasticity equation
-    GridFunction uInt(VhInt);
-    Problem elasticity(uInt);
+    TrialFunction uInt(VhInt);
+    TestFunction  vInt(VhInt);
+    Problem elasticity(uInt, vInt);
     elasticity = ElasticityIntegrator(lambda, mu)
                + DirichletBC(GammaD, VectorCoefficient{0, 0})
                + NeumannBC(GammaN, VectorCoefficient{0, -1});
@@ -80,7 +81,6 @@ int main(int, char**)
     uInt.transfer(u);
 
     // Hilbert extension-regularization procedure
-    GridFunction theta(Vh);
     auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
     auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
 
@@ -88,13 +88,20 @@ int main(int, char**)
     GridFunction w(Ph);
     w = (Dot(Ae, e) - ell).restrictTo(Interior);
 
-    Problem hilbert(theta);
+    TrialFunction g(Vh);
+    TestFunction  v(Vh);
+    Problem hilbert(g, v);
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
             - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
+    mfem::VectorDivergenceIntegrator m;
+    mfem::VectorMassIntegrator a;
+
+    g.save("g.gf");
+    Omega.save("Omegai.mesh");
 
     // Update objective
     obj.push_back(
@@ -103,7 +110,7 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    auto mmgVel = Cast(theta).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
+    auto mmgVel = Cast(g).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
     auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
@@ -112,7 +119,7 @@ int main(int, char**)
     auto mmgLs = dist.distance(mmgMesh);
 
     // Advect the level set function
-    double dt = Omega.getMaximumDisplacement(theta);
+    double dt = Omega.getMaximumDisplacement(g);
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain

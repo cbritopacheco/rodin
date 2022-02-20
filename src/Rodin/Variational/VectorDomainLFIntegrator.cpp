@@ -13,30 +13,17 @@
 namespace Rodin::Variational
 {
    VectorDomainLFIntegrator::VectorDomainLFIntegrator(const VectorCoefficientBase& f)
-      : m_f(f.copy())
+      : m_f(f.copy()),
+        m_mfemVector(f.build()),
+        m_mfemLFI(*m_mfemVector)
    {}
 
    VectorDomainLFIntegrator::VectorDomainLFIntegrator(const VectorDomainLFIntegrator& other)
-      :  m_attr(other.m_attr),
-         m_f(other.m_f->copy())
+      :  LinearFormDomainIntegrator(other),
+         m_f(other.m_f->copy()),
+         m_mfemVector(other.m_f->build()),
+         m_mfemLFI(*m_mfemVector)
    {}
-
-   void VectorDomainLFIntegrator::build()
-   {
-      m_f->build();
-      m_mfemLFI = std::make_unique<mfem::VectorDomainLFIntegrator>(m_f->get());
-   }
-
-   mfem::LinearFormIntegrator& VectorDomainLFIntegrator::get()
-   {
-      assert(m_mfemLFI);
-      return *m_mfemLFI;
-   }
-
-   mfem::LinearFormIntegrator* VectorDomainLFIntegrator::release()
-   {
-      return m_mfemLFI.release();
-   }
 
    VectorDomainLFIntegrator* VectorDomainLFIntegrator::copy() const noexcept
    {

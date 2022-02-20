@@ -94,6 +94,43 @@ namespace Rodin
    External::MMG::IncompleteVectorSolution2D
    Cast<Variational::GridFunction<Variational::H1>>
    ::to<External::MMG::IncompleteVectorSolution2D>() const;
+
+   template <class FEC>
+   class Cast<Variational::TrialFunction<FEC>, false>
+   {
+      public:
+         /**
+          * @brief Constructs a Cast instance with the object to be casted.
+          * @param[in] from Object to be casted.
+          */
+         Cast(const Variational::TrialFunction<FEC>& from)
+            : m_from(from)
+         {}
+
+         /**
+          * @brief Gets the constant reference to the object which will be
+          * casted.
+          * @returns Constant reference to the object which will be casted.
+          */
+         const Variational::TrialFunction<FEC>& from() const
+         {
+            return m_from;
+         }
+
+         /**
+          * @brief Perform cast to type To.
+          * @tparam To Target type, to which the object will be casted.
+          * @returns Value of type To.
+          */
+         template <class To>
+         To to() const
+         {
+            return Cast<Variational::GridFunction<FEC>>(m_from).template to<To>();
+         }
+
+      private:
+         const Variational::TrialFunction<FEC>& m_from;
+   };
 }
 
 

@@ -14,15 +14,10 @@ namespace Rodin::Variational
       :  m_matrix(other.m_matrix->copy())
    {}
 
-   void Trace::build()
+   double Trace::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    {
-      m_matrix->build();
-      m_mfemCoefficient.emplace(m_matrix->get());
-   }
-
-   mfem::Coefficient& Trace::get()
-   {
-      assert(m_mfemCoefficient);
-      return *m_mfemCoefficient;
+      mfem::DenseMatrix mat;
+      m_matrix->getValue(mat, trans, ip);
+      return mat.Trace();
    }
 }

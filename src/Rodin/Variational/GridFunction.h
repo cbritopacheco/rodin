@@ -35,8 +35,12 @@ namespace Rodin::Variational
    class GridFunctionBase
    {
       public:
+         virtual void update() = 0;
+
+         virtual double max() const = 0;
+         virtual double min() const = 0;
+
          /**
-          * @internal
           * @brief Gets the underlying handle to the mfem::GridFunction object.
           * @returns Reference to the underlying object.
           */
@@ -51,11 +55,19 @@ namespace Rodin::Variational
 
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
          virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
-         virtual void update() = 0;
+
          virtual GridFunctionBase& operator*=(double t) = 0;
          virtual GridFunctionBase& operator/=(double t) = 0;
-         virtual double max() const = 0;
-         virtual double min() const = 0;
+
+         virtual GridFunctionBase& project(const ScalarCoefficientBase& s, int attr) = 0;
+         virtual GridFunctionBase& project(const VectorCoefficientBase& s, int attr) = 0;
+         virtual GridFunctionBase& project(const ScalarCoefficientBase& s, const std::set<int>& attrs) = 0;
+         virtual GridFunctionBase& project(const VectorCoefficientBase& s, const std::set<int>& attrs) = 0;
+
+         virtual GridFunctionBase& projectOnBoundary(const ScalarCoefficientBase& s, int attr) = 0;
+         virtual GridFunctionBase& projectOnBoundary(const VectorCoefficientBase& s, int attr) = 0;
+         virtual GridFunctionBase& projectOnBoundary(const ScalarCoefficientBase& s, const std::set<int>& attrs) = 0;
+         virtual GridFunctionBase& projectOnBoundary(const VectorCoefficientBase& s, const std::set<int>& attrs) = 0;
 
          virtual std::pair<const double*, int> getData() const = 0;
    };
@@ -240,18 +252,129 @@ namespace Rodin::Variational
             return res;
          }
 
-         /**
-          * @brief Projects a scalar coefficient on the given GridFunction.
-          * @note The GridFunction must be scalar valued.
-          * @param[in] s Scalar coefficient to project
-          * @returns Reference to self
-          */
-         GridFunction& operator=(const ScalarCoefficientBase& s)
+         template <class T>
+         GridFunction& operator=(T&& v)
+         {
+            return project(std::forward<T>(v));
+         }
+
+         GridFunction& project(const ScalarCoefficientBase& s, int attr) override
+         {
+            return project(s, std::set<int>{attr});
+         }
+
+         GridFunction& project(const VectorCoefficientBase& v, int attr) override
+         {
+            return project(v, std::set<int>{attr});
+         }
+
+         GridFunction& projectOnBoundary(const ScalarCoefficientBase& s, int attr) override
+         {
+            return projectOnBoundary(s, std::set<int>{attr});
+         }
+
+         GridFunction& projectOnBoundary(const VectorCoefficientBase& v, int attr) override
+         {
+            return projectOnBoundary(v, std::set<int>{attr});
+         }
+
+         GridFunction& project(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getRangeDimension() == 1);
-            std::unique_ptr<ScalarCoefficientBase> sCopy(s.copy());
-            sCopy->build();
-            getHandle().ProjectCoefficient(sCopy->get());
+            std::unique_ptr<Internal::ScalarCoefficient> iv = s.build();
+
+            if (attrs.size() == 0)
+               getHandle().ProjectCoefficient(*iv);
+            else
+            {
+               int maxAttr = getFiniteElementSpace()
+                            .getMesh()
+                            .getHandle().attributes.Max();
+               mfem::Array<int> marker(maxAttr);
+               marker = 0;
+               for (const auto& attr : attrs)
+               {
+                  assert(attr - 1 < maxAttr);
+                  marker[attr - 1] = 1;
+               }
+               getHandle().ProjectCoefficient(*iv, marker);
+            }
+            return *this;
+         }
+
+         GridFunction& project(const VectorCoefficientBase& s, const std::set<int>& attrs = {}) override
+         {
+            assert(getFiniteElementSpace().getRangeDimension() == s.getDimension());
+            std::unique_ptr<Internal::VectorCoefficient> iv = s.build();
+
+            if (attrs.size() == 0)
+               getHandle().ProjectCoefficient(*iv);
+            else
+            {
+               int maxAttr = getFiniteElementSpace()
+                            .getMesh()
+                            .getHandle().attributes.Max();
+               mfem::Array<int> marker(maxAttr);
+               marker = 0;
+               for (const auto& attr : attrs)
+               {
+                  assert(attr - 1 < maxAttr);
+                  marker[attr - 1] = 1;
+               }
+               getHandle().ProjectCoefficient(*iv, marker);
+            }
+            return *this;
+         }
+
+         GridFunction& projectOnBoundary(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
+         {
+            assert(getFiniteElementSpace().getRangeDimension() == 1);
+            std::unique_ptr<Internal::ScalarCoefficient> iv = s.build();
+            int maxBdrAttr = getFiniteElementSpace()
+                            .getMesh()
+                            .getHandle().bdr_attributes.Max();
+            mfem::Array<int> marker(maxBdrAttr);
+            if (attrs.size() == 0)
+            {
+               marker = 1;
+               getHandle().ProjectBdrCoefficient(*iv, marker);
+            }
+            else
+            {
+               marker = 0;
+               for (const auto& attr : attrs)
+               {
+                  assert(attr - 1 < maxBdrAttr);
+                  marker[attr - 1] = 1;
+               }
+               getHandle().ProjectBdrCoefficient(*iv, marker);
+            }
+            return *this;
+         }
+
+         GridFunction& projectOnBoundary(const VectorCoefficientBase& v, const std::set<int>& attrs = {}) override
+         {
+            assert(getFiniteElementSpace().getRangeDimension() == v.getDimension());
+            std::unique_ptr<Internal::VectorCoefficient> iv = v.build();
+            int maxBdrAttr = getFiniteElementSpace()
+                            .getMesh()
+                            .getHandle().bdr_attributes.Max();
+            mfem::Array<int> marker(maxBdrAttr);
+            if (attrs.size() == 0)
+            {
+               marker = 1;
+               getHandle().ProjectBdrCoefficient(*iv, marker);
+            }
+            else
+            {
+               marker = 0;
+               for (const auto& attr : attrs)
+               {
+                  assert(attr - 1 < maxBdrAttr);
+                  marker[attr - 1] = 1;
+               }
+               getHandle().ProjectBdrCoefficient(*iv, marker);
+            }
             return *this;
          }
 
@@ -261,12 +384,10 @@ namespace Rodin::Variational
           * @param[in] s Scalar coefficient to project
           * @returns Reference to self
           */
-         GridFunction& operator=(const Restriction<ScalarCoefficientBase>& s)
+         GridFunction& project(const Restriction<ScalarCoefficientBase>& s)
          {
             assert(getFiniteElementSpace().getRangeDimension() == 1);
-            std::unique_ptr<ScalarCoefficientBase> sCopy(
-                  s.getScalarCoefficient().copy());
-            sCopy->build();
+            std::unique_ptr<Internal::ScalarCoefficient> iv = s.getScalarCoefficient().build();
             getHandle() = NAN;
             mfem::Array<int> vdofs;
             mfem::Vector vals;
@@ -279,26 +400,10 @@ namespace Rodin::Variational
                   fes.GetElementVDofs(i, vdofs);
                   vals.SetSize(vdofs.Size());
                   fes.GetFE(i)->Project(
-                        sCopy->get(),
-                        *fes.GetElementTransformation(i), vals);
+                        *iv, *fes.GetElementTransformation(i), vals);
                   getHandle().SetSubVector(vdofs, vals);
                }
             }
-            return *this;
-         }
-
-         /**
-          * @brief Projects a scalar coefficient on the given GridFunction.
-          * @note The GridFunction must be vector valued.
-          * @param[in] v Scalar coefficient to project
-          * @returns Reference to self
-          */
-         GridFunction& operator=(const VectorCoefficientBase& v)
-         {
-            assert(getFiniteElementSpace().getRangeDimension() == v.getDimension());
-            std::unique_ptr<VectorCoefficientBase> vCopy(v.copy());
-            vCopy->build();
-            getHandle().ProjectCoefficient(vCopy->get());
             return *this;
          }
 
@@ -358,12 +463,12 @@ namespace Rodin::Variational
             }
             else
             {
-               Alert::Exception("Unimplemented. Sorry.").raise();
                // If the meshes are equal or where obtained from refinements
                // one could use the mfem functionality to make a GridTransfer.
                // Alternatively, if the mesh is equal but the finite element
                // spaces are not, mfem also contains the TransferOperator class
                // which can come in useful.
+               Alert::Exception("Unimplemented. Sorry.").raise();
             }
          }
 

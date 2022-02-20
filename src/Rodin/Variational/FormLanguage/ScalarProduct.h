@@ -12,9 +12,8 @@ namespace Rodin::Variational::FormLanguage
 
          ScalarProduct(const ScalarProduct& other);
 
-         void build() override;
-
-         mfem::Coefficient& get() override;
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
 
          ScalarProduct* copy() const noexcept override
          {
@@ -24,7 +23,6 @@ namespace Rodin::Variational::FormLanguage
       private:
          std::unique_ptr<ScalarCoefficientBase> m_a;
          std::unique_ptr<ScalarCoefficientBase> m_b;
-         std::optional<mfem::ProductCoefficient> m_mfemCoefficient;
    };
 
    ScalarProduct

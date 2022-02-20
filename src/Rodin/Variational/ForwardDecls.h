@@ -12,7 +12,7 @@ namespace Rodin::Variational
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class FEC>
+   template <class TrialFEC, class TestFEC>
    class Problem;
 
    // ---- FiniteElementSpace ------------------------------------------------
@@ -35,6 +35,16 @@ namespace Rodin::Variational
    class GridFunction;
 
    class IncompleteGridFunction;
+
+   class TrialFunctionBase;
+
+   template <class FEC>
+   class TrialFunction;
+
+   class TestFunctionBase;
+
+   template <class FEC>
+   class TestFunction;
 
    /**
     * @brief Where the integration takes place.
@@ -100,6 +110,7 @@ namespace Rodin::Variational
 
    class MatrixCoefficient;
 
+   // ---- Expressions -------------------------------------------------------
    class Jacobian;
 
    template <int DirectionIndex, int ComponentIndex = 1>
@@ -107,13 +118,23 @@ namespace Rodin::Variational
 
    class Transpose;
 
-   template <class A, class B, class Enable = void>
+   template <class T>
    class Dot;
+
+   template <class T>
+   class Gradient;
 
    class RestrictionBase;
 
    template <class T>
    class Restriction;
+
+   namespace Internal
+   {
+      class ScalarCoefficient;
+      class VectorCoefficient;
+      class MatrixCoefficient;
+   }
 }
 
 #endif

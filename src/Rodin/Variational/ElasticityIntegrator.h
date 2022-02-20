@@ -64,27 +64,13 @@ namespace Rodin::Variational
 
          ElasticityIntegrator(const ElasticityIntegrator& other);
 
-         const std::set<int>& getAttributes() const override
+         void getElementMatrix(
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            return m_attr;
+            assert(&trial == &test);
+            m_bfi.AssembleElementMatrix(trial, trans, mat);
          }
-
-         ElasticityIntegrator& over(int attr) override
-         {
-            return over(std::set{attr});
-         }
-
-         ElasticityIntegrator& over(const std::set<int>& attrs) override
-         {
-            m_attr = attrs;
-            return *this;
-         }
-
-         void build() override;
-
-         mfem::BilinearFormIntegrator& get() override;
-
-         mfem::BilinearFormIntegrator* release() override;
 
          ElasticityIntegrator* copy() const noexcept override
          {
@@ -92,10 +78,12 @@ namespace Rodin::Variational
          }
 
       private:
-         std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
          std::unique_ptr<ScalarCoefficientBase> m_mu;
-         std::unique_ptr<mfem::ElasticityIntegrator> m_bfi;
+
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemLambda;
+         std::unique_ptr<Internal::ScalarCoefficient> m_mfemMu;
+         mfem::ElasticityIntegrator m_bfi;
    };
 }
 
