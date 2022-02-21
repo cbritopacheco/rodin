@@ -84,18 +84,19 @@ namespace Rodin::Variational
       public:
          Integral(const GridFunction<FEC>& u)
             : m_u(u),
-              m_bf(u.getFiniteElementSpace())
-         {}
+              m_lf(u.getFiniteElementSpace())
+         {
+            m_lf = Integral(ScalarCoefficient(1.0) * TestFunction(m_u.getFiniteElementSpace()));
+         }
 
          operator double() const
          {
-            m_bf = Integral(ScalarCoefficient(1.0) * TestFunction(m_u.getFiniteElementSpace()));
-            return m_bf(m_u);
+            return m_lf(m_u);
          }
 
       private:
          const GridFunction<FEC>& m_u;
-         BilinearForm<FEC> m_bf;
+         LinearForm<FEC> m_lf;
    };
    template <class FEC>
    Integral(const GridFunction<FEC>&) -> Integral<GridFunction<FEC>>;
