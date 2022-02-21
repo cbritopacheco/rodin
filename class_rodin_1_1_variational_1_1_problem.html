@@ -50,7 +50,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FEC&gt;</div>
+          <div class="m-doc-template">template&lt;class TrialFEC, class TestFEC&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem <span class="m-thin">class</span>
         </h1>
         <p>Represents a variational problem to be solved.</p>
@@ -75,7 +75,8 @@
             </dt>
             <dd>Deleted copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a09715bb361367b406139efdb4895b2b3" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac7391f9802443a79d8f27c664343d691" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC&gt;&amp; v)</span>
             </dt>
             <dd>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -111,12 +112,13 @@ $ v $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a09715bb361367b406139efdb4895b2b3"><div>
+          <section class="m-doc-details" id="ac7391f9802443a79d8f27c664343d691"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FEC&gt;
+                template&lt;class TrialFEC, class TestFEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09715bb361367b406139efdb4895b2b3" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC&gt;&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7391f9802443a79d8f27c664343d691" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC&gt;&amp; v)</span></span>
             </h3>
             <p>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -157,6 +159,10 @@ $ u $
 <use x='0' y='0' xlink:href='#eq3-g0-117'/>
 </g>
 </svg> belonging to a suitable finite element space.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td></td>
                 </tr>
               </tbody>
             </table>
