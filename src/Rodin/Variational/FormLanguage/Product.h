@@ -25,6 +25,16 @@ namespace Rodin::Variational::FormLanguage
             : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
+         Lhs& getLHS()
+         {
+            return *m_lhs;
+         }
+
+         Rhs& getRHS()
+         {
+            return *m_rhs;
+         }
+
          const Lhs& getLHS() const
          {
             return *m_lhs;

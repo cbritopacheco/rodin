@@ -24,10 +24,9 @@ int main(int, char**)
   auto f = ScalarCoefficient(1.0);
   auto g = ScalarCoefficient(0.0);
 
-
   Problem poisson(u, v);
   poisson = Integral(Gradient(u) * Gradient(v))
-          - DomainLFIntegrator(f)
+          - Integral(f * v)
           + DirichletBC(Gamma, g);
 
   // Solve problem

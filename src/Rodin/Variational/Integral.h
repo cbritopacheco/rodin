@@ -8,6 +8,7 @@
 #include "FormLanguage.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
+#include "ScalarCoefficient.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -21,11 +22,13 @@ namespace Rodin::Variational
       : public BilinearFormDomainIntegrator
    {
       public:
-         Integral(const FormLanguage::Product<TrialFunctionBase, TestFunctionBase>& prod);
+         Integral(const FormLanguage::Product<TrialFunctionBase, TestFunctionBase>& prod)
+            : m_prod(prod)
+         {}
 
          Integral(const Integral& other) = default;
 
-         virtual void getElementMatrix(
+         void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
 
@@ -43,6 +46,36 @@ namespace Rodin::Variational
    };
    Integral(const FormLanguage::Product<TrialFunctionBase, TestFunctionBase>&)
       -> Integral<FormLanguage::Product<TrialFunctionBase, TestFunctionBase>>;
+
+   template <>
+   class Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>
+      : public LinearFormDomainIntegrator
+   {
+      public:
+         Integral(const FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>& prod)
+            : m_prod(prod)
+         {}
+
+         Integral(const Integral& other) = default;
+
+         void getElementVector(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans, mfem::Vector& vec) override;
+
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return Domain;
+         }
+
+         Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
+      private:
+         FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase> m_prod;
+   };
+   Integral(const FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>&)
+      -> Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>;
 }
 
 #endif

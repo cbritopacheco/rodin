@@ -1,14 +1,11 @@
 #include "Integral.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
+#include "ScalarCoefficient.h"
 
 namespace Rodin::Variational
 {
-   Integral<FormLanguage::Product<TrialFunctionBase, TestFunctionBase>>
-   ::Integral(const FormLanguage::Product<TrialFunctionBase, TestFunctionBase>& prod)
-      : m_prod(prod)
-   {}
-
+   // ---- FormLanguage::Product<TrialFunctionBase, TestFunctionBase> --------
    void
    Integral<FormLanguage::Product<TrialFunctionBase, TestFunctionBase>>
    ::getElementMatrix(
@@ -40,7 +37,7 @@ namespace Rodin::Variational
             trialValue.SetSize(trialDof, spaceDim);
             testValue.SetSize(testDof, spaceDim);
 
-            int order = trialElement.GetOrder() + testElement.GetOrder() + trans.OrderW();
+            int order = trialElement.GetOrder() + testElement.GetOrder() + trans.OrderW() - 1;
             const mfem::IntegrationRule* ir =
                &mfem::IntRules.Get(trans.GetGeometryType(), order);
             for (int i = 0; i < ir->GetNPoints(); i++)
@@ -56,6 +53,59 @@ namespace Rodin::Variational
          }
          case ShapeFunction::Matrix:
          {
+            break;
+         }
+      }
+   }
+
+   // ---- FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase> ----
+   void
+   Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>
+   ::getElementVector(
+         const mfem::FiniteElement& fe,
+         mfem::ElementTransformation& trans, mfem::Vector& vec)
+   {
+      auto& scalar = m_prod.getLHS();
+      auto& test = m_prod.getRHS();
+      int dof = fe.GetDof();
+
+      switch (test.getValueType())
+      {
+         case ShapeFunction::Scalar:
+         {
+            vec.SetSize(dof);
+            vec = 0.0;
+
+            mfem::Vector value;
+            value.SetSize(dof);
+
+            int order = fe.GetOrder() + trans.OrderW() - 1;
+            const mfem::IntegrationRule* ir =
+               &mfem::IntRules.Get(trans.GetGeometryType(), order);
+
+            for (int i = 0; i < ir->GetNPoints(); i++)
+            {
+               const mfem::IntegrationPoint& ip = ir->IntPoint(i);
+               trans.SetIntPoint (&ip);
+               double val = ip.weight * trans.Weight() * scalar.getValue(trans, ip);
+
+               test.getValue(fe, trans, vec);
+               add(vec, ip.weight * val, value, vec);
+            }
+            break;
+         }
+         case ShapeFunction::Vector:
+         {
+            Alert::Exception()
+               << "Mismatching dimensions. Here goeth my AST log."
+               << Alert::Raise;
+            break;
+         }
+         case ShapeFunction::Matrix:
+         {
+            Alert::Exception()
+               << "Mismatching dimensions. Here goeth my AST log."
+               << Alert::Raise;
             break;
          }
       }
