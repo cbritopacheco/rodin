@@ -6,8 +6,9 @@
 
 #include "ForwardDecls.h"
 #include "FormLanguage.h"
-#include "TrialFunction.h"
+#include "GridFunction.h"
 #include "TestFunction.h"
+#include "TrialFunction.h"
 #include "ScalarCoefficient.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -76,6 +77,28 @@ namespace Rodin::Variational
    };
    Integral(const FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>&)
       -> Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>;
+
+   template <class FEC>
+   class Integral<GridFunction<FEC>>
+   {
+      public:
+         Integral(const GridFunction<FEC>& u)
+            : m_u(u),
+              m_bf(u.getFiniteElementSpace())
+         {}
+
+         operator double() const
+         {
+            m_bf = Integral(ScalarCoefficient(1.0) * TestFunction(m_u.getFiniteElementSpace()));
+            return m_bf(m_u);
+         }
+
+      private:
+         const GridFunction<FEC>& m_u;
+         BilinearForm<FEC> m_bf;
+   };
+   template <class FEC>
+   Integral(const GridFunction<FEC>&) -> Integral<GridFunction<FEC>>;
 }
 
 #endif

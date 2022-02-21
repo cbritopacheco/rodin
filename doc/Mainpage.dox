@@ -1,6 +1,6 @@
 /**
   @mainpage Rodin
-* *Lightweight and modern C++17 shape and topology optimization framework.*
+* *Lightweight and modern C++17 shape, density and topology optimization framework.*
 
   @section what-is-rodin What is Rodin?
 
