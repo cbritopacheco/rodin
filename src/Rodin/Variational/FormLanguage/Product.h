@@ -54,9 +54,11 @@ namespace Rodin::Variational::FormLanguage
    Product<TrialFunctionBase, TestFunctionBase>
    operator*(const TrialFunctionBase& lhs, const TestFunctionBase& rhs);
 
-   // ---- Rules -------------------------------------------------------------
    Product<ScalarCoefficientBase, TestFunctionBase>
    operator*(const ScalarCoefficientBase& lhs, const TestFunctionBase& rhs);
+
+   Product<ScalarCoefficientBase, TestFunctionBase>
+   operator*(double lhs, const TestFunctionBase& rhs);
 }
 
 #endif

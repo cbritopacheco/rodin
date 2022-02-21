@@ -16,4 +16,10 @@ namespace Rodin::Variational::FormLanguage
    {
       return Product(lhs, rhs);
    }
+
+   Product<ScalarCoefficientBase, TestFunctionBase>
+   operator*(double lhs, const TestFunctionBase& rhs)
+   {
+      return ScalarCoefficient(lhs) * rhs;
+   }
 }
