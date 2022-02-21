@@ -131,18 +131,17 @@ components:
     auto g = ScalarCoefficient(0.0);
 
     Problem poisson(u);
-    poisson = DiffusionIntegrator()
-            - DomainLFIntegrator(f)
+    poisson = Integral(Gradient(u) * Gradient(v))
+            - Integral(f * v)
             + DirichletBC(Gamma, g);
   @endcode
 
-  In this case the @ref Rodin::Variational::DiffusionIntegrator() "DiffusionIntegrator()"
+  In this case the `Integral(Gradient(u) * Gradient(v))`
   object represents the bilinear term
   @f[
     \int_\Omega \nabla u \cdot \nabla v \ dx \ ,
   @f]
-  while the @ref Rodin::Variational::DomainLFIntegrator() "DomainLFIntegrator()"
-  object represents the linear term
+  while the `Integral(f * v)` object represents the linear term
   @f[
     \int_\Omega f v \ dx .
   @f]
@@ -151,8 +150,9 @@ components:
   object specifies that the solution will satisfy the homogenous Dirichlet
   condition:
   @f[
-    u = 0 \quad \text{on} \quad \Gamma .
+    u = g \quad \text{on} \quad \Gamma .
   @f]
+  with @f$ g = 0 @f$ everywhere on @f$ \Gamma @f$.
 
   Generally, it is somewhat tedious to remember what each integrator
   represents so the developer is encouraged to use search the documentation
