@@ -37,7 +37,7 @@ namespace Rodin::Variational
             trialValue.SetSize(trialDof, spaceDim);
             testValue.SetSize(testDof, spaceDim);
 
-            int order = trialElement.GetOrder() + testElement.GetOrder() + trans.OrderW() - 1;
+            int order = trialElement.GetOrder() + testElement.GetOrder() + trans.OrderW();
             const mfem::IntegrationRule* ir =
                &mfem::IntRules.Get(trans.GetGeometryType(), order);
             for (int i = 0; i < ir->GetNPoints(); i++)

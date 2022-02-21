@@ -40,5 +40,10 @@ target_include_directories(RodinVariationalFormLanguage
   ${MFEM_INCLUDE_DIRS}
   )
 
+target_link_libraries(RodinVariationalFormLanguage
+  PUBLIC
+  RodinVariational
+  )
+
 
 

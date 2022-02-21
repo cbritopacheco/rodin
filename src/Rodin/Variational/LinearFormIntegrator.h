@@ -2,29 +2,32 @@
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
 #include <set>
+#include <memory>
 #include <mfem.hpp>
 
 #include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 
+namespace Rodin::Variational::Internal
+{
+   class LinearFormIntegrator : public mfem::LinearFormIntegrator
+   {
+      public:
+         LinearFormIntegrator(const LinearFormIntegratorBase& bfi);
+
+         LinearFormIntegrator(const LinearFormIntegrator& other);
+
+         void AssembleRHSElementVect(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans, mfem::Vector& vec) override;
+      private:
+         std::unique_ptr<LinearFormIntegratorBase> m_lfi;
+   };
+}
+
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      class LinearFormIntegrator : public mfem::LinearFormIntegrator
-      {
-         public:
-            LinearFormIntegrator(const LinearFormIntegratorBase& bfi);
-
-            void AssembleRHSElementVect(
-                  const mfem::FiniteElement& fe,
-                  mfem::ElementTransformation& trans, mfem::Vector& vec) override;
-         private:
-            std::unique_ptr<LinearFormIntegratorBase> m_lfi;
-      };
-   }
-
    class LinearFormIntegratorBase
       : public FormLanguage::Buildable<Internal::LinearFormIntegrator>
    {
