@@ -50,7 +50,7 @@ int main(int, char**)
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(hmax * hmax);
+  auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -97,8 +97,6 @@ int main(int, char**)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
             + DirichletBC(GammaN, VectorCoefficient{0, 0});
     solver.solve(hilbert);
-    mfem::VectorDivergenceIntegrator m;
-    mfem::VectorMassIntegrator a;
 
     g.save("g.gf");
     Omega.save("Omegai.mesh");

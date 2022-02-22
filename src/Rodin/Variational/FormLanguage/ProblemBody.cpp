@@ -4,8 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "LinearFormIntegratorUnaryMinus.h"
-#include "BilinearFormIntegratorUnaryMinus.h"
+#include "UnaryMinus.h"
 
 #include "ProblemBody.h"
 
@@ -80,11 +79,11 @@ namespace Rodin::Variational::FormLanguage
       {
          case IntegratorRegion::Domain:
          res.getLinearFormDomainIntegratorList().emplace_back(
-               new LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(lfi));
+               new UnaryMinus<LinearFormIntegratorBase>(lfi));
          break;
          case IntegratorRegion::Boundary:
          res.getLinearFormBoundaryIntegratorList().emplace_back(
-               new LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(lfi));
+               new UnaryMinus<LinearFormIntegratorBase>(lfi));
          break;
          default:
             Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;

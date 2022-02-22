@@ -7,22 +7,14 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_H
 
+#include "FormLanguage/Sum.h"
+#include "FormLanguage/Product.h"
+#include "FormLanguage/UnaryMinus.h"
 #include "FormLanguage/ProblemBody.h"
 
+// TODO: LinearFormIntegratorSum and BilinearFormIntegratorSum are just lists
+// so might want to change the naming convention and specify default behaviour
 #include "FormLanguage/LinearFormIntegratorSum.h"
-#include "FormLanguage/LinearFormIntegratorUnaryMinus.h"
-
 #include "FormLanguage/BilinearFormIntegratorSum.h"
-#include "FormLanguage/BilinearFormIntegratorUnaryMinus.h"
-
-#include "FormLanguage/ScalarSum.h"
-#include "FormLanguage/ScalarProduct.h"
-#include "FormLanguage/ScalarUnaryMinus.h"
-
-#include "FormLanguage/MatrixSum.h"
-
-#include "FormLanguage/ScalarMatrixProduct.h"
-
-#include "FormLanguage/Product.h"
 
 #endif

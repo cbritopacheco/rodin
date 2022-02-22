@@ -7,11 +7,9 @@
 #ifndef RODIN_VARIATIONAL_PROBLEM_HPP
 #define RODIN_VARIATIONAL_PROBLEM_HPP
 
-
 #include "Rodin/Utility.h"
 
 #include "FormLanguage/ProblemBody.h"
-#include "FormLanguage/LinearFormIntegratorUnaryMinus.h"
 
 #include "BoundaryCondition.h"
 #include "GridFunction.h"

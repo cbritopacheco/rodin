@@ -77,29 +77,6 @@ namespace Rodin::Variational
    };
    Integral(const FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>&)
       -> Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>;
-
-   template <class FEC>
-   class Integral<GridFunction<FEC>>
-   {
-      public:
-         Integral(const GridFunction<FEC>& u)
-            : m_u(u),
-              m_lf(u.getFiniteElementSpace())
-         {
-            m_lf = Integral(ScalarCoefficient(1.0) * TestFunction(m_u.getFiniteElementSpace()));
-         }
-
-         operator double() const
-         {
-            return m_lf(m_u);
-         }
-
-      private:
-         const GridFunction<FEC>& m_u;
-         LinearForm<FEC> m_lf;
-   };
-   template <class FEC>
-   Integral(const GridFunction<FEC>&) -> Integral<GridFunction<FEC>>;
 }
 
 #endif

@@ -5,7 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Alert.h"
-#include "LinearFormIntegratorUnaryMinus.h"
+
+#include "UnaryMinus.h"
 
 #include "LinearFormIntegratorSum.h"
 
@@ -115,28 +116,28 @@ namespace Rodin::Variational::FormLanguage
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs)
    {
       return LinearFormIntegratorSum(
-            lhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(rhs));
+            lhs, UnaryMinus<LinearFormIntegratorBase>(rhs));
    }
 
    LinearFormIntegratorSum operator-(
          const LinearFormIntegratorSum& lhs, const LinearFormIntegratorBase& rhs)
    {
       return LinearFormIntegratorSum(
-            lhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(rhs));
+            lhs, UnaryMinus<LinearFormIntegratorBase>(rhs));
    }
 
    LinearFormIntegratorSum operator-(
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorSum& rhs)
    {
       return LinearFormIntegratorSum(
-            rhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorBase>(lhs));
+            rhs, UnaryMinus<LinearFormIntegratorBase>(lhs));
    }
 
    LinearFormIntegratorSum operator-(
          const LinearFormIntegratorSum& lhs, const LinearFormIntegratorSum& rhs)
    {
       return LinearFormIntegratorSum(
-            lhs, LinearFormIntegratorUnaryMinus<LinearFormIntegratorSum>(rhs));
+            lhs, UnaryMinus<LinearFormIntegratorSum>(rhs));
    }
 }
 

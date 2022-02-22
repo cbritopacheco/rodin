@@ -133,10 +133,6 @@ namespace Rodin::Variational
          const T m_x;
    };
 
-   template <class FEC>
-   ScalarCoefficient(const GridFunction<FEC>&)
-      -> ScalarCoefficient<GridFunction<FEC>>;
-
    /**
     * @brief Represents a scalar coefficient which is built from a
     * GridFunction.
@@ -183,9 +179,9 @@ namespace Rodin::Variational
          const GridFunction<FEC>& m_u;
          mfem::GridFunctionCoefficient m_mfemCoefficient;
    };
-
-   ScalarCoefficient(std::function<double(const double*)>)
-      -> ScalarCoefficient<std::function<double(const double*)>>;
+   template <class FEC>
+   ScalarCoefficient(const GridFunction<FEC>&)
+      -> ScalarCoefficient<GridFunction<FEC>>;
 
    template <>
    class ScalarCoefficient<std::function<double(const double*)>>
@@ -222,13 +218,8 @@ namespace Rodin::Variational
          std::function<double(const double*)> m_f;
          mfem::FunctionCoefficient m_mfemCoefficient;
    };
-
-
-   ScalarCoefficient(const std::map<int, double>&)
-      -> ScalarCoefficient<std::map<int, double>>;
-
-   ScalarCoefficient(std::initializer_list<std::pair<int, double>>&)
-      -> ScalarCoefficient<std::map<int, double>>;
+   ScalarCoefficient(std::function<double(const double*)>)
+      -> ScalarCoefficient<std::function<double(const double*)>>;
 
    template <>
    class ScalarCoefficient<std::map<int, double>>
@@ -269,10 +260,16 @@ namespace Rodin::Variational
             return new ScalarCoefficient(*this);
          }
 
+
       private:
          std::map<int, double> m_pieces;
          mfem::PWConstCoefficient m_mfemCoefficient;
    };
+   ScalarCoefficient(const std::map<int, double>&)
+      -> ScalarCoefficient<std::map<int, double>>;
+   ScalarCoefficient(std::initializer_list<std::pair<int, double>>&)
+      -> ScalarCoefficient<std::map<int, double>>;
+
 }
 
 #include "ScalarCoefficient.hpp"

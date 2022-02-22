@@ -25,13 +25,14 @@ namespace Rodin::Variational::FormLanguage
 
    class LinearFormIntegratorSum;
 
-   template <class T>
-   class LinearFormIntegratorUnaryMinus;
-
-   class ScalarSum;
+   template <class Lhs, class Rhs>
+   class Sum;
 
    template <class Lhs, class Rhs>
    class Product;
+
+   template <class Operand>
+   class UnaryMinus;
 }
 
 #endif

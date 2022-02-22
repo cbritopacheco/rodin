@@ -136,7 +136,9 @@ components:
             + DirichletBC(Gamma, g);
   @endcode
 
-  In this case the `Integral(Gradient(u) * Gradient(v))`
+  In this case the
+  @ref Rodin::Variational::Integral<FormLanguage::Product<TrialFunctionBase,TestFunctionBase>>
+  "Integral(Gradient(u) * Gradient(v))"
   object represents the bilinear term
   @f[
     \int_\Omega \nabla u \cdot \nabla v \ dx \ ,

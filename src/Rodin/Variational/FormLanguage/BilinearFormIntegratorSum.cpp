@@ -5,8 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Alert.h"
-#include "BilinearFormIntegratorUnaryMinus.h"
 
+#include "UnaryMinus.h"
 #include "BilinearFormIntegratorSum.h"
 
 namespace Rodin::Variational::FormLanguage
@@ -95,28 +95,28 @@ namespace Rodin::Variational::FormLanguage
          const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs)
    {
       return BilinearFormIntegratorSum(
-            lhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>(rhs));
+            lhs, UnaryMinus<BilinearFormIntegratorBase>(rhs));
    }
 
    BilinearFormIntegratorSum operator-(
          const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorBase& rhs)
    {
       return BilinearFormIntegratorSum(
-            lhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>(rhs));
+            lhs, UnaryMinus<BilinearFormIntegratorBase>(rhs));
    }
 
    BilinearFormIntegratorSum operator-(
          const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorSum& rhs)
    {
       return BilinearFormIntegratorSum(
-            rhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorBase>(lhs));
+            rhs, UnaryMinus<BilinearFormIntegratorBase>(lhs));
    }
 
    BilinearFormIntegratorSum operator-(
          const BilinearFormIntegratorSum& lhs, const BilinearFormIntegratorSum& rhs)
    {
       return BilinearFormIntegratorSum(
-            lhs, BilinearFormIntegratorUnaryMinus<BilinearFormIntegratorSum>(rhs));
+            lhs, UnaryMinus<BilinearFormIntegratorSum>(rhs));
    }
 }
 
