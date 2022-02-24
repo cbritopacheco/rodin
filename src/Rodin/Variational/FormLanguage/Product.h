@@ -330,12 +330,16 @@ namespace Rodin::Variational::FormLanguage
             return *m_rhs;
          }
 
-         size_t getRows() const override
+         size_t getRows(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
          {
             assert(false);
          }
 
-         size_t getColumns() const override
+         size_t getColumns(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
          {
             assert(false);
          }
