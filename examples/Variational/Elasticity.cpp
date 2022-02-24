@@ -35,8 +35,8 @@ int main(int argc, char** argv)
   // Define problem
   Problem elasticity(u, v);
   elasticity = ElasticityIntegrator(lambda, mu)
-             + DirichletBC(GammaD, VectorCoefficient{0, 0})
-             + NeumannBC(GammaN, VectorCoefficient{0, -1});
+             - BoundaryIntegral(VectorCoefficient{0, -1} * v)
+             + DirichletBC(GammaD, VectorCoefficient{0, 0});
 
   // Solve problem
   Solver::CG().setMaxIterations(200)
@@ -45,8 +45,8 @@ int main(int argc, char** argv)
               .solve(elasticity);
 
   // Save solution
-  u.save("u.gf");
-  Omega.save("Omega.mesh");
+  // u.save("u.gf");
+  // Omega.save("Omega.mesh");
 
   return 0;
 }

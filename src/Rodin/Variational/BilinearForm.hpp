@@ -16,29 +16,29 @@
 
 namespace Rodin::Variational
 {
-   template <class FEC>
-   BilinearForm<FEC>::BilinearForm(FiniteElementSpace<FEC>& fes)
+   template <class FES>
+   BilinearForm<FES>::BilinearForm(FES& fes)
       :  m_fes(fes),
          m_bf(new mfem::BilinearForm(&fes.getFES()))
    {}
 
-   template <class FEC>
-   double BilinearForm<FEC>::operator()(
-         const GridFunction<FEC>& u, const GridFunction<FEC>& v) const
+   template <class FES>
+   double BilinearForm<FES>::operator()(
+         const GridFunction<FES>& u, const GridFunction<FES>& v) const
    {
       return m_bf->InnerProduct(u.getHandle(), v.getHandle());
    }
 
-   template <class FEC>
-   BilinearForm<FEC>&
-   BilinearForm<FEC>::operator=(const BilinearFormIntegratorBase& bfi)
+   template <class FES>
+   BilinearForm<FES>&
+   BilinearForm<FES>::operator=(const BilinearFormIntegratorBase& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
-   template <class FEC>
-   BilinearForm<FEC>& BilinearForm<FEC>::from(const BilinearFormIntegratorBase& bfi)
+   template <class FES>
+   BilinearForm<FES>& BilinearForm<FES>::from(const BilinearFormIntegratorBase& bfi)
    {
       switch (bfi.getIntegratorRegion())
       {
@@ -55,14 +55,14 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   void BilinearForm<FEC>::assemble()
+   template <class FES>
+   void BilinearForm<FES>::assemble()
    {
       m_bf->Assemble();
    }
 
-   template <class FEC>
-   BilinearForm<FEC>& BilinearForm<FEC>::add(
+   template <class FES>
+   BilinearForm<FES>& BilinearForm<FES>::add(
          const BilinearFormIntegratorBase& bfi)
    {
       switch (bfi.getIntegratorRegion())
@@ -99,8 +99,8 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   void BilinearForm<FEC>::update()
+   template <class FES>
+   void BilinearForm<FES>::update()
    {
       m_bf->Update();
    }

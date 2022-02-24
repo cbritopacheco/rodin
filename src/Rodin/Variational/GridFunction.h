@@ -12,6 +12,7 @@
 #include <fstream>
 #include <functional>
 #include <filesystem>
+#include <type_traits>
 
 #include <mfem.hpp>
 
@@ -92,13 +93,12 @@ namespace Rodin::Variational
           * @brief Associates a finite element space to the function.
           * @param[in] fes Finite element space to which the function belongs
           * to.
-          * @tparam FEC Finite element collection associated to the finite
-          * element space.
+          * @tparam FES Finite element space associated
           */
-         template <class FEC>
-         GridFunction<FEC> setFiniteElementSpace(FiniteElementSpace<FEC>& fes)
+         template <class FES>
+         GridFunction<FES> setFiniteElementSpace(FES& fes)
          {
-            GridFunction<FEC> res(fes);
+            GridFunction<FES> res(fes);
             int size = m_gf.Size();
             res.getHandle().SetDataAndSize(m_gf.StealData(), size);
             return res;
@@ -121,22 +121,25 @@ namespace Rodin::Variational
    /**
     * @brief Represents a grid function which belongs to some finite element space.
     *
-    * @tparam FEC Finite element collection to which the function belongs.
+    * @tparam FES Finite element collection to which the function belongs.
     *
-    * @note Note that the FEC template parameter is typically inferred when
+    * @note Note that the FES template parameter is typically inferred when
     * initializing the grid function, hence it is not necessary to make it
     * explicit.
     */
-   template <class FEC>
+   template <class FES>
    class GridFunction : public GridFunctionBase
    {
+      static_assert(
+            std::is_base_of_v<FiniteElementSpaceBase, FES>,
+            "FES must be derived from FiniteElementSpaceBase");
       public:
          /**
           * @brief Constructs a grid function on a finite element space.
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
-         GridFunction(FiniteElementSpace<FEC>& fes)
+         GridFunction(FES& fes)
             :  m_fes(fes),
                m_gf(&fes.getFES()),
                m_size(m_gf.Size()),
@@ -165,13 +168,13 @@ namespace Rodin::Variational
             m_gf.SetDataAndSize(m_data.get(), m_size);
          }
 
-         /**
-          * @brief Gets the finite element space to which the function
-          * belongs to.
-          * @returns Reference to finite element space to which the function
-          * belongs to.
-          */
-         FiniteElementSpace<FEC>& getFiniteElementSpace() override
+         GridFunction(GridFunction&& other)
+            : m_fes(other.m_fes),
+              m_gf(std::move(other.m_gf)),
+              m_size(other.m_size)
+         {}
+
+         FES& getFiniteElementSpace() override
          {
             return m_fes;
          }
@@ -182,7 +185,7 @@ namespace Rodin::Variational
           * @returns Constant reference to finite element space to which the
           * function belongs to.
           */
-         const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
+         const FES& getFiniteElementSpace() const override
          {
             return m_fes;
          }
@@ -280,7 +283,7 @@ namespace Rodin::Variational
 
          GridFunction& project(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
-            assert(getFiniteElementSpace().getRangeDimension() == 1);
+            assert(getFiniteElementSpace().getVectorDimension() == 1);
             std::unique_ptr<Internal::ScalarCoefficient> iv = s.build();
 
             if (attrs.size() == 0)
@@ -304,7 +307,7 @@ namespace Rodin::Variational
 
          GridFunction& project(const VectorCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
-            assert(getFiniteElementSpace().getRangeDimension() == s.getDimension());
+            assert(getFiniteElementSpace().getVectorDimension() == s.getDimension());
             std::unique_ptr<Internal::VectorCoefficient> iv = s.build();
 
             if (attrs.size() == 0)
@@ -328,7 +331,7 @@ namespace Rodin::Variational
 
          GridFunction& projectOnBoundary(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
-            assert(getFiniteElementSpace().getRangeDimension() == 1);
+            assert(getFiniteElementSpace().getVectorDimension() == 1);
             std::unique_ptr<Internal::ScalarCoefficient> iv = s.build();
             int maxBdrAttr = getFiniteElementSpace()
                             .getMesh()
@@ -354,7 +357,7 @@ namespace Rodin::Variational
 
          GridFunction& projectOnBoundary(const VectorCoefficientBase& v, const std::set<int>& attrs = {}) override
          {
-            assert(getFiniteElementSpace().getRangeDimension() == v.getDimension());
+            assert(getFiniteElementSpace().getVectorDimension() == v.getDimension());
             std::unique_ptr<Internal::VectorCoefficient> iv = v.build();
             int maxBdrAttr = getFiniteElementSpace()
                             .getMesh()
@@ -386,7 +389,7 @@ namespace Rodin::Variational
           */
          GridFunction& project(const Restriction<ScalarCoefficientBase>& s)
          {
-            assert(getFiniteElementSpace().getRangeDimension() == 1);
+            assert(getFiniteElementSpace().getVectorDimension() == 1);
             std::unique_ptr<Internal::ScalarCoefficient> iv = s.getScalarCoefficient().build();
             getHandle() = NAN;
             mfem::Array<int> vdofs;
@@ -411,22 +414,21 @@ namespace Rodin::Variational
           * @brief Transfers the grid function from one finite element space to
           * another.
           */
-         template <class OtherFEC>
-         void transfer(GridFunction<OtherFEC>& other)
+         template <class OtherFES>
+         void transfer(GridFunction<OtherFES>& other)
          {
-            assert(getFiniteElementSpace().getRangeDimension() ==
-                  other.getFiniteElementSpace().getRangeDimension());
+            assert(getFiniteElementSpace().getVectorDimension() ==
+                  other.getFiniteElementSpace().getVectorDimension());
             if (getFiniteElementSpace().getMesh().isSubMesh())
             {
                // If we are here the this means that we are in a submesh of the
-               // underlying target finite element space.
-               // Hence we should seek out to copy the grid function at the
-               // corresponding nodes given by the vertex map given by the
-               // Submesh object.
+               // underlying target finite element space. Hence we should seek
+               // out to copy the grid function at the corresponding nodes
+               // given by the vertex map given in the Submesh object.
                auto& submesh = static_cast<SubMesh&>(getFiniteElementSpace().getMesh());
                if (&submesh.getParent() == &other.getFiniteElementSpace().getMesh())
                {
-                  int vdim = getFiniteElementSpace().getRangeDimension();
+                  int vdim = getFiniteElementSpace().getVectorDimension();
                   const auto& s2pv = submesh.getVertexMap();
                   if (vdim == 1)
                   {
@@ -509,7 +511,7 @@ namespace Rodin::Variational
             return m_gf;
          }
       private:
-         std::reference_wrapper<FiniteElementSpace<FEC>> m_fes;
+         FES& m_fes;
          mfem::GridFunction m_gf;
          int m_size;
          std::unique_ptr<double[]> m_data;

@@ -111,7 +111,7 @@ namespace Rodin::Variational::FormLanguage
          }
 
          double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
 
          Sum* copy() const noexcept override
          {

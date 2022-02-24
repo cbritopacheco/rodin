@@ -32,7 +32,7 @@ namespace Rodin
 
    Mesh& Mesh::displace(const Variational::GridFunctionBase& u)
    {
-      assert(u.getFiniteElementSpace().getRangeDimension() == getDimension());
+      assert(u.getFiniteElementSpace().getVectorDimension() == getDimension());
       m_mesh.MoveNodes(u.getHandle());
       return *this;
    }

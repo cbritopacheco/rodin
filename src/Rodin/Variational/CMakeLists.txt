@@ -1,7 +1,6 @@
 set(RodinVariational_HEADERS
   BilinearForm.h
   BilinearFormIntegrator.h
-  BoundaryCondition.h
   DirichletBC.h
   DomainLFIntegrator.h
   VectorDomainLFDivIntegrator.h
@@ -20,11 +19,11 @@ set(RodinVariational_HEADERS
   H1.h
   IdentityMatrix.h
   Integral.h
+  BoundaryIntegral.h
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
   MatrixCoefficient.h
-  NeumannBC.h
   Problem.h
   ScalarCoefficient.h
   Trace.h
@@ -38,7 +37,6 @@ set(RodinVariational_HEADERS
   )
 
 set(RodinVariational_SRCS
-  DirichletBC.cpp
   VectorDomainLFDivIntegrator.cpp
   DomainLFIntegrator.cpp
   ElasticityIntegrator.cpp
@@ -52,7 +50,6 @@ set(RodinVariational_SRCS
   Integral.cpp
   Jacobian.cpp
   MatrixCoefficient.cpp
-  NeumannBC.cpp
   Trace.cpp
   Transpose.cpp
   VectorBoundaryFluxLFIntegrator.cpp
@@ -86,6 +83,7 @@ target_link_libraries(RodinVariational
   PUBLIC
   RodinMesh
   RodinAlert
+  RodinUtility
   RodinVariationalFormLanguage
   )
 

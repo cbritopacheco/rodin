@@ -14,7 +14,7 @@ namespace Rodin::Variational
       :  m_matrix(other.m_matrix->copy())
    {}
 
-   double Trace::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   double Trace::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
    {
       mfem::DenseMatrix mat;
       m_matrix->getValue(mat, trans, ip);

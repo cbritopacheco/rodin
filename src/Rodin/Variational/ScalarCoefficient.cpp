@@ -33,6 +33,7 @@ namespace Rodin::Variational
 
    double ScalarCoefficientBase::getValueOnInteriorBoundary(
          mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   const
    {
       std::optional<int> traceDomain = getTraceDomain();
       if (!traceDomain)

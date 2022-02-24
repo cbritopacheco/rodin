@@ -12,14 +12,11 @@ namespace Rodin::Variational
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class TrialFEC, class TestFEC>
+   template <class TrialFES, class TestFES>
    class Problem;
 
    // ---- FiniteElementSpace ------------------------------------------------
    class FiniteElementSpaceBase;
-
-   template <class Derived>
-   class FiniteElementSpace;
 
    class H1;
 
@@ -31,19 +28,24 @@ namespace Rodin::Variational
    template <class T>
    class GridFunctionIndex;
 
-   template <class FEC>
+   template <class FES>
    class GridFunction;
 
    class IncompleteGridFunction;
 
-   class TrialFunctionBase;
+   enum ShapeFunctionSpaceType
+   {
+      Trial,
+      Test
+   };
 
-   template <class FEC>
+   template <class FES, ShapeFunctionSpaceType Space>
+   class ShapeFunction;
+
+   template <class FES>
    class TrialFunction;
 
-   class TestFunctionBase;
-
-   template <class FEC>
+   template <class FES>
    class TestFunction;
 
    /**
@@ -55,10 +57,16 @@ namespace Rodin::Variational
       Boundary
    };
 
+   template <class Integrand>
+   class Integral;
+
+   template <class Integrand>
+   class BoundaryIntegral;
+
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 
-   template <class FEC>
+   template <class FES>
    class LinearForm;
 
    class LinearFormIntegratorBase;
@@ -72,7 +80,7 @@ namespace Rodin::Variational
    // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 
-   template <class FEC>
+   template <class FES>
    class BilinearForm;
 
    class BilinearFormIntegratorBase;
@@ -84,16 +92,7 @@ namespace Rodin::Variational
    class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------
-   class BoundaryConditionBase;
-
-   template <class T>
-   class BoundaryCondition;
-
-   template <class T>
    class DirichletBC;
-
-   template <class T>
-   class NeumannBC;
 
    // ---- Coefficients ------------------------------------------------------
    class ScalarCoefficientBase;

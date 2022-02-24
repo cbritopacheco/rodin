@@ -13,35 +13,35 @@
 
 namespace Rodin::Variational
 {
-   template <class FEC>
-   LinearForm<FEC>::LinearForm(FiniteElementSpace<FEC>& fes)
+   template <class FES>
+   LinearForm<FES>::LinearForm(FES& fes)
       :  m_fes(fes),
          m_lf(std::make_unique<mfem::LinearForm>(&fes.getFES()))
    {}
 
-   template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::operator=(const LinearFormIntegratorBase& lfi)
+   template <class FES>
+   LinearForm<FES>& LinearForm<FES>::operator=(const LinearFormIntegratorBase& lfi)
    {
       from(lfi).assemble();
       return *this;
    }
 
-   template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::operator=(
+   template <class FES>
+   LinearForm<FES>& LinearForm<FES>::operator=(
          const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       from(lsum).assemble();
       return *this;
    }
 
-   template <class FEC>
-   double LinearForm<FEC>::operator()(const GridFunction<FEC>& u) const
+   template <class FES>
+   double LinearForm<FES>::operator()(const GridFunction<FES>& u) const
    {
       return *m_lf * u.getHandle();
    }
 
-   template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormIntegratorBase& lfi)
+   template <class FES>
+   LinearForm<FES>& LinearForm<FES>::add(const LinearFormIntegratorBase& lfi)
    {
       switch (lfi.getIntegratorRegion())
       {
@@ -104,9 +104,9 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   LinearForm<FEC>&
-   LinearForm<FEC>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
+   template <class FES>
+   LinearForm<FES>&
+   LinearForm<FES>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getLinearFormDomainIntegratorList())
          add(*p);
@@ -115,9 +115,9 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   LinearForm<FEC>&
-   LinearForm<FEC>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
+   template <class FES>
+   LinearForm<FES>&
+   LinearForm<FES>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
       m_lfiDomainList.clear();
@@ -128,8 +128,8 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormIntegratorBase& lfi)
+   template <class FES>
+   LinearForm<FES>& LinearForm<FES>::from(const LinearFormIntegratorBase& lfi)
    {
       switch (lfi.getIntegratorRegion())
       {
@@ -153,14 +153,14 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FEC>
-   void LinearForm<FEC>::assemble()
+   template <class FES>
+   void LinearForm<FES>::assemble()
    {
       m_lf->Assemble();
    }
 
-   template <class FEC>
-   void LinearForm<FEC>::update()
+   template <class FES>
+   void LinearForm<FES>::update()
    {
       m_lf->Update();
    }

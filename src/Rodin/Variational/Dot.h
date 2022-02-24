@@ -40,7 +40,7 @@ namespace Rodin::Variational
          Dot(const Dot& other);
 
          double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
 
          Dot* copy() const noexcept override
          {

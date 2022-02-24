@@ -61,7 +61,6 @@ namespace Rodin::Variational
 
    /**
     * @brief Represents a bilinear form on some finite element space
-    * @tparam FEC Finite element collection on which the bilinear form operates
     *
     * An object of type BilinearForm represents a linear map
     * @f[
@@ -74,7 +73,7 @@ namespace Rodin::Variational
     * can be specified by from one or more bilinear integrators (e.g.
     * DiffusionIntegrator).
     */
-   template <class FEC>
+   template <class FES>
    class BilinearForm : public BilinearFormBase
    {
       public:
@@ -86,7 +85,7 @@ namespace Rodin::Variational
           *
           * @param[in] fes Reference to the finite element space
           */
-         BilinearForm(FiniteElementSpace<FEC>& fes);
+         BilinearForm(FES& fes);
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -99,22 +98,22 @@ namespace Rodin::Variational
           * at @f$ ( u, v ) @f$.
           */
          double operator()(
-               const GridFunction<FEC>& u, const GridFunction<FEC>& v) const;
+               const GridFunction<FES>& u, const GridFunction<FES>& v) const;
 
          /**
           * @brief Builds the bilinear form from a derived instance of
           * BilinearFormIntegratorBase.
           * @param[in] bfi Bilinear form integrator
           */
-         BilinearForm<FEC>& operator=(const BilinearFormIntegratorBase& bfi);
+         BilinearForm& operator=(const BilinearFormIntegratorBase& bfi);
 
          void assemble() override;
 
          void update() override;
 
-         BilinearForm<FEC>& add(const BilinearFormIntegratorBase& bfi) override;
+         BilinearForm& add(const BilinearFormIntegratorBase& bfi) override;
 
-         BilinearForm<FEC>& from(const BilinearFormIntegratorBase& bfi) override;
+         BilinearForm& from(const BilinearFormIntegratorBase& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {
@@ -127,7 +126,7 @@ namespace Rodin::Variational
          }
 
       private:
-         FiniteElementSpace<FEC>& m_fes;
+         FES& m_fes;
          std::unique_ptr<mfem::BilinearForm> m_bf;
          BFIList m_bfiDomainList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;

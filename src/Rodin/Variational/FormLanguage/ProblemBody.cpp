@@ -24,27 +24,19 @@ namespace Rodin::Variational::FormLanguage
 
    ProblemBody::ProblemBody(const ProblemBody& other)
    {
-      m_nbcs.reserve(other.m_nbcs.size());
       m_dbcs.reserve(other.m_dbcs.size());
       m_bfiDomainList.reserve(other.m_bfiDomainList.size());
       m_lfiDomainList.reserve(other.m_lfiDomainList.size());
       m_lfiBoundaryList.reserve(other.m_lfiBoundaryList.size());
 
-      for (const auto& v : other.m_nbcs)
-         m_nbcs.emplace_back(v->copy());
       for (const auto& v : other.m_dbcs)
-         m_dbcs.emplace_back(v->copy());
+         m_dbcs.push_back(v);
       for (const auto& v : other.m_bfiDomainList)
          m_bfiDomainList.emplace_back(v->copy());
       for (const auto& v : other.m_lfiDomainList)
          m_lfiDomainList.emplace_back(v->copy());
       for (const auto& v : other.m_lfiBoundaryList)
          m_lfiBoundaryList.emplace_back(v->copy());
-   }
-
-   ProblemBody::BCList& ProblemBody::getNeumannBCList()
-   {
-      return m_nbcs;
    }
 
    ProblemBody::BCList& ProblemBody::getDirichletBCList()
@@ -129,6 +121,13 @@ namespace Rodin::Variational::FormLanguage
          res.getLinearFormDomainIntegratorList().emplace_back(p->copy());
       for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
          res.getLinearFormBoundaryIntegratorList().emplace_back(p->copy());
+      return res;
+   }
+
+   ProblemBody operator+(const ProblemBody& pb, const DirichletBC& bc)
+   {
+      ProblemBody res(pb);
+      res.getDirichletBCList().push_back(bc);
       return res;
    }
 }

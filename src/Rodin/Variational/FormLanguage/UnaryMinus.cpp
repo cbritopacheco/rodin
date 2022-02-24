@@ -7,6 +7,7 @@ namespace Rodin::Variational::FormLanguage
    double
    UnaryMinus<ScalarCoefficientBase>
    ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   const
    {
       return -1.0 * getOperand().getValue(trans, ip);
    }

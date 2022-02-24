@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_PROBLEM_H
 #define RODIN_VARIATIONAL_PROBLEM_H
 
+#include <set>
 #include <variant>
 #include <functional>
 
@@ -17,6 +18,8 @@
 
 #include "FormLanguage/ForwardDecls.h"
 
+#include "TrialFunction.h"
+#include "TestFunction.h"
 #include "ForwardDecls.h"
 #include "BilinearForm.h"
 #include "LinearForm.h"
@@ -36,7 +39,7 @@ namespace Rodin::Variational
           */
          virtual GridFunctionBase& getSolution() = 0;
 
-         virtual mfem::Array<int>& getEssentialBoundary() = 0;
+         virtual std::set<int>& getEssentialBoundary() = 0;
 
          virtual BilinearFormBase& getBilinearForm() = 0;
 
@@ -99,26 +102,20 @@ namespace Rodin::Variational
           */
          Problem(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>& v);
 
-         Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
-
          void assemble() override;
          void update() override;
 
-         TrialFunction<TrialFEC>& getSolution() override;
+         GridFunction<TrialFEC>& getSolution() override;
          LinearForm<TrialFEC>& getLinearForm() override;
          BilinearForm<TrialFEC>& getBilinearForm() override;
-         mfem::Array<int>& getEssentialBoundary() override;
+         std::set<int>& getEssentialBoundary() override;
 
+         Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
       private:
          TrialFunction<TrialFEC>&   m_solution;
-
-         std::vector<mfem::Array<int>> m_bdr;
-
-         LinearForm<TrialFEC>      m_linearForm;
-         BilinearForm<TrialFEC>    m_bilinearForm;
-
-         mfem::Array<int> m_essBdr;
-
+         LinearForm<TrialFEC>       m_linearForm;
+         BilinearForm<TrialFEC>     m_bilinearForm;
+         std::set<int> m_essBdr;
          std::unique_ptr<FormLanguage::ProblemBody> m_pb;
    };
 }

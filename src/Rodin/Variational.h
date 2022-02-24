@@ -30,6 +30,7 @@
 #include "Variational/TestFunction.h"
 
 #include "Variational/Integral.h"
+#include "Variational/BoundaryIntegral.h"
 
 // ---- FormLanguage ---------------------------------------------------------
 #include "Variational/FormLanguage.h"
@@ -55,6 +56,5 @@
 
 // ---- Boundary conditions --------------------------------------------------
 #include "Variational/DirichletBC.h"
-#include "Variational/NeumannBC.h"
 
 #endif

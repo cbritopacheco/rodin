@@ -29,7 +29,7 @@ namespace Rodin::Variational::FormLanguage
    class Sum;
 
    template <class Lhs, class Rhs>
-   class Product;
+   class Mult;
 
    template <class Operand>
    class UnaryMinus;

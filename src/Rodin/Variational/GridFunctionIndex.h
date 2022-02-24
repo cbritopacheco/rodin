@@ -10,6 +10,8 @@
 #include <deque>
 
 #include "Rodin/Core.h"
+
+#include "H1.h"
 #include "ForwardDecls.h"
 
 namespace Rodin

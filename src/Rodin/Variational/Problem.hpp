@@ -11,10 +11,8 @@
 
 #include "FormLanguage/ProblemBody.h"
 
-#include "BoundaryCondition.h"
 #include "GridFunction.h"
 #include "DirichletBC.h"
-#include "NeumannBC.h"
 
 #include "Problem.h"
 
@@ -24,12 +22,8 @@ namespace Rodin::Variational
    Problem<TrialFEC, TestFEC>::Problem(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>&)
       :  m_solution(u),
          m_bilinearForm(u.getFiniteElementSpace()),
-         m_linearForm(u.getFiniteElementSpace()),
-         m_essBdr(u.getFiniteElementSpace()
-                   .getMesh().getHandle().bdr_attributes.Max())
-   {
-      m_essBdr = 0;
-   }
+         m_linearForm(u.getFiniteElementSpace())
+   {}
 
    template <class TrialFEC, class TestFEC>
    Problem<TrialFEC, TestFEC>& Problem<TrialFEC, TestFEC>::operator=(const FormLanguage::ProblemBody& rhs)
@@ -45,9 +39,7 @@ namespace Rodin::Variational
       for (auto& lfi : m_pb->getLinearFormBoundaryIntegratorList())
          m_linearForm.add(*lfi);
 
-      // Neumann boundary conditions are imposed instantly
-      for (auto& nbc : m_pb->getNeumannBCList())
-         nbc->imposeOn(*this);
+      m_solution.emplaceGridFunction();
 
       return *this;
    }
@@ -62,22 +54,38 @@ namespace Rodin::Variational
    template <class TrialFEC, class TestFEC>
    void Problem<TrialFEC, TestFEC>::update()
    {
-      m_solution.getFiniteElementSpace().update();
-      m_solution.update();
-      m_linearForm.update();
-      m_bilinearForm.update();
-      for (auto& dbc : m_pb->getDirichletBCList())
-         dbc->imposeOn(*this);
+      getSolution().getFiniteElementSpace().update();
+      getSolution().update();
+      getLinearForm().update();
+      getBilinearForm().update();
+      for (const auto& dbc : m_pb->getDirichletBCList())
+      {
+         // Project the coefficient onto the boundary
+         if (m_solution.getFiniteElementSpace().getVectorDimension() == 1)
+         {
+            getSolution().projectOnBoundary(
+                  dbc.getValue<ScalarCoefficientBase>(), dbc.getBoundaryAttributes());
+         }
+         else
+         {
+            assert(m_solution.getFiniteElementSpace().getVectorDimension() > 1);
+            getSolution().projectOnBoundary(
+                  dbc.getValue<VectorCoefficientBase>(), dbc.getBoundaryAttributes());
+         }
+
+         // Keep track of essential boundary attributes
+         getEssentialBoundary().insert(dbc.getBoundaryAttributes().begin(), dbc.getBoundaryAttributes().end());
+      }
    }
 
    template <class TrialFEC, class TestFEC>
-   TrialFunction<TrialFEC>& Problem<TrialFEC, TestFEC>::getSolution()
+   GridFunction<TrialFEC>& Problem<TrialFEC, TestFEC>::getSolution()
    {
-      return m_solution;
+      return m_solution.getGridFunction();
    }
 
    template <class TrialFEC, class TestFEC>
-   mfem::Array<int>& Problem<TrialFEC, TestFEC>::getEssentialBoundary()
+   std::set<int>& Problem<TrialFEC, TestFEC>::getEssentialBoundary()
    {
       return m_essBdr;
    }

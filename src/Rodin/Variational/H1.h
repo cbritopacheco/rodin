@@ -37,7 +37,7 @@ namespace Rodin::Variational
     * the kind of basis chosen.
     *
     */
-   class H1 : public FiniteElementSpace<H1>
+   class H1 : public FiniteElementSpaceBase
    {
       public:
          /**
@@ -162,9 +162,14 @@ namespace Rodin::Variational
          /**
           * @brief Gets the dimension @f$ d @f$ of the range space.
           */
-         int getRangeDimension() const override
+         int getVectorDimension() const override
          {
             return m_fes.GetVDim();
+         }
+
+         int getNumberOfDofs() const override
+         {
+            return m_fes.GetNDofs();
          }
 
          void update() override
@@ -177,12 +182,12 @@ namespace Rodin::Variational
           * @brief Returns the underlying mfem::H1_FECollection object.
           * @returns Reference to the underlying mfem::H1_FECollection.
           */
-         mfem::H1_FECollection& getFEC()
+         mfem::H1_FECollection& getFEC() override
          {
             return m_fec;
          }
 
-         const mfem::H1_FECollection& getFEC() const
+         const mfem::H1_FECollection& getFEC() const override
          {
             return m_fec;
          }
@@ -192,7 +197,7 @@ namespace Rodin::Variational
           * @brief Returns the underlying mfem::FiniteElementSpace object.
           * @returns Reference to the underlying mfem::FiniteElementSpace.
           */
-         mfem::FiniteElementSpace& getFES()
+         mfem::FiniteElementSpace& getFES() override
          {
             return m_fes;
          }

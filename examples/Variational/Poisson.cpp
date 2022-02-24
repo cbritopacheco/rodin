@@ -18,7 +18,7 @@ int main(int, char**)
   // Functions
   H1 Vh(Omega);
   TrialFunction u(Vh);
-  TestFunction v(Vh);
+  TestFunction  v(Vh);
 
   // Define problem
   auto f = ScalarCoefficient(1.0);
@@ -36,7 +36,7 @@ int main(int, char**)
               .solve(poisson);
 
   // Save solution
-  u.save("u.gf");
+  u.getGridFunction().save("u.gf");
   Omega.save("Omega.mesh");
 
   return 0;

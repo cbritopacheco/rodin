@@ -287,7 +287,7 @@ namespace Rodin
    ::to<External::MMG::IncompleteScalarSolution2D>()
    const
    {
-     assert(from().getFiniteElementSpace().getRangeDimension() == 1);
+     assert(from().getFiniteElementSpace().getVectorDimension() == 1);
      auto& gf = from();
      auto [data, size] = gf.getData();
      if (!size)
@@ -308,7 +308,7 @@ namespace Rodin
    Cast<Variational::GridFunction<Variational::H1>>
    ::to<External::MMG::IncompleteVectorSolution2D>() const
    {
-     assert(from().getFiniteElementSpace().getRangeDimension() == 2);
+     assert(from().getFiniteElementSpace().getVectorDimension() == 2);
      auto& gf = from();
      auto [data, size] = gf.getData();
      if (!size)

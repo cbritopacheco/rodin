@@ -3,61 +3,51 @@
 
 #include "ShapeFunction.h"
 #include "GridFunction.h"
-#include "FiniteElementSpace.h"
 
 namespace Rodin::Variational
 {
-   class TrialFunctionBase : public ShapeFunction
+   template <>
+   class TrialFunction<H1> : public ShapeFunction<H1, Trial>
    {
       public:
-         virtual SpaceType getSpaceType() const override
-         {
-            return Trial;
-         }
-
-         virtual TrialFunctionBase* copy() const noexcept override = 0;
-   };
-
-   template <class FEC>
-   class TrialFunction : public GridFunction<FEC>, public TrialFunctionBase
-   {
-      public:
-         TrialFunction(FiniteElementSpace<FEC>& fes)
-            :  GridFunction<FEC>(fes)
+         TrialFunction(H1& fes)
+            : ShapeFunction<H1, Trial>(fes)
          {}
 
-         TrialFunction(const TrialFunction& other) = default;
+         TrialFunction(const TrialFunction& other)
+            : ShapeFunction<H1, Trial>(other)
+         {}
 
-         void getValue(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               ScalarShape& values) const override
+         TrialFunction(TrialFunction&& other)
+            : ShapeFunction<H1, Trial>(std::move(other))
+         {}
+
+         TrialFunction& emplaceGridFunction()
          {
-            fe.CalcPhysShape(trans, values);
+            m_gf.emplace(this->getFiniteElementSpace());
+            return *this;
          }
 
-         FiniteElementSpace<FEC>& getFiniteElementSpace() override
+         GridFunction<H1>& getGridFunction()
          {
-            return GridFunction<FEC>::getFiniteElementSpace();
+            assert(m_gf);
+            return *m_gf;
          }
 
-         const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
+         const GridFunction<H1>& getGridFunction() const
          {
-            return GridFunction<FEC>::getFiniteElementSpace();
-         }
-
-         ShapeFunction::ValueType getValueType() const override
-         {
-            if (getFiniteElementSpace().getRangeDimension() == 1)
-               return ShapeFunction::Scalar;
-            else
-               return ShapeFunction::Vector;
+            assert(m_gf);
+            return *m_gf;
          }
 
          TrialFunction* copy() const noexcept override
          {
             return new TrialFunction(*this);
          }
+      private:
+         std::optional<GridFunction<H1>> m_gf;
    };
+   TrialFunction(H1& fes) -> TrialFunction<H1>;
 }
 #endif
+

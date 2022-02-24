@@ -65,11 +65,11 @@ namespace Rodin::Variational
 
          virtual void getValueOnInteriorBoundary(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip);
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
 
          virtual void getValue(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) = 0;
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
          /**
           * @brief Gets the dimension of the vector object.
@@ -133,7 +133,7 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             m_mfemVectorCoefficient.Eval(value, trans, ip);
          }
@@ -160,7 +160,8 @@ namespace Rodin::Variational
          const size_t m_dimension;
          std::tuple<Values...> m_values;
          std::vector<std::unique_ptr<ScalarCoefficientBase>> m_mfemCoefficients;
-         mfem::VectorArrayCoefficient m_mfemVectorCoefficient;
+
+         mutable mfem::VectorArrayCoefficient m_mfemVectorCoefficient;
    };
    template <class ... Values>
    VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
@@ -197,6 +198,7 @@ namespace Rodin::Variational
       private:
          const size_t m_dimension;
          GridFunction<FEC>& m_u;
+
          mfem::VectorGridFunctionCoefficient m_mfemVectorCoefficient;
    };
    template <class FEC>

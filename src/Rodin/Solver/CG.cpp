@@ -42,11 +42,12 @@ namespace Rodin::Solver
       problem.assemble();
 
       // Compute essential true degrees of freedom
+      int maxBdrAttr = u.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
       mfem::Array<int> essTrueDofList;
-      u.getHandle()
-       .FESpace()
-       ->GetEssentialTrueDofs(
-                   problem.getEssentialBoundary(), essTrueDofList);
+      u.getFiniteElementSpace()
+       .getFES()
+       .GetEssentialTrueDofs(
+                   Utility::set2marker(problem.getEssentialBoundary(), maxBdrAttr), essTrueDofList);
 
       // Form the linear system
       mfem::SparseMatrix A;

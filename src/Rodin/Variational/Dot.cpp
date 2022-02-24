@@ -14,6 +14,7 @@ namespace Rodin::Variational
 
    double Dot<MatrixCoefficientBase>::getValue(
          mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   const
    {
       mfem::DenseMatrix ma, mb;
       m_a->getValue(ma, trans, ip);

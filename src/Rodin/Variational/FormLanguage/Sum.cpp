@@ -11,6 +11,7 @@ namespace Rodin::Variational::FormLanguage
    double
    Sum<ScalarCoefficientBase, ScalarCoefficientBase>
    ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   const
    {
       return getLHS().getValue(trans, ip) + getRHS().getValue(trans, ip);
    }

@@ -27,6 +27,7 @@ namespace Rodin::Variational
 
    void VectorCoefficientBase::getValueOnInteriorBoundary(
          mfem::Vector& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+      const
    {
       std::optional<int> traceDomain = getTraceDomain();
       if (!traceDomain)

@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
 #include <set>
+#include <utility>
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
@@ -15,68 +16,74 @@
 
 namespace Rodin::Variational
 {
-   template <class T>
-   class Integral;
-
    template <>
-   class Integral<FormLanguage::Product<TrialFunctionBase, TestFunctionBase>>
+   class Integral<FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
       : public BilinearFormDomainIntegrator
    {
       public:
-         Integral(const FormLanguage::Product<TrialFunctionBase, TestFunctionBase>& prod)
+         using Integrand = FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
+
+         Integral(const Integrand& prod)
             : m_prod(prod)
          {}
 
-         Integral(const Integral& other) = default;
+         Integral(const Integral& other)
+            : BilinearFormDomainIntegrator(other),
+              m_prod(other.m_prod)
+         {}
+
+         Integral(Integral&& other)
+            : BilinearFormDomainIntegrator(std::move(other)),
+              m_prod(std::move(other.m_prod))
+         {}
 
          void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
 
-         IntegratorRegion getIntegratorRegion() const override
-         {
-            return Domain;
-         }
-
          Integral* copy() const noexcept override
          {
             return new Integral(*this);
          }
       private:
-         FormLanguage::Product<TrialFunctionBase, TestFunctionBase> m_prod;
+         Integrand m_prod;
    };
-   Integral(const FormLanguage::Product<TrialFunctionBase, TestFunctionBase>&)
-      -> Integral<FormLanguage::Product<TrialFunctionBase, TestFunctionBase>>;
+   Integral(const FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
+      -> Integral<FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
 
    template <>
-   class Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>
+   class Integral<ShapeFunctionBase<Test>>
       : public LinearFormDomainIntegrator
    {
       public:
-         Integral(const FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>& prod)
-            : m_prod(prod)
+         using Integrand = ShapeFunctionBase<Test>;
+
+         Integral(const Integrand& test)
+            : m_test(test.copy())
          {}
 
-         Integral(const Integral& other) = default;
+         Integral(const Integral& other)
+            : LinearFormDomainIntegrator(other),
+              m_test(other.m_test->copy())
+         {}
+
+         Integral(Integral&& other)
+            : LinearFormDomainIntegrator(std::move(other)),
+              m_test(std::move(other.m_test))
+         {}
 
          void getElementVector(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans, mfem::Vector& vec) override;
 
-         IntegratorRegion getIntegratorRegion() const override
-         {
-            return Domain;
-         }
-
          Integral* copy() const noexcept override
          {
             return new Integral(*this);
          }
       private:
-         FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase> m_prod;
+         std::unique_ptr<Integrand> m_test;
    };
-   Integral(const FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>&)
-      -> Integral<FormLanguage::Product<ScalarCoefficientBase, TestFunctionBase>>;
+   Integral(const ShapeFunctionBase<Test>&) -> Integral<ShapeFunctionBase<Test>>;
 }
 
 #endif

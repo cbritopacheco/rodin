@@ -69,9 +69,10 @@ namespace Rodin::Variational
                const std::set<int>& attrs);
 
          virtual double getValueOnInteriorBoundary(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip);
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
 
-         virtual double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) = 0;
+         virtual double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip
+               ) const = 0;
 
          std::unique_ptr<Internal::ScalarCoefficient> build() const override
          {
@@ -119,7 +120,7 @@ namespace Rodin::Variational
             return m_x;
          }
 
-         double getValue(mfem::ElementTransformation&, const mfem::IntegrationPoint&) override
+         double getValue(mfem::ElementTransformation&, const mfem::IntegrationPoint&) const override
          {
             return m_x;
          }
@@ -165,7 +166,7 @@ namespace Rodin::Variational
             return m_u;
          }
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             return m_mfemCoefficient.Eval(trans, ip);
          }
@@ -177,7 +178,7 @@ namespace Rodin::Variational
 
       private:
          const GridFunction<FEC>& m_u;
-         mfem::GridFunctionCoefficient m_mfemCoefficient;
+         mutable mfem::GridFunctionCoefficient m_mfemCoefficient;
    };
    template <class FEC>
    ScalarCoefficient(const GridFunction<FEC>&)
@@ -204,7 +205,7 @@ namespace Rodin::Variational
             return m_f;
          }
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             return m_mfemCoefficient.Eval(trans, ip);
          }
@@ -216,7 +217,7 @@ namespace Rodin::Variational
 
       private:
          std::function<double(const double*)> m_f;
-         mfem::FunctionCoefficient m_mfemCoefficient;
+         mutable mfem::FunctionCoefficient m_mfemCoefficient;
    };
    ScalarCoefficient(std::function<double(const double*)>)
       -> ScalarCoefficient<std::function<double(const double*)>>;
@@ -250,7 +251,7 @@ namespace Rodin::Variational
             return m_pieces;
          }
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             return m_mfemCoefficient.Eval(trans, ip);
          }
@@ -263,7 +264,7 @@ namespace Rodin::Variational
 
       private:
          std::map<int, double> m_pieces;
-         mfem::PWConstCoefficient m_mfemCoefficient;
+         mutable mfem::PWConstCoefficient m_mfemCoefficient;
    };
    ScalarCoefficient(const std::map<int, double>&)
       -> ScalarCoefficient<std::map<int, double>>;

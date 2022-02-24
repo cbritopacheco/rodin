@@ -9,8 +9,10 @@
 
 #include "ForwardDecls.h"
 
-#include "TrialFunction.h"
+#include "H1.h"
+#include "GridFunction.h"
 #include "TestFunction.h"
+#include "TrialFunction.h"
 #include "VectorCoefficient.h"
 
 namespace Rodin::Variational
@@ -39,13 +41,19 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Gradient(const GridFunction<H1>& u);
+         Gradient(const GridFunction<H1>& u)
+            : m_u(u),
+              m_mfemVectorCoefficient(&m_u.getHandle())
+         {}
 
-         size_t getDimension() const override;
+         size_t getDimension() const override
+         {
+            return m_u.getFiniteElementSpace().getMesh().getDimension();
+         }
 
          void getValue(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             m_mfemVectorCoefficient.Eval(value, trans, ip);
          }
@@ -57,59 +65,59 @@ namespace Rodin::Variational
 
       private:
          const GridFunction<H1>& m_u;
-         mfem::GradientGridFunctionCoefficient m_mfemVectorCoefficient;
+         mutable mfem::GradientGridFunctionCoefficient m_mfemVectorCoefficient;
    };
    Gradient(const GridFunction<H1>&) -> Gradient<GridFunction<H1>>;
 
-   template <>
-   class Gradient<TrialFunction<H1>> : public TrialFunctionBase
+   template <ShapeFunctionSpaceType Space>
+   class Gradient<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
    {
       public:
-         Gradient(const TrialFunction<H1>& u);
+         Gradient(ShapeFunction<H1, Space>& u)
+            : m_u(u)
+         {}
 
-         ValueType getValueType() const override;
-
-         void getValue(
+         void getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans,
-               VectorShape& values
-               ) const override;
+               mfem::DenseMatrix& op) const override
+         {
+            fe.CalcPhysDShape(trans, op);
+         }
 
-         const FiniteElementSpaceBase& getFiniteElementSpace() const override;
+         size_t getRows(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation&) const override
+         {
+            return fe.GetDof();
+         }
+
+         size_t getColumns(
+               const mfem::FiniteElement&,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return trans.GetSpaceDim();
+         }
+
+         H1& getFiniteElementSpace() override
+         {
+            return m_u.getFiniteElementSpace();
+         }
+
+         const H1& getFiniteElementSpace() const override
+         {
+            return m_u.getFiniteElementSpace();
+         }
 
          Gradient* copy() const noexcept override
          {
             return new Gradient(*this);
          }
       private:
-         const TrialFunction<H1>& m_u;
+         ShapeFunction<H1, Space>& m_u;
    };
-   Gradient(const TrialFunction<H1>&) -> Gradient<TrialFunction<H1>>;
-
-   template <>
-   class Gradient<TestFunction<H1>> : public TestFunctionBase
-   {
-      public:
-         Gradient(const TestFunction<H1>& v);
-
-         ValueType getValueType() const override;
-
-         void getValue(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               VectorShape& values
-               ) const override;
-
-         const FiniteElementSpaceBase& getFiniteElementSpace() const override;
-
-         Gradient* copy() const noexcept override
-         {
-            return new Gradient(*this);
-         }
-      private:
-         const TestFunction<H1>& m_v;
-   };
-   Gradient(const TestFunction<H1>&) -> Gradient<TestFunction<H1>>;
+   template <ShapeFunctionSpaceType Space>
+   Gradient(ShapeFunction<H1, Space>&) -> Gradient<ShapeFunction<H1, Space>>;
 }
 
 #endif
