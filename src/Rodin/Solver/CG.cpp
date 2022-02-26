@@ -55,9 +55,6 @@ namespace Rodin::Solver
       a.getHandle()
        .FormLinearSystem(essTrueDofList, u.getHandle(), b.getHandle(), A, X, B);
 
-      std::ofstream out("matrix.txt");
-      A.PrintMatlab(out);
-
       // Solve
       mfem::GSSmoother smoother(A);
       mfem::PCG(A, smoother, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
