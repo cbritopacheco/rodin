@@ -6,7 +6,7 @@
 namespace Rodin::Variational
 {
    void
-   Integral<FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
+   Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
    ::getElementMatrix(
          const mfem::FiniteElement& trialElement, const mfem::FiniteElement& testElement,
          mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
@@ -14,15 +14,11 @@ namespace Rodin::Variational
       auto& trial = m_prod.getLHS();
       auto& test = m_prod.getRHS();
 
+      assert(trial.getRows(trialElement, trans) == test.getRows(testElement, trans));
       assert(trial.getColumns(trialElement, trans) == test.getColumns(testElement, trans));
 
-      mat.SetSize(test.getRows(trialElement, trans), trial.getRows(testElement, trans));
+      mat.SetSize(test.getDOFs(trialElement, trans), trial.getDOFs(testElement, trans));
       mat = 0.0;
-
-      mfem::DenseMatrix trialOp;
-      mfem::DenseMatrix testOp;
-      trialOp.SetSize(trial.getRows(trialElement, trans), trial.getColumns(trialElement, trans));
-      testOp.SetSize(test.getRows(testElement, trans), test.getColumns(testElement, trans));
 
       int order = trialElement.GetOrder() + testElement.GetOrder() + trans.OrderW();
       const mfem::IntegrationRule* ir =
@@ -31,9 +27,11 @@ namespace Rodin::Variational
       {
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
-         trial.getOperator(trialElement, trans, trialOp);
-         test.getOperator(testElement, trans, testOp);
-         mfem::AddMult_a_ABt(trans.Weight() * ip.weight, testOp, trialOp, mat);
+         mfem::DenseMatrix dotmat =
+            trial.getOperator(trialElement, trans
+                  ).OperatorDot(
+                     test.getOperator(testElement, trans));
+         mfem::Add(mat, dotmat, trans.Weight() * ip.weight, mat);
       }
    }
 
@@ -42,14 +40,17 @@ namespace Rodin::Variational
          mfem::ElementTransformation& trans, mfem::Vector& vec)
    {
       auto& test = *m_test;
+      size_t rows = test.getRows(fe, trans);
+      size_t dofs = test.getDOFs(fe, trans);
+      size_t cols = test.getColumns(fe, trans);
 
       assert(test.getColumns(fe, trans) == 1);
+      assert(test.getRows(fe, trans) == 1);
 
-      vec.SetSize(test.getRows(fe, trans));
+      vec.SetSize(test.getDOFs(fe, trans));
       vec = 0.0;
 
-      mfem::DenseMatrix testOp;
-      testOp.SetSize(test.getRows(fe, trans), 1);
+      Internal::Rank3Operator testOp(rows, dofs, cols);
 
       int order = fe.GetOrder() + trans.OrderW();
       const mfem::IntegrationRule* ir =
@@ -58,9 +59,9 @@ namespace Rodin::Variational
       {
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
-         test.getOperator(fe, trans, testOp);
+         auto testOp = test.getOperator(fe, trans);
          testOp *= trans.Weight() * ip.weight;
-         testOp.AddToVector(0, vec);
+         testOp(0).AddToVector(0, vec);
       }
    }
 }

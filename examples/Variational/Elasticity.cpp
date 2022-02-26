@@ -26,16 +26,18 @@ int main(int argc, char** argv)
   H1 Vh(Omega, d);
 
   TrialFunction u(Vh);
-  TestFunction v(Vh);
+  TestFunction  v(Vh);
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
+  auto f = VectorCoefficient{0, -1};
+
   // Define problem
   Problem elasticity(u, v);
   elasticity = ElasticityIntegrator(lambda, mu)
-             - BoundaryIntegral(VectorCoefficient{0, -1} * v)
+             - BoundaryIntegral(f * v).over(GammaN)
              + DirichletBC(GammaD, VectorCoefficient{0, 0});
 
   // Solve problem
@@ -45,8 +47,8 @@ int main(int argc, char** argv)
               .solve(elasticity);
 
   // Save solution
-  // u.save("u.gf");
-  // Omega.save("Omega.mesh");
+  u.getGridFunction().save("u.gf");
+  Omega.save("Omega.mesh");
 
   return 0;
 }

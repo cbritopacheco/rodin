@@ -70,13 +70,17 @@ namespace Rodin::Variational::FormLanguage
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
-         res.getLinearFormDomainIntegratorList().emplace_back(
-               new UnaryMinus<LinearFormIntegratorBase>(lfi));
-         break;
+         {
+            res.getLinearFormDomainIntegratorList().emplace_back(
+                  new UnaryMinus<LinearFormIntegratorBase>(lfi));
+            break;
+         }
          case IntegratorRegion::Boundary:
-         res.getLinearFormBoundaryIntegratorList().emplace_back(
-               new UnaryMinus<LinearFormIntegratorBase>(lfi));
-         break;
+         {
+            res.getLinearFormBoundaryIntegratorList().emplace_back(
+                  new UnaryMinus<LinearFormIntegratorBase>(lfi));
+            break;
+         }
          default:
             Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
       }
@@ -91,11 +95,15 @@ namespace Rodin::Variational::FormLanguage
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
-         res.getLinearFormDomainIntegratorList().emplace_back(lfi.copy());
-         break;
+         {
+            res.getLinearFormDomainIntegratorList().emplace_back(lfi.copy());
+            break;
+         }
          case IntegratorRegion::Boundary:
-         res.getLinearFormBoundaryIntegratorList().emplace_back(lfi.copy());
-         break;
+         {
+            res.getLinearFormBoundaryIntegratorList().emplace_back(lfi.copy());
+            break;
+         }
          default:
             Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
       }

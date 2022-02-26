@@ -16,27 +16,27 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
+  // const char* meshFile = "../resources/mfem/meshes/levelset-cantilever-example.mesh";
 
-  // Define interior and exterior for level set discretization
-  int Interior = 1, Exterior = 2;
+  // // Define interior and exterior for level set discretization
+  // int Interior = 1, Exterior = 2;
 
-  // Define boundary attributes
-  int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
+  // // Define boundary attributes
+  // int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
-  // Lamé coefficients
-  auto mu     = ScalarCoefficient(0.3846),
-       lambda = ScalarCoefficient(0.5769);
+  // // Lamé coefficients
+  // auto mu     = ScalarCoefficient(0.3846),
+  //      lambda = ScalarCoefficient(0.5769);
 
-  // Compliance
-  auto compliance = [&](GridFunction<H1>& v)
-  {
-    BilinearForm bf(v.getFiniteElementSpace());
-    bf = ElasticityIntegrator(lambda, mu).over(Interior);
-    return bf(v, v);
-  };
+  // // Compliance
+  // auto compliance = [&](GridFunction<H1>& v)
+  // {
+  //   BilinearForm bf(v.getFiniteElementSpace());
+  //   bf = ElasticityIntegrator(lambda, mu).over(Interior);
+  //   return bf(v, v);
+  // };
 
-  // Load mesh
+  // // Load mesh
   // Mesh Omega = Mesh::load(meshFile);
   // Omega.save("Omega0.mesh");
   // std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
@@ -72,16 +72,16 @@ int main(int, char**)
   //   TestFunction  vInt(VhInt);
   //   Problem elasticity(uInt, vInt);
   //   elasticity = ElasticityIntegrator(lambda, mu)
-  //              + DirichletBC(GammaD, VectorCoefficient{0, 0})
-  //              + NeumannBC(GammaN, VectorCoefficient{0, -1});
+  //              - BoundaryIntegral(VectorCoefficient{0, 0} * vInt).over(GammaN)
+  //              + DirichletBC(GammaD, VectorCoefficient{0, 0});
   //   solver.solve(elasticity);
 
   //   // Transfer solution back to original domain
   //   GridFunction u(Vh);
-  //   uInt.transfer(u);
+  //   uInt.getGridFunction().transfer(u);
 
   //   // Hilbert extension-regularization procedure
-  //   auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
+  //   auto e = Mult(ScalarCoefficient(0.5), (Jacobian(u) + Jacobian(u).T()));
   //   auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
 
   //   H1 Ph(Omega);
@@ -98,7 +98,7 @@ int main(int, char**)
   //           + DirichletBC(GammaN, VectorCoefficient{0, 0});
   //   solver.solve(hilbert);
 
-  //   g.save("g.gf");
+  //   g.getGridFunction().save("g.gf");
   //   Omega.save("Omegai.mesh");
 
   //   // Update objective
@@ -117,7 +117,7 @@ int main(int, char**)
   //   auto mmgLs = dist.distance(mmgMesh);
 
   //   // Advect the level set function
-  //   double dt = Omega.getMaximumDisplacement(g);
+  //   double dt = Omega.getMaximumDisplacement(g.getGridFunction());
   //   MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
   //   // Recover the implicit domain
@@ -148,7 +148,6 @@ int main(int, char**)
   // }
 
   // std::cout << "Saved final mesh to Omega.mesh" << std::endl;
-  // mfem::MixedScalarWeakGradientIntegrator mm;
 
   // return 0;
 }

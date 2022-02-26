@@ -5,6 +5,7 @@
 #include <utility>
 #include <mfem.hpp>
 
+#include "Dot.h"
 #include "ForwardDecls.h"
 #include "FormLanguage.h"
 #include "GridFunction.h"
@@ -17,11 +18,11 @@
 namespace Rodin::Variational
 {
    template <>
-   class Integral<FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
+   class Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
       : public BilinearFormDomainIntegrator
    {
       public:
-         using Integrand = FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
+         using Integrand = Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
 
          Integral(const Integrand& prod)
             : m_prod(prod)
@@ -48,8 +49,8 @@ namespace Rodin::Variational
       private:
          Integrand m_prod;
    };
-   Integral(const FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
-      -> Integral<FormLanguage::Product<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
+   Integral(const Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
+      -> Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
 
    template <>
    class Integral<ShapeFunctionBase<Test>>

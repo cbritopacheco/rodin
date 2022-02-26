@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_FORMLANGUAGE_H
 
 #include "FormLanguage/Sum.h"
-#include "FormLanguage/Product.h"
 #include "FormLanguage/UnaryMinus.h"
 #include "FormLanguage/ProblemBody.h"
 

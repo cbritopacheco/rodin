@@ -2,7 +2,6 @@ set(RodinVariationalFormLanguage_HEADERS
   Base.h
   ForwardDecls.h
   Sum.h
-  Product.h
   ProblemBody.h
   UnaryMinus.cpp
   BilinearFormIntegratorSum.h
@@ -11,7 +10,6 @@ set(RodinVariationalFormLanguage_HEADERS
 
 set(RodinVariationalFormLanguage_SRCS
   Sum.cpp
-  Product.cpp
   UnaryMinus.cpp
   ProblemBody.cpp
   BilinearFormIntegratorSum.cpp

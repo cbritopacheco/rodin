@@ -112,12 +112,9 @@ namespace Rodin::Variational
    // ---- Expressions -------------------------------------------------------
    class Jacobian;
 
-   template <int DirectionIndex, int ComponentIndex = 1>
-   class Derivative;
-
    class Transpose;
 
-   template <class T>
+   template <class Lhs, class Rhs>
    class Dot;
 
    template <class T>

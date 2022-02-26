@@ -7,10 +7,27 @@
 
 #include "H1.h"
 #include "ForwardDecls.h"
+#include "Rank3Operator.h"
 #include "FiniteElementSpace.h"
 
 namespace Rodin::Variational
 {
+   template <ShapeFunctionSpaceType Space>
+   struct DualSpaceType;
+
+   template <>
+   struct DualSpaceType<Trial>
+   {
+      static constexpr ShapeFunctionSpaceType Value = Test;
+   };
+
+   template <>
+   struct DualSpaceType<Test>
+   {
+      static constexpr ShapeFunctionSpaceType Value = Trial;
+   };
+
+
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase : public FormLanguage::Base
    {
@@ -24,68 +41,17 @@ namespace Rodin::Variational
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
+         virtual size_t getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const = 0;
+
          virtual size_t getColumns(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
-         /**
-          * @brief Computes the associated operator @f$ U \in \mathbb{n \times d} @f$
-          *
-          * Let @f$ n @f$ denote the degrees of freedom of the basis
-          * representation of @f$ u = (u_1, \ldots, u_d) @f$. Furthermore, let
-          * @f$ w \in \mathbb{R^n} @f$ denote the basis weights
-          * Then, the associated operator @f$ U @f$ is defined as an
-          * @f$ n \times d @f$ matrix such that
-          * @f[
-          *    u = U^t w
-          * @f]
-          */
-         virtual void getOperator(
+         virtual Internal::Rank3Operator getOperator(
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               mfem::DenseMatrix& op) const = 0;
-
-         /**
-          * @brief Tensor dot product
-          */
-         virtual void dot(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::DenseMatrix& M,
-               mfem::DenseMatrix& UM) const
-         {
-            mfem::DenseMatrix U(getRows(fe, trans), getColumns(fe, trans));
-            getOperator(fe, trans, U);
-            mfem::Mult(U, M, UM);
-         }
-
-         /**
-          * @brief Scalar-Tensor multiplication
-          */
-         virtual void multiplication(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               double m,
-               mfem::DenseMatrix& op) const
-         {
-            getOperator(fe, trans, op);
-            op *= m;
-         }
-
-         /**
-          * @brief Tensor-Tensor multiplication
-          *
-          */
-         virtual void multiplication(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::DenseMatrix& M,
-               mfem::DenseMatrix& UMt) const
-         {
-            mfem::DenseMatrix U(getRows(fe, trans), getColumns(fe, trans));
-            getOperator(fe, trans, U);
-            mfem::MultABt(U, M, UMt);
-         }
+               mfem::ElementTransformation& trans) const = 0;
 
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
@@ -121,36 +87,44 @@ namespace Rodin::Variational
          }
 
          size_t getRows(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation&) const override
-         {
-            return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
-         }
-
-         size_t getColumns(
-               const mfem::FiniteElement& fe,
+               const mfem::FiniteElement&,
                const mfem::ElementTransformation&) const override
          {
             return getFiniteElementSpace().getVectorDimension();
          }
 
-         void getOperator(
+         size_t getDOFs(
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               mfem::DenseMatrix& op) const override
+               const mfem::ElementTransformation&) const
          {
+            return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
+         }
+
+         size_t getColumns(
+               const mfem::FiniteElement&,
+               const mfem::ElementTransformation&) const override
+         {
+            return 1;
+         }
+
+         Internal::Rank3Operator getOperator(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans) const override
+         {
+            Internal::Rank3Operator result(getRows(fe, trans), getDOFs(fe, trans), getColumns(fe, trans));
+            result = 0.0;
             size_t dofs = fe.GetDof();
             size_t vdim = getFiniteElementSpace().getVectorDimension();
-            mfem::Vector tmp(dofs * vdim);
+            mfem::Vector tmp(dofs);
             fe.CalcPhysShape(trans, tmp);
-            op = 0.0;
-            for (size_t j = 0; j < vdim; j++)
+            for (size_t i = 0; i < vdim; i++)
             {
-               for (size_t i = 0; i < dofs; i++)
+               for (size_t j = 0; j < dofs; j++)
                {
-                  op(i + j * dofs, j) = tmp(i + j * dofs);
+                  result(i, j + i * vdim, 0) = tmp(j);
                }
             }
+            return result;
          }
 
          virtual ShapeFunction* copy() const noexcept override = 0;

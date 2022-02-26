@@ -75,28 +75,48 @@ namespace Rodin::Variational
       public:
          Gradient(ShapeFunction<H1, Space>& u)
             : m_u(u)
-         {}
-
-         void getOperator(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               mfem::DenseMatrix& op) const override
          {
-            fe.CalcPhysDShape(trans, op);
+            assert(m_u.getFiniteElementSpace().getVectorDimension() == 1);
          }
 
          size_t getRows(
+               const mfem::FiniteElement&,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return trans.GetSpaceDim();
+         }
+
+         size_t getDOFs(
                const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation&) const override
+               const mfem::ElementTransformation& trans) const
          {
             return fe.GetDof();
          }
 
          size_t getColumns(
                const mfem::FiniteElement&,
-               const mfem::ElementTransformation& trans) const override
+               const mfem::ElementTransformation&) const override
          {
-            return trans.GetSpaceDim();
+            return 1;
+         }
+
+         Internal::Rank3Operator getOperator(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans) const override
+         {
+            size_t dofs = fe.GetDof();
+            size_t sdim = trans.GetSpaceDim();
+            Internal::Rank3Operator result(getRows(fe, trans), getDOFs(fe, trans), getColumns(fe, trans));
+            mfem::DenseMatrix tmp(dofs, sdim);
+            fe.CalcPhysDShape(trans, tmp);
+            for (size_t i = 0; i < sdim; i++)
+            {
+               for (size_t j = 0; j < dofs; j++)
+               {
+                  result(i, j, 0) = tmp(j, i);
+               }
+            }
+            return result;
          }
 
          H1& getFiniteElementSpace() override

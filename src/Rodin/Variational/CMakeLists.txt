@@ -20,6 +20,7 @@ set(RodinVariational_HEADERS
   IdentityMatrix.h
   Integral.h
   BoundaryIntegral.h
+  Multiplication.h
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
@@ -59,6 +60,7 @@ set(RodinVariational_SRCS
   VectorDomainLFIntegrator.cpp
   ScalarCoefficient.cpp
   Restriction.cpp
+  Multiplication.cpp
   BilinearForm.hpp
   Dot.cpp
   LinearForm.hpp

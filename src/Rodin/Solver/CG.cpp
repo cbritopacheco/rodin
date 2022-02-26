@@ -47,13 +47,16 @@ namespace Rodin::Solver
       u.getFiniteElementSpace()
        .getFES()
        .GetEssentialTrueDofs(
-                   Utility::set2marker(problem.getEssentialBoundary(), maxBdrAttr), essTrueDofList);
+             Utility::set2marker(problem.getEssentialBoundary(), maxBdrAttr), essTrueDofList);
 
       // Form the linear system
       mfem::SparseMatrix A;
       mfem::Vector B, X;
       a.getHandle()
        .FormLinearSystem(essTrueDofList, u.getHandle(), b.getHandle(), A, X, B);
+
+      std::ofstream out("matrix.txt");
+      A.PrintMatlab(out);
 
       // Solve
       mfem::GSSmoother smoother(A);

@@ -64,6 +64,13 @@ namespace Rodin::Variational
 
          ElasticityIntegrator(const ElasticityIntegrator& other);
 
+         ElasticityIntegrator(ElasticityIntegrator&& other)
+            : BilinearFormDomainIntegrator(std::move(other)),
+              m_lambda(std::move(other.m_lambda)), m_mu(std::move(other.m_mu)),
+              m_mfemLambda(std::move(other.m_mfemLambda)), m_mfemMu(std::move(other.m_mfemMu)),
+              m_bfi(std::move(other.m_bfi))
+         {}
+
          void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
