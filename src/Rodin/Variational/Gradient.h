@@ -79,44 +79,47 @@ namespace Rodin::Variational
             assert(m_u.getFiniteElementSpace().getVectorDimension() == 1);
          }
 
-         size_t getRows(
+         int getRows(
                const mfem::FiniteElement&,
                const mfem::ElementTransformation& trans) const override
          {
             return trans.GetSpaceDim();
          }
 
-         size_t getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const
-         {
-            return fe.GetDof();
-         }
-
-         size_t getColumns(
+         int getColumns(
                const mfem::FiniteElement&,
                const mfem::ElementTransformation&) const override
          {
             return 1;
          }
 
-         Internal::Rank3Operator getOperator(
+         int getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const
+         {
+            return m_u.getDOFs(fe, trans);
+         }
+
+         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            size_t dofs = fe.GetDof();
-            size_t sdim = trans.GetSpaceDim();
-            Internal::Rank3Operator result(getRows(fe, trans), getDOFs(fe, trans), getColumns(fe, trans));
-            mfem::DenseMatrix tmp(dofs, sdim);
-            fe.CalcPhysDShape(trans, tmp);
-            for (size_t i = 0; i < sdim; i++)
+            int dofs = fe.GetDof();
+            int sdim = trans.GetSpaceDim();
+            mfem::DenseMatrix gradphi;
+            gradphi.SetSize(dofs, sdim);
+            fe.CalcPhysDShape(trans, gradphi);
+            auto result =
+               new Internal::Rank3Operator(getRows(fe, trans), getColumns(fe, trans), getDOFs(fe, trans));
+            (*result) = 0.0;
+            for (int i = 0; i < dofs; i++)
             {
-               for (size_t j = 0; j < dofs; j++)
+               for (int j = 0; j < sdim; j++)
                {
-                  result(i, j, 0) = tmp(j, i);
+                  (*result)(j, 0, i) = gradphi(i, j);
                }
             }
-            return result;
+            return std::unique_ptr<Internal::Rank3OperatorBase>(result);
          }
 
          H1& getFiniteElementSpace() override

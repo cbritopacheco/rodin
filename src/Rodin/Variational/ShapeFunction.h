@@ -37,19 +37,19 @@ namespace Rodin::Variational
             return Space;
          }
 
-         virtual size_t getRows(
+         virtual int getRows(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
-         virtual size_t getDOFs(
+         virtual int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
-         virtual size_t getColumns(
+         virtual int getColumns(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
-         virtual Internal::Rank3Operator getOperator(
+         virtual std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const = 0;
 
@@ -86,45 +86,46 @@ namespace Rodin::Variational
             return m_fes;
          }
 
-         size_t getRows(
+         int getRows(
                const mfem::FiniteElement&,
                const mfem::ElementTransformation&) const override
          {
             return getFiniteElementSpace().getVectorDimension();
          }
 
-         size_t getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation&) const
-         {
-            return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
-         }
-
-         size_t getColumns(
+         int getColumns(
                const mfem::FiniteElement&,
                const mfem::ElementTransformation&) const override
          {
             return 1;
          }
 
-         Internal::Rank3Operator getOperator(
+         int getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation&) const
+         {
+            return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
+         }
+
+         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            Internal::Rank3Operator result(getRows(fe, trans), getDOFs(fe, trans), getColumns(fe, trans));
-            result = 0.0;
-            size_t dofs = fe.GetDof();
-            size_t vdim = getFiniteElementSpace().getVectorDimension();
-            mfem::Vector tmp(dofs);
-            fe.CalcPhysShape(trans, tmp);
-            for (size_t i = 0; i < vdim; i++)
-            {
-               for (size_t j = 0; j < dofs; j++)
-               {
-                  result(i, j + i * vdim, 0) = tmp(j);
-               }
-            }
-            return result;
+            // TODO: Performance is shitty with this representation, so create
+            // a new Rank3OperatorBase derived class which has the fast
+            // operations.
+            int dofs = fe.GetDof();
+            int vdim = getFiniteElementSpace().getVectorDimension();
+            mfem::Vector phi;
+            phi.SetSize(dofs);
+            fe.CalcPhysShape(trans, phi);
+            auto result =
+               new Internal::Rank3Operator(getRows(fe, trans), getColumns(fe, trans), getDOFs(fe, trans));
+            (*result) = 0.0;
+            for (int i = 0; i < dofs; i++)
+               for (int j = 0; j < vdim; j++)
+                  (*result)(j, 0, i + j * dofs) = phi(i);
+            return std::unique_ptr<Internal::Rank3OperatorBase>(result);
          }
 
          virtual ShapeFunction* copy() const noexcept override = 0;

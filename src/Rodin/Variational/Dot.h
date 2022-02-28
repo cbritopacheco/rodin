@@ -24,65 +24,65 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Dot product between instances of Lhs and Rhs
-    * @tparam Lhs Left-hand side operand type
-    * @tparam Rhs Right-hand side operand type
-    */
-   template <class Lhs, class Rhs>
-   class Dot : public FormLanguage::Base
-   {
-      static_assert(std::is_base_of_v<Base, Lhs>,
-            "Lhs must be derived from FormLanguage::Base");
-      static_assert(std::is_base_of_v<Base, Rhs>,
-            "Rhs must be derived from FormLanguage::Base");
+   // /**
+   //  * @brief Dot product between instances of Lhs and Rhs
+   //  * @tparam Lhs Left-hand side operand type
+   //  * @tparam Rhs Right-hand side operand type
+   //  */
+   // template <class Lhs, class Rhs>
+   // class Dot : public FormLanguage::Base
+   // {
+   //    static_assert(std::is_base_of_v<Base, Lhs>,
+   //          "Lhs must be derived from FormLanguage::Base");
+   //    static_assert(std::is_base_of_v<Base, Rhs>,
+   //          "Rhs must be derived from FormLanguage::Base");
 
-      public:
-         Dot(const Lhs& lhs, const Rhs& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
+   //    public:
+   //       Dot(const Lhs& lhs, const Rhs& rhs)
+   //          : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+   //       {}
 
-         Dot(const Dot& other)
-            : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
+   //       Dot(const Dot& other)
+   //          : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+   //       {}
 
-         Dot(Dot&&) = default;
+   //       Dot(Dot&&) = default;
 
-         virtual ~Dot() = default;
+   //       virtual ~Dot() = default;
 
-         Lhs& getLHS()
-         {
-            assert(m_lhs);
-            return *m_lhs;
-         }
+   //       Lhs& getLHS()
+   //       {
+   //          assert(m_lhs);
+   //          return *m_lhs;
+   //       }
 
-         Rhs& getRHS()
-         {
-            assert(m_rhs);
-            return *m_rhs;
-         }
+   //       Rhs& getRHS()
+   //       {
+   //          assert(m_rhs);
+   //          return *m_rhs;
+   //       }
 
-         const Lhs& getLHS() const
-         {
-            assert(m_lhs);
-            return *m_lhs;
-         }
+   //       const Lhs& getLHS() const
+   //       {
+   //          assert(m_lhs);
+   //          return *m_lhs;
+   //       }
 
-         const Rhs& getRHS() const
-         {
-            assert(m_lhs);
-            return *m_rhs;
-         }
+   //       const Rhs& getRHS() const
+   //       {
+   //          assert(m_lhs);
+   //          return *m_rhs;
+   //       }
 
-         Dot* copy() const noexcept override
-         {
-            return new Dot(*this);
-         }
+   //       Dot* copy() const noexcept override
+   //       {
+   //          return new Dot(*this);
+   //       }
 
-      private:
-         std::unique_ptr<Lhs> m_lhs;
-         std::unique_ptr<Rhs> m_rhs;
-   };
+   //    private:
+   //       std::unique_ptr<Lhs> m_lhs;
+   //       std::unique_ptr<Rhs> m_rhs;
+   // };
 
    /**
     * @brief Represents the dot product between two matrices.
@@ -161,37 +161,37 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         size_t getRows(
+         int getRows(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
          {
             return getRHS().getRows(fe, trans);
          }
 
-         size_t getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const
-         {
-            return getRHS().getDOFs(fe, trans);
-         }
-
-         size_t getColumns(
+         int getColumns(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
          {
             return getRHS().getColumns(fe, trans);
          }
 
-         Internal::Rank3Operator getOperator(
+         int getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const
+         {
+            return getRHS().getDOFs(fe, trans);
+         }
+
+         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
             assert(getRows(fe, trans) == 1);
             assert(getColumns(fe, trans) == 1);
 
-            Internal::Rank3Operator result = getRHS().getOperator(fe, trans);
-            result *= m_lhs->getValue(trans, trans.GetIntPoint());
-            return result;
+            auto result = getRHS().getOperator(fe, trans);
+            (*result) *= getLHS().getValue(trans, trans.GetIntPoint());
+            return std::move(result);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -264,28 +264,28 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         size_t getRows(
+         int getRows(
                const mfem::FiniteElement&,
                const mfem::ElementTransformation&) const override
          {
             return 1;
          }
 
-         size_t getDOFs(
+         int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const
          {
             return getRHS().getDOFs(fe, trans);
          }
 
-         size_t getColumns(
+         int getColumns(
                const mfem::FiniteElement&,
                const mfem::ElementTransformation&) const override
          {
             return 1;
          }
 
-         Internal::Rank3Operator getOperator(
+         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -294,7 +294,7 @@ namespace Rodin::Variational
                   || (getLHS().getDimension() == getRHS().getColumns(fe, trans) && getRHS().getRows(fe, trans) == 1));
             mfem::Vector v;
             getLHS().getValue(v, trans, trans.GetIntPoint());
-            return getRHS().getOperator(fe, trans).VectorDot(v);
+            return getRHS().getOperator(fe, trans)->VectorDot(v);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -326,8 +326,72 @@ namespace Rodin::Variational
    }
 
    /**
-    * @brief Dot product between functions of trial and test spaces
+    * @brief Dot product between instances of Lhs and Rhs
+    * @tparam Lhs Left-hand side operand type
+    * @tparam Rhs Right-hand side operand type
     */
+   template <>
+   class Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
+      : public FormLanguage::Base
+   {
+      public:
+         Dot(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+         {}
+
+         Dot(const Dot& other)
+            : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+         {}
+
+         Dot(Dot&&) = default;
+
+         ShapeFunctionBase<Trial>& getLHS()
+         {
+            assert(m_lhs);
+            return *m_lhs;
+         }
+
+         ShapeFunctionBase<Test>& getRHS()
+         {
+            assert(m_rhs);
+            return *m_rhs;
+         }
+
+         const ShapeFunctionBase<Trial>& getLHS() const
+         {
+            assert(m_lhs);
+            return *m_lhs;
+         }
+
+         const ShapeFunctionBase<Test>& getRHS() const
+         {
+            assert(m_rhs);
+            return *m_rhs;
+         }
+
+         mfem::DenseMatrix getElementMatrix(
+               const mfem::FiniteElement& trialElement, const mfem::FiniteElement& testElement,
+               mfem::ElementTransformation& trans) const
+         {
+            auto& trial = getLHS();
+            auto& test  = getRHS();
+            assert(trial.getRows(trialElement, trans) == test.getRows(testElement, trans));
+            assert(trial.getColumns(trialElement, trans) == test.getColumns(testElement, trans));
+            return test.getOperator(trialElement, trans)->OperatorDot(
+                     *trial.getOperator(testElement, trans));
+         }
+
+         Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+
+      private:
+         std::unique_ptr<ShapeFunctionBase<Trial>> m_lhs;
+         std::unique_ptr<ShapeFunctionBase<Test>>  m_rhs;
+   };
+   Dot(const ShapeFunctionBase<Trial>&, const ShapeFunctionBase<Test>&)
+      -> Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
    Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
    operator*(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs);
 }

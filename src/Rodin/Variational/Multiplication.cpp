@@ -8,9 +8,9 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
-   {
-      return Mult(lhs, rhs);
-   }
+   // Mult<ScalarCoefficientBase, ScalarCoefficientBase>
+   // operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   // {
+   //    return Mult(lhs, rhs);
+   // }
 }

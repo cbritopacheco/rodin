@@ -65,6 +65,7 @@ namespace Rodin::Variational
          LinearFormDomainIntegrator() = default;
          LinearFormDomainIntegrator(const LinearFormDomainIntegrator&) = default;
          LinearFormDomainIntegrator(LinearFormDomainIntegrator&&) = default;
+         virtual ~LinearFormDomainIntegrator() = default;
 
          IntegratorRegion getIntegratorRegion() const override
          {
@@ -113,6 +114,7 @@ namespace Rodin::Variational
          LinearFormBoundaryIntegrator() = default;
          LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator&) = default;
          LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
+         virtual ~LinearFormBoundaryIntegrator() = default;
 
          IntegratorRegion getIntegratorRegion() const override
          {
@@ -149,7 +151,6 @@ namespace Rodin::Variational
             m_attrs = attrs;
             return *this;
          }
-
 
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
       private:

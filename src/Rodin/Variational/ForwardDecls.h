@@ -125,6 +125,9 @@ namespace Rodin::Variational
    template <class T>
    class Restriction;
 
+   template <class Lhs, class Rhs>
+   class Mult;
+
    namespace Internal
    {
       class ScalarCoefficient;

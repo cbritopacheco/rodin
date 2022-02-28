@@ -44,11 +44,13 @@
 #include "Variational/Multiplication.h"
 
 #include "Variational/VectorDomainLFDivIntegrator.h"
+#include "Variational/VectorBoundaryLFIntegrator.h"
 
 // ---- Bilinear form integrators --------------------------------------------
 #include "Variational/VectorMassIntegrator.h"
 #include "Variational/VectorDiffusionIntegrator.h"
 #include "Variational/ElasticityIntegrator.h"
+#include "Variational/DiffusionIntegrator.h"
 
 // ---- Linear form integrators ----------------------------------------------
 #include "Variational/DomainLFIntegrator.h"

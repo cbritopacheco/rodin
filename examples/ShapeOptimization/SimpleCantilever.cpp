@@ -43,81 +43,84 @@ int main(int, char**)
   std::vector<double> obj;
 
   // Optimization loop
-  // for (size_t i = 0; i < maxIt; i++)
-  // {
-  //   // Finite element spaces
-  //   int d = 2;
-  //   H1 Vh(Omega, d);
+  for (size_t i = 0; i < maxIt; i++)
+  {
+    // Finite element spaces
+    int d = 2;
+    H1 Vh(Omega, d);
 
-  //   // Compliance
-  //   auto compliance = [&](GridFunction<H1>& v)
-  //   {
-  //     BilinearForm bf(Vh);
-  //     bf = ElasticityIntegrator(lambda, mu);
-  //     return bf(v, v);
-  //   };
+    // Compliance
+    auto compliance = [&](GridFunction<H1>& v)
+    {
+      BilinearForm bf(Vh);
+      bf = ElasticityIntegrator(lambda, mu);
+      return bf(v, v);
+    };
 
-  //   // Elasticity equation
-  //   TrialFunction u(Vh);
-  //   TestFunction  v(Vh);
-  //   Problem elasticity(u, v);
-  //   elasticity = ElasticityIntegrator(lambda, mu)
-  //              + DirichletBC(GammaD, VectorCoefficient{0, 0});
-  //              // + NeumannBC(GammaN, VectorCoefficient{0, -1});
-  //   cg.solve(elasticity);
+    // Elasticity equation
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+    Problem elasticity(u, v);
+    elasticity = ElasticityIntegrator(lambda, mu)
+               - BoundaryIntegral(VectorCoefficient{0, -1} * v).over(GammaN)
+               + DirichletBC(GammaD, VectorCoefficient{0, 0});
+    cg.solve(elasticity);
 
-  //   // Hilbert extension-regularization procedure
-  //   TrialFunction g(Vh);
-  //   TestFunction  w(Vh);
-  //   auto e = ScalarCoefficient(0.5) * (Jacobian(u) + Jacobian(u).T());
-  //   auto Ae = ScalarCoefficient(2.0) * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+    u.getGridFunction().save("u.gf");
+    Omega.save("Omega.mesh");
 
-  //   Problem hilbert(g, w);
-  //   hilbert = VectorDiffusionIntegrator(alpha)
-  //           + VectorMassIntegrator()
-  //           - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
-  //           + DirichletBC(GammaD, VectorCoefficient{0, 0})
-  //           + DirichletBC(GammaN, VectorCoefficient{0, 0});
-  //   cg.solve(hilbert);
+    // Hilbert extension-regularization procedure
+    TrialFunction g(Vh);
+    TestFunction  w(Vh);
+    auto e = Mult(0.5, Jacobian(u.getGridFunction()) + Jacobian(u.getGridFunction()).T());
+    auto Ae = Mult(Mult(2.0, mu), e) + Mult(lambda, Mult(Trace(e), IdentityMatrix(d)));
 
-  //   // Update objective
-  //   obj.push_back(compliance(u) + ell.getValue() * Omega.getVolume());
+    Problem hilbert(g, w);
+    hilbert = VectorDiffusionIntegrator(alpha)
+            + VectorMassIntegrator()
+            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
+            + DirichletBC(GammaD, VectorCoefficient{0, 0})
+            + DirichletBC(GammaN, VectorCoefficient{0, 0});
+    cg.solve(hilbert);
 
-  //   std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
+    // Update objective
+    obj.push_back(compliance(u.getGridFunction()) + ell.getValue() * Omega.getVolume());
 
-  //   // Test for convergence
-  //   if (i > 0 && abs(obj[i] - obj[i - 1]) < eps)
-  //     break;
+    std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
 
-  //   // Make the displacement
-  //   double dt = Omega.getMaximumDisplacement(g);
-  //   if (dt < 1e-4)
-  //   {
-  //     // If the maximum displacement is too small the mesh will degenerate
-  //     break;
-  //   }
-  //   else
-  //   {
-  //     g *= hmax * dt;
-  //     Omega.displace(g);
+    // Test for convergence
+    if (i > 0 && abs(obj[i] - obj[i - 1]) < eps)
+      break;
 
-  //     // Refine the mesh using MMG
-  //     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-  //     MMG::MeshOptimizer2D().setHMax(hmax).optimize(mmgMesh);
-  //     Omega = Cast(mmgMesh).to<Mesh>();
-  //   }
+    // Make the displacement
+    double dt = Omega.getMaximumDisplacement(g.getGridFunction());
+    if (dt < 1e-4)
+    {
+      // If the maximum displacement is too small the mesh will degenerate
+      break;
+    }
+    else
+    {
+      g.getGridFunction() *= hmax * dt;
+      Omega.displace(g.getGridFunction());
 
-  //   // Save mesh
-  //   Omega.save("Omega.mesh");
-  // }
+      // Refine the mesh using MMG
+      auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+      MMG::MeshOptimizer2D().setHMax(hmax).optimize(mmgMesh);
+      Omega = Cast(mmgMesh).to<Mesh>();
+    }
 
-  // std::cout << "Saved final mesh to Omega.mesh" << std::endl;
+    // Save mesh
+    Omega.save("Omega.mesh");
+  }
 
-  // std::ofstream plt("obj.txt");
-  // for (size_t i = 0; i < obj.size(); i++)
-  //   plt << obj[i] << "\n";
+  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
 
-  // std::cout << "Saved objective history to obj.txt" << std::endl;
+  std::ofstream plt("obj.txt");
+  for (size_t i = 0; i < obj.size(); i++)
+    plt << obj[i] << "\n";
+
+  std::cout << "Saved objective history to obj.txt" << std::endl;
 
   return 0;
 }

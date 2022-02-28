@@ -20,68 +20,8 @@
 #include "FormLanguage/Base.h"
 #include "ForwardDecls.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
-   /**
-    * @brief Multiplication between instances of Lhs and Rhs
-    * @tparam Lhs Left-hand side operand type
-    * @tparam Rhs Right-hand side operand type
-    */
-   template <class Lhs, class Rhs>
-   class Mult : public Base
-   {
-      static_assert(std::is_base_of_v<Base, Lhs>,
-            "Lhs must be derived from FormLanguage::Base");
-      static_assert(std::is_base_of_v<Base, Rhs>,
-            "Rhs must be derived from FormLanguage::Base");
-
-      public:
-         Mult(const Lhs& lhs, const Rhs& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
-
-         Mult(const Mult& other)
-            : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
-
-         Mult(Mult&&) = default;
-
-         virtual ~Mult() = default;
-
-         Lhs& getLHS()
-         {
-            assert(m_lhs);
-            return *m_lhs;
-         }
-
-         Rhs& getRHS()
-         {
-            assert(m_rhs);
-            return *m_rhs;
-         }
-
-         const Lhs& getLHS() const
-         {
-            assert(m_lhs);
-            return *m_lhs;
-         }
-
-         const Rhs& getRHS() const
-         {
-            assert(m_lhs);
-            return *m_rhs;
-         }
-
-         Mult* copy() const noexcept override
-         {
-            return new Mult(*this);
-         }
-
-      private:
-         std::unique_ptr<Lhs> m_lhs;
-         std::unique_ptr<Rhs> m_rhs;
-   };
-
    /**
     * @brief Multiplication of two ScalarCoefficientBase instances.
     */
@@ -90,6 +30,14 @@ namespace Rodin::Variational::FormLanguage
       : public ScalarCoefficientBase
    {
       public:
+         Mult(double lhs, const ScalarCoefficientBase& rhs)
+            : Mult(ScalarCoefficient(lhs), rhs)
+         {}
+
+         Mult(const ScalarCoefficientBase& rhs, double lhs)
+            : Mult(ScalarCoefficient(lhs), rhs)
+         {}
+
          Mult(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
@@ -138,8 +86,28 @@ namespace Rodin::Variational::FormLanguage
          std::unique_ptr<ScalarCoefficientBase> m_lhs;
          std::unique_ptr<ScalarCoefficientBase> m_rhs;
    };
-   Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+   Mult(const ScalarCoefficientBase&, const ScalarCoefficientBase&)
+      -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
+   Mult(double, const ScalarCoefficientBase&)
+      -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
+   Mult(const ScalarCoefficientBase&, double)
+      -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
+   // Mult<ScalarCoefficientBase, ScalarCoefficientBase>
+   // operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+
+   // template <class T>
+   // std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
+   // operator*(T lhs, const ScalarCoefficientBase& rhs)
+   // {
+   //    return Mult(ScalarCoefficient(lhs), rhs);
+   // }
+
+   // template <class T>
+   // std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
+   // operator*(const ScalarCoefficientBase& rhs, T lhs)
+   // {
+   //    return Mult(rhs, ScalarCoefficient(lhs));
+   // }
 
    /**
     * @brief Multiplication of ScalarCoefficientBase and MatrixCoefficientBase.
@@ -149,12 +117,20 @@ namespace Rodin::Variational::FormLanguage
       : public MatrixCoefficientBase
    {
       public:
-         Mult(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+         Mult(const MatrixCoefficientBase& rhs, double lhs)
+            : Mult(ScalarCoefficient(lhs), rhs)
+         {}
+
+         Mult(double lhs, const MatrixCoefficientBase& rhs)
+            : Mult(ScalarCoefficient(lhs), rhs)
          {}
 
          Mult(const MatrixCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
             : Mult(rhs, lhs)
+         {}
+
+         Mult(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Mult(const Mult& other)
@@ -213,6 +189,14 @@ namespace Rodin::Variational::FormLanguage
          std::unique_ptr<ScalarCoefficientBase> m_lhs;
          std::unique_ptr<MatrixCoefficientBase> m_rhs;
    };
+   Mult(const ScalarCoefficientBase&, const MatrixCoefficientBase&)
+      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
+   Mult(const MatrixCoefficientBase&, const ScalarCoefficientBase&)
+      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
+   Mult(double, const MatrixCoefficientBase&)
+      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
+   Mult(const MatrixCoefficientBase&, double)
+      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
 
    template <class FEC>
    Mult<ScalarCoefficientBase, GridFunction<FEC>>
