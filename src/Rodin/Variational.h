@@ -44,7 +44,6 @@
 #include "Variational/Multiplication.h"
 
 #include "Variational/VectorDomainLFDivIntegrator.h"
-#include "Variational/VectorBoundaryLFIntegrator.h"
 
 // ---- Bilinear form integrators --------------------------------------------
 #include "Variational/VectorMassIntegrator.h"
