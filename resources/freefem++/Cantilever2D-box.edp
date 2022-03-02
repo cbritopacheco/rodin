@@ -1,5 +1,4 @@
-load "medit"
-load "distance"
+include "RodinFF++.idp"
 
 // Borders
 int Gamma0 = 1;
@@ -16,25 +15,10 @@ border leftBottom(t=1,0.85){x=0;y=t;label=GammaD;};
 border leftMiddle(t=0.85,0.15){x=0;y=t;label=Gamma0;};
 border leftTop(t=0.15,0){x=0;y=t;label=GammaD;};
 
-// Mesh
-int n = 50;
-mesh Omega = buildmesh(
+mesh Th = buildmesh(
     bottom(n)
     + rightBottom(45 * n / 100) + rightMiddle(n / 10) + rightTop(45 * n/100)
     + top(n)
     + leftBottom(45 * n / 100) + leftMiddle(n / 10) + leftTop(45 * n / 100)
     );
-Omega = adaptmesh(Omega, 1. / 75, IsMetric=1, nbvx=100000);
-
-include "tools.idp"
-
-fespace Vh(Omega, P1);
-
-Vh phio, phi;
-
-phio = holes(4, 2);
-distance(Omega, phio, phi[]);
-
-savemesh(Omega, "ls.sol.mesh");
-savesol("ls.sol", Omega, phi);
-
+Th = adaptmesh(Th, 1. / 75, IsMetric=1, nbvx=100000);

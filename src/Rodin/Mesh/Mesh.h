@@ -155,6 +155,14 @@ namespace Rodin
          }
 
          /**
+          * @brief Performs a uniform refinement over all mesh elements
+          */
+         void refine()
+         {
+            getHandle().UniformRefinement();
+         }
+
+         /**
           * @internal
           * @brief Gets the underlying handle for the internal mesh.
           * @returns Reference to the underlying mfem::Mesh.

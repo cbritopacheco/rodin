@@ -16,13 +16,17 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-cantilever2d-example.mesh";
+  const char* meshFile = "../resources/mfem/meshes/levelset-mast2d-example.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
 
   // Define boundary attributes
-  int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
+  int Gamma0 = 1,  // Traction free boundary
+      GammaD = 2,  // Homogenous Dirichlet
+      GammaN = 3,  // Inhomogenous Neumann
+      Gamma = 4,   // Shape boundary
+      GammaNA = 5; // Non-active border
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
@@ -45,11 +49,11 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 500;
-  size_t activeBorderIt = 10;
+  size_t maxIt = 300;
+  size_t activeBorderIt = 20;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(1);
+  auto ell = ScalarCoefficient(4);
   auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
@@ -63,16 +67,18 @@ int main(int, char**)
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior, Gamma);
+    trimmed.save("trimmed.mesh");
 
     // Build a finite element space over the trimmed mesh
     H1 VhInt(trimmed, d);
 
     // Elasticity equation
+    auto f = VectorCoefficient{0, 0};
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
     elasticity = ElasticityIntegrator(lambda, mu)
-               - BoundaryIntegral(VectorCoefficient{0, -1} * vInt).over(GammaN)
+               - BoundaryIntegral(f * vInt).over(GammaN)
                + DirichletBC(GammaD, VectorCoefficient{0, 0});
     solver.solve(elasticity);
 
@@ -95,10 +101,11 @@ int main(int, char**)
             + VectorMassIntegrator()
             - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
-            + DirichletBC(GammaN, VectorCoefficient{0, 0});
+            + DirichletBC({GammaN, GammaNA}, VectorCoefficient{0, 0});
     solver.solve(hilbert);
 
     g.getGridFunction().save("g.gf");
+    u.save("u.gf");
     Omega.save("Omegai.mesh");
 
     // Update objective

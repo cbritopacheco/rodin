@@ -16,3 +16,12 @@ target_link_libraries(LevelSetCantilever
   Rodin::External::MMG
   )
 
+add_executable(LevelSetMast2D LevelSetMast2D.cpp)
+target_link_libraries(LevelSetMast2D
+  PUBLIC
+  Rodin::Mesh
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::External::MMG
+  )
+
