@@ -10,6 +10,44 @@
 #include "Rank3Operator.h"
 #include "FiniteElementSpace.h"
 
+namespace Rodin::Variational::Internal
+{
+   /**
+    * @brief Optimized version for functions whose original representation
+    * is of the form:
+    * @f[
+    *    u(x) = \left(
+    *       \sum^n_{i=1} w_{1, i} \phi_i(x), \ldots, \sum^n_{i=1} w_{d, i} \phi_i(x) \right)
+    * @f]
+    */
+   class ScalarShapeR3O : public Rank3Operator
+   {
+      public:
+         ScalarShapeR3O(mfem::Vector shape, int vdim)
+            : m_shape(shape),
+              m_vdim(vdim)
+         {}
+
+         int GetRows() const override;
+
+         int GetColumns() const override;
+
+         int GetDOFs() const override;
+
+         ScalarShapeR3O& operator*=(double s) override;
+
+         ScalarShapeR3O& operator=(double s) override;
+
+         double operator()(int row, int col, int dof) const override;
+
+         std::unique_ptr<Rank3Operator>
+         VectorDot(const mfem::Vector& rhs) const override;
+      private:
+         mfem::Vector m_shape;
+         int m_vdim;
+   };
+}
+
 namespace Rodin::Variational
 {
    template <ShapeFunctionSpaceType Space>
@@ -26,7 +64,6 @@ namespace Rodin::Variational
    {
       static constexpr ShapeFunctionSpaceType Value = Trial;
    };
-
 
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase : public FormLanguage::Base
@@ -49,7 +86,7 @@ namespace Rodin::Variational
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
-         virtual std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
+         virtual std::unique_ptr<Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const = 0;
 
@@ -69,11 +106,13 @@ namespace Rodin::Variational
          {}
 
          ShapeFunction(const ShapeFunction& other)
-            : m_fes(other.m_fes)
+            :  ShapeFunctionBase<Space>(other),
+               m_fes(other.m_fes)
          {}
 
          ShapeFunction(ShapeFunction&& other)
-            : m_fes(other.m_fes)
+            :  ShapeFunctionBase<Space>(std::move(other)),
+               m_fes(other.m_fes)
          {}
 
          H1& getFiniteElementSpace() override
@@ -107,25 +146,17 @@ namespace Rodin::Variational
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }
 
-         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
+         std::unique_ptr<Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            // TODO: Performance is shitty with this representation, so create
-            // a new Rank3OperatorBase derived class which has the fast
-            // operations.
             int dofs = fe.GetDof();
             int vdim = getFiniteElementSpace().getVectorDimension();
-            mfem::Vector phi;
-            phi.SetSize(dofs);
-            fe.CalcPhysShape(trans, phi);
-            auto result =
-               new Internal::Rank3Operator(getRows(fe, trans), getColumns(fe, trans), getDOFs(fe, trans));
-            (*result) = 0.0;
-            for (int i = 0; i < dofs; i++)
-               for (int j = 0; j < vdim; j++)
-                  (*result)(j, 0, i + j * dofs) = phi(i);
-            return std::unique_ptr<Internal::Rank3OperatorBase>(result);
+            mfem::Vector shape;
+            shape.SetSize(dofs);
+            fe.CalcPhysShape(trans, shape);
+            return std::unique_ptr<Rank3Operator>(
+                  new Internal::ScalarShapeR3O(std::move(shape), vdim));
          }
 
          virtual ShapeFunction* copy() const noexcept override = 0;

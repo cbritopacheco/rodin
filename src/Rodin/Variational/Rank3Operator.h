@@ -4,10 +4,10 @@
 #include <vector>
 #include <mfem.hpp>
 
-namespace Rodin::Variational::Internal
+namespace Rodin::Variational
 {
    /**
-    * @brief Rank-3 Tensor for discretized basis functions
+    * @brief Rank-3 tensor for discretized functions on finite bases
     *
     * Let @f$ u \in V_h @f$ be a function which has a basis representation
     * consisting of @f$ n @f$ degrees of freedom.
@@ -22,67 +22,39 @@ namespace Rodin::Variational::Internal
     *    where each @f$ T_i @f$ is a matrix of dimensions @f$ p \times q @f$.
     * @f]
     */
-   class Rank3OperatorBase
+   class Rank3Operator
    {
       public:
-         virtual ~Rank3OperatorBase() = default;
-
-         virtual void SetSize(int rows, int cols, int dofs) = 0;
-
-         virtual int GetRows() const = 0;
-
-         virtual int GetColumns() const = 0;
-
-         virtual int GetDOFs() const = 0;
-
-         /**
-          * @brief Gets the i-th matrix of the multi-dimensional array
-          */
-         virtual mfem::DenseMatrix& operator()(int i) = 0;
-
-         /**
-          * @brief Gets the i-th matrix of the multi-dimensional array
-          */
-         virtual const mfem::DenseMatrix& operator()(int i) const = 0;
-
-         /**
-          * @brief Gets the (i-th, j-th, k-th) element of the multi-dimensional array
-          *
-          * Returns the element given by @f$ A_{(i, j, k)} = (A_i)_{(j, k)} @f$
-          */
-         virtual double& operator()(int i, int j, int k) = 0;
-
-         virtual const double& operator()(int i, int j, int k) const = 0;
-
-         virtual Rank3OperatorBase& operator*=(double s) = 0;
-
-         virtual Rank3OperatorBase& operator=(double s) = 0;
-
          virtual
-         std::unique_ptr<Rank3OperatorBase>
-         Transpose() const = 0;
-
-         virtual
-         std::unique_ptr<Rank3OperatorBase>
-         VectorDot(const mfem::Vector& rhs) const = 0;
-
-         virtual
-         std::unique_ptr<Rank3OperatorBase>
-         MatrixDot(const mfem::DenseMatrix& rhs) const = 0;
-
-         virtual
-         std::unique_ptr<Rank3OperatorBase> Trace() const = 0;
+         ~Rank3Operator() = default;
 
          /**
           * @f[
-          *    A(u) \Lambda
+          *    \text{tr} \ A(u)
+          * @f]
+          * with @f$ A(u) \in \mathbb{R}^{p \times p} @f$.
+          */
+         virtual
+         std::unique_ptr<Rank3Operator> Trace() const;
+
+         /**
+          * @f[
+          *    A(u)^T
+          * @f]
+          * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$.
+          */
+         virtual
+         std::unique_ptr<Rank3Operator> Transpose() const;
+
+         /**
+          * @f[
+          *    \Lambda A(u)
           * @f]
           * with @f$ A(u) \in \mathbb{R} @f$,
           * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
           */
          virtual
-         std::unique_ptr<Rank3OperatorBase>
-         ScalarMatrixMult(const mfem::DenseMatrix& lhs) const = 0;
+         std::unique_ptr<Rank3Operator> ScalarMatrixMult(const mfem::DenseMatrix& lhs) const;
 
          /**
           * @f[
@@ -92,8 +64,7 @@ namespace Rodin::Variational::Internal
           * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
           */
          virtual
-         std::unique_ptr<Rank3OperatorBase>
-         RightMatrixMult(const mfem::DenseMatrix& rhs) const = 0;
+         std::unique_ptr<Rank3Operator> RightMatrixMult(const mfem::DenseMatrix& rhs) const;
 
          /**
           * @f[
@@ -103,29 +74,69 @@ namespace Rodin::Variational::Internal
           * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
           */
          virtual
-         std::unique_ptr<Rank3OperatorBase>
-         LeftMatrixMult(const mfem::DenseMatrix& lhs) const = 0;
+         std::unique_ptr<Rank3Operator> LeftMatrixMult(const mfem::DenseMatrix& lhs) const;
 
          /**
-          * @f$ u @f$ with @f$ n @f$ degrees
-          * @f$ v @f$ with @f$ v @f$ degrees
           * @f[
-          *    A(u) : B(v) \rightarrow \sum V_j U_j^t
+          *    \vec{\lambda} \cdot A(u)
           * @f]
+          * with @f$ A(u) \in \mathbb{R^d} @f$,
+          * @f$ \vec{\lambda} \in \mathbb{R}^{d} @f$.
+          */
+         virtual
+         std::unique_ptr<Rank3Operator> VectorDot(const mfem::Vector& rhs) const;
+
+         /**
+          * @f[
+          *    \Lambda : A(u)
+          * @f]
+          * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$,
+          * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
+          */
+         virtual
+         std::unique_ptr<Rank3Operator> MatrixDot(const mfem::DenseMatrix& rhs) const;
+
+         /**
+          * @f$ u @f$ with @f$ n @f$ degrees of freedom
+          * @f$ v @f$ with @f$ m @f$ degrees of freedom
+          *
           * Stiffness matrix of @f$ m \times n @f$.
           */
-         virtual mfem::DenseMatrix OperatorDot(const Rank3OperatorBase& rhs) const = 0;
+         virtual
+         mfem::DenseMatrix OperatorDot(const Rank3Operator& rhs) const;
 
-         virtual void AddToVector(int offset, mfem::Vector& vec) const = 0;
+         /**
+          * @brief Adds to element vector.
+          */
+         virtual
+         void AddToVector(mfem::Vector& vec) const;
+
+         virtual
+         int GetRows() const = 0;
+
+         virtual
+         int GetColumns() const = 0;
+
+         virtual
+         int GetDOFs() const = 0;
+
+         virtual
+         Rank3Operator& operator=(double s) = 0;
+
+         virtual
+         Rank3Operator& operator*=(double s) = 0;
+
+         virtual
+         double operator()(int row, int col, int dof) const = 0;
    };
 
-   class Rank3Operator : public Rank3OperatorBase
+   class DenseRank3Operator : public Rank3Operator
    {
       public:
-         Rank3Operator()
+         DenseRank3Operator()
          {}
 
-         Rank3Operator(int rows, int cols, int dofs)
+         DenseRank3Operator(int rows, int cols, int dofs)
             : m_tensor(rows, cols, dofs)
          {
             assert(rows > 0);
@@ -133,31 +144,22 @@ namespace Rodin::Variational::Internal
             assert(cols > 0);
          }
 
-         Rank3Operator(const Rank3Operator& other)
+         DenseRank3Operator(const DenseRank3Operator& other)
             : m_tensor(other.m_tensor)
          {}
 
-         Rank3Operator(Rank3Operator&& other)
+         DenseRank3Operator(DenseRank3Operator&& other)
             : m_tensor(std::move(other.m_tensor))
          {}
 
-         Rank3Operator& operator=(double s) override
+         mfem::DenseMatrix& operator()(int dof)
          {
-            for (int i = 0; i < GetDOFs(); i++)
-               (*this)(i) = s;
-            return *this;
+            return m_tensor(dof);
          }
 
-         Rank3Operator& operator*=(double s) override
+         const mfem::DenseMatrix& operator()(int dof) const
          {
-            for (int i = 0; i < GetDOFs(); i++)
-               (*this)(i) *= s;
-            return *this;
-         }
-
-         void SetSize(int rows, int cols, int dofs) override
-         {
-            m_tensor.SetSize(rows, cols, dofs);
+            return m_tensor(dof);
          }
 
          int GetRows() const override
@@ -175,144 +177,68 @@ namespace Rodin::Variational::Internal
             return m_tensor.SizeK();
          }
 
-         /**
-          * @brief Gets the i-th matrix of the multi-dimensional array
-          */
-         mfem::DenseMatrix& operator()(int dof) override
+         DenseRank3Operator& operator=(double s) override
          {
-            return m_tensor(dof);
-         }
-
-         const mfem::DenseMatrix& operator()(int dof) const override
-         {
-            return m_tensor(dof);
-         }
-
-         double& operator()(int row, int col, int dof) override
-         {
-            return m_tensor(row, col, dof);
-         }
-
-         const double& operator()(int row, int col, int dof) const override
-         {
-            return m_tensor(row, col, dof);
-         }
-
-         std::unique_ptr<Rank3OperatorBase> Transpose() const override
-         {
-            auto result = new Rank3Operator(GetColumns(), GetRows(), GetDOFs());
             for (int i = 0; i < GetDOFs(); i++)
-            {
-               for (int j = 0; j < GetRows(); j++)
-               {
-                  for (int k = 0; k < GetColumns(); k++)
-                  {
-                     (*result)(k, j, i) = (*this)(j, k, i);
-                  }
-               }
-            }
-            return std::unique_ptr<Rank3OperatorBase>(result);
+               (*this)(i) = s;
+            return *this;
          }
 
-         std::unique_ptr<Rank3OperatorBase> VectorDot(const mfem::Vector& rhs) const override
+         DenseRank3Operator& operator*=(double s) override
          {
-            assert(GetRows() == 1 || GetColumns() == 1);
-            auto result = new Rank3Operator(1, 1, GetDOFs());
-            (*result) = 0.0;
-            if (GetRows() == 1)
-            {
-               for (int i = 0; i < GetDOFs(); i++)
-                  for (int j = 0; j < GetColumns(); j++)
-                     (*result)(0, 0, i) += (*this)(0, j, i) * rhs(j);
-            }
-            else
-            {
-               assert(GetColumns() == 1);
-               for (int i = 0; i < GetDOFs(); i++)
-                  for (int j = 0; j < GetRows(); j++)
-                     (*result)(0, 0, i) += (*this)(j, 0, i) * rhs(j);
-            }
-            return std::unique_ptr<Rank3OperatorBase>(result);
+            for (int i = 0; i < GetDOFs(); i++)
+               (*this)(i) *= s;
+            return *this;
          }
 
-         std::unique_ptr<Rank3OperatorBase>
+         double& operator()(int row, int col, int dof)
+         {
+            return m_tensor(row, col, dof);
+         }
+
+         double operator()(int row, int col, int dof) const override
+         {
+            return m_tensor(row, col, dof);
+         }
+
+         std::unique_ptr<Rank3Operator> Trace() const override
+         {
+            assert(GetRows() == GetColumns());
+            auto result = new DenseRank3Operator(1, 1, GetDOFs());
+            for (int k = 0; k < GetDOFs(); k++)
+               (*result)(0, 0, k) = (*this)(k).Trace();
+            return std::unique_ptr<Rank3Operator>(result);
+         }
+
+         std::unique_ptr<Rank3Operator>
          MatrixDot(const mfem::DenseMatrix& rhs) const override
          {
             assert(GetRows() == rhs.NumRows());
             assert(GetColumns() == rhs.NumCols());
-            auto result = new Rank3Operator(1, 1, GetDOFs());
+            auto result = new DenseRank3Operator(1, 1, GetDOFs());
             for (int i = 0; i < GetDOFs(); i++)
                (*result)(0, 0, i) = (*this)(i) * rhs;
-            return std::unique_ptr<Rank3OperatorBase>(result);
+            return std::unique_ptr<Rank3Operator>(result);
          }
 
-         std::unique_ptr<Rank3OperatorBase> Trace() const override
-         {
-            assert(GetRows() == GetColumns());
-            auto result = new Rank3Operator(1, 1, GetDOFs());
-            for (int i = 0; i < GetDOFs(); i++)
-            {
-               (*result)(0, 0, i) = (*this)(i).Trace();
-            }
-            return std::unique_ptr<Rank3OperatorBase>(result);
-         }
-
-         std::unique_ptr<Rank3OperatorBase>
-         ScalarMatrixMult(const mfem::DenseMatrix& lhs) const override
-         {
-            assert(GetRows() == 1);
-            assert(GetColumns() == 1);
-            auto result = new Rank3Operator(lhs.NumRows(), lhs.NumCols(), GetDOFs());
-            for (int i = 0; i < GetDOFs(); i++)
-            {
-               (*result)(i) = lhs;
-               (*result)(i) *= (*this)(0, 0, i);
-            }
-            return std::unique_ptr<Rank3OperatorBase>(result);
-         }
-
-         std::unique_ptr<Rank3OperatorBase>
-         RightMatrixMult(const mfem::DenseMatrix& rhs) const override
-         {
-            assert(GetColumns() == rhs.NumRows());
-            auto result = new Rank3Operator(GetRows(), rhs.NumCols(), GetDOFs());
-            for (int i = 0; i < GetDOFs(); i++)
-               mfem::Mult((*this)(i), rhs, (*result)(i));
-            return std::unique_ptr<Rank3OperatorBase>(result);
-         }
-
-         std::unique_ptr<Rank3OperatorBase>
+         std::unique_ptr<Rank3Operator>
          LeftMatrixMult(const mfem::DenseMatrix& lhs) const override
          {
             assert(lhs.NumCols() == GetRows());
-            auto result = new Rank3Operator(lhs.NumRows(), GetColumns(), GetDOFs());
+            auto result = new DenseRank3Operator(lhs.NumRows(), GetColumns(), GetDOFs());
             for (int i = 0; i < GetDOFs(); i++)
                mfem::Mult(lhs, (*this)(i), (*result)(i));
-            return std::unique_ptr<Rank3OperatorBase>(result);
+            return std::unique_ptr<Rank3Operator>(result);
          }
 
-         mfem::DenseMatrix
-         OperatorDot(const Rank3OperatorBase& rhs) const override
+         std::unique_ptr<Rank3Operator>
+         RightMatrixMult(const mfem::DenseMatrix& rhs) const override
          {
-            assert(GetRows() == rhs.GetRows());
-            assert(GetColumns() == rhs.GetColumns());
-            mfem::DenseMatrix dot(GetDOFs(), rhs.GetDOFs());
+            assert(GetColumns() == rhs.NumRows());
+            auto result = new DenseRank3Operator(GetRows(), rhs.NumCols(), GetDOFs());
             for (int i = 0; i < GetDOFs(); i++)
-            {
-               for (int j = 0; j < rhs.GetDOFs(); j++)
-               {
-                  dot(i, j) = (*this)(i) * rhs(j);
-               }
-            }
-            return dot;
-         }
-
-         void AddToVector(int offset, mfem::Vector& vec) const override
-         {
-            const int n = m_tensor.SizeI() * m_tensor.SizeJ() * m_tensor.SizeK();
-            double* vdata = vec.GetData() + offset;
-            for (int i = 0; i < n; i++)
-               vdata[i] += m_tensor.Data()[i];
+               mfem::Mult((*this)(i), rhs, (*result)(i));
+            return std::unique_ptr<Rank3Operator>(result);
          }
       private:
          mfem::DenseTensor m_tensor;

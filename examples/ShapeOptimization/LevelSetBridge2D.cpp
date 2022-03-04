@@ -16,7 +16,9 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-mast2d-example.mesh";
+  const char* meshFile = "../resources/mfem/meshes/levelset-bridge2d-example.mesh";
+  // const char* meshFile = "rodin.mesh";
+  // const char* meshFile = "Omega.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -26,7 +28,7 @@ int main(int, char**)
       GammaD = 2,  // Homogenous Dirichlet
       GammaN = 3,  // Inhomogenous Neumann
       Gamma = 4,   // Shape boundary
-      GammaNA = 5; // Non-active border
+      GammaNA = 5;
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
@@ -49,11 +51,11 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 300;
+  size_t maxIt = 500;
   size_t activeBorderIt = 20;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(4);
+  auto ell = ScalarCoefficient(1.0);
   auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
@@ -67,7 +69,6 @@ int main(int, char**)
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior, Gamma);
-    trimmed.save("trimmed.mesh");
 
     // Build a finite element space over the trimmed mesh
     H1 VhInt(trimmed, d);

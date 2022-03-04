@@ -26,6 +26,7 @@
 #include "Variational/Dot.h"
 #include "Variational/IdentityMatrix.h"
 
+#include "Variational/Component.h"
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
 

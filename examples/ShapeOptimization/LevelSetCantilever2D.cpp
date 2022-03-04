@@ -73,7 +73,7 @@ int main(int, char**)
     Problem elasticity(uInt, vInt);
     elasticity = ElasticityIntegrator(lambda, mu)
                - BoundaryIntegral(VectorCoefficient{0, -1} * vInt).over(GammaN)
-               + DirichletBC(GammaD, VectorCoefficient{0, 0});
+               + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
 
     // Transfer solution back to original domain
@@ -95,7 +95,7 @@ int main(int, char**)
             + VectorMassIntegrator()
             - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
             - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
-            + DirichletBC(GammaN, VectorCoefficient{0, 0});
+            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
     g.getGridFunction().save("g.gf");

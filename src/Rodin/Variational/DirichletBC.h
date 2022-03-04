@@ -14,6 +14,8 @@
 
 #include "ForwardDecls.h"
 
+#include "Component.h"
+#include "ShapeFunction.h"
 #include "ScalarCoefficient.h"
 #include "VectorCoefficient.h"
 
@@ -40,32 +42,42 @@ namespace Rodin::Variational
    class DirichletBC
    {
       public:
-         DirichletBC(int bdrAtr, double v)
-            : DirichletBC(std::set<int>{bdrAtr}, ScalarCoefficient(v))
+         template <class T>
+         DirichletBC(const Component<TrialFunction<H1>>& u, T&& v)
+            : DirichletBC(u.getTrialFunction(), std::forward<T>(v))
+         {
+            m_componentIdx = u.getComponent();
+         }
+
+         DirichletBC(const TrialFunction<H1>& u, double v)
+            : DirichletBC(u, ScalarCoefficient(v))
          {}
 
-         DirichletBC(const std::set<int>& bdrAtr, double v)
-            : DirichletBC(bdrAtr, ScalarCoefficient(v))
+         DirichletBC(const TrialFunction<H1>& u, const ScalarCoefficientBase& v)
+            :  m_u(u),
+               m_value(std::unique_ptr<ScalarCoefficientBase>(v.copy()))
          {}
 
-         DirichletBC(int bdrAtr, const ScalarCoefficientBase& v)
-            : DirichletBC(std::set<int>{bdrAtr}, v)
+         DirichletBC(const TrialFunction<H1>& u, const VectorCoefficientBase& v)
+            :  m_u(u),
+               m_value(std::unique_ptr<VectorCoefficientBase>(v.copy()))
          {}
 
-         DirichletBC(const std::set<int>& bdrAtr, const ScalarCoefficientBase& v)
-            : m_essBdr(bdrAtr), m_value(std::unique_ptr<ScalarCoefficientBase>(v.copy()))
-         {}
+         DirichletBC& on(int bdrAtr)
+         {
+            return on(std::set<int>{bdrAtr});
+         }
 
-         DirichletBC(int bdrAtr, const VectorCoefficientBase& v)
-            : DirichletBC(std::set<int>{bdrAtr}, v)
-         {}
-
-         DirichletBC(const std::set<int>& bdrAtr, const VectorCoefficientBase& v)
-            : m_essBdr(bdrAtr), m_value(std::unique_ptr<VectorCoefficientBase>(v.copy()))
-         {}
+         DirichletBC& on(const std::set<int>& bdrAtr)
+         {
+            m_essBdr = bdrAtr;
+            return *this;
+         }
 
          DirichletBC(const DirichletBC& other)
-            : m_essBdr(other.m_essBdr)
+            :  m_u(other.m_u),
+               m_essBdr(other.m_essBdr),
+               m_componentIdx(other.m_componentIdx)
          {
                std::visit(Utility::Overloaded{
                   [this](const std::unique_ptr<ScalarCoefficientBase>& v)
@@ -76,8 +88,10 @@ namespace Rodin::Variational
          }
 
          DirichletBC(DirichletBC&& other)
-            : m_essBdr(std::move(other.m_essBdr)),
-              m_value(std::move(other.m_value))
+            :  m_u(other.m_u),
+               m_essBdr(std::move(other.m_essBdr)),
+               m_value(std::move(other.m_value)),
+               m_componentIdx(std::move(other.m_componentIdx))
          {}
 
          /**
@@ -87,6 +101,11 @@ namespace Rodin::Variational
          const std::set<int>& getBoundaryAttributes() const
          {
             return m_essBdr;
+         }
+
+         std::optional<int> getComponent() const
+         {
+            return m_componentIdx;
          }
 
          /**
@@ -105,10 +124,12 @@ namespace Rodin::Variational
             return new DirichletBC(*this);
          }
       private:
+         const TrialFunction<H1>& m_u;
          std::set<int> m_essBdr;
          std::variant<
             std::unique_ptr<ScalarCoefficientBase>,
             std::unique_ptr<VectorCoefficientBase>> m_value;
+         std::optional<int> m_componentIdx;
    };
 }
 

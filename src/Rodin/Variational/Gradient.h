@@ -10,6 +10,7 @@
 #include "ForwardDecls.h"
 
 #include "H1.h"
+#include "Jacobian.h"
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
@@ -100,26 +101,17 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
+         std::unique_ptr<Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
             int dofs = fe.GetDof();
             int sdim = trans.GetSpaceDim();
-            mfem::DenseMatrix gradphi;
-            gradphi.SetSize(dofs, sdim);
-            fe.CalcPhysDShape(trans, gradphi);
-            auto result =
-               new Internal::Rank3Operator(getRows(fe, trans), getColumns(fe, trans), getDOFs(fe, trans));
-            (*result) = 0.0;
-            for (int i = 0; i < dofs; i++)
-            {
-               for (int j = 0; j < sdim; j++)
-               {
-                  (*result)(j, 0, i) = gradphi(i, j);
-               }
-            }
-            return std::unique_ptr<Internal::Rank3OperatorBase>(result);
+            mfem::DenseMatrix dshape;
+            dshape.SetSize(dofs, sdim);
+            fe.CalcPhysDShape(trans, dshape);
+            return std::unique_ptr<Rank3Operator>(
+                  new Internal::JacobianShapeR3O(std::move(dshape), sdim, 1));
          }
 
          H1& getFiniteElementSpace() override

@@ -1,8 +1,9 @@
 #ifndef RODIN_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
-#include "ShapeFunction.h"
+#include "Component.h"
 #include "GridFunction.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
@@ -39,6 +40,12 @@ namespace Rodin::Variational
             assert(m_gf);
             return *m_gf;
          }
+
+         Component<TrialFunction<H1>> x() const;
+
+         Component<TrialFunction<H1>> y() const;
+
+         Component<TrialFunction<H1>> z() const;
 
          TrialFunction* copy() const noexcept override
          {

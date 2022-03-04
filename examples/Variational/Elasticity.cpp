@@ -37,9 +37,8 @@ int main(int argc, char** argv)
   // Define problem
   Problem elasticity(u, v);
   elasticity = ElasticityIntegrator(lambda, mu)
-             // - BoundaryIntegral(f * v).over(GammaN)
-             - Integral(f * v)
-             + DirichletBC(GammaD, VectorCoefficient{0, 0});
+             - BoundaryIntegral(f * v).over(GammaN)
+             + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
 
   // Solve problem
   Solver::CG().setMaxIterations(200)

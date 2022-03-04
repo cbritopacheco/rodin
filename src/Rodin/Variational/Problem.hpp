@@ -74,7 +74,8 @@ namespace Rodin::Variational
          }
 
          // Keep track of essential boundary attributes
-         getEssentialBoundary().insert(dbc.getBoundaryAttributes().begin(), dbc.getBoundaryAttributes().end());
+         getEssentialBoundary().insert(
+               dbc.getBoundaryAttributes().begin(), dbc.getBoundaryAttributes().end());
       }
    }
 

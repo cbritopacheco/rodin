@@ -63,7 +63,7 @@ int main(int, char**)
     Problem elasticity(u, v);
     elasticity = ElasticityIntegrator(lambda, mu)
                - BoundaryIntegral(VectorCoefficient{0, -1} * v).over(GammaN)
-               + DirichletBC(GammaD, VectorCoefficient{0, 0});
+               + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
     cg.solve(elasticity);
 
     u.getGridFunction().save("u.gf");
@@ -79,8 +79,8 @@ int main(int, char**)
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
             - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
-            + DirichletBC(GammaD, VectorCoefficient{0, 0})
-            + DirichletBC(GammaN, VectorCoefficient{0, 0});
+            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaD)
+            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     cg.solve(hilbert);
 
     // Update objective

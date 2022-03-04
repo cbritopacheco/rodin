@@ -7,9 +7,43 @@
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
+#include "H1.h"
+#include "GridFunction.h"
+#include "Rank3Operator.h"
+#include "ShapeFunction.h"
 #include "VectorCoefficient.h"
 #include "MatrixCoefficient.h"
-#include "GridFunction.h"
+
+namespace Rodin::Variational::Internal
+{
+   class JacobianShapeR3O : public Rank3Operator
+   {
+      public:
+         JacobianShapeR3O(mfem::DenseMatrix dshape, int sdim, int vdim)
+            : m_dshape(dshape),
+              m_sdim(sdim),
+              m_vdim(vdim)
+         {}
+
+         int GetRows() const override;
+
+         int GetColumns() const override;
+
+         int GetDOFs() const override;
+
+         JacobianShapeR3O& operator=(double s) override;
+
+         JacobianShapeR3O& operator*=(double s) override;
+
+         double operator()(int row, int col, int dof) const override;
+
+         std::unique_ptr<Rank3Operator> Trace() const override;
+
+      private:
+         mfem::DenseMatrix m_dshape;
+         int m_sdim, m_vdim;
+   };
+}
 
 namespace Rodin::Variational
 {
@@ -29,7 +63,8 @@ namespace Rodin::Variational
     * @f]
     * 
     */
-   class Jacobian : public MatrixCoefficientBase
+   template <>
+   class Jacobian<GridFunction<H1>> : public MatrixCoefficientBase
    {
       public:
          /**
@@ -37,19 +72,23 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         constexpr
          Jacobian(GridFunction<H1>& u)
             :  m_u(u)
          {}
 
-         constexpr
          Jacobian(const Jacobian& other)
             : m_u(other.m_u)
          {}
 
-         int getRows() const override;
+         int getRows() const override
+         {
+            return m_u.getFiniteElementSpace().getVectorDimension();
+         }
 
-         int getColumns() const override;
+         int getColumns() const override
+         {
+            return m_u.getFiniteElementSpace().getMesh().getDimension();
+         }
 
          void getValue(
                mfem::DenseMatrix& value,
@@ -66,6 +105,69 @@ namespace Rodin::Variational
       private:
          GridFunction<H1>& m_u;
    };
+   Jacobian(GridFunction<H1>&) -> Jacobian<GridFunction<H1>>;
+
+   template <ShapeFunctionSpaceType Space>
+   class Jacobian<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
+   {
+      public:
+         Jacobian(const ShapeFunction<H1, Space>& u)
+            : m_u(u)
+         {}
+
+         H1& getFiniteElementSpace() override
+         {
+            return m_u.getFiniteElementSpace();
+         }
+
+         const H1& getFiniteElementSpace() const override
+         {
+            return m_u.getFiniteElementSpace();
+         }
+
+         int getRows(
+               const mfem::FiniteElement&,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return trans.GetSpaceDim();
+         }
+
+         int getColumns(
+               const mfem::FiniteElement&,
+               const mfem::ElementTransformation&) const override
+         {
+            return m_u.getFiniteElementSpace().getVectorDimension();
+         }
+
+         int getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const
+         {
+            return m_u.getDOFs(fe, trans);
+         }
+
+         std::unique_ptr<Rank3Operator> getOperator(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans) const override
+         {
+            int dofs = fe.GetDof();
+            int sdim = trans.GetSpaceDim();
+            int vdim = m_u.getFiniteElementSpace().getVectorDimension();
+            mfem::DenseMatrix dshape;
+            dshape.SetSize(dofs, sdim);
+            return std::unique_ptr<Rank3Operator>(
+                  new Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim));
+         }
+
+         Jacobian* copy() const noexcept override
+         {
+            return new Jacobian(*this);
+         }
+      private:
+         const ShapeFunction<H1, Space>& m_u;
+   };
+   template <ShapeFunctionSpaceType Space>
+   Jacobian(ShapeFunction<H1, Space>&) -> Jacobian<ShapeFunction<H1, Space>>;
 }
 
 #endif

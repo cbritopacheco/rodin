@@ -3,6 +3,7 @@ set(RodinVariational_HEADERS
   BilinearFormIntegrator.h
   DirichletBC.h
   DomainLFIntegrator.h
+  EssentialBoundary.h
   VectorDomainLFDivIntegrator.h
   Dot.h
   ElasticityIntegrator.h
@@ -29,6 +30,7 @@ set(RodinVariational_HEADERS
   ScalarCoefficient.h
   Trace.h
   Transpose.h
+  Rank3Operator.h
   Restriction.h
   VectorBoundaryFluxLFIntegrator.h
   VectorCoefficient.h
@@ -41,6 +43,7 @@ set(RodinVariational_SRCS
   VectorDomainLFDivIntegrator.cpp
   DomainLFIntegrator.cpp
   ElasticityIntegrator.cpp
+  EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
   Gradient.cpp
@@ -60,6 +63,7 @@ set(RodinVariational_SRCS
   VectorDomainLFIntegrator.cpp
   ScalarCoefficient.cpp
   Restriction.cpp
+  Rank3Operator.cpp
   Multiplication.cpp
   BilinearForm.hpp
   Dot.cpp

@@ -7,8 +7,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // const char* meshFile = "../resources/mfem/meshes/poisson-example.mesh";
-  const char* meshFile = "rodin.mesh";
+  const char* meshFile = "../resources/mfem/meshes/poisson-example.mesh";
 
   // Define boundary attributes
   int Gamma = 1;
@@ -28,7 +27,7 @@ int main(int, char**)
   Problem poisson(u, v);
   poisson = Integral(Gradient(u) * Gradient(v))
           - Integral(f * v)
-          + DirichletBC(Gamma, g);
+          + DirichletBC(u, g).on(Gamma);
 
   // Solve problem
   Solver::CG().setMaxIterations(200)

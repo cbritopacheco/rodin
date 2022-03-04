@@ -48,6 +48,9 @@ namespace Rodin::Variational
    template <class FES>
    class TestFunction;
 
+   template <class T>
+   class Component;
+
    /**
     * @brief Where the integration takes place.
     */
@@ -110,6 +113,7 @@ namespace Rodin::Variational
    class MatrixCoefficient;
 
    // ---- Expressions -------------------------------------------------------
+   template <class T>
    class Jacobian;
 
    class Transpose;

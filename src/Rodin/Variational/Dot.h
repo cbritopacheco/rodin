@@ -24,66 +24,6 @@
 
 namespace Rodin::Variational
 {
-   // /**
-   //  * @brief Dot product between instances of Lhs and Rhs
-   //  * @tparam Lhs Left-hand side operand type
-   //  * @tparam Rhs Right-hand side operand type
-   //  */
-   // template <class Lhs, class Rhs>
-   // class Dot : public FormLanguage::Base
-   // {
-   //    static_assert(std::is_base_of_v<Base, Lhs>,
-   //          "Lhs must be derived from FormLanguage::Base");
-   //    static_assert(std::is_base_of_v<Base, Rhs>,
-   //          "Rhs must be derived from FormLanguage::Base");
-
-   //    public:
-   //       Dot(const Lhs& lhs, const Rhs& rhs)
-   //          : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-   //       {}
-
-   //       Dot(const Dot& other)
-   //          : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-   //       {}
-
-   //       Dot(Dot&&) = default;
-
-   //       virtual ~Dot() = default;
-
-   //       Lhs& getLHS()
-   //       {
-   //          assert(m_lhs);
-   //          return *m_lhs;
-   //       }
-
-   //       Rhs& getRHS()
-   //       {
-   //          assert(m_rhs);
-   //          return *m_rhs;
-   //       }
-
-   //       const Lhs& getLHS() const
-   //       {
-   //          assert(m_lhs);
-   //          return *m_lhs;
-   //       }
-
-   //       const Rhs& getRHS() const
-   //       {
-   //          assert(m_lhs);
-   //          return *m_rhs;
-   //       }
-
-   //       Dot* copy() const noexcept override
-   //       {
-   //          return new Dot(*this);
-   //       }
-
-   //    private:
-   //       std::unique_ptr<Lhs> m_lhs;
-   //       std::unique_ptr<Rhs> m_rhs;
-   // };
-
    /**
     * @brief Represents the dot product between two matrices.
     *
@@ -182,13 +122,12 @@ namespace Rodin::Variational
             return getRHS().getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
+         std::unique_ptr<Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
             assert(getRows(fe, trans) == 1);
             assert(getColumns(fe, trans) == 1);
-
             auto result = getRHS().getOperator(fe, trans);
             (*result) *= getLHS().getValue(trans, trans.GetIntPoint());
             return std::move(result);
@@ -285,7 +224,7 @@ namespace Rodin::Variational
             return 1;
          }
 
-         std::unique_ptr<Internal::Rank3OperatorBase> getOperator(
+         std::unique_ptr<Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
