@@ -122,7 +122,7 @@ namespace Rodin::Variational
    class Dot;
 
    template <class T>
-   class Gradient;
+   class Grad;
 
    class RestrictionBase;
 

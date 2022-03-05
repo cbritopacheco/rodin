@@ -34,15 +34,15 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Gradient<GridFunction<H1>> : public VectorCoefficientBase
+   class Grad<GridFunction<H1>> : public VectorCoefficientBase
    {
       public:
          /**
-          * @brief Constructs the Gradient of an @f$ H^1 @f$ function
+          * @brief Constructs the gradient of an @f$ H^1 @f$ function
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Gradient(const GridFunction<H1>& u)
+         Grad(const GridFunction<H1>& u)
             : m_u(u),
               m_mfemVectorCoefficient(&m_u.getHandle())
          {}
@@ -61,20 +61,20 @@ namespace Rodin::Variational
 
          VectorCoefficientBase* copy() const noexcept override
          {
-            return new Gradient(*this);
+            return new Grad(*this);
          }
 
       private:
          const GridFunction<H1>& m_u;
          mutable mfem::GradientGridFunctionCoefficient m_mfemVectorCoefficient;
    };
-   Gradient(const GridFunction<H1>&) -> Gradient<GridFunction<H1>>;
+   Grad(const GridFunction<H1>&) -> Grad<GridFunction<H1>>;
 
    template <ShapeFunctionSpaceType Space>
-   class Gradient<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
+   class Grad<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
    {
       public:
-         Gradient(ShapeFunction<H1, Space>& u)
+         Grad(ShapeFunction<H1, Space>& u)
             : m_u(u)
          {
             assert(m_u.getFiniteElementSpace().getVectorDimension() == 1);
@@ -124,15 +124,15 @@ namespace Rodin::Variational
             return m_u.getFiniteElementSpace();
          }
 
-         Gradient* copy() const noexcept override
+         Grad* copy() const noexcept override
          {
-            return new Gradient(*this);
+            return new Grad(*this);
          }
       private:
          ShapeFunction<H1, Space>& m_u;
    };
    template <ShapeFunctionSpaceType Space>
-   Gradient(ShapeFunction<H1, Space>&) -> Gradient<ShapeFunction<H1, Space>>;
+   Grad(ShapeFunction<H1, Space>&) -> Grad<ShapeFunction<H1, Space>>;
 }
 
 #endif

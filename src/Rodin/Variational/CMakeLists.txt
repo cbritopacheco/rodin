@@ -10,7 +10,7 @@ set(RodinVariational_HEADERS
   FiniteElementSpace.h
   FormLanguage.h
   ForwardDecls.h
-  Gradient.h
+  Grad.h
   GridFunction.h
   ShapeFunction.h
   TrialFunction.h
@@ -48,7 +48,7 @@ set(RodinVariational_SRCS
   EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
-  Gradient.cpp
+  Grad.cpp
   ShapeFunction.cpp
   GridFunctionIndex.cpp
   GridFunctionView.cpp

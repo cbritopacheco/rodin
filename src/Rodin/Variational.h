@@ -19,16 +19,24 @@
 #include "Variational/H1.h"
 #include "Variational/GridFunction.h"
 
-#include "Variational/Jacobian.h"
-#include "Variational/Gradient.h"
-#include "Variational/Transpose.h"
-#include "Variational/Trace.h"
 #include "Variational/Dot.h"
+#include "Variational/Sum.h"
+#include "Variational/Mult.h"
+#include "Variational/Grad.h"
+#include "Variational/Trace.h"
+#include "Variational/Jacobian.h"
+#include "Variational/Transpose.h"
+#include "Variational/UnaryMinus.h"
 #include "Variational/IdentityMatrix.h"
 
 #include "Variational/Component.h"
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
+
+#include "Variational/Restriction.h"
+#include "Variational/ScalarCoefficient.h"
+#include "Variational/VectorCoefficient.h"
+#include "Variational/MatrixCoefficient.h"
 
 #include "Variational/Integral.h"
 #include "Variational/BoundaryIntegral.h"
@@ -38,13 +46,6 @@
 #include "Variational/Problem.h"
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
-#include "Variational/Restriction.h"
-#include "Variational/ScalarCoefficient.h"
-#include "Variational/VectorCoefficient.h"
-#include "Variational/MatrixCoefficient.h"
-#include "Variational/Sum.h"
-#include "Variational/Mult.h"
-#include "Variational/UnaryMinus.h"
 
 #include "Variational/VectorDomainLFDivIntegrator.h"
 

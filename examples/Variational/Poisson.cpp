@@ -25,7 +25,7 @@ int main(int, char**)
   auto g = ScalarCoefficient(0.0);
 
   Problem poisson(u, v);
-  poisson = Integral(Dot(Gradient(u), Gradient(v)))
+  poisson = Integral(Dot(Grad(u), Grad(v)))
           - Integral(Dot(f, v))
           + DirichletBC(u, g).on(Gamma);
 

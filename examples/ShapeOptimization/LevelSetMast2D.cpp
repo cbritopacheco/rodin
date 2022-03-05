@@ -100,7 +100,7 @@ int main(int, char**)
     hilbert = VectorDiffusionIntegrator(alpha)
             + VectorMassIntegrator()
             - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
-            - VectorDomainLFIntegrator(Gradient(w)).over(Interior)
+            - VectorDomainLFIntegrator(Grad(w)).over(Interior)
             + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaN, GammaNA});
     solver.solve(hilbert);
 
