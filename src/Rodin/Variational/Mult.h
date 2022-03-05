@@ -198,12 +198,12 @@ namespace Rodin::Variational
    Mult(const MatrixCoefficientBase&, double)
       -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
 
-   template <class FEC>
-   Mult<ScalarCoefficientBase, GridFunction<FEC>>
-   operator*(const ScalarCoefficientBase& lhs, const GridFunction<FEC>& rhs)
-   {
-      return Mult(lhs, ScalarCoefficient(rhs));
-   }
+   // template <class FEC>
+   // Mult<ScalarCoefficientBase, GridFunction<FEC>>
+   // operator*(const ScalarCoefficientBase& lhs, const GridFunction<FEC>& rhs)
+   // {
+   //    return Mult(lhs, ScalarCoefficient(rhs));
+   // }
 }
 
 #endif

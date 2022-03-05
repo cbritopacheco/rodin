@@ -12,14 +12,13 @@
 
 #include "Rodin/Variational/ScalarCoefficient.h"
 #include "Rodin/Variational/MatrixCoefficient.h"
-
+#include "FormLanguage/Base.h"
 #include "ForwardDecls.h"
-#include "Base.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    template <class Lhs, class Rhs>
-   class Sum : public Base
+   class Sum : public FormLanguage::Base
    {
       static_assert(std::is_base_of_v<Base, Lhs>,
             "Lhs must be derived from FormLanguage::Base");

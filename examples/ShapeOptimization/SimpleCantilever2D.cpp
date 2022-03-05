@@ -15,7 +15,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/simple-cantilever-example.mesh";
+  const char* meshFile = "../resources/mfem/meshes/simple-cantilever2d-example.mesh";
 
   // Define boundary attributes
   int Gamma0 = 1, GammaD = 2, GammaN = 3;
@@ -62,7 +62,7 @@ int main(int, char**)
     TestFunction  v(Vh);
     Problem elasticity(u, v);
     elasticity = ElasticityIntegrator(lambda, mu)
-               - BoundaryIntegral(VectorCoefficient{0, -1} * v).over(GammaN)
+               - BoundaryIntegral(Dot(VectorCoefficient{0, -1}, v)).over(GammaN)
                + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
     cg.solve(elasticity);
 

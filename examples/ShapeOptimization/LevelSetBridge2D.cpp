@@ -17,8 +17,6 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/meshes/levelset-bridge2d-example.mesh";
-  // const char* meshFile = "rodin.mesh";
-  // const char* meshFile = "Omega.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -79,7 +77,7 @@ int main(int, char**)
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
     elasticity = ElasticityIntegrator(lambda, mu)
-               - BoundaryIntegral(f * vInt).over(GammaN)
+               - BoundaryIntegral(Dot(f, vInt)).over(GammaN)
                + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
 

@@ -152,14 +152,14 @@ namespace Rodin::Variational
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>
-   operator*(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
-   {
-      return Dot(lhs, rhs);
-   }
-   template <ShapeFunctionSpaceType Space>
    Dot(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
       -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   // template <ShapeFunctionSpaceType Space>
+   // Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+   // operator*(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+   // {
+   //    return Dot(lhs, rhs);
+   // }
 
    /**
     * @brief Dot product between VectorCoefficientBase and ShapeFunctionBase.
@@ -257,12 +257,12 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Dot(const VectorCoefficientBase&, const ShapeFunctionBase<Space>&)
       -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
-   template <ShapeFunctionSpaceType Space>
-   Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>
-   operator*(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
-   {
-      return Dot(lhs, rhs);
-   }
+   // template <ShapeFunctionSpaceType Space>
+   // Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>
+   // operator*(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+   // {
+   //    return Dot(lhs, rhs);
+   // }
 
    /**
     * @brief Dot product between instances of Lhs and Rhs
@@ -331,8 +331,8 @@ namespace Rodin::Variational
    };
    Dot(const ShapeFunctionBase<Trial>&, const ShapeFunctionBase<Test>&)
       -> Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
-   Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
-   operator*(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs);
+   // Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
+   // operator*(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs);
 }
 
 #endif

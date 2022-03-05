@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_H
 
-#include "FormLanguage/Sum.h"
-#include "FormLanguage/UnaryMinus.h"
 #include "FormLanguage/ProblemBody.h"
 
 // TODO: LinearFormIntegratorSum and BilinearFormIntegratorSum are just lists

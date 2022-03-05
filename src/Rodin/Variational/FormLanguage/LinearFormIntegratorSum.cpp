@@ -6,7 +6,7 @@
  */
 #include "Rodin/Alert.h"
 
-#include "UnaryMinus.h"
+#include "../UnaryMinus.h"
 
 #include "LinearFormIntegratorSum.h"
 

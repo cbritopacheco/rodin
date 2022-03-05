@@ -6,7 +6,7 @@
  */
 #include "Sum.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    double
    Sum<ScalarCoefficientBase, ScalarCoefficientBase>

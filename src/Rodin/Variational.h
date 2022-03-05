@@ -42,7 +42,9 @@
 #include "Variational/ScalarCoefficient.h"
 #include "Variational/VectorCoefficient.h"
 #include "Variational/MatrixCoefficient.h"
-#include "Variational/Multiplication.h"
+#include "Variational/Sum.h"
+#include "Variational/Mult.h"
+#include "Variational/UnaryMinus.h"
 
 #include "Variational/VectorDomainLFDivIntegrator.h"
 

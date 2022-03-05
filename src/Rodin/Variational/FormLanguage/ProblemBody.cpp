@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Variational/Component.h"
-#include "UnaryMinus.h"
+#include "../UnaryMinus.h"
 
 #include "ProblemBody.h"
 

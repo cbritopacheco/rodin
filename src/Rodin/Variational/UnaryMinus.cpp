@@ -2,7 +2,7 @@
 
 #include "UnaryMinus.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    double
    UnaryMinus<ScalarCoefficientBase>
@@ -49,8 +49,8 @@ namespace Rodin::Variational::FormLanguage
       return UnaryMinus(op);
    }
 
-   UnaryMinus<LinearFormIntegratorSum>
-   operator-(const LinearFormIntegratorSum& op)
+   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
+   operator-(const FormLanguage::LinearFormIntegratorSum& op)
    {
       return UnaryMinus(op);
    }
@@ -60,7 +60,8 @@ namespace Rodin::Variational::FormLanguage
       return UnaryMinus(op);
    }
 
-   UnaryMinus<BilinearFormIntegratorSum> operator-(const BilinearFormIntegratorSum& op)
+   UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
+         const FormLanguage::BilinearFormIntegratorSum& op)
    {
       return UnaryMinus(op);
    }

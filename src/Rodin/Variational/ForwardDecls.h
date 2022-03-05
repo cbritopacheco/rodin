@@ -132,6 +132,12 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class Mult;
 
+   template <class Lhs, class Rhs>
+   class Sum;
+
+   template <class Operand>
+   class UnaryMinus;
+
    namespace Internal
    {
       class ScalarCoefficient;

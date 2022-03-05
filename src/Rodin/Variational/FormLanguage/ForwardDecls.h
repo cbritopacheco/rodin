@@ -24,12 +24,6 @@ namespace Rodin::Variational::FormLanguage
    class BilinearFormIntegratorUnaryMinus;
 
    class LinearFormIntegratorSum;
-
-   template <class Lhs, class Rhs>
-   class Sum;
-
-   template <class Operand>
-   class UnaryMinus;
 }
 
 #endif

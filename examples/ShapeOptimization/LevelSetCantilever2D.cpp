@@ -72,7 +72,7 @@ int main(int, char**)
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
     elasticity = ElasticityIntegrator(lambda, mu)
-               - BoundaryIntegral(VectorCoefficient{0, -1} * vInt).over(GammaN)
+               - BoundaryIntegral(Dot(VectorCoefficient{0, -1}, vInt)).over(GammaN)
                + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
 

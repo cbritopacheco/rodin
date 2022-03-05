@@ -21,7 +21,9 @@ set(RodinVariational_HEADERS
   IdentityMatrix.h
   Integral.h
   BoundaryIntegral.h
-  Multiplication.h
+  Sum.h
+  UnaryMinus.h
+  Mult.h
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
@@ -64,7 +66,9 @@ set(RodinVariational_SRCS
   ScalarCoefficient.cpp
   Restriction.cpp
   Rank3Operator.cpp
-  Multiplication.cpp
+  Sum.cpp
+  UnaryMinus.cpp
+  Mult.cpp
   BilinearForm.hpp
   Dot.cpp
   LinearForm.hpp

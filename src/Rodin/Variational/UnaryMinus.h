@@ -13,16 +13,16 @@
 #include "Rodin/Variational/ScalarCoefficient.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 
-#include "LinearFormIntegratorSum.h"
-#include "BilinearFormIntegratorSum.h"
+#include "FormLanguage/LinearFormIntegratorSum.h"
+#include "FormLanguage/BilinearFormIntegratorSum.h"
+#include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-#include "Base.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    template <class Operand>
-   class UnaryMinus : public Base
+   class UnaryMinus : public FormLanguage::Base
    {
       static_assert(std::is_base_of_v<Base, Operand>,
             "Operand must be derived from FormLanguage::Base");
@@ -154,8 +154,8 @@ namespace Rodin::Variational::FormLanguage
    };
 
    template <>
-   class UnaryMinus<LinearFormIntegratorSum>
-      : public LinearFormIntegratorSum
+   class UnaryMinus<FormLanguage::LinearFormIntegratorSum>
+      : public FormLanguage::LinearFormIntegratorSum
    {
       public:
          UnaryMinus(const LinearFormIntegratorSum& op)
@@ -233,8 +233,8 @@ namespace Rodin::Variational::FormLanguage
    };
 
    template <>
-   class UnaryMinus<BilinearFormIntegratorSum>
-      : public BilinearFormIntegratorSum
+   class UnaryMinus<FormLanguage::BilinearFormIntegratorSum>
+      : public FormLanguage::BilinearFormIntegratorSum
    {
       public:
          UnaryMinus(const BilinearFormIntegratorSum& op)
@@ -267,12 +267,13 @@ namespace Rodin::Variational::FormLanguage
    UnaryMinus<LinearFormIntegratorBase>
    operator-(const LinearFormIntegratorBase& lfi);
 
-   UnaryMinus<LinearFormIntegratorSum>
-   operator-(const LinearFormIntegratorSum& lfi);
+   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
+   operator-(const FormLanguage::LinearFormIntegratorSum& lfi);
 
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op);
 
-   UnaryMinus<BilinearFormIntegratorSum> operator-(const BilinearFormIntegratorSum& op);
+   UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
+         const FormLanguage::BilinearFormIntegratorSum& op);
 }
 
 #endif
