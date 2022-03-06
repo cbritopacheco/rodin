@@ -21,6 +21,7 @@
 #include "Rodin/Variational/TrialFunction.h"
 #include "FormLanguage/Base.h"
 #include "ForwardDecls.h"
+#include "Mult.h"
 
 namespace Rodin::Variational
 {
@@ -67,6 +68,10 @@ namespace Rodin::Variational
       : public ShapeFunctionBase<Space>
    {
       public:
+         Dot(const ShapeFunctionBase<Space>& lhs, const ScalarCoefficientBase& rhs)
+            : Dot(rhs, lhs)
+         {}
+
          Dot(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
@@ -130,7 +135,7 @@ namespace Rodin::Variational
             assert(getColumns(fe, trans) == 1);
             auto result = getRHS().getOperator(fe, trans);
             (*result) *= getLHS().getValue(trans, trans.GetIntPoint());
-            return std::move(result);
+            return result;
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -154,6 +159,9 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Dot(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
       -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   template <ShapeFunctionSpaceType Space>
+   Dot(const ShapeFunctionBase<Space>&, const ScalarCoefficientBase&)
+      -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
    // template <ShapeFunctionSpaceType Space>
    // Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>
    // operator*(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
@@ -169,6 +177,10 @@ namespace Rodin::Variational
       : public ShapeFunctionBase<Space>
    {
       public:
+         Dot(const ShapeFunctionBase<Space>& lhs, const VectorCoefficientBase& rhs)
+            : Dot(rhs, lhs)
+         {}
+
          Dot(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
@@ -257,6 +269,9 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Dot(const VectorCoefficientBase&, const ShapeFunctionBase<Space>&)
       -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
+   template <ShapeFunctionSpaceType Space>
+   Dot(const ShapeFunctionBase<Space>&, const VectorCoefficientBase&)
+      -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
    // template <ShapeFunctionSpaceType Space>
    // Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>
    // operator*(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
@@ -282,7 +297,9 @@ namespace Rodin::Variational
             : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
-         Dot(Dot&&) = default;
+         Dot(Dot&& other)
+            : m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+         {}
 
          ShapeFunctionBase<Trial>& getLHS()
          {
@@ -316,8 +333,8 @@ namespace Rodin::Variational
             auto& test  = getRHS();
             assert(trial.getRows(trialElement, trans) == test.getRows(testElement, trans));
             assert(trial.getColumns(trialElement, trans) == test.getColumns(testElement, trans));
-            return test.getOperator(trialElement, trans)->OperatorDot(
-                     *trial.getOperator(testElement, trans));
+            return test.getOperator(testElement, trans)->OperatorDot(
+                     *trial.getOperator(trialElement, trans));
          }
 
          Dot* copy() const noexcept override

@@ -25,6 +25,18 @@ namespace Rodin::Variational::Internal
               m_vdim(vdim)
          {}
 
+         JacobianShapeR3O(const JacobianShapeR3O& other)
+            : m_dshape(other.m_dshape),
+              m_sdim(other.m_sdim),
+              m_vdim(other.m_vdim)
+         {}
+
+         JacobianShapeR3O(JacobianShapeR3O&& other)
+            : m_dshape(std::move(other.m_dshape)),
+              m_sdim(other.m_sdim),
+              m_vdim(other.m_vdim)
+         {}
+
          int GetRows() const override;
 
          int GetColumns() const override;
@@ -82,17 +94,17 @@ namespace Rodin::Variational
 
          int getRows() const override
          {
-            return m_u.getFiniteElementSpace().getVectorDimension();
+            return m_u.getFiniteElementSpace().getMesh().getDimension();
          }
 
          int getColumns() const override
          {
-            return m_u.getFiniteElementSpace().getMesh().getDimension();
+            return m_u.getFiniteElementSpace().getVectorDimension();
          }
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint&) override
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint&) const override
          {
             m_u.getHandle().GetVectorGradient(trans, value);
          }
@@ -111,7 +123,7 @@ namespace Rodin::Variational
    class Jacobian<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
    {
       public:
-         Jacobian(const ShapeFunction<H1, Space>& u)
+         Jacobian(ShapeFunction<H1, Space>& u)
             : m_u(u)
          {}
 
@@ -155,6 +167,7 @@ namespace Rodin::Variational
             int vdim = m_u.getFiniteElementSpace().getVectorDimension();
             mfem::DenseMatrix dshape;
             dshape.SetSize(dofs, sdim);
+            fe.CalcPhysDShape(trans, dshape);
             return std::unique_ptr<Rank3Operator>(
                   new Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim));
          }
@@ -164,7 +177,7 @@ namespace Rodin::Variational
             return new Jacobian(*this);
          }
       private:
-         const ShapeFunction<H1, Space>& m_u;
+         ShapeFunction<H1, Space>& m_u;
    };
    template <ShapeFunctionSpaceType Space>
    Jacobian(ShapeFunction<H1, Space>&) -> Jacobian<ShapeFunction<H1, Space>>;

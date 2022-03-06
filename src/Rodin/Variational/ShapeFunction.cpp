@@ -27,7 +27,7 @@ namespace Rodin::Variational::Internal
       assert(0 <= row && row < GetRows());
       assert(col == 0);
       assert(0 <= dof && dof < GetDOFs());
-      return (std::floor(dof / m_shape.Size()) == row) * m_shape(dof % m_shape.Size());
+      return (static_cast<int>(dof / m_shape.Size()) == row) * m_shape(dof % m_shape.Size());
    }
 
    ScalarShapeR3O&

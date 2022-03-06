@@ -17,6 +17,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Core.h"
+#include "Rodin/Alert.h"
 #include "Rodin/Mesh/SubMesh.h"
 
 #include "ForwardDecls.h"
@@ -284,7 +285,7 @@ namespace Rodin::Variational
          GridFunction& project(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
-            std::unique_ptr<Internal::ScalarCoefficient> iv = s.build();
+            auto iv = s.build();
 
             if (attrs.size() == 0)
                getHandle().ProjectCoefficient(*iv);
@@ -308,7 +309,7 @@ namespace Rodin::Variational
          GridFunction& project(const VectorCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == s.getDimension());
-            std::unique_ptr<Internal::VectorCoefficient> iv = s.build();
+            auto iv = s.build();
 
             if (attrs.size() == 0)
                getHandle().ProjectCoefficient(*iv);
@@ -332,7 +333,7 @@ namespace Rodin::Variational
          GridFunction& projectOnBoundary(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
-            std::unique_ptr<Internal::ScalarCoefficient> iv = s.build();
+            auto iv = s.build();
             int maxBdrAttr = getFiniteElementSpace()
                             .getMesh()
                             .getHandle().bdr_attributes.Max();
@@ -358,7 +359,7 @@ namespace Rodin::Variational
          GridFunction& projectOnBoundary(const VectorCoefficientBase& v, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == v.getDimension());
-            std::unique_ptr<Internal::VectorCoefficient> iv = v.build();
+            auto iv = v.build();
             int maxBdrAttr = getFiniteElementSpace()
                             .getMesh()
                             .getHandle().bdr_attributes.Max();
@@ -390,7 +391,7 @@ namespace Rodin::Variational
          GridFunction& project(const Restriction<ScalarCoefficientBase>& s)
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
-            std::unique_ptr<Internal::ScalarCoefficient> iv = s.getScalarCoefficient().build();
+            auto iv = s.getScalarCoefficient().build();
             getHandle() = NAN;
             mfem::Array<int> vdofs;
             mfem::Vector vals;

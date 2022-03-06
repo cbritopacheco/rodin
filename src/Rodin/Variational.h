@@ -15,39 +15,44 @@
 #include "Variational/ForwardDecls.h"
 
 // ---- Finite elements ------------------------------------------------------
-#include "Variational/FiniteElementSpace.h"
 #include "Variational/H1.h"
 #include "Variational/GridFunction.h"
+#include "Variational/FiniteElementSpace.h"
+
+#include "Variational/TrialFunction.h"
+#include "Variational/TestFunction.h"
+
+#include "Variational/Component.h"
+#include "Variational/Restriction.h"
+
+#include "Variational/LinearForm.h"
+#include "Variational/BilinearForm.h"
+
+// ---- FormLanguage ---------------------------------------------------------
+#include "Variational/FormLanguage.h"
 
 #include "Variational/Dot.h"
 #include "Variational/Sum.h"
 #include "Variational/Mult.h"
-#include "Variational/Grad.h"
-#include "Variational/Trace.h"
-#include "Variational/Jacobian.h"
-#include "Variational/Transpose.h"
 #include "Variational/UnaryMinus.h"
+
+#include "Variational/Div.h"
+#include "Variational/Grad.h"
+#include "Variational/Normal.h"
+#include "Variational/Jacobian.h"
+
+#include "Variational/Trace.h"
+#include "Variational/Transpose.h"
 #include "Variational/IdentityMatrix.h"
-
-#include "Variational/Component.h"
-#include "Variational/TrialFunction.h"
-#include "Variational/TestFunction.h"
-
-#include "Variational/Restriction.h"
-#include "Variational/ScalarCoefficient.h"
-#include "Variational/VectorCoefficient.h"
-#include "Variational/MatrixCoefficient.h"
 
 #include "Variational/Integral.h"
 #include "Variational/BoundaryIntegral.h"
 
-// ---- FormLanguage ---------------------------------------------------------
-#include "Variational/FormLanguage.h"
 #include "Variational/Problem.h"
-#include "Variational/LinearForm.h"
-#include "Variational/BilinearForm.h"
 
-#include "Variational/VectorDomainLFDivIntegrator.h"
+#include "Variational/ScalarCoefficient.h"
+#include "Variational/VectorCoefficient.h"
+#include "Variational/MatrixCoefficient.h"
 
 // ---- Bilinear form integrators --------------------------------------------
 #include "Variational/VectorMassIntegrator.h"
@@ -56,9 +61,9 @@
 #include "Variational/DiffusionIntegrator.h"
 
 // ---- Linear form integrators ----------------------------------------------
-#include "Variational/DomainLFIntegrator.h"
 #include "Variational/VectorDomainLFIntegrator.h"
 #include "Variational/VectorBoundaryFluxLFIntegrator.h"
+#include "Variational/VectorDomainLFDivIntegrator.h"
 
 // ---- Boundary conditions --------------------------------------------------
 #include "Variational/DirichletBC.h"

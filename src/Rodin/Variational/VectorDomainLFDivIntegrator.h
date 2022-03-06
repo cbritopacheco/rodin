@@ -3,6 +3,7 @@
 
 #include "ForwardDecls.h"
 
+#include "ScalarCoefficient.h"
 #include "LinearFormIntegrator.h"
 
 namespace Rodin::Variational
@@ -59,9 +60,18 @@ namespace Rodin::Variational
       : public LinearFormDomainIntegrator
    {
       public:
-         VectorDomainLFDivIntegrator(const ScalarCoefficientBase& f);
+         VectorDomainLFDivIntegrator(const ScalarCoefficientBase& f)
+            : m_f(f.copy()),
+              m_mfemScalar(m_f->build()),
+              m_mfemLFI(*m_mfemScalar)
+         {}
 
-         VectorDomainLFDivIntegrator(const VectorDomainLFDivIntegrator& other);
+         VectorDomainLFDivIntegrator(const VectorDomainLFDivIntegrator& other)
+            :  LinearFormDomainIntegrator(other),
+               m_f(other.m_f->copy()),
+               m_mfemScalar(m_f->build()),
+               m_mfemLFI(*m_mfemScalar)
+         {}
 
          void getElementVector(
                   const mfem::FiniteElement& el,
@@ -77,7 +87,7 @@ namespace Rodin::Variational
          }
       private:
          std::unique_ptr<ScalarCoefficientBase> m_f;
-         std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
+         std::unique_ptr<mfem::Coefficient> m_mfemScalar;
          Internal::VectorDomainLFDivIntegrator m_mfemLFI;
    };
 }

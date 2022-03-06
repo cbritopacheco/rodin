@@ -175,7 +175,7 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             getRHS().getValue(value, trans, ip);
             value *= getLHS().getValue(trans, ip);
@@ -204,6 +204,98 @@ namespace Rodin::Variational
    // {
    //    return Mult(lhs, ScalarCoefficient(rhs));
    // }
+
+
+   template <ShapeFunctionSpaceType Space>
+   class Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+      : public ShapeFunctionBase<Space>
+   {
+      public:
+         Mult(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+         {}
+
+         Mult(const Mult& other)
+            :  ShapeFunctionBase<Space>(other),
+               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+         {}
+
+         Mult(Mult&& other)
+            :  ShapeFunctionBase<Space>(std::move(other)),
+               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+         {}
+
+         ScalarCoefficientBase& getLHS()
+         {
+            return *m_lhs;
+         }
+
+         ShapeFunctionBase<Space>& getRHS()
+         {
+            return *m_rhs;
+         }
+
+         const ScalarCoefficientBase& getLHS() const
+         {
+            return *m_lhs;
+         }
+
+         const ShapeFunctionBase<Space>& getRHS() const
+         {
+            return *m_rhs;
+         }
+
+         int getRows(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return getRHS().getRows(fe, trans);
+         }
+
+         int getColumns(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return getRHS().getColumns(fe, trans);
+         }
+
+         int getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const
+         {
+            return getRHS().getDOFs(fe, trans);
+         }
+
+         std::unique_ptr<Rank3Operator> getOperator(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans) const override
+         {
+            auto result = getRHS().getOperator(fe, trans);
+            (*result) *= getLHS().getValue(trans, trans.GetIntPoint());
+            return result;
+         }
+
+         FiniteElementSpaceBase& getFiniteElementSpace() override
+         {
+            return getRHS().getFiniteElementSpace();
+         }
+
+         const FiniteElementSpaceBase& getFiniteElementSpace() const override
+         {
+            return getRHS().getFiniteElementSpace();
+         }
+
+         Mult* copy() const noexcept override
+         {
+            return new Mult(*this);
+         }
+      private:
+         std::unique_ptr<ScalarCoefficientBase> m_lhs;
+         std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
+   };
+   template <ShapeFunctionSpaceType Space>
+   Mult(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
+      -> Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
 }
 
 #endif

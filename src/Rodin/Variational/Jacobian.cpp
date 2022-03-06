@@ -23,7 +23,8 @@ namespace Rodin::Variational::Internal
       assert(0 <= row && row < GetRows());
       assert(0 <= col && col < GetColumns());
       assert(0 <= dof && dof < GetDOFs());
-      return (std::floor(dof / m_dshape.NumRows()) == col) * m_dshape(dof % m_dshape.NumRows(), row);
+      return (static_cast<int>(dof / m_dshape.NumRows()) == col
+            ) * m_dshape(dof % m_dshape.NumRows(), row);
    }
 
    JacobianShapeR3O& JacobianShapeR3O::operator*=(double s)

@@ -15,24 +15,8 @@
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      class MatrixCoefficient : public mfem::MatrixCoefficient
-      {
-         public:
-            MatrixCoefficient(const MatrixCoefficientBase& mat);
-
-            void Eval(
-                  mfem::DenseMatrix& value,
-                  mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
-
-         private:
-            std::unique_ptr<MatrixCoefficientBase> m_mat;
-      };
-   }
-
    class MatrixCoefficientBase
-      : public FormLanguage::Buildable<Internal::MatrixCoefficient>
+      : public FormLanguage::Buildable<mfem::MatrixCoefficient>
    {
       public:
          constexpr
@@ -54,31 +38,46 @@ namespace Rodin::Variational
             return m_traceDomain;
          }
 
-         virtual void getValueOnInteriorBoundary(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip);
-
-         virtual void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) = 0;
+         std::unique_ptr<mfem::MatrixCoefficient> build() const override;
 
          virtual ~MatrixCoefficientBase() = default;
 
          virtual Transpose T() const;
 
-         std::unique_ptr<Internal::MatrixCoefficient> build() const override
-         {
-            return std::make_unique<Internal::MatrixCoefficient>(*this);
-         }
-
          virtual int getRows() const = 0;
 
          virtual int getColumns() const = 0;
+
+         virtual void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
          virtual MatrixCoefficientBase* copy() const noexcept override = 0;
 
       private:
          std::optional<int> m_traceDomain;
+   };
+}
+
+namespace Rodin::Variational::Internal
+{
+   class ProxyMatrixCoefficient : public mfem::MatrixCoefficient
+   {
+      public:
+         ProxyMatrixCoefficient(const MatrixCoefficientBase& mat)
+            :  mfem::MatrixCoefficient(mat.getRows(), mat.getColumns()),
+               m_mat(mat)
+         {}
+
+         void Eval(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         {
+            m_mat.getValue(value, trans, ip);
+         }
+
+      private:
+         const MatrixCoefficientBase& m_mat;
    };
 }
 

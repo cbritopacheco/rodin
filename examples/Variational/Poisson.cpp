@@ -26,7 +26,7 @@ int main(int, char**)
 
   Problem poisson(u, v);
   poisson = Integral(Dot(Grad(u), Grad(v)))
-          - Integral(Dot(f, v))
+          - Integral(Mult(f, v))
           + DirichletBC(u, g).on(Gamma);
 
   // Solve problem

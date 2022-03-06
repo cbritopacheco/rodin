@@ -113,37 +113,33 @@ namespace Rodin::Variational
    class MatrixCoefficient;
 
    // ---- Expressions -------------------------------------------------------
-   template <class T>
-   class Jacobian;
-
    class Transpose;
-
-   template <class Lhs, class Rhs>
-   class Dot;
 
    template <class T>
    class Grad;
+
+   template <class T>
+   class Div;
+
+   template <class T>
+   class Jacobian;
 
    class RestrictionBase;
 
    template <class T>
    class Restriction;
 
-   template <class Lhs, class Rhs>
-   class Mult;
+   template <class Operand>
+   class UnaryMinus;
 
    template <class Lhs, class Rhs>
    class Sum;
 
-   template <class Operand>
-   class UnaryMinus;
+   template <class Lhs, class Rhs>
+   class Mult;
 
-   namespace Internal
-   {
-      class ScalarCoefficient;
-      class VectorCoefficient;
-      class MatrixCoefficient;
-   }
+   template <class Lhs, class Rhs>
+   class Dot;
 }
 
 #endif

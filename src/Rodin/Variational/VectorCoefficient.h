@@ -14,32 +14,19 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
+
+#include "Rodin/Alert.h"
 #include "FormLanguage/Base.h"
 
 #include "ScalarCoefficient.h"
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      class VectorCoefficient : public mfem::VectorCoefficient
-      {
-         public:
-            VectorCoefficient(const VectorCoefficientBase& v);
-
-            void Eval(mfem::Vector& value, mfem::ElementTransformation& trans,
-                  const mfem::IntegrationPoint& ip) override;
-
-         private:
-            std::unique_ptr<VectorCoefficientBase> m_v;
-      };
-   }
-
    /**
     * @brief Abstract base class for objects representing vector coefficients.
     */
    class VectorCoefficientBase
-      : public FormLanguage::Buildable<Internal::VectorCoefficient>
+      : public FormLanguage::Buildable<mfem::VectorCoefficient>
    {
       public:
          constexpr
@@ -63,9 +50,7 @@ namespace Rodin::Variational
             return m_traceDomain;
          }
 
-         virtual void getValueOnInteriorBoundary(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
+         std::unique_ptr<mfem::VectorCoefficient> build() const override;
 
          virtual void getValue(
                mfem::Vector& value,
@@ -76,11 +61,6 @@ namespace Rodin::Variational
           * @returns Dimension of vector.
           */
          virtual size_t getDimension() const = 0;
-
-         std::unique_ptr<Internal::VectorCoefficient> build() const override
-         {
-            return std::make_unique<Internal::VectorCoefficient>(*this);
-         }
 
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
 
@@ -151,11 +131,16 @@ namespace Rodin::Variational
       private:
          template<std::size_t I = 0, class ... Tp>
          typename std::enable_if_t<I == sizeof...(Tp)>
-         makeCoefficientsFromTuple(const std::tuple<Tp...>&);
+         makeCoefficientsFromTuple(const std::tuple<Tp...>&)
+         {}
 
          template<std::size_t I = 0, class ... Tp>
          typename std::enable_if_t<I < sizeof...(Tp)>
-         makeCoefficientsFromTuple(const std::tuple<Tp...>& t);
+         makeCoefficientsFromTuple(const std::tuple<Tp...>& t)
+         {
+            m_mfemCoefficients.emplace_back(new ScalarCoefficient(std::get<I>(t)));
+            makeCoefficientsFromTuple<I + 1, Tp...>(t);
+         }
 
          const size_t m_dimension;
          std::tuple<Values...> m_values;
@@ -179,16 +164,25 @@ namespace Rodin::Variational
    {
       public:
          /**
-          * @brief Constructs a VectorCoefficient from a vector valued grid
-          * function.
+          * @brief Constructs a VectorCoefficient from a vector valued GridFunction.
           */
          constexpr
-         VectorCoefficient(GridFunction<FEC>& u);
+         VectorCoefficient(GridFunction<FEC>& u)
+            :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
+               m_u(u),
+               m_mfemVectorCoefficient(&u.getHandle())
+         {}
 
          constexpr
-         VectorCoefficient(const VectorCoefficient& other);
+         VectorCoefficient(const VectorCoefficient& other)
+            :  m_dimension(other.m_dimension),
+               m_u(other.m_u)
+         {}
 
-         size_t getDimension() const override;
+         size_t getDimension() const override
+         {
+            return m_dimension;
+         }
 
          VectorCoefficient* copy() const noexcept override
          {
@@ -206,6 +200,25 @@ namespace Rodin::Variational
       -> VectorCoefficient<GridFunction<FEC>>;
 }
 
-#include "VectorCoefficient.hpp"
+namespace Rodin::Variational::Internal
+{
+   class ProxyVectorCoefficient : public mfem::VectorCoefficient
+   {
+      public:
+         ProxyVectorCoefficient(const VectorCoefficientBase& v)
+            :  mfem::VectorCoefficient(v.getDimension()),
+               m_v(v)
+         {}
+
+         void Eval(mfem::Vector& value, mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) override
+         {
+            m_v.getValue(value, trans, ip);
+         }
+
+      private:
+         const VectorCoefficientBase& m_v;
+   };
+}
 
 #endif

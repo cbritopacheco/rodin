@@ -55,7 +55,7 @@ namespace Rodin::Variational
       private:
          std::unique_ptr<ScalarCoefficientBase> m_f;
 
-         std::unique_ptr<Internal::ScalarCoefficient> m_mfemScalar;
+         std::unique_ptr<mfem::Coefficient> m_mfemScalar;
          mfem::VectorBoundaryFluxLFIntegrator m_mfemLFI;
    };
 

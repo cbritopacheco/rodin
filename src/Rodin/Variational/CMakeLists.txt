@@ -2,7 +2,6 @@ set(RodinVariational_HEADERS
   BilinearForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
-  DomainLFIntegrator.h
   EssentialBoundary.h
   VectorDomainLFDivIntegrator.h
   Dot.h
@@ -38,13 +37,9 @@ set(RodinVariational_HEADERS
   VectorCoefficient.h
   VectorMassIntegrator.h
   VectorDiffusionIntegrator.h
-  VectorDomainLFIntegrator.h
   )
 
 set(RodinVariational_SRCS
-  VectorDomainLFDivIntegrator.cpp
-  DomainLFIntegrator.cpp
-  ElasticityIntegrator.cpp
   EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
@@ -52,7 +47,6 @@ set(RodinVariational_SRCS
   ShapeFunction.cpp
   GridFunctionIndex.cpp
   GridFunctionView.cpp
-  IdentityMatrix.cpp
   Integral.cpp
   Jacobian.cpp
   MatrixCoefficient.cpp
@@ -62,7 +56,6 @@ set(RodinVariational_SRCS
   VectorCoefficient.cpp
   VectorMassIntegrator.cpp
   VectorDiffusionIntegrator.cpp
-  VectorDomainLFIntegrator.cpp
   ScalarCoefficient.cpp
   Restriction.cpp
   Rank3Operator.cpp
@@ -73,8 +66,6 @@ set(RodinVariational_SRCS
   Dot.cpp
   LinearForm.hpp
   Problem.hpp
-  ScalarCoefficient.hpp
-  VectorCoefficient.hpp
   )
 
 add_library(RodinVariational

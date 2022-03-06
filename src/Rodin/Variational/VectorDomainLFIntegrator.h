@@ -8,7 +8,7 @@
 #define RODIN_VARIATIONAL_VECTORDOMAINLFINTEGRATOR_H
 
 #include "ForwardDecls.h"
-#include "ScalarCoefficient.h"
+#include "VectorCoefficient.h"
 #include "LinearFormIntegrator.h"
 
 namespace Rodin::Variational
@@ -40,9 +40,18 @@ namespace Rodin::Variational
           *
           * @param[in] f Coefficient to integrate.
           */
-         VectorDomainLFIntegrator(const VectorCoefficientBase& f);
+         VectorDomainLFIntegrator(const VectorCoefficientBase& f)
+            : m_f(f.copy()),
+              m_mfemVector(f.build()),
+              m_mfemLFI(*m_mfemVector)
+         {}
 
-         VectorDomainLFIntegrator(const VectorDomainLFIntegrator& other);
+         VectorDomainLFIntegrator(const VectorDomainLFIntegrator& other)
+            :  LinearFormDomainIntegrator(other),
+               m_f(other.m_f->copy()),
+               m_mfemVector(other.m_f->build()),
+               m_mfemLFI(*m_mfemVector)
+         {}
 
          void getElementVector(
                const mfem::FiniteElement& fe, mfem::ElementTransformation&
@@ -51,11 +60,14 @@ namespace Rodin::Variational
             m_mfemLFI.AssembleRHSElementVect(fe, trans, vec);
          }
 
-         VectorDomainLFIntegrator* copy() const noexcept override;
+         VectorDomainLFIntegrator* copy() const noexcept override
+         {
+            return new VectorDomainLFIntegrator(*this);
+         }
 
       private:
          std::unique_ptr<VectorCoefficientBase> m_f;
-         std::unique_ptr<Internal::VectorCoefficient> m_mfemVector;
+         std::unique_ptr<mfem::VectorCoefficient> m_mfemVector;
          mfem::VectorDomainLFIntegrator m_mfemLFI;
    };
 }

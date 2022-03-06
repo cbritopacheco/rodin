@@ -34,7 +34,7 @@ int main(int, char**)
                         .setRelativeTolerance(1e-6);
 
   // Optimization parameters
-  size_t maxIt = 30;
+  size_t maxIt = 40;
   double eps = 1e-6;
   double hmax = 0.1;
   auto ell = ScalarCoefficient(5);
@@ -74,14 +74,17 @@ int main(int, char**)
     TestFunction  w(Vh);
     auto e = Mult(0.5, Jacobian(u.getGridFunction()) + Jacobian(u.getGridFunction()).T());
     auto Ae = Mult(Mult(2.0, mu), e) + Mult(lambda, Mult(Trace(e), IdentityMatrix(d)));
+    auto n = Normal(d);
 
     Problem hilbert(g, w);
-    hilbert = VectorDiffusionIntegrator(alpha)
-            + VectorMassIntegrator()
-            - VectorBoundaryFluxLFIntegrator(Dot(Ae, e) - ell).over(Gamma0)
+    hilbert = Integral(Dot(Mult(alpha, Jacobian(g)), Jacobian(w)))
+            + Integral(Dot(g, w))
+            - BoundaryIntegral(Mult(Dot(Ae, e) - ell, Dot(w, n))).over(Gamma0)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaD)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     cg.solve(hilbert);
+    Omega.save("Omegai.mesh");
+    g.getGridFunction().save("g.gf");
 
     // Update objective
     obj.push_back(compliance(u.getGridFunction()) + ell.getValue() * Omega.getVolume());

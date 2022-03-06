@@ -20,7 +20,7 @@ namespace Rodin::Variational
    Sum<MatrixCoefficientBase, MatrixCoefficientBase>
    ::getValue(
          mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
    {
       mfem::DenseMatrix m;
       m_lhs->getValue(m, trans, ip);

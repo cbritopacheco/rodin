@@ -75,7 +75,7 @@ namespace Rodin::Variational
          std::set<int> m_attr;
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
 
-         std::unique_ptr<Internal::ScalarCoefficient> m_mfemLambda;
+         std::unique_ptr<mfem::Coefficient> m_mfemLambda;
          mfem::VectorDiffusionIntegrator m_bfi;
    };
 }

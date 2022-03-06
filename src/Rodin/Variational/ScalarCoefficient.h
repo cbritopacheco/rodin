@@ -22,24 +22,11 @@
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      class ScalarCoefficient : public mfem::Coefficient
-      {
-         public:
-            ScalarCoefficient(const ScalarCoefficientBase& s);
-            double Eval(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
-
-         private:
-            std::unique_ptr<ScalarCoefficientBase> m_s;
-      };
-   }
-
    /**
     * @brief Abstract base class for objects representing scalar coefficients.
     */
    class ScalarCoefficientBase
-      : public FormLanguage::Buildable<Internal::ScalarCoefficient>
+      : public FormLanguage::Buildable<mfem::Coefficient>
    {
       public:
          constexpr
@@ -61,33 +48,22 @@ namespace Rodin::Variational
             return m_traceDomain;
          }
 
+         std::unique_ptr<mfem::Coefficient> build() const override;
+
          virtual ~ScalarCoefficientBase() = default;
 
          virtual Restriction<ScalarCoefficientBase> restrictTo(int attr);
 
-         virtual Restriction<ScalarCoefficientBase> restrictTo(
-               const std::set<int>& attrs);
-
-         virtual double getValueOnInteriorBoundary(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
+         virtual Restriction<ScalarCoefficientBase> restrictTo(const std::set<int>& attrs);
 
          virtual double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip
                ) const = 0;
-
-         std::unique_ptr<Internal::ScalarCoefficient> build() const override
-         {
-            return std::make_unique<Internal::ScalarCoefficient>(*this);
-         }
 
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
 
       private:
          std::optional<int> m_traceDomain;
    };
-
-   template <class T>
-   ScalarCoefficient(const T&)
-      -> ScalarCoefficient<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
 
    /**
     * @brief Represents a ScalarCoefficient of arithmetic type `T`.
@@ -99,6 +75,8 @@ namespace Rodin::Variational
    class ScalarCoefficient : public ScalarCoefficientBase
    {
       public:
+         static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
+
          /**
           * @brief Constructs a ScalarCoefficient from an arithmetic value.
           * @param[in] x Arithmetic value
@@ -133,6 +111,9 @@ namespace Rodin::Variational
       private:
          const T m_x;
    };
+   template <class T>
+   ScalarCoefficient(const T&)
+      -> ScalarCoefficient<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
 
    /**
     * @brief Represents a scalar coefficient which is built from a
@@ -260,8 +241,6 @@ namespace Rodin::Variational
          {
             return new ScalarCoefficient(*this);
          }
-
-
       private:
          std::map<int, double> m_pieces;
          mutable mfem::PWConstCoefficient m_mfemCoefficient;
@@ -270,9 +249,24 @@ namespace Rodin::Variational
       -> ScalarCoefficient<std::map<int, double>>;
    ScalarCoefficient(std::initializer_list<std::pair<int, double>>&)
       -> ScalarCoefficient<std::map<int, double>>;
-
 }
 
-#include "ScalarCoefficient.hpp"
+namespace Rodin::Variational::Internal
+{
+   class ProxyScalarCoefficient : public mfem::Coefficient
+   {
+      public:
+         ProxyScalarCoefficient(const ScalarCoefficientBase& s)
+            : m_s(s)
+         {}
+
+         double Eval(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+         {
+            return m_s.getValue(trans, ip);
+         }
+      private:
+         const ScalarCoefficientBase& m_s;
+   };
+}
 
 #endif

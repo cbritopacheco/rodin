@@ -40,7 +40,7 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             m_matrix->getValue(value, trans, ip);
             value.Transpose();

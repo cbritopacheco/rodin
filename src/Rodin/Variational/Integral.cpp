@@ -17,7 +17,7 @@ namespace Rodin::Variational
       mat.SetSize(test.getDOFs(trialElement, trans), trial.getDOFs(testElement, trans));
       mat = 0.0;
 
-      int order = trialElement.GetOrder() + testElement.GetOrder() + trans.OrderW();
+      int order = getIntegrationOrder(trialElement, testElement, trans);
       const mfem::IntegrationRule* ir =
          &mfem::IntRules.Get(trans.GetGeometryType(), order);
       for (int i = 0; i < ir->GetNPoints(); i++)
@@ -43,7 +43,7 @@ namespace Rodin::Variational
       vec.SetSize(test.getDOFs(fe, trans));
       vec = 0.0;
 
-      int order = fe.GetOrder() + trans.OrderW();
+      int order = getIntegrationOrder(fe, trans);
       const mfem::IntegrationRule* ir =
          &mfem::IntRules.Get(trans.GetGeometryType(), order);
       for (int i = 0; i < ir->GetNPoints(); i++)

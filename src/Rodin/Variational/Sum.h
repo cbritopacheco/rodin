@@ -169,7 +169,7 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override;
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
 
          Sum* copy() const noexcept override
          {

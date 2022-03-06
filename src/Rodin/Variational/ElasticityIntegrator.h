@@ -60,9 +60,18 @@ namespace Rodin::Variational
           * coefficients @f$ \lambda @f$ and @f$ \mu @f$.
           */
          ElasticityIntegrator(
-            const ScalarCoefficientBase& lambda, const ScalarCoefficientBase& mu);
+               const ScalarCoefficientBase& lambda, const ScalarCoefficientBase& mu)
+            : m_lambda(lambda.copy()), m_mu(mu.copy()),
+              m_mfemLambda(m_lambda->build()), m_mfemMu(m_mu->build()),
+              m_bfi(*m_mfemLambda, *m_mfemMu)
+         {}
 
-         ElasticityIntegrator(const ElasticityIntegrator& other);
+         ElasticityIntegrator(const ElasticityIntegrator& other)
+            :  BilinearFormDomainIntegrator(other),
+               m_lambda(other.m_lambda->copy()), m_mu(other.m_mu->copy()),
+               m_mfemLambda(m_lambda->build()), m_mfemMu(m_mu->build()),
+               m_bfi(*m_mfemLambda, *m_mfemMu)
+         {}
 
          ElasticityIntegrator(ElasticityIntegrator&& other)
             : BilinearFormDomainIntegrator(std::move(other)),
@@ -88,8 +97,8 @@ namespace Rodin::Variational
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
          std::unique_ptr<ScalarCoefficientBase> m_mu;
 
-         std::unique_ptr<Internal::ScalarCoefficient> m_mfemLambda;
-         std::unique_ptr<Internal::ScalarCoefficient> m_mfemMu;
+         std::unique_ptr<mfem::Coefficient> m_mfemLambda;
+         std::unique_ptr<mfem::Coefficient> m_mfemMu;
          mfem::ElasticityIntegrator m_bfi;
    };
 }
