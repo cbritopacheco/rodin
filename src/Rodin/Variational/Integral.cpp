@@ -9,7 +9,7 @@ namespace Rodin::Variational
    Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
    ::getElementMatrix(
          const mfem::FiniteElement& trialElement, const mfem::FiniteElement& testElement,
-         mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
+         mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const
    {
       auto& trial = m_prod.getLHS();
       auto& test = m_prod.getRHS();
@@ -33,7 +33,7 @@ namespace Rodin::Variational
 
    void Integral<ShapeFunctionBase<Test>>::getElementVector(
          const mfem::FiniteElement& fe,
-         mfem::ElementTransformation& trans, mfem::Vector& vec)
+         mfem::ElementTransformation& trans, mfem::Vector& vec) const
    {
       auto& test = *m_test;
 

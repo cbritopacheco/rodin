@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_DIFFUSIONINTEGRATOR_H
 #define RODIN_VARIATIONAL_DIFFUSIONINTEGRATOR_H
 
@@ -29,7 +35,7 @@ namespace Rodin::Variational
 
          void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override
          {
             assert(&trial == &test);
             m_bfi.AssembleElementMatrix(trial, trans, mat);
@@ -41,7 +47,7 @@ namespace Rodin::Variational
          }
 
       private:
-         mfem::DiffusionIntegrator m_bfi;
+         mutable mfem::DiffusionIntegrator m_bfi;
    };
 }
 

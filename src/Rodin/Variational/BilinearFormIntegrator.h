@@ -11,30 +11,13 @@
 
 namespace Rodin::Variational
 {
-   namespace Internal
-   {
-      class BilinearFormIntegrator : public mfem::BilinearFormIntegrator
-      {
-         public:
-            BilinearFormIntegrator(const BilinearFormIntegratorBase& bfi);
-
-            void AssembleElementMatrix(
-                  const mfem::FiniteElement& fe,
-                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
-
-            void AssembleElementMatrix2(
-                  const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
-         private:
-            std::unique_ptr<BilinearFormIntegratorBase> m_bfi;
-      };
-   }
-
    class BilinearFormIntegratorBase
-      : public FormLanguage::Buildable<Internal::BilinearFormIntegrator>
+      : public FormLanguage::Buildable<mfem::BilinearFormIntegrator>
    {
       public:
          virtual ~BilinearFormIntegratorBase() = default;
+
+         std::unique_ptr<mfem::BilinearFormIntegrator> build() const override;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -48,12 +31,7 @@ namespace Rodin::Variational
 
          virtual void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) = 0;
-
-         std::unique_ptr<Internal::BilinearFormIntegrator> build() const override
-         {
-            return std::make_unique<Internal::BilinearFormIntegrator>(*this);
-         }
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
    };
@@ -107,6 +85,43 @@ namespace Rodin::Variational
 
       private:
          std::set<int> m_attrs;
+   };
+}
+
+namespace Rodin::Variational::Internal
+{
+   class ProxyBilinearFormIntegrator : public mfem::BilinearFormIntegrator
+  {
+      public:
+         ProxyBilinearFormIntegrator(const BilinearFormIntegratorBase& bfi)
+            : m_bfi(bfi)
+         {}
+
+         ProxyBilinearFormIntegrator(const ProxyBilinearFormIntegrator& other)
+            : mfem::BilinearFormIntegrator(other),
+              m_bfi(other.m_bfi)
+         {}
+
+         ProxyBilinearFormIntegrator(ProxyBilinearFormIntegrator&& other)
+            : mfem::BilinearFormIntegrator(std::move(other)),
+              m_bfi(other.m_bfi)
+         {}
+
+         void AssembleElementMatrix(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+         {
+            m_bfi.getElementMatrix(fe, fe, trans, mat);
+         }
+
+         void AssembleElementMatrix2(
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+         {
+            m_bfi.getElementMatrix(trial, test, trans, mat);
+         }
+      private:
+         const BilinearFormIntegratorBase& m_bfi;
    };
 }
 

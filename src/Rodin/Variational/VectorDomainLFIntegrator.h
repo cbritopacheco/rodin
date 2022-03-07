@@ -55,7 +55,7 @@ namespace Rodin::Variational
 
          void getElementVector(
                const mfem::FiniteElement& fe, mfem::ElementTransformation&
-               trans, mfem::Vector& vec) override
+               trans, mfem::Vector& vec) const override
          {
             m_mfemLFI.AssembleRHSElementVect(fe, trans, vec);
          }
@@ -68,7 +68,7 @@ namespace Rodin::Variational
       private:
          std::unique_ptr<VectorCoefficientBase> m_f;
          std::unique_ptr<mfem::VectorCoefficient> m_mfemVector;
-         mfem::VectorDomainLFIntegrator m_mfemLFI;
+         mutable mfem::VectorDomainLFIntegrator m_mfemLFI;
    };
 }
 

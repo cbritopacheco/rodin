@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include "Sum.h"
 
 #include "UnaryMinus.h"
@@ -16,6 +22,7 @@ namespace Rodin::Variational
    UnaryMinus<LinearFormIntegratorBase>
    ::getElementVector(const mfem::FiniteElement& fe,
          mfem::ElementTransformation& trans, mfem::Vector& vec)
+   const
    {
       getOperand().getElementVector(fe, trans, vec);
       vec *= -1.0;
@@ -25,7 +32,7 @@ namespace Rodin::Variational
    UnaryMinus<BilinearFormIntegratorBase>
    ::getElementMatrix(
          const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-         mfem::ElementTransformation& trans, mfem::DenseMatrix& mat)
+         mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const
    {
       getOperand().getElementMatrix(trial, test, trans, mat);
       mat *= -1.0;

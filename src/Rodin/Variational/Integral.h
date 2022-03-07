@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_INTEGRAL_H
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
@@ -54,14 +60,14 @@ namespace Rodin::Variational
          }
 
          int getIntegrationOrder(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test, mfem::ElementTransformation& trans)
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test, mfem::ElementTransformation& trans) const
          {
             return m_intOrder(trial, test, trans);
          }
 
          void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override;
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override;
 
          Integral* copy() const noexcept override
          {
@@ -110,14 +116,14 @@ namespace Rodin::Variational
          }
 
          int getIntegrationOrder(
-               const mfem::FiniteElement& fe, mfem::ElementTransformation& trans)
+               const mfem::FiniteElement& fe, mfem::ElementTransformation& trans) const
          {
             return m_intOrder(fe, trans);
          }
 
          void getElementVector(
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) override;
+               mfem::ElementTransformation& trans, mfem::Vector& vec) const override;
 
          Integral* copy() const noexcept override
          {

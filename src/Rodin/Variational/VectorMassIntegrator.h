@@ -47,7 +47,7 @@ namespace Rodin::Variational
 
          void getElementMatrix(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override
          {
             m_mfemBFI.AssembleElementMatrix2(trial, test, trans, mat);
          }
@@ -61,7 +61,7 @@ namespace Rodin::Variational
          std::unique_ptr<ScalarCoefficientBase> m_lambda;
 
          std::unique_ptr<mfem::Coefficient> m_mfemLambda;
-         mfem::VectorMassIntegrator m_mfemBFI;
+         mutable mfem::VectorMassIntegrator m_mfemBFI;
    };
 
 }

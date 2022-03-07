@@ -210,6 +210,16 @@ namespace Rodin::Variational::Internal
                m_v(v)
          {}
 
+         ProxyVectorCoefficient(const ProxyVectorCoefficient& other)
+            :  mfem::VectorCoefficient(other),
+               m_v(other.m_v)
+         {}
+
+         ProxyVectorCoefficient(ProxyVectorCoefficient&& other)
+            :  mfem::VectorCoefficient(std::move(other)),
+               m_v(other.m_v)
+         {}
+
          void Eval(mfem::Vector& value, mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) override
          {

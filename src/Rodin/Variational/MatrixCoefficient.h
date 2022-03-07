@@ -69,6 +69,16 @@ namespace Rodin::Variational::Internal
                m_mat(mat)
          {}
 
+         ProxyMatrixCoefficient(const ProxyMatrixCoefficient& other)
+            :  mfem::MatrixCoefficient(other),
+               m_mat(other.m_mat)
+         {}
+
+         ProxyMatrixCoefficient(ProxyMatrixCoefficient&& other)
+            :  mfem::MatrixCoefficient(std::move(other)),
+               m_mat(other.m_mat)
+         {}
+
          void Eval(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override

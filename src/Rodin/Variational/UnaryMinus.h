@@ -142,7 +142,7 @@ namespace Rodin::Variational
          }
 
          void getElementVector(const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) override;
+               mfem::ElementTransformation& trans, mfem::Vector& vec) const override;
 
          UnaryMinus* copy() const noexcept override
          {
@@ -221,7 +221,7 @@ namespace Rodin::Variational
          }
 
          void getElementMatrix(const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& vec) override;
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& vec) const override;
 
          UnaryMinus* copy() const noexcept override
          {

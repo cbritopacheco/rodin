@@ -35,7 +35,7 @@ namespace Rodin::Variational
 
          void getElementVector(
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) override
+               mfem::ElementTransformation& trans, mfem::Vector& vec) const override
          {
             m_integral.getElementVector(fe, trans, vec);
          }

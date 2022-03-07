@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
@@ -9,30 +15,15 @@
 
 #include "ForwardDecls.h"
 
-namespace Rodin::Variational::Internal
-{
-   class LinearFormIntegrator : public mfem::LinearFormIntegrator
-   {
-      public:
-         LinearFormIntegrator(const LinearFormIntegratorBase& bfi);
-
-         LinearFormIntegrator(const LinearFormIntegrator& other);
-
-         void AssembleRHSElementVect(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) override;
-      private:
-         std::unique_ptr<LinearFormIntegratorBase> m_lfi;
-   };
-}
-
 namespace Rodin::Variational
 {
    class LinearFormIntegratorBase
-      : public FormLanguage::Buildable<Internal::LinearFormIntegrator>
+      : public FormLanguage::Buildable<mfem::LinearFormIntegrator>
    {
       public:
          virtual ~LinearFormIntegratorBase() = default;
+
+         std::unique_ptr<mfem::LinearFormIntegrator> build() const override;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -46,15 +37,7 @@ namespace Rodin::Variational
 
          virtual void getElementVector(
                const mfem::FiniteElement& fe, mfem::ElementTransformation&
-               trans, mfem::Vector& vec) = 0;
-
-         /**
-          * @internal
-          */
-         std::unique_ptr<Internal::LinearFormIntegrator> build() const override
-         {
-            return std::make_unique<Internal::LinearFormIntegrator>(*this);
-         }
+               trans, mfem::Vector& vec) const = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
    };
@@ -156,7 +139,36 @@ namespace Rodin::Variational
       private:
          std::set<int> m_attrs;
    };
+}
 
+namespace Rodin::Variational::Internal
+{
+   class ProxyLinearFormIntegrator : public mfem::LinearFormIntegrator
+   {
+      public:
+         ProxyLinearFormIntegrator(const LinearFormIntegratorBase& lfi)
+            : m_lfi(lfi)
+         {}
+
+         ProxyLinearFormIntegrator(const ProxyLinearFormIntegrator& other)
+            : mfem::LinearFormIntegrator(other),
+              m_lfi(other.m_lfi)
+         {}
+
+         ProxyLinearFormIntegrator(ProxyLinearFormIntegrator&& other)
+            : mfem::LinearFormIntegrator(std::move(other)),
+              m_lfi(other.m_lfi)
+         {}
+
+         void AssembleRHSElementVect(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans, mfem::Vector& vec) override
+         {
+            m_lfi.getElementVector(fe, trans, vec);
+         }
+      private:
+         const LinearFormIntegratorBase& m_lfi;
+   };
 }
 
 #endif

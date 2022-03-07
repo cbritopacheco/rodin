@@ -260,6 +260,16 @@ namespace Rodin::Variational::Internal
             : m_s(s)
          {}
 
+         ProxyScalarCoefficient(const ProxyScalarCoefficient& other)
+            : mfem::Coefficient(other),
+              m_s(other.m_s)
+         {}
+
+         ProxyScalarCoefficient(ProxyScalarCoefficient&& other)
+            : mfem::Coefficient(std::move(other)),
+              m_s(other.m_s)
+         {}
+
          double Eval(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
          {
             return m_s.getValue(trans, ip);
