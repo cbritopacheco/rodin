@@ -124,7 +124,8 @@ int main(int, char**)
     auto mmgLs = dist.distance(mmgMesh);
 
     // Advect the level set function
-    double dt = Omega.getMaximumDisplacement(g.getGridFunction());
+    double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
+    double dt = hmax / gInf;
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain
