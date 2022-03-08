@@ -14,11 +14,10 @@ namespace Rodin::Variational
     *
     * This tensor should be regarded as a multi-dimensional array:
     * @f[
-    *    T = \begin{pmatrix}
-    *       T_1\\
-    *       \vdots\\
+    *    T =
+    *       T_1
+    *       \vdot
     *       T_n
-    *    \end{bmatrix}
     *    where each @f$ T_i @f$ is a matrix of dimensions @f$ p \times q @f$.
     * @f]
     */
