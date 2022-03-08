@@ -378,7 +378,7 @@ $ u $
 <span class="n">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w"></span>
 <span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Gradient</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Gradient</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"></span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"></span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span><span class="w"></span></pre><p>In this case the <code>Integral(Gradient(u) * Gradient(v))</code> object represents the bilinear term</p><div class="m-math"><svg style="width: 8.179em; height: 2.819em;" viewBox="155.010143 -27.065451 78.522694 27.065451">
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">Gamma</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span><span class="w"></span></pre><p>In this case the <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Integral</a>&lt;FormLanguage::Product&lt;TrialFunctionBase,TestFunctionBase&gt;&gt; &quot;Integral(Gradient(u) * Gradient(v))&quot; object represents the bilinear term</p><div class="m-math"><svg style="width: 8.179em; height: 2.819em;" viewBox="155.010143 -27.065451 78.522694 27.065451">
 <title>
 \[ \int_\Omega \nabla u \cdot \nabla v \ dx \ , \]
 </title>
@@ -427,7 +427,7 @@ $ u $
 <use x='208.046911' y='-10.793007' xlink:href='#eq14-g1-120'/>
 <use x='214.698999' y='-10.793007' xlink:href='#eq14-g1-58'/>
 </g>
-</svg></div><p>Lastly, the <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_scalar_coefficient_base_01_4.html" class="m-doc">DirichletBC(Gamma, g)</a> object specifies that the solution will satisfy the homogenous Dirichlet condition:</p><div class="m-math"><svg style="width: 7.799em; height: 1.093em;" viewBox="156.834311 -10.493961 74.874346 10.493973">
+</svg></div><p>Lastly, the DirichletBC(Gamma, g) object specifies that the solution will satisfy the homogenous Dirichlet condition:</p><div class="m-math"><svg style="width: 7.799em; height: 1.093em;" viewBox="156.834311 -10.493961 74.874346 10.493973">
 <title>
 \[ u = g \quad \text{on} \quad \Gamma . \]
 </title>

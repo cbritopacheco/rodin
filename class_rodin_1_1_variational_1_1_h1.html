@@ -79,7 +79,6 @@ $ H^1(\Omega)^d $
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -262,16 +261,6 @@ $ P_\tau $
 <use x='7.545268' y='1.793263' xlink:href='#eq9-g0-28'/>
 </g>
 </svg> depends on the kind of basis chosen.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;H1&gt;</a>
-            </dt>
-            <dd>Base type for finite element spaces.</dd>
-          </dl>
-        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -316,8 +305,8 @@ $ P_\tau $
               <span class="m-doc-wrap-bumper">auto <a href="#a2a00264358b4a0972bc62577fa3ba0f4" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns a constant reference to the mesh on which the space is supported.</dd>
-            <dt id="a4044305f7d7104017a5fff7c2327688b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4044305f7d7104017a5fff7c2327688b" class="m-doc-self">getRangeDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="aa8e43300348ed57892ea6b3a37de0341">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa8e43300348ed57892ea6b3a37de0341" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
