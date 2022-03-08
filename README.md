@@ -12,7 +12,8 @@
 
 ## Requirements
 
-- CMake 3.12.0+
+- [CMake 3.12.0+](https://cmake.org/)
+- [SuiteSparse](https://people.engr.tamu.edu/davis/suitesparse.html)
 
 ## Building the project
 
