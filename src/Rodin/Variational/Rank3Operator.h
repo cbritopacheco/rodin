@@ -15,11 +15,13 @@ namespace Rodin::Variational
     * This tensor should be regarded as a multi-dimensional array:
     * @f[
     *    T =
-    *       T_1
-    *       \vdot
+    *    \begin{bmatrix}
+    *       T_1\\
+    *       \vdots\\
     *       T_n
-    *    where each @f$ T_i @f$ is a matrix of dimensions @f$ p \times q @f$.
+    *    \end{bmatrix}
     * @f]
+    * where each @f$ T_i @f$ is a matrix of dimensions @f$ p \times q @f$.
     */
    class Rank3Operator
    {
