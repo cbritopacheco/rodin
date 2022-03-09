@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_MULTIPLICATION_H
-#define RODIN_VARIATIONAL_FORMLANGUAGE_MULTIPLICATION_H
+#ifndef RODIN_VARIATIONAL_MULT_H
+#define RODIN_VARIATIONAL_MULT_H
 
 #include <memory>
 #include <type_traits>
@@ -30,14 +30,6 @@ namespace Rodin::Variational
       : public ScalarCoefficientBase
    {
       public:
-         Mult(double lhs, const ScalarCoefficientBase& rhs)
-            : Mult(ScalarCoefficient(lhs), rhs)
-         {}
-
-         Mult(const ScalarCoefficientBase& rhs, double lhs)
-            : Mult(ScalarCoefficient(lhs), rhs)
-         {}
-
          Mult(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
@@ -88,26 +80,23 @@ namespace Rodin::Variational
    };
    Mult(const ScalarCoefficientBase&, const ScalarCoefficientBase&)
       -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
-   Mult(double, const ScalarCoefficientBase&)
-      -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
-   Mult(const ScalarCoefficientBase&, double)
-      -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
-   // Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-   // operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 
-   // template <class T>
-   // std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
-   // operator*(T lhs, const ScalarCoefficientBase& rhs)
-   // {
-   //    return Mult(ScalarCoefficient(lhs), rhs);
-   // }
+   Mult<ScalarCoefficientBase, ScalarCoefficientBase>
+   operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 
-   // template <class T>
-   // std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
-   // operator*(const ScalarCoefficientBase& rhs, T lhs)
-   // {
-   //    return Mult(rhs, ScalarCoefficient(lhs));
-   // }
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
+   operator*(T lhs, const ScalarCoefficientBase& rhs)
+   {
+      return Mult(ScalarCoefficient(lhs), rhs);
+   }
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
+   operator*(const ScalarCoefficientBase& rhs, T lhs)
+   {
+      return Mult(rhs, ScalarCoefficient(lhs));
+   }
 
    /**
     * @brief Multiplication of ScalarCoefficientBase and MatrixCoefficientBase.
@@ -117,18 +106,6 @@ namespace Rodin::Variational
       : public MatrixCoefficientBase
    {
       public:
-         Mult(const MatrixCoefficientBase& rhs, double lhs)
-            : Mult(ScalarCoefficient(lhs), rhs)
-         {}
-
-         Mult(double lhs, const MatrixCoefficientBase& rhs)
-            : Mult(ScalarCoefficient(lhs), rhs)
-         {}
-
-         Mult(const MatrixCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
-            : Mult(rhs, lhs)
-         {}
-
          Mult(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
@@ -191,20 +168,26 @@ namespace Rodin::Variational
    };
    Mult(const ScalarCoefficientBase&, const MatrixCoefficientBase&)
       -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
-   Mult(const MatrixCoefficientBase&, const ScalarCoefficientBase&)
-      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
-   Mult(double, const MatrixCoefficientBase&)
-      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
-   Mult(const MatrixCoefficientBase&, double)
-      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
 
-   // template <class FEC>
-   // Mult<ScalarCoefficientBase, GridFunction<FEC>>
-   // operator*(const ScalarCoefficientBase& lhs, const GridFunction<FEC>& rhs)
-   // {
-   //    return Mult(lhs, ScalarCoefficient(rhs));
-   // }
+   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
+   operator*(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs);
 
+   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
+   operator*(const MatrixCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, MatrixCoefficientBase>>
+   operator*(T lhs, const MatrixCoefficientBase& rhs)
+   {
+      return Mult(ScalarCoefficient(lhs), rhs);
+   }
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, MatrixCoefficientBase>>
+   operator*(const MatrixCoefficientBase& lhs, T rhs)
+   {
+      return Mult(ScalarCoefficient(rhs), lhs);
+   }
 
    template <ShapeFunctionSpaceType Space>
    class Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
@@ -296,6 +279,34 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Mult(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
       -> Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+
+   template <ShapeFunctionSpaceType Space>
+   Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+   operator*(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+   {
+      return Mult(lhs, rhs);
+   }
+
+   template <ShapeFunctionSpaceType Space>
+   Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+   operator*(const ShapeFunctionBase<Space>& lhs, const ScalarCoefficientBase& rhs)
+   {
+      return Mult(rhs, lhs);
+   }
+
+   template <class T, ShapeFunctionSpaceType Space>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>>
+   operator*(T lhs, const ShapeFunctionBase<Space>& rhs)
+   {
+      return Mult(ScalarCoefficient(lhs), rhs);
+   }
+
+   template <class T, ShapeFunctionSpaceType Space>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>>
+   operator*(const ShapeFunctionBase<Space>& lhs, T rhs)
+   {
+      return Mult(lhs, ScalarCoefficient(rhs));
+   }
 }
 
 #endif

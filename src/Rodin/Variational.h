@@ -46,8 +46,7 @@
 #include "Variational/IdentityMatrix.h"
 
 #include "Variational/Integral.h"
-#include "Variational/BoundaryIntegral.h"
-
+#include "Variational/Inner.h"
 #include "Variational/Problem.h"
 
 #include "Variational/ScalarCoefficient.h"

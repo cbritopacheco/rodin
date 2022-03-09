@@ -162,12 +162,6 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Dot(const ShapeFunctionBase<Space>&, const ScalarCoefficientBase&)
       -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
-   // template <ShapeFunctionSpaceType Space>
-   // Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>
-   // operator*(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
-   // {
-   //    return Dot(lhs, rhs);
-   // }
 
    /**
     * @brief Dot product between VectorCoefficientBase and ShapeFunctionBase.
@@ -272,12 +266,6 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Dot(const ShapeFunctionBase<Space>&, const VectorCoefficientBase&)
       -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
-   // template <ShapeFunctionSpaceType Space>
-   // Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>
-   // operator*(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
-   // {
-   //    return Dot(lhs, rhs);
-   // }
 
    /**
     * @brief Dot product between instances of Lhs and Rhs
@@ -348,8 +336,6 @@ namespace Rodin::Variational
    };
    Dot(const ShapeFunctionBase<Trial>&, const ShapeFunctionBase<Test>&)
       -> Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
-   // Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
-   // operator*(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs);
 }
 
 #endif

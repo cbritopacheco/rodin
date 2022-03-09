@@ -72,14 +72,14 @@ int main(int, char**)
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  w(Vh);
-    auto e = Mult(0.5, Jacobian(u.getGridFunction()) + Jacobian(u.getGridFunction()).T());
-    auto Ae = Mult(Mult(2.0, mu), e) + Mult(lambda, Mult(Trace(e), IdentityMatrix(d)));
+    auto e = 0.5 * (Jacobian(u.getGridFunction()) + Jacobian(u.getGridFunction()).T());
+    auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
     Problem hilbert(g, w);
-    hilbert = Integral(Dot(Mult(alpha, Jacobian(g)), Jacobian(w)))
-            + Integral(Dot(g, w))
-            - BoundaryIntegral(Mult(Dot(Ae, e) - ell, Dot(w, n))).over(Gamma0)
+    hilbert = Inner(alpha * Jacobian(g), Jacobian(w))
+            + Inner(g, w)
+            - BoundaryInner(Dot(Ae, e) - ell, Dot(w, n)).over(Gamma0)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaD)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     cg.solve(hilbert);

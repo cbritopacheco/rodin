@@ -19,7 +19,6 @@ set(RodinVariational_HEADERS
   H1.h
   IdentityMatrix.h
   Integral.h
-  BoundaryIntegral.h
   Sum.h
   UnaryMinus.h
   Mult.h

@@ -13,41 +13,6 @@
 
 namespace Rodin::Variational
 {
-   template <>
-   class BoundaryIntegral<ShapeFunctionBase<Test>> : public LinearFormBoundaryIntegrator
-   {
-      public:
-         using Integrand = ShapeFunctionBase<Test>;
-
-         BoundaryIntegral(const Integrand& op)
-            : m_integral(op)
-         {}
-
-         BoundaryIntegral(const BoundaryIntegral& other)
-            : LinearFormBoundaryIntegrator(other),
-              m_integral(other.m_integral)
-         {}
-
-         BoundaryIntegral(BoundaryIntegral&& other)
-            : LinearFormBoundaryIntegrator(std::move(other)),
-              m_integral(std::move(other.m_integral))
-         {}
-
-         void getElementVector(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) const override
-         {
-            m_integral.getElementVector(fe, trans, vec);
-         }
-
-         BoundaryIntegral* copy() const noexcept override
-         {
-            return new BoundaryIntegral(*this);
-         }
-      private:
-         Integral<Integrand> m_integral;
-   };
-   BoundaryIntegral(const ShapeFunctionBase<Test>&) -> BoundaryIntegral<ShapeFunctionBase<Test>>;
 }
 
 #endif

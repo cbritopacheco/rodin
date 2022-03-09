@@ -86,8 +86,8 @@ int main(int, char**)
     uInt.getGridFunction().transfer(u);
 
     // Hilbert extension-regularization procedure
-    auto e = Mult(0.5, Jacobian(u) + Jacobian(u).T());
-    auto Ae = Mult(Mult(2.0, mu), e) + Mult(lambda, Mult(Trace(e), IdentityMatrix(d)));
+    auto e = 0.5 * (Jacobian(u) + Jacobian(u).T());
+    auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
 
     H1 Ph(Omega);
     GridFunction w(Ph);

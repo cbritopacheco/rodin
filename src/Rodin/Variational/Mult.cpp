@@ -6,11 +6,23 @@
  */
 #include "Mult.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
-   // Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-   // operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
-   // {
-   //    return Mult(lhs, rhs);
-   // }
+   Mult<ScalarCoefficientBase, ScalarCoefficientBase>
+   operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   {
+      return Mult(lhs, rhs);
+   }
+
+   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
+   operator*(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+   {
+      return Mult(lhs, rhs);
+   }
+
+   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
+   operator*(const MatrixCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   {
+      return Mult(rhs, lhs);
+   }
 }

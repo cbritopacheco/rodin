@@ -24,10 +24,4 @@ namespace Rodin::Variational
       m_b->getValue(mb, trans, ip);
       return ma * mb;
    }
-
-   // Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
-   // operator*(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
-   // {
-   //    return Dot(lhs, rhs);
-   // }
 }
