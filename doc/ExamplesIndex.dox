@@ -12,8 +12,8 @@
   problems of the form:
 
   @f[
-    \text{Find} \quad u \in U \quad \text{ s.t. } \quad a(u, v) = b(v) \quad
-    \forall v \in V
+    \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
+    a(u, v) = b(v) \ .
   @f]
 
   For the complete list of examples go to the link below:
