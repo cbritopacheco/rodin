@@ -68,11 +68,12 @@ int main(int, char**)
     H1 VhInt(trimmed, d);
 
     // Elasticity equation
+    auto f = VectorCoefficient{0, -1};
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
     elasticity = ElasticityIntegrator(lambda, mu)
-               - BoundaryIntegral(Dot(VectorCoefficient{0, -1}, vInt)).over(GammaN)
+               - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
 
@@ -91,10 +92,10 @@ int main(int, char**)
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
-    hilbert = VectorDiffusionIntegrator(alpha)
-            + VectorMassIntegrator()
-            - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
-            - VectorDomainLFIntegrator(Grad(w)).over(Interior)
+    hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+            + Integral(g, v)
+            - Integral(Dot(Ae, e) - ell, Div(v)).over(Interior)
+            - Integral(Grad(w), v).over(Interior)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
 

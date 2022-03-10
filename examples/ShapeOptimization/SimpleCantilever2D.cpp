@@ -57,12 +57,14 @@ int main(int, char**)
       return bf(v, v);
     };
 
+    auto f = VectorCoefficient{0, -1};
+
     // Elasticity equation
     TrialFunction u(Vh);
     TestFunction  v(Vh);
     Problem elasticity(u, v);
     elasticity = ElasticityIntegrator(lambda, mu)
-               - BoundaryIntegral(Dot(VectorCoefficient{0, -1}, v)).over(GammaN)
+               - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
     cg.solve(elasticity);
 
@@ -77,9 +79,9 @@ int main(int, char**)
     auto n = Normal(d);
 
     Problem hilbert(g, w);
-    hilbert = Inner(alpha * Jacobian(g), Jacobian(w))
-            + Inner(g, w)
-            - BoundaryInner(Dot(Ae, e) - ell, Dot(w, n)).over(Gamma0)
+    hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
+            + Integral(g, w)
+            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(w, n)).over(Gamma0)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaD)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     cg.solve(hilbert);

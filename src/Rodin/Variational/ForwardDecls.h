@@ -66,12 +66,6 @@ namespace Rodin::Variational
    template <class Integrand>
    class BoundaryIntegral;
 
-   template <class Lhs, class Rhs>
-   class Inner;
-
-   template <class Lhs, class Rhs>
-   class BoundaryInner;
-
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 

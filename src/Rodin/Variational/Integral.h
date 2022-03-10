@@ -30,6 +30,10 @@ namespace Rodin::Variational
       public:
          using Integrand = Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
 
+         Integral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+            : Integral(Dot(lhs, rhs))
+         {}
+
          Integral(const Integrand& prod)
             : m_prod(prod),
               m_intOrder(
@@ -80,6 +84,8 @@ namespace Rodin::Variational
    };
    Integral(const Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
       -> Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
+   Integral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+      -> Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
 
    template <>
    class Integral<ShapeFunctionBase<Test>>
@@ -88,8 +94,16 @@ namespace Rodin::Variational
       public:
          using Integrand = ShapeFunctionBase<Test>;
 
-         Integral(const Integrand& test)
-            : m_test(test.copy()),
+         Integral(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+            : Integral(Dot(lhs, rhs))
+         {}
+
+         Integral(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+            : Integral(Dot(lhs, rhs))
+         {}
+
+         Integral(const Integrand& integrand)
+            : m_test(integrand.copy()),
               m_intOrder(
                     [](const mfem::FiniteElement& fe,
                        mfem::ElementTransformation& trans)
@@ -134,7 +148,12 @@ namespace Rodin::Variational
          std::function<int(
             const mfem::FiniteElement&, mfem::ElementTransformation&)> m_intOrder;
    };
-   Integral(const ShapeFunctionBase<Test>&) -> Integral<ShapeFunctionBase<Test>>;
+   Integral(const ShapeFunctionBase<Test>&)
+      -> Integral<ShapeFunctionBase<Test>>;
+   Integral(const ScalarCoefficientBase&, const ShapeFunctionBase<Test>&)
+      -> Integral<ShapeFunctionBase<Test>>;
+   Integral(const VectorCoefficientBase&, const ShapeFunctionBase<Test>&)
+      -> Integral<ShapeFunctionBase<Test>>;
 
    template <>
    class BoundaryIntegral<ShapeFunctionBase<Test>> : public LinearFormBoundaryIntegrator
@@ -142,8 +161,13 @@ namespace Rodin::Variational
       public:
          using Integrand = ShapeFunctionBase<Test>;
 
-         BoundaryIntegral(const Integrand& op)
-            : m_integral(op)
+         template <class Lhs>
+         BoundaryIntegral(Lhs&& lhs, const ShapeFunctionBase<Test>& rhs)
+            : m_integral(std::forward<Lhs>(lhs), rhs)
+         {}
+
+         BoundaryIntegral(const Integrand& integrand)
+            : m_integral(integrand)
          {}
 
          BoundaryIntegral(const BoundaryIntegral& other)
@@ -170,7 +194,12 @@ namespace Rodin::Variational
       private:
          Integral<Integrand> m_integral;
    };
-   BoundaryIntegral(const ShapeFunctionBase<Test>&) -> BoundaryIntegral<ShapeFunctionBase<Test>>;
+   BoundaryIntegral(const ShapeFunctionBase<Test>&)
+      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
+
+   template <class Lhs>
+   BoundaryIntegral(Lhs&& lhs, const ShapeFunctionBase<Test>& rhs)
+      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
 }
 
 #endif
