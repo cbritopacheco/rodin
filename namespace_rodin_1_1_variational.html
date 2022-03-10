@@ -96,7 +96,7 @@
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between instances of Lhs and Rhs.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;ShapeFunctionSpaceType Space&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_vector_coefficient_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;VectorCoefficientBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a> and <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
@@ -164,6 +164,21 @@ $ H^1(\Omega)^d $
               class <a href="class_rodin_1_1_variational_1_1_incomplete_grid_function.html" class="m-doc">IncompleteGridFunction</a>
             </dt>
             <dd>Represents a grid function which does not yet have an associated finite element space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Integrand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> class.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_trial_01_4_00_01cba237f5df836f308ef13b130ce035f6.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;Trial&gt;, ShapeFunctionBase&lt;Test&gt;&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of the dot product of a trial function and a test function.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_shape_function_base_3_01_test_01_4_01_4.html" class="m-doc">Integral&lt;ShapeFunctionBase&lt;Test&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of a test function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_h1_01_4_01_4.html" class="m-doc">Jacobian&lt;GridFunction&lt;H1&gt;&gt;</a>
@@ -327,12 +342,66 @@ $ A $
         <section id="enum-members">
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
-            <dt id="a20f84fb55de829443d5c7e8b6eaaf3a2">
-              <span class="m-doc-wrap-bumper">enum <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc-self">IntegratorRegion</a> { </span><span class="m-doc-wrap"><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2aafdd3260deb9549b0ffd9b37869a1c43" class="m-doc">Domain</a>,
+            <dt>
+              <span class="m-doc-wrap-bumper">enum <a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> { </span><span class="m-doc-wrap"><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b4a937f6e6574be48ecb4e7bdc0c04a" class="m-doc">Trial</a>,
+              <a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a0c1982bd20a911687e4a2b59a1517f93" class="m-doc">Test</a> }</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> { </span><span class="m-doc-wrap"><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2aafdd3260deb9549b0ffd9b37869a1c43" class="m-doc">Domain</a>,
               <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2a20a67b76ea60cf3da41c2fa0aa7525fb" class="m-doc">Boundary</a> }</span>
             </dt>
-            <dd>Where the integration takes place.</dd>
+            <dd></dd>
           </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a6cd58505ac5f9e57b8f353cfeef7d7a4"><div>
+            <h3>
+              enum Rodin::<wbr />Variational::<wbr /><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc-self">ShapeFunctionSpaceType</a>
+            </h3>
+<p>Enumeration class to indicate whether a derived instance of <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> is either a Trial or <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> space.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b4a937f6e6574be48ecb4e7bdc0c04a" class="m-doc-self" id="a6cd58505ac5f9e57b8f353cfeef7d7a4a1b4a937f6e6574be48ecb4e7bdc0c04a">Trial</a></td>
+                  <td>
+                  <p>Trial function space.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a0c1982bd20a911687e4a2b59a1517f93" class="m-doc-self" id="a6cd58505ac5f9e57b8f353cfeef7d7a4a0c1982bd20a911687e4a2b59a1517f93">Test</a></td>
+                  <td>
+                  <p><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function space.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a20f84fb55de829443d5c7e8b6eaaf3a2"><div>
+            <h3>
+              enum Rodin::<wbr />Variational::<wbr /><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc-self">IntegratorRegion</a>
+            </h3>
+<p>Enumeration class to indicate whether the integration should be done either inside the Domain or on the Boundary.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2aafdd3260deb9549b0ffd9b37869a1c43" class="m-doc-self" id="a20f84fb55de829443d5c7e8b6eaaf3a2aafdd3260deb9549b0ffd9b37869a1c43">Domain</a></td>
+                  <td>
+                  <p>Perform the integration over the interior domain.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2a20a67b76ea60cf3da41c2fa0aa7525fb" class="m-doc-self" id="a20f84fb55de829443d5c7e8b6eaaf3a2a20a67b76ea60cf3da41c2fa0aa7525fb">Boundary</a></td>
+                  <td>
+                  <p>Perform the integration over the boundary of the domain.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
