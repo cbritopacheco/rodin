@@ -68,9 +68,6 @@ int main(int, char**)
                + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
     cg.solve(elasticity);
 
-    u.getGridFunction().save("u.gf");
-    Omega.save("Omega.mesh");
-
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  w(Vh);
@@ -84,8 +81,6 @@ int main(int, char**)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(w, n)).over(Gamma0)
             + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaD, GammaN});
     cg.solve(hilbert);
-    Omega.save("Omegai.mesh");
-    g.getGridFunction().save("g.gf");
 
     // Update objective
     obj.push_back(compliance(u.getGridFunction()) + ell.getValue() * Omega.getVolume());

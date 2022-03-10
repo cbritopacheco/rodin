@@ -104,10 +104,6 @@ int main(int, char**)
             + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaN, GammaNA});
     solver.solve(hilbert);
 
-    g.getGridFunction().save("g.gf");
-    u.save("u.gf");
-    Omega.save("Omegai.mesh");
-
     // Update objective
     obj.push_back(
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
