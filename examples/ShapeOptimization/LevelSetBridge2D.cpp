@@ -96,10 +96,10 @@ int main(int, char**)
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
-    hilbert = VectorDiffusionIntegrator(alpha)
-            + VectorMassIntegrator()
-            - VectorDomainLFDivIntegrator(Dot(Ae, e) - ell).over(Interior)
-            - VectorDomainLFIntegrator(Grad(w)).over(Interior)
+    hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+            + Integral(g, v)
+            - Integral(Dot(Ae, e) - ell, Div(v)).over(Interior)
+            - Integral(Grad(w), v).over(Interior)
             + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaN, GammaNA});
     solver.solve(hilbert);
 
