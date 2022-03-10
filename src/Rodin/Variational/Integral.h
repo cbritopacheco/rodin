@@ -23,6 +23,13 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Integral of the dot product of a trial function and a test function
+    *
+    * @f[
+    *    \int_\Omega A(u) : A(v) \ dx
+    * @f]
+    */
    template <>
    class Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
       : public BilinearFormDomainIntegrator
@@ -87,6 +94,14 @@ namespace Rodin::Variational
    Integral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
       -> Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
 
+
+   /**
+    * @brief Integral of a test function
+    *
+    * @f[
+    *    \int_\Omega A(v) \ dx
+    * @f]
+    */
    template <>
    class Integral<ShapeFunctionBase<Test>>
       : public LinearFormDomainIntegrator
@@ -94,14 +109,29 @@ namespace Rodin::Variational
       public:
          using Integrand = ShapeFunctionBase<Test>;
 
+         /**
+          * @f[
+          *    \int \lambda A(v) \ dx
+          * @f]
+          */
          Integral(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
+         /**
+          * @f[
+          *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx
+          * @f]
+          */
          Integral(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
+         /**
+          * @f[
+          *    \int A(v) \ dx
+          * @f]
+          */
          Integral(const Integrand& integrand)
             : m_test(integrand.copy()),
               m_intOrder(

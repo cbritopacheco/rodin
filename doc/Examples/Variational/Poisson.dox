@@ -97,31 +97,32 @@ components:
 
   With the mesh loaded, we can build our finite element space @f$ V_h @f$ and
   create some functions belonging to it. For our purposes, we need that our
-  space contains functions belonging to the @f$ H^1 (\Omega) @f$ collection of
+  space contain functions belonging to the @f$ H^1 (\Omega) @f$ collection of
   functions. This is achieved by the following line of code:
 
   @code{.cpp}
     H1 Vh(Omega);
   @endcode
 
-  After creating this space, we construct a trial function @f$ u @f$ which will
-  represent our solution:
+  After creating this space, we construct trial and test functions @f$ u @f$
+  and @f$ v @f$ which will be used to define our variational problem:
 
   @code{.cpp}
-    GridFunction u(Vh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
   @endcode
 
-  Having built our finite element space and declared our trial function, we can
-  start implementing the weak formulation associated to the Poisson equation.
-  In general, Rodin expects that you write you specify the weak formulation by
-  moving all terms to the left hand side of the equation. In symbols, this
-  would look like:
-
+  Hence we can start implementing the weak formulation associated to the
+  Poisson equation. In general, Rodin expects that you specify the weak
+  formulation by moving all terms to the left hand side of the equation. In
+  symbols, this would look like:
   @f[
   \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
   \forall v \in H^1_0(\Omega), \quad
-     a(u, v) - l(v) = 0
+     a(u, v) - l(v) = 0 \ ,
   @f]
+  where @f$ a(u, v) @f$ and @f$ l(v) @f$ are our respective bilinear and linear
+  forms.
 
   The left hand side is then used to define the variational problem which we
   want to solve. In the code this is achieved by the following declaration:
@@ -130,57 +131,51 @@ components:
     auto f = ScalarCoefficient(1.0);
     auto g = ScalarCoefficient(0.0);
 
-    Problem poisson(u);
-    poisson = Integral(Gradient(u) * Gradient(v))
-            - Integral(f * v)
-            + DirichletBC(Gamma, g);
+    Problem poisson(u, v);
+    poisson = Integral(Gradient(u), Gradient(v))
+            - Integral(f, v)
+            + DirichletBC(u, g).on(Gamma);
   @endcode
 
-  In this case the
-  @ref Rodin::Variational::Integral<FormLanguage::Product<TrialFunctionBase,TestFunctionBase>>
-  "Integral(Gradient(u) * Gradient(v))"
+  In this case the `Integral(Gradient(u), Gradient(v))`
   object represents the bilinear term
   @f[
     \int_\Omega \nabla u \cdot \nabla v \ dx \ ,
   @f]
-  while the `Integral(f * v)` object represents the linear term
+  while the `Integral(f, v)`
+  object represents the linear term
   @f[
     \int_\Omega f v \ dx .
   @f]
-  Lastly, the
-  @ref Rodin::Variational::DirichletBC<ScalarCoefficientBase>() "DirichletBC(Gamma, g)"
-  object specifies that the solution will satisfy the homogenous Dirichlet
-  condition:
+  Lastly, the line `DirichletBC(u, g).on(Gamma)` specifies that the solution
+  will satisfy the Dirichlet condition:
   @f[
     u = g \quad \text{on} \quad \Gamma .
   @f]
-  with @f$ g = 0 @f$ everywhere on @f$ \Gamma @f$.
-
-  Generally, it is somewhat tedious to remember what each integrator
-  represents so the developer is encouraged to use search the documentation
-  with the integrator term to know what the integrator represents.
 
   With the problem defined, we now need to solve the underlying linear system
   given by the associated stiffness matrix.
   There are many different types of solvers in Rodin but for this example we
-  will utilize the Preconditioned Conjugate Gradient (PCG) solver:
+  will utilize the @ref Rodin::Solver::CG "Conjugate Gradient (CG)" solver, as
+  shown in the following code snippet:
 
   @code{.cpp}
-    Solver::PCG().setMaxIterations(200)
-                 .setRelativeTolerance(1e-12)
-                 .printIterations(true)
-                 .solve(poisson);
+    Solver::CG().setMaxIterations(200)
+                .setRelativeTolerance(1e-12)
+                .printIterations(true)
+                .solve(poisson);
   @endcode
 
-  This piece of code creates a PCG object and sets some parameters before
-  solving the problem we just defined.
+  This piece of code creates a CG object in place, while setting some
+  parameters, and finally calling the @ref Rodin::Solver::CG.solve() "solve()"
+  method on the problem.
 
-  Finally, we will typically want to visualize our solution. We can do this by
-  saving both the solution and mesh objects to file, and then using
-  [GLVis](https://glvis.org/) to view the results.
+  Ultimately, with the problem solved, we will want to visualize our solution.
+  We can do this by saving both the solution and mesh objects to file, and then
+  using [GLVis](https://glvis.org/) to view the results.
 
   @code{.cpp}
-    u.save("u.gf");
+    u.getGridFunction().save("u.gf");
     Omega.save("Omega.mesh");
   @endcode
 

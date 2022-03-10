@@ -33,10 +33,14 @@ namespace Rodin::Variational
 
    class IncompleteGridFunction;
 
+   /**
+    * Enumeration class to indicate whether a derived instance of
+    * ShapeFunctionBase is either a Trial or Test space.
+    */
    enum ShapeFunctionSpaceType
    {
-      Trial,
-      Test
+      Trial, ///< Trial function space
+      Test ///< Test function space
    };
 
    template <class FES, ShapeFunctionSpaceType Space>
@@ -52,14 +56,18 @@ namespace Rodin::Variational
    class Component;
 
    /**
-    * @brief Where the integration takes place.
+    * Enumeration class to indicate whether the integration should be done
+    * either inside the Domain or on the Boundary.
     */
    enum IntegratorRegion
    {
-      Domain,
-      Boundary
+      Domain, ///< Perform the integration over the interior domain
+      Boundary ///< Perform the integration over the boundary of the domain
    };
 
+   /**
+    * @brief Integral class
+    */
    template <class Integrand>
    class Integral;
 
