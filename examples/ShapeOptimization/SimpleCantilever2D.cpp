@@ -82,8 +82,7 @@ int main(int, char**)
     hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(w, n)).over(Gamma0)
-            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaD)
-            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
+            + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaD, GammaN});
     cg.solve(hilbert);
     Omega.save("Omegai.mesh");
     g.getGridFunction().save("g.gf");
