@@ -11,7 +11,7 @@ namespace Rodin::Variational
       return std::unique_ptr<mfem::MatrixCoefficient>(new Internal::ProxyMatrixCoefficient(*this));
    }
 
-   Transpose MatrixCoefficientBase::T() const
+   Transpose<MatrixCoefficientBase> MatrixCoefficientBase::T() const
    {
       return Transpose(*this);
    }

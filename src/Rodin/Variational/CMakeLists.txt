@@ -50,7 +50,6 @@ set(RodinVariational_SRCS
   Jacobian.cpp
   MatrixCoefficient.cpp
   Trace.cpp
-  Transpose.cpp
   VectorBoundaryFluxLFIntegrator.cpp
   VectorCoefficient.cpp
   VectorMassIntegrator.cpp

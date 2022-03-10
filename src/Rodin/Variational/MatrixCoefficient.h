@@ -42,7 +42,7 @@ namespace Rodin::Variational
 
          virtual ~MatrixCoefficientBase() = default;
 
-         virtual Transpose T() const;
+         virtual Transpose<MatrixCoefficientBase> T() const;
 
          virtual int getRows() const = 0;
 

@@ -33,6 +33,25 @@ namespace Rodin::Variational
       return std::unique_ptr<Rank3Operator>(result);
    }
 
+   std::unique_ptr<Rank3Operator> Rank3Operator::OperatorSum(const Rank3Operator& rhs) const
+   {
+      assert(GetRows() == rhs.GetRows());
+      assert(GetColumns() == rhs.GetColumns());
+      assert(GetDOFs() == rhs.GetDOFs());
+      auto result = new DenseRank3Operator(GetColumns(), GetRows(), GetDOFs());
+      for (int k = 0; k < GetDOFs(); k++)
+      {
+         for (int i = 0; i < GetRows(); i++)
+         {
+            for (int j = 0; j < GetColumns(); j++)
+            {
+               (*result)(i, j, k) = (*this)(i, j, k) + rhs(i, j, k);
+            }
+         }
+      }
+      return std::unique_ptr<Rank3Operator>(result);
+   }
+
    std::unique_ptr<Rank3Operator> Rank3Operator::ScalarMatrixMult(
          const mfem::DenseMatrix& lhs) const
    {

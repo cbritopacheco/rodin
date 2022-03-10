@@ -25,8 +25,8 @@ target_link_libraries(LevelSetMast2D
   Rodin::External::MMG
   )
 
-add_executable(LevelSetBridge2D LevelSetBridge2D.cpp)
-target_link_libraries(LevelSetBridge2D
+add_executable(LevelSetArch2D LevelSetArch2D.cpp)
+target_link_libraries(LevelSetArch2D
   PUBLIC
   Rodin::Mesh
   Rodin::Solver

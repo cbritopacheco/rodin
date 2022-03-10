@@ -48,6 +48,15 @@ namespace Rodin::Variational
          std::unique_ptr<Rank3Operator> Transpose() const;
 
          /**
+          * @f$ u @f$ with @f$ n @f$ degrees of freedom
+          * @f$ v @f$ with @f$ m @f$ degrees of freedom
+          *
+          * Stiffness matrix of @f$ m \times n @f$.
+          */
+         virtual
+         std::unique_ptr<Rank3Operator> OperatorSum(const Rank3Operator& rhs) const;
+
+         /**
           * @f[
           *    \Lambda A(u)
           * @f]

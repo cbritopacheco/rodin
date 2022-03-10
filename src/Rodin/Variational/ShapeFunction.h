@@ -90,6 +90,11 @@ namespace Rodin::Variational
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const = 0;
 
+         Transpose<ShapeFunctionBase<Space>> T() const
+         {
+            return Transpose<ShapeFunctionBase<Space>>(*this);
+         }
+
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
          virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
@@ -141,7 +146,7 @@ namespace Rodin::Variational
 
          int getDOFs(
                const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation&) const
+               const mfem::ElementTransformation&) const override
          {
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }

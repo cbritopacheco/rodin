@@ -122,7 +122,7 @@ namespace Rodin::Variational
 
          int getDOFs(
                const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const
+               const mfem::ElementTransformation& trans) const override
          {
             return getRHS().getDOFs(fe, trans);
          }
@@ -218,7 +218,7 @@ namespace Rodin::Variational
 
          int getDOFs(
                const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const
+               const mfem::ElementTransformation& trans) const override
          {
             return getRHS().getDOFs(fe, trans);
          }

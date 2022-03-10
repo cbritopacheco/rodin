@@ -46,5 +46,5 @@ Vh phi0, phi;
 phi0 = holes2d(cx.n, cx, cy, 0.05);
 distance(Th, phi0, phi[]);
 
-savesol("bridge2d-box.sol", Th, phi);
-savemesh(Th, "bridge2d-box.mesh");
+savesol("arch2d-box.sol", Th, phi);
+savemesh(Th, "arch2d-box.mesh");

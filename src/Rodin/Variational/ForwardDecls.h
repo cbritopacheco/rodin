@@ -113,6 +113,7 @@ namespace Rodin::Variational
    class MatrixCoefficient;
 
    // ---- Expressions -------------------------------------------------------
+   template <class T>
    class Transpose;
 
    template <class T>

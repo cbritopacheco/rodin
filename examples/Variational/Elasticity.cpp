@@ -25,18 +25,21 @@ int main(int argc, char** argv)
   int d = 2;
   H1 Vh(Omega, d);
 
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
+  // Pull force
   auto f = VectorCoefficient{0, -1};
 
   // Define problem
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
   Problem elasticity(u, v);
-  elasticity = ElasticityIntegrator(lambda, mu)
+  elasticity = Integral(lambda * Div(u), Div(v))
+             + Integral(
+                 mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
 
