@@ -5,20 +5,20 @@
 
 namespace Rodin::Variational
 {
-   template <>
-   class TestFunction<H1> : public ShapeFunction<H1, Test>
+   template <class FES>
+   class TestFunction : public ShapeFunction<FES, Test>
    {
       public:
-         TestFunction(H1& fes)
-            : ShapeFunction<H1, Test>(fes)
+         TestFunction(FES& fes)
+            : ShapeFunction<FES, Test>(fes)
          {}
 
          TestFunction(const TestFunction& other)
-            : ShapeFunction<H1, Test>(other)
+            : ShapeFunction<FES, Test>(other)
          {}
 
          TestFunction(TestFunction&& other)
-            : ShapeFunction<H1, Test>(std::move(other))
+            : ShapeFunction<FES, Test>(std::move(other))
          {}
 
          TestFunction* copy() const noexcept override
@@ -26,6 +26,7 @@ namespace Rodin::Variational
             return new TestFunction(*this);
          }
    };
-   TestFunction(H1& fes) -> TestFunction<H1>;
+   template <class FES>
+   TestFunction(FES& fes) -> TestFunction<FES>;
 }
 #endif

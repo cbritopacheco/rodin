@@ -14,7 +14,6 @@
 
 #include "ForwardDecls.h"
 
-#include "Component.h"
 #include "ShapeFunction.h"
 #include "ScalarCoefficient.h"
 #include "VectorCoefficient.h"
@@ -39,16 +38,10 @@ namespace Rodin::Variational
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
     * | @f$ g @f$            | ScalarCoefficient                             |
     */
-   class DirichletBC
+   template <>
+   class DirichletBC<TrialFunction<H1>>
    {
       public:
-         template <class T>
-         DirichletBC(const Component<TrialFunction<H1>>& u, T&& v)
-            : DirichletBC(u.getTrialFunction(), std::forward<T>(v))
-         {
-            m_componentIdx = u.getComponent();
-         }
-
          DirichletBC(const TrialFunction<H1>& u, double v)
             : DirichletBC(u, ScalarCoefficient(v))
          {}
@@ -103,11 +96,6 @@ namespace Rodin::Variational
             return m_essBdr;
          }
 
-         std::optional<int> getComponent() const
-         {
-            return m_componentIdx;
-         }
-
          /**
           * @returns Returns reference to the value of the boundary condition
           * at the boundary
@@ -131,6 +119,12 @@ namespace Rodin::Variational
             std::unique_ptr<VectorCoefficientBase>> m_value;
          std::optional<int> m_componentIdx;
    };
+   DirichletBC(const TrialFunction<H1>&, double)
+      -> DirichletBC<TrialFunction<H1>>;
+   DirichletBC(const TrialFunction<H1>&, const ScalarCoefficientBase&)
+      -> DirichletBC<TrialFunction<H1>>;
+   DirichletBC(const TrialFunction<H1>&, const VectorCoefficientBase&)
+      -> DirichletBC<TrialFunction<H1>>;
 }
 
 #endif

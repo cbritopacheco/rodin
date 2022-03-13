@@ -10,7 +10,7 @@ namespace Rodin::Variational
    class Component<TrialFunction<FES>>
    {
       public:
-         Component(TrialFunction<FES>& u, int component)
+         Component(const TrialFunction<FES>& u, int component)
             : m_u(u),
               m_component(component)
          {}
@@ -25,11 +25,6 @@ namespace Rodin::Variational
               m_component(other.m_component)
          {}
 
-         TrialFunction<FES>& getTrialFunction()
-         {
-            return m_u;
-         }
-
          const TrialFunction<FES>& getTrialFunction() const
          {
             return m_u;
@@ -42,7 +37,7 @@ namespace Rodin::Variational
 
       private:
          const int m_component;
-         TrialFunction<FES>& m_u;
+         const TrialFunction<FES>& m_u;
    };
    template <class FES>
    Component(TrialFunction<FES>&, int) -> Component<TrialFunction<FES>>;

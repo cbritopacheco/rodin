@@ -27,7 +27,7 @@ namespace Rodin::Variational::FormLanguage
    class ProblemBody : public Base
    {
       public:
-         using BCList =  std::vector<DirichletBC>;
+         using BCList =  std::vector<DirichletBC<TrialFunction<H1>>>;
          using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
          using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
 
@@ -68,7 +68,7 @@ namespace Rodin::Variational::FormLanguage
    ProblemBody operator-(
          const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
 
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC& bc);
+   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<TrialFunction<H1>>& bc);
 }
 
 #endif

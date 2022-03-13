@@ -29,6 +29,7 @@ jobs:
           vulkan-headers
           molten-vk
           suitesparse
+          boost
       - name: Configure CMake
         run: >
           cmake

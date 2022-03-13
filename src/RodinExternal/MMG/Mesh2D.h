@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_RODININTEGRATION_MMG_MESH2D_H
-#define RODIN_RODININTEGRATION_MMG_MESH2D_H
+#ifndef RODIN_EXTERNAL_MMG_MESH2D_H
+#define RODIN_EXTERNAL_MMG_MESH2D_H
 
 #include <string>
 #include <vector>

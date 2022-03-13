@@ -18,38 +18,38 @@ int main(int, char**)
 
   // Build finite element space
   H1 Vh(Omega);
-  L2 Ph(Omega);
 
   double ell = 1;
   double mu = 0.1;
   auto f = ScalarCoefficient(1.0);
   double min = 0.0001, max = 1;
-  GridFunction gamma(Ph);
+
+  GridFunction gamma(Vh);
 
   // Poisson problem
   TrialFunction u(Vh);
   TestFunction  v(Vh);
   Problem poisson(u, v);
-  poisson = Integral((min + (max - min) * gamma) * Gradient(u) * Gradient(v))
+  poisson = Integral((min + (max - min) * gamma) * Grad(u), Grad(v))
           - Integral(f * v)
-          + DirichletBC(GammaD, ScalarCoefficient(0.0));
+          + DirichletBC(u, ScalarCoefficient(0.0)).on(GammaD);
 
   // Adjoint problem
   TrialFunction p(Vh);
   TestFunction  q(Vh);
   Problem adjoint(p, q);
-  poisson = Integral((min + (max - min) * gamma) * Gradient(p) * Gradient(q))
+  poisson = Integral((min + (max - min) * gamma) * Grad(u), Grad(v))
           - Integral(1.0 / Omega.getVolume() * q)
-          + DirichletBC(GammaD, ScalarCoefficient(0.0));
+          + DirichletBC(p, ScalarCoefficient(0.0)).on(GammaD);
 
   // Hilbert extension-regularization
   TrialFunction g(Vh);
   TestFunction  w(Vh);
   Problem hilbert(g, w);
-  hilbert = Integral(Gradient(g) * Gradient(w))
-          + Integral(g * w)
-          - Integral(ell + 3 * (max - min) * Pow(gamma, 2) * Gradient(u) * Gradient(p) * w)
-          + DirichletBC(GammaD, ScalarCoefficient(0.0));
+  hilbert = Integral(Grad(g), Grad(w))
+          + Integral(g, w)
+          - Integral(ell + 3 * (max - min) * Pow(gamma, 2) * Grad(u) * Grad(p) * w)
+          + DirichletBC(g, ScalarCoefficient(0.0)).on(GammaD);
 
   // Optimization loop
   double eps = 1e-6;

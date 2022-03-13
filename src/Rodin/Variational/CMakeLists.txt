@@ -42,7 +42,6 @@ set(RodinVariational_SRCS
   EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
-  Grad.cpp
   ShapeFunction.cpp
   GridFunctionIndex.cpp
   GridFunctionView.cpp
@@ -70,12 +69,15 @@ add_library(RodinVariational
   ${RodinVariational_SRCS} ${RodinVariational_HEADERS})
 add_library(Rodin::Variational ALIAS RodinVariational)
 
+find_package(Boost 1.65 REQUIRED)
+
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariational
   INTERFACE
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   PUBLIC
   ${MFEM_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
   )
 
 target_link_libraries(RodinVariational

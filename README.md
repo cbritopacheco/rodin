@@ -13,7 +13,11 @@
 ## Requirements
 
 - [CMake 3.12.0+](https://cmake.org/)
+- [Boost 1.65+](https://www.boost.org/)
 - [SuiteSparse](https://people.engr.tamu.edu/davis/suitesparse.html)
+
+Any of these should be available for quick install from your standard package
+manager.
 
 ## Building the project
 

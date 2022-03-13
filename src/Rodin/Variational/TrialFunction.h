@@ -1,26 +1,32 @@
 #ifndef RODIN_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 #include "Component.h"
 #include "GridFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
-   template <>
-   class TrialFunction<H1> : public ShapeFunction<H1, Trial>
+   template <class FES>
+   class TrialFunction : public ShapeFunction<FES, Trial>
    {
       public:
-         TrialFunction(H1& fes)
-            : ShapeFunction<H1, Trial>(fes)
+         TrialFunction(FES& fes)
+            : ShapeFunction<FES, Trial>(fes),
+              m_uuid(boost::uuids::random_generator()())
          {}
 
          TrialFunction(const TrialFunction& other)
-            : ShapeFunction<H1, Trial>(other)
+            : ShapeFunction<FES, Trial>(other),
+              m_uuid(other.m_uuid)
          {}
 
          TrialFunction(TrialFunction&& other)
-            : ShapeFunction<H1, Trial>(std::move(other))
+            : ShapeFunction<FES, Trial>(std::move(other)),
+              m_uuid(std::move(other.m_uuid))
          {}
 
          TrialFunction& emplaceGridFunction()
@@ -29,32 +35,48 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction<H1>& getGridFunction()
+         GridFunction<FES>& getGridFunction()
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         const GridFunction<H1>& getGridFunction() const
+         const GridFunction<FES>& getGridFunction() const
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         Component<TrialFunction<H1>> x() const;
+         Component<TrialFunction<FES>> x() const
+         {
+            return Component<TrialFunction<FES>>(*this, 0);
+         }
 
-         Component<TrialFunction<H1>> y() const;
+         Component<TrialFunction<FES>> y() const
+         {
+            return Component<TrialFunction<FES>>(*this, 1);
+         }
 
-         Component<TrialFunction<H1>> z() const;
+         Component<TrialFunction<FES>> z() const
+         {
+            return Component<TrialFunction<FES>>(*this, 2);
+         }
+
+         boost::uuids::uuid getUUID() const
+         {
+            return m_uuid;
+         }
 
          TrialFunction* copy() const noexcept override
          {
             return new TrialFunction(*this);
          }
       private:
-         std::optional<GridFunction<H1>> m_gf;
+         std::optional<GridFunction<FES>> m_gf;
+         const boost::uuids::uuid m_uuid;
    };
-   TrialFunction(H1& fes) -> TrialFunction<H1>;
+   template <class FES>
+   TrialFunction(FES& fes) -> TrialFunction<FES>;
 }
 #endif
 

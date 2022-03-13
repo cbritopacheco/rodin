@@ -15,9 +15,8 @@ namespace Rodin::Variational
    class EssentialBoundary
    {
       public:
-         void add(const TrialFunction<H1>& u, const ScalarCoefficientBase&);
-         void add(const TrialFunction<H1>& u, const VectorCoefficientBase&);
-         void add(const Component<TrialFunction<H1>>& u, const ScalarCoefficientBase&);
+         void add(const DirichletBC<TrialFunction<H1>>& dbc);
+         void add(const DirichletBC<Component<TrialFunction<H1>>>& dbc);
    };
 }
 

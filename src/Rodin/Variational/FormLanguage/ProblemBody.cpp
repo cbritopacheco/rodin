@@ -133,7 +133,7 @@ namespace Rodin::Variational::FormLanguage
       return res;
    }
 
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC& bc)
+   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<TrialFunction<H1>>& bc)
    {
       ProblemBody res(pb);
       res.getDirichletBCList().push_back(bc);
