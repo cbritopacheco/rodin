@@ -18,11 +18,14 @@
 
 #include "FormLanguage/ForwardDecls.h"
 
+#include "ForwardDecls.h"
+
+#include "ProblemBody.h"
+#include "LinearForm.h"
+#include "BilinearForm.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
-#include "ForwardDecls.h"
-#include "BilinearForm.h"
-#include "LinearForm.h"
+#include "EssentialBoundary.h"
 
 
 namespace Rodin::Variational
@@ -45,16 +48,16 @@ namespace Rodin::Variational
           * @param[in] rhs Problem body constructed using expressions from the
           * Variational::FormLanguage.
           */
-         virtual ProblemBase& operator=(const FormLanguage::ProblemBody& rhs) = 0;
+         virtual ProblemBase& operator=(const ProblemBody& rhs) = 0;
 
          /**
           * @brief Assembles the underlying linear system to solve.
-          *
-          * @note This is typically the first thing that is done when calling
-          * the @ref Solver::solve() method.
           */
          virtual void assemble() = 0;
 
+         /**
+          * @brief Updates the ProblemBase instance after a refinement in the mesh
+          */
          virtual void update() = 0;
    };
 
@@ -62,7 +65,7 @@ namespace Rodin::Variational
     * @brief Represents a variational problem to be solved.
     *
     * The problem may be specified via the overloaded operator
-    * @ref Variational::Problem::operator=(const FormLanguage::ProblemBody&).
+    * @ref Variational::Problem::operator=(const ProblemBody&).
     *
     * The problem may then be solved by utilizing any derived instance Solver
     * class in the Rodin::Solver namespace.
@@ -101,7 +104,7 @@ namespace Rodin::Variational
 
          void getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X) override;
 
-         Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
+         Problem& operator=(const ProblemBody& rhs) override;
       private:
          LinearForm<TrialFES>       m_linearForm;
          BilinearForm<TrialFES>     m_bilinearForm;
@@ -111,7 +114,7 @@ namespace Rodin::Variational
          const std::map<
             boost::uuids::uuid,
             std::reference_wrapper<TestFunction<TestFES>>> m_testFunctions;
-         std::unique_ptr<FormLanguage::ProblemBody> m_pb;
+         std::unique_ptr<ProblemBody> m_pb;
 
          mfem::Array<int> m_essTrueDofList;
    };

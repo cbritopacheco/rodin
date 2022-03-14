@@ -122,9 +122,7 @@ components:
      a(u, v) - b(v) = 0 \ ,
   @f]
   where @f$ a(u, v) @f$ and @f$ b(v) @f$ are our respective bilinear and linear
-  forms.
-
-  The left hand side is then used to define the variational problem which we
+  forms. The left hand side is then used to define the variational problem which we
   want to solve. In the code this is achieved by the following declaration:
 
   @code{.cpp}
@@ -136,7 +134,6 @@ components:
             - Integral(f, v)
             + DirichletBC(u, g).on(Gamma);
   @endcode
-
   In this case the `Integral(Gradient(u), Gradient(v))`
   object represents the bilinear term
   @f[

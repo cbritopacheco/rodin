@@ -11,7 +11,6 @@
 
 #include "ForwardDecls.h"
 #include "LinearFormIntegrator.h"
-#include "FormLanguage/ProblemBody.h"
 #include "FormLanguage/LinearFormIntegratorSum.h"
 
 namespace Rodin::Variational

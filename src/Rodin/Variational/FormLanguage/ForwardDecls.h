@@ -16,8 +16,6 @@ namespace Rodin::Variational::FormLanguage
    template <class InternalValue>
    class Buildable;
 
-   class ProblemBody;
-
    class BilinearFormIntegratorSum;
 
    template <class T>

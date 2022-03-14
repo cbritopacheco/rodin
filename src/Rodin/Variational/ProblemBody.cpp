@@ -4,19 +4,19 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Variational/Component.h"
-#include "../UnaryMinus.h"
+#include "Component.h"
+#include "UnaryMinus.h"
 
 #include "ProblemBody.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
    {
       m_bfiDomainList.emplace_back(bfi.copy());
    }
 
-   ProblemBody::ProblemBody(const BilinearFormIntegratorSum& bsum)
+   ProblemBody::ProblemBody(const FormLanguage::BilinearFormIntegratorSum& bsum)
    {
       m_bfiDomainList.reserve(bsum.getBilinearFormDomainIntegratorList().size());
       for (const auto& p : bsum.getBilinearFormDomainIntegratorList())
@@ -110,7 +110,7 @@ namespace Rodin::Variational::FormLanguage
    }
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
+         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi)
    {
       ProblemBody res(pb);
       for (const auto& p : lfi.getLinearFormDomainIntegratorList())
@@ -121,7 +121,7 @@ namespace Rodin::Variational::FormLanguage
    }
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
+         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi)
    {
       ProblemBody res(pb);
       for (const auto& p : lfi.getLinearFormDomainIntegratorList())

@@ -15,6 +15,8 @@ namespace Rodin::Variational
    template <class TrialFES, class TestFES>
    class Problem;
 
+   class ProblemBody;
+
    // ---- FiniteElementSpace ------------------------------------------------
    class FiniteElementSpaceBase;
 

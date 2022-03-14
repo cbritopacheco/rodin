@@ -27,6 +27,7 @@ set(RodinVariational_HEADERS
   LinearFormIntegrator.h
   MatrixCoefficient.h
   Problem.h
+  ProblemBody.h
   ScalarCoefficient.h
   Trace.h
   Transpose.h
@@ -63,6 +64,7 @@ set(RodinVariational_SRCS
   Dot.cpp
   LinearForm.hpp
   Problem.hpp
+  ProblemBody.cpp
   )
 
 add_library(RodinVariational

@@ -11,20 +11,22 @@
 #include <memory>
 #include <optional>
 
-#include "Rodin/Variational/BilinearFormIntegrator.h"
-#include "Rodin/Variational/LinearFormIntegrator.h"
-#include "Rodin/Variational/EssentialBoundary.h"
+
+#include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 
-#include "Base.h"
+#include "BilinearFormIntegrator.h"
+#include "LinearFormIntegrator.h"
+#include "EssentialBoundary.h"
 
-namespace Rodin::Variational::FormLanguage
+
+namespace Rodin::Variational
 {
    /**
     * @brief Represents the body of a variational problem.
     */
-   class ProblemBody : public Base
+   class ProblemBody : public FormLanguage::Base
    {
       public:
          using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
@@ -32,7 +34,7 @@ namespace Rodin::Variational::FormLanguage
 
          ProblemBody(const BilinearFormIntegratorBase& bfi);
 
-         ProblemBody(const BilinearFormIntegratorSum& bfi);
+         ProblemBody(const FormLanguage::BilinearFormIntegratorSum& bfi);
 
          ProblemBody(const ProblemBody& other);
 
@@ -61,10 +63,10 @@ namespace Rodin::Variational::FormLanguage
          const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
+         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi);
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
+         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi);
 
    template <class T, class Value>
    ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T, Value>& bc)

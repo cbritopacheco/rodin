@@ -9,8 +9,6 @@
 
 #include "Rodin/Utility.h"
 
-#include "FormLanguage/ProblemBody.h"
-
 #include "GridFunction.h"
 #include "DirichletBC.h"
 
@@ -27,7 +25,7 @@ namespace Rodin::Variational
    {}
 
    template <class TrialFES, class TestFES>
-   Problem<TrialFES, TestFES>& Problem<TrialFES, TestFES>::operator=(const FormLanguage::ProblemBody& rhs)
+   Problem<TrialFES, TestFES>& Problem<TrialFES, TestFES>::operator=(const ProblemBody& rhs)
    {
       m_pb.reset(rhs.copy());
 

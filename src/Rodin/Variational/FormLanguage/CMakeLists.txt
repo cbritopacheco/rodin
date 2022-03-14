@@ -1,13 +1,11 @@
 set(RodinVariationalFormLanguage_HEADERS
   Base.h
   ForwardDecls.h
-  ProblemBody.h
   BilinearFormIntegratorSum.h
   LinearFormIntegratorSum.h
   )
 
 set(RodinVariationalFormLanguage_SRCS
-  ProblemBody.cpp
   BilinearFormIntegratorSum.cpp
   LinearFormIntegratorSum.cpp
   )

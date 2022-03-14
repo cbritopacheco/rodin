@@ -11,7 +11,6 @@
 
 #include "ForwardDecls.h"
 #include "BilinearFormIntegrator.h"
-#include "FormLanguage/ProblemBody.h"
 
 namespace Rodin::Variational
 {
