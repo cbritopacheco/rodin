@@ -119,9 +119,9 @@ components:
   @f[
   \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
   \forall v \in H^1_0(\Omega), \quad
-     a(u, v) - l(v) = 0 \ ,
+     a(u, v) - b(v) = 0 \ ,
   @f]
-  where @f$ a(u, v) @f$ and @f$ l(v) @f$ are our respective bilinear and linear
+  where @f$ a(u, v) @f$ and @f$ b(v) @f$ are our respective bilinear and linear
   forms.
 
   The left hand side is then used to define the variational problem which we
