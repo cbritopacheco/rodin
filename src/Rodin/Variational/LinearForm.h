@@ -33,7 +33,7 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a linear form on some finite element space
+    * @brief Represents a linear form defined over some finite element space
     *
     * An object of type LinearForm represents a linear map
     * @f[
@@ -42,8 +42,10 @@ namespace Rodin::Variational
     *        v &\mapsto L(v)
     * \end{aligned}
     * @f]
-    * where @f$ V @f$ is a finite element space. A linear form can be specified
-    * by from one or more linear integrators (e.g. DomainLFIntegrator).
+    * where @f$ V @f$ is a finite element space.
+    *
+    * A linear form can be specified by from one or more
+    * LinearFormIntegratorBase instances.
     */
    template <class FES>
    class LinearForm : public LinearFormBase
@@ -59,6 +61,7 @@ namespace Rodin::Variational
          LinearForm(FES& fes);
 
          LinearForm& operator=(const LinearFormIntegratorBase& lfi);
+
          LinearForm& operator=(const FormLanguage::LinearFormIntegratorSum& lsum);
 
          /**

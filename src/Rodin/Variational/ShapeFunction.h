@@ -65,6 +65,9 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Value = Trial;
    };
 
+   /**
+    * @brief Base class for operators
+    */
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase : public FormLanguage::Base
    {

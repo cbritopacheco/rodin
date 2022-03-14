@@ -43,6 +43,9 @@ namespace Rodin::Variational
       Test ///< Test function space
    };
 
+   template <ShapeFunctionSpaceType Space>
+   class ShapeFunctionBase;
+
    template <class FES, ShapeFunctionSpaceType Space>
    class ShapeFunction;
 

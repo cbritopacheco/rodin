@@ -17,13 +17,17 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Base class for linear form integrators.
+    *
+    * An instance of LinearFormIntegratorBase performs the assembly of the
+    * element vector for each finite element.
+    */
    class LinearFormIntegratorBase
       : public FormLanguage::Buildable<mfem::LinearFormIntegrator>
    {
       public:
          virtual ~LinearFormIntegratorBase() = default;
-
-         std::unique_ptr<mfem::LinearFormIntegrator> build() const override;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -35,30 +39,34 @@ namespace Rodin::Variational
           */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
+         /**
+          * @brief Performs the assembly of the element vector.
+          * @param[in] fe Test space finite element
+          * @param[in] trans Element transformation
+          * @param[out] vec Element vector
+          */
          virtual void getElementVector(
                const mfem::FiniteElement& fe, mfem::ElementTransformation&
                trans, mfem::Vector& vec) const = 0;
 
+         std::unique_ptr<mfem::LinearFormIntegrator> build() const override;
+
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
    };
 
+   /**
+    * @brief Represents a linear form integrator over the interior of the domain
+    */
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
          LinearFormDomainIntegrator() = default;
+
          LinearFormDomainIntegrator(const LinearFormDomainIntegrator&) = default;
+
          LinearFormDomainIntegrator(LinearFormDomainIntegrator&&) = default;
+
          virtual ~LinearFormDomainIntegrator() = default;
-
-         IntegratorRegion getIntegratorRegion() const override
-         {
-            return IntegratorRegion::Domain;
-         }
-
-         const std::set<int>& getAttributes() const override
-         {
-            return m_attrs;
-         }
 
          /**
           * @brief Specifies the material reference over which to integrate.
@@ -86,11 +94,24 @@ namespace Rodin::Variational
             return *this;
          }
 
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Domain;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attrs;
+         }
+
          virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
       private:
          std::set<int> m_attrs;
    };
 
+   /**
+    * @brief Represents a linear form integrator over the boundary of the domain
+    */
    class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
    {
       public:
@@ -98,16 +119,6 @@ namespace Rodin::Variational
          LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator&) = default;
          LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
          virtual ~LinearFormBoundaryIntegrator() = default;
-
-         IntegratorRegion getIntegratorRegion() const override
-         {
-            return IntegratorRegion::Boundary;
-         }
-
-         const std::set<int>& getAttributes() const override
-         {
-            return m_attrs;
-         }
 
          /**
           * @brief Specifies the material reference over which to integrate.
@@ -133,6 +144,16 @@ namespace Rodin::Variational
             assert(attrs.size() > 0);
             m_attrs = attrs;
             return *this;
+         }
+
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Boundary;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attrs;
          }
 
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;

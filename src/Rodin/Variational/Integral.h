@@ -24,10 +24,15 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Integral of the dot product of a trial function and a test function
+    * @brief Integral of the dot product of a trial and a test operator
     *
+    * Given two operators defined over trial and test spaces @f$ U_h @f$ and @f$ V_h @f$,
     * @f[
-    *    \int_\Omega A(u) : A(v) \ dx
+    *    A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
+    * @f]
+    * this class represents the integral of their dot product:
+    * @f[
+    *    \int_\Omega A(u) : B(v) \ dx
     * @f]
     */
    template <>
@@ -37,10 +42,32 @@ namespace Rodin::Variational
       public:
          using Integrand = Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
 
+         /**
+          * @brief Integral of the dot product of trial and test operators
+          *
+          * Constructs an instance representing the following integral:
+          * @f[
+          *    \int_\Omega A(u) : B(v) \ dx
+          * @f]
+          *
+          * @param[in] lhs Trial operator @f$ A(u) @f$
+          * @param[in] rhs Test operator @f$ B(v) @f$
+          */
          Integral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
+         /**
+          * @brief Integral of the dot product of trial and test operators
+          *
+          * Constructs the following object representing the following
+          * integral:
+          * @f[
+          *    \int_\Omega A(u) : B(v) \ dx
+          * @f]
+          *
+          * @param[in] prod Dot product instance
+          */
          Integral(const Integrand& prod)
             : m_prod(prod),
               m_intOrder(
@@ -62,6 +89,11 @@ namespace Rodin::Variational
               m_intOrder(std::move(other.m_intOrder))
          {}
 
+         /**
+          * @brief Sets the function which calculates the integration order
+          * @param[in] order Function which computes the order of integration
+          * @returns Reference to self (for method chaining)
+          */
          Integral& setIntegrationOrder(
             std::function<
                int(const mfem::FiniteElement&, const mfem::FiniteElement&, mfem::ElementTransformation&)> order)
@@ -70,8 +102,14 @@ namespace Rodin::Variational
             return *this;
          }
 
+         /**
+          * @brief Sets the function which calculates the integration order
+          * @param[in] order Function which computes the order of integration
+          * @returns Reference to self (for method chaining)
+          */
          int getIntegrationOrder(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test, mfem::ElementTransformation& trans) const
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               mfem::ElementTransformation& trans) const
          {
             return m_intOrder(trial, test, trans);
          }
@@ -96,10 +134,15 @@ namespace Rodin::Variational
 
 
    /**
-    * @brief Integral of a test function
+    * @brief Integral of a scalar valued test function operator
     *
+    * Given an operator defined over a test space @f$ V_h @f$
     * @f[
-    *    \int_\Omega A(v) \ dx
+    *    A : V_h \rightarrow \mathbb{R},
+    * @f]
+    * this class will represent its integral
+    * @f[
+    *    \int_\Omega A(v) \ dx \ .
     * @f]
     */
    template <>
@@ -110,8 +153,16 @@ namespace Rodin::Variational
          using Integrand = ShapeFunctionBase<Test>;
 
          /**
+          * @brief Integral of the multiplication between a scalar valued function and operator
+          *
+          * Given
           * @f[
-          *    \int \lambda A(v) \ dx
+          * \lambda : \Omega \rightarrow \mathbb{R}, \quad
+          * A : V_h \rightarrow \mathbb{R}
+          * @f]
+          * constructs an instance representing the following integral
+          * @f[
+          *    \int \lambda A(v) \ dx \ .
           * @f]
           */
          Integral(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
@@ -119,8 +170,16 @@ namespace Rodin::Variational
          {}
 
          /**
+          * @brief Integral of the dot product between a vector valued function and operator
+          *
+          * Given
           * @f[
-          *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx
+          * \vec{\lambda} : \Omega \rightarrow \mathbb{R}^d, \quad
+          * \vec{A} : V_h \rightarrow \mathbb{R}^d
+          * @f]
+          * constructs an instance representing the following integral
+          * @f[
+          *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx \ .
           * @f]
           */
          Integral(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
@@ -128,8 +187,15 @@ namespace Rodin::Variational
          {}
 
          /**
+          * @brief Integral of a scalar valued test operator
+          *
+          * Given
           * @f[
-          *    \int A(v) \ dx
+          *    A : V_h \rightarrow \mathbb{R}
+          * @f]
+          * constructs an instance representing the following integral
+          * @f[
+          *    \int_\Omega A(v) \ dx \ .
           * @f]
           */
          Integral(const Integrand& integrand)
@@ -151,6 +217,11 @@ namespace Rodin::Variational
               m_test(std::move(other.m_test))
          {}
 
+         /**
+          * @brief Sets the function which calculates the integration order
+          * @param[in] order Function which computes the order of integration
+          * @returns Reference to self (for method chaining)
+          */
          Integral& setIntegrationOrder(
             std::function<
                int(const mfem::FiniteElement&, mfem::ElementTransformation&)> order)
@@ -159,6 +230,11 @@ namespace Rodin::Variational
             return *this;
          }
 
+         /**
+          * @brief Sets the function which calculates the integration order
+          * @param[in] order Function which computes the order of integration
+          * @returns Reference to self (for method chaining)
+          */
          int getIntegrationOrder(
                const mfem::FiniteElement& fe, mfem::ElementTransformation& trans) const
          {
