@@ -59,7 +59,9 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -126,6 +128,15 @@ $ f $
 <use x='0' y='0' xlink:href='#eq4-g0-102'/>
 </g>
 </svg></td><td><a href="class_rodin_1_1_variational_1_1_vector_coefficient.html" class="m-doc">VectorCoefficient</a></td></tr></tbody></table>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_domain_integrator.html" class="m-doc">LinearFormDomainIntegrator</a>
+            </dt>
+            <dd>Represents a linear form integrator over the interior of the domain.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -143,6 +154,17 @@ $ f $
 <use x='0' y='0' xlink:href='#eq5-g0-102'/>
 </g>
 </svg>.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1b155fe48618a82c682ee8cc40cd16d3" class="m-doc">getElementVector</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
+              mfem::ElementTransformation&amp; trans,
+              mfem::Vector&amp; vec) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Performs the assembly of the element vector.</dd>
           </dl>
         </section>
         <section>
@@ -170,6 +192,33 @@ $ f $
                 <tr>
                   <td style="width: 1%">f&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Coefficient to integrate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1b155fe48618a82c682ee8cc40cd16d3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />VectorDomainLFIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b155fe48618a82c682ee8cc40cd16d3" class="m-doc-self">getElementVector</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
+              mfem::ElementTransformation&amp; trans,
+              mfem::Vector&amp; vec) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Performs the assembly of the element vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fe&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> space finite element</td>
+                </tr>
+                <tr>
+                  <td>trans&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Element transformation</td>
+                </tr>
+                <tr>
+                  <td>vec&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Element vector</td>
                 </tr>
               </tbody>
             </table>

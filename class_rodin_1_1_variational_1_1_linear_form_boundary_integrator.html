@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::VectorCoefficientBase class | Rodin</title>
+  <title>Rodin::Variational::LinearFormBoundaryIntegrator class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,82 +50,92 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorCoefficientBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearFormBoundaryIntegrator <span class="m-thin">class</span>
         </h1>
-        <p>Abstract base class for objects representing vector coefficients.</p>
+        <p>Represents a linear form integrator over the boundary of the domain.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+          </dl>
+        </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_h1_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;H1&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_vector_boundary_flux_l_f_integrator.html" class="m-doc">VectorBoundaryFluxLFIntegrator</a>
             </dt>
-            <dd>Represents the gradient <svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
-<title>
-$ \nabla u $
-</title>
-<defs>
-<path id='eq3-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
-<path id='eq3-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
-</defs>
-<g id='eq3-page1'>
-<use x='0' y='0' xlink:href='#eq3-g0-114'/>
-<use x='9.962671' y='0' xlink:href='#eq3-g1-117'/>
-</g>
-</svg> of the scalar function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
-<title>
-$ u $
-</title>
-<defs>
-<path id='eq4-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
-</defs>
-<g id='eq4-page1'>
-<use x='0' y='0' xlink:href='#eq4-g0-117'/>
-</g>
-</svg>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class FEC&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_coefficient_3_01_grid_function_3_01_f_e_c_01_4_01_4.html" class="m-doc">VectorCoefficient&lt;GridFunction&lt;FEC&gt;&gt;</a>
-            </dt>
-            <dd>Vector which can be constructed from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> with vector values.</dd>
+            <dd></dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acdc0260c49ce5b1629ba05554b540aa4" class="m-doc">over</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_boundary_integrator.html" class="m-doc">LinearFormBoundaryIntegrator</a>&amp;</span>
             </dt>
-            <dd>Gets the dimension of the vector object.</dd>
+            <dd>Specifies the material reference over which to integrate.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#affe350e2d1f7b27564d556a7d36ae430" class="m-doc">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_boundary_integrator.html" class="m-doc">LinearFormBoundaryIntegrator</a>&amp;</span>
+            </dt>
+            <dd>Specifies the material references over which to integrate.</dd>
+            <dt id="ae4f4a6b4727c35d5572f60e615c5b801">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4f4a6b4727c35d5572f60e615c5b801" class="m-doc-self">getIntegratorRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_variational.html#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the integration region.</dd>
+            <dt id="a3efd00b8e81585a5a761e171c9f51238">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3efd00b8e81585a5a761e171c9f51238" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the attributes of the elements being integrated.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aecbab974d66ff87d16610de96cf16878"><div>
+          <section class="m-doc-details" id="acdc0260c49ce5b1629ba05554b540aa4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />VectorCoefficientBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_boundary_integrator.html" class="m-doc">LinearFormBoundaryIntegrator</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBoundaryIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acdc0260c49ce5b1629ba05554b540aa4" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">int attr)</span></span>
             </h3>
-            <p>Gets the dimension of the vector object.</p>
+            <p>Specifies the material reference over which to integrate.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Dimension of vector.</td>
+                  <td>Reference to self (for method chaining)</td>
                 </tr>
               </tfoot>
             </table>
+<p>Specifies the material reference over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="affe350e2d1f7b27564d556a7d36ae430"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_boundary_integrator.html" class="m-doc">LinearFormBoundaryIntegrator</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBoundaryIntegrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe350e2d1f7b27564d556a7d36ae430" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs)</span></span>
+            </h3>
+            <p>Specifies the material references over which to integrate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Specifies the material references over which the integration should take place.</p>
           </div></section>
         </section>
       </div>
