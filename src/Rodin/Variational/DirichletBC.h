@@ -38,22 +38,16 @@ namespace Rodin::Variational
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
     * | @f$ g @f$            | ScalarCoefficient                             |
     */
-   template <>
-   class DirichletBC<TrialFunction<H1>>
+   template <class FES, class Value>
+   class DirichletBC<TrialFunction<FES>, Value> : public FormLanguage::Base
    {
+      static_assert(
+            std::is_base_of_v<ScalarCoefficientBase, Value> ||
+            std::is_base_of_v<VectorCoefficientBase, Value>,
+            "Value must be derived from either ScalarCoefficientBase or VectorCoefficientBase");
       public:
-         DirichletBC(const TrialFunction<H1>& u, double v)
-            : DirichletBC(u, ScalarCoefficient(v))
-         {}
-
-         DirichletBC(const TrialFunction<H1>& u, const ScalarCoefficientBase& v)
-            :  m_u(u),
-               m_value(std::unique_ptr<ScalarCoefficientBase>(v.copy()))
-         {}
-
-         DirichletBC(const TrialFunction<H1>& u, const VectorCoefficientBase& v)
-            :  m_u(u),
-               m_value(std::unique_ptr<VectorCoefficientBase>(v.copy()))
+         DirichletBC(const TrialFunction<FES>& u, const Value& v)
+            : m_u(u), m_value(v.copy())
          {}
 
          DirichletBC& on(int bdrAtr)
@@ -69,23 +63,30 @@ namespace Rodin::Variational
 
          DirichletBC(const DirichletBC& other)
             :  m_u(other.m_u),
-               m_essBdr(other.m_essBdr),
-               m_componentIdx(other.m_componentIdx)
-         {
-               std::visit(Utility::Overloaded{
-                  [this](const std::unique_ptr<ScalarCoefficientBase>& v)
-                  { m_value = std::unique_ptr<ScalarCoefficientBase>(v->copy()); },
-                  [this](const std::unique_ptr<VectorCoefficientBase>& v)
-                  { m_value = std::unique_ptr<VectorCoefficientBase>(v->copy()); },
-                  }, other.m_value);
-         }
+               m_value(other.m_value->copy()),
+               m_essBdr(other.m_essBdr)
+         {}
 
          DirichletBC(DirichletBC&& other)
             :  m_u(other.m_u),
-               m_essBdr(std::move(other.m_essBdr)),
                m_value(std::move(other.m_value)),
-               m_componentIdx(std::move(other.m_componentIdx))
+               m_essBdr(std::move(other.m_essBdr))
          {}
+
+         /**
+          * @returns Returns reference to the value of the boundary condition
+          * at the boundary
+          */
+         const Value& getValue() const
+         {
+            assert(m_value);
+            return *m_value;
+         }
+
+         const TrialFunction<FES>& getTrialFunction() const
+         {
+            return m_u;
+         }
 
          /**
           * @returns Boundary attribute where the boundary condition is
@@ -96,35 +97,98 @@ namespace Rodin::Variational
             return m_essBdr;
          }
 
-         /**
-          * @returns Returns reference to the value of the boundary condition
-          * at the boundary
-          */
-         template <class CoefficientType>
-         const CoefficientType& getValue() const
-         {
-            assert(std::holds_alternative<std::unique_ptr<CoefficientType>>(m_value));
-            return *std::get<std::unique_ptr<CoefficientType>>(m_value);
-         }
-
-         DirichletBC* copy() const noexcept
+         DirichletBC* copy() const noexcept override
          {
             return new DirichletBC(*this);
          }
       private:
-         const TrialFunction<H1>& m_u;
+         const TrialFunction<FES>& m_u;
+         std::unique_ptr<Value> m_value;
          std::set<int> m_essBdr;
-         std::variant<
-            std::unique_ptr<ScalarCoefficientBase>,
-            std::unique_ptr<VectorCoefficientBase>> m_value;
-         std::optional<int> m_componentIdx;
    };
-   DirichletBC(const TrialFunction<H1>&, double)
-      -> DirichletBC<TrialFunction<H1>>;
-   DirichletBC(const TrialFunction<H1>&, const ScalarCoefficientBase&)
-      -> DirichletBC<TrialFunction<H1>>;
-   DirichletBC(const TrialFunction<H1>&, const VectorCoefficientBase&)
-      -> DirichletBC<TrialFunction<H1>>;
+   template <class FES>
+   DirichletBC(const TrialFunction<FES>&, const ScalarCoefficientBase&)
+      -> DirichletBC<TrialFunction<FES>, ScalarCoefficientBase>;
+   template <class FES>
+   DirichletBC(const TrialFunction<FES>&, const VectorCoefficientBase&)
+      -> DirichletBC<TrialFunction<FES>, VectorCoefficientBase>;
+
+   template <class FES, class Value>
+   class DirichletBC<Component<TrialFunction<FES>>, Value> : public FormLanguage::Base
+   {
+      static_assert(
+            std::is_base_of_v<ScalarCoefficientBase, Value> ||
+            std::is_base_of_v<VectorCoefficientBase, Value>,
+            "Value must be derived from either ScalarCoefficientBase or VectorCoefficientBase");
+      public:
+         DirichletBC(const Component<TrialFunction<FES>>& u, const Value& v)
+            : m_u(u), m_value(v.copy())
+         {
+            if constexpr (std::is_base_of_v<ScalarCoefficientBase, Value>)
+            {
+               assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+            }
+            else if constexpr (std::is_base_of_v<VectorCoefficientBase, Value>)
+            {
+               assert(u.getFiniteElementSpace().getVectorDimension() == v.getDimension());
+            }
+         }
+
+         DirichletBC& on(int bdrAtr)
+         {
+            return on(std::set<int>{bdrAtr});
+         }
+
+         DirichletBC& on(const std::set<int>& bdrAtr)
+         {
+            m_essBdr = bdrAtr;
+            return *this;
+         }
+
+         DirichletBC(const DirichletBC& other)
+            :  m_u(other.m_u),
+               m_value(other.m_value->copy()),
+               m_essBdr(other.m_essBdr)
+         {}
+
+         DirichletBC(DirichletBC&& other)
+            :  m_u(other.m_u),
+               m_value(std::move(other.m_value)),
+               m_essBdr(std::move(other.m_essBdr))
+         {}
+
+         /**
+          * @returns Returns reference to the value of the boundary condition
+          * at the boundary
+          */
+         const Value& getValue() const
+         {
+            assert(m_value);
+            return *m_value;
+         }
+
+         const Component<TrialFunction<FES>>& getComponent() const
+         {
+            return m_u;
+         }
+
+         const std::set<int>& getBoundaryAttributes() const
+         {
+            return m_essBdr;
+         }
+
+         DirichletBC* copy() const noexcept override
+         {
+            return new DirichletBC(*this);
+         }
+      private:
+         Component<TrialFunction<FES>> m_u;
+         std::unique_ptr<Value> m_value;
+         std::set<int> m_essBdr;
+   };
+   template <class FES>
+   DirichletBC(const Component<TrialFunction<FES>>&, const ScalarCoefficientBase&)
+      -> DirichletBC<Component<TrialFunction<FES>>, ScalarCoefficientBase>;
 }
 
 #endif

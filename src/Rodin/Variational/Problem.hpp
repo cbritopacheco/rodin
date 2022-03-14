@@ -18,15 +18,16 @@
 
 namespace Rodin::Variational
 {
-   template <class TrialFEC, class TestFEC>
-   Problem<TrialFEC, TestFEC>::Problem(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>&)
-      :  m_solution(u),
-         m_bilinearForm(u.getFiniteElementSpace()),
-         m_linearForm(u.getFiniteElementSpace())
+   template <class TrialFES, class TestFES>
+   Problem<TrialFES, TestFES>::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+      :  m_bilinearForm(u.getFiniteElementSpace()),
+         m_linearForm(u.getFiniteElementSpace()),
+         m_trialFunctions{{u.getUUID(), std::ref(u)}},
+         m_testFunctions{{v.getUUID(), std::ref(v)}}
    {}
 
-   template <class TrialFEC, class TestFEC>
-   Problem<TrialFEC, TestFEC>& Problem<TrialFEC, TestFEC>::operator=(const FormLanguage::ProblemBody& rhs)
+   template <class TrialFES, class TestFES>
+   Problem<TrialFES, TestFES>& Problem<TrialFES, TestFES>::operator=(const FormLanguage::ProblemBody& rhs)
    {
       m_pb.reset(rhs.copy());
 
@@ -39,68 +40,103 @@ namespace Rodin::Variational
       for (auto& lfi : m_pb->getLinearFormBoundaryIntegratorList())
          m_linearForm.add(*lfi);
 
-      m_solution.emplaceGridFunction();
+      // Emplace all the solutions
+      for (auto& [uuid, u] : m_trialFunctions)
+         u.get().emplaceGridFunction();
 
       return *this;
    }
 
-   template <class TrialFEC, class TestFEC>
-   void Problem<TrialFEC, TestFEC>::assemble()
+   template <class TrialFES, class TestFES>
+   void Problem<TrialFES, TestFES>::assemble()
    {
       m_linearForm.assemble();
       m_bilinearForm.assemble();
    }
 
-   template <class TrialFEC, class TestFEC>
-   void Problem<TrialFEC, TestFEC>::update()
+   template <class TrialFES, class TestFES>
+   void Problem<TrialFES, TestFES>::update()
    {
-      getSolution().getFiniteElementSpace().update();
-      getSolution().update();
-      getLinearForm().update();
-      getBilinearForm().update();
-      for (const auto& dbc : m_pb->getDirichletBCList())
+      // We don't support PDE systems (yet)
       {
-         // Project the coefficient onto the boundary
-         if (m_solution.getFiniteElementSpace().getVectorDimension() == 1)
-         {
-            getSolution().projectOnBoundary(
-                  dbc.getValue<ScalarCoefficientBase>(), dbc.getBoundaryAttributes());
-         }
-         else
-         {
-            assert(m_solution.getFiniteElementSpace().getVectorDimension() > 1);
-            getSolution().projectOnBoundary(
-                  dbc.getValue<VectorCoefficientBase>(), dbc.getBoundaryAttributes());
-         }
-
-         // Keep track of essential boundary attributes
-         getEssentialBoundary().insert(
-               dbc.getBoundaryAttributes().begin(), dbc.getBoundaryAttributes().end());
+         assert(m_trialFunctions.size() == 1);
+         assert(m_testFunctions.size() == 1);
       }
+
+      // Update all components of the problem
+      for (auto& [uuid, u] : m_trialFunctions)
+      {
+         u.get().getFiniteElementSpace().update();
+         u.get().getGridFunction().update();
+      }
+      m_linearForm.update();
+      m_bilinearForm.update();
+
+      // Project values onto the essential boundary and compute essential dofs
+      m_essTrueDofList.DeleteAll();
+
+      for (const auto& [uuid, tfValue] : getEssentialBoundary().getTFMap())
+      {
+         assert(m_trialFunctions.count(uuid) == 1);
+         auto& u = m_trialFunctions.at(uuid);
+         auto& bdrAttr = tfValue.attributes;
+         std::visit(
+               [&](auto&& v){ u.get().getGridFunction().projectOnBoundary(*v, bdrAttr); },
+               tfValue.value);
+         m_essTrueDofList.Append(u.get().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr));
+      }
+
+      for (const auto& [uuid, compMap] : getEssentialBoundary().getTFCompMap())
+      {
+         assert(m_trialFunctions.count(uuid) == 1);
+         auto& u = m_trialFunctions.at(uuid);
+         for (const auto& [component, compValue] : compMap)
+         {
+            auto& bdrAttr = compValue.attributes;
+            auto comp = Component(u.get().getGridFunction(), component);
+            comp.projectOnBoundary(*compValue.value, bdrAttr);
+            m_essTrueDofList.Append(u.get().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr, component));
+         }
+      }
+
+      m_essTrueDofList.Sort();
+      m_essTrueDofList.Unique();
    }
 
-   template <class TrialFEC, class TestFEC>
-   GridFunction<TrialFEC>& Problem<TrialFEC, TestFEC>::getSolution()
+   template <class TrialFES, class TestFES>
+   void
+   Problem<TrialFES, TestFES>
+   ::getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X)
    {
-      return m_solution.getGridFunction();
+      // We don't support PDE systems (yet)
+      {
+         assert(m_trialFunctions.size() == 1);
+         assert(m_testFunctions.size() == 1);
+      }
+
+      auto& [uuid, u] = *m_trialFunctions.begin();
+
+      m_bilinearForm.getHandle()
+       .FormLinearSystem(
+             m_essTrueDofList,
+             u.get().getGridFunction().getHandle(),
+             m_linearForm.getHandle(),
+             A, X, B);
    }
 
-   template <class TrialFEC, class TestFEC>
-   std::set<int>& Problem<TrialFEC, TestFEC>::getEssentialBoundary()
+   template <class TrialFES, class TestFES>
+   void Problem<TrialFES, TestFES>::getSolution(mfem::Vector& X)
    {
-      return m_essBdr;
+      auto& [uuid, u] = *m_trialFunctions.begin();
+      auto& a = m_bilinearForm;
+      auto& l = m_linearForm;
+      a.getHandle().RecoverFEMSolution(X, l.getHandle(), u.get().getGridFunction().getHandle());
    }
 
-   template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC>& Problem<TrialFEC, TestFEC>::getBilinearForm()
+   template <class TrialFES, class TestFES>
+   EssentialBoundary& Problem<TrialFES, TestFES>::getEssentialBoundary()
    {
-      return m_bilinearForm;
-   }
-
-   template <class TrialFEC, class TestFEC>
-   LinearForm<TrialFEC>& Problem<TrialFEC, TestFEC>::getLinearForm()
-   {
-      return m_linearForm;
+      return m_pb->getEssentialBoundary();
    }
 }
 

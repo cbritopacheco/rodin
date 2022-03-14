@@ -49,16 +49,19 @@ namespace Rodin::Variational
 
          Component<TrialFunction<FES>> x() const
          {
+            assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
             return Component<TrialFunction<FES>>(*this, 0);
          }
 
          Component<TrialFunction<FES>> y() const
          {
+            assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
             return Component<TrialFunction<FES>>(*this, 1);
          }
 
          Component<TrialFunction<FES>> z() const
          {
+            assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
             return Component<TrialFunction<FES>>(*this, 2);
          }
 

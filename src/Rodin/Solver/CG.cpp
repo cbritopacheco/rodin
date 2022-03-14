@@ -34,33 +34,21 @@ namespace Rodin::Solver
 
    void CG::solve(Variational::ProblemBase& problem)
    {
-      auto& a = problem.getBilinearForm();
-      auto& b = problem.getLinearForm();
-      auto& u = problem.getSolution();
-
+      // Update and assemble problem
       problem.update();
       problem.assemble();
-
-      // Compute essential true degrees of freedom
-      int maxBdrAttr = u.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
-      mfem::Array<int> essTrueDofList;
-      u.getFiniteElementSpace()
-       .getFES()
-       .GetEssentialTrueDofs(
-             Utility::set2marker(problem.getEssentialBoundary(), maxBdrAttr), essTrueDofList);
 
       // Form the linear system
       mfem::SparseMatrix A;
       mfem::Vector B, X;
-      a.getHandle()
-       .FormLinearSystem(essTrueDofList, u.getHandle(), b.getHandle(), A, X, B);
+      problem.getLinearSystem(A, B, X);
 
       // Solve
       mfem::GSSmoother smoother(A);
       mfem::PCG(A, smoother, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
 
-      a.getHandle()
-       .RecoverFEMSolution(X, b.getHandle(), u.getHandle());
+      // Recover solution
+      problem.getSolution(X);
    }
 }
 

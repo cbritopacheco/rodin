@@ -13,7 +13,7 @@
 
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
-#include "Rodin/Variational/DirichletBC.h"
+#include "Rodin/Variational/EssentialBoundary.h"
 
 #include "ForwardDecls.h"
 
@@ -27,7 +27,6 @@ namespace Rodin::Variational::FormLanguage
    class ProblemBody : public Base
    {
       public:
-         using BCList =  std::vector<DirichletBC<TrialFunction<H1>>>;
          using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
          using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
 
@@ -37,7 +36,8 @@ namespace Rodin::Variational::FormLanguage
 
          ProblemBody(const ProblemBody& other);
 
-         BCList& getDirichletBCList();
+         EssentialBoundary& getEssentialBoundary();
+
          LFIList& getLinearFormDomainIntegratorList();
          LFIList& getLinearFormBoundaryIntegratorList();
          BFIList& getBilinearFormDomainIntegratorList();
@@ -51,9 +51,7 @@ namespace Rodin::Variational::FormLanguage
          BFIList m_bfiDomainList;
          LFIList m_lfiDomainList;
          LFIList m_lfiBoundaryList;
-
-         BCList m_dbcs;
-         BCList m_nbcs;
+         EssentialBoundary m_essBdr;
    };
 
    ProblemBody operator+(
@@ -68,7 +66,13 @@ namespace Rodin::Variational::FormLanguage
    ProblemBody operator-(
          const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
 
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<TrialFunction<H1>>& bc);
+   template <class T, class Value>
+   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T, Value>& bc)
+   {
+      ProblemBody res(pb);
+      res.getEssentialBoundary().add(bc);
+      return res;
+   }
 }
 
 #endif

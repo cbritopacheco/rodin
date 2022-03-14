@@ -103,7 +103,7 @@ namespace Rodin::Variational
    class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------
-   template <class T>
+   template <class T, class Value>
    class DirichletBC;
 
    // ---- Coefficients ------------------------------------------------------

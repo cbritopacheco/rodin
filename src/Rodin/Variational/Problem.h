@@ -33,17 +33,10 @@ namespace Rodin::Variational
    class ProblemBase
    {
       public:
-         /**
-          * @brief Gets a reference to the solution.
-          * @returns Reference to the solution.
-          */
-         virtual GridFunctionBase& getSolution() = 0;
+         virtual void getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X) = 0;
+         virtual void getSolution(mfem::Vector& X) = 0;
 
-         virtual std::set<int>& getEssentialBoundary() = 0;
-
-         virtual BilinearFormBase& getBilinearForm() = 0;
-
-         virtual LinearFormBase& getLinearForm() = 0;
+         virtual EssentialBoundary& getEssentialBoundary() = 0;
 
          /**
           * @brief Builds the problem using the FormLanguage::ProblemBody
@@ -74,12 +67,8 @@ namespace Rodin::Variational
     * The problem may then be solved by utilizing any derived instance Solver
     * class in the Rodin::Solver namespace.
     *
-    * @note The underlying linear system is only assembled until the
-    * @ref assemble() method is called. It is usually the responsibility of
-    * the derived @ref Solver object to assemble the problem when solving it
-    * via the @ref solve(Problem&) method.
     */
-   template <class TrialFEC, class TestFEC>
+   template <class TrialFES, class TestFES>
    class Problem : public ProblemBase
    {
       public:
@@ -100,23 +89,31 @@ namespace Rodin::Variational
           * @param[in,out] u Trial function @f$ u @f$ belonging to a suitable
           * finite element space.
           */
-         Problem(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>& v);
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
 
          void assemble() override;
          void update() override;
 
-         GridFunction<TrialFEC>& getSolution() override;
-         LinearForm<TrialFEC>& getLinearForm() override;
-         BilinearForm<TrialFEC>& getBilinearForm() override;
-         std::set<int>& getEssentialBoundary() override;
+
+         void getSolution(mfem::Vector& X) override;
+
+         EssentialBoundary& getEssentialBoundary() override;
+
+         void getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X) override;
 
          Problem& operator=(const FormLanguage::ProblemBody& rhs) override;
       private:
-         TrialFunction<TrialFEC>&   m_solution;
-         LinearForm<TrialFEC>       m_linearForm;
-         BilinearForm<TrialFEC>     m_bilinearForm;
-         std::set<int> m_essBdr;
+         LinearForm<TrialFES>       m_linearForm;
+         BilinearForm<TrialFES>     m_bilinearForm;
+         const std::map<
+            boost::uuids::uuid,
+            std::reference_wrapper<TrialFunction<TrialFES>>> m_trialFunctions;
+         const std::map<
+            boost::uuids::uuid,
+            std::reference_wrapper<TestFunction<TestFES>>> m_testFunctions;
          std::unique_ptr<FormLanguage::ProblemBody> m_pb;
+
+         mfem::Array<int> m_essTrueDofList;
    };
 }
 

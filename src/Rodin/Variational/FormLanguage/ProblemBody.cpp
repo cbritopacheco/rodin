@@ -24,14 +24,12 @@ namespace Rodin::Variational::FormLanguage
    }
 
    ProblemBody::ProblemBody(const ProblemBody& other)
+      : m_essBdr(other.m_essBdr)
    {
-      m_dbcs.reserve(other.m_dbcs.size());
       m_bfiDomainList.reserve(other.m_bfiDomainList.size());
       m_lfiDomainList.reserve(other.m_lfiDomainList.size());
       m_lfiBoundaryList.reserve(other.m_lfiBoundaryList.size());
 
-      for (const auto& v : other.m_dbcs)
-         m_dbcs.push_back(v);
       for (const auto& v : other.m_bfiDomainList)
          m_bfiDomainList.emplace_back(v->copy());
       for (const auto& v : other.m_lfiDomainList)
@@ -40,9 +38,9 @@ namespace Rodin::Variational::FormLanguage
          m_lfiBoundaryList.emplace_back(v->copy());
    }
 
-   ProblemBody::BCList& ProblemBody::getDirichletBCList()
+   EssentialBoundary& ProblemBody::getEssentialBoundary()
    {
-      return m_dbcs;
+      return m_essBdr;
    }
 
    ProblemBody::LFIList&
@@ -130,13 +128,6 @@ namespace Rodin::Variational::FormLanguage
          res.getLinearFormDomainIntegratorList().emplace_back(p->copy());
       for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
          res.getLinearFormBoundaryIntegratorList().emplace_back(p->copy());
-      return res;
-   }
-
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<TrialFunction<H1>>& bc)
-   {
-      ProblemBody res(pb);
-      res.getDirichletBCList().push_back(bc);
       return res;
    }
 }

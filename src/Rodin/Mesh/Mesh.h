@@ -162,6 +162,18 @@ namespace Rodin
             getHandle().UniformRefinement();
          }
 
+         std::set<int> getAttributes() const
+         {
+            return std::set<int>(
+                  getHandle().attributes.begin(), getHandle().attributes.end());
+         }
+
+         std::set<int> getBoundaryAttributes() const
+         {
+            return std::set<int>(
+                  getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
+         }
+
          /**
           * @internal
           * @brief Gets the underlying handle for the internal mesh.
