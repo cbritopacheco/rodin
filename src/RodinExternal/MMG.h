@@ -19,4 +19,10 @@
 #include "MMG/Advect2D.h"
 #include "MMG/ImplicitDomainMesher2D.h"
 
+// ---- mmg3d ----------------------------------------------------------------
+#include "MMG/Mesh3D.h"
+
+// ---- mmgs -----------------------------------------------------------------
+#include "MMG/SurfaceMesh.h"
+
 #endif

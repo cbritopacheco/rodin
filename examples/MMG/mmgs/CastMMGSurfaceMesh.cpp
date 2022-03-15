@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "Rodin/Mesh.h"
-#include "RodinExternal/MMG.h"
+#include <Rodin/Mesh.h>
+#include <RodinExternal/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::External;
@@ -14,11 +14,11 @@ int main(int argc, char** argv)
     std::exit(EXIT_FAILURE);
   }
 
-  Rodin::Mesh rodinMesh = Rodin::Mesh::load(argv[1]);
+  MMG::SurfaceMesh mmgMesh = MMG::SurfaceMesh::load(argv[1]);
 
-  MMG::Mesh2D mmgMesh = Cast(rodinMesh).to<MMG::Mesh2D>();
+  Rodin::Mesh rodinMesh = Cast(mmgMesh).to<Rodin::Mesh>();
 
-  mmgMesh.save("mmg.mesh");
+  rodinMesh.save("rodin.mesh");
 
   return 0;
 }

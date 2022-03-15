@@ -18,11 +18,8 @@ namespace Rodin::External::MMG
 {
    /**
     * @brief Scalar solution supported on a mesh.
-    *
-    * @tparam Dimension Dimension of the solution support
     */
-   template <int Dimension>
-   class ScalarSolution : public Solution<Dimension>
+   class ScalarSolution : public SolutionBase
    {};
 }
 

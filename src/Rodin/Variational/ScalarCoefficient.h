@@ -81,8 +81,9 @@ namespace Rodin::Variational
           * @brief Constructs a ScalarCoefficient from an arithmetic value.
           * @param[in] x Arithmetic value
           */
+         template <typename U = T>
          constexpr
-         ScalarCoefficient(const T& x)
+         ScalarCoefficient(typename std::enable_if_t<std::is_arithmetic_v<U>, U> x)
             : m_x(x)
          {}
 
@@ -166,29 +167,27 @@ namespace Rodin::Variational
       -> ScalarCoefficient<GridFunction<FEC>>;
 
    template <>
-   class ScalarCoefficient<std::function<double(const double*)>>
+   class ScalarCoefficient<std::function<double(const double*, int)>>
       : public ScalarCoefficientBase
    {
       public:
-         ScalarCoefficient(std::function<double(const double*)> f)
-            : m_f(f),
-              m_mfemCoefficient(
-                [this](const mfem::Vector& v)
-                {
-                  return m_f(v.GetData());
-                })
+         ScalarCoefficient(std::function<double(const double*, int)> f)
+            : m_f(f)
          {}
 
          ScalarCoefficient(const ScalarCoefficient& other) = default;
 
-         std::function<double(const double*)> getValue() const
+         std::function<double(const double*, int)> getValue() const
          {
             return m_f;
          }
 
          double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            return m_mfemCoefficient.Eval(trans, ip);
+            double x[3];
+            mfem::Vector transip(x, 3);
+            trans.Transform(ip, transip);
+            return m_f(transip.GetData(), transip.Size());
          }
 
          ScalarCoefficient* copy() const noexcept override
@@ -197,11 +196,10 @@ namespace Rodin::Variational
          }
 
       private:
-         std::function<double(const double*)> m_f;
-         mutable mfem::FunctionCoefficient m_mfemCoefficient;
+         const std::function<double(const double*, int)> m_f;
    };
-   ScalarCoefficient(std::function<double(const double*)>)
-      -> ScalarCoefficient<std::function<double(const double*)>>;
+   ScalarCoefficient(std::function<double(const double*, int)>)
+      -> ScalarCoefficient<std::function<double(const double*, int)>>;
 
    template <>
    class ScalarCoefficient<std::map<int, double>>

@@ -91,8 +91,6 @@ namespace Rodin::Variational
 
    class LinearFormBoundaryIntegrator;
 
-   class DomainLFIntegrator;
-
    // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 

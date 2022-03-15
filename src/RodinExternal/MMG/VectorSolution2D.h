@@ -14,7 +14,7 @@
 
 namespace Rodin::External::MMG
 {
-  class VectorSolution2D : public VectorSolution<2>
+  class VectorSolution2D : public VectorSolution
   {
     public:
          /**

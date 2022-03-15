@@ -9,33 +9,28 @@
 
 namespace Rodin::External::MMG
 {
-   template <int Dimension>
-   class Mesh;
+   class MeshBase;
+   class SolutionBase;
 
    class MMG2D;
-
    class Mesh2D;
-
    class MeshAdaptor2D;
-
    class MeshOptimizer2D;
 
-   template <int Dimension>
-   class ScalarSolution;
-
-   class ScalarSolution2D;
-   class IncompleteScalarSolution2D;
-
-   template <int Dimension>
-   class VectorSolution;
-
-   class VectorSolution2D;
-   class IncompleteVectorSolution2D;
-
+   class Advect2D;
    class Distancer2D;
    class Redistancer2D;
 
-   class Advect2D;
+   class ScalarSolution;
+   class ScalarSolution2D;
+   class IncompleteScalarSolution2D;
+
+   class VectorSolution;
+   class VectorSolution2D;
+   class IncompleteVectorSolution2D;
+
+   class Mesh3D;
+   class SurfaceMesh;
 }
 
 #endif

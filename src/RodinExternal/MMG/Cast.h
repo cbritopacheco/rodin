@@ -9,14 +9,9 @@
 
 #include "Rodin/Cast.h"
 
+#include "Rodin/Mesh/ForwardDecls.h"
+#include "Rodin/Variational/ForwardDecls.h"
 #include "ForwardDecls.h"
-
-#include "Rodin/Mesh.h"
-#include "Rodin/Variational.h"
-
-#include "ScalarSolution2D.h"
-#include "VectorSolution2D.h"
-#include "Mesh2D.h"
 
 namespace Rodin
 {
@@ -94,6 +89,23 @@ namespace Rodin
    External::MMG::IncompleteVectorSolution2D
    Cast<Variational::GridFunction<Variational::H1>>
    ::to<External::MMG::IncompleteVectorSolution2D>() const;
+
+   /**
+    * @brief Specialization for converting from External::MMG::Mesh3D to Rodin::Mesh.
+    */
+   template <>
+   template <>
+   Rodin::Mesh
+   Cast<External::MMG::SurfaceMesh>::to<Rodin::Mesh>() const;
+
+   /**
+    * @brief Specialization for converting from Rodin::Mesh to
+    * External::MMG:Mesh3D.
+    */
+   template <>
+   template <>
+   External::MMG::SurfaceMesh
+   Cast<Rodin::Mesh>::to<External::MMG::SurfaceMesh>() const;
 }
 
 

@@ -8,6 +8,8 @@
 #define RODIN_RODININTEGRATION_MMG_MESH_H
 
 #include <cassert>
+#include <filesystem>
+
 #include <mmg/libmmg.h>
 
 #include "Configure.h"
@@ -20,11 +22,10 @@ namespace Rodin::External::MMG
     *
     * This class wraps the functionality of the type MMG5_Mesh.
     */
-   template <int Dimension>
-   class Mesh
+   class MeshBase
    {
       public:
-         virtual ~Mesh() = default;
+         virtual ~MeshBase() = default;
 
          /**
           * @brief Gets the maximum memory available to the mesh.
@@ -45,10 +46,17 @@ namespace Rodin::External::MMG
          /**
           * @returns Dimension of the mesh.
           */
-         constexpr int getDimension() const
+         int getDimension() const
          {
-            return Dimension;
+            return getHandle()->dim;
          }
+
+         /**
+          * @brief Writes the Mesh object to a text file using mmg format
+          *
+          * @param[in] filename Name of the file the mesh will be written to
+          */
+         virtual void save(const std::filesystem::path& filename) = 0;
 
          /**
           * @internal

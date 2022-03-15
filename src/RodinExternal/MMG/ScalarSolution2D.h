@@ -31,7 +31,7 @@ namespace Rodin::External::MMG
     * @f]
     * whose known values are given on vertices of some mesh @f$ \Omega @f$.
     */
-   class ScalarSolution2D :  public ScalarSolution<2>
+   class ScalarSolution2D :  public ScalarSolution
    {
       public:
          /**

@@ -20,11 +20,10 @@ namespace Rodin::External::MMG
     *
     * This class wraps the functionality of the type MMG5_Sol.
     */
-   template <int Dimension>
-   class Solution
+   class SolutionBase
    {
       public:
-         virtual ~Solution() = default;
+         virtual ~SolutionBase() = default;
 
          /**
           * @internal
@@ -41,16 +40,15 @@ namespace Rodin::External::MMG
          /**
           * @brief Gets the dimension of the solution support.
           */
-         int getDimension() const
+         virtual int getDimension() const
          {
-            assert(getHandle()->dim == Dimension);
-            return Dimension;
+            return getHandle()->dim;
          }
 
          /**
           * @returns Number of points of the solution.
           */
-         int count() const
+         virtual int count() const
          {
             return getHandle()->np;
          }
@@ -58,7 +56,7 @@ namespace Rodin::External::MMG
          /**
           * @returns Number of solutions per entity.
           */
-         int size() const
+         virtual int size() const
          {
             return getHandle()->size;
          }

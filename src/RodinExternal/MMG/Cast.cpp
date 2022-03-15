@@ -4,9 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-
-#include <mmg2d/mmg2d.h>
-
 /*
  * We have to undef the I macro (from complex.h) since it clashes with mfem
  * code (e.g. table.hpp) where the I variable is defined and causes all sorts
@@ -16,11 +13,26 @@
 #undef I
 #endif
 
+#include <mmg2d/mmg2d.h>
+#include <mmg3d/mmg3d.h>
+#include <mmgs/mmgs.h>
+
 #include "Rodin/Alert.h"
+
+#include "Rodin/Mesh.h"
 #include "Rodin/Variational.h"
 
-#include "Cast.h"
+#include "Mesh2D.h"
+#include "ScalarSolution2D.h"
+#include "VectorSolution2D.h"
 
+#include "Mesh3D.h"
+
+#include "SurfaceMesh.h"
+
+#include "Utility.h"
+
+#include "Cast.h"
 
 namespace Rodin
 {
@@ -42,69 +54,13 @@ namespace Rodin
     auto& mmgMesh = mesh.getHandle();
 
     if (mmgMesh->nt == 0)
-       Alert::Exception("Converting from a non-triangular MMG::Mesh2D to a"
-             " Rodin::Mesh is not supported ").raise();
-
-    bool shiftAttr = false;
-    for (int i = 1; i <= mmgMesh->nt; i++)
     {
-      if (mmgMesh->tria[i].ref == 0)
-        shiftAttr = true;
-      if (mmgMesh->tria[i].ref < 0)
-        Alert::Exception(
-            "Negative element attributes are not supported").raise();
+       Alert::Exception()
+         << "MMG::Mesh2D is empty (triangle count equals zero)"
+         << Alert::Raise;
     }
 
-    bool shiftBdrAttr = false;
-    for (int i = 1; i <= mmgMesh->na; i++)
-    {
-      if (mmgMesh->edge[i].ref == 0)
-        shiftBdrAttr = true;
-      if (mmgMesh->edge[i].ref < 0)
-        Alert::Exception(
-            "Negative boundary element attributes are not supported.").raise();
-    }
-
-    if (shiftAttr)
-      Alert::Warning(
-          "Elements with attribute equal to 0 are not supported. "
-          "All element attributes will be incremented by 1.").raise();
-
-    if (shiftBdrAttr)
-      Alert::Warning(
-          "Boundary elements with attribute equal to 0 are not supported. "
-          "All boundary element attributes will be incremented by 1.").raise();
-
-    /* So for some reason mmg types are 1 indexed. So when accessing the
-     * arrays make sure to start at 1 and not 0. I don't know why this is the
-     * case and I'm not sure if it's for every array in the library.
-     */
-    for (int i = 1; i <= mesh.getHandle()->np; i++)
-    {
-      res.AddVertex(
-          mmgMesh->point[i].c[0],
-          mmgMesh->point[i].c[1]
-          );
-    }
-
-    for (int i = 1; i <= mmgMesh->nt; i++)
-    {
-      res.AddTriangle(
-          mmgMesh->tria[i].v[0] - 1,
-          mmgMesh->tria[i].v[1] - 1,
-          mmgMesh->tria[i].v[2] - 1,
-          mmgMesh->tria[i].ref + shiftAttr
-          );
-    }
-    for (int i = 1; i <= mmgMesh->na; i++)
-    {
-       res.AddBdrSegment(
-             mmgMesh->edge[i].a - 1,
-             mmgMesh->edge[i].b - 1,
-             mmgMesh->edge[i].ref + shiftBdrAttr
-             );
-    }
-    res.FinalizeMesh(0, true);
+    External::MMG::MMG5_Mesh_To_MFEM_Mesh_Cast(mmgMesh, res);
 
     return Rodin::Mesh(std::move(res));
   }
@@ -161,7 +117,7 @@ namespace Rodin
 
     MMG2D_Set_commonFunc();
     if (!MMG2D_zaldy(mmgMesh))
-       Alert::Exception("Memory allocation for the MMG mesh failed.").raise();
+       Alert::Exception("Memory allocation for MMG::Mesh2D mesh failed.").raise();
 
     // Copy points
     for (int i = 1; i <= mmgMesh->np; i++)
@@ -334,5 +290,31 @@ namespace Rodin
        }
        return res;
      }
+   }
+
+   template <>
+   template <>
+   Rodin::Mesh
+   Cast<External::MMG::SurfaceMesh>::to<Rodin::Mesh>() const
+   {
+      auto& mesh = from();
+      mfem::Mesh res(
+           2,
+           mesh.count(MMG::SurfaceMesh::Entity::Vertex),
+           mesh.count(MMG::SurfaceMesh::Entity::Triangle),
+           0,
+           3);
+
+      auto& mmgMesh = mesh.getHandle();
+      if (mmgMesh->nt == 0)
+      {
+         Alert::Exception()
+           << "MMG::SurfaceMesh is empty (triangle count equals zero)"
+           << Alert::Raise;
+      }
+
+      External::MMG::MMG5_Mesh_To_MFEM_Mesh_Cast(mmgMesh, res);
+
+      return Rodin::Mesh(std::move(res));
    }
 }

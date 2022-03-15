@@ -17,6 +17,8 @@ set(RodinExternalMMG_HEADERS
   Mesh.h
   MMG2D.h
   Mesh2D.h
+  Mesh3D.h
+  SurfaceMesh.h
   MeshAdaptor2D.h
   MeshOptimizer2D.h
   ScalarSolution.h
@@ -24,6 +26,7 @@ set(RodinExternalMMG_HEADERS
   VectorSolution.h
   VectorSolution2D.h
   Solution.h
+  Utility.h
   )
 
 set(RodinExternalMMG_SRCS
@@ -33,10 +36,13 @@ set(RodinExternalMMG_SRCS
   ImplicitDomainMesher2D.cpp
   ISCDProcess.cpp
   Mesh2D.cpp
+  Mesh3D.cpp
+  SurfaceMesh.cpp
   MeshAdaptor2D.cpp
   MeshOptimizer2D.cpp
   ScalarSolution2D.cpp
   VectorSolution2D.cpp
+  Utility.cpp
   )
 
 add_library(RodinExternalMMG

@@ -1,0 +1,30 @@
+#ifndef RODIN_EXTERNAL_MMG_UTILITY_H
+#define RODIN_EXTERNAL_MMG_UTILITY_H
+
+#include <mfem.hpp>
+
+#include <mmg/libmmg.h>
+#include <libmmgcommon.h>
+
+namespace Rodin::External::MMG
+{
+  /**
+   * @internal
+   * @brief Performs a deep copy of the MMG5_Mesh objects.
+   *
+   * This method expects that the destination has already been allocated.
+   *
+   * @param[in] src Source mesh
+   * @oaram[in] dst Destination mesh
+   */
+  void MMG5_Mesh_Copy(const MMG5_pMesh src, MMG5_pMesh dst);
+
+  /**
+   * @internal
+   * @brief Attempts to convert all the fields inside an MMG5_Mesh instance to an mfem::Mesh instance
+   *
+   */
+  void MMG5_Mesh_To_MFEM_Mesh_Cast(const MMG5_pMesh src, mfem::Mesh& dst);
+}
+
+#endif

@@ -18,11 +18,8 @@ namespace Rodin::External::MMG
 {
    /**
     * @brief Vector solution supported on a mesh.
-    *
-    * @tparam Dimension Mesh dimension
     */
-   template <int Dimension>
-   class VectorSolution : public Solution<Dimension>
+   class VectorSolution : public SolutionBase
    {};
 }
 
