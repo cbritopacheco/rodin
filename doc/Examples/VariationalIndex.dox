@@ -4,5 +4,6 @@
 
   - @subpage examples-variational-poisson
   - @subpage examples-variational-elasticity
+  - @subpage examples-variational-surface_meshes
 
   */
