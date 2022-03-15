@@ -68,22 +68,26 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8752768ac9294e0b9d0bffd0ce9604f7" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad97891e9f4ed53dd758c739011cd923f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Builds the problem using the <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a> object.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dd>Builds the problem using the FormLanguage::ProblemBody object.</dd>
+            <dt id="aedef9817f0ecb43ca5cf9f5d10f6bcc3">
+              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
+            <dt id="a99b02345a8a15d3c5ea2844a2253f510">
+              <span class="m-doc-wrap-bumper">void <a href="#a99b02345a8a15d3c5ea2844a2253f510" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Updates the <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance after a refinement in the mesh.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a8752768ac9294e0b9d0bffd0ce9604f7"><div>
+          <section class="m-doc-details" id="ad97891e9f4ed53dd758c739011cd923f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8752768ac9294e0b9d0bffd0ce9604f7" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a>&amp; rhs) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad97891e9f4ed53dd758c739011cd923f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-            <p>Builds the problem using the <a href="class_rodin_1_1_variational_1_1_form_language_1_1_problem_body.html" class="m-doc">FormLanguage::<wbr />ProblemBody</a> object.</p>
+            <p>Builds the problem using the FormLanguage::ProblemBody object.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -95,13 +99,6 @@
                 </tr>
               </tbody>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Assembles the underlying linear system to solve.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>This is typically the first thing that is done when calling the Solver::solve() method.</p></aside>
           </div></section>
         </section>
       </div>

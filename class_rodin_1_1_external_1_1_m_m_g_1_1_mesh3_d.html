@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::Mesh2D class | Rodin</title>
+  <title>Rodin::External::MMG::Mesh3D class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -50,9 +50,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh2D <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh3D <span class="m-thin">class</span>
         </h1>
-        <p>Represents a mesh of a 2D domain.</p>
+        <p>Represents a mesh of a 3D domain.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -83,7 +83,8 @@
             <dt id="a2228f5f8d54732b2077779d47c6f5ffb">
               <span class="m-doc-wrap-bumper">enum <a href="#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc-self">Entity</a> { </span><span class="m-doc-wrap"><a href="#a2228f5f8d54732b2077779d47c6f5ffbad013c4439c3e09308d6b2eef2a4025ae" class="m-doc">Vertex</a> = MMG5_Vertex,
               <a href="#a2228f5f8d54732b2077779d47c6f5ffba7f0bc3a17ff45e6a7c3fe52b35db1888" class="m-doc">Edge</a> = MMG5_Edg,
-              <a href="#a2228f5f8d54732b2077779d47c6f5ffba773e9be14af3bc697c412f3e6c5c509e" class="m-doc">Triangle</a> = MMG5_Triangle }</span>
+              <a href="#a2228f5f8d54732b2077779d47c6f5ffba773e9be14af3bc697c412f3e6c5c509e" class="m-doc">Triangle</a> = MMG5_Triangle,
+              <a href="#a2228f5f8d54732b2077779d47c6f5ffba82adf2a294bd86a4468ca52d6d2025e4" class="m-doc">Tetrahedra</a> = MMG5_Tetrahedron }</span>
             </dt>
             <dd>Enumeration describing possible mesh entities.</dd>
           </dl>
@@ -92,28 +93,28 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ab1673ff14835f34e00d15e551abe91b6" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a64c1a6b62cb6b49d48552b10f88a44b2" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a></span>
             </dt>
-            <dd>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object from a text file, assuming it is in the <code>medit2</code> file format.</dd>
+            <dd>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a> object from a text file.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6ae5ff480d87d8c063be2cc13d248f6e" class="m-doc">Mesh2D</a>(</span><span class="m-doc-wrap">)</span>
+            <dt id="a8f9d82d632f841a9e6393ac9c6801dcc">
+              <span class="m-doc-wrap-bumper"><a href="#a8f9d82d632f841a9e6393ac9c6801dcc" class="m-doc-self">Mesh3D</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Writes the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object to file using the <code>medit2</code> file format.</dd>
-            <dt id="a9199118964a26912f901ba344b48cce4">
-              <span class="m-doc-wrap-bumper"><a href="#a9199118964a26912f901ba344b48cce4" class="m-doc-self">Mesh2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; other)</span>
+            <dd>Creates an empty mesh.</dd>
+            <dt id="a7310f0d1a178d403f7c09b69e3b06a1c">
+              <span class="m-doc-wrap-bumper"><a href="#a7310f0d1a178d403f7c09b69e3b06a1c" class="m-doc-self">Mesh3D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a>&amp; other)</span>
             </dt>
             <dd>Performs a deep copy of the mesh.</dd>
-            <dt id="ab9dc3a8d8f2fe74d06ac9897a8d9ebf8">
-              <span class="m-doc-wrap-bumper"><a href="#ab9dc3a8d8f2fe74d06ac9897a8d9ebf8" class="m-doc-self">Mesh2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp;&amp; other)</span>
+            <dt id="a9b8725c33acc2275ba3e1aedf2e95d40">
+              <span class="m-doc-wrap-bumper"><a href="#a9b8725c33acc2275ba3e1aedf2e95d40" class="m-doc-self">Mesh3D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a>&amp;&amp; other)</span>
             </dt>
-            <dd>Moves constructs the data of another <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object, while invalidating the latter.</dd>
-            <dt id="aa8eafb8aacad652ee621a3199cb315cd">
-              <span class="m-doc-wrap-bumper"><a href="#aa8eafb8aacad652ee621a3199cb315cd" class="m-doc-self">~Mesh2D</a>(</span><span class="m-doc-wrap">)</span>
+            <dd>Moves constructs the data of another <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a> object, while invalidating the latter.</dd>
+            <dt id="a389b618cfc94f25aa89a6ce5d887ee94">
+              <span class="m-doc-wrap-bumper"><a href="#a389b618cfc94f25aa89a6ce5d887ee94" class="m-doc-self">~Mesh3D</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Destructs the object.</dd>
           </dl>
@@ -122,7 +123,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acbfd936573c7fe635bda23727298849c" class="m-doc">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh2D::<wbr />Entity</a> e) const -&gt; int</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae460938ec915db32b577b9e59335d387" class="m-doc">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh3D::<wbr />Entity</a> e) const -&gt; int</span>
             </dt>
             <dd>Gets a count of the specified entities in the mesh.</dd>
             <dt>
@@ -133,11 +134,11 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab1673ff14835f34e00d15e551abe91b6"><div>
+          <section class="m-doc-details" id="a64c1a6b62cb6b49d48552b10f88a44b2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1673ff14835f34e00d15e551abe91b6" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64c1a6b62cb6b49d48552b10f88a44b2" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
             </h3>
-            <p>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object from a text file, assuming it is in the <code>medit2</code> file format.</p>
+            <p>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a> object from a text file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -151,21 +152,14 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object containing the mesh data in the file.</td>
+                  <td>A <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a> object containing the mesh data in the file.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6ae5ff480d87d8c063be2cc13d248f6e"><div>
+          <section class="m-doc-details" id="ae460938ec915db32b577b9e59335d387"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ae5ff480d87d8c063be2cc13d248f6e" class="m-doc-self">Mesh2D</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Writes the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a> object to file using the <code>medit2</code> file format.</p>
-<p>Creates an empty mesh.</p>
-          </div></section>
-          <section class="m-doc-details" id="acbfd936573c7fe635bda23727298849c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbfd936573c7fe635bda23727298849c" class="m-doc-self">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh2D::<wbr />Entity</a> e) const</span></span>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae460938ec915db32b577b9e59335d387" class="m-doc-self">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh3D::<wbr />Entity</a> e) const</span></span>
             </h3>
             <p>Gets a count of the specified entities in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -181,14 +175,14 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Number of entities of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh2D::<wbr />Entity</a>.</td>
+                  <td>Number of entities of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">Mesh3D::<wbr />Entity</a>.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="aa7daefdbb77c11d257333a63fc787e89"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7daefdbb77c11d257333a63fc787e89" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />Mesh3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7daefdbb77c11d257333a63fc787e89" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Writes the <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object to a text file using mmg format.</p>
             <table class="m-table m-fullwidth m-flat">

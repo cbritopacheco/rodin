@@ -81,19 +81,21 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7b9b6b484b380cea215d033f6f496088" class="m-doc">ScalarCoefficient</a>(</span><span class="m-doc-wrap">const T&amp; x) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;typename U = T&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a33a5c2a5f05916ecbdea63bd4d4cd505" class="m-doc">ScalarCoefficient</a>(</span><span class="m-doc-wrap">typename std::enable_if_t&lt;std::is_arithmetic_v&lt;U&gt;, U&gt; x) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> from an arithmetic value.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a7b9b6b484b380cea215d033f6f496088"><div>
+          <section class="m-doc-details" id="a33a5c2a5f05916ecbdea63bd4d4cd505"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class T&gt;
+                template&lt;typename U = T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ScalarCoefficient&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b9b6b484b380cea215d033f6f496088" class="m-doc-self">ScalarCoefficient</a>(</span><span class="m-doc-wrap">const T&amp; x) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ScalarCoefficient&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33a5c2a5f05916ecbdea63bd4d4cd505" class="m-doc-self">ScalarCoefficient</a>(</span><span class="m-doc-wrap">typename std::enable_if_t&lt;std::is_arithmetic_v&lt;U&gt;, U&gt; x) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a <a href="class_rodin_1_1_variational_1_1_scalar_coefficient.html" class="m-doc">ScalarCoefficient</a> from an arithmetic value.</p>
             <table class="m-table m-fullwidth m-flat">
