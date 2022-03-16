@@ -1,0 +1,2 @@
+add_executable(CastMMGMesh3DToRodinMesh CastMMGMesh3DToRodinMesh.cpp)
+target_link_libraries(CastMMGMesh3DToRodinMesh PUBLIC Rodin::External::MMG)

@@ -46,23 +46,85 @@ namespace Rodin
   const
   {
     auto& mesh = from();
-    mfem::Mesh res(
+    auto& src = mesh.getHandle();
+
+    mfem::Mesh dst(
          2,
          mesh.count(MMG::Mesh2D::Entity::Vertex),
          mesh.count(MMG::Mesh2D::Entity::Triangle));
 
-    auto& mmgMesh = mesh.getHandle();
-
-    if (mmgMesh->nt == 0)
+    if (src->nt == 0)
     {
        Alert::Exception()
          << "MMG::Mesh2D is empty (triangle count equals zero)"
          << Alert::Raise;
     }
 
-    External::MMG::MMG5_Mesh_To_MFEM_Mesh_Cast(mmgMesh, res);
+    bool shiftEdgeAttr = false;
+    for (int i = 1; i <= src->na; i++)
+    {
+      if (src->edge[i].ref == 0)
+        shiftEdgeAttr = true;
+      if (src->edge[i].ref < 0)
+        Alert::Exception(
+            "Negative edge element attributes are not supported.").raise();
+    }
 
-    return Rodin::Mesh(std::move(res));
+    bool shiftTriAttr = false;
+    for (int i = 1; i <= src->nt; i++)
+    {
+      if (src->tria[i].ref == 0)
+        shiftTriAttr = true;
+      if (src->tria[i].ref < 0)
+        Alert::Exception(
+            "Negative triangle attributes are not supported").raise();
+    }
+
+    if (shiftEdgeAttr)
+      Alert::Warning(
+          "Edges with attribute equal to 0 are not supported. "
+          "All edge attributes will be incremented by 1.").raise();
+
+    if (shiftTriAttr)
+      Alert::Warning(
+          "Triangles with attribute equal to 0 are not supported. "
+          "All triangle attributes will be incremented by 1.").raise();
+
+    /* So for some reason mmg types are 1 indexed. So when accessing the
+     * arrays make sure to start at 1 and not 0. I don't know why this is the
+     * case and I'm not sure if it's for every array in the library.
+     */
+    for (int i = 1; i <= src->np; i++)
+    {
+      dst.AddVertex(
+          src->point[i].c[0],
+          src->point[i].c[1],
+          src->point[i].c[2]
+          );
+    }
+
+    for (int i = 1; i <= src->nt; i++)
+    {
+      dst.AddTriangle(
+          src->tria[i].v[0] - 1,
+          src->tria[i].v[1] - 1,
+          src->tria[i].v[2] - 1,
+          src->tria[i].ref + shiftTriAttr
+          );
+    }
+
+    for (int i = 1; i <= src->na; i++)
+    {
+       dst.AddBdrSegment(
+             src->edge[i].a - 1,
+             src->edge[i].b - 1,
+             src->edge[i].ref + shiftEdgeAttr
+             );
+    }
+
+    dst.FinalizeMesh(0, true);
+
+    return Rodin::Mesh(std::move(dst));
   }
 
   // ---- From: Rodin::Mesh - To: MMG::Mesh2D> -------------------------------
@@ -77,6 +139,9 @@ namespace Rodin
 
     if (mesh.getDimension() != 2)
       Alert::Exception("Mesh must be two dimensional.").raise();
+
+    if (mesh.getSpaceDimension() != 2)
+      Alert::Exception("Mesh must be embedded in two dimensional space.").raise();
 
     if (mfemMesh.GetNE() == 0)
       Alert::Exception("Converting from an empty mesh is not supported.").raise();
@@ -302,24 +367,86 @@ namespace Rodin
    Cast<MMG::SurfaceMesh>::to<Rodin::Mesh>() const
    {
       auto& mesh = from();
-      mfem::Mesh res(
+      mfem::Mesh dst(
            2,
            mesh.count(MMG::SurfaceMesh::Entity::Vertex),
            mesh.count(MMG::SurfaceMesh::Entity::Triangle),
            0,
            3);
 
-      auto& mmgMesh = mesh.getHandle();
-      if (mmgMesh->nt == 0)
+      auto& src = mesh.getHandle();
+      if (src->nt == 0)
       {
          Alert::Exception()
            << "MMG::SurfaceMesh is empty (triangle count equals zero)"
            << Alert::Raise;
       }
 
-      External::MMG::MMG5_Mesh_To_MFEM_Mesh_Cast(mmgMesh, res);
+      bool shiftEdgeAttr = false;
+      for (int i = 1; i <= src->na; i++)
+      {
+        if (src->edge[i].ref == 0)
+          shiftEdgeAttr = true;
+        if (src->edge[i].ref < 0)
+          Alert::Exception(
+              "Negative edge element attributes are not supported.").raise();
+      }
 
-      return Rodin::Mesh(std::move(res));
+      bool shiftTriAttr = false;
+      for (int i = 1; i <= src->nt; i++)
+      {
+        if (src->tria[i].ref == 0)
+          shiftTriAttr = true;
+        if (src->tria[i].ref < 0)
+          Alert::Exception(
+              "Negative triangle attributes are not supported").raise();
+      }
+
+      if (shiftEdgeAttr)
+        Alert::Warning(
+            "Edges with attribute equal to 0 are not supported. "
+            "All edge attributes will be incremented by 1.").raise();
+
+      if (shiftTriAttr)
+        Alert::Warning(
+            "Triangles with attribute equal to 0 are not supported. "
+            "All triangle attributes will be incremented by 1.").raise();
+
+      /* So for some reason mmg types are 1 indexed. So when accessing the
+       * arrays make sure to start at 1 and not 0. I don't know why this is the
+       * case and I'm not sure if it's for every array in the library.
+       */
+      for (int i = 1; i <= src->np; i++)
+      {
+        dst.AddVertex(
+            src->point[i].c[0],
+            src->point[i].c[1],
+            src->point[i].c[2]
+            );
+      }
+
+      for (int i = 1; i <= src->nt; i++)
+      {
+        dst.AddTriangle(
+            src->tria[i].v[0] - 1,
+            src->tria[i].v[1] - 1,
+            src->tria[i].v[2] - 1,
+            src->tria[i].ref + shiftTriAttr
+            );
+      }
+
+      for (int i = 1; i <= src->na; i++)
+      {
+         dst.AddBdrSegment(
+               src->edge[i].a - 1,
+               src->edge[i].b - 1,
+               src->edge[i].ref + shiftEdgeAttr
+               );
+      }
+
+      dst.FinalizeMesh(0, true);
+
+      return Rodin::Mesh(std::move(dst));
    }
 
   // ---- From: Rodin::Mesh - To: MMG::SurfaceMesh> --------------------------
@@ -415,4 +542,107 @@ namespace Rodin
     }
     return res;
   }
+
+  // ---- From: MMG::Mesh3D - To: Rodin::Mesh> -------------------------------
+   template <>
+   template <>
+   Rodin::Mesh
+   Cast<MMG::Mesh3D>::to<Rodin::Mesh>() const
+   {
+      auto& mesh = from();
+      mfem::Mesh dst(
+           3,
+           mesh.count(MMG::Mesh3D::Entity::Vertex),
+           mesh.count(MMG::Mesh3D::Entity::Tetrahedra));
+
+      auto& src = mesh.getHandle();
+      if (src->ne == 0)
+      {
+         Alert::Exception()
+           << "MMG::Mesh3D is empty (tetrahedron count equals zero)"
+           << Alert::Raise;
+      }
+
+      bool shiftEdgeAttr = false;
+      for (int i = 1; i <= src->na; i++)
+      {
+        if (src->edge[i].ref == 0)
+          shiftEdgeAttr = true;
+        if (src->edge[i].ref < 0)
+          Alert::Exception(
+              "Negative edge element attributes are not supported.").raise();
+      }
+
+      bool shiftTriAttr = false;
+      for (int i = 1; i <= src->nt; i++)
+      {
+        if (src->tria[i].ref == 0)
+          shiftTriAttr = true;
+        if (src->tria[i].ref < 0)
+          Alert::Exception(
+              "Negative triangle attributes are not supported").raise();
+      }
+
+      bool shiftTetAttr = false;
+      for (int i = 1; i <= src->ne; i++)
+      {
+        if (src->tetra[i].ref == 0)
+          shiftTetAttr = true;
+        if (src->tetra[i].ref < 0)
+          Alert::Exception(
+              "Negative tetrahedron attributes are not supported").raise();
+      }
+
+      if (shiftEdgeAttr)
+        Alert::Warning(
+            "Edges with attribute equal to 0 are not supported. "
+            "All edge attributes will be incremented by 1.").raise();
+
+      if (shiftTriAttr)
+        Alert::Warning(
+            "Triangles with attribute equal to 0 are not supported. "
+            "All triangle attributes will be incremented by 1.").raise();
+
+      if (shiftTetAttr)
+        Alert::Warning(
+            "Tetrahedron with attribute equal to 0 are not supported. "
+            "All tetrahedron attributes will be incremented by 1.").raise();
+
+      /* So for some reason mmg types are 1 indexed. So when accessing the
+       * arrays make sure to start at 1 and not 0. I don't know why this is the
+       * case and I'm not sure if it's for every array in the library.
+       */
+      for (int i = 1; i <= src->np; i++)
+      {
+        dst.AddVertex(
+            src->point[i].c[0],
+            src->point[i].c[1],
+            src->point[i].c[2]
+            );
+      }
+
+      for (int i = 1; i <= src->nt; i++)
+      {
+        dst.AddBdrTriangle(
+            src->tria[i].v[0] - 1,
+            src->tria[i].v[1] - 1,
+            src->tria[i].v[2] - 1,
+            src->tria[i].ref + shiftTriAttr
+            );
+      }
+
+      for (int i = 1; i <= src->ne; i++)
+      {
+         dst.AddTet(
+               src->tetra[i].v[0] - 1,
+               src->tetra[i].v[1] - 1,
+               src->tetra[i].v[2] - 1,
+               src->tetra[i].v[3] - 1,
+               src->tetra[i].ref + shiftTetAttr);
+      }
+
+      dst.FinalizeMesh(0, true);
+
+      return Rodin::Mesh(std::move(dst));
+   }
 }

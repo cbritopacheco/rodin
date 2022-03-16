@@ -106,6 +106,11 @@ namespace Rodin
    template <>
    External::MMG::SurfaceMesh
    Cast<Rodin::Mesh>::to<External::MMG::SurfaceMesh>() const;
+
+   template <>
+   template <>
+   Rodin::Mesh
+   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh>() const;
 }
 
 

@@ -18,12 +18,6 @@ namespace Rodin::External::MMG
    * @oaram[in] dst Destination mesh
    */
   void MMG5_Mesh_Copy(const MMG5_pMesh src, MMG5_pMesh dst);
-
-  /**
-   * @internal
-   * @brief Copies all the equivalent fields inside an MMG5_Mesh to an mfem::Mesh
-   */
-  void MMG5_Mesh_To_MFEM_Mesh_Cast(const MMG5_pMesh src, mfem::Mesh& dst);
 }
 
 #endif
