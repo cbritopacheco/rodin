@@ -21,8 +21,7 @@ namespace Rodin::External::MMG
 
   /**
    * @internal
-   * @brief Attempts to convert all the fields inside an MMG5_Mesh instance to an mfem::Mesh instance
-   *
+   * @brief Copies all the equivalent fields inside an MMG5_Mesh to an mfem::Mesh
    */
   void MMG5_Mesh_To_MFEM_Mesh_Cast(const MMG5_pMesh src, mfem::Mesh& dst);
 }

@@ -12,9 +12,9 @@
 
 
   The full source code may be found below:
-  -   @ref ShapeOptimization/LevelSetCantilever.cpp "LevelSetCantilever.cpp"
+  -   @ref ShapeOptimization/LevelSetCantilever2D.cpp "LevelSetCantilever2D.cpp"
 
-  @example ShapeOptimization/LevelSetCantilever.cpp
+  @example ShapeOptimization/LevelSetCantilever2D.cpp
   @m_examplenavigation{examples-shapeoptimization-levelset_cantilever,ShapeOptimization/}
   @m_footernavigation
   */

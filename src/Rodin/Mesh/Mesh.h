@@ -64,6 +64,8 @@ namespace Rodin
           */
          int getDimension() const;
 
+         int getSpaceDimension() const;
+
          /**
           * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
           * @param[in] u Displacement at each node

@@ -83,8 +83,7 @@ namespace Rodin
 
     if (mfemMesh.NURBSext)
        Alert::Exception(
-             "Converting from a NURBS mfem::Mesh to MMG::Mesh2D is"
-             " not supported.").raise();
+             "Converting from a NURBS mfem::Mesh to an MMG::Mesh2D is not supported.").raise();
 
     mfem::Array<mfem::Geometry::Type> geoms;
     mfemMesh.GetGeometries(2, geoms);
@@ -167,10 +166,14 @@ namespace Rodin
         pt->v[1] = tmp;
         reorientedCount++;
         Alert::Warning()
-          << "Bad orientation in element " << i << ". "
-          << "Number of elements reoriented: " << std::to_string(reorientedCount)
-          << Alert::Raise;
+          << "Element reoriented: " << i << Alert::Raise;
       }
+    }
+    if (reorientedCount > 0)
+    {
+      Alert::Warning()
+        << "Number of elements reoriented: " << std::to_string(reorientedCount)
+        << Alert::Raise;
     }
     return res;
   }
@@ -292,10 +295,11 @@ namespace Rodin
      }
    }
 
+  // ---- From: MMG::SurfaceMesh - To: Rodin::Mesh> --------------------------
    template <>
    template <>
    Rodin::Mesh
-   Cast<External::MMG::SurfaceMesh>::to<Rodin::Mesh>() const
+   Cast<MMG::SurfaceMesh>::to<Rodin::Mesh>() const
    {
       auto& mesh = from();
       mfem::Mesh res(
@@ -317,4 +321,98 @@ namespace Rodin
 
       return Rodin::Mesh(std::move(res));
    }
+
+  // ---- From: Rodin::Mesh - To: MMG::SurfaceMesh> --------------------------
+  template <>
+  template <>
+  MMG::SurfaceMesh
+  Cast<Rodin::Mesh>::to<MMG::SurfaceMesh>()
+  const
+  {
+    auto& mesh = from();
+    auto& mfemMesh = mesh.getHandle();
+
+    if (!(mesh.getDimension() == 2 && mesh.getHandle().SpaceDimension() == 3))
+    {
+      Alert::Exception()
+        << "Mesh must have two dimensional elements, "
+        << "embedded in three dimensional space"
+        << Alert::Raise;
+    }
+
+    if (mfemMesh.GetNE() == 0)
+      Alert::Exception(
+          "Converting from an empty mesh is not supported.").raise();
+
+    if (mfemMesh.NURBSext)
+       Alert::Exception(
+             "Converting from a NURBS mfem::Mesh to an MMG::SurfaceMesh is"
+             " not supported.").raise();
+
+    mfem::Array<mfem::Geometry::Type> geoms;
+    mfemMesh.GetGeometries(2, geoms);
+    if (std::any_of(geoms.begin(), geoms.end(),
+             [](mfem::Geometry::Type geometry)
+             {
+               return geometry != mfem::Geometry::Type::TRIANGLE;
+             }))
+    {
+      Alert::Exception()
+        << "Converting from a non-triangular mfem::Mesh to MMG::Mesh2D is not"
+        << " not supported."
+        << Alert::Raise;
+    }
+
+    /*
+     * To build the MMG mesh we follow the same procedure as that of the
+     * function MMGS_loadMesh in inout_s.c
+     */
+    MMG::SurfaceMesh res;
+    auto& mmgMesh = res.getHandle();
+
+    mmgMesh->np = mmgMesh->nt = mmgMesh->na = mmgMesh->xp = 0;
+    mmgMesh->np = mfemMesh.GetNV();
+    mmgMesh->nt = mfemMesh.GetNE();
+    mmgMesh->na = mfemMesh.GetNBE();
+
+    mmgMesh->npi  = mmgMesh->np;
+    mmgMesh->nai  = mmgMesh->na;
+    mmgMesh->nti  = mmgMesh->nt;
+
+    MMGS_Set_commonFunc();
+    if (!MMGS_zaldy(mmgMesh))
+       Alert::Exception("Memory allocation for the MMG::SufaceMesh failed.").raise();
+
+    // Copy points
+    for (int i = 1; i <= mmgMesh->np; i++)
+    {
+      const double* coords = mfemMesh.GetVertex(i - 1);
+      std::copy(coords, coords + 3, mmgMesh->point[i].c);
+    }
+
+    // Copy edges
+    for (int i = 1; i <= mmgMesh->na; i++)
+    {
+       mfem::Array<int> vertices;
+       mfemMesh.GetBdrElementVertices(i - 1, vertices);
+       mmgMesh->edge[i].a = vertices[0] + 1;
+       mmgMesh->edge[i].b = vertices[1] + 1;
+       mmgMesh->edge[i].ref = mfemMesh.GetBdrAttribute(i - 1);
+    }
+
+    // Copy triangles
+    for (int i = 1; i <= mmgMesh->nt; i++)
+    {
+      MMG5_pTria pt = &mmgMesh->tria[i];
+      mfem::Array<int> vertices;
+      mfemMesh.GetElementVertices(i - 1, vertices);
+      for (int j = 0; j < 3; j++)
+        pt->v[j] = vertices[j] + 1;
+
+      pt->ref = mfemMesh.GetAttribute(i - 1);
+      for (int j = 0; j < 3; j++)
+         mmgMesh->point[pt->v[j]].tag &= ~MG_NUL;
+    }
+    return res;
+  }
 }

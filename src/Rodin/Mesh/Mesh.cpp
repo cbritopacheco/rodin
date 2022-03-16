@@ -50,6 +50,11 @@ namespace Rodin
       return m_mesh.Dimension();
    }
 
+   int Mesh::getSpaceDimension() const
+   {
+      return m_mesh.SpaceDimension();
+   }
+
    double Mesh::getVolume()
    {
       double totalVolume = 0;
