@@ -27,6 +27,7 @@
 #include "VectorSolution2D.h"
 
 #include "Mesh3D.h"
+#include "ScalarSolution3D.h"
 
 #include "SurfaceMesh.h"
 
@@ -38,7 +39,7 @@ namespace Rodin
 {
   using namespace External;
 
-  // ---- <MMG::Mesh2D, Rodin::Mesh> -----------------------------------------
+   // ---- mmg2d -------------------------------------------------------------
   template <>
   template <>
   Rodin::Mesh
@@ -127,7 +128,6 @@ namespace Rodin
     return Rodin::Mesh(std::move(dst));
   }
 
-  // ---- From: Rodin::Mesh - To: MMG::Mesh2D> -------------------------------
   template <>
   template <>
   MMG::Mesh2D
@@ -243,7 +243,6 @@ namespace Rodin
     return res;
   }
 
-  // ---- From: Rodin::GridFunction - To: MMG::ScalarSolution2D<false>> ------
   template <>
   template <>
   External::MMG::IncompleteScalarSolution2D
@@ -360,190 +359,7 @@ namespace Rodin
      }
    }
 
-  // ---- From: MMG::SurfaceMesh - To: Rodin::Mesh> --------------------------
-   template <>
-   template <>
-   Rodin::Mesh
-   Cast<MMG::SurfaceMesh>::to<Rodin::Mesh>() const
-   {
-      auto& mesh = from();
-      mfem::Mesh dst(
-           2,
-           mesh.count(MMG::SurfaceMesh::Entity::Vertex),
-           mesh.count(MMG::SurfaceMesh::Entity::Triangle),
-           0,
-           3);
-
-      auto& src = mesh.getHandle();
-      if (src->nt == 0)
-      {
-         Alert::Exception()
-           << "MMG::SurfaceMesh is empty (triangle count equals zero)"
-           << Alert::Raise;
-      }
-
-      bool shiftEdgeAttr = false;
-      for (int i = 1; i <= src->na; i++)
-      {
-        if (src->edge[i].ref == 0)
-          shiftEdgeAttr = true;
-        if (src->edge[i].ref < 0)
-          Alert::Exception(
-              "Negative edge element attributes are not supported.").raise();
-      }
-
-      bool shiftTriAttr = false;
-      for (int i = 1; i <= src->nt; i++)
-      {
-        if (src->tria[i].ref == 0)
-          shiftTriAttr = true;
-        if (src->tria[i].ref < 0)
-          Alert::Exception(
-              "Negative triangle attributes are not supported").raise();
-      }
-
-      if (shiftEdgeAttr)
-        Alert::Warning(
-            "Edges with attribute equal to 0 are not supported. "
-            "All edge attributes will be incremented by 1.").raise();
-
-      if (shiftTriAttr)
-        Alert::Warning(
-            "Triangles with attribute equal to 0 are not supported. "
-            "All triangle attributes will be incremented by 1.").raise();
-
-      /* So for some reason mmg types are 1 indexed. So when accessing the
-       * arrays make sure to start at 1 and not 0. I don't know why this is the
-       * case and I'm not sure if it's for every array in the library.
-       */
-      for (int i = 1; i <= src->np; i++)
-      {
-        dst.AddVertex(
-            src->point[i].c[0],
-            src->point[i].c[1],
-            src->point[i].c[2]
-            );
-      }
-
-      for (int i = 1; i <= src->nt; i++)
-      {
-        dst.AddTriangle(
-            src->tria[i].v[0] - 1,
-            src->tria[i].v[1] - 1,
-            src->tria[i].v[2] - 1,
-            src->tria[i].ref + shiftTriAttr
-            );
-      }
-
-      for (int i = 1; i <= src->na; i++)
-      {
-         dst.AddBdrSegment(
-               src->edge[i].a - 1,
-               src->edge[i].b - 1,
-               src->edge[i].ref + shiftEdgeAttr
-               );
-      }
-
-      dst.FinalizeMesh(0, true);
-
-      return Rodin::Mesh(std::move(dst));
-   }
-
-  // ---- From: Rodin::Mesh - To: MMG::SurfaceMesh> --------------------------
-  template <>
-  template <>
-  MMG::SurfaceMesh
-  Cast<Rodin::Mesh>::to<MMG::SurfaceMesh>()
-  const
-  {
-    auto& mesh = from();
-    auto& mfemMesh = mesh.getHandle();
-
-    if (!(mesh.getDimension() == 2 && mesh.getHandle().SpaceDimension() == 3))
-    {
-      Alert::Exception()
-        << "Mesh must have two dimensional elements, "
-        << "embedded in three dimensional space"
-        << Alert::Raise;
-    }
-
-    if (mfemMesh.GetNE() == 0)
-      Alert::Exception(
-          "Converting from an empty mesh is not supported.").raise();
-
-    if (mfemMesh.NURBSext)
-       Alert::Exception(
-             "Converting from a NURBS mfem::Mesh to an MMG::SurfaceMesh is"
-             " not supported.").raise();
-
-    mfem::Array<mfem::Geometry::Type> geoms;
-    mfemMesh.GetGeometries(2, geoms);
-    if (std::any_of(geoms.begin(), geoms.end(),
-             [](mfem::Geometry::Type geometry)
-             {
-               return geometry != mfem::Geometry::Type::TRIANGLE;
-             }))
-    {
-      Alert::Exception()
-        << "Converting from a non-triangular mfem::Mesh to MMG::Mesh2D is not"
-        << " not supported."
-        << Alert::Raise;
-    }
-
-    /*
-     * To build the MMG mesh we follow the same procedure as that of the
-     * function MMGS_loadMesh in inout_s.c
-     */
-    MMG::SurfaceMesh res;
-    auto& mmgMesh = res.getHandle();
-
-    mmgMesh->np = mmgMesh->nt = mmgMesh->na = mmgMesh->xp = 0;
-    mmgMesh->np = mfemMesh.GetNV();
-    mmgMesh->nt = mfemMesh.GetNE();
-    mmgMesh->na = mfemMesh.GetNBE();
-
-    mmgMesh->npi  = mmgMesh->np;
-    mmgMesh->nai  = mmgMesh->na;
-    mmgMesh->nti  = mmgMesh->nt;
-
-    MMGS_Set_commonFunc();
-    if (!MMGS_zaldy(mmgMesh))
-       Alert::Exception("Memory allocation for the MMG::SufaceMesh failed.").raise();
-
-    // Copy points
-    for (int i = 1; i <= mmgMesh->np; i++)
-    {
-      const double* coords = mfemMesh.GetVertex(i - 1);
-      std::copy(coords, coords + 3, mmgMesh->point[i].c);
-    }
-
-    // Copy edges
-    for (int i = 1; i <= mmgMesh->na; i++)
-    {
-       mfem::Array<int> vertices;
-       mfemMesh.GetBdrElementVertices(i - 1, vertices);
-       mmgMesh->edge[i].a = vertices[0] + 1;
-       mmgMesh->edge[i].b = vertices[1] + 1;
-       mmgMesh->edge[i].ref = mfemMesh.GetBdrAttribute(i - 1);
-    }
-
-    // Copy triangles
-    for (int i = 1; i <= mmgMesh->nt; i++)
-    {
-      MMG5_pTria pt = &mmgMesh->tria[i];
-      mfem::Array<int> vertices;
-      mfemMesh.GetElementVertices(i - 1, vertices);
-      for (int j = 0; j < 3; j++)
-        pt->v[j] = vertices[j] + 1;
-
-      pt->ref = mfemMesh.GetAttribute(i - 1);
-      for (int j = 0; j < 3; j++)
-         mmgMesh->point[pt->v[j]].tag &= ~MG_NUL;
-    }
-    return res;
-  }
-
-  // ---- From: MMG::Mesh3D - To: Rodin::Mesh> -------------------------------
+   // ---- mmg3d -------------------------------------------------------------
    template <>
    template <>
    Rodin::Mesh
@@ -645,4 +461,335 @@ namespace Rodin
 
       return Rodin::Mesh(std::move(dst));
    }
+
+   template <>
+   template <>
+   External::MMG::Mesh3D
+   Cast<Rodin::Mesh>::to<External::MMG::Mesh3D>() const
+   {
+     auto& mesh = from();
+     auto& mfemMesh = mesh.getHandle();
+
+     if (mesh.getDimension() != 3)
+       Alert::Exception("Mesh must be three dimensional.").raise();
+
+     if (mesh.getSpaceDimension() != 3)
+       Alert::Exception("Mesh must be embedded in three dimensional space.").raise();
+
+     if (mfemMesh.GetNE() == 0)
+       Alert::Exception("Converting from an empty mesh is not supported.").raise();
+
+     if (mfemMesh.NURBSext)
+        Alert::Exception(
+              "Converting from a NURBS mfem::Mesh to an MMG::Mesh3D is not supported.").raise();
+
+     mfem::Array<mfem::Geometry::Type> geoms;
+     mfemMesh.GetGeometries(3, geoms);
+     if (std::any_of(geoms.begin(), geoms.end(),
+              [](mfem::Geometry::Type geometry)
+              {
+                return geometry != mfem::Geometry::Type::TETRAHEDRON;
+              }))
+     {
+       Alert::Exception()
+         << "Converting from a non-tetrahedral mfem::Mesh to an MMG::Mesh3D is not"
+         << " not supported."
+         << Alert::Raise;
+     }
+
+     /*
+      * To build the MMG mesh we follow the same procedure as that of the
+      * function MMG2D_loadMesh in inout_2d.c
+      */
+     MMG::Mesh3D res;
+     auto& mmgMesh = res.getHandle();
+
+     mmgMesh->np = mmgMesh->nt = mmgMesh->na = mmgMesh->xp = 0;
+     mmgMesh->np = mfemMesh.GetNV();
+     mmgMesh->ne = mfemMesh.GetNE();
+     mmgMesh->nt = mfemMesh.GetNBE();
+
+     mmgMesh->npi  = mmgMesh->np;
+     mmgMesh->nai  = mmgMesh->na;
+     mmgMesh->nti  = mmgMesh->nt;
+
+     MMG3D_Set_commonFunc();
+     if (!MMG3D_zaldy(mmgMesh))
+        Alert::Exception("Memory allocation for MMG::Mesh3D mesh failed.").raise();
+
+     // Copy points
+     for (int i = 1; i <= mmgMesh->np; i++)
+     {
+       const double* coords = mfemMesh.GetVertex(i - 1);
+       std::copy(coords, coords + 3, mmgMesh->point[i].c);
+     }
+
+     // Copy triangles
+     for (int i = 1; i <= mmgMesh->nt; i++)
+     {
+       MMG5_pTria pt = &mmgMesh->tria[i];
+       mfem::Array<int> vertices;
+       mfemMesh.GetBdrElementVertices(i - 1, vertices);
+       for (int j = 0; j < 3; j++)
+         pt->v[j] = vertices[j] + 1;
+       pt->ref = mfemMesh.GetBdrAttribute(i - 1);
+     }
+
+     // Copy tetrahedra
+     int reorientedCount = 0;
+     for (int i = 1; i <= mmgMesh->ne; i++)
+     {
+       MMG5_pTetra pt = &mmgMesh->tetra[i];
+       mfem::Array<int> vertices;
+       mfemMesh.GetElementVertices(i - 1, vertices);
+       for (int j = 0; j < 4; j++)
+         pt->v[j] = vertices[j] + 1;
+
+       pt->ref = mfemMesh.GetAttribute(i - 1);
+
+       for (int j = 0; j < 4; j++)
+         mmgMesh->point[pt->v[j]].tag &= ~MG_NUL;
+
+       if (MMG5_orvol(mmgMesh->point, pt->v) < 0.0)
+       {
+         reorientedCount++;
+         int aux = pt->v[2];
+         pt->v[2] = pt->v[3];
+         pt->v[3] = aux;
+         Alert::Warning() << "Element reoriented: " << i << Alert::Raise;
+       }
+       if (reorientedCount > 0)
+       {
+         Alert::Warning()
+           << "Number of elements reoriented: " << std::to_string(reorientedCount)
+           << Alert::Raise;
+       }
+     }
+     return res;
+   }
+
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolution3D
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteScalarSolution3D>()
+   const
+   {
+     assert(from().getFiniteElementSpace().getVectorDimension() == 1);
+     auto& gf = from();
+     auto [data, size] = gf.getData();
+     if (!size)
+       return External::MMG::IncompleteScalarSolution3D();
+     else
+     {
+       External::MMG::IncompleteScalarSolution3D res(size);
+       // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
+       // m + size + 1.
+       std::copy(data, data + size, res.getHandle()->m + 1);
+       return res;
+     }
+   }
+
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolution3D
+   Cast<Variational::IncompleteGridFunction>
+   ::to<External::MMG::IncompleteScalarSolution3D>() const
+   {
+     auto& gf = from();
+     int size = gf.getHandle().Size();
+     const double* data = gf.getHandle().GetData();
+     if (!size)
+       return External::MMG::IncompleteScalarSolution3D();
+     else
+     {
+       External::MMG::IncompleteScalarSolution3D res(size);
+       // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
+       // m + size + 1.
+       std::copy(data, data + size, res.getHandle()->m + 1);
+       return res;
+     }
+   }
+
+   // ---- mmgs --------------------------------------------------------------
+   template <>
+   template <>
+   Rodin::Mesh
+   Cast<MMG::SurfaceMesh>::to<Rodin::Mesh>() const
+   {
+      auto& mesh = from();
+      mfem::Mesh dst(
+           2,
+           mesh.count(MMG::SurfaceMesh::Entity::Vertex),
+           mesh.count(MMG::SurfaceMesh::Entity::Triangle),
+           0,
+           3);
+
+      auto& src = mesh.getHandle();
+      if (src->nt == 0)
+      {
+         Alert::Exception()
+           << "MMG::SurfaceMesh is empty (triangle count equals zero)"
+           << Alert::Raise;
+      }
+
+      bool shiftEdgeAttr = false;
+      for (int i = 1; i <= src->na; i++)
+      {
+        if (src->edge[i].ref == 0)
+          shiftEdgeAttr = true;
+        if (src->edge[i].ref < 0)
+          Alert::Exception(
+              "Negative edge element attributes are not supported.").raise();
+      }
+
+      bool shiftTriAttr = false;
+      for (int i = 1; i <= src->nt; i++)
+      {
+        if (src->tria[i].ref == 0)
+          shiftTriAttr = true;
+        if (src->tria[i].ref < 0)
+          Alert::Exception(
+              "Negative triangle attributes are not supported").raise();
+      }
+
+      if (shiftEdgeAttr)
+        Alert::Warning(
+            "Edges with attribute equal to 0 are not supported. "
+            "All edge attributes will be incremented by 1.").raise();
+
+      if (shiftTriAttr)
+        Alert::Warning(
+            "Triangles with attribute equal to 0 are not supported. "
+            "All triangle attributes will be incremented by 1.").raise();
+
+      /* So for some reason mmg types are 1 indexed. So when accessing the
+       * arrays make sure to start at 1 and not 0. I don't know why this is the
+       * case and I'm not sure if it's for every array in the library.
+       */
+      for (int i = 1; i <= src->np; i++)
+      {
+        dst.AddVertex(
+            src->point[i].c[0],
+            src->point[i].c[1],
+            src->point[i].c[2]
+            );
+      }
+
+      for (int i = 1; i <= src->nt; i++)
+      {
+        dst.AddTriangle(
+            src->tria[i].v[0] - 1,
+            src->tria[i].v[1] - 1,
+            src->tria[i].v[2] - 1,
+            src->tria[i].ref + shiftTriAttr
+            );
+      }
+
+      for (int i = 1; i <= src->na; i++)
+      {
+         dst.AddBdrSegment(
+               src->edge[i].a - 1,
+               src->edge[i].b - 1,
+               src->edge[i].ref + shiftEdgeAttr
+               );
+      }
+
+      dst.FinalizeMesh(0, true);
+
+      return Rodin::Mesh(std::move(dst));
+   }
+
+  template <>
+  template <>
+  MMG::SurfaceMesh
+  Cast<Rodin::Mesh>::to<MMG::SurfaceMesh>()
+  const
+  {
+    auto& mesh = from();
+    auto& mfemMesh = mesh.getHandle();
+
+    if (!(mesh.getDimension() == 2 && mesh.getHandle().SpaceDimension() == 3))
+    {
+      Alert::Exception()
+        << "Mesh must have two dimensional elements, "
+        << "embedded in three dimensional space"
+        << Alert::Raise;
+    }
+
+    if (mfemMesh.GetNE() == 0)
+      Alert::Exception(
+          "Converting from an empty mesh is not supported.").raise();
+
+    if (mfemMesh.NURBSext)
+       Alert::Exception(
+             "Converting from a NURBS mfem::Mesh to an MMG::SurfaceMesh is"
+             " not supported.").raise();
+
+    mfem::Array<mfem::Geometry::Type> geoms;
+    mfemMesh.GetGeometries(2, geoms);
+    if (std::any_of(geoms.begin(), geoms.end(),
+             [](mfem::Geometry::Type geometry)
+             {
+               return geometry != mfem::Geometry::Type::TRIANGLE;
+             }))
+    {
+      Alert::Exception()
+        << "Converting from a non-triangular mfem::Mesh to MMG::Mesh2D is not"
+        << " not supported."
+        << Alert::Raise;
+    }
+
+    /*
+     * To build the MMG mesh we follow the same procedure as that of the
+     * function MMGS_loadMesh in inout_s.c
+     */
+    MMG::SurfaceMesh res;
+    auto& mmgMesh = res.getHandle();
+
+    mmgMesh->np = mmgMesh->nt = mmgMesh->na = mmgMesh->xp = 0;
+    mmgMesh->np = mfemMesh.GetNV();
+    mmgMesh->nt = mfemMesh.GetNE();
+    mmgMesh->na = mfemMesh.GetNBE();
+
+    mmgMesh->npi  = mmgMesh->np;
+    mmgMesh->nai  = mmgMesh->na;
+    mmgMesh->nti  = mmgMesh->nt;
+
+    MMGS_Set_commonFunc();
+    if (!MMGS_zaldy(mmgMesh))
+       Alert::Exception("Memory allocation for the MMG::SufaceMesh failed.").raise();
+
+    // Copy points
+    for (int i = 1; i <= mmgMesh->np; i++)
+    {
+      const double* coords = mfemMesh.GetVertex(i - 1);
+      std::copy(coords, coords + 3, mmgMesh->point[i].c);
+    }
+
+    // Copy edges
+    for (int i = 1; i <= mmgMesh->na; i++)
+    {
+       mfem::Array<int> vertices;
+       mfemMesh.GetBdrElementVertices(i - 1, vertices);
+       mmgMesh->edge[i].a = vertices[0] + 1;
+       mmgMesh->edge[i].b = vertices[1] + 1;
+       mmgMesh->edge[i].ref = mfemMesh.GetBdrAttribute(i - 1);
+    }
+
+    // Copy triangles
+    for (int i = 1; i <= mmgMesh->nt; i++)
+    {
+      MMG5_pTria pt = &mmgMesh->tria[i];
+      mfem::Array<int> vertices;
+      mfemMesh.GetElementVertices(i - 1, vertices);
+      for (int j = 0; j < 3; j++)
+        pt->v[j] = vertices[j] + 1;
+
+      pt->ref = mfemMesh.GetAttribute(i - 1);
+      for (int j = 0; j < 3; j++)
+         mmgMesh->point[pt->v[j]].tag &= ~MG_NUL;
+    }
+    return res;
+  }
 }

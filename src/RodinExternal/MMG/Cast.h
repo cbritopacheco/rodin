@@ -15,8 +15,9 @@
 
 namespace Rodin
 {
+   // ---- mmg2d -------------------------------------------------------------
    /**
-    * @brief Specialization for converting from External::MMG::Mesh2D to Rodin::Mesh.
+    * MMG::Mesh2D -> Rodin::Mesh
     */
    template <>
    template <>
@@ -24,8 +25,7 @@ namespace Rodin
    Cast<External::MMG::Mesh2D>::to<Rodin::Mesh>() const;
 
    /**
-    * @brief Specialization for converting from Rodin::Mesh to
-    * External::MMG:Mesh2D.
+    * Rodin::Mesh -> MMG::Mesh2D
     */
    template <>
    template <>
@@ -33,18 +33,7 @@ namespace Rodin
    Cast<Rodin::Mesh>::to<External::MMG::Mesh2D>() const;
 
    /**
-    * @brief Specialization for converting from External::MMG::ScalarSolution2D to
-    * Rodin::Variational::GridFunction.
-    */
-   template <>
-   template <>
-   Variational::IncompleteGridFunction
-   Cast<External::MMG::ScalarSolution2D>
-   ::to<Variational::IncompleteGridFunction>() const;
-
-   /**
-    * @brief Specialization for converting from External::MMG::ScalarSolution2D to
-    * Rodin::Variational::GridFunction.
+    * MMG::ScalarSolution2D -> Rodin::Variational::IncompleteGridFunction
     */
    template <>
    template <>
@@ -53,9 +42,7 @@ namespace Rodin
    ::to<Variational::IncompleteGridFunction>() const;
 
    /**
-    * @brief Specialization for converting from
-    * Rodin::Variational::GridFunction<H1> to
-    * External::MMG::IncompleteScalarSolution2D.
+    * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution2D
     */
    template <>
    template <>
@@ -64,25 +51,7 @@ namespace Rodin
    ::to<External::MMG::IncompleteScalarSolution2D>() const;
 
    /**
-    * @brief Specialization for converting from
-    * Rodin::Variational::IncompleteGridFunction to
-    * External::MMG::IncompleteScalarSolution2D.
-    */
-   template <>
-   template <>
-   External::MMG::IncompleteScalarSolution2D
-   Cast<Variational::IncompleteGridFunction>
-   ::to<External::MMG::IncompleteScalarSolution2D>() const;
-
-   /**
-    * @brief Specialization for converting from
-    * Rodin::Variational::GridFunction to
-    * External::MMG::IncompleteVectorSolution2D.
-    *
-    * @note This is a lossy cast. Data from the old object that has no direct
-    * correspondence will not be present in the new object.
-    *
-    * @todo Which fields are not compatible?
+    * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteVectorSolution2D
     */
    template <>
    template <>
@@ -91,7 +60,61 @@ namespace Rodin
    ::to<External::MMG::IncompleteVectorSolution2D>() const;
 
    /**
-    * @brief Specialization for converting from External::MMG::Mesh3D to Rodin::Mesh.
+    * Rodin::Variational::IncompleteGridFunction -> MMG::ScalarSolution2D
+    */
+   template <>
+   template <>
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::ScalarSolution2D>
+   ::to<Variational::IncompleteGridFunction>() const;
+
+   /**
+    * Rodin::Variational::IncompleteGridFunction -> MMG::IncompleteScalarSolution2D
+    */
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolution2D
+   Cast<Variational::IncompleteGridFunction>
+   ::to<External::MMG::IncompleteScalarSolution2D>() const;
+
+   // ---- mmg3d -------------------------------------------------------------
+   /**
+    * MMG::Mesh3D -> Rodin::Mesh
+    */
+   template <>
+   template <>
+   Rodin::Mesh
+   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh>() const;
+
+   /**
+    * Rodin::Mesh -> MMG::Mesh3D
+    */
+   template <>
+   template <>
+   External::MMG::Mesh3D
+   Cast<Rodin::Mesh>::to<External::MMG::Mesh3D>() const;
+
+   /**
+    * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution3D
+    */
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolution3D
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteScalarSolution3D>() const;
+
+   /**
+    * Rodin::Variational::IncompleteGridFunction -> MMG::IncompleteScalarSolution3D
+    */
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolution3D
+   Cast<Variational::IncompleteGridFunction>
+   ::to<External::MMG::IncompleteScalarSolution3D>() const;
+
+   // ---- mmgs --------------------------------------------------------------
+   /**
+    * MMG::SurfaceMesh -> Rodin::Mesh.
     */
    template <>
    template <>
@@ -99,18 +122,12 @@ namespace Rodin
    Cast<External::MMG::SurfaceMesh>::to<Rodin::Mesh>() const;
 
    /**
-    * @brief Specialization for converting from Rodin::Mesh to
-    * External::MMG:Mesh3D.
+    * Rodin::Mesh -> MMG::SurfaceMesh
     */
    template <>
    template <>
    External::MMG::SurfaceMesh
    Cast<Rodin::Mesh>::to<External::MMG::SurfaceMesh>() const;
-
-   template <>
-   template <>
-   Rodin::Mesh
-   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh>() const;
 }
 
 

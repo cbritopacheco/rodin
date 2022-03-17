@@ -105,6 +105,18 @@ namespace Rodin::Variational
             return res;
          }
 
+         IncompleteGridFunction& setVectorDimension(int vdim)
+         {
+            m_vdim = vdim;
+            return *this;
+         }
+
+         int getVectorDimension() const
+         {
+            assert(m_vdim);
+            return *m_vdim;
+         }
+
          mfem::GridFunction& getHandle()
          {
             return m_gf;
@@ -117,6 +129,7 @@ namespace Rodin::Variational
 
       private:
          mfem::GridFunction m_gf;
+         std::optional<int> m_vdim;
    };
 
    /**
@@ -201,7 +214,56 @@ namespace Rodin::Variational
          {
             std::ifstream in(filename);
             IncompleteGridFunction res;
-            res.getHandle().Load(in);
+            int l = 0;
+
+            // Read VDim manually
+            std::string buff;
+            constexpr std::string_view kw("VDim: ");
+            std::optional<int> vdim;
+            while (std::getline(in, buff))
+            {
+               l++;
+               std::string::size_type n = buff.find(kw);
+               if (n != std::string::npos)
+               {
+                  vdim = std::stoi(buff.substr(kw.length()));
+                  break;
+               }
+            }
+            if (vdim)
+               res.setVectorDimension(*vdim);
+            else
+               Alert::Exception(
+                  "VDim keyword not found while loading GridFunction").raise();
+
+            // Advance until we see the "Ordering" keyword
+            while (std::getline(in, buff))
+            {
+               l++;
+               if (buff.find("Ordering: ") == std::string::npos)
+                  break;
+            }
+
+            // Skip empty lines
+            while (std::getline(in, buff))
+            {
+               l++;
+               if (!buff.empty())
+                  break;
+            }
+
+            // Count lines
+            int size = 1;
+            while (std::getline(in, buff))
+               size++;
+
+            // Load actual file
+            in.clear();
+            in.seekg(0);
+            for (int i = 0; i < l - 1; i++)
+               std::getline(in, buff);
+            res.getHandle().Load(in, size);
+
             return res;
          }
 
@@ -306,7 +368,9 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction& project(const VectorCoefficientBase& s, const std::set<int>& attrs = {}) override
+         GridFunction& project(
+               const VectorCoefficientBase& s,
+               const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == s.getDimension());
             auto iv = s.build();
@@ -330,7 +394,8 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction& projectOnBoundary(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
+         GridFunction& projectOnBoundary(
+               const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
             auto iv = s.build();
@@ -356,7 +421,8 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction& projectOnBoundary(const VectorCoefficientBase& v, const std::set<int>& attrs = {}) override
+         GridFunction& projectOnBoundary(
+               const VectorCoefficientBase& v, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == v.getDimension());
             auto iv = v.build();
@@ -392,7 +458,7 @@ namespace Rodin::Variational
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
             auto iv = s.getScalarCoefficient().build();
-            getHandle() = NAN;
+            getHandle() = std::numeric_limits<double>::quiet_NaN();
             mfem::Array<int> vdofs;
             mfem::Vector vals;
             const auto& fes = getFiniteElementSpace().getFES();

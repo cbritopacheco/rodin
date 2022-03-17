@@ -7,42 +7,50 @@ Distributed under the Boost Software License, Version 1.0.
 
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
-  Advect2D.h
   Cast.h
-  ForwardDecls.h
+  Utility.h
   Configure.h
   ISCDProcess.h
-  ImplicitDomainMesher2D.h
-  Distancer2D.h
+  ForwardDecls.h
   Mesh.h
+  Solution.h
+  ScalarSolution.h
+  VectorSolution.h
+# ---- mmg2d
   MMG2D.h
   Mesh2D.h
-  Mesh3D.h
-  SurfaceMesh.h
+  Advect2D.h
+  Distancer2D.h
   MeshAdaptor2D.h
   MeshOptimizer2D.h
-  ScalarSolution.h
   ScalarSolution2D.h
-  VectorSolution.h
   VectorSolution2D.h
-  Solution.h
-  Utility.h
+  ImplicitDomainMesher2D.h
+# ---- mmg3d
+  Mesh3D.h
+  ScalarSolution3D.h
+# ---- mmgs
+  SurfaceMesh.h
   )
 
 set(RodinExternalMMG_SRCS
-  Advect2D.cpp
   Cast.cpp
-  Distancer2D.cpp
-  ImplicitDomainMesher2D.cpp
+  Utility.cpp
   ISCDProcess.cpp
+# ---- mmg2d
   Mesh2D.cpp
-  Mesh3D.cpp
-  SurfaceMesh.cpp
+  Advect2D.cpp
+  Distancer2D.cpp
   MeshAdaptor2D.cpp
   MeshOptimizer2D.cpp
   ScalarSolution2D.cpp
   VectorSolution2D.cpp
-  Utility.cpp
+  ImplicitDomainMesher2D.cpp
+# ---- mmg3d
+  Mesh3D.cpp
+  ScalarSolution3D.cpp
+# ---- mmgs
+  SurfaceMesh.cpp
   )
 
 add_library(RodinExternalMMG

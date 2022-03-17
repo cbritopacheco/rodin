@@ -14,6 +14,14 @@ target_link_libraries(Elasticity
   Rodin::Variational
   )
 
+add_executable(VolumeMesh VolumeMesh.cpp)
+target_link_libraries(VolumeMesh
+  PUBLIC
+  Rodin::Mesh
+  Rodin::Solver
+  Rodin::Variational
+  )
+
 add_executable(SurfaceMeshes SurfaceMeshes.cpp)
 target_link_libraries(SurfaceMeshes
   PUBLIC

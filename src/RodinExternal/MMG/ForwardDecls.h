@@ -30,6 +30,9 @@ namespace Rodin::External::MMG
    class IncompleteVectorSolution2D;
 
    class Mesh3D;
+   class ScalarSolution3D;
+   class IncompleteScalarSolution3D;
+
    class SurfaceMesh;
 }
 
