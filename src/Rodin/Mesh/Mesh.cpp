@@ -275,6 +275,101 @@ namespace Rodin
       return SubMesh(std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
    }
 
+   SubMesh Mesh::skin()
+   {
+      assert(getDimension() >= 2);
+
+      // Determine mapping from vertex to boundary vertex
+      std::set<int> bdrVertices;
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+      {
+         mfem::Element* el = getHandle().GetBdrElement(i);
+         int *v = el->GetVertices();
+         int nv = el->GetNVertices();
+         for (int j = 0; j < nv; j++)
+            bdrVertices.insert(v[j]);
+      }
+
+      mfem::Mesh res(getDimension() - 1, bdrVertices.size(),
+            getHandle().GetNBE(), 0, getSpaceDimension());
+
+      // Copy vertices to the boundary mesh
+      int vertexIdx = 0;
+      std::map<int, int> s2pv; // Submesh to mesh node map
+      std::map<int, int> p2sv; // Mesh to submesh node map
+      for (const auto& v : bdrVertices)
+      {
+         p2sv[v] = vertexIdx;
+         s2pv[vertexIdx] = v;
+         vertexIdx++;
+         double *c = getHandle().GetVertex(v);
+         res.AddVertex(c);
+      }
+
+      // Copy elements to the boundary mesh
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+      {
+         mfem::Element *el = getHandle().GetBdrElement(i);
+         int *v = el->GetVertices();
+         int nv = el->GetNVertices();
+
+         std::vector<int> bv(nv);
+         for (int j = 0; j < nv; j++)
+            bv[j] = p2sv[v[j]];
+
+         switch (el->GetGeometryType())
+         {
+            case mfem::Geometry::SEGMENT:
+               res.AddSegment(bv.data(), el->GetAttribute());
+               break;
+            case mfem::Geometry::TRIANGLE:
+               res.AddTriangle(bv.data(), el->GetAttribute());
+               break;
+            case mfem::Geometry::SQUARE:
+               res.AddQuad(bv.data(), el->GetAttribute());
+               break;
+            default:
+               break; // This should not happen
+         }
+      }
+      res.FinalizeTopology();
+
+      // Copy GridFunction describing nodes if present
+      if (getHandle().GetNodes())
+      {
+         mfem::FiniteElementSpace* fes = getHandle().GetNodes()->FESpace();
+         const mfem::FiniteElementCollection* fec = fes->FEColl();
+         if (dynamic_cast<const mfem::H1_FECollection*>(fec))
+         {
+            mfem::FiniteElementCollection *fec_copy =
+               mfem::FiniteElementCollection::New(fec->Name());
+            mfem::FiniteElementSpace* fes_copy =
+               new mfem::FiniteElementSpace(*fes, &res, fec_copy);
+            mfem::GridFunction *bdr_nodes = new mfem::GridFunction(fes_copy);
+            bdr_nodes->MakeOwner(fec_copy);
+
+            res.NewNodes(*bdr_nodes, true);
+
+            mfem::Array<int> vdofs;
+            mfem::Array<int> bvdofs;
+            mfem::Vector v;
+            for (int i = 0; i < getHandle().GetNBE(); i++)
+            {
+               fes->GetBdrElementVDofs(i, vdofs);
+               getHandle().GetNodes()->GetSubVector(vdofs, v);
+
+               fes_copy->GetElementVDofs(i, bvdofs);
+               bdr_nodes->SetSubVector(bvdofs, v);
+            }
+         }
+         else
+         {
+            Alert::Exception("Discontinuous node space not yet supported.").raise();
+         }
+      }
+      return SubMesh(std::move(res)).setVertexMap(std::move(s2pv)).setParent(*this);
+   }
+
    mfem::Mesh& Mesh::getHandle()
    {
       return m_mesh;

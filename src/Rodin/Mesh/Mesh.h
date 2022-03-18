@@ -59,11 +59,17 @@ namespace Rodin
          Mesh& operator=(Mesh&& other) = default;
 
          /**
-          * @brief Gets the dimension of the elements.
-          * @returns Dimension of the mesh.
+          * @brief Gets the dimension of the elements
+          * @returns Dimension of the elements
+          * @see getSpaceDimension() const
           */
          int getDimension() const;
 
+         /**
+          * @brief Gets the dimension of the ambient space
+          * @returns Dimension of the space which the mesh is embedded in
+          * @see getDimension() const
+          */
          int getSpaceDimension() const;
 
          /**
@@ -135,6 +141,15 @@ namespace Rodin
           * original mesh.
           */
          SubMesh trim(const std::set<int>& attrs, int bdrLabel);
+
+         /**
+          * @brief Skins the mesh to obtain its boundary mesh
+          *
+          * This function will "skin" the mesh to return the mesh boundary as a
+          * new SubMesh object. The new mesh will be embedded in the original
+          * space dimension.
+          */
+         SubMesh skin();
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.

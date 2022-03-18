@@ -16,7 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-bridge2d-example.mesh";
+  const char* meshFile = "../resources/mfem/meshes/levelset-arch2d-example.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;

@@ -35,19 +35,6 @@ namespace Rodin::Variational
          constexpr
          ScalarCoefficientBase(const ScalarCoefficientBase&) = default;
 
-         constexpr
-         ScalarCoefficientBase& setTraceDomain(int domain)
-         {
-            m_traceDomain = domain;
-            return *this;
-         }
-
-         constexpr
-         std::optional<int> getTraceDomain() const
-         {
-            return m_traceDomain;
-         }
-
          std::unique_ptr<mfem::Coefficient> build() const override;
 
          virtual ~ScalarCoefficientBase() = default;
@@ -60,9 +47,6 @@ namespace Rodin::Variational
                ) const = 0;
 
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
-
-      private:
-         std::optional<int> m_traceDomain;
    };
 
    /**

@@ -25,19 +25,6 @@ namespace Rodin::Variational
          constexpr
          MatrixCoefficientBase(const MatrixCoefficientBase&) = default;
 
-         constexpr
-         MatrixCoefficientBase& setTraceDomain(int domain)
-         {
-            m_traceDomain = domain;
-            return *this;
-         }
-
-         constexpr
-         std::optional<int> getTraceDomain() const
-         {
-            return m_traceDomain;
-         }
-
          std::unique_ptr<mfem::MatrixCoefficient> build() const override;
 
          virtual ~MatrixCoefficientBase() = default;
@@ -53,9 +40,6 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
          virtual MatrixCoefficientBase* copy() const noexcept override = 0;
-
-      private:
-         std::optional<int> m_traceDomain;
    };
 }
 

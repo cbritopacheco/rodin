@@ -37,21 +37,6 @@ namespace Rodin::Variational
 
          virtual ~VectorCoefficientBase() = default;
 
-         constexpr
-         VectorCoefficientBase& setTraceDomain(int domain)
-         {
-            m_traceDomain = domain;
-            return *this;
-         }
-
-         constexpr
-         std::optional<int> getTraceDomain() const
-         {
-            return m_traceDomain;
-         }
-
-         std::unique_ptr<mfem::VectorCoefficient> build() const override;
-
          virtual void getValue(
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
@@ -64,8 +49,7 @@ namespace Rodin::Variational
 
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
 
-      private:
-         std::optional<int> m_traceDomain;
+         std::unique_ptr<mfem::VectorCoefficient> build() const override;
    };
 
    /**
