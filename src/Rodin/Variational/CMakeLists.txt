@@ -71,6 +71,7 @@ add_library(RodinVariational
   ${RodinVariational_SRCS} ${RodinVariational_HEADERS})
 add_library(Rodin::Variational ALIAS RodinVariational)
 
+# ---- Boost.UUID ----
 find_package(Boost 1.65 REQUIRED)
 
 # ---- Link targets ----------------------------------------------------------

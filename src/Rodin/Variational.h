@@ -40,6 +40,7 @@
 #include "Variational/Grad.h"
 #include "Variational/Normal.h"
 #include "Variational/Jacobian.h"
+#include "Variational/Derivative.h"
 
 #include "Variational/Trace.h"
 #include "Variational/Transpose.h"

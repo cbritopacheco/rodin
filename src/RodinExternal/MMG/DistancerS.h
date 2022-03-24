@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_EXTERNAL_MMG_DISTANCER2D_H
-#define RODIN_EXTERNAL_MMG_DISTANCER2D_H
+#ifndef RODIN_EXTERNAL_MMG_DISTANCERS_H
+#define RODIN_EXTERNAL_MMG_DISTANCERS_H
 
 #include <set>
 #include <optional>
@@ -17,32 +17,13 @@
 
 namespace Rodin::External::MMG
 {
-  /**
-   * @brief Class which generates the signed distance function of a domain.
-   *
-   * Given a domain @f$ \Omega \subset D @f$, with boundary @f$ \partial \Omega
-   * @f$ then the signed distance function @f$ \phi : D \rightarrow \mathbb{R}
-   * @f$ is defined by:
-   *
-   * @f[
-   *  \phi(x) = \begin{cases}
-   *    d(x, \partial \Omega) & \text{if } x \in \Omega\\
-   *    0 & \text{if } x \in \partial \Omega\\
-   *    -d(x, \partial \Omega) & \text{if } x \in \Omega^c
-   *  \end{cases}
-   * @f]
-   * where
-   * @f[
-   *  d(x, \partial \Omega) := \inf_{y \in \partial \Omega} d(x, y)
-   * @f]
-   */
-  class Distancer2D
+  class DistancerS
   {
     public:
       /**
-       * @brief Creates a Distancer2D object with default values.
+       * @brief Creates a DistancerS object with default values.
        */
-      Distancer2D();
+      DistancerS();
 
       /**
        * @brief Computes a signed distance function to a subdomain.
@@ -57,7 +38,7 @@ namespace Rodin::External::MMG
        * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
        * @returns Signed distance function representing @f$ \Omega @f$.
        */
-      ScalarSolution2D distance(Mesh2D& box);
+      ScalarSolutionS distance(MeshS& box);
 
       /**
        * @brief Computes a signed distance function from a given bounding box
@@ -72,9 +53,9 @@ namespace Rodin::External::MMG
        * @param[in] contour Orientable contour @f$ \partial \Omega @f$ to distance.
        * @returns Signed distance function representing @f$ \Omega @f$.
        * @note The contour mesh is allowed to contain a volume part, in which
-       * case only the edge (2D) or triangle (3D) information will be retained.
+       * case only the edge (S) or triangle (3D) information will be retained.
        */
-      ScalarSolution2D distance(Mesh2D& box, Mesh2D& contour);
+      ScalarSolutionS distance(MeshS& box, MeshS& contour);
 
       /**
        * @brief Redistances the level set function.
@@ -86,7 +67,7 @@ namespace Rodin::External::MMG
        *
        * @param[in,out] sol Level set function
        */
-      void redistance(ScalarSolution2D& sol);
+      void redistance(ScalarSolutionS& sol);
 
       /**
        * @brief Specifies which material reference is to be understood as
@@ -97,9 +78,9 @@ namespace Rodin::External::MMG
        * By default, the interior elements are assumed to have the material
        * reference 3.
        *
-       * @see distance(Mesh2D&) const
+       * @see distance(MeshS&) const
        */
-      Distancer2D& setInteriorDomain(const MaterialReference& ref)
+      DistancerS& setInteriorDomain(const MaterialReference& ref)
       {
         return setInteriorDomain(std::set<MaterialReference>{ref});
       }
@@ -113,24 +94,24 @@ namespace Rodin::External::MMG
        * By default, the interior elements are assumed to have the material
        * reference 3.
        *
-       * @see distance(Mesh2D&) const
+       * @see distance(MeshS&) const
        */
-      Distancer2D& setInteriorDomain(const std::set<MaterialReference>& refs);
+      DistancerS& setInteriorDomain(const std::set<MaterialReference>& refs);
 
       /**
        * @brief Specifies the active border of the mesh.
        * @returns Reference to self (for method chaining)
        *
-       * An active border (in 2D) is a subset of the bounding box boundary
+       * An active border (in S) is a subset of the bounding box boundary
        * where the level set function will be equal to zero.
        *
        * This implicitly enables active border mode.
        *
        * By default, all the bounding box boundary is inactive.
        *
-       * @see distance(Mesh2D&) const
+       * @see distance(MeshS&) const
        */
-      Distancer2D& setActiveBorder(const MaterialReference& ref)
+      DistancerS& setActiveBorder(const MaterialReference& ref)
       {
         return setActiveBorder(std::set<MaterialReference>{ref});
       }
@@ -139,24 +120,24 @@ namespace Rodin::External::MMG
        * @brief Specifies the active borders of the mesh.
        * @returns Reference to self (for method chaining)
        *
-       * An active border (in 2D) is a subset of the bounding box boundary
+       * An active border (in S) is a subset of the bounding box boundary
        * where the level set function will be equal to zero.
        *
        * This implicitly enables active border mode.
        *
        * By default, all the bounding box boundary is inactive.
        *
-       * @see distance(Mesh2D&) const
+       * @see distance(MeshS&) const
        */
-      Distancer2D& setActiveBorder(const std::set<MaterialReference>& refs);
+      DistancerS& setActiveBorder(const std::set<MaterialReference>& refs);
 
       /**
        * @brief Specifies that the whole bounding box boundary will be active.
        *
-       * @see distance(Mesh2D&) const
+       * @see distance(MeshS&) const
        * @see setActiveBorders(const std::set<MaterialReference>&) const
        */
-      Distancer2D& setActiveBorders();
+      DistancerS& setActiveBorders();
 
       /**
        * @brief Specifies whether to enable the scaling of the contour mesh.
@@ -166,9 +147,9 @@ namespace Rodin::External::MMG
        *
        * By default, it is enabled.
        *
-       * @see distance(Mesh2D&, Mesh2D&)
+       * @see distance(MeshS&, MeshS&)
        */
-      Distancer2D& enableScaling(bool b = true);
+      DistancerS& enableScaling(bool b = true);
 
       /**
        * @brief Specifies how many CPUs to use when distancing in parallel.
@@ -176,7 +157,7 @@ namespace Rodin::External::MMG
        *
        * By default, it will utilize `std::thread::hardware_concurrency()`.
        */
-      Distancer2D& setCPUs(unsigned int ncpu);
+      DistancerS& setCPUs(unsigned int ncpu);
 
       /**
        * @returns Number of CPUs which will be used when performing the

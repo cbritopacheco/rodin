@@ -11,8 +11,11 @@
 #include <random>
 #include <vector>
 #include <sstream>
+#include <iostream>
 #include <filesystem>
 #include <type_traits>
+
+#include <boost/process.hpp>
 
 #include "Configure.h"
 
@@ -71,24 +74,67 @@ namespace Rodin::External::MMG
 
       ISCDProcess(const std::filesystem::path& executable);
 
+      ISCDProcess(const ISCDProcess& other);
+
+      ISCDProcess(ISCDProcess&& other) = default;
+
       template <class ... Ts>
-      int run(Ts... args) const
+      int run(Ts... args)
       {
         // Accumulate args
         ParameterPack ps(std::forward<Ts>(args)...);
         std::string strArgs = ps.toString();
 
         // Run command
-        return std::system((m_executable.string() + " " + strArgs).c_str());
+        if (m_out)
+          return boost::process::system(
+              (m_executable.string() + " " + strArgs).c_str(),
+              boost::process::std_out > *m_out
+            );
+        else
+          return boost::process::system(
+              (m_executable.string() + " " + strArgs).c_str(),
+              boost::process::std_out > boost::process::null
+            );
       }
 
-      int run(const std::vector<std::string>& args) const
+      int run(const std::vector<std::string>& args)
       {
         // Run command
         std::string strArgs = "";
         for (const auto& arg : args)
           strArgs += " " + arg;
-        return std::system((m_executable.string() + strArgs).c_str());
+        if (m_out)
+          return boost::process::system(
+              (m_executable.string() + strArgs).c_str(),
+              boost::process::std_out > *m_out,
+              boost::process::std_err > *m_out
+            );
+        else
+          return boost::process::system(
+              (m_executable.string() + strArgs).c_str(),
+              boost::process::std_out > boost::process::null,
+              boost::process::std_out > boost::process::null
+            );
+      }
+
+      ISCDProcess& logOutput(bool enable = true)
+      {
+        if (enable)
+        {
+          if (!m_out)
+            m_out.emplace();
+        }
+        else
+        {
+          m_out.reset();
+        }
+        return *this;
+      }
+
+      std::optional<boost::process::ipstream>& getOutputLog()
+      {
+        return m_out;
       }
 
       static std::filesystem::path tmpnam(
@@ -113,6 +159,7 @@ namespace Rodin::External::MMG
 
       std::filesystem::path m_executable;
       unsigned int m_ncpu;
+      std::optional<boost::process::ipstream> m_out;
   };
 }
 

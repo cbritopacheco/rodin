@@ -24,6 +24,6 @@
 #include "MMG/ScalarSolution3D.h"
 
 // ---- mmgs -----------------------------------------------------------------
-#include "MMG/SurfaceMesh.h"
+#include "MMG/MeshS.h"
 
 #endif

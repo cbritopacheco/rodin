@@ -11,6 +11,7 @@ namespace Rodin::External::MMG
 {
    class MeshBase;
    class SolutionBase;
+   class ScalarSolution;
 
    class MMG2D;
    class Mesh2D;
@@ -21,7 +22,6 @@ namespace Rodin::External::MMG
    class Distancer2D;
    class Redistancer2D;
 
-   class ScalarSolution;
    class ScalarSolution2D;
    class IncompleteScalarSolution2D;
 
@@ -33,7 +33,12 @@ namespace Rodin::External::MMG
    class ScalarSolution3D;
    class IncompleteScalarSolution3D;
 
-   class SurfaceMesh;
+   class MeshS;
+   class ScalarSolutionS;
+   class IncompleteScalarSolutionS;
+
+   class VectorSolutionS;
+   class IncompleteVectorSolutionS;
 }
 
 #endif

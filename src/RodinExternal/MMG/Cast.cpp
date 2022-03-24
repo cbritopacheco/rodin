@@ -29,7 +29,7 @@
 #include "Mesh3D.h"
 #include "ScalarSolution3D.h"
 
-#include "SurfaceMesh.h"
+#include "MeshS.h"
 
 #include "Utility.h"
 
@@ -615,13 +615,13 @@ namespace Rodin
    template <>
    template <>
    Rodin::Mesh
-   Cast<MMG::SurfaceMesh>::to<Rodin::Mesh>() const
+   Cast<MMG::MeshS>::to<Rodin::Mesh>() const
    {
       auto& mesh = from();
       mfem::Mesh dst(
            2,
-           mesh.count(MMG::SurfaceMesh::Entity::Vertex),
-           mesh.count(MMG::SurfaceMesh::Entity::Triangle),
+           mesh.count(MMG::MeshS::Entity::Vertex),
+           mesh.count(MMG::MeshS::Entity::Triangle),
            0,
            3);
 
@@ -629,7 +629,7 @@ namespace Rodin
       if (src->nt == 0)
       {
          Alert::Exception()
-           << "MMG::SurfaceMesh is empty (triangle count equals zero)"
+           << "MMG::MeshS is empty (triangle count equals zero)"
            << Alert::Raise;
       }
 
@@ -702,8 +702,8 @@ namespace Rodin
 
   template <>
   template <>
-  MMG::SurfaceMesh
-  Cast<Rodin::Mesh>::to<MMG::SurfaceMesh>()
+  MMG::MeshS
+  Cast<Rodin::Mesh>::to<MMG::MeshS>()
   const
   {
     auto& mesh = from();
@@ -723,7 +723,7 @@ namespace Rodin
 
     if (mfemMesh.NURBSext)
        Alert::Exception(
-             "Converting from a NURBS mfem::Mesh to an MMG::SurfaceMesh is"
+             "Converting from a NURBS mfem::Mesh to an MMG::MeshS is"
              " not supported.").raise();
 
     mfem::Array<mfem::Geometry::Type> geoms;
@@ -744,7 +744,7 @@ namespace Rodin
      * To build the MMG mesh we follow the same procedure as that of the
      * function MMGS_loadMesh in inout_s.c
      */
-    MMG::SurfaceMesh res;
+    MMG::MeshS res;
     auto& mmgMesh = res.getHandle();
 
     mmgMesh->np = mmgMesh->nt = mmgMesh->na = mmgMesh->xp = 0;

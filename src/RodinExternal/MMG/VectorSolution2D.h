@@ -75,7 +75,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to write.
           */
-         void save(const std::filesystem::path& filename);
+         void save(const std::filesystem::path& filename) override;
 
          /**
           * @brief Sets the associated mesh.

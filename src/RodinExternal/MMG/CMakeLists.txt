@@ -30,13 +30,14 @@ set(RodinExternalMMG_HEADERS
   Mesh3D.h
   ScalarSolution3D.h
 # ---- mmgs
-  SurfaceMesh.h
-  )
+  MeshS.h
+  ScalarSolutionS.h)
 
 set(RodinExternalMMG_SRCS
   Cast.cpp
   Utility.cpp
   ISCDProcess.cpp
+  ScalarSolution.cpp
 # ---- mmg2d
   Mesh2D.cpp
   Advect2D.cpp
@@ -50,8 +51,10 @@ set(RodinExternalMMG_SRCS
   Mesh3D.cpp
   ScalarSolution3D.cpp
 # ---- mmgs
-  SurfaceMesh.cpp
-  )
+  MeshS.cpp
+  AdvectS.h
+  DistancerS.h
+  ScalarSolutionS.cpp)
 
 add_library(RodinExternalMMG
   ${RodinExternalMMG_HEADERS} ${RodinExternalMMG_SRCS})
@@ -69,6 +72,9 @@ add_subdirectory(
 # - Mmg::libmmg2d_a
 # - Mmg::libmmg3d_a
 # - Mmg::libmmgs_a
+
+# ---- Boost.Process ----
+find_package(Boost 1.65 REQUIRED)
 
 # ---- ISCD Commons Library ----
 include(ExternalProject)

@@ -17,6 +17,11 @@ namespace Rodin::External::MMG
     : m_executable(executable)
   {}
 
+  ISCDProcess::ISCDProcess(const ISCDProcess& other)
+    : m_executable(other.m_executable),
+      m_ncpu(other.m_ncpu)
+  {}
+
   std::filesystem::path ISCDProcess::tmpnam(
       const std::filesystem::path& extension,
       const std::filesystem::path& prefix)

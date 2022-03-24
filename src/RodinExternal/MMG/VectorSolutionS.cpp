@@ -1,18 +1,18 @@
 #include <cstring>
 
-#include <mmg2d/mmg2d.h>
+#include <mmgs/mmgs.h>
 #include <libmmgcommon.h>
 #include <common/mmgcommon.h>
 
 #include "Rodin/Alert.h"
-#include "Mesh2D.h"
+#include "MeshS.h"
 
-#include "VectorSolution2D.h"
+#include "VectorSolutionS.h"
 
 namespace Rodin::External::MMG
 {
-  // ---- VectorSolution2D --------------------------------------------------
-  VectorSolution2D::VectorSolution2D(Mesh2D& mesh)
+  // ---- VectorSolutionS --------------------------------------------------
+  VectorSolutionS::VectorSolutionS(MeshS& mesh)
      : m_mesh(mesh)
   {
      auto calloc =
@@ -27,13 +27,13 @@ namespace Rodin::External::MMG
      if (!calloc())
         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
-     m_sol->dim  = mesh.getDimension(); // Supported on 2D mesh
+     m_sol->dim  = mesh.getDimension(); // Supported on S mesh
      m_sol->ver  = 2;
      m_sol->size = 2; // Vector solution
      m_sol->type = MMG5_Vector;
   }
 
-  VectorSolution2D::~VectorSolution2D()
+  VectorSolutionS::~VectorSolutionS()
   {
      if (m_sol)
      {
@@ -48,14 +48,14 @@ namespace Rodin::External::MMG
      }
   }
 
-  VectorSolution2D::VectorSolution2D(VectorSolution2D&& other)
+  VectorSolutionS::VectorSolutionS(VectorSolutionS&& other)
      :  m_mesh(other.m_mesh),
         m_sol(other.m_sol)
   {
      other.m_sol = nullptr;
   }
 
-  VectorSolution2D& VectorSolution2D::operator=(VectorSolution2D&& other)
+  VectorSolutionS& VectorSolutionS::operator=(VectorSolutionS&& other)
   {
      m_mesh = other.m_mesh;
      m_sol = other.m_sol;
@@ -63,7 +63,7 @@ namespace Rodin::External::MMG
      return *this;
   }
 
-  VectorSolution2D::VectorSolution2D(const VectorSolution2D& other)
+  VectorSolutionS::VectorSolutionS(const VectorSolutionS& other)
      : m_mesh(other.m_mesh)
   {
      assert(other.m_sol);
@@ -82,7 +82,7 @@ namespace Rodin::External::MMG
         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
      // Copy the fields
-     m_sol->dim  = 2; // Supported on 2D mesh
+     m_sol->dim  = other.getMesh().getDimension(); // Supported on S mesh
      m_sol->ver  = 2; // Version 2
      m_sol->type = MMG5_Vector;
      m_sol->size = 2; // Two solutions per entity
@@ -97,7 +97,7 @@ namespace Rodin::External::MMG
         /*
          * We should be keeping track of the memory usage in the mesh object
          * that would be associated with this solution. However, we don't do
-         * that since it would require initiliazing the object with a Mesh2D.
+         * that since it would require initiliazing the object with a MeshS.
          * For now we just assume that they're independent.
          * MMG5_ADD_MEM(
          *      mesh, (m_sol->size * (m_sol->npmax + 1)) * sizeof(double),"", ;);
@@ -124,12 +124,12 @@ namespace Rodin::External::MMG
      }
   }
 
-  VectorSolution2D&
-  VectorSolution2D::operator=(const VectorSolution2D& other)
+  VectorSolutionS&
+  VectorSolutionS::operator=(const VectorSolutionS& other)
   {
      if (this != &other)
      {
-        VectorSolution2D tmp(other);
+        VectorSolutionS tmp(other);
 
         std::swap(m_sol->dim, tmp.m_sol->dim);
         std::swap(m_sol->entities, tmp.m_sol->entities);
@@ -149,15 +149,15 @@ namespace Rodin::External::MMG
      return *this;
   }
 
-  IncompleteVectorSolution2D VectorSolution2D::load(
+  IncompleteVectorSolutionS VectorSolutionS::load(
         const std::filesystem::path& filename)
   {
-     IncompleteVectorSolution2D res;
+     IncompleteVectorSolutionS res;
      MMG5_pSol sol = res.getHandle();
 
      /*
       * To load the solution file, we use basically the same methodology in
-      * MMG2D_loadSol in mmg2d/inout_2d.c
+      * MMGS_loadSol in mmgS/inout_S.c
       *
       * We cannot use the actual function since it requires an MMG5_pMesh
       * object which is not used in the call and subcalls of this method,
@@ -238,7 +238,7 @@ namespace Rodin::External::MMG
      {
         sol->np  = np;
         sol->npi = np;
-        sol->npmax = std::max(static_cast<int>(1.5 * sol->np), MMG2D_NPMAX);
+        sol->npmax = std::max(static_cast<int>(1.5 * sol->np), MMGS_NPMAX);
         MMG5_SAFE_CALLOC(
               sol->m, (sol->size * (sol->npmax + 1)), double, /* No op */);
      }
@@ -268,7 +268,7 @@ namespace Rodin::External::MMG
      return res;
   }
 
-  void VectorSolution2D::save(const std::filesystem::path& filename)
+  void VectorSolutionS::save(const std::filesystem::path& filename)
   {
      if (!m_sol->np || !m_sol->m)
      {
@@ -276,41 +276,41 @@ namespace Rodin::External::MMG
               "Failed to write to Vector solution to file. No data!").raise();
      }
 
-     if (!MMG2D_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
+     if (!MMGS_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
      {
         Alert::Exception("Failed to open file for writing: " + filename.string()).raise();
      }
   }
 
-  VectorSolution2D& VectorSolution2D::setMesh(Mesh2D& mesh)
+  VectorSolutionS& VectorSolutionS::setMesh(MeshS& mesh)
   {
-     assert(mesh.count(Mesh2D::Entity::Vertex) == count());
+     assert(mesh.count(MeshS::Entity::Vertex) == count());
      m_mesh = mesh;
      return *this;
   }
 
-  const Mesh2D& VectorSolution2D::getMesh() const
+  const MeshS& VectorSolutionS::getMesh() const
   {
      return m_mesh;
   }
 
-  Mesh2D& VectorSolution2D::getMesh()
+  MeshS& VectorSolutionS::getMesh()
   {
      return m_mesh;
   }
 
-  MMG5_pSol& VectorSolution2D::getHandle()
+  MMG5_pSol& VectorSolutionS::getHandle()
   {
      return m_sol;
   }
 
-  const MMG5_pSol& VectorSolution2D::getHandle() const
+  const MMG5_pSol& VectorSolutionS::getHandle() const
   {
      return m_sol;
   }
 
-  // ---- IncompleteVectorSolution2D ----------------------------------------
-  IncompleteVectorSolution2D::IncompleteVectorSolution2D()
+  // ---- IncompleteVectorSolutionS ----------------------------------------
+  IncompleteVectorSolutionS::IncompleteVectorSolutionS()
      : m_isOwner(true)
   {
      auto calloc =
@@ -325,26 +325,26 @@ namespace Rodin::External::MMG
      if (!calloc())
         Alert::Exception("Failed to allocate memory for the mesh").raise();
 
-     m_sol->dim  = 2; // Supported on 2D mesh
+     m_sol->dim  = 3; // Supported on S mesh
      m_sol->ver  = 2;
      m_sol->size = 2; // Vector solution
      m_sol->type = MMG5_Vector;
   }
 
-  IncompleteVectorSolution2D::IncompleteVectorSolution2D(int n)
-     : IncompleteVectorSolution2D()
+  IncompleteVectorSolutionS::IncompleteVectorSolutionS(int n)
+     : IncompleteVectorSolutionS()
   {
      if (n)
      {
         m_sol->np  = n;
         m_sol->npi = n;
-        m_sol->npmax = std::max(static_cast<int>(1.5 * m_sol->np), MMG2D_NPMAX);
+        m_sol->npmax = std::max(static_cast<int>(1.5 * m_sol->np), MMGS_NPMAX);
         MMG5_SAFE_CALLOC(
               m_sol->m, (m_sol->size * (m_sol->npmax + 1)), double, /* No op */);
      }
   }
 
-  IncompleteVectorSolution2D::~IncompleteVectorSolution2D()
+  IncompleteVectorSolutionS::~IncompleteVectorSolutionS()
   {
      if (m_isOwner)
      {
@@ -362,20 +362,20 @@ namespace Rodin::External::MMG
      }
   }
 
-  VectorSolution2D IncompleteVectorSolution2D::setMesh(Mesh2D& mesh)
+  VectorSolutionS IncompleteVectorSolutionS::setMesh(MeshS& mesh)
   {
-     VectorSolution2D res(mesh);
+     VectorSolutionS res(mesh);
      res.getHandle() = m_sol;
      m_isOwner = false;
      return res;
   }
 
-  MMG5_pSol& IncompleteVectorSolution2D::getHandle()
+  MMG5_pSol& IncompleteVectorSolutionS::getHandle()
   {
      return m_sol;
   }
 
-  const MMG5_pSol& IncompleteVectorSolution2D::getHandle() const
+  const MMG5_pSol& IncompleteVectorSolutionS::getHandle() const
   {
      return m_sol;
   }

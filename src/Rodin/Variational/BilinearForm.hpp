@@ -9,6 +9,8 @@
 
 #include <cassert>
 
+#include "FormLanguage/BilinearFormIntegratorSum.h"
+
 #include "FiniteElementSpace.h"
 #include "BilinearFormIntegrator.h"
 
@@ -38,6 +40,14 @@ namespace Rodin::Variational
    }
 
    template <class FES>
+   BilinearForm<FES>&
+   BilinearForm<FES>::operator=(const FormLanguage::BilinearFormIntegratorSum& bfi)
+   {
+      from(bfi).assemble();
+      return *this;
+   }
+
+   template <class FES>
    BilinearForm<FES>& BilinearForm<FES>::from(const BilinearFormIntegratorBase& bfi)
    {
       switch (bfi.getIntegratorRegion())
@@ -56,9 +66,29 @@ namespace Rodin::Variational
    }
 
    template <class FES>
+   BilinearForm<FES>&
+   BilinearForm<FES>::from(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   {
+      m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
+      m_bfiDomainList.clear();
+      m_domAttrMarkers.clear();
+      add(lsum);
+      return *this;
+   }
+
+   template <class FES>
    void BilinearForm<FES>::assemble()
    {
       m_bf->Assemble();
+   }
+
+   template <class FES>
+   BilinearForm<FES>&
+   BilinearForm<FES>::add(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   {
+      for (const auto& p : lsum.getBilinearFormDomainIntegratorList())
+         add(*p);
+      return *this;
    }
 
    template <class FES>

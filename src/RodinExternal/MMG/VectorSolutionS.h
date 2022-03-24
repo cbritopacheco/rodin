@@ -4,35 +4,19 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_EXTERNAL_MMG_SCALARSOLUTION3D_H
-#define RODIN_EXTERNAL_MMG_SCALARSOLUTION3D_H
+#ifndef RODIN_EXTERNAL_MMG_VECTORSOLUTIONS_H
+#define RODIN_EXTERNAL_MMG_VECTORSOLUTIONS_H
 
-#include <cstddef>
-#include <functional>
-
-#include <mmg/mmg3d/libmmg3d.h>
-
-#include "Rodin/Alert.h"
+#include <filesystem>
 
 #include "ForwardDecls.h"
-#include "Mesh3D.h"
-
-#include "ScalarSolution.h"
+#include "VectorSolution.h"
 
 namespace Rodin::External::MMG
 {
-   /**
-    * @brief Scalar solution supported on a 3D mesh.
-    *
-    * An object of type ScalarSolution3D represents a function
-    * @f[
-    * f : \Omega \subset \mathbb{R}^2 \rightarrow \mathbb{R}
-    * @f]
-    * whose known values are given on vertices of some mesh @f$ \Omega @f$.
-    */
-   class ScalarSolution3D :  public ScalarSolution
-   {
-      public:
+  class VectorSolutionS : public VectorSolution
+  {
+    public:
          /**
           * @brief Reads the solution text file.
           *
@@ -40,21 +24,21 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to read.
           */
-         static IncompleteScalarSolution3D load(const std::filesystem::path& filename);
+         static IncompleteVectorSolutionS load(const std::filesystem::path& filename);
 
          /**
           * @brief Initializes the object with no data
           *
           * @param[in] mesh Reference to the underlying mesh.
           */
-         ScalarSolution3D(Mesh3D& mesh);
+         VectorSolutionS(MeshS& mesh);
 
          /**
           * @brief Performs a move construction from the `other` solution object.
           *
           * @param[in] other Object to move.
           */
-         ScalarSolution3D(ScalarSolution3D&& other);
+         VectorSolutionS(VectorSolutionS&& other);
 
          /**
           * @brief Performs a copy of the `other` solution object.
@@ -63,26 +47,35 @@ namespace Rodin::External::MMG
           * @note It does not perform a copy the mesh. Instead the new object
           * will have a reference to the original mesh.
           */
-         ScalarSolution3D(const ScalarSolution3D& other);
+         VectorSolutionS(const VectorSolutionS& other);
 
          /**
           * @brief Frees the data.
           */
-         virtual ~ScalarSolution3D();
+         virtual ~VectorSolutionS();
 
          /**
           * @brief Move assigns the `other` solution object to this object.
           *
           * @param[in] other Object to move.
           */
-         ScalarSolution3D& operator=(ScalarSolution3D&& other);
+         VectorSolutionS& operator=(VectorSolutionS&& other);
 
          /**
           * @brief Copy assigns the `other` solution object to this object.
           *
           * @param[in] other Object to copy.
           */
-         ScalarSolution3D& operator=(const ScalarSolution3D& other);
+         VectorSolutionS& operator=(const VectorSolutionS& other);
+
+         /**
+          * @brief Write the solution to a text file.
+          *
+          * The file is written using MMGv2 format.
+          *
+          * @param[in] filename Name of file to write.
+          */
+         void save(const std::filesystem::path& filename) override;
 
          /**
           * @brief Sets the associated mesh.
@@ -96,62 +89,59 @@ namespace Rodin::External::MMG
           * user to ensure that the number of points are the same, keep track
           * of the modifications to the underlying mesh, etc.
           */
-         ScalarSolution3D& setMesh(Mesh3D& mesh);
+         VectorSolutionS& setMesh(MeshS& mesh);
 
          /**
           * @brief Gets the constant reference to the underlying mesh.
           *
           * @returns Constant reference to the underlying mesh.
           */
-         const Mesh3D& getMesh() const;
+         const MeshS& getMesh() const;
 
          /**
           * @brief Gets the reference to the underlying mesh.
           *
           * @returns Reference to the underlying mesh.
           */
-         Mesh3D& getMesh();
+         MeshS& getMesh();
 
-         void save(const std::filesystem::path& filename) override;
-
-         MMG5_pSol& getHandle() override;
-
-         const MMG5_pSol& getHandle() const override;
+         virtual MMG5_pSol& getHandle() override;
+         virtual const MMG5_pSol& getHandle() const override;
 
       private:
-         std::reference_wrapper<Mesh3D> m_mesh;
+         std::reference_wrapper<MeshS> m_mesh;
          MMG5_pSol m_sol;
-   };
+  };
 
    /**
-    * @brief A scalar solution which does not have a mesh assigned to it.
+    * @brief A vector solution which does not have a mesh assigned to it.
     *
     * To unlock the full functionality of the class you must call the
-    * @ref setMesh(Mesh3D&) method. For example, when loading it from file:
+    * @ref setMesh(MeshS&) method. For example, when loading it from file:
     *
     * @code{.cpp}
-    * auto sol = ScalarSolution3D::load(filename).setMesh(mesh);
+    * auto sol = VectorSolutionS::load(filename).setMesh(mesh);
     * @endcode
     */
-   class IncompleteScalarSolution3D
+   class IncompleteVectorSolutionS
    {
       public:
          /**
-          * @brief Constructs an empty scalar solution object without a mesh.
+          * @brief Constructs an empty Vector solution object without a mesh.
           */
-         IncompleteScalarSolution3D();
+         IncompleteVectorSolutionS();
 
          /**
-          * @brief Constructs a scalar solution with `n` unitialized entries.
+          * @brief Constructs a Vector solution with `n` unitialized entries.
           * @param[in] n Number of entries that the solution has.
           */
-         IncompleteScalarSolution3D(int n);
+         IncompleteVectorSolutionS(int n);
 
          /**
           * @brief Frees the data if it still owns the data, i.e. the
-          * setMesh(Mesh3D&) method has not been called.
+          * setMesh(MeshS&) method has not been called.
           */
-         virtual ~IncompleteScalarSolution3D();
+         virtual ~IncompleteVectorSolutionS();
 
          /**
           * @brief Sets the associated mesh and moves ownership to the new
@@ -159,7 +149,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] mesh Reference to mesh.
           *
-          * @returns An object of type ScalarSolution3D which represents the
+          * @returns An object of type VectorSolutionS which represents the
           * object with all its functionality.
           *
           * @note The method does not incur any significant performance penalty
@@ -170,18 +160,19 @@ namespace Rodin::External::MMG
           * user to ensure that the number of points are the same and keep
           * track of the modifications to the underlying mesh.
           */
-         ScalarSolution3D setMesh(Mesh3D& mesh);
+         VectorSolutionS setMesh(MeshS& mesh);
 
-         /**
-          * @internal
-          * @returns Reference to underlying solution handle.
-          */
+         double* begin()
+         {
+            return getHandle()->m + getHandle()->size;
+         }
+
+         double* end()
+         {
+            return getHandle()->m + getHandle()->size * (getHandle()->np + 1);
+         }
+
          MMG5_pSol& getHandle();
-
-         /**
-          * @internal
-          * @returns Constant reference to underlying solution handle.
-          */
          const MMG5_pSol& getHandle() const;
 
       private:
@@ -189,4 +180,5 @@ namespace Rodin::External::MMG
          bool m_isOwner;
    };
 }
+
 #endif

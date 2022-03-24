@@ -6,11 +6,11 @@
 
 #include "Utility.h"
 
-#include "SurfaceMesh.h"
+#include "MeshS.h"
 
 namespace Rodin::External::MMG
 {
-   SurfaceMesh::SurfaceMesh()
+   MeshS::MeshS()
    {
        m_mesh = nullptr;
 
@@ -42,28 +42,28 @@ namespace Rodin::External::MMG
              VERBOSITY_LEVEL);
    }
 
-   SurfaceMesh::SurfaceMesh(const SurfaceMesh& other)
-      : SurfaceMesh()
+   MeshS::MeshS(const MeshS& other)
+      : MeshS()
    {
       MMG5_Mesh_Copy(other.getHandle(), getHandle());
    }
 
 
-   SurfaceMesh::SurfaceMesh(SurfaceMesh&& other)
+   MeshS::MeshS(MeshS&& other)
    {
        m_mesh = other.m_mesh;
        other.m_mesh = nullptr;
    }
 
-   SurfaceMesh::~SurfaceMesh()
+   MeshS::~MeshS()
    {
        if (m_mesh)
          MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &m_mesh, MMG5_ARG_end);
    }
 
-   SurfaceMesh SurfaceMesh::load(const std::filesystem::path& filename)
+   MeshS MeshS::load(const std::filesystem::path& filename)
    {
-     SurfaceMesh mesh;
+     MeshS mesh;
      if (!MMGS_loadMesh(mesh.getHandle(), filename.c_str()))
      {
         Alert::Exception(
@@ -72,7 +72,7 @@ namespace Rodin::External::MMG
      return mesh;
    }
 
-   void SurfaceMesh::save(const std::filesystem::path& filename)
+   void MeshS::save(const std::filesystem::path& filename)
    {
      if (!MMGS_saveMesh(getHandle(), filename.c_str()))
      {
@@ -81,7 +81,7 @@ namespace Rodin::External::MMG
      }
    }
 
-  int SurfaceMesh::count(SurfaceMesh::Entity e) const
+  int MeshS::count(MeshS::Entity e) const
   {
     switch (e)
     {
@@ -92,17 +92,17 @@ namespace Rodin::External::MMG
       case Entity::Triangle:
         return getHandle()->nt;
       default:
-        Alert::Exception("Unknown SurfaceMesh::Entity").raise();
+        Alert::Exception("Unknown MeshS::Entity").raise();
     }
     return 0;
   }
 
-   MMG5_pMesh& SurfaceMesh::getHandle()
+   MMG5_pMesh& MeshS::getHandle()
    {
       return m_mesh;
    }
 
-   const MMG5_pMesh& SurfaceMesh::getHandle() const
+   const MMG5_pMesh& MeshS::getHandle() const
    {
       return m_mesh;
    }

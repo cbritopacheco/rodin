@@ -35,58 +35,6 @@ namespace Rodin::External::MMG
    {
       public:
          /**
-          * @internal
-          */
-         class Iterator
-         {
-            public:
-               using iterator_category = std::random_access_iterator_tag;
-               using difference_type   = std::ptrdiff_t;
-               using value_type        = double;
-               using pointer           = double*;
-               using reference         = double&;
-
-               Iterator(pointer ptr);
-               reference operator*() const;
-               pointer operator->();
-               Iterator& operator++();
-               Iterator operator++(int);
-               friend bool operator==(const Iterator& a, const Iterator& b);
-               friend bool operator!=(const Iterator& a, const Iterator& b);
-
-            private:
-                 pointer m_ptr;
-         };
-
-         /**
-          * @internal
-          */
-         class ConstIterator
-         {
-            public:
-               using iterator_category = std::forward_iterator_tag;
-               using difference_type   = std::ptrdiff_t;
-               using value_type        = double;
-               using pointer           = double*;
-               using reference         = double&;
-               using const_reference   = const double&;
-
-               ConstIterator(pointer ptr);
-
-               const_reference operator*() const;
-               pointer operator->();
-               ConstIterator& operator++();
-               ConstIterator operator++(int);
-               friend bool operator==(const ConstIterator& a, const
-                     ConstIterator& b);
-               friend bool operator!=(const ConstIterator& a, const
-                     ConstIterator& b);
-
-            private:
-                 pointer m_ptr;
-         };
-
-         /**
           * @brief Reads the solution text file.
           *
           * The file is read using MMGv2 format.
@@ -94,15 +42,6 @@ namespace Rodin::External::MMG
           * @param[in] filename Name of file to read.
           */
          static IncompleteScalarSolution2D load(const std::filesystem::path& filename);
-
-         /**
-          * @brief Write the solution to a text file.
-          *
-          * The file is written using MMGv2 format.
-          *
-          * @param[in] filename Name of file to write.
-          */
-         void save(const std::filesystem::path& filename);
 
          /**
           * @brief Initializes the object with no data
@@ -174,28 +113,11 @@ namespace Rodin::External::MMG
           */
          Mesh2D& getMesh();
 
-         /**
-          * @returns Iterator to the beginning.
-          */
-         Iterator begin();
+         MMG5_pSol& getHandle() override;
 
-         /**
-          * @returns Iterator to the end.
-          */
-         Iterator end();
+         const MMG5_pSol& getHandle() const override;
 
-         /**
-          * @returns ConstIterator to the beginning.
-          */
-         ConstIterator begin() const;
-
-         /**
-          * @returns ConstIterator to the end.
-          */
-         ConstIterator end() const;
-
-         virtual MMG5_pSol& getHandle() override;
-         virtual const MMG5_pSol& getHandle() const override;
+         void save(const std::filesystem::path& filename) override;
 
       private:
          std::reference_wrapper<Mesh2D> m_mesh;
@@ -251,16 +173,8 @@ namespace Rodin::External::MMG
           */
          ScalarSolution2D setMesh(Mesh2D& mesh);
 
-         /**
-          * @internal
-          * @returns Reference to underlying solution handle.
-          */
          MMG5_pSol& getHandle();
 
-         /**
-          * @internal
-          * @returns Constant reference to underlying solution handle.
-          */
          const MMG5_pSol& getHandle() const;
 
       private:

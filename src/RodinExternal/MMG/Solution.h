@@ -8,6 +8,7 @@
 #define RODIN_RODININTEGRATION_MMG_SOLUTION_H
 
 #include <cassert>
+#include <filesystem>
 
 #include <mmg/libmmg.h>
 #include <mmg/mmg2d/libmmg2d.h>
@@ -24,18 +25,6 @@ namespace Rodin::External::MMG
    {
       public:
          virtual ~SolutionBase() = default;
-
-         /**
-          * @internal
-          * @returns Reference to underlying solution handle.
-          */
-         virtual MMG5_pSol& getHandle() = 0;
-
-         /**
-          * @internal
-          * @returns Constant reference to underlying solution handle.
-          */
-         virtual const MMG5_pSol& getHandle() const = 0;
 
          /**
           * @brief Gets the dimension of the solution support.
@@ -60,6 +49,20 @@ namespace Rodin::External::MMG
          {
             return getHandle()->size;
          }
+
+         virtual void save(const std::filesystem::path& filename) = 0;
+
+         /**
+          * @internal
+          * @returns Reference to underlying solution handle.
+          */
+         virtual MMG5_pSol& getHandle() = 0;
+
+         /**
+          * @internal
+          * @returns Constant reference to underlying solution handle.
+          */
+         virtual const MMG5_pSol& getHandle() const = 0;
    };
 }
 

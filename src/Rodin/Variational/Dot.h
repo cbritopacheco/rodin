@@ -25,6 +25,48 @@
 
 namespace Rodin::Variational
 {
+   template <>
+   class Dot<VectorCoefficientBase, VectorCoefficientBase> : public ScalarCoefficientBase
+   {
+      public:
+         /**
+          * @brief Constructs the Dot product between two given matrices.
+          * @param[in] a Derived instance of VectorCoefficientBase
+          * @param[in] b Derived instance of VectorCoefficientBase
+          */
+         Dot(const VectorCoefficientBase& a, const VectorCoefficientBase& b)
+            : m_a(a.copy()), m_b(b.copy())
+         {}
+
+         Dot(const Dot& other)
+            :  ScalarCoefficientBase(other),
+               m_a(other.m_a->copy()), m_b(other.m_b->copy())
+         {}
+
+         Dot(Dot&& other)
+            :  ScalarCoefficientBase(std::move(other)),
+               m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
+         {}
+
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            mfem::Vector va, vb;
+            m_a->getValue(va, trans, ip);
+            m_b->getValue(vb, trans, ip);
+            return va * vb;
+         }
+
+         Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+      private:
+         std::unique_ptr<VectorCoefficientBase> m_a, m_b;
+   };
+   Dot(const VectorCoefficientBase&, const VectorCoefficientBase&)
+      -> Dot<VectorCoefficientBase, VectorCoefficientBase>;
+
    /**
     * @brief Represents the dot product between two matrices.
     *
@@ -46,12 +88,28 @@ namespace Rodin::Variational
           * @param[in] a Derived instance of MatrixCoefficientBase
           * @param[in] b Derived instance of MatrixCoefficientBase
           */
-         Dot(const MatrixCoefficientBase& a, const MatrixCoefficientBase& b);
+         Dot(const MatrixCoefficientBase& a, const MatrixCoefficientBase& b)
+            : m_a(a.copy()), m_b(b.copy())
+         {}
 
-         Dot(const Dot& other);
+         Dot(const Dot& other)
+            :  ScalarCoefficientBase(other),
+               m_a(other.m_a->copy()), m_b(other.m_b->copy())
+         {}
+
+         Dot(Dot&& other)
+            :  ScalarCoefficientBase(std::move(other)),
+               m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
+         {}
 
          double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            mfem::DenseMatrix ma, mb;
+            m_a->getValue(ma, trans, ip);
+            m_b->getValue(mb, trans, ip);
+            return ma * mb;
+         }
 
          Dot* copy() const noexcept override
          {

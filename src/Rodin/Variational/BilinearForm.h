@@ -41,11 +41,17 @@ namespace Rodin::Variational
          virtual BilinearFormBase& from(
                const BilinearFormIntegratorBase& bfi) = 0;
 
+         virtual BilinearFormBase& from(
+               const FormLanguage::BilinearFormIntegratorSum& bfi) = 0;
+
          /**
           * @brief Adds a BilinearFormDomainIntegrator to the bilinear form.
           */
          virtual BilinearFormBase& add(
                const BilinearFormIntegratorBase& bfi) = 0;
+
+         virtual BilinearFormBase& add(
+               const FormLanguage::BilinearFormIntegratorSum& lsum) = 0;
 
          /**
           * @brief Reflects the changes in the mesh.
@@ -106,13 +112,18 @@ namespace Rodin::Variational
           */
          BilinearForm& operator=(const BilinearFormIntegratorBase& bfi);
 
+         BilinearForm& operator=(const FormLanguage::BilinearFormIntegratorSum& lsum);
+
          void assemble() override;
 
          void update() override;
 
          BilinearForm& add(const BilinearFormIntegratorBase& bfi) override;
+         BilinearForm& add(const FormLanguage::BilinearFormIntegratorSum& lsum) override;
 
          BilinearForm& from(const BilinearFormIntegratorBase& bfi) override;
+
+         BilinearForm& from(const FormLanguage::BilinearFormIntegratorSum& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {

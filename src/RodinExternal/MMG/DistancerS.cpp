@@ -7,32 +7,33 @@
 #include <thread>
 #include <fstream>
 #include <utility>
-#include "Distancer2D.h"
-#include "ScalarSolution2D.h"
+
+#include "DistancerS.h"
+#include "ScalarSolutionS.h"
 
 namespace Rodin::External::MMG
 {
-  Distancer2D::Distancer2D()
+  DistancerS::DistancerS()
     : m_scale(true),
       m_activeBorder(false),
       m_ncpu(std::thread::hardware_concurrency()),
       m_mshdist(MSHDIST_EXECUTABLE)
   {}
 
-  Distancer2D& Distancer2D::setInteriorDomain(
+  DistancerS& DistancerS::setInteriorDomain(
       const std::set<MaterialReference>& refs)
   {
     m_interiorDomains = refs;
     return *this;
   }
 
-  Distancer2D& Distancer2D::setActiveBorders()
+  DistancerS& DistancerS::setActiveBorders()
   {
     m_activeBorder = true;
     return *this;
   }
 
-  Distancer2D& Distancer2D::setActiveBorder(const std::set<MaterialReference>& refs)
+  DistancerS& DistancerS::setActiveBorder(const std::set<MaterialReference>& refs)
   {
     assert(refs.size() > 0);
     m_activeBorders = refs;
@@ -40,7 +41,7 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ScalarSolution2D Distancer2D::distance(Mesh2D& box)
+  ScalarSolutionS DistancerS::distance(MeshS& box)
   {
     auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     box.save(boxp);
@@ -73,11 +74,11 @@ namespace Rodin::External::MMG
         "-ncpu", m_ncpu,
         "-v 0");
 
-    auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
+    auto res = ScalarSolutionS::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
   }
 
-  ScalarSolution2D Distancer2D::distance(Mesh2D& box, Mesh2D& contour)
+  ScalarSolutionS DistancerS::distance(MeshS& box, MeshS& contour)
   {
     auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     box.save(boxp);
@@ -90,11 +91,11 @@ namespace Rodin::External::MMG
     else
       m_mshdist.run(boxp, contourp, "-noscale", "-ncpu", m_ncpu, "-v 0");
 
-    auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
+    auto res = ScalarSolutionS::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
   }
 
-  void Distancer2D::redistance(ScalarSolution2D& ls)
+  void DistancerS::redistance(ScalarSolutionS& ls)
   {
     auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     ls.getMesh().save(meshp);
@@ -105,24 +106,25 @@ namespace Rodin::External::MMG
 
     m_mshdist.run(solp , "-ncpu", m_ncpu, "-v 0");
 
-    auto res = ScalarSolution2D::load(solp).setMesh(ls.getMesh());
+    auto res = ScalarSolutionS::load(solp).setMesh(ls.getMesh());
     ls = std::move(res);
   }
 
-  Distancer2D& Distancer2D::setCPUs(unsigned int ncpu)
+  DistancerS& DistancerS::setCPUs(unsigned int ncpu)
   {
     m_ncpu = ncpu;
     return *this;
   }
 
-  Distancer2D& Distancer2D::enableScaling(bool b)
+  DistancerS& DistancerS::enableScaling(bool b)
   {
     m_scale = b;
     return *this;
   }
 
-  unsigned int Distancer2D::getCPUs() const
+  unsigned int DistancerS::getCPUs() const
   {
     return m_ncpu;
   }
 }
+

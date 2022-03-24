@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_HPP
 #define RODIN_VARIATIONAL_LINEARFORM_HPP
 
+#include "Rodin/Alert.h"
 #include "FiniteElementSpace.h"
 
 #include "LinearForm.h"

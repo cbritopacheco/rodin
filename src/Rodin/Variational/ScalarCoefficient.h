@@ -121,7 +121,7 @@ namespace Rodin::Variational
             :  m_u(u),
                m_mfemCoefficient(&u.getHandle())
          {
-            assert(u.getFiniteElementSpace().getRangeDimension() == 1);
+            assert(u.getFiniteElementSpace().getVectorDimension() == 1);
          }
 
          constexpr

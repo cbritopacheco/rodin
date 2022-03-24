@@ -1,23 +1,15 @@
-/*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
- * Distributed under the Boost Software License, Version 1.0.
- *       (See accompanying file LICENSE or copy at
- *          https://www.boost.org/LICENSE_1_0.txt)
- */
-#include <string>
-#include <cstdio>
-#include <cstring>
-
-#include <mmg3d/mmg3d.h>
+#include <mmgs/mmgs.h>
 #include <libmmgcommon.h>
 #include <common/mmgcommon.h>
 
-#include "ScalarSolution3D.h"
+#include "Rodin/Alert.h"
+
+#include "ScalarSolutionS.h"
 
 namespace Rodin::External::MMG
 {
-   // ---- ScalarSolution3D --------------------------------------------------
-   ScalarSolution3D::ScalarSolution3D(Mesh3D& mesh)
+   // ---- ScalarSolution2D --------------------------------------------------
+   ScalarSolutionS::ScalarSolutionS(MeshS& mesh)
       : m_mesh(mesh)
    {
       auto calloc =
@@ -32,13 +24,13 @@ namespace Rodin::External::MMG
       if (!calloc())
          Alert::Exception("Failed to allocate memory for the mesh").raise();
 
-      m_sol->dim  = 3; // Supported on 3D mesh
+      m_sol->dim  = 2; // Supported on S mesh
       m_sol->ver  = 2;
       m_sol->size = 1; // Scalar solution
       m_sol->type = MMG5_Scalar;
    }
 
-   ScalarSolution3D::~ScalarSolution3D()
+   ScalarSolutionS::~ScalarSolutionS()
    {
       if (m_sol)
       {
@@ -53,14 +45,14 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution3D::ScalarSolution3D(ScalarSolution3D&& other)
+   ScalarSolutionS::ScalarSolutionS(ScalarSolutionS&& other)
       :  m_mesh(other.m_mesh),
          m_sol(other.m_sol)
    {
       other.m_sol = nullptr;
    }
 
-   ScalarSolution3D& ScalarSolution3D::operator=(ScalarSolution3D&& other)
+   ScalarSolutionS& ScalarSolutionS::operator=(ScalarSolutionS&& other)
    {
       m_mesh = other.m_mesh;
       m_sol = other.m_sol;
@@ -68,15 +60,15 @@ namespace Rodin::External::MMG
       return *this;
    }
 
-   IncompleteScalarSolution3D ScalarSolution3D::load(
+   IncompleteScalarSolutionS ScalarSolutionS::load(
          const std::filesystem::path& filename)
    {
-      IncompleteScalarSolution3D res;
+      IncompleteScalarSolutionS res;
       MMG5_pSol sol = res.getHandle();
 
       /*
        * To load the solution file, we use basically the same methodology in
-       * MMG3D_loadSol in mmg3D/inout_3D.c
+       * MMGS_loadSol in mmgS/inout_S.c
        *
        * We cannot use the actual function since it requires an MMG5_pMesh
        * object which is not used in the call and subcalls of this method,
@@ -157,7 +149,7 @@ namespace Rodin::External::MMG
       {
          sol->np  = np;
          sol->npi = np;
-         sol->npmax = std::max(static_cast<int>(1.5 * sol->np), MMG3D_NPMAX);
+         sol->npmax = std::max(static_cast<int>(1.5 * sol->np), MMGS_NPMAX);
          MMG5_SAFE_CALLOC(
                sol->m, (sol->size * (sol->npmax + 1)), double, /* No op */);
       }
@@ -187,21 +179,21 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   void ScalarSolution3D::save(const std::filesystem::path& filename)
+   void ScalarSolutionS::save(const std::filesystem::path& filename)
    {
       if (!m_sol->np || !m_sol->m)
       {
          Alert::Exception(
-               "Failed to write ScalarSolution3D to file. No data!").raise();
+               "Failed to write ScalarSolutionS to file. No data!").raise();
       }
 
-      if (!MMG3D_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
+      if (!MMGS_saveSol(m_mesh.get().getHandle(), m_sol, filename.c_str()))
       {
          Alert::Exception("Failed to open file for writing: " + filename.string()).raise();
       }
    }
 
-   ScalarSolution3D::ScalarSolution3D(const ScalarSolution3D& other)
+   ScalarSolutionS::ScalarSolutionS(const ScalarSolutionS& other)
       : m_mesh(other.m_mesh)
    {
       assert(other.m_sol);
@@ -220,10 +212,10 @@ namespace Rodin::External::MMG
          Alert::Exception("Failed to allocate memory for the mesh").raise();
 
       // Copy the fields
-      m_sol->dim  = 3; // Supported on 3D mesh
+      m_sol->dim  = 3; // Supported on surface mesh
       m_sol->ver  = 2; // Version 2
-      m_sol->size = 1; // Scalar solution
       m_sol->type = MMG5_Scalar;
+      m_sol->size = 1; // One solution per entity
 
       m_sol->np = other.m_sol->np;
       m_sol->npmax = other.m_sol->npmax;
@@ -235,7 +227,7 @@ namespace Rodin::External::MMG
          /*
           * We should be keeping track of the memory usage in the mesh object
           * that would be associated with this solution. However, we don't do
-          * that since it would require initiliazing the object with a Mesh3D.
+          * that since it would require initiliazing the object with a MeshS.
           * For now we just assume that they're independent.
           * MMG5_ADD_MEM(
           *      mesh, (m_sol->size * (m_sol->npmax + 1)) * sizeof(double),"", ;);
@@ -263,12 +255,12 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution3D&
-   ScalarSolution3D::operator=(const ScalarSolution3D& other)
+   ScalarSolutionS&
+   ScalarSolutionS::operator=(const ScalarSolutionS& other)
    {
       if (this != &other)
       {
-         ScalarSolution3D tmp(other);
+         ScalarSolutionS tmp(other);
 
          std::swap(m_sol->dim, tmp.m_sol->dim);
          std::swap(m_sol->entities, tmp.m_sol->entities);
@@ -288,35 +280,35 @@ namespace Rodin::External::MMG
       return *this;
    }
 
-   ScalarSolution3D&
-   ScalarSolution3D::setMesh(Mesh3D& mesh)
+   ScalarSolutionS&
+   ScalarSolutionS::setMesh(MeshS& mesh)
    {
       m_mesh = mesh;
       return *this;
    }
 
-   const Mesh3D& ScalarSolution3D::getMesh() const
+   const MeshS& ScalarSolutionS::getMesh() const
    {
       return m_mesh;
    }
 
-   Mesh3D& ScalarSolution3D::getMesh()
+   MeshS& ScalarSolutionS::getMesh()
    {
       return m_mesh;
    }
 
-   MMG5_pSol& ScalarSolution3D::getHandle()
+   MMG5_pSol& ScalarSolutionS::getHandle()
    {
       return m_sol;
    }
 
-   const MMG5_pSol& ScalarSolution3D::getHandle() const
+   const MMG5_pSol& ScalarSolutionS::getHandle() const
    {
       return m_sol;
    }
 
-   // ---- IncompleteScalarSolution3D -------------------------------------------
-   IncompleteScalarSolution3D::IncompleteScalarSolution3D()
+   // ---- IncompleteScalarSolutionS -------------------------------------------
+   IncompleteScalarSolutionS::IncompleteScalarSolutionS()
       : m_isOwner(true)
    {
       auto calloc =
@@ -331,26 +323,26 @@ namespace Rodin::External::MMG
       if (!calloc())
          Alert::Exception("Failed to allocate memory for the mesh").raise();
 
-      m_sol->dim  = 3; // Supported on 3D mesh
+      m_sol->dim  = 2; // Supported on S mesh
       m_sol->ver  = 2;
       m_sol->size = 1; // Scalar solution
       m_sol->type = MMG5_Scalar;
    }
 
-   IncompleteScalarSolution3D::IncompleteScalarSolution3D(int size)
-      : IncompleteScalarSolution3D()
+   IncompleteScalarSolutionS::IncompleteScalarSolutionS(int size)
+      : IncompleteScalarSolutionS()
    {
       if (size)
       {
          m_sol->np  = size;
          m_sol->npi = size;
-         m_sol->npmax = std::max(static_cast<int>(1.5 * m_sol->np), MMG3D_NPMAX);
+         m_sol->npmax = std::max(static_cast<int>(1.5 * m_sol->np), MMGS_NPMAX);
          MMG5_SAFE_CALLOC(
                m_sol->m, (m_sol->size * (m_sol->npmax + 1)), double, /* No op */);
       }
    }
 
-   IncompleteScalarSolution3D::~IncompleteScalarSolution3D()
+   IncompleteScalarSolutionS::~IncompleteScalarSolutionS()
    {
       if (m_isOwner)
       {
@@ -368,20 +360,20 @@ namespace Rodin::External::MMG
       }
    }
 
-   ScalarSolution3D IncompleteScalarSolution3D::setMesh(Mesh3D& mesh)
+   ScalarSolutionS IncompleteScalarSolutionS::setMesh(MeshS& mesh)
    {
-      ScalarSolution3D res(mesh);
+      ScalarSolutionS res(mesh);
       res.getHandle() = m_sol;
       m_isOwner = false;
       return res;
    }
 
-   MMG5_pSol& IncompleteScalarSolution3D::getHandle()
+   MMG5_pSol& IncompleteScalarSolutionS::getHandle()
    {
       return m_sol;
    }
 
-   const MMG5_pSol& IncompleteScalarSolution3D::getHandle() const
+   const MMG5_pSol& IncompleteScalarSolutionS::getHandle() const
    {
       return m_sol;
    }

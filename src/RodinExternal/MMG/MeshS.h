@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_EXTERNAL_MMG_SURFACEMESH_H
-#define RODIN_EXTERNAL_MMG_SURFACEMESH_H
+#ifndef RODIN_EXTERNAL_MMG_MESHS_H
+#define RODIN_EXTERNAL_MMG_MESHS_H
 
 #include <string>
 #include <vector>
@@ -22,7 +22,7 @@ namespace Rodin::External::MMG
    /**
     * @brief Triangular surface mesh
     */
-   class SurfaceMesh : public MeshBase
+   class MeshS : public MeshBase
    {
        public:
           /**
@@ -41,35 +41,35 @@ namespace Rodin::External::MMG
            * @param[in] filename Name of file where the mesh will be read from.
            * @returns A Mesh3D object containing the mesh data in the file.
            */
-          static SurfaceMesh load(const std::filesystem::path& filename);
+          static MeshS load(const std::filesystem::path& filename);
 
           /**
            * @brief Creates an empty mesh.
            */
-          SurfaceMesh();
+          MeshS();
 
           /**
            * @brief Performs a deep copy of the mesh.
            */
-          SurfaceMesh(const SurfaceMesh& other);
+          MeshS(const MeshS& other);
 
           /**
            * @brief Moves constructs the data of another SurfaceMesh object, while
            * invalidating the latter.
            */
-          SurfaceMesh(SurfaceMesh&& other);
+          MeshS(MeshS&& other);
 
           /**
            * @brief Destructs the object.
            */
-          ~SurfaceMesh();
+          ~MeshS();
 
           /**
            * @brief Gets a count of the specified entities in the mesh.
            * @param[in] e Type of entity to count.
            * @return Number of entities of type SurfaceMesh::Entity.
            */
-          int count(SurfaceMesh::Entity e) const;
+          int count(MeshS::Entity e) const;
 
           void save(const std::filesystem::path& filename) override;
 

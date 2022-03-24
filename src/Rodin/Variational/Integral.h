@@ -12,12 +12,15 @@
 #include <mfem.hpp>
 
 #include "Dot.h"
+#include "LinearForm.h"
 #include "ForwardDecls.h"
 #include "FormLanguage.h"
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
 #include "ScalarCoefficient.h"
+#include "VectorCoefficient.h"
+#include "MatrixCoefficient.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -260,6 +263,58 @@ namespace Rodin::Variational
       -> Integral<ShapeFunctionBase<Test>>;
    Integral(const VectorCoefficientBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
+
+   /**
+    * @brief Integral of a GridFunction
+    */
+   template <class FES>
+   class Integral<GridFunction<FES>> : public FormLanguage::Base
+   {
+      public:
+         /**
+          * @brief Constructs the integral object
+          */
+         Integral(GridFunction<FES>& u)
+            : m_u(u),
+              m_v(u.getFiniteElementSpace()),
+              m_one(u.getFiniteElementSpace()),
+              m_lf(u.getFiniteElementSpace()),
+              m_assembled(false)
+         {
+            assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+            m_one = ScalarCoefficient(1.0);
+            m_lf.from(Integral<ShapeFunctionBase<Test>>(ScalarCoefficient(u) * m_v));
+         }
+
+         Integral(const Integral& other)
+            : Integral(other.m_u)
+         {}
+
+         Integral(Integral&& other) = default;
+
+         double compute()
+         {
+            m_assembled = true;
+            if (m_assembled)
+               m_lf.update();
+            else
+               m_lf.assemble();
+            return m_lf(m_one);
+         }
+
+         Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
+      private:
+         GridFunction<FES>&   m_u;
+         TestFunction<FES>    m_v;
+         GridFunction<FES>    m_one;
+         LinearForm<FES>      m_lf;
+         bool m_assembled;
+   };
+   template <class FES>
+   Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
 
    template <>
    class BoundaryIntegral<ShapeFunctionBase<Test>> : public LinearFormBoundaryIntegrator
