@@ -107,6 +107,7 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint&) const override
          {
             m_u.getHandle().GetVectorGradient(trans, value);
+            value.Transpose();
          }
 
          Jacobian* copy() const noexcept override

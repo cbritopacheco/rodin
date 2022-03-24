@@ -32,6 +32,7 @@
 #include "Variational/FormLanguage.h"
 
 #include "Variational/Dot.h"
+#include "Variational/Pow.h"
 #include "Variational/Sum.h"
 #include "Variational/Mult.h"
 #include "Variational/UnaryMinus.h"

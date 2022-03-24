@@ -6,18 +6,9 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "rodin.mesh";
+  const char* meshFile = "../resources/mfem/meshes/poisson-example.mesh";
 
   Mesh Omega = Mesh::load(meshFile);
-  H1 Vh(Omega, 2);
-  H1 Ph(Omega);
-
-  GridFunction u(Vh);
-  GridFunction der(Ph);
-
-  Derivative dx(0, 0, u);
-
-  der.project(dx);
 
   return 0;
 }

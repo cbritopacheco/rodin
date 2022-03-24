@@ -19,7 +19,7 @@ int main(int, char**)
 
   // Right hand side
   auto f = ScalarCoefficient(
-      [](const double* x, int) -> double
+      [](const double* x, int)
       {
         double l2 = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
         return 7 * x[0] * x[1] / l2;

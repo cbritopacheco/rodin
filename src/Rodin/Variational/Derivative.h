@@ -29,28 +29,11 @@ namespace Rodin::Variational
 
          double getValue(
                mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+               const mfem::IntegrationPoint&) const override
          {
-            switch (trans.ElementType)
-            {
-               case mfem::ElementTransformation::ELEMENT:
-               {
-                  const mfem::FiniteElement* fe =
-                     m_u.getFiniteElementSpace().getFES().GetFE(trans.ElementNo);
-                  const mfem::IntegrationRule& ir = fe->GetNodes();
-                  mfem::DenseMatrix dshape(fe->GetDof(), trans.GetSpaceDim());
-                  fe->CalcPhysDShape(trans, dshape);
-                  assert(false);
-                  break;
-               }
-               case mfem::ElementTransformation::BDR_ELEMENT:
-               {
-                  break;
-               }
-               default:
-                  Alert::Exception("Unhandled element type").raise();
-            }
-            return NAN;
+            mfem::DenseMatrix grad;
+            m_u.getHandle().GetVectorGradient(trans, grad);
+            return grad(m_component, m_direction);
          }
 
          Derivative* copy() const noexcept override
@@ -62,6 +45,10 @@ namespace Rodin::Variational
          int m_component;
          GridFunction<H1>& m_u;
    };
+
+   Derivative Dx(GridFunction<H1>& u);
+   Derivative Dy(GridFunction<H1>& u);
+   Derivative Dz(GridFunction<H1>& u);
 }
 
 #endif

@@ -4,13 +4,42 @@
 
   @section what-is-rodin What is Rodin?
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis,
-  enim vitae efficitur cursus, ex nibh fringilla nunc, ut dapibus lacus ligula
-  vitae nisi. Suspendisse sapien quam, faucibus non scelerisque vel, varius sed
-  nisl. Nulla vel tortor mattis, lobortis nisl ut, sollicitudin leo. Quisque
-  nec lacus at velit suscipit lacinia eget eu turpis. Aliquam molestie orci
-  risus, in laoreet augue posuere non. Integer suscipit faucibus metus. Nam
-  condimentum lacus id ex ornare rutrum.
+  Rodin is a lightweight and modular shape optimization framework which
+  provides many of the associated functionalities that are needed when
+  implementing shape and topology optimization algorithms. These
+  functionalities range from refining and remeshing the underlying shape, to
+  providing elegant mechanisms to specify and solve variational problems.
 
+  It is named after the French sculptor [Auguste
+  Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
+  of modern sculpture.
+
+  @section how-does-rodin-work How does Rodin work?
+
+  To provide many of the functionalities, Rodin utilizes many low-level
+  libraries such as:
+  - [MFEM](https://mfem.org/)
+  - [MMG](https://www.mmgtools.org/)
+  - [ISCD Toolbox](https://iscd.sorbonne-universite.fr/)
+
+  Aside from wrapping most of these tools into uniform and well documented
+  interfaces, Rodin also builds upon many of the already existing functionality
+  to provide common features without the need to reimplement these yourself.
+
+  @section rodin-philosophy Philosophy behind Rodin
+
+  From its inception, Rodin was built with a ["batteries included, but screws
+  not glued in"](http://blog.mosra.cz/) philosophy. We think that code should
+  be well documented, readable, and stick very close to the mathematical
+  notation it represents.
+
+  @section development-status Development Status
+
+  The library is currently in very active and early development! Currently,
+  some interfaces are likely to change. However, a lot of the functionality is
+  already implemented with various extension points. Furthermore, there is a
+  lot of code lacking documentation. Hence, contributors are always welcome!
+  Currently it is mantained (and primarily used) by [Carlos
+  Brito](https://github.com/cbritopacheco).
 
   */

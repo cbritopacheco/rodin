@@ -4,6 +4,7 @@ set(RodinVariational_HEADERS
   DirichletBC.h
   EssentialBoundary.h
   VectorDomainLFDivIntegrator.h
+  Derivative.h
   Dot.h
   ElasticityIntegrator.h
   FiniteElementSpace.h
@@ -44,6 +45,7 @@ set(RodinVariational_SRCS
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
   ShapeFunction.cpp
+  Derivative.cpp
   GridFunctionIndex.cpp
   GridFunctionView.cpp
   Integral.cpp
