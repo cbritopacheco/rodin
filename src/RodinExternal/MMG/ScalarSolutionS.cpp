@@ -24,7 +24,7 @@ namespace Rodin::External::MMG
       if (!calloc())
          Alert::Exception("Failed to allocate memory for the mesh").raise();
 
-      m_sol->dim  = 2; // Supported on S mesh
+      m_sol->dim  = 3; // Supported on S mesh
       m_sol->ver  = 2;
       m_sol->size = 1; // Scalar solution
       m_sol->type = MMG5_Scalar;
@@ -323,7 +323,7 @@ namespace Rodin::External::MMG
       if (!calloc())
          Alert::Exception("Failed to allocate memory for the mesh").raise();
 
-      m_sol->dim  = 2; // Supported on S mesh
+      m_sol->dim  = 3; // Supported on S mesh
       m_sol->ver  = 2;
       m_sol->size = 1; // Scalar solution
       m_sol->type = MMG5_Scalar;

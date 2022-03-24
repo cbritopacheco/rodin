@@ -22,7 +22,7 @@ int main(int argc, char** argv)
   auto rodinMesh = Mesh::load(argv[1]);
   auto gf = GridFunction<H1>::load(argv[2]);
 
-  switch (rodinMesh.getDimension())
+  switch (rodinMesh.getSpaceDimension())
   {
     case 2:
     {
@@ -49,15 +49,30 @@ int main(int argc, char** argv)
       {
         case 1:
         {
-          // Convert the Rodin mesh to MMG
-          auto mmgMesh = Cast(rodinMesh).to<MMG::Mesh3D>();
+          if (rodinMesh.getDimension() == 2)
+          {
+            // Convert the Rodin mesh to MMG
+            auto mmgMesh = Cast(rodinMesh).to<MMG::MeshS>();
 
-          // Perform the cast and set the mesh we just casted
-          auto sol = Cast(gf).to<MMG::IncompleteScalarSolution3D>().setMesh(mmgMesh);
+            // Perform the cast and set the mesh we just casted
+            auto sol = Cast(gf).to<MMG::IncompleteScalarSolutionS>().setMesh(mmgMesh);
 
-          // Save mesh and solution
-          mmgMesh.save("mmg.mesh");
-          sol.save("mmg.sol");
+            // Save mesh and solution
+            mmgMesh.save("mmg.mesh");
+            sol.save("mmg.sol");
+          }
+          else if (rodinMesh.getDimension() == 3)
+          {
+            // Convert the Rodin mesh to MMG
+            auto mmgMesh = Cast(rodinMesh).to<MMG::Mesh3D>();
+
+            // Perform the cast and set the mesh we just casted
+            auto sol = Cast(gf).to<MMG::IncompleteScalarSolution3D>().setMesh(mmgMesh);
+
+            // Save mesh and solution
+            mmgMesh.save("mmg.mesh");
+            sol.save("mmg.sol");
+          }
         }
       }
       break;

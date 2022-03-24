@@ -29,7 +29,7 @@ int main(int argc, char** argv)
         }
         case 3:
         {
-          MMG::SurfaceMesh mmgMesh = Cast(rodinMesh).to<MMG::SurfaceMesh>();
+          MMG::MeshS mmgMesh = Cast(rodinMesh).to<MMG::MeshS>();
           mmgMesh.save("mmg.mesh");
           break;
         }

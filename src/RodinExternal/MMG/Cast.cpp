@@ -30,6 +30,7 @@
 #include "ScalarSolution3D.h"
 
 #include "MeshS.h"
+#include "ScalarSolutionS.h"
 
 #include "Utility.h"
 
@@ -284,6 +285,25 @@ namespace Rodin
      return res;
    }
 
+   template<>
+   template <>
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::ScalarSolutionS>
+   ::to<Variational::IncompleteGridFunction>() const
+   {
+     auto& sol = from();
+     MMG5_pSol mmgSol = sol.getHandle();
+     assert(mmgSol->type == MMG5_Scalar);
+     Variational::IncompleteGridFunction res;
+     double* data = new double[mmgSol->np];
+     // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
+     // + np + 1.
+     std::copy(mmgSol->m + 1, mmgSol->m + mmgSol->np + 1, data);
+     res.getHandle().SetDataAndSize(data, mmgSol->np);
+     res.getHandle().MakeDataOwner();
+     return res;
+   }
+
    template <>
    template <>
    Variational::IncompleteGridFunction
@@ -318,6 +338,28 @@ namespace Rodin
      else
      {
        External::MMG::IncompleteScalarSolution2D res(size);
+       // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
+       // m + size + 1.
+       std::copy(data, data + size, res.getHandle()->m + 1);
+       return res;
+     }
+   }
+
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolutionS
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteScalarSolutionS>()
+   const
+   {
+     assert(from().getFiniteElementSpace().getVectorDimension() == 1);
+     auto& gf = from();
+     auto [data, size] = gf.getData();
+     if (!size)
+       return External::MMG::IncompleteScalarSolutionS();
+     else
+     {
+       External::MMG::IncompleteScalarSolutionS res(size);
        // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
        // m + size + 1.
        std::copy(data, data + size, res.getHandle()->m + 1);
@@ -604,6 +646,27 @@ namespace Rodin
      else
      {
        External::MMG::IncompleteScalarSolution3D res(size);
+       // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
+       // m + size + 1.
+       std::copy(data, data + size, res.getHandle()->m + 1);
+       return res;
+     }
+   }
+
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolutionS
+   Cast<Variational::IncompleteGridFunction>
+   ::to<External::MMG::IncompleteScalarSolutionS>() const
+   {
+     auto& gf = from();
+     int size = gf.getHandle().Size();
+     const double* data = gf.getHandle().GetData();
+     if (!size)
+       return External::MMG::IncompleteScalarSolutionS();
+     else
+     {
+       External::MMG::IncompleteScalarSolutionS res(size);
        // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at
        // m + size + 1.
        std::copy(data, data + size, res.getHandle()->m + 1);

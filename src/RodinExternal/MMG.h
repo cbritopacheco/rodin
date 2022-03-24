@@ -25,5 +25,6 @@
 
 // ---- mmgs -----------------------------------------------------------------
 #include "MMG/MeshS.h"
+#include "MMG/ScalarSolutionS.h"
 
 #endif

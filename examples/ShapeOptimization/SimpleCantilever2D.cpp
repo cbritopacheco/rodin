@@ -50,20 +50,27 @@ int main(int, char**)
     H1 Vh(Omega, d);
 
     // Compliance
-    auto compliance = [&](GridFunction<H1>& v)
+    auto compliance = [&](GridFunction<H1>& w) -> double
     {
-      BilinearForm bf(Vh);
-      bf = ElasticityIntegrator(lambda, mu);
-      return bf(v, v);
+      TrialFunction u(Vh);
+      TestFunction  v(Vh);
+      BilinearForm bf(v.getFiniteElementSpace());
+      bf = Integral(lambda * Div(u), Div(v))
+         + Integral(
+             mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+      return bf(w, w);
     };
 
+    // Pull-down force
     auto f = VectorCoefficient{0, -1};
 
     // Elasticity equation
     TrialFunction u(Vh);
     TestFunction  v(Vh);
     Problem elasticity(u, v);
-    elasticity = ElasticityIntegrator(lambda, mu)
+    elasticity = Integral(lambda * Div(u), Div(v))
+               + Integral(
+                   mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
     cg.solve(elasticity);
@@ -71,6 +78,7 @@ int main(int, char**)
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  w(Vh);
+
     auto e = 0.5 * (Jacobian(u.getGridFunction()) + Jacobian(u.getGridFunction()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);

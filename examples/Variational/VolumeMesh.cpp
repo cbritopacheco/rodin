@@ -12,10 +12,12 @@ int main(int, char**)
   // Load mesh
   Mesh Omega = Mesh::load(meshFile);
 
+  SubMesh dOmega = Omega.skin();
+
   // Functions
-  H1 Vh(Omega);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
+  H1 Sh(dOmega);
+  TrialFunction u(Sh);
+  TestFunction  v(Sh);
 
   // Right hand side
   auto f = ScalarCoefficient(
@@ -39,5 +41,14 @@ int main(int, char**)
 
   // Save solution
   u.getGridFunction().save("u.gf");
+  dOmega.save("dOmega.mesh");
+
+  H1 Vh(Omega);
+  GridFunction uVolume(Vh);
+
+  u.getGridFunction().transfer(uVolume);
+
+  uVolume.save("uVolume.gf");
   Omega.save("Omega.mesh");
+
 }

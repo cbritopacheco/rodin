@@ -49,12 +49,12 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 500;
+  size_t maxIt = 300;
   size_t activeBorderIt = 20;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1.0);
-  auto alpha = ScalarCoefficient(4 * hmax * hmax);
+  auto alpha = ScalarCoefficient(2 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -119,7 +119,8 @@ int main(int, char**)
     auto mmgLs = dist.distance(mmgMesh);
 
     // Advect the level set function
-    double dt = Omega.getMaximumDisplacement(g.getGridFunction());
+    double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
+    double dt = hmax / gInf;
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain
@@ -130,6 +131,8 @@ int main(int, char**)
                                    .setHMax(hmax)
                                    .setBoundaryReference(Gamma)
                                    .discretize(mmgLs);
+
+    mmgImplicit.save("arch2d/Omega." + std::to_string(i) + ".mesh");
 
     // Convert back to Rodin data type
     Omega = Cast(mmgImplicit).to<Rodin::Mesh>();

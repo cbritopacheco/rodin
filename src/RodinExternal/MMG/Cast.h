@@ -128,6 +128,24 @@ namespace Rodin
    template <>
    External::MMG::MeshS
    Cast<Rodin::Mesh>::to<External::MMG::MeshS>() const;
+
+   template<>
+   template <>
+   Variational::IncompleteGridFunction
+   Cast<External::MMG::ScalarSolutionS>
+   ::to<Variational::IncompleteGridFunction>() const;
+
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolutionS
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteScalarSolutionS>() const;
+
+   template <>
+   template <>
+   External::MMG::IncompleteScalarSolutionS
+   Cast<Variational::IncompleteGridFunction>
+   ::to<External::MMG::IncompleteScalarSolutionS>() const;
 }
 
 
