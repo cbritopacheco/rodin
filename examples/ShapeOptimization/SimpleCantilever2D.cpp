@@ -29,6 +29,19 @@ int main(int, char**)
   auto mu     = ScalarCoefficient(0.3846),
        lambda = ScalarCoefficient(0.5769);
 
+  // Compliance
+  auto compliance = [&](GridFunction<H1>& w)
+  {
+    auto& Vh = w.getFiniteElementSpace();
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+    BilinearForm bf(v.getFiniteElementSpace());
+    bf = Integral(lambda * Div(u), Div(v))
+       + Integral(
+           mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+    return bf(w, w);
+  };
+
   // Conjugate Gradient solver
   auto cg = Solver::CG().setMaxIterations(500)
                         .setRelativeTolerance(1e-6);
@@ -48,18 +61,6 @@ int main(int, char**)
     // Finite element spaces
     int d = 2;
     H1 Vh(Omega, d);
-
-    // Compliance
-    auto compliance = [&](GridFunction<H1>& w) -> double
-    {
-      TrialFunction u(Vh);
-      TestFunction  v(Vh);
-      BilinearForm bf(v.getFiniteElementSpace());
-      bf = Integral(lambda * Div(u), Div(v))
-         + Integral(
-             mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
-      return bf(w, w);
-    };
 
     // Pull-down force
     auto f = VectorCoefficient{0, -1};

@@ -29,11 +29,16 @@ int main(int, char**)
        lambda = ScalarCoefficient(0.5769);
 
   // Compliance
-  auto compliance = [&](GridFunction<H1>& v)
+  auto compliance = [&](GridFunction<H1>& w)
   {
+    auto& Vh = w.getFiniteElementSpace();
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
     BilinearForm bf(v.getFiniteElementSpace());
-    bf = ElasticityIntegrator(lambda, mu).over(Interior);
-    return bf(v, v);
+    bf = Integral(lambda * Div(u), Div(v)).over(Interior)
+       + Integral(
+           mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())).over(Interior);
+    return bf(w, w);
   };
 
   // Load mesh
@@ -72,7 +77,9 @@ int main(int, char**)
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
-    elasticity = ElasticityIntegrator(lambda, mu)
+    elasticity = Integral(lambda * Div(uInt), Div(vInt))
+               + Integral(
+                   mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
@@ -127,7 +134,6 @@ int main(int, char**)
                                    .setHMax(hmax)
                                    .setBoundaryReference(Gamma)
                                    .discretize(mmgLs);
-    mmgImplicit.save("cantilever2d/Omega." + std::to_string(i) + ".mesh");
 
     // Convert back to Rodin data type
     Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
