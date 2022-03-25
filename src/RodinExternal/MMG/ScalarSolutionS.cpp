@@ -1,3 +1,4 @@
+#include <cstring>
 #include <mmgs/mmgs.h>
 #include <libmmgcommon.h>
 #include <common/mmgcommon.h>

@@ -88,12 +88,12 @@ namespace Rodin::External::MMG
         // Run command
         if (m_out)
           return boost::process::system(
-              (m_executable.string() + " " + strArgs).c_str(),
+              m_executable.string() + " " + strArgs,
               boost::process::std_out > *m_out
             );
         else
           return boost::process::system(
-              (m_executable.string() + " " + strArgs).c_str(),
+              m_executable.string() + " " + strArgs,
               boost::process::std_out > boost::process::null
             );
       }
@@ -106,13 +106,13 @@ namespace Rodin::External::MMG
           strArgs += " " + arg;
         if (m_out)
           return boost::process::system(
-              (m_executable.string() + strArgs).c_str(),
+              m_executable.string() + strArgs,
               boost::process::std_out > *m_out,
               boost::process::std_err > *m_out
             );
         else
           return boost::process::system(
-              (m_executable.string() + strArgs).c_str(),
+              m_executable.string() + strArgs,
               boost::process::std_out > boost::process::null,
               boost::process::std_out > boost::process::null
             );
