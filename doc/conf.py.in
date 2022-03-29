@@ -10,7 +10,9 @@ THEME_COLOR = '#22272e'
 FAVICON = 'favicon-dark.png'
 
 LINKS_NAVBAR1 = [
-    ("Pages", 'pages', [("Examples", 'examples-index')]),
+    ("Pages", 'pages', [
+        ("Examples", 'examples-index'),
+        ('Credits', 'credits-index')]),
     ("Namespaces", 'namespaces', [])
 ]
 LINKS_NAVBAR2 = [

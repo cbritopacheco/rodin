@@ -1,0 +1,73 @@
+/**
+  @page credits-index Credits
+  @brief People and third-party software who make Rodin possible
+
+  @tableofcontents
+
+  @section credits-index-3rd-party Third-party Software
+
+  @subsection credits-index-mfem MFEM
+
+
+    MFEM is a modular parallel C++ library for finite element methods. Its goal
+    is to enable high-performance scalable finite element discretization
+    research and application development on a wide variety of platforms,
+    ranging from laptops to supercomputers. It is licensed under the
+    [BSD-3-Clause License](https://github.com/mfem/mfem/blob/master/LICENSE).
+
+  @par Links
+  @parblock
+  - https://mfem.org/
+  - https://glvis.org/
+  @endparblock
+
+  @subsection credits-index-mmg MMG
+
+
+  MMG is an open source software for bidimensional and tridimensional surface
+  and volume remeshing. It is licensed under the
+  [LGPL](https://github.com/MmgTools/mmg/blob/master/LICENSE) and is originally
+  based on @cite dapogny2014three .
+
+  @par Links
+  @parblock
+  - https://www.mmgtools.org/
+  @endparblock
+
+  @subsection credits-index-iscd ISCD Toolbox
+
+  The institute of computing and data sciences (ISCD) is dedicated to exploring
+  and developing the potential of computational and data-driven research and
+  training across science, humanities and medicine at Sorbonne Université. They
+  have created a series of repositories containing various tools for various
+  different computational tasks.
+
+  @par Links
+  @parblock
+  - https://github.com/ISCDtoolbox
+  - https://iscd.sorbonne-universite.fr/
+  @endparblock
+
+  @subsubsection credits-index-iscd-commons Commons
+
+  TODO
+
+  @subsubsection credits-index-iscd-mshdist Mshdist
+
+  Mshdist is a simple algorithm to generate the signed distance function to
+  given objects in two and three space dimensions. It is licensed under the
+  [GPL-3.0
+  License](https://github.com/ISCDtoolbox/Mshdist/blob/master/LICENSE.md) and
+  is originally based on @cite dapogny2012computation.
+
+  @par Links
+  @parblock
+  - https://github.com/ISCDtoolbox/Mshdist
+  @endparblock
+
+  @subsubsection credits-index-iscd-advection Advection
+
+  TODO
+
+*/
+
