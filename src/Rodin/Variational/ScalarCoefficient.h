@@ -49,6 +49,36 @@ namespace Rodin::Variational
          virtual ScalarCoefficientBase* copy() const noexcept override = 0;
    };
 
+   template <>
+   class ScalarCoefficient<ScalarCoefficientBase> : public ScalarCoefficientBase
+   {
+      public:
+         ScalarCoefficient(const ScalarCoefficientBase& nested)
+            : m_nested(nested.copy())
+         {}
+
+         ScalarCoefficient(const ScalarCoefficient& other)
+            : m_nested(other.m_nested->copy())
+         {}
+
+         ScalarCoefficient(ScalarCoefficient&& other) = default;
+
+         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            return m_nested->getValue(trans, ip);
+         }
+
+         ScalarCoefficient* copy() const noexcept override
+         {
+            return new ScalarCoefficient(*this);
+         }
+
+      private:
+         std::unique_ptr<ScalarCoefficientBase> m_nested;
+   };
+   ScalarCoefficient(const ScalarCoefficientBase&)
+      -> ScalarCoefficient<ScalarCoefficientBase>;
+
    /**
     * @brief Represents a ScalarCoefficient of arithmetic type `T`.
     *

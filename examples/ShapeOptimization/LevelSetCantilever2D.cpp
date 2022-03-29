@@ -16,7 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-cantilever2d-example.mesh";
+  const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -51,7 +51,6 @@ int main(int, char**)
 
   // Optimization parameters
   size_t maxIt = 600;
-  size_t activeBorderIt = 10;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
@@ -91,6 +90,7 @@ int main(int, char**)
     // Hilbert extension-regularization procedure
     auto e = 0.5 * (Jacobian(u) + Jacobian(u).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+    auto n = Normal(d);
 
     H1 Ph(Omega);
     GridFunction w(Ph);
@@ -101,10 +101,13 @@ int main(int, char**)
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            - Integral(Dot(Ae, e) - ell, Div(v)).over(Interior)
-            - Integral(Grad(w), v).over(Interior)
+            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
+
+    g.getGridFunction().save("g.gf");
+    Omega.save("Omega.mesh");
+    std::exit(1);
 
     // Update objective
     obj.push_back(
@@ -116,10 +119,7 @@ int main(int, char**)
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
-    auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
-    if (i < activeBorderIt)
-      dist.setActiveBorder(Gamma0);
-    auto mmgLs = dist.distance(mmgMesh);
+    auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior).distance(mmgMesh);
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());

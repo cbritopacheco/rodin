@@ -8,14 +8,18 @@ namespace Rodin::Variational
    class IdentityMatrix : public MatrixCoefficientBase
    {
       public:
-         constexpr
          IdentityMatrix(int n)
             : m_n(n)
          {}
 
-         constexpr
          IdentityMatrix(const IdentityMatrix& other)
-            : m_n(other.m_n)
+            :  MatrixCoefficientBase(other),
+               m_n(other.m_n)
+         {}
+
+         IdentityMatrix(IdentityMatrix&& other)
+            :  MatrixCoefficientBase(std::move(other)),
+               m_n(other.m_n)
          {}
 
          int getRows() const override

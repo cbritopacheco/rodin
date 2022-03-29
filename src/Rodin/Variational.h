@@ -54,17 +54,6 @@
 #include "Variational/VectorCoefficient.h"
 #include "Variational/MatrixCoefficient.h"
 
-// ---- Bilinear form integrators --------------------------------------------
-#include "Variational/VectorMassIntegrator.h"
-#include "Variational/VectorDiffusionIntegrator.h"
-#include "Variational/ElasticityIntegrator.h"
-#include "Variational/DiffusionIntegrator.h"
-
-// ---- Linear form integrators ----------------------------------------------
-#include "Variational/VectorDomainLFIntegrator.h"
-#include "Variational/VectorBoundaryFluxLFIntegrator.h"
-#include "Variational/VectorDomainLFDivIntegrator.h"
-
 // ---- Boundary conditions --------------------------------------------------
 #include "Variational/DirichletBC.h"
 

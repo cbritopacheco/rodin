@@ -118,47 +118,6 @@ namespace Rodin::External::MMG
       Distancer2D& setInteriorDomain(const std::set<MaterialReference>& refs);
 
       /**
-       * @brief Specifies the active border of the mesh.
-       * @returns Reference to self (for method chaining)
-       *
-       * An active border (in 2D) is a subset of the bounding box boundary
-       * where the level set function will be equal to zero.
-       *
-       * This implicitly enables active border mode.
-       *
-       * By default, all the bounding box boundary is inactive.
-       *
-       * @see distance(Mesh2D&) const
-       */
-      Distancer2D& setActiveBorder(const MaterialReference& ref)
-      {
-        return setActiveBorder(std::set<MaterialReference>{ref});
-      }
-
-      /**
-       * @brief Specifies the active borders of the mesh.
-       * @returns Reference to self (for method chaining)
-       *
-       * An active border (in 2D) is a subset of the bounding box boundary
-       * where the level set function will be equal to zero.
-       *
-       * This implicitly enables active border mode.
-       *
-       * By default, all the bounding box boundary is inactive.
-       *
-       * @see distance(Mesh2D&) const
-       */
-      Distancer2D& setActiveBorder(const std::set<MaterialReference>& refs);
-
-      /**
-       * @brief Specifies that the whole bounding box boundary will be active.
-       *
-       * @see distance(Mesh2D&) const
-       * @see setActiveBorders(const std::set<MaterialReference>&) const
-       */
-      Distancer2D& setActiveBorders();
-
-      /**
        * @brief Specifies whether to enable the scaling of the contour mesh.
        *
        * Specifies whether the contour mesh should be scaled down so that the

@@ -71,16 +71,16 @@ namespace Rodin::Variational
     * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_d}{\partial x_1}\\
     * \vdots & \ddots & \vdots\\
     * \dfrac{\partial u_1}{\partial x_s} & \ldots & \dfrac{\partial u_d}{\partial x_s}
-    * \end{bmatrix}
+    * \end{bmatrix} .
     * @f]
-    * 
+    * This class aids in the calculation of the Jacobian of a GridFunction<H1>.
     */
    template <>
    class Jacobian<GridFunction<H1>> : public MatrixCoefficientBase
    {
       public:
          /**
-          * @brief Constructs the Jacobian matrix of an @f$ H^1 @f$ function
+          * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
@@ -89,7 +89,13 @@ namespace Rodin::Variational
          {}
 
          Jacobian(const Jacobian& other)
-            : m_u(other.m_u)
+            :  MatrixCoefficientBase(other),
+               m_u(other.m_u)
+         {}
+
+         Jacobian(Jacobian&& other)
+            : MatrixCoefficientBase(std::move(other)),
+              m_u(other.m_u)
          {}
 
          int getRows() const override
@@ -104,9 +110,55 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint&) const override
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            m_u.getHandle().GetVectorGradient(trans, value);
+            const auto& traceDomain = getTraceDomain();
+            switch (trans.ElementType)
+            {
+               case mfem::ElementTransformation::BDR_ELEMENT:
+               {
+                  int fn = trans.mesh->GetBdrFace(trans.ElementNo);
+                  if (trans.mesh->FaceIsInterior(fn))
+                  {
+                     if (traceDomain.empty())
+                     {
+                        Alert::Exception()
+                           << "Integration over an interior boundary element "
+                           << "requires a trace domain."
+                           << Alert::Raise;
+                     }
+
+                     // Extend the values on the trace domain up to the
+                     // interior boundary.
+                     mfem::FaceElementTransformations* ft =
+                        trans.mesh->GetFaceElementTransformations(fn);
+                     ft->SetAllIntPoints(&ip);
+                     if (traceDomain.count(ft->GetElement1Transformation().Attribute))
+                        m_u.getHandle().GetVectorGradient(ft->GetElement1Transformation(), value);
+                     else if (traceDomain.count(ft->GetElement2Transformation().Attribute))
+                        m_u.getHandle().GetVectorGradient(ft->GetElement2Transformation(), value);
+                     else
+                     {
+                        // The boundary over which we are evaluating must be
+                        // the interface between the trace domain and some
+                        // other domain, i.e. it is not the boundary that was
+                        // specified!
+                        auto ex = Alert::Exception();
+                        ex << "Boundary element " << trans.ElementNo
+                           << " with attribute " << trans.Attribute
+                           << " is not a boundary of the trace domain.";
+                        ex.raise();
+                     }
+                  }
+                  else
+                  {
+                     m_u.getHandle().GetVectorGradient(trans, value);
+                  }
+                  break;
+               }
+               default:
+                  m_u.getHandle().GetVectorGradient(trans, value);
+            }
             value.Transpose();
          }
 

@@ -4,5 +4,6 @@ target_link_libraries(CoNormalAdvection
   Rodin::Mesh
   Rodin::Solver
   Rodin::Variational
+  Rodin::External::MMG
   )
 

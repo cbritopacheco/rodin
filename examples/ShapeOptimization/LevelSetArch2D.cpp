@@ -16,7 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/levelset-arch2d-example.mesh";
+  const char* meshFile = "../resources/mfem/levelset-arch2d-example.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -25,8 +25,7 @@ int main(int, char**)
   int Gamma0 = 1,  // Traction free boundary
       GammaD = 2,  // Homogenous Dirichlet
       GammaN = 3,  // Inhomogenous Neumann
-      Gamma = 4,   // Shape boundary
-      GammaNA = 5;
+      Gamma  = 4;  // Shape boundary
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
@@ -55,11 +54,10 @@ int main(int, char**)
 
   // Optimization parameters
   size_t maxIt = 300;
-  size_t activeBorderIt = 20;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1.0);
-  auto alpha = ScalarCoefficient(2 * hmax * hmax);
+  auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -85,7 +83,8 @@ int main(int, char**)
                + Integral(
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
-               + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
+               + DirichletBC(uInt.x(), ScalarCoefficient{0}).on(GammaD)
+               + DirichletBC(uInt.y(), ScalarCoefficient{0}).on(GammaD);
     solver.solve(elasticity);
 
     // Transfer solution back to original domain
@@ -93,8 +92,9 @@ int main(int, char**)
     uInt.getGridFunction().transfer(u);
 
     // Hilbert extension-regularization procedure
-    auto e = 0.5 * (Jacobian(u) + Jacobian(u).T());
+    auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+    auto n = Normal(d);
 
     H1 Ph(Omega);
     GridFunction w(Ph);
@@ -105,10 +105,12 @@ int main(int, char**)
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            - Integral(Dot(Ae, e) - ell, Div(v)).over(Interior)
-            - Integral(Grad(w), v).over(Interior)
-            + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaN, GammaNA});
+            + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
+            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
+    Omega.save("Omegai.mesh");
+    g.getGridFunction().save("g.gf");
+
 
     // Update objective
     obj.push_back(
@@ -120,10 +122,7 @@ int main(int, char**)
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
-    auto dist = MMG::Distancer2D().setInteriorDomain(Interior);
-    if (i < activeBorderIt)
-      dist.setActiveBorder(Gamma0);
-    auto mmgLs = dist.distance(mmgMesh);
+    auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior).distance(mmgMesh);
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());

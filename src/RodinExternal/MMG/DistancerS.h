@@ -99,47 +99,6 @@ namespace Rodin::External::MMG
       DistancerS& setInteriorDomain(const std::set<MaterialReference>& refs);
 
       /**
-       * @brief Specifies the active border of the mesh.
-       * @returns Reference to self (for method chaining)
-       *
-       * An active border (in S) is a subset of the bounding box boundary
-       * where the level set function will be equal to zero.
-       *
-       * This implicitly enables active border mode.
-       *
-       * By default, all the bounding box boundary is inactive.
-       *
-       * @see distance(MeshS&) const
-       */
-      DistancerS& setActiveBorder(const MaterialReference& ref)
-      {
-        return setActiveBorder(std::set<MaterialReference>{ref});
-      }
-
-      /**
-       * @brief Specifies the active borders of the mesh.
-       * @returns Reference to self (for method chaining)
-       *
-       * An active border (in S) is a subset of the bounding box boundary
-       * where the level set function will be equal to zero.
-       *
-       * This implicitly enables active border mode.
-       *
-       * By default, all the bounding box boundary is inactive.
-       *
-       * @see distance(MeshS&) const
-       */
-      DistancerS& setActiveBorder(const std::set<MaterialReference>& refs);
-
-      /**
-       * @brief Specifies that the whole bounding box boundary will be active.
-       *
-       * @see distance(MeshS&) const
-       * @see setActiveBorders(const std::set<MaterialReference>&) const
-       */
-      DistancerS& setActiveBorders();
-
-      /**
        * @brief Specifies whether to enable the scaling of the contour mesh.
        *
        * Specifies whether the contour mesh should be scaled down so that the
@@ -166,8 +125,7 @@ namespace Rodin::External::MMG
       unsigned int getCPUs() const;
 
     private:
-      bool m_scale,
-           m_activeBorder;
+      bool m_scale;
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
       std::optional<std::set<MaterialReference>> m_interiorDomains;

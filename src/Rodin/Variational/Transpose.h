@@ -33,7 +33,13 @@ namespace Rodin::Variational
          {}
 
          Transpose(const Transpose& other)
-            :  m_matrix(other.m_matrix->copy())
+            :  MatrixCoefficientBase(other),
+               m_matrix(other.m_matrix->copy())
+         {}
+
+         Transpose(Transpose&& other)
+            : MatrixCoefficientBase(std::move(other)),
+              m_matrix(std::move(other.m_matrix))
          {}
 
          int getRows() const override

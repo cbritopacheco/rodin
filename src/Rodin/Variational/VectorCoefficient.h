@@ -67,44 +67,40 @@ namespace Rodin::Variational
           */
          constexpr
          VectorCoefficient(Values... values)
-            :  m_dimension(sizeof...(Values)),
-               m_values(std::forward_as_tuple(values...)),
-               m_mfemVectorCoefficient(m_dimension)
          {
-            m_mfemCoefficients.reserve(m_dimension);
-            makeCoefficientsFromTuple(m_values);
-            for (size_t i = 0; i < m_dimension; i++)
-            {
-               m_mfemVectorCoefficient.Set(
-                     i, m_mfemCoefficients[i]->build().release(), false);
-            }
+            m_coeffs.reserve(sizeof...(Values));
+            makeCoefficientsFromTuple(std::forward_as_tuple(values...));
          }
 
          constexpr
          VectorCoefficient(const VectorCoefficient& other)
-            : m_dimension(other.m_dimension),
-              m_values(other.m_values),
-              m_mfemVectorCoefficient(m_dimension)
          {
-            m_mfemCoefficients.reserve(m_dimension);
-            makeCoefficientsFromTuple(m_values);
-            for (size_t i = 0; i < m_dimension; i++)
-            {
-               m_mfemVectorCoefficient.Set(
-                     i, m_mfemCoefficients[i]->build().release(), true);
-            }
+            m_coeffs.reserve(sizeof...(Values));
+            for (const auto& v : other.m_coeffs)
+               m_coeffs.emplace_back(v->copy());
+         }
+
+         constexpr
+         VectorCoefficient(VectorCoefficient&&) = default;
+
+         const ScalarCoefficientBase& operator()(int i) const
+         {
+            assert(i < sizeof...(Values));
+            return *m_coeffs[i];
          }
 
          void getValue(
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            m_mfemVectorCoefficient.Eval(value, trans, ip);
+            value.SetSize(static_cast<int>(sizeof...(Values)));
+            for (int i = 0; i < sizeof...(Values); i++)
+               value(i) = m_coeffs[i]->getValue(trans, ip);
          }
 
          size_t getDimension() const override
          {
-            return m_dimension;
+            return sizeof...(Values);
          }
 
          VectorCoefficient* copy() const noexcept override
@@ -122,15 +118,11 @@ namespace Rodin::Variational
          typename std::enable_if_t<I < sizeof...(Tp)>
          makeCoefficientsFromTuple(const std::tuple<Tp...>& t)
          {
-            m_mfemCoefficients.emplace_back(new ScalarCoefficient(std::get<I>(t)));
+            m_coeffs.emplace_back(new ScalarCoefficient(std::get<I>(t)));
             makeCoefficientsFromTuple<I + 1, Tp...>(t);
          }
 
-         const size_t m_dimension;
-         std::tuple<Values...> m_values;
-         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_mfemCoefficients;
-
-         mutable mfem::VectorArrayCoefficient m_mfemVectorCoefficient;
+         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_coeffs;
    };
    template <class ... Values>
    VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;

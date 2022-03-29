@@ -3,10 +3,8 @@ set(RodinVariational_HEADERS
   BilinearFormIntegrator.h
   DirichletBC.h
   EssentialBoundary.h
-  VectorDomainLFDivIntegrator.h
   Derivative.h
   Dot.h
-  ElasticityIntegrator.h
   FiniteElementSpace.h
   FormLanguage.h
   ForwardDecls.h
@@ -34,10 +32,7 @@ set(RodinVariational_HEADERS
   Transpose.h
   Rank3Operator.h
   Restriction.h
-  VectorBoundaryFluxLFIntegrator.h
   VectorCoefficient.h
-  VectorMassIntegrator.h
-  VectorDiffusionIntegrator.h
   )
 
 set(RodinVariational_SRCS
@@ -52,10 +47,7 @@ set(RodinVariational_SRCS
   Jacobian.cpp
   MatrixCoefficient.cpp
   Trace.cpp
-  VectorBoundaryFluxLFIntegrator.cpp
   VectorCoefficient.cpp
-  VectorMassIntegrator.cpp
-  VectorDiffusionIntegrator.cpp
   ScalarCoefficient.cpp
   Restriction.cpp
   Rank3Operator.cpp

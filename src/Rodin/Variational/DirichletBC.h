@@ -48,7 +48,18 @@ namespace Rodin::Variational
       public:
          DirichletBC(const TrialFunction<FES>& u, const Value& v)
             : m_u(u), m_value(v.copy())
-         {}
+         {
+            if constexpr (std::is_base_of_v<ScalarCoefficientBase, Value>)
+            {
+               assert(
+                     u.getFiniteElementSpace().getVectorDimension() == 1);
+            }
+            else if constexpr (std::is_base_of_v<VectorCoefficientBase, Value>)
+            {
+               assert(
+                     u.getFiniteElementSpace().getVectorDimension() == v.getDimension());
+            }
+         }
 
          DirichletBC& on(int bdrAtr)
          {
@@ -113,26 +124,13 @@ namespace Rodin::Variational
    DirichletBC(const TrialFunction<FES>&, const VectorCoefficientBase&)
       -> DirichletBC<TrialFunction<FES>, VectorCoefficientBase>;
 
-   template <class FES, class Value>
-   class DirichletBC<Component<TrialFunction<FES>>, Value> : public FormLanguage::Base
+   template <class FES>
+   class DirichletBC<Component<TrialFunction<FES>>, ScalarCoefficientBase> : public FormLanguage::Base
    {
-      static_assert(
-            std::is_base_of_v<ScalarCoefficientBase, Value> ||
-            std::is_base_of_v<VectorCoefficientBase, Value>,
-            "Value must be derived from either ScalarCoefficientBase or VectorCoefficientBase");
       public:
-         DirichletBC(const Component<TrialFunction<FES>>& u, const Value& v)
-            : m_u(u), m_value(v.copy())
-         {
-            if constexpr (std::is_base_of_v<ScalarCoefficientBase, Value>)
-            {
-               assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-            }
-            else if constexpr (std::is_base_of_v<VectorCoefficientBase, Value>)
-            {
-               assert(u.getFiniteElementSpace().getVectorDimension() == v.getDimension());
-            }
-         }
+         DirichletBC(const Component<TrialFunction<FES>>& ux, const ScalarCoefficientBase& v)
+            : m_ux(ux), m_value(v.copy())
+         {}
 
          DirichletBC& on(int bdrAtr)
          {
@@ -146,13 +144,13 @@ namespace Rodin::Variational
          }
 
          DirichletBC(const DirichletBC& other)
-            :  m_u(other.m_u),
+            :  m_ux(other.m_ux),
                m_value(other.m_value->copy()),
                m_essBdr(other.m_essBdr)
          {}
 
          DirichletBC(DirichletBC&& other)
-            :  m_u(other.m_u),
+            :  m_ux(other.m_u),
                m_value(std::move(other.m_value)),
                m_essBdr(std::move(other.m_essBdr))
          {}
@@ -161,7 +159,7 @@ namespace Rodin::Variational
           * @returns Returns reference to the value of the boundary condition
           * at the boundary
           */
-         const Value& getValue() const
+         const ScalarCoefficientBase& getValue() const
          {
             assert(m_value);
             return *m_value;
@@ -169,7 +167,7 @@ namespace Rodin::Variational
 
          const Component<TrialFunction<FES>>& getComponent() const
          {
-            return m_u;
+            return m_ux;
          }
 
          const std::set<int>& getBoundaryAttributes() const
@@ -182,8 +180,8 @@ namespace Rodin::Variational
             return new DirichletBC(*this);
          }
       private:
-         Component<TrialFunction<FES>> m_u;
-         std::unique_ptr<Value> m_value;
+         Component<TrialFunction<FES>> m_ux;
+         std::unique_ptr<ScalarCoefficientBase> m_value;
          std::set<int> m_essBdr;
    };
    template <class FES>
