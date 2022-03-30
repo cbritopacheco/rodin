@@ -8,11 +8,14 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Unit @a outward normal.
+    * @brief Outward unit normal.
     */
    class Normal : public VectorCoefficientBase
    {
       public:
+         /**
+          * @brief Constructs the outward unit normal.
+          */
          constexpr
          Normal(int dimension)
             : m_dimension(dimension)
