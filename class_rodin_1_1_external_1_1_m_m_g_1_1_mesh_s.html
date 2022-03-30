@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::SurfaceMesh class | Rodin</title>
+  <title>Rodin::External::MMG::MeshS class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -28,6 +28,7 @@
               <a href="pages.html">Pages</a>
               <ol>
                 <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
             <li><a href="namespaces.html">Namespaces</a></li>
@@ -50,7 +51,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>SurfaceMesh <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>MeshS <span class="m-thin">class</span>
         </h1>
         <p>Triangular surface mesh.</p>
         <nav class="m-block m-default">
@@ -92,28 +93,28 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a3e94c39d3e3b3c4fd61ad2dc5fcca6e9" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a436079fec787f24e5ed21274bf34bb7b" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a></span>
             </dt>
-            <dd>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a> object from a text file.</dd>
+            <dd>Loads the SurfaceMesh object from a text file.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a70ef123dcb0954683a2df083e1dafb87">
-              <span class="m-doc-wrap-bumper"><a href="#a70ef123dcb0954683a2df083e1dafb87" class="m-doc-self">SurfaceMesh</a>(</span><span class="m-doc-wrap">)</span>
+            <dt id="a1099dc7dffbc5b353570e8764250874d">
+              <span class="m-doc-wrap-bumper"><a href="#a1099dc7dffbc5b353570e8764250874d" class="m-doc-self">MeshS</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Creates an empty mesh.</dd>
-            <dt id="abe79736e3cd24cd01a150f9024122a97">
-              <span class="m-doc-wrap-bumper"><a href="#abe79736e3cd24cd01a150f9024122a97" class="m-doc-self">SurfaceMesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a>&amp; other)</span>
+            <dt id="a6b337cdd4714af57286113feb7ec6399">
+              <span class="m-doc-wrap-bumper"><a href="#a6b337cdd4714af57286113feb7ec6399" class="m-doc-self">MeshS</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a>&amp; other)</span>
             </dt>
             <dd>Performs a deep copy of the mesh.</dd>
-            <dt id="ac55eeb95fb6dece373db850bb5a0478e">
-              <span class="m-doc-wrap-bumper"><a href="#ac55eeb95fb6dece373db850bb5a0478e" class="m-doc-self">SurfaceMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a>&amp;&amp; other)</span>
+            <dt id="ad60704f5001e172dfe125bfaf0323f75">
+              <span class="m-doc-wrap-bumper"><a href="#ad60704f5001e172dfe125bfaf0323f75" class="m-doc-self">MeshS</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a>&amp;&amp; other)</span>
             </dt>
-            <dd>Moves constructs the data of another <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a> object, while invalidating the latter.</dd>
-            <dt id="a80462de7e77a5231315f0e93e69fc1d2">
-              <span class="m-doc-wrap-bumper"><a href="#a80462de7e77a5231315f0e93e69fc1d2" class="m-doc-self">~SurfaceMesh</a>(</span><span class="m-doc-wrap">)</span>
+            <dd>Moves constructs the data of another SurfaceMesh object, while invalidating the latter.</dd>
+            <dt id="ab0cfb0f3e072bc0232f0cea80c669961">
+              <span class="m-doc-wrap-bumper"><a href="#ab0cfb0f3e072bc0232f0cea80c669961" class="m-doc-self">~MeshS</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Destructs the object.</dd>
           </dl>
@@ -122,22 +123,22 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a281318a687d52b6b190af0962cb070b6" class="m-doc">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">SurfaceMesh::<wbr />Entity</a> e) const -&gt; int</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bfc25b9ac3967af932f5d177c67e24b" class="m-doc">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">MeshS::<wbr />Entity</a> e) const -&gt; int</span>
             </dt>
             <dd>Gets a count of the specified entities in the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aa7daefdbb77c11d257333a63fc787e89" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a37df8588adc62342deeecf1b850de3e2" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Writes the <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object to a text file using mmg format.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a3e94c39d3e3b3c4fd61ad2dc5fcca6e9"><div>
+          <section class="m-doc-details" id="a436079fec787f24e5ed21274bf34bb7b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a> Rodin::<wbr />External::<wbr />MMG::<wbr />SurfaceMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e94c39d3e3b3c4fd61ad2dc5fcca6e9" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a> Rodin::<wbr />External::<wbr />MMG::<wbr />MeshS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a436079fec787f24e5ed21274bf34bb7b" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
             </h3>
-            <p>Loads the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html" class="m-doc">SurfaceMesh</a> object from a text file.</p>
+            <p>Loads the SurfaceMesh object from a text file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -156,9 +157,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a281318a687d52b6b190af0962cb070b6"><div>
+          <section class="m-doc-details" id="a5bfc25b9ac3967af932f5d177c67e24b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />External::<wbr />MMG::<wbr />SurfaceMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a281318a687d52b6b190af0962cb070b6" class="m-doc-self">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">SurfaceMesh::<wbr />Entity</a> e) const</span></span>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />External::<wbr />MMG::<wbr />MeshS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bfc25b9ac3967af932f5d177c67e24b" class="m-doc-self">count</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">MeshS::<wbr />Entity</a> e) const</span></span>
             </h3>
             <p>Gets a count of the specified entities in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -174,14 +175,14 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Number of entities of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_surface_mesh.html#a2228f5f8d54732b2077779d47c6f5ffb" class="m-doc">SurfaceMesh::<wbr />Entity</a>.</td>
+                  <td>Number of entities of type SurfaceMesh::Entity.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa7daefdbb77c11d257333a63fc787e89"><div>
+          <section class="m-doc-details" id="a37df8588adc62342deeecf1b850de3e2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />SurfaceMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7daefdbb77c11d257333a63fc787e89" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />External::<wbr />MMG::<wbr />MeshS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37df8588adc62342deeecf1b850de3e2" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Writes the <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object to a text file using mmg format.</p>
             <table class="m-table m-fullwidth m-flat">

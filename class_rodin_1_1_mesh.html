@@ -28,6 +28,7 @@
               <a href="pages.html">Pages</a>
               <ol>
                 <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
             <li><a href="namespaces.html">Namespaces</a></li>
@@ -70,7 +71,7 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ab0331688889874690e9001e78ccab824" class="m-doc">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a5d080fd10af34a1a4532a0415d77831b" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a></span>
             </dt>
             <dd>Loads a mesh from file.</dd>
           </dl>
@@ -96,7 +97,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae505a01954ee76e90574a2b6c8acaf11" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span>
             </dt>
             <dd>Saves the mesh to file.</dd>
             <dt id="ac3462215a38fbd687febccc809ef1776">
@@ -107,6 +108,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>
             <dd>Gets the dimension of the elements.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88934a975de1283c54ed3787cb6dbc32" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
+            </dt>
+            <dd>Gets the dimension of the ambient space.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0f3ac52dffad012516f046f13cf9cf92" class="m-doc">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
@@ -164,6 +169,10 @@ $ u $
             </dt>
             <dd>Trims the elements with the given material references.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c95f662bbae81a4e3d3f5d0071c3b11" class="m-doc">skin</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a></span>
+            </dt>
+            <dd>Skins the mesh to obtain its boundary mesh.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2dbb687ace813b1bd35fdb765c7dbbc9" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Indicates whether the mesh is a submesh or not.</dd>
@@ -175,9 +184,9 @@ $ u $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab0331688889874690e9001e78ccab824"><div>
+          <section class="m-doc-details" id="a5d080fd10af34a1a4532a0415d77831b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0331688889874690e9001e78ccab824" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d080fd10af34a1a4532a0415d77831b" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
             </h3>
             <p>Loads a mesh from file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -192,9 +201,9 @@ $ u $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae6a4b6d08fec0d25e321ea7250ee8973"><div>
+          <section class="m-doc-details" id="ae505a01954ee76e90574a2b6c8acaf11"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6a4b6d08fec0d25e321ea7250ee8973" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const std::filesystem::path&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae505a01954ee76e90574a2b6c8acaf11" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
             </h3>
             <p>Saves the mesh to file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -218,10 +227,26 @@ $ u $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Dimension of the mesh.</td>
+                  <td>Dimension of the elements</td>
                 </tr>
               </tfoot>
             </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh.html#a88934a975de1283c54ed3787cb6dbc32" class="m-doc">getSpaceDimension() const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a88934a975de1283c54ed3787cb6dbc32"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88934a975de1283c54ed3787cb6dbc32" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the dimension of the ambient space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dimension of the space which the mesh is embedded in</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh.html#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension() const</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a0f3ac52dffad012516f046f13cf9cf92"><div>
             <h3>
@@ -440,6 +465,13 @@ $ u $
             </h3>
             <p>Trims the elements with the given material references.</p>
 <p>This function will trim the current mesh and return a Submesh object containing the elements which were not trimmed from the original mesh.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9c95f662bbae81a4e3d3f5d0071c3b11"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c95f662bbae81a4e3d3f5d0071c3b11" class="m-doc-self">skin</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Skins the mesh to obtain its boundary mesh.</p>
+<p>This function will &quot;skin&quot; the mesh to return the mesh boundary as a new <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object. The new mesh will be embedded in the original space dimension.</p>
           </div></section>
           <section class="m-doc-details" id="a2dbb687ace813b1bd35fdb765c7dbbc9"><div>
             <h3>
