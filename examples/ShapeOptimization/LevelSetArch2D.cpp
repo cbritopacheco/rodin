@@ -83,8 +83,7 @@ int main(int, char**)
                + Integral(
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
-               + DirichletBC(uInt.x(), ScalarCoefficient{0}).on(GammaD)
-               + DirichletBC(uInt.y(), ScalarCoefficient{0}).on(GammaD);
+               + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
 
     // Transfer solution back to original domain
