@@ -15,10 +15,10 @@ target_include_directories(RodinMesh
   ${MFEM_INCLUDE_DIRS})
 
 target_link_libraries(RodinMesh
-  PUBLIC
-  Rodin::Alert
   PRIVATE
   mfem
+  PUBLIC
+  Rodin::Alert
   ${Boost_LIBRARIES})
 
 
