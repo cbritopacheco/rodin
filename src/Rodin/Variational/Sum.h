@@ -76,6 +76,9 @@ namespace Rodin::Variational
    Sum<ScalarCoefficientBase, ScalarCoefficientBase>
    operator+(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
 
+   /**
+    * @brief %Sum of two MatrixCoefficientBase instances.
+    */
    template <>
    class Sum<MatrixCoefficientBase, MatrixCoefficientBase>
       : public MatrixCoefficientBase

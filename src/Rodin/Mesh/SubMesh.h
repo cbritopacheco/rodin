@@ -10,6 +10,24 @@
 
 namespace Rodin
 {
+   /**
+    * @brief A SubMesh object represents a subregion of a Mesh object.
+    *
+    * A SubMesh object contains a reference to the parent Mesh object. It also
+    * contains information regarding the mapping of elements and vertices
+    * between the child and parent Mesh.
+    *
+    * A Mesh which is also a SubMesh may be casted into down to access
+    * the SubMesh functionality. For example:
+    * @code{.cpp}
+    * if (mesh.isSubMesh())
+    * {
+    *    // Cast is well defined
+    *    auto& submesh = static_cast<SubMesh&>(mesh);
+    * }
+    * @endcode
+    *
+    */
    class SubMesh : public Mesh
    {
       public:

@@ -126,15 +126,22 @@ namespace Rodin
 
          /**
           * @brief Trims the elements with the given material reference.
+          * @param[in] attr Attribute to trim
+          * @param[in] bdr Boundary label which will be assigned to the
+          * exterior boundary.
+          * @returns SubMesh object to the remaining region of the mesh
           *
-          * This function will trim the current mesh and return a Submesh
-          * object containing the elements which were not trimmed from the
-          * original mesh.
+          * Convenience function to call trim(const std::set<int>&, int) with
+          * only one attribute.
           */
          SubMesh trim(int attr, int bdrLabel);
 
          /**
           * @brief Trims the elements with the given material references.
+          * @param[in] attr Attributes to trim
+          * @param[in] bdr Boundary label which will be assigned to the
+          * exterior boundary.
+          * @returns SubMesh object to the remaining region of the mesh
           *
           * This function will trim the current mesh and return a Submesh
           * object containing the elements which were not trimmed from the
@@ -144,6 +151,7 @@ namespace Rodin
 
          /**
           * @brief Skins the mesh to obtain its boundary mesh
+          * @returns SubMesh object to the boundary region of the mesh
           *
           * This function will "skin" the mesh to return the mesh boundary as a
           * new SubMesh object. The new mesh will be embedded in the original

@@ -92,10 +92,23 @@ namespace Rodin::Variational
 
          virtual ~MatrixCoefficientBase() = default;
 
+         /**
+          * @brief Convenience function to get the transpose @f$ A^T @f$ of the
+          * matrix object @f$ A @f$
+          * @returns Transpose coefficient of the matrix instance
+          */
          virtual Transpose<MatrixCoefficientBase> T() const;
 
+         /**
+          * @brief Gets the number of rows in the matrix
+          * @returns Number of rows
+          */
          virtual int getRows() const = 0;
 
+         /**
+          * @brief Gets the number of columns in the matrix
+          * @returns Number of columns
+          */
          virtual int getColumns() const = 0;
 
          virtual void getValue(

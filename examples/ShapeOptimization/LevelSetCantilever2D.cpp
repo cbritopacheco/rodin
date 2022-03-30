@@ -16,7 +16,8 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
+  // const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
+  const char* meshFile = "Omega.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -100,6 +101,9 @@ int main(int, char**)
             + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
+
+    g.getGridFunction().save("g.gf");
+    Omega.save("Omegai.mesh");
 
     // Update objective
     obj.push_back(
