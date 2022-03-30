@@ -9,9 +9,8 @@
 #include <mmgs/mmgs.h>
 
 /*
- * We have to undef the I macro (from complex.h) since it clashes with mfem
- * code (e.g. table.hpp) where the I variable is defined and causes all sorts
- * of nasty errors.
+ * mmg includes complex.h which defines the I macro. We have to undefine it to
+ * avoid a whole bunch of name clashes!
  */
 #ifdef I
 #undef I
