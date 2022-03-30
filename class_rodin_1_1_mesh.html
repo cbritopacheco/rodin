@@ -60,6 +60,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -67,6 +68,15 @@
             </li>
           </ul>
         </nav>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>
+            </dt>
+            <dd>A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
+          </dl>
+        </section>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -456,7 +466,28 @@ $ u $
               int bdrLabel)</span></span>
             </h3>
             <p>Trims the elements with the given material reference.</p>
-<p>This function will trim the current mesh and return a Submesh object containing the elements which were not trimmed from the original mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute to trim</td>
+                </tr>
+                <tr>
+                  <td>bdrLabel</td>
+                  <td></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call <a href="class_rodin_1_1_mesh.html#ad30be32984b855e43a98b7aac62fa426" class="m-doc">trim(const std::<wbr />set&lt;int&gt;&amp;, int)</a> with only one attribute.</p>
           </div></section>
           <section class="m-doc-details" id="ad30be32984b855e43a98b7aac62fa426"><div>
             <h3>
@@ -464,6 +495,14 @@ $ u $
               int bdrLabel)</span></span>
             </h3>
             <p>Trims the elements with the given material references.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>This function will trim the current mesh and return a Submesh object containing the elements which were not trimmed from the original mesh.</p>
           </div></section>
           <section class="m-doc-details" id="a9c95f662bbae81a4e3d3f5d0071c3b11"><div>
@@ -471,6 +510,14 @@ $ u $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> Rodin::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c95f662bbae81a4e3d3f5d0071c3b11" class="m-doc-self">skin</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Skins the mesh to obtain its boundary mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the boundary region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>This function will &quot;skin&quot; the mesh to return the mesh boundary as a new <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object. The new mesh will be embedded in the original space dimension.</p>
           </div></section>
           <section class="m-doc-details" id="a2dbb687ace813b1bd35fdb765c7dbbc9"><div>
