@@ -69,7 +69,7 @@
 
   TODO
 
-  @subsection credits-index-suitesparse
+  @subsection credits-index-suitesparse SuiteSparse
 
   SuiteSparse is a suite of sparse matrix algorithms.
   Each package has its own individual
@@ -80,7 +80,7 @@
   - https://people.engr.tamu.edu/davis/suitesparse.html
   @endparblock
 
-  @subsection credits-index-boost
+  @subsection credits-index-boost Boost
 
   Boost libraries are intended to be widely useful, and usable across a broad
   spectrum of applications. The libraries are licensed under the [Boost
