@@ -15,6 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
         compiler: [gcc-8, clang-7]
+      fail-fast: false
     env:
       MAKEFLAGS: "-j2"
     steps:
@@ -50,6 +51,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-10.15, macos-11]
+      fail-fast: false
     env:
       MAKEFLAGS: "-j2"
     steps:

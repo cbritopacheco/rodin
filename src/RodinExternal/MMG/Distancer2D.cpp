@@ -65,10 +65,14 @@ namespace Rodin::External::MMG
     auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     contour.save(contourp);
 
+    int retcode;
     if (m_scale)
-      m_mshdist.run(boxp.string(), contourp.string(), "-ncpu", m_ncpu, "-v 0");
+      retcode = m_mshdist.run(boxp.string(), contourp.string(), "-ncpu", m_ncpu, "-v 0");
     else
-      m_mshdist.run(boxp.string(), contourp.string(), "-noscale", "-ncpu", m_ncpu, "-v 0");
+      retcode = m_mshdist.run(boxp.string(), contourp.string(), "-noscale", "-ncpu", m_ncpu, "-v 0");
+
+    if (retcode != 0)
+      Alert::Exception("Mshdist invocation failed.").raise();
 
     auto res = ScalarSolution2D::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -83,7 +87,9 @@ namespace Rodin::External::MMG
     solp.replace_extension(".sol");
     ls.save(solp);
 
-    m_mshdist.run(solp.string(), "-ncpu", m_ncpu, "-v 0");
+    int retcode = m_mshdist.run(solp.string(), "-ncpu", m_ncpu, "-v 0");
+    if (retcode != 0)
+      Alert::Exception("Mshdist invocation failed.").raise();
 
     auto res = ScalarSolution2D::load(solp).setMesh(ls.getMesh());
     ls = std::move(res);

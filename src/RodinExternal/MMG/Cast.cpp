@@ -4,15 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/*
- * We have to undef the I macro (from complex.h) since it clashes with mfem
- * code (e.g. table.hpp) where the I variable is defined and causes all sorts
- * of nasty errors.
- */
-#ifdef I
-#undef I
-#endif
-
 #include <mmg2d/mmg2d.h>
 #include <mmg3d/mmg3d.h>
 #include <mmgs/mmgs.h>
@@ -35,6 +26,15 @@
 #include "Utility.h"
 
 #include "Cast.h"
+
+/*
+ * We have to undef the I macro (from complex.h) since it clashes with mfem
+ * code (e.g. table.hpp) where the I variable is defined and causes all sorts
+ * of nasty errors.
+ */
+#ifdef I
+#undef I
+#endif
 
 namespace Rodin
 {

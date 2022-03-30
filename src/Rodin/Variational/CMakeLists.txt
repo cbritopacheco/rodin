@@ -74,8 +74,6 @@ target_include_directories(RodinVariational
   ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(RodinVariational
-  PRIVATE
-  mfem
   PUBLIC
   RodinMesh
   RodinAlert
