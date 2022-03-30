@@ -88,26 +88,18 @@ int main(int, char**)
     uInt.getGridFunction().transfer(u);
 
     // Hilbert extension-regularization procedure
-    auto e = 0.5 * (Jacobian(u) + Jacobian(u).T());
+    auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
-
-    H1 Ph(Omega);
-    GridFunction w(Ph);
-    w = (Dot(Ae, e) - ell).restrictTo(Interior);
 
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
+            + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
-
-    g.getGridFunction().save("g.gf");
-    Omega.save("Omega.mesh");
-    std::exit(1);
 
     // Update objective
     obj.push_back(

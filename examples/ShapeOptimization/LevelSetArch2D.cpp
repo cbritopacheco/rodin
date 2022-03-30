@@ -53,10 +53,10 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 300;
+  size_t maxIt = 250;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(1.0);
+  auto ell = ScalarCoefficient(2.0);
   auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
@@ -95,10 +95,6 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
-    H1 Ph(Omega);
-    GridFunction w(Ph);
-    w = (Dot(Ae, e) - ell).restrictTo(Interior);
-
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
@@ -107,9 +103,6 @@ int main(int, char**)
             + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
-    Omega.save("Omegai.mesh");
-    g.getGridFunction().save("g.gf");
-
 
     // Update objective
     obj.push_back(

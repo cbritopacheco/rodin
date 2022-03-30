@@ -25,8 +25,7 @@ int main(int, char**)
   int Gamma0 = 1,  // Traction free boundary
       GammaD = 2,  // Homogenous Dirichlet
       GammaN = 3,  // Inhomogenous Neumann
-      Gamma = 4,   // Shape boundary
-      GammaNA = 5; // Non-active border
+      Gamma  = 4;  // Shape boundary
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),
@@ -54,10 +53,10 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 360;
+  size_t maxIt = 200;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(4);
+  auto ell = ScalarCoefficient(4.0);
   auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
@@ -84,7 +83,7 @@ int main(int, char**)
     elasticity = Integral(lambda * Div(uInt), Div(vInt))
                + Integral(
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
-               - BoundaryIntegral(f, vInt).over(Gamma)
+               - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
     solver.solve(elasticity);
 
@@ -93,21 +92,17 @@ int main(int, char**)
     uInt.getGridFunction().transfer(u);
 
     // Hilbert extension-regularization procedure
-    auto e = 0.5 * (Jacobian(u) + Jacobian(u).T());
+    auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
-
-    H1 Ph(Omega);
-    GridFunction w(Ph);
-    w = (Dot(Ae, e) - ell).restrictTo(Interior);
 
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
-            + DirichletBC(g, VectorCoefficient{0, 0}).on({GammaN, GammaNA});
+            + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
+            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
     // Update objective

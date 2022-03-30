@@ -114,9 +114,11 @@ namespace Rodin::Variational
    {
       ProblemBody res(pb);
       for (const auto& p : lfi.getLinearFormDomainIntegratorList())
-         res.getLinearFormDomainIntegratorList().emplace_back(p->copy());
+         res.getLinearFormDomainIntegratorList().emplace_back(
+               new UnaryMinus<LinearFormIntegratorBase>(*p));
       for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
-         res.getLinearFormBoundaryIntegratorList().emplace_back(p->copy());
+         res.getLinearFormBoundaryIntegratorList().emplace_back(
+               new UnaryMinus<LinearFormIntegratorBase>(*p));
       return res;
    }
 

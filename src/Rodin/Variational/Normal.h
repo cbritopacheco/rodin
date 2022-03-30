@@ -7,6 +7,9 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Unit @a outward normal.
+    */
    class Normal : public VectorCoefficientBase
    {
       public:
@@ -33,6 +36,8 @@ namespace Rodin::Variational
             assert(trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT);
             value.SetSize(m_dimension);
             mfem::CalcOrtho(trans.Jacobian(), value);
+            const double norm = value.Norml2();
+            value /= norm;
          }
 
          Normal* copy() const noexcept override
