@@ -3,14 +3,10 @@
 [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
 [![Documentation](https://img.shields.io/badge/documentation-master-blue)](https://cbritopacheco.github.io/rodin/)
 
-![Master Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master))
-![Develop Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop))
-
-| OS              | Compiler      |  Status  |
-|:---------------:|:-------------:|:--------:|
-| Ubuntu 18.04    | GCC 8         | [![Badge](https://byob.yarr.is/cbritopacheco/rodin/Ubuntu-18_04-gcc-8-build_badge)](https://github.com/cbritopacheco/rodin/actions/workflows/Ubuntu-18_04-gcc-8.yml) |
-| Ubuntu 18.04    | Clang 7       | [![Badge](https://byob.yarr.is/cbritopacheco/rodin/Ubuntu-18_04-clang-7-build_badge)](https://github.com/cbritopacheco/rodin/actions/workflows/Ubuntu-18_04-clang-7.yml) |
-| macOS Catalina  | AppleClang 12 | [![Badge](https://byob.yarr.is/cbritopacheco/rodin/macOS-10_15-clang-12-build_badge)](https://github.com/cbritopacheco/rodin/actions/workflows/macOS-10_15-clang-12.yml) |
+| Branch      |  Matrix  | Documentation |
+|:-----------:|:--------:|:-------------:|
+| Master      | ![Master Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)) | [![Documentation](https://img.shields.io/badge/documentation-master-blue)](https://cbritopacheco.github.io/rodin/) |
+| Develop     | ![Develop Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)) | |
 
 ## Requirements
 
