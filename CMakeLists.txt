@@ -117,7 +117,7 @@ if (RODIN_BUILD_SRC)
     find_package(MagnumIntegration REQUIRED Eigen)
 
     # ---- Boost ----
-    find_package(Boost 1.65 REQUIRED System)
+    find_package(Boost 1.65 COMPONENTS System REQUIRED)
   endif()
 
   add_subdirectory(src)
