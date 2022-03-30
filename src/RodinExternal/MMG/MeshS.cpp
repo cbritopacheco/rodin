@@ -1,6 +1,3 @@
-#include <libmmgcommon.h>
-#include <mmgs/mmgs.h>
-
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/Warning.h"
 

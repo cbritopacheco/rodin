@@ -8,10 +8,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include <mmg3d/mmg3d.h>
-#include <libmmgcommon.h>
-#include <common/mmgcommon.h>
-
 #include "ScalarSolution3D.h"
 
 namespace Rodin::External::MMG

@@ -7,6 +7,7 @@
 #include <thread>
 #include <fstream>
 #include <utility>
+
 #include "Distancer2D.h"
 #include "ScalarSolution2D.h"
 

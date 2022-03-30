@@ -10,8 +10,6 @@
 #include <cstddef>
 #include <functional>
 
-#include <mmg/mmg3d/libmmg3d.h>
-
 #include "Rodin/Alert.h"
 
 #include "ForwardDecls.h"

@@ -1,16 +1,5 @@
 #include <algorithm>
 
-#include <mmg2d/mmg2d.h>
-#include <mmg3d/mmg3d.h>
-
-/*
- * mmg includes complex.h which defines the I macro. We have to undefine it to
- * avoid a whole bunch of name clashes!
- */
-#ifdef I
-#undef I
-#endif
-
 #include "Rodin/Alert.h"
 
 #include "Utility.h"

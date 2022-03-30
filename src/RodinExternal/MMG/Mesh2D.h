@@ -12,8 +12,6 @@
 #include <variant>
 #include <optional>
 
-#include <mmg/mmg2d/libmmg2d.h>
-
 #include "Mesh.h"
 
 namespace Rodin::External::MMG

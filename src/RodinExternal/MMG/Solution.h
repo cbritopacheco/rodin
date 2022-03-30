@@ -10,8 +10,7 @@
 #include <cassert>
 #include <boost/filesystem.hpp>
 
-#include <mmg/libmmg.h>
-#include <mmg/mmg2d/libmmg2d.h>
+#include "Common.h"
 
 namespace Rodin::External::MMG
 {

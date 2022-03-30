@@ -13,8 +13,6 @@
 #include <optional>
 #include <boost/filesystem.hpp>
 
-#include <mmg/mmg3d/libmmg3d.h>
-
 #include "Mesh.h"
 
 namespace Rodin::External::MMG

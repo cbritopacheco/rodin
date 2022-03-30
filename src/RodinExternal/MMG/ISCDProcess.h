@@ -17,6 +17,7 @@
 
 #include <boost/process.hpp>
 
+#include "Common.h"
 #include "Configure.h"
 
 namespace Rodin::External::MMG

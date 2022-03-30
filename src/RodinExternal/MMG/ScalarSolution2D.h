@@ -11,8 +11,6 @@
 #include <iterator>
 #include <functional>
 
-#include <mmg/mmg2d/libmmg2d.h>
-
 #include "Rodin/Alert.h"
 
 #include "ForwardDecls.h"

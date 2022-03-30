@@ -11,6 +11,8 @@
 
 #include "Rodin/Mesh/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
+
+#include "Common.h"
 #include "ForwardDecls.h"
 
 namespace Rodin

@@ -122,7 +122,7 @@ target_include_directories(RodinExternalMMG
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   ${Boost_INCLUDE_DIRS}
-  PRIVATE
+  PUBLIC
   ${PROJECT_SOURCE_DIR}/third-party/mmg/src
   ${PROJECT_SOURCE_DIR}/third-party/mmg/include
   )

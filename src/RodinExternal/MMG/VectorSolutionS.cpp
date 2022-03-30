@@ -1,9 +1,5 @@
 #include <cstring>
 
-#include <mmgs/mmgs.h>
-#include <libmmgcommon.h>
-#include <common/mmgcommon.h>
-
 #include "Rodin/Alert.h"
 #include "MeshS.h"
 

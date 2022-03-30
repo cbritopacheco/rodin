@@ -9,9 +9,6 @@
 
 #include <cassert>
 
-#include <mmg/libmmg.h>
-#include <mmg/mmg2d/libmmg2d.h>
-
 #include "Solution.h"
 
 namespace Rodin::External::MMG

@@ -10,6 +10,24 @@
 #include <map>
 #include <variant>
 
+#include <mmg/libmmg.h>
+#include <libmmgcommon.h>
+#include <mmg2d/mmg2d.h>
+#include <mmg/mmg2d/libmmg2d.h>
+#include <mmg3d/mmg3d.h>
+#include <mmg/mmg3d/libmmg3d.h>
+#include <mmgs/mmgs.h>
+#include <mmg/mmgs/libmmgs.h>
+#include <common/mmgcommon.h>
+
+/*
+ * mmg includes complex.h which defines the I macro. We have to undefine it to
+ * avoid a whole bunch of name clashes!
+ */
+#ifdef I
+#undef I
+#endif
+
 namespace Rodin::External::MMG
 {
   /**

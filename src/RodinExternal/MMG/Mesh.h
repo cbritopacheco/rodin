@@ -10,7 +10,7 @@
 #include <cassert>
 #include <boost/filesystem.hpp>
 
-#include <mmg/libmmg.h>
+#include "Common.h"
 
 #include "Configure.h"
 

@@ -3,8 +3,7 @@
 
 #include <mfem.hpp>
 
-#include <mmg/libmmg.h>
-#include <libmmgcommon.h>
+#include "Common.h"
 
 namespace Rodin::External::MMG
 {

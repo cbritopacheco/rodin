@@ -4,22 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <mmg2d/mmg2d.h>
-#include <mmg3d/mmg3d.h>
-#include <mmgs/mmgs.h>
-
-/*
- * mmg includes complex.h which defines the I macro. We have to undefine it to
- * avoid a whole bunch of name clashes!
- */
-#ifdef I
-#undef I
-#endif
-
 #include "Rodin/Alert.h"
 
 #include "Rodin/Mesh.h"
 #include "Rodin/Variational.h"
+
+#include "Common.h"
 
 #include "Mesh2D.h"
 #include "ScalarSolution2D.h"
@@ -30,8 +20,6 @@
 
 #include "MeshS.h"
 #include "ScalarSolutionS.h"
-
-#include "Utility.h"
 
 #include "Cast.h"
 

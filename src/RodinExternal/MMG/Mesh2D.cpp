@@ -8,8 +8,7 @@
 #include <cstring>
 #include <fstream>
 
-#include <libmmgcommon.h>
-#include <mmg2d/mmg2d.h>
+#include "Common.h"
 
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/Warning.h"
