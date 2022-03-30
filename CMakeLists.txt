@@ -41,7 +41,7 @@ if (NOT ${CMAKE_CXX_FLAGS_RELEASE})
     -w
     -fvisibility=hidden
     -fvisibility-inlines-hidden)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     add_compile_options(-Wno-error=narrowing)
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
