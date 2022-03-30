@@ -53,7 +53,7 @@ int main(int, char**)
   size_t maxIt = 600;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(4);
+  auto ell = ScalarCoefficient(1);
   auto alpha = ScalarCoefficient(4 * hmax * hmax);
 
   std::vector<double> obj;
