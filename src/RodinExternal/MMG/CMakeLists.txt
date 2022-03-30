@@ -121,10 +121,10 @@ configure_file(Configure.h.in Configure.h @ONLY)
 target_include_directories(RodinExternalMMG
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  ${Boost_INCLUDE_DIRS}
   PRIVATE
   ${PROJECT_SOURCE_DIR}/third-party/mmg/src
   ${PROJECT_SOURCE_DIR}/third-party/mmg/include
-  ${Boost_INCLUDE_DIRS}
   )
 target_link_libraries(RodinExternalMMG
   PUBLIC
