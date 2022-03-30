@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
 [![Documentation](https://img.shields.io/badge/documentation-master-blue)](https://cbritopacheco.github.io/rodin/)
 
+![Master Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master))
+![Develop Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop))
 
 | OS              | Compiler      |  Status  |
 |:---------------:|:-------------:|:--------:|

@@ -1,4 +1,4 @@
-name: Rodin Build
+name: Build
 on:
   push:
     branches:

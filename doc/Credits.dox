@@ -69,5 +69,23 @@
 
   TODO
 
+  @subsection credits-index-suitesparse
+
+  SuiteSparse is a suite of sparse matrix algorithms.
+  Each package has its own individual
+  [license](https://github.com/DrTimothyAldenDavis/SuiteSparse/blob/master/LICENSE.txt).
+
+  @par Links
+  @parblock
+  - https://people.engr.tamu.edu/davis/suitesparse.html
+  @endparblock
+
+  @subsection credits-index-boost
+
+  Boost libraries are intended to be widely useful, and usable across a broad
+  spectrum of applications. The libraries are licensed under the [Boost
+  Software License](https://www.boost.org/users/license.html), which is the
+  same license Rodin utilizes.
+
 */
 

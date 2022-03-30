@@ -43,7 +43,14 @@ if (NOT ${CMAKE_CXX_FLAGS_RELEASE})
     -fvisibility-inlines-hidden)
   if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     add_compile_options(-Wno-error=narrowing)
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_LANG_COMPILER_VERSION VERSION_LESS 9.0)
+      add_compile_options(-lc++fs)
+    endif()
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if (CMAKE_LANG_COMPILER_VERSION VERSION_LESS 9.1)
+      add_compile_options(-lstdc++fs)
+    endif()
   endif()
 endif()
 
@@ -57,8 +64,7 @@ if (NOT ${CMAKE_CXX_FLAGS_DEBUG})
     -Wextra
     -pedantic
     -fvisibility=hidden
-    -fvisibility-inlines-hidden
-    )
+    -fvisibility-inlines-hidden)
   if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
