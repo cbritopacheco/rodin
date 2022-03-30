@@ -73,9 +73,6 @@ add_subdirectory(
 # - Mmg::libmmg3d_a
 # - Mmg::libmmgs_a
 
-# ---- Boost.Process ----
-find_package(Boost 1.65 REQUIRED)
-
 # ---- ISCD Commons Library ----
 include(ExternalProject)
 ExternalProject_Add(RodinExternalISCDCommons
@@ -127,6 +124,7 @@ target_include_directories(RodinExternalMMG
   PRIVATE
   ${PROJECT_SOURCE_DIR}/third-party/mmg/src
   ${PROJECT_SOURCE_DIR}/third-party/mmg/include
+  ${Boost_INCLUDE_DIRS}
   )
 target_link_libraries(RodinExternalMMG
   PUBLIC
@@ -137,4 +135,5 @@ target_link_libraries(RodinExternalMMG
   RodinAlert
   RodinMesh
   RodinVariational
+  ${Boost_SYSTEM_LIBRARY}
   )

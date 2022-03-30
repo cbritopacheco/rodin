@@ -40,8 +40,11 @@ if (NOT ${CMAKE_CXX_FLAGS_RELEASE})
     -O3
     -w
     -fvisibility=hidden
-    -fvisibility-inlines-hidden
-    )
+    -fvisibility-inlines-hidden)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Wno-error=narrowing)
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  endif()
 endif()
 
 if (NOT ${CMAKE_CXX_FLAGS_DEBUG})
@@ -56,6 +59,9 @@ if (NOT ${CMAKE_CXX_FLAGS_DEBUG})
     -fvisibility=hidden
     -fvisibility-inlines-hidden
     )
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  endif()
 endif()
 
 if (RODIN_BUILD_SRC)
@@ -109,6 +115,9 @@ if (RODIN_BUILD_SRC)
     set(WITH_EIGEN ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/magnum-integration EXCLUDE_FROM_ALL)
     find_package(MagnumIntegration REQUIRED Eigen)
+
+    # ---- Boost ----
+    find_package(Boost 1.65 REQUIRED System)
   endif()
 
   add_subdirectory(src)
