@@ -4,8 +4,8 @@
 
 | Branch      |  Matrix  | Documentation |
 |:-----------:|:--------:|:-------------:|
-| master      | ![Master Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)) | [![Documentation](https://img.shields.io/badge/Documentation-master-blue)](https://cbritopacheco.github.io/rodin/) |
-| develop     | ![Develop Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)) | |
+| master      | ![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master) | [![Documentation](https://img.shields.io/badge/Documentation-master-blue)](https://cbritopacheco.github.io/rodin/) |
+| develop     | ![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop) | |
 
 ## Requirements
 
