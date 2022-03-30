@@ -44,13 +44,8 @@ if (NOT ${CMAKE_CXX_FLAGS_RELEASE})
   if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     add_compile_options(-Wno-error=narrowing)
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    if (CMAKE_LANG_COMPILER_VERSION VERSION_LESS 9.0)
-      add_compile_options(-lc++fs)
-    endif()
+    add_compile_options(-Wno-error=narrowing)
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if (CMAKE_LANG_COMPILER_VERSION VERSION_LESS 9.1)
-      add_compile_options(-lstdc++fs)
-    endif()
   endif()
 endif()
 
@@ -123,7 +118,7 @@ if (RODIN_BUILD_SRC)
     find_package(MagnumIntegration REQUIRED Eigen)
 
     # ---- Boost ----
-    find_package(Boost 1.65 COMPONENTS System REQUIRED)
+    find_package(Boost 1.65 COMPONENTS System Filesystem REQUIRED)
   endif()
 
   add_subdirectory(src)

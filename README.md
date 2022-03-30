@@ -1,12 +1,11 @@
 # Rodin
 
 [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
-[![Documentation](https://img.shields.io/badge/documentation-master-blue)](https://cbritopacheco.github.io/rodin/)
 
 | Branch      |  Matrix  | Documentation |
 |:-----------:|:--------:|:-------------:|
-| Master      | ![Master Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)) | [![Documentation](https://img.shields.io/badge/documentation-master-blue)](https://cbritopacheco.github.io/rodin/) |
-| Develop     | ![Develop Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)) | |
+| master      | ![Master Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)) | [![Documentation](https://img.shields.io/badge/Documentation-master-blue)](https://cbritopacheco.github.io/rodin/) |
+| develop     | ![Develop Status](![Badge](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)) | |
 
 ## Requirements
 
