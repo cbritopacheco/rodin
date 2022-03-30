@@ -85,8 +85,8 @@ if (RODIN_BUILD_SRC)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
   # ---- PThreads ----
-  # set(THREADS_PREFER_PTHREAD_FLAG ON)
-  # find_package(Threads REQUIRED)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
 
   # ---- Boost ----
   # set(Boost_USE_STATIC_LIBS        OFF)
