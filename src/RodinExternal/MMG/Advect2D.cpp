@@ -46,13 +46,13 @@ namespace Rodin::External::MMG
     auto outp = m_advect.tmpnam(".sol", "RodinMMG");
 
     std::vector<std::string> args{
-      meshp,
+      meshp.string(),
       "-dt", std::to_string(dt),
       m_avoidTrunc ? "-nocfl" : "",
       m_ex ? "" : "-noex",
-      "-c", solp,
-      "-s", dispp,
-      "-o", outp,
+      "-c", solp.string(),
+      "-s", dispp.string(),
+      "-o", outp.string(),
       "-v"
     };
 

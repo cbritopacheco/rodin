@@ -7,7 +7,7 @@
 #ifndef RODIN_EXTERNAL_MMG_VECTORSOLUTION2D_H
 #define RODIN_EXTERNAL_MMG_VECTORSOLUTION2D_H
 
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include "ForwardDecls.h"
 #include "VectorSolution.h"
@@ -24,7 +24,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to read.
           */
-         static IncompleteVectorSolution2D load(const std::filesystem::path& filename);
+         static IncompleteVectorSolution2D load(const boost::filesystem::path& filename);
 
          /**
           * @brief Initializes the object with no data
@@ -75,7 +75,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to write.
           */
-         void save(const std::filesystem::path& filename) override;
+         void save(const boost::filesystem::path& filename) override;
 
          /**
           * @brief Sets the associated mesh.

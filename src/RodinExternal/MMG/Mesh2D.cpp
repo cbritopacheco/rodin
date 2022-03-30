@@ -20,7 +20,7 @@
 
 namespace Rodin::External::MMG
 {
-  Mesh2D Mesh2D::load(const std::filesystem::path& filename)
+  Mesh2D Mesh2D::load(const boost::filesystem::path& filename)
   {
     Mesh2D mesh;
     if (!MMG2D_loadMesh(mesh.getHandle(), filename.c_str()))
@@ -31,7 +31,7 @@ namespace Rodin::External::MMG
     return mesh;
   }
 
-  void Mesh2D::save(const std::filesystem::path& filename)
+  void Mesh2D::save(const boost::filesystem::path& filename)
   {
     if (!MMG2D_saveMesh(getHandle(), filename.c_str()))
     {

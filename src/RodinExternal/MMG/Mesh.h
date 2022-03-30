@@ -8,7 +8,7 @@
 #define RODIN_RODININTEGRATION_MMG_MESH_H
 
 #include <cassert>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include <mmg/libmmg.h>
 
@@ -56,7 +56,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of the file the mesh will be written to
           */
-         virtual void save(const std::filesystem::path& filename) = 0;
+         virtual void save(const boost::filesystem::path& filename) = 0;
 
          /**
           * @internal

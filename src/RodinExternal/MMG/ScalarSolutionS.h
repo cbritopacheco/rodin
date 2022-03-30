@@ -33,7 +33,7 @@ namespace Rodin::External::MMG
           *
           * @param[in] filename Name of file to read.
           */
-         static IncompleteScalarSolutionS load(const std::filesystem::path& filename);
+         static IncompleteScalarSolutionS load(const boost::filesystem::path& filename);
 
          /**
           * @brief Initializes the object with no data
@@ -105,7 +105,7 @@ namespace Rodin::External::MMG
           */
          MeshS& getMesh();
 
-         void save(const std::filesystem::path& filename) override;
+         void save(const boost::filesystem::path& filename) override;
 
          MMG5_pSol& getHandle() override;
 

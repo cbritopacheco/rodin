@@ -150,7 +150,7 @@ namespace Rodin::External::MMG
   }
 
   IncompleteVectorSolutionS VectorSolutionS::load(
-        const std::filesystem::path& filename)
+        const boost::filesystem::path& filename)
   {
      IncompleteVectorSolutionS res;
      MMG5_pSol sol = res.getHandle();
@@ -268,7 +268,7 @@ namespace Rodin::External::MMG
      return res;
   }
 
-  void VectorSolutionS::save(const std::filesystem::path& filename)
+  void VectorSolutionS::save(const boost::filesystem::path& filename)
   {
      if (!m_sol->np || !m_sol->m)
      {

@@ -69,7 +69,7 @@ namespace Rodin::External::MMG
    }
 
    IncompleteScalarSolution3D ScalarSolution3D::load(
-         const std::filesystem::path& filename)
+         const boost::filesystem::path& filename)
    {
       IncompleteScalarSolution3D res;
       MMG5_pSol sol = res.getHandle();
@@ -187,7 +187,7 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   void ScalarSolution3D::save(const std::filesystem::path& filename)
+   void ScalarSolution3D::save(const boost::filesystem::path& filename)
    {
       if (!m_sol->np || !m_sol->m)
       {

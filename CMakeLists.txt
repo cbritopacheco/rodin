@@ -84,6 +84,15 @@ if (RODIN_BUILD_SRC)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
+  # ---- Boost ----
+  set(Boost_USE_STATIC_LIBS        OFF)
+  set(Boost_USE_MULTITHREADED      ON)
+  set(Boost_USE_STATIC_RUNTIME     OFF)
+  find_package(Boost 1.65 REQUIRED
+    COMPONENTS
+    System
+    Filesystem)
+
   # ---- Corrade ----
   message(STATUS "Configuring Corrade...")
   add_subdirectory(third-party/corrade EXCLUDE_FROM_ALL)
@@ -116,9 +125,6 @@ if (RODIN_BUILD_SRC)
     set(WITH_EIGEN ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/magnum-integration EXCLUDE_FROM_ALL)
     find_package(MagnumIntegration REQUIRED Eigen)
-
-    # ---- Boost ----
-    find_package(Boost 1.65 COMPONENTS System Filesystem REQUIRED)
   endif()
 
   add_subdirectory(src)

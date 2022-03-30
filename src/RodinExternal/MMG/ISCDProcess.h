@@ -12,7 +12,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 #include <type_traits>
 
 #include <boost/process.hpp>
@@ -72,7 +72,7 @@ namespace Rodin::External::MMG
           std::string m_str;
       };
 
-      ISCDProcess(const std::filesystem::path& executable);
+      ISCDProcess(const boost::filesystem::path& executable);
 
       ISCDProcess(const ISCDProcess& other);
 
@@ -137,9 +137,9 @@ namespace Rodin::External::MMG
         return m_out;
       }
 
-      static std::filesystem::path tmpnam(
-          const std::filesystem::path& extension,
-          const std::filesystem::path& prefix = std::filesystem::path());
+      static boost::filesystem::path tmpnam(
+          const boost::filesystem::path& extension,
+          const boost::filesystem::path& prefix = boost::filesystem::path());
 
     private:
       template <typename I>
@@ -152,12 +152,12 @@ namespace Rodin::External::MMG
           return rc;
       }
 
-      static std::filesystem::path s_tmpDirPath;
+      static boost::filesystem::path s_tmpDirPath;
       static std::random_device s_randomDevice;
       static std::mt19937 s_rng;
       static std::uniform_int_distribution<std::mt19937::result_type> s_dist;
 
-      std::filesystem::path m_executable;
+      boost::filesystem::path m_executable;
       unsigned int m_ncpu;
       std::optional<boost::process::ipstream> m_out;
   };

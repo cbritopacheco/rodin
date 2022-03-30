@@ -11,7 +11,7 @@
 #include <utility>
 #include <fstream>
 #include <functional>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 #include <type_traits>
 
 #include <mfem.hpp>
@@ -210,9 +210,9 @@ namespace Rodin::Variational
           * @param[in] filename Name of file to which the grid function will be
           * written to.
           */
-         static IncompleteGridFunction load(const std::filesystem::path& filename)
+         static IncompleteGridFunction load(const boost::filesystem::path& filename)
          {
-            std::ifstream in(filename);
+            std::ifstream in(filename.string());
             IncompleteGridFunction res;
             int l = 0;
 
@@ -272,7 +272,7 @@ namespace Rodin::Variational
           * @param[in] filename Name of file to which the solution file will be
           * written.
           */
-         void save(const std::filesystem::path& filename)
+         void save(const boost::filesystem::path& filename)
          {
             m_gf.Save(filename.string().c_str());
          }

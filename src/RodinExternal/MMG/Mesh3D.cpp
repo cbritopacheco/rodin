@@ -71,7 +71,7 @@ namespace Rodin::External::MMG
          MMG3D_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &m_mesh, MMG5_ARG_end);
    }
 
-   Mesh3D Mesh3D::load(const std::filesystem::path& filename)
+   Mesh3D Mesh3D::load(const boost::filesystem::path& filename)
    {
      Mesh3D mesh;
      if (!MMG3D_loadMesh(mesh.getHandle(), filename.c_str()))
@@ -82,7 +82,7 @@ namespace Rodin::External::MMG
      return mesh;
    }
 
-   void Mesh3D::save(const std::filesystem::path& filename)
+   void Mesh3D::save(const boost::filesystem::path& filename)
    {
      if (!MMG3D_saveMesh(getHandle(), filename.c_str()))
      {

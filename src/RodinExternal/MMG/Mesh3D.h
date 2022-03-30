@@ -11,7 +11,7 @@
 #include <vector>
 #include <variant>
 #include <optional>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include <mmg/mmg3d/libmmg3d.h>
 
@@ -42,7 +42,7 @@ namespace Rodin::External::MMG
           * @param[in] filename Name of file where the mesh will be read from.
           * @returns A Mesh3D object containing the mesh data in the file.
           */
-         static Mesh3D load(const std::filesystem::path& filename);
+         static Mesh3D load(const boost::filesystem::path& filename);
 
          /**
           * @brief Creates an empty mesh.
@@ -72,7 +72,7 @@ namespace Rodin::External::MMG
           */
          int count(Mesh3D::Entity e) const;
 
-         void save(const std::filesystem::path& filename) override;
+         void save(const boost::filesystem::path& filename) override;
 
          MMG5_pMesh& getHandle() override;
 

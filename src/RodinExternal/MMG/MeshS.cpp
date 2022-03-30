@@ -61,7 +61,7 @@ namespace Rodin::External::MMG
          MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &m_mesh, MMG5_ARG_end);
    }
 
-   MeshS MeshS::load(const std::filesystem::path& filename)
+   MeshS MeshS::load(const boost::filesystem::path& filename)
    {
      MeshS mesh;
      if (!MMGS_loadMesh(mesh.getHandle(), filename.c_str()))
@@ -72,7 +72,7 @@ namespace Rodin::External::MMG
      return mesh;
    }
 
-   void MeshS::save(const std::filesystem::path& filename)
+   void MeshS::save(const boost::filesystem::path& filename)
    {
      if (!MMGS_saveMesh(getHandle(), filename.c_str()))
      {

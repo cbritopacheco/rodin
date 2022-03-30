@@ -8,12 +8,12 @@
 
 namespace Rodin::External::MMG
 {
-  std::filesystem::path ISCDProcess::s_tmpDirPath = std::filesystem::temp_directory_path();
+  boost::filesystem::path ISCDProcess::s_tmpDirPath = boost::filesystem::temp_directory_path();
   std::random_device ISCDProcess::s_randomDevice;
   std::mt19937 ISCDProcess::s_rng(ISCDProcess::s_randomDevice());
   std::uniform_int_distribution<std::mt19937::result_type> ISCDProcess::s_dist;
 
-  ISCDProcess::ISCDProcess(const std::filesystem::path& executable)
+  ISCDProcess::ISCDProcess(const boost::filesystem::path& executable)
     : m_executable(executable)
   {}
 
@@ -22,11 +22,11 @@ namespace Rodin::External::MMG
       m_ncpu(other.m_ncpu)
   {}
 
-  std::filesystem::path ISCDProcess::tmpnam(
-      const std::filesystem::path& extension,
-      const std::filesystem::path& prefix)
+  boost::filesystem::path ISCDProcess::tmpnam(
+      const boost::filesystem::path& extension,
+      const boost::filesystem::path& prefix)
   {
-    std::filesystem::path res;
+    boost::filesystem::path res;
     int counter = 0;
     do
     {
@@ -35,7 +35,7 @@ namespace Rodin::External::MMG
       if (counter++ > 255)
         throw std::runtime_error(
             "Failed to obtain a temporary filename after 256 tries.");
-    } while(std::filesystem::exists(res));
+    } while(boost::filesystem::exists(res));
     return res;
   }
 }

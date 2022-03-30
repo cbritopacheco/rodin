@@ -9,7 +9,7 @@
 
 #include <set>
 #include <string>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include <mfem.hpp>
 
@@ -30,13 +30,13 @@ namespace Rodin
           * @brief Loads a mesh from file.
           * @param[in] filename Name of file to read
           */
-         static Mesh load(const std::filesystem::path& filename);
+         static Mesh load(const boost::filesystem::path& filename);
 
          /**
           * @brief Saves the mesh to file.
           * @param[in] filename Name of file to write
           */
-         void save(const std::filesystem::path& filename);
+         void save(const boost::filesystem::path& filename);
 
          /**
           * @brief Constructs an empty mesh with no elements.

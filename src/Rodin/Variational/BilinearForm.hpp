@@ -9,6 +9,7 @@
 
 #include <cassert>
 
+#include "Rodin/Alert.h"
 #include "FormLanguage/BilinearFormIntegratorSum.h"
 
 #include "FiniteElementSpace.h"

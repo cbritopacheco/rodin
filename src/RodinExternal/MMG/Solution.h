@@ -8,7 +8,7 @@
 #define RODIN_RODININTEGRATION_MMG_SOLUTION_H
 
 #include <cassert>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #include <mmg/libmmg.h>
 #include <mmg/mmg2d/libmmg2d.h>
@@ -50,7 +50,7 @@ namespace Rodin::External::MMG
             return getHandle()->size;
          }
 
-         virtual void save(const std::filesystem::path& filename) = 0;
+         virtual void save(const boost::filesystem::path& filename) = 0;
 
          /**
           * @internal

@@ -135,5 +135,5 @@ target_link_libraries(RodinExternalMMG
   RodinAlert
   RodinMesh
   RodinVariational
-  ${Boost_SYSTEM_LIBRARY}
-  )
+  ${Boost_LIBRARIES})
+

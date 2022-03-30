@@ -71,15 +71,16 @@ target_include_directories(RodinVariational
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   PUBLIC
   ${MFEM_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  )
+  ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(RodinVariational
+  PRIVATE
+  mfem
   PUBLIC
   RodinMesh
   RodinAlert
   RodinUtility
   RodinVariationalFormLanguage
-  )
+  ${Boost_LIBRARIES})
 
 add_subdirectory(FormLanguage)

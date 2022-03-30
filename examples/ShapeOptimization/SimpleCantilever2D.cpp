@@ -69,7 +69,7 @@ int main(int, char**)
     TrialFunction u(Vh);
     TestFunction  v(Vh);
     Problem elasticity(u, v);
-    elasticity = Integral(lambda * Div(u), Div(v)).over(GammaN)
+    elasticity = Integral(lambda * Div(u), Div(v))
                + Integral(
                    mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
                - BoundaryIntegral(f, v).over(GammaN)
