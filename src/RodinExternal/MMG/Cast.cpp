@@ -8,6 +8,15 @@
 #include <mmg3d/mmg3d.h>
 #include <mmgs/mmgs.h>
 
+/*
+ * We have to undef the I macro (from complex.h) since it clashes with mfem
+ * code (e.g. table.hpp) where the I variable is defined and causes all sorts
+ * of nasty errors.
+ */
+#ifdef I
+#undef I
+#endif
+
 #include "Rodin/Alert.h"
 
 #include "Rodin/Mesh.h"
@@ -26,15 +35,6 @@
 #include "Utility.h"
 
 #include "Cast.h"
-
-/*
- * We have to undef the I macro (from complex.h) since it clashes with mfem
- * code (e.g. table.hpp) where the I variable is defined and causes all sorts
- * of nasty errors.
- */
-#ifdef I
-#undef I
-#endif
 
 namespace Rodin
 {
