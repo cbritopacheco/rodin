@@ -90,8 +90,8 @@ if (RODIN_BUILD_SRC)
   # set(Boost_USE_STATIC_RUNTIME     OFF)
   find_package(Boost 1.65 REQUIRED
     COMPONENTS
-    System
-    Filesystem)
+    system
+    filesystem)
 
   # ---- Corrade ----
   message(STATUS "Configuring Corrade...")
