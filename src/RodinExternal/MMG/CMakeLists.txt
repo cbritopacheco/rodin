@@ -76,8 +76,6 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wall
     -Wextra
     -Wpedantic
-    -Wno-error=extra
-    -Wno-error=pedantic
     -Wno-sign-compare
     -Wno-old-style-cast
     -Wno-unused-variable
@@ -86,7 +84,10 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-double-promotion
     -Wno-missing-prototypes
     -Wno-missing-declarations
-    -Wno-zero-as-null-pointer-constant)
+    -Wno-zero-as-null-pointer-constant
+    -Wno-error=extra
+    -Wno-error=pedantic
+    )
 endif()
 
 add_library(RodinExternalMMG
