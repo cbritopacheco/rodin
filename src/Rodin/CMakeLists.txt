@@ -30,8 +30,10 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wpedantic
     -Wno-old-style-cast
     -Wno-unused-parameter
+    -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
     -Wno-error=pedantic
+    -Wno-error=cast-function-type
     -Wno-error=zero-as-null-pointer-constant
     )
 endif()
