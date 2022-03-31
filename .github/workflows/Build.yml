@@ -15,6 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
         compiler: [gcc-8, clang-7]
+        build_type: ['Release', 'Debug']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -39,7 +40,7 @@ jobs:
         run: >
           cmake
           -B ${{github.workspace}}/build
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
