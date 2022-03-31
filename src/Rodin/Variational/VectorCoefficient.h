@@ -24,18 +24,93 @@ namespace Rodin::Variational
 {
    /**
     * @brief Abstract base class for objects representing vector coefficients.
+    *
+    * @note Vectors are zero indexed. This means that the 0-index corresponds
+    * to the 1st entry of the vector.
     */
    class VectorCoefficientBase
       : public FormLanguage::Buildable<mfem::VectorCoefficient>
    {
       public:
-         constexpr
          VectorCoefficientBase() = default;
 
-         constexpr
          VectorCoefficientBase(const VectorCoefficientBase&) = default;
 
+         /**
+          * @brief Sets an attribute which will be interpreted as the domain to
+          * trace.
+          *
+          * Convenience function to call traceOf(std::set<int>) with only one
+          * attribute.
+          *
+          * @returns Reference to self (for method chaining)
+          */
+         VectorCoefficientBase& traceOf(int attr)
+         {
+            return traceOf(std::set<int>{attr});
+         }
+
+         /**
+          * @brief Sets which attributes will be interpreted as the domain to
+          * trace.
+          * @returns Reference to self (for method chaining)
+          *
+          * When integrating along interior boundaries sometimes it is
+          * necessary to specify which attributes should be interpreted as the
+          * respective "interior" domain. For example, coefficients which
+          * involve the derivatives of a GridFunction need to know the element
+          * to "trace".
+          *
+          * @note Setting the trace domain of a VectorCoefficientBase instance
+          * does not guarantee that it will taken into consideration when
+          * computing its value. That said, it is up to the subclass to decide
+          * how it will use this information which can be obtained via the
+          * getTraceDomain() method.
+          *
+          * @see @ref VectorCoefficientBase::getTraceDomain() "getTraceDomain()"
+          *
+          */
+         VectorCoefficientBase& traceOf(std::set<int> attrs)
+         {
+            m_traceDomain = attrs;
+            return *this;
+         }
+
+         /**
+          * @brief Gets the set of attributes which will be interpreted as the
+          * domains to "trace".
+          *
+          * The domains to trace are interpreted as the domains where there
+          * shall be a continuous extension from values to the interior
+          * boundaries. If the trace domain is empty, then this has the
+          * semantic value that it has not been specified yet.
+          */
+         const std::set<int>& getTraceDomain() const
+         {
+            return m_traceDomain;
+         }
+
+         /**
+          * @brief Convenience function to access the 1st component of the
+          * vector.
+          */
+         Component<VectorCoefficientBase> x() const;
+
+         /**
+          * @brief Convenience function to access the 2nd component of the
+          * vector.
+          */
+         Component<VectorCoefficientBase> y() const;
+
+         /**
+          * @brief Convenience function to access the 3nd component of the
+          * vector.
+          */
+         Component<VectorCoefficientBase> z() const;
+
          virtual ~VectorCoefficientBase() = default;
+
+         virtual Component<VectorCoefficientBase> operator()(int i) const;
 
          virtual void getValue(
                mfem::Vector& value,
@@ -50,6 +125,9 @@ namespace Rodin::Variational
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
 
          std::unique_ptr<mfem::VectorCoefficient> build() const override;
+
+      private:
+         std::set<int> m_traceDomain;
    };
 
    /**
@@ -82,12 +160,6 @@ namespace Rodin::Variational
 
          constexpr
          VectorCoefficient(VectorCoefficient&&) = default;
-
-         const ScalarCoefficientBase& operator()(int i) const
-         {
-            assert(i < sizeof...(Values));
-            return *m_coeffs[i];
-         }
 
          void getValue(
                mfem::Vector& value,

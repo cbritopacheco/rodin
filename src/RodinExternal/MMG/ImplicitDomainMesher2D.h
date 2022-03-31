@@ -126,7 +126,6 @@ namespace Rodin::External::MMG
                             m_hausd,
                             m_rmc;
       std::optional<MaterialReference> m_isoref;
-
   };
 }
 

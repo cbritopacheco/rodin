@@ -30,6 +30,7 @@ set(RodinExternalMMG_HEADERS
   Mesh3D.h
   ScalarSolution3D.h
 # ---- mmgs
+  MMGS.h
   MeshS.h
   ScalarSolutionS.h)
 
@@ -52,9 +53,11 @@ set(RodinExternalMMG_SRCS
   ScalarSolution3D.cpp
 # ---- mmgs
   MeshS.cpp
-  AdvectS.h
-  DistancerS.h
-  ScalarSolutionS.cpp)
+  AdvectS.cpp
+  DistancerS.cpp
+  ScalarSolutionS.cpp
+  ImplicitDomainMesherS.cpp
+  )
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   add_compile_options(

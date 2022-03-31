@@ -13,6 +13,7 @@
 #include "MMG/Mesh2D.h"
 #include "MMG/ScalarSolution2D.h"
 #include "MMG/VectorSolution2D.h"
+
 #include "MMG/Advect2D.h"
 #include "MMG/Distancer2D.h"
 #include "MMG/MeshAdaptor2D.h"
@@ -26,5 +27,9 @@
 // ---- mmgs -----------------------------------------------------------------
 #include "MMG/MeshS.h"
 #include "MMG/ScalarSolutionS.h"
+
+#include "MMG/AdvectS.h"
+#include "MMG/DistancerS.h"
+#include "MMG/ImplicitDomainMesherS.h"
 
 #endif

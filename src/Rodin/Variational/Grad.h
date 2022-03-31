@@ -36,6 +36,27 @@ namespace Rodin::Variational
    template <>
    class Grad<GridFunction<H1>> : public VectorCoefficientBase
    {
+      mfem::ElementTransformation *RefinedToCoarse(
+         mfem::Mesh &coarse_mesh, const mfem::ElementTransformation &T,
+         const mfem::IntegrationPoint &ip, mfem::IntegrationPoint &coarse_ip) const;
+
+      void GetGradient(
+            mfem::Vector& grad, mfem::ElementTransformation& trans,
+            const mfem::IntegrationPoint& ip) const
+      {
+         mfem::Mesh* gf_mesh = m_u.getHandle().FESpace()->GetMesh();
+         if (trans.mesh == gf_mesh)
+         {
+            m_u.getHandle().GetGradient(trans, grad);
+         }
+         else
+         {
+            mfem::IntegrationPoint coarse_ip;
+            mfem::ElementTransformation *coarse_T = RefinedToCoarse(*gf_mesh, trans, ip, coarse_ip);
+            m_u.getHandle().GetGradient(*coarse_T, grad);
+         }
+      }
+
       public:
          /**
           * @brief Constructs the gradient of an @f$ H^1 @f$ function
@@ -43,20 +64,75 @@ namespace Rodin::Variational
           * @param[in] u Grid function to be differentiated
           */
          Grad(const GridFunction<H1>& u)
-            : m_u(u),
-              m_mfemVectorCoefficient(&m_u.getHandle())
+            : m_u(u)
+         {}
+
+         Grad(const Grad& other)
+            :  VectorCoefficientBase(other),
+               m_u(other.m_u)
+         {}
+
+         Grad(Grad&& other)
+            :  VectorCoefficientBase(std::move(other)),
+               m_u(other.m_u)
          {}
 
          int getDimension() const override
          {
-            return m_u.getFiniteElementSpace().getMesh().getDimension();
+            return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
          }
 
          void getValue(
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            m_mfemVectorCoefficient.Eval(value, trans, ip);
+            const auto& traceDomain = getTraceDomain();
+            switch (trans.ElementType)
+            {
+               case mfem::ElementTransformation::BDR_ELEMENT:
+               {
+                  int fn = trans.mesh->GetBdrFace(trans.ElementNo);
+                  if (trans.mesh->FaceIsInterior(fn))
+                  {
+                     if (traceDomain.empty())
+                     {
+                        Alert::Exception()
+                           << "Integration over an interior boundary element "
+                           << "requires a trace domain."
+                           << Alert::Raise;
+                     }
+
+                     // Extend the values on the trace domain up to the
+                     // interior boundary.
+                     mfem::FaceElementTransformations* ft =
+                        trans.mesh->GetFaceElementTransformations(fn);
+                     ft->SetAllIntPoints(&ip);
+                     if (traceDomain.count(ft->GetElement1Transformation().Attribute))
+                        GetGradient(value, ft->GetElement1Transformation(), ip);
+                     else if (traceDomain.count(ft->GetElement2Transformation().Attribute))
+                        GetGradient(value, ft->GetElement2Transformation(), ip);
+                     else
+                     {
+                        // The boundary over which we are evaluating must be
+                        // the interface between the trace domain and some
+                        // other domain, i.e. it is not the boundary that was
+                        // specified!
+                        Alert::Exception()
+                           << "Boundary element " << trans.ElementNo
+                           << " with attribute " << trans.Attribute
+                           << " is not a boundary of the trace domain."
+                           << Alert::Raise;
+                     }
+                  }
+                  else
+                  {
+                     GetGradient(value, trans, ip);
+                  }
+                  break;
+               }
+               default:
+                  GetGradient(value, trans, ip);
+            }
          }
 
          VectorCoefficientBase* copy() const noexcept override
@@ -66,7 +142,6 @@ namespace Rodin::Variational
 
       private:
          const GridFunction<H1>& m_u;
-         mutable mfem::GradientGridFunctionCoefficient m_mfemVectorCoefficient;
    };
    Grad(const GridFunction<H1>&) -> Grad<GridFunction<H1>>;
 

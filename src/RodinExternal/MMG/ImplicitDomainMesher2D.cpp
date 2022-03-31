@@ -109,7 +109,7 @@ namespace Rodin::External::MMG
             MMG2D_DPARAM_ls, m_ls);
       MMG2D_mmg2dls(mesh.getHandle(), sol.getHandle(), NULL);
     }
-    return {mesh, sol};
+    return {std::move(mesh), std::move(sol)};
   }
 
   ImplicitDomainMesher2D& ImplicitDomainMesher2D::split(

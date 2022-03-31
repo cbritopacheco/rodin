@@ -45,6 +45,7 @@ set(RodinVariational_SRCS
   GridFunctionView.cpp
   Integral.cpp
   Jacobian.cpp
+  Grad.cpp
   MatrixCoefficient.cpp
   Trace.cpp
   VectorCoefficient.cpp

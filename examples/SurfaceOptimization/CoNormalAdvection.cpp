@@ -34,7 +34,7 @@ int main(int, char**)
 
   // Function for generating holes
   auto f = ScalarCoefficient(
-      [&](const double* x, int dim)
+      [&](const double* x, int dim) -> double
       {
         double d = std::numeric_limits<double>::max();
         for (const auto& c : cs)
@@ -42,21 +42,39 @@ int main(int, char**)
           double dd = gd(x, c.data(), dim) - rr;
           d = std::min(d, dd);
         }
-        return -d;
+        if (d <= rr)
+          return 1;
+        else
+          return -1;
       });
 
   H1 Vh(Omega);
-  GridFunction dist(Vh);
-  dist = f;
-
-  Omega.save("Omega.mesh");
-  dist.save("dist.gf");
+  GridFunction ls(Vh);
+  ls = f;
 
   auto mmgMesh = Cast(Omega).to<MMG::MeshS>();
-  auto mmgLs = Cast(dist).to<MMG::IncompleteScalarSolutionS>().setMesh(mmgMesh);
+  auto mmgLs = Cast(ls).to<MMG::IncompleteScalarSolutionS>().setMesh(mmgMesh);
+  // mmgMesh.save("mmg.mesh");
+  // mmgLs.save("mmg.sol");
+  // MMG::DistancerS().distance(mmgImplicit);
 
-  mmgMesh.save("mmg.mesh");
-  mmgLs.save("mmg.sol");
+  auto [mmgImplicit, _] = MMG::ImplicitDomainMesherS().discretize(mmgLs);
+
+  GridFunction dist = Cast(mmgLs).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
+
+  H1 Th(Omega, 3);
+  GridFunction g(Vh);
+  auto n = Normal(3);
+  auto gradT = Dot(Grad(dist), n) * n;
+  g = Pow(Pow(gradT.x(), 2) + Pow(gradT.y(), 2) + Pow(gradT.z(), 2), 0.5);
+  dist.save("dist.gf");
+  g.save("g.gf");
+
+  Omega = Cast(mmgImplicit).to<Mesh>();
+  Omega.save("Omega.mesh");
+
+  // mmgMesh.save("mmg.mesh");
+  // mmgLs.save("mmg.sol");
 
   return 0;
 }

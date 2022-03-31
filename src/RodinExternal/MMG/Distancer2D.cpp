@@ -88,7 +88,10 @@ namespace Rodin::External::MMG
     solp.replace_extension(".sol");
     ls.save(solp);
 
-    int retcode = m_mshdist.run(solp.string(), "-ncpu", m_ncpu, "-v 0");
+    auto name = solp;
+    name.replace_extension();
+
+    int retcode = m_mshdist.run(name.string(), "-ncpu", m_ncpu, "-v 0");
     if (retcode != 0)
       Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 

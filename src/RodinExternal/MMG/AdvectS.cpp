@@ -1,3 +1,5 @@
+#include "Rodin/Alert.h"
+
 #include "ScalarSolutionS.h"
 #include "VectorSolutionS.h"
 
@@ -43,18 +45,19 @@ namespace Rodin::External::MMG
 
     auto outp = m_advect.tmpnam(".sol", "RodinMMG");
 
-    std::vector<std::string> args{
-      meshp,
+    int retcode = m_advect.run(
+      meshp.string(),
       "-dt", std::to_string(dt),
+      "-surf",
       m_avoidTrunc ? "-nocfl" : "",
       m_ex ? "" : "-noex",
-      "-c", solp,
-      "-s", dispp,
-      "-o", outp,
-      "-v"
-    };
+      "-c", solp.string(),
+      "-s", dispp.string(),
+      "-o", outp.string(),
+      "-v");
 
-    m_advect.run(args);
+    if (retcode != 0)
+      Alert::Exception("ISCD::Avection invocation failed.").raise();
 
     m_ls = ScalarSolutionS::load(outp).setMesh(mesh);
 

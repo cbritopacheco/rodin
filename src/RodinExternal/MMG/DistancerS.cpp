@@ -8,6 +8,8 @@
 #include <fstream>
 #include <utility>
 
+#include "Rodin/Alert.h"
+
 #include "DistancerS.h"
 #include "ScalarSolutionS.h"
 
@@ -45,11 +47,15 @@ namespace Rodin::External::MMG
       }
     }
 
-    m_mshdist.run(
+    int retcode = m_mshdist.run(
         boxp.string(),
+        "-surf",
         "-dom",
         "-ncpu", m_ncpu,
         "-v 0");
+
+    if (retcode != 0)
+      Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
     auto res = ScalarSolutionS::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -63,10 +69,16 @@ namespace Rodin::External::MMG
     auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
     contour.save(contourp);
 
+    int retcode;
     if (m_scale)
-      m_mshdist.run(boxp.string(), contourp.string(), "-ncpu", m_ncpu, "-v 0");
+      retcode = m_mshdist.run(
+          boxp.string(), contourp.string(), "-surf", "-ncpu", m_ncpu, "-v 0");
     else
-      m_mshdist.run(boxp.string(), contourp.string(), "-noscale", "-ncpu", m_ncpu, "-v 0");
+      retcode = m_mshdist.run(
+          boxp.string(), contourp.string(), "-surf", "-noscale", "-ncpu", m_ncpu, "-v 0");
+
+    if (retcode != 0)
+      Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
     auto res = ScalarSolutionS::load(boxp.replace_extension(".sol")).setMesh(box);
     return res;
@@ -81,7 +93,12 @@ namespace Rodin::External::MMG
     solp.replace_extension(".sol");
     ls.save(solp);
 
-    m_mshdist.run(solp.string(), "-ncpu", m_ncpu, "-v 0");
+    auto name = solp;
+    name.replace_extension();
+
+    int retcode = m_mshdist.run(name.string(), "-surf", "-ncpu", m_ncpu, "-v 0");
+    if (retcode != 0)
+      Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
     auto res = ScalarSolutionS::load(solp).setMesh(ls.getMesh());
     ls = std::move(res);

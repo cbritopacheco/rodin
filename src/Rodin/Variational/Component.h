@@ -9,6 +9,9 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the component (or entry) of a vectorial TrialFunction.
+    */
    template <class FES>
    class Component<TrialFunction<FES>>
    {
@@ -45,6 +48,9 @@ namespace Rodin::Variational
    template <class FES>
    Component(TrialFunction<FES>&, int) -> Component<TrialFunction<FES>>;
 
+   /**
+    * @brief Represents the component (or entry) of a vectorial GridFunction.
+    */
    template <class FES>
    class Component<GridFunction<FES>>
    {
@@ -109,6 +115,55 @@ namespace Rodin::Variational
    };
    template <class FES>
    Component(GridFunction<FES>&, int) -> Component<GridFunction<FES>>;
+
+   /**
+    * @brief Represents the component (or entry) of a VectorCoefficientBase
+    * instance.
+    */
+   template <>
+   class Component<VectorCoefficientBase> : public ScalarCoefficientBase
+   {
+      public:
+         Component(const VectorCoefficientBase& v, int component)
+            :  m_v(v.copy()),
+               m_idx(component)
+         {}
+
+         Component(const Component& other)
+            :  ScalarCoefficientBase(other),
+               m_v(other.m_v->copy()),
+               m_idx(other.m_idx)
+         {}
+
+         Component(Component&& other)
+            :  ScalarCoefficientBase(std::move(other)),
+               m_v(std::move(other.m_v)),
+               m_idx(other.m_idx)
+         {}
+
+         int getIndex() const
+         {
+            return m_idx;
+         }
+
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            mfem::Vector v;
+            m_v->getValue(v, trans, ip);
+            assert(m_idx < v.Size());
+            return v(m_idx);
+         }
+
+         Component* copy() const noexcept override
+         {
+            return new Component(*this);
+         }
+      private:
+         std::unique_ptr<VectorCoefficientBase> m_v;
+         const int m_idx;
+   };
+   Component(const VectorCoefficientBase&, int) -> Component<VectorCoefficientBase>;
 }
 
 #endif

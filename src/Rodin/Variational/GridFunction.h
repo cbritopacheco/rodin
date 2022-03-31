@@ -188,6 +188,13 @@ namespace Rodin::Variational
               m_size(other.m_size)
          {}
 
+         GridFunction& operator=(const GridFunction&) = delete;
+
+         /**
+          * @brief Move assignment operator.
+          */
+         GridFunction& operator=(GridFunction&&) = default;
+
          FES& getFiniteElementSpace() override
          {
             return m_fes;
@@ -319,7 +326,10 @@ namespace Rodin::Variational
          }
 
          template <class T>
-         GridFunction& operator=(T&& v)
+         std::enable_if_t<
+            std::is_base_of_v<ScalarCoefficientBase, std::remove_reference_t<T>> ||
+            std::is_base_of_v<VectorCoefficientBase, std::remove_reference_t<T>>, GridFunction&>
+         operator=(T&& v)
          {
             return project(std::forward<T>(v));
          }
@@ -583,6 +593,8 @@ namespace Rodin::Variational
          int m_size;
          std::unique_ptr<double[]> m_data;
    };
+   template <class FES>
+   GridFunction(FES&) -> GridFunction<FES>;
 }
 
 #endif

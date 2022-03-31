@@ -16,12 +16,10 @@ namespace Rodin::Variational
          /**
           * @brief Constructs the outward unit normal.
           */
-         constexpr
          Normal(int dimension)
             : m_dimension(dimension)
          {}
 
-         constexpr
          Normal(const Normal& other)
             : m_dimension(other.m_dimension)
          {}
@@ -36,7 +34,7 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint&) const override
          {
-            assert(trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT);
+            // assert(trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT);
             value.SetSize(m_dimension);
             mfem::CalcOrtho(trans.Jacobian(), value);
             const double norm = value.Norml2();
