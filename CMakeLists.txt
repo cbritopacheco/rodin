@@ -26,7 +26,7 @@ include("${PROJECT_SOURCE_DIR}/cmake/configuration.cmake")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # ---- Configure compiler ----------------------
-if(NOT CMAKE_BUILD_TYPE)
+if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
