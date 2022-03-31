@@ -81,7 +81,9 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-unused-variable
     -Wno-unused-function
     -Wno-unused-parameter
+    -Wno-double-promotion
     -Wno-missing-prototypes
+    -Wno-missing-declarations
     -Wno-zero-as-null-pointer-constant)
 endif()
 
