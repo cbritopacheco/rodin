@@ -101,9 +101,6 @@ int main(int, char**)
             + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
-    g.getGridFunction().save("g.gf");
-    Omega.save("Omegai.mesh");
-
     // Update objective
     obj.push_back(
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
@@ -111,7 +108,6 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    mmgMesh.save("cantilever2d/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function

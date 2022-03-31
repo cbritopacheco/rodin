@@ -70,7 +70,6 @@ int main(int, char**)
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior, Gamma);
-    trimmed.save("trimmed.mesh");
 
     // Build a finite element space over the trimmed mesh
     H1 VhInt(trimmed, d);
@@ -112,7 +111,6 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    mmgMesh.save("mast2d/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function

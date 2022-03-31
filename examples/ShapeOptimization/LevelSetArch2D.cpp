@@ -111,7 +111,6 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    mmgMesh.save("arch2d/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
