@@ -144,12 +144,10 @@ namespace Rodin::External::MMG
       unsigned int getCPUs() const;
 
     private:
-      bool m_scale,
-           m_activeBorder;
+      bool m_scale;
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
       std::optional<std::set<MaterialReference>> m_interiorDomains;
-      std::optional<std::set<MaterialReference>> m_activeBorders;
   };
 }
 

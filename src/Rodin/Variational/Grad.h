@@ -47,7 +47,7 @@ namespace Rodin::Variational
               m_mfemVectorCoefficient(&m_u.getHandle())
          {}
 
-         size_t getDimension() const override
+         int getDimension() const override
          {
             return m_u.getFiniteElementSpace().getMesh().getDimension();
          }

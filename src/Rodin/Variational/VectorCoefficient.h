@@ -45,7 +45,7 @@ namespace Rodin::Variational
           * @brief Gets the dimension of the vector object.
           * @returns Dimension of vector.
           */
-         virtual size_t getDimension() const = 0;
+         virtual int getDimension() const = 0;
 
          virtual VectorCoefficientBase* copy() const noexcept override = 0;
 
@@ -98,7 +98,7 @@ namespace Rodin::Variational
                value(i) = m_coeffs[i]->getValue(trans, ip);
          }
 
-         size_t getDimension() const override
+         int getDimension() const override
          {
             return sizeof...(Values);
          }
@@ -155,7 +155,7 @@ namespace Rodin::Variational
                m_u(other.m_u)
          {}
 
-         size_t getDimension() const override
+         int getDimension() const override
          {
             return m_dimension;
          }

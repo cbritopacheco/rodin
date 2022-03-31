@@ -21,6 +21,7 @@ namespace Rodin
       class GridFunctionIndexBase
       {
          public:
+            virtual ~GridFunctionIndexBase() = default;
             virtual std::vector<int> getIndices() const = 0;
       };
 

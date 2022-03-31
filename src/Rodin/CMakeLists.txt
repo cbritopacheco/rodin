@@ -25,6 +25,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -g
     -O0
     -Wall
+    -Werror
     -Wextra
     -Wpedantic
     -Wno-old-style-cast

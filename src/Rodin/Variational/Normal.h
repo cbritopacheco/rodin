@@ -26,7 +26,7 @@ namespace Rodin::Variational
             : m_dimension(other.m_dimension)
          {}
 
-         size_t getDimension() const override
+         int getDimension() const override
          {
             return m_dimension;
          }

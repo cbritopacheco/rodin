@@ -202,7 +202,7 @@ namespace Rodin::Variational
             return m_fes;
          }
 
-         const mfem::FiniteElementSpace& getFES() const
+         const mfem::FiniteElementSpace& getFES() const override
          {
             return m_fes;
          }
