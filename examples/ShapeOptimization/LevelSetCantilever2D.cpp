@@ -16,8 +16,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
-  const char* meshFile = "Omega.mesh";
+  const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
 
   // Define interior and exterior for level set discretization
   int Interior = 1, Exterior = 2;
@@ -51,7 +50,7 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 600;
+  size_t maxIt = 250;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(1);
@@ -112,6 +111,7 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    mmgMesh.save("cantilever2d/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function

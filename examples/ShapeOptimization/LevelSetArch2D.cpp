@@ -111,6 +111,7 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    mmgMesh.save("arch2d/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
@@ -118,7 +119,7 @@ int main(int, char**)
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = hmax / gInf;
+    double dt = 2 * hmax / gInf;
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain

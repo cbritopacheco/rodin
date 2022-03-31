@@ -56,7 +56,9 @@ namespace Rodin::External::MMG
       "-v"
     };
 
-    m_advect.run(args);
+    int retcode = m_advect.run(args);
+    if (retcode != 0)
+      Alert::Exception("ISCD::Advection invocation failed.").raise();
 
     m_ls = ScalarSolution2D::load(outp).setMesh(mesh);
 

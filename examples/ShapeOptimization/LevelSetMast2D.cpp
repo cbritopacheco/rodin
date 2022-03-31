@@ -53,7 +53,7 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 200;
+  size_t maxIt = 100;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarCoefficient(4.0);
@@ -112,6 +112,7 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    mmgMesh.save("mast2d/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::IncompleteVectorSolution2D>().setMesh(mmgMesh);
 
     // Generate signed distance function
@@ -119,7 +120,7 @@ int main(int, char**)
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = hmax / gInf;
+    double dt = 2 * hmax / gInf;
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain
