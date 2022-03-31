@@ -9,7 +9,7 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
 endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 
-project(Rodin CXX)
+project(Rodin CXX C)
 
 # ---- Options ---------------------------------------------------------------
 option(RODIN_BUILD_SRC          "Build the Rodin source code"     ON)
@@ -19,11 +19,12 @@ option(RODIN_USE_MCSS           "Use m.css style documentation"   OFF)
 option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"    OFF)
 option(RODIN_USE_SUITESPARSE    "Build SuiteSparse integrations"  ON)
 
-# ---- Configuration ---------------------------
-include("${PROJECT_SOURCE_DIR}/cmake/configuration.cmake")
-
 # ---- Set the module path ---------------------
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# ---- CMake Modules ---------------------------
+include(RodinConfig)
+include(RodinUtility)
 
 # ---- Configure compiler ----------------------
 if(CMAKE_BUILD_TYPE STREQUAL "")

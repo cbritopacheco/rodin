@@ -11,17 +11,11 @@ set(Rodin_HEADERS
 
 # ---- Set compile options for all the submodules ----------------------------
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  add_compile_options(
-    -w
-    -O3
-    )
-  if (CMAKE_CXX_COMPILER_ID MATCHES AppleClang)
-    add_compile_options(-Wno-error=narrowing)
-  elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    add_compile_options(-Wno-error=narrowing)
-  endif()
+  rodin_add_compile_options(CXX -w -O3)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-  add_compile_options(
+  rodin_add_compile_options(
+    LANG CXX
+    OPTIONS
     -g
     -O0
     -Wall
@@ -33,7 +27,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
     -Wno-error=pedantic
-    -Wno-error=bad-function-cast
+    -Wno-error=cast-function-type
     -Wno-error=zero-as-null-pointer-constant
     )
 endif()

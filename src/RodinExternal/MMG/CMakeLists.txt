@@ -9,7 +9,7 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinExternalMMG_HEADERS
   Cast.h
   Utility.h
-  Configure.h
+  Configure.h.in
   ISCDProcess.h
   ForwardDecls.h
   Mesh.h
@@ -60,17 +60,11 @@ set(RodinExternalMMG_SRCS
   )
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  add_compile_options(
-    -w
-    -O3
-    )
-  if (CMAKE_CXX_COMPILER_ID MATCHES AppleClang)
-    add_compile_options(-Wno-error=narrowing)
-  elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    add_compile_options(-Wno-error=narrowing)
-  endif()
+  rodin_add_compile_options(CXX -w -O3)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-  add_compile_options(
+  rodin_add_compile_options(
+    LANG CXX C
+    OPTIONS
     -g
     -O0
     -Wall
@@ -86,8 +80,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-missing-declarations
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
-    -Wno-error=pedantic
-    )
+    -Wno-error=pedantic)
 endif()
 
 add_library(RodinExternalMMG
