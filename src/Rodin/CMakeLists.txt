@@ -29,7 +29,9 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wextra
     -Wpedantic
     -Wno-old-style-cast
-    -Wno-unused-parameter)
+    -Wno-unused-parameter
+    -Wno-zero-as-null-pointer-constant
+    )
 endif()
 
 add_library(Rodin INTERFACE)

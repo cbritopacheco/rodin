@@ -82,7 +82,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-unused-function
     -Wno-unused-parameter
     -Wno-missing-prototypes
-    )
+    -Wno-zero-as-null-pointer-constant)
 endif()
 
 add_library(RodinExternalMMG
