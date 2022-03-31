@@ -76,6 +76,8 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wall
     -Wextra
     -Wpedantic
+    -Wno-error=extra
+    -Wno-error=pedantic
     -Wno-sign-compare
     -Wno-old-style-cast
     -Wno-unused-variable
