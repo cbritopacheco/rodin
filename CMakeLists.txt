@@ -35,35 +35,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (NOT ${CMAKE_CXX_FLAGS_RELEASE})
-  add_compile_options(
-    -O3
-    -w
-    -fvisibility=hidden
-    -fvisibility-inlines-hidden)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    add_compile_options(-Wno-error=narrowing)
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_compile_options(-Wno-error=narrowing)
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  endif()
-endif()
-
-if (NOT ${CMAKE_CXX_FLAGS_DEBUG})
-  add_compile_options(
-    -O0
-    -g
-    -ggdb
-    -Wno-old-style-cast
-    -Wall
-    -Wextra
-    -pedantic
-    -fvisibility=hidden
-    -fvisibility-inlines-hidden)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  endif()
-endif()
+add_compile_options(
+  -fvisibility=hidden
+  -fvisibility-inlines-hidden)
 
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
@@ -78,7 +52,6 @@ if (RODIN_BUILD_SRC)
   find_package(MFEM
     REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
     NO_DEFAULT_PATH)
-  message(INFO ${MFEM_INCLUDE_DIRS})
 
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")

@@ -8,10 +8,32 @@ set(Rodin_HEADERS
   Solver.h
   Variational.h
   )
+
+# ---- Set compile options for all the submodules ----------------------------
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  add_compile_options(
+    -w
+    -O3
+    )
+  if (CMAKE_CXX_COMPILER_ID MATCHES AppleClang)
+    add_compile_options(-Wno-error=narrowing)
+  elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    add_compile_options(-Wno-error=narrowing)
+  endif()
+elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
+  add_compile_options(
+    -g
+    -O0
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wno-old-style-cast
+    -Wno-unused-parameter)
+endif()
+
 add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
 target_sources(Rodin INTERFACE ${Rodin_HEADERS})
-
 
 if (RODIN_WITH_PLOT)
 # The Plot module is currently broken and barely has any code. So we don't add
@@ -22,6 +44,7 @@ if (RODIN_WITH_PLOT)
 
 # add_subdirectory(Plot)
 endif()
+
 add_subdirectory(Core)
 add_subdirectory(Mesh)
 add_subdirectory(Test)

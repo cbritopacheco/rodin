@@ -21,8 +21,6 @@ if (RODIN_USE_SUITESPARSE)
     )
 endif()
 
-
-
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinSolver
   PUBLIC

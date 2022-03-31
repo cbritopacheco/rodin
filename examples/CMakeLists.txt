@@ -1,5 +1,7 @@
 project(Rodin::Examples)
 
+add_compile_options(-w -O3)
+
 if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(MMG)
   add_subdirectory(Variational)

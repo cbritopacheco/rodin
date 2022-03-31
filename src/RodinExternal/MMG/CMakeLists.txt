@@ -56,6 +56,32 @@ set(RodinExternalMMG_SRCS
   DistancerS.h
   ScalarSolutionS.cpp)
 
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  add_compile_options(
+    -w
+    -O3
+    )
+  if (CMAKE_CXX_COMPILER_ID MATCHES AppleClang)
+    add_compile_options(-Wno-error=narrowing)
+  elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    add_compile_options(-Wno-error=narrowing)
+  endif()
+elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
+  add_compile_options(
+    -g
+    -O0
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wno-sign-compare
+    -Wno-old-style-cast
+    -Wno-unused-variable
+    -Wno-unused-function
+    -Wno-unused-parameter
+    -Wno-missing-prototypes
+    )
+endif()
+
 add_library(RodinExternalMMG
   ${RodinExternalMMG_HEADERS} ${RodinExternalMMG_SRCS})
 add_library(Rodin::External::MMG ALIAS RodinExternalMMG)
