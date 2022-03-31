@@ -33,7 +33,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
     -Wno-error=pedantic
-    -Wno-error=cast-function-type
+    -Wno-error=bad-function-cast
     -Wno-error=zero-as-null-pointer-constant
     )
 endif()
