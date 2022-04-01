@@ -1,0 +1,159 @@
+/**
+  @page examples-variational-elasticity Solving the elasticity equation
+  @brief Showcases the resolution of the elasticity system
+
+  @image html Elasticity.png width=410px
+
+  @m_keywords{Elasticity}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  In this example we will seek to solve the linearized elasticity system. Most
+  of the reference material in the introduction is taken from
+  @cite allaire2021shape.
+
+  @section examples-variational-elasticity-intro Introduction
+
+  In the elasticity setting, we are most typically interested in characterizing
+  the <em> elastic displacement </em> @f$ u_\Omega : \Omega \rightarrow
+  \mathbb{R}^d @f$ of a mechanical structure @f$ \Omega \subset \mathbb{R}^d
+  @f$, which in the mathematical setting is most usually defined as a bounded,
+  Lipschitz domain, whose boundary is decomposed into three disjoint pieces:
+  @f$ \Gamma_D \cup \Gamma_N \cup \Gamma_0@f$. Each piece of the boundary has
+  the following semantic meanings:
+
+  - on the segment @f$ \Gamma_D \neq \emptyset @f$ is where the structure is
+  "fixed" or "attached", which is to say that the strucure cannot be displaced
+  or moved
+  - on the segment @f$ \Gamma_N @f$ is where the <em> traction loads </em>
+  @f$ g : \Gamma_N \rightarrow \mathbb{R}^d @f$ are applied
+  - the remaining segment @f$ \Gamma @f$ corresponds to a traction-free
+  boundary; this is the region where the shape is free to move about
+
+  Additionally, @f$ \Omega @f$ can be subjected to body forces @f$ f : \Omega
+  \rightarrow \mathbb{R}^d @f$. In general, this framework gives rise to the
+  <em> linearized elasticity system
+  </em>:
+
+  @f[
+  \left\{
+    \begin{aligned}
+      - \nabla \cdot \sigma (u_\Omega) &= 0 && \mathrm{in} \ \Omega \\
+      u_\Omega &= 0 && \mathrm{on} \ \Gamma_D \\
+      \sigma(u_\Omega) \cdot n &= 0 && \mathrm{on} \ \Gamma_0 \\
+      \sigma(u_\Omega) \cdot n &= f && \mathrm{on} \ \Gamma_N
+    \end{aligned}
+   \right. ,
+  @f]
+  where @f$ \sigma(u_\Omega) @f$ is known as the <em> stress tensor </em> of
+  the displacement field @f$ u_\Omega @f$. Furthermore, this stress tensor is
+  related to the <em> strain tensor </em>
+  @f[
+    e(u_\Omega) := \dfrac{1}{2}\left( \nabla u + \nabla u^T \right)
+  @f]
+  via Hooke's law
+  @f[
+    \sigma(u_\Omega) = Ae(u_\Omega) \ ,
+  @f]
+  where for any @f$ e @f$ in the set @f$ \mathbb{R}^{d \times d}_s @f$ of
+  symmetric @f$ d \times d @f$ matrices,
+  @f[
+    Ae = 2 \mu e + \lambda \mathrm{tr}(e) I \ .
+  @f]
+  Here @f$ I @f$ is the identity @f$ d \times d @f$ matrix, and @f$ \lambda
+  @f$, @f$ \mu @f$ are the <em> Lamé parameters </em> of the constituent
+  material, satisfying @f$ \mu > 0 @f$ and @f$ \lambda + 2\mu / d > 0 @f$.
+  In general, as we have said in the
+  @ref examples-variational-poisson "Poisson example", we are mainly interested
+  in the variational formulation of this equation. That is we seek to solve the
+  problem:
+  @f[
+  \text{Find } u_\Omega \in H^1_{\Gamma_D}(\Omega)^d \text{ s.t. }
+  \forall v \in H^1_{\Gamma_D}(\Omega)^d, \quad
+     \int_{\Omega} Ae(u_\Omega) : e(v) \ dx = \int_{\Omega} f \cdot v \ dx
+     + \int_{\Gamma_N} g \cdot v \ dx \ ,
+  @f]
+  As far as the mathematical setting is concerned @f$ f \in L^2(\Omega)^d @f$,
+  @f$ g \in L^2(\Gamma_N)^d @f$ and the space @f$ H^1_{\Gamma_D}(\Omega)^d @f$
+  is defined by:
+  @f[
+    H^1_{\Gamma_D}(\Omega)^d := \{ u \in H^1(\Omega)^d, \ u = 0 \text{ on }
+    \Gamma_D = 0 \} \ .
+  @f]
+  In particular, this problem is well posed via the classical Lax-Milgram
+  theory. In this example we will be implementing the variational formulation
+  using Rodin's @ref Rodin::Variational "Variational" module.
+
+  @section examples-variational-elasticity-impl Implementation
+
+  For simplicity, we will disregard any body forces by taking @f$ f = 0 @f$.
+  In this vein, we also note that the integral in the variational formulation
+  may be expanded and rewritten into
+  @f[
+     \int_{\Omega} \lambda (\mathrm{div} \ u) \  (\mathrm{div} \ v)  \ dx
+     + \int_{\Omega} \mu e(u_\Omega) : e(v) \ dx
+     = \int_{\Gamma_N} g \cdot v \ dx \ ,
+  @f]
+  which should allow us to more easily translate it into code. In fact, the
+  implementation follows exactly the same philosophy as the Poisson case:
+  @code{.cpp}
+    // Define boundary attributes
+    int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
+
+    // Load mesh
+    Mesh Omega = Mesh::load(meshFile);
+
+    // Functions
+    int d = 2;
+    H1 Vh(Omega, d);
+
+    // Lamé coefficients
+    auto mu     = ScalarCoefficient(0.3846),
+         lambda = ScalarCoefficient(0.5769);
+
+    // Pull force
+    auto f = VectorCoefficient{0, -1};
+  @endcode
+  We define the relevant boundary attributes (which we should know beforehand),
+  we load the mesh, we build the (vectorial) finite element space, and define our
+  parameters.
+  The only real difference will be the variational formulation! But even this is easy
+  to implement if you know what the weak formulation looks like:
+  @code{.cpp}
+  // Define problem
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+  Problem elasticity(u, v);
+  elasticity = Integral(lambda * Div(u), Div(v))
+             + Integral(
+                 mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
+             - BoundaryIntegral(f, v).over(GammaN)
+             + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
+  @endcode
+  In this case we have just written out the definition of the terms @f$ e(u_\Omega)
+  @f$ and @f$ e(v) @f$. Rodin is smart enough to figure out how to build
+  the underlying linear system to solve and assemble it when we need to solve
+  it.
+
+  This brings us to the last point which is solving the variational problem. In
+  exactly the same fashion as the previous example, we need only choose a
+  Solver which should allows us to solve the problem.
+  @code{.cpp}
+  // Solve problem
+  Solver::CG().setMaxIterations(200)
+              .setRelativeTolerance(1e-12)
+              .printIterations(true)
+              .solve(elasticity);
+
+  // Save solution
+  u.getGridFunction().save("u.gf");
+  Omega.save("Omega.mesh");
+  @endcode
+
+  The full source code may be found below:
+  -   @ref Variational/Elasticity.cpp "Elasticity.cpp"
+
+  @example Variational/Elasticity.cpp @m_examplenavigation{examples-variational-elasticity,Variational/} @m_footernavigation
+  */

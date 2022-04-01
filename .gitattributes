@@ -1,0 +1,8 @@
+resources/**/*.mesh filter=lfs diff=lfs merge=lfs -text
+resources/**/*.msh filter=lfs diff=lfs merge=lfs -text
+resources/**/*.sol filter=lfs diff=lfs merge=lfs -text
+resources/**/*.stp filter=lfs diff=lfs merge=lfs -text
+resources/**/*.step filter=lfs diff=lfs merge=lfs -text
+resources/**/*.gf filter=lfs diff=lfs merge=lfs -text
+resources/**/*.geo filter=lfs diff=lfs merge=lfs -text
+resources/tests/** !text -filter -merge -diff

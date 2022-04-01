@@ -1,0 +1,50 @@
+/**
+  @page examples-index Examples and Tutorials
+  @brief Examples utilizing the Rodin library
+
+  @tableofcontents
+
+  @subsection examples-index-getting_started Getting started
+
+  @subsection examples-index-variational Utilizing the variational methods module
+
+  The Rodin::Variational module is mostly used when dealing with to variational
+  problems of the form:
+
+  @f[
+    \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
+    a(u, v) = b(v) \ .
+  @f]
+
+  For the complete list of examples go to the link below:
+
+  - @subpage examples-variational-index
+
+  @subsection examples-index-solver Utilizing the linear algebra solver module
+
+  Rodin::Solver
+
+  In progress.
+
+  @subsection examples-index-mesh Utilizing the mesh module
+
+  Rodin::Mesh
+
+  In progress.
+
+  @subsection examples-index-mmg Working with MMG
+
+  The Rodin::External::MMG module has a wide variety of uses which ranges from
+  optimization of the mesh, to implicit domain meshing. It provides many C++
+  wrappers to execute the functionality of the [Mmg
+  Platform](https://www.mmgtools.org/).
+
+  For the complete list of examples go to the link below:
+
+  - @subpage examples-mmg-index
+
+  @subsection examples-index-shapeoptimization Shape optimization examples
+
+  - @subpage examples-shapeoptimization-index
+
+  */

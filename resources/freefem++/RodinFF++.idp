@@ -1,0 +1,80 @@
+load "msh3"
+load "medit"
+load "tetgen"
+load "isoline"
+load "distance"
+
+macro Gradient2D(u) [dx(u), dy(u)]//
+
+/**
+  * @brief Generates distance function with holes at the given points.
+  * @param[in] cx x-coordinates of centers
+  * @param[in] cy y-coordinates of centers
+  * @param[in] r Radius of holes
+  */
+func real holes2d(int nh, real[int]& cx, real[int]& cy, real r)
+{
+  real d = 10, dd;
+  for (int i = 0; i < nh; i++)
+  {
+    dd = (x - cx[i])^2 + (y - cy[i])^2 - r^2;
+    d = min(d, dd);
+  }
+  return -d;
+}
+
+/**
+  * @brief Utility function to add holes along the isolines of a 2D domain.
+  *
+  */
+func int isolineHoles2d(
+    mesh& Th, real[int]& ls, real iso, real r, real spacing)
+{
+  int[int] attr(128);
+  for (int i = 0; i < 128; i++)
+    attr[i] = i;
+
+  fespace Vh(Th, P1);
+  Vh u, v;
+  problem Poisson(u, v) =
+    int2d(Th)(Gradient2D(u)' * Gradient2D(v))
+    - int2d(Th)(v)
+    + on(attr, u = 0)
+    ;
+  Poisson;
+
+  real umax = u[].max;
+  real umin = u[].min;
+  u = (u - umin) / (umax - umin);
+
+  real[int, int] xy(3, 1);
+  int[int] be(1);
+  real[int] viso = [iso];
+
+  int nbc = isoline(Th, u, xy, close=1, iso=iso, beginend=be, smoothing=0.1);
+  assert(nbc >= 1);
+
+  int ac = 0;
+  real[int] cx(1000);
+  real[int] cy(1000);
+  for (int c = 0; c < nbc; c++)
+  {
+    int i0 = be[2 * c], i1 = be[2 * c + 1] - 1;
+
+    real olds = 0;
+    for(int i = i0; i <= i1; ++i)
+    {
+      if (abs(xy(2, i) - olds) >= spacing)
+      {
+        cx(ac) = xy(0, i);
+        cy(ac++) = xy(1, i);
+        olds = xy(2, i);
+      }
+    }
+  }
+
+  Vh phi0;
+  phi0 = holes2d(ac, cx, cy, r);
+  distance(Th, phi0, ls);
+  return ac;
+}
