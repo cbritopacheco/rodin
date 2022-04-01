@@ -12,9 +12,9 @@
 
 
   The full source code may be found below:
-  -   @ref ShapeOptimization/SimpleCantilever.cpp "SimpleCantilever.cpp"
+  -   @ref ShapeOptimization/SimpleCantilever2D.cpp "SimpleCantilever2D.cpp"
 
-  @example ShapeOptimization/SimpleCantilever.cpp
+  @example ShapeOptimization/SimpleCantilever2D.cpp
   @m_examplenavigation{examples-shapeoptimization-simple_cantilever,ShapeOptimization/}
   @m_footernavigation
   */
