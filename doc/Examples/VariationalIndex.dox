@@ -1,0 +1,9 @@
+/**
+  @page examples-variational-index Examples utilizing the variational methods module
+  @brief Showcases the usage of the Rodin::Variational module
+
+  - @subpage examples-variational-poisson
+  - @subpage examples-variational-elasticity
+  - @subpage examples-variational-surface_meshes
+
+  */

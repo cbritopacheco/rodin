@@ -1,0 +1,46 @@
+name: Deploy Documentation
+on:
+  push:
+    branches:
+      - master
+jobs:
+  Build-And-Deploy:
+    runs-on: ubuntu-latest
+    env:
+      MAKEFLAGS: "-j2"
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - run: pip install -r doc/requirements.txt
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          doxygen
+          texlive-base
+          texlive-latex-extra
+          texlive-fonts-extra
+          texlive-fonts-recommended
+      - name: Configure CMake
+        run: >
+          cmake
+          -B ${{github.workspace}}/build
+          -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_DOC=ON
+          -DRODIN_USE_MCSS=ON
+          -DRODIN_BUILD_SRC=OFF
+          -DRODIN_BUILD_EXAMPLES=OFF
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --target RodinDoxygen
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{github.workspace}}/build/doc/html
+

@@ -1,0 +1,27 @@
+[submodule "third-party/mmg"]
+	path = third-party/mmg
+	url = https://github.com/cbritopacheco/mmg
+[submodule "third-party/mfem"]
+	path = third-party/mfem
+	url = https://github.com/mfem/mfem/
+[submodule "third-party/rang"]
+	path = third-party/rang
+	url = https://github.com/agauniyal/rang
+[submodule "third-party/corrade"]
+	path = third-party/corrade
+	url = https://github.com/mosra/corrade
+[submodule "third-party/magnum"]
+	path = third-party/magnum
+	url = https://github.com/mosra/magnum
+[submodule "third-party/magnum-integration"]
+	path = third-party/magnum-integration
+	url = https://github.com/mosra/magnum-integration
+[submodule "third-party/m.css"]
+	path = third-party/m.css
+	url = https://github.com/cbritopacheco/m.css
+[submodule "third-party/Mshdist"]
+	path = third-party/ISCD/Mshdist
+	url = https://github.com/cbritopacheco/Mshdist
+[submodule "third-party/ISCD/Advection"]
+	path = third-party/ISCD/Advection
+	url = https://github.com/cbritopacheco/Advection/

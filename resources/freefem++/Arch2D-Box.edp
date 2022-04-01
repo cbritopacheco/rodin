@@ -1,0 +1,50 @@
+include "RodinFF++.idp"
+
+int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4, GammaNA = 5;
+
+border left(t=0.0,1.5){ x=-1.0; y=1.5-t;        label=Gamma0; };
+border botgl(t=0.0,0.1){ x=-1.0+t; y=0.0;       label=GammaD; };
+border botglna(t=0.1,0.2){ x=-1.0+t; y=0.0;     label=GammaNA; };
+border botf1(t=0.2,0.8){ x=-1.0+t; y=0.0;       label=Gamma0; };
+border botneu1(t=0.8,0.9){ x=-1.0+t; y=0.0;     label=GammaNA; };
+border botneu(t=0.9,1.1){ x=-1.0+t; y=0.0;      label=GammaN; };
+border botneu2(t=1.1,1.2){ x=-1.0+t; y=0.0;     label=GammaNA; };
+border botf2(t=1.2,1.8){ x=-1.0+t; y=0.0;       label=Gamma0; };
+border botdirna(t=1.8,1.9){ x=-1.0+t; y=0.0;    label=GammaNA; };
+border botdir(t=1.9,2.0){ x=-1.0+t; y=0.0;      label=GammaD; };
+border right(t=0.0,1.5){ x=1.0; y=t;            label=Gamma0; };
+border top(t=0.0,2.0){ x=1.0-t; y=1.5;          label=Gamma0; };
+
+mesh Th = buildmesh(
+    left(50)
+    + botgl(5) + botglna(5) + botf1(45) + botneu1(5) + botneu(5) + botneu2(5) + botf2(45)
+    + botdirna(5) + botdir(5)
+    + right(50) + top(100)
+    );
+
+// Holes
+real[int] cx = [
+    -0.8, -0.4, 0, 0.4, 0.8,
+    -0.6, -0.2, 0.2, 0.6,
+    -0.8, -0.4, 0, 0.4, 0.8,
+    -0.6, -0.2, 0.2, 0.6,
+    -0.5, 0.5
+];
+real[int] cy = [
+    0.2, 0.2, 0.2, 0.2, 0.2,
+    0.6, 0.6, 0.6, 0.6,
+    1.0, 1.0, 1.0, 1.0, 1.0,
+    1.4, 1.4, 1.4, 1.4,
+    0.0, 0.0
+];
+
+assert(cx.n == cy.n);
+
+// Distance
+fespace Vh(Th, P1);
+Vh phi0, phi;
+phi0 = holes2d(cx.n, cx, cy, 0.05);
+distance(Th, phi0, phi[]);
+
+savesol("arch2d-box.sol", Th, phi);
+savemesh(Th, "arch2d-box.mesh");
