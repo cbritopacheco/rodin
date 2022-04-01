@@ -64,18 +64,18 @@ namespace Rodin::Variational
    {
       public:
          LinearFormDomainIntegrator(const ShapeFunctionBase<Test>& v)
-            : m_v(v)
+            : m_v(v.copy())
          {}
 
          LinearFormDomainIntegrator(const LinearFormDomainIntegrator& other)
             : LinearFormIntegratorBase(other),
-              m_v(other.m_v),
+              m_v(other.m_v->copy()),
               m_attrs(other.m_attrs)
          {}
 
          LinearFormDomainIntegrator(LinearFormDomainIntegrator&& other)
             : LinearFormIntegratorBase(std::move(other)),
-              m_v(other.m_v),
+              m_v(std::move(other.m_v)),
               m_attrs(std::move(other.m_attrs))
          {}
 
@@ -109,7 +109,7 @@ namespace Rodin::Variational
 
          const ShapeFunctionBase<Test>& getTestFunction() const override
          {
-            return m_v;
+            return *m_v;
          }
 
          IntegratorRegion getIntegratorRegion() const override
@@ -124,7 +124,7 @@ namespace Rodin::Variational
 
          virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
       private:
-         const ShapeFunctionBase<Test>& m_v;
+         std::unique_ptr<ShapeFunctionBase<Test>> m_v;
          std::set<int> m_attrs;
    };
 
@@ -135,18 +135,18 @@ namespace Rodin::Variational
    {
       public:
          LinearFormBoundaryIntegrator(const ShapeFunctionBase<Test>& v)
-            : m_v(v)
+            : m_v(v.copy())
          {}
 
          LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator& other)
             : LinearFormIntegratorBase(other),
-              m_v(other.m_v),
+              m_v(other.m_v->copy()),
               m_attrs(other.m_attrs)
          {}
 
          LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&& other)
             : LinearFormIntegratorBase(std::move(other)),
-              m_v(other.m_v),
+              m_v(std::move(other.m_v)),
               m_attrs(std::move(other.m_attrs))
          {}
 
@@ -180,7 +180,7 @@ namespace Rodin::Variational
 
          const ShapeFunctionBase<Test>& getTestFunction() const override
          {
-            return m_v;
+            return *m_v;
          }
 
          IntegratorRegion getIntegratorRegion() const override
@@ -195,7 +195,7 @@ namespace Rodin::Variational
 
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
       private:
-         const ShapeFunctionBase<Test>& m_v;
+         std::unique_ptr<ShapeFunctionBase<Test>> m_v;
          std::set<int> m_attrs;
    };
 }
