@@ -24,6 +24,10 @@ namespace Rodin::Variational
             : ShapeFunction<FES, Test>(std::move(other))
          {}
 
+         void operator=(const TestFunction&) = delete;
+
+         void operator=(TestFunction&&) = delete;
+
          ShapeFunctionBase<Test>& getRoot() override
          {
             return *this;

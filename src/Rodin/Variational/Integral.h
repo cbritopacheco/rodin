@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_INTEGRAL_H
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
+#include <boost/uuid/uuid_io.hpp>
 #include <set>
 #include <utility>
 #include <mfem.hpp>
