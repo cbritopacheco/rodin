@@ -14,6 +14,7 @@
 #include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "TestFunction.h"
 
 namespace Rodin::Variational
 {
@@ -28,6 +29,8 @@ namespace Rodin::Variational
    {
       public:
          virtual ~LinearFormIntegratorBase() = default;
+
+         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -60,11 +63,21 @@ namespace Rodin::Variational
    class LinearFormDomainIntegrator : public LinearFormIntegratorBase
    {
       public:
-         LinearFormDomainIntegrator() = default;
+         LinearFormDomainIntegrator(const ShapeFunctionBase<Test>& v)
+            : m_v(v)
+         {}
 
-         LinearFormDomainIntegrator(const LinearFormDomainIntegrator&) = default;
+         LinearFormDomainIntegrator(const LinearFormDomainIntegrator& other)
+            : LinearFormIntegratorBase(other),
+              m_v(other.m_v),
+              m_attrs(other.m_attrs)
+         {}
 
-         LinearFormDomainIntegrator(LinearFormDomainIntegrator&&) = default;
+         LinearFormDomainIntegrator(LinearFormDomainIntegrator&& other)
+            : LinearFormIntegratorBase(std::move(other)),
+              m_v(other.m_v),
+              m_attrs(std::move(other.m_attrs))
+         {}
 
          virtual ~LinearFormDomainIntegrator() = default;
 
@@ -94,6 +107,11 @@ namespace Rodin::Variational
             return *this;
          }
 
+         const ShapeFunctionBase<Test>& getTestFunction() const override
+         {
+            return m_v;
+         }
+
          IntegratorRegion getIntegratorRegion() const override
          {
             return IntegratorRegion::Domain;
@@ -106,6 +124,7 @@ namespace Rodin::Variational
 
          virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
       private:
+         const ShapeFunctionBase<Test>& m_v;
          std::set<int> m_attrs;
    };
 
@@ -115,9 +134,22 @@ namespace Rodin::Variational
    class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
    {
       public:
-         LinearFormBoundaryIntegrator() = default;
-         LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator&) = default;
-         LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&&) = default;
+         LinearFormBoundaryIntegrator(const ShapeFunctionBase<Test>& v)
+            : m_v(v)
+         {}
+
+         LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator& other)
+            : LinearFormIntegratorBase(other),
+              m_v(other.m_v),
+              m_attrs(other.m_attrs)
+         {}
+
+         LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&& other)
+            : LinearFormIntegratorBase(std::move(other)),
+              m_v(other.m_v),
+              m_attrs(std::move(other.m_attrs))
+         {}
+
          virtual ~LinearFormBoundaryIntegrator() = default;
 
          /**
@@ -146,6 +178,11 @@ namespace Rodin::Variational
             return *this;
          }
 
+         const ShapeFunctionBase<Test>& getTestFunction() const override
+         {
+            return m_v;
+         }
+
          IntegratorRegion getIntegratorRegion() const override
          {
             return IntegratorRegion::Boundary;
@@ -158,6 +195,7 @@ namespace Rodin::Variational
 
          virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
       private:
+         const ShapeFunctionBase<Test>& m_v;
          std::set<int> m_attrs;
    };
 }

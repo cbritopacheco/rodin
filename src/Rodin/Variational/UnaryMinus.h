@@ -17,6 +17,8 @@
 #include "FormLanguage/BilinearFormIntegratorSum.h"
 #include "FormLanguage/Base.h"
 
+#include "LinearFormIntegrator.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Variational
@@ -141,6 +143,11 @@ namespace Rodin::Variational
             return getOperand().getIntegratorRegion();
          }
 
+         const ShapeFunctionBase<Test>& getTestFunction() const override
+         {
+            return m_op->getTestFunction();
+         }
+
          void getElementVector(const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans, mfem::Vector& vec) const override;
 
@@ -208,6 +215,16 @@ namespace Rodin::Variational
          const BilinearFormIntegratorBase& getOperand() const
          {
             return *m_op;
+         }
+
+         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         {
+            return m_op->getTrialFunction();
+         }
+
+         const ShapeFunctionBase<Test>& getTestFunction() const override
+         {
+            return m_op->getTestFunction();
          }
 
          const std::set<int>& getAttributes() const override
