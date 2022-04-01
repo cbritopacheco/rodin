@@ -13,7 +13,7 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
-  const char* meshFile = "../resources/mfem/meshes/elasticity-example.mesh";
+  const char* meshFile = "../resources/mfem/elasticity-example.mesh";
 
   // Define boundary attributes
   int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
@@ -24,7 +24,6 @@ int main(int argc, char** argv)
   // Functions
   int d = 2;
   H1 Vh(Omega, d);
-
 
   // Lamé coefficients
   auto mu     = ScalarCoefficient(0.3846),

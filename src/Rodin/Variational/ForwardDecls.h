@@ -94,7 +94,7 @@ namespace Rodin::Variational
    // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 
-   template <class FES>
+   template <class TrialFES, class TestFES>
    class BilinearForm;
 
    class BilinearFormIntegratorBase;

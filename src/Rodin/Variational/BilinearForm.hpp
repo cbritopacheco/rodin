@@ -19,43 +19,44 @@
 
 namespace Rodin::Variational
 {
-   template <class FES>
-   BilinearForm<FES>::BilinearForm(FES& fes)
-      :  m_fes(fes),
-         m_bf(new mfem::BilinearForm(&fes.getFES()))
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>::BilinearForm(
+         TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+      :  m_u(u), m_v(v),
+         m_bf(new mfem::BilinearForm(&m_v.getFiniteElementSpace().getFES()))
    {}
 
-   template <class FES>
-   double BilinearForm<FES>::operator()(
-         const GridFunction<FES>& u, const GridFunction<FES>& v) const
+   template <class TrialFES, class TestFES>
+   double BilinearForm<TrialFES, TestFES>::operator()(
+         const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
    {
       return m_bf->InnerProduct(u.getHandle(), v.getHandle());
    }
 
-   template <class FES>
-   BilinearForm<FES>&
-   BilinearForm<FES>::operator=(const BilinearFormIntegratorBase& bfi)
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>&
+   BilinearForm<TrialFES, TestFES>::operator=(const BilinearFormIntegratorBase& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
-   template <class FES>
-   BilinearForm<FES>&
-   BilinearForm<FES>::operator=(const FormLanguage::BilinearFormIntegratorSum& bfi)
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>&
+   BilinearForm<TrialFES, TestFES>::operator=(const FormLanguage::BilinearFormIntegratorSum& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
-   template <class FES>
-   BilinearForm<FES>& BilinearForm<FES>::from(const BilinearFormIntegratorBase& bfi)
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>& BilinearForm<TrialFES, TestFES>::from(const BilinearFormIntegratorBase& bfi)
    {
       switch (bfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
          {
-            m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
+            m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getFES()));
             m_domAttrMarkers.clear();
             add(bfi);
             break;
@@ -66,36 +67,39 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FES>
-   BilinearForm<FES>&
-   BilinearForm<FES>::from(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>&
+   BilinearForm<TrialFES, TestFES>::from(const FormLanguage::BilinearFormIntegratorSum& lsum)
    {
-      m_bf.reset(new mfem::BilinearForm(&m_fes.getFES()));
+      m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getFES()));
       m_bfiDomainList.clear();
       m_domAttrMarkers.clear();
       add(lsum);
       return *this;
    }
 
-   template <class FES>
-   void BilinearForm<FES>::assemble()
+   template <class TrialFES, class TestFES>
+   void BilinearForm<TrialFES, TestFES>::assemble()
    {
       m_bf->Assemble();
    }
 
-   template <class FES>
-   BilinearForm<FES>&
-   BilinearForm<FES>::add(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>&
+   BilinearForm<TrialFES, TestFES>::add(const FormLanguage::BilinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getBilinearFormDomainIntegratorList())
          add(*p);
       return *this;
    }
 
-   template <class FES>
-   BilinearForm<FES>& BilinearForm<FES>::add(
+   template <class TrialFES, class TestFES>
+   BilinearForm<TrialFES, TestFES>& BilinearForm<TrialFES, TestFES>::add(
          const BilinearFormIntegratorBase& bfi)
    {
+      assert(bfi.getTrialFunction().getRoot().getUUID() == getTrialFunction().getRoot().getUUID());
+      assert(bfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
+
       switch (bfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
@@ -109,7 +113,7 @@ namespace Rodin::Variational
             }
             else
             {
-               int size = m_fes.getMesh().getHandle().attributes.Max();
+               int size = m_u.getFiniteElementSpace().getMesh().getHandle().attributes.Max();
                auto data = std::make_unique<mfem::Array<int>>(size);
                *data = 0;
                for (const auto& b : domAttrs)
@@ -130,8 +134,8 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FES>
-   void BilinearForm<FES>::update()
+   template <class TrialFES, class TestFES>
+   void BilinearForm<TrialFES, TestFES>::update()
    {
       m_bf->Update();
    }

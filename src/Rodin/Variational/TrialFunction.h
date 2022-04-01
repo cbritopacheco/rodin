@@ -1,9 +1,6 @@
 #ifndef RODIN_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-
 #include "Component.h"
 #include "GridFunction.h"
 #include "ShapeFunction.h"
@@ -15,18 +12,15 @@ namespace Rodin::Variational
    {
       public:
          TrialFunction(FES& fes)
-            : ShapeFunction<FES, Trial>(fes),
-              m_uuid(boost::uuids::random_generator()())
+            : ShapeFunction<FES, Trial>(fes)
          {}
 
          TrialFunction(const TrialFunction& other)
-            : ShapeFunction<FES, Trial>(other),
-              m_uuid(other.m_uuid)
+            : ShapeFunction<FES, Trial>(other)
          {}
 
          TrialFunction(TrialFunction&& other)
-            : ShapeFunction<FES, Trial>(std::move(other)),
-              m_uuid(std::move(other.m_uuid))
+            : ShapeFunction<FES, Trial>(std::move(other))
          {}
 
          TrialFunction& emplaceGridFunction()
@@ -65,9 +59,14 @@ namespace Rodin::Variational
             return Component<TrialFunction<FES>>(*this, 2);
          }
 
-         boost::uuids::uuid getUUID() const
+         ShapeFunctionBase<Trial>& getRoot()  override
          {
-            return m_uuid;
+            return *this;
+         }
+
+         const ShapeFunctionBase<Trial>& getRoot() const override
+         {
+            return *this;
          }
 
          TrialFunction* copy() const noexcept override
@@ -76,7 +75,6 @@ namespace Rodin::Variational
          }
       private:
          std::optional<GridFunction<FES>> m_gf;
-         const boost::uuids::uuid m_uuid;
    };
    template <class FES>
    TrialFunction(FES& fes) -> TrialFunction<FES>;

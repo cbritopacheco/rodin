@@ -72,10 +72,26 @@ namespace Rodin::Variational
    class ShapeFunctionBase : public FormLanguage::Base
    {
       public:
+         ShapeFunctionBase()
+            : FormLanguage::Base()
+         {}
+
+         ShapeFunctionBase(const ShapeFunctionBase& other)
+            : FormLanguage::Base(other)
+         {}
+
+         ShapeFunctionBase(ShapeFunctionBase&& other)
+            : FormLanguage::Base(std::move(other))
+         {}
+
          ShapeFunctionSpaceType getSpaceType() const
          {
             return Space;
          }
+
+         virtual ShapeFunctionBase<Space>& getRoot() = 0;
+
+         virtual const ShapeFunctionBase<Space>& getRoot() const = 0;
 
          virtual int getRows(
                const mfem::FiniteElement& fe,

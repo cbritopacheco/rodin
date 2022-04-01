@@ -10,6 +10,7 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
+#include "TestFunction.h"
 #include "LinearFormIntegrator.h"
 #include "FormLanguage/LinearFormIntegratorSum.h"
 
@@ -29,6 +30,8 @@ namespace Rodin::Variational
 
          virtual void assemble() = 0;
          virtual void update() = 0;
+
+         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
    };
 
    /**
@@ -57,7 +60,7 @@ namespace Rodin::Variational
           * space
           * @param[in] fes Reference to the finite element space
           */
-         LinearForm(FES& fes);
+         LinearForm(TestFunction<FES>& v);
 
          LinearForm& operator=(const LinearFormIntegratorBase& lfi);
 
@@ -77,6 +80,11 @@ namespace Rodin::Variational
 
          void assemble() override;
 
+         const TestFunction<FES>& getTestFunction() const override
+         {
+            return m_v;
+         }
+
          LinearForm& add(const LinearFormIntegratorBase& lfi) override;
          LinearForm& add(const FormLanguage::LinearFormIntegratorSum& lsum) override;
 
@@ -94,7 +102,7 @@ namespace Rodin::Variational
          }
 
       private:
-         FES& m_fes;
+         TestFunction<FES>& m_v;
          std::unique_ptr<mfem::LinearForm> m_lf;
          LFIList m_lfiDomainList;
          LFIList m_lfiBoundaryList;

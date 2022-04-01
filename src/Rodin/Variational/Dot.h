@@ -164,6 +164,16 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
+         ShapeFunctionBase<Space>& getRoot() override
+         {
+            return getRHS().getRoot();
+         }
+
+         const ShapeFunctionBase<Space>& getRoot() const override
+         {
+            return getRHS().getRoot();
+         }
+
          int getRows(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
@@ -265,6 +275,16 @@ namespace Rodin::Variational
          const ShapeFunctionBase<Space>& getRHS() const
          {
             return *m_rhs;
+         }
+
+         ShapeFunctionBase<Space>& getRoot() override
+         {
+            return getRHS().getRoot();
+         }
+
+         const ShapeFunctionBase<Space>& getRoot() const override
+         {
+            return getRHS().getRoot();
          }
 
          int getRows(

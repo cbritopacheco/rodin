@@ -72,7 +72,8 @@ namespace Rodin::Variational
           * @param[in] prod Dot product instance
           */
          Integral(const Integrand& prod)
-            : m_prod(prod),
+            : BilinearFormDomainIntegrator(prod.getLHS().getRoot(), prod.getRHS().getRoot()),
+              m_prod(prod),
               m_intOrder(
                     [](const mfem::FiniteElement& trial,
                        const mfem::FiniteElement& test,
@@ -202,8 +203,9 @@ namespace Rodin::Variational
           * @f]
           */
          Integral(const Integrand& integrand)
-            : m_test(integrand.copy()),
-              m_intOrder(
+            :  LinearFormDomainIntegrator(integrand.getRoot()),
+               m_test(integrand.copy()),
+               m_intOrder(
                     [](const mfem::FiniteElement& fe,
                        mfem::ElementTransformation& trans)
                     { return fe.GetOrder() + trans.OrderW(); })
@@ -324,11 +326,13 @@ namespace Rodin::Variational
 
          template <class Lhs>
          BoundaryIntegral(Lhs&& lhs, const ShapeFunctionBase<Test>& rhs)
-            : m_integral(std::forward<Lhs>(lhs), rhs)
+            :  LinearFormBoundaryIntegrator(rhs.getRoot()),
+               m_integral(std::forward<Lhs>(lhs), rhs)
          {}
 
          BoundaryIntegral(const Integrand& integrand)
-            : m_integral(integrand)
+            :  LinearFormBoundaryIntegrator(integrand.getRoot()),
+               m_integral(integrand)
          {}
 
          BoundaryIntegral(const BoundaryIntegral& other)
