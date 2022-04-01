@@ -51,7 +51,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FES&gt;</div>
+          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearForm <span class="m-thin">class</span>
         </h1>
         <p>Represents a bilinear form on some finite element space.</p>
@@ -132,8 +132,9 @@ $ V $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a2df0e1e2d9b863001f64e33416fd2cfa" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap">FES&amp; fes)</span>
+            <dt id="a5026d8e48f842034070943d759666ed8">
+              <span class="m-doc-wrap-bumper"><a href="#a5026d8e48f842034070943d759666ed8" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v)</span>
             </dt>
             <dd>Constructs a bilinear form defined on some finite element space.</dd>
           </dl>
@@ -142,8 +143,8 @@ $ V $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1bee1222ab88b6228e349ff00cb599b5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u,
-              const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; v) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7fd9dd25fc5510d9e52180aa162e731a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TrialFES&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TestFES&gt;&amp; v) const -&gt; double</span>
             </dt>
             <dd>Evaluates the linear form at the functions <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -167,7 +168,7 @@ $ v $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7a7193fe9db99de0f0cfedf2c2a5ba26" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9e27bae8d0c1fe8c64ea6fb9752b226e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
             </dt>
             <dd>Builds the bilinear form from a derived instance of <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>.</dd>
             <dt id="a1995c774d971ab0041610829222607a5">
@@ -178,45 +179,25 @@ $ v $
               <span class="m-doc-wrap-bumper">void <a href="#a44137bb65de2396875934e48a6ee5099" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Reflects the changes in the mesh.</dd>
-            <dt id="aaccccf838ccc6f17a629712d3a8c7946">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaccccf838ccc6f17a629712d3a8c7946" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a0cf9af2f6c5d3d942387cce02ad2a383">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0cf9af2f6c5d3d942387cce02ad2a383" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Adds a <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4241e18942dc785ac21ef5a59131c413" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afcae3b02a442a8c5039f69ac44a9cbd0" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Builds the bilinear form the given <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a2df0e1e2d9b863001f64e33416fd2cfa"><div>
+          <section class="m-doc-details" id="a7fd9dd25fc5510d9e52180aa162e731a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES&gt;
+                template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2df0e1e2d9b863001f64e33416fd2cfa" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap">FES&amp; fes)</span></span>
-            </h3>
-            <p>Constructs a bilinear form defined on some finite element space.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">fes&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference to the finite element space</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a1bee1222ab88b6228e349ff00cb599b5"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />BilinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bee1222ab88b6228e349ff00cb599b5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u,
-              const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fd9dd25fc5510d9e52180aa162e731a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TrialFES&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TestFES&gt;&amp; v) const</span></span>
             </h3>
             <p>Evaluates the linear form at the functions <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -327,12 +308,12 @@ $ a(u, v) $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="a7a7193fe9db99de0f0cfedf2c2a5ba26"><div>
+          <section class="m-doc-details" id="a9e27bae8d0c1fe8c64ea6fb9752b226e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES&gt;
+                template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a7193fe9db99de0f0cfedf2c2a5ba26" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e27bae8d0c1fe8c64ea6fb9752b226e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi)</span></span>
             </h3>
             <p>Builds the bilinear form from a derived instance of <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -347,12 +328,12 @@ $ a(u, v) $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a4241e18942dc785ac21ef5a59131c413"><div>
+          <section class="m-doc-details" id="afcae3b02a442a8c5039f69ac44a9cbd0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES&gt;
+                template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4241e18942dc785ac21ef5a59131c413" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afcae3b02a442a8c5039f69ac44a9cbd0" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Builds the bilinear form the given <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>.</p>
             <table class="m-table m-fullwidth m-flat">
