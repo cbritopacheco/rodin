@@ -19,6 +19,10 @@ namespace Rodin::Variational
 
          std::unique_ptr<mfem::BilinearFormIntegrator> build() const override;
 
+         virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
+
+         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
+
          /**
           * @brief Gets the attributes of the elements being integrated.
           */
@@ -39,11 +43,21 @@ namespace Rodin::Variational
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
-         BilinearFormDomainIntegrator() = default;
+         BilinearFormDomainIntegrator(const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
+            :  m_u(u), m_v(v)
+         {}
 
-         BilinearFormDomainIntegrator(const BilinearFormDomainIntegrator&) = default;
+         BilinearFormDomainIntegrator(const BilinearFormDomainIntegrator& other)
+            :  BilinearFormIntegratorBase(other),
+               m_u(other.m_u), m_v(other.m_v),
+               m_attrs(other.m_attrs)
+         {}
 
-         BilinearFormDomainIntegrator(BilinearFormDomainIntegrator&&) = default;
+         BilinearFormDomainIntegrator(BilinearFormDomainIntegrator&& other)
+            :  BilinearFormIntegratorBase(std::move(other)),
+               m_u(other.m_u), m_v(other.m_v),
+               m_attrs(std::move(other.m_attrs))
+         {}
 
          IntegratorRegion getIntegratorRegion() const override
          {
@@ -76,6 +90,16 @@ namespace Rodin::Variational
             return *this;
          }
 
+         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         {
+            return m_u;
+         }
+
+         const ShapeFunctionBase<Test>& getTestFunction() const override
+         {
+            return m_v;
+         }
+
          const std::set<int>& getAttributes() const override
          {
             return m_attrs;
@@ -84,6 +108,8 @@ namespace Rodin::Variational
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
 
       private:
+         const ShapeFunctionBase<Trial>& m_u;
+         const ShapeFunctionBase<Test>&  m_v;
          std::set<int> m_attrs;
    };
 }

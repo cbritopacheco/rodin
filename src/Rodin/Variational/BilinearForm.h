@@ -10,6 +10,8 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
+#include "TrialFunction.h"
+#include "TestFunction.h"
 #include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
@@ -62,6 +64,10 @@ namespace Rodin::Variational
           * @brief Assembles the bilinear form.
           */
          virtual void assemble() = 0;
+
+         virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
+
+         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
    };
 
    /**
@@ -78,9 +84,13 @@ namespace Rodin::Variational
     * can be specified by from one or more bilinear integrators (e.g.
     * DiffusionIntegrator).
     */
-   template <class FES>
+   template <class TrialFES, class TestFES>
    class BilinearForm : public BilinearFormBase
    {
+      static_assert(
+            std::is_same_v<TrialFES, TestFES>,
+            "Different trial and test spaces are currently not supported.");
+
       public:
          using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
 
@@ -90,7 +100,7 @@ namespace Rodin::Variational
           *
           * @param[in] fes Reference to the finite element space
           */
-         BilinearForm(FES& fes);
+         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -103,7 +113,7 @@ namespace Rodin::Variational
           * at @f$ ( u, v ) @f$.
           */
          double operator()(
-               const GridFunction<FES>& u, const GridFunction<FES>& v) const;
+               const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const;
 
          /**
           * @brief Builds the bilinear form from a derived instance of
@@ -117,6 +127,16 @@ namespace Rodin::Variational
          void assemble() override;
 
          void update() override;
+
+         const TrialFunction<TrialFES>& getTrialFunction() const override
+         {
+            return m_u;
+         }
+
+         const TestFunction<TestFES>& getTestFunction() const override
+         {
+            return m_v;
+         }
 
          BilinearForm& add(const BilinearFormIntegratorBase& bfi) override;
          BilinearForm& add(const FormLanguage::BilinearFormIntegratorSum& lsum) override;
@@ -136,7 +156,8 @@ namespace Rodin::Variational
          }
 
       private:
-         FES& m_fes;
+         TrialFunction<TrialFES>& m_u;
+         TestFunction<TestFES>&   m_v;
          std::unique_ptr<mfem::BilinearForm> m_bf;
          BFIList m_bfiDomainList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;

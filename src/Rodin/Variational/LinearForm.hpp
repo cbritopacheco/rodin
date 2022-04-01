@@ -15,9 +15,9 @@
 namespace Rodin::Variational
 {
    template <class FES>
-   LinearForm<FES>::LinearForm(FES& fes)
-      :  m_fes(fes),
-         m_lf(std::make_unique<mfem::LinearForm>(&fes.getFES()))
+   LinearForm<FES>::LinearForm(TestFunction<FES>& v)
+      :  m_v(v),
+         m_lf(std::make_unique<mfem::LinearForm>(&v.getFiniteElementSpace().getFES()))
    {}
 
    template <class FES>
@@ -44,6 +44,7 @@ namespace Rodin::Variational
    template <class FES>
    LinearForm<FES>& LinearForm<FES>::add(const LinearFormIntegratorBase& lfi)
    {
+      assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
@@ -58,7 +59,7 @@ namespace Rodin::Variational
             }
             else
             {
-               int size = m_fes.getMesh().getHandle().attributes.Max();
+               int size = m_v.getFiniteElementSpace().getMesh().getHandle().attributes.Max();
                auto data = std::make_unique<mfem::Array<int>>(size);
                *data = 0;
                for (const auto& b : domAttrs)
@@ -84,7 +85,7 @@ namespace Rodin::Variational
             }
             else
             {
-               int size = m_fes.getMesh().getHandle().bdr_attributes.Max();
+               int size = m_v.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
                auto data = std::make_unique<mfem::Array<int>>(size);
                *data = 0;
                for (const auto& b : bdrAttrs)
@@ -120,7 +121,7 @@ namespace Rodin::Variational
    LinearForm<FES>&
    LinearForm<FES>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
-      m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+      m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getFES()));
       m_lfiDomainList.clear();
       m_lfiBoundaryList.clear();
       m_domAttrMarkers.clear();
@@ -132,11 +133,12 @@ namespace Rodin::Variational
    template <class FES>
    LinearForm<FES>& LinearForm<FES>::from(const LinearFormIntegratorBase& lfi)
    {
+      assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
          {
-            m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+            m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getFES()));
             m_lfiDomainList.clear();
             m_domAttrMarkers.clear();
             add(lfi);
@@ -144,7 +146,7 @@ namespace Rodin::Variational
          }
          case IntegratorRegion::Boundary:
          {
-            m_lf.reset(new mfem::LinearForm(&m_fes.getFES()));
+            m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getFES()));
             m_lfiBoundaryList.clear();
             m_bdrAttrMarkers.clear();
             add(lfi);

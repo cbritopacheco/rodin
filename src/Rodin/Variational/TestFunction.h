@@ -13,31 +13,31 @@ namespace Rodin::Variational
    {
       public:
          TestFunction(FES& fes)
-            : ShapeFunction<FES, Test>(fes),
-              m_uuid(boost::uuids::random_generator()())
+            : ShapeFunction<FES, Test>(fes)
          {}
 
          TestFunction(const TestFunction& other)
-            : ShapeFunction<FES, Test>(other),
-              m_uuid(other.m_uuid)
+            : ShapeFunction<FES, Test>(other)
          {}
 
          TestFunction(TestFunction&& other)
-            : ShapeFunction<FES, Test>(std::move(other)),
-              m_uuid(std::move(other.m_uuid))
+            : ShapeFunction<FES, Test>(std::move(other))
          {}
 
-         boost::uuids::uuid getUUID() const
+         ShapeFunctionBase<Test>& getRoot() override
          {
-            return m_uuid;
+            return *this;
+         }
+
+         const ShapeFunctionBase<Test>& getRoot() const override
+         {
+            return *this;
          }
 
          TestFunction* copy() const noexcept override
          {
             return new TestFunction(*this);
          }
-      private:
-         const boost::uuids::uuid m_uuid;
    };
    template <class FES>
    TestFunction(FES& fes) -> TestFunction<FES>;

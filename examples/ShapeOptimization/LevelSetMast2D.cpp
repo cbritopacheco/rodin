@@ -37,7 +37,7 @@ int main(int, char**)
     auto& Vh = w.getFiniteElementSpace();
     TrialFunction u(Vh);
     TestFunction  v(Vh);
-    BilinearForm bf(Vh);
+    BilinearForm  bf(u, v);
     bf = Integral(lambda * Div(u), Div(v)).over(Interior)
        + Integral(
            mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())).over(Interior);
