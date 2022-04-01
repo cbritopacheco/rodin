@@ -18,8 +18,8 @@ namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES>
    Problem<TrialFES, TestFES>::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-      :  m_bilinearForm(u.getFiniteElementSpace()),
-         m_linearForm(u.getFiniteElementSpace()),
+      :  m_bilinearForm(u, v),
+         m_linearForm(v),
          m_trialFunctions{{u.getUUID(), std::ref(u)}},
          m_testFunctions{{v.getUUID(), std::ref(v)}}
    {}

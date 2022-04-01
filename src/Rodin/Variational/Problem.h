@@ -106,8 +106,8 @@ namespace Rodin::Variational
 
          Problem& operator=(const ProblemBody& rhs) override;
       private:
-         LinearForm<TrialFES>       m_linearForm;
-         BilinearForm<TrialFES>     m_bilinearForm;
+         LinearForm<TrialFES>                m_linearForm;
+         BilinearForm<TrialFES, TestFES>     m_bilinearForm;
          const std::map<
             boost::uuids::uuid,
             std::reference_wrapper<TrialFunction<TrialFES>>> m_trialFunctions;

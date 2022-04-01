@@ -7,7 +7,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/poisson-example.mesh";
+  const char* meshFile = "../resources/mfem/poisson-example.mesh";
 
   // Define boundary attributes
   int Gamma = 1;
