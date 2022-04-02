@@ -47,7 +47,6 @@ namespace Rodin::Variational
          BilinearFormDomainIntegrator(
                const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
             :  m_u(u.copy()), m_v(v.copy())
-         {}
 
          BilinearFormDomainIntegrator(const BilinearFormDomainIntegrator& other)
             :  BilinearFormIntegratorBase(other),
