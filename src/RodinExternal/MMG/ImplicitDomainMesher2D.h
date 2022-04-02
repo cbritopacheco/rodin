@@ -27,15 +27,6 @@ namespace Rodin::External::MMG
   {
     public:
       /**
-       * @brief Discretized mesh and solution.
-       */
-      struct Discretization
-      {
-        Mesh2D mesh; /// Discretized mesh
-        ScalarSolution2D solution; /// Level set function defined on the new vertices
-      };
-
-      /**
        * @brief Constructs an ImplicitDomainMesher2D with default values.
        */
       ImplicitDomainMesher2D();
@@ -110,7 +101,7 @@ namespace Rodin::External::MMG
        * @param[in] ls Level set function
        * @returns Discretization
        */
-      Discretization discretize(ScalarSolution2D& ls);
+      Mesh2D discretize(ScalarSolution2D& ls);
 
       ImplicitDomainMesher2D& setHMin(double hmin) override;
       ImplicitDomainMesher2D& setHMax(double hmax) override;

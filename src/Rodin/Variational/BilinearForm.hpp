@@ -97,8 +97,10 @@ namespace Rodin::Variational
    BilinearForm<TrialFES, TestFES>& BilinearForm<TrialFES, TestFES>::add(
          const BilinearFormIntegratorBase& bfi)
    {
-      assert(bfi.getTrialFunction().getRoot().getUUID() == getTrialFunction().getRoot().getUUID());
-      assert(bfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
+      assert(
+         bfi.getTrialFunction().getRoot().getUUID()== getTrialFunction().getRoot().getUUID());
+      assert(
+         bfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
 
       switch (bfi.getIntegratorRegion())
       {

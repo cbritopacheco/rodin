@@ -28,7 +28,7 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ImplicitDomainMesher2D::Discretization
+  Mesh2D
   ImplicitDomainMesher2D::discretize(ScalarSolution2D& ls)
   {
     Mesh2D mesh(ls.getMesh());
@@ -109,7 +109,7 @@ namespace Rodin::External::MMG
             MMG2D_DPARAM_ls, m_ls);
       MMG2D_mmg2dls(mesh.getHandle(), sol.getHandle(), NULL);
     }
-    return {std::move(mesh), std::move(sol)};
+    return mesh;
   }
 
   ImplicitDomainMesher2D& ImplicitDomainMesher2D::split(

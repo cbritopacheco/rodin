@@ -49,6 +49,7 @@ namespace Rodin::External::MMG
 
     int retcode = m_mshdist.run(
         boxp.string(),
+        "-fmm",
         "-surf",
         "-dom",
         "-ncpu", m_ncpu,
@@ -96,7 +97,7 @@ namespace Rodin::External::MMG
     auto name = solp;
     name.replace_extension();
 
-    int retcode = m_mshdist.run(name.string(), "-surf", "-ncpu", m_ncpu, "-v 0");
+    int retcode = m_mshdist.run(name.string(), "-fmm", "-surf", "-ncpu", m_ncpu, "-v 0");
     if (retcode != 0)
       Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
