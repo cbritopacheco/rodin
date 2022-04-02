@@ -1,11 +1,11 @@
 #ifndef RODIN_VARIATIONAL_IDENTITYMATRIX_H
 #define RODIN_VARIATIONAL_IDENTITYMATRIX_H
 
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 
 namespace Rodin::Variational
 {
-   class IdentityMatrix : public MatrixCoefficientBase
+   class IdentityMatrix : public MatrixFunctionBase
    {
       public:
          IdentityMatrix(int n)
@@ -13,12 +13,12 @@ namespace Rodin::Variational
          {}
 
          IdentityMatrix(const IdentityMatrix& other)
-            :  MatrixCoefficientBase(other),
+            :  MatrixFunctionBase(other),
                m_n(other.m_n)
          {}
 
          IdentityMatrix(IdentityMatrix&& other)
-            :  MatrixCoefficientBase(std::move(other)),
+            :  MatrixFunctionBase(std::move(other)),
                m_n(other.m_n)
          {}
 
