@@ -57,7 +57,6 @@ int main(int, char**)
   //       else
   //         return -1;
   //     });
-
   // GridFunction ls(Vh);
   // ls = f;
 
@@ -106,10 +105,6 @@ int main(int, char**)
   // phi.save("phi.gf");
   nn.save("nn.gf");
   Omega.save("Omega.mesh");
-  // auto mmgLs = Cast(ls).to<MMG::IncompleteScalarSolutionS>().setMesh(mmgMesh);
-
-  // mmgMesh.save("mmg.mesh");
-  // mmgLs.save("mmg.sol");
 
   return 0;
 }
