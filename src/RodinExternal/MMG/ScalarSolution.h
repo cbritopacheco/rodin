@@ -20,6 +20,20 @@ namespace Rodin::External::MMG
    class ScalarSolution : public SolutionBase
    {
       public:
+         ScalarSolution(MMG5_pSol sol = nullptr)
+           : SolutionBase(sol)
+         {}
+
+         ScalarSolution(const ScalarSolution& other)
+            : SolutionBase(other)
+         {}
+
+         ScalarSolution(ScalarSolution&& other)
+           : SolutionBase(std::move(other))
+         {}
+
+         ScalarSolution& operator=(ScalarSolution&&) = default;
+
          class Iterator
          {
             public:

@@ -27,6 +27,7 @@
 // ---- mmgs -----------------------------------------------------------------
 #include "MMG/MeshS.h"
 #include "MMG/ScalarSolutionS.h"
+#include "MMG/VectorSolutionS.h"
 
 #include "MMG/AdvectS.h"
 #include "MMG/DistancerS.h"
