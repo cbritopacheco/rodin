@@ -27,15 +27,6 @@ namespace Rodin::External::MMG
   {
     public:
       /**
-       * @brief Discretized mesh and solution.
-       */
-      struct Discretization
-      {
-        MeshS mesh; /// Discretized mesh
-        ScalarSolutionS solution; /// Level set function defined on the new vertices
-      };
-
-      /**
        * @brief Constructs an ImplicitDomainMesherS with default values.
        */
       ImplicitDomainMesherS();
@@ -64,12 +55,10 @@ namespace Rodin::External::MMG
        * @brief Discretizes and optimizes an implicitly defined surface defined
        * by a level set function.
        *
-       * The material reference of the level set (edge) boundary will be 10.
-       *
        * @param[in] ls Level set function
        * @returns Discretization
        */
-      Discretization discretize(ScalarSolutionS& ls);
+      MeshS discretize(ScalarSolutionS& ls);
 
       ImplicitDomainMesherS& setHMin(double hmin) override;
       ImplicitDomainMesherS& setHMax(double hmax) override;

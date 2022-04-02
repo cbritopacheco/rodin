@@ -119,7 +119,7 @@ int main(int, char**)
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain
-    auto [mmgImplicit, _] =
+    auto mmgImplicit =
       MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
                                    .split(Exterior, {Interior, Exterior})
                                    .setRMC(1e-3)
