@@ -21,7 +21,7 @@
 #include "TrialFunction.h"
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 

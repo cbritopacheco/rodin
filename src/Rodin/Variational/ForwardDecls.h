@@ -120,9 +120,9 @@ namespace Rodin::Variational
    template <class ... Values>
    class VectorFunction;
 
-   class MatrixCoefficientBase;
+   class MatrixFunctionBase;
 
-   class MatrixCoefficient;
+   class MatrixFunction;
 
    // ---- Expressions -------------------------------------------------------
    template <class T>

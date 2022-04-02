@@ -24,7 +24,7 @@
 #include "Restriction.h"
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 #include "GridFunctionView.h"
 #include "GridFunctionIndex.h"
 

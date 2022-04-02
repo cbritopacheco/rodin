@@ -20,7 +20,7 @@
 #include "GridFunction.h"
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
 #include "Mult.h"
@@ -78,19 +78,19 @@ namespace Rodin::Variational
     *    A \colon B = \sum_{i = 1}^n \sum_{j = 1}^m A_{ij} B_{ij} = \mathrm{tr}(B^T A)
     * @f]
     *
-    * @tparam A Derived type from MatrixCoefficientBase
-    * @tparam B Derived type from MatrixCoefficientBase
+    * @tparam A Derived type from MatrixFunctionBase
+    * @tparam B Derived type from MatrixFunctionBase
     */
    template <>
-   class Dot<MatrixCoefficientBase, MatrixCoefficientBase> : public ScalarFunctionBase
+   class Dot<MatrixFunctionBase, MatrixFunctionBase> : public ScalarFunctionBase
    {
       public:
          /**
           * @brief Constructs the Dot product between two given matrices.
-          * @param[in] a Derived instance of MatrixCoefficientBase
-          * @param[in] b Derived instance of MatrixCoefficientBase
+          * @param[in] a Derived instance of MatrixFunctionBase
+          * @param[in] b Derived instance of MatrixFunctionBase
           */
-         Dot(const MatrixCoefficientBase& a, const MatrixCoefficientBase& b)
+         Dot(const MatrixFunctionBase& a, const MatrixFunctionBase& b)
             : m_a(a.copy()), m_b(b.copy())
          {}
 
@@ -118,10 +118,10 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<MatrixCoefficientBase> m_a, m_b;
+         std::unique_ptr<MatrixFunctionBase> m_a, m_b;
    };
-   Dot(const MatrixCoefficientBase&, const MatrixCoefficientBase&)
-      -> Dot<MatrixCoefficientBase, MatrixCoefficientBase>;
+   Dot(const MatrixFunctionBase&, const MatrixFunctionBase&)
+      -> Dot<MatrixFunctionBase, MatrixFunctionBase>;
 
    template <ShapeFunctionSpaceType Space>
    class Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>
