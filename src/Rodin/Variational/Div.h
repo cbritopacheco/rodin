@@ -12,6 +12,9 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Divergence of an H1 ShapeFunction.
+    */
    template <ShapeFunctionSpaceType Space>
    class Div<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
    {

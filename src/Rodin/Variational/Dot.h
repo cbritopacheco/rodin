@@ -13,14 +13,16 @@
 #include <type_traits>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Variational/GridFunction.h"
-#include "Rodin/Variational/ScalarCoefficient.h"
-#include "Rodin/Variational/VectorCoefficient.h"
-#include "Rodin/Variational/MatrixCoefficient.h"
-#include "Rodin/Variational/TestFunction.h"
-#include "Rodin/Variational/TrialFunction.h"
+
 #include "FormLanguage/Base.h"
+
 #include "ForwardDecls.h"
+#include "GridFunction.h"
+#include "ScalarCoefficient.h"
+#include "VectorCoefficient.h"
+#include "MatrixCoefficient.h"
+#include "TestFunction.h"
+#include "TrialFunction.h"
 #include "Mult.h"
 
 namespace Rodin::Variational

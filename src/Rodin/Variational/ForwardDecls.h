@@ -152,6 +152,9 @@ namespace Rodin::Variational
    class Mult;
 
    template <class Lhs, class Rhs>
+   class Division;
+
+   template <class Lhs, class Rhs>
    class Dot;
 }
 
