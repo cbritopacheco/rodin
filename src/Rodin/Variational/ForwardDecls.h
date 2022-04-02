@@ -110,19 +110,19 @@ namespace Rodin::Variational
    class DirichletBC;
 
    // ---- Coefficients ------------------------------------------------------
-   class ScalarCoefficientBase;
+   class ScalarFunctionBase;
 
    template <class T>
-   class ScalarCoefficient;
+   class ScalarFunction;
 
-   class VectorCoefficientBase;
+   class VectorFunctionBase;
 
    template <class ... Values>
-   class VectorCoefficient;
+   class VectorFunction;
 
-   class MatrixCoefficientBase;
+   class MatrixFunctionBase;
 
-   class MatrixCoefficient;
+   class MatrixFunction;
 
    // ---- Expressions -------------------------------------------------------
    template <class T>
@@ -150,6 +150,9 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Mult;
+
+   template <class Lhs, class Rhs>
+   class Division;
 
    template <class Lhs, class Rhs>
    class Dot;

@@ -1,4 +1,4 @@
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 
 #include "Dot.h"
 
