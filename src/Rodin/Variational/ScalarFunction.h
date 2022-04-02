@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
-#define RODIN_VARIATIONAL_SCALARCOEFFICIENT_H
+#ifndef RODIN_VARIATIONAL_SCALARFUNCTION_H
+#define RODIN_VARIATIONAL_SCALARFUNCTION_H
 
 #include <map>
 #include <set>
@@ -25,13 +25,13 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for objects representing scalar coefficients.
     */
-   class ScalarCoefficientBase
+   class ScalarFunctionBase
       : public FormLanguage::Buildable<mfem::Coefficient>
    {
       public:
-         ScalarCoefficientBase() = default;
+         ScalarFunctionBase() = default;
 
-         ScalarCoefficientBase(const ScalarCoefficientBase&) = default;
+         ScalarFunctionBase(const ScalarFunctionBase&) = default;
 
          /**
           * @brief Sets an attribute which will be interpreted as the domain to
@@ -42,7 +42,7 @@ namespace Rodin::Variational
           *
           * @returns Reference to self (for method chaining)
           */
-         ScalarCoefficientBase& traceOf(int attr)
+         ScalarFunctionBase& traceOf(int attr)
          {
             return traceOf(std::set<int>{attr});
          }
@@ -58,16 +58,16 @@ namespace Rodin::Variational
           * involve the derivatives of a GridFunction need to know the element
           * to "trace".
           *
-          * @note Setting the trace domain of a ScalarCoefficientBase instance
+          * @note Setting the trace domain of a ScalarFunctionBase instance
           * does not guarantee that it will taken into consideration when
           * computing its value. That said, it is up to the subclass to decide
           * how it will use this information which can be obtained via the
           * getTraceDomain() method.
           *
-          * @see @ref ScalarCoefficientBase::getTraceDomain() "getTraceDomain()"
+          * @see @ref ScalarFunctionBase::getTraceDomain() "getTraceDomain()"
           *
           */
-         ScalarCoefficientBase& traceOf(std::set<int> attrs)
+         ScalarFunctionBase& traceOf(std::set<int> attrs)
          {
             m_traceDomain = attrs;
             return *this;
@@ -89,78 +89,78 @@ namespace Rodin::Variational
 
          std::unique_ptr<mfem::Coefficient> build() const override;
 
-         virtual ~ScalarCoefficientBase() = default;
+         virtual ~ScalarFunctionBase() = default;
 
-         virtual Restriction<ScalarCoefficientBase> restrictTo(int attr);
+         virtual Restriction<ScalarFunctionBase> restrictTo(int attr);
 
-         virtual Restriction<ScalarCoefficientBase> restrictTo(const std::set<int>& attrs);
+         virtual Restriction<ScalarFunctionBase> restrictTo(const std::set<int>& attrs);
 
          virtual double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip
                ) const = 0;
 
-         virtual ScalarCoefficientBase* copy() const noexcept override = 0;
+         virtual ScalarFunctionBase* copy() const noexcept override = 0;
 
       private:
          std::set<int> m_traceDomain;
    };
 
    template <>
-   class ScalarCoefficient<ScalarCoefficientBase> : public ScalarCoefficientBase
+   class ScalarFunction<ScalarFunctionBase> : public ScalarFunctionBase
    {
       public:
-         ScalarCoefficient(const ScalarCoefficientBase& nested)
+         ScalarFunction(const ScalarFunctionBase& nested)
             : m_nested(nested.copy())
          {}
 
-         ScalarCoefficient(const ScalarCoefficient& other)
+         ScalarFunction(const ScalarFunction& other)
             : m_nested(other.m_nested->copy())
          {}
 
-         ScalarCoefficient(ScalarCoefficient&& other) = default;
+         ScalarFunction(ScalarFunction&& other) = default;
 
          double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             return m_nested->getValue(trans, ip);
          }
 
-         ScalarCoefficient* copy() const noexcept override
+         ScalarFunction* copy() const noexcept override
          {
-            return new ScalarCoefficient(*this);
+            return new ScalarFunction(*this);
          }
 
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_nested;
+         std::unique_ptr<ScalarFunctionBase> m_nested;
    };
-   ScalarCoefficient(const ScalarCoefficientBase&)
-      -> ScalarCoefficient<ScalarCoefficientBase>;
+   ScalarFunction(const ScalarFunctionBase&)
+      -> ScalarFunction<ScalarFunctionBase>;
 
    /**
-    * @brief Represents a ScalarCoefficient of arithmetic type `T`.
+    * @brief Represents a ScalarFunction of arithmetic type `T`.
     *
     * @tparam T Arithmetic type
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class T>
-   class ScalarCoefficient : public ScalarCoefficientBase
+   class ScalarFunction : public ScalarFunctionBase
    {
       public:
          static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
 
          /**
-          * @brief Constructs a ScalarCoefficient from an arithmetic value.
+          * @brief Constructs a ScalarFunction from an arithmetic value.
           * @param[in] x Arithmetic value
           */
          template <typename U = T>
          constexpr
-         ScalarCoefficient(typename std::enable_if_t<std::is_arithmetic_v<U>, U> x)
+         ScalarFunction(typename std::enable_if_t<std::is_arithmetic_v<U>, U> x)
             : m_x(x)
          {}
 
          constexpr
-         ScalarCoefficient(const ScalarCoefficient& other) = default;
+         ScalarFunction(const ScalarFunction& other) = default;
 
          constexpr
-         ScalarCoefficient(ScalarCoefficient&&) = default;
+         ScalarFunction(ScalarFunction&&) = default;
 
          constexpr
          T getValue() const
@@ -173,17 +173,17 @@ namespace Rodin::Variational
             return m_x;
          }
 
-         ScalarCoefficient* copy() const noexcept override
+         ScalarFunction* copy() const noexcept override
          {
-            return new ScalarCoefficient(*this);
+            return new ScalarFunction(*this);
          }
 
       private:
          const T m_x;
    };
    template <class T>
-   ScalarCoefficient(const T&)
-      -> ScalarCoefficient<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
+   ScalarFunction(const T&)
+      -> ScalarFunction<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
 
    /**
     * @brief Represents a scalar coefficient which is built from a
@@ -192,17 +192,17 @@ namespace Rodin::Variational
     * @tparam FEC Finite element collection
     */
    template <class FEC>
-   class ScalarCoefficient<GridFunction<FEC>>
-      : public ScalarCoefficientBase
+   class ScalarFunction<GridFunction<FEC>>
+      : public ScalarFunctionBase
    {
       public:
          /**
-          * @brief Constructs a ScalarCoefficient from a GridFunction u
+          * @brief Constructs a ScalarFunction from a GridFunction u
           * @param[in] u GridFunction which belongs to the finite element
           * collection FEC
           */
          constexpr
-         ScalarCoefficient(const GridFunction<FEC>& u)
+         ScalarFunction(const GridFunction<FEC>& u)
             :  m_u(u),
                m_mfemCoefficient(&u.getHandle())
          {
@@ -210,7 +210,7 @@ namespace Rodin::Variational
          }
 
          constexpr
-         ScalarCoefficient(const ScalarCoefficient& other) = default;
+         ScalarFunction(const ScalarFunction& other) = default;
 
          const GridFunction<FEC>& getValue() const
          {
@@ -222,9 +222,9 @@ namespace Rodin::Variational
             return m_mfemCoefficient.Eval(trans, ip);
          }
 
-         ScalarCoefficient* copy() const noexcept override
+         ScalarFunction* copy() const noexcept override
          {
-            return new ScalarCoefficient(*this);
+            return new ScalarFunction(*this);
          }
 
       private:
@@ -232,19 +232,19 @@ namespace Rodin::Variational
          mutable mfem::GridFunctionCoefficient m_mfemCoefficient;
    };
    template <class FEC>
-   ScalarCoefficient(const GridFunction<FEC>&)
-      -> ScalarCoefficient<GridFunction<FEC>>;
+   ScalarFunction(const GridFunction<FEC>&)
+      -> ScalarFunction<GridFunction<FEC>>;
 
    template <>
-   class ScalarCoefficient<std::function<double(const double*, int)>>
-      : public ScalarCoefficientBase
+   class ScalarFunction<std::function<double(const double*, int)>>
+      : public ScalarFunctionBase
    {
       public:
-         ScalarCoefficient(std::function<double(const double*, int)> f)
+         ScalarFunction(std::function<double(const double*, int)> f)
             : m_f(f)
          {}
 
-         ScalarCoefficient(const ScalarCoefficient& other) = default;
+         ScalarFunction(const ScalarFunction& other) = default;
 
          std::function<double(const double*, int)> getValue() const
          {
@@ -259,23 +259,23 @@ namespace Rodin::Variational
             return m_f(transip.GetData(), transip.Size());
          }
 
-         ScalarCoefficient* copy() const noexcept override
+         ScalarFunction* copy() const noexcept override
          {
-            return new ScalarCoefficient(*this);
+            return new ScalarFunction(*this);
          }
 
       private:
          const std::function<double(const double*, int)> m_f;
    };
-   ScalarCoefficient(std::function<double(const double*, int)>)
-      -> ScalarCoefficient<std::function<double(const double*, int)>>;
+   ScalarFunction(std::function<double(const double*, int)>)
+      -> ScalarFunction<std::function<double(const double*, int)>>;
 
    template <>
-   class ScalarCoefficient<std::map<int, double>>
-      : public ScalarCoefficientBase
+   class ScalarFunction<std::map<int, double>>
+      : public ScalarFunctionBase
    {
       public:
-         ScalarCoefficient(const std::map<int, double>& pieces)
+         ScalarFunction(const std::map<int, double>& pieces)
             : m_pieces(pieces),
               m_mfemCoefficient(pieces.rbegin()->first) // Maximum attribute
          {
@@ -290,7 +290,7 @@ namespace Rodin::Variational
             }
          }
 
-         ScalarCoefficient(const ScalarCoefficient& other)
+         ScalarFunction(const ScalarFunction& other)
             : m_pieces(other.m_pieces)
          {}
 
@@ -299,40 +299,42 @@ namespace Rodin::Variational
             return m_pieces;
          }
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+         const override
          {
             return m_mfemCoefficient.Eval(trans, ip);
          }
 
-         ScalarCoefficient* copy() const noexcept override
+         ScalarFunction* copy() const noexcept override
          {
-            return new ScalarCoefficient(*this);
+            return new ScalarFunction(*this);
          }
       private:
          std::map<int, double> m_pieces;
          mutable mfem::PWConstCoefficient m_mfemCoefficient;
    };
-   ScalarCoefficient(const std::map<int, double>&)
-      -> ScalarCoefficient<std::map<int, double>>;
-   ScalarCoefficient(std::initializer_list<std::pair<int, double>>&)
-      -> ScalarCoefficient<std::map<int, double>>;
+   ScalarFunction(const std::map<int, double>&)
+      -> ScalarFunction<std::map<int, double>>;
+   ScalarFunction(std::initializer_list<std::pair<int, double>>&)
+      -> ScalarFunction<std::map<int, double>>;
 }
 
 namespace Rodin::Variational::Internal
 {
-   class ProxyScalarCoefficient : public mfem::Coefficient
+   class ProxyScalarFunction : public mfem::Coefficient
    {
       public:
-         ProxyScalarCoefficient(const ScalarCoefficientBase& s)
+         ProxyScalarFunction(const ScalarFunctionBase& s)
             : m_s(s)
          {}
 
-         ProxyScalarCoefficient(const ProxyScalarCoefficient& other)
+         ProxyScalarFunction(const ProxyScalarFunction& other)
             : mfem::Coefficient(other),
               m_s(other.m_s)
          {}
 
-         ProxyScalarCoefficient(ProxyScalarCoefficient&& other)
+         ProxyScalarFunction(ProxyScalarFunction&& other)
             : mfem::Coefficient(std::move(other)),
               m_s(other.m_s)
          {}
@@ -342,7 +344,7 @@ namespace Rodin::Variational::Internal
             return m_s.getValue(trans, ip);
          }
       private:
-         const ScalarCoefficientBase& m_s;
+         const ScalarFunctionBase& m_s;
    };
 }
 

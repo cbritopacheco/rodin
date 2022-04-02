@@ -9,7 +9,7 @@
 
 #include <set>
 #include "ForwardDecls.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 #include "FormLanguage/Base.h"
 
 namespace Rodin::Variational
@@ -25,10 +25,10 @@ namespace Rodin::Variational
    {};
 
    template <>
-   class Restriction<ScalarCoefficientBase> : public RestrictionBase
+   class Restriction<ScalarFunctionBase> : public RestrictionBase
    {
       public:
-         Restriction(const ScalarCoefficientBase& s);
+         Restriction(const ScalarFunctionBase& s);
 
          Restriction(const Restriction& other);
 
@@ -39,7 +39,7 @@ namespace Rodin::Variational
 
          Restriction& to(const std::set<int>& attrs);
 
-         const ScalarCoefficientBase& getScalarCoefficient() const;
+         const ScalarFunctionBase& getScalarFunction() const;
 
          const std::set<int>& getAttributes() const override;
 
@@ -50,10 +50,10 @@ namespace Rodin::Variational
 
       private:
          std::set<int> m_attr;
-         std::unique_ptr<ScalarCoefficientBase> m_s;
+         std::unique_ptr<ScalarFunctionBase> m_s;
    };
 
-   using RestrictedScalarCoefficient = Restriction<ScalarCoefficientBase>;
+   using RestrictedScalarFunction = Restriction<ScalarFunctionBase>;
 }
 
 #endif

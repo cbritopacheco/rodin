@@ -9,7 +9,7 @@
 namespace Rodin::Variational
 {
    double
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
    ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    const
    {
@@ -17,7 +17,7 @@ namespace Rodin::Variational
    }
 
    void
-   Sum<MatrixCoefficientBase, MatrixCoefficientBase>
+   Sum<MatrixFunctionBase, MatrixFunctionBase>
    ::getValue(
          mfem::DenseMatrix& value,
          mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
@@ -28,24 +28,24 @@ namespace Rodin::Variational
       value += m;
    }
 
-   int Sum<MatrixCoefficientBase, MatrixCoefficientBase>::getRows() const
+   int Sum<MatrixFunctionBase, MatrixFunctionBase>::getRows() const
    {
       return m_lhs->getRows();
    }
 
-   int Sum<MatrixCoefficientBase, MatrixCoefficientBase>::getColumns() const
+   int Sum<MatrixFunctionBase, MatrixFunctionBase>::getColumns() const
    {
       return m_lhs->getColumns();
    }
 
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator+(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Sum(lhs, rhs);
    }
 
-   Sum<MatrixCoefficientBase, MatrixCoefficientBase>
-   operator+(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+   Sum<MatrixFunctionBase, MatrixFunctionBase>
+   operator+(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs)
    {
       return Sum(lhs, rhs);
    }

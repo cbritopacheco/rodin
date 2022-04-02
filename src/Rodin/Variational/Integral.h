@@ -19,9 +19,9 @@
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "ScalarCoefficient.h"
-#include "VectorCoefficient.h"
-#include "MatrixCoefficient.h"
+#include "ScalarFunction.h"
+#include "VectorFunction.h"
+#include "MatrixFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -170,7 +170,7 @@ namespace Rodin::Variational
           *    \int \lambda A(v) \ dx \ .
           * @f]
           */
-         Integral(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -187,7 +187,7 @@ namespace Rodin::Variational
           *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx \ .
           * @f]
           */
-         Integral(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -262,9 +262,9 @@ namespace Rodin::Variational
    };
    Integral(const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const ScalarCoefficientBase&, const ShapeFunctionBase<Test>&)
+   Integral(const ScalarFunctionBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const VectorCoefficientBase&, const ShapeFunctionBase<Test>&)
+   Integral(const VectorFunctionBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
 
    /**
@@ -285,8 +285,8 @@ namespace Rodin::Variational
               m_assembled(false)
          {
             assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-            m_one = ScalarCoefficient(1.0);
-            m_lf.from(Integral<ShapeFunctionBase<Test>>(ScalarCoefficient(u) * m_v));
+            m_one = ScalarFunction(1.0);
+            m_lf.from(Integral<ShapeFunctionBase<Test>>(ScalarFunction(u) * m_v));
          }
 
          Integral(const Integral& other)
