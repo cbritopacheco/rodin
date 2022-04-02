@@ -10,7 +10,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "Rodin/Variational/ScalarCoefficient.h"
+#include "Rodin/Variational/ScalarFunction.h"
 #include "Rodin/Variational/VectorCoefficient.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 
@@ -65,30 +65,30 @@ namespace Rodin::Variational
    };
 
    template <>
-   class UnaryMinus<ScalarCoefficientBase>
-      : public ScalarCoefficientBase
+   class UnaryMinus<ScalarFunctionBase>
+      : public ScalarFunctionBase
    {
       public:
-         UnaryMinus(const ScalarCoefficientBase& op)
+         UnaryMinus(const ScalarFunctionBase& op)
             : m_op(op.copy())
          {}
 
          UnaryMinus(const UnaryMinus& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_op(other.m_op->copy())
          {}
 
          UnaryMinus(UnaryMinus&& other)
-            : ScalarCoefficientBase(std::move(other)),
+            : ScalarFunctionBase(std::move(other)),
               m_op(std::move(other.m_op))
          {}
 
-         ScalarCoefficientBase& getOperand()
+         ScalarFunctionBase& getOperand()
          {
             return *m_op;
          }
 
-         const ScalarCoefficientBase& getOperand() const
+         const ScalarFunctionBase& getOperand() const
          {
             return *m_op;
          }
@@ -102,12 +102,12 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_op;
+         std::unique_ptr<ScalarFunctionBase> m_op;
    };
-   UnaryMinus<ScalarCoefficientBase> operator-(const ScalarCoefficientBase& op);
+   UnaryMinus<ScalarFunctionBase> operator-(const ScalarFunctionBase& op);
 
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    template <>
    class UnaryMinus<VectorCoefficientBase>

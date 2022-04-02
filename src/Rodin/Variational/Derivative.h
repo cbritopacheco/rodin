@@ -7,7 +7,7 @@
 #include "ForwardDecls.h"
 #include "H1.h"
 #include "GridFunction.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
@@ -22,7 +22,7 @@ namespace Rodin::Variational
     * @f]
     * where @f$ \quad 0 \leq i < s @f$ and @f$ \ 0 \leq j < d @f$.
     */
-   class Derivative : public ScalarCoefficientBase
+   class Derivative : public ScalarFunctionBase
    {
       public:
          /**

@@ -9,7 +9,7 @@
 namespace Rodin::Variational
 {
    double
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
    ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    const
    {
@@ -38,8 +38,8 @@ namespace Rodin::Variational
       return m_lhs->getColumns();
    }
 
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator+(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Sum(lhs, rhs);
    }

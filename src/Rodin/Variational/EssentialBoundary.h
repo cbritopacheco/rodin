@@ -10,14 +10,14 @@
 #include "Component.h"
 #include "DirichletBC.h"
 #include "TrialFunction.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 #include "VectorCoefficient.h"
 
 namespace Rodin::Variational
 {
    class EssentialBoundary
    {
-      using ScalarValue = std::unique_ptr<ScalarCoefficientBase>;
+      using ScalarValue = std::unique_ptr<ScalarFunctionBase>;
       using VectorValue = std::unique_ptr<VectorCoefficientBase>;
 
       struct TrialFunctionValue
@@ -65,7 +65,7 @@ namespace Rodin::Variational
          {}
 
          template <class FES>
-         void add(const DirichletBC<TrialFunction<FES>, ScalarCoefficientBase>& dbc)
+         void add(const DirichletBC<TrialFunction<FES>, ScalarFunctionBase>& dbc)
          {
             m_tfVal[dbc.getTrialFunction().getUUID()] =
                TrialFunctionValue{
@@ -85,7 +85,7 @@ namespace Rodin::Variational
          }
 
          template <class FES>
-         void add(const DirichletBC<Component<TrialFunction<FES>>, ScalarCoefficientBase>& dbc)
+         void add(const DirichletBC<Component<TrialFunction<FES>>, ScalarFunctionBase>& dbc)
          {
             auto uuid = dbc.getComponent().getTrialFunction().getUUID();
             m_tfCompVal[uuid][dbc.getComponent().getIndex()] =

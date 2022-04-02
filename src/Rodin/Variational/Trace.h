@@ -9,7 +9,7 @@
 
 #include "ForwardDecls.h"
 
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
@@ -22,7 +22,7 @@ namespace Rodin::Variational
     *    \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii}
     * @f]
     */
-   class Trace : public ScalarCoefficientBase
+   class Trace : public ScalarFunctionBase
    {
       public:
          /**

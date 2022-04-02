@@ -11,15 +11,15 @@
 namespace Rodin::Variational
 {
    double
-   UnaryMinus<ScalarCoefficientBase>
+   UnaryMinus<ScalarFunctionBase>
    ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    const
    {
       return -1.0 * getOperand().getValue(trans, ip);
    }
 
-   UnaryMinus<ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& op)
+   UnaryMinus<ScalarFunctionBase>
+   operator-(const ScalarFunctionBase& op)
    {
       return UnaryMinus(op);
    }
@@ -72,10 +72,10 @@ namespace Rodin::Variational
       return UnaryMinus(op);
    }
 
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
-      return Sum<ScalarCoefficientBase, ScalarCoefficientBase>(lhs, UnaryMinus(rhs));
+      return Sum<ScalarFunctionBase, ScalarFunctionBase>(lhs, UnaryMinus(rhs));
    }
 
    UnaryMinus<FormLanguage::LinearFormIntegratorSum>

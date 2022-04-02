@@ -25,8 +25,8 @@ int main(int, char**)
   int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
   // Lamé coefficients
-  auto mu     = ScalarCoefficient(0.3846),
-       lambda = ScalarCoefficient(0.5769);
+  auto mu     = ScalarFunction(0.3846),
+       lambda = ScalarFunction(0.5769);
 
   // Compliance
   auto compliance = [&](GridFunction<H1>& w)
@@ -53,8 +53,8 @@ int main(int, char**)
   size_t maxIt = 150;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(4 * hmax * hmax);
+  auto ell = ScalarFunction(1);
+  auto alpha = ScalarFunction(4 * hmax * hmax);
 
   std::vector<double> obj;
 

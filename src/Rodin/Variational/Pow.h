@@ -3,28 +3,28 @@
 
 #include <cmath>
 
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
    template <class T>
-   class Pow : public ScalarCoefficientBase
+   class Pow : public ScalarFunctionBase
    {
       static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
       public:
-         Pow(const ScalarCoefficientBase& s, T p)
+         Pow(const ScalarFunctionBase& s, T p)
             : m_s(s.copy()),
               m_p(p)
          {}
 
          Pow(const Pow& other)
-            : ScalarCoefficientBase(other),
+            : ScalarFunctionBase(other),
               m_s(other.m_s->copy()),
               m_p(other.m_p)
          {}
 
          Pow(Pow&& other)
-            : ScalarCoefficientBase(std::move(other)),
+            : ScalarFunctionBase(std::move(other)),
               m_s(std::move(other.m_s)),
               m_p(other.m_p)
          {}
@@ -41,7 +41,7 @@ namespace Rodin::Variational
             return new Pow(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_s;
+         std::unique_ptr<ScalarFunctionBase> m_s;
          T m_p;
    };
 }

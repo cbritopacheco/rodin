@@ -27,7 +27,7 @@ set(RodinVariational_HEADERS
   MatrixCoefficient.h
   Problem.h
   ProblemBody.h
-  ScalarCoefficient.h
+  ScalarFunction.h
   Trace.h
   Transpose.h
   Rank3Operator.h
@@ -50,7 +50,7 @@ set(RodinVariational_SRCS
   MatrixCoefficient.cpp
   Trace.cpp
   VectorCoefficient.cpp
-  ScalarCoefficient.cpp
+  ScalarFunction.cpp
   Restriction.cpp
   Rank3Operator.cpp
   Sum.cpp

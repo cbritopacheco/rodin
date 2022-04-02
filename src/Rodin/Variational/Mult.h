@@ -16,7 +16,7 @@
 #include "ForwardDecls.h"
 
 #include "GridFunction.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 #include "VectorCoefficient.h"
 #include "MatrixCoefficient.h"
 #include "TestFunction.h"
@@ -25,43 +25,43 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Multiplication of two ScalarCoefficientBase instances.
+    * @brief Multiplication of two ScalarFunctionBase instances.
     */
    template <>
-   class Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-      : public ScalarCoefficientBase
+   class Mult<ScalarFunctionBase, ScalarFunctionBase>
+      : public ScalarFunctionBase
    {
       public:
-         Mult(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+         Mult(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Mult(const Mult& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Mult(Mult&& other)
-            :  ScalarCoefficientBase(std::move(other)),
+            :  ScalarFunctionBase(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
 
-         ScalarCoefficientBase& getRHS()
+         ScalarFunctionBase& getRHS()
          {
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
 
-         const ScalarCoefficientBase& getRHS() const
+         const ScalarFunctionBase& getRHS() const
          {
             return *m_rhs;
          }
@@ -77,38 +77,38 @@ namespace Rodin::Variational
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
-         std::unique_ptr<ScalarCoefficientBase> m_rhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_rhs;
    };
-   Mult(const ScalarCoefficientBase&, const ScalarCoefficientBase&)
-      -> Mult<ScalarCoefficientBase, ScalarCoefficientBase>;
+   Mult(const ScalarFunctionBase&, const ScalarFunctionBase&)
+      -> Mult<ScalarFunctionBase, ScalarFunctionBase>;
 
-   Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+   Mult<ScalarFunctionBase, ScalarFunctionBase>
+   operator*(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
-   operator*(T lhs, const ScalarCoefficientBase& rhs)
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ScalarFunctionBase>>
+   operator*(T lhs, const ScalarFunctionBase& rhs)
    {
-      return Mult(ScalarCoefficient(lhs), rhs);
+      return Mult(ScalarFunction(lhs), rhs);
    }
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ScalarCoefficientBase>>
-   operator*(const ScalarCoefficientBase& rhs, T lhs)
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ScalarFunctionBase>>
+   operator*(const ScalarFunctionBase& rhs, T lhs)
    {
-      return Mult(rhs, ScalarCoefficient(lhs));
+      return Mult(rhs, ScalarFunction(lhs));
    }
 
    /**
-    * @brief Multiplication of ScalarCoefficientBase and VectorCoefficientBase.
+    * @brief Multiplication of ScalarFunctionBase and VectorCoefficientBase.
     */
    template <>
-   class Mult<ScalarCoefficientBase, VectorCoefficientBase>
+   class Mult<ScalarFunctionBase, VectorCoefficientBase>
       : public VectorCoefficientBase
    {
       public:
-         Mult(const ScalarCoefficientBase& lhs, const VectorCoefficientBase& rhs)
+         Mult(const ScalarFunctionBase& lhs, const VectorCoefficientBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -122,7 +122,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -132,7 +132,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -160,41 +160,41 @@ namespace Rodin::Variational
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
          std::unique_ptr<VectorCoefficientBase> m_rhs;
    };
-   Mult(const ScalarCoefficientBase&, const VectorCoefficientBase&)
-      -> Mult<ScalarCoefficientBase, VectorCoefficientBase>;
+   Mult(const ScalarFunctionBase&, const VectorCoefficientBase&)
+      -> Mult<ScalarFunctionBase, VectorCoefficientBase>;
 
-   Mult<ScalarCoefficientBase, VectorCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const VectorCoefficientBase& rhs);
+   Mult<ScalarFunctionBase, VectorCoefficientBase>
+   operator*(const ScalarFunctionBase& lhs, const VectorCoefficientBase& rhs);
 
-   Mult<ScalarCoefficientBase, VectorCoefficientBase>
-   operator*(const VectorCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+   Mult<ScalarFunctionBase, VectorCoefficientBase>
+   operator*(const VectorCoefficientBase& lhs, const ScalarFunctionBase& rhs);
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, VectorCoefficientBase>>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, VectorCoefficientBase>>
    operator*(T lhs, const VectorCoefficientBase& rhs)
    {
-      return Mult(ScalarCoefficient(lhs), rhs);
+      return Mult(ScalarFunction(lhs), rhs);
    }
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, VectorCoefficientBase>>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, VectorCoefficientBase>>
    operator*(const VectorCoefficientBase& lhs, T rhs)
    {
-      return Mult(ScalarCoefficient(rhs), lhs);
+      return Mult(ScalarFunction(rhs), lhs);
    }
 
    /**
-    * @brief Multiplication of ScalarCoefficientBase and MatrixCoefficientBase.
+    * @brief Multiplication of ScalarFunctionBase and MatrixCoefficientBase.
     */
    template <>
-   class Mult<ScalarCoefficientBase, MatrixCoefficientBase>
+   class Mult<ScalarFunctionBase, MatrixCoefficientBase>
       : public MatrixCoefficientBase
    {
       public:
-         Mult(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+         Mult(const ScalarFunctionBase& lhs, const MatrixCoefficientBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -208,7 +208,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -218,7 +218,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -251,38 +251,38 @@ namespace Rodin::Variational
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
          std::unique_ptr<MatrixCoefficientBase> m_rhs;
    };
-   Mult(const ScalarCoefficientBase&, const MatrixCoefficientBase&)
-      -> Mult<ScalarCoefficientBase, MatrixCoefficientBase>;
+   Mult(const ScalarFunctionBase&, const MatrixCoefficientBase&)
+      -> Mult<ScalarFunctionBase, MatrixCoefficientBase>;
 
-   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs);
+   Mult<ScalarFunctionBase, MatrixCoefficientBase>
+   operator*(const ScalarFunctionBase& lhs, const MatrixCoefficientBase& rhs);
 
-   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
-   operator*(const MatrixCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+   Mult<ScalarFunctionBase, MatrixCoefficientBase>
+   operator*(const MatrixCoefficientBase& lhs, const ScalarFunctionBase& rhs);
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, MatrixCoefficientBase>>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixCoefficientBase>>
    operator*(T lhs, const MatrixCoefficientBase& rhs)
    {
-      return Mult(ScalarCoefficient(lhs), rhs);
+      return Mult(ScalarFunction(lhs), rhs);
    }
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, MatrixCoefficientBase>>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixCoefficientBase>>
    operator*(const MatrixCoefficientBase& lhs, T rhs)
    {
-      return Mult(ScalarCoefficient(rhs), lhs);
+      return Mult(ScalarFunction(rhs), lhs);
    }
 
    template <ShapeFunctionSpaceType Space>
-   class Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+   class Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
-         Mult(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+         Mult(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -296,7 +296,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -306,7 +306,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -371,39 +371,39 @@ namespace Rodin::Variational
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Mult(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
-      -> Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   Mult(const ScalarFunctionBase&, const ShapeFunctionBase<Space>&)
+      -> Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>;
 
    template <ShapeFunctionSpaceType Space>
-   Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
-   operator*(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+   Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>
+   operator*(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
    {
       return Mult(lhs, rhs);
    }
 
    template <ShapeFunctionSpaceType Space>
-   Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>
-   operator*(const ShapeFunctionBase<Space>& lhs, const ScalarCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>
+   operator*(const ShapeFunctionBase<Space>& lhs, const ScalarFunctionBase& rhs)
    {
       return Mult(rhs, lhs);
    }
 
    template <class T, ShapeFunctionSpaceType Space>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>>
    operator*(T lhs, const ShapeFunctionBase<Space>& rhs)
    {
-      return Mult(ScalarCoefficient(lhs), rhs);
+      return Mult(ScalarFunction(lhs), rhs);
    }
 
    template <class T, ShapeFunctionSpaceType Space>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarCoefficientBase, ShapeFunctionBase<Space>>>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>>
    operator*(const ShapeFunctionBase<Space>& lhs, T rhs)
    {
-      return Mult(lhs, ScalarCoefficient(rhs));
+      return Mult(lhs, ScalarFunction(rhs));
    }
 }
 
