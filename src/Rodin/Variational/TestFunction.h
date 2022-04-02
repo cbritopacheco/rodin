@@ -36,6 +36,7 @@ namespace Rodin::Variational
          const ShapeFunctionBase<Test>& getRoot() const override
          {
             return *this;
+
          }
 
          TestFunction* copy() const noexcept override
