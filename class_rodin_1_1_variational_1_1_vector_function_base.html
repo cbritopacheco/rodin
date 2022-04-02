@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::VectorCoefficientBase class | Rodin</title>
+  <title>Rodin::Variational::VectorFunctionBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,7 +51,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorCoefficientBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorFunctionBase <span class="m-thin">class</span>
         </h1>
         <p>Abstract base class for objects representing vector coefficients.</p>
         <nav class="m-block m-default">
@@ -70,6 +70,11 @@
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_division_3_01_vector_function_base_00_01_scalar_function_base_01_4.html" class="m-doc">Division&lt;VectorFunctionBase, ScalarFunctionBase&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_h1_01_4_01_4.html" class="m-doc">Grad&lt;GridFunction&lt;H1&gt;&gt;</a>
@@ -99,16 +104,16 @@ $ u $
 </svg>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_scalar_coefficient_base_00_01_vector_coefficient_base_01_4.html" class="m-doc">Mult&lt;ScalarCoefficientBase, VectorCoefficientBase&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_scalar_function_base_00_01_vector_function_base_01_4.html" class="m-doc">Mult&lt;ScalarFunctionBase, VectorFunctionBase&gt;</a>
             </dt>
-            <dd>Multiplication of <a href="class_rodin_1_1_variational_1_1_scalar_coefficient_base.html" class="m-doc">ScalarCoefficientBase</a> and <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>.</dd>
+            <dd>Multiplication of <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a>
             </dt>
             <dd>Outward unit normal.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FEC&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_coefficient_3_01_grid_function_3_01_f_e_c_01_4_01_4.html" class="m-doc">VectorCoefficient&lt;GridFunction&lt;FEC&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_3_01_grid_function_3_01_f_e_c_01_4_01_4.html" class="m-doc">VectorFunction&lt;GridFunction&lt;FEC&gt;&gt;</a>
             </dt>
             <dd>Vector which can be constructed from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> with vector values.</dd>
           </dl>
@@ -117,27 +122,27 @@ $ u $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3a489dabdd0631870a822151281aa118" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3a02db1f90d6a634990446f76a5de488" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp;</span>
             </dt>
             <dd>Sets an attribute which will be interpreted as the domain to trace.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a41c467a2e38d567176557f4d3e7d0b64" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">std::set&lt;int&gt; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2704d286b32dd8bdc9f42d5f422b8234" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">std::set&lt;int&gt; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp;</span>
             </dt>
             <dd>Sets which attributes will be interpreted as the domain to trace.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp;</span>
             </dt>
             <dd>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</dd>
-            <dt id="a587135a8a2ef850bfaf1a72ed0801a82">
-              <span class="m-doc-wrap-bumper">auto <a href="#a587135a8a2ef850bfaf1a72ed0801a82" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&gt;</span>
+            <dt id="a104e820547d2bfb362f75f6b06b95e3d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a104e820547d2bfb362f75f6b06b95e3d" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&gt;</span>
             </dt>
             <dd>Convenience function to access the 1st component of the vector.</dd>
-            <dt id="ae0b50564571af1bcb87923b669d1575e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae0b50564571af1bcb87923b669d1575e" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&gt;</span>
+            <dt id="a624448b7ff219fe5e61f12f5eb6c4ff4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a624448b7ff219fe5e61f12f5eb6c4ff4" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&gt;</span>
             </dt>
             <dd>Convenience function to access the 2nd component of the vector.</dd>
-            <dt id="adc9682cad90174bfde363d1296bdc889">
-              <span class="m-doc-wrap-bumper">auto <a href="#adc9682cad90174bfde363d1296bdc889" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&gt;</span>
+            <dt id="a4d0749d53ee6a848f5cebc2a0e991b7a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d0749d53ee6a848f5cebc2a0e991b7a" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&gt;</span>
             </dt>
             <dd>Convenience function to access the 3nd component of the vector.</dd>
             <dt>
@@ -148,9 +153,9 @@ $ u $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a3a489dabdd0631870a822151281aa118"><div>
+          <section class="m-doc-details" id="a3a02db1f90d6a634990446f76a5de488"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; Rodin::<wbr />Variational::<wbr />VectorCoefficientBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a489dabdd0631870a822151281aa118" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">int attr)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />VectorFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a02db1f90d6a634990446f76a5de488" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">int attr)</span></span>
             </h3>
             <p>Sets an attribute which will be interpreted as the domain to trace.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -161,11 +166,11 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>Convenience function to call <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html#a41c467a2e38d567176557f4d3e7d0b64" class="m-doc">traceOf(std::<wbr />set&lt;int&gt;)</a> with only one attribute.</p>
+<p>Convenience function to call <a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a2704d286b32dd8bdc9f42d5f422b8234" class="m-doc">traceOf(std::<wbr />set&lt;int&gt;)</a> with only one attribute.</p>
           </div></section>
-          <section class="m-doc-details" id="a41c467a2e38d567176557f4d3e7d0b64"><div>
+          <section class="m-doc-details" id="a2704d286b32dd8bdc9f42d5f422b8234"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a>&amp; Rodin::<wbr />Variational::<wbr />VectorCoefficientBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41c467a2e38d567176557f4d3e7d0b64" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">std::set&lt;int&gt; attrs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />VectorFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2704d286b32dd8bdc9f42d5f422b8234" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">std::set&lt;int&gt; attrs)</span></span>
             </h3>
             <p>Sets which attributes will be interpreted as the domain to trace.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -176,18 +181,18 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>When integrating along interior boundaries sometimes it is necessary to specify which attributes should be interpreted as the respective &quot;interior&quot; domain. For example, coefficients which involve the derivatives of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> need to know the element to &quot;trace&quot;.</p><aside class="m-note m-info"><h4>Note</h4><p>Setting the trace domain of a <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html" class="m-doc">VectorCoefficientBase</a> instance does not guarantee that it will taken into consideration when computing its value. That said, it is up to the subclass to decide how it will use this information which can be obtained via the <a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a> method.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_vector_coefficient_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a></p></aside>
+<p>When integrating along interior boundaries sometimes it is necessary to specify which attributes should be interpreted as the respective &quot;interior&quot; domain. For example, coefficients which involve the derivatives of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> need to know the element to &quot;trace&quot;.</p><aside class="m-note m-info"><h4>Note</h4><p>Setting the trace domain of a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance does not guarantee that it will taken into consideration when computing its value. That said, it is up to the subclass to decide how it will use this information which can be obtained via the <a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a> method.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a3d346522fa20da0b303cb46cbfb97409"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const std::set&lt;int&gt;&amp; Rodin::<wbr />Variational::<wbr />VectorCoefficientBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d346522fa20da0b303cb46cbfb97409" class="m-doc-self">getTraceDomain</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const std::set&lt;int&gt;&amp; Rodin::<wbr />Variational::<wbr />VectorFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d346522fa20da0b303cb46cbfb97409" class="m-doc-self">getTraceDomain</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</p>
 <p>The domains to trace are interpreted as the domains where there shall be a continuous extension from values to the interior boundaries. If the trace domain is empty, then this has the semantic value that it has not been specified yet.</p>
           </div></section>
           <section class="m-doc-details" id="ac9bf0076a255a131795cdb8a1e19fb94"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />VectorCoefficientBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9bf0076a255a131795cdb8a1e19fb94" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />VectorFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9bf0076a255a131795cdb8a1e19fb94" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the dimension of the vector object.</p>
             <table class="m-table m-fullwidth m-flat">
