@@ -64,10 +64,11 @@ int main(int, char**)
   H1 Th(Omega, 3);
 
   auto mmgMesh = Cast(Omega).to<MMG::MeshS>();
-  auto mmgLs = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
-  auto phi = Cast(mmgLs).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
+  auto mmgDist = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
+  auto phi = Cast(mmgDist).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
+  phi.save("phi.gf");
 
-  auto n0 = -VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
+  auto n0 = VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
 
   double alpha = 0.1;
 
