@@ -32,7 +32,7 @@ set(RodinVariational_HEADERS
   Transpose.h
   Rank3Operator.h
   Restriction.h
-  VectorCoefficient.h
+  VectorFunction.h
   )
 
 set(RodinVariational_SRCS
@@ -49,7 +49,7 @@ set(RodinVariational_SRCS
   Grad.cpp
   MatrixCoefficient.cpp
   Trace.cpp
-  VectorCoefficient.cpp
+  VectorFunction.cpp
   ScalarFunction.cpp
   Restriction.cpp
   Rank3Operator.cpp

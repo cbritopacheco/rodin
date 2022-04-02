@@ -25,7 +25,7 @@ namespace Rodin::Variational
    }
 
    void
-   UnaryMinus<VectorCoefficientBase>
+   UnaryMinus<VectorFunctionBase>
    ::getValue(
          mfem::Vector& value,
          mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
@@ -35,8 +35,8 @@ namespace Rodin::Variational
       value.Neg();
    }
 
-   UnaryMinus<VectorCoefficientBase>
-   operator-(const VectorCoefficientBase& op)
+   UnaryMinus<VectorFunctionBase>
+   operator-(const VectorFunctionBase& op)
    {
       return UnaryMinus(op);
    }

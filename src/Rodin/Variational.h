@@ -52,7 +52,7 @@
 #include "Variational/Problem.h"
 
 #include "Variational/ScalarFunction.h"
-#include "Variational/VectorCoefficient.h"
+#include "Variational/VectorFunction.h"
 #include "Variational/MatrixCoefficient.h"
 
 // ---- Boundary conditions --------------------------------------------------

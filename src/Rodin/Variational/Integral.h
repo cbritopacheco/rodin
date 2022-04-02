@@ -20,7 +20,7 @@
 #include "TestFunction.h"
 #include "TrialFunction.h"
 #include "ScalarFunction.h"
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 #include "MatrixCoefficient.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -187,7 +187,7 @@ namespace Rodin::Variational
           *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx \ .
           * @f]
           */
-         Integral(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -264,7 +264,7 @@ namespace Rodin::Variational
       -> Integral<ShapeFunctionBase<Test>>;
    Integral(const ScalarFunctionBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const VectorCoefficientBase&, const ShapeFunctionBase<Test>&)
+   Integral(const VectorFunctionBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
 
    /**

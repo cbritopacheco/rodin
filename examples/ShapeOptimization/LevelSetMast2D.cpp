@@ -75,7 +75,7 @@ int main(int, char**)
     H1 VhInt(trimmed, d);
 
     // Elasticity equation
-    auto f = VectorCoefficient{0, -1};
+    auto f = VectorFunction{0, -1};
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
@@ -83,7 +83,7 @@ int main(int, char**)
                + Integral(
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
-               + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
+               + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
     solver.solve(elasticity);
 
     // Transfer solution back to original domain
@@ -101,7 +101,7 @@ int main(int, char**)
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
             + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
-            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
+            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
     // Update objective
