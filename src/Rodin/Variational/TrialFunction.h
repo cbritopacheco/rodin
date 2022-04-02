@@ -23,6 +23,10 @@ namespace Rodin::Variational
             : ShapeFunction<FES, Trial>(std::move(other))
          {}
 
+         void operator=(const TrialFunction&) = delete;
+
+         void operator=(TrialFunction&&) = delete;
+
          TrialFunction& emplaceGridFunction()
          {
             m_gf.emplace(this->getFiniteElementSpace());

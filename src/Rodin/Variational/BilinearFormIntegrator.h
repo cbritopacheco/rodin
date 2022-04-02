@@ -8,6 +8,7 @@
 #include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
@@ -43,19 +44,20 @@ namespace Rodin::Variational
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
-         BilinearFormDomainIntegrator(const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
-            :  m_u(u), m_v(v)
+         BilinearFormDomainIntegrator(
+               const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
+            :  m_u(u.copy()), m_v(v.copy())
          {}
 
          BilinearFormDomainIntegrator(const BilinearFormDomainIntegrator& other)
             :  BilinearFormIntegratorBase(other),
-               m_u(other.m_u), m_v(other.m_v),
+               m_u(other.m_u->copy()), m_v(other.m_v->copy()),
                m_attrs(other.m_attrs)
          {}
 
          BilinearFormDomainIntegrator(BilinearFormDomainIntegrator&& other)
             :  BilinearFormIntegratorBase(std::move(other)),
-               m_u(other.m_u), m_v(other.m_v),
+               m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
                m_attrs(std::move(other.m_attrs))
          {}
 
@@ -92,12 +94,12 @@ namespace Rodin::Variational
 
          const ShapeFunctionBase<Trial>& getTrialFunction() const override
          {
-            return m_u;
+            return *m_u;
          }
 
          const ShapeFunctionBase<Test>& getTestFunction() const override
          {
-            return m_v;
+            return *m_v;
          }
 
          const std::set<int>& getAttributes() const override
@@ -108,8 +110,8 @@ namespace Rodin::Variational
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
 
       private:
-         const ShapeFunctionBase<Trial>& m_u;
-         const ShapeFunctionBase<Test>&  m_v;
+         std::unique_ptr<ShapeFunctionBase<Trial>> m_u;
+         std::unique_ptr<ShapeFunctionBase<Test>>  m_v;
          std::set<int> m_attrs;
    };
 }

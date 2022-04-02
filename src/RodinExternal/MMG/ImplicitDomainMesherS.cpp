@@ -28,7 +28,7 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ImplicitDomainMesherS::Discretization
+  MeshS
   ImplicitDomainMesherS::discretize(ScalarSolutionS& ls)
   {
     MeshS mesh(ls.getMesh());
@@ -69,7 +69,7 @@ namespace Rodin::External::MMG
       MMGS_Set_dparameter(mesh.getHandle(), sol.getHandle(), MMGS_DPARAM_ls, m_ls);
       MMGS_mmgsls(mesh.getHandle(), sol.getHandle(), NULL);
     }
-    return {std::move(mesh), std::move(sol)};
+    return mesh;
   }
 
   ImplicitDomainMesherS& ImplicitDomainMesherS::setHMin(double hmin)
