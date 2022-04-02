@@ -18,7 +18,7 @@ int main(int, char**)
   TestFunction  v(Vh);
 
   // Right hand side
-  auto f = ScalarCoefficient(
+  auto f = ScalarFunction(
       [](const double* x, int)
       {
         double l2 = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];

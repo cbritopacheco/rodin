@@ -18,7 +18,7 @@
 #include "Rodin/Alert.h"
 #include "FormLanguage/Base.h"
 
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
@@ -133,7 +133,7 @@ namespace Rodin::Variational
    /**
     * @brief Variadic vector of values
     * Represents a vector which may be constructed from values which can be
-    * converted to objects of type ScalarCoefficient.
+    * converted to objects of type ScalarFunction.
     */
    template <class ... Values>
    class VectorCoefficient : public VectorCoefficientBase
@@ -190,11 +190,11 @@ namespace Rodin::Variational
          typename std::enable_if_t<I < sizeof...(Tp)>
          makeCoefficientsFromTuple(const std::tuple<Tp...>& t)
          {
-            m_coeffs.emplace_back(new ScalarCoefficient(std::get<I>(t)));
+            m_coeffs.emplace_back(new ScalarFunction(std::get<I>(t)));
             makeCoefficientsFromTuple<I + 1, Tp...>(t);
          }
 
-         std::vector<std::unique_ptr<ScalarCoefficientBase>> m_coeffs;
+         std::vector<std::unique_ptr<ScalarFunctionBase>> m_coeffs;
    };
    template <class ... Values>
    VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;

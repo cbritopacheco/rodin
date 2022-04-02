@@ -22,7 +22,7 @@
 
 #include "ForwardDecls.h"
 #include "Restriction.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 #include "VectorCoefficient.h"
 #include "MatrixCoefficient.h"
 #include "GridFunctionView.h"
@@ -61,14 +61,14 @@ namespace Rodin::Variational
          virtual GridFunctionBase& operator*=(double t) = 0;
          virtual GridFunctionBase& operator/=(double t) = 0;
 
-         virtual GridFunctionBase& project(const ScalarCoefficientBase& s, int attr) = 0;
+         virtual GridFunctionBase& project(const ScalarFunctionBase& s, int attr) = 0;
          virtual GridFunctionBase& project(const VectorCoefficientBase& s, int attr) = 0;
-         virtual GridFunctionBase& project(const ScalarCoefficientBase& s, const std::set<int>& attrs) = 0;
+         virtual GridFunctionBase& project(const ScalarFunctionBase& s, const std::set<int>& attrs) = 0;
          virtual GridFunctionBase& project(const VectorCoefficientBase& s, const std::set<int>& attrs) = 0;
 
-         virtual GridFunctionBase& projectOnBoundary(const ScalarCoefficientBase& s, int attr) = 0;
+         virtual GridFunctionBase& projectOnBoundary(const ScalarFunctionBase& s, int attr) = 0;
          virtual GridFunctionBase& projectOnBoundary(const VectorCoefficientBase& s, int attr) = 0;
-         virtual GridFunctionBase& projectOnBoundary(const ScalarCoefficientBase& s, const std::set<int>& attrs) = 0;
+         virtual GridFunctionBase& projectOnBoundary(const ScalarFunctionBase& s, const std::set<int>& attrs) = 0;
          virtual GridFunctionBase& projectOnBoundary(const VectorCoefficientBase& s, const std::set<int>& attrs) = 0;
 
          virtual std::pair<const double*, int> getData() const = 0;
@@ -327,14 +327,14 @@ namespace Rodin::Variational
 
          template <class T>
          std::enable_if_t<
-            std::is_base_of_v<ScalarCoefficientBase, std::remove_reference_t<T>> ||
+            std::is_base_of_v<ScalarFunctionBase, std::remove_reference_t<T>> ||
             std::is_base_of_v<VectorCoefficientBase, std::remove_reference_t<T>>, GridFunction&>
          operator=(T&& v)
          {
             return project(std::forward<T>(v));
          }
 
-         GridFunction& project(const ScalarCoefficientBase& s, int attr) override
+         GridFunction& project(const ScalarFunctionBase& s, int attr) override
          {
             return project(s, std::set<int>{attr});
          }
@@ -344,7 +344,7 @@ namespace Rodin::Variational
             return project(v, std::set<int>{attr});
          }
 
-         GridFunction& projectOnBoundary(const ScalarCoefficientBase& s, int attr) override
+         GridFunction& projectOnBoundary(const ScalarFunctionBase& s, int attr) override
          {
             return projectOnBoundary(s, std::set<int>{attr});
          }
@@ -354,7 +354,7 @@ namespace Rodin::Variational
             return projectOnBoundary(v, std::set<int>{attr});
          }
 
-         GridFunction& project(const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
+         GridFunction& project(const ScalarFunctionBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
             auto iv = s.build();
@@ -405,7 +405,7 @@ namespace Rodin::Variational
          }
 
          GridFunction& projectOnBoundary(
-               const ScalarCoefficientBase& s, const std::set<int>& attrs = {}) override
+               const ScalarFunctionBase& s, const std::set<int>& attrs = {}) override
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
             auto iv = s.build();
@@ -464,10 +464,10 @@ namespace Rodin::Variational
           * @param[in] s Scalar coefficient to project
           * @returns Reference to self
           */
-         GridFunction& project(const Restriction<ScalarCoefficientBase>& s)
+         GridFunction& project(const Restriction<ScalarFunctionBase>& s)
          {
             assert(getFiniteElementSpace().getVectorDimension() == 1);
-            auto iv = s.getScalarCoefficient().build();
+            auto iv = s.getScalarFunction().build();
             getHandle() = std::numeric_limits<double>::quiet_NaN();
             mfem::Array<int> vdofs;
             mfem::Vector vals;

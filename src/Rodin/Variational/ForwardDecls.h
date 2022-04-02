@@ -110,10 +110,10 @@ namespace Rodin::Variational
    class DirichletBC;
 
    // ---- Coefficients ------------------------------------------------------
-   class ScalarCoefficientBase;
+   class ScalarFunctionBase;
 
    template <class T>
-   class ScalarCoefficient;
+   class ScalarFunction;
 
    class VectorCoefficientBase;
 

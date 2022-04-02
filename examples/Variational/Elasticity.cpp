@@ -26,8 +26,8 @@ int main(int argc, char** argv)
   H1 Vh(Omega, d);
 
   // Lamé coefficients
-  auto mu     = ScalarCoefficient(0.3846),
-       lambda = ScalarCoefficient(0.5769);
+  auto mu     = ScalarFunction(0.3846),
+       lambda = ScalarFunction(0.5769);
 
   // Pull force
   auto f = VectorCoefficient{0, -1};

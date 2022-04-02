@@ -18,7 +18,7 @@
 
 #include "ForwardDecls.h"
 #include "GridFunction.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 #include "VectorCoefficient.h"
 #include "MatrixCoefficient.h"
 #include "TestFunction.h"
@@ -28,7 +28,7 @@
 namespace Rodin::Variational
 {
    template <>
-   class Dot<VectorCoefficientBase, VectorCoefficientBase> : public ScalarCoefficientBase
+   class Dot<VectorCoefficientBase, VectorCoefficientBase> : public ScalarFunctionBase
    {
       public:
          /**
@@ -41,12 +41,12 @@ namespace Rodin::Variational
          {}
 
          Dot(const Dot& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_a(other.m_a->copy()), m_b(other.m_b->copy())
          {}
 
          Dot(Dot&& other)
-            :  ScalarCoefficientBase(std::move(other)),
+            :  ScalarFunctionBase(std::move(other)),
                m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
          {}
 
@@ -82,7 +82,7 @@ namespace Rodin::Variational
     * @tparam B Derived type from MatrixCoefficientBase
     */
    template <>
-   class Dot<MatrixCoefficientBase, MatrixCoefficientBase> : public ScalarCoefficientBase
+   class Dot<MatrixCoefficientBase, MatrixCoefficientBase> : public ScalarFunctionBase
    {
       public:
          /**
@@ -95,12 +95,12 @@ namespace Rodin::Variational
          {}
 
          Dot(const Dot& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_a(other.m_a->copy()), m_b(other.m_b->copy())
          {}
 
          Dot(Dot&& other)
-            :  ScalarCoefficientBase(std::move(other)),
+            :  ScalarFunctionBase(std::move(other)),
                m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
          {}
 
@@ -124,15 +124,15 @@ namespace Rodin::Variational
       -> Dot<MatrixCoefficientBase, MatrixCoefficientBase>;
 
    template <ShapeFunctionSpaceType Space>
-   class Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+   class Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
-         Dot(const ShapeFunctionBase<Space>& lhs, const ScalarCoefficientBase& rhs)
+         Dot(const ShapeFunctionBase<Space>& lhs, const ScalarFunctionBase& rhs)
             : Dot(rhs, lhs)
          {}
 
-         Dot(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+         Dot(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -146,7 +146,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -156,7 +156,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -223,15 +223,15 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Dot(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
-      -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const ScalarFunctionBase&, const ShapeFunctionBase<Space>&)
+      -> Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>;
    template <ShapeFunctionSpaceType Space>
-   Dot(const ShapeFunctionBase<Space>&, const ScalarCoefficientBase&)
-      -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const ShapeFunctionBase<Space>&, const ScalarFunctionBase&)
+      -> Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>;
 
    /**
     * @brief Dot product between VectorCoefficientBase and ShapeFunctionBase.
