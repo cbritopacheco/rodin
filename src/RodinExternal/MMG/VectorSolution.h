@@ -13,11 +13,26 @@
 
 namespace Rodin::External::MMG
 {
-   /**
-    * @brief Vector solution supported on a mesh.
-    */
-   class VectorSolution : public SolutionBase
-   {};
+  /**
+   * @brief Vector solution supported on a mesh.
+   */
+  class VectorSolution : public SolutionBase
+  {
+    public:
+      VectorSolution(MMG5_pSol sol = nullptr)
+        : SolutionBase(sol)
+      {}
+
+      VectorSolution(const VectorSolution& other)
+         : SolutionBase(other)
+      {}
+
+      VectorSolution(VectorSolution&& other)
+        : SolutionBase(std::move(other))
+      {}
+
+      VectorSolution& operator=(VectorSolution&&) = default;
+  };
 }
 
 #endif

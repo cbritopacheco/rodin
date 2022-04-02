@@ -40,6 +40,7 @@ set(RodinExternalMMG_SRCS
   Cast.cpp
   Utility.cpp
   ISCDProcess.cpp
+  Solution.cpp
   ScalarSolution.cpp
 # ---- mmg2d
   Mesh2D.cpp
@@ -58,6 +59,7 @@ set(RodinExternalMMG_SRCS
   AdvectS.cpp
   DistancerS.cpp
   ScalarSolutionS.cpp
+  VectorSolutionS.cpp
   ImplicitDomainMesherS.cpp
   )
 
