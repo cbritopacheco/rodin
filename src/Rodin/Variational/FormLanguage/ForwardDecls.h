@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_FORWARDDECLS_H
 
-#include "../ForwardDecls.h"
-
 namespace Rodin::Variational::FormLanguage
 {
    class Base;
@@ -16,12 +14,9 @@ namespace Rodin::Variational::FormLanguage
    template <class InternalValue>
    class Buildable;
 
-   class BilinearFormIntegratorSum;
-
-   template <class T>
-   class BilinearFormIntegratorUnaryMinus;
-
    class LinearFormIntegratorSum;
+
+   class BilinearFormIntegratorSum;
 }
 
 #endif

@@ -9,7 +9,7 @@
 
 #include "ForwardDecls.h"
 
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
@@ -22,14 +22,14 @@ namespace Rodin::Variational
     *    \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii}
     * @f]
     */
-   class Trace : public ScalarCoefficientBase
+   class Trace : public ScalarFunctionBase
    {
       public:
          /**
           * @brief Constructs the Trace of the given matrix
           * @param[in] m Square matrix
           */
-         Trace(const MatrixCoefficientBase& m);
+         Trace(const MatrixFunctionBase& m);
 
          Trace(const Trace& other);
 
@@ -40,7 +40,7 @@ namespace Rodin::Variational
             return new Trace(*this);
          }
       private:
-         std::unique_ptr<MatrixCoefficientBase> m_matrix;
+         std::unique_ptr<MatrixFunctionBase> m_matrix;
    };
 }
 

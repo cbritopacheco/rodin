@@ -13,38 +13,40 @@
 #include <type_traits>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Variational/GridFunction.h"
-#include "Rodin/Variational/ScalarCoefficient.h"
-#include "Rodin/Variational/VectorCoefficient.h"
-#include "Rodin/Variational/MatrixCoefficient.h"
-#include "Rodin/Variational/TestFunction.h"
-#include "Rodin/Variational/TrialFunction.h"
+
 #include "FormLanguage/Base.h"
+
 #include "ForwardDecls.h"
+#include "GridFunction.h"
+#include "ScalarFunction.h"
+#include "VectorFunction.h"
+#include "MatrixFunction.h"
+#include "TestFunction.h"
+#include "TrialFunction.h"
 #include "Mult.h"
 
 namespace Rodin::Variational
 {
    template <>
-   class Dot<VectorCoefficientBase, VectorCoefficientBase> : public ScalarCoefficientBase
+   class Dot<VectorFunctionBase, VectorFunctionBase> : public ScalarFunctionBase
    {
       public:
          /**
           * @brief Constructs the Dot product between two given matrices.
-          * @param[in] a Derived instance of VectorCoefficientBase
-          * @param[in] b Derived instance of VectorCoefficientBase
+          * @param[in] a Derived instance of VectorFunctionBase
+          * @param[in] b Derived instance of VectorFunctionBase
           */
-         Dot(const VectorCoefficientBase& a, const VectorCoefficientBase& b)
+         Dot(const VectorFunctionBase& a, const VectorFunctionBase& b)
             : m_a(a.copy()), m_b(b.copy())
          {}
 
          Dot(const Dot& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_a(other.m_a->copy()), m_b(other.m_b->copy())
          {}
 
          Dot(Dot&& other)
-            :  ScalarCoefficientBase(std::move(other)),
+            :  ScalarFunctionBase(std::move(other)),
                m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
          {}
 
@@ -62,10 +64,10 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<VectorCoefficientBase> m_a, m_b;
+         std::unique_ptr<VectorFunctionBase> m_a, m_b;
    };
-   Dot(const VectorCoefficientBase&, const VectorCoefficientBase&)
-      -> Dot<VectorCoefficientBase, VectorCoefficientBase>;
+   Dot(const VectorFunctionBase&, const VectorFunctionBase&)
+      -> Dot<VectorFunctionBase, VectorFunctionBase>;
 
    /**
     * @brief Represents the dot product between two matrices.
@@ -76,29 +78,29 @@ namespace Rodin::Variational
     *    A \colon B = \sum_{i = 1}^n \sum_{j = 1}^m A_{ij} B_{ij} = \mathrm{tr}(B^T A)
     * @f]
     *
-    * @tparam A Derived type from MatrixCoefficientBase
-    * @tparam B Derived type from MatrixCoefficientBase
+    * @tparam A Derived type from MatrixFunctionBase
+    * @tparam B Derived type from MatrixFunctionBase
     */
    template <>
-   class Dot<MatrixCoefficientBase, MatrixCoefficientBase> : public ScalarCoefficientBase
+   class Dot<MatrixFunctionBase, MatrixFunctionBase> : public ScalarFunctionBase
    {
       public:
          /**
           * @brief Constructs the Dot product between two given matrices.
-          * @param[in] a Derived instance of MatrixCoefficientBase
-          * @param[in] b Derived instance of MatrixCoefficientBase
+          * @param[in] a Derived instance of MatrixFunctionBase
+          * @param[in] b Derived instance of MatrixFunctionBase
           */
-         Dot(const MatrixCoefficientBase& a, const MatrixCoefficientBase& b)
+         Dot(const MatrixFunctionBase& a, const MatrixFunctionBase& b)
             : m_a(a.copy()), m_b(b.copy())
          {}
 
          Dot(const Dot& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_a(other.m_a->copy()), m_b(other.m_b->copy())
          {}
 
          Dot(Dot&& other)
-            :  ScalarCoefficientBase(std::move(other)),
+            :  ScalarFunctionBase(std::move(other)),
                m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
          {}
 
@@ -116,21 +118,21 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<MatrixCoefficientBase> m_a, m_b;
+         std::unique_ptr<MatrixFunctionBase> m_a, m_b;
    };
-   Dot(const MatrixCoefficientBase&, const MatrixCoefficientBase&)
-      -> Dot<MatrixCoefficientBase, MatrixCoefficientBase>;
+   Dot(const MatrixFunctionBase&, const MatrixFunctionBase&)
+      -> Dot<MatrixFunctionBase, MatrixFunctionBase>;
 
    template <ShapeFunctionSpaceType Space>
-   class Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>
+   class Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
-         Dot(const ShapeFunctionBase<Space>& lhs, const ScalarCoefficientBase& rhs)
+         Dot(const ShapeFunctionBase<Space>& lhs, const ScalarFunctionBase& rhs)
             : Dot(rhs, lhs)
          {}
 
-         Dot(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+         Dot(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -144,7 +146,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -154,7 +156,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -221,29 +223,29 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Dot(const ScalarCoefficientBase&, const ShapeFunctionBase<Space>&)
-      -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const ScalarFunctionBase&, const ShapeFunctionBase<Space>&)
+      -> Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>;
    template <ShapeFunctionSpaceType Space>
-   Dot(const ShapeFunctionBase<Space>&, const ScalarCoefficientBase&)
-      -> Dot<ScalarCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const ShapeFunctionBase<Space>&, const ScalarFunctionBase&)
+      -> Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>;
 
    /**
-    * @brief Dot product between VectorCoefficientBase and ShapeFunctionBase.
+    * @brief Dot product between VectorFunctionBase and ShapeFunctionBase.
     */
    template <ShapeFunctionSpaceType Space>
-   class Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>
+   class Dot<VectorFunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
-         Dot(const ShapeFunctionBase<Space>& lhs, const VectorCoefficientBase& rhs)
+         Dot(const ShapeFunctionBase<Space>& lhs, const VectorFunctionBase& rhs)
             : Dot(rhs, lhs)
          {}
 
-         Dot(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+         Dot(const VectorFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -257,7 +259,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         VectorCoefficientBase& getLHS()
+         VectorFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -267,7 +269,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const VectorCoefficientBase& getLHS() const
+         const VectorFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -335,15 +337,15 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<VectorCoefficientBase> m_lhs;
+         std::unique_ptr<VectorFunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Dot(const VectorCoefficientBase&, const ShapeFunctionBase<Space>&)
-      -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const VectorFunctionBase&, const ShapeFunctionBase<Space>&)
+      -> Dot<VectorFunctionBase, ShapeFunctionBase<Space>>;
    template <ShapeFunctionSpaceType Space>
-   Dot(const ShapeFunctionBase<Space>&, const VectorCoefficientBase&)
-      -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const ShapeFunctionBase<Space>&, const VectorFunctionBase&)
+      -> Dot<VectorFunctionBase, ShapeFunctionBase<Space>>;
 
    /**
     * @brief Dot product between instances of Lhs and Rhs
