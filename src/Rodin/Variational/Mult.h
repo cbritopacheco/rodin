@@ -18,7 +18,7 @@
 #include "GridFunction.h"
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
 
@@ -187,24 +187,24 @@ namespace Rodin::Variational
    }
 
    /**
-    * @brief Multiplication of ScalarFunctionBase and MatrixCoefficientBase.
+    * @brief Multiplication of ScalarFunctionBase and MatrixFunctionBase.
     */
    template <>
-   class Mult<ScalarFunctionBase, MatrixCoefficientBase>
-      : public MatrixCoefficientBase
+   class Mult<ScalarFunctionBase, MatrixFunctionBase>
+      : public MatrixFunctionBase
    {
       public:
-         Mult(const ScalarFunctionBase& lhs, const MatrixCoefficientBase& rhs)
+         Mult(const ScalarFunctionBase& lhs, const MatrixFunctionBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Mult(const Mult& other)
-            :  MatrixCoefficientBase(other),
+            :  MatrixFunctionBase(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Mult(Mult&& other)
-            :  MatrixCoefficientBase(std::move(other)),
+            :  MatrixFunctionBase(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
@@ -213,7 +213,7 @@ namespace Rodin::Variational
             return *m_lhs;
          }
 
-         MatrixCoefficientBase& getRHS()
+         MatrixFunctionBase& getRHS()
          {
             return *m_rhs;
          }
@@ -223,7 +223,7 @@ namespace Rodin::Variational
             return *m_lhs;
          }
 
-         const MatrixCoefficientBase& getRHS() const
+         const MatrixFunctionBase& getRHS() const
          {
             return *m_rhs;
          }
@@ -252,27 +252,27 @@ namespace Rodin::Variational
          }
       private:
          std::unique_ptr<ScalarFunctionBase> m_lhs;
-         std::unique_ptr<MatrixCoefficientBase> m_rhs;
+         std::unique_ptr<MatrixFunctionBase> m_rhs;
    };
-   Mult(const ScalarFunctionBase&, const MatrixCoefficientBase&)
-      -> Mult<ScalarFunctionBase, MatrixCoefficientBase>;
+   Mult(const ScalarFunctionBase&, const MatrixFunctionBase&)
+      -> Mult<ScalarFunctionBase, MatrixFunctionBase>;
 
-   Mult<ScalarFunctionBase, MatrixCoefficientBase>
-   operator*(const ScalarFunctionBase& lhs, const MatrixCoefficientBase& rhs);
+   Mult<ScalarFunctionBase, MatrixFunctionBase>
+   operator*(const ScalarFunctionBase& lhs, const MatrixFunctionBase& rhs);
 
-   Mult<ScalarFunctionBase, MatrixCoefficientBase>
-   operator*(const MatrixCoefficientBase& lhs, const ScalarFunctionBase& rhs);
+   Mult<ScalarFunctionBase, MatrixFunctionBase>
+   operator*(const MatrixFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixCoefficientBase>>
-   operator*(T lhs, const MatrixCoefficientBase& rhs)
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixFunctionBase>>
+   operator*(T lhs, const MatrixFunctionBase& rhs)
    {
       return Mult(ScalarFunction(lhs), rhs);
    }
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixCoefficientBase>>
-   operator*(const MatrixCoefficientBase& lhs, T rhs)
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixFunctionBase>>
+   operator*(const MatrixFunctionBase& lhs, T rhs)
    {
       return Mult(ScalarFunction(rhs), lhs);
    }

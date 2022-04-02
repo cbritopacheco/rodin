@@ -15,7 +15,7 @@
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 
 namespace Rodin::Variational
 {
@@ -77,43 +77,43 @@ namespace Rodin::Variational
    operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    /**
-    * @brief %Sum of two MatrixCoefficientBase instances.
+    * @brief %Sum of two MatrixFunctionBase instances.
     */
    template <>
-   class Sum<MatrixCoefficientBase, MatrixCoefficientBase>
-      : public MatrixCoefficientBase
+   class Sum<MatrixFunctionBase, MatrixFunctionBase>
+      : public MatrixFunctionBase
    {
       public:
-         Sum(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+         Sum(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Sum(const Sum& other)
-            :  MatrixCoefficientBase(other),
+            :  MatrixFunctionBase(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Sum(Sum&& other)
-            :  MatrixCoefficientBase(std::move(other)),
+            :  MatrixFunctionBase(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         MatrixCoefficientBase& getLHS()
+         MatrixFunctionBase& getLHS()
          {
             return *m_lhs;
          }
 
-         MatrixCoefficientBase& getRHS()
+         MatrixFunctionBase& getRHS()
          {
             return *m_rhs;
          }
 
-         const MatrixCoefficientBase& getLHS() const
+         const MatrixFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
 
-         const MatrixCoefficientBase& getRHS() const
+         const MatrixFunctionBase& getRHS() const
          {
             return *m_rhs;
          }
@@ -132,13 +132,13 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<MatrixCoefficientBase> m_lhs;
-         std::unique_ptr<MatrixCoefficientBase> m_rhs;
+         std::unique_ptr<MatrixFunctionBase> m_lhs;
+         std::unique_ptr<MatrixFunctionBase> m_rhs;
    };
-   Sum(const MatrixCoefficientBase&, const MatrixCoefficientBase&)
-      -> Sum<MatrixCoefficientBase, MatrixCoefficientBase>;
-   Sum<MatrixCoefficientBase, MatrixCoefficientBase>
-   operator+(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs);
+   Sum(const MatrixFunctionBase&, const MatrixFunctionBase&)
+      -> Sum<MatrixFunctionBase, MatrixFunctionBase>;
+   Sum<MatrixFunctionBase, MatrixFunctionBase>
+   operator+(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs);
 
    template <ShapeFunctionSpaceType Space>
    class Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>

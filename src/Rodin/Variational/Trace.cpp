@@ -1,10 +1,10 @@
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 
 #include "Trace.h"
 
 namespace Rodin::Variational
 {
-   Trace::Trace(const MatrixCoefficientBase& m)
+   Trace::Trace(const MatrixFunctionBase& m)
       : m_matrix(m.copy())
    {
       assert(m.getColumns() == m.getRows());

@@ -8,7 +8,7 @@
 #define RODIN_VARIATIONAL_TRANSPOSE_H
 
 #include "ShapeFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 
 namespace Rodin::Variational
 {
@@ -22,23 +22,23 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Transpose<MatrixCoefficientBase> : public MatrixCoefficientBase
+   class Transpose<MatrixFunctionBase> : public MatrixFunctionBase
    {
       public:
          /**
           * @brief Constructs the Transpose matrix of the given matrix.
           */
-         Transpose(const MatrixCoefficientBase& m)
+         Transpose(const MatrixFunctionBase& m)
             : m_matrix(m.copy())
          {}
 
          Transpose(const Transpose& other)
-            :  MatrixCoefficientBase(other),
+            :  MatrixFunctionBase(other),
                m_matrix(other.m_matrix->copy())
          {}
 
          Transpose(Transpose&& other)
-            : MatrixCoefficientBase(std::move(other)),
+            : MatrixFunctionBase(std::move(other)),
               m_matrix(std::move(other.m_matrix))
          {}
 
@@ -66,10 +66,10 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<MatrixCoefficientBase> m_matrix;
+         std::unique_ptr<MatrixFunctionBase> m_matrix;
    };
-   Transpose(const MatrixCoefficientBase&)
-      -> Transpose<MatrixCoefficientBase>;
+   Transpose(const MatrixFunctionBase&)
+      -> Transpose<MatrixFunctionBase>;
 
    template <ShapeFunctionSpaceType Space>
    class Transpose<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>

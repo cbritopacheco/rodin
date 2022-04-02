@@ -12,7 +12,7 @@
 #include "Rank3Operator.h"
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
-#include "MatrixCoefficient.h"
+#include "MatrixFunction.h"
 
 namespace Rodin::Variational::Internal
 {
@@ -76,7 +76,7 @@ namespace Rodin::Variational
     * This class aids in the calculation of the Jacobian of a GridFunction<H1>.
     */
    template <>
-   class Jacobian<GridFunction<H1>> : public MatrixCoefficientBase
+   class Jacobian<GridFunction<H1>> : public MatrixFunctionBase
    {
       public:
          /**
@@ -89,12 +89,12 @@ namespace Rodin::Variational
          {}
 
          Jacobian(const Jacobian& other)
-            :  MatrixCoefficientBase(other),
+            :  MatrixFunctionBase(other),
                m_u(other.m_u)
          {}
 
          Jacobian(Jacobian&& other)
-            : MatrixCoefficientBase(std::move(other)),
+            : MatrixFunctionBase(std::move(other)),
               m_u(other.m_u)
          {}
 

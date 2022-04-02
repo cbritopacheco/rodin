@@ -53,7 +53,7 @@
 
 #include "Variational/ScalarFunction.h"
 #include "Variational/VectorFunction.h"
-#include "Variational/MatrixCoefficient.h"
+#include "Variational/MatrixFunction.h"
 
 // ---- Boundary conditions --------------------------------------------------
 #include "Variational/DirichletBC.h"

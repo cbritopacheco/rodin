@@ -24,7 +24,7 @@ set(RodinVariational_HEADERS
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
-  MatrixCoefficient.h
+  MatrixFunction.h
   Problem.h
   ProblemBody.h
   ScalarFunction.h
@@ -47,7 +47,7 @@ set(RodinVariational_SRCS
   Jacobian.cpp
   Division.cpp
   Grad.cpp
-  MatrixCoefficient.cpp
+  MatrixFunction.cpp
   Trace.cpp
   VectorFunction.cpp
   ScalarFunction.cpp
