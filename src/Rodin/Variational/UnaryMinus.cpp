@@ -18,6 +18,29 @@ namespace Rodin::Variational
       return -1.0 * getOperand().getValue(trans, ip);
    }
 
+   UnaryMinus<ScalarCoefficientBase>
+   operator-(const ScalarCoefficientBase& op)
+   {
+      return UnaryMinus(op);
+   }
+
+   void
+   UnaryMinus<VectorCoefficientBase>
+   ::getValue(
+         mfem::Vector& value,
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   const
+   {
+      getOperand().getValue(value, trans, ip);
+      value.Neg();
+   }
+
+   UnaryMinus<VectorCoefficientBase>
+   operator-(const VectorCoefficientBase& op)
+   {
+      return UnaryMinus(op);
+   }
+
    void
    UnaryMinus<LinearFormIntegratorBase>
    ::getElementVector(const mfem::FiniteElement& fe,
@@ -26,6 +49,12 @@ namespace Rodin::Variational
    {
       getOperand().getElementVector(fe, trans, vec);
       vec *= -1.0;
+   }
+
+   UnaryMinus<LinearFormIntegratorBase>
+   operator-(const LinearFormIntegratorBase& op)
+   {
+      return UnaryMinus(op);
    }
 
    void
@@ -38,31 +67,19 @@ namespace Rodin::Variational
       mat *= -1.0;
    }
 
+   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
+   {
+      return UnaryMinus(op);
+   }
+
    Sum<ScalarCoefficientBase, ScalarCoefficientBase>
    operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
    {
       return Sum<ScalarCoefficientBase, ScalarCoefficientBase>(lhs, UnaryMinus(rhs));
    }
 
-   UnaryMinus<ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& op)
-   {
-      return UnaryMinus(op);
-   }
-
-   UnaryMinus<LinearFormIntegratorBase>
-   operator-(const LinearFormIntegratorBase& op)
-   {
-      return UnaryMinus(op);
-   }
-
    UnaryMinus<FormLanguage::LinearFormIntegratorSum>
    operator-(const FormLanguage::LinearFormIntegratorSum& op)
-   {
-      return UnaryMinus(op);
-   }
-
-   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
    {
       return UnaryMinus(op);
    }
