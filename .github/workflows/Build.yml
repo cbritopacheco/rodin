@@ -10,7 +10,7 @@ on:
       - develop
 
 concurrency:
-  group: ${{ github.ref }}
+  group: Build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
