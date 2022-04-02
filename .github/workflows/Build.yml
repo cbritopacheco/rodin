@@ -8,6 +8,11 @@ on:
     branches:
       - master
       - develop
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   Ubuntu:
     runs-on: ${{ matrix.os }}
