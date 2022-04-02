@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_MATRIXCOEFFICIENT_H
-#define RODIN_VARIATIONAL_MATRIXCOEFFICIENT_H
+#ifndef RODIN_VARIATIONAL_MATRIXFUNCTION_H
+#define RODIN_VARIATIONAL_MATRIXFUNCTION_H
 
 #include <set>
 #include <optional>
@@ -20,17 +20,17 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for objects representing matrix coefficients.
     */
-   class MatrixCoefficientBase
+   class MatrixFunctionBase
       : public FormLanguage::Buildable<mfem::MatrixCoefficient>
    {
       public:
-         MatrixCoefficientBase() = default;
+         MatrixFunctionBase() = default;
 
-         MatrixCoefficientBase(const MatrixCoefficientBase& other)
+         MatrixFunctionBase(const MatrixFunctionBase& other)
             : m_traceDomain(other.m_traceDomain)
          {}
 
-         MatrixCoefficientBase(MatrixCoefficientBase&& other)
+         MatrixFunctionBase(MatrixFunctionBase&& other)
             : m_traceDomain(std::move(other.m_traceDomain))
          {}
 
@@ -43,7 +43,7 @@ namespace Rodin::Variational
           *
           * @returns Reference to self (for method chaining)
           */
-         MatrixCoefficientBase& traceOf(int attr)
+         MatrixFunctionBase& traceOf(int attr)
          {
             return traceOf(std::set<int>{attr});
          }
@@ -59,16 +59,16 @@ namespace Rodin::Variational
           * involve the derivatives of a GridFunction need to know the element
           * to "trace".
           *
-          * @note Setting the trace domain of a MatrixCoefficientBase instance
+          * @note Setting the trace domain of a MatrixFunctionBase instance
           * does not guarantee that it will taken into consideration when
           * computing its value. That said, it is up to the subclass to decide
           * how it will use this information which can be obtained via the
           * getTraceDomain() method.
           *
-          * @see @ref MatrixCoefficientBase::getTraceDomain() "getTraceDomain()"
+          * @see @ref MatrixFunctionBase::getTraceDomain() "getTraceDomain()"
           *
           */
-         MatrixCoefficientBase& traceOf(std::set<int> attrs)
+         MatrixFunctionBase& traceOf(std::set<int> attrs)
          {
             m_traceDomain = attrs;
             return *this;
@@ -90,14 +90,14 @@ namespace Rodin::Variational
 
          std::unique_ptr<mfem::MatrixCoefficient> build() const override;
 
-         virtual ~MatrixCoefficientBase() = default;
+         virtual ~MatrixFunctionBase() = default;
 
          /**
           * @brief Convenience function to get the transpose @f$ A^T @f$ of the
           * matrix object @f$ A @f$
           * @returns Transpose coefficient of the matrix instance
           */
-         virtual Transpose<MatrixCoefficientBase> T() const;
+         virtual Transpose<MatrixFunctionBase> T() const;
 
          /**
           * @brief Gets the number of rows in the matrix
@@ -115,7 +115,7 @@ namespace Rodin::Variational
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
-         virtual MatrixCoefficientBase* copy() const noexcept override = 0;
+         virtual MatrixFunctionBase* copy() const noexcept override = 0;
 
       private:
          std::set<int> m_traceDomain;
@@ -124,20 +124,20 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational::Internal
 {
-   class ProxyMatrixCoefficient : public mfem::MatrixCoefficient
+   class ProxyMatrixFunction : public mfem::MatrixCoefficient
    {
       public:
-         ProxyMatrixCoefficient(const MatrixCoefficientBase& mat)
+         ProxyMatrixFunction(const MatrixFunctionBase& mat)
             :  mfem::MatrixCoefficient(mat.getRows(), mat.getColumns()),
                m_mat(mat)
          {}
 
-         ProxyMatrixCoefficient(const ProxyMatrixCoefficient& other)
+         ProxyMatrixFunction(const ProxyMatrixFunction& other)
             :  mfem::MatrixCoefficient(other),
                m_mat(other.m_mat)
          {}
 
-         ProxyMatrixCoefficient(ProxyMatrixCoefficient&& other)
+         ProxyMatrixFunction(ProxyMatrixFunction&& other)
             :  mfem::MatrixCoefficient(std::move(other)),
                m_mat(other.m_mat)
          {}
@@ -150,7 +150,7 @@ namespace Rodin::Variational::Internal
          }
 
       private:
-         const MatrixCoefficientBase& m_mat;
+         const MatrixFunctionBase& m_mat;
    };
 }
 

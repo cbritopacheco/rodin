@@ -8,32 +8,32 @@
 
 namespace Rodin::Variational
 {
-   Mult<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, ScalarFunctionBase>
+   operator*(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Mult(lhs, rhs);
    }
 
-   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, MatrixFunctionBase>
+   operator*(const ScalarFunctionBase& lhs, const MatrixFunctionBase& rhs)
    {
       return Mult(lhs, rhs);
    }
 
-   Mult<ScalarCoefficientBase, MatrixCoefficientBase>
-   operator*(const MatrixCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, MatrixFunctionBase>
+   operator*(const MatrixFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Mult(rhs, lhs);
    }
 
-   Mult<ScalarCoefficientBase, VectorCoefficientBase>
-   operator*(const ScalarCoefficientBase& lhs, const VectorCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, VectorFunctionBase>
+   operator*(const ScalarFunctionBase& lhs, const VectorFunctionBase& rhs)
    {
       return Mult(lhs, rhs);
    }
 
-   Mult<ScalarCoefficientBase, VectorCoefficientBase>
-   operator*(const VectorCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, VectorFunctionBase>
+   operator*(const VectorFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Mult(rhs, lhs);
    }

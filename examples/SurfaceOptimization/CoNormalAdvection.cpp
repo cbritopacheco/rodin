@@ -1,4 +1,11 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <Rodin/Mesh.h>
+#include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
@@ -51,27 +58,54 @@ int main(int, char**)
   //         return -1;
   //     });
 
-  // H1 Vh(Omega);
-  // H1 Th(Omega, 3);
-
   // GridFunction ls(Vh);
   // ls = f;
 
+  H1 Vh(Omega);
+  H1 Th(Omega, 3);
+
   auto mmgMesh = Cast(Omega).to<MMG::MeshS>();
   auto mmgLs = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
-  auto mmgImplicit = MMG::ImplicitDomainMesherS().setBoundaryReference(Gamma)
-                                          .discretize(mmgLs);
-  mmgImplicit.save("mmg.mesh");
+  auto phi = Cast(mmgLs).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
 
-  // auto phi = Cast(mmgLs).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
-  // Omega = Cast(mmgImplicit).to<Mesh>();
+  auto n0 = -VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
 
-  // GridFunction n(Th);
-  // n = VectorCoefficient{Dx(phi), Dy(phi), Dz(phi)};
+  double alpha = 0.1;
+
+  TrialFunction nx(Vh);
+  TrialFunction ny(Vh);
+  TrialFunction nz(Vh);
+  TestFunction  v(Vh);
+
+  auto solver = Solver::UMFPack();
+
+  Problem velextX(nx, v);
+  velextX = Integral(alpha * Grad(nx), Grad(v))
+          + Integral(nx, v)
+          - Integral(n0.x(), v);
+  solver.solve(velextX);
+
+  Problem velextY(ny, v);
+  velextY = Integral(alpha * Grad(ny), Grad(v))
+          + Integral(ny, v)
+          - Integral(n0.y(), v);
+  solver.solve(velextY);
+
+  Problem velextZ(nz, v);
+  velextZ = Integral(alpha * Grad(nz), Grad(v))
+          + Integral(nz, v)
+          - Integral(n0.z(), v);
+  solver.solve(velextZ);
+
+  auto n = VectorFunction{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
+  auto norm = Pow(n.x() * n.x() + n.y() * n.y() + n.z() * n.z(), 0.5);
+
+  GridFunction nn(Th);
+  nn = n / norm;
 
   // phi.save("phi.gf");
-  // n.save("n.gf");
-  // Omega.save("Omega.mesh");
+  nn.save("nn.gf");
+  Omega.save("Omega.mesh");
   // auto mmgLs = Cast(ls).to<MMG::IncompleteScalarSolutionS>().setMesh(mmgMesh);
 
   // mmgMesh.save("mmg.mesh");

@@ -10,7 +10,8 @@
 #include <memory>
 #include <type_traits>
 
-#include "Rodin/Variational/ScalarCoefficient.h"
+#include "Rodin/Variational/ScalarFunction.h"
+#include "Rodin/Variational/VectorFunction.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 
 #include "FormLanguage/LinearFormIntegratorSum.h"
@@ -64,30 +65,30 @@ namespace Rodin::Variational
    };
 
    template <>
-   class UnaryMinus<ScalarCoefficientBase>
-      : public ScalarCoefficientBase
+   class UnaryMinus<ScalarFunctionBase>
+      : public ScalarFunctionBase
    {
       public:
-         UnaryMinus(const ScalarCoefficientBase& op)
+         UnaryMinus(const ScalarFunctionBase& op)
             : m_op(op.copy())
          {}
 
          UnaryMinus(const UnaryMinus& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_op(other.m_op->copy())
          {}
 
          UnaryMinus(UnaryMinus&& other)
-            : ScalarCoefficientBase(std::move(other)),
+            : ScalarFunctionBase(std::move(other)),
               m_op(std::move(other.m_op))
          {}
 
-         ScalarCoefficientBase& getOperand()
+         ScalarFunctionBase& getOperand()
          {
             return *m_op;
          }
 
-         const ScalarCoefficientBase& getOperand() const
+         const ScalarFunctionBase& getOperand() const
          {
             return *m_op;
          }
@@ -101,8 +102,61 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_op;
+         std::unique_ptr<ScalarFunctionBase> m_op;
    };
+   UnaryMinus<ScalarFunctionBase> operator-(const ScalarFunctionBase& op);
+
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
+
+   template <>
+   class UnaryMinus<VectorFunctionBase>
+      : public VectorFunctionBase
+   {
+      public:
+         UnaryMinus(const VectorFunctionBase& op)
+            : m_op(op.copy())
+         {}
+
+         UnaryMinus(const UnaryMinus& other)
+            :  VectorFunctionBase(other),
+               m_op(other.m_op->copy())
+         {}
+
+         UnaryMinus(UnaryMinus&& other)
+            : VectorFunctionBase(std::move(other)),
+              m_op(std::move(other.m_op))
+         {}
+
+         VectorFunctionBase& getOperand()
+         {
+            return *m_op;
+         }
+
+         const VectorFunctionBase& getOperand() const
+         {
+            return *m_op;
+         }
+
+         int getDimension() const override
+         {
+            return getOperand().getDimension();
+         }
+
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
+
+         UnaryMinus* copy() const noexcept override
+         {
+            return new UnaryMinus(*this);
+         }
+
+      private:
+         std::unique_ptr<VectorFunctionBase> m_op;
+   };
+   UnaryMinus<VectorFunctionBase> operator-(const VectorFunctionBase& op);
 
    template <>
    class UnaryMinus<LinearFormIntegratorBase>
@@ -159,6 +213,7 @@ namespace Rodin::Variational
       private:
          std::unique_ptr<LinearFormIntegratorBase> m_op;
    };
+   UnaryMinus<LinearFormIntegratorBase> operator-(const LinearFormIntegratorBase& lfi);
 
    template <>
    class UnaryMinus<FormLanguage::LinearFormIntegratorSum>
@@ -187,6 +242,8 @@ namespace Rodin::Variational
             return new UnaryMinus(*this);
          }
    };
+   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
+   operator-(const FormLanguage::LinearFormIntegratorSum& lfi);
 
    template <>
    class UnaryMinus<BilinearFormIntegratorBase>
@@ -248,6 +305,7 @@ namespace Rodin::Variational
       private:
          std::unique_ptr<BilinearFormIntegratorBase> m_op;
    };
+   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op);
 
    template <>
    class UnaryMinus<FormLanguage::BilinearFormIntegratorSum>
@@ -274,21 +332,6 @@ namespace Rodin::Variational
             return new UnaryMinus(*this);
          }
    };
-
-   UnaryMinus<ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& op);
-
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
-
-   UnaryMinus<LinearFormIntegratorBase>
-   operator-(const LinearFormIntegratorBase& lfi);
-
-   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
-   operator-(const FormLanguage::LinearFormIntegratorSum& lfi);
-
-   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op);
-
    UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
          const FormLanguage::BilinearFormIntegratorSum& op);
 }

@@ -35,6 +35,7 @@
 #include "Variational/Pow.h"
 #include "Variational/Sum.h"
 #include "Variational/Mult.h"
+#include "Variational/Division.h"
 #include "Variational/UnaryMinus.h"
 
 #include "Variational/Div.h"
@@ -50,9 +51,9 @@
 #include "Variational/Integral.h"
 #include "Variational/Problem.h"
 
-#include "Variational/ScalarCoefficient.h"
-#include "Variational/VectorCoefficient.h"
-#include "Variational/MatrixCoefficient.h"
+#include "Variational/ScalarFunction.h"
+#include "Variational/VectorFunction.h"
+#include "Variational/MatrixFunction.h"
 
 // ---- Boundary conditions --------------------------------------------------
 #include "Variational/DirichletBC.h"

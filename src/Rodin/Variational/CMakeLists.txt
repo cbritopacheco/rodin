@@ -24,15 +24,15 @@ set(RodinVariational_HEADERS
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
-  MatrixCoefficient.h
+  MatrixFunction.h
   Problem.h
   ProblemBody.h
-  ScalarCoefficient.h
+  ScalarFunction.h
   Trace.h
   Transpose.h
   Rank3Operator.h
   Restriction.h
-  VectorCoefficient.h
+  VectorFunction.h
   )
 
 set(RodinVariational_SRCS
@@ -45,11 +45,12 @@ set(RodinVariational_SRCS
   GridFunctionView.cpp
   Integral.cpp
   Jacobian.cpp
+  Division.cpp
   Grad.cpp
-  MatrixCoefficient.cpp
+  MatrixFunction.cpp
   Trace.cpp
-  VectorCoefficient.cpp
-  ScalarCoefficient.cpp
+  VectorFunction.cpp
+  ScalarFunction.cpp
   Restriction.cpp
   Rank3Operator.cpp
   Sum.cpp
