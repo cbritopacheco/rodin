@@ -11,7 +11,7 @@
 #include <type_traits>
 
 #include "Rodin/Variational/ScalarFunction.h"
-#include "Rodin/Variational/VectorCoefficient.h"
+#include "Rodin/Variational/VectorFunction.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 
 #include "FormLanguage/LinearFormIntegratorSum.h"
@@ -110,30 +110,30 @@ namespace Rodin::Variational
    operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    template <>
-   class UnaryMinus<VectorCoefficientBase>
-      : public VectorCoefficientBase
+   class UnaryMinus<VectorFunctionBase>
+      : public VectorFunctionBase
    {
       public:
-         UnaryMinus(const VectorCoefficientBase& op)
+         UnaryMinus(const VectorFunctionBase& op)
             : m_op(op.copy())
          {}
 
          UnaryMinus(const UnaryMinus& other)
-            :  VectorCoefficientBase(other),
+            :  VectorFunctionBase(other),
                m_op(other.m_op->copy())
          {}
 
          UnaryMinus(UnaryMinus&& other)
-            : VectorCoefficientBase(std::move(other)),
+            : VectorFunctionBase(std::move(other)),
               m_op(std::move(other.m_op))
          {}
 
-         VectorCoefficientBase& getOperand()
+         VectorFunctionBase& getOperand()
          {
             return *m_op;
          }
 
-         const VectorCoefficientBase& getOperand() const
+         const VectorFunctionBase& getOperand() const
          {
             return *m_op;
          }
@@ -154,9 +154,9 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<VectorCoefficientBase> m_op;
+         std::unique_ptr<VectorFunctionBase> m_op;
    };
-   UnaryMinus<VectorCoefficientBase> operator-(const VectorCoefficientBase& op);
+   UnaryMinus<VectorFunctionBase> operator-(const VectorFunctionBase& op);
 
    template <>
    class UnaryMinus<LinearFormIntegratorBase>

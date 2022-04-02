@@ -9,33 +9,33 @@
 
 #include "ForwardDecls.h"
 #include "ScalarFunction.h"
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
    /**
-    * @brief Division of VectorCoefficientBase by ScalarFunctionBase.
+    * @brief Division of VectorFunctionBase by ScalarFunctionBase.
     */
    template <>
-   class Division<VectorCoefficientBase, ScalarFunctionBase>
-      : public VectorCoefficientBase
+   class Division<VectorFunctionBase, ScalarFunctionBase>
+      : public VectorFunctionBase
    {
       public:
-         Division(const VectorCoefficientBase& lhs, const ScalarFunctionBase& rhs)
+         Division(const VectorFunctionBase& lhs, const ScalarFunctionBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Division(const Division& other)
-            :  VectorCoefficientBase(other),
+            :  VectorFunctionBase(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Division(Division&& other)
-            :  VectorCoefficientBase(std::move(other)),
+            :  VectorFunctionBase(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         VectorCoefficientBase& getLHS()
+         VectorFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -45,7 +45,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const VectorCoefficientBase& getLHS() const
+         const VectorFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -73,19 +73,19 @@ namespace Rodin::Variational
             return new Division(*this);
          }
       private:
-         std::unique_ptr<VectorCoefficientBase> m_lhs;
+         std::unique_ptr<VectorFunctionBase> m_lhs;
          std::unique_ptr<ScalarFunctionBase> m_rhs;
    };
-   Division(const VectorCoefficientBase&, const ScalarFunctionBase&)
-      -> Division<VectorCoefficientBase, ScalarFunctionBase>;
+   Division(const VectorFunctionBase&, const ScalarFunctionBase&)
+      -> Division<VectorFunctionBase, ScalarFunctionBase>;
 
-   Division<VectorCoefficientBase, ScalarFunctionBase>
-   operator/(const VectorCoefficientBase& lhs, const ScalarFunctionBase& rhs);
+   Division<VectorFunctionBase, ScalarFunctionBase>
+   operator/(const VectorFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    template <class T>
    std::enable_if_t<std::is_arithmetic_v<T>,
-      Division<VectorCoefficientBase, ScalarFunctionBase>>
-   operator*(const VectorCoefficientBase& lhs, T rhs)
+      Division<VectorFunctionBase, ScalarFunctionBase>>
+   operator*(const VectorFunctionBase& lhs, T rhs)
    {
       return Division(lhs, ScalarFunction(rhs));
    }

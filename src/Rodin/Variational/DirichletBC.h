@@ -16,7 +16,7 @@
 
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
@@ -43,8 +43,8 @@ namespace Rodin::Variational
    {
       static_assert(
             std::is_base_of_v<ScalarFunctionBase, Value> ||
-            std::is_base_of_v<VectorCoefficientBase, Value>,
-            "Value must be derived from either ScalarFunctionBase or VectorCoefficientBase");
+            std::is_base_of_v<VectorFunctionBase, Value>,
+            "Value must be derived from either ScalarFunctionBase or VectorFunctionBase");
       public:
          DirichletBC(const TrialFunction<FES>& u, const Value& v)
             : m_u(u), m_value(v.copy())
@@ -54,7 +54,7 @@ namespace Rodin::Variational
                assert(
                      u.getFiniteElementSpace().getVectorDimension() == 1);
             }
-            else if constexpr (std::is_base_of_v<VectorCoefficientBase, Value>)
+            else if constexpr (std::is_base_of_v<VectorFunctionBase, Value>)
             {
                assert(
                      u.getFiniteElementSpace().getVectorDimension() == v.getDimension());
@@ -121,8 +121,8 @@ namespace Rodin::Variational
    DirichletBC(const TrialFunction<FES>&, const ScalarFunctionBase&)
       -> DirichletBC<TrialFunction<FES>, ScalarFunctionBase>;
    template <class FES>
-   DirichletBC(const TrialFunction<FES>&, const VectorCoefficientBase&)
-      -> DirichletBC<TrialFunction<FES>, VectorCoefficientBase>;
+   DirichletBC(const TrialFunction<FES>&, const VectorFunctionBase&)
+      -> DirichletBC<TrialFunction<FES>, VectorFunctionBase>;
 
    template <class FES>
    class DirichletBC<Component<TrialFunction<FES>>, ScalarFunctionBase> : public FormLanguage::Base

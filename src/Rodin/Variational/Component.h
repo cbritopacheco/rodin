@@ -117,14 +117,14 @@ namespace Rodin::Variational
    Component(GridFunction<FES>&, int) -> Component<GridFunction<FES>>;
 
    /**
-    * @brief Represents the component (or entry) of a VectorCoefficientBase
+    * @brief Represents the component (or entry) of a VectorFunctionBase
     * instance.
     */
    template <>
-   class Component<VectorCoefficientBase> : public ScalarFunctionBase
+   class Component<VectorFunctionBase> : public ScalarFunctionBase
    {
       public:
-         Component(const VectorCoefficientBase& v, int component)
+         Component(const VectorFunctionBase& v, int component)
             :  m_v(v.copy()),
                m_idx(component)
          {}
@@ -160,10 +160,10 @@ namespace Rodin::Variational
             return new Component(*this);
          }
       private:
-         std::unique_ptr<VectorCoefficientBase> m_v;
+         std::unique_ptr<VectorFunctionBase> m_v;
          const int m_idx;
    };
-   Component(const VectorCoefficientBase&, int) -> Component<VectorCoefficientBase>;
+   Component(const VectorFunctionBase&, int) -> Component<VectorFunctionBase>;
 }
 
 #endif

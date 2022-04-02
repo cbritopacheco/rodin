@@ -68,7 +68,7 @@ int main(int, char**)
   auto mmgLs = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
   auto phi = Cast(mmgLs).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
 
-  auto n0 = -VectorCoefficient{Dx(phi), Dy(phi), Dz(phi)};
+  auto n0 = -VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
 
   double alpha = 0.1;
 
@@ -97,7 +97,7 @@ int main(int, char**)
           - Integral(n0.z(), v);
   solver.solve(velextZ);
 
-  auto n = VectorCoefficient{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
+  auto n = VectorFunction{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
   auto norm = Pow(n.x() * n.x() + n.y() * n.y() + n.z() * n.z(), 0.5);
 
   GridFunction nn(Th);

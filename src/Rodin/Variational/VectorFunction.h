@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_VECTORCOEFFICIENT_H
-#define RODIN_VARIATIONAL_VECTORCOEFFICIENT_H
+#ifndef RODIN_VARIATIONAL_VECTORFUNCTION_H
+#define RODIN_VARIATIONAL_VECTORFUNCTION_H
 
 #include <memory>
 #include <optional>
@@ -28,13 +28,13 @@ namespace Rodin::Variational
     * @note Vectors are zero indexed. This means that the 0-index corresponds
     * to the 1st entry of the vector.
     */
-   class VectorCoefficientBase
+   class VectorFunctionBase
       : public FormLanguage::Buildable<mfem::VectorCoefficient>
    {
       public:
-         VectorCoefficientBase() = default;
+         VectorFunctionBase() = default;
 
-         VectorCoefficientBase(const VectorCoefficientBase&) = default;
+         VectorFunctionBase(const VectorFunctionBase&) = default;
 
          /**
           * @brief Sets an attribute which will be interpreted as the domain to
@@ -45,7 +45,7 @@ namespace Rodin::Variational
           *
           * @returns Reference to self (for method chaining)
           */
-         VectorCoefficientBase& traceOf(int attr)
+         VectorFunctionBase& traceOf(int attr)
          {
             return traceOf(std::set<int>{attr});
          }
@@ -61,16 +61,16 @@ namespace Rodin::Variational
           * involve the derivatives of a GridFunction need to know the element
           * to "trace".
           *
-          * @note Setting the trace domain of a VectorCoefficientBase instance
+          * @note Setting the trace domain of a VectorFunctionBase instance
           * does not guarantee that it will taken into consideration when
           * computing its value. That said, it is up to the subclass to decide
           * how it will use this information which can be obtained via the
           * getTraceDomain() method.
           *
-          * @see @ref VectorCoefficientBase::getTraceDomain() "getTraceDomain()"
+          * @see @ref VectorFunctionBase::getTraceDomain() "getTraceDomain()"
           *
           */
-         VectorCoefficientBase& traceOf(std::set<int> attrs)
+         VectorFunctionBase& traceOf(std::set<int> attrs)
          {
             m_traceDomain = attrs;
             return *this;
@@ -94,23 +94,23 @@ namespace Rodin::Variational
           * @brief Convenience function to access the 1st component of the
           * vector.
           */
-         Component<VectorCoefficientBase> x() const;
+         Component<VectorFunctionBase> x() const;
 
          /**
           * @brief Convenience function to access the 2nd component of the
           * vector.
           */
-         Component<VectorCoefficientBase> y() const;
+         Component<VectorFunctionBase> y() const;
 
          /**
           * @brief Convenience function to access the 3nd component of the
           * vector.
           */
-         Component<VectorCoefficientBase> z() const;
+         Component<VectorFunctionBase> z() const;
 
-         virtual ~VectorCoefficientBase() = default;
+         virtual ~VectorFunctionBase() = default;
 
-         virtual Component<VectorCoefficientBase> operator()(int i) const;
+         virtual Component<VectorFunctionBase> operator()(int i) const;
 
          virtual void getValue(
                mfem::Vector& value,
@@ -122,7 +122,7 @@ namespace Rodin::Variational
           */
          virtual int getDimension() const = 0;
 
-         virtual VectorCoefficientBase* copy() const noexcept override = 0;
+         virtual VectorFunctionBase* copy() const noexcept override = 0;
 
          std::unique_ptr<mfem::VectorCoefficient> build() const override;
 
@@ -136,7 +136,7 @@ namespace Rodin::Variational
     * converted to objects of type ScalarFunction.
     */
    template <class ... Values>
-   class VectorCoefficient : public VectorCoefficientBase
+   class VectorFunction : public VectorFunctionBase
    {
       public:
          /**
@@ -144,14 +144,14 @@ namespace Rodin::Variational
           * @param[in] values Parameter pack of values
           */
          constexpr
-         VectorCoefficient(Values... values)
+         VectorFunction(Values... values)
          {
             m_coeffs.reserve(sizeof...(Values));
             makeCoefficientsFromTuple(std::forward_as_tuple(values...));
          }
 
          constexpr
-         VectorCoefficient(const VectorCoefficient& other)
+         VectorFunction(const VectorFunction& other)
          {
             m_coeffs.reserve(sizeof...(Values));
             for (const auto& v : other.m_coeffs)
@@ -159,7 +159,7 @@ namespace Rodin::Variational
          }
 
          constexpr
-         VectorCoefficient(VectorCoefficient&&) = default;
+         VectorFunction(VectorFunction&&) = default;
 
          void getValue(
                mfem::Vector& value,
@@ -175,9 +175,9 @@ namespace Rodin::Variational
             return sizeof...(Values);
          }
 
-         VectorCoefficient* copy() const noexcept override
+         VectorFunction* copy() const noexcept override
          {
-            return new VectorCoefficient(*this);
+            return new VectorFunction(*this);
          }
 
       private:
@@ -197,7 +197,7 @@ namespace Rodin::Variational
          std::vector<std::unique_ptr<ScalarFunctionBase>> m_coeffs;
    };
    template <class ... Values>
-   VectorCoefficient(Values&&...) -> VectorCoefficient<Values...>;
+   VectorFunction(Values&&...) -> VectorFunction<Values...>;
 
    /**
     * @brief Vector which can be constructed from a GridFunction with vector
@@ -207,22 +207,22 @@ namespace Rodin::Variational
     * takes on vector values at the mesh vertices.
     */
    template <class FEC>
-   class VectorCoefficient<GridFunction<FEC>>
-      : public VectorCoefficientBase
+   class VectorFunction<GridFunction<FEC>>
+      : public VectorFunctionBase
    {
       public:
          /**
-          * @brief Constructs a VectorCoefficient from a vector valued GridFunction.
+          * @brief Constructs a VectorFunction from a vector valued GridFunction.
           */
          constexpr
-         VectorCoefficient(GridFunction<FEC>& u)
+         VectorFunction(GridFunction<FEC>& u)
             :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
                m_u(u),
-               m_mfemVectorCoefficient(&u.getHandle())
+               m_mfemVectorFunction(&u.getHandle())
          {}
 
          constexpr
-         VectorCoefficient(const VectorCoefficient& other)
+         VectorFunction(const VectorFunction& other)
             :  m_dimension(other.m_dimension),
                m_u(other.m_u)
          {}
@@ -232,38 +232,38 @@ namespace Rodin::Variational
             return m_dimension;
          }
 
-         VectorCoefficient* copy() const noexcept override
+         VectorFunction* copy() const noexcept override
          {
-            return new VectorCoefficient(*this);
+            return new VectorFunction(*this);
          }
 
       private:
          const size_t m_dimension;
          GridFunction<FEC>& m_u;
 
-         mfem::VectorGridFunctionCoefficient m_mfemVectorCoefficient;
+         mfem::VectorGridFunctionCoefficient m_mfemVectorFunction;
    };
    template <class FEC>
-   VectorCoefficient(GridFunction<FEC>&)
-      -> VectorCoefficient<GridFunction<FEC>>;
+   VectorFunction(GridFunction<FEC>&)
+      -> VectorFunction<GridFunction<FEC>>;
 }
 
 namespace Rodin::Variational::Internal
 {
-   class ProxyVectorCoefficient : public mfem::VectorCoefficient
+   class ProxyVectorFunction : public mfem::VectorCoefficient
    {
       public:
-         ProxyVectorCoefficient(const VectorCoefficientBase& v)
+         ProxyVectorFunction(const VectorFunctionBase& v)
             :  mfem::VectorCoefficient(v.getDimension()),
                m_v(v)
          {}
 
-         ProxyVectorCoefficient(const ProxyVectorCoefficient& other)
+         ProxyVectorFunction(const ProxyVectorFunction& other)
             :  mfem::VectorCoefficient(other),
                m_v(other.m_v)
          {}
 
-         ProxyVectorCoefficient(ProxyVectorCoefficient&& other)
+         ProxyVectorFunction(ProxyVectorFunction&& other)
             :  mfem::VectorCoefficient(std::move(other)),
                m_v(other.m_v)
          {}
@@ -275,7 +275,7 @@ namespace Rodin::Variational::Internal
          }
 
       private:
-         const VectorCoefficientBase& m_v;
+         const VectorFunctionBase& m_v;
    };
 }
 

@@ -11,7 +11,7 @@
 #include "GridFunction.h"
 #include "Rank3Operator.h"
 #include "ShapeFunction.h"
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 #include "MatrixCoefficient.h"
 
 namespace Rodin::Variational::Internal

@@ -8,8 +8,8 @@
 
 namespace Rodin::Variational
 {
-   Division<VectorCoefficientBase, ScalarFunctionBase>
-   operator/(const VectorCoefficientBase& lhs, const ScalarFunctionBase& rhs)
+   Division<VectorFunctionBase, ScalarFunctionBase>
+   operator/(const VectorFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Division(lhs, rhs);
    }

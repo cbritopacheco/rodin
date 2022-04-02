@@ -115,10 +115,10 @@ namespace Rodin::Variational
    template <class T>
    class ScalarFunction;
 
-   class VectorCoefficientBase;
+   class VectorFunctionBase;
 
    template <class ... Values>
-   class VectorCoefficient;
+   class VectorFunction;
 
    class MatrixCoefficientBase;
 

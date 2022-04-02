@@ -26,14 +26,14 @@ namespace Rodin::Variational
       return Mult(rhs, lhs);
    }
 
-   Mult<ScalarFunctionBase, VectorCoefficientBase>
-   operator*(const ScalarFunctionBase& lhs, const VectorCoefficientBase& rhs)
+   Mult<ScalarFunctionBase, VectorFunctionBase>
+   operator*(const ScalarFunctionBase& lhs, const VectorFunctionBase& rhs)
    {
       return Mult(lhs, rhs);
    }
 
-   Mult<ScalarFunctionBase, VectorCoefficientBase>
-   operator*(const VectorCoefficientBase& lhs, const ScalarFunctionBase& rhs)
+   Mult<ScalarFunctionBase, VectorFunctionBase>
+   operator*(const VectorFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
       return Mult(rhs, lhs);
    }

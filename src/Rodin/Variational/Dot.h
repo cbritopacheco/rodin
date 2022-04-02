@@ -19,7 +19,7 @@
 #include "ForwardDecls.h"
 #include "GridFunction.h"
 #include "ScalarFunction.h"
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 #include "MatrixCoefficient.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
@@ -28,15 +28,15 @@
 namespace Rodin::Variational
 {
    template <>
-   class Dot<VectorCoefficientBase, VectorCoefficientBase> : public ScalarFunctionBase
+   class Dot<VectorFunctionBase, VectorFunctionBase> : public ScalarFunctionBase
    {
       public:
          /**
           * @brief Constructs the Dot product between two given matrices.
-          * @param[in] a Derived instance of VectorCoefficientBase
-          * @param[in] b Derived instance of VectorCoefficientBase
+          * @param[in] a Derived instance of VectorFunctionBase
+          * @param[in] b Derived instance of VectorFunctionBase
           */
-         Dot(const VectorCoefficientBase& a, const VectorCoefficientBase& b)
+         Dot(const VectorFunctionBase& a, const VectorFunctionBase& b)
             : m_a(a.copy()), m_b(b.copy())
          {}
 
@@ -64,10 +64,10 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<VectorCoefficientBase> m_a, m_b;
+         std::unique_ptr<VectorFunctionBase> m_a, m_b;
    };
-   Dot(const VectorCoefficientBase&, const VectorCoefficientBase&)
-      -> Dot<VectorCoefficientBase, VectorCoefficientBase>;
+   Dot(const VectorFunctionBase&, const VectorFunctionBase&)
+      -> Dot<VectorFunctionBase, VectorFunctionBase>;
 
    /**
     * @brief Represents the dot product between two matrices.
@@ -234,18 +234,18 @@ namespace Rodin::Variational
       -> Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>;
 
    /**
-    * @brief Dot product between VectorCoefficientBase and ShapeFunctionBase.
+    * @brief Dot product between VectorFunctionBase and ShapeFunctionBase.
     */
    template <ShapeFunctionSpaceType Space>
-   class Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>
+   class Dot<VectorFunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
-         Dot(const ShapeFunctionBase<Space>& lhs, const VectorCoefficientBase& rhs)
+         Dot(const ShapeFunctionBase<Space>& lhs, const VectorFunctionBase& rhs)
             : Dot(rhs, lhs)
          {}
 
-         Dot(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Space>& rhs)
+         Dot(const VectorFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -259,7 +259,7 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         VectorCoefficientBase& getLHS()
+         VectorFunctionBase& getLHS()
          {
             return *m_lhs;
          }
@@ -269,7 +269,7 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         const VectorCoefficientBase& getLHS() const
+         const VectorFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
@@ -337,15 +337,15 @@ namespace Rodin::Variational
             return new Dot(*this);
          }
       private:
-         std::unique_ptr<VectorCoefficientBase> m_lhs;
+         std::unique_ptr<VectorFunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Dot(const VectorCoefficientBase&, const ShapeFunctionBase<Space>&)
-      -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const VectorFunctionBase&, const ShapeFunctionBase<Space>&)
+      -> Dot<VectorFunctionBase, ShapeFunctionBase<Space>>;
    template <ShapeFunctionSpaceType Space>
-   Dot(const ShapeFunctionBase<Space>&, const VectorCoefficientBase&)
-      -> Dot<VectorCoefficientBase, ShapeFunctionBase<Space>>;
+   Dot(const ShapeFunctionBase<Space>&, const VectorFunctionBase&)
+      -> Dot<VectorFunctionBase, ShapeFunctionBase<Space>>;
 
    /**
     * @brief Dot product between instances of Lhs and Rhs
