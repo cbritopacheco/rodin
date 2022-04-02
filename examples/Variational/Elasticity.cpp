@@ -26,11 +26,11 @@ int main(int argc, char** argv)
   H1 Vh(Omega, d);
 
   // Lamé coefficients
-  auto mu     = ScalarCoefficient(0.3846),
-       lambda = ScalarCoefficient(0.5769);
+  auto mu     = ScalarFunction(0.3846),
+       lambda = ScalarFunction(0.5769);
 
   // Pull force
-  auto f = VectorCoefficient{0, -1};
+  auto f = VectorFunction{0, -1};
 
   // Define problem
   TrialFunction u(Vh);
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
              + Integral(
                  mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
   // Solve problem
   Solver::CG().setMaxIterations(200)

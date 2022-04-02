@@ -14,7 +14,7 @@
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
@@ -34,7 +34,7 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Grad<GridFunction<H1>> : public VectorCoefficientBase
+   class Grad<GridFunction<H1>> : public VectorFunctionBase
    {
       mfem::ElementTransformation *RefinedToCoarse(
          mfem::Mesh &coarse_mesh, const mfem::ElementTransformation &T,
@@ -68,12 +68,12 @@ namespace Rodin::Variational
          {}
 
          Grad(const Grad& other)
-            :  VectorCoefficientBase(other),
+            :  VectorFunctionBase(other),
                m_u(other.m_u)
          {}
 
          Grad(Grad&& other)
-            :  VectorCoefficientBase(std::move(other)),
+            :  VectorFunctionBase(std::move(other)),
                m_u(other.m_u)
          {}
 
@@ -135,7 +135,7 @@ namespace Rodin::Variational
             }
          }
 
-         VectorCoefficientBase* copy() const noexcept override
+         VectorFunctionBase* copy() const noexcept override
          {
             return new Grad(*this);
          }

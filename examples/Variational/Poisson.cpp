@@ -21,8 +21,8 @@ int main(int, char**)
   TestFunction  v(Vh);
 
   // Define problem
-  auto f = ScalarCoefficient(1.0);
-  auto g = ScalarCoefficient(0.0);
+  auto f = ScalarFunction(1.0);
+  auto g = ScalarFunction(0.0);
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))

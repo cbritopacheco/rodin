@@ -11,11 +11,34 @@
 namespace Rodin::Variational
 {
    double
-   UnaryMinus<ScalarCoefficientBase>
+   UnaryMinus<ScalarFunctionBase>
    ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
    const
    {
       return -1.0 * getOperand().getValue(trans, ip);
+   }
+
+   UnaryMinus<ScalarFunctionBase>
+   operator-(const ScalarFunctionBase& op)
+   {
+      return UnaryMinus(op);
+   }
+
+   void
+   UnaryMinus<VectorFunctionBase>
+   ::getValue(
+         mfem::Vector& value,
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+   const
+   {
+      getOperand().getValue(value, trans, ip);
+      value.Neg();
+   }
+
+   UnaryMinus<VectorFunctionBase>
+   operator-(const VectorFunctionBase& op)
+   {
+      return UnaryMinus(op);
    }
 
    void
@@ -28,6 +51,12 @@ namespace Rodin::Variational
       vec *= -1.0;
    }
 
+   UnaryMinus<LinearFormIntegratorBase>
+   operator-(const LinearFormIntegratorBase& op)
+   {
+      return UnaryMinus(op);
+   }
+
    void
    UnaryMinus<BilinearFormIntegratorBase>
    ::getElementMatrix(
@@ -38,31 +67,19 @@ namespace Rodin::Variational
       mat *= -1.0;
    }
 
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
-   {
-      return Sum<ScalarCoefficientBase, ScalarCoefficientBase>(lhs, UnaryMinus(rhs));
-   }
-
-   UnaryMinus<ScalarCoefficientBase>
-   operator-(const ScalarCoefficientBase& op)
+   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
    {
       return UnaryMinus(op);
    }
 
-   UnaryMinus<LinearFormIntegratorBase>
-   operator-(const LinearFormIntegratorBase& op)
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
    {
-      return UnaryMinus(op);
+      return Sum<ScalarFunctionBase, ScalarFunctionBase>(lhs, UnaryMinus(rhs));
    }
 
    UnaryMinus<FormLanguage::LinearFormIntegratorSum>
    operator-(const FormLanguage::LinearFormIntegratorSum& op)
-   {
-      return UnaryMinus(op);
-   }
-
-   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
    {
       return UnaryMinus(op);
    }

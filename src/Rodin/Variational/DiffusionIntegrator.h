@@ -8,7 +8,7 @@
 #define RODIN_VARIATIONAL_DIFFUSIONINTEGRATOR_H
 
 #include "ForwardDecls.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 #include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational

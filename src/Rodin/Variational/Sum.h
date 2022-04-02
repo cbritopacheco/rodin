@@ -14,46 +14,46 @@
 
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
-#include "ScalarCoefficient.h"
-#include "MatrixCoefficient.h"
+#include "ScalarFunction.h"
+#include "MatrixFunction.h"
 
 namespace Rodin::Variational
 {
    template <>
-   class Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-      : public ScalarCoefficientBase
+   class Sum<ScalarFunctionBase, ScalarFunctionBase>
+      : public ScalarFunctionBase
    {
       public:
-         Sum(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs)
+         Sum(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Sum(const Sum& other)
-            :  ScalarCoefficientBase(other),
+            :  ScalarFunctionBase(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Sum(Sum&& other)
-            :  ScalarCoefficientBase(std::move(other)),
+            :  ScalarFunctionBase(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ScalarCoefficientBase& getLHS()
+         ScalarFunctionBase& getLHS()
          {
             return *m_lhs;
          }
 
-         ScalarCoefficientBase& getRHS()
+         ScalarFunctionBase& getRHS()
          {
             return *m_rhs;
          }
 
-         const ScalarCoefficientBase& getLHS() const
+         const ScalarFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
 
-         const ScalarCoefficientBase& getRHS() const
+         const ScalarFunctionBase& getRHS() const
          {
             return *m_rhs;
          }
@@ -67,53 +67,53 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<ScalarCoefficientBase> m_lhs;
-         std::unique_ptr<ScalarCoefficientBase> m_rhs;
+         std::unique_ptr<ScalarFunctionBase> m_lhs;
+         std::unique_ptr<ScalarFunctionBase> m_rhs;
    };
-   Sum(const ScalarCoefficientBase&, const ScalarCoefficientBase&)
-      -> Sum<ScalarCoefficientBase, ScalarCoefficientBase>;
+   Sum(const ScalarFunctionBase&, const ScalarFunctionBase&)
+      -> Sum<ScalarFunctionBase, ScalarFunctionBase>;
 
-   Sum<ScalarCoefficientBase, ScalarCoefficientBase>
-   operator+(const ScalarCoefficientBase& lhs, const ScalarCoefficientBase& rhs);
+   Sum<ScalarFunctionBase, ScalarFunctionBase>
+   operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
 
    /**
-    * @brief %Sum of two MatrixCoefficientBase instances.
+    * @brief %Sum of two MatrixFunctionBase instances.
     */
    template <>
-   class Sum<MatrixCoefficientBase, MatrixCoefficientBase>
-      : public MatrixCoefficientBase
+   class Sum<MatrixFunctionBase, MatrixFunctionBase>
+      : public MatrixFunctionBase
    {
       public:
-         Sum(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs)
+         Sum(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          Sum(const Sum& other)
-            :  MatrixCoefficientBase(other),
+            :  MatrixFunctionBase(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Sum(Sum&& other)
-            :  MatrixCoefficientBase(std::move(other)),
+            :  MatrixFunctionBase(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         MatrixCoefficientBase& getLHS()
+         MatrixFunctionBase& getLHS()
          {
             return *m_lhs;
          }
 
-         MatrixCoefficientBase& getRHS()
+         MatrixFunctionBase& getRHS()
          {
             return *m_rhs;
          }
 
-         const MatrixCoefficientBase& getLHS() const
+         const MatrixFunctionBase& getLHS() const
          {
             return *m_lhs;
          }
 
-         const MatrixCoefficientBase& getRHS() const
+         const MatrixFunctionBase& getRHS() const
          {
             return *m_rhs;
          }
@@ -132,13 +132,13 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<MatrixCoefficientBase> m_lhs;
-         std::unique_ptr<MatrixCoefficientBase> m_rhs;
+         std::unique_ptr<MatrixFunctionBase> m_lhs;
+         std::unique_ptr<MatrixFunctionBase> m_rhs;
    };
-   Sum(const MatrixCoefficientBase&, const MatrixCoefficientBase&)
-      -> Sum<MatrixCoefficientBase, MatrixCoefficientBase>;
-   Sum<MatrixCoefficientBase, MatrixCoefficientBase>
-   operator+(const MatrixCoefficientBase& lhs, const MatrixCoefficientBase& rhs);
+   Sum(const MatrixFunctionBase&, const MatrixFunctionBase&)
+      -> Sum<MatrixFunctionBase, MatrixFunctionBase>;
+   Sum<MatrixFunctionBase, MatrixFunctionBase>
+   operator+(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs);
 
    template <ShapeFunctionSpaceType Space>
    class Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>

@@ -3,14 +3,14 @@
 
 #include "ForwardDecls.h"
 
-#include "VectorCoefficient.h"
+#include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
    /**
     * @brief Outward unit normal.
     */
-   class Normal : public VectorCoefficientBase
+   class Normal : public VectorFunctionBase
    {
       public:
          /**
