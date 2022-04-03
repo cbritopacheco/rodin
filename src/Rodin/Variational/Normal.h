@@ -34,11 +34,35 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint&) const override
          {
-            // assert(trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT);
+            assert(
+               // We are on a boundary element of a d-mesh in d-space
+               (
+                  trans.mesh->Dimension() == trans.mesh->SpaceDimension() &&
+                  trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT
+               ) ||
+               // Or we are on an element of a d-mesh in (d + 1)-space.
+               (
+                  trans.mesh->Dimension() == (trans.mesh->SpaceDimension() - 1) &&
+                  trans.ElementType == mfem::ElementTransformation::ELEMENT
+               )
+            );
             value.SetSize(m_dimension);
             mfem::CalcOrtho(trans.Jacobian(), value);
             const double norm = value.Norml2();
-            value /= norm;
+            switch (trans.ElementType)
+            {
+               case mfem::ElementTransformation::BDR_ELEMENT:
+               {
+                  value /= norm * (
+                        1.0 - 2.0 * trans.mesh->FaceIsInterior(
+                           trans.mesh->GetBdrFace(trans.ElementNo)));
+                  break;
+               }
+               default:
+               {
+                  value /= norm;
+               }
+            }
          }
 
          Normal* copy() const noexcept override

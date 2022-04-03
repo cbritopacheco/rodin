@@ -14,55 +14,111 @@
 
 namespace Rodin::External::MMG
 {
-   /**
-    * @brief Base class for MMG solution objects.
-    * @tparam Dimension Mesh dimension
-    *
-    * This class wraps the functionality of the type MMG5_Sol.
-    */
-   class SolutionBase
-   {
-      public:
-         virtual ~SolutionBase() = default;
+  /**
+   * @brief Base class for MMG solution objects.
+   * @tparam Dimension Mesh dimension
+   *
+   * This class wraps the functionality of the type MMG5_Sol.
+   */
+  class SolutionBase
+  {
+    public:
+      SolutionBase(MMG5_pSol sol = nullptr);
 
-         /**
-          * @brief Gets the dimension of the solution support.
-          */
-         virtual int getDimension() const
-         {
-            return getHandle()->dim;
-         }
+      SolutionBase(SolutionBase&& other);
 
-         /**
-          * @returns Number of points of the solution.
-          */
-         virtual int count() const
-         {
-            return getHandle()->np;
-         }
+      SolutionBase(const SolutionBase& other);
 
-         /**
-          * @returns Number of solutions per entity.
-          */
-         virtual int size() const
-         {
-            return getHandle()->size;
-         }
+      SolutionBase& operator=(const SolutionBase& other);
 
-         virtual void save(const boost::filesystem::path& filename) = 0;
+      SolutionBase& operator=(SolutionBase&& other);
 
-         /**
-          * @internal
-          * @returns Reference to underlying solution handle.
-          */
-         virtual MMG5_pSol& getHandle() = 0;
+      virtual ~SolutionBase();
 
-         /**
-          * @internal
-          * @returns Constant reference to underlying solution handle.
-          */
-         virtual const MMG5_pSol& getHandle() const = 0;
-   };
+      /**
+       * @brief Gets the dimension of the solution support.
+       */
+      int getDimension() const
+      {
+         return getHandle()->dim;
+      }
+
+      /**
+       * @returns Number of points of the solution.
+       */
+      int count() const
+      {
+         return getHandle()->np;
+      }
+
+      /**
+       * @returns Number of solutions per entity.
+       */
+      int size() const
+      {
+         return getHandle()->size;
+      }
+
+      /**
+       * @internal
+       * @returns Reference to underlying solution handle.
+       */
+      MMG5_pSol& getHandle()
+      {
+         return m_sol;
+      }
+
+      /**
+       * @internal
+       * @returns Constant reference to underlying solution handle.
+       */
+      const MMG5_pSol& getHandle() const
+      {
+         return m_sol;
+      }
+
+      virtual void save(const boost::filesystem::path& filename) = 0;
+    private:
+       MMG5_pSol m_sol;
+  };
+
+  class IncompleteSolutionBase
+  {
+    public:
+      IncompleteSolutionBase();
+
+      IncompleteSolutionBase(const IncompleteSolutionBase& other);
+
+      IncompleteSolutionBase(IncompleteSolutionBase&& other);
+
+      virtual ~IncompleteSolutionBase();
+
+      MMG5_pSol release()
+      {
+         m_isOwner = false;
+         auto sol = m_sol;
+         m_sol = nullptr;
+         return sol;
+      }
+
+      bool isOwner() const
+      {
+         return m_isOwner;
+      }
+
+      MMG5_pSol& getHandle()
+      {
+         return m_sol;
+      }
+
+      const MMG5_pSol& getHandle() const
+      {
+         return m_sol;
+      }
+    private:
+      MMG5_pSol m_sol;
+      bool m_isOwner;
+  };
 }
 
 #endif

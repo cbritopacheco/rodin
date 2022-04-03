@@ -23,6 +23,26 @@ int main(int, char**)
 
   Mesh Omega = Mesh::load(meshFile);
 
+  // H1 Vh(Omega, 2);
+
+  // GridFunction f(Vh);
+  // f = VectorFunction{
+  //   [](const double* x, int){ return 3 * x[0] * x[0] + sin(10 * x[1]); },
+  //   [](const double* x, int){ return 3 * x[0] + cos(10 * x[1]); }};
+
+  // Omega.save("Omega.mesh");
+  // f.save("f.gf");
+
+  // auto mmgMesh = MMG::MeshS::load("surface.mesh");
+  // auto mmgSol = MMG::ScalarSolutionS::load("surface.sol").setMesh(mmgMesh);
+
+  // mmgMesh.save("lel.mesh");
+  // mmgSol.save("lel.sol");
+
+  // MMG::ScalarSolution2D tmp(mmgSol);
+  // mmgMesh.save("mmg.mesh");
+  // tmp.save("mmg.sol");
+
   // // Sphere radius
   // double r = 1;
 
@@ -64,10 +84,12 @@ int main(int, char**)
   H1 Th(Omega, 3);
 
   auto mmgMesh = Cast(Omega).to<MMG::MeshS>();
-  auto mmgLs = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
-  auto phi = Cast(mmgLs).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
+  auto mmgDist = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
 
-  auto n0 = -VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
+  auto phi = Cast(mmgDist).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
+
+  // Compute extended conormal
+  auto n0 = VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
 
   double alpha = 0.1;
 
@@ -99,12 +121,15 @@ int main(int, char**)
   auto n = VectorFunction{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
   auto norm = Pow(n.x() * n.x() + n.y() * n.y() + n.z() * n.z(), 0.5);
 
-  GridFunction nn(Th);
-  nn = n / norm;
+  GridFunction conormal(Th);
+  conormal = n / norm;
 
-  // phi.save("phi.gf");
-  nn.save("nn.gf");
+  phi.save("phi.gf");
+  conormal.save("conormal.gf");
   Omega.save("Omega.mesh");
+
+  auto mmgCo = Cast(conormal).to<MMG::IncompleteVectorSolutionS>().setMesh(mmgMesh);
+  mmgCo.save("mmg.sol");
 
   return 0;
 }

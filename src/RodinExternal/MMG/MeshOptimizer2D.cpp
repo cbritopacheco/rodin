@@ -34,38 +34,41 @@ namespace Rodin::External::MMG
 
   ScalarSolution2D MeshOptimizer2D::optimize(Mesh2D& mesh)
   {
-    ScalarSolution2D metric(mesh);
+    MMG5_pSol sol = nullptr;
+    MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
+        Alert::Exception("Could not allocate MMG5_Sol.").raise());
+    if (!MMG2D_Set_solSize(mesh.getHandle(), sol, MMG5_Vertex, 0, MMG5_Scalar))
+      Alert::Exception("Could not set solution size.").raise();
     if (mesh.count(Mesh2D::Vertex) == 0)
     {
-       Alert::Exception("Mesh vertex count is zero. Nothing to optimize.").raise();
+      Alert::Exception("Mesh vertex count is zero. Nothing to optimize.").raise();
     }
     else
     {
       if (m_hmin)
       {
         MMG2D_Set_dparameter(
-            mesh.getHandle(), metric.getHandle(), MMG2D_DPARAM_hmin, *m_hmin);
+            mesh.getHandle(), sol, MMG2D_DPARAM_hmin, *m_hmin);
       }
       if (m_hmax)
       {
         MMG2D_Set_dparameter(
-            mesh.getHandle(), metric.getHandle(), MMG2D_DPARAM_hmax, *m_hmax);
+            mesh.getHandle(), sol, MMG2D_DPARAM_hmax, *m_hmax);
       }
       if (m_hgrad)
       {
         MMG2D_Set_dparameter(
-            mesh.getHandle(), metric.getHandle(), MMG2D_DPARAM_hgrad, *m_hgrad);
+            mesh.getHandle(), sol, MMG2D_DPARAM_hgrad, *m_hgrad);
       }
       if (m_hausd)
       {
         MMG2D_Set_dparameter(
-            mesh.getHandle(), metric.getHandle(), MMG2D_DPARAM_hausd, *m_hausd);
+            mesh.getHandle(), sol, MMG2D_DPARAM_hausd, *m_hausd);
       }
-      MMG2D_Set_iparameter(mesh.getHandle(), metric.getHandle(),
-          MMG2D_IPARAM_optim, 1);
-      MMG2D_mmg2dlib(mesh.getHandle(), metric.getHandle());
+      MMG2D_Set_iparameter(mesh.getHandle(), sol, MMG2D_IPARAM_optim, 1);
+      MMG2D_mmg2dlib(mesh.getHandle(), sol);
     }
-    return metric;
+    return ScalarSolution2D(sol, mesh);
   }
 }
 
