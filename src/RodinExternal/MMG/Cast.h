@@ -35,15 +35,6 @@ namespace Rodin
    Cast<Rodin::Mesh>::to<External::MMG::Mesh2D>() const;
 
    /**
-    * MMG::ScalarSolution2D -> Rodin::Variational::IncompleteGridFunction
-    */
-   template <>
-   template <>
-   Variational::IncompleteGridFunction
-   Cast<External::MMG::IncompleteScalarSolution2D>
-   ::to<Variational::IncompleteGridFunction>() const;
-
-   /**
     * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution2D
     */
    template <>
@@ -62,22 +53,13 @@ namespace Rodin
    ::to<External::MMG::IncompleteVectorSolution2D>() const;
 
    /**
-    * Rodin::Variational::IncompleteGridFunction -> MMG::ScalarSolution2D
+    * MMG::ScalarSolution2D -> Rodin::Variational::IncompleteGridFunction
     */
    template <>
    template <>
    Variational::IncompleteGridFunction
    Cast<External::MMG::ScalarSolution2D>
    ::to<Variational::IncompleteGridFunction>() const;
-
-   /**
-    * Rodin::Variational::IncompleteGridFunction -> MMG::IncompleteScalarSolution2D
-    */
-   template <>
-   template <>
-   External::MMG::IncompleteScalarSolution2D
-   Cast<Variational::IncompleteGridFunction>
-   ::to<External::MMG::IncompleteScalarSolution2D>() const;
 
    // ---- mmg3d -------------------------------------------------------------
    /**
@@ -103,15 +85,6 @@ namespace Rodin
    template <>
    External::MMG::IncompleteScalarSolution3D
    Cast<Variational::GridFunction<Variational::H1>>
-   ::to<External::MMG::IncompleteScalarSolution3D>() const;
-
-   /**
-    * Rodin::Variational::IncompleteGridFunction -> MMG::IncompleteScalarSolution3D
-    */
-   template <>
-   template <>
-   External::MMG::IncompleteScalarSolution3D
-   Cast<Variational::IncompleteGridFunction>
    ::to<External::MMG::IncompleteScalarSolution3D>() const;
 
    // ---- mmgs --------------------------------------------------------------
@@ -145,9 +118,9 @@ namespace Rodin
 
    template <>
    template <>
-   External::MMG::IncompleteScalarSolutionS
-   Cast<Variational::IncompleteGridFunction>
-   ::to<External::MMG::IncompleteScalarSolutionS>() const;
+   External::MMG::IncompleteVectorSolutionS
+   Cast<Variational::GridFunction<Variational::H1>>
+   ::to<External::MMG::IncompleteVectorSolutionS>() const;
 }
 
 
