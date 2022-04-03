@@ -60,30 +60,12 @@
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution3_d.html#ab3d6081884075d69b06d02b2b42a9f13" class="m-doc">setMesh(Mesh3D&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarSolution3D</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="ae9f16a2afc523dad33bdccc5b6acf3bf">
-              <span class="m-doc-wrap-bumper"><a href="#ae9f16a2afc523dad33bdccc5b6acf3bf" class="m-doc-self">IncompleteScalarSolution3D</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Constructs an empty scalar solution object without a mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afb056639324aed9be6620b6d855d4ebb" class="m-doc">IncompleteScalarSolution3D</a>(</span><span class="m-doc-wrap">int n)</span>
-            </dt>
-            <dd>Constructs a scalar solution with <code>n</code> unitialized entries.</dd>
-            <dt id="abf7d7b45f1d543da0bd92c3460c1bf9e">
-              <span class="m-doc-wrap-bumper"><a href="#abf7d7b45f1d543da0bd92c3460c1bf9e" class="m-doc-self">~IncompleteScalarSolution3D</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Frees the data if it still owns the data, i.e. the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution3_d.html#ab3d6081884075d69b06d02b2b42a9f13" class="m-doc">setMesh(Mesh3D&amp;)</a> method has not been called.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -95,23 +77,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="afb056639324aed9be6620b6d855d4ebb"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolution3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb056639324aed9be6620b6d855d4ebb" class="m-doc-self">IncompleteScalarSolution3D</a>(</span><span class="m-doc-wrap">int n)</span></span>
-            </h3>
-            <p>Constructs a scalar solution with <code>n</code> unitialized entries.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">n&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Number of entries that the solution has.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="ab3d6081884075d69b06d02b2b42a9f13"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution3_d.html" class="m-doc">ScalarSolution3D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolution3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3d6081884075d69b06d02b2b42a9f13" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a>&amp; mesh)</span></span>

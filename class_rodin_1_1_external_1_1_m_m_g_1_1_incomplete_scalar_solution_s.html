@@ -60,30 +60,12 @@
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution_s.html#a3f44a693a3ee05a54f908b94aef611ef" class="m-doc">setMesh(MeshS&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarSolutionS</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="a69f77036a804c950a2aefd4945b28f23">
-              <span class="m-doc-wrap-bumper"><a href="#a69f77036a804c950a2aefd4945b28f23" class="m-doc-self">IncompleteScalarSolutionS</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Constructs an empty scalar solution object without a mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a982ea25a9595da102cd97f20af05963f" class="m-doc">IncompleteScalarSolutionS</a>(</span><span class="m-doc-wrap">int n)</span>
-            </dt>
-            <dd>Constructs a scalar solution with <code>n</code> unitialized entries.</dd>
-            <dt id="a3ea7d86ef18af274a1d51a52a3c6278d">
-              <span class="m-doc-wrap-bumper"><a href="#a3ea7d86ef18af274a1d51a52a3c6278d" class="m-doc-self">~IncompleteScalarSolutionS</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Frees the data if it still owns the data, i.e. the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution_s.html#a3f44a693a3ee05a54f908b94aef611ef" class="m-doc">setMesh(MeshS&amp;)</a> method has not been called.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -95,23 +77,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a982ea25a9595da102cd97f20af05963f"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolutionS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a982ea25a9595da102cd97f20af05963f" class="m-doc-self">IncompleteScalarSolutionS</a>(</span><span class="m-doc-wrap">int n)</span></span>
-            </h3>
-            <p>Constructs a scalar solution with <code>n</code> unitialized entries.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">n&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Number of entries that the solution has.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a3f44a693a3ee05a54f908b94aef611ef"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution_s.html" class="m-doc">ScalarSolutionS</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolutionS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f44a693a3ee05a54f908b94aef611ef" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a>&amp; mesh)</span></span>

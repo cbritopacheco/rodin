@@ -53,37 +53,19 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>IncompleteVectorSolution2D <span class="m-thin">class</span>
         </h1>
-        <p>A vector solution which does not have a mesh assigned to it.</p>
+        <p>A Vector solution which does not have a mesh assigned to it.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html#a68b8b5e86e17209db847cced3dfe28fb" class="m-doc">setMesh(Mesh2D&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorSolution2D</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="a9496df6f655ae3d4d99d46aa3b372d5a">
-              <span class="m-doc-wrap-bumper"><a href="#a9496df6f655ae3d4d99d46aa3b372d5a" class="m-doc-self">IncompleteVectorSolution2D</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Constructs an empty Vector solution object without a mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a5f2905c1f62ceaadda5aa34dcf74ac41" class="m-doc">IncompleteVectorSolution2D</a>(</span><span class="m-doc-wrap">int n)</span>
-            </dt>
-            <dd>Constructs a Vector solution with <code>n</code> unitialized entries.</dd>
-            <dt id="ae603b2abd2328808a050b256c7465ed1">
-              <span class="m-doc-wrap-bumper"><a href="#ae603b2abd2328808a050b256c7465ed1" class="m-doc-self">~IncompleteVectorSolution2D</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Frees the data if it still owns the data, i.e. the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html#a68b8b5e86e17209db847cced3dfe28fb" class="m-doc">setMesh(Mesh2D&amp;)</a> method has not been called.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -95,23 +77,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a5f2905c1f62ceaadda5aa34dcf74ac41"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteVectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f2905c1f62ceaadda5aa34dcf74ac41" class="m-doc-self">IncompleteVectorSolution2D</a>(</span><span class="m-doc-wrap">int n)</span></span>
-            </h3>
-            <p>Constructs a Vector solution with <code>n</code> unitialized entries.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">n&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Number of entries that the solution has.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a68b8b5e86e17209db847cced3dfe28fb"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteVectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68b8b5e86e17209db847cced3dfe28fb" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>

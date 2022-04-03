@@ -60,30 +60,12 @@
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html#a99d9fd3eed44415636310dd73cf9b4ce" class="m-doc">setMesh(Mesh2D&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarSolution2D</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="a75b30eed48ecd8c33171229f27006c3e">
-              <span class="m-doc-wrap-bumper"><a href="#a75b30eed48ecd8c33171229f27006c3e" class="m-doc-self">IncompleteScalarSolution2D</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Constructs an empty scalar solution object without a mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa3af994dd54cd4f91465c180b69aa286" class="m-doc">IncompleteScalarSolution2D</a>(</span><span class="m-doc-wrap">int n)</span>
-            </dt>
-            <dd>Constructs a scalar solution with <code>n</code> unitialized entries.</dd>
-            <dt id="a4ff8547bd15d80d8253b4bfe09da4d91">
-              <span class="m-doc-wrap-bumper"><a href="#a4ff8547bd15d80d8253b4bfe09da4d91" class="m-doc-self">~IncompleteScalarSolution2D</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Frees the data if it still owns the data, i.e. the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html#a99d9fd3eed44415636310dd73cf9b4ce" class="m-doc">setMesh(Mesh2D&amp;)</a> method has not been called.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -95,23 +77,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa3af994dd54cd4f91465c180b69aa286"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa3af994dd54cd4f91465c180b69aa286" class="m-doc-self">IncompleteScalarSolution2D</a>(</span><span class="m-doc-wrap">int n)</span></span>
-            </h3>
-            <p>Constructs a scalar solution with <code>n</code> unitialized entries.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">n&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Number of entries that the solution has.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a99d9fd3eed44415636310dd73cf9b4ce"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99d9fd3eed44415636310dd73cf9b4ce" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>

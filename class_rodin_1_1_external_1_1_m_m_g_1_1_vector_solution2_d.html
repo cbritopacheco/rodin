@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::ScalarSolution2D class | Rodin</title>
+  <title>Rodin::External::MMG::VectorSolution2D class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,9 +51,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>ScalarSolution2D <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>VectorSolution2D <span class="m-thin">class</span>
         </h1>
-        <p>Scalar solution supported on a 2D mesh.</p>
+        <p>Vector solution supported on a 2D mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -68,7 +68,7 @@
             </li>
           </ul>
         </nav>
-<p>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> represents a function</p><div class="m-math"><svg style="width: 8.535em; height: 1.291em;" viewBox="153.305476 -12.397084 81.932032 12.397095">
+<p>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a> represents a function</p><div class="m-math"><svg style="width: 8.535em; height: 1.291em;" viewBox="153.305476 -12.397084 81.932032 12.397095">
 <title>
 \[ f : \Omega \subset \mathbb{R}^2 \rightarrow \mathbb{R} \]
 </title>
@@ -106,16 +106,16 @@ $ \Omega $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution.html" class="m-doc">ScalarSolution</a>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution.html" class="m-doc">VectorSolution</a>
             </dt>
-            <dd>Scalar solution supported on a mesh.</dd>
+            <dd>Vector solution supported on a mesh.</dd>
           </dl>
         </section>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a3135b6f6dc62c824d9c6c8829077c75a" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">IncompleteScalarSolution2D</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a0e7dbe786cfaac5af8c8d3dc3262cb4b" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html" class="m-doc">IncompleteVectorSolution2D</a></span>
             </dt>
             <dd>Reads the solution text file.</dd>
           </dl>
@@ -124,15 +124,15 @@ $ \Omega $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#add8889e30fa9786b80796337635ea859" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aee5aafc557959c837dd869f54029e668" class="m-doc">VectorSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span>
             </dt>
             <dd>Initializes the object with no data.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a691d1f52ea88dbd04ef0cf32733250ae" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#add6fa1af170715ddd70fe3a1d47ce73d" class="m-doc">VectorSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp;&amp; other)</span>
             </dt>
             <dd>Performs a move construction from the <code>other</code> solution object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6e378ccabab1ccfad39ffe4d9aa2a320" class="m-doc">ScalarSolution2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a0e2461e31a61ac44663ce7f81776fd5f" class="m-doc">VectorSolution2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; other)</span>
             </dt>
             <dd>Performs a copy of the <code>other</code> solution object.</dd>
           </dl>
@@ -141,15 +141,15 @@ $ \Omega $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1bf7071e03006a177ac07008c14fbbb4" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51dad570fdde44d03b605a908024fd9c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assigns the <code>other</code> solution object to this object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#add6aa3932c91e817ad814cb3b2fe5bbb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afdbba34d0547a7d687d13f6e6448e5be" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp;</span>
             </dt>
             <dd>Copy assigns the <code>other</code> solution object to this object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ace567706860b90543efc27b76b2a7c97" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad67c1f6be95222b7f485759aa156b6bf" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp;</span>
             </dt>
             <dd>Sets the associated mesh.</dd>
             <dt>
@@ -164,9 +164,9 @@ $ \Omega $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a3135b6f6dc62c824d9c6c8829077c75a"><div>
+          <section class="m-doc-details" id="a0e7dbe786cfaac5af8c8d3dc3262cb4b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">IncompleteScalarSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3135b6f6dc62c824d9c6c8829077c75a" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html" class="m-doc">IncompleteVectorSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e7dbe786cfaac5af8c8d3dc3262cb4b" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
             </h3>
             <p>Reads the solution text file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -182,9 +182,9 @@ $ \Omega $
             </table>
 <p>The file is read using MMGv2 format.</p>
           </div></section>
-          <section class="m-doc-details" id="add8889e30fa9786b80796337635ea859"><div>
+          <section class="m-doc-details" id="aee5aafc557959c837dd869f54029e668"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add8889e30fa9786b80796337635ea859" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee5aafc557959c837dd869f54029e668" class="m-doc-self">VectorSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
             </h3>
             <p>Initializes the object with no data.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -199,9 +199,9 @@ $ \Omega $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a691d1f52ea88dbd04ef0cf32733250ae"><div>
+          <section class="m-doc-details" id="add6fa1af170715ddd70fe3a1d47ce73d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a691d1f52ea88dbd04ef0cf32733250ae" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add6fa1af170715ddd70fe3a1d47ce73d" class="m-doc-self">VectorSolution2D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Performs a move construction from the <code>other</code> solution object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -216,9 +216,9 @@ $ \Omega $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6e378ccabab1ccfad39ffe4d9aa2a320"><div>
+          <section class="m-doc-details" id="a0e2461e31a61ac44663ce7f81776fd5f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e378ccabab1ccfad39ffe4d9aa2a320" class="m-doc-self">ScalarSolution2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e2461e31a61ac44663ce7f81776fd5f" class="m-doc-self">VectorSolution2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; other)</span></span>
             </h3>
             <p>Performs a copy of the <code>other</code> solution object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -234,9 +234,9 @@ $ \Omega $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>It does not perform a copy the mesh. Instead the new object will have a reference to the original mesh.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a1bf7071e03006a177ac07008c14fbbb4"><div>
+          <section class="m-doc-details" id="a51dad570fdde44d03b605a908024fd9c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bf7071e03006a177ac07008c14fbbb4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51dad570fdde44d03b605a908024fd9c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move assigns the <code>other</code> solution object to this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -251,9 +251,9 @@ $ \Omega $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="add6aa3932c91e817ad814cb3b2fe5bbb"><div>
+          <section class="m-doc-details" id="afdbba34d0547a7d687d13f6e6448e5be"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add6aa3932c91e817ad814cb3b2fe5bbb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdbba34d0547a7d687d13f6e6448e5be" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; other)</span></span>
             </h3>
             <p>Copy assigns the <code>other</code> solution object to this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -268,9 +268,9 @@ $ \Omega $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ace567706860b90543efc27b76b2a7c97"><div>
+          <section class="m-doc-details" id="ad67c1f6be95222b7f485759aa156b6bf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace567706860b90543efc27b76b2a7c97" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution2_d.html" class="m-doc">VectorSolution2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad67c1f6be95222b7f485759aa156b6bf" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
             </h3>
             <p>Sets the associated mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -294,7 +294,7 @@ $ \Omega $
           </div></section>
           <section class="m-doc-details" id="a70b2888f962dd424e5ef03cf8d7269d7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70b2888f962dd424e5ef03cf8d7269d7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70b2888f962dd424e5ef03cf8d7269d7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the constant reference to the underlying mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -308,7 +308,7 @@ $ \Omega $
           </div></section>
           <section class="m-doc-details" id="a56a5c81c6a17937f8e93279ad2b99208"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56a5c81c6a17937f8e93279ad2b99208" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56a5c81c6a17937f8e93279ad2b99208" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the reference to the underlying mesh.</p>
             <table class="m-table m-fullwidth m-flat">
