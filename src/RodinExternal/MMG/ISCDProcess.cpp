@@ -30,7 +30,7 @@ namespace Rodin::External::MMG
     int counter = 0;
     do
     {
-      res = s_tmpDirPath.string() + prefix.string() + n2hexstr(s_dist(s_rng));
+      res = s_tmpDirPath / (prefix.string() + n2hexstr(s_dist(s_rng)));
       res.replace_extension(extension);
       if (counter++ > 255)
         throw std::runtime_error(
