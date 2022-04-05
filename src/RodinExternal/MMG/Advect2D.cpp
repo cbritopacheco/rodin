@@ -52,8 +52,7 @@ namespace Rodin::External::MMG
       m_ex ? "" : "-noex",
       "-c", solp.string(),
       "-s", dispp.string(),
-      "-o", outp.string(),
-      "-v"
+      "-o", outp.string()
     };
 
     int retcode = m_advect.run(args);

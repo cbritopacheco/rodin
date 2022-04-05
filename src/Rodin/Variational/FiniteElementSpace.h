@@ -33,6 +33,11 @@ namespace Rodin::Variational
          virtual mfem::FiniteElementCollection& getFEC() = 0;
          virtual const mfem::FiniteElementCollection& getFEC() const = 0;
 
+         int getOrder()
+         {
+            return getFEC().GetOrder();
+         }
+
          mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr)
          {
             mfem::Array<int> essTrueDofList;
