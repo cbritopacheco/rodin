@@ -139,6 +139,7 @@ namespace Rodin::Variational
          }
 
          BilinearForm& add(const BilinearFormIntegratorBase& bfi) override;
+
          BilinearForm& add(const FormLanguage::BilinearFormIntegratorSum& lsum) override;
 
          BilinearForm& from(const BilinearFormIntegratorBase& bfi) override;

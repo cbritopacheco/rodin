@@ -136,7 +136,7 @@ namespace Rodin::Variational
           * @brief Gets the type of basis
           * @returns Type of basis
           */
-         Basis getBasis() const
+         Basis getBasisType() const
          {
             return m_basis;
          }
