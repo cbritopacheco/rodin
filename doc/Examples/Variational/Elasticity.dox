@@ -110,11 +110,11 @@
     H1 Vh(Omega, d);
 
     // Lamé coefficients
-    auto mu     = ScalarCoefficient(0.3846),
-         lambda = ScalarCoefficient(0.5769);
+    auto mu     = ScalarFunction(0.3846),
+         lambda = ScalarFunction(0.5769);
 
     // Pull force
-    auto f = VectorCoefficient{0, -1};
+    auto f = VectorFunction{0, -1};
   @endcode
   We define the relevant boundary attributes (which we should know beforehand),
   we load the mesh, we build the (vectorial) finite element space, and define our
@@ -130,7 +130,7 @@
              + Integral(
                  mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorCoefficient{0, 0}).on(GammaD);
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
   @endcode
   In this case we have just written out the definition of the terms @f$ e(u_\Omega)
   @f$ and @f$ e(v) @f$. Rodin is smart enough to figure out how to build
