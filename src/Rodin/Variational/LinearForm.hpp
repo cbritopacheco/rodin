@@ -14,35 +14,35 @@
 
 namespace Rodin::Variational
 {
-   template <class FES>
-   LinearForm<FES>::LinearForm(TestFunction<FES>& v)
+   template <class FEC>
+   LinearForm<FEC>::LinearForm(TestFunction<FEC>& v)
       :  m_v(v),
-         m_lf(std::make_unique<mfem::LinearForm>(&v.getFiniteElementSpace().getFES()))
+         m_lf(std::make_unique<mfem::LinearForm>(&v.getFiniteElementSpace().getHandle()))
    {}
 
-   template <class FES>
-   LinearForm<FES>& LinearForm<FES>::operator=(const LinearFormIntegratorBase& lfi)
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::operator=(const LinearFormIntegratorBase& lfi)
    {
       from(lfi).assemble();
       return *this;
    }
 
-   template <class FES>
-   LinearForm<FES>& LinearForm<FES>::operator=(
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::operator=(
          const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       from(lsum).assemble();
       return *this;
    }
 
-   template <class FES>
-   double LinearForm<FES>::operator()(const GridFunction<FES>& u) const
+   template <class FEC>
+   double LinearForm<FEC>::operator()(const GridFunction<FEC>& u) const
    {
       return *m_lf * u.getHandle();
    }
 
-   template <class FES>
-   LinearForm<FES>& LinearForm<FES>::add(const LinearFormIntegratorBase& lfi)
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormIntegratorBase& lfi)
    {
       assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
       switch (lfi.getIntegratorRegion())
@@ -106,9 +106,9 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FES>
-   LinearForm<FES>&
-   LinearForm<FES>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
+   template <class FEC>
+   LinearForm<FEC>&
+   LinearForm<FEC>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getLinearFormDomainIntegratorList())
          add(*p);
@@ -117,11 +117,11 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FES>
-   LinearForm<FES>&
-   LinearForm<FES>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
+   template <class FEC>
+   LinearForm<FEC>&
+   LinearForm<FEC>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
-      m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getFES()));
+      m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
       m_lfiDomainList.clear();
       m_lfiBoundaryList.clear();
       m_domAttrMarkers.clear();
@@ -130,15 +130,15 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FES>
-   LinearForm<FES>& LinearForm<FES>::from(const LinearFormIntegratorBase& lfi)
+   template <class FEC>
+   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormIntegratorBase& lfi)
    {
       assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
          {
-            m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getFES()));
+            m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
             m_lfiDomainList.clear();
             m_domAttrMarkers.clear();
             add(lfi);
@@ -146,7 +146,7 @@ namespace Rodin::Variational
          }
          case IntegratorRegion::Boundary:
          {
-            m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getFES()));
+            m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
             m_lfiBoundaryList.clear();
             m_bdrAttrMarkers.clear();
             add(lfi);
@@ -156,14 +156,14 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class FES>
-   void LinearForm<FES>::assemble()
+   template <class FEC>
+   void LinearForm<FEC>::assemble()
    {
       m_lf->Assemble();
    }
 
-   template <class FES>
-   void LinearForm<FES>::update()
+   template <class FEC>
+   void LinearForm<FEC>::update()
    {
       m_lf->Update();
    }

@@ -6,6 +6,7 @@
 
 #include "ForwardDecls.h"
 #include "H1.h"
+#include "FiniteElementSpace.h"
 #include "GridFunction.h"
 #include "ScalarFunction.h"
 

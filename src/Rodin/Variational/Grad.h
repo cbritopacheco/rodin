@@ -199,12 +199,12 @@ namespace Rodin::Variational
                   new Internal::JacobianShapeR3O(std::move(dshape), sdim, 1));
          }
 
-         H1& getFiniteElementSpace() override
+         FiniteElementSpace<H1>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const H1& getFiniteElementSpace() const override
+         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }

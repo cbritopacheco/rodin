@@ -54,7 +54,7 @@ namespace Rodin::External::MMG
       }
       else
       {
-        switch (gf.getFiniteElementSpace().getFES().GetOrdering())
+        switch (gf.getFiniteElementSpace().getHandle().GetOrdering())
         {
           case mfem::Ordering::byNODES:
           {

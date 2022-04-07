@@ -14,7 +14,13 @@ namespace Rodin::Variational
    class FiniteElementCollectionBase
    {
       public:
+         int getOrder() const
+         {
+            return getHandle().GetOrder();
+         }
+
          virtual mfem::FiniteElementCollection& getHandle() = 0;
+
          virtual const mfem::FiniteElementCollection& getHandle() const = 0;
    };
 }

@@ -84,11 +84,11 @@ namespace Rodin::Variational
     * can be specified by from one or more bilinear integrators (e.g.
     * DiffusionIntegrator).
     */
-   template <class TrialFES, class TestFES>
+   template <class TrialFEC, class TestFEC>
    class BilinearForm : public BilinearFormBase
    {
       static_assert(
-            std::is_same_v<TrialFES, TestFES>,
+            std::is_same_v<TrialFEC, TestFEC>,
             "Different trial and test spaces are currently not supported.");
 
       public:
@@ -100,7 +100,7 @@ namespace Rodin::Variational
           *
           * @param[in] fes Reference to the finite element space
           */
-         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
+         BilinearForm(TrialFunction<TrialFEC>& u, TestFunction<TestFEC>& v);
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -113,7 +113,7 @@ namespace Rodin::Variational
           * at @f$ ( u, v ) @f$.
           */
          double operator()(
-               const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const;
+               const GridFunction<TrialFEC>& u, const GridFunction<TestFEC>& v) const;
 
          /**
           * @brief Builds the bilinear form from a derived instance of
@@ -128,12 +128,12 @@ namespace Rodin::Variational
 
          void update() override;
 
-         const TrialFunction<TrialFES>& getTrialFunction() const override
+         const TrialFunction<TrialFEC>& getTrialFunction() const override
          {
             return m_u;
          }
 
-         const TestFunction<TestFES>& getTestFunction() const override
+         const TestFunction<TestFEC>& getTestFunction() const override
          {
             return m_v;
          }
@@ -157,8 +157,8 @@ namespace Rodin::Variational
          }
 
       private:
-         TrialFunction<TrialFES>& m_u;
-         TestFunction<TestFES>&   m_v;
+         TrialFunction<TrialFEC>& m_u;
+         TestFunction<TestFEC>&   m_v;
          std::unique_ptr<mfem::BilinearForm> m_bf;
          BFIList m_bfiDomainList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
