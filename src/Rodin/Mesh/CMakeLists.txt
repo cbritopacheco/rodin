@@ -11,7 +11,7 @@ add_library(RodinMesh ${RodinMesh_SRCS} ${RodinMesh_HEADERS})
 add_library(Rodin::Mesh ALIAS RodinMesh)
 
 target_include_directories(RodinMesh
-  PRIVATE
+  PUBLIC
   ${MFEM_INCLUDE_DIRS})
 
 target_link_libraries(RodinMesh
@@ -19,6 +19,6 @@ target_link_libraries(RodinMesh
   mfem
   PUBLIC
   Rodin::Alert
-  ${Boost_LIBRARIES})
-
+  Rodin::Parallel
+  Boost::filesystem)
 

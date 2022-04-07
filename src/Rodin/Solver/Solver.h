@@ -7,6 +7,7 @@
 #ifndef RODIN_SOLVER_SOLVER_H
 #define RODIN_SOLVER_SOLVER_H
 
+#include "Rodin/Configure.h"
 #include "Rodin/Variational/Problem.h"
 
 namespace Rodin::Solver

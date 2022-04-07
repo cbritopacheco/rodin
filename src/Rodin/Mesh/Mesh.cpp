@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Alert.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
@@ -12,74 +13,99 @@
 
 namespace Rodin
 {
-   Mesh Mesh::load(const boost::filesystem::path& filename)
+   // ---- MeshBase ----------------------------------------------------------
+   int MeshBase::getSpaceDimension() const
    {
-      return Mesh(mfem::Mesh::LoadFromFile(filename.c_str()));
+      return getHandle().SpaceDimension();
    }
 
-   void Mesh::save(const boost::filesystem::path& filename)
+   int MeshBase::getDimension() const
+   {
+      return getHandle().Dimension();
+   }
+
+   void MeshBase::refine()
+   {
+      getHandle().UniformRefinement();
+   }
+
+   std::set<int> MeshBase::getAttributes() const
+   {
+      return std::set<int>(
+            getHandle().attributes.begin(), getHandle().attributes.end());
+   }
+
+   std::set<int> MeshBase::getBoundaryAttributes() const
+   {
+      return std::set<int>(
+            getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
+   }
+
+   void MeshBase::save(const boost::filesystem::path& filename)
    {
       getHandle().Save(filename.c_str());
    }
 
-   Mesh::Mesh(mfem::Mesh&& mesh)
-      : m_mesh(std::move(mesh))
-   {}
-
-   Mesh::Mesh(const Mesh& other)
-      : m_mesh(other.m_mesh)
-   {}
-
-   Mesh& Mesh::displace(const Variational::GridFunctionBase& u)
+   MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
    {
       assert(u.getFiniteElementSpace().getVectorDimension() == getDimension());
-      m_mesh.MoveNodes(u.getHandle());
+      getHandle().MoveNodes(u.getHandle());
       return *this;
    }
 
    double
-   Mesh::getMaximumDisplacement(const Variational::GridFunctionBase& u)
+   MeshBase::getMaximumDisplacement(const Variational::GridFunctionBase& u)
    {
       double res;
-      m_mesh.CheckDisplacements(u.getHandle(), res);
+      getHandle().CheckDisplacements(u.getHandle(), res);
       return res;
    }
 
-   int Mesh::getDimension() const
-   {
-      return m_mesh.Dimension();
-   }
-
-   int Mesh::getSpaceDimension() const
-   {
-      return m_mesh.SpaceDimension();
-   }
-
-   double Mesh::getVolume()
+   double MeshBase::getVolume()
    {
       double totalVolume = 0;
-      for (int i = 0; i < m_mesh.GetNE(); i++)
-         totalVolume += m_mesh.GetElementVolume(i);
+      for (int i = 0; i < getHandle().GetNE(); i++)
+         totalVolume += getHandle().GetElementVolume(i);
       return totalVolume;
    }
 
-   double Mesh::getVolume(int attr)
+   double MeshBase::getVolume(int attr)
    {
       double totalVolume = 0;
-      for (int i = 0; i < m_mesh.GetNE(); i++)
+      for (int i = 0; i < getHandle().GetNE(); i++)
       {
-         if (m_mesh.GetAttribute(i) == attr)
-            totalVolume += m_mesh.GetElementVolume(i);
+         if (getHandle().GetAttribute(i) == attr)
+            totalVolume += getHandle().GetElementVolume(i);
       }
       return totalVolume;
    }
 
-   SubMesh Mesh::trim(int attr, int bdrLabel)
+   Mesh<Parallel::Trait::Parallel>
+   Mesh<Parallel::Trait::Serial>::parallelize(boost::mpi::communicator comm)
+   {
+      return Mesh<Parallel::Trait::Parallel>(comm, *this);
+   }
+
+   // ---- Mesh<Serial> ------------------------------------------------------
+   Mesh<Parallel::Trait::Serial>::Mesh(mfem::Mesh&& mesh)
+      : m_mesh(std::move(mesh))
+   {}
+
+   Mesh<Parallel::Trait::Serial>::Mesh(const Mesh& other)
+      : m_mesh(other.m_mesh)
+   {}
+
+   void Mesh<Parallel::Trait::Serial>::load(const boost::filesystem::path& filename)
+   {
+      m_mesh = mfem::Mesh(filename.c_str());
+   }
+
+   SubMesh Mesh<Parallel::Trait::Serial>::trim(int attr, int bdrLabel)
    {
       return trim(std::set<int>{attr}, bdrLabel);
    }
 
-   SubMesh Mesh::trim(const std::set<int>& attrs, int bdrLabel)
+   SubMesh Mesh<Parallel::Trait::Serial>::trim(const std::set<int>& attrs, int bdrLabel)
    {
       assert(attrs.size() > 0);
 
@@ -275,7 +301,7 @@ namespace Rodin
       return SubMesh(std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
    }
 
-   SubMesh Mesh::skin()
+   SubMesh Mesh<Parallel::Trait::Serial>::skin()
    {
       assert(getDimension() >= 2);
 
@@ -370,14 +396,16 @@ namespace Rodin
       return SubMesh(std::move(res)).setVertexMap(std::move(s2pv)).setParent(*this);
    }
 
-   mfem::Mesh& Mesh::getHandle()
+   mfem::Mesh& Mesh<Parallel::Trait::Serial>::getHandle()
    {
       return m_mesh;
    }
 
-   const mfem::Mesh& Mesh::getHandle() const
+   const mfem::Mesh& Mesh<Parallel::Trait::Serial>::getHandle() const
    {
       return m_mesh;
    }
+
+   // ---- Mesh<Parallel> ----------------------------------------------------
 }
 

@@ -1,0 +1,8 @@
+#ifndef RODIN_CONFIGURE_H
+#define RODIN_CONFIGURE_H
+
+#cmakedefine RODIN_USE_MPI
+#cmakedefine RODIN_USE_SUITESPARSE
+#cmakedefine RODIN_SILENCE_WARNINGS
+
+#endif
