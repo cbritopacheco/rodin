@@ -25,8 +25,6 @@
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
-#include "GridFunctionView.h"
-#include "GridFunctionIndex.h"
 
 namespace Rodin::Variational
 {
@@ -313,16 +311,6 @@ namespace Rodin::Variational
          {
             getHandle() = v;
             return *this;
-         }
-
-         template <class T>
-         std::enable_if_t<
-           std::is_base_of_v<GridFunctionIndexBase, T>, GridFunctionView>
-         operator[](T&& idx)
-         {
-            GridFunctionView res(*this);
-            res.setIndex(std::forward<T>(idx));
-            return res;
          }
 
          template <class T>

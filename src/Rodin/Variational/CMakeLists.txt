@@ -13,8 +13,6 @@ set(RodinVariational_HEADERS
   ShapeFunction.h
   TrialFunction.h
   TestFunction.h
-  GridFunctionIndex.h
-  GridFunctionView.h
   H1.h
   IdentityMatrix.h
   Integral.h
@@ -36,13 +34,12 @@ set(RodinVariational_HEADERS
   )
 
 set(RodinVariational_SRCS
+  FiniteElementSpace.cpp
   EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
   ShapeFunction.cpp
   Derivative.cpp
-  GridFunctionIndex.cpp
-  GridFunctionView.cpp
   Integral.cpp
   Jacobian.cpp
   Division.cpp
@@ -72,15 +69,13 @@ target_include_directories(RodinVariational
   INTERFACE
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   PUBLIC
-  ${MFEM_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS})
+  ${MFEM_INCLUDE_DIRS})
 
 target_link_libraries(RodinVariational
   PUBLIC
   RodinMesh
   RodinAlert
   RodinUtility
-  RodinVariationalFormLanguage
-  ${Boost_LIBRARIES})
+  RodinVariationalFormLanguage)
 
 add_subdirectory(FormLanguage)

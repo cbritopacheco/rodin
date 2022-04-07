@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
+#include "Rodin/Parallel/ForwardDecls.h"
+
 namespace Rodin::Variational
 {
    // ---- Problem -----------------------------------------------------------
@@ -19,6 +21,8 @@ namespace Rodin::Variational
 
    // ---- FiniteElementSpace ------------------------------------------------
    class FiniteElementSpaceBase;
+
+   class FiniteElementCollection;
 
    class H1;
 

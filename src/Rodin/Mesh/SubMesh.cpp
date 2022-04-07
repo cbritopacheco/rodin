@@ -20,13 +20,13 @@ namespace Rodin
       return *this;
    }
 
-   SubMesh& SubMesh::setParent(const Mesh& parent)
+   SubMesh& SubMesh::setParent(const MeshBase& parent)
    {
       m_parent = std::cref(parent);
       return *this;
    }
 
-   const Mesh& SubMesh::getParent()
+   const MeshBase& SubMesh::getParent()
    {
       assert(m_parent);
       return m_parent->get();

@@ -7,9 +7,15 @@
 #ifndef RODIN_MESH_FORWARDDECLS_H
 #define RODIN_MESH_FORWARDDECLS_H
 
+#include "Rodin/Parallel/ForwardDecls.h"
+
 namespace Rodin
 {
+   class MeshBase;
+
+   template <Parallel::Trait ParallelOrSerial = Parallel::Trait::Serial>
    class Mesh;
+
    class SubMesh;
 }
 

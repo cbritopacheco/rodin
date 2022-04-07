@@ -3,6 +3,7 @@ set(Rodin_HEADERS
   Core.h
   Alert.h
   Mesh.h
+  Parallel.h
   # Plot module is broken. See below.
   # Plot.h
   Solver.h
@@ -28,13 +29,20 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-error=extra
     -Wno-error=pedantic
     -Wno-error=cast-function-type
-    -Wno-error=zero-as-null-pointer-constant
-    )
+    -Wno-error=zero-as-null-pointer-constant)
 endif()
 
 add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
 target_sources(Rodin INTERFACE ${Rodin_HEADERS})
+
+configure_file(Configure.h.in Configure.h @ONLY)
+
+target_include_directories(Rodin
+  INTERFACE
+  ${PROJECT_SOURCE_DIR}/src
+  ${PROJECT_BINARY_DIR}/src
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 if (RODIN_WITH_PLOT)
 # The Plot module is currently broken and barely has any code. So we don't add
@@ -47,6 +55,7 @@ if (RODIN_WITH_PLOT)
 endif()
 
 add_subdirectory(Core)
+add_subdirectory(Parallel)
 add_subdirectory(Mesh)
 add_subdirectory(Test)
 add_subdirectory(Alert)
@@ -54,8 +63,3 @@ add_subdirectory(Solver)
 add_subdirectory(Utility)
 add_subdirectory(Variational)
 
-target_include_directories(Rodin
-  INTERFACE
-  ${PROJECT_SOURCE_DIR}/src
-  ${PROJECT_BINARY_DIR}/src
-  )

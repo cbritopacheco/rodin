@@ -19,40 +19,35 @@ namespace Rodin::Variational
    class FiniteElementSpaceBase
    {
       public:
-         virtual void update() = 0;
+         void update();
 
-         virtual Mesh& getMesh() = 0;
-         virtual const Mesh& getMesh() const = 0;
+         /**
+          * @returns Order of the highest dimensional finite element.
+          */
+         int getOrder() const;
 
-         virtual int getNumberOfDofs() const = 0;
-         virtual int getVectorDimension() const = 0;
+         int getNumberOfDofs() const;
+
+         /**
+          * @brief Gets the vector dimensions
+          */
+         int getVectorDimension() const;
+
+         mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr) const;
+
+         mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
+
+         virtual MeshBase& getMesh() = 0;
+
+         virtual const MeshBase& getMesh() const = 0;
 
          virtual mfem::FiniteElementSpace& getFES() = 0;
+
          virtual const mfem::FiniteElementSpace& getFES() const = 0;
 
          virtual mfem::FiniteElementCollection& getFEC() = 0;
+
          virtual const mfem::FiniteElementCollection& getFEC() const = 0;
-
-         int getOrder()
-         {
-            return getFEC().GetOrder();
-         }
-
-         mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr)
-         {
-            mfem::Array<int> essTrueDofList;
-            int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-            getFES().GetEssentialTrueDofs(Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList);
-            return essTrueDofList;
-         }
-
-         mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component)
-         {
-            mfem::Array<int> essTrueDofList;
-            int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-            getFES().GetEssentialTrueDofs(Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList, component);
-            return essTrueDofList;
-         }
    };
 }
 

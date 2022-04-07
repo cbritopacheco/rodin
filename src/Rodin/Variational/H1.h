@@ -122,7 +122,7 @@ namespace Rodin::Variational
           * equal to 1.
           * @param[in] basis Type of basis to use.
           */
-         H1(Mesh& mesh,
+         H1(MeshBase& mesh,
                const int dim = 1, const int order = 1, Basis basis = GaussLobato)
             :  m_mesh(mesh),
                m_fec(order, m_mesh.get().getDimension(), basis),
@@ -145,7 +145,7 @@ namespace Rodin::Variational
           * @brief Returns the reference to the mesh on which the space is
           * supported.
           */
-         Mesh& getMesh() override
+         MeshBase& getMesh() override
          {
             return m_mesh;
          }
@@ -154,27 +154,9 @@ namespace Rodin::Variational
           * @brief Returns a constant reference to the mesh on which the space is
           * supported.
           */
-         const Mesh& getMesh() const override
+         const MeshBase& getMesh() const override
          {
             return m_mesh;
-         }
-
-         /**
-          * @brief Gets the dimension @f$ d @f$ of the range space.
-          */
-         int getVectorDimension() const override
-         {
-            return m_fes.GetVDim();
-         }
-
-         int getNumberOfDofs() const override
-         {
-            return m_fes.GetNDofs();
-         }
-
-         void update() override
-         {
-            m_fes.Update();
          }
 
          /**
@@ -208,7 +190,7 @@ namespace Rodin::Variational
          }
 
       private:
-         std::reference_wrapper<Mesh> m_mesh;
+         std::reference_wrapper<MeshBase> m_mesh;
          mfem::H1_FECollection m_fec;
          mfem::FiniteElementSpace m_fes;
          Basis m_basis;
