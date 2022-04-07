@@ -49,7 +49,7 @@ namespace Rodin::Variational
     * A linear form can be specified by from one or more
     * LinearFormIntegratorBase instances.
     */
-   template <class FES>
+   template <class FEC>
    class LinearForm : public LinearFormBase
    {
       public:
@@ -60,7 +60,7 @@ namespace Rodin::Variational
           * space
           * @param[in] fes Reference to the finite element space
           */
-         LinearForm(TestFunction<FES>& v);
+         LinearForm(TestFunction<FEC>& v);
 
          LinearForm& operator=(const LinearFormIntegratorBase& lfi);
 
@@ -74,13 +74,13 @@ namespace Rodin::Variational
           *
           * @returns The value which the linear form takes at @f$ u @f$.
           */
-         double operator()(const GridFunction<FES>& u) const;
+         double operator()(const GridFunction<FEC>& u) const;
 
          void update() override;
 
          void assemble() override;
 
-         const TestFunction<FES>& getTestFunction() const override
+         const TestFunction<FEC>& getTestFunction() const override
          {
             return m_v;
          }
@@ -102,7 +102,7 @@ namespace Rodin::Variational
          }
 
       private:
-         TestFunction<FES>& m_v;
+         TestFunction<FEC>& m_v;
          std::unique_ptr<mfem::LinearForm> m_lf;
          LFIList m_lfiDomainList;
          LFIList m_lfiBoundaryList;

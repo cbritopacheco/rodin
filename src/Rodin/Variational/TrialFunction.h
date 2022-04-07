@@ -7,20 +7,20 @@
 
 namespace Rodin::Variational
 {
-   template <class FES>
-   class TrialFunction : public ShapeFunction<FES, Trial>
+   template <class FEC>
+   class TrialFunction : public ShapeFunction<FEC, Trial>
    {
       public:
-         TrialFunction(FES& fes)
-            : ShapeFunction<FES, Trial>(fes)
+         TrialFunction(FiniteElementSpace<FEC>& fes)
+            : ShapeFunction<FEC, Trial>(fes)
          {}
 
          TrialFunction(const TrialFunction& other)
-            : ShapeFunction<FES, Trial>(other)
+            : ShapeFunction<FEC, Trial>(other)
          {}
 
          TrialFunction(TrialFunction&& other)
-            : ShapeFunction<FES, Trial>(std::move(other))
+            : ShapeFunction<FEC, Trial>(std::move(other))
          {}
 
          void operator=(const TrialFunction&) = delete;
@@ -33,34 +33,34 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction<FES>& getGridFunction()
+         GridFunction<FEC>& getGridFunction()
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         const GridFunction<FES>& getGridFunction() const
+         const GridFunction<FEC>& getGridFunction() const
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         Component<TrialFunction<FES>> x() const
+         Component<TrialFunction<FEC>> x() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
-            return Component<TrialFunction<FES>>(*this, 0);
+            return Component<TrialFunction<FEC>>(*this, 0);
          }
 
-         Component<TrialFunction<FES>> y() const
+         Component<TrialFunction<FEC>> y() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
-            return Component<TrialFunction<FES>>(*this, 1);
+            return Component<TrialFunction<FEC>>(*this, 1);
          }
 
-         Component<TrialFunction<FES>> z() const
+         Component<TrialFunction<FEC>> z() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
-            return Component<TrialFunction<FES>>(*this, 2);
+            return Component<TrialFunction<FEC>>(*this, 2);
          }
 
          ShapeFunctionBase<Trial>& getRoot()  override
@@ -78,10 +78,10 @@ namespace Rodin::Variational
             return new TrialFunction(*this);
          }
       private:
-         std::optional<GridFunction<FES>> m_gf;
+         std::optional<GridFunction<FEC>> m_gf;
    };
-   template <class FES>
-   TrialFunction(FES& fes) -> TrialFunction<FES>;
+   template <class FEC>
+   TrialFunction(FiniteElementSpace<FEC>&) -> TrialFunction<FEC>;
 }
 #endif
 

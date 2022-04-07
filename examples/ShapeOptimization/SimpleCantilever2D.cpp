@@ -61,7 +61,7 @@ int main(int, char**)
   {
     // Finite element spaces
     int d = 2;
-    H1 Vh(Omega, d);
+    FiniteElementSpace<H1> Vh(Omega, d);
 
     // Pull-down force
     auto f = VectorFunction{0, -1};

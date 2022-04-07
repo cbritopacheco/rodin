@@ -52,12 +52,12 @@ namespace Rodin
          /**
           * @returns Reference to the parent Mesh object
           */
-         const MeshBase& getParent();
+         const MeshBase& getParent() const;
 
          /**
           * @returns The SubMesh to Mesh vertex map
           */
-         const std::map<int, int>& getVertexMap();
+         const std::map<int, int>& getVertexMap() const;
 
          bool isSubMesh() const override
          {

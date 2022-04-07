@@ -8,7 +8,7 @@ namespace Rodin
          m_s2pv(other.m_s2pv)
    {}
 
-   const std::map<int, int>& SubMesh::getVertexMap()
+   const std::map<int, int>& SubMesh::getVertexMap() const
    {
       assert(m_s2pv);
       return *m_s2pv;
@@ -26,7 +26,7 @@ namespace Rodin
       return *this;
    }
 
-   const MeshBase& SubMesh::getParent()
+   const MeshBase& SubMesh::getParent() const
    {
       assert(m_parent);
       return m_parent->get();

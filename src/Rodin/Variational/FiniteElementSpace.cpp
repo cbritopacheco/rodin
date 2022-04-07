@@ -4,22 +4,17 @@ namespace Rodin::Variational
 {
    int FiniteElementSpaceBase::getNumberOfDofs() const
    {
-      return getFES().GetNDofs();
+      return getHandle().GetNDofs();
    }
 
    int FiniteElementSpaceBase::getVectorDimension() const
    {
-      return getFES().GetVDim();
-   }
-
-   int FiniteElementSpaceBase::getOrder() const
-   {
-      return getFEC().GetOrder();
+      return getHandle().GetVDim();
    }
 
    void FiniteElementSpaceBase::update()
    {
-      getFES().Update();
+      getHandle().Update();
    }
 
    mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
@@ -27,7 +22,7 @@ namespace Rodin::Variational
    {
       mfem::Array<int> essTrueDofList;
       int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-      const_cast<mfem::FiniteElementSpace&>(getFES()
+      const_cast<mfem::FiniteElementSpace&>(getHandle()
             ).GetEssentialTrueDofs(
                Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList);
       return essTrueDofList;
@@ -38,7 +33,7 @@ namespace Rodin::Variational
    {
       mfem::Array<int> essTrueDofList;
       int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-      const_cast<mfem::FiniteElementSpace&>(getFES()
+      const_cast<mfem::FiniteElementSpace&>(getHandle()
             ).GetEssentialTrueDofs(
                Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList, component);
       return essTrueDofList;

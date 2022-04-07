@@ -9,13 +9,11 @@
 
 #include <functional>
 
-#include <mfem.hpp>
-
 #include "Rodin/Mesh.h"
 
 #include "ForwardDecls.h"
 
-#include "FiniteElementSpace.h"
+#include "FiniteElementCollection.h"
 
 namespace Rodin::Variational
 {
@@ -37,7 +35,7 @@ namespace Rodin::Variational
     * the kind of basis chosen.
     *
     */
-   class H1 : public FiniteElementSpaceBase
+   class H1 : public FiniteElementCollectionBase
    {
       public:
          /**
@@ -112,87 +110,31 @@ namespace Rodin::Variational
             IntegratedGLL        = mfem::BasisType::IntegratedGLL
          };
 
-         /**
-          * @brief Constructs a finite element space of H1 functions supported
-          * on the given mesh.
-          *
-          * @param[in] mesh Reference to mesh.
-          * @param[in] dim Dimension @f$ d @f$ of the range.
-          * @param[in] order Order of approximation. Must be greater than or
-          * equal to 1.
-          * @param[in] basis Type of basis to use.
-          */
-         H1(MeshBase& mesh,
-               const int dim = 1, const int order = 1, Basis basis = GaussLobato)
-            :  m_mesh(mesh),
-               m_fec(order, m_mesh.get().getDimension(), basis),
-               m_fes(&m_mesh.get().getHandle(), &m_fec, dim),
-               m_basis(basis)
+         static constexpr Basis DefaultBasis = Basis::GaussLobato;
+
+         H1(const int order, const int elemDim, Basis basis)
+            : m_fec(order, elemDim, basis)
          {
             assert(order >= 1);
          }
 
-         /**
-          * @brief Gets the type of basis
-          * @returns Type of basis
-          */
          Basis getBasisType() const
          {
             return m_basis;
          }
 
-         /**
-          * @brief Returns the reference to the mesh on which the space is
-          * supported.
-          */
-         MeshBase& getMesh() override
-         {
-            return m_mesh;
-         }
-
-         /**
-          * @brief Returns a constant reference to the mesh on which the space is
-          * supported.
-          */
-         const MeshBase& getMesh() const override
-         {
-            return m_mesh;
-         }
-
-         /**
-          * @internal
-          * @brief Returns the underlying mfem::H1_FECollection object.
-          * @returns Reference to the underlying mfem::H1_FECollection.
-          */
-         mfem::H1_FECollection& getFEC() override
+         mfem::FiniteElementCollection& getHandle()
          {
             return m_fec;
          }
 
-         const mfem::H1_FECollection& getFEC() const override
+         const mfem::FiniteElementCollection& getHandle() const
          {
             return m_fec;
-         }
-
-         /**
-          * @internal
-          * @brief Returns the underlying mfem::FiniteElementSpace object.
-          * @returns Reference to the underlying mfem::FiniteElementSpace.
-          */
-         mfem::FiniteElementSpace& getFES() override
-         {
-            return m_fes;
-         }
-
-         const mfem::FiniteElementSpace& getFES() const override
-         {
-            return m_fes;
          }
 
       private:
-         std::reference_wrapper<MeshBase> m_mesh;
          mfem::H1_FECollection m_fec;
-         mfem::FiniteElementSpace m_fes;
          Basis m_basis;
    };
 }
