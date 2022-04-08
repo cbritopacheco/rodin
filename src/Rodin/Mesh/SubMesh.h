@@ -28,10 +28,11 @@ namespace Rodin
     * @endcode
     *
     */
-   class SubMesh : public Mesh
+   template <>
+   class SubMesh<Traits::Serial> : public Mesh<Traits::Serial>
    {
       public:
-         using Mesh::Mesh;
+         using Mesh<Traits::Serial>::Mesh;
 
          SubMesh(const SubMesh& other);
 
@@ -47,17 +48,17 @@ namespace Rodin
          /**
           * @brief Sets the reference to the parent Mesh object
           */
-         SubMesh& setParent(const Mesh& parent);
+         SubMesh& setParent(const MeshBase& parent);
 
          /**
           * @returns Reference to the parent Mesh object
           */
-         const Mesh& getParent();
+         const MeshBase& getParent() const;
 
          /**
           * @returns The SubMesh to Mesh vertex map
           */
-         const std::map<int, int>& getVertexMap();
+         const std::map<int, int>& getVertexMap() const;
 
          bool isSubMesh() const override
          {
@@ -65,7 +66,7 @@ namespace Rodin
          }
 
       private:
-         std::optional<std::reference_wrapper<const Mesh>> m_parent;
+         std::optional<std::reference_wrapper<const MeshBase>> m_parent;
          std::optional<std::map<int, int>> m_s2pv;
    };
 }

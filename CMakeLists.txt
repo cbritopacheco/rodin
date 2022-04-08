@@ -17,7 +17,10 @@ option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"        ON)
 option(RODIN_BUILD_DOC          "Build the Rodin documentation"   OFF)
 option(RODIN_USE_MCSS           "Use m.css style documentation"   OFF)
 option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"    OFF)
-option(RODIN_USE_SUITESPARSE    "Build SuiteSparse integrations"  ON)
+option(RODIN_USE_MPI            "Build with MPI support"          OFF)
+option(RODIN_USE_OPENMP         "Build with OpenMP support"       OFF)
+option(RODIN_USE_SUITESPARSE    "Build with SuiteSparse support"  ON)
+option(RODIN_SILENCE_WARNINGS   "Silence warning outputted by Rodin"  OFF)
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -42,11 +45,21 @@ add_compile_options(
 
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
-  # ---- MFEM ----
   if (RODIN_USE_SUITESPARSE)
     set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
   endif()
 
+  if (RODIN_USE_MPI)
+    set(MFEM_USE_MPI ON CACHE BOOL TRUE FORCE)
+    find_package(MPI REQUIRED)
+  endif()
+
+  if (RODIN_USE_OPENMP)
+    find_package(OpenMP REQUIRED)
+    set(MFEM_USE_OPENMP ON CACHE BOOL TRUE FORCE)
+  endif()
+
+  # ---- MFEM ----
   set(BUILD_DOC OFF CACHE BOOL "" FORCE)
   message(STATUS "Configuring mfem ...")
   add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
@@ -64,12 +77,19 @@ if (RODIN_BUILD_SRC)
 
   # ---- Boost ----
   # set(Boost_USE_STATIC_LIBS        OFF)
-  # set(Boost_USE_MULTITHREADED      ON)
   # set(Boost_USE_STATIC_RUNTIME     OFF)
+
+  if (RODIN_USE_MPI)
+    set(Boost_USE_MULTITHREADED ON)
+    find_package(Boost 1.65 REQUIRED COMPONENTS mpi serialization)
+    include_directories(${Boost_INCLUDE_DIRS})
+  endif()
+
   find_package(Boost 1.65 REQUIRED
     COMPONENTS
     system
     filesystem)
+  include_directories(${Boost_INCLUDE_DIRS})
 
   # ---- Corrade ----
   message(STATUS "Configuring Corrade...")
@@ -77,7 +97,9 @@ if (RODIN_BUILD_SRC)
   find_package(Corrade REQUIRED Utility)
   set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-  if (RODIN_WITH_PLOT)
+  if (RODIN_WITH_PLOT) # TODO: BROKEN
+    message(FATAL_ERROR
+      "Rodin::Plot build is broken. Please set RODIN_WITH_PLOT=OFF")
     # ---- Magnum ----
     message(STATUS "Configuring Magnum...")
     set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)

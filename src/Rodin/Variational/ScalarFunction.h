@@ -191,8 +191,8 @@ namespace Rodin::Variational
     *
     * @tparam FEC Finite element collection
     */
-   template <class FEC>
-   class ScalarFunction<GridFunction<FEC>>
+   template <class FEC, class Trait>
+   class ScalarFunction<GridFunction<FEC, Trait>>
       : public ScalarFunctionBase
    {
       public:
@@ -202,7 +202,7 @@ namespace Rodin::Variational
           * collection FEC
           */
          constexpr
-         ScalarFunction(const GridFunction<FEC>& u)
+         ScalarFunction(const GridFunction<FEC, Trait>& u)
             :  m_u(u),
                m_mfemCoefficient(&u.getHandle())
          {
@@ -212,7 +212,7 @@ namespace Rodin::Variational
          constexpr
          ScalarFunction(const ScalarFunction& other) = default;
 
-         const GridFunction<FEC>& getValue() const
+         const GridFunction<FEC, Trait>& getValue() const
          {
             return m_u;
          }
@@ -228,12 +228,12 @@ namespace Rodin::Variational
          }
 
       private:
-         const GridFunction<FEC>& m_u;
+         const GridFunction<FEC, Trait>& m_u;
          mutable mfem::GridFunctionCoefficient m_mfemCoefficient;
    };
-   template <class FEC>
-   ScalarFunction(const GridFunction<FEC>&)
-      -> ScalarFunction<GridFunction<FEC>>;
+   template <class FEC, class Trait>
+   ScalarFunction(const GridFunction<FEC, Trait>&)
+      -> ScalarFunction<GridFunction<FEC, Trait>>;
 
    template <>
    class ScalarFunction<std::function<double(const double*, int)>>

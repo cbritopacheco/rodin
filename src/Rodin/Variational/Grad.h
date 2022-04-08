@@ -33,12 +33,33 @@ namespace Rodin::Variational
     *    \right]^T
     * @f]
     */
-   template <>
-   class Grad<GridFunction<H1>> : public VectorFunctionBase
+   template <class Trait>
+   class Grad<GridFunction<H1, Trait>> : public VectorFunctionBase
    {
+
       mfem::ElementTransformation *RefinedToCoarse(
-         mfem::Mesh &coarse_mesh, const mfem::ElementTransformation &T,
-         const mfem::IntegrationPoint &ip, mfem::IntegrationPoint &coarse_ip) const;
+        mfem::Mesh &coarse_mesh, const mfem::ElementTransformation &T,
+        const mfem::IntegrationPoint &ip, mfem::IntegrationPoint &coarse_ip) const
+      {
+        mfem::Mesh &fine_mesh = *T.mesh;
+        // Get the element transformation of the coarse element containing the
+        // fine element.
+        int fine_element = T.ElementNo;
+        const mfem::CoarseFineTransformations &cf = fine_mesh.GetRefinementTransforms();
+        int coarse_element = cf.embeddings[fine_element].parent;
+        mfem::ElementTransformation *coarse_T =
+           coarse_mesh.GetElementTransformation(coarse_element);
+        // Transform the integration point from fine element coordinates to coarse
+        // element coordinates.
+        mfem::Geometry::Type geom = T.GetGeometryType();
+        mfem::IntegrationPointTransformation fine_to_coarse;
+        mfem::IsoparametricTransformation &emb_tr = fine_to_coarse.Transf;
+        emb_tr.SetIdentityTransformation(geom);
+        emb_tr.SetPointMat(cf.point_matrices[geom](cf.embeddings[fine_element].matrix));
+        fine_to_coarse.Transform(ip, coarse_ip);
+        coarse_T->SetIntPoint(&coarse_ip);
+        return coarse_T;
+      }
 
       void GetGradient(
             mfem::Vector& grad, mfem::ElementTransformation& trans,
@@ -63,7 +84,7 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Grad(const GridFunction<H1>& u)
+         Grad(const GridFunction<H1, Trait>& u)
             : m_u(u)
          {}
 
@@ -141,9 +162,10 @@ namespace Rodin::Variational
          }
 
       private:
-         const GridFunction<H1>& m_u;
+         const GridFunction<H1, Trait>& m_u;
    };
-   Grad(const GridFunction<H1>&) -> Grad<GridFunction<H1>>;
+   template <class Trait>
+   Grad(const GridFunction<H1, Trait>&) -> Grad<GridFunction<H1, Trait>>;
 
    template <ShapeFunctionSpaceType Space>
    class Grad<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
@@ -199,12 +221,12 @@ namespace Rodin::Variational
                   new Internal::JacobianShapeR3O(std::move(dshape), sdim, 1));
          }
 
-         H1& getFiniteElementSpace() override
+         FiniteElementSpace<H1>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const H1& getFiniteElementSpace() const override
+         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }

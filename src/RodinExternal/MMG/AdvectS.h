@@ -31,6 +31,8 @@ namespace Rodin::External::MMG
     * \right.
     * @f]
     * where @f$ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} @f$ is known.
+    *
+    * @note Unlike Advect2D and Advect3D, time truncation is always avoided.
     */
   class AdvectS
   {
@@ -41,16 +43,6 @@ namespace Rodin::External::MMG
        * @param[in] disp Displacement velocity field
        */
       AdvectS(ScalarSolutionS& ls, VectorSolutionS& disp);
-
-      /**
-       * @brief Specifies whether to enable or disable truncation of time in the CFL condition.
-       *
-       * If true, avoids truncation of the time period for advection due to
-       * the CFL condition. Otherwise, no action is taken.
-       *
-       * By default it is set to false.
-       */
-      AdvectS& avoidTimeTruncation(bool avoidTrunc = true);
 
       /**
        * @brief Specifies whether to extrapolate characteristic lines or not.
@@ -71,7 +63,7 @@ namespace Rodin::External::MMG
 
     private:
       double m_t;
-      bool m_avoidTrunc, m_ex;
+      bool m_ex;
       ScalarSolutionS& m_ls;
       VectorSolutionS& m_disp;
       ISCDProcess m_advect;

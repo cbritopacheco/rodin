@@ -125,7 +125,7 @@ namespace Rodin::Variational
    class ShapeFunction<H1, Space> : public ShapeFunctionBase<Space>
    {
       public:
-         ShapeFunction(H1& fes)
+         ShapeFunction(FiniteElementSpace<H1>& fes)
             : m_fes(fes)
          {}
 
@@ -139,12 +139,12 @@ namespace Rodin::Variational
                m_fes(other.m_fes)
          {}
 
-         H1& getFiniteElementSpace() override
+         FiniteElementSpace<H1>& getFiniteElementSpace() override
          {
             return m_fes;
          }
 
-         const H1& getFiniteElementSpace() const override
+         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
          {
             return m_fes;
          }
@@ -186,7 +186,7 @@ namespace Rodin::Variational
          virtual ShapeFunction* copy() const noexcept override = 0;
 
       private:
-         H1& m_fes;
+         FiniteElementSpace<H1>& m_fes;
    };
 }
 

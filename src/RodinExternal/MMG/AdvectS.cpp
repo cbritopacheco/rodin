@@ -9,18 +9,11 @@ namespace Rodin::External::MMG
 {
   AdvectS::AdvectS(ScalarSolutionS& ls, VectorSolutionS& disp)
     : m_t(0),
-      m_avoidTrunc(false),
       m_ex(true),
       m_ls(ls),
       m_disp(disp),
       m_advect(ADVECTION_EXECUTABLE)
   {}
-
-  AdvectS& AdvectS::avoidTimeTruncation(bool avoidTrunc)
-  {
-    m_avoidTrunc = avoidTrunc;
-    return *this;
-  }
 
   AdvectS& AdvectS::enableExtrapolation(bool ex)
   {
@@ -48,13 +41,11 @@ namespace Rodin::External::MMG
     int retcode = m_advect.run(
       meshp.string(),
       "-dt", std::to_string(dt),
-      "-surf",
-      m_avoidTrunc ? "-nocfl" : "",
       m_ex ? "" : "-noex",
       "-c", solp.string(),
       "-s", dispp.string(),
       "-o", outp.string(),
-      "-v");
+      "-nocfl");
 
     if (retcode != 0)
       Alert::Exception("ISCD::Avection invocation failed.").raise();

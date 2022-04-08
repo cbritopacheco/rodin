@@ -13,14 +13,14 @@ namespace Rodin::External::MMG
    * @internal
    * @brief Path to the ISCD Mshdist executable.
    */
-  static constexpr const char* MSHDIST_EXECUTABLE =
+  inline constexpr const char* MSHDIST_EXECUTABLE =
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
   /**
    * @internal
    * @brief Path to the ISCD Mshdist executable.
    */
-  static constexpr const char* ADVECTION_EXECUTABLE =
+  inline constexpr const char* ADVECTION_EXECUTABLE =
     "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 
   /**
@@ -28,7 +28,7 @@ namespace Rodin::External::MMG
    *
    * Ranges from -1 to INT_MAX. A higher number means more verbose output.
    */
-  static constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
+  inline constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
 }
 
 #endif
