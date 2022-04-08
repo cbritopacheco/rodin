@@ -19,7 +19,7 @@ namespace Rodin::Alert
 
    void Warning::raise() const noexcept
    {
-#if RODIN_SILENCE_WARNINGS
+#ifdef RODIN_SILENCE_WARNINGS
 #else
       std::cerr << rang::fg::yellow
                 << "Warning: "

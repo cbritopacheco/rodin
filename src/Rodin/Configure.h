@@ -1,6 +1,0 @@
-#ifndef RODIN_CONFIGURE_H
-#define RODIN_CONFIGURE_H
-
-#define RODIN_SILENCE_WARNINGS 0
-
-#endif

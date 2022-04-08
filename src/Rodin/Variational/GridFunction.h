@@ -25,8 +25,6 @@
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
-#include "GridFunctionView.h"
-#include "GridFunctionIndex.h"
 
 namespace Rodin::Variational
 {
@@ -37,10 +35,20 @@ namespace Rodin::Variational
    class GridFunctionBase
    {
       public:
-         virtual void update() = 0;
+         void update()
+         {
+            return getHandle().Update();
+         }
 
-         virtual double max() const = 0;
-         virtual double min() const = 0;
+         double max() const
+         {
+            return getHandle().Max();
+         }
+
+         double min() const
+         {
+            return getHandle().Min();
+         }
 
          /**
           * @brief Gets the underlying handle to the mfem::GridFunction object.
@@ -56,6 +64,7 @@ namespace Rodin::Variational
          virtual const mfem::GridFunction& getHandle() const = 0;
 
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
+
          virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
 
          virtual GridFunctionBase& operator*=(double t) = 0;
@@ -96,10 +105,10 @@ namespace Rodin::Variational
           * to.
           * @tparam FES Finite element space associated
           */
-         template <class FES>
-         GridFunction<FES> setFiniteElementSpace(FES& fes)
+         template <class FEC, class Trait>
+         GridFunction<FEC, Trait> setFiniteElementSpace(FiniteElementSpace<FEC, Trait>& fes)
          {
-            GridFunction<FES> res(fes);
+            GridFunction<FEC, Trait> res(fes);
             int size = m_gf.Size();
             res.getHandle().SetDataAndSize(m_gf.StealData(), size);
             return res;
@@ -141,26 +150,22 @@ namespace Rodin::Variational
     * initializing the grid function, hence it is not necessary to make it
     * explicit.
     */
-   template <class FES>
-   class GridFunction : public GridFunctionBase
+   template <class FEC>
+   class GridFunction<FEC, Traits::Serial> : public GridFunctionBase
    {
       static_assert(
-            std::is_base_of_v<FiniteElementSpaceBase, FES>,
-            "FES must be derived from FiniteElementSpaceBase");
+            std::is_base_of_v<FiniteElementSpaceBase, FiniteElementSpace<FEC>>,
+            "FiniteElementSpace<FEC> must be derived from FiniteElementSpaceBase");
       public:
          /**
           * @brief Constructs a grid function on a finite element space.
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
-         GridFunction(FES& fes)
+         GridFunction(FiniteElementSpace<FEC>& fes)
             :  m_fes(fes),
-               m_gf(&fes.getFES()),
-               m_size(m_gf.Size()),
-               m_data(m_gf.StealData())
+               m_gf(&fes.getHandle())
          {
-            assert(!m_gf.OwnsData());
-            m_gf.SetDataAndSize(m_data.get(), m_size);
             m_gf = 0.0;
          }
 
@@ -170,22 +175,12 @@ namespace Rodin::Variational
           */
          GridFunction(const GridFunction& other)
             :  m_fes(other.m_fes),
-               m_gf(other.m_gf),
-               m_size(other.m_size)
-         {
-            assert(!m_gf.OwnsData());
-            m_data = std::unique_ptr<double[]>(new double[other.m_size]);
-            std::copy(
-                  other.m_data.get(), other.m_data.get() + other.m_size,
-                  m_data.get()
-                  );
-            m_gf.SetDataAndSize(m_data.get(), m_size);
-         }
+               m_gf(other.m_gf)
+         {}
 
          GridFunction(GridFunction&& other)
             : m_fes(other.m_fes),
-              m_gf(std::move(other.m_gf)),
-              m_size(other.m_size)
+              m_gf(std::move(other.m_gf))
          {}
 
          GridFunction& operator=(const GridFunction&) = delete;
@@ -195,7 +190,7 @@ namespace Rodin::Variational
           */
          GridFunction& operator=(GridFunction&&) = default;
 
-         FES& getFiniteElementSpace() override
+         FiniteElementSpace<FEC>& getFiniteElementSpace() override
          {
             return m_fes;
          }
@@ -206,7 +201,7 @@ namespace Rodin::Variational
           * @returns Constant reference to finite element space to which the
           * function belongs to.
           */
-         const FES& getFiniteElementSpace() const override
+         const FiniteElementSpace<FEC>& getFiniteElementSpace() const override
          {
             return m_fes;
          }
@@ -294,9 +289,7 @@ namespace Rodin::Variational
           */
          GridFunction& setData(std::unique_ptr<double[]> data, int size)
          {
-            assert(data.get());
-            m_data = std::move(data);
-            m_gf.SetDataAndSize(m_data.get(), size);
+            m_gf.SetDataAndSize(data.release(), size);
             return *this;
          }
 
@@ -306,23 +299,13 @@ namespace Rodin::Variational
           */
          std::pair<const double*, int> getData() const override
          {
-            return {m_data.get(), m_size};
+            return {static_cast<const double*>(m_gf.GetData()), m_gf.Size()};
          }
 
          GridFunction& operator=(double v)
          {
             getHandle() = v;
             return *this;
-         }
-
-         template <class T>
-         std::enable_if_t<
-           std::is_base_of_v<GridFunctionIndexBase, T>, GridFunctionView>
-         operator[](T&& idx)
-         {
-            GridFunctionView res(*this);
-            res.setIndex(std::forward<T>(idx));
-            return res;
          }
 
          template <class T>
@@ -471,7 +454,7 @@ namespace Rodin::Variational
             getHandle() = std::numeric_limits<double>::quiet_NaN();
             mfem::Array<int> vdofs;
             mfem::Vector vals;
-            const auto& fes = getFiniteElementSpace().getFES();
+            const auto& fes = getFiniteElementSpace().getHandle();
             const auto& attrs = s.getAttributes();
             for (int i = 0; i < fes.GetNE(); i++)
             {
@@ -491,8 +474,8 @@ namespace Rodin::Variational
           * @brief Transfers the grid function from one finite element space to
           * another.
           */
-         template <class OtherFES>
-         void transfer(GridFunction<OtherFES>& other)
+         template <class OtherFEC>
+         void transfer(GridFunction<OtherFEC, Traits::Serial>& other)
          {
             assert(getFiniteElementSpace().getVectorDimension() ==
                   other.getFiniteElementSpace().getVectorDimension());
@@ -502,7 +485,8 @@ namespace Rodin::Variational
                // underlying target finite element space. Hence we should seek
                // out to copy the grid function at the corresponding nodes
                // given by the vertex map given in the Submesh object.
-               auto& submesh = static_cast<SubMesh&>(getFiniteElementSpace().getMesh());
+               auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
+                     getFiniteElementSpace().getMesh());
                if (&submesh.getParent() == &other.getFiniteElementSpace().getMesh())
                {
                   int vdim = getFiniteElementSpace().getVectorDimension();
@@ -515,12 +499,12 @@ namespace Rodin::Variational
                   }
                   else
                   {
-                     int nv = getFiniteElementSpace().getFES().GetNV();
-                     int pnv = other.getFiniteElementSpace().getFES().GetNV();
+                     int nv = getFiniteElementSpace().getHandle().GetNV();
+                     int pnv = other.getFiniteElementSpace().getHandle().GetNV();
 
-                     assert(getFiniteElementSpace().getFES().GetOrdering() ==
-                              getFiniteElementSpace().getFES().GetOrdering());
-                     switch(getFiniteElementSpace().getFES().GetOrdering())
+                     assert(getFiniteElementSpace().getHandle().GetOrdering() ==
+                              getFiniteElementSpace().getHandle().GetOrdering());
+                     switch(getFiniteElementSpace().getHandle().GetOrdering())
                      {
                         case mfem::Ordering::byNODES:
                         {
@@ -563,21 +547,6 @@ namespace Rodin::Variational
             return *this;
          }
 
-         void update() override
-         {
-            return m_gf.Update();
-         }
-
-         double max() const override
-         {
-            return m_gf.Max();
-         }
-
-         double min() const override
-         {
-            return m_gf.Min();
-         }
-
          mfem::GridFunction& getHandle() override
          {
             return m_gf;
@@ -588,13 +557,11 @@ namespace Rodin::Variational
             return m_gf;
          }
       private:
-         FES& m_fes;
+         FiniteElementSpace<FEC>& m_fes;
          mfem::GridFunction m_gf;
-         int m_size;
-         std::unique_ptr<double[]> m_data;
    };
-   template <class FES>
-   GridFunction(FES&) -> GridFunction<FES>;
+   template <class FEC, class Trait>
+   GridFunction(FiniteElementSpace<FEC, Trait>&) -> GridFunction<FEC, Trait>;
 }
 
 #endif

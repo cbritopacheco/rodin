@@ -21,7 +21,8 @@ int main(int, char**)
   int Gamma0 = 1, GammaD = 2, GammaN = 3;
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
   Omega.save("Omega0.mesh");
   std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
 
@@ -60,7 +61,7 @@ int main(int, char**)
   {
     // Finite element spaces
     int d = 2;
-    H1 Vh(Omega, d);
+    FiniteElementSpace<H1> Vh(Omega, d);
 
     // Pull-down force
     auto f = VectorFunction{0, -1};
@@ -115,7 +116,7 @@ int main(int, char**)
       // Refine the mesh using MMG
       auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
       MMG::MeshOptimizer2D().setHMax(hmax).optimize(mmgMesh);
-      Omega = Cast(mmgMesh).to<Mesh>();
+      Omega = Cast(mmgMesh).to<Mesh<Traits::Serial>>();
     }
 
     // Save mesh

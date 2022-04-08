@@ -12,6 +12,10 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(ShapeOptimization)
   add_subdirectory(DensityOptimization)
   add_subdirectory(SurfaceOptimization)
+
+  if (RODIN_USE_MPI)
+    add_subdirectory(Parallel)
+  endif()
   # Plot module is broken. Uncomment when it has been fixed.
   # add_subdirectory(Plot)
 endif()

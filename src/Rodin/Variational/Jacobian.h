@@ -75,8 +75,8 @@ namespace Rodin::Variational
     * @f]
     * This class aids in the calculation of the Jacobian of a GridFunction<H1>.
     */
-   template <>
-   class Jacobian<GridFunction<H1>> : public MatrixFunctionBase
+   template <class Trait>
+   class Jacobian<GridFunction<H1, Trait>> : public MatrixFunctionBase
    {
       public:
          /**
@@ -84,7 +84,7 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Jacobian(GridFunction<H1>& u)
+         Jacobian(GridFunction<H1, Trait>& u)
             :  m_u(u)
          {}
 
@@ -168,9 +168,10 @@ namespace Rodin::Variational
          }
 
       private:
-         GridFunction<H1>& m_u;
+         GridFunction<H1, Trait>& m_u;
    };
-   Jacobian(GridFunction<H1>&) -> Jacobian<GridFunction<H1>>;
+   template <class Trait>
+   Jacobian(GridFunction<H1, Trait>&) -> Jacobian<GridFunction<H1, Trait>>;
 
    template <ShapeFunctionSpaceType Space>
    class Jacobian<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
@@ -180,12 +181,12 @@ namespace Rodin::Variational
             : m_u(u)
          {}
 
-         H1& getFiniteElementSpace() override
+         FiniteElementSpace<H1>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const H1& getFiniteElementSpace() const override
+         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }
