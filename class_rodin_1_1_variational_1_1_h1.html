@@ -81,8 +81,6 @@ $ H^1(\Omega)^d $
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -277,49 +275,6 @@ $ P_\tau $
               <a href="#a1a7528fc0951f0f2c52aa766db348049a35e29b2cd1b2da534a88083c7c225c63" class="m-doc">IntegratedGLL</a> = mfem::BasisType::IntegratedGLL }</span>
             </dt>
             <dd>Possible types of bases for the <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a532b635899814caeaed7c8868f351171" class="m-doc">H1</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; mesh,
-              const int dim = 1,
-              const int order = 1,
-              <a href="class_rodin_1_1_variational_1_1_h1.html#a1a7528fc0951f0f2c52aa766db348049" class="m-doc">Basis</a> basis = <a href="class_rodin_1_1_variational_1_1_h1.html#a1a7528fc0951f0f2c52aa766db348049afceb9df27b218edab5a04c5d5c3a2395" class="m-doc">GaussLobato</a>)</span>
-            </dt>
-            <dd>Constructs a finite element space of <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> functions supported on the given mesh.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acc4116fff38f14e69d609f371be0ee5b" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_h1.html#a1a7528fc0951f0f2c52aa766db348049" class="m-doc">Basis</a></span>
-            </dt>
-            <dd>Gets the type of basis.</dd>
-            <dt id="a6220c87f204178300463a2036943a5c4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6220c87f204178300463a2036943a5c4" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Returns the reference to the mesh on which the space is supported.</dd>
-            <dt id="a2a00264358b4a0972bc62577fa3ba0f4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2a00264358b4a0972bc62577fa3ba0f4" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Returns a constant reference to the mesh on which the space is supported.</dd>
-            <dt id="aa8e43300348ed57892ea6b3a37de0341">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa8e43300348ed57892ea6b3a37de0341" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
-<title>
-$ d $
-</title>
-<defs>
-<path id='eq20-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
-</defs>
-<g id='eq20-page1'>
-<use x='0' y='0' xlink:href='#eq20-g0-100'/>
-</g>
-</svg> of the range space.</dd>
           </dl>
         </section>
         <section>
@@ -590,65 +545,6 @@ $ i = 0, \ldots, n - 1 $
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div></section>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a532b635899814caeaed7c8868f351171"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a532b635899814caeaed7c8868f351171" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; mesh,
-              const int dim = 1,
-              const int order = 1,
-              <a href="class_rodin_1_1_variational_1_1_h1.html#a1a7528fc0951f0f2c52aa766db348049" class="m-doc">Basis</a> basis = <a href="class_rodin_1_1_variational_1_1_h1.html#a1a7528fc0951f0f2c52aa766db348049afceb9df27b218edab5a04c5d5c3a2395" class="m-doc">GaussLobato</a>)</span></span>
-            </h3>
-            <p>Constructs a finite element space of <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> functions supported on the given mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference to mesh.</td>
-                </tr>
-                <tr>
-                  <td>dim&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
-<title>
-$ d $
-</title>
-<defs>
-<path id='eq19-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
-</defs>
-<g id='eq19-page1'>
-<use x='0' y='0' xlink:href='#eq19-g0-100'/>
-</g>
-</svg> of the range.</td>
-                </tr>
-                <tr>
-                  <td>order&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Order of approximation. Must be greater than or equal to 1.</td>
-                </tr>
-                <tr>
-                  <td>basis&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Type of basis to use.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="acc4116fff38f14e69d609f371be0ee5b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1.html#a1a7528fc0951f0f2c52aa766db348049" class="m-doc">Basis</a> Rodin::<wbr />Variational::<wbr />H1::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc4116fff38f14e69d609f371be0ee5b" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-            <p>Gets the type of basis.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Type of basis</td>
-                </tr>
-              </tfoot>
             </table>
           </div></section>
         </section>

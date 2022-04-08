@@ -174,7 +174,7 @@ $ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} $
 <use x='38.098665' y='0' xlink:href='#eq2-g1-33'/>
 <use x='53.374697' y='0' xlink:href='#eq2-g0-82'/>
 </g>
-</svg> is known.</p>
+</svg> is known.</p><aside class="m-note m-info"><h4>Note</h4><p>Unlike <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect2_d.html" class="m-doc">Advect2D</a> and Advect3D, time truncation is always avoided.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -188,10 +188,6 @@ $ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa53acca1b5ad280c46b3df8dcfbd4c41" class="m-doc">avoidTimeTruncation</a>(</span><span class="m-doc-wrap">bool avoidTrunc = true) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect_s.html" class="m-doc">AdvectS</a>&amp;</span>
-            </dt>
-            <dd>Specifies whether to enable or disable truncation of time in the CFL condition.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad417199703e9d67469dc1dac623da9cf" class="m-doc">enableExtrapolation</a>(</span><span class="m-doc-wrap">bool ex = true) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect_s.html" class="m-doc">AdvectS</a>&amp;</span>
             </dt>
@@ -225,13 +221,6 @@ $ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} $
                 </tr>
               </tbody>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="aa53acca1b5ad280c46b3df8dcfbd4c41"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect_s.html" class="m-doc">AdvectS</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />AdvectS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa53acca1b5ad280c46b3df8dcfbd4c41" class="m-doc-self">avoidTimeTruncation</a>(</span><span class="m-doc-wrap">bool avoidTrunc = true)</span></span>
-            </h3>
-            <p>Specifies whether to enable or disable truncation of time in the CFL condition.</p>
-<p>If true, avoids truncation of the time period for advection due to the CFL condition. Otherwise, no action is taken.</p><p>By default it is set to false.</p>
           </div></section>
           <section class="m-doc-details" id="ad417199703e9d67469dc1dac623da9cf"><div>
             <h3>

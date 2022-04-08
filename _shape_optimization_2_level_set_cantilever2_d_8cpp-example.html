@@ -101,7 +101,9 @@
 <span class="w">  </span><span class="p">};</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Load mesh</span>
-<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mesh</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">meshFile</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">meshFile</span><span class="p">);</span><span class="w"></span>
+
 <span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega0.mesh&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Saved initial mesh to Omega0.mesh&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
@@ -122,13 +124,13 @@
 <span class="w">  </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="c1">// Vector field finite element space over the whole domain</span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">H1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">Omega</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">FiniteElementSpace</span><span class="o">&lt;</span><span class="n">H1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">Omega</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Trim the exterior part of the mesh to solve the elasticity system</span>
 <span class="w">    </span><span class="n">SubMesh</span><span class="w"> </span><span class="n">trimmed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Omega</span><span class="p">.</span><span class="n">trim</span><span class="p">(</span><span class="n">Exterior</span><span class="p">,</span><span class="w"> </span><span class="n">Gamma</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Build a finite element space over the trimmed mesh</span>
-<span class="w">    </span><span class="n">H1</span><span class="w"> </span><span class="n">VhInt</span><span class="p">(</span><span class="n">trimmed</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">FiniteElementSpace</span><span class="o">&lt;</span><span class="n">H1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">VhInt</span><span class="p">(</span><span class="n">trimmed</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Elasticity equation</span>
 <span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorFunction</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">};</span><span class="w"></span>
@@ -187,7 +189,7 @@
 <span class="w">                                   </span><span class="p">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">mmgLs</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Convert back to Rodin data type</span>
-<span class="w">    </span><span class="n">Omega</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cast</span><span class="p">(</span><span class="n">mmgImplicit</span><span class="p">).</span><span class="n">to</span><span class="o">&lt;</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">Omega</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cast</span><span class="p">(</span><span class="n">mmgImplicit</span><span class="p">).</span><span class="n">to</span><span class="o">&lt;</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;&gt;&gt;</span><span class="p">();</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Save mesh</span>
 <span class="w">    </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span><span class="w"></span>

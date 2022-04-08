@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::SubMesh class | Rodin</title>
+  <title>Rodin::Mesh&lt;Traits::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,34 +51,31 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>SubMesh <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Mesh&lt;Traits::Serial&gt; <span class="m-thin">class</span>
         </h1>
-        <p>A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object.</p>
+        <p>Represents the subdivision of some domain into faces of (possibly) different geometries.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object contains a reference to the parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object. It also contains information regarding the mapping of elements and vertices between the child and parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>.</p><p>A <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="c1">// Cast is well defined</span>
-<span class="w">   </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span></pre>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_sub_mesh_3_01_traits_1_1_serial_01_4.html" class="m-doc">SubMesh&lt;Traits::Serial&gt;</a>
             </dt>
-            <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
+            <dd>A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -102,65 +99,130 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a869a942b01c265a8239c828f0961db58" class="m-doc">setVertexMap</a>(</span><span class="m-doc-wrap">std::map&lt;int, int&gt; s2pv) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">void <a href="#acc17160e132dccbdf36baa6f507bf4a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span>
             </dt>
-            <dd>Sets the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> vertex map.</dd>
-            <dt id="abe3c366d8bccfea6004182ad42920f8f">
-              <span class="m-doc-wrap-bumper">auto <a href="#abe3c366d8bccfea6004182ad42920f8f" class="m-doc-self">setParent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; parent) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
+            <dd>Loads a mesh from file.</dd>
+            <dt id="ac3462215a38fbd687febccc809ef1776">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac3462215a38fbd687febccc809ef1776" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Sets the reference to the parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
+            <dd>Move assigns the mesh from another mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a759eba23de1b2e42912ec31f1a628bfc" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) -&gt; const <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeda2178f44774d0de1984f29715cfb11" class="m-doc">trim</a>(</span><span class="m-doc-wrap">int attr,
+              int bdrLabel) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Trims the elements with the given material reference.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e33fe8a28ee6c177f1e385ef4706b44" class="m-doc">getVertexMap</a>(</span><span class="m-doc-wrap">) -&gt; const std::map&lt;int, int&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa8f79aba121590e033ddf94356525eb" class="m-doc">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs,
+              int bdrLabel) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Trims the elements with the given material references.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2dfcd869638b98e79b379afdaa24c9a3" class="m-doc">skin</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
+            </dt>
+            <dd>Skins the mesh to obtain its boundary mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd63496fbf1f2d60dddc6aa7d11c733b" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Indicates whether the mesh is a submesh or not.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a869a942b01c265a8239c828f0961db58"><div>
+          <section class="m-doc-details" id="acc17160e132dccbdf36baa6f507bf4a0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />SubMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a869a942b01c265a8239c828f0961db58" class="m-doc-self">setVertexMap</a>(</span><span class="m-doc-wrap">std::map&lt;int, int&gt; s2pv)</span></span>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc17160e132dccbdf36baa6f507bf4a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
             </h3>
-            <p>Sets the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> vertex map.</p>
-<p>Each key-value pair in the map indicates the correspondence between vertex indices in the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> and vertex indices in the parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>.</p>
+            <p>Loads a mesh from file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to read</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
-          <section class="m-doc-details" id="a759eba23de1b2e42912ec31f1a628bfc"><div>
+          <section class="m-doc-details" id="aeda2178f44774d0de1984f29715cfb11"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />SubMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a759eba23de1b2e42912ec31f1a628bfc" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeda2178f44774d0de1984f29715cfb11" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">int attr,
+              int bdrLabel)</span></span>
             </h3>
+            <p>Trims the elements with the given material reference.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute to trim</td>
+                </tr>
+                <tr>
+                  <td>bdrLabel</td>
+                  <td></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call <a href="class_rodin_1_1_mesh_3_01_traits_1_1_serial_01_4.html#aaa8f79aba121590e033ddf94356525eb" class="m-doc">trim(const std::<wbr />set&lt;int&gt;&amp;, int)</a> with only one attribute.</p>
+          </div></section>
+          <section class="m-doc-details" id="aaa8f79aba121590e033ddf94356525eb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa8f79aba121590e033ddf94356525eb" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs,
+              int bdrLabel)</span></span>
+            </h3>
+            <p>Trims the elements with the given material references.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to the parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object</td>
+                  <td><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
                 </tr>
               </tfoot>
             </table>
+<p>This function will trim the current mesh and return a Submesh object containing the elements which were not trimmed from the original mesh.</p>
           </div></section>
-          <section class="m-doc-details" id="a6e33fe8a28ee6c177f1e385ef4706b44"><div>
+          <section class="m-doc-details" id="a2dfcd869638b98e79b379afdaa24c9a3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const std::map&lt;int, int&gt;&amp; Rodin::<wbr />SubMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e33fe8a28ee6c177f1e385ef4706b44" class="m-doc-self">getVertexMap</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2dfcd869638b98e79b379afdaa24c9a3" class="m-doc-self">skin</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
+            <p>Skins the mesh to obtain its boundary mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>The <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> vertex map</td>
+                  <td><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the boundary region of the mesh</td>
                 </tr>
               </tfoot>
             </table>
+<p>This function will &quot;skin&quot; the mesh to return the mesh boundary as a new <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object. The new mesh will be embedded in the original space dimension.</p>
           </div></section>
-          <section class="m-doc-details" id="a07118dd6dc984cb9260ae21fc61a4130"><div>
+          <section class="m-doc-details" id="acd63496fbf1f2d60dddc6aa7d11c733b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />SubMesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd63496fbf1f2d60dddc6aa7d11c733b" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Indicates whether the mesh is a submesh or not.</p>
             <table class="m-table m-fullwidth m-flat">

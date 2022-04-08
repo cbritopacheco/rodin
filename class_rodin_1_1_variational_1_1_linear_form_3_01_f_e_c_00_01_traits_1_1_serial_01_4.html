@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::LinearForm class | Rodin</title>
+  <title>Rodin::Variational::LinearForm&lt;FEC, Traits::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,8 +51,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class FEC&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FEC, Traits::Serial&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents a linear form defined over some finite element space.</p>
         <nav class="m-block m-default">
@@ -110,8 +110,8 @@ $ V $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="abc9ce771dd35090ed27eb96ac10e9519">
-              <span class="m-doc-wrap-bumper"><a href="#abc9ce771dd35090ed27eb96ac10e9519" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v)</span>
+            <dt id="a3b849341c64b8b2d7836b7314f1043b7">
+              <span class="m-doc-wrap-bumper"><a href="#a3b849341c64b8b2d7836b7314f1043b7" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v)</span>
             </dt>
             <dd>Constructs a linear form defined on some finite element space.</dd>
           </dl>
@@ -120,7 +120,7 @@ $ V $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a30ae22b146264ed14bfa2577e10fad8f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af6e00ff4bd1dca24d3d48c62a47d0118" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u) const -&gt; double</span>
             </dt>
             <dd>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -137,12 +137,12 @@ $ u $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a30ae22b146264ed14bfa2577e10fad8f"><div>
+          <section class="m-doc-details" id="af6e00ff4bd1dca24d3d48c62a47d0118"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES&gt;
+                template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30ae22b146264ed14bfa2577e10fad8f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FEC, Traits::<wbr />Serial&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6e00ff4bd1dca24d3d48c62a47d0118" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u) const</span></span>
             </h3>
             <p>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
