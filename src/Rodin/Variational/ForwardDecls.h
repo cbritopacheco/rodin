@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
+#include "Rodin/Traits.h"
 #include "Rodin/Parallel/ForwardDecls.h"
 
 namespace Rodin::Variational
@@ -14,7 +15,7 @@ namespace Rodin::Variational
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class TrialFEC, class TestFEC>
+   template <class TrialFEC, class TestFEC, class Trait>
    class Problem;
 
    class ProblemBody;
@@ -27,18 +28,13 @@ namespace Rodin::Variational
    // ---- FiniteElementSpace ------------------------------------------------
    class FiniteElementSpaceBase;
 
-   template <class FEC, Parallel::Trait SerialOrParallel = Parallel::Trait::Serial>
+   template <class FEC, class Trait = Traits::Serial>
    class FiniteElementSpace;
 
    // ---- GridFunction ------------------------------------------------------
    class GridFunctionBase;
 
-   class GridFunctionIndexBase;
-
-   template <class T>
-   class GridFunctionIndex;
-
-   template <class FEC>
+   template <class FEC, class Trait = Traits::Serial>
    class GridFunction;
 
    class IncompleteGridFunction;
@@ -59,10 +55,10 @@ namespace Rodin::Variational
    template <class FEC, ShapeFunctionSpaceType Space>
    class ShapeFunction;
 
-   template <class FEC>
+   template <class FEC, class Trait>
    class TrialFunction;
 
-   template <class FEC>
+   template <class FEC, class Trait>
    class TestFunction;
 
    template <class T>
@@ -90,7 +86,7 @@ namespace Rodin::Variational
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 
-   template <class FEC>
+   template <class FEC, class Trait>
    class LinearForm;
 
    class LinearFormIntegratorBase;
@@ -102,7 +98,7 @@ namespace Rodin::Variational
    // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 
-   template <class TrialFEC, class TestFEC>
+   template <class TrialFEC, class TestFEC, class Trait>
    class BilinearForm;
 
    class BilinearFormIntegratorBase;

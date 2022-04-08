@@ -14,7 +14,9 @@ int main(int argc, char** argv)
     std::exit(EXIT_FAILURE);
   }
 
-  Mesh rodinMesh = Mesh::load(argv[1]);
+  Mesh rodinMesh;
+  rodinMesh.load(argv[1]);
+
   switch (rodinMesh.getDimension())
   {
     case 2:

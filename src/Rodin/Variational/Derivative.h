@@ -33,7 +33,8 @@ namespace Rodin::Variational
           * @param[in] component Component @f$ u_j @f$ to differentiate
           * @param[in] u GridFunction in H1 space
           */
-         Derivative(int direction, int component, GridFunction<H1>& u)
+         template <class Trait>
+         Derivative(int direction, int component, GridFunction<H1, Trait>& u)
             :  m_direction(direction),
                m_component(component),
                m_u(u)
@@ -59,7 +60,7 @@ namespace Rodin::Variational
       private:
          int m_direction;
          int m_component;
-         GridFunction<H1>& m_u;
+         GridFunctionBase& m_u;
    };
 
    /**
@@ -72,7 +73,12 @@ namespace Rodin::Variational
     *    \dfrac{\partial u}{\partial x}
     * @f$
     */
-   Derivative Dx(GridFunction<H1>& u);
+   template <class Trait>
+   Derivative Dx(GridFunction<H1, Trait>& u)
+   {
+      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      return Derivative(0, 0, u);
+   }
 
    /**
     * @brief %Utility function for computing @f$ \partial_y u @f$
@@ -84,7 +90,12 @@ namespace Rodin::Variational
     *    \dfrac{\partial u}{\partial y}
     * @f$
     */
-   Derivative Dy(GridFunction<H1>& u);
+   template <class Trait>
+   Derivative Dy(GridFunction<H1, Trait>& u)
+   {
+      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      return Derivative(1, 0, u);
+   }
 
    /**
     * @brief %Utility function for computing @f$ \partial_z u @f$
@@ -96,7 +107,12 @@ namespace Rodin::Variational
     *    \dfrac{\partial u}{\partial z}
     * @f$
     */
-   Derivative Dz(GridFunction<H1>& u);
+   template <class Trait>
+   Derivative Dz(GridFunction<H1, Trait>& u)
+   {
+      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      return Derivative(2, 0, u);
+   }
 }
 
 #endif

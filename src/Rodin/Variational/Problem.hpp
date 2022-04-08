@@ -16,16 +16,20 @@
 
 namespace Rodin::Variational
 {
-   template <class TrialFES, class TestFES>
-   Problem<TrialFES, TestFES>::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+   template <class TrialFEC, class TestFEC>
+   Problem<TrialFEC, TestFEC, Traits::Serial>
+   ::Problem(
+         TrialFunction<TrialFEC, Traits::Serial>& u,
+         TestFunction<TestFEC, Traits::Serial>& v)
       :  m_bilinearForm(u, v),
          m_linearForm(v),
          m_trialFunctions{{u.getUUID(), std::ref(u)}},
          m_testFunctions{{v.getUUID(), std::ref(v)}}
    {}
 
-   template <class TrialFES, class TestFES>
-   Problem<TrialFES, TestFES>& Problem<TrialFES, TestFES>::operator=(const ProblemBody& rhs)
+   template <class TrialFEC, class TestFEC>
+   Problem<TrialFEC, TestFEC, Traits::Serial>&
+   Problem<TrialFEC, TestFEC, Traits::Serial>::operator=(const ProblemBody& rhs)
    {
       m_pb.reset(rhs.copy());
 
@@ -45,15 +49,15 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class TrialFES, class TestFES>
-   void Problem<TrialFES, TestFES>::assemble()
+   template <class TrialFEC, class TestFEC>
+   void Problem<TrialFEC, TestFEC, Traits::Serial>::assemble()
    {
       m_linearForm.assemble();
       m_bilinearForm.assemble();
    }
 
-   template <class TrialFES, class TestFES>
-   void Problem<TrialFES, TestFES>::update()
+   template <class TrialFEC, class TestFEC>
+   void Problem<TrialFEC, TestFEC, Traits::Serial>::update()
    {
       // We don't support PDE systems (yet)
       {
@@ -101,9 +105,9 @@ namespace Rodin::Variational
       m_essTrueDofList.Unique();
    }
 
-   template <class TrialFES, class TestFES>
+   template <class TrialFEC, class TestFEC>
    void
-   Problem<TrialFES, TestFES>
+   Problem<TrialFEC, TestFEC, Traits::Serial>
    ::getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X)
    {
       // We don't support PDE systems (yet)
@@ -122,8 +126,8 @@ namespace Rodin::Variational
              A, X, B);
    }
 
-   template <class TrialFES, class TestFES>
-   void Problem<TrialFES, TestFES>::getSolution(mfem::Vector& X)
+   template <class TrialFEC, class TestFEC>
+   void Problem<TrialFEC, TestFEC, Traits::Serial>::getSolution(mfem::Vector& X)
    {
       auto& [uuid, u] = *m_trialFunctions.begin();
       auto& a = m_bilinearForm;
@@ -131,8 +135,9 @@ namespace Rodin::Variational
       a.getHandle().RecoverFEMSolution(X, l.getHandle(), u.get().getGridFunction().getHandle());
    }
 
-   template <class TrialFES, class TestFES>
-   EssentialBoundary& Problem<TrialFES, TestFES>::getEssentialBoundary()
+   template <class TrialFEC, class TestFEC>
+   EssentialBoundary&
+   Problem<TrialFEC, TestFEC, Traits::Serial>::getEssentialBoundary()
    {
       return m_pb->getEssentialBoundary();
    }

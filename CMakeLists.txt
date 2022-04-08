@@ -55,8 +55,8 @@ if (RODIN_BUILD_SRC)
   endif()
 
   if (RODIN_USE_OPENMP)
-    set(MFEM_USE_OPENMP ON CACHE BOOL TRUE FORCE)
     find_package(OpenMP REQUIRED)
+    set(MFEM_USE_OPENMP ON CACHE BOOL TRUE FORCE)
   endif()
 
   # ---- MFEM ----

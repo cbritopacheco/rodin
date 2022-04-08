@@ -7,11 +7,11 @@
 
 namespace Rodin::Variational
 {
-   template <class FEC>
+   template <class FEC, class Trait>
    class TrialFunction : public ShapeFunction<FEC, Trial>
    {
       public:
-         TrialFunction(FiniteElementSpace<FEC>& fes)
+         TrialFunction(FiniteElementSpace<FEC, Trait>& fes)
             : ShapeFunction<FEC, Trial>(fes)
          {}
 
@@ -33,34 +33,34 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction<FEC>& getGridFunction()
+         GridFunction<FEC, Trait>& getGridFunction()
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         const GridFunction<FEC>& getGridFunction() const
+         const GridFunction<FEC, Trait>& getGridFunction() const
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         Component<TrialFunction<FEC>> x() const
+         Component<TrialFunction<FEC, Trait>> x() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
-            return Component<TrialFunction<FEC>>(*this, 0);
+            return Component<TrialFunction<FEC, Trait>>(*this, 0);
          }
 
-         Component<TrialFunction<FEC>> y() const
+         Component<TrialFunction<FEC, Trait>> y() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
-            return Component<TrialFunction<FEC>>(*this, 1);
+            return Component<TrialFunction<FEC, Trait>>(*this, 1);
          }
 
-         Component<TrialFunction<FEC>> z() const
+         Component<TrialFunction<FEC, Trait>> z() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
-            return Component<TrialFunction<FEC>>(*this, 2);
+            return Component<TrialFunction<FEC, Trait>>(*this, 2);
          }
 
          ShapeFunctionBase<Trial>& getRoot()  override
@@ -78,10 +78,10 @@ namespace Rodin::Variational
             return new TrialFunction(*this);
          }
       private:
-         std::optional<GridFunction<FEC>> m_gf;
+         std::optional<GridFunction<FEC, Trait>> m_gf;
    };
-   template <class FEC>
-   TrialFunction(FiniteElementSpace<FEC>&) -> TrialFunction<FEC>;
+   template <class FEC, class Trait>
+   TrialFunction(FiniteElementSpace<FEC, Trait>&) -> TrialFunction<FEC, Trait>;
 }
 #endif
 

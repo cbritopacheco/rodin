@@ -39,6 +39,8 @@ namespace Rodin::Variational
 
          mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
 
+         virtual bool isParallel() const = 0;
+
          virtual const MeshBase& getMesh() const = 0;
 
          virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
@@ -49,17 +51,22 @@ namespace Rodin::Variational
    };
 
    template <class FEC>
-   class FiniteElementSpace<FEC, Parallel::Trait::Serial>
+   class FiniteElementSpace<FEC, Traits::Serial>
       : public FiniteElementSpaceBase
    {
       public:
          FiniteElementSpace(
-               Mesh<Parallel::Trait::Serial>& mesh,
+               Mesh<Traits::Serial>& mesh,
                int vdim = 1, int order = 1, typename FEC::Basis basis = FEC::DefaultBasis)
             :  m_mesh(mesh),
                m_fec(order, mesh.getDimension(), basis),
                m_fes(&mesh.getHandle(), &m_fec.getHandle(), vdim)
          {}
+
+         bool isParallel() const override
+         {
+            return false;
+         }
 
          const MeshBase& getMesh() const override
          {
@@ -83,7 +90,7 @@ namespace Rodin::Variational
 
       private:
          FEC m_fec;
-         Mesh<Parallel::Trait::Serial>& m_mesh;
+         Mesh<Traits::Serial>& m_mesh;
          mfem::FiniteElementSpace m_fes;
    };
 }

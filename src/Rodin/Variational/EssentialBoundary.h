@@ -64,8 +64,8 @@ namespace Rodin::Variational
               m_tfCompVal(std::move(other.m_tfCompVal))
          {}
 
-         template <class FES>
-         void add(const DirichletBC<TrialFunction<FES>, ScalarFunctionBase>& dbc)
+         template <class FES, class Trait>
+         void add(const DirichletBC<TrialFunction<FES, Trait>, ScalarFunctionBase>& dbc)
          {
             m_tfVal[dbc.getTrialFunction().getUUID()] =
                TrialFunctionValue{
@@ -74,8 +74,8 @@ namespace Rodin::Variational
                };
          }
 
-         template <class FES>
-         void add(const DirichletBC<TrialFunction<FES>, VectorFunctionBase>& dbc)
+         template <class FES, class Trait>
+         void add(const DirichletBC<TrialFunction<FES, Trait>, VectorFunctionBase>& dbc)
          {
             m_tfVal[dbc.getTrialFunction().getUUID()] =
                TrialFunctionValue{
@@ -84,8 +84,8 @@ namespace Rodin::Variational
                };
          }
 
-         template <class FES>
-         void add(const DirichletBC<Component<TrialFunction<FES>>, ScalarFunctionBase>& dbc)
+         template <class FES, class Trait>
+         void add(const DirichletBC<Component<TrialFunction<FES, Trait>>, ScalarFunctionBase>& dbc)
          {
             auto uuid = dbc.getComponent().getTrialFunction().getUUID();
             m_tfCompVal[uuid][dbc.getComponent().getIndex()] =
