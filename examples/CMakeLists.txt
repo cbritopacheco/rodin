@@ -8,6 +8,7 @@ endif()
 
 if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(MMG)
+  add_subdirectory(Parallel)
   add_subdirectory(Variational)
   add_subdirectory(ShapeOptimization)
   add_subdirectory(DensityOptimization)

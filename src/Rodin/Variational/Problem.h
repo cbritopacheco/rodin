@@ -71,8 +71,9 @@ namespace Rodin::Variational
     * class in the Rodin::Solver namespace.
     *
     */
-   template <class TrialFES, class TestFES>
-   class Problem : public ProblemBase
+   template <class TrialFEC, class TestFEC>
+   class Problem<TrialFEC, TestFEC, Traits::Serial>
+      : public ProblemBase
    {
       public:
          /**
@@ -92,7 +93,9 @@ namespace Rodin::Variational
           * @param[in,out] u Trial function @f$ u @f$ belonging to a suitable
           * finite element space.
           */
-         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
+         Problem(
+               TrialFunction<TrialFEC, Traits::Serial>& u,
+               TestFunction<TestFEC, Traits::Serial>& v);
 
          void assemble() override;
          void update() override;
@@ -105,19 +108,24 @@ namespace Rodin::Variational
          void getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X) override;
 
          Problem& operator=(const ProblemBody& rhs) override;
+
       private:
-         LinearForm<TrialFES>                m_linearForm;
-         BilinearForm<TrialFES, TestFES>     m_bilinearForm;
+         LinearForm<TrialFEC, Traits::Serial>                m_linearForm;
+         BilinearForm<TrialFEC, TestFEC, Traits::Serial>     m_bilinearForm;
+
          const std::map<
             boost::uuids::uuid,
-            std::reference_wrapper<TrialFunction<TrialFES>>> m_trialFunctions;
+            std::reference_wrapper<TrialFunction<TrialFEC, Traits::Serial>>> m_trialFunctions;
          const std::map<
             boost::uuids::uuid,
-            std::reference_wrapper<TestFunction<TestFES>>> m_testFunctions;
+            std::reference_wrapper<TestFunction<TestFEC, Traits::Serial>>> m_testFunctions;
          std::unique_ptr<ProblemBody> m_pb;
 
          mfem::Array<int> m_essTrueDofList;
    };
+   template <class TrialFEC, class TestFEC, class Trait>
+   Problem(TrialFunction<TrialFEC, Trait>&, TestFunction<TestFEC, Trait>&)
+      -> Problem<TrialFEC, TestFEC, Trait>;
 }
 
 #include "Problem.hpp"

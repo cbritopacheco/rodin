@@ -107,7 +107,7 @@
 
     // Functions
     int d = 2;
-    H1 Vh(Omega, d);
+    FiniteElementSpace<H1> Vh(Omega, d);
 
     // Lamé coefficients
     auto mu     = ScalarFunction(0.3846),

@@ -24,6 +24,41 @@ namespace Rodin::Variational
    {
       public:
          /**
+          * @brief Reflects the changes in the mesh.
+          */
+         void update()
+         {
+            getHandle().Update();
+         }
+
+         /**
+          * @brief Assembles the bilinear form.
+          */
+         void assemble()
+         {
+            static_cast<mfem::ParBilinearForm&>(getHandle()).ParallelAssemble();
+            getHandle().Assemble();
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated sparse matrix
+          * to the BilinearForm.
+          */
+         mfem::SparseMatrix& getMatrix()
+         {
+            return getHandle().SpMat();
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated sparse matrix
+          * to the BilinearForm.
+          */
+         const mfem::SparseMatrix& getMatrix() const
+         {
+            return getHandle().SpMat();
+         }
+
+         /**
           * @internal
           * @returns Underlying internal reference to bilinear form.
           */
@@ -55,16 +90,6 @@ namespace Rodin::Variational
          virtual BilinearFormBase& add(
                const FormLanguage::BilinearFormIntegratorSum& lsum) = 0;
 
-         /**
-          * @brief Reflects the changes in the mesh.
-          */
-         virtual void update() = 0;
-
-         /**
-          * @brief Assembles the bilinear form.
-          */
-         virtual void assemble() = 0;
-
          virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
 
          virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
@@ -84,11 +109,12 @@ namespace Rodin::Variational
     * can be specified by from one or more bilinear integrators (e.g.
     * DiffusionIntegrator).
     */
-   template <class TrialFES, class TestFES>
-   class BilinearForm : public BilinearFormBase
+   template <class TrialFEC, class TestFEC>
+   class BilinearForm<TrialFEC, TestFEC, Traits::Serial>
+      : public BilinearFormBase
    {
       static_assert(
-            std::is_same_v<TrialFES, TestFES>,
+            std::is_same_v<TrialFEC, TestFEC>,
             "Different trial and test spaces are currently not supported.");
 
       public:
@@ -100,7 +126,9 @@ namespace Rodin::Variational
           *
           * @param[in] fes Reference to the finite element space
           */
-         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
+         BilinearForm(
+               TrialFunction<TrialFEC, Traits::Serial>& u,
+               TestFunction<TestFEC, Traits::Serial>& v);
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -113,7 +141,8 @@ namespace Rodin::Variational
           * at @f$ ( u, v ) @f$.
           */
          double operator()(
-               const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const;
+               const GridFunction<TrialFEC, Traits::Serial>& u,
+               const GridFunction<TestFEC, Traits::Serial>& v) const;
 
          /**
           * @brief Builds the bilinear form from a derived instance of
@@ -124,16 +153,12 @@ namespace Rodin::Variational
 
          BilinearForm& operator=(const FormLanguage::BilinearFormIntegratorSum& lsum);
 
-         void assemble() override;
-
-         void update() override;
-
-         const TrialFunction<TrialFES>& getTrialFunction() const override
+         const TrialFunction<TrialFEC, Traits::Serial>& getTrialFunction() const override
          {
             return m_u;
          }
 
-         const TestFunction<TestFES>& getTestFunction() const override
+         const TestFunction<TestFEC, Traits::Serial>& getTestFunction() const override
          {
             return m_v;
          }
@@ -157,12 +182,15 @@ namespace Rodin::Variational
          }
 
       private:
-         TrialFunction<TrialFES>& m_u;
-         TestFunction<TestFES>&   m_v;
+         TrialFunction<TrialFEC, Traits::Serial>& m_u;
+         TestFunction<TestFEC, Traits::Serial>&   m_v;
          std::unique_ptr<mfem::BilinearForm> m_bf;
          BFIList m_bfiDomainList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
+   template <class TrialFEC, class TestFEC, class Trait>
+   BilinearForm(TrialFunction<TrialFEC, Trait>&, TestFunction<TestFEC, Trait>&)
+      -> BilinearForm<TrialFEC, TestFEC, Trait>;
 }
 
 #include "BilinearForm.hpp"
