@@ -36,9 +36,6 @@ namespace Rodin::Variational
    class ProblemBase
    {
       public:
-         virtual void getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X) = 0;
-         virtual void getSolution(mfem::Vector& X) = 0;
-
          virtual EssentialBoundary& getEssentialBoundary() = 0;
 
          /**
@@ -58,21 +55,32 @@ namespace Rodin::Variational
          /**
           * @brief Updates the ProblemBase instance after a refinement in the mesh
           */
-         virtual void update() = 0;
+         virtual ProblemBase& update() = 0;
+
+         virtual void recoverSolution() = 0;
+
+         virtual mfem::Operator& getStiffnessMatrix() = 0;
+
+         virtual const mfem::Operator& getStiffnessMatrix() const = 0;
+
+         virtual mfem::Vector& getMassVector() = 0;
+
+         virtual const mfem::Vector& getMassVector() const = 0;
+
+         virtual mfem::Vector& getInitialGuess() = 0;
+
+         virtual const mfem::Vector& getInitialGuess() const = 0;
    };
 
    /**
     * @brief Represents a variational problem to be solved.
     *
-    * The problem may be specified via the overloaded operator
-    * @ref Variational::Problem::operator=(const ProblemBody&).
-    *
     * The problem may then be solved by utilizing any derived instance Solver
     * class in the Rodin::Solver namespace.
     *
     */
-   template <class TrialFEC, class TestFEC>
-   class Problem<TrialFEC, TestFEC, Traits::Serial>
+   template <class TrialFEC, class TestFEC, class OperatorType>
+   class Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>
       : public ProblemBase
    {
       public:
@@ -90,28 +98,61 @@ namespace Rodin::Variational
           * @brief Constructs an empty problem involving the trial function @f$ u @f$
           * and the test function @f$ v @f$.
           *
-          * @param[in,out] u Trial function @f$ u @f$ belonging to a suitable
-          * finite element space.
+          * @param[in,out] u Trial function @f$ u @f$
+          * @param[in,out] v Test function @f$ v @f$
           */
          Problem(
                TrialFunction<TrialFEC, Traits::Serial>& u,
-               TestFunction<TestFEC, Traits::Serial>& v);
+               TestFunction<TestFEC, Traits::Serial>& v,
+               OperatorType* = new OperatorType);
+
+         Problem& update() override;
 
          void assemble() override;
-         void update() override;
 
-
-         void getSolution(mfem::Vector& X) override;
+         void recoverSolution() override;
 
          EssentialBoundary& getEssentialBoundary() override;
 
-         void getLinearSystem(mfem::SparseMatrix& A, mfem::Vector& B, mfem::Vector& X) override;
-
          Problem& operator=(const ProblemBody& rhs) override;
+
+         OperatorType& getStiffnessMatrix() override
+         {
+            return *m_stiffnessOp.As<OperatorType>();
+         }
+
+         const OperatorType& getStiffnessMatrix() const override
+         {
+            return *m_stiffnessOp.As<OperatorType>();
+         }
+
+         mfem::Vector& getMassVector() override
+         {
+            return m_massVector;
+         }
+
+         const mfem::Vector& getMassVector() const override
+         {
+            return m_massVector;
+         }
+
+         mfem::Vector& getInitialGuess() override
+         {
+            return m_guess;
+         }
+
+         const mfem::Vector& getInitialGuess() const override
+         {
+            return m_guess;
+         }
 
       private:
          LinearForm<TrialFEC, Traits::Serial>                m_linearForm;
          BilinearForm<TrialFEC, TestFEC, Traits::Serial>     m_bilinearForm;
+
+         mfem::OperatorHandle    m_stiffnessOp;
+         mfem::Vector            m_massVector;
+         mfem::Vector            m_guess;
 
          const std::map<
             boost::uuids::uuid,
@@ -123,9 +164,16 @@ namespace Rodin::Variational
 
          mfem::Array<int> m_essTrueDofList;
    };
-   template <class TrialFEC, class TestFEC, class Trait>
-   Problem(TrialFunction<TrialFEC, Trait>&, TestFunction<TestFEC, Trait>&)
-      -> Problem<TrialFEC, TestFEC, Trait>;
+   template <class TrialFEC, class TestFEC>
+   Problem(TrialFunction<TrialFEC, Traits::Serial>&, TestFunction<TestFEC, Traits::Serial>&)
+      -> Problem<TrialFEC, TestFEC, mfem::SparseMatrix, Traits::Serial>;
+
+   template <class TrialFEC, class TestFEC, class OperatorType, class Trait>
+   Problem(
+         TrialFunction<TrialFEC, Trait>&,
+         TestFunction<TestFEC, Trait>&,
+         OperatorType*)
+      -> Problem<TrialFEC, TestFEC, OperatorType, Trait>;
 }
 
 #include "Problem.hpp"
