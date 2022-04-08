@@ -12,11 +12,11 @@ namespace Rodin::Variational
    /**
     * @brief Represents the component (or entry) of a vectorial TrialFunction.
     */
-   template <class FES>
-   class Component<TrialFunction<FES>>
+   template <class FEC, class Trait>
+   class Component<TrialFunction<FEC, Trait>>
    {
       public:
-         Component(const TrialFunction<FES>& u, int component)
+         Component(const TrialFunction<FEC, Trait>& u, int component)
             : m_u(u),
               m_idx(component)
          {}
@@ -31,7 +31,7 @@ namespace Rodin::Variational
               m_idx(other.m_idx)
          {}
 
-         const TrialFunction<FES>& getTrialFunction() const
+         const TrialFunction<FEC, Trait>& getTrialFunction() const
          {
             return m_u;
          }
@@ -43,19 +43,19 @@ namespace Rodin::Variational
 
       private:
          const int m_idx;
-         const TrialFunction<FES>& m_u;
+         const TrialFunction<FEC, Trait>& m_u;
    };
-   template <class FES>
-   Component(TrialFunction<FES>&, int) -> Component<TrialFunction<FES>>;
+   template <class FEC, class Trait>
+   Component(TrialFunction<FEC, Trait>&, int) -> Component<TrialFunction<FEC, Trait>>;
 
    /**
     * @brief Represents the component (or entry) of a vectorial GridFunction.
     */
-   template <class FES>
-   class Component<GridFunction<FES>>
+   template <class FEC, class Trait>
+   class Component<GridFunction<FEC, Trait>>
    {
       public:
-         Component(GridFunction<FES>& u, int component)
+         Component(GridFunction<FEC, Trait>& u, int component)
             : m_u(u),
               m_idx(component)
          {}
@@ -70,7 +70,7 @@ namespace Rodin::Variational
               m_idx(other.m_component)
          {}
 
-         const GridFunction<FES>& getGridFunction() const
+         const GridFunction<FEC, Trait>& getGridFunction() const
          {
             return m_u;
          }
@@ -111,10 +111,10 @@ namespace Rodin::Variational
 
       private:
          const int m_idx;
-         GridFunction<FES>& m_u;
+         GridFunction<FEC, Trait>& m_u;
    };
-   template <class FES>
-   Component(GridFunction<FES>&, int) -> Component<GridFunction<FES>>;
+   template <class FEC, class Trait>
+   Component(GridFunction<FEC, Trait>&, int) -> Component<GridFunction<FEC, Trait>>;
 
    /**
     * @brief Represents the component (or entry) of a VectorFunctionBase

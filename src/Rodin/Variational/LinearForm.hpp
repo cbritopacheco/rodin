@@ -15,20 +15,21 @@
 namespace Rodin::Variational
 {
    template <class FEC>
-   LinearForm<FEC>::LinearForm(TestFunction<FEC>& v)
+   LinearForm<FEC, Traits::Serial>::LinearForm(TestFunction<FEC, Traits::Serial>& v)
       :  m_v(v),
          m_lf(std::make_unique<mfem::LinearForm>(&v.getFiniteElementSpace().getHandle()))
    {}
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::operator=(const LinearFormIntegratorBase& lfi)
+   LinearForm<FEC, Traits::Serial>&
+   LinearForm<FEC, Traits::Serial>::operator=(const LinearFormIntegratorBase& lfi)
    {
       from(lfi).assemble();
       return *this;
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::operator=(
+   LinearForm<FEC, Traits::Serial>& LinearForm<FEC, Traits::Serial>::operator=(
          const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       from(lsum).assemble();
@@ -36,13 +37,15 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   double LinearForm<FEC>::operator()(const GridFunction<FEC>& u) const
+   double LinearForm<FEC, Traits::Serial>::operator()(
+         const GridFunction<FEC, Traits::Serial>& u) const
    {
       return *m_lf * u.getHandle();
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::add(const LinearFormIntegratorBase& lfi)
+   LinearForm<FEC, Traits::Serial>&
+   LinearForm<FEC, Traits::Serial>::add(const LinearFormIntegratorBase& lfi)
    {
       assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
       switch (lfi.getIntegratorRegion())
@@ -107,8 +110,8 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   LinearForm<FEC>&
-   LinearForm<FEC>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
+   LinearForm<FEC, Traits::Serial>&
+   LinearForm<FEC, Traits::Serial>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getLinearFormDomainIntegratorList())
          add(*p);
@@ -118,8 +121,8 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   LinearForm<FEC>&
-   LinearForm<FEC>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
+   LinearForm<FEC, Traits::Serial>&
+   LinearForm<FEC, Traits::Serial>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
    {
       m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
       m_lfiDomainList.clear();
@@ -131,7 +134,8 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   LinearForm<FEC>& LinearForm<FEC>::from(const LinearFormIntegratorBase& lfi)
+   LinearForm<FEC, Traits::Serial>&
+   LinearForm<FEC, Traits::Serial>::from(const LinearFormIntegratorBase& lfi)
    {
       assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
       switch (lfi.getIntegratorRegion())
@@ -154,18 +158,6 @@ namespace Rodin::Variational
          }
       }
       return *this;
-   }
-
-   template <class FEC>
-   void LinearForm<FEC>::assemble()
-   {
-      m_lf->Assemble();
-   }
-
-   template <class FEC>
-   void LinearForm<FEC>::update()
-   {
-      m_lf->Update();
    }
 }
 

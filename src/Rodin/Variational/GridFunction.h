@@ -105,10 +105,10 @@ namespace Rodin::Variational
           * to.
           * @tparam FES Finite element space associated
           */
-         template <class FES>
-         GridFunction<FES> setFiniteElementSpace(FES& fes)
+         template <class FEC, class Trait>
+         GridFunction<FEC, Trait> setFiniteElementSpace(FiniteElementSpace<FEC, Trait>& fes)
          {
-            GridFunction<FES> res(fes);
+            GridFunction<FEC, Trait> res(fes);
             int size = m_gf.Size();
             res.getHandle().SetDataAndSize(m_gf.StealData(), size);
             return res;
@@ -151,7 +151,7 @@ namespace Rodin::Variational
     * explicit.
     */
    template <class FEC>
-   class GridFunction : public GridFunctionBase
+   class GridFunction<FEC, Traits::Serial> : public GridFunctionBase
    {
       static_assert(
             std::is_base_of_v<FiniteElementSpaceBase, FiniteElementSpace<FEC>>,
@@ -166,7 +166,6 @@ namespace Rodin::Variational
             :  m_fes(fes),
                m_gf(&fes.getHandle())
          {
-            assert(!m_gf.OwnsData());
             m_gf = 0.0;
          }
 
@@ -476,7 +475,7 @@ namespace Rodin::Variational
           * another.
           */
          template <class OtherFEC>
-         void transfer(GridFunction<OtherFEC>& other)
+         void transfer(GridFunction<OtherFEC, Traits::Serial>& other)
          {
             assert(getFiniteElementSpace().getVectorDimension() ==
                   other.getFiniteElementSpace().getVectorDimension());
@@ -486,7 +485,8 @@ namespace Rodin::Variational
                // underlying target finite element space. Hence we should seek
                // out to copy the grid function at the corresponding nodes
                // given by the vertex map given in the Submesh object.
-               auto& submesh = static_cast<const SubMesh&>(getFiniteElementSpace().getMesh());
+               auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
+                     getFiniteElementSpace().getMesh());
                if (&submesh.getParent() == &other.getFiniteElementSpace().getMesh())
                {
                   int vdim = getFiniteElementSpace().getVectorDimension();
@@ -560,8 +560,8 @@ namespace Rodin::Variational
          FiniteElementSpace<FEC>& m_fes;
          mfem::GridFunction m_gf;
    };
-   template <class FES>
-   GridFunction(FES&) -> GridFunction<FES>;
+   template <class FEC, class Trait>
+   GridFunction(FiniteElementSpace<FEC, Trait>&) -> GridFunction<FEC, Trait>;
 }
 
 #endif

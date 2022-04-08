@@ -20,5 +20,6 @@ target_link_libraries(RodinMesh
   PUBLIC
   Rodin::Alert
   Rodin::Parallel
+  Rodin::Variational
   Boost::filesystem)
 

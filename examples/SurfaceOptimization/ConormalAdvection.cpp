@@ -21,7 +21,8 @@ int main(int, char**)
   int Interior = 2, Exterior = 3;
   int Gamma = 4;
 
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
 
   // H1 Vh(Omega, 2);
 
@@ -80,8 +81,8 @@ int main(int, char**)
   // GridFunction ls(Vh);
   // ls = f;
 
-  H1 Vh(Omega);
-  H1 Th(Omega, 3);
+  FiniteElementSpace<H1> Vh(Omega);
+  FiniteElementSpace<H1> Th(Omega, 3);
 
   auto mmgMesh = Cast(Omega).to<MMG::MeshS>();
   auto mmgDist = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);

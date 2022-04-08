@@ -45,7 +45,9 @@ int main(int, char**)
   };
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
+
   Omega.save("Omega0.mesh");
   std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
 
@@ -66,13 +68,13 @@ int main(int, char**)
   {
     // Vector field finite element space over the whole domain
     int d = 2;
-    H1 Vh(Omega, d);
+    FiniteElementSpace<H1> Vh(Omega, d);
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior, Gamma);
 
     // Build a finite element space over the trimmed mesh
-    H1 VhInt(trimmed, d);
+    FiniteElementSpace<H1> VhInt(trimmed, d);
 
     // Elasticity equation
     auto f = VectorFunction{0, -1};
@@ -131,7 +133,7 @@ int main(int, char**)
                                    .discretize(mmgLs);
 
     // Convert back to Rodin data type
-    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
+    Omega = Cast(mmgImplicit).to<Rodin::Mesh<Traits::Serial>>();
 
     // Save mesh
     Omega.save("Omega.mesh");

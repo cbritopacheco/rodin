@@ -118,6 +118,8 @@ namespace Rodin
           */
          virtual bool isSubMesh() const = 0;
 
+         virtual bool isParallel() const = 0;
+
          /**
           * @internal
           * @brief Gets the underlying handle for the internal mesh.
@@ -138,7 +140,7 @@ namespace Rodin
     * different geometries.
     */
    template <>
-   class Mesh<Parallel::Trait::Serial> : public MeshBase
+   class Mesh<Traits::Serial> : public MeshBase
    {
       public:
          /**
@@ -177,7 +179,7 @@ namespace Rodin
           * Convenience function to call trim(const std::set<int>&, int) with
           * only one attribute.
           */
-         SubMesh trim(int attr, int bdrLabel);
+         SubMesh<Traits::Serial> trim(int attr, int bdrLabel);
 
          /**
           * @brief Trims the elements with the given material references.
@@ -190,7 +192,7 @@ namespace Rodin
           * object containing the elements which were not trimmed from the
           * original mesh.
           */
-         SubMesh trim(const std::set<int>& attrs, int bdrLabel);
+         SubMesh<Traits::Serial> trim(const std::set<int>& attrs, int bdrLabel);
 
          /**
           * @brief Skins the mesh to obtain its boundary mesh
@@ -200,9 +202,14 @@ namespace Rodin
           * new SubMesh object. The new mesh will be embedded in the original
           * space dimension.
           */
-         SubMesh skin();
+         SubMesh<Traits::Serial> skin();
 
          virtual bool isSubMesh() const override
+         {
+            return false;
+         }
+
+         bool isParallel() const override
          {
             return false;
          }
@@ -222,7 +229,7 @@ namespace Rodin
          /**
           * @brief Set the MPI Communicator
           */
-         Mesh<Parallel::Trait::Parallel> parallelize(boost::mpi::communicator comm);
+         Mesh<Traits::Parallel> parallelize(boost::mpi::communicator comm);
 #endif
       private:
          mfem::Mesh m_mesh;
@@ -230,13 +237,13 @@ namespace Rodin
 
 #ifdef RODIN_USE_MPI
    template <>
-   class Mesh<Parallel::Trait::Parallel> : public MeshBase
+   class Mesh<Traits::Parallel> : public MeshBase
    {
       public:
          /**
           * @internal
           */
-         Mesh(boost::mpi::communicator comm, Mesh<Parallel::Trait::Serial>& serialMesh)
+         Mesh(boost::mpi::communicator comm, Mesh<Traits::Serial>& serialMesh)
             :  m_comm(comm),
                m_mesh(mfem::ParMesh(m_comm, serialMesh.getHandle()))
          {}
@@ -251,6 +258,11 @@ namespace Rodin
          }
 
          virtual bool isSubMesh() const override
+         {
+            return false;
+         }
+
+         bool isParallel() const override
          {
             return false;
          }

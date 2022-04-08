@@ -80,32 +80,32 @@ namespace Rodin
       return totalVolume;
    }
 
-   Mesh<Parallel::Trait::Parallel>
-   Mesh<Parallel::Trait::Serial>::parallelize(boost::mpi::communicator comm)
+   Mesh<Traits::Parallel>
+   Mesh<Traits::Serial>::parallelize(boost::mpi::communicator comm)
    {
-      return Mesh<Parallel::Trait::Parallel>(comm, *this);
+      return Mesh<Traits::Parallel>(comm, *this);
    }
 
    // ---- Mesh<Serial> ------------------------------------------------------
-   Mesh<Parallel::Trait::Serial>::Mesh(mfem::Mesh&& mesh)
+   Mesh<Traits::Serial>::Mesh(mfem::Mesh&& mesh)
       : m_mesh(std::move(mesh))
    {}
 
-   Mesh<Parallel::Trait::Serial>::Mesh(const Mesh& other)
+   Mesh<Traits::Serial>::Mesh(const Mesh& other)
       : m_mesh(other.m_mesh)
    {}
 
-   void Mesh<Parallel::Trait::Serial>::load(const boost::filesystem::path& filename)
+   void Mesh<Traits::Serial>::load(const boost::filesystem::path& filename)
    {
       m_mesh = mfem::Mesh(filename.c_str());
    }
 
-   SubMesh Mesh<Parallel::Trait::Serial>::trim(int attr, int bdrLabel)
+   SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(int attr, int bdrLabel)
    {
       return trim(std::set<int>{attr}, bdrLabel);
    }
 
-   SubMesh Mesh<Parallel::Trait::Serial>::trim(const std::set<int>& attrs, int bdrLabel)
+   SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(const std::set<int>& attrs, int bdrLabel)
    {
       assert(attrs.size() > 0);
 
@@ -298,10 +298,11 @@ namespace Rodin
             }
          }
       }
-      return SubMesh(std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
+      return SubMesh<Traits::Serial>(
+            std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
    }
 
-   SubMesh Mesh<Parallel::Trait::Serial>::skin()
+   SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin()
    {
       assert(getDimension() >= 2);
 
@@ -393,15 +394,16 @@ namespace Rodin
             Alert::Exception("Discontinuous node space not yet supported.").raise();
          }
       }
-      return SubMesh(std::move(res)).setVertexMap(std::move(s2pv)).setParent(*this);
+      return SubMesh<Traits::Serial>(
+            std::move(res)).setVertexMap(std::move(s2pv)).setParent(*this);
    }
 
-   mfem::Mesh& Mesh<Parallel::Trait::Serial>::getHandle()
+   mfem::Mesh& Mesh<Traits::Serial>::getHandle()
    {
       return m_mesh;
    }
 
-   const mfem::Mesh& Mesh<Parallel::Trait::Serial>::getHandle() const
+   const mfem::Mesh& Mesh<Traits::Serial>::getHandle() const
    {
       return m_mesh;
    }

@@ -101,7 +101,7 @@ components:
   functions. This is achieved by the following line of code:
 
   @code{.cpp}
-    H1 Vh(Omega);
+    FiniteElementSpace<H1> Vh(Omega);
   @endcode
 
   After creating this space, we construct trial and test functions @f$ u @f$

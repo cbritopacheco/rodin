@@ -116,7 +116,7 @@ int main(int, char**)
       // Refine the mesh using MMG
       auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
       MMG::MeshOptimizer2D().setHMax(hmax).optimize(mmgMesh);
-      Omega = Cast(mmgMesh).to<Mesh<>>();
+      Omega = Cast(mmgMesh).to<Mesh<Traits::Serial>>();
     }
 
     // Save mesh

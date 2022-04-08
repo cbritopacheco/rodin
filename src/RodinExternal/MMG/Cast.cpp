@@ -247,7 +247,7 @@ namespace Rodin
   template <>
   template <>
   External::MMG::IncompleteScalarSolution2D
-  Cast<Variational::GridFunction<Variational::H1>>
+  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
   ::to<External::MMG::IncompleteScalarSolution2D>()
   const
   {
@@ -260,7 +260,7 @@ namespace Rodin
   template <>
   template <>
   External::MMG::IncompleteVectorSolution2D
-  Cast<Variational::GridFunction<Variational::H1>>
+  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
   ::to<External::MMG::IncompleteVectorSolution2D>() const
   {
     assert(from().getFiniteElementSpace().getVectorDimension() == 2);
@@ -481,7 +481,7 @@ namespace Rodin
   template <>
   template <>
   External::MMG::IncompleteScalarSolution3D
-  Cast<Variational::GridFunction<Variational::H1>>
+  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
   ::to<External::MMG::IncompleteScalarSolution3D>()
   const
   {
@@ -676,7 +676,7 @@ namespace Rodin
   template <>
   template <>
   External::MMG::IncompleteScalarSolutionS
-  Cast<Variational::GridFunction<Variational::H1>>
+  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
   ::to<External::MMG::IncompleteScalarSolutionS>()
   const
   {
@@ -689,7 +689,7 @@ namespace Rodin
   template <>
   template <>
   External::MMG::IncompleteVectorSolutionS
-  Cast<Variational::GridFunction<Variational::H1>>
+  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
   ::to<External::MMG::IncompleteVectorSolutionS>()
   const
   {

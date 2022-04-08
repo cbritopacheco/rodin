@@ -28,10 +28,11 @@ namespace Rodin
     * @endcode
     *
     */
-   class SubMesh : public Mesh<Parallel::Trait::Serial>
+   template <>
+   class SubMesh<Traits::Serial> : public Mesh<Traits::Serial>
    {
       public:
-         using Mesh<Parallel::Trait::Serial>::Mesh;
+         using Mesh<Traits::Serial>::Mesh;
 
          SubMesh(const SubMesh& other);
 

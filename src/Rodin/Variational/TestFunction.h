@@ -8,11 +8,11 @@
 
 namespace Rodin::Variational
 {
-   template <class FEC>
+   template <class FEC, class Trait>
    class TestFunction : public ShapeFunction<FEC, Test>
    {
       public:
-         TestFunction(FiniteElementSpace<FEC>& fes)
+         TestFunction(FiniteElementSpace<FEC, Trait>& fes)
             : ShapeFunction<FEC, Test>(fes)
          {}
 
@@ -44,7 +44,7 @@ namespace Rodin::Variational
             return new TestFunction(*this);
          }
    };
-   template <class FEC>
-   TestFunction(FiniteElementSpace<FEC>& fes) -> TestFunction<FEC>;
+   template <class FEC, class Trait>
+   TestFunction(FiniteElementSpace<FEC, Trait>& fes) -> TestFunction<FEC, Trait>;
 }
 #endif

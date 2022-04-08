@@ -20,37 +20,39 @@
 namespace Rodin::Variational
 {
    template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>::BilinearForm(
-         TrialFunction<TrialFEC>& u, TestFunction<TestFEC>& v)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::BilinearForm(
+         TrialFunction<TrialFEC, Traits::Serial>& u, TestFunction<TestFEC, Traits::Serial>& v)
       :  m_u(u), m_v(v),
          m_bf(new mfem::BilinearForm(&m_v.getFiniteElementSpace().getHandle()))
    {}
 
    template <class TrialFEC, class TestFEC>
-   double BilinearForm<TrialFEC, TestFEC>::operator()(
-         const GridFunction<TrialFEC>& u, const GridFunction<TestFEC>& v) const
+   double BilinearForm<TrialFEC, TestFEC, Traits::Serial>::operator()(
+         const GridFunction<TrialFEC, Traits::Serial>& u,
+         const GridFunction<TestFEC, Traits::Serial>& v) const
    {
       return m_bf->InnerProduct(u.getHandle(), v.getHandle());
    }
 
    template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>&
-   BilinearForm<TrialFEC, TestFEC>::operator=(const BilinearFormIntegratorBase& bfi)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::operator=(const BilinearFormIntegratorBase& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
    template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>&
-   BilinearForm<TrialFEC, TestFEC>::operator=(const FormLanguage::BilinearFormIntegratorSum& bfi)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::operator=(const FormLanguage::BilinearFormIntegratorSum& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
    template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>& BilinearForm<TrialFEC, TestFEC>::from(const BilinearFormIntegratorBase& bfi)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::from(const BilinearFormIntegratorBase& bfi)
    {
       switch (bfi.getIntegratorRegion())
       {
@@ -68,8 +70,8 @@ namespace Rodin::Variational
    }
 
    template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>&
-   BilinearForm<TrialFEC, TestFEC>::from(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::from(const FormLanguage::BilinearFormIntegratorSum& lsum)
    {
       m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getHandle()));
       m_bfiDomainList.clear();
@@ -79,14 +81,8 @@ namespace Rodin::Variational
    }
 
    template <class TrialFEC, class TestFEC>
-   void BilinearForm<TrialFEC, TestFEC>::assemble()
-   {
-      m_bf->Assemble();
-   }
-
-   template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>&
-   BilinearForm<TrialFEC, TestFEC>::add(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::add(const FormLanguage::BilinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getBilinearFormDomainIntegratorList())
          add(*p);
@@ -94,7 +90,7 @@ namespace Rodin::Variational
    }
 
    template <class TrialFEC, class TestFEC>
-   BilinearForm<TrialFEC, TestFEC>& BilinearForm<TrialFEC, TestFEC>::add(
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>& BilinearForm<TrialFEC, TestFEC, Traits::Serial>::add(
          const BilinearFormIntegratorBase& bfi)
    {
       assert(
@@ -134,12 +130,6 @@ namespace Rodin::Variational
             Alert::Exception() << "IntegratorRegion not supported." << Alert::Raise;
       }
       return *this;
-   }
-
-   template <class TrialFEC, class TestFEC>
-   void BilinearForm<TrialFEC, TestFEC>::update()
-   {
-      m_bf->Update();
    }
 }
 

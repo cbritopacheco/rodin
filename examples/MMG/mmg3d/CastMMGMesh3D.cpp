@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 
   MMG::Mesh3D mmgMesh = MMG::Mesh3D::load(argv[1]);
 
-  Rodin::Mesh rodinMesh = Cast(mmgMesh).to<Rodin::Mesh>();
+  Rodin::Mesh rodinMesh = Cast(mmgMesh).to<Rodin::Mesh<>>();
 
   rodinMesh.save("rodin.mesh");
 
