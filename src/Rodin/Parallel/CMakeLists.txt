@@ -11,11 +11,11 @@ target_include_directories(RodinParallel
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 if (RODIN_USE_MPI)
-target_link_libraries(RodinParallel
-  PUBLIC
-  Boost::mpi
-  Boost::serialization
-  MPI::MPI_CXX)
+  target_link_libraries(RodinParallel
+    PUBLIC
+    Boost::mpi
+    Boost::serialization
+    MPI::MPI_CXX)
 endif()
 
 
