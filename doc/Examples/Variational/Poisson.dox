@@ -101,7 +101,7 @@ components:
   functions. This is achieved by the following line of code:
 
   @code{.cpp}
-    H1 Vh(Omega);
+    FiniteElementSpace<H1> Vh(Omega);
   @endcode
 
   After creating this space, we construct trial and test functions @f$ u @f$
@@ -126,15 +126,15 @@ components:
   want to solve. In the code this is achieved by the following declaration:
 
   @code{.cpp}
-    auto f = ScalarCoefficient(1.0);
-    auto g = ScalarCoefficient(0.0);
+    auto f = ScalarFunction(1.0);
+    auto g = ScalarFunction(0.0);
 
     Problem poisson(u, v);
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, g).on(Gamma);
   @endcode
-  In this case the `Integral(Gradient(u), Gradient(v))`
+  In this case the `Integral(Grad(u), Grad(v))`
   object represents the bilinear term
   @f[
     \int_\Omega \nabla u \cdot \nabla v \ dx \ ,

@@ -19,11 +19,12 @@ int main(int argc, char** argv)
   int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
 
   // Functions
   int d = 2;
-  H1 Vh(Omega, d);
+  FiniteElementSpace<H1> Vh(Omega, d);
 
   // Lamé coefficients
   auto mu     = ScalarFunction(0.3846),

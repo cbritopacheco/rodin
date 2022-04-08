@@ -18,6 +18,7 @@
 #include "Variational/H1.h"
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
+#include "Variational/FiniteElementCollection.h"
 
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"

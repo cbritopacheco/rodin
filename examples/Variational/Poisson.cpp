@@ -13,10 +13,11 @@ int main(int, char**)
   int Gamma = 1;
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
 
   // Functions
-  H1 Vh(Omega);
+  FiniteElementSpace<H1> Vh(Omega);
   TrialFunction u(Vh);
   TestFunction  v(Vh);
 

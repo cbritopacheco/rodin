@@ -206,8 +206,8 @@ namespace Rodin::Variational
     * Represents a vector which may be constructed from a GridFunction which
     * takes on vector values at the mesh vertices.
     */
-   template <class FEC>
-   class VectorFunction<GridFunction<FEC>>
+   template <class FEC, class Trait>
+   class VectorFunction<GridFunction<FEC, Trait>>
       : public VectorFunctionBase
    {
       public:
@@ -215,7 +215,7 @@ namespace Rodin::Variational
           * @brief Constructs a VectorFunction from a vector valued GridFunction.
           */
          constexpr
-         VectorFunction(GridFunction<FEC>& u)
+         VectorFunction(GridFunction<FEC, Trait>& u)
             :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
                m_u(u),
                m_mfemVectorFunction(&u.getHandle())
@@ -239,13 +239,13 @@ namespace Rodin::Variational
 
       private:
          const size_t m_dimension;
-         GridFunction<FEC>& m_u;
+         GridFunction<FEC, Trait>& m_u;
 
          mfem::VectorGridFunctionCoefficient m_mfemVectorFunction;
    };
-   template <class FEC>
-   VectorFunction(GridFunction<FEC>&)
-      -> VectorFunction<GridFunction<FEC>>;
+   template <class FEC, class Trait>
+   VectorFunction(GridFunction<FEC, Trait>&)
+      -> VectorFunction<GridFunction<FEC, Trait>>;
 }
 
 namespace Rodin::Variational::Internal

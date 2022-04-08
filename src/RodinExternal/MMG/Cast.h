@@ -19,20 +19,20 @@ namespace Rodin
 {
    // ---- mmg2d -------------------------------------------------------------
    /**
-    * MMG::Mesh2D -> Rodin::Mesh
+    * MMG::Mesh2D -> Rodin::Mesh<>
     */
    template <>
    template <>
-   Rodin::Mesh
-   Cast<External::MMG::Mesh2D>::to<Rodin::Mesh>() const;
+   Rodin::Mesh<>
+   Cast<External::MMG::Mesh2D>::to<Rodin::Mesh<>>() const;
 
    /**
-    * Rodin::Mesh -> MMG::Mesh2D
+    * Rodin::Mesh<> -> MMG::Mesh2D
     */
    template <>
    template <>
    External::MMG::Mesh2D
-   Cast<Rodin::Mesh>::to<External::MMG::Mesh2D>() const;
+   Cast<Rodin::Mesh<>>::to<External::MMG::Mesh2D>() const;
 
    /**
     * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution2D
@@ -40,7 +40,7 @@ namespace Rodin
    template <>
    template <>
    External::MMG::IncompleteScalarSolution2D
-   Cast<Variational::GridFunction<Variational::H1>>
+   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
    ::to<External::MMG::IncompleteScalarSolution2D>() const;
 
    /**
@@ -49,7 +49,7 @@ namespace Rodin
    template <>
    template <>
    External::MMG::IncompleteVectorSolution2D
-   Cast<Variational::GridFunction<Variational::H1>>
+   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
    ::to<External::MMG::IncompleteVectorSolution2D>() const;
 
    /**
@@ -63,20 +63,20 @@ namespace Rodin
 
    // ---- mmg3d -------------------------------------------------------------
    /**
-    * MMG::Mesh3D -> Rodin::Mesh
+    * MMG::Mesh3D -> Rodin::Mesh<>
     */
    template <>
    template <>
-   Rodin::Mesh
-   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh>() const;
+   Rodin::Mesh<>
+   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh<>>() const;
 
    /**
-    * Rodin::Mesh -> MMG::Mesh3D
+    * Rodin::Mesh<> -> MMG::Mesh3D
     */
    template <>
    template <>
    External::MMG::Mesh3D
-   Cast<Rodin::Mesh>::to<External::MMG::Mesh3D>() const;
+   Cast<Rodin::Mesh<>>::to<External::MMG::Mesh3D>() const;
 
    /**
     * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution3D
@@ -84,25 +84,25 @@ namespace Rodin
    template <>
    template <>
    External::MMG::IncompleteScalarSolution3D
-   Cast<Variational::GridFunction<Variational::H1>>
+   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
    ::to<External::MMG::IncompleteScalarSolution3D>() const;
 
    // ---- mmgs --------------------------------------------------------------
    /**
-    * MMG::SurfaceMesh -> Rodin::Mesh.
+    * MMG::SurfaceMesh -> Rodin::Mesh<>.
     */
    template <>
    template <>
-   Rodin::Mesh
-   Cast<External::MMG::MeshS>::to<Rodin::Mesh>() const;
+   Rodin::Mesh<>
+   Cast<External::MMG::MeshS>::to<Rodin::Mesh<>>() const;
 
    /**
-    * Rodin::Mesh -> MMG::SurfaceMesh
+    * Rodin::Mesh<> -> MMG::SurfaceMesh
     */
    template <>
    template <>
    External::MMG::MeshS
-   Cast<Rodin::Mesh>::to<External::MMG::MeshS>() const;
+   Cast<Rodin::Mesh<>>::to<External::MMG::MeshS>() const;
 
    template<>
    template <>
@@ -113,13 +113,13 @@ namespace Rodin
    template <>
    template <>
    External::MMG::IncompleteScalarSolutionS
-   Cast<Variational::GridFunction<Variational::H1>>
+   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
    ::to<External::MMG::IncompleteScalarSolutionS>() const;
 
    template <>
    template <>
    External::MMG::IncompleteVectorSolutionS
-   Cast<Variational::GridFunction<Variational::H1>>
+   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
    ::to<External::MMG::IncompleteVectorSolutionS>() const;
 }
 
