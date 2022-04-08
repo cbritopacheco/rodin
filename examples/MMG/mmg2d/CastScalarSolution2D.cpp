@@ -23,10 +23,10 @@ int main(int argc, char** argv)
   auto mmgSol  = MMG::ScalarSolution2D::load(argv[2]).setMesh(mmgMesh);
 
   // Convert the MMG mesh to Rodin
-  auto rodinMesh = Cast(mmgMesh).to<Rodin::Mesh>();
+  auto rodinMesh = Cast(mmgMesh).to<Rodin::Mesh<>>();
 
   // Build finite element space
-  H1 Vh(rodinMesh);
+  FiniteElementSpace<H1> Vh(rodinMesh);
 
   // Perform the cast using the finite element space we just built
   auto gf = Cast(mmgSol).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);

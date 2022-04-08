@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "Rodin/Alert.h"
+#include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "Utility.h"
 #include "Configure.h"
@@ -416,5 +417,44 @@ namespace Rodin::External::MMG
        MMG5_SAFE_FREE(sol);
     }
     sol = nullptr;
+  }
+
+  void Rodin_GridFunction_To_MMG5_Sol(
+      const Variational::GridFunctionBase& gf, MMG5_pSol sol)
+  {
+    auto [data, size] = gf.getData();
+    if (size)
+    {
+      int vdim = gf.getFiniteElementSpace().getVectorDimension();
+      assert(size % vdim == 0);
+      size_t n = size / vdim;
+      sol->np  = n;
+      sol->npi = n;
+      sol->npmax = std::max({static_cast<int>(1.5 * sol->np), MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+      MMG5_SAFE_CALLOC(sol->m, (sol->size * (sol->npmax + 1)), double,
+          Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+      if (vdim == 1)
+      {
+        std::copy(data, data + size, sol->m + 1);
+      }
+      else
+      {
+        switch (gf.getFiniteElementSpace().getHandle().GetOrdering())
+        {
+          case mfem::Ordering::byNODES:
+          {
+            for (size_t i = 0; i < n; i++)
+              for (size_t j = 0; j < vdim; j++)
+                sol->m[(i + 1) * sol->size + j] = data[i + j * n];
+            break;
+          }
+          case mfem::Ordering::byVDIM:
+          {
+            std::copy(data, data + size, sol->m + sol->size);
+            break;
+          }
+        }
+      }
+    }
   }
 }
