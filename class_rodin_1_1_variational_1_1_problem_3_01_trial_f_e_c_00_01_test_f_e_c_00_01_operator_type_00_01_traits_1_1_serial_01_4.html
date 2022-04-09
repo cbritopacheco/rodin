@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Problem&lt;TrialFEC, TestFEC, Traits::Serial&gt; class | Rodin</title>
+  <title>Rodin::Variational::Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,8 +51,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class TrialFEC, class TestFEC&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;TrialFEC, TestFEC, Traits::Serial&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::Serial&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents a variational problem to be solved.</p>
         <nav class="m-block m-default">
@@ -68,7 +68,7 @@
             </li>
           </ul>
         </nav>
-<p>The problem may be specified via the overloaded operator Variational::Problem::operator=(const ProblemBody&amp;).</p><p>The problem may then be solved by utilizing any derived instance <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> class in the <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a> namespace.</p>
+<p>The problem may then be solved by utilizing any derived instance <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> class in the <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a> namespace.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -86,8 +86,9 @@
             </dt>
             <dd>Deleted copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad9a2d8c7a18450244242401217bad885" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aa475cf8fecd52f63b5b8242af4ae40d1" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v,
+              OperatorType* = new OperatorType)</span>
             </dt>
             <dd>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -119,29 +120,30 @@ $ v $
               <span class="m-doc-wrap-bumper">void <a href="#a3c51b5afefc53f6a75e6fcac51b80fba" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Deleted copy assignment operator.</dd>
+            <dt id="a1f9c351ac832da2e1b88d983f4548715">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1f9c351ac832da2e1b88d983f4548715" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Updates the <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance after a refinement in the mesh.</dd>
             <dt id="a1995c774d971ab0041610829222607a5">
               <span class="m-doc-wrap-bumper">void <a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
-            <dt id="a44137bb65de2396875934e48a6ee5099">
-              <span class="m-doc-wrap-bumper">void <a href="#a44137bb65de2396875934e48a6ee5099" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Updates the <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance after a refinement in the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae61cee270c383dd9e7a1e8570895f283" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a42a9322dec81048f4fce51bd89bd6436" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Builds the problem using the FormLanguage::ProblemBody object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ad9a2d8c7a18450244242401217bad885"><div>
+          <section class="m-doc-details" id="aa475cf8fecd52f63b5b8242af4ae40d1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFEC, class TestFEC&gt;
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9a2d8c7a18450244242401217bad885" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa475cf8fecd52f63b5b8242af4ae40d1" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v,
+              OperatorType* = new OperatorType)</span></span>
             </h3>
             <p>Constructs an empty problem involving the trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -181,21 +183,31 @@ $ u $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-117'/>
 </g>
-</svg> belonging to a suitable finite element space.</td>
+</svg></td>
                 </tr>
                 <tr>
-                  <td>v</td>
-                  <td></td>
+                  <td>v&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function <svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
+<title>
+$ v $
+</title>
+<defs>
+<path id='eq4-g0-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-118'/>
+</g>
+</svg></td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae61cee270c383dd9e7a1e8570895f283"><div>
+          <section class="m-doc-details" id="a42a9322dec81048f4fce51bd89bd6436"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFEC, class TestFEC&gt;
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae61cee270c383dd9e7a1e8570895f283" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a42a9322dec81048f4fce51bd89bd6436" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Builds the problem using the FormLanguage::ProblemBody object.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -70,8 +70,8 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class TrialFEC, class TestFEC&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_traits_1_1_serial_01_4.html" class="m-doc">Problem&lt;TrialFEC, TestFEC, Traits::Serial&gt;</a>
+              <div class="m-doc-template">template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_operator_type_00_01_traits_1_1_serial_01_4.html" class="m-doc">Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::Serial&gt;</a>
             </dt>
             <dd>Represents a variational problem to be solved.</dd>
           </dl>
@@ -87,8 +87,8 @@
               <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
-            <dt id="a99b02345a8a15d3c5ea2844a2253f510">
-              <span class="m-doc-wrap-bumper">void <a href="#a99b02345a8a15d3c5ea2844a2253f510" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="ae32fe2af985936d8a96e965d18149d22">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae32fe2af985936d8a96e965d18149d22" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Updates the <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance after a refinement in the mesh.</dd>
           </dl>
