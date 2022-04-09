@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
 #include "Rodin/Traits.h"
-#include "Rodin/Parallel/ForwardDecls.h"
 
 namespace Rodin::Variational
 {

@@ -62,6 +62,16 @@
  */
 
 /**
+  @namespace Rodin::Traits
+  @brief Module containing metaprogramming facilities
+ */
+
+/**
+  @dir Rodin/Traits
+  @brief Namespace @ref Rodin::Traits
+ */
+
+/**
   @dir rodin/src/RodinExternal
   @brief Namespace @ref Rodin::External
  */
