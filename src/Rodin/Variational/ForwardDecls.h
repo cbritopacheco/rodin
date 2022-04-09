@@ -15,7 +15,7 @@ namespace Rodin::Variational
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class TrialFEC, class TestFEC, class Trait>
+   template <class TrialFEC, class TestFEC, class OperatorType, class Trait>
    class Problem;
 
    class ProblemBody;
