@@ -94,9 +94,9 @@ namespace Rodin::Variational
          const BilinearFormIntegratorBase& bfi)
    {
       assert(
-         bfi.getTrialFunction().getRoot().getUUID()== getTrialFunction().getRoot().getUUID());
+         bfi.getTrialFunction().getLeaf().getUUID()== getTrialFunction().getLeaf().getUUID());
       assert(
-         bfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
+         bfi.getTestFunction().getLeaf().getUUID() == getTestFunction().getLeaf().getUUID());
 
       switch (bfi.getIntegratorRegion())
       {
