@@ -80,11 +80,13 @@ namespace Rodin
       return totalVolume;
    }
 
+#ifdef RODIN_USE_MPI
    Mesh<Traits::Parallel>
    Mesh<Traits::Serial>::parallelize(boost::mpi::communicator comm)
    {
       return Mesh<Traits::Parallel>(comm, *this);
    }
+#endif
 
    // ---- Mesh<Serial> ------------------------------------------------------
    Mesh<Traits::Serial>::Mesh(mfem::Mesh&& mesh)

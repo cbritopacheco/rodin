@@ -36,7 +36,6 @@ namespace Rodin::Variational
           */
          void assemble()
          {
-            static_cast<mfem::ParBilinearForm&>(getHandle()).ParallelAssemble();
             getHandle().Assemble();
          }
 
