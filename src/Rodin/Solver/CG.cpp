@@ -34,21 +34,19 @@ namespace Rodin::Solver
 
    void CG::solve(Variational::ProblemBase& problem)
    {
-      // Update and assemble problem
-      problem.update();
-      problem.assemble();
+      problem.update().assemble();
 
-      // Form the linear system
-      mfem::SparseMatrix A;
-      mfem::Vector B, X;
-      problem.getLinearSystem(A, B, X);
+      mfem::GSSmoother smoother;
+      smoother.SetOperator(problem.getStiffnessMatrix());
 
-      // Solve
-      mfem::GSSmoother smoother(A);
-      mfem::PCG(A, smoother, B, X, m_printIterations, m_maxIterations, m_rtol, m_atol);
+      mfem::PCG(
+            problem.getStiffnessMatrix(),
+            smoother,
+            problem.getMassVector(),
+            problem.getInitialGuess(),
+            m_printIterations, m_maxIterations, m_rtol, m_atol);
 
-      // Recover solution
-      problem.getSolution(X);
+      problem.recoverSolution();
    }
 }
 

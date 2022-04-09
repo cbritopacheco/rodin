@@ -19,6 +19,16 @@ namespace Rodin::Variational
    class LinearFormBase
    {
       public:
+         void update()
+         {
+            return getHandle().Update();
+         }
+
+         void assemble()
+         {
+            return getHandle().Assemble();
+         }
+
          /**
           * @brief Gets the reference to the (local) associated vector
           * to the LinearForm.
@@ -37,12 +47,6 @@ namespace Rodin::Variational
             return static_cast<const mfem::Vector&>(getHandle());
          }
 
-         virtual void update() = 0;
-
-         virtual void assemble() = 0;
-
-         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
-
          virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
 
          virtual LinearFormBase& from(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
@@ -50,6 +54,8 @@ namespace Rodin::Variational
          virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi) = 0;
 
          virtual LinearFormBase& add(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
+
+         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
 
          virtual mfem::LinearForm& getHandle() = 0;
 
@@ -98,25 +104,17 @@ namespace Rodin::Variational
           */
          double operator()(const GridFunction<FEC, Traits::Serial>& u) const;
 
-         const TestFunction<FEC, Traits::Serial>& getTestFunction() const override
-         {
-            return m_v;
-         }
-
          LinearForm& add(const LinearFormIntegratorBase& lfi) override;
+
          LinearForm& add(const FormLanguage::LinearFormIntegratorSum& lsum) override;
 
          LinearForm& from(const LinearFormIntegratorBase& lfi) override;
+
          LinearForm& from(const FormLanguage::LinearFormIntegratorSum& lsum) override;
 
-         void update() override
+         const TestFunction<FEC, Traits::Serial>& getTestFunction() const override
          {
-            return getHandle().Update();
-         }
-
-         void assemble() override
-         {
-            return getHandle().Assemble();
+            return m_v;
          }
 
          mfem::LinearForm& getHandle() override
