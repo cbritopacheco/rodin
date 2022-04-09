@@ -7,6 +7,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents a function which belongs to a trial space
+    * @tparam FEC Finite Element Collection
+    * @tparam Trait Indicates whether the FiniteElementSpace to which the
+    * TrialFunction belongs to is parallel or serial
+    */
    template <class FEC, class Trait>
    class TrialFunction : public ShapeFunction<FEC, Trial>
    {
@@ -63,12 +69,12 @@ namespace Rodin::Variational
             return Component<TrialFunction<FEC, Trait>>(*this, 2);
          }
 
-         ShapeFunctionBase<Trial>& getRoot()  override
+         ShapeFunctionBase<Trial>& getLeaf()  override
          {
             return *this;
          }
 
-         const ShapeFunctionBase<Trial>& getRoot() const override
+         const ShapeFunctionBase<Trial>& getLeaf() const override
          {
             return *this;
          }

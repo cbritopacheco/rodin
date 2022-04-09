@@ -89,9 +89,9 @@ namespace Rodin::Variational
             return Space;
          }
 
-         virtual ShapeFunctionBase<Space>& getRoot() = 0;
+         virtual ShapeFunctionBase<Space>& getLeaf() = 0;
 
-         virtual const ShapeFunctionBase<Space>& getRoot() const = 0;
+         virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
 
          virtual int getRows(
                const mfem::FiniteElement& fe,

@@ -9,11 +9,15 @@
 
 #include <set>
 #include <string>
-#include <boost/filesystem.hpp>
 
 #include <mfem.hpp>
 
-#include "Rodin/Parallel.h"
+#include "Rodin/Configure.h"
+
+#ifdef RODIN_USE_MPI
+#include <boost/mpi.hpp>
+#endif
+#include <boost/filesystem.hpp>
 
 #include "Rodin/Variational/ForwardDecls.h"
 
