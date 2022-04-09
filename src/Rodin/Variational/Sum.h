@@ -148,7 +148,7 @@ namespace Rodin::Variational
          Sum(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {
-            assert(lhs.getRoot().getUUID() == rhs.getRoot().getUUID());
+            assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
          }
 
          Sum(const Sum& other)
@@ -179,14 +179,14 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         ShapeFunctionBase<Space>& getRoot() override
+         ShapeFunctionBase<Space>& getLeaf() override
          {
-            return getRHS().getRoot();
+            return getRHS().getLeaf();
          }
 
-         const ShapeFunctionBase<Space>& getRoot() const override
+         const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return getRHS().getRoot();
+            return getRHS().getLeaf();
          }
 
          int getRows(

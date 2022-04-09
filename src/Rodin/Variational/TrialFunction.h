@@ -63,12 +63,12 @@ namespace Rodin::Variational
             return Component<TrialFunction<FEC, Trait>>(*this, 2);
          }
 
-         ShapeFunctionBase<Trial>& getRoot()  override
+         ShapeFunctionBase<Trial>& getLeaf()  override
          {
             return *this;
          }
 
-         const ShapeFunctionBase<Trial>& getRoot() const override
+         const ShapeFunctionBase<Trial>& getLeaf() const override
          {
             return *this;
          }

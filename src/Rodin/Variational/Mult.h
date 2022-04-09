@@ -316,14 +316,14 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         ShapeFunctionBase<Space>& getRoot() override
+         ShapeFunctionBase<Space>& getLeaf() override
          {
-            return getRHS().getRoot();
+            return getRHS().getLeaf();
          }
 
-         const ShapeFunctionBase<Space>& getRoot() const override
+         const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return getRHS().getRoot();
+            return getRHS().getLeaf();
          }
 
          int getRows(
