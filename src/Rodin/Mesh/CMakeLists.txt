@@ -19,7 +19,14 @@ target_link_libraries(RodinMesh
   mfem
   PUBLIC
   Rodin::Alert
-  Rodin::Parallel
   Rodin::Variational
   Boost::filesystem)
+
+if (RODIN_USE_MPI)
+  target_link_libraries(RodinMesh
+    PUBLIC
+    Boost::mpi
+    Boost::serialization
+    MPI::MPI_CXX)
+endif()
 

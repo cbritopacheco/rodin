@@ -8,7 +8,7 @@
 #define RODIN_MESH_FORWARDDECLS_H
 
 #include "Rodin/Traits.h"
-#include "Rodin/Parallel/ForwardDecls.h"
+#include "Rodin/Configure.h"
 
 namespace Rodin
 {
