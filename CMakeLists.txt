@@ -117,9 +117,7 @@ if (RODIN_BUILD_SRC)
   add_subdirectory(third-party/spectra)
   unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
 
-  find_package (Spectra 1.0.1 REQUIRED
-    HINTS
-    "${PROJECT_BINARY_DIR}/third-party/spectra")
+  find_package (Spectra 1.0.1 REQUIRED)
 
   if (RODIN_WITH_PLOT) # TODO: BROKEN
     message(FATAL_ERROR
