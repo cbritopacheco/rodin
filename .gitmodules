@@ -25,3 +25,9 @@
 [submodule "third-party/ISCD/Advection"]
 	path = third-party/ISCD/Advection
 	url = https://github.com/cbritopacheco/Advection/
+[submodule "third-party/eigen"]
+	path = third-party/eigen
+	url = https://gitlab.com/libeigen/eigen
+[submodule "third-party/spectra"]
+	path = third-party/spectra
+	url = https://github.com/yixuan/spectra.git
