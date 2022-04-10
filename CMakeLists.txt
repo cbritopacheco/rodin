@@ -9,7 +9,7 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
 endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 
-project(Rodin CXX C)
+project(Rodin LANGUAGES CXX C)
 
 # ---- Options ---------------------------------------------------------------
 option(RODIN_BUILD_SRC          "Build the Rodin source code"     ON)
@@ -27,7 +27,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # ---- CMake Modules ---------------------------
 include(RodinConfig)
-include(RodinUtility)
 
 # ---- Configure compiler ----------------------
 if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -60,8 +59,8 @@ if (RODIN_BUILD_SRC)
   endif()
 
   # ---- MFEM ----
+  message (STATUS "Configuring mfem...")
   set(BUILD_DOC OFF CACHE BOOL "" FORCE)
-  message(STATUS "Configuring mfem ...")
   add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
   find_package(MFEM
     REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
@@ -97,6 +96,29 @@ if (RODIN_BUILD_SRC)
   find_package(Corrade REQUIRED Utility)
   set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
+  # ---- Eigen ----
+  message(STATUS "Configuring Eigen3...")
+  set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  add_subdirectory(third-party/eigen)
+  unset(BUILD_TESTING)
+
+  find_package (Eigen3 3.3 REQUIRED NO_MODULE
+    HINTS
+    "${PROJECT_BINARY_DIR}/third-party/eigen"
+    "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
+
+  # ---- Spectra ----
+  message(STATUS "Configuring Spectra...")
+  set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
+  add_subdirectory(third-party/spectra)
+
+  find_package (Spectra 1.0.1 REQUIRED
+    HINTS
+    "${PROJECT_BINARY_DIR}/third-party/spectra")
+
   if (RODIN_WITH_PLOT) # TODO: BROKEN
     message(FATAL_ERROR
       "Rodin::Plot build is broken. Please set RODIN_WITH_PLOT=OFF")
@@ -106,17 +128,6 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(third-party/magnum EXCLUDE_FROM_ALL)
     find_package(Magnum REQUIRED GL Shaders Sdl2Application)
     set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
-    # ---- Eigen ----
-    # message(STATUS "Configuring Eigen...")
-    # set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
-    # set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-    # add_subdirectory(third-party/eigen)
-    # unset(BUILD_TESTING)
-
-    # find_package (Eigen3 3.3 REQUIRED NO_MODULE
-    #   HINTS
-    #   "${PROJECT_SOURCE_DIR}/third-party/eigen")
 
     # ---- Magnum-Eigen integration ----
     message(STATUS "Configuring Magnum-Eigen integration...")
@@ -138,3 +149,4 @@ if (RODIN_BUILD_DOC)
   add_subdirectory(doc)
 endif()
 
+# feature_summary(INCLUDE_QUIET_PACKAGES WHAT ALL)
