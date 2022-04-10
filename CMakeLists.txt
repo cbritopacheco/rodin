@@ -112,8 +112,10 @@ if (RODIN_BUILD_SRC)
   message(STATUS "Configuring Spectra...")
   set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
   set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT TRUE)
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
   add_subdirectory(third-party/spectra)
+  unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
 
   find_package (Spectra 1.0.1 REQUIRED
     HINTS
