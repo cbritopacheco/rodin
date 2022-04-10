@@ -57,14 +57,46 @@ namespace Rodin::Variational
           */
          virtual ProblemBase& update() = 0;
 
+         /**
+          * @brief After solving the problem using a linear solver, this method
+          * must be called to recover the solution.
+          *
+          * After this call, the solution(s) will be contained in the
+          * respective TrialFunction object(s) and can be obtained via
+          * TrialFunction::getGridFunction().
+          */
          virtual void recoverSolution() = 0;
 
+         /**
+          * @returns Reference to the mfem::Operator representing the stiffness
+          * matrix.
+          *
+          * This must be called only after assemble() has been called.
+          */
          virtual mfem::Operator& getStiffnessMatrix() = 0;
 
+         /**
+          * @returns Constant reference to the mfem::Operator representing the stiffness
+          * matrix, i.e. the LHS of the weak formulation.
+          *
+          * This must be called only after assemble() has been called.
+          */
          virtual const mfem::Operator& getStiffnessMatrix() const = 0;
 
+         /**
+          * @returns Reference to the mfem::Vector representing the mass
+          * vector, i.e. the RHS of the weak formulation.
+          *
+          * This must be called only after assemble() has been called.
+          */
          virtual mfem::Vector& getMassVector() = 0;
 
+         /**
+          * @returns Constant reference to the mfem::Vector representing the mass
+          * vector, i.e. the RHS of the weak formulation.
+          *
+          * This must be called only after assemble() has been called.
+          */
          virtual const mfem::Vector& getMassVector() const = 0;
 
          virtual mfem::Vector& getInitialGuess() = 0;
