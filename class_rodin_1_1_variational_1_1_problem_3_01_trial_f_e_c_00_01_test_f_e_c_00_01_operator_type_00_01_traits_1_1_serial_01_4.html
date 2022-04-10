@@ -129,9 +129,29 @@ $ v $
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a016fe909a20503054fb9cc00b6bce82f" class="m-doc">recoverSolution</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>After solving the problem using a linear solver, this method must be called to recover the solution.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a42a9322dec81048f4fce51bd89bd6436" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Builds the problem using the FormLanguage::ProblemBody object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd3012a3a495177bd26051b0f1bd11a6" class="m-doc">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae96459b9863198ab7ae2c302cb53b65f" class="m-doc">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e6811cb8b409006c1db6b67b913c80c" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) -&gt; mfem::Vector&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af6d99f0db83022e121ca016bcdca1dee" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) const -&gt; const mfem::Vector&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
           </dl>
         </section>
         <section>
@@ -202,6 +222,16 @@ $ v $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a016fe909a20503054fb9cc00b6bce82f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a016fe909a20503054fb9cc00b6bce82f" class="m-doc-self">recoverSolution</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>After solving the problem using a linear solver, this method must be called to recover the solution.</p>
+<p>After this call, the solution(s) will be contained in the respective <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> object(s) and can be obtained via TrialFunction::getGridFunction().</p>
+          </div></section>
           <section class="m-doc-details" id="a42a9322dec81048f4fce51bd89bd6436"><div>
             <h3>
               <div class="m-doc-template">
@@ -221,6 +251,74 @@ $ v $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="abd3012a3a495177bd26051b0f1bd11a6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">OperatorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd3012a3a495177bd26051b0f1bd11a6" class="m-doc-self">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the mfem::Operator representing the stiffness matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_operator_type_00_01_traits_1_1_serial_01_4.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae96459b9863198ab7ae2c302cb53b65f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae96459b9863198ab7ae2c302cb53b65f" class="m-doc-self">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the mfem::Operator representing the stiffness matrix, i.e. the LHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_operator_type_00_01_traits_1_1_serial_01_4.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4e6811cb8b409006c1db6b67b913c80c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">mfem::Vector&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e6811cb8b409006c1db6b67b913c80c" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the mfem::Vector representing the mass vector, i.e. the RHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_operator_type_00_01_traits_1_1_serial_01_4.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="af6d99f0db83022e121ca016bcdca1dee"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC, class OperatorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const mfem::Vector&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC, OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6d99f0db83022e121ca016bcdca1dee" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the mfem::Vector representing the mass vector, i.e. the RHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_operator_type_00_01_traits_1_1_serial_01_4.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
         </section>
       </div>

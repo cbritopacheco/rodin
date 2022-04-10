@@ -91,6 +91,26 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae32fe2af985936d8a96e965d18149d22" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Updates the <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> instance after a refinement in the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aafc6e8dc4a3adc765f5b8358f1d7cca2" class="m-doc">recoverSolution</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>After solving the problem using a linear solver, this method must be called to recover the solution.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8697fda6cc3e4a5502eb785dfd183078" class="m-doc">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) -&gt; mfem::Operator&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a358590a47c5a3881ae8def8b3be29481" class="m-doc">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; const mfem::Operator&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37d63c835a929f5332631be5db02df44" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) -&gt; mfem::Vector&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9774432bf5ecec3a26ba98864b82af8f" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) const -&gt; const mfem::Vector&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd></dd>
           </dl>
         </section>
         <section>
@@ -111,6 +131,69 @@
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="aafc6e8dc4a3adc765f5b8358f1d7cca2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafc6e8dc4a3adc765f5b8358f1d7cca2" class="m-doc-self">recoverSolution</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>After solving the problem using a linear solver, this method must be called to recover the solution.</p>
+<p>After this call, the solution(s) will be contained in the respective <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> object(s) and can be obtained via TrialFunction::getGridFunction().</p>
+          </div></section>
+          <section class="m-doc-details" id="a8697fda6cc3e4a5502eb785dfd183078"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">mfem::Operator&amp; Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8697fda6cc3e4a5502eb785dfd183078" class="m-doc-self">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the mfem::Operator representing the stiffness matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_base.html#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="a358590a47c5a3881ae8def8b3be29481"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const mfem::Operator&amp; Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a358590a47c5a3881ae8def8b3be29481" class="m-doc-self">getStiffnessMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the mfem::Operator representing the stiffness matrix, i.e. the LHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_base.html#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="a37d63c835a929f5332631be5db02df44"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">mfem::Vector&amp; Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37d63c835a929f5332631be5db02df44" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the mfem::Vector representing the mass vector, i.e. the RHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_base.html#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9774432bf5ecec3a26ba98864b82af8f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const mfem::Vector&amp; Rodin::<wbr />Variational::<wbr />ProblemBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9774432bf5ecec3a26ba98864b82af8f" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the mfem::Vector representing the mass vector, i.e. the RHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_base.html#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
         </section>
       </div>
