@@ -30,4 +30,4 @@
 	url = https://gitlab.com/libeigen/eigen
 [submodule "third-party/spectra"]
 	path = third-party/spectra
-	url = https://github.com/yixuan/spectra.git
+	url = https://github.com/cbritopacheco/spectra.git
