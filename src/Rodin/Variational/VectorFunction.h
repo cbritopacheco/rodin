@@ -218,8 +218,7 @@ namespace Rodin::Variational
          constexpr
          VectorFunction(GridFunction<FEC, Trait>& u)
             :  m_dimension(u.getFiniteElementSpace().getVectorDimension()),
-               m_u(u),
-               m_mfemVectorFunction(&u.getHandle())
+               m_u(u)
          {}
 
          constexpr
