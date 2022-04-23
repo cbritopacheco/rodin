@@ -61,7 +61,6 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -111,15 +110,6 @@ $ \Omega $
             <dd>Vector solution supported on a mesh.</dd>
           </dl>
         </section>
-        <section id="pub-static-methods">
-          <h2><a href="#pub-static-methods">Public static functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a7395f350a5c9e174b68e550dbc42890e" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution_s.html" class="m-doc">IncompleteVectorSolutionS</a></span>
-            </dt>
-            <dd>Reads the solution text file.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -140,6 +130,10 @@ $ \Omega $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0a5b75a89b042e691a75febeb71bc46" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Reads the solution text file.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a95b47081a4e52dae98f71730ee985f53" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
@@ -164,24 +158,6 @@ $ \Omega $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a7395f350a5c9e174b68e550dbc42890e"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution_s.html" class="m-doc">IncompleteVectorSolutionS</a> Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolutionS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7395f350a5c9e174b68e550dbc42890e" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
-            </h3>
-            <p>Reads the solution text file.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Name of file to read.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>The file is read using MMGv2 format.</p>
-          </div></section>
           <section class="m-doc-details" id="a33db4e6028cd691fd0290cbaa8206b49"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolutionS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33db4e6028cd691fd0290cbaa8206b49" class="m-doc-self">VectorSolutionS</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a>&amp; mesh)</span></span>
@@ -233,6 +209,24 @@ $ \Omega $
               </tbody>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>It does not perform a copy the mesh. Instead the new object will have a reference to the original mesh.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ad0a5b75a89b042e691a75febeb71bc46"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />VectorSolutionS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0a5b75a89b042e691a75febeb71bc46" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Reads the solution text file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to read.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The file is read using MMGv2 format.</p>
           </div></section>
           <section class="m-doc-details" id="a95b47081a4e52dae98f71730ee985f53"><div>
             <h3>

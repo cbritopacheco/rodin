@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::IncompleteVectorSolutionS class | Rodin</title>
+  <title>Rodin/Variational/Advect.cpp file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,56 +51,29 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>IncompleteVectorSolutionS <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Advect.cpp <span class="m-thin">file</span>
         </h1>
-        <p>A Vector solution which does not have a mesh assigned to it.</p>
+        <p>Contains the implementation for the Advect class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#namespaces">Namespaces</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution_s.html#a3ebc5b551d1c687c3966a265608d5b2d" class="m-doc">setMesh(MeshS&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorSolutionS</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+<p>The internal code for the Advect functionality has been taken and adapted from the mfem library, example 9. This code is distributed under the BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="https://github.com/mfem/mfem/blob/master/LICENSE">https:/<wbr />/<wbr />github.com/<wbr />mfem/<wbr />mfem/<wbr />blob/<wbr />master/<wbr />LICENSE</a></p><p><a href="https://github.com/mfem/mfem/blob/master/examples/ex9.cpp">https:/<wbr />/<wbr />github.com/<wbr />mfem/<wbr />mfem/<wbr />blob/<wbr />master/<wbr />examples/<wbr />ex9.cpp</a></p></aside>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ebc5b551d1c687c3966a265608d5b2d" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a></span>
-            </dt>
-            <dd>Sets the associated mesh and moves ownership to the new object.</dd>
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Module for implementing variational methods.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a3ebc5b551d1c687c3966a265608d5b2d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteVectorSolutionS::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ebc5b551d1c687c3966a265608d5b2d" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">MeshS</a>&amp; mesh)</span></span>
-            </h3>
-            <p>Sets the associated mesh and moves ownership to the new object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference to mesh.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_vector_solution_s.html" class="m-doc">VectorSolutionS</a> which represents the object with all its functionality.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>The method does not incur any significant performance penalty since no data is copied.</p></aside><aside class="m-note m-danger"><h4>Warning</h4><p>The method does not check to see if the mesh is compatible with the current data in the solution. In general, it is up to the user to ensure that the number of points are the same and keep track of the modifications to the underlying mesh.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>

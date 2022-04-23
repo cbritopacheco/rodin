@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::IncompleteScalarSolution2D class | Rodin</title>
+  <title>Rodin::Variational::Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,56 +51,18 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>IncompleteScalarSolution2D <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt; <span class="m-thin">class</span>
         </h1>
-        <p>A scalar solution which does not have a mesh assigned to it.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>To unlock the full functionality of the class you must call the <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html#a99d9fd3eed44415636310dd73cf9b4ce" class="m-doc">setMesh(Mesh2D&amp;)</a> method. For example, when loading it from file:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarSolution2D</span><span class="o">::</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span></pre>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <p><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a99d9fd3eed44415636310dd73cf9b4ce" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a></span>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
             </dt>
-            <dd>Sets the associated mesh and moves ownership to the new object.</dd>
+            <dd>Abstract base class for objects representing scalar coefficients.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a99d9fd3eed44415636310dd73cf9b4ce"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />IncompleteScalarSolution2D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99d9fd3eed44415636310dd73cf9b4ce" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">Mesh2D</a>&amp; mesh)</span></span>
-            </h3>
-            <p>Sets the associated mesh and moves ownership to the new object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference to mesh.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>An object of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution2_d.html" class="m-doc">ScalarSolution2D</a> which represents the object with all its functionality.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>The method does not incur any significant performance penalty since no data is copied.</p></aside><aside class="m-note m-danger"><h4>Warning</h4><p>The method does not check to see if the mesh is compatible with the current data in the solution. In general, it is up to the user to ensure that the number of points are the same and keep track of the modifications to the underlying mesh.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>

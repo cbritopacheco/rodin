@@ -61,7 +61,6 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -111,15 +110,6 @@ $ \Omega $
             <dd>Scalar solution supported on a mesh.</dd>
           </dl>
         </section>
-        <section id="pub-static-methods">
-          <h2><a href="#pub-static-methods">Public static functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a4f5640ca7e636019892ffe32cb96923d" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution3_d.html" class="m-doc">IncompleteScalarSolution3D</a></span>
-            </dt>
-            <dd>Reads the solution text file.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -140,6 +130,10 @@ $ \Omega $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3bd76f890158237de400767d278ed5e8" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution3_d.html" class="m-doc">ScalarSolution3D</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Reads the solution text file.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab416109c7a4f1a325cbd448c4839ca3b" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution3_d.html" class="m-doc">ScalarSolution3D</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution3_d.html" class="m-doc">ScalarSolution3D</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
@@ -164,24 +158,6 @@ $ \Omega $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a4f5640ca7e636019892ffe32cb96923d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution3_d.html" class="m-doc">IncompleteScalarSolution3D</a> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f5640ca7e636019892ffe32cb96923d" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
-            </h3>
-            <p>Reads the solution text file.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Name of file to read.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>The file is read using MMGv2 format.</p>
-          </div></section>
           <section class="m-doc-details" id="a951384b0ddcd3057d60f6e8f137bd3b2"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a951384b0ddcd3057d60f6e8f137bd3b2" class="m-doc-self">ScalarSolution3D</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">Mesh3D</a>&amp; mesh)</span></span>
@@ -233,6 +209,24 @@ $ \Omega $
               </tbody>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>It does not perform a copy the mesh. Instead the new object will have a reference to the original mesh.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a3bd76f890158237de400767d278ed5e8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_scalar_solution3_d.html" class="m-doc">ScalarSolution3D</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ScalarSolution3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3bd76f890158237de400767d278ed5e8" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Reads the solution text file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to read.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The file is read using MMGv2 format.</p>
           </div></section>
           <section class="m-doc-details" id="ab416109c7a4f1a325cbd448c4839ca3b"><div>
             <h3>

@@ -51,7 +51,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class From, bool Mutable = false&gt;</div>
+          <div class="m-doc-template">template&lt;class From&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Cast <span class="m-thin">class</span>
         </h1>
         <p>Class to help in the casting of objects from a type to another.</p>
@@ -64,10 +64,6 @@
               <td style="width: 1%">From</td>
               <td>Type to be converted/cast</td>
             </tr>
-            <tr>
-              <td>Mutable</td>
-              <td>Specifies whether the <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> instance will be allowed to mutate the casted object.</td>
-            </tr>
           </tbody>
         </table>
         <nav class="m-block m-default">
@@ -76,16 +72,36 @@
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+<p>Specialization representing an immutable cast.</p><p>An immutable cast is that which is not allowed to mutate the underlying casted object. This class should be initialized with l-values of type From.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a48010fa8702340131e44e0d8925db6e5" class="m-doc">Cast</a>(</span><span class="m-doc-wrap">const From&amp; from)</span>
+            </dt>
+            <dd>Constructs a <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> instance with the object to be casted.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a19a3a0e8f45a96ac2c784722f7c475ee" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3720a98ad3db7cc5505ab9cfbd983e44" class="m-doc">from</a>(</span><span class="m-doc-wrap">) const -&gt; const From&amp;</span>
+            </dt>
+            <dd>Gets the constant reference to the object which will be casted.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class DstType, class ... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac50c59f1f3ef1b2cdb51a745e75fdee5" class="m-doc">to</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) const -&gt; DstType</span>
+            </dt>
+            <dd>Perform cast to type DstType.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a587ce7df808e56b856e3cf5072214321" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
             </dt>
             <dd></dd>
             <dt>
@@ -93,27 +109,11 @@
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad28aa73f49f13e66ded28fb34f1569ca" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">External::<wbr />MMG::<wbr />IncompleteScalarSolution2D</a></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f587b42c925644e953c79749c3b8f95" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html" class="m-doc">External::<wbr />MMG::<wbr />IncompleteVectorSolution2D</a></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a82d79a3f384ec0aa061a54a43007a010" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_incomplete_grid_function.html" class="m-doc">Variational::<wbr />IncompleteGridFunction</a></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a19a3a0e8f45a96ac2c784722f7c475ee" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad50385efbd32bfe8e942d43d6724df9" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a></span>
             </dt>
             <dd></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa164724a3ecbb920575e6df0b537c9e9" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh3D</a></span>
-            </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a017b29bd103f3e201d4e7e7b969f26af" class="m-doc">to</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution3_d.html" class="m-doc">External::<wbr />MMG::<wbr />IncompleteScalarSolution3D</a></span>
             </dt>
             <dd></dd>
             <dt>
@@ -128,93 +128,134 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a19a3a0e8f45a96ac2c784722f7c475ee"><div>
+          <section class="m-doc-details" id="a48010fa8702340131e44e0d8925db6e5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
+                template&lt;class From&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19a3a0e8f45a96ac2c784722f7c475ee" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48010fa8702340131e44e0d8925db6e5" class="m-doc-self">Cast</a>(</span><span class="m-doc-wrap">const From&amp; from)</span></span>
+            </h3>
+            <p>Constructs a <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> instance with the object to be casted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">from&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Object to be casted.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3720a98ad3db7cc5505ab9cfbd983e44"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const From&amp; Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3720a98ad3db7cc5505ab9cfbd983e44" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the constant reference to the object which will be casted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the object which will be casted.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac50c59f1f3ef1b2cdb51a745e75fdee5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+                template&lt;class DstType, class ... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">DstType Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac50c59f1f3ef1b2cdb51a745e75fdee5" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) const</span></span>
+            </h3>
+            <p>Perform cast to type DstType.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">DstType</td>
+                  <td>Target type to which the object will be casted.</td>
+                </tr>
+                <tr>
+                  <td>Args</td>
+                  <td></td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>args&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>List of arguments to be forwarded to the <a href="class_rodin_1_1_a_d_l_caster.html" class="m-doc">ADLCaster</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of type To.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a587ce7df808e56b856e3cf5072214321"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class From&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a587ce7df808e56b856e3cf5072214321" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
 <p>MMG::Mesh2D -&gt; Rodin::Mesh&lt;&gt;</p>
           </div></section>
           <section class="m-doc-details" id="a023f4cb1e721b677e9c4c75bb94d71e3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
+                template&lt;class From&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a023f4cb1e721b677e9c4c75bb94d71e3" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh2_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh2D</a> Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a023f4cb1e721b677e9c4c75bb94d71e3" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-<p>Rodin::Mesh&lt;&gt; -&gt; MMG::Mesh2D</p>
+<p><a href="class_rodin_1_1_mesh_3_01_traits_1_1_serial_01_4.html" class="m-doc">Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;</a> -&gt; MMG::Mesh2D</p>
           </div></section>
-          <section class="m-doc-details" id="ad28aa73f49f13e66ded28fb34f1569ca"><div>
+          <section class="m-doc-details" id="aad50385efbd32bfe8e942d43d6724df9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
+                template&lt;class From&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution2_d.html" class="m-doc">External::<wbr />MMG::<wbr />IncompleteScalarSolution2D</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad28aa73f49f13e66ded28fb34f1569ca" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Rodin::Variational::GridFunction&lt;H1&gt; -&gt; MMG::IncompleteScalarSolution2D</p>
-          </div></section>
-          <section class="m-doc-details" id="a4f587b42c925644e953c79749c3b8f95"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_vector_solution2_d.html" class="m-doc">External::<wbr />MMG::<wbr />IncompleteVectorSolution2D</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f587b42c925644e953c79749c3b8f95" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Rodin::Variational::GridFunction&lt;H1&gt; -&gt; MMG::IncompleteVectorSolution2D</p>
-          </div></section>
-          <section class="m-doc-details" id="a82d79a3f384ec0aa061a54a43007a010"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_incomplete_grid_function.html" class="m-doc">Variational::<wbr />IncompleteGridFunction</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82d79a3f384ec0aa061a54a43007a010" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>MMG::ScalarSolution2D -&gt; <a href="class_rodin_1_1_variational_1_1_incomplete_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />IncompleteGridFunction</a></p>
-          </div></section>
-          <section class="m-doc-details" id="a19a3a0e8f45a96ac2c784722f7c475ee"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19a3a0e8f45a96ac2c784722f7c475ee" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad50385efbd32bfe8e942d43d6724df9" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
 <p>MMG::Mesh3D -&gt; Rodin::Mesh&lt;&gt;</p>
           </div></section>
           <section class="m-doc-details" id="aa164724a3ecbb920575e6df0b537c9e9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
+                template&lt;class From&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh3D</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa164724a3ecbb920575e6df0b537c9e9" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh3_d.html" class="m-doc">External::<wbr />MMG::<wbr />Mesh3D</a> Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa164724a3ecbb920575e6df0b537c9e9" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
 <p>Rodin::Mesh&lt;&gt; -&gt; MMG::Mesh3D</p>
-          </div></section>
-          <section class="m-doc-details" id="a017b29bd103f3e201d4e7e7b969f26af"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_incomplete_scalar_solution3_d.html" class="m-doc">External::<wbr />MMG::<wbr />IncompleteScalarSolution3D</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a017b29bd103f3e201d4e7e7b969f26af" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Rodin::Variational::GridFunction&lt;H1&gt; -&gt; MMG::IncompleteScalarSolution3D</p>
           </div></section>
           <section class="m-doc-details" id="a19a3a0e8f45a96ac2c784722f7c475ee"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
+                template&lt;class From&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19a3a0e8f45a96ac2c784722f7c475ee" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Rodin::<wbr />Mesh</a> Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19a3a0e8f45a96ac2c784722f7c475ee" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
 <p>MMG::SurfaceMesh -&gt; Rodin::Mesh&lt;&gt;.</p>
           </div></section>
           <section class="m-doc-details" id="a314096f4aee5876208ced5fdc83f3228"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class From, bool Mutable&gt;
+                template&lt;class From&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">External::<wbr />MMG::<wbr />MeshS</a> Rodin::<wbr />Cast&lt;From, Mutable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a314096f4aee5876208ced5fdc83f3228" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_s.html" class="m-doc">External::<wbr />MMG::<wbr />MeshS</a> Rodin::<wbr />Cast&lt;From&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a314096f4aee5876208ced5fdc83f3228" class="m-doc-self">to</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
 <p>Rodin::Mesh&lt;&gt; -&gt; MMG::SurfaceMesh</p>
           </div></section>
