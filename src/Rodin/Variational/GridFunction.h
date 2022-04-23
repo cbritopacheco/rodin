@@ -16,6 +16,7 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Cast.h"
 #include "Rodin/Core.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Mesh/SubMesh.h"
@@ -84,64 +85,6 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a grid function which does not yet have an associated
-    * finite element space.
-    *
-    * To obtain the full functionality of the GridFunction class one must call
-    * the @ref setFiniteElementSpace(FiniteElementSpace&) method.
-    */
-   class IncompleteGridFunction
-   {
-      public:
-         /**
-          * @brief Constructs an empty grid function with no associated finite
-          * element space.
-          */
-         IncompleteGridFunction() = default;
-
-         /**
-          * @brief Associates a finite element space to the function.
-          * @param[in] fes Finite element space to which the function belongs
-          * to.
-          * @tparam FES Finite element space associated
-          */
-         template <class FEC, class Trait>
-         GridFunction<FEC, Trait> setFiniteElementSpace(FiniteElementSpace<FEC, Trait>& fes)
-         {
-            GridFunction<FEC, Trait> res(fes);
-            int size = m_gf.Size();
-            res.getHandle().SetDataAndSize(m_gf.StealData(), size);
-            return res;
-         }
-
-         IncompleteGridFunction& setVectorDimension(int vdim)
-         {
-            m_vdim = vdim;
-            return *this;
-         }
-
-         int getVectorDimension() const
-         {
-            assert(m_vdim);
-            return *m_vdim;
-         }
-
-         mfem::GridFunction& getHandle()
-         {
-            return m_gf;
-         }
-
-         const mfem::GridFunction& getHandle() const
-         {
-            return m_gf;
-         }
-
-      private:
-         mfem::GridFunction m_gf;
-         std::optional<int> m_vdim;
-   };
-
-   /**
     * @brief Represents a grid function which belongs to some finite element space.
     *
     * @tparam FES Finite element collection to which the function belongs.
@@ -150,9 +93,11 @@ namespace Rodin::Variational
     * initializing the grid function, hence it is not necessary to make it
     * explicit.
     */
-   template <class FEC>
-   class GridFunction<FEC, Traits::Serial> : public GridFunctionBase
+   template <class FEC, class Trait>
+   class GridFunction : public GridFunctionBase
    {
+      static_assert(std::is_same_v<Trait, Traits::Serial>,
+            "Parallel GridFunction is not supported yet");
       static_assert(
             std::is_base_of_v<FiniteElementSpaceBase, FiniteElementSpace<FEC>>,
             "FiniteElementSpace<FEC> must be derived from FiniteElementSpaceBase");
@@ -212,61 +157,11 @@ namespace Rodin::Variational
           * @param[in] filename Name of file to which the grid function will be
           * written to.
           */
-         static IncompleteGridFunction load(const boost::filesystem::path& filename)
+         GridFunction& load(const boost::filesystem::path& filename)
          {
             std::ifstream in(filename.string());
-            IncompleteGridFunction res;
-            int l = 0;
-
-            // Read VDim manually
-            std::string buff;
-            constexpr std::string_view kw("VDim: ");
-            std::optional<int> vdim;
-            while (std::getline(in, buff))
-            {
-               l++;
-               std::string::size_type n = buff.find(kw);
-               if (n != std::string::npos)
-               {
-                  vdim = std::stoi(buff.substr(kw.length()));
-                  break;
-               }
-            }
-            if (vdim)
-               res.setVectorDimension(*vdim);
-            else
-               Alert::Exception(
-                  "VDim keyword not found while loading GridFunction").raise();
-
-            // Advance until we see the "Ordering" keyword
-            while (std::getline(in, buff))
-            {
-               l++;
-               if (buff.find("Ordering: ") == std::string::npos)
-                  break;
-            }
-
-            // Skip empty lines
-            while (std::getline(in, buff))
-            {
-               l++;
-               if (!buff.empty())
-                  break;
-            }
-
-            // Count lines
-            int size = 1;
-            while (std::getline(in, buff))
-               size++;
-
-            // Load actual file
-            in.clear();
-            in.seekg(0);
-            for (int i = 0; i < l - 1; i++)
-               std::getline(in, buff);
-            res.getHandle().Load(in, size);
-
-            return res;
+            m_gf.Load(in, m_gf.Size());
+            return *this;
          }
 
          /**
