@@ -258,8 +258,6 @@ namespace Rodin::Variational
       private:
          const size_t m_dimension;
          GridFunction<FEC, Trait>& m_u;
-
-         mfem::VectorGridFunctionCoefficient m_mfemVectorFunction;
    };
    template <class FEC, class Trait>
    VectorFunction(GridFunction<FEC, Trait>&)
