@@ -87,14 +87,14 @@ namespace Rodin::Variational
             : m_op(std::move(other))
          {}
 
-         ShapeFunctionBase<Space>& getRoot() override
+         ShapeFunctionBase<Space>& getLeaf() override
          {
-            return m_op->getRoot();
+            return m_op->getLeaf();
          }
 
-         const ShapeFunctionBase<Space>& getRoot() const override
+         const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return m_op->getRoot();
+            return m_op->getLeaf();
          }
 
          int getRows(

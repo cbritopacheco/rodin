@@ -44,6 +44,12 @@ namespace Rodin::Variational
       return Sum(lhs, rhs);
    }
 
+   Sum<VectorFunctionBase, VectorFunctionBase>
+   operator+(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs)
+   {
+      return Sum(lhs, rhs);
+   }
+
    Sum<MatrixFunctionBase, MatrixFunctionBase>
    operator+(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs)
    {

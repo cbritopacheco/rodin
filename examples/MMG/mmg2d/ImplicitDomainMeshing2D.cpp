@@ -19,7 +19,7 @@ int main(int argc, char** argv)
   int Boundary = 4;
 
   auto box = Mesh2D::load(argv[1]);
-  auto ls  = ScalarSolution2D::load(argv[2]).setMesh(box);
+  auto ls  = ScalarSolution2D(box).load(argv[2]);
   auto mesh = ImplicitDomainMesher2D().split(Omega, {Interior, Exterior})
                                            .setHMax(0.1)
                                            .setRMC()

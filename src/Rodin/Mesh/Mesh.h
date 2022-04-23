@@ -9,11 +9,15 @@
 
 #include <set>
 #include <string>
-#include <boost/filesystem.hpp>
 
 #include <mfem.hpp>
 
-#include "Rodin/Parallel.h"
+#include "Rodin/Configure.h"
+
+#ifdef RODIN_USE_MPI
+#include <boost/mpi.hpp>
+#endif
+#include <boost/filesystem.hpp>
 
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -147,7 +151,7 @@ namespace Rodin
           * @brief Loads a mesh from file.
           * @param[in] filename Name of file to read
           */
-         void load(const boost::filesystem::path& filename);
+         Mesh& load(const boost::filesystem::path& filename);
 
          /**
           * @brief Constructs an empty mesh with no elements.

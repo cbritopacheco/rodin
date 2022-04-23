@@ -32,8 +32,8 @@ namespace Rodin
    // ---- mmg2d -------------------------------------------------------------
   template <>
   template <>
-  Rodin::Mesh<>
-  Cast<MMG::Mesh2D>::to<Rodin::Mesh<>>()
+  Rodin::Mesh<Traits::Serial>
+  Cast<MMG::Mesh2D>::to<Rodin::Mesh<Traits::Serial>>()
   const
   {
     auto& mesh = from();
@@ -115,13 +115,13 @@ namespace Rodin
 
     dst.FinalizeMesh(0, true);
 
-    return Rodin::Mesh<>(std::move(dst));
+    return Rodin::Mesh<Traits::Serial>(std::move(dst));
   }
 
   template <>
   template <>
   MMG::Mesh2D
-  Cast<Rodin::Mesh<>>::to<MMG::Mesh2D>()
+  Cast<Rodin::Mesh<Traits::Serial>>::to<MMG::Mesh2D>()
   const
   {
     auto& mesh = from();
@@ -233,47 +233,11 @@ namespace Rodin
     return res;
   }
 
-  template <>
-  template <>
-  Variational::IncompleteGridFunction
-  Cast<External::MMG::ScalarSolution2D>
-  ::to<Variational::IncompleteGridFunction>() const
-  {
-    Variational::IncompleteGridFunction res;
-    External::MMG::MMG5_Sol_To_Rodin_IncompleteGridFunction(from().getHandle(), res);
-    return res;
-  }
-
-  template <>
-  template <>
-  External::MMG::IncompleteScalarSolution2D
-  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-  ::to<External::MMG::IncompleteScalarSolution2D>()
-  const
-  {
-    assert(from().getFiniteElementSpace().getVectorDimension() == 1);
-    External::MMG::IncompleteScalarSolution2D res;
-    External::MMG::Rodin_GridFunction_To_MMG5_Sol(from(), res.getHandle());
-    return res;
-  }
-
-  template <>
-  template <>
-  External::MMG::IncompleteVectorSolution2D
-  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-  ::to<External::MMG::IncompleteVectorSolution2D>() const
-  {
-    assert(from().getFiniteElementSpace().getVectorDimension() == 2);
-    External::MMG::IncompleteVectorSolution2D res;
-    External::MMG::Rodin_GridFunction_To_MMG5_Sol(from(), res.getHandle());
-    return res;
-  }
-
   // ---- mmg3d -------------------------------------------------------------
   template <>
   template <>
-  Rodin::Mesh<>
-  Cast<MMG::Mesh3D>::to<Rodin::Mesh<>>() const
+  Rodin::Mesh<Traits::Serial>
+  Cast<MMG::Mesh3D>::to<Rodin::Mesh<Traits::Serial>>() const
   {
      auto& mesh = from();
      mfem::Mesh dst(
@@ -369,13 +333,13 @@ namespace Rodin
 
      dst.FinalizeMesh(0, true);
 
-     return Rodin::Mesh<>(std::move(dst));
+     return Rodin::Mesh<Traits::Serial>(std::move(dst));
   }
 
   template <>
   template <>
   External::MMG::Mesh3D
-  Cast<Rodin::Mesh<>>::to<External::MMG::Mesh3D>() const
+  Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const
   {
     auto& mesh = from();
     auto& mfemMesh = mesh.getHandle();
@@ -478,24 +442,11 @@ namespace Rodin
     return res;
   }
 
-  template <>
-  template <>
-  External::MMG::IncompleteScalarSolution3D
-  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-  ::to<External::MMG::IncompleteScalarSolution3D>()
-  const
-  {
-    assert(from().getFiniteElementSpace().getVectorDimension() == 1);
-    External::MMG::IncompleteScalarSolution3D res;
-    External::MMG::Rodin_GridFunction_To_MMG5_Sol(from(), res.getHandle());
-    return res;
-  }
-
   // ---- mmgs --------------------------------------------------------------
   template <>
   template <>
   Rodin::Mesh<>
-  Cast<MMG::MeshS>::to<Rodin::Mesh<>>() const
+  Cast<MMG::MeshS>::to<Rodin::Mesh<Traits::Serial>>() const
   {
      auto& mesh = from();
      mfem::Mesh dst(
@@ -577,13 +528,13 @@ namespace Rodin
 
      dst.FinalizeMesh(0, true);
 
-     return Rodin::Mesh<>(std::move(dst));
+     return Rodin::Mesh<Traits::Serial>(std::move(dst));
   }
 
   template <>
   template <>
   MMG::MeshS
-  Cast<Rodin::Mesh<>>::to<MMG::MeshS>()
+  Cast<Rodin::Mesh<Traits::Serial>>::to<MMG::MeshS>()
   const
   {
     auto& mesh = from();
@@ -670,44 +621,6 @@ namespace Rodin
       for (int j = 0; j < 3; j++)
          mmgMesh->point[pt->v[j]].tag &= ~MG_NUL;
     }
-    return res;
-  }
-
-  template <>
-  template <>
-  External::MMG::IncompleteScalarSolutionS
-  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-  ::to<External::MMG::IncompleteScalarSolutionS>()
-  const
-  {
-    assert(from().getFiniteElementSpace().getVectorDimension() == 1);
-    External::MMG::IncompleteScalarSolutionS res;
-    External::MMG::Rodin_GridFunction_To_MMG5_Sol(from(), res.getHandle());
-    return res;
-  }
-
-  template <>
-  template <>
-  External::MMG::IncompleteVectorSolutionS
-  Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-  ::to<External::MMG::IncompleteVectorSolutionS>()
-  const
-  {
-    assert(from().getFiniteElementSpace().getVectorDimension() == 3);
-    External::MMG::IncompleteVectorSolutionS res;
-    External::MMG::Rodin_GridFunction_To_MMG5_Sol(from(), res.getHandle());
-    return res;
-  }
-
-  template<>
-  template <>
-  Variational::IncompleteGridFunction
-  Cast<External::MMG::ScalarSolutionS>
-  ::to<Variational::IncompleteGridFunction>()
-  const
-  {
-    Variational::IncompleteGridFunction res;
-    External::MMG::MMG5_Sol_To_Rodin_IncompleteGridFunction(from().getHandle(), res);
     return res;
   }
 }

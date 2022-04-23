@@ -58,7 +58,8 @@ namespace Rodin::External::MMG
     if (retcode != 0)
       Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
-    auto res = ScalarSolutionS::load(boxp.replace_extension(".sol")).setMesh(box);
+    ScalarSolutionS res(box);
+    res.load(boxp.replace_extension(".sol"));
     return res;
   }
 
@@ -81,7 +82,8 @@ namespace Rodin::External::MMG
     if (retcode != 0)
       Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
-    auto res = ScalarSolutionS::load(boxp.replace_extension(".sol")).setMesh(box);
+    ScalarSolutionS res(box);
+    res.load(boxp.replace_extension(".sol"));
     return res;
   }
 
@@ -101,7 +103,8 @@ namespace Rodin::External::MMG
     if (retcode != 0)
       Alert::Exception("ISCD::Mshdist invocation failed.").raise();
 
-    auto res = ScalarSolutionS::load(solp).setMesh(ls.getMesh());
+    ScalarSolutionS res(ls.getMesh());
+    res.load(solp);
     ls = std::move(res);
   }
 

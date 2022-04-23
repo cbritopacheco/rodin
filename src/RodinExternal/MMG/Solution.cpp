@@ -39,30 +39,4 @@ namespace Rodin::External::MMG
      other.m_sol = nullptr;
      return *this;
   }
-
-  IncompleteSolutionBase::IncompleteSolutionBase()
-    : m_isOwner(true)
-  {
-    MMG5_SAFE_CALLOC(m_sol, 1, MMG5_Sol,
-      Alert::Exception("Failed to allocate memory for MMG5_pSol").raise());
-  }
-
-  IncompleteSolutionBase::IncompleteSolutionBase(const IncompleteSolutionBase& other)
-    : IncompleteSolutionBase()
-  {
-    MMG5_Sol_Copy(other.m_sol, m_sol);
-  }
-
-  IncompleteSolutionBase::IncompleteSolutionBase(IncompleteSolutionBase&& other)
-    : m_sol(other.m_sol),
-      m_isOwner(other.m_isOwner)
-  {
-    other.m_sol = nullptr;
-  }
-
-  IncompleteSolutionBase::~IncompleteSolutionBase()
-  {
-    if (isOwner())
-      MMG5_Sol_Free(m_sol);
-  }
 }

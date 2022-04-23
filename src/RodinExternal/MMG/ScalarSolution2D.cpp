@@ -58,12 +58,10 @@ namespace Rodin::External::MMG
      return *this;
   }
 
-  IncompleteScalarSolution2D ScalarSolution2D::load(
-        const boost::filesystem::path& filename)
+  ScalarSolution2D& ScalarSolution2D::load(const boost::filesystem::path& filename)
   {
-     IncompleteScalarSolution2D res;
-     Load_MMG5_Sol(filename, 2, res.getHandle());
-     return res;
+     Load_MMG5_Sol(filename, 2, getHandle());
+     return *this;
   }
 
   void ScalarSolution2D::save(const boost::filesystem::path& filename)
@@ -94,15 +92,5 @@ namespace Rodin::External::MMG
   Mesh2D& ScalarSolution2D::getMesh()
   {
      return m_mesh;
-  }
-
-  // ---- IncompleteScalarSolution2D -------------------------------------------
-  IncompleteScalarSolution2D::IncompleteScalarSolution2D()
-    : IncompleteSolutionBase()
-  {
-    getHandle()->ver  = 2;
-    getHandle()->size = 1;
-    getHandle()->type = MMG5_Scalar;
-    getHandle()->dim  = 2;
   }
 }

@@ -47,7 +47,7 @@ namespace Rodin::Variational
    LinearForm<FEC, Traits::Serial>&
    LinearForm<FEC, Traits::Serial>::add(const LinearFormIntegratorBase& lfi)
    {
-      assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
+      assert(lfi.getTestFunction().getLeaf().getUUID() == getTestFunction().getLeaf().getUUID());
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
@@ -137,7 +137,7 @@ namespace Rodin::Variational
    LinearForm<FEC, Traits::Serial>&
    LinearForm<FEC, Traits::Serial>::from(const LinearFormIntegratorBase& lfi)
    {
-      assert(lfi.getTestFunction().getRoot().getUUID() == getTestFunction().getRoot().getUUID());
+      assert(lfi.getTestFunction().getLeaf().getUUID() == getTestFunction().getLeaf().getUUID());
       switch (lfi.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:

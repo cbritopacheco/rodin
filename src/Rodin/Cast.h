@@ -16,13 +16,20 @@
 
 namespace Rodin
 {
+   template <class From, class DstType>
+   class ADLCaster
+   {
+      public:
+         DstType cast(const From& src);
+   };
+
    /**
     * @brief Class to help in the casting of objects from a type to another.
     * @tparam From Type to be converted/cast
     * @tparam Mutable Specifies whether the Cast instance will be allowed to
     * mutate the casted object.
     */
-   template <class From, bool Mutable = false>
+   template <class From>
    class Cast;
 
    /**
@@ -34,36 +41,7 @@ namespace Rodin
     * From.
     */
    template <class From>
-   using ImmutableCast = Cast<From, false>;
-
-   /**
-    * @internal
-    * @tparam From Type to be converted/cast
-    * @brief Deduction guide to aid in the construction of a mutable cast
-    * instances, from l-values.
-    */
-   template <class From>
-   Cast(From&) -> Cast<From, false>;
-
-   /**
-    * @internal
-    * @tparam From Type to be converted/cast
-    * @brief Deduction guide to aid in the construction of a mutable cast
-    * instances, from const l-values.
-    */
-   template <class From>
-   Cast(const From&) -> Cast<From, false>;
-
-   /**
-    * @brief Specialization representing an immutable cast.
-    * @tparam From Type to be converted/cast
-    *
-    * An immutable cast is that which is not allowed to mutate the underlying
-    * casted object. This class should be initialized with l-values of type
-    * From.
-    */
-   template <class From>
-   class Cast<From, false>
+   class Cast
    {
       public:
          /**
@@ -85,91 +63,21 @@ namespace Rodin
          }
 
          /**
-          * @brief Perform cast to type To.
-          * @tparam To Target type, to which the object will be casted.
+          * @brief Perform cast to type DstType.
+          *
+          * @tparam DstType Target type to which the object will be casted.
+          * @param[in] args List of arguments to be forwarded to the ADLCaster.
           * @returns Value of type To.
           */
-         template <class To>
-         To to() const
+         template <class DstType, class ... Args>
+         DstType to(Args&&... args) const
          {
-            return static_cast<To>(from());
+            static_assert(std::is_constructible_v<ADLCaster<From, DstType>, Args...>);
+            return ADLCaster<From, DstType>(std::forward<Args>(args)...).cast(from());
          }
 
       private:
          const From& m_from;
-   };
-
-   /**
-    * @brief Specialization representing a mutable cast.
-    * @tparam From Type to be converted/cast
-    *
-    * A mutable cast is that which is allowed to mutate the underlying casted
-    * object. This class should be initialized with r-values of type From.
-    */
-   template <class From>
-   using MutableCast = Cast<From, true>;
-
-   /**
-    * @internal
-    * @brief Deduction guide to aid in the construction of a mutable cast
-    * instances, from r-values or moved objects.
-    * @tparam From Type to be converted/cast
-    */
-   template <class From>
-   Cast(From&&) -> Cast<From, true>;
-
-   /**
-    * @brief Specialization representing an immutable cast.
-    * @tparam From Type to be converted/cast
-    *
-    * An immutable cast is that which is not allowed to mutate the underlying
-    * casted object. This class should be initialized with l-values of type
-    * From.
-    */
-   template <class From>
-   class Cast<From, true>
-   {
-      public:
-         /**
-          * @brief Constructs a Cast instance with the object to be casted.
-          * @param[in] from Object to be casted.
-          */
-         Cast(From&& from)
-            : m_from(std::move(from))
-         {}
-
-         /**
-          * @brief Gets the constant reference to the object which will be
-          * casted.
-          * @returns Constant reference to the object which will be casted.
-          */
-         const From& from() const
-         {
-            return m_from;
-         }
-
-         /**
-          * @brief Gets the reference to the object which will be casted.
-          * @returns Reference to the object which will be casted.
-          */
-         From& from()
-         {
-            return m_from;
-         }
-
-         /**
-          * @brief Perform cast to type To.
-          * @tparam To Target type, to which the object will be casted.
-          * @returns Value of type To.
-          */
-         template <class To>
-         To to() const
-         {
-            return static_cast<To>(from());
-         }
-
-      private:
-         From m_from;
    };
 }
 
