@@ -22,6 +22,8 @@ namespace Rodin::Variational
    // ---- FiniteElementCollection -------------------------------------------
    class FiniteElementCollectionBase;
 
+   class L2;
+
    class H1;
 
    // ---- FiniteElementSpace ------------------------------------------------
@@ -35,8 +37,6 @@ namespace Rodin::Variational
 
    template <class FEC, class Trait = Traits::Serial>
    class GridFunction;
-
-   class IncompleteGridFunction;
 
    /**
     * Enumeration class to indicate whether a derived instance of

@@ -95,8 +95,8 @@ namespace Rodin::Variational
 
          virtual Restriction<ScalarFunctionBase> restrictTo(const std::set<int>& attrs);
 
-         virtual double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip
-               ) const = 0;
+         virtual double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
          virtual ScalarFunctionBase* copy() const noexcept override = 0;
 
@@ -118,7 +118,8 @@ namespace Rodin::Variational
 
          ScalarFunction(ScalarFunction&& other) = default;
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         double getValue(
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             return m_nested->getValue(trans, ip);
          }
@@ -191,8 +192,8 @@ namespace Rodin::Variational
     *
     * @tparam FEC Finite element collection
     */
-   template <class FEC, class Trait>
-   class ScalarFunction<GridFunction<FEC, Trait>>
+   template <>
+   class ScalarFunction<GridFunctionBase>
       : public ScalarFunctionBase
    {
       public:
@@ -201,26 +202,18 @@ namespace Rodin::Variational
           * @param[in] u GridFunction which belongs to the finite element
           * collection FEC
           */
-         constexpr
-         ScalarFunction(const GridFunction<FEC, Trait>& u)
-            :  m_u(u),
-               m_mfemCoefficient(&u.getHandle())
-         {
-            assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-         }
+         ScalarFunction(const GridFunctionBase& u);
 
-         constexpr
          ScalarFunction(const ScalarFunction& other) = default;
 
-         const GridFunction<FEC, Trait>& getValue() const
+         const GridFunctionBase& getValue() const
          {
             return m_u;
          }
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            return m_mfemCoefficient.Eval(trans, ip);
-         }
+         double getValue(
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
 
          ScalarFunction* copy() const noexcept override
          {
@@ -228,12 +221,9 @@ namespace Rodin::Variational
          }
 
       private:
-         const GridFunction<FEC, Trait>& m_u;
-         mutable mfem::GridFunctionCoefficient m_mfemCoefficient;
+         const GridFunctionBase& m_u;
    };
-   template <class FEC, class Trait>
-   ScalarFunction(const GridFunction<FEC, Trait>&)
-      -> ScalarFunction<GridFunction<FEC, Trait>>;
+   ScalarFunction(GridFunctionBase&) -> ScalarFunction<GridFunctionBase>;
 
    template <>
    class ScalarFunction<std::function<double(const double*, int)>>
