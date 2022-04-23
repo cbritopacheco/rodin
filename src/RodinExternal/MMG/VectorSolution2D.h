@@ -39,7 +39,7 @@ namespace Rodin::External::MMG
        *
        * @param[in] filename Name of file to read.
        */
-      static IncompleteVectorSolution2D load(const boost::filesystem::path& filename);
+      VectorSolution2D& load(const boost::filesystem::path& filename) override;
 
       /**
        * @internal
@@ -115,52 +115,6 @@ namespace Rodin::External::MMG
 
     private:
       std::reference_wrapper<Mesh2D> m_mesh;
-  };
-
-  /**
-   * @brief A Vector solution which does not have a mesh assigned to it.
-   *
-   * To unlock the full functionality of the class you must call the
-   * @ref setMesh(Mesh2D&) method. For example, when loading it from file:
-   *
-   * @code{.cpp}
-   * auto sol = VectorSolution2D::load(filename).setMesh(mesh);
-   * @endcode
-   */
-  class IncompleteVectorSolution2D : public IncompleteSolutionBase
-  {
-    public:
-      IncompleteVectorSolution2D();
-
-      IncompleteVectorSolution2D(const IncompleteVectorSolution2D& other)
-        : IncompleteSolutionBase(other)
-      {}
-
-      IncompleteVectorSolution2D(IncompleteVectorSolution2D&& other)
-        : IncompleteSolutionBase(std::move(other))
-      {}
-
-      /**
-       * @brief Sets the associated mesh and moves ownership to the new
-       * object.
-       *
-       * @param[in] mesh Reference to mesh.
-       *
-       * @returns An object of type VectorSolution2D which represents the
-       * object with all its functionality.
-       *
-       * @note The method does not incur any significant performance penalty
-       * since no data is copied.
-       *
-       * @warning The method does not check to see if the mesh is compatible
-       * with the current data in the solution. In general, it is up to the
-       * user to ensure that the number of points are the same and keep
-       * track of the modifications to the underlying mesh.
-       */
-      VectorSolution2D setMesh(Mesh2D& mesh)
-      {
-        return VectorSolution2D(release(), mesh);
-      }
   };
 }
 #endif

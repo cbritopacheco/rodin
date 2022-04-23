@@ -11,6 +11,17 @@
 
 #include "Rodin/Mesh/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/H1.h"
+#include "Rodin/Variational/GridFunction.h"
+#include "Rodin/Variational/FiniteElementSpace.h"
+
+#include "Utility.h"
+#include "ScalarSolution2D.h"
+#include "ScalarSolution3D.h"
+#include "ScalarSolutionS.h"
+
+#include "VectorSolution2D.h"
+#include "VectorSolutionS.h"
 
 #include "Common.h"
 #include "ForwardDecls.h"
@@ -23,43 +34,88 @@ namespace Rodin
     */
    template <>
    template <>
-   Rodin::Mesh<>
+   Rodin::Mesh<Traits::Serial>
    Cast<External::MMG::Mesh2D>::to<Rodin::Mesh<>>() const;
 
    /**
-    * Rodin::Mesh<> -> MMG::Mesh2D
+    * Rodin::Mesh<Traits::Serial> -> MMG::Mesh2D
     */
    template <>
    template <>
    External::MMG::Mesh2D
-   Cast<Rodin::Mesh<>>::to<External::MMG::Mesh2D>() const;
+   Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh2D>() const;
 
    /**
-    * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution2D
+    * Rodin::Variational::GridFunction<FEC, Traits::Serial> -> MMG::IncompleteScalarSolution2D
     */
-   template <>
-   template <>
-   External::MMG::IncompleteScalarSolution2D
-   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-   ::to<External::MMG::IncompleteScalarSolution2D>() const;
+   template <class FEC>
+   class ADLCaster<
+      Variational::GridFunction<FEC, Traits::Serial>, External::MMG::ScalarSolution2D>
+   {
+      public:
+         ADLCaster(External::MMG::Mesh2D& mesh)
+            : m_mesh(mesh)
+         {}
+
+         External::MMG::ScalarSolution2D cast(
+               const Variational::GridFunction<FEC, Traits::Serial>& src)
+         {
+            assert(src.getFiniteElementSpace().getVectorDimension() == 1);
+            External::MMG::ScalarSolution2D res(m_mesh);
+            External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
+            return res;
+         }
+
+      private:
+         External::MMG::Mesh2D& m_mesh;
+   };
 
    /**
-    * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteVectorSolution2D
+    * Rodin::Variational::GridFunction<FEC, Traits::Serial> -> MMG::VectorSolution2D
     */
-   template <>
-   template <>
-   External::MMG::IncompleteVectorSolution2D
-   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-   ::to<External::MMG::IncompleteVectorSolution2D>() const;
+   template <class FEC>
+   class ADLCaster<
+      Variational::GridFunction<FEC, Traits::Serial>, External::MMG::VectorSolution2D>
+   {
+      public:
+         ADLCaster(External::MMG::Mesh2D& mesh)
+            : m_mesh(mesh)
+         {}
+
+         External::MMG::VectorSolution2D cast(
+               const Variational::GridFunction<FEC, Traits::Serial>& src)
+         {
+            assert(src.getFiniteElementSpace().getVectorDimension() == 2);
+            External::MMG::VectorSolution2D res(m_mesh);
+            External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
+            return res;
+         }
+
+      private:
+         External::MMG::Mesh2D& m_mesh;
+   };
 
    /**
-    * MMG::ScalarSolution2D -> Rodin::Variational::IncompleteGridFunction
+    * MMG::ScalarSolution2D -> Rodin::Variational::GridFunction<Variational::H1, Traits::Serial>
     */
-   template <>
-   template <>
-   Variational::IncompleteGridFunction
-   Cast<External::MMG::ScalarSolution2D>
-   ::to<Variational::IncompleteGridFunction>() const;
+   template <class FEC>
+   class ADLCaster<External::MMG::ScalarSolution2D, Variational::GridFunction<FEC, Traits::Serial>>
+   {
+      public:
+         ADLCaster(Variational::FiniteElementSpace<FEC>& mesh)
+            : m_fes(mesh)
+         {}
+
+         Variational::GridFunction<FEC, Traits::Serial> cast(
+               const External::MMG::ScalarSolution2D& src)
+         {
+            Variational::GridFunction<FEC> res(m_fes);
+            External::MMG::MMG5_Sol_To_Rodin_GridFunction(src.getHandle(), res);
+            return res;
+         }
+      private:
+         Variational::FiniteElementSpace<FEC>& m_fes;
+   };
 
    // ---- mmg3d -------------------------------------------------------------
    /**
@@ -68,7 +124,7 @@ namespace Rodin
    template <>
    template <>
    Rodin::Mesh<>
-   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh<>>() const;
+   Cast<External::MMG::Mesh3D>::to<Rodin::Mesh<Traits::Serial>>() const;
 
    /**
     * Rodin::Mesh<> -> MMG::Mesh3D
@@ -76,16 +132,29 @@ namespace Rodin
    template <>
    template <>
    External::MMG::Mesh3D
-   Cast<Rodin::Mesh<>>::to<External::MMG::Mesh3D>() const;
+   Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const;
 
-   /**
-    * Rodin::Variational::GridFunction<H1> -> MMG::IncompleteScalarSolution3D
-    */
-   template <>
-   template <>
-   External::MMG::IncompleteScalarSolution3D
-   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-   ::to<External::MMG::IncompleteScalarSolution3D>() const;
+   template <class FEC>
+   class ADLCaster<
+      Variational::GridFunction<FEC, Traits::Serial>, External::MMG::ScalarSolution3D>
+   {
+      public:
+         ADLCaster(External::MMG::Mesh3D& mesh)
+            : m_mesh(mesh)
+         {}
+
+         External::MMG::ScalarSolution3D cast(
+               const Variational::GridFunction<FEC, Traits::Serial>& src)
+         {
+            assert(src.getFiniteElementSpace().getVectorDimension() == 1);
+            External::MMG::ScalarSolution3D res(m_mesh);
+            External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
+            return res;
+         }
+
+      private:
+         External::MMG::Mesh3D& m_mesh;
+   };
 
    // ---- mmgs --------------------------------------------------------------
    /**
@@ -102,25 +171,73 @@ namespace Rodin
    template <>
    template <>
    External::MMG::MeshS
-   Cast<Rodin::Mesh<>>::to<External::MMG::MeshS>() const;
+   Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::MeshS>() const;
 
-   template<>
-   template <>
-   Variational::IncompleteGridFunction
-   Cast<External::MMG::ScalarSolutionS>
-   ::to<Variational::IncompleteGridFunction>() const;
+   /**
+    * MMG::ScalarSolutionS -> Rodin::Variational::GridFunction<Variational::H1, Traits::Serial>
+    */
+   template <class FEC>
+   class ADLCaster<External::MMG::ScalarSolutionS, Variational::GridFunction<FEC, Traits::Serial>>
+   {
+      public:
+         ADLCaster(Variational::FiniteElementSpace<FEC>& mesh)
+            : m_fes(mesh)
+         {}
 
-   template <>
-   template <>
-   External::MMG::IncompleteScalarSolutionS
-   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-   ::to<External::MMG::IncompleteScalarSolutionS>() const;
+         Variational::GridFunction<FEC, Traits::Serial> cast(
+               const External::MMG::ScalarSolutionS& src)
+         {
+            Variational::GridFunction<FEC> res(m_fes);
+            External::MMG::MMG5_Sol_To_Rodin_GridFunction(src.getHandle(), res);
+            return res;
+         }
+      private:
+         Variational::FiniteElementSpace<FEC>& m_fes;
+   };
 
-   template <>
-   template <>
-   External::MMG::IncompleteVectorSolutionS
-   Cast<Variational::GridFunction<Variational::H1, Traits::Serial>>
-   ::to<External::MMG::IncompleteVectorSolutionS>() const;
+   template <class FEC>
+   class ADLCaster<
+      Variational::GridFunction<FEC, Traits::Serial>, External::MMG::ScalarSolutionS>
+   {
+      public:
+         ADLCaster(External::MMG::MeshS& mesh)
+            : m_mesh(mesh)
+         {}
+
+         External::MMG::ScalarSolutionS cast(
+               const Variational::GridFunction<FEC, Traits::Serial>& src)
+         {
+            assert(src.getFiniteElementSpace().getVectorDimension() == 1);
+            External::MMG::ScalarSolutionS res(m_mesh);
+            External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
+            return res;
+         }
+
+      private:
+         External::MMG::MeshS& m_mesh;
+   };
+
+   template <class FEC>
+   class ADLCaster<
+      Variational::GridFunction<FEC, Traits::Serial>, External::MMG::VectorSolutionS>
+   {
+      public:
+         ADLCaster(External::MMG::MeshS& mesh)
+            : m_mesh(mesh)
+         {}
+
+         External::MMG::VectorSolutionS cast(
+               const Variational::GridFunction<FEC, Traits::Serial>& src)
+         {
+            assert(src.getFiniteElementSpace().getVectorDimension() == 3);
+            External::MMG::VectorSolutionS res(m_mesh);
+            External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
+            return res;
+         }
+
+      private:
+         External::MMG::MeshS& m_mesh;
+   };
 }
 
 

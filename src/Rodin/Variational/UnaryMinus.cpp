@@ -78,6 +78,12 @@ namespace Rodin::Variational
       return Sum<ScalarFunctionBase, ScalarFunctionBase>(lhs, UnaryMinus(rhs));
    }
 
+   Sum<VectorFunctionBase, VectorFunctionBase>
+   operator-(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs)
+   {
+      return Sum<VectorFunctionBase, VectorFunctionBase>(lhs, UnaryMinus(rhs));
+   }
+
    UnaryMinus<FormLanguage::LinearFormIntegratorSum>
    operator-(const FormLanguage::LinearFormIntegratorSum& op)
    {

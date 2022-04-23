@@ -158,6 +158,9 @@ namespace Rodin::Variational
    };
    UnaryMinus<VectorFunctionBase> operator-(const VectorFunctionBase& op);
 
+   Sum<VectorFunctionBase, VectorFunctionBase>
+   operator-(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs);
+
    template <>
    class UnaryMinus<LinearFormIntegratorBase>
       : public LinearFormIntegratorBase

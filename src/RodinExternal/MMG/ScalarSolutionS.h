@@ -39,7 +39,7 @@ namespace Rodin::External::MMG
        *
        * @param[in] filename Name of file to read.
        */
-      static IncompleteScalarSolutionS load(const boost::filesystem::path& filename);
+      ScalarSolutionS& load(const boost::filesystem::path& filename) override;
 
       /**
        * @internal
@@ -115,52 +115,6 @@ namespace Rodin::External::MMG
 
     private:
       std::reference_wrapper<MeshS> m_mesh;
-  };
-
-  /**
-   * @brief A scalar solution which does not have a mesh assigned to it.
-   *
-   * To unlock the full functionality of the class you must call the
-   * @ref setMesh(MeshS&) method. For example, when loading it from file:
-   *
-   * @code{.cpp}
-   * auto sol = ScalarSolutionS::load(filename).setMesh(mesh);
-   * @endcode
-   */
-  class IncompleteScalarSolutionS : public IncompleteSolutionBase
-  {
-    public:
-      IncompleteScalarSolutionS();
-
-      IncompleteScalarSolutionS(const IncompleteScalarSolutionS& other)
-        : IncompleteSolutionBase(other)
-      {}
-
-      IncompleteScalarSolutionS(IncompleteScalarSolutionS&& other)
-        : IncompleteSolutionBase(std::move(other))
-      {}
-
-      /**
-       * @brief Sets the associated mesh and moves ownership to the new
-       * object.
-       *
-       * @param[in] mesh Reference to mesh.
-       *
-       * @returns An object of type ScalarSolutionS which represents the
-       * object with all its functionality.
-       *
-       * @note The method does not incur any significant performance penalty
-       * since no data is copied.
-       *
-       * @warning The method does not check to see if the mesh is compatible
-       * with the current data in the solution. In general, it is up to the
-       * user to ensure that the number of points are the same and keep
-       * track of the modifications to the underlying mesh.
-       */
-      ScalarSolutionS setMesh(MeshS& mesh)
-      {
-        return ScalarSolutionS(release(), mesh);
-      }
   };
 }
 #endif
