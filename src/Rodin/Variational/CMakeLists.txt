@@ -31,6 +31,7 @@ set(RodinVariational_HEADERS
   Rank3Operator.h
   Restriction.h
   VectorFunction.h
+  Utility.h
   )
 
 set(RodinVariational_SRCS
@@ -58,6 +59,7 @@ set(RodinVariational_SRCS
   LinearForm.hpp
   Problem.hpp
   ProblemBody.cpp
+  Utility.cpp
   )
 
 add_library(RodinVariational

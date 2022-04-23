@@ -18,6 +18,7 @@
 #include "Rodin/Alert.h"
 #include "FormLanguage/Base.h"
 
+#include "Utility.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
@@ -216,7 +217,7 @@ namespace Rodin::Variational
           */
          constexpr
          VectorFunction(GridFunction<FEC, Trait>& u)
-            :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
+            :  m_dimension(u.getFiniteElementSpace().getVectorDimension()),
                m_u(u),
                m_mfemVectorFunction(&u.getHandle())
          {}
@@ -230,6 +231,23 @@ namespace Rodin::Variational
          int getDimension() const override
          {
             return m_dimension;
+         }
+
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            mfem::Mesh* gfMesh = m_u.getHandle().FESpace()->GetMesh();
+            if (trans.mesh == gfMesh)
+            {
+               m_u.getHandle().GetVectorValue(trans, ip, value);
+            }
+            else
+            {
+               mfem::IntegrationPoint coarseIp;
+               mfem::ElementTransformation* coarseTrans = refinedToCoarse(*gfMesh, trans, ip, coarseIp);
+               m_u.getHandle().GetVectorValue(*coarseTrans, coarseIp, value);
+            }
          }
 
          VectorFunction* copy() const noexcept override
