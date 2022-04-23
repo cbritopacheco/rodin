@@ -15,6 +15,7 @@
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
+#include "VectorFunction.h"
 #include "MatrixFunction.h"
 
 namespace Rodin::Variational
@@ -75,6 +76,76 @@ namespace Rodin::Variational
 
    Sum<ScalarFunctionBase, ScalarFunctionBase>
    operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
+
+   template <>
+   class Sum<VectorFunctionBase, VectorFunctionBase>
+      : public VectorFunctionBase
+   {
+      public:
+         Sum(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs)
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+         {
+            assert(lhs.getDimension() == rhs.getDimension());
+         }
+
+         Sum(const Sum& other)
+            :  VectorFunctionBase(other),
+               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+         {}
+
+         Sum(Sum&& other)
+            :  VectorFunctionBase(std::move(other)),
+               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+         {}
+
+         VectorFunctionBase& getLHS()
+         {
+            return *m_lhs;
+         }
+
+         VectorFunctionBase& getRHS()
+         {
+            return *m_rhs;
+         }
+
+         const VectorFunctionBase& getLHS() const
+         {
+            return *m_lhs;
+         }
+
+         const VectorFunctionBase& getRHS() const
+         {
+            return *m_rhs;
+         }
+
+         int getDimension() const override
+         {
+            return m_lhs->getDimension();
+         }
+
+         void getValue(mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            getLHS().getValue(value, trans, ip);
+            mfem::Vector tmp;
+            getRHS().getValue(tmp, trans, ip);
+            value += tmp;
+         }
+
+         Sum* copy() const noexcept override
+         {
+            return new Sum(*this);
+         }
+
+      private:
+         std::unique_ptr<VectorFunctionBase> m_lhs;
+         std::unique_ptr<VectorFunctionBase> m_rhs;
+   };
+   Sum(const VectorFunctionBase&, const VectorFunctionBase&)
+      -> Sum<VectorFunctionBase, VectorFunctionBase>;
+
+   Sum<VectorFunctionBase, VectorFunctionBase>
+   operator+(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs);
 
    /**
     * @brief %Sum of two MatrixFunctionBase instances.
@@ -148,7 +219,7 @@ namespace Rodin::Variational
          Sum(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {
-            assert(lhs.getRoot().getUUID() == rhs.getRoot().getUUID());
+            assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
          }
 
          Sum(const Sum& other)
@@ -179,14 +250,14 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         ShapeFunctionBase<Space>& getRoot() override
+         ShapeFunctionBase<Space>& getLeaf() override
          {
-            return getRHS().getRoot();
+            return getRHS().getLeaf();
          }
 
-         const ShapeFunctionBase<Space>& getRoot() const override
+         const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return getRHS().getRoot();
+            return getRHS().getLeaf();
          }
 
          int getRows(

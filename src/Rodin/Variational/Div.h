@@ -25,12 +25,12 @@ namespace Rodin::Variational
             assert(m_u.getFiniteElementSpace().getVectorDimension() > 1);
          }
 
-         ShapeFunction<H1, Space>& getRoot() override
+         ShapeFunction<H1, Space>& getLeaf() override
          {
             return m_u;
          }
 
-         const ShapeFunction<H1, Space>& getRoot() const override
+         const ShapeFunction<H1, Space>& getLeaf() const override
          {
             return m_u;
          }

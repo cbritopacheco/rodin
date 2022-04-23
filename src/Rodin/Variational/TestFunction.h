@@ -28,12 +28,12 @@ namespace Rodin::Variational
 
          void operator=(TestFunction&&) = delete;
 
-         ShapeFunctionBase<Test>& getRoot() override
+         ShapeFunctionBase<Test>& getLeaf() override
          {
             return *this;
          }
 
-         const ShapeFunctionBase<Test>& getRoot() const override
+         const ShapeFunctionBase<Test>& getLeaf() const override
          {
             return *this;
 

@@ -33,3 +33,13 @@ target_link_libraries(LevelSetArch2D
   Rodin::Variational
   Rodin::External::MMG
   )
+
+add_executable(LevelSetEigenvalue2D LevelSetEigenvalue2D.cpp)
+target_link_libraries(LevelSetEigenvalue2D
+  PUBLIC
+  Rodin::Mesh
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::External::MMG
+  Spectra::Spectra
+  )

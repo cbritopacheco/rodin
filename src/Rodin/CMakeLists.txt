@@ -3,7 +3,6 @@ set(Rodin_HEADERS
   Core.h
   Alert.h
   Mesh.h
-  Parallel.h
   # Plot module is broken. See below.
   # Plot.h
   Solver.h
@@ -55,7 +54,6 @@ if (RODIN_WITH_PLOT)
 endif()
 
 add_subdirectory(Core)
-add_subdirectory(Parallel)
 add_subdirectory(Mesh)
 add_subdirectory(Test)
 add_subdirectory(Alert)
