@@ -22,6 +22,8 @@ namespace Rodin::Variational
    // ---- FiniteElementCollection -------------------------------------------
    class FiniteElementCollectionBase;
 
+   class L2;
+
    class H1;
 
    // ---- FiniteElementSpace ------------------------------------------------

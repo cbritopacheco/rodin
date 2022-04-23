@@ -207,21 +207,16 @@ namespace Rodin::Variational
     * Represents a vector which may be constructed from a GridFunction which
     * takes on vector values at the mesh vertices.
     */
-   template <class FEC, class Trait>
-   class VectorFunction<GridFunction<FEC, Trait>>
+   template <>
+   class VectorFunction<GridFunctionBase>
       : public VectorFunctionBase
    {
       public:
          /**
           * @brief Constructs a VectorFunction from a vector valued GridFunction.
           */
-         constexpr
-         VectorFunction(GridFunction<FEC, Trait>& u)
-            :  m_dimension(u.getFiniteElementSpace().getVectorDimension()),
-               m_u(u)
-         {}
+         VectorFunction(const GridFunctionBase& u);
 
-         constexpr
          VectorFunction(const VectorFunction& other)
             :  m_dimension(other.m_dimension),
                m_u(other.m_u)
@@ -234,20 +229,7 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            mfem::Mesh* gfMesh = m_u.getHandle().FESpace()->GetMesh();
-            if (trans.mesh == gfMesh)
-            {
-               m_u.getHandle().GetVectorValue(trans, ip, value);
-            }
-            else
-            {
-               mfem::IntegrationPoint coarseIp;
-               mfem::ElementTransformation* coarseTrans = refinedToCoarse(*gfMesh, trans, ip, coarseIp);
-               m_u.getHandle().GetVectorValue(*coarseTrans, coarseIp, value);
-            }
-         }
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
 
          VectorFunction* copy() const noexcept override
          {
@@ -256,11 +238,9 @@ namespace Rodin::Variational
 
       private:
          const size_t m_dimension;
-         GridFunction<FEC, Trait>& m_u;
+         const GridFunctionBase& m_u;
    };
-   template <class FEC, class Trait>
-   VectorFunction(GridFunction<FEC, Trait>&)
-      -> VectorFunction<GridFunction<FEC, Trait>>;
+   VectorFunction(GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
 }
 
 namespace Rodin::Variational::Internal
