@@ -59,7 +59,7 @@ namespace Rodin::External::MMG
     if (retcode != 0)
       Alert::Exception("ISCD::Advection invocation failed.").raise();
 
-    m_ls = ScalarSolution2D::load(outp).setMesh(mesh);
+    m_ls = ScalarSolution2D(mesh).load(outp);
 
     m_t += dt;
   }

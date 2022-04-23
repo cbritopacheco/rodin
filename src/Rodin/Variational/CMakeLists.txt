@@ -43,6 +43,7 @@ set(RodinVariational_SRCS
   Derivative.cpp
   Integral.cpp
   Jacobian.cpp
+  GridFunction.cpp
   Division.cpp
   Grad.cpp
   MatrixFunction.cpp

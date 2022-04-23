@@ -87,7 +87,7 @@ int main(int, char**)
   auto mmgMesh = Cast(Omega).to<MMG::MeshS>();
   auto mmgDist = MMG::DistancerS().distance(mmgMesh).setMesh(mmgMesh);
 
-  auto phi = Cast(mmgDist).to<IncompleteGridFunction>().setFiniteElementSpace(Vh);
+  auto phi = Cast(mmgDist).to<GridFunction<H1>>(Vh);
 
   // Compute extended conormal
   auto n0 = VectorFunction{Dx(phi), Dy(phi), Dz(phi)};
@@ -129,7 +129,7 @@ int main(int, char**)
   conormal.save("conormal.gf");
   Omega.save("Omega.mesh");
 
-  auto mmgCo = Cast(conormal).to<MMG::IncompleteVectorSolutionS>().setMesh(mmgMesh);
+  auto mmgCo = Cast(conormal).to<MMG::VectorSolutionS>(mmgMesh);
   mmgCo.save("mmg.sol");
 
   return 0;

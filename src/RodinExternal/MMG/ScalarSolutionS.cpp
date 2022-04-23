@@ -58,12 +58,10 @@ namespace Rodin::External::MMG
      return *this;
   }
 
-  IncompleteScalarSolutionS ScalarSolutionS::load(
-        const boost::filesystem::path& filename)
+  ScalarSolutionS& ScalarSolutionS::load(const boost::filesystem::path& filename)
   {
-     IncompleteScalarSolutionS res;
-     Load_MMG5_Sol(filename, 3, res.getHandle());
-     return res;
+     Load_MMG5_Sol(filename, 3, getHandle());
+     return *this;
   }
 
   void ScalarSolutionS::save(const boost::filesystem::path& filename)
@@ -94,15 +92,5 @@ namespace Rodin::External::MMG
   MeshS& ScalarSolutionS::getMesh()
   {
      return m_mesh;
-  }
-
-  // ---- IncompleteScalarSolutionS -------------------------------------------
-  IncompleteScalarSolutionS::IncompleteScalarSolutionS()
-    : IncompleteSolutionBase()
-  {
-    getHandle()->ver  = 2;
-    getHandle()->size = 1;
-    getHandle()->type = MMG5_Scalar;
-    getHandle()->dim  = 3;
   }
 }

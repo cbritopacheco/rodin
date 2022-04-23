@@ -23,22 +23,17 @@ namespace Rodin::External::MMG
    class Redistancer2D;
 
    class ScalarSolution2D;
-   class IncompleteScalarSolution2D;
 
    class VectorSolution;
    class VectorSolution2D;
-   class IncompleteVectorSolution2D;
 
    class Mesh3D;
    class ScalarSolution3D;
-   class IncompleteScalarSolution3D;
 
    class MeshS;
    class ScalarSolutionS;
-   class IncompleteScalarSolutionS;
 
    class VectorSolutionS;
-   class IncompleteVectorSolutionS;
 }
 
 #endif
