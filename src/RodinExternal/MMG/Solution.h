@@ -78,46 +78,11 @@ namespace Rodin::External::MMG
       }
 
       virtual void save(const boost::filesystem::path& filename) = 0;
+
+      virtual SolutionBase& load(const boost::filesystem::path& filename) = 0;
+
     private:
        MMG5_pSol m_sol;
-  };
-
-  class IncompleteSolutionBase
-  {
-    public:
-      IncompleteSolutionBase();
-
-      IncompleteSolutionBase(const IncompleteSolutionBase& other);
-
-      IncompleteSolutionBase(IncompleteSolutionBase&& other);
-
-      virtual ~IncompleteSolutionBase();
-
-      MMG5_pSol release()
-      {
-         m_isOwner = false;
-         auto sol = m_sol;
-         m_sol = nullptr;
-         return sol;
-      }
-
-      bool isOwner() const
-      {
-         return m_isOwner;
-      }
-
-      MMG5_pSol& getHandle()
-      {
-         return m_sol;
-      }
-
-      const MMG5_pSol& getHandle() const
-      {
-         return m_sol;
-      }
-    private:
-      MMG5_pSol m_sol;
-      bool m_isOwner;
   };
 }
 

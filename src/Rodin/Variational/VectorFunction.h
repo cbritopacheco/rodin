@@ -18,6 +18,7 @@
 #include "Rodin/Alert.h"
 #include "FormLanguage/Base.h"
 
+#include "Utility.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
@@ -206,22 +207,16 @@ namespace Rodin::Variational
     * Represents a vector which may be constructed from a GridFunction which
     * takes on vector values at the mesh vertices.
     */
-   template <class FEC, class Trait>
-   class VectorFunction<GridFunction<FEC, Trait>>
+   template <>
+   class VectorFunction<GridFunctionBase>
       : public VectorFunctionBase
    {
       public:
          /**
           * @brief Constructs a VectorFunction from a vector valued GridFunction.
           */
-         constexpr
-         VectorFunction(GridFunction<FEC, Trait>& u)
-            :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
-               m_u(u),
-               m_mfemVectorFunction(&u.getHandle())
-         {}
+         VectorFunction(const GridFunctionBase& u);
 
-         constexpr
          VectorFunction(const VectorFunction& other)
             :  m_dimension(other.m_dimension),
                m_u(other.m_u)
@@ -232,6 +227,10 @@ namespace Rodin::Variational
             return m_dimension;
          }
 
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
+
          VectorFunction* copy() const noexcept override
          {
             return new VectorFunction(*this);
@@ -239,13 +238,9 @@ namespace Rodin::Variational
 
       private:
          const size_t m_dimension;
-         GridFunction<FEC, Trait>& m_u;
-
-         mfem::VectorGridFunctionCoefficient m_mfemVectorFunction;
+         const GridFunctionBase& m_u;
    };
-   template <class FEC, class Trait>
-   VectorFunction(GridFunction<FEC, Trait>&)
-      -> VectorFunction<GridFunction<FEC, Trait>>;
+   VectorFunction(GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
 }
 
 namespace Rodin::Variational::Internal

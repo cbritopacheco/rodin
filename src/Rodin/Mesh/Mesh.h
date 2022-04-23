@@ -151,7 +151,7 @@ namespace Rodin
           * @brief Loads a mesh from file.
           * @param[in] filename Name of file to read
           */
-         void load(const boost::filesystem::path& filename);
+         Mesh& load(const boost::filesystem::path& filename);
 
          /**
           * @brief Constructs an empty mesh with no elements.

@@ -17,8 +17,8 @@ int main(int argc, char** argv)
   if (argc == 5)
   {
     auto mesh = Mesh2D::load(argv[1]);
-    auto ls = ScalarSolution2D::load(argv[2]).setMesh(mesh);
-    auto displacement = VectorSolution2D::load(argv[3]).setMesh(mesh);
+    auto ls = ScalarSolution2D(mesh).load(argv[2]);
+    auto displacement = VectorSolution2D(mesh).load(argv[3]);
     double dt = std::atof(argv[4]);
 
     Advect2D(ls, displacement).step(dt);

@@ -58,12 +58,10 @@ namespace Rodin::External::MMG
      return *this;
   }
 
-  IncompleteVectorSolution2D VectorSolution2D::load(
-        const boost::filesystem::path& filename)
+  VectorSolution2D& VectorSolution2D::load(const boost::filesystem::path& filename)
   {
-     IncompleteVectorSolution2D res;
-     Load_MMG5_Sol(filename, 2, res.getHandle());
-     return res;
+     Load_MMG5_Sol(filename, 2, getHandle());
+     return *this;
   }
 
   void VectorSolution2D::save(const boost::filesystem::path& filename)
@@ -94,15 +92,5 @@ namespace Rodin::External::MMG
   Mesh2D& VectorSolution2D::getMesh()
   {
      return m_mesh;
-  }
-
-  // ---- IncompleteVectorSolution2D -------------------------------------------
-  IncompleteVectorSolution2D::IncompleteVectorSolution2D()
-    : IncompleteSolutionBase()
-  {
-    getHandle()->ver  = 2;
-    getHandle()->size = 2;
-    getHandle()->type = MMG5_Vector;
-    getHandle()->dim  = 2;
   }
 }

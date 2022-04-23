@@ -97,9 +97,10 @@ namespace Rodin
       : m_mesh(other.m_mesh)
    {}
 
-   void Mesh<Traits::Serial>::load(const boost::filesystem::path& filename)
+   Mesh<Traits::Serial>& Mesh<Traits::Serial>::load(const boost::filesystem::path& filename)
    {
       m_mesh = mfem::Mesh(filename.c_str());
+      return *this;
    }
 
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(int attr, int bdrLabel)

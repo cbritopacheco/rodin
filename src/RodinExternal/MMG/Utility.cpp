@@ -264,8 +264,8 @@ namespace Rodin::External::MMG
     }
   }
 
-  void MMG5_Sol_To_Rodin_IncompleteGridFunction(
-        const MMG5_pSol src, Variational::IncompleteGridFunction& dst)
+  void MMG5_Sol_To_Rodin_GridFunction(
+        const MMG5_pSol src, Variational::GridFunctionBase& dst)
   {
     assert(src->type == MMG5_Scalar);
     double* data = new double[src->np];
@@ -353,7 +353,9 @@ namespace Rodin::External::MMG
                 "Failed to load solution. Unknown solution type.").raise();
     }
 
-    assert(!sol->m);
+    if (sol->m)
+       MMG5_SAFE_FREE(sol->m);
+
     if (np)
     {
        sol->np  = np;
