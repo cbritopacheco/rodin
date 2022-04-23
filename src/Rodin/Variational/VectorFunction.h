@@ -18,6 +18,7 @@
 #include "Rodin/Alert.h"
 #include "FormLanguage/Base.h"
 
+#include "Utility.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
@@ -216,9 +217,8 @@ namespace Rodin::Variational
           */
          constexpr
          VectorFunction(GridFunction<FEC, Trait>& u)
-            :  m_dimension(u.getFiniteElementSpace().getRangeDimension()),
-               m_u(u),
-               m_mfemVectorFunction(&u.getHandle())
+            :  m_dimension(u.getFiniteElementSpace().getVectorDimension()),
+               m_u(u)
          {}
 
          constexpr
@@ -232,6 +232,23 @@ namespace Rodin::Variational
             return m_dimension;
          }
 
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            mfem::Mesh* gfMesh = m_u.getHandle().FESpace()->GetMesh();
+            if (trans.mesh == gfMesh)
+            {
+               m_u.getHandle().GetVectorValue(trans, ip, value);
+            }
+            else
+            {
+               mfem::IntegrationPoint coarseIp;
+               mfem::ElementTransformation* coarseTrans = refinedToCoarse(*gfMesh, trans, ip, coarseIp);
+               m_u.getHandle().GetVectorValue(*coarseTrans, coarseIp, value);
+            }
+         }
+
          VectorFunction* copy() const noexcept override
          {
             return new VectorFunction(*this);
@@ -240,8 +257,6 @@ namespace Rodin::Variational
       private:
          const size_t m_dimension;
          GridFunction<FEC, Trait>& m_u;
-
-         mfem::VectorGridFunctionCoefficient m_mfemVectorFunction;
    };
    template <class FEC, class Trait>
    VectorFunction(GridFunction<FEC, Trait>&)
