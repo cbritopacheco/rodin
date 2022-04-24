@@ -132,7 +132,7 @@ namespace Rodin::Plot
        */
       const SDL_GLContext& getGLContext() const;
 
-      Eigen::Array2<int> getMousePosition() const;
+      Magnum::Math::Vector2<int> getMousePosition() const;
 
       /**
        * Sets the cursor 

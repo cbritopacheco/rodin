@@ -10,11 +10,11 @@
 #include <memory>
 #include <vector>
 
+#include <Magnum/Array.h>
 
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Event.h"
-
-#include "Rodin/Core/Geometry/Rectangle.h"
+#include "Rodin/Plot/Geometry/Rectangle.h"
 
 namespace Rodin::Plot::Backend::Bases
 {
@@ -33,17 +33,17 @@ namespace Rodin::Plot::Backend::Bases
 
       BaseAxes(
           Artist::Figure& fig,
-          Eigen::Array2<int> bottomLeft,
-          Eigen::Array2<int> size,
+          Magnum::Math::Vector2<int> bottomLeft,
+          Magnum::Math::Vector2<int> size,
           bool frameEnabled);
 
       virtual ~BaseAxes() = default;
 
       virtual void drawContent() = 0;
 
-      Eigen::Array2<int> getSize() const;
+      Magnum::Math::Vector2<int> getSize() const;
 
-      Eigen::Array2<int> getBottomLeft() const;
+      Magnum::Math::Vector2<int> getBottomLeft() const;
 
       Artist::Figure& getFigure();
       const Artist::Figure& getFigure() const;
@@ -59,7 +59,7 @@ namespace Rodin::Plot::Backend::Bases
       BaseAxes& setXLimits(const XLimits& xlim);
       BaseAxes& setYLimits(const YLimits& ylim);
 
-      Core::Geometry::Rectangle<int> getBoundingBox() const;
+      Geometry::Rectangle<int> getBoundingBox() const;
 
       virtual void handle(const Backend::Event::MouseMotionEvent& e) = 0;
       virtual void handle(const Backend::Event::MouseButtonEvent& e) = 0;
@@ -67,8 +67,8 @@ namespace Rodin::Plot::Backend::Bases
     private:
       Artist::Figure&       m_figure;
 
-      Eigen::Array2<int> m_bottomLeft;
-      Eigen::Array2<int> m_size;
+      Magnum::Math::Vector2<int> m_bottomLeft;
+      Magnum::Math::Vector2<int> m_size;
 
       bool          m_frameEnabled;
       XLimits       m_xlim;

@@ -272,7 +272,7 @@ namespace Rodin::Plot
       quit();
   }
 
-  Eigen::Array2<int> Plot::getMousePosition() const
+  Magnum::Math::Vector2<int> Plot::getMousePosition() const
   {
     int x, y;
     SDL_GetMouseState(&x, &y);

@@ -128,7 +128,7 @@ namespace Rodin::Plot::Artist
     for (auto it = m_axes.rbegin(); it != m_axes.rend(); it++)
     {
       auto& ax = *it;
-      if (ax.axes->getBoundingBox().contains(mousePos.matrix()))
+      if (ax.axes->getBoundingBox().contains(mousePos))
       {
         ax.axes->handle(e);
         return;

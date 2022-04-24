@@ -134,6 +134,6 @@ namespace Rodin::Plot::Artist
   };
 }
 
-#include "Figure.ipp"
+#include "Figure.hpp"
 
 #endif

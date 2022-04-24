@@ -16,6 +16,8 @@ if (RODIN_BUILD_EXAMPLES)
   if (RODIN_USE_MPI)
     add_subdirectory(Parallel)
   endif()
-  # Plot module is broken. Uncomment when it has been fixed.
-  # add_subdirectory(Plot)
+
+  if (RODIN_WITH_PLOT)
+    add_subdirectory(Plot)
+  endif()
 endif()
