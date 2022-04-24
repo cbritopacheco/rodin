@@ -1,8 +1,6 @@
 #ifndef RODIN_CORE_GEOMETRY_POINT2D_IPP
 #define RODIN_CORE_GEOMETRY_POINT2D_IPP
 
-#include <Eigen/Core>
-
 #include "Line2D.h"
 #include "Circle.h"
 #include "LineSegment2D.h"
@@ -34,10 +32,10 @@ namespace Rodin::Plot::Geometry
       return LineSegment2D<T>(
           *this,
           Point2D<T>({
-            line.b() * (line.b() * Eigen::Vector2<T>::x() - line.a() *
-                Eigen::Vector2<T>::y()) + line.a() * line.c(),
-            line.a() * (-line.b() * Eigen::Vector2<T>::x() + line.a() *
-                Eigen::Vector2<T>::y()) + line.b() * line.c()
+            line.b() * (line.b() * Magnum::Math::Vector2<T>::x() - line.a() *
+                Magnum::Math::Vector2<T>::y()) + line.a() * line.c(),
+            line.a() * (-line.b() * Magnum::Math::Vector2<T>::x() + line.a() *
+                Magnum::Math::Vector2<T>::y()) + line.b() * line.c()
             }) / (line.a() * line.a() + line.b() * line.b()));
     }
     else

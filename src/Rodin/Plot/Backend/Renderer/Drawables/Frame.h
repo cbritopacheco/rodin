@@ -7,8 +7,6 @@
 #ifndef RODIN_PLOT_BACKEND_DRAWABLES_FRAME_H
 #define RODIN_PLOT_BACKEND_DRAWABLES_FRAME_H
 
-#include <Eigen/Core>
-
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Color.h>
 #include <Magnum/GL/Renderer.h>

@@ -10,6 +10,7 @@
 #include <variant>
 #include <algorithm>
 
+#include <Eigen/Core>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Color.h>
 #include <Magnum/Shaders/FlatGL.h>
