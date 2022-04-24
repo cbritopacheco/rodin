@@ -17,7 +17,7 @@
 
 #include <Corrade/Containers/ArrayViewStl.h>
 
-#include "Rodin/Core/Geometry/LineSegment2D.h"
+#include "Rodin/Plot/Geometry/Line2D.h"
 
 #include "Line2D.h"
 
@@ -57,9 +57,9 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
 
   void Line2D::computeMesh(Magnum::SceneGraph::Camera2D& camera)
   {
-    using LineSegment2D = Core::Geometry::LineSegment2D<float>;
+    using LineSegment2D = Geometry::LineSegment2D<float>;
 
-    static auto perpendicular = [](const Eigen::Vector2<float>& v)
+    static auto perpendicular = [](const Magnum::Math::Vector2<float>& v)
     {
       return Eigen::Vector2<float>(-v.y(), v.x());
     };
@@ -99,19 +99,19 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
       // TODO: We just draw quads for now, until probably the Core::Geometry
       // module is done so we can devise a more elegant solution
       vertices.push_back(Vertex{
-          Magnum::Math::Vector2<float>(segment.start().eval()
+          Magnum::Math::Vector2<float>(segment.start()
               ) - scaledNormal
           });
       vertices.push_back(Vertex{
-              Magnum::Math::Vector2<float>(segment.end().eval()
+              Magnum::Math::Vector2<float>(segment.end()
                   ) - scaledNormal
           });
       vertices.push_back(Vertex{
-              Magnum::Math::Vector2<float>(segment.end().eval()
+              Magnum::Math::Vector2<float>(segment.end()
                   ) + scaledNormal
           });
       vertices.push_back(Vertex{
-              Magnum::Math::Vector2<float>(segment.start().eval()
+              Magnum::Math::Vector2<float>(segment.start()
                   ) + scaledNormal
           });
       index.insert(index.end(), {idx, idx + 1, idx + 2});

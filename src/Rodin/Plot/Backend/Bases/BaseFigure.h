@@ -12,6 +12,8 @@
 #include <iostream>
 #include <cassert>
 
+#include <Eigen/Core>
+
 #include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
 #include "Rodin/Plot/Backend/Event.h"
@@ -42,23 +44,26 @@ namespace Rodin::Plot::Backend::Bases
       std::string getTitle() const;
 
       BaseFigure& setVisible(bool isVisible);
+
       BaseFigure& setTitle(const std::string& title);
+
+      bool makeCurrent();
 
       WindowHandle getWindowHandle();
 
       ConstWindowHandle getWindowHandle() const;
 
-      bool makeCurrent();
+      Eigen::Array2<int> getWindowSize() const;
+
+      Eigen::Array2<float> getDPIScaling() const;
+
+      Eigen::Array2<int> getFrameBufferSize() const;
 
       virtual void drawContent() = 0;
 
       virtual void handle(const Backend::Event::MouseMotionEvent&) = 0;
       virtual void handle(const Backend::Event::MouseButtonEvent&) = 0;
       virtual void handle(const Backend::Event::MouseWheelEvent&) = 0;
-
-      Eigen::Array2<int> getFrameBufferSize() const;
-      Eigen::Array2<int> getWindowSize() const;
-      Eigen::Array2<float> getDPIScaling() const;
 
     private:
       const SDL_GLContext&    m_glContext;
