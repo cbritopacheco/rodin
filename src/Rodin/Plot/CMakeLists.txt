@@ -58,8 +58,8 @@ target_include_directories(RodinVariational
 # ---- Link targets ----------------------------------------------------------
 target_link_libraries(RodinPlot
   PUBLIC
-  Rodin::Rodin
   Eigen3::Eigen
+  Rodin::Rodin
   Corrade::Main
   Magnum::GL
   Magnum::Magnum
@@ -67,7 +67,5 @@ target_link_libraries(RodinPlot
   Magnum::Primitives
   Magnum::SceneGraph
   Magnum::Application
-  PRIVATE
-  MagnumIntegration::Eigen
   )
 

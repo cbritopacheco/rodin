@@ -9,11 +9,10 @@
 
 #include <Magnum/Mesh.h>
 #include <Magnum/Math/Color.h>
-#include <Magnum/Math/Vector2.h>
 #include <Magnum/GL/Renderer.h>
+#include <Magnum/Math/Vector2.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/SceneGraph/Camera.h>
-#include <Magnum/EigenIntegration/Integration.h>
 
 #include <Corrade/Containers/ArrayViewStl.h>
 
@@ -59,11 +58,6 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
   {
     using LineSegment2D = Geometry::LineSegment2D<float>;
 
-    static auto perpendicular = [](const Magnum::Math::Vector2<float>& v)
-    {
-      return Eigen::Vector2<float>(-v.y(), v.x());
-    };
-
     struct Vertex {
       Magnum::Math::Vector2<float>  position;
     };
@@ -85,7 +79,7 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
           {m_xData[i + 1], m_yData[i + 1]}
           );
 
-      Eigen::Vector2<float> normal = perpendicular(segment.direction()).normalized();
+      Magnum::Math::Vector2<float> normal = segment.direction().perpendicular().normalized();
 
       // Use the scaled normal to ensure same thickness regardless of scale
       Magnum::Math::Vector2<float> scaledNormal

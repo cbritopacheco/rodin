@@ -12,7 +12,7 @@
 #include <iostream>
 #include <cassert>
 
-#include <Eigen/Core>
+#include <Magnum/Math/Vector2.h>
 
 #include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
@@ -53,11 +53,11 @@ namespace Rodin::Plot::Backend::Bases
 
       ConstWindowHandle getWindowHandle() const;
 
-      Eigen::Array2<int> getWindowSize() const;
+      Magnum::Math::Vector2<int> getWindowSize() const;
 
-      Eigen::Array2<float> getDPIScaling() const;
+      Magnum::Math::Vector2<float> getDPIScaling() const;
 
-      Eigen::Array2<int> getFrameBufferSize() const;
+      Magnum::Math::Vector2<int> getFrameBufferSize() const;
 
       virtual void drawContent() = 0;
 

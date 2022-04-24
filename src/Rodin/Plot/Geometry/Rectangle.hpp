@@ -1,8 +1,6 @@
 #ifndef RODIN_CORE_GEOMETRY_RECTANGLE_IPP
 #define RODIN_CORE_GEOMETRY_RECTANGLE_IPP
 
-#include <Eigen/Core>
-
 #include "Point2D.h"
 
 #include "Rectangle.h"
@@ -39,11 +37,11 @@ namespace Rodin::Plot::Geometry
     }
     else if constexpr (c == BottomRight)
     {
-      return m_bottomLeft + Eigen::Vector2<T>(m_topRight.x() - m_bottomLeft.x(), 0);
+      return m_bottomLeft + Magnum::Math::Vector2<T>(m_topRight.x() - m_bottomLeft.x(), 0);
     }
     else if constexpr (c == TopLeft)
     {
-      return m_bottomLeft + Eigen::Vector2<T>(0, m_topRight.y() - m_bottomLeft.y());
+      return m_bottomLeft + Magnum::Math::Vector2<T>(0, m_topRight.y() - m_bottomLeft.y());
     }
     else if constexpr (c == TopRight)
     {
