@@ -119,9 +119,7 @@ if (RODIN_BUILD_SRC)
 
   find_package (Spectra 1.0.1 REQUIRED)
 
-  if (RODIN_WITH_PLOT) # TODO: BROKEN
-    message(FATAL_ERROR
-      "Rodin::Plot build is broken. Please set RODIN_WITH_PLOT=OFF")
+  if (RODIN_WITH_PLOT)
     # ---- Magnum ----
     message(STATUS "Configuring Magnum...")
     set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)
