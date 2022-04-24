@@ -1,10 +1,7 @@
 set(RodinCore_HEADERS
-  Common.h
-  )
+  Common.h)
 
-set(RodinCore_SRCS
-  Common.hpp
-  )
+set(RodinCore_SRCS )
 
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)
@@ -27,5 +24,4 @@ target_include_directories(RodinCore
   INTERFACE
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   )
-
 
