@@ -4,7 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <Magnum/EigenIntegration/Integration.h>
 #include <Magnum/Math/Matrix3.h>
 
 #include "Rodin/Plot/Plot.h"
@@ -16,8 +15,8 @@ namespace Rodin::Plot::Artist::Axes
 {
   Axes2D::Axes2D(
       Figure& fig,
-      Eigen::Array2<int> bottomLeft,
-      Eigen::Array2<int> size,
+      Magnum::Math::Vector2<int> bottomLeft,
+      Magnum::Math::Vector2<int> size,
       bool frameEnabled)
     : BaseAxes(fig, bottomLeft, size, frameEnabled),
       m_camera(m_scene.addChild<Backend::Renderer::Object2D>())

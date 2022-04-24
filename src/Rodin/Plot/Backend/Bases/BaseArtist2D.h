@@ -50,6 +50,6 @@ namespace Rodin::Plot::Backend::Bases
   };
 }
 
-#include "BaseArtist2D.ipp"
+#include "BaseArtist2D.hpp"
 
 #endif
