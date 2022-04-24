@@ -27,8 +27,8 @@ namespace Rodin::Plot::Artist::Axes
        * @param frameEnable Enable the drawing of the axes frames
        */
       Axes2D(Figure& figRef,
-          Eigen::Array2<int> bottomLeft,
-          Eigen::Array2<int> size,
+          Magnum::Math::Vector2<int> bottomLeft,
+          Magnum::Math::Vector2<int> size,
           bool frameEnabled = true);
 
       virtual ~Axes2D() = default;
@@ -67,11 +67,11 @@ namespace Rodin::Plot::Artist::Axes
 
       Backend::Renderer::DrawableGroup2D      m_drawables;
 
-      XLimits m_xlim;
-      YLimits m_ylim;
+      // XLimits m_xlim;
+      // YLimits m_ylim;
   };
 }
 
-#include "Axes2D.ipp"
+#include "Axes2D.hpp"
 
 #endif

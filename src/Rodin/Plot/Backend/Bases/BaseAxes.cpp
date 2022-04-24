@@ -14,8 +14,8 @@ namespace Rodin::Plot::Backend::Bases
 {
   BaseAxes::BaseAxes(
       Artist::Figure& figure,
-      Eigen::Array2<int> bottomLeft,
-      Eigen::Array2<int> size,
+      Magnum::Math::Vector2<int> bottomLeft,
+      Magnum::Math::Vector2<int> size,
       bool frameEnabled)
     : m_figure(figure),
       m_bottomLeft(bottomLeft),
@@ -23,12 +23,12 @@ namespace Rodin::Plot::Backend::Bases
       m_frameEnabled(frameEnabled)
   {}
 
-  Eigen::Array2<int> BaseAxes::getBottomLeft() const
+  Magnum::Math::Vector2<int> BaseAxes::getBottomLeft() const
   {
     return m_bottomLeft;
   }
 
-  Eigen::Array2<int> BaseAxes::getSize() const
+  Magnum::Math::Vector2<int> BaseAxes::getSize() const
   {
     return m_size;
   }
@@ -78,10 +78,10 @@ namespace Rodin::Plot::Backend::Bases
     return *this;
   }
 
-  Core::Geometry::Rectangle<int> BaseAxes::getBoundingBox() const
+  Geometry::Rectangle<int> BaseAxes::getBoundingBox() const
   {
-    return Core::Geometry::Rectangle<int>(
-        getBottomLeft().matrix(),
+    return Geometry::Rectangle<int>(
+        getBottomLeft(),
         {
           getBottomLeft().x() + getSize().x(),
           getBottomLeft().y() + getSize().y()

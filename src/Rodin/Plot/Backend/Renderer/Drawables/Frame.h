@@ -27,8 +27,8 @@ namespace Rodin::Plot::Backend::Renderer::Drawables
     explicit Frame(
         Object2D& parent,
         DrawableGroup2D* group,
-        const Eigen::Array2<float> bottomLeft,
-        const Eigen::Array2<float> size,
+        const Magnum::Math::Vector2<float> bottomLeft,
+        const Magnum::Math::Vector2<float> size,
         const Magnum::Color4& color = {0, 0, 0}
         )
       : Bases::BaseDrawable2D(parent, group),

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <cassert>
 
+#include <Magnum/Math/Vector2.h>
+
 #include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
 #include "Rodin/Plot/Backend/Event.h"
@@ -42,23 +44,26 @@ namespace Rodin::Plot::Backend::Bases
       std::string getTitle() const;
 
       BaseFigure& setVisible(bool isVisible);
+
       BaseFigure& setTitle(const std::string& title);
+
+      bool makeCurrent();
 
       WindowHandle getWindowHandle();
 
       ConstWindowHandle getWindowHandle() const;
 
-      bool makeCurrent();
+      Magnum::Math::Vector2<int> getWindowSize() const;
+
+      Magnum::Math::Vector2<float> getDPIScaling() const;
+
+      Magnum::Math::Vector2<int> getFrameBufferSize() const;
 
       virtual void drawContent() = 0;
 
       virtual void handle(const Backend::Event::MouseMotionEvent&) = 0;
       virtual void handle(const Backend::Event::MouseButtonEvent&) = 0;
       virtual void handle(const Backend::Event::MouseWheelEvent&) = 0;
-
-      Eigen::Array2<int> getFrameBufferSize() const;
-      Eigen::Array2<int> getWindowSize() const;
-      Eigen::Array2<float> getDPIScaling() const;
 
     private:
       const SDL_GLContext&    m_glContext;
