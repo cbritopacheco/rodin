@@ -33,20 +33,20 @@ namespace Rodin::Variational
     *
     * | Detail               | Description                                   |
     * |----------------------|-----------------------------------------------|
-    * | Spaces supported     | L2, H1                                        |
+    * | Spaces supported     | H1                                            |
     * | Dimensions supported | 1D, 2D, 3D                                    |
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
-    * | @f$ g @f$            | ScalarFunction                             |
+    * | @f$ g @f$            | ScalarFunction                                |
     */
-   template <class FEC, class Value, class Trait>
-   class DirichletBC<TrialFunction<FEC, Trait>, Value> : public FormLanguage::Base
+   template <class Value, class Trait>
+   class DirichletBC<TrialFunction<H1, Trait>, Value> : public FormLanguage::Base
    {
       static_assert(
             std::is_base_of_v<ScalarFunctionBase, Value> ||
             std::is_base_of_v<VectorFunctionBase, Value>,
             "Value must be derived from either ScalarFunctionBase or VectorFunctionBase");
       public:
-         DirichletBC(const TrialFunction<FEC, Trait>& u, const Value& v)
+         DirichletBC(const TrialFunction<H1, Trait>& u, const Value& v)
             : m_u(u), m_value(v.copy())
          {
             if constexpr (std::is_base_of_v<ScalarFunctionBase, Value>)
@@ -94,7 +94,7 @@ namespace Rodin::Variational
             return *m_value;
          }
 
-         const TrialFunction<FEC, Trait>& getTrialFunction() const
+         const TrialFunction<H1, Trait>& getTrialFunction() const
          {
             return m_u;
          }
@@ -113,23 +113,23 @@ namespace Rodin::Variational
             return new DirichletBC(*this);
          }
       private:
-         const TrialFunction<FEC, Trait>& m_u;
+         const TrialFunction<H1, Trait>& m_u;
          std::unique_ptr<Value> m_value;
          std::set<int> m_essBdr;
    };
-   template <class FES, class Trait>
-   DirichletBC(const TrialFunction<FES, Trait>&, const ScalarFunctionBase&)
-      -> DirichletBC<TrialFunction<FES, Trait>, ScalarFunctionBase>;
-   template <class FES, class Trait>
-   DirichletBC(const TrialFunction<FES, Trait>&, const VectorFunctionBase&)
-      -> DirichletBC<TrialFunction<FES, Trait>, VectorFunctionBase>;
-
    template <class FEC, class Trait>
-   class DirichletBC<Component<TrialFunction<FEC, Trait>>, ScalarFunctionBase>
+   DirichletBC(const TrialFunction<FEC, Trait>&, const ScalarFunctionBase&)
+      -> DirichletBC<TrialFunction<FEC, Trait>, ScalarFunctionBase>;
+   template <class FEC, class Trait>
+   DirichletBC(const TrialFunction<FEC, Trait>&, const VectorFunctionBase&)
+      -> DirichletBC<TrialFunction<FEC, Trait>, VectorFunctionBase>;
+
+   template <class Trait>
+   class DirichletBC<Component<TrialFunction<H1, Trait>>, ScalarFunctionBase>
       : public FormLanguage::Base
    {
       public:
-         DirichletBC(const Component<TrialFunction<FEC, Trait>>& ux, const ScalarFunctionBase& v)
+         DirichletBC(const Component<TrialFunction<H1, Trait>>& ux, const ScalarFunctionBase& v)
             : m_ux(ux), m_value(v.copy())
          {}
 
@@ -166,7 +166,7 @@ namespace Rodin::Variational
             return *m_value;
          }
 
-         const Component<TrialFunction<FEC, Trait>>& getComponent() const
+         const Component<TrialFunction<H1, Trait>>& getComponent() const
          {
             return m_ux;
          }
@@ -181,7 +181,7 @@ namespace Rodin::Variational
             return new DirichletBC(*this);
          }
       private:
-         Component<TrialFunction<FEC, Trait>> m_ux;
+         Component<TrialFunction<H1, Trait>> m_ux;
          std::unique_ptr<ScalarFunctionBase> m_value;
          std::set<int> m_essBdr;
    };

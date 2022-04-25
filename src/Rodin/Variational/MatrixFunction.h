@@ -55,9 +55,11 @@ namespace Rodin::Variational
           *
           * When integrating along interior boundaries sometimes it is
           * necessary to specify which attributes should be interpreted as the
-          * respective "interior" domain. For example, coefficients which
-          * involve the derivatives of a GridFunction need to know the element
-          * to "trace".
+          * respective "interior" domain, since it is not clear which domain
+          * attribute can be used to extend the value continuously up to the
+          * boundary. To resolve this ambiguity the trace domain is interpreted
+          * as the domain which shall be used to make this continuous
+          * extension.
           *
           * @note Setting the trace domain of a MatrixFunctionBase instance
           * does not guarantee that it will taken into consideration when
