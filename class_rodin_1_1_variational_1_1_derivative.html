@@ -62,6 +62,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -172,7 +173,7 @@ $ \ 0 \leq j &lt; d $
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
             </dt>
-            <dd>Abstract base class for objects representing scalar coefficients.</dd>
+            <dd>Abstract base class for objects representing scalar functions.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -185,6 +186,16 @@ $ \ 0 \leq j &lt; d $
               <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>, Trait&gt;&amp; u)</span>
             </dt>
             <dd>Constructs the derivative in the i-th direction of the j-th component.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a49127ad78ee4cd97f2dfcece95675c27" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Computes the value at the given transformation and integration point.</dd>
           </dl>
         </section>
         <section>
@@ -241,6 +252,21 @@ $ u_j $
                   <td><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> in <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a49127ad78ee4cd97f2dfcece95675c27"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />Derivative::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49127ad78ee4cd97f2dfcece95675c27" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Computes the value at the given transformation and integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value at given transformation and integration point.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>

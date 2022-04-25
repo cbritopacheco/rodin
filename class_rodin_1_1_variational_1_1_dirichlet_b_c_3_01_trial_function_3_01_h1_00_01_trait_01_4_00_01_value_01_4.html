@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::DirichletBC&lt;TrialFunction&lt;FEC, Trait&gt;, Value&gt; class | Rodin</title>
+  <title>Rodin::Variational::DirichletBC&lt;TrialFunction&lt;H1, Trait&gt;, Value&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,8 +51,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FEC, class Value, class Trait&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBC&lt;TrialFunction&lt;FEC, Trait&gt;, Value&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class Value, class Trait&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBC&lt;TrialFunction&lt;H1, Trait&gt;, Value&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents a Dirichlet boundary condition.</p>
         <nav class="m-block m-default">
@@ -107,7 +107,7 @@ $ \Gamma_D \subset \partial \Omega $
 <use x='30.935061' y='0' xlink:href='#eq2-g2-64'/>
 <use x='37.764929' y='0' xlink:href='#eq2-g3-10'/>
 </g>
-</svg> specified by the boundary attribute.</p><table class="m-table"><thead><tr><th>Detail</th><th>Description</th></tr></thead><tbody><tr><td>Spaces supported</td><td><a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a></td></tr><tr><td>Dimensions supported</td><td>1D, 2D, 3D</td></tr><tr><td>Continuous operator</td><td><svg class="m-math" style="width: 6.341em; height: 1.093em; vertical-align: -0.243em;" viewBox="0 -8.169366 60.872531 10.493973">
+</svg> specified by the boundary attribute.</p><table class="m-table"><thead><tr><th>Detail</th><th>Description</th></tr></thead><tbody><tr><td>Spaces supported</td><td><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a></td></tr><tr><td>Dimensions supported</td><td>1D, 2D, 3D</td></tr><tr><td>Continuous operator</td><td><svg class="m-math" style="width: 6.341em; height: 1.093em; vertical-align: -0.243em;" viewBox="0 -8.169366 60.872531 10.493973">
 <title>
 $ u = g \text{ on } \Gamma_D$
 </title>
@@ -167,9 +167,9 @@ $ g $
           <section class="m-doc-details" id="a3d70c1843421dd9d2865c3d4f9a68ab6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FEC, class Value, class Trait&gt;
+                template&lt;class Value, class Trait&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const Value&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;FEC, Trait&gt;, Value&gt;&lt;FEC, Value, Trait&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d70c1843421dd9d2865c3d4f9a68ab6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const Value&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;H1, Trait&gt;, Value&gt;&lt;Value, Trait&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d70c1843421dd9d2865c3d4f9a68ab6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -183,9 +183,9 @@ $ g $
           <section class="m-doc-details" id="a893493be3568394839a08005821045da"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FEC, class Value, class Trait&gt;
+                template&lt;class Value, class Trait&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const std::set&lt;int&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;FEC, Trait&gt;, Value&gt;&lt;FEC, Value, Trait&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a893493be3568394839a08005821045da" class="m-doc-self">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const std::set&lt;int&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;H1, Trait&gt;, Value&gt;&lt;Value, Trait&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a893493be3568394839a08005821045da" class="m-doc-self">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>

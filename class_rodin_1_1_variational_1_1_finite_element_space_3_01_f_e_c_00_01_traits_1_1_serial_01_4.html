@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt; class | Rodin</title>
+  <title>Rodin::Variational::FiniteElementSpace&lt;FEC, Traits::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,10 +51,21 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class FEC&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FiniteElementSpace&lt;FEC, Traits::Serial&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</p>
+        <p>Represents a finite element space defined on some element collection.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">FEC</td>
+              <td>Finite element collection</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -62,7 +73,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
@@ -71,39 +82,58 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html" class="m-doc">FiniteElementSpaceBase</a>
             </dt>
-            <dd>Abstract base class for objects representing scalar functions.</dd>
+            <dd>Abstract base class for finite element spaces.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a02518be7090da1dfc5877e976c49e599" class="m-doc">FiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; mesh,
+              int vdim = 1,
+              int order = 1,
+              typename FEC::Basis basis = FEC::DefaultBasis)</span>
             </dt>
-            <dd>Computes the value at the given transformation and integration point.</dd>
+            <dd>Constructs a finite element space supported on the give mesh.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a66c9660fd8bb2cfa3325b6fe9f3cd670"><div>
+          <section class="m-doc-details" id="a02518be7090da1dfc5877e976c49e599"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;&gt;
+                template&lt;class FEC&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;FEC, Traits::<wbr />Serial&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02518be7090da1dfc5877e976c49e599" class="m-doc-self">FiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; mesh,
+              int vdim = 1,
+              int order = 1,
+              typename FEC::Basis basis = FEC::DefaultBasis)</span></span>
             </h3>
-            <p>Computes the value at the given transformation and integration point.</p>
+            <p>Constructs a finite element space supported on the give mesh.</p>
             <table class="m-table m-fullwidth m-flat">
-              <tfoot>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
                 <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Value at given transformation and integration point.</td>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Support of finite element space</td>
                 </tr>
-              </tfoot>
+                <tr>
+                  <td>vdim&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vector dimensions of the finite element functions</td>
+                </tr>
+                <tr>
+                  <td>order&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Element order</td>
+                </tr>
+                <tr>
+                  <td>basis&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Basis of the finite element space</td>
+                </tr>
+              </tbody>
             </table>
           </div></section>
         </section>

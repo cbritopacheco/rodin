@@ -63,6 +63,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -174,7 +175,7 @@ $ A \colon B $
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
             </dt>
-            <dd>Abstract base class for objects representing scalar coefficients.</dd>
+            <dd>Abstract base class for objects representing scalar functions.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -185,6 +186,16 @@ $ A \colon B $
               const <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&amp; b)</span>
             </dt>
             <dd>Constructs the <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between two given matrices.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Computes the value at the given transformation and integration point.</dd>
           </dl>
         </section>
         <section>
@@ -212,6 +223,24 @@ $ A \colon B $
                   <td>Derived instance of <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a></td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a66c9660fd8bb2cfa3325b6fe9f3cd670"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />Dot&lt;MatrixFunctionBase, MatrixFunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Computes the value at the given transformation and integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value at given transformation and integration point.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>

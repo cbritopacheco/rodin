@@ -54,13 +54,29 @@
           <div class="m-doc-template">template&lt;class TrialFEC, class TestFEC&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearForm&lt;TrialFEC, TestFEC, Traits::Serial&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Represents a bilinear form on some finite element space.</p>
+        <p>Represents a serial bilinear form supported on two finite element spaces originating from two instances of FiniteElementCollection.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">TrialFEC</td>
+              <td>Trial FiniteElementCollection</td>
+            </tr>
+            <tr>
+              <td>TestFEC</td>
+              <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> FiniteElementCollection</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -128,15 +144,31 @@ $ V $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-86'/>
 </g>
-</svg> are finite element spaces. A bilinear form can be specified by from one or more bilinear integrators (e.g. <a href="class_rodin_1_1_variational_1_1_diffusion_integrator.html" class="m-doc">DiffusionIntegrator</a>).</p>
+</svg> are finite element spaces.</p><p>A bilinear form may be built using the form language. For example,</p><pre class="m-code"><span class="c1">// Define spaces</span>
+<span class="n">FiniteElementSpace</span><span class="o">&lt;</span><span class="n">H1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">;</span><span class="w"></span>
+<span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
+<span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
+
+<span class="c1">// Define mass bilinear form</span>
+<span class="n">BilinearForm</span><span class="w"> </span><span class="nf">bf</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span>
+<span class="n">bf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span></pre>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>
+            </dt>
+            <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a379348abe30da475af3da509f99af8c7">
-              <span class="m-doc-wrap-bumper"><a href="#a379348abe30da475af3da509f99af8c7" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a379348abe30da475af3da509f99af8c7" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
               <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v)</span>
             </dt>
-            <dd>Constructs a bilinear form defined on some finite element space.</dd>
+            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> from a <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> and <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -171,18 +203,63 @@ $ v $
               <span class="m-doc-wrap-bumper">auto <a href="#aae6100d588f88102472d6b8376a7b3b1" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
             </dt>
             <dd>Builds the bilinear form from a derived instance of <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>.</dd>
-            <dt id="a2fa720c6ab5fb2f0864c052b99f5a84e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2fa720c6ab5fb2f0864c052b99f5a84e" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8c2cdc294215fabd848ee99621b081d3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; lsum) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1bc96d690cfa4df544c7fde9871b3323" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8c6d3fb37702369d4fde3788a2a913c3" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2fa720c6ab5fb2f0864c052b99f5a84e" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Adds a <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> to the bilinear form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9d2b723ccfee04321e90b2619d6adce6" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; lsum) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a41dcbfe748b5995c2da7050e12d48b47" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Builds the bilinear form the given <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35a115f2159d9e7522d02f845c74be64" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a379348abe30da475af3da509f99af8c7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a379348abe30da475af3da509f99af8c7" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v)</span></span>
+            </h3>
+            <p>Constructs a <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> from a <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> and <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a></td>
+                </tr>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a01f627ffc2c989e722da680095f0c8be"><div>
             <h3>
               <div class="m-doc-template">
@@ -320,6 +397,75 @@ $ a(u, v) $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a8c2cdc294215fabd848ee99621b081d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c2cdc294215fabd848ee99621b081d3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; lsum)</span></span>
+            </h3>
+<aside class="m-note m-dim"><h4><a href="todo.html#_todo000003" class="m-doc">Todo</a></h4></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1bc96d690cfa4df544c7fde9871b3323"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bc96d690cfa4df544c7fde9871b3323" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8c6d3fb37702369d4fde3788a2a913c3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c6d3fb37702369d4fde3788a2a913c3" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2fa720c6ab5fb2f0864c052b99f5a84e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fa720c6ab5fb2f0864c052b99f5a84e" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Adds a <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> to the bilinear form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9d2b723ccfee04321e90b2619d6adce6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d2b723ccfee04321e90b2619d6adce6" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; lsum) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+<aside class="m-note m-dim"><h4><a href="todo.html#_todo000002" class="m-doc">Todo</a></h4></aside>
+          </div></section>
           <section class="m-doc-details" id="a41dcbfe748b5995c2da7050e12d48b47"><div>
             <h3>
               <div class="m-doc-template">
@@ -338,7 +484,22 @@ $ a(u, v) $
                   <td><a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> which will be used to build the bilinear form.</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a35a115f2159d9e7522d02f845c74be64"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFEC, class TestFEC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35a115f2159d9e7522d02f845c74be64" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; bfi) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+<aside class="m-note m-dim"><h4><a href="todo.html#_todo000001" class="m-doc">Todo</a></h4></aside>
           </div></section>
         </section>
       </div>

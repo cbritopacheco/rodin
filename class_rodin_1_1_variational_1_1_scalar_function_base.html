@@ -53,7 +53,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ScalarFunctionBase <span class="m-thin">class</span>
         </h1>
-        <p>Abstract base class for objects representing scalar coefficients.</p>
+        <p>Abstract base class for objects representing scalar functions.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,14 +90,29 @@
             <dd>Represents the dot product between two matrices.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_vector_function_base_00_01_vector_function_base_01_4.html" class="m-doc">Dot&lt;VectorFunctionBase, VectorFunctionBase&gt;</a>
+            </dt>
+            <dd>Represents the dot product of two vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_mult_3_01_scalar_function_base_00_01_scalar_function_base_01_4.html" class="m-doc">Mult&lt;ScalarFunctionBase, ScalarFunctionBase&gt;</a>
             </dt>
             <dd>Multiplication of two <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instances.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>
+            </dt>
+            <dd>Represent the power function.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_grid_function_base_01_4.html" class="m-doc">ScalarFunction&lt;GridFunctionBase&gt;</a>
             </dt>
-            <dd>Represents a scalar coefficient which is built from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dd>Represents a scalar function which is built from a scalar valued <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01double_01_5_00_01int_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const double*, int)&gt;&gt;</a>
+            </dt>
+            <dd>Represents a scalar function given by an arbitrary function.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a>
             </dt>
@@ -147,6 +162,19 @@ $ A $
               <span class="m-doc-wrap-bumper">auto <a href="#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp;</span>
             </dt>
             <dd>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae27e43d1aaf4456e7f34d5230a54b8e2" class="m-doc">restrictTo</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6eafe6ec9a1d6873f909290cdf41af3a" class="m-doc">restrictTo</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af1e892f740ede28b6c161dfef53254ec" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Computes the value at the given transformation and integration point.</dd>
           </dl>
         </section>
         <section>
@@ -179,7 +207,7 @@ $ A $
                 </tr>
               </tfoot>
             </table>
-<p>When integrating along interior boundaries sometimes it is necessary to specify which attributes should be interpreted as the respective &quot;interior&quot; domain. For example, coefficients which involve the derivatives of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> need to know the element to &quot;trace&quot;.</p><aside class="m-note m-info"><h4>Note</h4><p>Setting the trace domain of a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance does not guarantee that it will taken into consideration when computing its value. That said, it is up to the subclass to decide how it will use this information which can be obtained via the <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a> method.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a></p></aside>
+<p>When integrating along interior boundaries sometimes it is necessary to specify which attributes should be interpreted as the respective &quot;interior&quot; domain, since it is not clear which domain attribute can be used to extend the value continuously up to the boundary. To resolve this ambiguity the trace domain is interpreted as the domain which shall be used to make this continuous extension.</p><aside class="m-note m-info"><h4>Note</h4><p>Setting the trace domain of a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance does not guarantee that it will taken into consideration when computing its value. That said, it is up to the subclass to decide how it will use this information which can be obtained via the <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a> method.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a3d346522fa20da0b303cb46cbfb97409"><div>
             <h3>
@@ -187,6 +215,56 @@ $ A $
             </h3>
             <p>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</p>
 <p>The domains to trace are interpreted as the domains where there shall be a continuous extension from values to the interior boundaries. If the trace domain is empty, then this has the semantic value that it has not been specified yet.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae27e43d1aaf4456e7f34d5230a54b8e2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&gt; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae27e43d1aaf4456e7f34d5230a54b8e2" class="m-doc-self">restrictTo</a>(</span><span class="m-doc-wrap">int attr) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute specifying the restriction domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Restricts the function to the given attribute.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6eafe6ec9a1d6873f909290cdf41af3a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&gt; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6eafe6ec9a1d6873f909290cdf41af3a" class="m-doc-self">restrictTo</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Restricts the function to the given attributes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af1e892f740ede28b6c161dfef53254ec"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />ScalarFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1e892f740ede28b6c161dfef53254ec" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Computes the value at the given transformation and integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value at given transformation and integration point.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

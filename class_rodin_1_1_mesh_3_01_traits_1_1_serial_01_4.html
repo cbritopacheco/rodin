@@ -61,6 +61,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -68,6 +69,15 @@
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>
+            </dt>
+            <dd>Abstract base class for <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> objects.</dd>
+          </dl>
+        </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -124,6 +134,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#acd63496fbf1f2d60dddc6aa7d11c733b" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Indicates whether the mesh is a submesh or not.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2622fa5ca5a442264d8e990dfc900c2a" class="m-doc">isParallel</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Indicates if the <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> object has been parallelized.</dd>
           </dl>
         </section>
         <section>
@@ -146,6 +160,12 @@
                   <td>Name of file to read</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="aeda2178f44774d0de1984f29715cfb11"><div>
@@ -238,6 +258,24 @@
 <span class="w">   </span><span class="c1">// Cast is well defined</span>
 <span class="w">   </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a2622fa5ca5a442264d8e990dfc900c2a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2622fa5ca5a442264d8e990dfc900c2a" class="m-doc-self">isParallel</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Indicates if the <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> object has been parallelized.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if the <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> has been parallelized, false otherwise.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh_3_01_traits_1_1_serial_01_4.html#a51021126098595338e367d7ee42aa24c" class="m-doc">Mesh&lt;Traits::<wbr />Parallel&gt;</a></p><p>Mesh&lt;Traits::Serial&gt;::parallelize()</p></aside>
           </div></section>
         </section>
       </div>

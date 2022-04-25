@@ -83,6 +83,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a12754d41b6029ac01247ee48b7b2c394" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension of the vector object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aaf98b9b72b0b23edb42c7dc00299ab40" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::Vector&amp; value,
+              mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Computes the value at the given transformation and integration point.</dd>
           </dl>
         </section>
         <section>
@@ -100,6 +106,25 @@
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Dimension of vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaf98b9b72b0b23edb42c7dc00299ab40"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Division&lt;VectorFunctionBase, ScalarFunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf98b9b72b0b23edb42c7dc00299ab40" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::Vector&amp; value,
+              mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Computes the value at the given transformation and integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value at given transformation and integration point.</td>
                 </tr>
               </tfoot>
             </table>

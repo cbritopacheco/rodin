@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt; class | Rodin</title>
+  <title>Rodin::Variational::BilinearFormIntegratorBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,61 +51,50 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearFormIntegratorBase <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</p>
+        <p>Abstract base class for bilinear form integrators.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>
             </dt>
-            <dd>Abstract base class for objects representing scalar functions.</dd>
+            <dd>Represents an integrator which integrates over the domain elements.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a9cb8f1b33749422d9fead0d4aa03e43c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9cb8f1b33749422d9fead0d4aa03e43c" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b4a937f6e6574be48ecb4e7bdc0c04a" class="m-doc">Trial</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Computes the value at the given transformation and integration point.</dd>
+            <dd>Gets reference to trial function.</dd>
+            <dt id="a247b19d0513b8b9b09fd07e271f06d81">
+              <span class="m-doc-wrap-bumper">auto <a href="#a247b19d0513b8b9b09fd07e271f06d81" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a0c1982bd20a911687e4a2b59a1517f93" class="m-doc">Test</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets reference to test function.</dd>
+            <dt id="a280cf67bc04b28acf8576e34774b8c3c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a280cf67bc04b28acf8576e34774b8c3c" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets the attributes of the elements being integrated.</dd>
+            <dt id="a4bcc62d6b0e58426f441cf4a4d07e1fc">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4bcc62d6b0e58426f441cf4a4d07e1fc" class="m-doc-self">getIntegratorRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_variational.html#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets the integration region.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a66c9660fd8bb2cfa3325b6fe9f3cd670"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Computes the value at the given transformation and integration point.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Value at given transformation and integration point.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>
