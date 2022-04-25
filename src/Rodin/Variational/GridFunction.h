@@ -33,7 +33,6 @@
 namespace Rodin::Variational
 {
    /**
-    * @internal
     * @brief Abstract class for GridFunction objects.
     */
    class GridFunctionBase
@@ -49,12 +48,35 @@ namespace Rodin::Variational
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
 
+         /**
+          * @brief Searches for the maximum value in the grid function data.
+          * @returns Maximum value in grid function.
+          *
+          * This function will compute the maximum value in the grid function
+          * data array.
+          */
          double max() const;
 
+         /**
+          * @brief Searches the minimum value in the grid function data.
+          * @returns Minimum value in grid function.
+          *
+          * This function will compute the minimum value in the grid function
+          * data array.
+          */
          double min() const;
 
+         /**
+          * @brief Updates the state after a refinement in the mesh.
+          *
+          * This method will update the grid function after a call to the
+          * @ref MeshBase::refine() "refine()" method.
+          */
          GridFunctionBase& update();
 
+         /**
+          * @brief Bulk assigns the value to the whole data array.
+          */
          GridFunctionBase& operator=(double v);
 
          /**
@@ -77,41 +99,122 @@ namespace Rodin::Variational
 
          GridFunctionBase& load(const boost::filesystem::path& filename);
 
+         /**
+          * @brief Addition of a scalar value.
+          */
          GridFunctionBase& operator+=(double t);
+
+         /**
+          * @brief Substraction of a scalar value.
+          */
          GridFunctionBase& operator-=(double t);
+
+         /**
+          * @brief Multiplication by a scalar value.
+          */
          GridFunctionBase& operator*=(double t);
+
+         /**
+          * @brief Division by a scalar value.
+          */
          GridFunctionBase& operator/=(double t);
 
+         /**
+          * @brief Addition of a scalar function.
+          */
          GridFunctionBase& operator+=(const ScalarFunctionBase& v);
+
+         /**
+          * @brief Substraction of a scalar function.
+          */
          GridFunctionBase& operator-=(const ScalarFunctionBase& v);
+
+         /**
+          * @brief Multiplication by a scalar function.
+          */
          GridFunctionBase& operator*=(const ScalarFunctionBase& v);
+
+         /**
+          * @brief Division by a scalar function.
+          */
          GridFunctionBase& operator/=(const ScalarFunctionBase& v);
 
+         /**
+          * @brief Addition of a vector function.
+          * @note The grid function must have the same vector dimension as the
+          * vector function.
+          */
          GridFunctionBase& operator+=(const VectorFunctionBase& v);
+
+         /**
+          * @brief Substraction of a vector function.
+          * @note The grid function must have the same vector dimension as the
+          * vector function.
+          */
          GridFunctionBase& operator-=(const VectorFunctionBase& v);
 
+         /**
+          * @brief Projection of a scalar function.
+          */
          GridFunctionBase& operator=(const ScalarFunctionBase& v)
          {
             return project(v);
          }
 
+         /**
+          * @brief Projection of a vector function.
+          */
          GridFunctionBase& operator=(const VectorFunctionBase& v)
          {
             return project(v);
          }
 
+         /**
+          * @brief Projects a ScalarFunctionBase instance
+          *
+          * This function will project a ScalarFunctionBase instance on the
+          * domain elements with the given attribute.
+          *
+          * It is a convenience function to call
+          * project(const ScalarFunctionBase&, const std::set<int>&) with one
+          * attribute.
+          */
          GridFunctionBase& project(const ScalarFunctionBase& v, int attr)
          {
             return project(v, std::set<int>{attr});
          }
 
+         /**
+          * @brief Projects a VectorFunctionBase instance
+          *
+          * This function will project a VectorFunctionBase instance on the
+          * domain elements with the given attribute.
+          *
+          * It is a convenience function to call
+          * project(const VectorFunctionBase&, const std::set<int>&) with one
+          * attribute.
+          */
          GridFunctionBase& project(const VectorFunctionBase& v, int attr)
          {
             return project(v, std::set<int>{attr});
          }
 
+         /**
+          * @brief Projects a ScalarFunctionBase instance on the grid function.
+          *
+          * This function will project a ScalarFunctionBase instance on the
+          * domain elements with the given attributes. If the attribute set is
+          * empty, this function will project over all elements in the mesh.
+          */
          GridFunctionBase& project(const ScalarFunctionBase& s, const std::set<int>& attrs = {});
 
+         /**
+          * @brief Projects a VectorFunctionBase instance on the grid function.
+          *
+          * This function will project a VectorFunctionBase instance on the
+          * domain elements with the given attributes. If the attribute set is
+          * empty, this function will project over all elements in the mesh.
+          */
          GridFunctionBase& project(const VectorFunctionBase& s, const std::set<int>& attrs = {});
 
          /**
@@ -185,6 +288,10 @@ namespace Rodin::Variational
                m_gf(other.m_gf)
          {}
 
+         /**
+          * @brief Move constructs the grid function.
+          * @param[in] other Other grid function to move.
+          */
          GridFunction(GridFunction&& other)
             :  GridFunctionBase(std::move(other)),
                m_fes(std::move(other.m_fes)),
@@ -309,12 +416,6 @@ namespace Rodin::Variational
             return m_fes.get();
          }
 
-         /**
-          * @brief Gets the finite element space to which the function
-          * belongs to.
-          * @returns Constant reference to finite element space to which the
-          * function belongs to.
-          */
          const FiniteElementSpace<H1>& getFiniteElementSpace() const override
          {
             return m_fes.get();
@@ -364,6 +465,10 @@ namespace Rodin::Variational
                m_gf(other.m_gf)
          {}
 
+         /**
+          * @brief Move constructs the grid function.
+          * @param[in] other Other grid function to move.
+          */
          GridFunction(GridFunction&& other)
             :  GridFunctionBase(std::move(other)),
                m_fes(std::move(other.m_fes)),
@@ -424,12 +529,6 @@ namespace Rodin::Variational
             return m_fes.get();
          }
 
-         /**
-          * @brief Gets the finite element space to which the function
-          * belongs to.
-          * @returns Constant reference to finite element space to which the
-          * function belongs to.
-          */
          const FiniteElementSpace<L2>& getFiniteElementSpace() const override
          {
             return m_fes.get();

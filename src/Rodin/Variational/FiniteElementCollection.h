@@ -11,6 +11,11 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Abstract base class for finite element collections.
+    * @see L2
+    * @see H1
+    */
    class FiniteElementCollectionBase
    {
       public:

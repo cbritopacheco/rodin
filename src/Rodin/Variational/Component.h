@@ -16,6 +16,10 @@ namespace Rodin::Variational
    class Component<TrialFunction<FEC, Trait>>
    {
       public:
+         /**
+          * @brief Constructs the component object from a TrialFunction and its
+          * component index.
+          */
          Component(const TrialFunction<FEC, Trait>& u, int component)
             : m_u(u),
               m_idx(component)
@@ -55,6 +59,10 @@ namespace Rodin::Variational
    class Component<GridFunction<FEC, Trait>>
    {
       public:
+         /**
+          * @brief Constructs the component object from a GridFunction and its
+          * component index.
+          */
          Component(GridFunction<FEC, Trait>& u, int component)
             : m_u(u),
               m_idx(component)
@@ -80,12 +88,14 @@ namespace Rodin::Variational
             return m_idx;
          }
 
-         Component& projectOnBoundary(const ScalarFunctionBase& s, int attr)
+         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
+         projectOnBoundary(const ScalarFunctionBase& s, int attr)
          {
             return projectOnBoundary(s, std::set<int>{attr});
          }
 
-         Component& projectOnBoundary(const ScalarFunctionBase& s, const std::set<int>& attrs = {})
+         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
+         projectOnBoundary(const ScalarFunctionBase& s, const std::set<int>& attrs = {})
          {
             int maxAttr = *m_u.getFiniteElementSpace()
                               .getMesh()
