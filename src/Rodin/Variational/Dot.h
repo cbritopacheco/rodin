@@ -27,6 +27,16 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the dot product of two vectors
+    *
+    * For two given @f$ n @f$ dimensional vectors, their dot product @f$ u
+    * \cdot v @f$ is defined as
+    * @f[
+    *    u \colon v = \sum_{i = 1} u_i v_i
+    * @f]
+    * where @f$ u_i @f$, @f$ v_i @f$ are the respective entries of each vector.
+    */
    template <>
    class Dot<VectorFunctionBase, VectorFunctionBase> : public ScalarFunctionBase
    {
@@ -77,9 +87,6 @@ namespace Rodin::Variational
     * @f[
     *    A \colon B = \sum_{i = 1}^n \sum_{j = 1}^m A_{ij} B_{ij} = \mathrm{tr}(B^T A)
     * @f]
-    *
-    * @tparam A Derived type from MatrixFunctionBase
-    * @tparam B Derived type from MatrixFunctionBase
     */
    template <>
    class Dot<MatrixFunctionBase, MatrixFunctionBase> : public ScalarFunctionBase
@@ -123,6 +130,12 @@ namespace Rodin::Variational
    Dot(const MatrixFunctionBase&, const MatrixFunctionBase&)
       -> Dot<MatrixFunctionBase, MatrixFunctionBase>;
 
+   /**
+    * @brief Represents the dot product between insntances of
+    * ScalarFunctionBase and ShapeFunctionBase.
+    *
+    * This corresponds to the usual multiplication.
+    */
    template <ShapeFunctionSpaceType Space>
    class Dot<ScalarFunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
@@ -348,9 +361,7 @@ namespace Rodin::Variational
       -> Dot<VectorFunctionBase, ShapeFunctionBase<Space>>;
 
    /**
-    * @brief Dot product between instances of Lhs and Rhs
-    * @tparam Lhs Left-hand side operand type
-    * @tparam Rhs Right-hand side operand type
+    * @brief Dot product between vector value ShapeFunctionBase instances.
     */
    template <>
    class Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>

@@ -13,12 +13,22 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Divergence of an H1 ShapeFunction.
+    * @brief Represents the divergence @f \text{div} u @f of a function @f$ u \in H^1 @f$.
+    *
+    * This class represents the sum of the first derivatives of a
+    * vector valued H1 ShapeFunction.
+    * @f[
+    *    \text{div} u
+    * @f]
     */
    template <ShapeFunctionSpaceType Space>
    class Div<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
    {
       public:
+         /**
+          * @brief Constructs Div object
+          * @param[in] u ShapeFunction to be differentiated
+          */
          Div(ShapeFunction<H1, Space>& u)
             : m_u(u)
          {

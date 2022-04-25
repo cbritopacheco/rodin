@@ -18,6 +18,9 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Abstract base class for finite element spaces.
+    */
    class FiniteElementSpaceBase
    {
       public:
@@ -50,11 +53,24 @@ namespace Rodin::Variational
          virtual const mfem::FiniteElementSpace& getHandle() const = 0;
    };
 
+   /**
+    * @brief Represents a finite element space defined on some element
+    * collection.
+    * @tparam FEC Finite element collection
+    */
    template <class FEC>
    class FiniteElementSpace<FEC, Traits::Serial>
       : public FiniteElementSpaceBase
    {
       public:
+         /**
+          * @brief Constructs a finite element space supported on the give
+          * mesh.
+          * @param[in] mesh Support of finite element space
+          * @param[in] vdim Vector dimensions of the finite element functions
+          * @param[in] order Element order
+          * @param[in] basis Basis of the finite element space
+          */
          FiniteElementSpace(
                Mesh<Traits::Serial>& mesh,
                int vdim = 1, int order = 1, typename FEC::Basis basis = FEC::DefaultBasis)
