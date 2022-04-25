@@ -14,9 +14,31 @@ namespace Rodin
 {
    class MeshBase;
 
+   /**
+    * @brief Templated class for Mesh.
+    * @tparam Trait Indicates whether if Mesh is in a parallel context. It is
+    * one of Traits::Serial or Traits::Parallel.
+    *
+    * The Mesh class represents an n-dimensional support for instances of type
+    * GridFunctionBase or ShapeFunctionBase.
+    *
+    * There are two possible specializations:
+    * - Mesh<Traits::Serial>
+    * - Mesh<Traits::Parallel>
+    */
    template <class Trait = Traits::Serial>
    class Mesh;
 
+   /**
+    * @brief Templated class for SubMesh.
+    *
+    * @tparam Trait Indicates whether the Mesh is in a parallel context. It is
+    * one of Traits::Serial or Traits::Parallel.
+    *
+    * There are two possible specializations:
+    * - SubMesh<Traits::Serial>
+    * - SubMesh<Traits::Parallel>
+    */
    template <class Trait>
    class SubMesh;
 }

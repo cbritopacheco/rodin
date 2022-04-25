@@ -5,9 +5,23 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the identity matrix function.
+    *
+    * This class represents the matrix function, which at each point, returns
+    * the @f$ n @f$ dimensional identity matrix:
+    *
+    * @f$
+    *    F(x) = I_n
+    * @f$
+    */
    class IdentityMatrix : public MatrixFunctionBase
    {
       public:
+         /**
+          * @brief Constructs the identity matrix function.
+          * @param[in] n Dimension of identity matrix
+          */
          IdentityMatrix(int n)
             : m_n(n)
          {}

@@ -97,6 +97,14 @@ namespace Rodin::Variational
    // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 
+   /**
+    * @brief Represents a serial bilinear form supported on two finite element
+    * spaces originating from two instances of FiniteElementCollection.
+    * @tparam TrialFEC Trial FiniteElementCollection
+    * @tparam TestFEC Test FiniteElementCollection
+    * @tparam Trait Indicates if the BilinearForm is in a parallel context. It is
+    * one of Traits::Serial or Traits::Parallel.
+    */
    template <class TrialFEC, class TestFEC, class Trait>
    class BilinearForm;
 
