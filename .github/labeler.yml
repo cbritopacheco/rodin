@@ -1,26 +1,32 @@
 docs:
 - any: ['doc/**/*']
 
-Rodin::MMG:
+examples:
+- any: ['examples/**/*']
+
+cmake:
+- any: ['cmake/**/*']
+
+mmg:
 - any: ['src/RodinExternal/MMG/**/*']
 
-Rodin::Mesh:
+mesh:
 - any: ['src/Rodin/Mesh/**/*']
 
-Rodin::Variational:
+variational:
 - any: ['src/Rodin/Variational/**/*']
 
-Rodin::Solver:
+solver:
 - any: ['src/Rodin/Solver/**/*']
 
-Rodin::Utility:
+utility:
 - any: ['src/Rodin/Utility/**/*']
 
-Rodin::Core:
+core:
 - any: ['src/Rodin/Core/**/*']
 
-Rodin::Alert:
+alerts:
 - any: ['src/Rodin/Alert/**/*']
 
-Rodin::Plot:
+plotting:
 - any: ['src/Rodin/Plot/**/*']
