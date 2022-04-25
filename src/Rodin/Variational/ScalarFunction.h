@@ -23,7 +23,7 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Abstract base class for objects representing scalar coefficients.
+    * @brief Abstract base class for objects representing scalar functions.
     */
    class ScalarFunctionBase
       : public FormLanguage::Buildable<mfem::Coefficient>
@@ -54,9 +54,11 @@ namespace Rodin::Variational
           *
           * When integrating along interior boundaries sometimes it is
           * necessary to specify which attributes should be interpreted as the
-          * respective "interior" domain. For example, coefficients which
-          * involve the derivatives of a GridFunction need to know the element
-          * to "trace".
+          * respective "interior" domain, since it is not clear which domain
+          * attribute can be used to extend the value continuously up to the
+          * boundary. To resolve this ambiguity the trace domain is interpreted
+          * as the domain which shall be used to make this continuous
+          * extension.
           *
           * @note Setting the trace domain of a ScalarFunctionBase instance
           * does not guarantee that it will taken into consideration when
@@ -91,10 +93,24 @@ namespace Rodin::Variational
 
          virtual ~ScalarFunctionBase() = default;
 
+         /**
+          * @returns Restricts the function to the given attribute.
+          * @param[in] attr Attribute specifying the restriction domain
+          */
          virtual Restriction<ScalarFunctionBase> restrictTo(int attr);
 
+         /**
+          * @returns Restricts the function to the given attributes.
+          * @param[in] attr Set of attributes specifying the restriction
+          * domain
+          */
          virtual Restriction<ScalarFunctionBase> restrictTo(const std::set<int>& attrs);
 
+         /**
+          * @brief Computes the value at the given transformation and
+          * integration point.
+          * @returns Value at given transformation and integration point.
+          */
          virtual double getValue(
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
@@ -187,10 +203,8 @@ namespace Rodin::Variational
       -> ScalarFunction<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
 
    /**
-    * @brief Represents a scalar coefficient which is built from a
+    * @brief Represents a scalar function which is built from a scalar valued
     * GridFunction.
-    *
-    * @tparam FEC Finite element collection
     */
    template <>
    class ScalarFunction<GridFunctionBase>
@@ -198,14 +212,16 @@ namespace Rodin::Variational
    {
       public:
          /**
-          * @brief Constructs a ScalarFunction from a GridFunction u
-          * @param[in] u GridFunction which belongs to the finite element
-          * collection FEC
+          * @brief Constructs a ScalarFunction from a scalar valued grid function
+          * @param[in] u Grid function
           */
          ScalarFunction(const GridFunctionBase& u);
 
          ScalarFunction(const ScalarFunction& other) = default;
 
+         /**
+          * @returns Constant reference to underlying grid function.
+          */
          const GridFunctionBase& getValue() const
          {
             return m_u;
@@ -225,23 +241,36 @@ namespace Rodin::Variational
    };
    ScalarFunction(GridFunctionBase&) -> ScalarFunction<GridFunctionBase>;
 
+   /**
+    * @brief Represents a scalar function given by an arbitrary function.
+    *
+    * This class represents a ScalarFunction whose values are given by any
+    * function taking `double*` data array and `int` dimension parameter.
+    */
    template <>
    class ScalarFunction<std::function<double(const double*, int)>>
       : public ScalarFunctionBase
    {
       public:
+         /**
+          * @brief Constructs a ScalarFunction from an std::function.
+          */
          ScalarFunction(std::function<double(const double*, int)> f)
             : m_f(f)
          {}
 
          ScalarFunction(const ScalarFunction& other) = default;
 
+         /**
+          * @returns Function used to compute the value of the ScalarFunction
+          */
          std::function<double(const double*, int)> getValue() const
          {
             return m_f;
          }
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         double getValue(mfem::ElementTransformation& trans, const
+               mfem::IntegrationPoint& ip) const override
          {
             double x[3];
             mfem::Vector transip(x, 3);
