@@ -7,11 +7,25 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represent the power function.
+    *
+    * This class represents the exponentiation of the base value @f$ x @f$
+    * to the power @f$ p @f$:
+    * @f$
+    *    f(x) = x^p
+    * @f$
+    */
    template <class T>
    class Pow : public ScalarFunctionBase
    {
       static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
       public:
+         /**
+          * @bref Constructs the power object
+          * @param[in] s Base value
+          * @param[in] p Power
+          */
          Pow(const ScalarFunctionBase& s, T p)
             : m_s(s.copy()),
               m_p(p)

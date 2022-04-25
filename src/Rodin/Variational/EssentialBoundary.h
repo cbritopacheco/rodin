@@ -16,6 +16,9 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the essential boundary of a variational problem.
+    */
    class EssentialBoundary
    {
       using ScalarValue = std::unique_ptr<ScalarFunctionBase>;

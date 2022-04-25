@@ -16,14 +16,31 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Abstract base class for objects of type LinearForm.
+    */
    class LinearFormBase
    {
       public:
+         /**
+          * @brief Updates the state after a refinement in the mesh.
+          *
+          * This method will update the bilinear form after a call to the
+          * @ref MeshBase::refine() "refine()" method.
+          */
          void update()
          {
             return getHandle().Update();
          }
 
+         /**
+          * @brief Assembles the linear form.
+          *
+          * This method will assemble the underlying vector associated
+          * the linear form.
+          *
+          * @see getVector()
+          */
          void assemble()
          {
             return getHandle().Assemble();
@@ -47,10 +64,22 @@ namespace Rodin::Variational
             return static_cast<const mfem::Vector&>(getHandle());
          }
 
+         /**
+          * @brief Builds the linear form the given LinearFormIntegratorBase
+          * instance
+          * @param[in] lfi Integrator which will be used to build the linear form.
+          * @returns Reference to this (for method chaining)
+          */
          virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
 
          virtual LinearFormBase& from(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
 
+         /**
+          * @brief Builds the linear form the given LinearFormIntegratorBase
+          * instance
+          * @param[in] lfi Integrator which will be used to build the linear form.
+          * @returns Reference to this (for method chaining)
+          */
          virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi) = 0;
 
          virtual LinearFormBase& add(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
