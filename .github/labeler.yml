@@ -1,26 +1,26 @@
 docs:
 - any: ['doc/**/*']
 
-mmg:
+Rodin::MMG:
 - any: ['src/RodinExternal/MMG/**/*']
 
-mesh:
+Rodin::Mesh:
 - any: ['src/Rodin/Mesh/**/*']
 
-variational:
+Rodin::Variational:
 - any: ['src/Rodin/Variational/**/*']
 
-solver:
+Rodin::Solver:
 - any: ['src/Rodin/Solver/**/*']
 
-utility:
+Rodin::Utility:
 - any: ['src/Rodin/Utility/**/*']
 
-core:
+Rodin::Core:
 - any: ['src/Rodin/Core/**/*']
 
-alerts:
+Rodin::Alert:
 - any: ['src/Rodin/Alert/**/*']
 
-plotting:
+Rodin::Plot:
 - any: ['src/Rodin/Plot/**/*']
