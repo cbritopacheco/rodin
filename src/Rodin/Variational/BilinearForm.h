@@ -17,14 +17,16 @@
 namespace Rodin::Variational
 {
    /**
-    * @internal
-    * @brief Abstract base class for objects representing bilinear forms.
+    * @brief Abstract base class for objects of type BilinearForm.
     */
    class BilinearFormBase
    {
       public:
          /**
-          * @brief Reflects the changes in the mesh.
+          * @brief Updates the state after a refinement in the mesh.
+          *
+          * This method will update the bilinear form after a call to the
+          * @ref MeshBase::refine() "refine()" method.
           */
          void update()
          {
@@ -33,6 +35,11 @@ namespace Rodin::Variational
 
          /**
           * @brief Assembles the bilinear form.
+          *
+          * This method will assemble the underlying sparse matrix associated
+          * the bilinear form.
+          *
+          * @see getMatrix()
           */
          void assemble()
          {
@@ -41,7 +48,8 @@ namespace Rodin::Variational
 
          /**
           * @brief Gets the reference to the (local) associated sparse matrix
-          * to the BilinearForm.
+          * to the bilinear form.
+          * @returns Reference to the associated sparse matrix.
           */
          mfem::SparseMatrix& getMatrix()
          {
@@ -50,7 +58,8 @@ namespace Rodin::Variational
 
          /**
           * @brief Gets the reference to the (local) associated sparse matrix
-          * to the BilinearForm.
+          * to the bilinear form.
+          * @returns Constant reference to the associated sparse matrix.
           */
          const mfem::SparseMatrix& getMatrix() const
          {
@@ -73,29 +82,48 @@ namespace Rodin::Variational
           * @brief Builds the bilinear form the given BilinearFormDomainIntegrator.
           * @param[in] bfi BilinearFormDomainIntegrator which will be used to
           * build the bilinear form.
+          * @returns Reference to this (for method chaining)
           */
          virtual BilinearFormBase& from(
                const BilinearFormIntegratorBase& bfi) = 0;
 
+         /**
+          * @todo
+          */
          virtual BilinearFormBase& from(
                const FormLanguage::BilinearFormIntegratorSum& bfi) = 0;
 
          /**
           * @brief Adds a BilinearFormDomainIntegrator to the bilinear form.
+          * @returns Reference to this (for method chaining)
           */
          virtual BilinearFormBase& add(
                const BilinearFormIntegratorBase& bfi) = 0;
 
+         /**
+          * @todo
+          */
          virtual BilinearFormBase& add(
                const FormLanguage::BilinearFormIntegratorSum& lsum) = 0;
 
+         /**
+          * @brief Gets the reference to the associated TrialFunction object.
+          * @returns Reference to this (for method chaining)
+          */
          virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
 
+         /**
+          * @brief Gets the reference to the associated TestFunction object.
+          * @returns Reference to this (for method chaining)
+          */
          virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
    };
 
    /**
-    * @brief Represents a bilinear form on some finite element space
+    * @brief Represents a serial bilinear form supported on two finite element
+    * spaces originating from two instances of FiniteElementCollection.
+    * @tparam TrialFEC Trial FiniteElementCollection
+    * @tparam TestFEC Test FiniteElementCollection
     *
     * An object of type BilinearForm represents a linear map
     * @f[
@@ -104,9 +132,19 @@ namespace Rodin::Variational
     *        (u, v) &\mapsto a(u, v)
     * \end{aligned}
     * @f]
-    * where @f$ U @f$ and @f$ V @f$ are finite element spaces. A bilinear form
-    * can be specified by from one or more bilinear integrators (e.g.
-    * DiffusionIntegrator).
+    * where @f$ U @f$ and @f$ V @f$ are finite element spaces.
+    *
+    * A bilinear form may be built using the form language. For example,
+    * @code{.cpp}
+    * // Define spaces
+    * FiniteElementSpace<H1> Vh;
+    * TrialFunction u(Vh);
+    * TestFunction  v(Vh);
+    *
+    * // Define mass bilinear form
+    * BilinearForm bf(u, v);
+    * bf = Integral(u, v);
+    * @endcode
     */
    template <class TrialFEC, class TestFEC>
    class BilinearForm<TrialFEC, TestFEC, Traits::Serial>
@@ -120,10 +158,11 @@ namespace Rodin::Variational
          using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
 
          /**
-          * @brief Constructs a bilinear form defined on some finite element
-          * space.
+          * @brief Constructs a BilinearForm from a TrialFunction and
+          * TestFunction.
           *
-          * @param[in] fes Reference to the finite element space
+          * @param[in] u TrialFunction
+          * @param[out] v TestFunction
           */
          BilinearForm(
                TrialFunction<TrialFEC, Traits::Serial>& u,
@@ -150,6 +189,9 @@ namespace Rodin::Variational
           */
          BilinearForm& operator=(const BilinearFormIntegratorBase& bfi);
 
+         /**
+          * @todo
+          */
          BilinearForm& operator=(const FormLanguage::BilinearFormIntegratorSum& lsum);
 
          const TrialFunction<TrialFEC, Traits::Serial>& getTrialFunction() const override

@@ -58,9 +58,11 @@ namespace Rodin::Variational
           *
           * When integrating along interior boundaries sometimes it is
           * necessary to specify which attributes should be interpreted as the
-          * respective "interior" domain. For example, coefficients which
-          * involve the derivatives of a GridFunction need to know the element
-          * to "trace".
+          * respective "interior" domain, since it is not clear which domain
+          * attribute can be used to extend the value continuously up to the
+          * boundary. To resolve this ambiguity the trace domain is interpreted
+          * as the domain which shall be used to make this continuous
+          * extension.
           *
           * @note Setting the trace domain of a VectorFunctionBase instance
           * does not guarantee that it will taken into consideration when
@@ -104,15 +106,25 @@ namespace Rodin::Variational
          Component<VectorFunctionBase> y() const;
 
          /**
-          * @brief Convenience function to access the 3nd component of the
+          * @brief Convenience function to access the 3rd component of the
           * vector.
           */
          Component<VectorFunctionBase> z() const;
 
          virtual ~VectorFunctionBase() = default;
 
+         /**
+          * @brief Access the ith component of the vector function.
+          * @returns Object of type Component<VectorFunctionBase> representing
+          * the ith component of the VectorFunction.
+          */
          virtual Component<VectorFunctionBase> operator()(int i) const;
 
+         /**
+          * @brief Computes the value at the given transformation and
+          * integration point.
+          * @returns Value at given transformation and integration point.
+          */
          virtual void getValue(
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
@@ -132,9 +144,21 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Variadic vector of values
-    * Represents a vector which may be constructed from values which can be
-    * converted to objects of type ScalarFunction.
+    * @brief Represents a vector which may be constructed from values which can
+    * be converted to objects of type ScalarFunction.
+    *
+    * In general one may construct any VectorFunction by specifying its values
+    * in a uniform initialization manner. For example, to construct a
+    * VectorFunction with constant entries (1, 2, 3) :
+    * @code{.cpp}
+    * auto v = VectorFunction{1, 2, 3};
+    * @endcode
+    * Alternatively, we may construct instances of VectorFunction from any type
+    * which is convertible to specializations of ScalarFunction:
+    * @code{.cpp}
+    * auto s = ScalarFunction(3.1416);
+    * auto v = VectorFunction{Dx(s), 42, s};
+    * @endcode
     */
    template <class ... Values>
    class VectorFunction : public VectorFunctionBase
@@ -143,6 +167,9 @@ namespace Rodin::Variational
          /**
           * @brief Constructs a vector with the given values.
           * @param[in] values Parameter pack of values
+          *
+          * Each value passed must be convertible to any specialization of
+          * ScalarFunction.
           */
          constexpr
          VectorFunction(Values... values)
@@ -201,7 +228,7 @@ namespace Rodin::Variational
    VectorFunction(Values&&...) -> VectorFunction<Values...>;
 
    /**
-    * @brief Vector which can be constructed from a GridFunction with vector
+    * @brief Represents from a GridFunction with vector
     * values.
     *
     * Represents a vector which may be constructed from a GridFunction which

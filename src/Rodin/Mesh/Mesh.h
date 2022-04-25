@@ -25,6 +25,9 @@
 
 namespace Rodin
 {
+   /**
+    * @brief Abstract base class for Mesh objects.
+    */
    class MeshBase
    {
       public:
@@ -47,10 +50,24 @@ namespace Rodin
           */
          void refine();
 
+         /**
+          * @brief Gets the labels of the domain elements in the mesh.
+          * @returns Set of all the attributes in the mesh object.
+          * @see getBoundaryAttributes() const
+          */
          std::set<int> getAttributes() const;
 
+         /**
+          * @brief Gets the labels of the boundary elements in the mesh.
+          * @returns Set of all the boundary attributes in the mesh object.
+          * @see getAttributes() const
+          */
          std::set<int> getBoundaryAttributes() const;
 
+         /**
+          * @brief Saves the object to text file.
+          * @param[in] filename Name of the file.
+          */
          virtual void save(const boost::filesystem::path& filename);
 
          /**
@@ -64,8 +81,8 @@ namespace Rodin
           * @f]
           * at each node @f$ x @f$ of the mesh.
           *
-          * @note The range dimension of @f$ u @f$ must be equal to the
-          * mesh dimension.
+          * @note The vector dimension of @f$ u @f$ must be equal to the
+          * space dimension.
           *
           * @returns Reference to this (for method chaining)
           */
@@ -83,8 +100,8 @@ namespace Rodin
           * @f]
           * gives a valid mesh without actually displacing the mesh.
           *
-          * @note The range dimension of @f$ u @f$ must be equal to the
-          * mesh dimension.
+          * @note The vector dimension of @f$ u @f$ must be equal to the
+          * space dimension.
           *
           * @returns Maximum time so that the mesh remains valid.
           */
@@ -92,6 +109,7 @@ namespace Rodin
 
          /**
           * @brief Gets the total volume of the mesh.
+          * @returns Sum of the volume of all elements.
           */
          double getVolume();
 
@@ -99,7 +117,7 @@ namespace Rodin
           * @brief Gets the sum of the volumes of the elements given by the
           * specified attribute.
           * @param[in] attr Attribute of elements
-          * @returns Sum of element volumes
+          * @returns Sum of element volumes with given attribute
           * @note If the element attribute does not exist then this function
           * will return 0 as the volume.
           */
@@ -122,6 +140,13 @@ namespace Rodin
           */
          virtual bool isSubMesh() const = 0;
 
+         /**
+          * @brief Indicates if the MeshBase object has been parallelized.
+          * @returns True if the MeshBase has been parallelized, false
+          * otherwise.
+          * @see Mesh<Traits::Parallel>
+          * @see Mesh<Traits::Serial>::parallelize()
+          */
          virtual bool isParallel() const = 0;
 
          /**
@@ -150,6 +175,7 @@ namespace Rodin
          /**
           * @brief Loads a mesh from file.
           * @param[in] filename Name of file to read
+          * @returns Reference to this (for method chaining)
           */
          Mesh& load(const boost::filesystem::path& filename);
 
@@ -231,7 +257,13 @@ namespace Rodin
 
 #ifdef RODIN_USE_MPI
          /**
-          * @brief Set the MPI Communicator
+          * @brief Parallelizes the mesh by setting the MPI communicator
+          * object.
+          * @param[in] comm MPI communicator
+          *
+          * This method parallelizes the serial mesh object and returns a new
+          * parallelized mesh. The parallelized mesh is independent of the
+          * serial mesh instance.
           */
          Mesh<Traits::Parallel> parallelize(boost::mpi::communicator comm);
 #endif
@@ -245,17 +277,33 @@ namespace Rodin
    {
       public:
          /**
-          * @internal
+          * Constructs a parallel mesh object from a serial mesh instance.
+          * @param[in] comm MPI communicator
+          * @param[in] serialMesh Serial mesh instance
+          *
+          * This method parallelizes the serial mesh object and constructs a
+          * new parallelized mesh. The parallelized mesh is independent of the
+          * serial mesh instance.
           */
          Mesh(boost::mpi::communicator comm, Mesh<Traits::Serial>& serialMesh)
             :  m_comm(comm),
                m_mesh(mfem::ParMesh(m_comm, serialMesh.getHandle()))
          {}
 
+         /**
+          * @brief Deleted copy constructor.
+          */
          Mesh(const Mesh&) = delete;
 
+         /**
+          * @brief Move constructor.
+          */
          Mesh(Mesh&&) = default;
 
+         /**
+          * @brief Gets a constant reference to the MPI communicator object.
+          * @returns Constant reference to the MPI communicator object.
+          */
          const boost::mpi::communicator& getMPIComm() const
          {
             return m_comm;

@@ -12,6 +12,9 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Abstract base class for bilinear form integrators.
+    */
    class BilinearFormIntegratorBase
       : public FormLanguage::Buildable<mfem::BilinearFormIntegrator>
    {
@@ -20,8 +23,14 @@ namespace Rodin::Variational
 
          std::unique_ptr<mfem::BilinearFormIntegrator> build() const override;
 
+         /**
+          * @brief Gets reference to trial function.
+          */
          virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
 
+         /**
+          * @brief Gets reference to test function.
+          */
          virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
 
          /**
@@ -41,6 +50,10 @@ namespace Rodin::Variational
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
    };
 
+   /**
+    * @brief Represents an integrator which integrates over the domain
+    * elements.
+    */
    class BilinearFormDomainIntegrator : public BilinearFormIntegratorBase
    {
       public:
