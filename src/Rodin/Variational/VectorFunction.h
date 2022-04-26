@@ -144,6 +144,55 @@ namespace Rodin::Variational
    };
 
    /**
+    * @brief Represents from a GridFunction with vector
+    * values.
+    *
+    * Represents a vector which may be constructed from a GridFunction which
+    * takes on vector values at the mesh vertices.
+    */
+   template <>
+   class VectorFunction<GridFunctionBase>
+      : public VectorFunctionBase
+   {
+      public:
+         /**
+          * @brief Constructs a VectorFunction from a vector valued GridFunction.
+          */
+         VectorFunction(const GridFunctionBase& u);
+
+         VectorFunction(const VectorFunction& other)
+            :  VectorFunctionBase(other),
+               m_dimension(other.m_dimension),
+               m_u(other.m_u)
+         {}
+
+         int getDimension() const override
+         {
+            return m_dimension;
+         }
+
+         void getValue(
+               mfem::Vector& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
+
+         VectorFunction* copy() const noexcept override
+         {
+            return new VectorFunction(*this);
+         }
+
+      private:
+         const size_t m_dimension;
+         const GridFunctionBase& m_u;
+   };
+   VectorFunction(GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
+   VectorFunction(const GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
+
+   template <class FEC, class Trait>
+   VectorFunction(GridFunction<FEC, Trait>&) -> VectorFunction<GridFunctionBase>;
+   template <class FEC, class Trait>
+   VectorFunction(const GridFunction<FEC, Trait>&) -> VectorFunction<GridFunctionBase>;
+
+   /**
     * @brief Represents a vector which may be constructed from values which can
     * be converted to objects of type ScalarFunction.
     *
@@ -180,6 +229,7 @@ namespace Rodin::Variational
 
          constexpr
          VectorFunction(const VectorFunction& other)
+            : VectorFunctionBase(other)
          {
             m_coeffs.reserve(sizeof...(Values));
             for (const auto& v : other.m_coeffs)
@@ -187,14 +237,17 @@ namespace Rodin::Variational
          }
 
          constexpr
-         VectorFunction(VectorFunction&&) = default;
+         VectorFunction(VectorFunction&& other)
+            : VectorFunctionBase(std::move(other)),
+               m_coeffs(std::move(other.m_coeffs))
+         {}
 
          void getValue(
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             value.SetSize(static_cast<int>(sizeof...(Values)));
-            for (int i = 0; i < sizeof...(Values); i++)
+            for (size_t i = 0; i < sizeof...(Values); i++)
                value(i) = m_coeffs[i]->getValue(trans, ip);
          }
 
@@ -226,48 +279,6 @@ namespace Rodin::Variational
    };
    template <class ... Values>
    VectorFunction(Values&&...) -> VectorFunction<Values...>;
-
-   /**
-    * @brief Represents from a GridFunction with vector
-    * values.
-    *
-    * Represents a vector which may be constructed from a GridFunction which
-    * takes on vector values at the mesh vertices.
-    */
-   template <>
-   class VectorFunction<GridFunctionBase>
-      : public VectorFunctionBase
-   {
-      public:
-         /**
-          * @brief Constructs a VectorFunction from a vector valued GridFunction.
-          */
-         VectorFunction(const GridFunctionBase& u);
-
-         VectorFunction(const VectorFunction& other)
-            :  m_dimension(other.m_dimension),
-               m_u(other.m_u)
-         {}
-
-         int getDimension() const override
-         {
-            return m_dimension;
-         }
-
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
-
-         VectorFunction* copy() const noexcept override
-         {
-            return new VectorFunction(*this);
-         }
-
-      private:
-         const size_t m_dimension;
-         const GridFunctionBase& m_u;
-   };
-   VectorFunction(GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
 }
 
 namespace Rodin::Variational::Internal
