@@ -89,7 +89,7 @@ int main(int argc, char** argv)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 10;
+  size_t maxIt = 100;
   double eps = 1e-6;
   double hmax = 0.05;
   int k = 1; // The eigenvalue to optimize
@@ -182,21 +182,40 @@ int main(int argc, char** argv)
     // Vector field finite element space over the whole domain
     FiniteElementSpace<H1> Uh(Omega, 2);
     auto n = Normal(2);
-    GridFunction dJ(Uh);
+
+    // GridFunction dJ(Uh);
     //dJ = Omega.getVolume(Interior)*(Dot(Grad(u), Grad(u)) + mu*Dot(u,u))*n + mu*n; //  /Integral(Dot(u,u)) sur le sous-mesh
-    dJ = Dot(Grad(u), Grad(u))*n;
     //std::cout << dJ.getFiniteElementSpace().getVectorDimension() << std::endl;
 
+    // Note from Carlos: 26/Avril/2022
+    // Salut !
+    // 1. I changed some things around, in particular I do not project the
+    // expression for dJ on a GridFunction. Instead I wrote the thing directly
+    // and hope that Rodin understands what I want hehe
+    // 2. I fixed the bug in the transfer function, thank you for testing this
+    // and narrowing down the problem! It helps a lot :)
+    // 3. I tried to run your code and it seems that the objective goes down
+    // but at one point the computation fails. I think due to parasitic
+    // components.
+    // 4. In the hilbertian procedure I removed the use of DirichletBC and used
+    // the usual expression.
+    //
+    // See you soon!
 
     // Hilbert extension-regularization procedure
     // This is bullshit
+    auto dJ = Dot(Grad(u).traceOf(Interior), Grad(u).traceOf(Interior)) * n;
     TrialFunction g(Uh);
     TestFunction  v(Uh);
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            + DirichletBC(g, VectorFunction(dJ)).on(GammaN);
+            + BoundaryIntegral(dJ, v).over(Gamma);
     solver.solve(hilbert);
+
+    // Save data to inspect
+    // Omega.save("Omegai.mesh");
+    // g.getGridFunction().save("g.gf");
 
     // Update objective
     obj.push_back(
@@ -212,7 +231,7 @@ int main(int argc, char** argv)
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = 4 * hmax / gInf;
+    double dt = hmax / gInf;
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain
@@ -324,11 +343,11 @@ void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, FiniteElement
 
     std::unique_ptr<double[]> data(new double[dim]);
     for(int j=0; j<dim; j++){
-      data.get()[j] = evecs.col(m_nev-i-1).data()[j];
+      data[j] = evecs.col(m_nev-i-1)[j];
     }
     //std::copy(evecs.col(m_nev-i-1).data(), evecs.col(m_nev-i-1).data()+dim, data.get());
 
     m_eigenfunctions.push_back(new GridFunction<H1>(fes));
-    m_eigenfunctions[i]->setData(move(data), dim);
+    m_eigenfunctions[i]->setData(std::move(data), dim);
   }
 }
