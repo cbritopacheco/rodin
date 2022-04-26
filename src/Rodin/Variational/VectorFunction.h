@@ -184,8 +184,11 @@ namespace Rodin::Variational
          const size_t m_dimension;
          const GridFunctionBase& m_u;
    };
+   VectorFunction(GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
    VectorFunction(const GridFunctionBase&) -> VectorFunction<GridFunctionBase>;
 
+   template <class FEC, class Trait>
+   VectorFunction(GridFunction<FEC, Trait>&) -> VectorFunction<GridFunctionBase>;
    template <class FEC, class Trait>
    VectorFunction(const GridFunction<FEC, Trait>&) -> VectorFunction<GridFunctionBase>;
 

@@ -249,7 +249,6 @@ int main(int argc, char** argv)
     // Save mesh
     Omega.save("Omega.mesh");
 
-
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
