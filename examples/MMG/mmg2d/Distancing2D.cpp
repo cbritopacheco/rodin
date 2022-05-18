@@ -19,7 +19,8 @@ int main(int argc, char** argv)
     // Generation of distance function to a subdomain
     int Interior = 1;
 
-    auto box = Mesh2D::load(argv[1]);
+    Mesh2D box;
+    box.load(argv[1]);
     auto ls = Distancer2D().setInteriorDomain({ Interior }).distance(box);
 
     ls.save("ls.sol");
@@ -28,8 +29,11 @@ int main(int argc, char** argv)
   else if (argc == 3)
   {
     // Generation of distance function with explicit contour
-    auto box = Mesh2D::load(argv[1]);
-    auto contour = Mesh2D::load(argv[2]);
+    Mesh2D box;
+    box.load(argv[1]);
+
+    Mesh2D contour;
+    contour.load(argv[2]);
     auto ls = Distancer2D().enableScaling(false).distance(box, contour);
 
     ls.save("ls.sol");

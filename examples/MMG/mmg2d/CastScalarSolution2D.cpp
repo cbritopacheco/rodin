@@ -19,7 +19,8 @@ int main(int argc, char** argv)
   }
 
   // Load MMG mesh and solution
-  auto mmgMesh = MMG::Mesh2D::load(argv[1]);
+  MMG::Mesh2D mmgMesh;
+  mmgMesh.load(argv[1]);
   auto mmgSol  = MMG::ScalarSolution2D(mmgMesh).load(argv[2]);
 
   // Convert the MMG mesh to Rodin

@@ -14,7 +14,8 @@ using namespace Rodin::External::MMG;
 
 int main(int argc, char** argv)
 {
-  auto box = Mesh2D::load(argv[1]);
+  Mesh2D box;
+  box.load(argv[1]);
   auto ls  = ScalarSolution2D(box).load(argv[2]);
 
   Distancer2D().redistance(ls);

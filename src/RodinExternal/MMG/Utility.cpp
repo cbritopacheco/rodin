@@ -303,14 +303,13 @@ namespace Rodin::External::MMG
     {
        case -1:
           fclose(inm);
-          MMG5_SAFE_FREE(type);
+          // MMG5_SAFE_FREE(type);
           Alert::Exception(
                 "Failed to load solution. Invalid data.").raise();
           break;
        case 0:
           fclose(inm);
-          if (type)
-             MMG5_SAFE_FREE(type);
+          // MMG5_SAFE_FREE(type);
           Alert::Exception(
                 "Failed to load solution. File not found: " + filename.string()).raise();
           break;
@@ -319,7 +318,7 @@ namespace Rodin::External::MMG
           break;
        default:
           fclose(inm);
-          MMG5_SAFE_FREE(type);
+          // MMG5_SAFE_FREE(type);
           Alert::Exception(
                 "Failed to load solution. Invalid error code returned.").raise();
     }
@@ -327,7 +326,7 @@ namespace Rodin::External::MMG
     if (nsols != 1)
     {
        fclose(inm);
-       MMG5_SAFE_FREE(type);
+       // MMG5_SAFE_FREE(type);
        Alert::Exception(
              "Failed to load solution. Multiple solutions not supported.").raise();
     }

@@ -134,6 +134,28 @@ namespace Rodin
    External::MMG::Mesh3D
    Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const;
 
+   /**
+    * MMG::ScalarSolution3D -> Rodin::Variational::GridFunction<Variational::H1, Traits::Serial>
+    */
+   template <class FEC>
+   class ADLCaster<External::MMG::ScalarSolution3D, Variational::GridFunction<FEC, Traits::Serial>>
+   {
+      public:
+         ADLCaster(Variational::FiniteElementSpace<FEC>& mesh)
+            : m_fes(mesh)
+         {}
+
+         Variational::GridFunction<FEC, Traits::Serial> cast(
+               const External::MMG::ScalarSolution3D& src)
+         {
+            Variational::GridFunction<FEC> res(m_fes);
+            External::MMG::MMG5_Sol_To_Rodin_GridFunction(src.getHandle(), res);
+            return res;
+         }
+      private:
+         Variational::FiniteElementSpace<FEC>& m_fes;
+   };
+
    template <class FEC>
    class ADLCaster<
       Variational::GridFunction<FEC, Traits::Serial>, External::MMG::ScalarSolution3D>
