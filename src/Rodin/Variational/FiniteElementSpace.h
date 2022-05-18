@@ -44,6 +44,8 @@ namespace Rodin::Variational
 
          virtual bool isParallel() const = 0;
 
+         virtual MeshBase& getMesh() = 0;
+
          virtual const MeshBase& getMesh() const = 0;
 
          virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
@@ -84,7 +86,12 @@ namespace Rodin::Variational
             return false;
          }
 
-         const MeshBase& getMesh() const override
+         Mesh<Traits::Serial>& getMesh() override
+         {
+            return m_mesh;
+         }
+
+         const Mesh<Traits::Serial>& getMesh() const override
          {
             return m_mesh;
          }

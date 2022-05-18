@@ -31,6 +31,7 @@ set(RodinExternalMMG_HEADERS
 # ---- mmg3d
   Mesh3D.h
   ScalarSolution3D.h
+  VectorSolution3D.h
 # ---- mmgs
   MMGS.h
   MeshS.h
@@ -54,6 +55,7 @@ set(RodinExternalMMG_SRCS
 # ---- mmg3d
   Mesh3D.cpp
   ScalarSolution3D.cpp
+  VectorSolution3D.cpp
 # ---- mmgs
   MeshS.cpp
   AdvectS.cpp

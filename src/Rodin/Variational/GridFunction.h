@@ -270,7 +270,7 @@ namespace Rodin::Variational
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
-         GridFunction(FiniteElementSpace<H1>& fes)
+         GridFunction(FiniteElementSpace<H1, Trait>& fes)
             :  GridFunctionBase(),
                m_fes(fes),
                m_gf(&fes.getHandle())
@@ -411,12 +411,13 @@ namespace Rodin::Variational
             return *this;
          }
 
-         FiniteElementSpace<H1>& getFiniteElementSpace() override
+         FiniteElementSpace<H1, Trait>& getFiniteElementSpace() override
          {
             return m_fes.get();
          }
 
-         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
+         const FiniteElementSpace<H1, Trait>& getFiniteElementSpace() const override
+
          {
             return m_fes.get();
          }
@@ -431,7 +432,7 @@ namespace Rodin::Variational
             return m_gf;
          }
       private:
-         std::reference_wrapper<FiniteElementSpace<H1>> m_fes;
+         std::reference_wrapper<FiniteElementSpace<H1, Trait>> m_fes;
          mfem::GridFunction m_gf;
    };
 
@@ -447,7 +448,7 @@ namespace Rodin::Variational
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
-         GridFunction(FiniteElementSpace<L2>& fes)
+         GridFunction(FiniteElementSpace<L2, Trait>& fes)
             :  GridFunctionBase(),
                m_fes(fes),
                m_gf(&fes.getHandle())
@@ -524,12 +525,12 @@ namespace Rodin::Variational
                   GridFunctionBase::project(std::forward<Args>(args)...));
          }
 
-         FiniteElementSpace<L2>& getFiniteElementSpace() override
+         FiniteElementSpace<L2, Trait>& getFiniteElementSpace() override
          {
             return m_fes.get();
          }
 
-         const FiniteElementSpace<L2>& getFiniteElementSpace() const override
+         const FiniteElementSpace<L2, Trait>& getFiniteElementSpace() const override
          {
             return m_fes.get();
          }
@@ -544,7 +545,7 @@ namespace Rodin::Variational
             return m_gf;
          }
       private:
-         std::reference_wrapper<FiniteElementSpace<L2>> m_fes;
+         std::reference_wrapper<FiniteElementSpace<L2, Trait>> m_fes;
          mfem::GridFunction m_gf;
    };
 

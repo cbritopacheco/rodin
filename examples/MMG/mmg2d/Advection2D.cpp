@@ -16,7 +16,8 @@ int main(int argc, char** argv)
 {
   if (argc == 5)
   {
-    auto mesh = Mesh2D::load(argv[1]);
+    Mesh2D mesh;
+    mesh.load(argv[1]);
     auto ls = ScalarSolution2D(mesh).load(argv[2]);
     auto displacement = VectorSolution2D(mesh).load(argv[3]);
     double dt = std::atof(argv[4]);
