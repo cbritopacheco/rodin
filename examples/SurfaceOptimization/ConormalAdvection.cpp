@@ -53,7 +53,7 @@ auto getConormal(
   auto norm = Pow(n.x() * n.x() + n.y() * n.y() + n.z() * n.z(), 0.5);
 
   GridFunction conormal(vecFes);
-  conormal = n;
+  conormal = n / norm;
 
   return conormal;
 }
@@ -156,10 +156,16 @@ int main(int, char**)
   GridFunction distS(VhS);
   dist.transfer(distS);
   auto conormal = getConormal(VhS, ThS, distS, solver);
-  skin.save("skin.mesh");
 
+  GridFunction ext(Th);
+  conormal.transfer(ext);
 
-  conormal.save("conormal.gf");
+  Omega.save("Omega.mesh");
+  ext.save("conormal.gf");
+
+  auto mmgConormal = Cast(ext).to<MMG::VectorSolution3D>(mmgMesh);
+  mmgMesh.save("v.mesh");
+  mmgConormal.save("v.sol");
 
   return 0;
 }

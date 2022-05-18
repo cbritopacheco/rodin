@@ -223,14 +223,14 @@ namespace Rodin::Variational
                {
                   for (int i = 0; i < vdim; i++)
                      for (int j = 0; j < nv; j++)
-                        dst.getHandle()[s2pv.at(j) + i * pnv] = getHandle()[j + i * nv];
+                        dst.getHandle()[s2pv.left.at(j) + i * pnv] = getHandle()[j + i * nv];
                   return;
                }
                case mfem::Ordering::byVDIM:
                {
                   for (int i = 0; i < nv; i++)
                      for (int j = 0; j < vdim; j++)
-                        dst.getHandle()[s2pv.at(i) * vdim + j] = getHandle()[i * vdim + j];
+                        dst.getHandle()[s2pv.left.at(i) * vdim + j] = getHandle()[i * vdim + j];
                   return;
                }
             }
@@ -241,6 +241,34 @@ namespace Rodin::Variational
             &static_cast<const SubMesh<Traits::Serial>&>(
                dst.getFiniteElementSpace().getMesh()).getParent()))
       {
+         auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
+               dst.getFiniteElementSpace().getMesh());
+         int vdim = getFiniteElementSpace().getVectorDimension();
+         const auto& s2pv = submesh.getVertexMap();
+         int nv = getFiniteElementSpace().getHandle().GetNV();
+         int pnv = dst.getFiniteElementSpace().getHandle().GetNV();
+
+         assert(getFiniteElementSpace().getHandle().GetOrdering() ==
+                  getFiniteElementSpace().getHandle().GetOrdering());
+         switch(getFiniteElementSpace().getHandle().GetOrdering())
+         {
+            case mfem::Ordering::byNODES:
+            {
+               for (int i = 0; i < vdim; i++)
+                  for (int j = 0; j < nv; j++)
+                     if (s2pv.right.count(j))
+                        dst.getHandle()[s2pv.right.at(j) + i * pnv] = getHandle()[j + i * nv];
+               return;
+            }
+            case mfem::Ordering::byVDIM:
+            {
+               for (int i = 0; i < nv; i++)
+                  for (int j = 0; j < vdim; j++)
+                     if (s2pv.right.count(i))
+                        dst.getHandle()[s2pv.right.at(i) * vdim + j] = getHandle()[i * vdim + j];
+               return;
+            }
+         }
       }
       else
       {
