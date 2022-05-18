@@ -206,18 +206,12 @@ namespace Rodin::Variational
          // underlying target finite element space. Hence we should seek
          // out to copy the grid function at the corresponding nodes
          // given by the vertex map given in the Submesh object.
-         auto& submesh =
-            static_cast<const SubMesh<Traits::Serial>&>(getFiniteElementSpace().getMesh());
-         int vdim = getFiniteElementSpace().getVectorDimension();
-         const auto& s2pv = submesh.getVertexMap();
-         if (vdim == 1)
+         auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
+               getFiniteElementSpace().getMesh());
+         if (&submesh.getParent() == &dst.getFiniteElementSpace().getMesh())
          {
-            int size = getHandle().Size();
-            for (int i = 0; i < size; i++)
-               dst.getHandle()[i] = getHandle()[s2pv.at(i)];
-         }
-         else
-         {
+            int vdim = getFiniteElementSpace().getVectorDimension();
+            const auto& s2pv = submesh.getVertexMap();
             int nv = getFiniteElementSpace().getHandle().GetNV();
             int pnv = dst.getFiniteElementSpace().getHandle().GetNV();
 
