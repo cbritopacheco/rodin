@@ -23,6 +23,7 @@
 // ---- mmg3d ----------------------------------------------------------------
 #include "MMG/Mesh3D.h"
 #include "MMG/ScalarSolution3D.h"
+#include "MMG/VectorSolution3D.h"
 
 // ---- mmgs -----------------------------------------------------------------
 #include "MMG/MeshS.h"

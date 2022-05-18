@@ -4,6 +4,7 @@
 #include <map>
 #include <optional>
 #include <functional>
+#include <boost/bimap.hpp>
 
 #include "ForwardDecls.h"
 #include "Mesh.h"
@@ -43,7 +44,7 @@ namespace Rodin
           * vertex indices in the SubMesh and vertex indices in the parent
           * Mesh.
           */
-         SubMesh& setVertexMap(std::map<int, int> s2pv);
+         SubMesh& setVertexMap(boost::bimap<int, int> s2pv);
 
          /**
           * @brief Sets the reference to the parent Mesh object
@@ -58,7 +59,7 @@ namespace Rodin
          /**
           * @returns The SubMesh to Mesh vertex map
           */
-         const std::map<int, int>& getVertexMap() const;
+         const boost::bimap<int, int>& getVertexMap() const;
 
          bool isSubMesh() const override
          {
@@ -67,7 +68,7 @@ namespace Rodin
 
       private:
          std::optional<std::reference_wrapper<const MeshBase>> m_parent;
-         std::optional<std::map<int, int>> m_s2pv;
+         std::optional<boost::bimap<int, int>> m_s2pv;
    };
 }
 
