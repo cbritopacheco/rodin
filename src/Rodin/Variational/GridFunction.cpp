@@ -193,54 +193,60 @@ namespace Rodin::Variational
       return *this;
    }
 
-   void GridFunctionBase::transfer(GridFunctionBase& other)
+   void GridFunctionBase::transfer(GridFunctionBase& dst)
    {
       assert(getFiniteElementSpace().getVectorDimension() ==
-            other.getFiniteElementSpace().getVectorDimension());
-      if (getFiniteElementSpace().getMesh().isSubMesh())
+            dst.getFiniteElementSpace().getVectorDimension());
+      if (getFiniteElementSpace().getMesh().isSubMesh() && (
+            &dst.getFiniteElementSpace().getMesh()) ==
+            &static_cast<const SubMesh<Traits::Serial>&>(
+               getFiniteElementSpace().getMesh()).getParent())
       {
          // If we are here the this means that we are in a submesh of the
          // underlying target finite element space. Hence we should seek
          // out to copy the grid function at the corresponding nodes
          // given by the vertex map given in the Submesh object.
-         auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
-               getFiniteElementSpace().getMesh());
-         if (&submesh.getParent() == &other.getFiniteElementSpace().getMesh())
+         auto& submesh =
+            static_cast<const SubMesh<Traits::Serial>&>(getFiniteElementSpace().getMesh());
+         int vdim = getFiniteElementSpace().getVectorDimension();
+         const auto& s2pv = submesh.getVertexMap();
+         if (vdim == 1)
          {
-            int vdim = getFiniteElementSpace().getVectorDimension();
-            const auto& s2pv = submesh.getVertexMap();
-            if (vdim == 1)
-            {
-               int size = getHandle().Size();
-               for (int i = 0; i < size; i++)
-                  other.getHandle()[i] = getHandle()[s2pv.at(i)];
-            }
-            else
-            {
-               int nv = getFiniteElementSpace().getHandle().GetNV();
-               int pnv = other.getFiniteElementSpace().getHandle().GetNV();
+            int size = getHandle().Size();
+            for (int i = 0; i < size; i++)
+               dst.getHandle()[i] = getHandle()[s2pv.at(i)];
+         }
+         else
+         {
+            int nv = getFiniteElementSpace().getHandle().GetNV();
+            int pnv = dst.getFiniteElementSpace().getHandle().GetNV();
 
-               assert(getFiniteElementSpace().getHandle().GetOrdering() ==
-                        getFiniteElementSpace().getHandle().GetOrdering());
-               switch(getFiniteElementSpace().getHandle().GetOrdering())
+            assert(getFiniteElementSpace().getHandle().GetOrdering() ==
+                     getFiniteElementSpace().getHandle().GetOrdering());
+            switch(getFiniteElementSpace().getHandle().GetOrdering())
+            {
+               case mfem::Ordering::byNODES:
                {
-                  case mfem::Ordering::byNODES:
-                  {
-                     for (int i = 0; i < vdim; i++)
-                        for (int j = 0; j < nv; j++)
-                           other.getHandle()[s2pv.at(j) + i * pnv] = getHandle()[j + i * nv];
-                     return;
-                  }
-                  case mfem::Ordering::byVDIM:
-                  {
-                     for (int i = 0; i < nv; i++)
-                        for (int j = 0; j < vdim; j++)
-                           other.getHandle()[s2pv.at(i) * vdim + j] = getHandle()[i * vdim + j];
-                     return;
-                  }
+                  for (int i = 0; i < vdim; i++)
+                     for (int j = 0; j < nv; j++)
+                        dst.getHandle()[s2pv.at(j) + i * pnv] = getHandle()[j + i * nv];
+                  return;
+               }
+               case mfem::Ordering::byVDIM:
+               {
+                  for (int i = 0; i < nv; i++)
+                     for (int j = 0; j < vdim; j++)
+                        dst.getHandle()[s2pv.at(i) * vdim + j] = getHandle()[i * vdim + j];
+                  return;
                }
             }
          }
+      }
+      else if (dst.getFiniteElementSpace().getMesh().isSubMesh() && (
+            &getFiniteElementSpace().getMesh() ==
+            &static_cast<const SubMesh<Traits::Serial>&>(
+               dst.getFiniteElementSpace().getMesh()).getParent()))
+      {
       }
       else
       {

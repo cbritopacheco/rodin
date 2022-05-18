@@ -18,7 +18,8 @@ int main(int argc, char** argv)
   int Interior = 1, Exterior = 2;
   int Boundary = 4;
 
-  auto box = Mesh2D::load(argv[1]);
+  Mesh2D box;
+  box.load(argv[1]);
   auto ls  = ScalarSolution2D(box).load(argv[2]);
   auto mesh = ImplicitDomainMesher2D().split(Omega, {Interior, Exterior})
                                            .setHMax(0.1)
