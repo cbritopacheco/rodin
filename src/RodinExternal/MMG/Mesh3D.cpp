@@ -58,8 +58,8 @@ namespace Rodin::External::MMG
 
    Mesh3D::Mesh3D(Mesh3D&& other)
    {
-       m_mesh = other.m_mesh;
-       other.m_mesh = nullptr;
+      m_mesh = other.m_mesh;
+      other.m_mesh = nullptr;
    }
 
    Mesh3D::~Mesh3D()
@@ -68,15 +68,14 @@ namespace Rodin::External::MMG
          MMG3D_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &m_mesh, MMG5_ARG_end);
    }
 
-   Mesh3D Mesh3D::load(const boost::filesystem::path& filename)
+   Mesh3D& Mesh3D::load(const boost::filesystem::path& filename)
    {
-     Mesh3D mesh;
-     if (!MMG3D_loadMesh(mesh.getHandle(), filename.c_str()))
+     if (!MMG3D_loadMesh(getHandle(), filename.c_str()))
      {
         Alert::Exception(
               "Failed to open file for reading: " + filename.string()).raise();
      }
-     return mesh;
+     return *this;
    }
 
    void Mesh3D::save(const boost::filesystem::path& filename)

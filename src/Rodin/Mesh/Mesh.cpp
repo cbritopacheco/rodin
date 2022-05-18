@@ -252,11 +252,11 @@ namespace Rodin
          }
       }
       int vertexIdx = 0;
-      std::map<int, int> s2pv; // Submesh to mesh node map
+      boost::bimap<int, int> s2pv; // Submesh to mesh node map
       for (int i = 0; i < vertexUsage.Size(); i++)
       {
          if (vertexUsage[i])
-            s2pv[vertexIdx++] = i;
+            s2pv.insert({vertexIdx++, i});
       }
 
       trimmed.RemoveUnusedVertices();
@@ -325,12 +325,10 @@ namespace Rodin
 
       // Copy vertices to the boundary mesh
       int vertexIdx = 0;
-      std::map<int, int> s2pv; // Submesh to mesh node map
-      std::map<int, int> p2sv; // Mesh to submesh node map
+      boost::bimap<int, int> s2pv; // Submesh to mesh node map
       for (const auto& v : bdrVertices)
       {
-         p2sv[v] = vertexIdx;
-         s2pv[vertexIdx] = v;
+         s2pv.insert({vertexIdx, v});
          vertexIdx++;
          double *c = getHandle().GetVertex(v);
          res.AddVertex(c);
@@ -345,7 +343,7 @@ namespace Rodin
 
          std::vector<int> bv(nv);
          for (int j = 0; j < nv; j++)
-            bv[j] = p2sv[v[j]];
+            bv[j] = s2pv.right.at(v[j]);
 
          switch (el->GetGeometryType())
          {

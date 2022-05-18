@@ -12,7 +12,8 @@ int main(int argc, char** argv)
     std::exit(EXIT_FAILURE);
   }
 
-  MMG::Mesh2D mesh = MMG::Mesh2D::load(argv[1]);
+  MMG::Mesh2D mesh;
+  mesh.load(argv[1]);
 
   MMG::MeshAdaptor2D adaptor;
   adaptor.setGradation(1.23).adapt(mesh);

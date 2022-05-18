@@ -14,7 +14,8 @@ int main(int argc, char** argv)
     std::exit(EXIT_FAILURE);
   }
 
-  MMG::MeshS mmgMesh = MMG::MeshS::load(argv[1]);
+  MMG::MeshS mmgMesh;
+  mmgMesh.load(argv[1]);
 
   Rodin::Mesh rodinMesh = Cast(mmgMesh).to<Rodin::Mesh<>>();
 

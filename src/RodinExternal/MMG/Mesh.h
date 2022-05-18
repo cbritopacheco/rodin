@@ -58,6 +58,8 @@ namespace Rodin::External::MMG
           */
          virtual void save(const boost::filesystem::path& filename) = 0;
 
+         virtual MeshBase& load(const boost::filesystem::path& filename) = 0;
+
          /**
           * @internal
           * @returns Reference to underlying mesh handle.
