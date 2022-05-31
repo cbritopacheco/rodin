@@ -67,6 +67,13 @@ namespace Rodin::Variational
             return new Sum(*this);
          }
 
+         Sum& operator+=(const ScalarFunctionBase& lhs)
+         {
+            auto sum = new Sum(lhs, *m_rhs);
+            m_rhs.reset(sum);
+            return *this;
+         }
+
       private:
          std::unique_ptr<ScalarFunctionBase> m_lhs;
          std::unique_ptr<ScalarFunctionBase> m_rhs;
@@ -130,6 +137,13 @@ namespace Rodin::Variational
             mfem::Vector tmp;
             getRHS().getValue(tmp, trans, ip);
             value += tmp;
+         }
+
+         Sum& operator+=(const VectorFunctionBase& lhs)
+         {
+            auto sum = new Sum(lhs, *m_rhs);
+            m_rhs.reset(sum);
+            return *this;
          }
 
          Sum* copy() const noexcept override
@@ -196,6 +210,13 @@ namespace Rodin::Variational
          void getValue(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
+
+         Sum& operator+=(const MatrixFunctionBase& lhs)
+         {
+            auto sum = new Sum(lhs, *m_rhs);
+            m_rhs.reset(sum);
+            return *this;
+         }
 
          Sum* copy() const noexcept override
          {
