@@ -25,6 +25,7 @@ namespace Rodin::Variational
       mfem::DenseMatrix m;
       m_lhs->getValue(m, trans, ip);
       m_rhs->getValue(value, trans, ip);
+      value += m;
    }
 
    int Sum<MatrixFunctionBase, MatrixFunctionBase>::getRows() const
