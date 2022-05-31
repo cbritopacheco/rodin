@@ -40,7 +40,7 @@ namespace Rodin::External::MMG
           * @param[in] filename Name of file where the mesh will be read from.
           * @returns A Mesh3D object containing the mesh data in the file.
           */
-         static Mesh3D load(const boost::filesystem::path& filename);
+         Mesh3D& load(const boost::filesystem::path& filename) override;
 
          /**
           * @brief Creates an empty mesh.
@@ -57,6 +57,12 @@ namespace Rodin::External::MMG
           * invalidating the latter.
           */
          Mesh3D(Mesh3D&& other);
+
+         Mesh3D& operator=(Mesh3D&& other)
+         {
+            std::swap(getHandle(), other.getHandle());
+            return *this;
+         }
 
          /**
           * @brief Destructs the object.
