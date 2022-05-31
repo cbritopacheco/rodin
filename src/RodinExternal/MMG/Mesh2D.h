@@ -39,7 +39,7 @@ namespace Rodin::External::MMG
           * @param[in] filename Name of file where the mesh will be read from.
           * @returns A Mesh2D object containing the mesh data in the file.
           */
-         static Mesh2D load(const boost::filesystem::path& filename);
+         Mesh2D& load(const boost::filesystem::path& filename) override;
 
          /**
           * @brief Writes the Mesh2D object to file using the `medit2` file
@@ -68,6 +68,12 @@ namespace Rodin::External::MMG
           * @brief Destructs the object.
           */
          ~Mesh2D();
+
+         Mesh2D& operator=(Mesh2D&& other)
+         {
+            std::swap(getHandle(), other.getHandle());
+            return *this;
+         }
 
          /**
           * @brief Gets a count of the specified entities in the mesh.

@@ -19,15 +19,14 @@
 
 namespace Rodin::External::MMG
 {
-  Mesh2D Mesh2D::load(const boost::filesystem::path& filename)
+  Mesh2D& Mesh2D::load(const boost::filesystem::path& filename)
   {
-    Mesh2D mesh;
-    if (!MMG2D_loadMesh(mesh.getHandle(), filename.c_str()))
+    if (!MMG2D_loadMesh(getHandle(), filename.c_str()))
     {
        Alert::Exception(
              "Failed to open file for reading: " + filename.string()).raise();
     }
-    return mesh;
+    return *this;
   }
 
   void Mesh2D::save(const boost::filesystem::path& filename)

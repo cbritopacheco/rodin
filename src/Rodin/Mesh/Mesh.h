@@ -164,6 +164,8 @@ namespace Rodin
          virtual const mfem::Mesh& getHandle() const = 0;
    };
 
+   using SerialMesh = Mesh<Traits::Serial>;
+
    /**
     * @brief Represents the subdivision of some domain into faces of (possibly)
     * different geometries.
@@ -272,6 +274,8 @@ namespace Rodin
    };
 
 #ifdef RODIN_USE_MPI
+   using ParallelMesh = Mesh<Traits::Parallel>;
+
    template <>
    class Mesh<Traits::Parallel> : public MeshBase
    {

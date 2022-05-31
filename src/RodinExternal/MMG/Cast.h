@@ -21,6 +21,7 @@
 #include "ScalarSolutionS.h"
 
 #include "VectorSolution2D.h"
+#include "VectorSolution3D.h"
 #include "VectorSolutionS.h"
 
 #include "Common.h"
@@ -134,6 +135,28 @@ namespace Rodin
    External::MMG::Mesh3D
    Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const;
 
+   /**
+    * MMG::ScalarSolution3D -> Rodin::Variational::GridFunction<Variational::H1, Traits::Serial>
+    */
+   template <class FEC>
+   class ADLCaster<External::MMG::ScalarSolution3D, Variational::GridFunction<FEC, Traits::Serial>>
+   {
+      public:
+         ADLCaster(Variational::FiniteElementSpace<FEC>& mesh)
+            : m_fes(mesh)
+         {}
+
+         Variational::GridFunction<FEC, Traits::Serial> cast(
+               const External::MMG::ScalarSolution3D& src)
+         {
+            Variational::GridFunction<FEC> res(m_fes);
+            External::MMG::MMG5_Sol_To_Rodin_GridFunction(src.getHandle(), res);
+            return res;
+         }
+      private:
+         Variational::FiniteElementSpace<FEC>& m_fes;
+   };
+
    template <class FEC>
    class ADLCaster<
       Variational::GridFunction<FEC, Traits::Serial>, External::MMG::ScalarSolution3D>
@@ -148,6 +171,28 @@ namespace Rodin
          {
             assert(src.getFiniteElementSpace().getVectorDimension() == 1);
             External::MMG::ScalarSolution3D res(m_mesh);
+            External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
+            return res;
+         }
+
+      private:
+         External::MMG::Mesh3D& m_mesh;
+   };
+
+   template <class FEC>
+   class ADLCaster<
+      Variational::GridFunction<FEC, Traits::Serial>, External::MMG::VectorSolution3D>
+   {
+      public:
+         ADLCaster(External::MMG::Mesh3D& mesh)
+            : m_mesh(mesh)
+         {}
+
+         External::MMG::VectorSolution3D cast(
+               const Variational::GridFunction<FEC, Traits::Serial>& src)
+         {
+            assert(src.getFiniteElementSpace().getVectorDimension() == 3);
+            External::MMG::VectorSolution3D res(m_mesh);
             External::MMG::Rodin_GridFunction_To_MMG5_Sol(src, res.getHandle());
             return res;
          }
