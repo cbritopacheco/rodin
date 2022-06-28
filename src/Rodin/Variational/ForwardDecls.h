@@ -167,6 +167,9 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Dot;
+
+   template <class Lhs, class Rhs>
+   class Composition;
 }
 
 #endif

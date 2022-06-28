@@ -31,6 +31,10 @@ namespace Rodin
    class MeshBase
    {
       public:
+         Element getElement(int i);
+
+         BoundaryElement getBoundaryElement(int i);
+
          /**
           * @brief Gets the dimension of the ambient space
           * @returns Dimension of the space which the mesh is embedded in
@@ -109,7 +113,7 @@ namespace Rodin
 
          /**
           * @brief Gets the total volume of the mesh.
-          * @returns Sum of the volume of all elements.
+          * @returns Sum of all element volumes.
           */
          double getVolume();
 
@@ -122,6 +126,22 @@ namespace Rodin
           * will return 0 as the volume.
           */
          double getVolume(int attr);
+
+         /**
+          * @brief Gets the total perimeter of the mesh.
+          * @returns Sum of all element perimeters.
+          */
+         double getPerimeter();
+
+         /**
+          * @brief Gets the sum of the perimeters of the elements given by the
+          * specified attribute.
+          * @param[in] attr Attribute of elements
+          * @returns Sum of element perimeters with given attribute
+          * @note If the element attribute does not exist then this function
+          * will return 0 as the perimeter.
+          */
+         double getPerimeter(int attr);
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
@@ -162,6 +182,9 @@ namespace Rodin
           * @returns Constant reference to the underlying mfem::Mesh.
           */
          virtual const mfem::Mesh& getHandle() const = 0;
+
+      private:
+         double getBoundaryElementArea(int i);
    };
 
    using SerialMesh = Mesh<Traits::Serial>;
@@ -320,7 +343,7 @@ namespace Rodin
 
          bool isParallel() const override
          {
-            return false;
+            return true;
          }
 
          mfem::ParMesh& getHandle() override

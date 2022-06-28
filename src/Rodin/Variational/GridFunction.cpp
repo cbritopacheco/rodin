@@ -7,8 +7,8 @@
 #include "GridFunction.h"
 
 #include "Sum.h"
-#include "UnaryMinus.h"
 #include "Mult.h"
+#include "Minus.h"
 #include "Division.h"
 
 #include "FiniteElementSpace.h"
@@ -82,42 +82,6 @@ namespace Rodin::Variational
    {
       getHandle() = v;
       return *this;
-   }
-
-   GridFunctionBase& GridFunctionBase::operator+=(const ScalarFunctionBase& v)
-   {
-      return project(ScalarFunction(*this) + v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator-=(const ScalarFunctionBase& v)
-   {
-      return project(ScalarFunction(*this) - v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator*=(const ScalarFunctionBase& v)
-   {
-      if (getFiniteElementSpace().getVectorDimension() > 1)
-         return project(VectorFunction(*this) * v);
-      else
-         return project(ScalarFunction(*this) * v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator/=(const ScalarFunctionBase& v)
-   {
-      if (getFiniteElementSpace().getVectorDimension() > 1)
-         return project(VectorFunction(*this) / v);
-      else
-         return project(ScalarFunction(*this) / v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator+=(const VectorFunctionBase& v)
-   {
-      return project(VectorFunction(*this) + v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator-=(const VectorFunctionBase& v)
-   {
-      return project(VectorFunction(*this) - v);
    }
 
    GridFunctionBase& GridFunctionBase::project(

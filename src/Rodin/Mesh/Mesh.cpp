@@ -11,9 +11,21 @@
 #include "Mesh.h"
 #include "SubMesh.h"
 
+#include "Element.h"
+
 namespace Rodin
 {
    // ---- MeshBase ----------------------------------------------------------
+   Element MeshBase::getElement(int i)
+   {
+      return Element(*this, getHandle().GetElement(i), i);
+   }
+
+   BoundaryElement MeshBase::getBoundaryElement(int i)
+   {
+      return BoundaryElement(*this, getHandle().GetElement(i), i);
+   }
+
    int MeshBase::getSpaceDimension() const
    {
       return getHandle().SpaceDimension();
@@ -73,10 +85,38 @@ namespace Rodin
    {
       double totalVolume = 0;
       for (int i = 0; i < getHandle().GetNE(); i++)
+         totalVolume += getHandle().GetElementVolume(i) * (getHandle().GetAttribute(i) == attr);
+      return totalVolume;
+   }
+
+   double MeshBase::getBoundaryElementArea(int i)
+   {
+      mfem::ElementTransformation *et = getHandle().GetBdrElementTransformation(i);
+      const mfem::IntegrationRule &ir = mfem::IntRules.Get(
+            getHandle().GetBdrElementBaseGeometry(i), et->OrderJ());
+      double area = 0.0;
+      for (int j = 0; j < ir.GetNPoints(); j++)
       {
-         if (getHandle().GetAttribute(i) == attr)
-            totalVolume += getHandle().GetElementVolume(i);
+         const mfem::IntegrationPoint &ip = ir.IntPoint(j);
+         et->SetIntPoint(&ip);
+         area += ip.weight * et->Weight();
       }
+      return area;
+   }
+
+   double MeshBase::getPerimeter()
+   {
+      double totalArea = 0;
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         totalArea += getBoundaryElementArea(i);
+      return totalArea;
+   }
+
+   double MeshBase::getPerimeter(int attr)
+   {
+      double totalVolume = 0;
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         totalVolume += getBoundaryElementArea(i) * (getHandle().GetBdrAttribute(i) == attr);
       return totalVolume;
    }
 

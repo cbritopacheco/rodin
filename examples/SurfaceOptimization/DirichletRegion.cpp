@@ -1,0 +1,202 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <Rodin/Mesh.h>
+#include <Rodin/Solver.h>
+#include <Rodin/Variational.h>
+#include <RodinExternal/MMG.h>
+
+using namespace Rodin;
+using namespace Rodin::Variational;
+using namespace Rodin::External;
+
+// Parameters
+static constexpr int Gamma = 1;
+static constexpr int GammaD = 5;
+static constexpr int GammaN = 6;
+static constexpr double ell = 1;
+static constexpr double alpha = 0.1;
+static constexpr double epsilon = 0.01;
+static constexpr double tgv = std::numeric_limits<double>::max();
+
+/**
+ * @brief Computes the conormal field.
+ * @param[in] Sh Scalar finite element space
+ * @oaram[in] Vh Vectorial finite element space
+ */
+GridFunction<H1> getShapeGradient(
+    FiniteElementSpace<H1>& scalarFes,
+    FiniteElementSpace<H1>& vecFes,
+    GridFunction<H1>& dist,
+    GridFunction<H1>& state,
+    GridFunction<H1>& adjoint,
+    const ScalarFunctionBase& g,
+    Solver::Solver& solver);
+
+int main(int, char**)
+{
+  const char* meshFile = "Omega.mesh";
+
+  Mesh Omega;
+  Omega.load(meshFile);
+
+  auto dOmega = Omega.skin();
+
+  FiniteElementSpace<H1> Vh(Omega);
+  FiniteElementSpace<H1> Th(Omega, 3);
+
+  FiniteElementSpace<H1> VhS(dOmega);
+  FiniteElementSpace<H1> ThS(dOmega, 3);
+
+  auto mmgMesh = Cast(dOmega).to<MMG::MeshS>();
+  auto mmgDist = MMG::DistancerS().setInteriorDomain(GammaD).distance(mmgMesh);
+  auto distSurf = Cast(mmgDist).to<GridFunction<H1>>(VhS);
+
+  GridFunction dist(Vh);
+  distSurf.transfer(dist);
+
+
+  ScalarFunction g = 2.0;
+
+  auto h = [](double r)
+  {
+    if (r < -1.0)
+      return 1.0;
+    else if (r > 1.0)
+      return 0.0;
+    else
+      return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
+  };
+  auto he = compose(h, ScalarFunction(dist) / epsilon) / epsilon;
+
+  auto J = [&](GridFunction<H1>& u)
+  {
+    return Integral(u).compute() - ell * Omega.getPerimeter(GammaN);
+  };
+
+  auto solver = Solver::UMFPack();
+
+  // State equation
+  ScalarFunction f = 1;
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+  Problem state(u, v);
+  state = Integral(Grad(u), Grad(v))
+        + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
+        - Integral(f, v)
+        - BoundaryIntegral(g, v).over(GammaN);
+  solver.solve(state);
+
+  // GridFunction hegf(Vh);
+  // hegf = he;
+  // hegf.save("miaow.gf");
+  // dist.save("dist.gf");
+
+  u.getGridFunction().save("u.gf");
+  dOmega.save("dOmega.mesh");
+  Omega.save("Omega.mesh");
+
+  // Adjoint equation
+  TrialFunction p(Vh);
+  TestFunction  q(Vh);
+  Problem adjoint(p, q);
+  adjoint = Integral(Grad(p), Grad(q))
+          + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
+          + Integral(ScalarFunction(u.getGridFunction()), q);
+  solver.solve(adjoint);
+  p.getGridFunction().save("p.gf");
+
+  // Shape gradient
+  GridFunction uS(VhS), pS(VhS);
+  u.getGridFunction().transfer(uS);
+  p.getGridFunction().transfer(pS);
+
+  GridFunction<H1> grad = getShapeGradient(VhS, ThS, distSurf, uS, pS, g, solver);
+
+  GridFunction product(VhS);
+  product = ScalarFunction(uS) * ScalarFunction(pS);
+  product.save("product.gf");
+
+  // grad *= -1.0;
+
+  // dist.save("dist.gf");
+  grad.save("grad.gf");
+
+  return 0;
+}
+
+GridFunction<H1> getShapeGradient(
+    FiniteElementSpace<H1>& scalarFes,
+    FiniteElementSpace<H1>& vecFes,
+    GridFunction<H1>& dist,
+    GridFunction<H1>& state,
+    GridFunction<H1>& adjoint,
+    const ScalarFunctionBase& g,
+    Solver::Solver& solver)
+{
+  auto n0 = VectorFunction{Dx(dist), Dy(dist), Dz(dist)};
+
+  TrialFunction nx(scalarFes);
+  TrialFunction ny(scalarFes);
+  TrialFunction nz(scalarFes);
+  TestFunction  v(scalarFes);
+
+  // Conormal calculation
+  Problem conormalX(nx, v);
+  conormalX = Integral(alpha * Grad(nx), Grad(v))
+          + Integral(nx, v)
+          - Integral(n0.x(), v).over(GammaD);
+  solver.solve(conormalX);
+
+  Problem conormalY(ny, v);
+  conormalY = Integral(alpha * Grad(ny), Grad(v))
+          + Integral(ny, v)
+          - Integral(n0.y(), v).over(GammaD);
+  solver.solve(conormalY);
+
+  Problem conormalZ(nz, v);
+  conormalZ = Integral(alpha * Grad(nz), Grad(v))
+          + Integral(nz, v)
+          - Integral(n0.z(), v).over(GammaD);
+  solver.solve(conormalZ);
+
+  auto d = VectorFunction{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
+  auto conormal = d / Pow(d.x() * d.x() + d.y() * d.y() + d.z() * d.z(), 0.5);
+
+  auto expr = -ScalarFunction(state) * ScalarFunction(adjoint) - ell;
+
+  auto n = Normal(3);
+  TrialFunction gx(scalarFes);
+  TrialFunction gy(scalarFes);
+  TrialFunction gz(scalarFes);
+  Problem velextX(gx, v);
+  velextX = Integral(alpha * Grad(gx), Grad(v))
+          + Integral(gx, v)
+          + Integral(tgv * gx, v).over(GammaN)
+          - Integral(expr * conormal.x(), v).over({Gamma, GammaD});
+  solver.solve(velextX);
+
+  Problem velextY(gy, v);
+  velextY = Integral(alpha * Grad(gy), Grad(v))
+          + Integral(gy, v)
+          + Integral(tgv * gy, v).over(GammaN)
+          - Integral(expr * conormal.y(), v).over({Gamma, GammaD});
+  solver.solve(velextY);
+
+  Problem velextZ(gz, v);
+  velextZ = Integral(alpha * Grad(gz), Grad(v))
+          + Integral(gz, v)
+          + Integral(tgv * gz, v).over(GammaN)
+          - Integral(expr * conormal.z(), v).over({Gamma, GammaD});
+  solver.solve(velextZ);
+
+  GridFunction gradT(vecFes);
+  auto grad = VectorFunction{gx.getGridFunction(), gy.getGridFunction(), gz.getGridFunction()};
+  gradT = grad - n * Dot(grad, n);
+
+  return gradT;
+}
+

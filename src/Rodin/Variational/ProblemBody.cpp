@@ -21,17 +21,22 @@ namespace Rodin::Variational
       m_bfiDomainList.reserve(bsum.getBilinearFormDomainIntegratorList().size());
       for (const auto& p : bsum.getBilinearFormDomainIntegratorList())
          m_bfiDomainList.emplace_back(p->copy());
+      for (const auto& p : bsum.getBilinearFormBoundaryIntegratorList())
+         m_bfiBoundaryList.emplace_back(p->copy());
    }
 
    ProblemBody::ProblemBody(const ProblemBody& other)
       : m_essBdr(other.m_essBdr)
    {
       m_bfiDomainList.reserve(other.m_bfiDomainList.size());
+      m_bfiBoundaryList.reserve(other.m_bfiBoundaryList.size());
       m_lfiDomainList.reserve(other.m_lfiDomainList.size());
       m_lfiBoundaryList.reserve(other.m_lfiBoundaryList.size());
 
       for (const auto& v : other.m_bfiDomainList)
          m_bfiDomainList.emplace_back(v->copy());
+      for (const auto& v : other.m_bfiBoundaryList)
+         m_bfiBoundaryList.emplace_back(v->copy());
       for (const auto& v : other.m_lfiDomainList)
          m_lfiDomainList.emplace_back(v->copy());
       for (const auto& v : other.m_lfiBoundaryList)
@@ -59,6 +64,12 @@ namespace Rodin::Variational
    ProblemBody::getBilinearFormDomainIntegratorList()
    {
       return m_bfiDomainList;
+   }
+
+   ProblemBody::BFIList&
+   ProblemBody::getBilinearFormBoundaryIntegratorList()
+   {
+      return m_bfiBoundaryList;
    }
 
    ProblemBody operator+(

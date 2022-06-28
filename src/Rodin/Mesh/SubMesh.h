@@ -66,6 +66,11 @@ namespace Rodin
             return true;
          }
 
+         Mesh<Traits::Serial>& mesh()
+         {
+            return *this;
+         }
+
       private:
          std::optional<std::reference_wrapper<const MeshBase>> m_parent;
          std::optional<boost::bimap<int, int>> m_s2pv;

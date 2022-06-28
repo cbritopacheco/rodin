@@ -623,4 +623,31 @@ namespace Rodin
     }
     return res;
   }
+
+   template <>
+   template <>
+   External::MMG::MeshS
+   Cast<Rodin::SubMesh<Traits::Serial>>::to<External::MMG::MeshS>() const
+   {
+      return Cast<Rodin::Mesh<Traits::Serial>>(
+            static_cast<const Mesh<Traits::Serial>&>(from())).to<External::MMG::MeshS>();
+   }
+
+   template <>
+   template <>
+   External::MMG::Mesh2D
+   Cast<Rodin::SubMesh<Traits::Serial>>::to<External::MMG::Mesh2D>() const
+   {
+      return Cast<Rodin::Mesh<Traits::Serial>>(
+            static_cast<const Mesh<Traits::Serial>&>(from())).to<External::MMG::Mesh2D>();
+   }
+
+   template <>
+   template <>
+   External::MMG::Mesh3D
+   Cast<Rodin::SubMesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const
+   {
+      return Cast<Rodin::Mesh<Traits::Serial>>(
+            static_cast<const Mesh<Traits::Serial>&>(from())).to<External::MMG::Mesh3D>();
+   }
 }

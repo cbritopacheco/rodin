@@ -46,6 +46,11 @@ namespace Rodin
    External::MMG::Mesh2D
    Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh2D>() const;
 
+   template <>
+   template <>
+   External::MMG::Mesh2D
+   Cast<Rodin::SubMesh<Traits::Serial>>::to<External::MMG::Mesh2D>() const;
+
    /**
     * Rodin::Variational::GridFunction<FEC, Traits::Serial> -> MMG::IncompleteScalarSolution2D
     */
@@ -135,6 +140,11 @@ namespace Rodin
    External::MMG::Mesh3D
    Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const;
 
+   template <>
+   template <>
+   External::MMG::Mesh3D
+   Cast<Rodin::SubMesh<Traits::Serial>>::to<External::MMG::Mesh3D>() const;
+
    /**
     * MMG::ScalarSolution3D -> Rodin::Variational::GridFunction<Variational::H1, Traits::Serial>
     */
@@ -217,6 +227,11 @@ namespace Rodin
    template <>
    External::MMG::MeshS
    Cast<Rodin::Mesh<Traits::Serial>>::to<External::MMG::MeshS>() const;
+
+   template <>
+   template <>
+   External::MMG::MeshS
+   Cast<Rodin::SubMesh<Traits::Serial>>::to<External::MMG::MeshS>() const;
 
    /**
     * MMG::ScalarSolutionS -> Rodin::Variational::GridFunction<Variational::H1, Traits::Serial>

@@ -281,7 +281,7 @@ namespace Rodin::Variational
             : m_u(u),
               m_v(u.getFiniteElementSpace()),
               m_one(u.getFiniteElementSpace()),
-              m_lf(u.getFiniteElementSpace()),
+              m_lf(m_v),
               m_assembled(false)
          {
             assert(u.getFiniteElementSpace().getVectorDimension() == 1);
@@ -295,6 +295,12 @@ namespace Rodin::Variational
 
          Integral(Integral&& other) = default;
 
+         /**
+          * @brief Integrates the expression and returns the value
+          * @returns Value of integral
+          *
+          * This method does not cache the integrated value.
+          */
          double compute()
          {
             if (m_assembled)
@@ -325,10 +331,14 @@ namespace Rodin::Variational
       public:
          using Integrand = ShapeFunctionBase<Test>;
 
-         template <class Lhs>
-         BoundaryIntegral(Lhs&& lhs, const ShapeFunctionBase<Test>& rhs)
+         BoundaryIntegral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
             :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
-               m_integral(std::forward<Lhs>(lhs), rhs)
+               m_integral(lhs, rhs)
+         {}
+
+         BoundaryIntegral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+            :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
+               m_integral(lhs, rhs)
          {}
 
          BoundaryIntegral(const Integrand& integrand)
@@ -362,10 +372,60 @@ namespace Rodin::Variational
    };
    BoundaryIntegral(const ShapeFunctionBase<Test>&)
       -> BoundaryIntegral<ShapeFunctionBase<Test>>;
-
-   template <class Lhs>
-   BoundaryIntegral(Lhs&& lhs, const ShapeFunctionBase<Test>& rhs)
+   BoundaryIntegral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
       -> BoundaryIntegral<ShapeFunctionBase<Test>>;
+   BoundaryIntegral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
+   BoundaryIntegral(const MatrixFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
+
+   template <>
+   class BoundaryIntegral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
+      : public BilinearFormBoundaryIntegrator
+   {
+      public:
+         using Integrand = Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
+
+         BoundaryIntegral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+            :  BilinearFormBoundaryIntegrator(lhs.getLeaf(), rhs.getLeaf()),
+               m_integral(lhs, rhs)
+         {}
+
+         BoundaryIntegral(const Integrand& integrand)
+            :  BilinearFormBoundaryIntegrator(integrand.getLHS(), integrand.getRHS()),
+               m_integral(integrand)
+         {}
+
+         BoundaryIntegral(const BoundaryIntegral& other)
+            : BilinearFormBoundaryIntegrator(other),
+              m_integral(other.m_integral)
+         {}
+
+         BoundaryIntegral(BoundaryIntegral&& other)
+            : BilinearFormBoundaryIntegrator(std::move(other)),
+              m_integral(std::move(other.m_integral))
+         {}
+
+         void getElementMatrix(
+               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override
+         {
+            return m_integral.getElementMatrix(trial, test, trans, mat);
+         }
+
+         BoundaryIntegral* copy() const noexcept override
+         {
+            return new BoundaryIntegral(*this);
+         }
+
+      private:
+         Integral<Integrand> m_integral;
+   };
+   BoundaryIntegral(const Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
+      -> BoundaryIntegral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
+   BoundaryIntegral(const ShapeFunctionBase<Trial>&, const ShapeFunctionBase<Test>&)
+      -> BoundaryIntegral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
+
 }
 
 #endif

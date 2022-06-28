@@ -19,6 +19,9 @@ namespace Rodin::Variational::FormLanguage
          case IntegratorRegion::Domain:
             m_bfiDomainList.emplace_back(lhs.copy());
             break;
+         case IntegratorRegion::Boundary:
+            m_bfiBoundaryList.emplace_back(lhs.copy());
+            break;
          default:
             Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
       }
@@ -26,6 +29,9 @@ namespace Rodin::Variational::FormLanguage
       {
          case IntegratorRegion::Domain:
             m_bfiDomainList.emplace_back(rhs.copy());
+            break;
+         case IntegratorRegion::Boundary:
+            m_bfiBoundaryList.emplace_back(rhs.copy());
             break;
          default:
             Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
@@ -38,10 +44,15 @@ namespace Rodin::Variational::FormLanguage
       m_bfiDomainList.reserve(lhs.m_bfiDomainList.size() + 1);
       for (const auto& p : lhs.m_bfiDomainList)
          m_bfiDomainList.emplace_back(p->copy());
+      for (const auto& p : lhs.m_bfiBoundaryList)
+         m_bfiBoundaryList.emplace_back(p->copy());
       switch (rhs.getIntegratorRegion())
       {
          case IntegratorRegion::Domain:
             m_bfiDomainList.emplace_back(rhs.copy());
+            break;
+         case IntegratorRegion::Boundary:
+            m_bfiBoundaryList.emplace_back(rhs.copy());
             break;
          default:
             Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
@@ -57,6 +68,12 @@ namespace Rodin::Variational::FormLanguage
          m_bfiDomainList.emplace_back(p->copy());
       for (const auto& p : rhs.m_bfiDomainList)
          m_bfiDomainList.emplace_back(p->copy());
+
+      m_bfiBoundaryList.reserve(lhs.m_bfiBoundaryList.size() + rhs.m_bfiBoundaryList.size());
+      for (const auto& p : lhs.m_bfiBoundaryList)
+         m_bfiBoundaryList.emplace_back(p->copy());
+      for (const auto& p : rhs.m_bfiBoundaryList)
+         m_bfiBoundaryList.emplace_back(p->copy());
    }
 
    BilinearFormIntegratorSum::BilinearFormIntegratorSum(
@@ -65,6 +82,10 @@ namespace Rodin::Variational::FormLanguage
       m_bfiDomainList.reserve(other.m_bfiDomainList.size());
       for (const auto& p : other.m_bfiDomainList)
          m_bfiDomainList.emplace_back(p->copy());
+
+      m_bfiBoundaryList.reserve(other.m_bfiBoundaryList.size());
+      for (const auto& p : other.m_bfiBoundaryList)
+         m_bfiBoundaryList.emplace_back(p->copy());
    }
 
    BilinearFormIntegratorSum operator+(

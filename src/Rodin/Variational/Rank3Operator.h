@@ -68,6 +68,16 @@ namespace Rodin::Variational
 
          /**
           * @f[
+          *    \Lambda A(u)
+          * @f]
+          * with @f$ A(u) \in \mathbb{R} @f$,
+          * @f$ \Lambda \in \mathbb{R}^p @f$.
+          */
+         virtual
+         std::unique_ptr<Rank3Operator> ScalarVectorMult(const mfem::Vector& lhs) const;
+
+         /**
+          * @f[
           *    A(u) \Lambda
           * @f]
           * with @f$ A(u) \in \mathbb{R}^{s \times p} @f$,
