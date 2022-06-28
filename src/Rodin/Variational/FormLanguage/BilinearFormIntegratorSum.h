@@ -47,6 +47,16 @@ namespace Rodin::Variational::FormLanguage
             return m_bfiDomainList;
          }
 
+         BFIList& getBilinearFormBoundaryIntegratorList()
+         {
+            return m_bfiBoundaryList;
+         }
+
+         const BFIList& getBilinearFormBoundaryIntegratorList() const
+         {
+            return m_bfiBoundaryList;
+         }
+
          BilinearFormIntegratorSum* copy() const noexcept override
          {
             return new BilinearFormIntegratorSum(*this);
@@ -54,6 +64,7 @@ namespace Rodin::Variational::FormLanguage
 
       private:
          BFIList m_bfiDomainList;
+         BFIList m_bfiBoundaryList;
    };
 
    BilinearFormIntegratorSum operator+(

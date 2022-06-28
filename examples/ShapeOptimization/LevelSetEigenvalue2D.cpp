@@ -89,10 +89,10 @@ int main(int argc, char** argv)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 500;
+  size_t maxIt = 155;
   double eps = 1e-6;
   double hmax = 0.05;
-  double target_volume = 1.;
+  double target_volume = 0.8;
   int k = 2; // The eigenvalue to optimize
   auto alpha = ScalarFunction(4 * hmax * hmax); // Parameter for hilbertian regularization
   auto ell = ScalarFunction(10);
@@ -140,7 +140,10 @@ int main(int argc, char** argv)
 
     // Hilbert extension-regularization procedure
     auto n = Normal(2);
-    auto dJ = Dot(Grad(u).traceOf(Interior), Grad(u).traceOf(Interior)) * n - mu*ScalarFunction(u)*ScalarFunction(u) * n + mu * n - 2*ell*(Omega.getVolume(Interior) - target_volume)*n;
+    auto dJ = (
+        Dot(Grad(u).traceOf(Interior), Grad(u).traceOf(Interior))
+        - mu * ScalarFunction(u) * ScalarFunction(u)
+        - 2 * ell * (Omega.getVolume(Interior) - target_volume))*n;
     FiniteElementSpace<H1> Uh(Omega, 2);
     TrialFunction g(Uh);
     TestFunction  v(Uh);

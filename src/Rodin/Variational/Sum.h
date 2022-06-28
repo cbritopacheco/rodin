@@ -340,6 +340,13 @@ namespace Rodin::Variational
    {
       return Sum(lhs, rhs);
    }
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Sum<ScalarFunctionBase, ScalarFunctionBase>>
+   operator+(const ScalarFunctionBase& lhs, T v)
+   {
+      return Sum(lhs, ScalarFunction<T>(v));
+   }
 }
 
 #endif

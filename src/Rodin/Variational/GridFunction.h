@@ -120,40 +120,6 @@ namespace Rodin::Variational
          GridFunctionBase& operator/=(double t);
 
          /**
-          * @brief Addition of a scalar function.
-          */
-         GridFunctionBase& operator+=(const ScalarFunctionBase& v);
-
-         /**
-          * @brief Substraction of a scalar function.
-          */
-         GridFunctionBase& operator-=(const ScalarFunctionBase& v);
-
-         /**
-          * @brief Multiplication by a scalar function.
-          */
-         GridFunctionBase& operator*=(const ScalarFunctionBase& v);
-
-         /**
-          * @brief Division by a scalar function.
-          */
-         GridFunctionBase& operator/=(const ScalarFunctionBase& v);
-
-         /**
-          * @brief Addition of a vector function.
-          * @note The grid function must have the same vector dimension as the
-          * vector function.
-          */
-         GridFunctionBase& operator+=(const VectorFunctionBase& v);
-
-         /**
-          * @brief Substraction of a vector function.
-          * @note The grid function must have the same vector dimension as the
-          * vector function.
-          */
-         GridFunctionBase& operator-=(const VectorFunctionBase& v);
-
-         /**
           * @brief Projection of a scalar function.
           */
          GridFunctionBase& operator=(const ScalarFunctionBase& v)

@@ -38,7 +38,7 @@ namespace Rodin::Variational
       assert(GetRows() == rhs.GetRows());
       assert(GetColumns() == rhs.GetColumns());
       assert(GetDOFs() == rhs.GetDOFs());
-      auto result = new DenseRank3Operator(GetColumns(), GetRows(), GetDOFs());
+      auto result = new DenseRank3Operator(GetRows(), GetColumns(), GetDOFs());
       for (int k = 0; k < GetDOFs(); k++)
       {
          for (int i = 0; i < GetRows(); i++)
@@ -63,6 +63,18 @@ namespace Rodin::Variational
          (*result)(i) = lhs;
          (*result)(i) *= (*this)(0, 0, i);
       }
+      return std::unique_ptr<Rank3Operator>(result);
+   }
+
+   std::unique_ptr<Rank3Operator> Rank3Operator::ScalarVectorMult(
+         const mfem::Vector& lhs) const
+   {
+      assert(GetRows() == 1);
+      assert(GetColumns() == 1);
+      auto result = new DenseRank3Operator(lhs.Size(), 1, GetDOFs());
+      for (int l = 0; l < GetDOFs(); l++)
+         for (int i = 0; i < lhs.Size(); i++)
+            (*result)(i, 0, l) = lhs(i) * (*this)(0, 0, l);
       return std::unique_ptr<Rank3Operator>(result);
    }
 

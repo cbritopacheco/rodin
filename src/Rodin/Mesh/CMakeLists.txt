@@ -1,10 +1,12 @@
 set(RodinMesh_HEADERS
   Mesh.h
+  Element.h
   SubMesh.h
   )
 
 set(RodinMesh_SRCS
   Mesh.cpp
+  Element.cpp
   SubMesh.cpp
   )
 add_library(RodinMesh ${RodinMesh_SRCS} ${RodinMesh_HEADERS})

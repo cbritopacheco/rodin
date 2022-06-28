@@ -79,8 +79,8 @@ namespace Rodin::Variational
          virtual const mfem::BilinearForm& getHandle() const = 0;
 
          /**
-          * @brief Builds the bilinear form the given BilinearFormDomainIntegrator.
-          * @param[in] bfi BilinearFormDomainIntegrator which will be used to
+          * @brief Builds the bilinear form the given bilinear integrator
+          * @param[in] bfi Bilinear integrator which will be used to
           * build the bilinear form.
           * @returns Reference to this (for method chaining)
           */
@@ -94,7 +94,7 @@ namespace Rodin::Variational
                const FormLanguage::BilinearFormIntegratorSum& bfi) = 0;
 
          /**
-          * @brief Adds a BilinearFormDomainIntegrator to the bilinear form.
+          * @brief Adds a bilinear integrator to the bilinear form.
           * @returns Reference to this (for method chaining)
           */
          virtual BilinearFormBase& add(
@@ -227,7 +227,9 @@ namespace Rodin::Variational
          TestFunction<TestFEC, Traits::Serial>&   m_v;
          std::unique_ptr<mfem::BilinearForm> m_bf;
          BFIList m_bfiDomainList;
+         BFIList m_bfiBoundaryList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
+         std::vector<std::unique_ptr<mfem::Array<int>>> m_bdrAttrMarkers;
    };
    template <class TrialFEC, class TestFEC, class Trait>
    BilinearForm(TrialFunction<TrialFEC, Trait>&, TestFunction<TestFEC, Trait>&)
