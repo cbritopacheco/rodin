@@ -16,8 +16,10 @@ using namespace Rodin::External;
 // Parameters
 static constexpr int Gamma = 1;
 static constexpr int GammaD = 5;
+static constexpr int SigmaD = 1;
 static constexpr int GammaN = 6;
-static constexpr double ell = 1;
+static constexpr int SigmaN = 2;
+static constexpr double ell = 0.1;
 static constexpr double alpha = 0.1;
 static constexpr double epsilon = 0.01;
 static constexpr double tgv = std::numeric_limits<double>::max();
@@ -42,8 +44,10 @@ int main(int, char**)
 
   Mesh Omega;
   Omega.load(meshFile);
+  Omega.refine();
 
-  auto dOmega = Omega.skin();
+  auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
+  dOmega.save("dOmega.mesh");
 
   FiniteElementSpace<H1> Vh(Omega);
   FiniteElementSpace<H1> Th(Omega, 3);
@@ -52,6 +56,7 @@ int main(int, char**)
   FiniteElementSpace<H1> ThS(dOmega, 3);
 
   auto mmgMesh = Cast(dOmega).to<MMG::MeshS>();
+  mmgMesh.save("dmmg.mesh");
   auto mmgDist = MMG::DistancerS().setInteriorDomain(GammaD).distance(mmgMesh);
   auto distSurf = Cast(mmgDist).to<GridFunction<H1>>(VhS);
 
@@ -176,27 +181,26 @@ GridFunction<H1> getShapeGradient(
   velextX = Integral(alpha * Grad(gx), Grad(v))
           + Integral(gx, v)
           + Integral(tgv * gx, v).over(GammaN)
-          - Integral(expr * conormal.x(), v).over({Gamma, GammaD});
+          - BoundaryIntegral(expr * conormal.x(), v).over(SigmaD);
   solver.solve(velextX);
 
   Problem velextY(gy, v);
   velextY = Integral(alpha * Grad(gy), Grad(v))
           + Integral(gy, v)
           + Integral(tgv * gy, v).over(GammaN)
-          - Integral(expr * conormal.y(), v).over({Gamma, GammaD});
+          - BoundaryIntegral(expr * conormal.y(), v).over(SigmaD);
   solver.solve(velextY);
 
   Problem velextZ(gz, v);
   velextZ = Integral(alpha * Grad(gz), Grad(v))
           + Integral(gz, v)
           + Integral(tgv * gz, v).over(GammaN)
-          - Integral(expr * conormal.z(), v).over({Gamma, GammaD});
+          - BoundaryIntegral(expr * conormal.z(), v).over(SigmaD);
   solver.solve(velextZ);
 
-  GridFunction gradT(vecFes);
-  auto grad = VectorFunction{gx.getGridFunction(), gy.getGridFunction(), gz.getGridFunction()};
-  gradT = grad - n * Dot(grad, n);
+  GridFunction grad(vecFes);
+  grad = VectorFunction{gx.getGridFunction(), gy.getGridFunction(), gz.getGridFunction()};
 
-  return gradT;
+  return grad;
 }
 
