@@ -345,6 +345,40 @@ namespace Rodin
             std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
    }
 
+   SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin(const std::map<int, int>& bdrAttr)
+   {
+      auto res = skin();
+      if (bdrAttr.size() == 0)
+         return res;
+
+      for (int i = 0; i < res.getHandle().GetNumFaces(); i++)
+      {
+         int el1, el2;
+         res.getHandle().GetFaceElements(i, &el1, &el2);
+
+         int attr1 = res.getHandle().GetAttribute(el1);
+         int attr2 = res.getHandle().GetAttribute(el2);
+
+         if (attr1 != attr2)
+         {
+            int attr;
+            if (bdrAttr.count(attr1))
+               attr = bdrAttr.at(attr1);
+            else if (bdrAttr.count(attr2))
+               attr = bdrAttr.at(attr2);
+            else
+               continue;
+
+            mfem::Element* fc = res.getHandle().GetFace(i)->Duplicate(&res.getHandle());
+            fc->SetAttribute(attr);
+            res.getHandle().AddBdrElement(fc);
+         }
+      }
+      res.getHandle().SetAttributes();
+
+      return res;
+   }
+
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin()
    {
       assert(getDimension() >= 2);
