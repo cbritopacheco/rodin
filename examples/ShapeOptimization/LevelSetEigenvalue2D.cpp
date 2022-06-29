@@ -140,8 +140,9 @@ int main(int argc, char** argv)
 
     // Hilbert extension-regularization procedure
     auto n = Normal(2);
+    auto gu = Grad(u);
     auto dJ = (
-        Dot(Grad(u).traceOf(Interior), Grad(u).traceOf(Interior))
+        Dot(gu.traceOf(Interior), gu.traceOf(Interior))
         - mu * ScalarFunction(u) * ScalarFunction(u)
         - 2 * ell * (Omega.getVolume(Interior) - target_volume))*n;
     FiniteElementSpace<H1> Uh(Omega, 2);

@@ -120,22 +120,23 @@ GridFunction<H1> getShapeGradient(
   TrialFunction nz(scalarFes);
   TestFunction  v(scalarFes);
 
+  auto expr = ScalarFunction(adjoint) * g - ScalarFunction(ell);
   Problem velextX(nx, v);
   velextX = Integral(alpha * Grad(nx), Grad(v))
           + Integral(nx, v)
-          - Integral((ScalarFunction(adjoint) * g - ScalarFunction(ell)) * n0.x(), v);
+          - Integral(expr * n0.x(), v);
   solver.solve(velextX);
 
   Problem velextY(ny, v);
   velextY = Integral(alpha * Grad(ny), Grad(v))
           + Integral(ny, v)
-          - Integral((ScalarFunction(adjoint) * g - ScalarFunction(ell)) * n0.y(), v);
+          - Integral(expr * n0.y(), v);
   solver.solve(velextY);
 
   Problem velextZ(nz, v);
   velextZ = Integral(alpha * Grad(nz), Grad(v))
           + Integral(nz, v)
-          - Integral((ScalarFunction(adjoint) * g - ScalarFunction(ell)) * n0.z(), v);
+          - Integral(expr * n0.z(), v);
   solver.solve(velextZ);
 
   GridFunction grad(vecFes);
