@@ -11,48 +11,39 @@
 #include <optional>
 #include <mfem.hpp>
 
+#include "Rodin/IO/Printer.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::MeshTools
 {
-   class PrinterBase
+   class MeshPrinterBase : public IO::Printer<mfem::Mesh>
    {
       public:
-         PrinterBase(mfem::Mesh& mesh)
+         MeshPrinterBase(mfem::Mesh& mesh)
             : m_mesh(mesh)
          {}
-
-         struct Error
-         {
-            std::string message;
-         };
-
-         struct Status
-         {
-            bool success;
-            std::optional<Error> error;
-         };
 
          const mfem::Mesh& getMesh() const
          {
             return m_mesh;
          }
 
-         virtual Status print(std::ostream& os) = 0;
+         virtual IO::Status print(std::ostream& os) = 0;
 
       private:
          mfem::Mesh& m_mesh;
    };
 
    template <>
-   class Printer<MeshFormat::MFEM> : public PrinterBase
+   class MeshPrinter<MeshFormat::MFEM> : public MeshPrinterBase
    {
       public:
-         Printer(mfem::Mesh& mesh)
-            : PrinterBase(mesh)
+         MeshPrinter(mfem::Mesh& mesh)
+            : MeshPrinterBase(mesh)
          {}
 
-         Status print(std::ostream& os) override
+         IO::Status print(std::ostream& os) override
          {
             getMesh().Print(os);
             return {true, {}};
@@ -60,14 +51,14 @@ namespace Rodin::MeshTools
    };
 
    template <>
-   class Printer<MeshFormat::GMSH> : public PrinterBase
+   class MeshPrinter<MeshFormat::GMSH> : public MeshPrinterBase
    {
       public:
-         Printer(mfem::Mesh& mesh)
-            : PrinterBase(mesh)
+         MeshPrinter(mfem::Mesh& mesh)
+            : MeshPrinterBase(mesh)
          {}
 
-         Status print(std::ostream& os) override;
+         IO::Status print(std::ostream& os) override;
    };
 }
 

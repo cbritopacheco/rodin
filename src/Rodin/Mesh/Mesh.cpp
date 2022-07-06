@@ -13,8 +13,8 @@
 
 #include "Element.h"
 
-#include "MeshTools/Loader.h"
-#include "MeshTools/Printer.h"
+#include "MeshTools/MeshLoader.h"
+#include "MeshTools/MeshPrinter.h"
 
 namespace Rodin
 {
@@ -58,22 +58,30 @@ namespace Rodin
 
    void MeshBase::save(const boost::filesystem::path& filename, MeshFormat fmt, int precision)
    {
+      IO::Status status;
+
       std::ofstream ofs(filename.c_str());
       ofs.precision(precision);
       switch (fmt)
       {
          case MeshFormat::MFEM:
          {
-            MeshTools::Printer<MeshFormat::MFEM> printer(getHandle());
-            printer.print(ofs);
+            MeshTools::MeshPrinter<MeshFormat::MFEM> printer(getHandle());
+            status = printer.print(ofs);
             break;
          }
          case MeshFormat::GMSH:
          {
-            MeshTools::Printer<MeshFormat::GMSH> printer(getHandle());
-            printer.print(ofs);
+            MeshTools::MeshPrinter<MeshFormat::GMSH> printer(getHandle());
+            status = printer.print(ofs);
             break;
          }
+      }
+
+      if (!status.success)
+      {
+         Alert::Exception() << "Could not write to file: " << filename << ". "
+                            << (status.error ? status.error->message : "");
       }
    }
 
@@ -159,21 +167,21 @@ namespace Rodin
    Mesh<Traits::Serial>&
    Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, MeshFormat fmt)
    {
-      MeshTools::LoaderStatus status;
+      IO::Status status;
       mfem::named_ifgzstream input(filename.c_str());
       switch (fmt)
       {
          case MeshFormat::MFEM:
          {
-            MeshTools::Loader<MeshFormat::MFEM> loader(input);
-            status = loader.load();
+            MeshTools::MeshLoader<MeshFormat::MFEM> loader;
+            status = loader.load(input);
             m_mesh = std::move(loader.getMesh());
             break;
          }
          case MeshFormat::GMSH:
          {
-            MeshTools::Loader<MeshFormat::GMSH> loader(input);
-            status = loader.load();
+            MeshTools::MeshLoader<MeshFormat::GMSH> loader;
+            status = loader.load(input);
             m_mesh = std::move(loader.getMesh());
             break;
          }
@@ -183,7 +191,7 @@ namespace Rodin
 
       if (!status.success)
       {
-         Alert::Exception() << "Could not open: " << filename << ". "
+         Alert::Exception() << "Could not load file: " << filename << ". "
                             << (status.error ? status.error->message : "");
       }
 

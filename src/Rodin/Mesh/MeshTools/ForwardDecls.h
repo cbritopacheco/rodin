@@ -11,15 +11,15 @@
 
 namespace Rodin::MeshTools
 {
-   class LoaderBase;
+   class MeshLoaderBase;
 
    template <MeshFormat fmt>
-   class Loader;
+   class MeshLoader;
 
-   class PrinterBase;
+   class MeshPrinterBase;
 
    template <MeshFormat fmt>
-   class Printer;
+   class MeshPrinter;
 }
 
 #endif
