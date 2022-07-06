@@ -52,7 +52,7 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 150;
+  size_t maxIt = 250;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarFunction(1);
@@ -110,6 +110,7 @@ int main(int, char**)
 
     // Convert data types to mmg types
     auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
+    mmgMesh.save("gif/Omega." + std::to_string(i) + ".mesh");
     auto mmgVel = Cast(g.getGridFunction()).to<MMG::VectorSolution2D>(mmgMesh);
 
     // Generate signed distance function
