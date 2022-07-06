@@ -13,6 +13,9 @@
 
 #include "Element.h"
 
+#include "MeshTools/Loader.h"
+#include "MeshTools/Printer.h"
+
 namespace Rodin
 {
    // ---- MeshBase ----------------------------------------------------------
@@ -53,9 +56,25 @@ namespace Rodin
             getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
    }
 
-   void MeshBase::save(const boost::filesystem::path& filename)
+   void MeshBase::save(const boost::filesystem::path& filename, MeshFormat fmt, int precision)
    {
-      getHandle().Save(filename.c_str());
+      std::ofstream ofs(filename.c_str());
+      ofs.precision(precision);
+      switch (fmt)
+      {
+         case MeshFormat::MFEM:
+         {
+            MeshTools::Printer<MeshFormat::MFEM> printer(getHandle());
+            printer.print(ofs);
+            break;
+         }
+         case MeshFormat::GMSH:
+         {
+            MeshTools::Printer<MeshFormat::GMSH> printer(getHandle());
+            printer.print(ofs);
+            break;
+         }
+      }
    }
 
    MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
@@ -137,9 +156,37 @@ namespace Rodin
       : m_mesh(other.m_mesh)
    {}
 
-   Mesh<Traits::Serial>& Mesh<Traits::Serial>::load(const boost::filesystem::path& filename)
+   Mesh<Traits::Serial>&
+   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, MeshFormat fmt)
    {
-      m_mesh = mfem::Mesh(filename.c_str());
+      MeshTools::LoaderStatus status;
+      mfem::named_ifgzstream input(filename.c_str());
+      switch (fmt)
+      {
+         case MeshFormat::MFEM:
+         {
+            MeshTools::Loader<MeshFormat::MFEM> loader(input);
+            status = loader.load();
+            m_mesh = std::move(loader.getMesh());
+            break;
+         }
+         case MeshFormat::GMSH:
+         {
+            MeshTools::Loader<MeshFormat::GMSH> loader(input);
+            status = loader.load();
+            m_mesh = std::move(loader.getMesh());
+            break;
+         }
+         default:
+            Alert::Exception("Unhandled mesh format.").raise();
+      }
+
+      if (!status.success)
+      {
+         Alert::Exception() << "Could not open: " << filename << ". "
+                            << (status.error ? status.error->message : "");
+      }
+
       return *this;
    }
 
