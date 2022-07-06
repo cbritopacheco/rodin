@@ -17,6 +17,7 @@
 #ifdef RODIN_USE_MPI
 #include <boost/mpi.hpp>
 #endif
+
 #include <boost/filesystem.hpp>
 
 #include "Rodin/Variational/ForwardDecls.h"
@@ -72,7 +73,7 @@ namespace Rodin
           * @brief Saves the object to text file.
           * @param[in] filename Name of the file.
           */
-         virtual void save(const boost::filesystem::path& filename);
+         virtual void save(const boost::filesystem::path& filename, MeshFormat fmt = MeshFormat::MFEM, int precison = 16);
 
          /**
           * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -202,7 +203,7 @@ namespace Rodin
           * @param[in] filename Name of file to read
           * @returns Reference to this (for method chaining)
           */
-         Mesh& load(const boost::filesystem::path& filename);
+         Mesh& load(const boost::filesystem::path& filename, MeshFormat fmt = MeshFormat::MFEM);
 
          /**
           * @brief Constructs an empty mesh with no elements.

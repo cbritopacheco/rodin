@@ -12,6 +12,12 @@
 
 namespace Rodin
 {
+   enum class MeshFormat
+   {
+      MFEM,
+      GMSH
+   };
+
    class MeshBase;
 
    /**
