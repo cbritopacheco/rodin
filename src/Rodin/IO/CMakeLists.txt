@@ -1,11 +1,11 @@
 set(RodinMeshTools_HEADERS
-  MeshLoader.h
-  MeshPrinter.h
+  Loader.h
+  Printer.h
   )
 
 set(RodinMeshTools_SRCS
-  MeshLoader.cpp
-  MeshPrinter.cpp
+  Loader.cpp
+  Printer.cpp
   )
 add_library(RodinMeshTools ${RodinMeshTools_SRCS} ${RodinMeshTools_HEADERS})
 add_library(Rodin::MeshTools ALIAS RodinMeshTools)
