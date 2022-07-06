@@ -196,7 +196,7 @@ namespace Rodin::Variational
             return getOperand().getIntegratorRegion();
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return m_op->getTestFunction();
          }
@@ -273,12 +273,12 @@ namespace Rodin::Variational
             return *m_op;
          }
 
-         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override
          {
             return m_op->getTrialFunction();
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return m_op->getTestFunction();
          }

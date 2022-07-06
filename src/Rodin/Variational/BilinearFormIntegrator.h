@@ -26,12 +26,12 @@ namespace Rodin::Variational
          /**
           * @brief Gets reference to trial function.
           */
-         virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
+         virtual const ShapeFunctionBase<TrialSpace>& getTrialFunction() const = 0;
 
          /**
           * @brief Gets reference to test function.
           */
-         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
+         virtual const ShapeFunctionBase<TestSpace>& getTestFunction() const = 0;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -58,7 +58,8 @@ namespace Rodin::Variational
    {
       public:
          BilinearFormDomainIntegrator(
-               const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
+               const ShapeFunctionBase<TrialSpace>& u,
+               const ShapeFunctionBase<TestSpace>& v)
             :  m_u(u.copy()), m_v(v.copy())
          {}
 
@@ -105,12 +106,12 @@ namespace Rodin::Variational
             return *this;
          }
 
-         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override
          {
             return *m_u;
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return *m_v;
          }
@@ -123,8 +124,8 @@ namespace Rodin::Variational
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
 
       private:
-         std::unique_ptr<ShapeFunctionBase<Trial>> m_u;
-         std::unique_ptr<ShapeFunctionBase<Test>>  m_v;
+         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_u;
+         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_v;
          std::set<int> m_attrs;
    };
 
@@ -132,7 +133,8 @@ namespace Rodin::Variational
    {
       public:
          BilinearFormBoundaryIntegrator(
-               const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
+               const ShapeFunctionBase<TrialSpace>& u,
+               const ShapeFunctionBase<TestSpace>& v)
             :  m_u(u.copy()), m_v(v.copy())
          {}
 
@@ -179,12 +181,12 @@ namespace Rodin::Variational
             return *this;
          }
 
-         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override
          {
             return *m_u;
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return *m_v;
          }
@@ -197,8 +199,8 @@ namespace Rodin::Variational
          virtual BilinearFormBoundaryIntegrator* copy() const noexcept override = 0;
 
       private:
-         std::unique_ptr<ShapeFunctionBase<Trial>> m_u;
-         std::unique_ptr<ShapeFunctionBase<Test>>  m_v;
+         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_u;
+         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_v;
          std::set<int> m_attrs;
    };
 }

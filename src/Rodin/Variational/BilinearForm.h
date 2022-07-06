@@ -110,13 +110,13 @@ namespace Rodin::Variational
           * @brief Gets the reference to the associated TrialFunction object.
           * @returns Reference to this (for method chaining)
           */
-         virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
+         virtual const ShapeFunctionBase<TrialSpace>& getTrialFunction() const = 0;
 
          /**
           * @brief Gets the reference to the associated TestFunction object.
           * @returns Reference to this (for method chaining)
           */
-         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
+         virtual const ShapeFunctionBase<TestSpace>& getTestFunction() const = 0;
    };
 
    /**
