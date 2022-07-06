@@ -9,31 +9,31 @@
 namespace Rodin::Variational
 {
    template <class FEC, class Trait>
-   class TestFunction : public ShapeFunction<FEC, Test>
+   class TestFunction : public ShapeFunction<FEC, TestSpace>
    {
       public:
          TestFunction(FiniteElementSpace<FEC, Trait>& fes)
-            : ShapeFunction<FEC, Test>(fes)
+            : ShapeFunction<FEC, TestSpace>(fes)
          {}
 
          TestFunction(const TestFunction& other)
-            : ShapeFunction<FEC, Test>(other)
+            : ShapeFunction<FEC, TestSpace>(other)
          {}
 
          TestFunction(TestFunction&& other)
-            : ShapeFunction<FEC, Test>(std::move(other))
+            : ShapeFunction<FEC, TestSpace>(std::move(other))
          {}
 
          void operator=(const TestFunction&) = delete;
 
          void operator=(TestFunction&&) = delete;
 
-         ShapeFunctionBase<Test>& getLeaf() override
+         ShapeFunctionBase<TestSpace>& getLeaf() override
          {
             return *this;
          }
 
-         const ShapeFunctionBase<Test>& getLeaf() const override
+         const ShapeFunctionBase<TestSpace>& getLeaf() const override
          {
             return *this;
 

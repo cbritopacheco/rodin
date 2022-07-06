@@ -364,11 +364,14 @@ namespace Rodin::Variational
     * @brief Dot product between vector value ShapeFunctionBase instances.
     */
    template <>
-   class Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>
+   class Dot<
+      ShapeFunctionBase<TrialSpace>,
+      ShapeFunctionBase<TestSpace>>
       : public FormLanguage::Base
    {
       public:
-         Dot(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+         Dot(const ShapeFunctionBase<TrialSpace>& lhs,
+               const ShapeFunctionBase<TestSpace>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
@@ -380,25 +383,25 @@ namespace Rodin::Variational
             : m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         ShapeFunctionBase<Trial>& getLHS()
+         ShapeFunctionBase<TrialSpace>& getLHS()
          {
             assert(m_lhs);
             return *m_lhs;
          }
 
-         ShapeFunctionBase<Test>& getRHS()
+         ShapeFunctionBase<TestSpace>& getRHS()
          {
             assert(m_rhs);
             return *m_rhs;
          }
 
-         const ShapeFunctionBase<Trial>& getLHS() const
+         const ShapeFunctionBase<TrialSpace>& getLHS() const
          {
             assert(m_lhs);
             return *m_lhs;
          }
 
-         const ShapeFunctionBase<Test>& getRHS() const
+         const ShapeFunctionBase<TestSpace>& getRHS() const
          {
             assert(m_rhs);
             return *m_rhs;
@@ -422,11 +425,14 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<ShapeFunctionBase<Trial>> m_lhs;
-         std::unique_ptr<ShapeFunctionBase<Test>>  m_rhs;
+         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_lhs;
+         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_rhs;
    };
-   Dot(const ShapeFunctionBase<Trial>&, const ShapeFunctionBase<Test>&)
-      -> Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
+   Dot(const ShapeFunctionBase<TrialSpace>&,
+         const ShapeFunctionBase<TestSpace>&)
+      -> Dot<
+         ShapeFunctionBase<TrialSpace>,
+         ShapeFunctionBase<TestSpace>>;
 }
 
 #endif

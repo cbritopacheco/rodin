@@ -40,11 +40,16 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
+   class Integral<Dot<
+                      ShapeFunctionBase<TrialSpace>,
+                      ShapeFunctionBase<TestSpace>>>
       : public BilinearFormDomainIntegrator
    {
       public:
-         using Integrand = Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
+         using Integrand =
+            Dot<
+               ShapeFunctionBase<TrialSpace>,
+               ShapeFunctionBase<TestSpace>>;
 
          /**
           * @brief Integral of the dot product of trial and test operators
@@ -57,7 +62,9 @@ namespace Rodin::Variational
           * @param[in] lhs Trial operator @f$ A(u) @f$
           * @param[in] rhs Test operator @f$ B(v) @f$
           */
-         Integral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(
+               const ShapeFunctionBase<TrialSpace>& lhs,
+               const ShapeFunctionBase<TestSpace>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -132,10 +139,14 @@ namespace Rodin::Variational
          std::function<int(
             const mfem::FiniteElement&, const mfem::FiniteElement&, mfem::ElementTransformation&)> m_intOrder;
    };
-   Integral(const Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
-      -> Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
-   Integral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
-      -> Integral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
+   Integral(
+         const Dot<ShapeFunctionBase<TrialSpace>,
+         ShapeFunctionBase<TestSpace>>&)
+      -> Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+   Integral(
+         const ShapeFunctionBase<TrialSpace>& lhs,
+         const ShapeFunctionBase<TestSpace>& rhs)
+      -> Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
 
    /**
@@ -151,11 +162,11 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Integral<ShapeFunctionBase<Test>>
+   class Integral<ShapeFunctionBase<TestSpace>>
       : public LinearFormDomainIntegrator
    {
       public:
-         using Integrand = ShapeFunctionBase<Test>;
+         using Integrand = ShapeFunctionBase<TestSpace>;
 
          /**
           * @brief Integral of the multiplication between a scalar valued function and operator
@@ -170,7 +181,9 @@ namespace Rodin::Variational
           *    \int \lambda A(v) \ dx \ .
           * @f]
           */
-         Integral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(
+               const ScalarFunctionBase& lhs,
+               const ShapeFunctionBase<TestSpace>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -187,7 +200,7 @@ namespace Rodin::Variational
           *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx \ .
           * @f]
           */
-         Integral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(const VectorFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -260,12 +273,12 @@ namespace Rodin::Variational
          std::function<int(
             const mfem::FiniteElement&, mfem::ElementTransformation&)> m_intOrder;
    };
-   Integral(const ShapeFunctionBase<Test>&)
-      -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const ScalarFunctionBase&, const ShapeFunctionBase<Test>&)
-      -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const VectorFunctionBase&, const ShapeFunctionBase<Test>&)
-      -> Integral<ShapeFunctionBase<Test>>;
+   Integral(const ShapeFunctionBase<TestSpace>&)
+      -> Integral<ShapeFunctionBase<TestSpace>>;
+   Integral(const ScalarFunctionBase&, const ShapeFunctionBase<TestSpace>&)
+      -> Integral<ShapeFunctionBase<TestSpace>>;
+   Integral(const VectorFunctionBase&, const ShapeFunctionBase<TestSpace>&)
+      -> Integral<ShapeFunctionBase<TestSpace>>;
 
    /**
     * @brief Integral of a GridFunction
@@ -286,7 +299,7 @@ namespace Rodin::Variational
          {
             assert(u.getFiniteElementSpace().getVectorDimension() == 1);
             m_one = ScalarFunction(1.0);
-            m_lf.from(Integral<ShapeFunctionBase<Test>>(ScalarFunction(u) * m_v));
+            m_lf.from(Integral<ShapeFunctionBase<TestSpace>>(ScalarFunction(u) * m_v));
          }
 
          Integral(const Integral& other)
@@ -326,17 +339,21 @@ namespace Rodin::Variational
    Integral(GridFunction<FEC, Trait>&) -> Integral<GridFunction<FEC, Trait>>;
 
    template <>
-   class BoundaryIntegral<ShapeFunctionBase<Test>> : public LinearFormBoundaryIntegrator
+   class BoundaryIntegral<ShapeFunctionBase<TestSpace>> : public LinearFormBoundaryIntegrator
    {
       public:
-         using Integrand = ShapeFunctionBase<Test>;
+         using Integrand = ShapeFunctionBase<TestSpace>;
 
-         BoundaryIntegral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         BoundaryIntegral(
+               const ScalarFunctionBase& lhs,
+               const ShapeFunctionBase<TestSpace>& rhs)
             :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
                m_integral(lhs, rhs)
          {}
 
-         BoundaryIntegral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         BoundaryIntegral(
+               const VectorFunctionBase& lhs,
+               const ShapeFunctionBase<TestSpace>& rhs)
             :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
                m_integral(lhs, rhs)
          {}
@@ -370,23 +387,25 @@ namespace Rodin::Variational
       private:
          Integral<Integrand> m_integral;
    };
-   BoundaryIntegral(const ShapeFunctionBase<Test>&)
-      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
-   BoundaryIntegral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
-      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
-   BoundaryIntegral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
-      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
-   BoundaryIntegral(const MatrixFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
-      -> BoundaryIntegral<ShapeFunctionBase<Test>>;
+   BoundaryIntegral(const ShapeFunctionBase<TestSpace>&)
+      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
+   BoundaryIntegral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
+      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
+   BoundaryIntegral(const VectorFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
+      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
+   BoundaryIntegral(const MatrixFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
+      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
 
    template <>
-   class BoundaryIntegral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>
+   class BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
       : public BilinearFormBoundaryIntegrator
    {
       public:
-         using Integrand = Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>;
+         using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
 
-         BoundaryIntegral(const ShapeFunctionBase<Trial>& lhs, const ShapeFunctionBase<Test>& rhs)
+         BoundaryIntegral(
+               const ShapeFunctionBase<TrialSpace>& lhs,
+               const ShapeFunctionBase<TestSpace>& rhs)
             :  BilinearFormBoundaryIntegrator(lhs.getLeaf(), rhs.getLeaf()),
                m_integral(lhs, rhs)
          {}
@@ -421,10 +440,10 @@ namespace Rodin::Variational
       private:
          Integral<Integrand> m_integral;
    };
-   BoundaryIntegral(const Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>&)
-      -> BoundaryIntegral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
-   BoundaryIntegral(const ShapeFunctionBase<Trial>&, const ShapeFunctionBase<Test>&)
-      -> BoundaryIntegral<Dot<ShapeFunctionBase<Trial>, ShapeFunctionBase<Test>>>;
+   BoundaryIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
+      -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+   BoundaryIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
+      -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
 }
 
