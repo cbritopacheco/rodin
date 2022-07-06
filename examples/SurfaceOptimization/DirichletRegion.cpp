@@ -44,7 +44,6 @@ int main(int, char**)
 
   Mesh Omega;
   Omega.load(meshFile);
-  Omega.refine();
 
   auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
   dOmega.save("dOmega.mesh");
@@ -62,7 +61,7 @@ int main(int, char**)
 
   GridFunction dist(Vh);
   distSurf.transfer(dist);
-
+  distSurf.save("dist.gf");
 
   ScalarFunction g = 2.0;
 
@@ -95,14 +94,8 @@ int main(int, char**)
         - BoundaryIntegral(g, v).over(GammaN);
   solver.solve(state);
 
-  // GridFunction hegf(Vh);
-  // hegf = he;
-  // hegf.save("miaow.gf");
-  // dist.save("dist.gf");
-
   u.getGridFunction().save("u.gf");
   dOmega.save("dOmega.mesh");
-  Omega.save("Omega.mesh");
 
   // Adjoint equation
   TrialFunction p(Vh);
@@ -168,12 +161,11 @@ GridFunction<H1> getShapeGradient(
           - Integral(n0.z(), v).over(GammaD);
   solver.solve(conormalZ);
 
-  auto d = VectorFunction{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
+  auto d = VectorFunction{
+    nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
   auto conormal = d / Pow(d.x() * d.x() + d.y() * d.y() + d.z() * d.z(), 0.5);
-
   auto expr = -ScalarFunction(state) * ScalarFunction(adjoint) - ell;
 
-  auto n = Normal(3);
   TrialFunction gx(scalarFes);
   TrialFunction gy(scalarFes);
   TrialFunction gz(scalarFes);
