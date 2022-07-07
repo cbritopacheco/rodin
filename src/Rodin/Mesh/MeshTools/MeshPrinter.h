@@ -60,6 +60,17 @@ namespace Rodin::MeshTools
 
          IO::Status print(std::ostream& os) override;
    };
+
+   template <>
+   class MeshPrinter<MeshFormat::MEDIT> : public MeshPrinterBase
+   {
+      public:
+         MeshPrinter(mfem::Mesh& mesh)
+            : MeshPrinterBase(mesh)
+         {}
+
+         IO::Status print(std::ostream& os) override;
+   };
 }
 
 #endif

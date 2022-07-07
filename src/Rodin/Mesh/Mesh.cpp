@@ -76,12 +76,19 @@ namespace Rodin
             status = printer.print(ofs);
             break;
          }
+         case MeshFormat::MEDIT:
+         {
+            MeshTools::MeshPrinter<MeshFormat::MEDIT> printer(getHandle());
+            status = printer.print(ofs);
+            break;
+         }
       }
 
       if (!status.success)
       {
          Alert::Exception() << "Could not write to file: " << filename << ". "
-                            << (status.error ? status.error->message : "");
+                            << (status.error ? status.error->message : "")
+                            << Alert::Raise;
       }
    }
 
@@ -185,14 +192,20 @@ namespace Rodin
             m_mesh = std::move(loader.getMesh());
             break;
          }
-         default:
-            Alert::Exception("Unhandled mesh format.").raise();
+         case MeshFormat::MEDIT:
+         {
+            MeshTools::MeshLoader<MeshFormat::MEDIT> loader;
+            status = loader.load(input);
+            m_mesh = std::move(loader.getMesh());
+            break;
+         }
       }
 
       if (!status.success)
       {
          Alert::Exception() << "Could not load file: " << filename << ". "
-                            << (status.error ? status.error->message : "");
+                            << (status.error ? status.error->message : "")
+                            << Alert::Raise;
       }
 
       return *this;

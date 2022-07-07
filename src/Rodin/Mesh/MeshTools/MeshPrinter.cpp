@@ -128,4 +128,114 @@ namespace Rodin::MeshTools
 
       return {true, {}};
    }
+
+   IO::Status MeshPrinter<MeshFormat::MEDIT>::print(std::ostream& os)
+   {
+      int meshDim = getMesh().Dimension();
+      int spaceDim = getMesh().SpaceDimension();
+
+      os << "MeshVersionFormatted 2"
+         << '\n'
+         << "Dimension " << spaceDim
+         << "\n\n";
+
+      // Print vertices
+      os << "Vertices"
+         << '\n'
+         << getMesh().GetNV()
+         << '\n';
+      for (int i = 0; i < getMesh().GetNV(); i++)
+      {
+         const double* coords = getMesh().GetVertex(i);
+         for (int j = 0; j < getMesh().SpaceDimension(); j++)
+            os << coords[j] << " ";
+         os << 0 << '\n'; // Dummy reference for all vertices
+      }
+
+      // Print triangles
+      os << '\n' << "Triangles" << '\n';
+      switch (getMesh().Dimension())
+      {
+         case 2:
+         {
+            os << getMesh().GetNE() << '\n';
+            mfem::Array<int> v;
+            for (int i = 0; i < getMesh().GetNE(); i++)
+            {
+               getMesh().GetElementVertices(i, v);
+               os << v[0] + 1 << " "
+                  << v[1] + 1 << " "
+                  << v[2] + 1 << " "
+                  << getMesh().GetAttribute(i) << '\n';
+            }
+            break;
+         }
+         case 3:
+         {
+            os << getMesh().GetNBE() << '\n';
+            mfem::Array<int> v;
+            for (int i = 0; i < getMesh().GetNBE(); i++)
+            {
+               getMesh().GetBdrElementVertices(i, v);
+               os << v[0] + 1 << " "
+                  << v[1] + 1 << " "
+                  << v[2] + 1 << " "
+                  << getMesh().GetBdrAttribute(i) << '\n';
+            }
+            break;
+         }
+         default:
+         {
+            return {false, IO::Error{"Bad mesh dimension: " + std::to_string(meshDim)}};
+         }
+      }
+
+      // Print tetrahedra
+      switch (meshDim)
+      {
+         case 3:
+         {
+            os << '\n' << "Tetrahedra" << '\n'
+               << getMesh().GetNE() << '\n';
+            mfem::Array<int> v;
+            for (int i = 0; i < getMesh().GetNE(); i++)
+            {
+               getMesh().GetElementVertices(i, v);
+               os << v[0] + 1 << " "
+                  << v[1] + 1 << " "
+                  << v[2] + 1 << " "
+                  << v[3] + 1 << " "
+                  << getMesh().GetAttribute(i) << '\n';
+            }
+         }
+         default:
+         {
+            // Do nothing
+         }
+      }
+
+      // Print edges
+      switch (meshDim)
+      {
+         case 2:
+         {
+            os << '\n' << "Edges" << '\n'
+               << getMesh().GetNBE() << '\n';
+            mfem::Array<int> v;
+            for (int i = 0; i < getMesh().GetNBE(); i++)
+            {
+               getMesh().GetBdrElementVertices(i, v);
+               os << v[0] + 1 << " "
+                  << v[1] + 1 << " "
+                  << getMesh().GetBdrAttribute(i) << '\n';
+            }
+         }
+         default:
+         {
+            // Do nothing
+         }
+      }
+
+      return {true, {}};
+   }
 }
