@@ -23,7 +23,7 @@ namespace Rodin::MeshTools
       static const std::map<std::string, MeshFormat> FILE_HEADERS;
 
       public:
-         static std::optional<MeshFormat> getMeshFormat(std::istream& input);
+         static std::optional<MeshFormat> getMeshFormat(std::istream& input, bool seekBeg = true);
 
          MeshLoaderBase()
             : m_fixOrientation(true)
@@ -65,6 +65,24 @@ namespace Rodin::MeshTools
    {
       public:
          IO::Status load(std::istream& is) override;
+   };
+
+   template <>
+   class MeshLoader<MeshFormat::MEDIT> : public MeshLoaderBase
+   {
+      public:
+         enum class EntityKeyword
+         {
+            Vertices,
+            Triangles,
+            Tetrahedra,
+            Edges
+         };
+
+         IO::Status load(std::istream& is) override;
+
+      private:
+         static const std::map<std::string, EntityKeyword> s_entities;
    };
 }
 

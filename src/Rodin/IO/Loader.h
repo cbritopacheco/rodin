@@ -9,6 +9,8 @@
 
 #include <istream>
 
+#include <boost/filesystem/path.hpp>
+
 #include "ForwardDecls.h"
 
 namespace Rodin::IO
@@ -18,6 +20,12 @@ namespace Rodin::IO
    {
       public:
          virtual IO::Status load(std::istream& is) = 0;
+
+         virtual IO::Status load(const boost::filesystem::path& is)
+         {
+            std::ifstream in(is.c_str());
+            return load(in);
+         }
    };
 }
 

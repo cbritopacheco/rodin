@@ -15,9 +15,9 @@ int main(int, char**)
 {
   Mesh mesh;
 
-  mesh.load("Omega.mesh", MeshFormat::MFEM);
+  mesh.load("mmg.mesh", MeshFormat::MEDIT);
 
-  mesh.save("OmegaGmsh.msh", MeshFormat::GMSH, 8);
+  mesh.save("OmegaMedit.mesh", MeshFormat::MFEM);
 
   return 0;
 }
