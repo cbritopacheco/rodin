@@ -20,6 +20,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -50,6 +51,8 @@ namespace Rodin
           */
          int getDimension() const;
 
+         bool isSurface() const;
+
          /**
           * @brief Performs a uniform refinement over all mesh elements
           */
@@ -68,12 +71,6 @@ namespace Rodin
           * @see getAttributes() const
           */
          std::set<int> getBoundaryAttributes() const;
-
-         /**
-          * @brief Saves the object to text file.
-          * @param[in] filename Name of the file.
-          */
-         virtual void save(const boost::filesystem::path& filename, MeshFormat fmt = MeshFormat::MFEM, int precison = 16);
 
          /**
           * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -203,7 +200,13 @@ namespace Rodin
           * @param[in] filename Name of file to read
           * @returns Reference to this (for method chaining)
           */
-         Mesh& load(const boost::filesystem::path& filename, MeshFormat fmt = MeshFormat::MFEM);
+         Mesh& load(
+               const boost::filesystem::path& filename,
+               IO::MeshFormat fmt = IO::MeshFormat::MFEM);
+
+         void save(
+               const boost::filesystem::path& filename,
+               IO::MeshFormat fmt = IO::MeshFormat::MFEM, int precison = 16) const;
 
          /**
           * @brief Constructs an empty mesh with no elements.

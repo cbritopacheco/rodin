@@ -6,12 +6,14 @@
  */
 #include "GridFunction.h"
 
+#include "Rodin/IO/GridFunctionLoader.h"
+
 #include "Sum.h"
 #include "Mult.h"
 #include "Minus.h"
 #include "Division.h"
-
 #include "FiniteElementSpace.h"
+
 
 namespace Rodin::Variational
 {
@@ -34,13 +36,6 @@ namespace Rodin::Variational
    void GridFunctionBase::save(const boost::filesystem::path& filename)
    {
       getHandle().Save(filename.string().c_str());
-   }
-
-   GridFunctionBase& GridFunctionBase::load(const boost::filesystem::path& filename)
-   {
-      std::ifstream in(filename.string());
-      getHandle().Load(in, getHandle().Size());
-      return *this;
    }
 
    std::pair<const double*, int> GridFunctionBase::getData() const

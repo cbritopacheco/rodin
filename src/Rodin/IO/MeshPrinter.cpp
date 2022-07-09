@@ -8,10 +8,12 @@
 
 #include "MeshPrinter.h"
 
-namespace Rodin::MeshTools
+namespace Rodin::IO
 {
-   IO::Status MeshPrinter<MeshFormat::GMSH>::print(std::ostream& os)
+   Status MeshPrinter<MeshFormat::GMSH, Traits::Serial>::print(std::ostream& os)
    {
+      const auto& mfemMesh = getObject().getHandle();
+
       // 1. Head of the file
       //====================
       os << "$MeshFormat\n" "2.2 0 " + std::to_string(os.precision()) + "\n$EndMeshFormat\n";
@@ -19,19 +21,19 @@ namespace Rodin::MeshTools
       // 2. Writing nodes
       //================
       os << "$Nodes\n";
-      os << getMesh().GetNV() << "\n";
-      for (int i = 0; i < getMesh().GetNV(); i++)
+      os << mfemMesh.GetNV() << "\n";
+      for (int i = 0; i < mfemMesh.GetNV(); i++)
       {
          os << i + 1
-            << " " << getMesh().GetVertex(i)[0]
-            << " " << getMesh().GetVertex(i)[1] << " " << getMesh().GetVertex(i)[2]
+            << " " << mfemMesh.GetVertex(i)[0]
+            << " " << mfemMesh.GetVertex(i)[1] << " " << mfemMesh.GetVertex(i)[2]
             << "\n"; 
       }
       os << "$EndNodes\n";
 
       // 3. Writing elements
       //====================
-      int num_ele_bnd = getMesh().GetNBE(), num_ele = getMesh().GetNE();
+      int num_ele_bnd = mfemMesh.GetNBE(), num_ele = mfemMesh.GetNE();
       os << "$Elements\n";
       os << (num_ele_bnd + num_ele) << "\n";
 
@@ -40,7 +42,7 @@ namespace Rodin::MeshTools
       for (int i = 0; i < num_ele_bnd; i++)
       {
          int ele_type = 0;
-         switch (getMesh().GetBdrElement(i)->GetType())
+         switch (mfemMesh.GetBdrElement(i)->GetType())
          {
             case mfem::Element::SEGMENT:
             {
@@ -65,9 +67,9 @@ namespace Rodin::MeshTools
          os << i + 1
             << " " << ele_type
             << " " << 1
-            << " " << getMesh().GetBdrElement(i)->GetAttribute();
-         const int* vertices_list = getMesh().GetBdrElement(i)->GetVertices();
-         for (int j = 0; j < (getMesh().GetBdrElement(i)->GetNVertices()); j++)
+            << " " << mfemMesh.GetBdrElement(i)->GetAttribute();
+         const int* vertices_list = mfemMesh.GetBdrElement(i)->GetVertices();
+         for (int j = 0; j < (mfemMesh.GetBdrElement(i)->GetNVertices()); j++)
             os << " " << (vertices_list[j] + 1);
          os << "\n"; 
       }
@@ -77,7 +79,7 @@ namespace Rodin::MeshTools
       for (int i = 0; i < num_ele; i++)
       {
          int ele_type = 0;
-         switch (getMesh().GetElement(i)->GetType())
+         switch (mfemMesh.GetElement(i)->GetType())
          {
             case mfem::Element::SEGMENT:
             {
@@ -117,10 +119,10 @@ namespace Rodin::MeshTools
 
          os << (i + 1 + num_ele_bnd)
             << " " << ele_type
-            << " " << 1 << " " << getMesh().GetElement(i)->GetAttribute();
+            << " " << 1 << " " << mfemMesh.GetElement(i)->GetAttribute();
 
-         const int* vertices_list = getMesh().GetElement(i)->GetVertices();
-         for (int j = 0; j < getMesh().GetElement(i)->GetNVertices(); j++)
+         const int* vertices_list = mfemMesh.GetElement(i)->GetVertices();
+         for (int j = 0; j < mfemMesh.GetElement(i)->GetNVertices(); j++)
             os << " " << (vertices_list[j] + 1);
          os << "\n"; 
       }
@@ -129,10 +131,12 @@ namespace Rodin::MeshTools
       return {true, {}};
    }
 
-   IO::Status MeshPrinter<MeshFormat::MEDIT>::print(std::ostream& os)
+   IO::Status MeshPrinter<MeshFormat::MEDIT, Traits::Serial>::print(std::ostream& os)
    {
-      int meshDim = getMesh().Dimension();
-      int spaceDim = getMesh().SpaceDimension();
+      const auto& mfemMesh = getObject().getHandle();
+
+      int meshDim = mfemMesh.Dimension();
+      int spaceDim = mfemMesh.SpaceDimension();
 
       os << "MeshVersionFormatted 2"
          << '\n'
@@ -142,45 +146,45 @@ namespace Rodin::MeshTools
       // Print vertices
       os << "Vertices"
          << '\n'
-         << getMesh().GetNV()
+         << mfemMesh.GetNV()
          << '\n';
-      for (int i = 0; i < getMesh().GetNV(); i++)
+      for (int i = 0; i < mfemMesh.GetNV(); i++)
       {
-         const double* coords = getMesh().GetVertex(i);
-         for (int j = 0; j < getMesh().SpaceDimension(); j++)
+         const double* coords = mfemMesh.GetVertex(i);
+         for (int j = 0; j < mfemMesh.SpaceDimension(); j++)
             os << coords[j] << " ";
          os << 0 << '\n'; // Dummy reference for all vertices
       }
 
       // Print triangles
       os << '\n' << "Triangles" << '\n';
-      switch (getMesh().Dimension())
+      switch (mfemMesh.Dimension())
       {
          case 2:
          {
-            os << getMesh().GetNE() << '\n';
+            os << mfemMesh.GetNE() << '\n';
             mfem::Array<int> v;
-            for (int i = 0; i < getMesh().GetNE(); i++)
+            for (int i = 0; i < mfemMesh.GetNE(); i++)
             {
-               getMesh().GetElementVertices(i, v);
+               mfemMesh.GetElementVertices(i, v);
                os << v[0] + 1 << " "
                   << v[1] + 1 << " "
                   << v[2] + 1 << " "
-                  << getMesh().GetAttribute(i) << '\n';
+                  << mfemMesh.GetAttribute(i) << '\n';
             }
             break;
          }
          case 3:
          {
-            os << getMesh().GetNBE() << '\n';
+            os << mfemMesh.GetNBE() << '\n';
             mfem::Array<int> v;
-            for (int i = 0; i < getMesh().GetNBE(); i++)
+            for (int i = 0; i < mfemMesh.GetNBE(); i++)
             {
-               getMesh().GetBdrElementVertices(i, v);
+               mfemMesh.GetBdrElementVertices(i, v);
                os << v[0] + 1 << " "
                   << v[1] + 1 << " "
                   << v[2] + 1 << " "
-                  << getMesh().GetBdrAttribute(i) << '\n';
+                  << mfemMesh.GetBdrAttribute(i) << '\n';
             }
             break;
          }
@@ -196,16 +200,16 @@ namespace Rodin::MeshTools
          case 3:
          {
             os << '\n' << "Tetrahedra" << '\n'
-               << getMesh().GetNE() << '\n';
+               << mfemMesh.GetNE() << '\n';
             mfem::Array<int> v;
-            for (int i = 0; i < getMesh().GetNE(); i++)
+            for (int i = 0; i < mfemMesh.GetNE(); i++)
             {
-               getMesh().GetElementVertices(i, v);
+               mfemMesh.GetElementVertices(i, v);
                os << v[0] + 1 << " "
                   << v[1] + 1 << " "
                   << v[2] + 1 << " "
                   << v[3] + 1 << " "
-                  << getMesh().GetAttribute(i) << '\n';
+                  << mfemMesh.GetAttribute(i) << '\n';
             }
          }
          default:
@@ -220,14 +224,14 @@ namespace Rodin::MeshTools
          case 2:
          {
             os << '\n' << "Edges" << '\n'
-               << getMesh().GetNBE() << '\n';
+               << mfemMesh.GetNBE() << '\n';
             mfem::Array<int> v;
-            for (int i = 0; i < getMesh().GetNBE(); i++)
+            for (int i = 0; i < mfemMesh.GetNBE(); i++)
             {
-               getMesh().GetBdrElementVertices(i, v);
+               mfemMesh.GetBdrElementVertices(i, v);
                os << v[0] + 1 << " "
                   << v[1] + 1 << " "
-                  << getMesh().GetBdrAttribute(i) << '\n';
+                  << mfemMesh.GetBdrAttribute(i) << '\n';
             }
          }
          default:

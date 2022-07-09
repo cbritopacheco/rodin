@@ -114,6 +114,11 @@ int main(int, char**)
 
     // Generate signed distance function
     auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior).distance(mmgMesh);
+    mmgMesh.save("ls.mesh");
+    // mmgLs.save("ls.sol");
+    FiniteElementSpace<H1> Sh(Omega);
+    Cast(mmgLs).to<GridFunction<H1>>(Sh).save("ls.gf");
+    std::exit(1);
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());

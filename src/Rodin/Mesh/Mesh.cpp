@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Alert.h"
+#include "Rodin/IO/MeshLoader.h"
+#include "Rodin/IO/MeshPrinter.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
@@ -12,9 +14,6 @@
 #include "SubMesh.h"
 
 #include "Element.h"
-
-#include "MeshTools/MeshLoader.h"
-#include "MeshTools/MeshPrinter.h"
 
 namespace Rodin
 {
@@ -39,6 +38,11 @@ namespace Rodin
       return getHandle().Dimension();
    }
 
+   bool MeshBase::isSurface() const
+   {
+      return (getSpaceDimension() - 1 == getDimension());
+   }
+
    void MeshBase::refine()
    {
       getHandle().UniformRefinement();
@@ -56,7 +60,8 @@ namespace Rodin
             getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
    }
 
-   void MeshBase::save(const boost::filesystem::path& filename, MeshFormat fmt, int precision)
+   void Mesh<Traits::Serial>::save(
+         const boost::filesystem::path& filename, IO::MeshFormat fmt, int precision) const
    {
       IO::Status status;
 
@@ -64,21 +69,21 @@ namespace Rodin
       ofs.precision(precision);
       switch (fmt)
       {
-         case MeshFormat::MFEM:
+         case IO::MeshFormat::MFEM:
          {
-            MeshTools::MeshPrinter<MeshFormat::MFEM> printer(getHandle());
+            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
             status = printer.print(ofs);
             break;
          }
-         case MeshFormat::GMSH:
+         case IO::MeshFormat::GMSH:
          {
-            MeshTools::MeshPrinter<MeshFormat::GMSH> printer(getHandle());
+            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
             status = printer.print(ofs);
             break;
          }
-         case MeshFormat::MEDIT:
+         case IO::MeshFormat::MEDIT:
          {
-            MeshTools::MeshPrinter<MeshFormat::MEDIT> printer(getHandle());
+            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
             status = printer.print(ofs);
             break;
          }
@@ -172,38 +177,38 @@ namespace Rodin
    {}
 
    Mesh<Traits::Serial>&
-   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, MeshFormat fmt)
+   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, IO::MeshFormat fmt)
    {
       IO::Status status;
       mfem::named_ifgzstream input(filename.c_str());
       switch (fmt)
       {
-         case MeshFormat::MFEM:
+         case IO::MeshFormat::MFEM:
          {
-            MeshTools::MeshLoader<MeshFormat::MFEM> loader;
+            IO::MeshLoader<IO::MeshFormat::MFEM, Traits::Serial> loader;
             status = loader.load(input);
-            m_mesh = std::move(loader.getMesh());
+            *this = std::move(loader.getObject());
             break;
          }
-         case MeshFormat::GMSH:
+         case IO::MeshFormat::GMSH:
          {
-            MeshTools::MeshLoader<MeshFormat::GMSH> loader;
+            IO::MeshLoader<IO::MeshFormat::GMSH, Traits::Serial> loader;
             status = loader.load(input);
-            m_mesh = std::move(loader.getMesh());
+            *this = std::move(loader.getObject());
             break;
          }
-         case MeshFormat::MEDIT:
+         case IO::MeshFormat::MEDIT:
          {
-            MeshTools::MeshLoader<MeshFormat::MEDIT> loader;
+            IO::MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial> loader;
             status = loader.load(input);
-            m_mesh = std::move(loader.getMesh());
+            *this = std::move(loader.getObject());
             break;
          }
       }
 
       if (!status.success)
       {
-         Alert::Exception() << "Could not load file: " << filename << ". "
+         Alert::Exception() << "Could not load Mesh from file: " << filename << ". "
                             << (status.error ? status.error->message : "")
                             << Alert::Raise;
       }

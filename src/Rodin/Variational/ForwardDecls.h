@@ -38,6 +38,8 @@ namespace Rodin::Variational
    template <class FEC, class Trait = Traits::Serial>
    class GridFunction;
 
+   // ---- ShapeFunction -----------------------------------------------------
+
    /**
     * Enumeration class to indicate whether a derived instance of
     * ShapeFunctionBase is either a Trial or Test space.

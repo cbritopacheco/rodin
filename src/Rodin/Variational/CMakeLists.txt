@@ -78,9 +78,10 @@ target_include_directories(RodinVariational
 
 target_link_libraries(RodinVariational
   PUBLIC
-  RodinMesh
-  RodinAlert
-  RodinUtility
+  Rodin::IO
+  Rodin::Mesh
+  Rodin::Alert
+  Rodin::Utility
   RodinVariationalFormLanguage)
 
 add_subdirectory(FormLanguage)

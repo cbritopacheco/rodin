@@ -16,13 +16,11 @@ target_include_directories(RodinMesh
   PUBLIC
   ${MFEM_INCLUDE_DIRS})
 
-add_subdirectory(MeshTools)
-
 target_link_libraries(RodinMesh
   PRIVATE
   mfem
-  Rodin::MeshTools
   PUBLIC
+  Rodin::IO
   Rodin::Alert
   Rodin::Variational
   Boost::filesystem)

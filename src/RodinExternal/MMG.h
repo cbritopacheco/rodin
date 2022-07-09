@@ -7,16 +7,18 @@
 #ifndef RODIN_EXTERNAL_MMG_H
 #define RODIN_EXTERNAL_MMG_H
 
+#include "MMG/MMG5.h"
+#include "MMG/ImplicitDomainMesher.h"
+
 #include "MMG/Cast.h"
 
-// ---- mmg2d ----------------------------------------------------------------
+//---- mmg2d ----------------------------------------------------------------
 #include "MMG/Mesh2D.h"
 #include "MMG/ScalarSolution2D.h"
 #include "MMG/VectorSolution2D.h"
 
 #include "MMG/Advect2D.h"
 #include "MMG/Distancer2D.h"
-#include "MMG/MeshAdaptor2D.h"
 #include "MMG/MeshOptimizer2D.h"
 #include "MMG/ImplicitDomainMesher2D.h"
 
@@ -33,5 +35,6 @@
 #include "MMG/AdvectS.h"
 #include "MMG/DistancerS.h"
 #include "MMG/ImplicitDomainMesherS.h"
+
 
 #endif

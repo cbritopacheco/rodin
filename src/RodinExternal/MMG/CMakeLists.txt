@@ -9,60 +9,65 @@ include (ExternalProject)
 
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
-  Cast.h
-  Utility.h
-  Configure.h.in
-  ISCDProcess.h
-  ForwardDecls.h
-  Mesh.h
-  Solution.h
-  ScalarSolution.h
-  VectorSolution.h
-# ---- mmg2d
-  MMG2D.h
-  Mesh2D.h
-  Advect2D.h
-  Distancer2D.h
-  MeshAdaptor2D.h
-  MeshOptimizer2D.h
-  ScalarSolution2D.h
-  VectorSolution2D.h
-  ImplicitDomainMesher2D.h
-# ---- mmg3d
-  Mesh3D.h
-  ScalarSolution3D.h
-  VectorSolution3D.h
-# ---- mmgs
-  MMGS.h
-  MeshS.h
-  ScalarSolutionS.h)
+  MMG5.h
+  ImplicitDomainMesher.h
+  Distancer.h
+    Cast.h
+    Utility.h
+    Configure.h.in
+    ISCDProcess.h
+    ForwardDecls.h
+    Mesh.h
+    Solution.h
+    ScalarSolution.h
+    VectorSolution.h
+  # ---- mmg2d
+    MMG2D.h
+    Mesh2D.h
+    Advect2D.h
+    Distancer2D.h
+    MeshOptimizer2D.h
+    ScalarSolution2D.h
+    VectorSolution2D.h
+    ImplicitDomainMesher2D.h
+  # ---- mmg3d
+    Mesh3D.h
+    ScalarSolution3D.h
+    VectorSolution3D.h
+  # ---- mmgs
+    MMGS.h
+    MeshS.h
+    ScalarSolutionS.h
+  )
 
 set(RodinExternalMMG_SRCS
-  Cast.cpp
-  Utility.cpp
-  ISCDProcess.cpp
-  Solution.cpp
-  ScalarSolution.cpp
-# ---- mmg2d
-  Mesh2D.cpp
-  Advect2D.cpp
-  Distancer2D.cpp
-  MeshAdaptor2D.cpp
-  MeshOptimizer2D.cpp
-  ScalarSolution2D.cpp
-  VectorSolution2D.cpp
-  ImplicitDomainMesher2D.cpp
-# ---- mmg3d
-  Mesh3D.cpp
-  ScalarSolution3D.cpp
-  VectorSolution3D.cpp
-# ---- mmgs
-  MeshS.cpp
-  AdvectS.cpp
-  DistancerS.cpp
-  ScalarSolutionS.cpp
-  VectorSolutionS.cpp
-  ImplicitDomainMesherS.cpp
+  MMG5.cpp
+  ImplicitDomainMesher.cpp
+  Distancer.cpp
+    Cast.cpp
+    Utility.cpp
+    ISCDProcess.cpp
+    Solution.cpp
+    ScalarSolution.cpp
+  # ---- mmg2d
+    Mesh2D.cpp
+    Advect2D.cpp
+    Distancer2D.cpp
+    MeshOptimizer2D.cpp
+    ScalarSolution2D.cpp
+    VectorSolution2D.cpp
+    ImplicitDomainMesher2D.cpp
+  # ---- mmg3d
+    Mesh3D.cpp
+    ScalarSolution3D.cpp
+    VectorSolution3D.cpp
+  # ---- mmgs
+    MeshS.cpp
+    AdvectS.cpp
+    DistancerS.cpp
+    ScalarSolutionS.cpp
+    VectorSolutionS.cpp
+    ImplicitDomainMesherS.cpp
   )
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
