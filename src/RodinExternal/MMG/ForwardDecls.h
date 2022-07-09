@@ -13,6 +13,7 @@ namespace Rodin::External::MMG
    class SolutionBase;
    class ScalarSolution;
 
+   class MMG5;
    class MMG2D;
    class Mesh2D;
    class MeshAdaptor2D;

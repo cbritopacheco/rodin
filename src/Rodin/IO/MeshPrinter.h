@@ -4,57 +4,59 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_MESHTOOLS_PRINTER_H
-#define RODIN_MESH_MESHTOOLS_PRINTER_H
+#ifndef RODIN_MESH_MESHPRINTER_H
+#define RODIN_MESH_MESHPRINTER_H
 
 #include <string>
 #include <optional>
 #include <mfem.hpp>
 
+#include "Rodin/Mesh.h"
 #include "Rodin/IO/Printer.h"
 
 #include "ForwardDecls.h"
 
-namespace Rodin::MeshTools
+namespace Rodin::IO
 {
-   class MeshPrinterBase : public IO::Printer<mfem::Mesh>
+   template <class Trait>
+   class MeshPrinterBase : public IO::Printer<Rodin::Mesh<Trait>>
    {
       public:
-         MeshPrinterBase(mfem::Mesh& mesh)
+         MeshPrinterBase(const Rodin::Mesh<Traits::Serial>& mesh)
             : m_mesh(mesh)
          {}
 
-         const mfem::Mesh& getMesh() const
+         const Rodin::Mesh<Traits::Serial>& getObject() const override
          {
             return m_mesh;
          }
 
-         virtual IO::Status print(std::ostream& os) = 0;
-
       private:
-         mfem::Mesh& m_mesh;
+         const Rodin::Mesh<Traits::Serial>& m_mesh;
    };
 
    template <>
-   class MeshPrinter<MeshFormat::MFEM> : public MeshPrinterBase
+   class MeshPrinter<MeshFormat::MFEM, Traits::Serial>
+      : public MeshPrinterBase<Traits::Serial>
    {
       public:
-         MeshPrinter(mfem::Mesh& mesh)
+         MeshPrinter(const Rodin::Mesh<Traits::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 
          IO::Status print(std::ostream& os) override
          {
-            getMesh().Print(os);
+            getObject().getHandle().Print(os);
             return {true, {}};
          }
    };
 
    template <>
-   class MeshPrinter<MeshFormat::GMSH> : public MeshPrinterBase
+   class MeshPrinter<MeshFormat::GMSH, Traits::Serial>
+      : public MeshPrinterBase<Traits::Serial>
    {
       public:
-         MeshPrinter(mfem::Mesh& mesh)
+         MeshPrinter(const Rodin::Mesh<Traits::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 
@@ -62,10 +64,11 @@ namespace Rodin::MeshTools
    };
 
    template <>
-   class MeshPrinter<MeshFormat::MEDIT> : public MeshPrinterBase
+   class MeshPrinter<MeshFormat::MEDIT, Traits::Serial>
+      : public MeshPrinterBase<Traits::Serial>
    {
       public:
-         MeshPrinter(mfem::Mesh& mesh)
+         MeshPrinter(const Rodin::Mesh<Traits::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 

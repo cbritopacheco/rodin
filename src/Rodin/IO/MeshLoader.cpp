@@ -10,64 +10,17 @@
 
 #include "MeshLoader.h"
 
-namespace Rodin::MeshTools
+namespace Rodin::IO
 {
-   const std::map<std::string, MeshFormat> MeshLoaderBase::FILE_HEADERS =
-   {
-      {"MFEM mesh v1.0",      MeshFormat::MFEM},
-      {"MFEM mesh v1.2",      MeshFormat::MFEM},
-      {"MFEM NC mesh v1.0",   MeshFormat::MFEM},
-      {"MFEM mesh v1.1",      MeshFormat::MFEM},
-      {"$MeshFormat",         MeshFormat::GMSH},
-      {"MeshVersionFormatted 1", MeshFormat::MEDIT},
-      {"MeshVersionFormatted 2", MeshFormat::MEDIT}
-   };
-
-   const std::map<std::string, MeshLoader<MeshFormat::MEDIT>::EntityKeyword>
-      MeshLoader<MeshFormat::MEDIT>::s_entities =
-   {
-      {"Vertices",      EntityKeyword::Vertices},
-      {"Triangles",     EntityKeyword::Triangles},
-      {"Tetrahedra",    EntityKeyword::Tetrahedra},
-      {"Edges",         EntityKeyword::Edges}
-   };
-
-   std::optional<MeshFormat> MeshLoaderBase::getMeshFormat(std::istream& input, bool seekBeg)
-   {
-      assert(input);
-
-      std::string meshType;
-      input >> std::ws;
-      std::getline(input, meshType);
-      if (seekBeg)
-      {
-         input.clear();
-         input.seekg(0, std::ios::beg);
-      }
-
-      // Check for, and remove, a trailing '\\r' from and std::string.
-      if (!meshType.empty() && *meshType.rbegin() == '\r')
-         meshType.resize(meshType.size() - 1);
-
-      if (MeshLoaderBase::FILE_HEADERS.count(meshType))
-      {
-         return MeshLoaderBase::FILE_HEADERS.at(meshType);
-      }
-      else
-      {
-         return {};
-      }
-   }
-
-   IO::Status MeshLoader<MeshFormat::MFEM>::load(std::istream& is)
+   IO::Status MeshLoader<MeshFormat::MFEM, Traits::Serial>::load(std::istream& is)
    {
       assert(is);
-
-      SetEmpty();
-
-      if (getMeshFormat(is) == MeshFormat::MFEM)
+      auto fmt = getMeshFormat(is);
+      if (!fmt.has_value())
+         Alert::Exception("Unrecognized mesh format.").raise();
+      if (fmt == MeshFormat::MFEM)
       {
-         mfem::Mesh::Load(is, 0, 1, getFixOrientation());
+         getObject() = Rodin::Mesh<Traits::Serial>(mfem::Mesh(is, 0, 1, getFixOrientation()));
          return {true, {}};
       }
       else
@@ -76,15 +29,15 @@ namespace Rodin::MeshTools
       }
    }
 
-   IO::Status MeshLoader<MeshFormat::GMSH>::load(std::istream& is)
+   IO::Status MeshLoader<MeshFormat::GMSH, Traits::Serial>::load(std::istream& is)
    {
       assert(is);
-
-      SetEmpty();
-
-      if (getMeshFormat(is) == MeshFormat::GMSH)
+      auto fmt = getMeshFormat(is);
+      if (!fmt.has_value())
+         Alert::Exception("Unrecognized mesh format.").raise();
+      if (fmt == MeshFormat::GMSH)
       {
-         mfem::Mesh::Load(is, 0, 1, getFixOrientation());
+         getObject() = Rodin::Mesh<Traits::Serial>(mfem::Mesh(is, 0, 1, getFixOrientation()));
          return {true, {}};
       }
       else
@@ -93,17 +46,20 @@ namespace Rodin::MeshTools
       }
    }
 
-   IO::Status MeshLoader<MeshFormat::MEDIT>::load(std::istream& is)
+   IO::Status MeshLoader<MeshFormat::MEDIT, Traits::Serial>::load(std::istream& is)
    {
-      SetEmpty();
-
       int spaceDim = 0;
-      if (getMeshFormat(is, false) == MeshFormat::MEDIT)
+      auto fmt = getMeshFormat(is, false);
+      if (!fmt.has_value())
+         Alert::Exception("Unrecognized mesh format.").raise();
+      if (fmt == MeshFormat::MEDIT)
       {
+         mfem::Mesh mfemMesh;
+
          std::string line;
 
-         std::map<EntityKeyword, std::optional<std::istream::pos_type>> pos;
-         std::map<EntityKeyword, size_t> count;
+         std::map<Medit::EntityKeyword, std::optional<std::istream::pos_type>> pos;
+         std::map<Medit::EntityKeyword, size_t> count;
 
          while (std::getline(is, line))
          {
@@ -120,9 +76,9 @@ namespace Rodin::MeshTools
                if (spaceDim < 2 || spaceDim > 3)
                   return {false, IO::Error{"Invalid mesh dimension: " + std::to_string(spaceDim)}};
             }
-            else if (s_entities.count(kw))
+            else if (Medit::EntityKeywordMap.left.count(kw))
             {
-               auto ent = s_entities.at(kw);
+               auto ent = Medit::EntityKeywordMap.left.at(kw);
                std::getline(is, line);
                pos[ent] = is.tellg();
                std::istringstream lss(line);
@@ -133,52 +89,53 @@ namespace Rodin::MeshTools
          // Infer type of mesh
          bool isSurfaceMesh;
          if (spaceDim == 3 && (
-                  count.count(EntityKeyword::Tetrahedra) == 0
-                  || count.at(EntityKeyword::Tetrahedra) == 0))
+                  count.count(Medit::EntityKeyword::Tetrahedra) == 0
+                  || count.at(Medit::EntityKeyword::Tetrahedra) == 0))
          {
             // It's a surface mesh
-            InitMesh(
+            mfemMesh = mfem::Mesh(
                   spaceDim - 1, // Dimension
-                  spaceDim, // Space dimension
-                  count.at(EntityKeyword::Vertices),
-                  count.at(EntityKeyword::Triangles),
-                  count.at(EntityKeyword::Edges));
+                  count.at(Medit::EntityKeyword::Vertices),
+                  count.at(Medit::EntityKeyword::Triangles),
+                  count.at(Medit::EntityKeyword::Edges),
+                  spaceDim // Space dimension
+                  );
             isSurfaceMesh = true;
          }
          else if (spaceDim == 2 && (
-                  count.count(EntityKeyword::Triangles) == 0
-                  || count.at(EntityKeyword::Triangles) == 0))
+                  count.count(Medit::EntityKeyword::Triangles) == 0
+                  || count.at(Medit::EntityKeyword::Triangles) == 0))
          {
             // It's a surface mesh
-            InitMesh(
+            mfemMesh = mfem::Mesh(
                   spaceDim - 1, // Dimension
-                  spaceDim, // Space dimension
-                  count.at(EntityKeyword::Vertices),
-                  count.at(EntityKeyword::Edges),
-                  0);
+                  count.at(Medit::EntityKeyword::Vertices),
+                  count.at(Medit::EntityKeyword::Edges),
+                  spaceDim // Space dimension
+                  );
             isSurfaceMesh = true;
          }
          else if (spaceDim == 3)
          {
             // It's a volume mesh
-            InitMesh(
+            mfemMesh = mfem::Mesh(
                   spaceDim,
-                  spaceDim,
-                  count.at(EntityKeyword::Vertices),
-                  count.at(EntityKeyword::Tetrahedra),
-                  count.at(EntityKeyword::Triangles)
+                  count.at(Medit::EntityKeyword::Vertices),
+                  count.at(Medit::EntityKeyword::Tetrahedra),
+                  count.at(Medit::EntityKeyword::Triangles),
+                  spaceDim
                   );
             isSurfaceMesh = false;
          }
          else if (spaceDim == 2)
          {
             // It's a volume mesh
-            InitMesh(
+            mfemMesh = mfem::Mesh(
                   spaceDim,
-                  spaceDim,
-                  count.at(EntityKeyword::Vertices),
-                  count.at(EntityKeyword::Triangles),
-                  count.at(EntityKeyword::Edges)
+                  count.at(Medit::EntityKeyword::Vertices),
+                  count.at(Medit::EntityKeyword::Triangles),
+                  count.at(Medit::EntityKeyword::Edges),
+                  spaceDim
                   );
             isSurfaceMesh = false;
          }
@@ -188,7 +145,7 @@ namespace Rodin::MeshTools
          }
 
          is.clear();
-         for (const auto& [kw, ent] : s_entities)
+         for (const auto& [kw, ent] : Medit::EntityKeywordMap)
          {
             if (pos.count(ent))
             {
@@ -200,7 +157,7 @@ namespace Rodin::MeshTools
                   {
                      switch (ent)
                      {
-                        case EntityKeyword::Vertices:
+                        case Medit::EntityKeyword::Vertices:
                         {
                            // Read all vertices
                            for (size_t i = 0; i < count.at(ent); i++)
@@ -211,12 +168,12 @@ namespace Rodin::MeshTools
                               double coords[3];
                               for (int j = 0; j < spaceDim; j++)
                                  lss >> coords[j];
-                              AddVertex(coords[0], coords[1], coords[2]);
+                              mfemMesh.AddVertex(coords[0], coords[1], coords[2]);
                               // We ignore the reference
                            }
                            break;
                         }
-                        case EntityKeyword::Triangles:
+                        case Medit::EntityKeyword::Triangles:
                         {
                            assert(spaceDim >= 2);
                            // Read all triangles
@@ -231,15 +188,15 @@ namespace Rodin::MeshTools
                               {
                                  case 2:
                                  {
-                                    AddTriangle(v1 - 1, v2 - 1, v3 - 1, ref);
+                                    mfemMesh.AddTriangle(v1 - 1, v2 - 1, v3 - 1, ref);
                                     break;
                                  }
                                  case 3:
                                  {
                                     if (isSurfaceMesh)
-                                       AddTriangle(v1 - 1, v2 - 1, v3 - 1, ref);
+                                       mfemMesh.AddTriangle(v1 - 1, v2 - 1, v3 - 1, ref);
                                     else
-                                       AddBdrTriangle(v1 - 1, v2 - 1, v3 - 1, ref);
+                                       mfemMesh.AddBdrTriangle(v1 - 1, v2 - 1, v3 - 1, ref);
                                     break;
                                  }
                                  default:
@@ -248,7 +205,7 @@ namespace Rodin::MeshTools
                            }
                            break;
                         }
-                        case EntityKeyword::Tetrahedra:
+                        case Medit::EntityKeyword::Tetrahedra:
                         {
                            assert(spaceDim >= 3);
                            // Read all tetrahedra
@@ -259,11 +216,11 @@ namespace Rodin::MeshTools
                               std::istringstream lss(line);
                               int v1, v2, v3, v4, ref;
                               lss >> v1 >> v2 >> v3 >> v4 >> ref;
-                              AddTet(v1 - 1, v2 - 1, v3 - 1, v4 - 1, ref);
+                              mfemMesh.AddTet(v1 - 1, v2 - 1, v3 - 1, v4 - 1, ref);
                            }
                            break;
                         }
-                        case EntityKeyword::Edges:
+                        case Medit::EntityKeyword::Edges:
                         {
                            assert(spaceDim >= 2);
                            // Read all edges
@@ -279,7 +236,7 @@ namespace Rodin::MeshTools
                                  case 2: // Planar mesh
                                  case 3: // Surface mesh
                                  {
-                                    AddBdrSegment(v1 - 1, v2 - 1, ref);
+                                    mfemMesh.AddBdrSegment(v1 - 1, v2 - 1, ref);
                                     break;
                                  }
                                  default:
@@ -302,7 +259,9 @@ namespace Rodin::MeshTools
             }
          }
 
-         FinalizeMesh(0, getFixOrientation());
+         mfemMesh.FinalizeMesh(0, getFixOrientation());
+
+         getObject() = Rodin::Mesh<Traits::Serial>(std::move(mfemMesh));
 
          return {true, {}};
       }

@@ -1,15 +1,22 @@
-add_subdirectory(mmg2d)
-add_subdirectory(mmg3d)
-add_subdirectory(mmgs)
+# add_subdirectory(mmg2d)
+# add_subdirectory(mmg3d)
+# add_subdirectory(mmgs)
 
-add_executable(CastGridFunction CastGridFunction.cpp)
-target_link_libraries(CastGridFunction
-  PUBLIC
-  Rodin::Variational
-  Rodin::External::MMG)
+# add_executable(CastGridFunction CastGridFunction.cpp)
+# target_link_libraries(CastGridFunction
+#   PUBLIC
+#   Rodin::Variational
+#   Rodin::External::MMG)
+# 
+# add_executable(CastMesh CastMesh.cpp)
+# target_link_libraries(CastMesh
+#   PUBLIC
+#   Rodin::Variational
+#   Rodin::External::MMG)
 
-add_executable(CastMesh CastMesh.cpp)
-target_link_libraries(CastMesh
+add_executable(ImplicitDomain ImplicitDomain.cpp)
+target_link_libraries(ImplicitDomain
   PUBLIC
+  Rodin::Mesh
   Rodin::Variational
   Rodin::External::MMG)

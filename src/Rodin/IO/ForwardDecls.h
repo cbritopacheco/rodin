@@ -29,6 +29,31 @@ namespace Rodin::IO
       bool success;
       std::optional<Error> error;
    };
+
+   enum class MeshFormat
+   {
+      MFEM,
+      GMSH,
+      MEDIT
+   };
+
+   enum class GridFunctionFormat
+   {
+      MFEM,
+      MEDIT
+   };
+
+   template <MeshFormat fmt, class Trait>
+   class MeshLoader;
+
+   template <MeshFormat fmt, class Trait>
+   class MeshPrinter;
+
+   template <GridFunctionFormat fmt, class FEC, class Trait>
+   class GridFunctionLoader;
+
+   template <GridFunctionFormat fmt, class FEC, class Trait>
+   class GridFunctionPrinter;
 }
 
 #endif

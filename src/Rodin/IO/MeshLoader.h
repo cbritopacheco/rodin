@@ -4,34 +4,33 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_MESHTOOLS_LOADER_H
-#define RODIN_MESH_MESHTOOLS_LOADER_H
+#ifndef RODIN_MESH_MESHLOADER_H
+#define RODIN_MESH_MESHLOADER_H
 
 #include <map>
 #include <optional>
 #include <mfem.hpp>
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Mesh.h"
 #include "Rodin/IO/Loader.h"
 
 #include "ForwardDecls.h"
+#include "Helpers.h"
 
-namespace Rodin::MeshTools
+namespace Rodin::IO
 {
-   class MeshLoaderBase : public IO::Loader<mfem::Mesh>, protected mfem::Mesh
+   template <class Trait>
+   class MeshLoaderBase : public IO::Loader<Rodin::Mesh<Trait>>
    {
-      static const std::map<std::string, MeshFormat> FILE_HEADERS;
-
       public:
-         static std::optional<MeshFormat> getMeshFormat(std::istream& input, bool seekBeg = true);
-
          MeshLoaderBase()
             : m_fixOrientation(true)
          {}
 
-         mfem::Mesh& getMesh()
+         Rodin::Mesh<Trait>& getObject() override
          {
-            return *this;
+            return m_mesh;
          }
 
          MeshLoaderBase& fixOrientation(bool fixOrientation)
@@ -47,11 +46,13 @@ namespace Rodin::MeshTools
          }
 
       private:
+         Rodin::Mesh<Traits::Serial> m_mesh;
          bool m_fixOrientation;
    };
 
    template <>
-   class MeshLoader<MeshFormat::MFEM> : public MeshLoaderBase
+   class MeshLoader<IO::MeshFormat::MFEM, Traits::Serial>
+      : public MeshLoaderBase<Traits::Serial>
    {
       public:
          IO::Status load(std::istream& is) override;
@@ -61,28 +62,19 @@ namespace Rodin::MeshTools
    };
 
    template <>
-   class MeshLoader<MeshFormat::GMSH> : public MeshLoaderBase
+   class MeshLoader<IO::MeshFormat::GMSH, Traits::Serial>
+      : public MeshLoaderBase<Traits::Serial>
    {
       public:
          IO::Status load(std::istream& is) override;
    };
 
    template <>
-   class MeshLoader<MeshFormat::MEDIT> : public MeshLoaderBase
+   class MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial>
+      : public MeshLoaderBase<Traits::Serial>
    {
       public:
-         enum class EntityKeyword
-         {
-            Vertices,
-            Triangles,
-            Tetrahedra,
-            Edges
-         };
-
          IO::Status load(std::istream& is) override;
-
-      private:
-         static const std::map<std::string, EntityKeyword> s_entities;
    };
 }
 

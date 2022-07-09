@@ -9,6 +9,10 @@
 
 namespace Rodin::External::MMG
 {
+  MMG5_pMesh MMG5_Create_Mesh(int version, int spaceDim);
+
+  MMG5_pMesh MMG5_Load_Mesh(const boost::filesystem::path& filename);
+
   /**
    * @internal
    * @brief Performs a deep copy of the MMG5_Mesh objects.
@@ -19,6 +23,8 @@ namespace Rodin::External::MMG
    * @oaram[in] dst Destination mesh
    */
   void MMG5_Mesh_Copy(const MMG5_pMesh src, MMG5_pMesh dst);
+
+  MMG5_pSol MMG5_Create_Sol(MMG5_pMesh mesh, int vdim);
 
   void MMG5_Sol_Copy(const MMG5_pSol src, MMG5_pSol dst);
 
@@ -36,6 +42,13 @@ namespace Rodin::External::MMG
    */
   void Rodin_GridFunction_To_MMG5_Sol(
       const Variational::GridFunctionBase& gf, MMG5_pSol sol);
+
+  template <class Trait>
+  void Rodin_Mesh_To_MMG5_Mesh(const Rodin::Mesh<Trait>& src, MMG5_pMesh dst);
+
+  template <>
+  void Rodin_Mesh_To_MMG5_Mesh<Traits::Serial>(
+      const Rodin::Mesh<Traits::Serial>& src, MMG5_pMesh dst);
 
   /**
    * @internal

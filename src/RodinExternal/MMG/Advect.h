@@ -4,21 +4,22 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_IO_PRINTER_H
-#define RODIN_IO_PRINTER_H
+#ifndef RODIN_EXTERNAL_MMG_ADVECT_H
+#define RODIN_EXTERNAL_MMG_ADVECT_H
 
+#include <vector>
+#include <optional>
+
+#include "Common.h"
+#include "Configure.h"
 #include "ForwardDecls.h"
+#include "ISCDProcess.h"
 
-namespace Rodin::IO
+namespace Rodin::External::MMG
 {
-   template <class T>
-   class Printer
-   {
-      public:
-         virtual IO::Status print(std::ostream& os) = 0;
-         virtual const T& getObject() const = 0;
-   };
+  class Advect
+  {
+  };
 }
 
 #endif
-

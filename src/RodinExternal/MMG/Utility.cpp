@@ -8,6 +8,19 @@
 
 namespace Rodin::External::MMG
 {
+   MMG5_pMesh MMG5_Create_Mesh(int version, int spaceDim)
+   {
+      MMG5_pMesh res;
+      MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
+            Alert::Exception("Failed to allocate memory for the mesh").raise());
+      MMG5_Init_fileNames(res, nullptr);
+      MMG5_Init_parameters(res);
+      res->ver = version;
+      res->dim = spaceDim;
+      res->info.imprim = VERBOSITY_LEVEL;
+      return res;
+   }
+
    void MMG5_Mesh_Copy(const MMG5_pMesh src, MMG5_pMesh dst)
    {
       assert(src);
@@ -233,6 +246,29 @@ namespace Rodin::External::MMG
       MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout),
           char, /* No op */);
       std::strcpy(dst->nameout, src->nameout);
+   }
+
+   MMG5_pSol MMG5_Create_Sol(MMG5_pMesh mesh, int vdim)
+   {
+      if (vdim < 1 || vdim > 3)
+         return nullptr;
+      MMG5_pSol res = nullptr;
+      MMG5_SAFE_CALLOC(res, 1, MMG5_Sol,
+            Alert::Exception("Failed to allocate memory for MMG5_pSol").raise());
+      res->ver  = mesh->ver;
+      res->size = vdim;
+      if (vdim == 1)
+         res->type = MMG5_Scalar;
+      else
+         res->type = MMG5_Vector;
+      res->dim = mesh->dim;
+      res->np  = mesh->np;
+      res->npi = mesh->npi;
+      res->npmax = mesh->npmax;
+      MMG5_SAFE_CALLOC(
+            res->m, res->size * (res->npmax + 1), double,
+            Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+      return res;
    }
 
    void MMG5_Sol_Copy(const MMG5_pSol src, MMG5_pSol dst)

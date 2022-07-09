@@ -20,6 +20,7 @@
 #include "Rodin/Core.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Mesh/SubMesh.h"
+#include "Rodin/IO/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "H1.h"
@@ -29,6 +30,7 @@
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
 #include "FiniteElementSpace.h"
+
 
 namespace Rodin::Variational
 {
@@ -97,7 +99,8 @@ namespace Rodin::Variational
 
          void save(const boost::filesystem::path& filename);
 
-         GridFunctionBase& load(const boost::filesystem::path& filename);
+         virtual GridFunctionBase& load(
+               const boost::filesystem::path& filename, IO::GridFunctionFormat) = 0;
 
          /**
           * @brief Addition of a scalar value.
@@ -377,6 +380,10 @@ namespace Rodin::Variational
             return *this;
          }
 
+         GridFunction& load(
+               const boost::filesystem::path& filename,
+               IO::GridFunctionFormat fmt = IO::GridFunctionFormat::MFEM) override;
+
          FiniteElementSpace<H1, Trait>& getFiniteElementSpace() override
          {
             return m_fes.get();
@@ -518,5 +525,7 @@ namespace Rodin::Variational
    template <class FEC, class Trait>
    GridFunction(FiniteElementSpace<FEC, Trait>&) -> GridFunction<FEC, Trait>;
 }
+
+#include "GridFunction.hpp"
 
 #endif
