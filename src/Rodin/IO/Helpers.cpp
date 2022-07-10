@@ -1,6 +1,6 @@
-#include "Helpers.h"
+#include <boost/algorithm/string.hpp>
 
-#include <iostream>
+#include "Helpers.h"
 
 namespace Rodin::IO
 {
@@ -17,17 +17,16 @@ namespace Rodin::IO
       return res;
    }
 
-   std::optional<IO::MeshFormat> getMeshFormat(std::istream& input, bool seekBeg)
+   std::optional<IO::MeshFormat> getMeshFormat(std::istream& input)
    {
       assert(input);
 
       std::string meshType;
-      input >> std::ws;
-      std::getline(input, meshType);
-      if (seekBeg)
+      while (std::getline(input, meshType))
       {
-         input.clear();
-         input.seekg(0, std::ios::beg);
+         boost::algorithm::trim(meshType);
+         if (!meshType.empty())
+            break;
       }
 
       // Check for, and remove, a trailing '\\r' from and std::string.
@@ -47,26 +46,30 @@ namespace Rodin::IO
 
 namespace Rodin::IO::Medit
 {
-   boost::bimap<std::string, SolKeyword> getSolKeywordMap()
+   boost::bimap<std::string, Keyword> getKeywordMap()
    {
-      boost::bimap<std::string, SolKeyword> res;
-      res.insert({"SolAtVertices",          SolKeyword::SolAtVertices});
-      res.insert({"SolAtEdges",             SolKeyword::SolAtEdges});
-      res.insert({"SolAtTriangles",         SolKeyword::SolAtTriangles});
-      res.insert({"SolAtQuadrilaterals",    SolKeyword::SolAtQuadrilaterals});
-      res.insert({"SolAtTetrahedra",        SolKeyword::SolAtTetrahedra});
-      res.insert({"SolAtPentahedra",        SolKeyword::SolAtPentahedra});
-      res.insert({"SolAtHexahedra",         SolKeyword::SolAtHexahedra});
+      boost::bimap<std::string, Keyword> res;
+      res.insert({"MeshVersionFormatted", Keyword::MeshVersionFormatted});
+      res.insert({"Dimension",            Keyword::Dimension});
+      res.insert({"Vertices",             Keyword::Vertices});
+      res.insert({"Edges",                Keyword::Edges});
+      res.insert({"Triangles",            Keyword::Triangles});
+      res.insert({"Tetrahedra",           Keyword::Tetrahedra});
+      res.insert({"SolAtVertices",        Keyword::SolAtVertices});
+      res.insert({"SolAtEdges",           Keyword::SolAtEdges});
+      res.insert({"SolAtTriangles",       Keyword::SolAtTriangles});
+      res.insert({"SolAtQuadrilaterals",  Keyword::SolAtQuadrilaterals});
+      res.insert({"SolAtTetrahedra",      Keyword::SolAtTetrahedra});
+      res.insert({"SolAtPentahedra",      Keyword::SolAtPentahedra});
+      res.insert({"SolAtHexahedra",       Keyword::SolAtHexahedra});
+      res.insert({"End",                  Keyword::End});
       return res;
    }
 
-   boost::bimap<std::string, EntityKeyword> getEntityKeywordMap()
+   std::ostream& operator<<(std::ostream& os, Keyword kw)
    {
-      boost::bimap<std::string, EntityKeyword> res;
-      res.insert({"Vertices",          EntityKeyword::Vertices});
-      res.insert({"Edges",             EntityKeyword::Edges});
-      res.insert({"Triangles",         EntityKeyword::Triangles});
-      res.insert({"SolAtTetrahedra",   EntityKeyword::Tetrahedra});
-      return res;
+      assert(KeywordMap.right.count(kw));
+      os << KeywordMap.right.at(kw);
+      return os;
    }
 }

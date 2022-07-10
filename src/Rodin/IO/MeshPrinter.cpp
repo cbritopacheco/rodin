@@ -6,11 +6,13 @@
  */
 #include "Rodin/Alert.h"
 
+#include "Helpers.h"
+
 #include "MeshPrinter.h"
 
 namespace Rodin::IO
 {
-   Status MeshPrinter<MeshFormat::GMSH, Traits::Serial>::print(std::ostream& os)
+   void MeshPrinter<MeshFormat::GMSH, Traits::Serial>::print(std::ostream& os)
    {
       const auto& mfemMesh = getObject().getHandle();
 
@@ -127,24 +129,22 @@ namespace Rodin::IO
          os << "\n"; 
       }
       os << "$EndElements\n";
-
-      return {true, {}};
    }
 
-   IO::Status MeshPrinter<MeshFormat::MEDIT, Traits::Serial>::print(std::ostream& os)
+   void MeshPrinter<MeshFormat::MEDIT, Traits::Serial>::print(std::ostream& os)
    {
       const auto& mfemMesh = getObject().getHandle();
 
       int meshDim = mfemMesh.Dimension();
       int spaceDim = mfemMesh.SpaceDimension();
 
-      os << "MeshVersionFormatted 2"
+      os << Medit::Keyword::MeshVersionFormatted << " " << 2
          << '\n'
-         << "Dimension " << spaceDim
+         << Medit::Keyword::Dimension << " " << spaceDim
          << "\n\n";
 
       // Print vertices
-      os << "Vertices"
+      os << Medit::Keyword::Vertices
          << '\n'
          << mfemMesh.GetNV()
          << '\n';
@@ -157,7 +157,7 @@ namespace Rodin::IO
       }
 
       // Print triangles
-      os << '\n' << "Triangles" << '\n';
+      os << '\n' << Medit::Keyword::Triangles << '\n';
       switch (mfemMesh.Dimension())
       {
          case 2:
@@ -190,7 +190,7 @@ namespace Rodin::IO
          }
          default:
          {
-            return {false, IO::Error{"Bad mesh dimension: " + std::to_string(meshDim)}};
+            Alert::Exception() << "Bad mesh dimension " << meshDim;
          }
       }
 
@@ -199,8 +199,11 @@ namespace Rodin::IO
       {
          case 3:
          {
-            os << '\n' << "Tetrahedra" << '\n'
-               << mfemMesh.GetNE() << '\n';
+            os << '\n'
+               << Medit::Keyword::Tetrahedra
+               << '\n'
+               << mfemMesh.GetNE()
+               << '\n';
             mfem::Array<int> v;
             for (int i = 0; i < mfemMesh.GetNE(); i++)
             {
@@ -223,8 +226,11 @@ namespace Rodin::IO
       {
          case 2:
          {
-            os << '\n' << "Edges" << '\n'
-               << mfemMesh.GetNBE() << '\n';
+            os << '\n'
+               << Medit::Keyword::Edges
+               << '\n'
+               << mfemMesh.GetNBE()
+               << '\n';
             mfem::Array<int> v;
             for (int i = 0; i < mfemMesh.GetNBE(); i++)
             {
@@ -239,7 +245,6 @@ namespace Rodin::IO
             // Do nothing
          }
       }
-
-      return {true, {}};
+      os << '\n' << Medit::Keyword::End;
    }
 }

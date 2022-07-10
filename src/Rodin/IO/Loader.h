@@ -19,15 +19,16 @@ namespace Rodin::IO
    class Loader
    {
       public:
-         virtual T& getObject() = 0;
+         virtual void load(std::istream& is) = 0;
 
-         virtual IO::Status load(std::istream& is) = 0;
-
-         virtual IO::Status load(const boost::filesystem::path& is)
+         virtual void load(const boost::filesystem::path& is)
          {
             std::ifstream in(is.c_str());
-            return load(in);
+            load(in);
          }
+
+      protected:
+         virtual T& getObject() = 0;
    };
 }
 

@@ -7,6 +7,8 @@
 #ifndef RODIN_IO_PRINTER_H
 #define RODIN_IO_PRINTER_H
 
+#include <ostream>
+
 #include "ForwardDecls.h"
 
 namespace Rodin::IO
@@ -15,7 +17,9 @@ namespace Rodin::IO
    class Printer
    {
       public:
-         virtual IO::Status print(std::ostream& os) = 0;
+         virtual void print(std::ostream& os) = 0;
+
+      protected:
          virtual const T& getObject() const = 0;
    };
 }

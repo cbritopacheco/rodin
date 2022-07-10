@@ -63,37 +63,34 @@ namespace Rodin
    void Mesh<Traits::Serial>::save(
          const boost::filesystem::path& filename, IO::MeshFormat fmt, int precision) const
    {
-      IO::Status status;
-
       std::ofstream ofs(filename.c_str());
+      if (!ofs)
+      {
+         Alert::Exception()
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+      }
       ofs.precision(precision);
       switch (fmt)
       {
          case IO::MeshFormat::MFEM:
          {
             IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
-            status = printer.print(ofs);
+            printer.print(ofs);
             break;
          }
          case IO::MeshFormat::GMSH:
          {
-            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
-            status = printer.print(ofs);
+            IO::MeshPrinter<IO::MeshFormat::GMSH, Traits::Serial> printer(*this);
+            printer.print(ofs);
             break;
          }
          case IO::MeshFormat::MEDIT:
          {
-            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
-            status = printer.print(ofs);
+            IO::MeshPrinter<IO::MeshFormat::MEDIT, Traits::Serial> printer(*this);
+            printer.print(ofs);
             break;
          }
-      }
-
-      if (!status.success)
-      {
-         Alert::Exception() << "Could not write to file: " << filename << ". "
-                            << (status.error ? status.error->message : "")
-                            << Alert::Raise;
       }
    }
 
@@ -179,38 +176,33 @@ namespace Rodin
    Mesh<Traits::Serial>&
    Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, IO::MeshFormat fmt)
    {
-      IO::Status status;
       mfem::named_ifgzstream input(filename.c_str());
+      if (!input)
+      {
+         Alert::Exception()
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+      }
       switch (fmt)
       {
          case IO::MeshFormat::MFEM:
          {
-            IO::MeshLoader<IO::MeshFormat::MFEM, Traits::Serial> loader;
-            status = loader.load(input);
-            *this = std::move(loader.getObject());
+            IO::MeshLoader<IO::MeshFormat::MFEM, Traits::Serial> loader(*this);
+            loader.load(input);
             break;
          }
          case IO::MeshFormat::GMSH:
          {
-            IO::MeshLoader<IO::MeshFormat::GMSH, Traits::Serial> loader;
-            status = loader.load(input);
-            *this = std::move(loader.getObject());
+            IO::MeshLoader<IO::MeshFormat::GMSH, Traits::Serial> loader(*this);
+            loader.load(input);
             break;
          }
          case IO::MeshFormat::MEDIT:
          {
-            IO::MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial> loader;
-            status = loader.load(input);
-            *this = std::move(loader.getObject());
+            IO::MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial> loader(*this);
+            loader.load(input);
             break;
          }
-      }
-
-      if (!status.success)
-      {
-         Alert::Exception() << "Could not load Mesh from file: " << filename << ". "
-                            << (status.error ? status.error->message : "")
-                            << Alert::Raise;
       }
 
       return *this;

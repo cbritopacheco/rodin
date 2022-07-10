@@ -33,11 +33,6 @@ namespace Rodin::Variational
       return getHandle().Min();
    }
 
-   void GridFunctionBase::save(const boost::filesystem::path& filename)
-   {
-      getHandle().Save(filename.string().c_str());
-   }
-
    std::pair<const double*, int> GridFunctionBase::getData() const
    {
       return {static_cast<const double*>(getHandle().GetData()), getHandle().Size()};

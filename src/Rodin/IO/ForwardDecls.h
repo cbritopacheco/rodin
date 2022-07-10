@@ -19,17 +19,6 @@ namespace Rodin::IO
    template <class T>
    class Printer;
 
-   struct Error
-   {
-      std::string message;
-   };
-
-   struct Status
-   {
-      bool success;
-      std::optional<Error> error;
-   };
-
    enum class MeshFormat
    {
       MFEM,

@@ -24,14 +24,10 @@ namespace Rodin::IO
    class MeshLoaderBase : public IO::Loader<Rodin::Mesh<Trait>>
    {
       public:
-         MeshLoaderBase()
-            : m_fixOrientation(true)
+         MeshLoaderBase(Rodin::Mesh<Trait>& mesh)
+            :  m_mesh(mesh),
+               m_fixOrientation(true)
          {}
-
-         Rodin::Mesh<Trait>& getObject() override
-         {
-            return m_mesh;
-         }
 
          MeshLoaderBase& fixOrientation(bool fixOrientation)
          {
@@ -40,13 +36,18 @@ namespace Rodin::IO
          }
 
       protected:
+         Rodin::Mesh<Trait>& getObject() override
+         {
+            return m_mesh;
+         }
+
          bool getFixOrientation() const
          {
             return m_fixOrientation;
          }
 
       private:
-         Rodin::Mesh<Traits::Serial> m_mesh;
+         Rodin::Mesh<Traits::Serial>& m_mesh;
          bool m_fixOrientation;
    };
 
@@ -55,7 +56,11 @@ namespace Rodin::IO
       : public MeshLoaderBase<Traits::Serial>
    {
       public:
-         IO::Status load(std::istream& is) override;
+         MeshLoader(Rodin::Mesh<Traits::Serial>& mesh)
+            : MeshLoaderBase<Traits::Serial>(mesh)
+         {}
+
+         void load(std::istream& is) override;
 
       private:
          std::string m_parseTag;
@@ -66,7 +71,11 @@ namespace Rodin::IO
       : public MeshLoaderBase<Traits::Serial>
    {
       public:
-         IO::Status load(std::istream& is) override;
+         MeshLoader(Rodin::Mesh<Traits::Serial>& mesh)
+            : MeshLoaderBase<Traits::Serial>(mesh)
+         {}
+
+         void load(std::istream& is) override;
    };
 
    template <>
@@ -74,7 +83,11 @@ namespace Rodin::IO
       : public MeshLoaderBase<Traits::Serial>
    {
       public:
-         IO::Status load(std::istream& is) override;
+         MeshLoader(Rodin::Mesh<Traits::Serial>& mesh)
+            : MeshLoaderBase<Traits::Serial>(mesh)
+         {}
+
+         void load(std::istream& is) override;
    };
 }
 

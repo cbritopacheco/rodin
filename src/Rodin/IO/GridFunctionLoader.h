@@ -10,7 +10,6 @@
 #include <map>
 #include <optional>
 #include <mfem.hpp>
-#include <boost/filesystem.hpp>
 
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -24,12 +23,18 @@ namespace Rodin::IO
    class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FEC, Trait>>
    {
       public:
-         GridFunctionLoaderBase(Variational::GridFunction<FEC, Trait>& gf);
+         GridFunctionLoaderBase(Variational::GridFunction<FEC, Trait>& gf)
+            : m_gf(gf)
+         {}
 
-         Variational::GridFunction<FEC, Trait>& getObject() override;
+      protected:
+         Variational::GridFunction<FEC, Trait>& getObject() override
+         {
+            return m_gf;
+         }
 
       private:
-         Variational::GridFunction<FEC, Trait> m_gf;
+         Variational::GridFunction<FEC, Trait>& m_gf;
    };
 
    // ---- MFEM Format -------------------------------------------------------
@@ -38,9 +43,11 @@ namespace Rodin::IO
       : public GridFunctionLoaderBase<FEC, Traits::Serial>
    {
       public:
-         GridFunctionLoader(Variational::GridFunction<FEC, Traits::Serial>& gf);
+         GridFunctionLoader(Variational::GridFunction<FEC, Traits::Serial>& gf)
+            : GridFunctionLoaderBase<FEC, Traits::Serial>(gf)
+         {}
 
-         IO::Status load(std::istream& is) override;
+         void load(std::istream& is) override;
    };
 
    // ---- MEDIT Format ------------------------------------------------------
@@ -49,9 +56,11 @@ namespace Rodin::IO
       : public GridFunctionLoaderBase<FEC, Traits::Serial>
    {
       public:
-         GridFunctionLoader(Variational::GridFunction<FEC, Traits::Serial>& gf);
+         GridFunctionLoader(Variational::GridFunction<FEC, Traits::Serial>& gf)
+            : GridFunctionLoaderBase<FEC, Traits::Serial>(gf)
+         {}
 
-         IO::Status load(std::istream& is) override;
+         void load(std::istream& is) override;
    };
 }
 
