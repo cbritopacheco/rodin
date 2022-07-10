@@ -26,6 +26,7 @@ namespace Rodin::IO
             : m_mesh(mesh)
          {}
 
+      protected:
          const Rodin::Mesh<Traits::Serial>& getObject() const override
          {
             return m_mesh;
@@ -44,10 +45,9 @@ namespace Rodin::IO
             : MeshPrinterBase(mesh)
          {}
 
-         IO::Status print(std::ostream& os) override
+         void print(std::ostream& os) override
          {
             getObject().getHandle().Print(os);
-            return {true, {}};
          }
    };
 
@@ -60,7 +60,7 @@ namespace Rodin::IO
             : MeshPrinterBase(mesh)
          {}
 
-         IO::Status print(std::ostream& os) override;
+         void print(std::ostream& os) override;
    };
 
    template <>
@@ -72,7 +72,7 @@ namespace Rodin::IO
             : MeshPrinterBase(mesh)
          {}
 
-         IO::Status print(std::ostream& os) override;
+         void print(std::ostream& os) override;
    };
 }
 

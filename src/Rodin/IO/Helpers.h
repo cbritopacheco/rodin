@@ -7,6 +7,7 @@
 #ifndef RODIN_IO_HELPERS_H
 #define RODIN_IO_HELPERS_H
 
+#include <ostream>
 #include <boost/bimap.hpp>
 
 #include "ForwardDecls.h"
@@ -16,32 +17,39 @@ namespace Rodin::IO
    std::map<std::string, IO::MeshFormat> getMeshFileHeaders();
    static const std::map<std::string, IO::MeshFormat> MeshFileHeaders = getMeshFileHeaders();
 
-   std::optional<IO::MeshFormat> getMeshFormat(std::istream& input, bool seekBeg = true);
+   std::optional<IO::MeshFormat> getMeshFormat(std::istream& input);
 }
 
 namespace Rodin::IO::Medit
 {
-   enum class SolKeyword
+   enum class Keyword
    {
+      MeshVersionFormatted,
+      Dimension,
+      Vertices,
+      Triangles,
+      Tetrahedra,
+      Edges,
       SolAtVertices,
       SolAtEdges,
       SolAtTriangles,
       SolAtQuadrilaterals,
       SolAtTetrahedra,
       SolAtPentahedra,
-      SolAtHexahedra
+      SolAtHexahedra,
+      End
    };
-   boost::bimap<std::string, SolKeyword> getSolKeywordMap();
-   static const boost::bimap<std::string, SolKeyword> SolKeywordMap = getSolKeywordMap();
 
-   enum class EntityKeyword
+   enum SolutionType
    {
-      Vertices,
-      Triangles,
-      Tetrahedra,
-      Edges
+      Scalar = 1,
+      Vector = 2,
+      Tensor = 3
    };
-   boost::bimap<std::string, EntityKeyword> getEntityKeywordMap();
-   static const boost::bimap<std::string, EntityKeyword> EntityKeywordMap = getEntityKeywordMap();
+
+   boost::bimap<std::string, Keyword> getKeywordMap();
+   static const boost::bimap<std::string, Keyword> KeywordMap = getKeywordMap();
+
+   std::ostream& operator<<(std::ostream& os, Keyword kw);
 }
 #endif
