@@ -46,8 +46,6 @@ namespace Rodin::External::MMG
   {
     if (m_rmc)
       MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_rmc, *m_rmc);
-    if (m_isoref)
-      MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_isoref, *m_isoref);
     if (m_split.size() > 0)
     {
       MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_numberOfMat, m_split.size());
@@ -76,6 +74,10 @@ namespace Rodin::External::MMG
         }, split);
       }
     }
+
+    if (m_isoref)
+      MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_isoref, *m_isoref);
+
     MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_iso, 1);
     MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_ls, m_ls);
     MMG2D_mmg2dls(mesh, sol, nullptr);
@@ -128,7 +130,7 @@ namespace Rodin::External::MMG
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (m_split.size() > 0)
-      Alert::Warning("Warning splitting option is not supported for surfaces").raise();
+      Alert::Warning("Warning material splitting is not supported for surfaces").raise();
     MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_iso, 1);
     MMGS_Set_dparameter(mesh, sol, MMGS_DPARAM_ls, m_ls);
     MMGS_mmgsls(mesh, sol, nullptr);

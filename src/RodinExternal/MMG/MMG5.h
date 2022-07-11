@@ -60,45 +60,51 @@ namespace Rodin::External::MMG
       }
 
       template <class FEC>
-      static void copySolution(Variational::GridFunction<FEC, Traits::Serial>& src, const MMG5_pSol dst)
+      static void copySolution(
+          Variational::GridFunction<FEC, Traits::Serial>& src, const MMG5_pSol dst)
       {
         assert(dst);
         auto [data, size] = src.getData();
         if (size)
         {
           int vdim = src.getFiniteElementSpace().getVectorDimension();
-           assert(size % vdim == 0);
-           size_t n = size / vdim;
-           dst->np  = n;
-           dst->npi = n;
-           dst->npmax = std::max({static_cast<int>(1.5 * dst->np), MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
-           if (!dst->m)
-           {
-             MMG5_SAFE_CALLOC(dst->m, (dst->size * (dst->npmax + 1)), double,
-                   Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
-           }
-           if (vdim == 1)
-           {
-              std::copy(data, data + size, dst->m + 1);
-           }
-           else
-           {
-              switch (src.getFiniteElementSpace().getHandle().GetOrdering())
+          assert(size % vdim == 0);
+          assert(dst->size == vdim);
+          size_t n = size / vdim;
+          assert(n > 0);
+          dst->np  = n;
+          dst->npi = n;
+          dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+          assert(dst->np < dst->npmax);
+          if (!dst->m)
+          {
+            // So (dst->size + 1) * (dst->np + 1) seems to work for most
+            // applications
+            MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
+                  Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+          }
+          if (vdim == 1)
+          {
+             std::copy(data, data + size, dst->m + 1);
+          }
+          else
+          {
+            switch (src.getFiniteElementSpace().getHandle().GetOrdering())
+            {
+              case mfem::Ordering::byNODES:
               {
-                 case mfem::Ordering::byNODES:
-                 {
-                    for (size_t i = 0; i < n; i++)
-                       for (size_t j = 0; j < vdim; j++)
-                          dst->m[(i + 1) * dst->size + j] = data[i + j * n];
-                   break;
-                 }
-                 case mfem::Ordering::byVDIM:
-                 {
-                   std::copy(data, data + size, dst->m + dst->size);
-                   break;
-                 }
+                 for (size_t i = 0; i < n; i++)
+                    for (size_t j = 0; j < vdim; j++)
+                       dst->m[(i + 1) * dst->size + j] = data[i + j * n];
+                break;
               }
-           }
+              case mfem::Ordering::byVDIM:
+              {
+                std::copy(data, data + size, dst->m + dst->size);
+                break;
+              }
+            }
+          }
         }
       }
 

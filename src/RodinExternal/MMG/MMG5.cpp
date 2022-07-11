@@ -25,19 +25,16 @@ namespace Rodin::External::MMG
       if (isSurface)
       {
          MMGS_Set_commonFunc();
-         // MMGS_Init_fileNames(res, nullptr);
          MMGS_Init_parameters(res);
       }
       else if (dim == 2)
       {
          MMG2D_Set_commonFunc();
-         // MMG2D_Init_fileNames(res, nullptr);
          MMG2D_Init_parameters(res);
       }
       else if (dim == 3)
       {
          MMG3D_Set_commonFunc();
-         // MMG3D_Init_fileNames(res, nullptr);
          MMG3D_Init_parameters(res);
       }
       else
@@ -45,9 +42,11 @@ namespace Rodin::External::MMG
          Alert::Exception("Unhandled case").raise();
          return nullptr;
       }
+      res->np = 0;
       res->ver = version;
       res->dim = dim;
-      res->info.imprim = VERBOSITY_LEVEL;
+      res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+      res->info.imprim = getMMGVerbosityLevel();
       return res;
    }
 
@@ -295,10 +294,19 @@ namespace Rodin::External::MMG
          res->type = MMG5_Vector;
       res->dim = mesh->dim;
       res->np  = mesh->np;
-      res->npi = mesh->npi;
+      res->npi = 0;
       res->npmax = mesh->npmax;
-      MMG5_SAFE_CALLOC(res->m, res->size * (res->np + 1), double,
-            Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+      if (res->np)
+      {
+         // So (res->size + 1) * (res->np + 1) seems to work for most
+         // applications
+         MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->np + 1), double,
+               Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+      }
+      else
+      {
+         res->m = nullptr;
+      }
       return res;
    }
 
@@ -307,7 +315,8 @@ namespace Rodin::External::MMG
       bool isSurface = src.isSurface();
       assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
 
-      MMG5_pMesh res = createMesh(s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+      MMG5_pMesh res = createMesh(
+            s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
 
       res->npi = 0;
       res->nai = 0;
@@ -502,7 +511,7 @@ namespace Rodin::External::MMG
             dst = mfem::Mesh(
                   src->dim, // Dimension
                   src->np,  // Vertex count
-                  src->nt,   // Element count,
+                  src->nt,  // Element count,
                   src->na   // Boundary element count
                   );
             for (int i = 1; i <= src->np; i++)
@@ -622,7 +631,9 @@ namespace Rodin::External::MMG
 
       if (dst->np)
       {
-         MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->np + 1), double,
+         // So (dst->size + 1) * (dst->np + 1) seems to work for most
+         // applications
+         MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
                Alert::Exception("Failed to allocate memory for the MMG5_pSol->m").raise());
          std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
       }
@@ -686,6 +697,26 @@ namespace Rodin::External::MMG
          MMG5_SAFE_FREE(sol);
       }
       sol = nullptr;
+   }
+
+   void MMG5::destroyMesh(MMG5_pMesh mesh)
+   {
+      if (isSurfaceMesh(mesh))
+      {
+         MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
+      }
+      else if (mesh->dim == 2)
+      {
+         MMG2D_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
+      }
+      else if (mesh->dim == 3)
+      {
+         MMG3D_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
+      }
+      else
+      {
+         assert(false);
+      }
    }
 
    MMG5& MMG5::setParameters(MMG5_pMesh mesh)

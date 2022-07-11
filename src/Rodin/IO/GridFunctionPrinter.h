@@ -43,7 +43,7 @@ namespace Rodin::IO
       : public GridFunctionPrinterBase<FEC, Traits::Serial>
    {
       public:
-         GridFunctionPrinter(Variational::GridFunction<FEC, Traits::Serial>& gf)
+         GridFunctionPrinter(const Variational::GridFunction<FEC, Traits::Serial>& gf)
             : GridFunctionPrinterBase<FEC, Traits::Serial>(gf)
          {}
 
@@ -55,7 +55,7 @@ namespace Rodin::IO
       : public GridFunctionPrinterBase<FEC, Traits::Serial>
    {
       public:
-         GridFunctionPrinter(Variational::GridFunction<FEC, Traits::Serial>& gf)
+         GridFunctionPrinter(const Variational::GridFunction<FEC, Traits::Serial>& gf)
             : GridFunctionPrinterBase<FEC, Traits::Serial>(gf)
          {}
 

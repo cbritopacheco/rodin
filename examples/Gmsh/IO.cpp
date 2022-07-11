@@ -14,9 +14,15 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   Mesh mesh;
-
   mesh.load("dmmg.mesh", IO::MeshFormat::MEDIT);
-  mesh.save("OmegaMedit.mesh", IO::MeshFormat::MFEM);
+
+  FiniteElementSpace<H1> fes(mesh, 3);
+  GridFunction gf(fes);
+  gf.load("dmmg.sol", IO::GridFunctionFormat::MEDIT);
+
+  gf.save("miaow.gf");
+
+  mesh.save("OmegaMedit.mesh");
 
   return 0;
 }

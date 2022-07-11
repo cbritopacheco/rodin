@@ -184,7 +184,7 @@ namespace Rodin::IO
                      default:
                      {
                         Alert::Exception()
-                           << "Unknown solution type \"" << solType << " \"."
+                           << "Unknown solution type \"" << solType << "\"."
                            << Alert::Raise;
                      }
                   }
@@ -207,7 +207,12 @@ namespace Rodin::IO
                      {
                         for (int i = 0; i < elementCount; i++)
                         {
-                           std::getline(is, line);
+                           while (std::getline(is, line))
+                           {
+                              boost::algorithm::trim(line);
+                              if (!line.empty())
+                                 break;
+                           }
                            std::istringstream iss(line);
                            for (int j = 0; j < vdim; j++)
                            {
@@ -227,7 +232,12 @@ namespace Rodin::IO
                      {
                         for (int i = 0; i < elementCount; i++)
                         {
-                           std::getline(is, line);
+                           while (std::getline(is, line))
+                           {
+                              boost::algorithm::trim(line);
+                              if (!line.empty())
+                                 break;
+                           }
                            std::istringstream iss(line);
                            for (int j = 0; j < vdim; j++)
                            {

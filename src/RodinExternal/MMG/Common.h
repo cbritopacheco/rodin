@@ -23,6 +23,8 @@
 #include <mmg/mmgs/libmmgs.h>
 #include <common/mmgcommon.h>
 
+#include "Configure.h"
+
 /*
  * mmg includes complex.h which defines the I macro. We have to undefine it to
  * avoid a whole bunch of name clashes!
@@ -64,6 +66,12 @@ namespace Rodin::External::MMG
    */
   using SplitMap = std::map<
     MaterialReference, std::variant<Split, NoSplitT>>;
+
+  const char* getISCDMshdistExecutable();
+
+  const char* getISCDAdvectExecutable();
+
+  int getMMGVerbosityLevel();
 }
 
 #endif

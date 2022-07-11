@@ -4,22 +4,22 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_RODININTEGRATION_MMG_FORWARDDECLS_H
-#define RODIN_RODININTEGRATION_MMG_FORWARDDECLS_H
+#include "Common.h"
 
 namespace Rodin::External::MMG
 {
-  class MMG5;
+  const char* getISCDMshdistExecutable()
+  {
+    return ISCD_MSHDIST_EXECUTABLE;
+  }
 
-  template <class T>
-  class Distancer;
+  const char* getISCDAdvectExecutable()
+  {
+    return ISCD_ADVECTION_EXECUTABLE;
+  }
 
-  template <class FEC>
-  class Advect;
-
-  class ISCDProcess;
-
-  class ImplicitDomainMesher;
+  int getMMGVerbosityLevel()
+  {
+    return VERBOSITY_LEVEL;
+  }
 }
-
-#endif

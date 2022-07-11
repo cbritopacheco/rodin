@@ -8,33 +8,38 @@
 #define RODIN_EXTERNAL_MMG_H
 
 #include "MMG/MMG5.h"
+
+#include "MMG/Distancer.h"
+#include "MMG/Advect.h"
+
+#include "MMG/MeshOptimizer.h"
 #include "MMG/ImplicitDomainMesher.h"
 
-#include "MMG/Cast.h"
+// #include "MMG/Cast.h"
 
-//---- mmg2d ----------------------------------------------------------------
-#include "MMG/Mesh2D.h"
-#include "MMG/ScalarSolution2D.h"
-#include "MMG/VectorSolution2D.h"
-
-#include "MMG/Advect2D.h"
-#include "MMG/Distancer2D.h"
-#include "MMG/MeshOptimizer2D.h"
-#include "MMG/ImplicitDomainMesher2D.h"
-
-// ---- mmg3d ----------------------------------------------------------------
-#include "MMG/Mesh3D.h"
-#include "MMG/ScalarSolution3D.h"
-#include "MMG/VectorSolution3D.h"
-
-// ---- mmgs -----------------------------------------------------------------
-#include "MMG/MeshS.h"
-#include "MMG/ScalarSolutionS.h"
-#include "MMG/VectorSolutionS.h"
-
-#include "MMG/AdvectS.h"
-#include "MMG/DistancerS.h"
-#include "MMG/ImplicitDomainMesherS.h"
+// //---- mmg2d ----------------------------------------------------------------
+// #include "MMG/Mesh2D.h"
+// #include "MMG/ScalarSolution2D.h"
+// #include "MMG/VectorSolution2D.h"
+// 
+// #include "MMG/Advect2D.h"
+// #include "MMG/Distancer2D.h"
+// #include "MMG/MeshOptimizer2D.h"
+// #include "MMG/ImplicitDomainMesher2D.h"
+// 
+// // ---- mmg3d ----------------------------------------------------------------
+// #include "MMG/Mesh3D.h"
+// #include "MMG/ScalarSolution3D.h"
+// #include "MMG/VectorSolution3D.h"
+// 
+// // ---- mmgs -----------------------------------------------------------------
+// #include "MMG/MeshS.h"
+// #include "MMG/ScalarSolutionS.h"
+// #include "MMG/VectorSolutionS.h"
+// 
+// #include "MMG/AdvectS.h"
+// #include "MMG/DistancerS.h"
+// #include "MMG/ImplicitDomainMesherS.h"
 
 
 #endif

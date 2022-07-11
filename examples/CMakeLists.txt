@@ -11,7 +11,7 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(Gmsh)
   add_subdirectory(Variational)
   add_subdirectory(ShapeOptimization)
-  # add_subdirectory(DensityOptimization)
+  add_subdirectory(DensityOptimization)
   # add_subdirectory(SurfaceOptimization)
 
   if (RODIN_USE_MPI)
