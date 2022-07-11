@@ -11,7 +11,7 @@ namespace Rodin::IO
       res.insert({"MFEM mesh v1.2",          IO::MeshFormat::MFEM});
       res.insert({"MFEM NC mesh v1.0",       IO::MeshFormat::MFEM});
       res.insert({"MFEM mesh v1.1",          IO::MeshFormat::MFEM});
-      res.insert({"$IO::MeshFormat",         IO::MeshFormat::GMSH});
+      res.insert({"$MeshFormat",             IO::MeshFormat::GMSH});
       res.insert({"MeshVersionFormatted 1",  IO::MeshFormat::MEDIT});
       res.insert({"MeshVersionFormatted 2",  IO::MeshFormat::MEDIT});
       return res;
