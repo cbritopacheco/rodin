@@ -41,7 +41,7 @@ namespace Rodin::Variational
          /**
           * @brief Possible types of bases for the H1 finite element space.
           */
-         enum Basis
+         enum class Basis
          {
             /**
              * @brief Gauss Lobatto basis (endpoints are included).
@@ -74,7 +74,7 @@ namespace Rodin::Variational
          static constexpr Basis DefaultBasis = Basis::GaussLobato;
 
          H1(const int order, const int elemDim, Basis basis)
-            : m_fec(order, elemDim, basis)
+            : m_fec(order, elemDim, static_cast<int>(basis))
          {
             assert(order >= 1);
          }

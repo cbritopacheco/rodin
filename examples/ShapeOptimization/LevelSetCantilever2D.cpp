@@ -52,7 +52,7 @@ int main(int, char**)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 150;
+  size_t maxIt = 250;
   double eps = 1e-6;
   double hmax = 0.05;
   auto ell = ScalarFunction(1);
@@ -102,36 +102,30 @@ int main(int, char**)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     solver.solve(hilbert);
+    g.getGridFunction().save("g.gf");
 
     // Update objective
     obj.push_back(
         compliance(u) + ell.getValue() * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    // Convert data types to mmg types
-    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    auto mmgVel = Cast(g.getGridFunction()).to<MMG::VectorSolution2D>(mmgMesh);
-
     // Generate signed distance function
-    auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior).distance(mmgMesh);
+    FiniteElementSpace<H1> Dh(Omega);
+    auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
+                                  .distance(Omega);
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
     double dt = 4 * hmax / gInf;
-    MMG::Advect2D(mmgLs, mmgVel).step(dt);
+    MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
-    auto mmgImplicit =
-      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                   .split(Exterior, {Interior, Exterior})
-                                   .setRMC(1e-3)
-                                   .setHMax(hmax)
-                                   .setBoundaryReference(Gamma)
-                                   .discretize(mmgLs);
-
-    // Convert back to Rodin data type
-    Omega = Cast(mmgImplicit).to<Rodin::Mesh<>>();
-
+    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                                       .split(Exterior, {Interior, Exterior})
+                                       .setRMC(1e-3)
+                                       .setHMax(hmax)
+                                       .setBoundaryReference(Gamma)
+                                       .discretize(dist);
     // Save mesh
     Omega.save("Omega.mesh");
 

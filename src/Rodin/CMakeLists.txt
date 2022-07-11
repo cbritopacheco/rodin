@@ -43,6 +43,7 @@ target_include_directories(Rodin
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 add_subdirectory(Core)
+add_subdirectory(IO)
 add_subdirectory(Mesh)
 add_subdirectory(Test)
 add_subdirectory(Alert)

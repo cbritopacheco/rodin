@@ -54,15 +54,15 @@ namespace Rodin::Variational
    struct DualSpaceType;
 
    template <>
-   struct DualSpaceType<Trial>
+   struct DualSpaceType<TrialSpace>
    {
-      static constexpr ShapeFunctionSpaceType Value = Test;
+      static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Test;
    };
 
    template <>
-   struct DualSpaceType<Test>
+   struct DualSpaceType<TestSpace>
    {
-      static constexpr ShapeFunctionSpaceType Value = Trial;
+      static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
    };
 
    /**

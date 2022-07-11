@@ -32,6 +32,7 @@ set(RodinVariational_HEADERS
   Restriction.h
   VectorFunction.h
   Utility.h
+  Minus.h
   )
 
 set(RodinVariational_SRCS
@@ -61,6 +62,7 @@ set(RodinVariational_SRCS
   Problem.hpp
   ProblemBody.cpp
   Utility.cpp
+  Minus.cpp
   )
 
 add_library(RodinVariational
@@ -76,9 +78,10 @@ target_include_directories(RodinVariational
 
 target_link_libraries(RodinVariational
   PUBLIC
-  RodinMesh
-  RodinAlert
-  RodinUtility
+  Rodin::IO
+  Rodin::Mesh
+  Rodin::Alert
+  Rodin::Utility
   RodinVariationalFormLanguage)
 
 add_subdirectory(FormLanguage)
