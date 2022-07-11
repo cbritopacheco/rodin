@@ -60,112 +60,108 @@ auto getConormal(
 
 int main(int, char**)
 {
-  // const char* meshFile = "rodin.mesh";
-  // const double pi = std::atan(1) * 4;
+  const char* meshFile = "Omega.mesh";
+  const double pi = std::atan(1) * 4;
 
-  // int Interior = 2, Exterior = 3;
-  // int Gamma = 4;
+  int Interior = 2, Exterior = 3;
+  int Gamma = 4;
 
-  // // Mesh Omega;
-  // // Omega.load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
 
 
-  // // GridFunction f(Vh);
-  // // f = VectorFunction{
-  // //   [](const double* x, int){ return 3 * x[0] * x[0] + sin(10 * x[1]); },
-  // //   [](const double* x, int){ return 3 * x[0] + cos(10 * x[1]); }};
-
-  // MMG::Mesh3D mmgMesh;
-  // mmgMesh.load("volume.mesh");
-
-  // MMG::ScalarSolution3D mmgSol(mmgMesh);
-  // mmgSol.load("volume.sol");
-
-  // auto Omega = Cast(mmgMesh).to<Mesh<Traits::Serial>>();
-
-  // FiniteElementSpace<H1> Vh(Omega);
-
-  // auto dist = Cast(mmgSol).to<GridFunction<H1>>(Vh);
-
-  // // Sphere radius
-  // double r = 1;
-
-  // // Hole radius
-  // double rr = 0.2;
-
-  // // Hole centers on sphere
-  // std::vector<std::array<double, 3>> cs = {
-  //   { r * sin(0) * cos(0), r * sin(0) * sin(0), r * cos(0) },
-  //   { r * sin(pi / 2) * cos(pi), r * sin(pi / 2) * sin(pi), r * cos(pi / 2) },
-  //   { r * sin(pi / 2) * cos(pi / 2), r * sin(pi / 2) * sin(pi / 2), r * cos(pi / 2) }
-  // };
-
-  // // Geodesic distance
-  // auto gd = [&](const double* x, const double* c, int)
-  //           {
-  //             return std::acos((x[0] * c[0] + x[1] * c[1] + x[2] * c[2]));
-  //           };
-
-  // // Function for generating holes
-  // auto f = ScalarFunction(
-  //     [&](const double* x, int dim) -> double
-  //     {
-  //       double d = std::numeric_limits<double>::max();
-  //       for (const auto& c : cs)
-  //       {
-  //         double dd = gd(x, c.data(), dim) - rr;
-  //         d = std::min(d, dd);
-  //       }
-  //       if (d <= rr)
-  //         return 1;
-  //       else
-  //         return -1;
-  //     });
-
-  // dist = f;
-
-  // Omega.save("Omega.mesh");
-  // dist.save("dist.gf");
-
-  // mmgMesh = Cast(Omega).to<MMG::Mesh3D>();
-  // mmgSol = Cast(dist).to<MMG::ScalarSolution3D>(mmgMesh);
-
-  // mmgMesh.save("mmg.mesh");
-  // mmgSol.save("mmg.sol");
-
-  MMG::Mesh3D mmgMesh;
-  mmgMesh.load("mmg.mesh");
-
-  MMG::ScalarSolution3D mmgDist(mmgMesh);
-  mmgDist.load("mmg.sol");
-
-  auto Omega = Cast(mmgMesh).to<SerialMesh>();
+  // GridFunction f(Vh);
+  // f = VectorFunction{
+  //   [](const double* x, int){ return 3 * x[0] * x[0] + sin(10 * x[1]); },
+  //   [](const double* x, int){ return 3 * x[0] + cos(10 * x[1]); }};
 
   FiniteElementSpace<H1> Vh(Omega);
-  FiniteElementSpace<H1> Th(Omega, 3);
 
-  auto dist = Cast(mmgDist).to<GridFunction<H1>>(Vh);
+  // Sphere radius
+  double r = 1;
 
-  dist.save("dist.gf");
+  // Hole radius
+  double rr = 0.2;
 
-  auto solver = Solver::UMFPack();
+  // Hole centers on sphere
+  std::vector<std::array<double, 3>> cs = {
+    // { r * sin(0) * cos(0), r * sin(0) * sin(0), r * cos(0) },
+    { r * sin(pi / 2) * cos(pi), r * sin(pi / 2) * sin(pi), r * cos(pi / 2) },
+    { r * sin(pi / 2) * cos(pi / 2), r * sin(pi / 2) * sin(pi / 2), r * cos(pi / 2) }
+  };
 
-  auto skin = Omega.skin();
-  FiniteElementSpace<H1> VhS(skin);
-  FiniteElementSpace<H1> ThS(skin, 3);
-  GridFunction distS(VhS);
-  dist.transfer(distS);
-  auto conormal = getConormal(VhS, ThS, distS, solver);
+  // Geodesic distance
+  auto gd = [&](const double* x, const double* c, int)
+            {
+              return std::acos((x[0] * c[0] + x[1] * c[1] + x[2] * c[2]));
+            };
 
-  GridFunction ext(Th);
-  conormal.transfer(ext);
+  // Function for generating holes
+  auto f = ScalarFunction(
+      [&](const double* x, int dim) -> double
+      {
+        double d = std::numeric_limits<double>::max();
+        for (const auto& c : cs)
+        {
+          double dd = gd(x, c.data(), dim) - rr;
+          d = std::min(d, dd);
+        }
+        if (d <= rr)
+          return d;
+        else
+          return -d;
+      });
+
+  for (const auto& c : cs)
+  {
+    for (int i = 0; i < Omega.getHandle().GetNBE(); i++)
+    {
+      mfem::Array<int> vs;
+      Omega.getHandle().GetBdrElement(i)->GetVertices(vs);
+      double d = std::numeric_limits<double>::max();
+      for (int v = 0; v < vs.Size(); v++)
+      {
+        double dd = gd(Omega.getHandle().GetVertex(vs[v]), c.data(), 3) - rr;
+        d = std::min(d, dd);
+        if (d <= rr)
+          Omega.getHandle().SetBdrAttribute(i, 6);
+        // else
+        // Omega.getHandle().SetBdrAttribute(i, 1);
+      }
+    }
+  }
+
+  GridFunction dist(Vh);
+  dist = f;
 
   Omega.save("Omega.mesh");
-  ext.save("conormal.gf");
+  dist.save("dist.gf");
 
-  auto mmgConormal = Cast(ext).to<MMG::VectorSolution3D>(mmgMesh);
-  mmgMesh.save("v.mesh");
-  mmgConormal.save("v.sol");
+  // Cast(Omega).to<MMG::Mesh3D>().save("mmg.mesh");
+  // Cast(dist).to<MMG::ScalarSolution3D>(mmgMesh).save("mmg.sol");
+
+  // mmgSol.save("mmg.sol");
+
+  // MMG::Mesh3D mmgMesh;
+  // mmgMesh.load("test.mesh");
+
+  // MMG::ScalarSolution3D mmgDist(mmgMesh);
+  // mmgDist.load("test.sol");
+
+  // auto Omega = Cast(mmgMesh).to<SerialMesh>();
+
+  // FiniteElementSpace<H1> Vh(Omega);
+  // FiniteElementSpace<H1> Th(Omega, 3);
+
+  // auto dist = Cast(mmgDist).to<GridFunction<H1>>(Vh);
+
+
+  // auto skin = Omega.skin();
+  // FiniteElementSpace<H1> VhS(skin);
+  // FiniteElementSpace<H1> ThS(skin, 3);
+  // GridFunction distS(VhS);
+  // dist.transfer(distS);
+
 
   return 0;
 }

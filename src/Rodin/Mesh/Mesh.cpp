@@ -5,15 +5,29 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Alert.h"
+#include "Rodin/IO/MeshLoader.h"
+#include "Rodin/IO/MeshPrinter.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
 
+#include "Element.h"
+
 namespace Rodin
 {
    // ---- MeshBase ----------------------------------------------------------
+   Element MeshBase::getElement(int i)
+   {
+      return Element(*this, getHandle().GetElement(i), i);
+   }
+
+   BoundaryElement MeshBase::getBoundaryElement(int i)
+   {
+      return BoundaryElement(*this, getHandle().GetElement(i), i);
+   }
+
    int MeshBase::getSpaceDimension() const
    {
       return getHandle().SpaceDimension();
@@ -22,6 +36,11 @@ namespace Rodin
    int MeshBase::getDimension() const
    {
       return getHandle().Dimension();
+   }
+
+   bool MeshBase::isSurface() const
+   {
+      return (getSpaceDimension() - 1 == getDimension());
    }
 
    void MeshBase::refine()
@@ -41,9 +60,38 @@ namespace Rodin
             getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
    }
 
-   void MeshBase::save(const boost::filesystem::path& filename)
+   void Mesh<Traits::Serial>::save(
+         const boost::filesystem::path& filename, IO::MeshFormat fmt, int precision) const
    {
-      getHandle().Save(filename.c_str());
+      std::ofstream ofs(filename.c_str());
+      if (!ofs)
+      {
+         Alert::Exception()
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+      }
+      ofs.precision(precision);
+      switch (fmt)
+      {
+         case IO::MeshFormat::MFEM:
+         {
+            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
+            printer.print(ofs);
+            break;
+         }
+         case IO::MeshFormat::GMSH:
+         {
+            IO::MeshPrinter<IO::MeshFormat::GMSH, Traits::Serial> printer(*this);
+            printer.print(ofs);
+            break;
+         }
+         case IO::MeshFormat::MEDIT:
+         {
+            IO::MeshPrinter<IO::MeshFormat::MEDIT, Traits::Serial> printer(*this);
+            printer.print(ofs);
+            break;
+         }
+      }
    }
 
    MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
@@ -73,10 +121,38 @@ namespace Rodin
    {
       double totalVolume = 0;
       for (int i = 0; i < getHandle().GetNE(); i++)
+         totalVolume += getHandle().GetElementVolume(i) * (getHandle().GetAttribute(i) == attr);
+      return totalVolume;
+   }
+
+   double MeshBase::getBoundaryElementArea(int i)
+   {
+      mfem::ElementTransformation *et = getHandle().GetBdrElementTransformation(i);
+      const mfem::IntegrationRule &ir = mfem::IntRules.Get(
+            getHandle().GetBdrElementBaseGeometry(i), et->OrderJ());
+      double area = 0.0;
+      for (int j = 0; j < ir.GetNPoints(); j++)
       {
-         if (getHandle().GetAttribute(i) == attr)
-            totalVolume += getHandle().GetElementVolume(i);
+         const mfem::IntegrationPoint &ip = ir.IntPoint(j);
+         et->SetIntPoint(&ip);
+         area += ip.weight * et->Weight();
       }
+      return area;
+   }
+
+   double MeshBase::getPerimeter()
+   {
+      double totalArea = 0;
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         totalArea += getBoundaryElementArea(i);
+      return totalArea;
+   }
+
+   double MeshBase::getPerimeter(int attr)
+   {
+      double totalVolume = 0;
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         totalVolume += getBoundaryElementArea(i) * (getHandle().GetBdrAttribute(i) == attr);
       return totalVolume;
    }
 
@@ -97,9 +173,38 @@ namespace Rodin
       : m_mesh(other.m_mesh)
    {}
 
-   Mesh<Traits::Serial>& Mesh<Traits::Serial>::load(const boost::filesystem::path& filename)
+   Mesh<Traits::Serial>&
+   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, IO::MeshFormat fmt)
    {
-      m_mesh = mfem::Mesh(filename.c_str());
+      mfem::named_ifgzstream input(filename.c_str());
+      if (!input)
+      {
+         Alert::Exception()
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+      }
+      switch (fmt)
+      {
+         case IO::MeshFormat::MFEM:
+         {
+            IO::MeshLoader<IO::MeshFormat::MFEM, Traits::Serial> loader(*this);
+            loader.load(input);
+            break;
+         }
+         case IO::MeshFormat::GMSH:
+         {
+            IO::MeshLoader<IO::MeshFormat::GMSH, Traits::Serial> loader(*this);
+            loader.load(input);
+            break;
+         }
+         case IO::MeshFormat::MEDIT:
+         {
+            IO::MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial> loader(*this);
+            loader.load(input);
+            break;
+         }
+      }
+
       return *this;
    }
 
@@ -303,6 +408,40 @@ namespace Rodin
       }
       return SubMesh<Traits::Serial>(
             std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
+   }
+
+   SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin(const std::map<int, int>& bdrAttr)
+   {
+      auto res = skin();
+      if (bdrAttr.size() == 0)
+         return res;
+
+      for (int i = 0; i < res.getHandle().GetNumFaces(); i++)
+      {
+         int el1, el2;
+         res.getHandle().GetFaceElements(i, &el1, &el2);
+
+         int attr1 = res.getHandle().GetAttribute(el1);
+         int attr2 = res.getHandle().GetAttribute(el2);
+
+         if (attr1 != attr2)
+         {
+            int attr;
+            if (bdrAttr.count(attr1))
+               attr = bdrAttr.at(attr1);
+            else if (bdrAttr.count(attr2))
+               attr = bdrAttr.at(attr2);
+            else
+               continue;
+
+            mfem::Element* fc = res.getHandle().GetFace(i)->Duplicate(&res.getHandle());
+            fc->SetAttribute(attr);
+            res.getHandle().AddBdrElement(fc);
+         }
+      }
+      res.getHandle().SetAttributes();
+
+      return res;
    }
 
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin()

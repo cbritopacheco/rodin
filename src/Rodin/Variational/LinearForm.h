@@ -84,7 +84,7 @@ namespace Rodin::Variational
 
          virtual LinearFormBase& add(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
 
-         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
+         virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
 
          virtual mfem::LinearForm& getHandle() = 0;
 

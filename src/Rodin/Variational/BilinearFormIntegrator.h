@@ -26,12 +26,12 @@ namespace Rodin::Variational
          /**
           * @brief Gets reference to trial function.
           */
-         virtual const ShapeFunctionBase<Trial>& getTrialFunction() const = 0;
+         virtual const ShapeFunctionBase<TrialSpace>& getTrialFunction() const = 0;
 
          /**
           * @brief Gets reference to test function.
           */
-         virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
+         virtual const ShapeFunctionBase<TestSpace>& getTestFunction() const = 0;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -58,7 +58,8 @@ namespace Rodin::Variational
    {
       public:
          BilinearFormDomainIntegrator(
-               const ShapeFunctionBase<Trial>& u, const ShapeFunctionBase<Test>& v)
+               const ShapeFunctionBase<TrialSpace>& u,
+               const ShapeFunctionBase<TestSpace>& v)
             :  m_u(u.copy()), m_v(v.copy())
          {}
 
@@ -105,12 +106,12 @@ namespace Rodin::Variational
             return *this;
          }
 
-         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override
          {
             return *m_u;
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return *m_v;
          }
@@ -123,8 +124,83 @@ namespace Rodin::Variational
          virtual BilinearFormDomainIntegrator* copy() const noexcept override = 0;
 
       private:
-         std::unique_ptr<ShapeFunctionBase<Trial>> m_u;
-         std::unique_ptr<ShapeFunctionBase<Test>>  m_v;
+         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_u;
+         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_v;
+         std::set<int> m_attrs;
+   };
+
+   class BilinearFormBoundaryIntegrator : public BilinearFormIntegratorBase
+   {
+      public:
+         BilinearFormBoundaryIntegrator(
+               const ShapeFunctionBase<TrialSpace>& u,
+               const ShapeFunctionBase<TestSpace>& v)
+            :  m_u(u.copy()), m_v(v.copy())
+         {}
+
+         BilinearFormBoundaryIntegrator(const BilinearFormBoundaryIntegrator& other)
+            :  BilinearFormIntegratorBase(other),
+               m_u(other.m_u->copy()), m_v(other.m_v->copy()),
+               m_attrs(other.m_attrs)
+         {}
+
+         BilinearFormBoundaryIntegrator(BilinearFormBoundaryIntegrator&& other)
+            :  BilinearFormIntegratorBase(std::move(other)),
+               m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+               m_attrs(std::move(other.m_attrs))
+         {}
+
+         IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Boundary;
+         }
+
+         /**
+          * @brief Specifies the material reference over which to integrate.
+          * @returns Reference to self (for method chaining)
+          *
+          * Specifies the material reference over which the integration should
+          * take place.
+          */
+         BilinearFormBoundaryIntegrator& over(int attr)
+         {
+            return over(std::set<int>{attr});
+         }
+
+         /**
+          * @brief Specifies the material references over which to integrate.
+          * @returns Reference to self (for method chaining)
+          *
+          * Specifies the material references over which the integration should
+          * take place.
+          */
+         BilinearFormBoundaryIntegrator& over(const std::set<int>& attrs)
+         {
+            assert(attrs.size() > 0);
+            m_attrs = attrs;
+            return *this;
+         }
+
+         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override
+         {
+            return *m_u;
+         }
+
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
+         {
+            return *m_v;
+         }
+
+         const std::set<int>& getAttributes() const override
+         {
+            return m_attrs;
+         }
+
+         virtual BilinearFormBoundaryIntegrator* copy() const noexcept override = 0;
+
+      private:
+         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_u;
+         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_v;
          std::set<int> m_attrs;
    };
 }

@@ -41,6 +41,10 @@ namespace Rodin
     */
    template <class Trait>
    class SubMesh;
+
+   class ElementBase;
+   class Element;
+   class BoundaryElement;
 }
 
 #endif

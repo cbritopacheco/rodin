@@ -22,6 +22,8 @@
 
 #include "ForwardDecls.h"
 
+#include "Sum.h"
+
 namespace Rodin::Variational
 {
    template <class Operand>
@@ -106,9 +108,6 @@ namespace Rodin::Variational
    };
    UnaryMinus<ScalarFunctionBase> operator-(const ScalarFunctionBase& op);
 
-   Sum<ScalarFunctionBase, ScalarFunctionBase>
-   operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
-
    template <>
    class UnaryMinus<VectorFunctionBase>
       : public VectorFunctionBase
@@ -158,9 +157,6 @@ namespace Rodin::Variational
    };
    UnaryMinus<VectorFunctionBase> operator-(const VectorFunctionBase& op);
 
-   Sum<VectorFunctionBase, VectorFunctionBase>
-   operator-(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs);
-
    template <>
    class UnaryMinus<LinearFormIntegratorBase>
       : public LinearFormIntegratorBase
@@ -200,7 +196,7 @@ namespace Rodin::Variational
             return getOperand().getIntegratorRegion();
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return m_op->getTestFunction();
          }
@@ -277,12 +273,12 @@ namespace Rodin::Variational
             return *m_op;
          }
 
-         const ShapeFunctionBase<Trial>& getTrialFunction() const override
+         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override
          {
             return m_op->getTrialFunction();
          }
 
-         const ShapeFunctionBase<Test>& getTestFunction() const override
+         const ShapeFunctionBase<TestSpace>& getTestFunction() const override
          {
             return m_op->getTestFunction();
          }
@@ -320,6 +316,8 @@ namespace Rodin::Variational
          {
             for (auto& p : getBilinearFormDomainIntegratorList())
                p.reset(new UnaryMinus<BilinearFormIntegratorBase>(*p));
+            for (auto& p : getBilinearFormBoundaryIntegratorList())
+               p.reset(new UnaryMinus<BilinearFormIntegratorBase>(*p));
          }
 
          UnaryMinus(const UnaryMinus& other)
@@ -337,6 +335,92 @@ namespace Rodin::Variational
    };
    UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
          const FormLanguage::BilinearFormIntegratorSum& op);
+
+   template <ShapeFunctionSpaceType Space>
+   class UnaryMinus<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
+   {
+      public:
+         UnaryMinus(const ShapeFunctionBase<Space>& rhs)
+            : m_op(rhs.copy())
+         {}
+
+         UnaryMinus(const UnaryMinus& other)
+            :  ShapeFunctionBase<Space>(other),
+               m_op(other.m_op->copy())
+         {}
+
+         UnaryMinus(UnaryMinus&& other)
+            :  ShapeFunctionBase<Space>(std::move(other)),
+               m_op(std::move(other.m_op))
+         {}
+
+         ShapeFunctionBase<Space>& getOperand()
+         {
+            return *m_op;
+         }
+
+         const ShapeFunctionBase<Space>& getOperand() const
+         {
+            return *m_op;
+         }
+
+         ShapeFunctionBase<Space>& getLeaf() override
+         {
+            return getOperand().getLeaf();
+         }
+
+         const ShapeFunctionBase<Space>& getLeaf() const override
+         {
+            return getOperand().getLeaf();
+         }
+
+         int getRows(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return getOperand().getRows(fe, trans);
+         }
+
+         int getColumns(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return getOperand().getColumns(fe, trans);
+         }
+
+         int getDOFs(
+               const mfem::FiniteElement& fe,
+               const mfem::ElementTransformation& trans) const override
+         {
+            return getOperand().getDOFs(fe, trans);
+         }
+
+         std::unique_ptr<Rank3Operator> getOperator(
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans) const override
+         {
+            auto result = getOperand().getOperator(fe, trans);
+            (*result) *= -1.0;
+            return result;
+         }
+
+         FiniteElementSpaceBase& getFiniteElementSpace() override
+         {
+            return getOperand().getFiniteElementSpace();
+         }
+
+         const FiniteElementSpaceBase& getFiniteElementSpace() const override
+         {
+            return getOperand().getFiniteElementSpace();
+         }
+
+         UnaryMinus* copy() const noexcept override
+         {
+            return new UnaryMinus(*this);
+         }
+      private:
+         std::unique_ptr<ShapeFunctionBase<Space>> m_op;
+   };
 }
 
 #endif

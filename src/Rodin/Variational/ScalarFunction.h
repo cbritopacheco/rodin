@@ -31,7 +31,15 @@ namespace Rodin::Variational
       public:
          ScalarFunctionBase() = default;
 
-         ScalarFunctionBase(const ScalarFunctionBase&) = default;
+         ScalarFunctionBase(const ScalarFunctionBase& other)
+            :  FormLanguage::Buildable<mfem::Coefficient>(other),
+               m_traceDomain(other.m_traceDomain)
+         {}
+
+         ScalarFunctionBase(ScalarFunctionBase&& other)
+            :  FormLanguage::Buildable<mfem::Coefficient>(std::move(other)),
+               m_traceDomain(std::move(other.m_traceDomain))
+         {}
 
          /**
           * @brief Sets an attribute which will be interpreted as the domain to
@@ -129,10 +137,14 @@ namespace Rodin::Variational
          {}
 
          ScalarFunction(const ScalarFunction& other)
-            : m_nested(other.m_nested->copy())
+            :  ScalarFunctionBase(other),
+               m_nested(other.m_nested->copy())
          {}
 
-         ScalarFunction(ScalarFunction&& other) = default;
+         ScalarFunction(ScalarFunction&& other)
+            : ScalarFunctionBase(std::move(other)),
+              m_nested(std::move(other.m_nested))
+         {}
 
          double getValue(
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
@@ -174,10 +186,16 @@ namespace Rodin::Variational
          {}
 
          constexpr
-         ScalarFunction(const ScalarFunction& other) = default;
+         ScalarFunction(const ScalarFunction& other)
+            : ScalarFunctionBase(other),
+              m_x(other.m_x)
+         {}
 
          constexpr
-         ScalarFunction(ScalarFunction&&) = default;
+         ScalarFunction(ScalarFunction&& other)
+            : ScalarFunctionBase(std::move(other)),
+              m_x(other.m_x)
+         {}
 
          constexpr
          T getValue() const
@@ -217,7 +235,15 @@ namespace Rodin::Variational
           */
          ScalarFunction(const GridFunctionBase& u);
 
-         ScalarFunction(const ScalarFunction& other) = default;
+         ScalarFunction(const ScalarFunction& other)
+            : ScalarFunctionBase(other),
+              m_u(other.m_u)
+         {}
+
+         ScalarFunction(ScalarFunction&& other)
+            : ScalarFunctionBase(std::move(other)),
+              m_u(other.m_u)
+         {}
 
          /**
           * @returns Constant reference to underlying grid function.
@@ -252,6 +278,12 @@ namespace Rodin::Variational
       : public ScalarFunctionBase
    {
       public:
+         template <class T>
+         ScalarFunction(T&& f)
+            : ScalarFunction(
+                  std::function<double(const double*, int)>(std::forward<T>(f)))
+         {}
+
          /**
           * @brief Constructs a ScalarFunction from an std::function.
           */
@@ -259,7 +291,15 @@ namespace Rodin::Variational
             : m_f(f)
          {}
 
-         ScalarFunction(const ScalarFunction& other) = default;
+         ScalarFunction(const ScalarFunction& other)
+            : ScalarFunctionBase(other),
+              m_f(other.m_f)
+         {}
+
+         ScalarFunction(ScalarFunction&& other)
+            : ScalarFunctionBase(std::move(other)),
+              m_f(std::move(other.m_f))
+         {}
 
          /**
           * @returns Function used to compute the value of the ScalarFunction
@@ -288,6 +328,11 @@ namespace Rodin::Variational
    };
    ScalarFunction(std::function<double(const double*, int)>)
       -> ScalarFunction<std::function<double(const double*, int)>>;
+   template <class T>
+   ScalarFunction(T)
+      -> ScalarFunction<
+      std::enable_if_t<std::is_invocable_r_v<double, T, const double*, int>,
+      std::function<double(const double*, int)>>>;
 
    template <>
    class ScalarFunction<std::map<int, double>>
@@ -310,7 +355,13 @@ namespace Rodin::Variational
          }
 
          ScalarFunction(const ScalarFunction& other)
-            : m_pieces(other.m_pieces)
+            :  ScalarFunctionBase(other),
+               m_pieces(other.m_pieces)
+         {}
+
+         ScalarFunction(ScalarFunction&& other)
+            :  ScalarFunctionBase(std::move(other)),
+               m_pieces(std::move(other.m_pieces))
          {}
 
          const std::map<int, double>& getValue() const

@@ -43,6 +43,7 @@ namespace Rodin::Variational
          LFIList& getLinearFormDomainIntegratorList();
          LFIList& getLinearFormBoundaryIntegratorList();
          BFIList& getBilinearFormDomainIntegratorList();
+         BFIList& getBilinearFormBoundaryIntegratorList();
 
          virtual ProblemBody* copy() const noexcept override
          {
@@ -51,6 +52,7 @@ namespace Rodin::Variational
 
       private:
          BFIList m_bfiDomainList;
+         BFIList m_bfiBoundaryList;
          LFIList m_lfiDomainList;
          LFIList m_lfiBoundaryList;
          EssentialBoundary m_essBdr;

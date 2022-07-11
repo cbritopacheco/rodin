@@ -114,9 +114,7 @@ int main(int, char**)
       Omega.displace(g.getGridFunction());
 
       // Refine the mesh using MMG
-      auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-      MMG::MeshOptimizer2D().setHMax(hmax).optimize(mmgMesh);
-      Omega = Cast(mmgMesh).to<Mesh<Traits::Serial>>();
+      MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
     }
 
     // Save mesh

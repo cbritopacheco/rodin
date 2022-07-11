@@ -14,19 +14,19 @@ namespace Rodin::Variational
     * TrialFunction belongs to is parallel or serial
     */
    template <class FEC, class Trait>
-   class TrialFunction : public ShapeFunction<FEC, Trial>
+   class TrialFunction : public ShapeFunction<FEC, TrialSpace>
    {
       public:
          TrialFunction(FiniteElementSpace<FEC, Trait>& fes)
-            : ShapeFunction<FEC, Trial>(fes)
+            : ShapeFunction<FEC, TrialSpace>(fes)
          {}
 
          TrialFunction(const TrialFunction& other)
-            : ShapeFunction<FEC, Trial>(other)
+            : ShapeFunction<FEC, TrialSpace>(other)
          {}
 
          TrialFunction(TrialFunction&& other)
-            : ShapeFunction<FEC, Trial>(std::move(other))
+            : ShapeFunction<FEC, TrialSpace>(std::move(other))
          {}
 
          void operator=(const TrialFunction&) = delete;
@@ -69,12 +69,12 @@ namespace Rodin::Variational
             return Component<TrialFunction<FEC, Trait>>(*this, 2);
          }
 
-         ShapeFunctionBase<Trial>& getLeaf()  override
+         ShapeFunctionBase<TrialSpace>& getLeaf()  override
          {
             return *this;
          }
 
-         const ShapeFunctionBase<Trial>& getLeaf() const override
+         const ShapeFunctionBase<TrialSpace>& getLeaf() const override
          {
             return *this;
          }
