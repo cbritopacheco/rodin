@@ -38,15 +38,21 @@ namespace Rodin::Variational
    template <class FEC, class Trait = Traits::Serial>
    class GridFunction;
 
+   // ---- ShapeFunction -----------------------------------------------------
+
    /**
     * Enumeration class to indicate whether a derived instance of
     * ShapeFunctionBase is either a Trial or Test space.
     */
-   enum ShapeFunctionSpaceType
+   enum class ShapeFunctionSpaceType
    {
       Trial, ///< Trial function space
       Test ///< Test function space
    };
+
+   static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
+
+   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase;
@@ -67,7 +73,7 @@ namespace Rodin::Variational
     * Enumeration class to indicate whether the integration should be done
     * either inside the Domain or on the Boundary.
     */
-   enum IntegratorRegion
+   enum class IntegratorRegion
    {
       Domain, ///< Perform the integration over the interior domain
       Boundary ///< Perform the integration over the boundary of the domain
@@ -167,6 +173,9 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Dot;
+
+   template <class Lhs, class Rhs>
+   class Composition;
 }
 
 #endif

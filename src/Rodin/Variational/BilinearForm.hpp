@@ -126,6 +126,32 @@ namespace Rodin::Variational
             }
             break;
          }
+         case IntegratorRegion::Boundary:
+         {
+            auto& l = m_bfiBoundaryList.emplace_back(bfi.copy());
+            const auto& bdrAttrs = bfi.getAttributes();
+
+            if (bdrAttrs.size() == 0)
+            {
+               m_bf->AddBoundaryIntegrator(l->build().release());
+            }
+            else
+            {
+               int size = m_u.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
+               auto data = std::make_unique<mfem::Array<int>>(size);
+               *data = 0;
+               for (const auto& b : bdrAttrs)
+               {
+                  // All Boundary attributes are one-indexed.
+                  assert(b - 1 < size);
+                  (*data)[b - 1] = 1;
+               }
+               m_bf->AddBoundaryIntegrator(
+                     l->build().release(),
+                     *m_bdrAttrMarkers.emplace_back(std::move(data)));
+            }
+            break;
+         }
          default:
             Alert::Exception() << "IntegratorRegion not supported." << Alert::Raise;
       }

@@ -6,6 +6,8 @@
  */
 #include "ScalarFunction.h"
 
+#include "Rodin/Mesh/SubMesh.h"
+
 #include "Utility.h"
 #include "Restriction.h"
 #include "GridFunction.h"

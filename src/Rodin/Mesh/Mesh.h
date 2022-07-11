@@ -17,8 +17,10 @@
 #ifdef RODIN_USE_MPI
 #include <boost/mpi.hpp>
 #endif
+
 #include <boost/filesystem.hpp>
 
+#include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -31,6 +33,10 @@ namespace Rodin
    class MeshBase
    {
       public:
+         Element getElement(int i);
+
+         BoundaryElement getBoundaryElement(int i);
+
          /**
           * @brief Gets the dimension of the ambient space
           * @returns Dimension of the space which the mesh is embedded in
@@ -44,6 +50,8 @@ namespace Rodin
           * @see getSpaceDimension() const
           */
          int getDimension() const;
+
+         bool isSurface() const;
 
          /**
           * @brief Performs a uniform refinement over all mesh elements
@@ -63,12 +71,6 @@ namespace Rodin
           * @see getAttributes() const
           */
          std::set<int> getBoundaryAttributes() const;
-
-         /**
-          * @brief Saves the object to text file.
-          * @param[in] filename Name of the file.
-          */
-         virtual void save(const boost::filesystem::path& filename);
 
          /**
           * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -109,7 +111,7 @@ namespace Rodin
 
          /**
           * @brief Gets the total volume of the mesh.
-          * @returns Sum of the volume of all elements.
+          * @returns Sum of all element volumes.
           */
          double getVolume();
 
@@ -122,6 +124,22 @@ namespace Rodin
           * will return 0 as the volume.
           */
          double getVolume(int attr);
+
+         /**
+          * @brief Gets the total perimeter of the mesh.
+          * @returns Sum of all element perimeters.
+          */
+         double getPerimeter();
+
+         /**
+          * @brief Gets the sum of the perimeters of the elements given by the
+          * specified attribute.
+          * @param[in] attr Attribute of elements
+          * @returns Sum of element perimeters with given attribute
+          * @note If the element attribute does not exist then this function
+          * will return 0 as the perimeter.
+          */
+         double getPerimeter(int attr);
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
@@ -162,6 +180,9 @@ namespace Rodin
           * @returns Constant reference to the underlying mfem::Mesh.
           */
          virtual const mfem::Mesh& getHandle() const = 0;
+
+      private:
+         double getBoundaryElementArea(int i);
    };
 
    using SerialMesh = Mesh<Traits::Serial>;
@@ -179,7 +200,13 @@ namespace Rodin
           * @param[in] filename Name of file to read
           * @returns Reference to this (for method chaining)
           */
-         Mesh& load(const boost::filesystem::path& filename);
+         Mesh& load(
+               const boost::filesystem::path& filename,
+               IO::MeshFormat fmt = IO::MeshFormat::MFEM);
+
+         void save(
+               const boost::filesystem::path& filename,
+               IO::MeshFormat fmt = IO::MeshFormat::MFEM, int precison = 16) const;
 
          /**
           * @brief Constructs an empty mesh with no elements.
@@ -235,6 +262,8 @@ namespace Rodin
           * space dimension.
           */
          SubMesh<Traits::Serial> skin();
+
+         SubMesh<Traits::Serial> skin(const std::map<int, int>& bdrAttr);
 
          virtual bool isSubMesh() const override
          {
@@ -320,7 +349,7 @@ namespace Rodin
 
          bool isParallel() const override
          {
-            return false;
+            return true;
          }
 
          mfem::ParMesh& getHandle() override
