@@ -2,6 +2,12 @@
 
 namespace Rodin::External::MMG
 {
+  ImplicitDomainMesher& ImplicitDomainMesher::surface(bool meshTheSurface)
+  {
+    m_meshTheSurface = meshTheSurface;
+    return *this;
+  }
+
   ImplicitDomainMesher& ImplicitDomainMesher::setLevelSet(double ls)
   {
     m_ls = ls;
@@ -42,7 +48,7 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  void ImplicitDomainMesher::discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol)
+  int ImplicitDomainMesher::discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
       MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_rmc, *m_rmc);
@@ -77,14 +83,22 @@ namespace Rodin::External::MMG
 
     if (m_isoref)
       MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_isoref, *m_isoref);
-
-    MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_iso, 1);
+    if (m_meshTheSurface)
+    {
+      Alert::Exception()
+        << "Meshing the surface for a 2D mesh is not supported."
+        << Alert::Raise;
+    }
+    else
+    {
+      MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_iso, 1);
+    }
     MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_ls, m_ls);
-    MMG2D_mmg2dls(mesh, sol, nullptr);
+    return MMG2D_mmg2dls(mesh, sol, nullptr);
   }
 
 
-  void ImplicitDomainMesher::discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol)
+  int ImplicitDomainMesher::discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
       MMG3D_Set_dparameter(mesh, sol, MMG3D_DPARAM_rmc, *m_rmc);
@@ -118,12 +132,17 @@ namespace Rodin::External::MMG
         }, split);
       }
     }
-    MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_iso, 1);
+
+    if (m_meshTheSurface)
+      MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isosurf, 1);
+    else
+      MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_iso, 1);
+
     MMG3D_Set_dparameter(mesh, sol, MMG3D_DPARAM_ls, m_ls);
-    MMG3D_mmg3dls(mesh, sol, nullptr);
+    return MMG3D_mmg3dls(mesh, sol, nullptr);
   }
 
-  void ImplicitDomainMesher::discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol)
+  int ImplicitDomainMesher::discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
       Alert::Warning("Warning RMC option is not supported for surfaces").raise();
@@ -131,8 +150,19 @@ namespace Rodin::External::MMG
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (m_split.size() > 0)
       Alert::Warning("Warning material splitting is not supported for surfaces").raise();
-    MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_iso, 1);
+
+
+    if (m_meshTheSurface)
+    {
+      Alert::Exception()
+        << "Meshing the surface for a surface mesh is not supported."
+        << Alert::Raise;
+    }
+    else
+    {
+      MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_iso, 1);
+    }
     MMGS_Set_dparameter(mesh, sol, MMGS_DPARAM_ls, m_ls);
-    MMGS_mmgsls(mesh, sol, nullptr);
+    return MMGS_mmgsls(mesh, sol, nullptr);
   }
 }

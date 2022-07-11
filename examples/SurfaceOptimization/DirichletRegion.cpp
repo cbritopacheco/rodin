@@ -44,7 +44,7 @@ int main(int, char**)
 
   // Load and build finite element spaces on the volumetric domain
   Mesh Omega;
-  Omega.load(meshFile, IO::MeshFormat::MEDIT);
+  Omega.load(meshFile);
 
   FiniteElementSpace<H1> Vh(Omega);
   FiniteElementSpace<H1> Th(Omega, 3);
@@ -59,14 +59,18 @@ int main(int, char**)
   auto distSurf = MMG::Distancer(VhS).setInteriorDomain(GammaD)
                                      .distance(dOmega);
 
-  // Omega = MMG::ImplicitDomainMesher();
-  dOmega.save("miaow.mesh");
-  distSurf.save("miaow.gf");
-
-  // Extend the distance to the whole domain
+  // Transfer the distance to the whole domain
   GridFunction dist(Vh);
   distSurf.transfer(dist);
-  distSurf.save("dist.gf");
+
+  dist.save("faulty.sol", IO::GridFunctionFormat::MEDIT);
+  Omega.save("faulty.mesh", IO::MeshFormat::MEDIT);
+
+  // Mesh only the surface part of the mesh
+  Omega = MMG::ImplicitDomainMesher().surface()
+                                     .discretize(dist);
+
+  std::exit(1);
 
   ScalarFunction g = 2.0;
 
@@ -99,9 +103,6 @@ int main(int, char**)
         - BoundaryIntegral(g, v).over(GammaN);
   solver.solve(state);
 
-  u.getGridFunction().save("u.gf");
-  dOmega.save("dOmega.mesh");
-
   // Adjoint equation
   TrialFunction p(Vh);
   TestFunction  q(Vh);
@@ -110,7 +111,6 @@ int main(int, char**)
           + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
           + Integral(ScalarFunction(u.getGridFunction()), q);
   solver.solve(adjoint);
-  p.getGridFunction().save("p.gf");
 
   // Shape gradient
   GridFunction uS(VhS), pS(VhS);

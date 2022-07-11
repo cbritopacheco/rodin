@@ -19,8 +19,11 @@ namespace Rodin::External::MMG
   {
     public:
       ImplicitDomainMesher()
-        : m_ls(0.0)
+        : m_ls(0.0),
+          m_meshTheSurface(false)
       {}
+
+      ImplicitDomainMesher& surface(bool meshTheSurface = true);
 
       ImplicitDomainMesher& setLevelSet(double ls);
 
@@ -76,22 +79,34 @@ namespace Rodin::External::MMG
         MMG5::setParameters(mesh);
 
         bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
+        int retcode = MMG5_STRONGFAILURE;
         switch (mesh->dim)
         {
           case 2:
           {
             assert(!isSurface);
-            discretizeMMG2D(mesh, sol);
+            retcode = discretizeMMG2D(mesh, sol);
             break;
           }
           case 3:
           {
             if (isSurface)
-              discretizeMMGS(mesh, sol);
+            {
+              retcode = discretizeMMGS(mesh, sol);
+            }
             else
-              discretizeMMG3D(mesh, sol);
+            {
+              retcode = discretizeMMG3D(mesh, sol);
+            }
             break;
           }
+        }
+
+        if (retcode != MMG5_SUCCESS)
+        {
+          Alert::Exception()
+            << "Failed to discretize the implicit domain."
+            << Alert::Raise;
         }
 
         auto rodinMesh = meshToRodin(mesh);
@@ -125,12 +140,13 @@ namespace Rodin::External::MMG
       }
 
     private:
-      void discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol);
-      void discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
-      void discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
+      int discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol);
+      int discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
+      int discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
 
       double m_ls;
       SplitMap m_split;
+      bool m_meshTheSurface;
       std::optional<double> m_rmc;
       std::optional<MaterialReference> m_isoref;
   };
