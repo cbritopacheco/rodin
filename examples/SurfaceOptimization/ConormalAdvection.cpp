@@ -63,17 +63,11 @@ int main(int, char**)
   const char* meshFile = "Omega.mesh";
   const double pi = std::atan(1) * 4;
 
-  int Interior = 2, Exterior = 3;
-  int Gamma = 4;
 
   Mesh Omega;
   Omega.load(meshFile);
-
-
-  // GridFunction f(Vh);
-  // f = VectorFunction{
-  //   [](const double* x, int){ return 3 * x[0] * x[0] + sin(10 * x[1]); },
-  //   [](const double* x, int){ return 3 * x[0] + cos(10 * x[1]); }};
+  Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
+  std::exit(1);
 
   FiniteElementSpace<H1> Vh(Omega);
 
@@ -131,37 +125,7 @@ int main(int, char**)
     }
   }
 
-  GridFunction dist(Vh);
-  dist = f;
-
-  Omega.save("Omega.mesh");
-  dist.save("dist.gf");
-
-  // Cast(Omega).to<MMG::Mesh3D>().save("mmg.mesh");
-  // Cast(dist).to<MMG::ScalarSolution3D>(mmgMesh).save("mmg.sol");
-
-  // mmgSol.save("mmg.sol");
-
-  // MMG::Mesh3D mmgMesh;
-  // mmgMesh.load("test.mesh");
-
-  // MMG::ScalarSolution3D mmgDist(mmgMesh);
-  // mmgDist.load("test.sol");
-
-  // auto Omega = Cast(mmgMesh).to<SerialMesh>();
-
-  // FiniteElementSpace<H1> Vh(Omega);
-  // FiniteElementSpace<H1> Th(Omega, 3);
-
-  // auto dist = Cast(mmgDist).to<GridFunction<H1>>(Vh);
-
-
-  // auto skin = Omega.skin();
-  // FiniteElementSpace<H1> VhS(skin);
-  // FiniteElementSpace<H1> ThS(skin, 3);
-  // GridFunction distS(VhS);
-  // dist.transfer(distS);
-
+  Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
 
   return 0;
 }

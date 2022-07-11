@@ -42,23 +42,28 @@ int main(int, char**)
 {
   const char* meshFile = "Omega.mesh";
 
+  // Load and build finite element spaces on the volumetric domain
   Mesh Omega;
-  Omega.load(meshFile);
-
-  auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
-  dOmega.save("dOmega.mesh");
+  Omega.load(meshFile, IO::MeshFormat::MEDIT);
 
   FiniteElementSpace<H1> Vh(Omega);
   FiniteElementSpace<H1> Th(Omega, 3);
 
+  // Skin the mesh and build finite element spaces on the submesh
+  auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
+
   FiniteElementSpace<H1> VhS(dOmega);
   FiniteElementSpace<H1> ThS(dOmega, 3);
 
-  auto mmgMesh = Cast(dOmega).to<MMG::MeshS>();
-  mmgMesh.save("dmmg.mesh");
-  auto mmgDist = MMG::DistancerS().setInteriorDomain(GammaD).distance(mmgMesh);
-  auto distSurf = Cast(mmgDist).to<GridFunction<H1>>(VhS);
+  // Distance the surface
+  auto distSurf = MMG::Distancer(VhS).setInteriorDomain(GammaD)
+                                     .distance(dOmega);
 
+  // Omega = MMG::ImplicitDomainMesher();
+  dOmega.save("miaow.mesh");
+  distSurf.save("miaow.gf");
+
+  // Extend the distance to the whole domain
   GridFunction dist(Vh);
   distSurf.transfer(dist);
   distSurf.save("dist.gf");
@@ -114,13 +119,6 @@ int main(int, char**)
 
   GridFunction<H1> grad = getShapeGradient(VhS, ThS, distSurf, uS, pS, g, solver);
 
-  GridFunction product(VhS);
-  product = ScalarFunction(uS) * ScalarFunction(pS);
-  product.save("product.gf");
-
-  // grad *= -1.0;
-
-  // dist.save("dist.gf");
   grad.save("grad.gf");
 
   return 0;
