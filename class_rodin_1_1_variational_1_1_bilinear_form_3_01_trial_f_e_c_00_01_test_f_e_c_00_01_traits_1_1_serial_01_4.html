@@ -218,7 +218,7 @@ $ v $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2fa720c6ab5fb2f0864c052b99f5a84e" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Adds a <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> to the bilinear form.</dd>
+            <dd>Adds a bilinear integrator to the bilinear form.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9d2b723ccfee04321e90b2619d6adce6" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; lsum) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -226,7 +226,7 @@ $ v $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a41dcbfe748b5995c2da7050e12d48b47" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Builds the bilinear form the given <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>.</dd>
+            <dd>Builds the bilinear form the given bilinear integrator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a35a115f2159d9e7522d02f845c74be64" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_bilinear_form_integrator_sum.html" class="m-doc">FormLanguage::<wbr />BilinearFormIntegratorSum</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -447,7 +447,7 @@ $ a(u, v) $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fa720c6ab5fb2f0864c052b99f5a84e" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Adds a <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> to the bilinear form.</p>
+            <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -473,7 +473,7 @@ $ a(u, v) $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFEC, TestFEC, Traits::<wbr />Serial&gt;&lt;TrialFEC, TestFEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41dcbfe748b5995c2da7050e12d48b47" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Builds the bilinear form the given <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>.</p>
+            <p>Builds the bilinear form the given bilinear integrator.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -481,7 +481,7 @@ $ a(u, v) $
               <tbody>
                 <tr>
                   <td style="width: 1%">bfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a> which will be used to build the bilinear form.</td>
+                  <td>Bilinear integrator which will be used to build the bilinear form.</td>
                 </tr>
               </tbody>
               <tfoot>

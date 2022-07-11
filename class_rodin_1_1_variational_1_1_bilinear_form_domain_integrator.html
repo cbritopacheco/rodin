@@ -81,7 +81,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_trial_01_4_00_01cba237f5df836f308ef13b130ce035f6.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;Trial&gt;, ShapeFunctionBase&lt;Test&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_trial_space_01_43dc8669d83d92fc51620283bd1c293ce.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;TrialSpace&gt;, ShapeFunctionBase&lt;TestSpace&gt;&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of the dot product of a trial and a test operator.</dd>
           </dl>
@@ -101,12 +101,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#abfdba31414a5b0181e6b332290ebb9c7" class="m-doc">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>&amp;</span>
             </dt>
             <dd>Specifies the material references over which to integrate.</dd>
-            <dt id="aee158e0fc6350c3c5a6dca81541c34bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#aee158e0fc6350c3c5a6dca81541c34bb" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b4a937f6e6574be48ecb4e7bdc0c04a" class="m-doc">Trial</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a6b3f0d10c6ce530318224a9f4e29f6b0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6b3f0d10c6ce530318224a9f4e29f6b0" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TrialSpace&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets reference to trial function.</dd>
-            <dt id="af87a33365176677d958eb52668cd828b">
-              <span class="m-doc-wrap-bumper">auto <a href="#af87a33365176677d958eb52668cd828b" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a0c1982bd20a911687e4a2b59a1517f93" class="m-doc">Test</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a715389e221f656db0021b4168bac8852">
+              <span class="m-doc-wrap-bumper">auto <a href="#a715389e221f656db0021b4168bac8852" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TestSpace&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets reference to test function.</dd>
             <dt id="a3efd00b8e81585a5a761e171c9f51238">
