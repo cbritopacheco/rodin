@@ -12,7 +12,6 @@
 
 #include "MMG5.h"
 #include "Common.h"
-#include "Utility.h"
 
 namespace Rodin::External::MMG
 {
@@ -76,7 +75,7 @@ namespace Rodin::External::MMG
 
         MMG5::setParameters(mesh);
 
-        bool isSurface = isSurfaceMesh(mesh);
+        bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
         switch (mesh->dim)
         {
           case 2:
@@ -94,7 +93,11 @@ namespace Rodin::External::MMG
             break;
           }
         }
-        return meshToRodin(mesh);
+
+        auto rodinMesh = meshToRodin(mesh);
+        destroySolution(sol);
+        destroyMesh(mesh);
+        return rodinMesh;
       }
 
       ImplicitDomainMesher& setHMin(double hmin)

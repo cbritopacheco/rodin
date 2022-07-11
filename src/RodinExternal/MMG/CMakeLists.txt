@@ -10,64 +10,19 @@ include (ExternalProject)
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
   MMG5.h
-  ImplicitDomainMesher.h
+  Common.h
+  ISCDProcess.h
   Distancer.h
-    Cast.h
-    Utility.h
-    Configure.h.in
-    ISCDProcess.h
-    ForwardDecls.h
-    Mesh.h
-    Solution.h
-    ScalarSolution.h
-    VectorSolution.h
-  # ---- mmg2d
-    MMG2D.h
-    Mesh2D.h
-    Advect2D.h
-    Distancer2D.h
-    MeshOptimizer2D.h
-    ScalarSolution2D.h
-    VectorSolution2D.h
-    ImplicitDomainMesher2D.h
-  # ---- mmg3d
-    Mesh3D.h
-    ScalarSolution3D.h
-    VectorSolution3D.h
-  # ---- mmgs
-    MMGS.h
-    MeshS.h
-    ScalarSolutionS.h
+  MeshOptimizer.h
+  ImplicitDomainMesher.h
   )
 
 set(RodinExternalMMG_SRCS
   MMG5.cpp
+  Common.cpp
+  ISCDProcess.cpp
+  MeshOptimizer.cpp
   ImplicitDomainMesher.cpp
-  Distancer.cpp
-    Cast.cpp
-    Utility.cpp
-    ISCDProcess.cpp
-    Solution.cpp
-    ScalarSolution.cpp
-  # ---- mmg2d
-    Mesh2D.cpp
-    Advect2D.cpp
-    Distancer2D.cpp
-    MeshOptimizer2D.cpp
-    ScalarSolution2D.cpp
-    VectorSolution2D.cpp
-    ImplicitDomainMesher2D.cpp
-  # ---- mmg3d
-    Mesh3D.cpp
-    ScalarSolution3D.cpp
-    VectorSolution3D.cpp
-  # ---- mmgs
-    MeshS.cpp
-    AdvectS.cpp
-    DistancerS.cpp
-    ScalarSolutionS.cpp
-    VectorSolutionS.cpp
-    ImplicitDomainMesherS.cpp
   )
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
@@ -139,6 +94,7 @@ set(RODIN_ISCD_MSHDIST_EXECUTABLE
   ${PROJECT_BINARY_DIR}/third-party/ISCD/Mshdist/mshdist)
 set(RODIN_ISCD_ADVECTION_EXECUTABLE
   ${PROJECT_BINARY_DIR}/third-party/ISCD/Advection/Advection)
+
 configure_file(Configure.h.in Configure.h @ONLY)
 
 target_include_directories(RodinExternalMMG

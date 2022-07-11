@@ -13,6 +13,9 @@ namespace Rodin::External::MMG
    * @internal
    * @brief Path to the ISCD Mshdist executable.
    */
+  inline constexpr const char* ISCD_MSHDIST_EXECUTABLE =
+    "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
+
   inline constexpr const char* MSHDIST_EXECUTABLE =
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
@@ -20,6 +23,9 @@ namespace Rodin::External::MMG
    * @internal
    * @brief Path to the ISCD Mshdist executable.
    */
+  inline constexpr const char* ISCD_ADVECTION_EXECUTABLE =
+    "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
+
   inline constexpr const char* ADVECTION_EXECUTABLE =
     "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 

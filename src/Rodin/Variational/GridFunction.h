@@ -99,7 +99,7 @@ namespace Rodin::Variational
 
          virtual void save(
                const boost::filesystem::path& filename, IO::GridFunctionFormat fmt,
-               int precision) = 0;
+               int precision) const = 0;
 
          virtual GridFunctionBase& load(
                const boost::filesystem::path& filename, IO::GridFunctionFormat fmt) = 0;
@@ -385,7 +385,7 @@ namespace Rodin::Variational
          void save(
                const boost::filesystem::path& filename,
                IO::GridFunctionFormat fmt = IO::GridFunctionFormat::MFEM,
-               int precision = 16) override;
+               int precision = 16) const override;
 
          GridFunction& load(
                const boost::filesystem::path& filename,

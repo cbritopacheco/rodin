@@ -164,32 +164,23 @@ int main(int argc, char** argv)
         mu * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    // Convert data types to mmg types
-    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    auto mmgVel = Cast(g.getGridFunction()).to<MMG::VectorSolution2D>(mmgMesh);
-
     // Generate signed distance function
-    auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior).distance(mmgMesh);
+    FiniteElementSpace<H1> Dh(Omega);
+    auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
+                                  .distance(Omega);
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
     double dt = hmax / gInf;
-    MMG::Advect2D(mmgLs, mmgVel).step(dt);
+    MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
-    auto mmgImplicit =
-      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                   .split(Exterior, {Interior, Exterior})
-                                   .setRMC(1e-3)
-                                   .setHMax(hmax)
-                                   .setBoundaryReference(Gamma)
-                                   .discretize(mmgLs);
-
-    mmgImplicit.save("tmp/Omega."+std::to_string(i)+".mesh");
-
-    // Convert back to Rodin data type
-    Omega = Cast(mmgImplicit).to<Rodin::Mesh<>>();
-
+    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                                       .split(Exterior, {Interior, Exterior})
+                                       .setRMC(1e-3)
+                                       .setHMax(hmax)
+                                       .setBoundaryReference(Gamma)
+                                       .discretize(dist);
 
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)

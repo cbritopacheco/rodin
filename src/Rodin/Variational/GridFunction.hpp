@@ -47,6 +47,7 @@ namespace Rodin::Variational
    template <class Trait>
    void GridFunction<H1, Trait>
    ::save(const boost::filesystem::path& filename, IO::GridFunctionFormat fmt, int precision)
+   const
    {
       std::ofstream output(filename.c_str());
       if (!output)
