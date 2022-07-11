@@ -30,10 +30,6 @@ namespace Rodin::External::MMG
 
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 
-      static MMG5_pMesh loadMesh(const boost::filesystem::path& filename);
-
-      static void saveMesh(MMG5_pMesh mesh, const boost::filesystem::path& filename);
-
       static bool isSurfaceMesh(MMG5_pMesh mesh);
 
       static void destroyMesh(MMG5_pMesh);
@@ -111,10 +107,6 @@ namespace Rodin::External::MMG
       static void swapSolution(MMG5_pSol a, MMG5_pSol b);
 
       static void destroySolution(MMG5_pSol sol);
-
-      static MMG5_pSol loadSolution(const boost::filesystem::path& filename);
-
-      static void saveSolution(const boost::filesystem::path& filename, MMG5_pSol sol);
 
       /**
        * @brief Sets the minimal edge size.

@@ -266,19 +266,6 @@ namespace Rodin::External::MMG
       std::strcpy(dst->nameout, src->nameout);
    }
 
-   MMG5_pMesh MMG5::loadMesh(const boost::filesystem::path& filename)
-   {
-      Mesh mesh;
-      mesh.load(filename, IO::MeshFormat::MEDIT);
-      return rodinToMesh(mesh);
-   }
-
-   void MMG5::saveMesh(MMG5_pMesh mesh, const boost::filesystem::path& filename)
-   {
-      // TODO: Change this so we use the MMG2D, MMG3D, MMGS functions
-      meshToRodin(mesh).save(filename);
-   }
-
    MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, int vdim)
    {
       if (vdim < 1 || vdim > 3)
