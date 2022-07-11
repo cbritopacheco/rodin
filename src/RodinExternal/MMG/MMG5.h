@@ -108,6 +108,7 @@ namespace Rodin::External::MMG
 
       static void destroySolution(MMG5_pSol sol);
 
+    protected:
       /**
        * @brief Sets the minimal edge size.
        *
