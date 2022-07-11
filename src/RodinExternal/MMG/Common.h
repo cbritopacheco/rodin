@@ -12,14 +12,14 @@
 
 #include <mmg/libmmg.h>
 #include <libmmgcommon.h>
-#include <mmg2d/mmg2d.h>
-//#include <mmg2d/libmmg2d_private.h>
+// #include <mmg2d/mmg2d.h>
+#include <mmg2d/libmmg2d_private.h>
 #include <mmg/mmg2d/libmmg2d.h>
-#include <mmg3d/mmg3d.h>
-//#include <mmg3d/libmmg3d_private.h>
+// #include <mmg3d/mmg3d.h>
+#include <mmg3d/libmmg3d_private.h>
 #include <mmg/mmg3d/libmmg3d.h>
-#include <mmgs/mmgs.h>
-//#include <mmgs/libmmgs_private.h>
+// #include <mmgs/mmgs.h>
+#include <mmgs/libmmgs_private.h>
 #include <mmg/mmgs/libmmgs.h>
 #include <common/mmgcommon.h>
 
