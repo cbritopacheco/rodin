@@ -6,12 +6,14 @@
  */
 #include "GridFunction.h"
 
-#include "Sum.h"
-#include "UnaryMinus.h"
-#include "Mult.h"
-#include "Division.h"
+#include "Rodin/IO/GridFunctionLoader.h"
 
+#include "Sum.h"
+#include "Mult.h"
+#include "Minus.h"
+#include "Division.h"
 #include "FiniteElementSpace.h"
+
 
 namespace Rodin::Variational
 {
@@ -29,18 +31,6 @@ namespace Rodin::Variational
    double GridFunctionBase::min() const
    {
       return getHandle().Min();
-   }
-
-   void GridFunctionBase::save(const boost::filesystem::path& filename)
-   {
-      getHandle().Save(filename.string().c_str());
-   }
-
-   GridFunctionBase& GridFunctionBase::load(const boost::filesystem::path& filename)
-   {
-      std::ifstream in(filename.string());
-      getHandle().Load(in, getHandle().Size());
-      return *this;
    }
 
    std::pair<const double*, int> GridFunctionBase::getData() const
@@ -82,42 +72,6 @@ namespace Rodin::Variational
    {
       getHandle() = v;
       return *this;
-   }
-
-   GridFunctionBase& GridFunctionBase::operator+=(const ScalarFunctionBase& v)
-   {
-      return project(ScalarFunction(*this) + v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator-=(const ScalarFunctionBase& v)
-   {
-      return project(ScalarFunction(*this) - v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator*=(const ScalarFunctionBase& v)
-   {
-      if (getFiniteElementSpace().getVectorDimension() > 1)
-         return project(VectorFunction(*this) * v);
-      else
-         return project(ScalarFunction(*this) * v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator/=(const ScalarFunctionBase& v)
-   {
-      if (getFiniteElementSpace().getVectorDimension() > 1)
-         return project(VectorFunction(*this) / v);
-      else
-         return project(ScalarFunction(*this) / v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator+=(const VectorFunctionBase& v)
-   {
-      return project(VectorFunction(*this) + v);
-   }
-
-   GridFunctionBase& GridFunctionBase::operator-=(const VectorFunctionBase& v)
-   {
-      return project(VectorFunction(*this) - v);
    }
 
    GridFunctionBase& GridFunctionBase::project(

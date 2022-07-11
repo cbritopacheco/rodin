@@ -36,8 +36,10 @@
 #include "Variational/Pow.h"
 #include "Variational/Sum.h"
 #include "Variational/Mult.h"
+#include "Variational/Minus.h"
 #include "Variational/Division.h"
 #include "Variational/UnaryMinus.h"
+#include "Variational/Composition.h"
 
 #include "Variational/Div.h"
 #include "Variational/Grad.h"

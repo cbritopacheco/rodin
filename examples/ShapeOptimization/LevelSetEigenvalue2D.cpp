@@ -89,55 +89,15 @@ int main(int argc, char** argv)
   auto solver = Solver::UMFPack();
 
   // Optimization parameters
-  size_t maxIt = 100;
+  size_t maxIt = 155;
   double eps = 1e-6;
   double hmax = 0.05;
-  int k = 1; // The eigenvalue to optimize
+  double target_volume = 0.8;
+  int k = 2; // The eigenvalue to optimize
   auto alpha = ScalarFunction(4 * hmax * hmax); // Parameter for hilbertian regularization
+  auto ell = ScalarFunction(10);
 
   std::vector<double> obj;
-
-  /*
-  // Scalar field finite element space over the whole domain
-  FiniteElementSpace<H1> Vh(Omega);
-
-  // Trim the exterior part of the mesh to solve the elasticity system
-  SubMesh trimmed = Omega.trim(Exterior, Gamma);
-
-  // Build a finite element space over the trimmed mesh
-  FiniteElementSpace<H1> VhInt(trimmed);
-
-  // Elasticity equation
-  TrialFunction uInt(VhInt);
-  TestFunction  vInt(VhInt);
-
-  // A
-  Problem stiffness(uInt, vInt);
-  stiffness = Integral(Grad(uInt), Grad(vInt));
-  stiffness.update().assemble();
-
-  // B
-  Problem mass(uInt, vInt);
-  mass = Integral(uInt, vInt);
-  mass.update().assemble();
-
-  auto& m1 = stiffness.getStiffnessMatrix();
-  auto& m2 = mass.getStiffnessMatrix();
-
-
-  // Solve eigenvalue problem
-  EigenSolver ES;
-  ES.setShift(1.0).setNumEV(k+4).solve(m1, m2, VhInt);
-
-  // Get solution and transfer to original domain
-  GridFunction u(Vh);
-  ES.getEigenFunction(k).transfer(u);
-  double mu = ES.getEigenValue(k);
-
-  // Save solution
-  u.save("u.gf");
-  Omega.save("Omega.mesh");
-  */
 
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
@@ -178,39 +138,21 @@ int main(int argc, char** argv)
     ES.getEigenFunction(k).transfer(u);
     double mu = ES.getEigenValue(k);
 
-    // Compute the boundary shape gradientv
-    // Vector field finite element space over the whole domain
-    FiniteElementSpace<H1> Uh(Omega, 2);
-    auto n = Normal(2);
-
-    // GridFunction dJ(Uh);
-    //dJ = Omega.getVolume(Interior)*(Dot(Grad(u), Grad(u)) + mu*Dot(u,u))*n + mu*n; //  /Integral(Dot(u,u)) sur le sous-mesh
-    //std::cout << dJ.getFiniteElementSpace().getVectorDimension() << std::endl;
-
-    // Note from Carlos: 26/Avril/2022
-    // Salut !
-    // 1. I changed some things around, in particular I do not project the
-    // expression for dJ on a GridFunction. Instead I wrote the thing directly
-    // and hope that Rodin understands what I want hehe
-    // 2. I fixed the bug in the transfer function, thank you for testing this
-    // and narrowing down the problem! It helps a lot :)
-    // 3. I tried to run your code and it seems that the objective goes down
-    // but at one point the computation fails. I think due to parasitic
-    // components.
-    // 4. In the hilbertian procedure I removed the use of DirichletBC and used
-    // the usual expression.
-    //
-    // See you soon!
-
     // Hilbert extension-regularization procedure
-    // This is bullshit
-    auto dJ = Dot(Grad(u).traceOf(Interior), Grad(u).traceOf(Interior)) * n;
+    auto n = Normal(2);
+    auto gu = Grad(u);
+    gu.traceOf(Interior);
+    auto dJ = (
+        Dot(gu, gu)
+        - mu * ScalarFunction(u) * ScalarFunction(u)
+        - 2 * ell * (Omega.getVolume(Interior) - target_volume))*n;
+    FiniteElementSpace<H1> Uh(Omega, 2);
     TrialFunction g(Uh);
     TestFunction  v(Uh);
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            + BoundaryIntegral(dJ, v).over(Gamma);
+            - BoundaryIntegral(dJ, v).over(Gamma);
     solver.solve(hilbert);
 
     // Save data to inspect
@@ -222,32 +164,23 @@ int main(int argc, char** argv)
         mu * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    // Convert data types to mmg types
-    auto mmgMesh = Cast(Omega).to<MMG::Mesh2D>();
-    auto mmgVel = Cast(g.getGridFunction()).to<MMG::VectorSolution2D>(mmgMesh);
-
     // Generate signed distance function
-    auto mmgLs = MMG::Distancer2D().setInteriorDomain(Interior).distance(mmgMesh);
+    FiniteElementSpace<H1> Dh(Omega);
+    auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
+                                  .distance(Omega);
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
     double dt = hmax / gInf;
-    MMG::Advect2D(mmgLs, mmgVel).step(dt);
+    MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
-    auto mmgImplicit =
-      MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
-                                   .split(Exterior, {Interior, Exterior})
-                                   .setRMC(1e-3)
-                                   .setHMax(hmax)
-                                   .setBoundaryReference(Gamma)
-                                   .discretize(mmgLs);
-
-    // Convert back to Rodin data type
-    Omega = Cast(mmgImplicit).to<Rodin::Mesh<>>();
-
-    // Save mesh
-    Omega.save("Omega.mesh");
+    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                                       .split(Exterior, {Interior, Exterior})
+                                       .setRMC(1e-3)
+                                       .setHMax(hmax)
+                                       .setBoundaryReference(Gamma)
+                                       .discretize(dist);
 
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)

@@ -39,6 +39,8 @@ namespace Rodin::Variational
 
       for (auto& bfi : m_pb->getBilinearFormDomainIntegratorList())
          m_bilinearForm.add(*bfi);
+      for (auto& bfi : m_pb->getBilinearFormBoundaryIntegratorList())
+         m_bilinearForm.add(*bfi);
 
       // The LinearFormIntegrator instances have already been moved to the LHS
       for (auto& lfi : m_pb->getLinearFormDomainIntegratorList())
