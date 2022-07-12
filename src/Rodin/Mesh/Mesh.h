@@ -9,6 +9,7 @@
 
 #include <set>
 #include <string>
+#include <deque>
 
 #include <mfem.hpp>
 
@@ -33,9 +34,17 @@ namespace Rodin
    class MeshBase
    {
       public:
-         Element getElement(int i);
+         int getElementCount() const;
 
-         BoundaryElement getBoundaryElement(int i);
+         int getBoundaryElementCount() const;
+
+         ElementView getElement(int i);
+
+         Element getElement(int i) const;
+
+         FaceView getBoundaryElement(int i);
+
+         Face getBoundaryElement(int i) const;
 
          /**
           * @brief Gets the dimension of the ambient space
@@ -45,12 +54,19 @@ namespace Rodin
          int getSpaceDimension() const;
 
          /**
-          * @brief Gets the dimension of the elements
-          * @returns Dimension of the elements
+          * @brief Gets the dimension of the elements.
+          * @returns Dimension of the elements.
           * @see getSpaceDimension() const
           */
          int getDimension() const;
 
+         /**
+          * @brief Indicates whether the mesh is a surface or not.
+          * @returns True if mesh is a surface, false otherwise.
+          *
+          * A surface mesh is a mesh of codimension 1. That is, the difference
+          * between its space dimension and dimension is 1.
+          */
          bool isSurface() const;
 
          /**
@@ -140,6 +156,9 @@ namespace Rodin
           * will return 0 as the perimeter.
           */
          double getPerimeter(int attr);
+
+         std::deque<std::set<int>> ccl(
+               std::function<bool(const Element&, const Element&)> p) const;
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
