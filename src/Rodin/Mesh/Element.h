@@ -1,7 +1,9 @@
 #ifndef RODIN_MESH_ELEMENT_H
 #define RODIN_MESH_ELEMENT_H
 
+#include <set>
 #include <mfem.hpp>
+
 #include "ForwardDecls.h"
 
 namespace Rodin
@@ -22,7 +24,11 @@ namespace Rodin
             Pyramid = mfem::Geometry::PYRAMID
          };
 
-         ElementBase(MeshBase& mesh, mfem::Element* element, int index);
+         ElementBase(const MeshBase& mesh, const mfem::Element* element, int index)
+            :  m_mesh(mesh),
+               m_element(element),
+               m_index(index)
+         {}
 
          virtual ~ElementBase()
          {
@@ -34,16 +40,11 @@ namespace Rodin
             return static_cast<Geometry>(m_element->GetGeometryType());
          }
 
-         double getAttribute() const;
+         int getAttribute() const;
 
          int getIndex() const
          {
             return m_index;
-         }
-
-         MeshBase& getMesh()
-         {
-            return m_mesh;
          }
 
          const MeshBase& getMesh() const
@@ -51,40 +52,93 @@ namespace Rodin
             return m_mesh;
          }
 
-         mfem::Element& getHandle()
-         {
-            return *m_element;
-         }
-
          const mfem::Element& getHandle() const
          {
             return *m_element;
          }
 
+         virtual std::set<int> adjacent() const = 0;
+
       private:
-         MeshBase& m_mesh;
-         mfem::Element* m_element;
+         const MeshBase& m_mesh;
+         const mfem::Element* m_element;
          int m_index;
    };
 
    class Element : public ElementBase
    {
       public:
-         Element(MeshBase& mesh, mfem::Element* element, int index)
+         Element(const MeshBase& mesh, const mfem::Element* element, int index)
             : ElementBase(mesh, element, index)
          {}
 
          double getVolume() const;
+
+         std::set<int> adjacent() const override;
    };
 
-   class BoundaryElement : public ElementBase
+   class ElementView : public Element
    {
       public:
-         BoundaryElement(MeshBase& mesh, mfem::Element* element, int index)
+         ElementView(MeshBase& mesh, mfem::Element* element, int index)
+            : Element(mesh, element, index),
+              m_mesh(mesh),
+              m_element(element)
+         {}
+
+         MeshBase& getMesh()
+         {
+            return m_mesh;
+         }
+
+         mfem::Element* getHandle()
+         {
+            return m_element;
+         }
+
+      private:
+         MeshBase& m_mesh;
+         mfem::Element* m_element;
+
+   };
+
+   class Face : public ElementBase
+   {
+      public:
+         Face(const MeshBase& mesh, const mfem::Element* element, int index)
             : ElementBase(mesh, element, index)
          {}
 
+         std::set<int> adjacent() const override
+         {
+            assert(false);
+         }
+
          double getArea() const;
+   };
+
+   class FaceView : public Face
+   {
+      public:
+         FaceView(MeshBase& mesh, mfem::Element* element, int index)
+            : Face(mesh, element, index),
+              m_mesh(mesh),
+              m_element(element)
+         {}
+
+         MeshBase& getMesh()
+         {
+            return m_mesh;
+         }
+
+         mfem::Element* getHandle()
+         {
+            return m_element;
+         }
+
+      private:
+         MeshBase& m_mesh;
+         mfem::Element* m_element;
    };
 }
 

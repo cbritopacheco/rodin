@@ -5,19 +5,13 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Mesh.h>
-#include <Rodin/Solver.h>
-#include <Rodin/Variational.h>
 
 using namespace Rodin;
-using namespace Rodin::Variational;
 
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("../resources/gmsh/inductor.msh", IO::MeshFormat::GMSH);
 
-  std::cout << "Saved Gmsh file to mfem.mesh in Mfem format" << std::endl;
-  mesh.save("mfem.mesh", IO::MeshFormat::MFEM);
 
   return 0;
 }
