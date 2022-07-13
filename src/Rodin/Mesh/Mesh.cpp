@@ -222,7 +222,8 @@ namespace Rodin
             {
                int el = searchQueue.back();
                searchQueue.pop_back();
-               auto [_, inserted] = visited.insert(el);
+               auto result = visited.insert(el);
+               bool inserted = result.second;
                if (inserted)
                {
                   res.back().insert(el);
