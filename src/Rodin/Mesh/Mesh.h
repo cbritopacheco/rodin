@@ -42,9 +42,9 @@ namespace Rodin
 
          Element getElement(int i) const;
 
-         FaceView getBoundaryElement(int i);
+         BoundaryElementView getBoundaryElement(int i);
 
-         Face getBoundaryElement(int i) const;
+         BoundaryElement getBoundaryElement(int i) const;
 
          /**
           * @brief Gets the dimension of the ambient space
@@ -157,8 +157,43 @@ namespace Rodin
           */
          double getPerimeter(int attr);
 
+         /**
+          * @brief Performs connected-component labelling.
+          * @param[in] p Function which returns true if two adjacent elements
+          * belong to the same component, false otherwise.
+          * @returns List of sets, each set representing a component containing
+          * the indices of its elements.
+          *
+          * @note Both elements passed to the function will always be adjacent
+          * to each other, i.e. it is not necessary to verify this is the case.
+          */
          std::deque<std::set<int>> ccl(
                std::function<bool(const Element&, const Element&)> p) const;
+
+         /**
+          * @brief Obtains a set of elements satisfying the given condition.
+          * @param[in] condition Function which returns true if the element
+          * satisfies the condition.
+          * @returns Set containing the element indices satisfying the
+          * condition.
+          */
+         std::set<int> where(std::function<bool(const Element&)> condition) const;
+
+         /**
+          * @brief Edits all elements in the mesh via the given function.
+          * @param[in] f Function which takes an ElementView to modify each
+          * element.
+          */
+         MeshBase& edit(std::function<void(ElementView)> f);
+
+         /**
+          * @brief Edits the specified elements in the mesh via the given function.
+          * @param[in] f Function which takes an ElementView to modify each
+          * element.
+          * @param[in] elements Set of indices corresponding to the elements
+          * which will be modified.
+          */
+         MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
