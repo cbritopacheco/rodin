@@ -79,6 +79,7 @@ namespace Rodin::Variational::FormLanguage
 
    LinearFormIntegratorSum::LinearFormIntegratorSum(
          const LinearFormIntegratorSum& other)
+      : FormLanguage::Base(other)
    {
       m_lfiDomainList.reserve(other.m_lfiDomainList.size());
       for (const auto& p : other.m_lfiDomainList)

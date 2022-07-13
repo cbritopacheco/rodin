@@ -33,7 +33,12 @@ namespace Rodin::Variational::FormLanguage
                const BilinearFormIntegratorSum& lhs,
                const BilinearFormIntegratorSum& rhs);
 
-         BilinearFormIntegratorSum(BilinearFormIntegratorSum&& other) = default;
+         BilinearFormIntegratorSum(BilinearFormIntegratorSum&& other)
+            :  FormLanguage::Base(std::move(other)),
+               m_bfiDomainList(std::move(other.m_bfiDomainList)),
+               m_bfiBoundaryList(std::move(other.m_bfiBoundaryList))
+         {}
+
 
          BilinearFormIntegratorSum(const BilinearFormIntegratorSum& other);
 

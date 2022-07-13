@@ -33,7 +33,11 @@ namespace Rodin::Variational::FormLanguage
                const LinearFormIntegratorSum& lhs,
                const LinearFormIntegratorSum& rhs);
 
-         LinearFormIntegratorSum(LinearFormIntegratorSum&& other) = default;
+         LinearFormIntegratorSum(LinearFormIntegratorSum&& other)
+            :  FormLanguage::Base(std::move(other)),
+               m_lfiDomainList(std::move(other.m_lfiDomainList)),
+               m_lfiBoundaryList(std::move(other.m_lfiBoundaryList))
+         {}
 
          LinearFormIntegratorSum(const LinearFormIntegratorSum& other);
 

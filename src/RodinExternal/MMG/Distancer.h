@@ -21,10 +21,33 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Class which generates the signed distance function of a domain.
+   *
+   * Given a domain @f$ \Omega \subset D @f$, with boundary @f$ \partial \Omega
+   * @f$ then the signed distance function @f$ \phi : D \rightarrow \mathbb{R}
+   * @f$ is defined by:
+   *
+   * @f[
+   *  \phi(x) = \begin{cases}
+   *    d(x, \partial \Omega) & \text{if } x \in \Omega\\
+   *    0 & \text{if } x \in \partial \Omega\\
+   *    -d(x, \partial \Omega) & \text{if } x \in \Omega^c
+   *  \end{cases}
+   * @f]
+   * where
+   * @f[
+   *  d(x, \partial \Omega) := \inf_{y \in \partial \Omega} d(x, y)
+   * @f]
+   */
   template <class FEC>
   class Distancer<Variational::FiniteElementSpace<FEC>>
   {
     public:
+      /**
+       * @brief Creates a Distancer2D object with default values.
+       * @param[in] fes Finite element space for the distance function
+       */
       Distancer(Variational::FiniteElementSpace<FEC, Traits::Serial>& fes)
         : m_fes(fes),
           m_scale(true),
@@ -239,6 +262,9 @@ namespace Rodin::External::MMG
   Distancer(Variational::FiniteElementSpace<FEC>&)
     -> Distancer<Variational::FiniteElementSpace<FEC>>;
 
+  /**
+   * @brief Distancer specialization for redistancing a level set function.
+   */
   template <>
   class Distancer<void>
   {
@@ -301,6 +327,7 @@ namespace Rodin::External::MMG
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
   };
+  Distancer() -> Distancer<void>;
 
 
 }
