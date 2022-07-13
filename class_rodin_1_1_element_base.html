@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG namespace | Rodin</title>
+  <title>Rodin::ElementBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,80 +51,71 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span>MMG <span class="m-thin">namespace</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>ElementBase <span class="m-thin">class</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>Base class for all geometric elements of the mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#typedef-members">Typedefs</a></li>
-                <li><a href="#var-members">Variables</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />External::<wbr />MMG</a> module has a wide variety of uses which ranges from optimization of the mesh, to implicit domain meshing. It provides many C++ wrappers to execute the functionality of the <a href="https://www.mmgtools.org/">Mmg Platform</a>.</p>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class FEC&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect.html" class="m-doc">Advect</a>
+              class <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>
             </dt>
-            <dd>Advection of a level set function by a velocity field.</dd>
+            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class FEC&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer_3_01_variational_1_1_finite_element_space_3_01_f_e_c_01_4_01_4.html" class="m-doc">Distancer&lt;Variational::FiniteElementSpace&lt;FEC&gt;&gt;</a>
+              class <a href="class_rodin_1_1_face.html" class="m-doc">Face</a>
             </dt>
-            <dd>Class which generates the signed distance function of a domain.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer_3_01void_01_4.html" class="m-doc">Distancer&lt;void&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer.html" class="m-doc">Distancer</a> specialization for redistancing a level set function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>
-            </dt>
-            <dd>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer.html" class="m-doc">MeshOptimizer</a>
-            </dt>
-            <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
-            <dt>
-              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>
-            </dt>
-            <dd>Empty class tag to specify that a material reference should not be splitted.</dd>
-            <dt>
-              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>
-            </dt>
-            <dd>Class to specify the interior and exterior material references.</dd>
+            <dd>Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</dd>
           </dl>
         </section>
-        <section id="typedef-members">
-          <h2><a href="#typedef-members">Typedefs</a></h2>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a077152ee876d6e213437cf61fba97e90">
-              using <a href="#a077152ee876d6e213437cf61fba97e90" class="m-doc-self">MaterialReference</a> = int
+            <dt id="a6473c7d827873a20eeaf6121119a30c8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6473c7d827873a20eeaf6121119a30c8" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>
-            <dd>Material reference for each element.</dd>
-            <dt id="ac72151e3771f28bd1282a1aa79bb23f7">
-              using <a href="#ac72151e3771f28bd1282a1aa79bb23f7" class="m-doc-self">SplitMap</a> = std::map&lt;<a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a077152ee876d6e213437cf61fba97e90" class="m-doc">MaterialReference</a>, std::variant&lt;<a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>, <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>&gt;&gt;
+            <dd>Gets the attribute of the element.</dd>
+            <dt id="a1678b8fbb78027fe25fd31e6b4001f0e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1678b8fbb78027fe25fd31e6b4001f0e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>
-            <dd>Map indicating how a material reference should be split into exterior and interior material references.</dd>
+            <dd>Gets the index of the element in the mesh.</dd>
+            <dt id="a775a932670cf697a44e5a89df24e287c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a775a932670cf697a44e5a89df24e287c" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+            </dt>
+            <dd>Gets the associated mesh to the element.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a16a0188ba7087a564462ea245939d976" class="m-doc">adjacent</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;int&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets the set of spatially adjacent elements (of the same dimension).</dd>
           </dl>
         </section>
-        <section id="var-members">
-          <h2><a href="#var-members">Variables</a></h2>
-          <dl class="m-doc">
-            <dt id="aedca4332ab915213f5f99c61b951ab12">
-              static <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc-self">NoSplit</a> <span class="m-label m-flat m-primary">constexpr</span>
-            </dt>
-            <dd>Instance of the empty struct tag <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>.</dd>
-          </dl>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a16a0188ba7087a564462ea245939d976"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />ElementBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16a0188ba7087a564462ea245939d976" class="m-doc-self">adjacent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the set of spatially adjacent elements (of the same dimension).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Set of integer indices corresponding to the spatially adjacent elements of the same dimension.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

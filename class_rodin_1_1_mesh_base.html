@@ -87,6 +87,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>
             <dd>Gets the dimension of the elements.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Indicates whether the mesh is a surface or not.</dd>
             <dt id="abd1562affe186e62a245d91f90d1ed10">
               <span class="m-doc-wrap-bumper">void <a href="#abd1562affe186e62a245d91f90d1ed10" class="m-doc-self">refine</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
@@ -154,6 +158,23 @@ $ u $
             </dt>
             <dd>Gets the sum of the perimeters of the elements given by the specified attribute.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af795fc6351731af5a5a088230199d93e" class="m-doc">ccl</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;, const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; p) const -&gt; std::deque&lt;std::set&lt;int&gt;&gt;</span>
+            </dt>
+            <dd>Performs connected-component labelling.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6003192aff6b595b2f5f5c8965c96b18" class="m-doc">where</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; condition) const -&gt; std::set&lt;int&gt;</span>
+            </dt>
+            <dd>Obtains a set of elements satisfying the given condition.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39427e8035c03aaef411c4e410c4a591" class="m-doc">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f) -&gt; <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+            </dt>
+            <dd>Edits all elements in the mesh via the given function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0983a1530ab535ac9af62735da66523" class="m-doc">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f,
+              const std::set&lt;int&gt;&amp; elements) -&gt; <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+            </dt>
+            <dd>Edits the specified elements in the mesh via the given function.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0f3b89fad95e67e618f74858cd5927a3" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Indicates whether the mesh is a submesh or not.</dd>
@@ -189,11 +210,26 @@ $ u $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Dimension of the elements</td>
+                  <td>Dimension of the elements.</td>
                 </tr>
               </tfoot>
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh_base.html#a88934a975de1283c54ed3787cb6dbc32" class="m-doc">getSpaceDimension() const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a5c0ab183385f8806ca268b5c1b31d55d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Indicates whether the mesh is a surface or not.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if mesh is a surface, false otherwise.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>A surface mesh is a mesh of codimension 1. That is, the difference between its space dimension and dimension is 1.</p>
           </div></section>
           <section class="m-doc-details" id="ae2c6ab3b88dd786e405569b0a680bea0"><div>
             <h3>
@@ -478,6 +514,92 @@ $ u $
               </tfoot>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the perimeter.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af795fc6351731af5a5a088230199d93e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::deque&lt;std::set&lt;int&gt;&gt; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af795fc6351731af5a5a088230199d93e" class="m-doc-self">ccl</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;, const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; p) const</span></span>
+            </h3>
+            <p>Performs connected-component labelling.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Function which returns true if two adjacent elements belong to the same component, false otherwise.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>List of sets, each set representing a component containing the indices of its elements.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>Both elements passed to the function will always be adjacent to each other, i.e. it is not necessary to verify this is the case.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6003192aff6b595b2f5f5c8965c96b18"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6003192aff6b595b2f5f5c8965c96b18" class="m-doc-self">where</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; condition) const</span></span>
+            </h3>
+            <p>Obtains a set of elements satisfying the given condition.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">condition&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Function which returns true if the element satisfies the condition.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Set containing the element indices satisfying the condition.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a39427e8035c03aaef411c4e410c4a591"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39427e8035c03aaef411c4e410c4a591" class="m-doc-self">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f)</span></span>
+            </h3>
+            <p>Edits all elements in the mesh via the given function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">f&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Function which takes an <a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a> to modify each element.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab0983a1530ab535ac9af62735da66523"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0983a1530ab535ac9af62735da66523" class="m-doc-self">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f,
+              const std::set&lt;int&gt;&amp; elements)</span></span>
+            </h3>
+            <p>Edits the specified elements in the mesh via the given function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">f&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Function which takes an <a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a> to modify each element.</td>
+                </tr>
+                <tr>
+                  <td>elements&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Set of indices corresponding to the elements which will be modified.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a0f3b89fad95e67e618f74858cd5927a3"><div>
             <h3>
