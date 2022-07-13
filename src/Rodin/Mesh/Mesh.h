@@ -9,6 +9,7 @@
 
 #include <set>
 #include <string>
+#include <deque>
 
 #include <mfem.hpp>
 
@@ -33,9 +34,17 @@ namespace Rodin
    class MeshBase
    {
       public:
-         Element getElement(int i);
+         int getElementCount() const;
 
-         BoundaryElement getBoundaryElement(int i);
+         int getBoundaryElementCount() const;
+
+         ElementView getElement(int i);
+
+         Element getElement(int i) const;
+
+         BoundaryElementView getBoundaryElement(int i);
+
+         BoundaryElement getBoundaryElement(int i) const;
 
          /**
           * @brief Gets the dimension of the ambient space
@@ -45,12 +54,19 @@ namespace Rodin
          int getSpaceDimension() const;
 
          /**
-          * @brief Gets the dimension of the elements
-          * @returns Dimension of the elements
+          * @brief Gets the dimension of the elements.
+          * @returns Dimension of the elements.
           * @see getSpaceDimension() const
           */
          int getDimension() const;
 
+         /**
+          * @brief Indicates whether the mesh is a surface or not.
+          * @returns True if mesh is a surface, false otherwise.
+          *
+          * A surface mesh is a mesh of codimension 1. That is, the difference
+          * between its space dimension and dimension is 1.
+          */
          bool isSurface() const;
 
          /**
@@ -140,6 +156,44 @@ namespace Rodin
           * will return 0 as the perimeter.
           */
          double getPerimeter(int attr);
+
+         /**
+          * @brief Performs connected-component labelling.
+          * @param[in] p Function which returns true if two adjacent elements
+          * belong to the same component, false otherwise.
+          * @returns List of sets, each set representing a component containing
+          * the indices of its elements.
+          *
+          * @note Both elements passed to the function will always be adjacent
+          * to each other, i.e. it is not necessary to verify this is the case.
+          */
+         std::deque<std::set<int>> ccl(
+               std::function<bool(const Element&, const Element&)> p) const;
+
+         /**
+          * @brief Obtains a set of elements satisfying the given condition.
+          * @param[in] condition Function which returns true if the element
+          * satisfies the condition.
+          * @returns Set containing the element indices satisfying the
+          * condition.
+          */
+         std::set<int> where(std::function<bool(const Element&)> condition) const;
+
+         /**
+          * @brief Edits all elements in the mesh via the given function.
+          * @param[in] f Function which takes an ElementView to modify each
+          * element.
+          */
+         MeshBase& edit(std::function<void(ElementView)> f);
+
+         /**
+          * @brief Edits the specified elements in the mesh via the given function.
+          * @param[in] f Function which takes an ElementView to modify each
+          * element.
+          * @param[in] elements Set of indices corresponding to the elements
+          * which will be modified.
+          */
+         MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.

@@ -19,6 +19,21 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Advection of a level set function by a velocity field.
+   *
+   * Solves the advection equation
+   * @f[
+   * \left\{
+   *    \begin{aligned}
+   *       \dfrac{\partial u}{\partial t} + v(x) \cdot \nabla u (t, x) &= 0
+   *          && \text{ in } \Omega \times (0, + \infty) \\
+   *       u(x, 0) &= u_0(x) && \text{ on } \Omega \times \{ t = 0 \}
+   *    \end{aligned}
+   * \right.
+   * @f]
+   * where @f$ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} @f$ is known.
+   */
   template <class FEC>
   class Advect
   {
