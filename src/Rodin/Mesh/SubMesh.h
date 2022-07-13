@@ -39,6 +39,7 @@ namespace Rodin
 
          /**
           * @brief Sets the SubMesh to Mesh vertex map
+          * @param[in] Map going from SubMesh to Mesh vertex indices.
           *
           * Each key-value pair in the map indicates the correspondence between
           * vertex indices in the SubMesh and vertex indices in the parent
