@@ -11,8 +11,9 @@ using namespace Rodin;
 
 int main(int, char**)
 {
+  const char* filename = "../resources/mfem/ccl-2d-example.mesh";
   Mesh mesh;
-  mesh.load("Omega.mesh");
+  mesh.load(filename);
 
   Alert::Info() << "Performing CCL on mesh attributes..." << Alert::Raise;
 
@@ -27,11 +28,11 @@ int main(int, char**)
   for (size_t i = 0; i < ccs.size(); i++)
   {
     const auto& cc = ccs[i];
-    mesh.edit(cc,
+    mesh.edit(
         [&](ElementView element)
         {
           element.setAttribute(i + 1);
-        });
+        }, cc);
   }
 
   Alert::Info() << "Saved mesh to CCL.mesh" << Alert::Raise;

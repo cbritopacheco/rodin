@@ -13,11 +13,21 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Improves the mesh quality, mantaining the mean edge lenghts of the mesh.
+   */
   class MeshOptimizer : public MMG5
   {
     public:
       MeshOptimizer() = default;
 
+      /**
+       * @brief Performs the optimization of the mesh.
+       * @param[in, out] mesh Mesh to optimize
+       * @note The mean of the edge lengths is preserved at the vertices.
+       * Hence, if the edges passing through a vertex have very different
+       * sizes, the resulting mesh may be very different from the initial one.
+       */
       void optimize(Mesh<Traits::Serial>& mesh)
       {
         MMG5_pMesh mmgMesh = rodinToMesh(mesh);
