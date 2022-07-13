@@ -28,14 +28,14 @@ namespace Rodin
       return Element(*this, getHandle().GetElement(i), i);
    }
 
-   FaceView MeshBase::getBoundaryElement(int i)
+   BoundaryElementView MeshBase::getBoundaryElement(int i)
    {
-      return FaceView(*this, getHandle().GetElement(i), i);
+      return BoundaryElementView(*this, getHandle().GetBdrElement(i), i);
    }
 
-   Face MeshBase::getBoundaryElement(int i) const
+   BoundaryElement MeshBase::getBoundaryElement(int i) const
    {
-      return Face(*this, getHandle().GetElement(i), i);
+      return BoundaryElement(*this, getHandle().GetBdrElement(i), i);
    }
 
    int MeshBase::getElementCount() const
@@ -176,6 +176,34 @@ namespace Rodin
       return totalVolume;
    }
 
+   std::set<int> MeshBase::where(std::function<bool(const Element&)> p) const
+   {
+      std::set<int> res;
+      for (int i = 0; i < getElementCount(); i++)
+         if (p(getElement(i)))
+            res.insert(i);
+      return res;
+   }
+
+   MeshBase& MeshBase::edit(std::function<void(ElementView)> f)
+   {
+      for (int i = 0; i < getElementCount(); i++)
+         f(getElement(i));
+      return *this;
+   }
+
+   MeshBase& MeshBase::edit(std::function<void(ElementView)> f, const std::set<int>& elements)
+   {
+      for (auto el : elements)
+      {
+         assert(el >= 0);
+         assert(el < getElementCount());
+
+         f(getElement(el));
+      }
+      return *this;
+   }
+
    std::deque<std::set<int>> MeshBase::ccl(
          std::function<bool(const Element&, const Element&)> p) const
    {
@@ -192,13 +220,20 @@ namespace Rodin
             searchQueue.push_back(i);
             while (searchQueue.size() > 0)
             {
-               int el = searchQueue.front();
-               searchQueue.pop_front();
-               visited.insert(el);
-               res.back().insert(el);
-               for (int n : getElement(el).adjacent())
-                  if (!visited.count(n) && p(getElement(el), getElement(n)))
-                     searchQueue.push_back(n);
+               int el = searchQueue.back();
+               searchQueue.pop_back();
+               auto [_, inserted] = visited.insert(el);
+               if (inserted)
+               {
+                  res.back().insert(el);
+                  for (int n : getElement(el).adjacent())
+                  {
+                     if (p(getElement(el), getElement(n)))
+                     {
+                        searchQueue.push_back(n);
+                     }
+                  }
+               }
             }
          }
       }

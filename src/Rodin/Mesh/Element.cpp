@@ -9,7 +9,7 @@ namespace Rodin
       // This call does not actually modify the Element object. Only the Mesh
       // object. Hence we const_cast to access the ElementToElementTable table
       // method.
-      auto& adj = const_cast<MeshBase&>(getMesh()).getHandle().ElementToElementTable();
+      const auto& adj = const_cast<MeshBase&>(getMesh()).getHandle().ElementToElementTable();
       const int* elements = adj.GetRow(getIndex());
       for (int i = 0; i < adj.RowSize(getIndex()); i++)
          res.insert(elements[i]);
@@ -19,6 +19,12 @@ namespace Rodin
    int ElementBase::getAttribute() const
    {
       return m_element->GetAttribute();
+   }
+
+   ElementView& ElementView::setAttribute(int attr)
+   {
+      getMesh().getHandle().SetAttribute(getIndex(), attr);
+      return *this;
    }
 
    double Element::getVolume() const
@@ -51,5 +57,11 @@ namespace Rodin
          area += ip.weight * et->Weight();
       }
       return area;
+   }
+
+   BoundaryElementView& BoundaryElementView::setAttribute(int attr)
+   {
+      FaceView::getMesh().getHandle().SetBdrAttribute(FaceView::getIndex(), attr);
+      return *this;
    }
 }

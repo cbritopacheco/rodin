@@ -49,6 +49,9 @@ namespace Rodin
 
    class Face;
    class FaceView;
+
+   class BoundaryElement;
+   class BoundaryElementView;
 }
 
 #endif
