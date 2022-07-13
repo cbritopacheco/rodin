@@ -3,13 +3,28 @@
 
 namespace Rodin
 {
-   ElementBase::ElementBase(MeshBase& mesh, mfem::Element* element, int index)
-      : m_mesh(mesh), m_element(element), m_index(index)
-   {}
+   std::set<int> Element::adjacent() const
+   {
+      std::set<int> res;
+      // This call does not actually modify the Element object. Only the Mesh
+      // object. Hence we const_cast to access the ElementToElementTable table
+      // method.
+      const auto& adj = const_cast<MeshBase&>(getMesh()).getHandle().ElementToElementTable();
+      const int* elements = adj.GetRow(getIndex());
+      for (int i = 0; i < adj.RowSize(getIndex()); i++)
+         res.insert(elements[i]);
+      return res;
+   }
 
-   double ElementBase::getAttribute() const
+   int ElementBase::getAttribute() const
    {
       return m_element->GetAttribute();
+   }
+
+   ElementView& ElementView::setAttribute(int attr)
+   {
+      getMesh().getHandle().SetAttribute(getIndex(), attr);
+      return *this;
    }
 
    double Element::getVolume() const
@@ -28,10 +43,10 @@ namespace Rodin
       return volume;
    }
 
-   double BoundaryElement::getArea() const
+   double Face::getArea() const
    {
       mfem::ElementTransformation *et = const_cast<MeshBase&>(getMesh()
-            ).getHandle().GetBdrElementTransformation(getIndex());
+            ).getHandle().GetFaceTransformation(getIndex());
       const mfem::IntegrationRule &ir = mfem::IntRules.Get(
             getHandle().GetGeometryType(), et->OrderJ());
       double area = 0.0;
@@ -42,5 +57,11 @@ namespace Rodin
          area += ip.weight * et->Weight();
       }
       return area;
+   }
+
+   BoundaryElementView& BoundaryElementView::setAttribute(int attr)
+   {
+      FaceView::getMesh().getHandle().SetBdrAttribute(FaceView::getIndex(), attr);
+      return *this;
    }
 }

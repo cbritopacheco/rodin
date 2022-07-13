@@ -43,8 +43,15 @@ namespace Rodin
    class SubMesh;
 
    class ElementBase;
+
    class Element;
+   class ElementView;
+
+   class Face;
+   class FaceView;
+
    class BoundaryElement;
+   class BoundaryElementView;
 }
 
 #endif
