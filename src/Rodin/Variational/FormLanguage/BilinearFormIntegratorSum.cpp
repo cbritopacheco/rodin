@@ -78,6 +78,7 @@ namespace Rodin::Variational::FormLanguage
 
    BilinearFormIntegratorSum::BilinearFormIntegratorSum(
          const BilinearFormIntegratorSum& other)
+      : FormLanguage::Base(other)
    {
       m_bfiDomainList.reserve(other.m_bfiDomainList.size());
       for (const auto& p : other.m_bfiDomainList)
