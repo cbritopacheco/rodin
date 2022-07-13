@@ -11,5 +11,6 @@ namespace Rodin::Alert {}
 
 #include "Alert/Exception.h"
 #include "Alert/Warning.h"
+#include "Alert/Info.h"
 
 #endif

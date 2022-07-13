@@ -18,14 +18,34 @@
 namespace Rodin
 {
    // ---- MeshBase ----------------------------------------------------------
-   Element MeshBase::getElement(int i)
+   ElementView MeshBase::getElement(int i)
+   {
+      return ElementView(*this, getHandle().GetElement(i), i);
+   }
+
+   Element MeshBase::getElement(int i) const
    {
       return Element(*this, getHandle().GetElement(i), i);
    }
 
-   BoundaryElement MeshBase::getBoundaryElement(int i)
+   BoundaryElementView MeshBase::getBoundaryElement(int i)
    {
-      return BoundaryElement(*this, getHandle().GetElement(i), i);
+      return BoundaryElementView(*this, getHandle().GetBdrElement(i), i);
+   }
+
+   BoundaryElement MeshBase::getBoundaryElement(int i) const
+   {
+      return BoundaryElement(*this, getHandle().GetBdrElement(i), i);
+   }
+
+   int MeshBase::getElementCount() const
+   {
+      return getHandle().GetNE();
+   }
+
+   int MeshBase::getBoundaryElementCount() const
+   {
+      return getHandle().GetNBE();
    }
 
    int MeshBase::getSpaceDimension() const
@@ -112,7 +132,7 @@ namespace Rodin
    double MeshBase::getVolume()
    {
       double totalVolume = 0;
-      for (int i = 0; i < getHandle().GetNE(); i++)
+      for (int i = 0; i < getElementCount(); i++)
          totalVolume += getHandle().GetElementVolume(i);
       return totalVolume;
    }
@@ -120,7 +140,7 @@ namespace Rodin
    double MeshBase::getVolume(int attr)
    {
       double totalVolume = 0;
-      for (int i = 0; i < getHandle().GetNE(); i++)
+      for (int i = 0; i < getElementCount(); i++)
          totalVolume += getHandle().GetElementVolume(i) * (getHandle().GetAttribute(i) == attr);
       return totalVolume;
    }
@@ -143,7 +163,7 @@ namespace Rodin
    double MeshBase::getPerimeter()
    {
       double totalArea = 0;
-      for (int i = 0; i < getHandle().GetNBE(); i++)
+      for (int i = 0; i < getElementCount(); i++)
          totalArea += getBoundaryElementArea(i);
       return totalArea;
    }
@@ -151,9 +171,73 @@ namespace Rodin
    double MeshBase::getPerimeter(int attr)
    {
       double totalVolume = 0;
-      for (int i = 0; i < getHandle().GetNBE(); i++)
+      for (int i = 0; i < getBoundaryElementCount(); i++)
          totalVolume += getBoundaryElementArea(i) * (getHandle().GetBdrAttribute(i) == attr);
       return totalVolume;
+   }
+
+   std::set<int> MeshBase::where(std::function<bool(const Element&)> p) const
+   {
+      std::set<int> res;
+      for (int i = 0; i < getElementCount(); i++)
+         if (p(getElement(i)))
+            res.insert(i);
+      return res;
+   }
+
+   MeshBase& MeshBase::edit(std::function<void(ElementView)> f)
+   {
+      for (int i = 0; i < getElementCount(); i++)
+         f(getElement(i));
+      return *this;
+   }
+
+   MeshBase& MeshBase::edit(std::function<void(ElementView)> f, const std::set<int>& elements)
+   {
+      for (auto el : elements)
+      {
+         assert(el >= 0);
+         assert(el < getElementCount());
+
+         f(getElement(el));
+      }
+      return *this;
+   }
+
+   std::deque<std::set<int>> MeshBase::ccl(
+         std::function<bool(const Element&, const Element&)> p) const
+   {
+      std::set<int> visited;
+      std::deque<int> searchQueue;
+      std::deque<std::set<int>> res;
+
+      // Perform the labelling
+      for (int i = 0; i < getElementCount(); i++)
+      {
+         if (!visited.count(i))
+         {
+            res.push_back({});
+            searchQueue.push_back(i);
+            while (searchQueue.size() > 0)
+            {
+               int el = searchQueue.back();
+               searchQueue.pop_back();
+               auto [_, inserted] = visited.insert(el);
+               if (inserted)
+               {
+                  res.back().insert(el);
+                  for (int n : getElement(el).adjacent())
+                  {
+                     if (p(getElement(el), getElement(n)))
+                     {
+                        searchQueue.push_back(n);
+                     }
+                  }
+               }
+            }
+         }
+      }
+      return res;
    }
 
 #ifdef RODIN_USE_MPI
@@ -219,7 +303,7 @@ namespace Rodin
 
       // Count the number of elements in the trimmed mesh
       int ne = 0;
-      for (int i = 0; i < getHandle().GetNE(); i++)
+      for (int i = 0; i < getElementCount(); i++)
       {
          int elemAttr = getHandle().GetElement(i)->GetAttribute();
          ne += !attrs.count(elemAttr); // Count is always 0 or 1
@@ -258,7 +342,7 @@ namespace Rodin
          trimmed.AddVertex(getHandle().GetVertex(i));
 
       // Copy elements
-      for (int i = 0; i < getHandle().GetNE(); i++)
+      for (int i = 0; i < getElementCount(); i++)
       {
          mfem::Element* el = getHandle().GetElement(i);
          int elemAttr = el->GetAttribute();
@@ -272,7 +356,7 @@ namespace Rodin
       }
 
       // Copy selected boundary elements
-      for (int i = 0; i < getHandle().GetNBE(); i++)
+      for (int i = 0; i < getBoundaryElementCount(); i++)
       {
          int e, info;
          getHandle().GetBdrElementAdjacentElement(i, e, info);
@@ -391,7 +475,7 @@ namespace Rodin
 
          // Copy nodes to trimmed mesh
          int te = 0;
-         for (int e = 0; e < getHandle().GetNE(); e++)
+         for (int e = 0; e < getElementCount(); e++)
          {
             mfem::Element* el = getHandle().GetElement(e);
             int elemAttr = el->GetAttribute();
@@ -450,7 +534,7 @@ namespace Rodin
 
       // Determine mapping from vertex to boundary vertex
       std::set<int> bdrVertices;
-      for (int i = 0; i < getHandle().GetNBE(); i++)
+      for (int i = 0; i < getBoundaryElementCount(); i++)
       {
          mfem::Element* el = getHandle().GetBdrElement(i);
          int *v = el->GetVertices();
@@ -460,7 +544,7 @@ namespace Rodin
       }
 
       mfem::Mesh res(getDimension() - 1, bdrVertices.size(),
-            getHandle().GetNBE(), 0, getSpaceDimension());
+            getBoundaryElementCount(), 0, getSpaceDimension());
 
       // Copy vertices to the boundary mesh
       int vertexIdx = 0;
@@ -474,7 +558,7 @@ namespace Rodin
       }
 
       // Copy elements to the boundary mesh
-      for (int i = 0; i < getHandle().GetNBE(); i++)
+      for (int i = 0; i < getBoundaryElementCount(); i++)
       {
          mfem::Element *el = getHandle().GetBdrElement(i);
          int *v = el->GetVertices();
@@ -520,7 +604,7 @@ namespace Rodin
             mfem::Array<int> vdofs;
             mfem::Array<int> bvdofs;
             mfem::Vector v;
-            for (int i = 0; i < getHandle().GetNBE(); i++)
+            for (int i = 0; i < getBoundaryElementCount(); i++)
             {
                fes->GetBdrElementVDofs(i, vdofs);
                getHandle().GetNodes()->GetSubVector(vdofs, v);
