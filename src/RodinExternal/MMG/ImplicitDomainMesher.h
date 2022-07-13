@@ -15,9 +15,16 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Class to perform the discretization and optimization of a
+   * surface implicitly defined by a level set function.
+   */
   class ImplicitDomainMesher : public MMG5
   {
     public:
+      /**
+       * @brief Constructs an ImplicitDomainMesher2D with default values.
+       */
       ImplicitDomainMesher()
         : m_ls(0.0),
           m_meshTheSurface(false)
@@ -25,8 +32,19 @@ namespace Rodin::External::MMG
 
       ImplicitDomainMesher& surface(bool meshTheSurface = true);
 
+      /**
+       * @brief Specifies the level set to discretize.
+       *
+       * The default value is 0.
+       *
+       * @returns Reference to self (for method chaining)
+       */
       ImplicitDomainMesher& setLevelSet(double ls);
 
+      /**
+       * @brief Specifies the removal of small parasitic components.
+       * @returns Reference to self (for method chaining)
+       */
       ImplicitDomainMesher& setRMC(double rmc = 1e-5);
 
       /**
@@ -69,6 +87,13 @@ namespace Rodin::External::MMG
        */
       ImplicitDomainMesher& noSplit(const MaterialReference& ref);
 
+      /**
+       * @brief Discretizes and optimizes an implicitly defined surface defined
+       * by a level set function.
+       * @param[in] ls Level set function
+       *
+       * The material reference of the level set (edge) boundary will be 10.
+       */
       template <class FEC>
       Rodin::Mesh<Traits::Serial> discretize(Variational::GridFunction<FEC, Traits::Serial>& ls)
       {
