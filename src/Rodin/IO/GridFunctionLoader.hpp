@@ -24,6 +24,7 @@ namespace Rodin::IO
       auto& gf = GridFunctionLoaderBase<FEC, Traits::Serial>::getObject();
       gf.getHandle() = mfem::GridFunction(
             &gf.getFiniteElementSpace().getMesh().getHandle(), is);
+      gf.getHandle().SetSpace(&gf.getFiniteElementSpace().getHandle());
    }
 
    template <class FEC>
