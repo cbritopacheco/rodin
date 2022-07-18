@@ -384,7 +384,8 @@ namespace Rodin::IO
                      case 2: // Planar mesh
                      case 3: // Surface mesh
                      {
-                        mfemMesh.AddBdrSegment(v1 - 1, v2 - 1, ref);
+                        if (isSurfaceMesh)
+                           mfemMesh.AddBdrSegment(v1 - 1, v2 - 1, ref);
                         break;
                      }
                      default:
