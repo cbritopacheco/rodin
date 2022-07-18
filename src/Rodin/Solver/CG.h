@@ -27,7 +27,11 @@ namespace Rodin::Solver
          /**
           * @brief Constructs the CG object with default parameters.
           */
-         CG() = default;
+         CG()
+            : m_maxIterations(200),
+              m_rtol(1e-12),
+              m_atol(0)
+         {}
 
          ~CG() = default;
 
