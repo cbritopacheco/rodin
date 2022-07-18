@@ -40,11 +40,11 @@ GridFunction<H1> getShapeGradient(
 
 int main(int, char**)
 {
-  const char* meshFile = "Omega.mesh";
+  const char* meshFile = "Omega.o.mesh";
 
   // Load and build finite element spaces on the volumetric domain
   Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::MeshFormat::MEDIT);
 
   FiniteElementSpace<H1> Vh(Omega);
   FiniteElementSpace<H1> Th(Omega, 3);
@@ -56,19 +56,18 @@ int main(int, char**)
   FiniteElementSpace<H1> ThS(dOmega, 3);
 
   // Distance the surface
-  auto distSurf = MMG::Distancer(VhS).setInteriorDomain(GammaD)
+  auto distSurf = MMG::Distancer(VhS).setInteriorDomain(3)
                                      .distance(dOmega);
 
   // Transfer the distance to the whole domain
   GridFunction dist(Vh);
   distSurf.transfer(dist);
 
-  dist.save("faulty.sol", IO::GridFunctionFormat::MEDIT);
-  Omega.save("faulty.mesh", IO::MeshFormat::MEDIT);
+  auto solver = Solver::CG();
 
   // Mesh only the surface part of the mesh
-  Omega = MMG::ImplicitDomainMesher().surface()
-                                     .discretize(dist);
+  Omega = MMG::ImplicitDomainMesher().surface().setHMax(0.05).discretize(dist);
+  Omega.save("miaow.mesh", IO::MeshFormat::MEDIT);
 
   std::exit(1);
 
@@ -90,7 +89,6 @@ int main(int, char**)
     return Integral(u).compute() - ell * Omega.getPerimeter(GammaN);
   };
 
-  auto solver = Solver::UMFPack();
 
   // State equation
   ScalarFunction f = 1;
