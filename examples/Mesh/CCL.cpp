@@ -35,9 +35,9 @@ int main(int, char**)
         }, cc);
   }
 
-  Alert::Info() << "Saved mesh to CCL.mesh" << Alert::Raise;
+  Alert::Info() << "Saved mesh to ccl.mesh" << Alert::Raise;
 
-  mesh.save("CCL.mesh");
+  mesh.save("ccl.mesh");
 
   return 0;
 }
