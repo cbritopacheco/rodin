@@ -532,11 +532,11 @@ namespace Rodin::External::MMG
             if (isSurface)
             {
                dst = mfem::Mesh(
-                     2,       // Dimension
-                     src->np, // Vertex count
-                     src->nt, // Element count
-                     src->na, // Boundary element count
-                     src->dim // Space dim
+                     src->dim - 1,     // Dimension
+                     src->np,          // Vertex count
+                     src->nt,          // Element count
+                     src->na,          // Boundary element count
+                     src->dim          // Space dim
                      );
                for (int i = 1; i <= src->np; i++)
                {
@@ -566,10 +566,10 @@ namespace Rodin::External::MMG
             else
             {
                dst = mfem::Mesh(
-                     2,       // Dimension
-                     src->np, // Vertex count
-                     src->ne, // Element count
-                     src->nt  // Boundary element count
+                     src->dim, // Dimension
+                     src->np,  // Vertex count
+                     src->ne,  // Element count
+                     src->nt   // Boundary element count
                      );
                for (int i = 1; i <= src->np; i++)
                {
