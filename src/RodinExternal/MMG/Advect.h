@@ -49,6 +49,7 @@ namespace Rodin::External::MMG
         : m_t(0),
           m_avoidTrunc(false),
           m_ex(true),
+          m_advectTheSurface(false),
           m_ls(ls),
           m_disp(disp),
           m_advect(getISCDAdvectExecutable())
@@ -115,12 +116,15 @@ namespace Rodin::External::MMG
           if (!m_avoidTrunc)
           {
             Alert::Warning()
-              << "Time truncation is always avoided for surface meshes."
+              << "MMG::Advect: "
+              << "Time truncation is set to not be avoided but"
+              << " this is always avoided for surface meshes."
               << Alert::Raise;
           }
 
           retcode = m_advect.run(
               meshp.string(),
+              "-surf",
               "-dt", std::to_string(dt),
               m_ex ? "" : "-noex",
               "-c", solp.string(),
@@ -130,27 +134,45 @@ namespace Rodin::External::MMG
         }
         else
         {
+          if (!m_avoidTrunc && m_advectTheSurface)
+          {
+            Alert::Warning()
+              << "MMG::Advect: "
+              << "Time truncation is set to not be avoided but"
+              << " this is always avoided for surface meshes."
+              << Alert::Raise;
+          }
+
           retcode = m_advect.run(
               meshp.string(),
+              m_advectTheSurface ? "-surf -nocfl" : "",
               "-dt", std::to_string(dt),
-              m_avoidTrunc ? "-nocfl" : "",
               m_ex ? "" : "-noex",
               "-c", solp.string(),
               "-s", dispp.string(),
-              "-o", outp.string());
+              "-o", outp.string()
+              );
         }
 
         if (retcode != 0)
-          Alert::Exception("ISCD::Advection invocation failed.").raise();
+          Alert::Exception(
+              "MMG::Advect: ISCD::Advection invocation failed.").raise();
 
         m_ls.load(outp, IO::GridFunctionFormat::MEDIT);
 
         m_t += dt;
       }
 
+      Advect& surface(bool advectTheSurface = true)
+      {
+        m_advectTheSurface = advectTheSurface;
+        return *this;
+      }
+
     private:
       double m_t;
       bool m_avoidTrunc, m_ex;
+      bool m_advectTheSurface;
       Variational::GridFunction<FEC, Traits::Serial>& m_ls;
       const Variational::GridFunction<FEC, Traits::Serial>& m_disp;
       ISCDProcess m_advect;

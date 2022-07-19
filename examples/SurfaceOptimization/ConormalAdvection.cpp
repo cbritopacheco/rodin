@@ -60,14 +60,13 @@ auto getConormal(
 
 int main(int, char**)
 {
-  const char* meshFile = "Omega.mesh";
+  const char* meshFile = "miaow.o.mesh";
   const double pi = std::atan(1) * 4;
 
 
   Mesh Omega;
-  Omega.load(meshFile);
-  Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
-  std::exit(1);
+  Omega.load(meshFile, IO::MeshFormat::MEDIT);
+  // Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
 
   FiniteElementSpace<H1> Vh(Omega);
 

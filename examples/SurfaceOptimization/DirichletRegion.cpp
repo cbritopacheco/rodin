@@ -14,11 +14,16 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 // Parameters
-static constexpr int Gamma = 1;
-static constexpr int GammaD = 5;
-static constexpr int SigmaD = 1;
+static constexpr int Gamma = 2;
+static constexpr int GammaD = 3;
 static constexpr int GammaN = 6;
+
+static constexpr int SigmaD = 1;
 static constexpr int SigmaN = 2;
+
+static constexpr size_t maxIt = 250;
+
+static constexpr double hmax = 0.05;
 static constexpr double ell = 0.1;
 static constexpr double alpha = 0.1;
 static constexpr double epsilon = 0.01;
@@ -40,84 +45,103 @@ GridFunction<H1> getShapeGradient(
 
 int main(int, char**)
 {
-  const char* meshFile = "Omega.o.mesh";
+  const char* meshFile = "../resources/mfem/dirichlet-region-example.mesh";
 
   // Load and build finite element spaces on the volumetric domain
   Mesh Omega;
-  Omega.load(meshFile, IO::MeshFormat::MEDIT);
-
-  FiniteElementSpace<H1> Vh(Omega);
-  FiniteElementSpace<H1> Th(Omega, 3);
-
-  // Skin the mesh and build finite element spaces on the submesh
-  auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
-
-  FiniteElementSpace<H1> VhS(dOmega);
-  FiniteElementSpace<H1> ThS(dOmega, 3);
-
-  // Distance the surface
-  auto distSurf = MMG::Distancer(VhS).setInteriorDomain(3)
-                                     .distance(dOmega);
-
-  // Transfer the distance to the whole domain
-  GridFunction dist(Vh);
-  distSurf.transfer(dist);
-
-  auto solver = Solver::CG();
-
-  // Mesh only the surface part of the mesh
-  Omega = MMG::ImplicitDomainMesher().surface().setHMax(0.05).discretize(dist);
-  Omega.save("miaow.mesh", IO::MeshFormat::MEDIT);
-
-  std::exit(1);
-
-  ScalarFunction g = 2.0;
-
-  auto h = [](double r)
-  {
-    if (r < -1.0)
-      return 1.0;
-    else if (r > 1.0)
-      return 0.0;
-    else
-      return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
-  };
-  auto he = compose(h, ScalarFunction(dist) / epsilon) / epsilon;
+  Omega.load(meshFile);
 
   auto J = [&](GridFunction<H1>& u)
   {
     return Integral(u).compute() - ell * Omega.getPerimeter(GammaN);
   };
 
+  for (size_t i = 0; i < maxIt; i++)
+  {
+    Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
-  // State equation
-  ScalarFunction f = 1;
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-  Problem state(u, v);
-  state = Integral(Grad(u), Grad(v))
-        + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
-        - Integral(f, v)
-        - BoundaryIntegral(g, v).over(GammaN);
-  solver.solve(state);
+    // Skin the mesh, computing the borders of the new regions
+    Alert::Info() << "    | Skinning mesh." << Alert::Raise;
+    auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
 
-  // Adjoint equation
-  TrialFunction p(Vh);
-  TestFunction  q(Vh);
-  Problem adjoint(p, q);
-  adjoint = Integral(Grad(p), Grad(q))
-          + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
-          + Integral(ScalarFunction(u.getGridFunction()), q);
-  solver.solve(adjoint);
+    // Build finite element spaces
+    Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
+    FiniteElementSpace<H1> Vh(Omega);
+    FiniteElementSpace<H1> Th(Omega, Omega.getSpaceDimension());
 
-  // Shape gradient
-  GridFunction uS(VhS), pS(VhS);
-  u.getGridFunction().transfer(uS);
-  p.getGridFunction().transfer(pS);
+    FiniteElementSpace<H1> VhS(dOmega);
+    FiniteElementSpace<H1> ThS(dOmega, dOmega.getSpaceDimension());
 
-  GridFunction<H1> grad = getShapeGradient(VhS, ThS, distSurf, uS, pS, g, solver);
+    Alert::Info() << "    | Distancing domain." << Alert::Raise;
+    auto distS = MMG::Distancer(VhS).setInteriorDomain(GammaD)
+                                    .distance(dOmega);
 
-  grad.save("grad.gf");
+    GridFunction dist(Vh);
+    distS.transfer(dist);
+
+    auto solver = Solver::CG();
+
+    auto h = [](double r)
+    {
+      if (r < -1.0)
+        return 1.0;
+      else if (r > 1.0)
+        return 0.0;
+      else
+        return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
+    };
+    auto he = compose(h, ScalarFunction(dist) / epsilon) / epsilon;
+
+    // State equation
+    Alert::Info() << "    | Solving state equation." << Alert::Raise;
+    ScalarFunction f = 1;
+    ScalarFunction g = 2.0;
+
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+    Problem state(u, v);
+    state = Integral(Grad(u), Grad(v))
+          + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
+          - Integral(f, v)
+          - BoundaryIntegral(g, v).over(GammaN);
+    solver.solve(state);
+
+    // Adjoint equation
+    Alert::Info() << "    | Solving adjoint equation." << Alert::Raise;
+    TrialFunction p(Vh);
+    TestFunction  q(Vh);
+    Problem adjoint(p, q);
+    adjoint = Integral(Grad(p), Grad(q))
+            + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
+            + Integral(ScalarFunction(u.getGridFunction()), q);
+    solver.solve(adjoint);
+
+    Alert::Info() << "    | Objective: " << J(u.getGridFunction())
+                  << Alert::Raise;
+
+    // Transfer the functions to the surfacic spaces
+    GridFunction uS(VhS), pS(VhS);
+    u.getGridFunction().transfer(uS);
+    p.getGridFunction().transfer(pS);
+
+    // Compute the shape gradient
+    Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
+    auto gradS = getShapeGradient(VhS, ThS, distS, uS, pS, g, solver);
+
+    // Transfer back the vector field to the whole space
+    GridFunction grad(Th);
+    gradS.transfer(grad);
+
+    // Advect the distance function with the gradient
+    Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
+    double gInf = std::max(grad.max(), -grad.min());
+    double dt = 4 * hmax / gInf;
+    MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
+
+    // Mesh only the surface part
+    Alert::Info() << "    | Meshing the domain." << Alert::Raise;
+    Omega = MMG::ImplicitDomainMesher().noSplit(Gamma).surface().discretize(dist);
+  }
 
   return 0;
 }
