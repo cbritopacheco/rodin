@@ -23,7 +23,7 @@ namespace Rodin::Alert
                 << rang::fg::reset
                 << Alert::what()
                 << std::endl;
-      std::abort();
+      std::terminate();
    }
 }
 

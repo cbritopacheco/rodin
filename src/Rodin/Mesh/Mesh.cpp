@@ -293,6 +293,16 @@ namespace Rodin
       return *this;
    }
 
+   SubMesh<Traits::Serial> Mesh<Traits::Serial>::extract(const std::set<int>& elements)
+   {
+      SubMesh<Traits::Serial> res(*this);
+      res.initialize(getDimension(), getSpaceDimension(), elements.size());
+      for (int el : elements)
+         res.add(getElement(el));
+      res.finalize();
+      return res;
+   }
+
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(int attr, int bdrLabel)
    {
       return trim(std::set<int>{attr}, bdrLabel);
@@ -300,199 +310,200 @@ namespace Rodin
 
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(const std::set<int>& attrs, int bdrLabel)
    {
-      assert(attrs.size() > 0);
+      return SubMesh<Traits::Serial>(*this);
+      // assert(attrs.size() > 0);
 
-      // Count the number of elements in the trimmed mesh
-      int ne = 0;
-      for (int i = 0; i < getElementCount(); i++)
-      {
-         int elemAttr = getHandle().GetElement(i)->GetAttribute();
-         ne += !attrs.count(elemAttr); // Count is always 0 or 1
-      }
+      // // Count the number of elements in the trimmed mesh
+      // int ne = 0;
+      // for (int i = 0; i < getElementCount(); i++)
+      // {
+      //    int elemAttr = getHandle().GetElement(i)->GetAttribute();
+      //    ne += !attrs.count(elemAttr); // Count is always 0 or 1
+      // }
 
-      // Count the number of boundary elements in the trimmed mesh
-      int nbe = 0;
-      for (int i = 0; i < getHandle().GetNumFaces(); i++)
-      {
-         int e1 = -1, e2 = -1;
-         getHandle().GetFaceElements(i, &e1, &e2);
+      // // Count the number of boundary elements in the trimmed mesh
+      // int nbe = 0;
+      // for (int i = 0; i < getHandle().GetNumFaces(); i++)
+      // {
+      //    int e1 = -1, e2 = -1;
+      //    getHandle().GetFaceElements(i, &e1, &e2);
 
-         int a1 = 0, a2 = 0;
-         if (e1 >= 0)
-            a1 = getHandle().GetElement(e1)->GetAttribute();
-         if (e2 >= 0)
-            a2 = getHandle().GetElement(e2)->GetAttribute();
+      //    int a1 = 0, a2 = 0;
+      //    if (e1 >= 0)
+      //       a1 = getHandle().GetElement(e1)->GetAttribute();
+      //    if (e2 >= 0)
+      //       a2 = getHandle().GetElement(e2)->GetAttribute();
 
-         if (a1 == 0 || a2 == 0)
-         {
-            nbe += (a1 == 0) && !attrs.count(a2);
-            nbe += (a2 == 0 && !attrs.count(a1));
-         }
-         else
-         {
-            nbe += attrs.count(a1) && !attrs.count(a2);
-            nbe += !attrs.count(a1) && attrs.count(a2);
-         }
-      }
+      //    if (a1 == 0 || a2 == 0)
+      //    {
+      //       nbe += (a1 == 0) && !attrs.count(a2);
+      //       nbe += (a2 == 0 && !attrs.count(a1));
+      //    }
+      //    else
+      //    {
+      //       nbe += attrs.count(a1) && !attrs.count(a2);
+      //       nbe += !attrs.count(a1) && attrs.count(a2);
+      //    }
+      // }
 
-      mfem::Mesh trimmed(getHandle().Dimension(), getHandle().GetNV(),
-            ne, nbe, getHandle().SpaceDimension());
+      // mfem::Mesh trimmed(getHandle().Dimension(), getHandle().GetNV(),
+      //       ne, nbe, getHandle().SpaceDimension());
 
-      // Copy vertices
-      for (int i = 0; i < getHandle().GetNV(); i++)
-         trimmed.AddVertex(getHandle().GetVertex(i));
+      // // Copy vertices
+      // for (int i = 0; i < getHandle().GetNV(); i++)
+      //    trimmed.AddVertex(getHandle().GetVertex(i));
 
-      // Copy elements
-      for (int i = 0; i < getElementCount(); i++)
-      {
-         mfem::Element* el = getHandle().GetElement(i);
-         int elemAttr = el->GetAttribute();
-         if (!attrs.count(elemAttr))
-         {
-            mfem::Element* nel = getHandle().NewElement(el->GetGeometryType());
-            nel->SetAttribute(elemAttr);
-            nel->SetVertices(el->GetVertices());
-            trimmed.AddElement(nel);
-         }
-      }
+      // // Copy elements
+      // for (int i = 0; i < getElementCount(); i++)
+      // {
+      //    mfem::Element* el = getHandle().GetElement(i);
+      //    int elemAttr = el->GetAttribute();
+      //    if (!attrs.count(elemAttr))
+      //    {
+      //       mfem::Element* nel = getHandle().NewElement(el->GetGeometryType());
+      //       nel->SetAttribute(elemAttr);
+      //       nel->SetVertices(el->GetVertices());
+      //       trimmed.AddElement(nel);
+      //    }
+      // }
 
-      // Copy selected boundary elements
-      for (int i = 0; i < getBoundaryElementCount(); i++)
-      {
-         int e, info;
-         getHandle().GetBdrElementAdjacentElement(i, e, info);
+      // // Copy selected boundary elements
+      // for (int i = 0; i < getBoundaryElementCount(); i++)
+      // {
+      //    int e, info;
+      //    getHandle().GetBdrElementAdjacentElement(i, e, info);
 
-         int elemAttr = getHandle().GetElement(e)->GetAttribute();
-         if (!attrs.count(elemAttr))
-         {
-            mfem::Element* nbel = getHandle().GetBdrElement(i)->Duplicate(&trimmed);
-            trimmed.AddBdrElement(nbel);
-         }
-      }
+      //    int elemAttr = getHandle().GetElement(e)->GetAttribute();
+      //    if (!attrs.count(elemAttr))
+      //    {
+      //       mfem::Element* nbel = getHandle().GetBdrElement(i)->Duplicate(&trimmed);
+      //       trimmed.AddBdrElement(nbel);
+      //    }
+      // }
 
-      // Create new boundary elements
-      for (int i = 0; i < getHandle().GetNumFaces(); i++)
-      {
-         int e1 = -1, e2 = -1;
-         getHandle().GetFaceElements(i, &e1, &e2);
+      // // Create new boundary elements
+      // for (int i = 0; i < getHandle().GetNumFaces(); i++)
+      // {
+      //    int e1 = -1, e2 = -1;
+      //    getHandle().GetFaceElements(i, &e1, &e2);
 
-         int i1 = -1, i2 = -1;
-         getHandle().GetFaceInfos(i, &i1, &i2);
+      //    int i1 = -1, i2 = -1;
+      //    getHandle().GetFaceInfos(i, &i1, &i2);
 
-         int a1 = 0, a2 = 0;
-         if (e1 >= 0)
-            a1 = getHandle().GetElement(e1)->GetAttribute();
-         if (e2 >= 0)
-            a2 = getHandle().GetElement(e2)->GetAttribute();
+      //    int a1 = 0, a2 = 0;
+      //    if (e1 >= 0)
+      //       a1 = getHandle().GetElement(e1)->GetAttribute();
+      //    if (e2 >= 0)
+      //       a2 = getHandle().GetElement(e2)->GetAttribute();
 
-         if (a1 != 0 && a2 != 0)
-         {
-            if (attrs.count(a1) && !attrs.count(a2))
-            {
-               mfem::Element* bel;
-               if (getHandle().Dimension() == 1)
-                  bel = new mfem::Point(&i);
-               else
-                  bel = getHandle().GetFace(i)->Duplicate(&trimmed);
-               bel->SetAttribute(bdrLabel);
-               trimmed.AddBdrElement(bel);
-            }
-            else if (!attrs.count(a1) && attrs.count(a2))
-            {
-               mfem::Element* bel;
-               if (getHandle().Dimension() == 1)
-                  bel = new mfem::Point(&i);
-               else
-                  bel = getHandle().GetFace(i)->Duplicate(&trimmed);
-               bel->SetAttribute(bdrLabel);
-               trimmed.AddBdrElement(bel);
-            }
-         }
-      }
+      //    if (a1 != 0 && a2 != 0)
+      //    {
+      //       if (attrs.count(a1) && !attrs.count(a2))
+      //       {
+      //          mfem::Element* bel;
+      //          if (getHandle().Dimension() == 1)
+      //             bel = new mfem::Point(&i);
+      //          else
+      //             bel = getHandle().GetFace(i)->Duplicate(&trimmed);
+      //          bel->SetAttribute(bdrLabel);
+      //          trimmed.AddBdrElement(bel);
+      //       }
+      //       else if (!attrs.count(a1) && attrs.count(a2))
+      //       {
+      //          mfem::Element* bel;
+      //          if (getHandle().Dimension() == 1)
+      //             bel = new mfem::Point(&i);
+      //          else
+      //             bel = getHandle().GetFace(i)->Duplicate(&trimmed);
+      //          bel->SetAttribute(bdrLabel);
+      //          trimmed.AddBdrElement(bel);
+      //       }
+      //    }
+      // }
 
-      trimmed.FinalizeTopology();
-      trimmed.Finalize();
+      // trimmed.FinalizeTopology();
+      // trimmed.Finalize();
 
-      /* Get map of vertices from submesh to mesh
-       *
-       * The following code is taken from RemoveUnusedVertices() method and
-       * slightly modified to be clearer. It computes the submesh to mesh map
-       * of the vertex numberings.
-       */
-      mfem::Array<int> vertexUsage(trimmed.GetNV());
-      vertexUsage = 0;
-      for (int i = 0; i < trimmed.GetNE(); i++)
-      {
-         mfem::Element* el = trimmed.GetElement(i);
-         const int* v = el->GetVertices();
-         for (int j = 0; j < el->GetNVertices(); j++)
-         {
-            assert(v[j] < trimmed.GetNV());
-            vertexUsage[v[j]] = 1;
-         }
-      }
-      for (int i = 0; i < trimmed.GetNBE(); i++)
-      {
-         mfem::Element* el = trimmed.GetBdrElement(i);
-         const int* v = el->GetVertices();
-         for (int j = 0; j < el->GetNVertices(); j++)
-         {
-            assert(v[j] < trimmed.GetNV());
-            vertexUsage[v[j]] = 1;
-         }
-      }
-      int vertexIdx = 0;
-      boost::bimap<int, int> s2pv; // Submesh to mesh node map
-      for (int i = 0; i < vertexUsage.Size(); i++)
-      {
-         if (vertexUsage[i])
-            s2pv.insert({vertexIdx++, i});
-      }
+      // /* Get map of vertices from submesh to mesh
+      //  *
+      //  * The following code is taken from RemoveUnusedVertices() method and
+      //  * slightly modified to be clearer. It computes the submesh to mesh map
+      //  * of the vertex numberings.
+      //  */
+      // mfem::Array<int> vertexUsage(trimmed.GetNV());
+      // vertexUsage = 0;
+      // for (int i = 0; i < trimmed.GetNE(); i++)
+      // {
+      //    mfem::Element* el = trimmed.GetElement(i);
+      //    const int* v = el->GetVertices();
+      //    for (int j = 0; j < el->GetNVertices(); j++)
+      //    {
+      //       assert(v[j] < trimmed.GetNV());
+      //       vertexUsage[v[j]] = 1;
+      //    }
+      // }
+      // for (int i = 0; i < trimmed.GetNBE(); i++)
+      // {
+      //    mfem::Element* el = trimmed.GetBdrElement(i);
+      //    const int* v = el->GetVertices();
+      //    for (int j = 0; j < el->GetNVertices(); j++)
+      //    {
+      //       assert(v[j] < trimmed.GetNV());
+      //       vertexUsage[v[j]] = 1;
+      //    }
+      // }
+      // int vertexIdx = 0;
+      // boost::bimap<int, int> s2pv; // Submesh to mesh node map
+      // for (int i = 0; i < vertexUsage.Size(); i++)
+      // {
+      //    if (vertexUsage[i])
+      //       s2pv.insert({vertexIdx++, i});
+      // }
 
-      trimmed.RemoveUnusedVertices();
+      // trimmed.RemoveUnusedVertices();
 
-      // Check for curved or discontinuous mesh
-      if (getHandle().GetNodes())
-      {
-         // Extract Nodes GridFunction and determine its type
-         const mfem::GridFunction* Nodes = getHandle().GetNodes();
-         const mfem::FiniteElementSpace* fes = Nodes->FESpace();
+      // // Check for curved or discontinuous mesh
+      // if (getHandle().GetNodes())
+      // {
+      //    // Extract Nodes GridFunction and determine its type
+      //    const mfem::GridFunction* Nodes = getHandle().GetNodes();
+      //    const mfem::FiniteElementSpace* fes = Nodes->FESpace();
 
-         mfem::Ordering::Type ordering = fes->GetOrdering();
-         int order = fes->FEColl()->GetOrder();
-         int sdim = getHandle().SpaceDimension();
-         bool discont =
-            dynamic_cast<const mfem::L2_FECollection*>(fes->FEColl()) != NULL;
+      //    mfem::Ordering::Type ordering = fes->GetOrdering();
+      //    int order = fes->FEColl()->GetOrder();
+      //    int sdim = getHandle().SpaceDimension();
+      //    bool discont =
+      //       dynamic_cast<const mfem::L2_FECollection*>(fes->FEColl()) != NULL;
 
-         // Set curvature of the same type as original mesh
-         trimmed.SetCurvature(order, discont, sdim, ordering);
+      //    // Set curvature of the same type as original mesh
+      //    trimmed.SetCurvature(order, discont, sdim, ordering);
 
-         const mfem::FiniteElementSpace* trimmedFES = trimmed.GetNodalFESpace();
-         mfem::GridFunction* trimmedNodes = trimmed.GetNodes();
+      //    const mfem::FiniteElementSpace* trimmedFES = trimmed.GetNodalFESpace();
+      //    mfem::GridFunction* trimmedNodes = trimmed.GetNodes();
 
-         mfem::Array<int> vdofs;
-         mfem::Array<int> trimmedVdofs;
-         mfem::Vector locVec;
+      //    mfem::Array<int> vdofs;
+      //    mfem::Array<int> trimmedVdofs;
+      //    mfem::Vector locVec;
 
-         // Copy nodes to trimmed mesh
-         int te = 0;
-         for (int e = 0; e < getElementCount(); e++)
-         {
-            mfem::Element* el = getHandle().GetElement(e);
-            int elemAttr = el->GetAttribute();
-            if (!attrs.count(elemAttr))
-            {
-               fes->GetElementVDofs(e, vdofs);
-               Nodes->GetSubVector(vdofs, locVec);
+      //    // Copy nodes to trimmed mesh
+      //    int te = 0;
+      //    for (int e = 0; e < getElementCount(); e++)
+      //    {
+      //       mfem::Element* el = getHandle().GetElement(e);
+      //       int elemAttr = el->GetAttribute();
+      //       if (!attrs.count(elemAttr))
+      //       {
+      //          fes->GetElementVDofs(e, vdofs);
+      //          Nodes->GetSubVector(vdofs, locVec);
 
-               trimmedFES->GetElementVDofs(te, trimmedVdofs);
-               trimmedNodes->SetSubVector(trimmedVdofs, locVec);
-               te++;
-            }
-         }
-      }
-      return SubMesh<Traits::Serial>(
-            std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
+      //          trimmedFES->GetElementVDofs(te, trimmedVdofs);
+      //          trimmedNodes->SetSubVector(trimmedVdofs, locVec);
+      //          te++;
+      //       }
+      //    }
+      // }
+      // return SubMesh<Traits::Serial>(
+      //       std::move(trimmed)).setParent(*this).setVertexMap(std::move(s2pv));
    }
 
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin(const std::map<int, int>& bdrAttr)
@@ -531,96 +542,97 @@ namespace Rodin
 
    SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin()
    {
-      assert(getDimension() >= 2);
+      return SubMesh<Traits::Serial>(*this);
+      // assert(getDimension() >= 2);
 
-      // Determine mapping from vertex to boundary vertex
-      std::set<int> bdrVertices;
-      for (int i = 0; i < getBoundaryElementCount(); i++)
-      {
-         mfem::Element* el = getHandle().GetBdrElement(i);
-         int *v = el->GetVertices();
-         int nv = el->GetNVertices();
-         for (int j = 0; j < nv; j++)
-            bdrVertices.insert(v[j]);
-      }
+      // // Determine mapping from vertex to boundary vertex
+      // std::set<int> bdrVertices;
+      // for (int i = 0; i < getBoundaryElementCount(); i++)
+      // {
+      //    mfem::Element* el = getHandle().GetBdrElement(i);
+      //    int *v = el->GetVertices();
+      //    int nv = el->GetNVertices();
+      //    for (int j = 0; j < nv; j++)
+      //       bdrVertices.insert(v[j]);
+      // }
 
-      mfem::Mesh res(getDimension() - 1, bdrVertices.size(),
-            getBoundaryElementCount(), 0, getSpaceDimension());
+      // mfem::Mesh res(getDimension() - 1, bdrVertices.size(),
+      //       getBoundaryElementCount(), 0, getSpaceDimension());
 
-      // Copy vertices to the boundary mesh
-      int vertexIdx = 0;
-      boost::bimap<int, int> s2pv; // Submesh to mesh node map
-      for (const auto& v : bdrVertices)
-      {
-         s2pv.insert({vertexIdx, v});
-         vertexIdx++;
-         double *c = getHandle().GetVertex(v);
-         res.AddVertex(c);
-      }
+      // // Copy vertices to the boundary mesh
+      // int vertexIdx = 0;
+      // boost::bimap<int, int> s2pv; // Submesh to mesh node map
+      // for (const auto& v : bdrVertices)
+      // {
+      //    s2pv.insert({vertexIdx, v});
+      //    vertexIdx++;
+      //    double *c = getHandle().GetVertex(v);
+      //    res.AddVertex(c);
+      // }
 
-      // Copy elements to the boundary mesh
-      for (int i = 0; i < getBoundaryElementCount(); i++)
-      {
-         mfem::Element *el = getHandle().GetBdrElement(i);
-         int *v = el->GetVertices();
-         int nv = el->GetNVertices();
+      // // Copy elements to the boundary mesh
+      // for (int i = 0; i < getBoundaryElementCount(); i++)
+      // {
+      //    mfem::Element *el = getHandle().GetBdrElement(i);
+      //    int *v = el->GetVertices();
+      //    int nv = el->GetNVertices();
 
-         std::vector<int> bv(nv);
-         for (int j = 0; j < nv; j++)
-            bv[j] = s2pv.right.at(v[j]);
+      //    std::vector<int> bv(nv);
+      //    for (int j = 0; j < nv; j++)
+      //       bv[j] = s2pv.right.at(v[j]);
 
-         switch (el->GetGeometryType())
-         {
-            case mfem::Geometry::SEGMENT:
-               res.AddSegment(bv.data(), el->GetAttribute());
-               break;
-            case mfem::Geometry::TRIANGLE:
-               res.AddTriangle(bv.data(), el->GetAttribute());
-               break;
-            case mfem::Geometry::SQUARE:
-               res.AddQuad(bv.data(), el->GetAttribute());
-               break;
-            default:
-               break; // This should not happen
-         }
-      }
-      res.FinalizeTopology();
+      //    switch (el->GetGeometryType())
+      //    {
+      //       case mfem::Geometry::SEGMENT:
+      //          res.AddSegment(bv.data(), el->GetAttribute());
+      //          break;
+      //       case mfem::Geometry::TRIANGLE:
+      //          res.AddTriangle(bv.data(), el->GetAttribute());
+      //          break;
+      //       case mfem::Geometry::SQUARE:
+      //          res.AddQuad(bv.data(), el->GetAttribute());
+      //          break;
+      //       default:
+      //          break; // This should not happen
+      //    }
+      // }
+      // res.FinalizeTopology();
 
-      // Copy GridFunction describing nodes if present
-      if (getHandle().GetNodes())
-      {
-         mfem::FiniteElementSpace* fes = getHandle().GetNodes()->FESpace();
-         const mfem::FiniteElementCollection* fec = fes->FEColl();
-         if (dynamic_cast<const mfem::H1_FECollection*>(fec))
-         {
-            mfem::FiniteElementCollection *fec_copy =
-               mfem::FiniteElementCollection::New(fec->Name());
-            mfem::FiniteElementSpace* fes_copy =
-               new mfem::FiniteElementSpace(*fes, &res, fec_copy);
-            mfem::GridFunction *bdr_nodes = new mfem::GridFunction(fes_copy);
-            bdr_nodes->MakeOwner(fec_copy);
+      // // Copy GridFunction describing nodes if present
+      // if (getHandle().GetNodes())
+      // {
+      //    mfem::FiniteElementSpace* fes = getHandle().GetNodes()->FESpace();
+      //    const mfem::FiniteElementCollection* fec = fes->FEColl();
+      //    if (dynamic_cast<const mfem::H1_FECollection*>(fec))
+      //    {
+      //       mfem::FiniteElementCollection *fec_copy =
+      //          mfem::FiniteElementCollection::New(fec->Name());
+      //       mfem::FiniteElementSpace* fes_copy =
+      //          new mfem::FiniteElementSpace(*fes, &res, fec_copy);
+      //       mfem::GridFunction *bdr_nodes = new mfem::GridFunction(fes_copy);
+      //       bdr_nodes->MakeOwner(fec_copy);
 
-            res.NewNodes(*bdr_nodes, true);
+      //       res.NewNodes(*bdr_nodes, true);
 
-            mfem::Array<int> vdofs;
-            mfem::Array<int> bvdofs;
-            mfem::Vector v;
-            for (int i = 0; i < getBoundaryElementCount(); i++)
-            {
-               fes->GetBdrElementVDofs(i, vdofs);
-               getHandle().GetNodes()->GetSubVector(vdofs, v);
+      //       mfem::Array<int> vdofs;
+      //       mfem::Array<int> bvdofs;
+      //       mfem::Vector v;
+      //       for (int i = 0; i < getBoundaryElementCount(); i++)
+      //       {
+      //          fes->GetBdrElementVDofs(i, vdofs);
+      //          getHandle().GetNodes()->GetSubVector(vdofs, v);
 
-               fes_copy->GetElementVDofs(i, bvdofs);
-               bdr_nodes->SetSubVector(bvdofs, v);
-            }
-         }
-         else
-         {
-            Alert::Exception("Discontinuous node space not yet supported.").raise();
-         }
-      }
-      return SubMesh<Traits::Serial>(
-            std::move(res)).setVertexMap(std::move(s2pv)).setParent(*this);
+      //          fes_copy->GetElementVDofs(i, bvdofs);
+      //          bdr_nodes->SetSubVector(bvdofs, v);
+      //       }
+      //    }
+      //    else
+      //    {
+      //       Alert::Exception("Discontinuous node space not yet supported.").raise();
+      //    }
+      // }
+      // return SubMesh<Traits::Serial>(
+      //       std::move(res)).setVertexMap(std::move(s2pv)).setParent(*this);
    }
 
    mfem::Mesh& Mesh<Traits::Serial>::getHandle()
