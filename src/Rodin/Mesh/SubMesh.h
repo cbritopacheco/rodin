@@ -33,7 +33,7 @@ namespace Rodin
    class SubMesh<Traits::Serial> : public Mesh<Traits::Serial>
    {
       public:
-         using Mesh<Traits::Serial>::Mesh;
+         SubMesh(const MeshBase& parent);
 
          SubMesh(const SubMesh& other);
 
@@ -46,11 +46,6 @@ namespace Rodin
           * Mesh.
           */
          SubMesh& setVertexMap(boost::bimap<int, int> s2pv);
-
-         /**
-          * @brief Sets the reference to the parent Mesh object
-          */
-         SubMesh& setParent(const MeshBase& parent);
 
          /**
           * @returns Reference to the parent Mesh object
@@ -67,14 +62,29 @@ namespace Rodin
             return true;
          }
 
-         Mesh<Traits::Serial>& mesh()
+         SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
          {
+            getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
             return *this;
          }
 
+         void finalize()
+         {
+            getHandle().Finalize();
+         }
+
+         /**
+          * @brief Adds an element into the mesh
+          *
+          * @param[in] el Element from the parent mesh
+          */
+         SubMesh& add(const ElementBase& el);
+
       private:
-         std::optional<std::reference_wrapper<const MeshBase>> m_parent;
-         std::optional<boost::bimap<int, int>> m_s2pv;
+         const MeshBase& m_parent;
+         boost::bimap<int, int> m_s2pv;
+         boost::bimap<int, int> m_s2pf;
+         boost::bimap<int, int> m_s2pe;
    };
 }
 

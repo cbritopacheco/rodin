@@ -105,7 +105,7 @@ namespace Rodin::Alert
           * The actual behaviour for raising the Alert is specified in its
           * subclasses by overriding this function.
           */
-         virtual void raise() const noexcept = 0;
+         virtual void raise() const = 0;
 
       private:
          std::stringstream m_what;

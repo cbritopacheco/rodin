@@ -319,6 +319,8 @@ namespace Rodin
 
          SubMesh<Traits::Serial> skin(const std::map<int, int>& bdrAttr);
 
+         SubMesh<Traits::Serial> extract(const std::set<int>& elements);
+
          virtual bool isSubMesh() const override
          {
             return false;
