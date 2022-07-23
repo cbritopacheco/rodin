@@ -14,14 +14,14 @@
 namespace Rodin::IO
 {
    template <class FEC>
-   void GridFunctionPrinter<GridFunctionFormat::MFEM, FEC, Traits::Serial>
+   void GridFunctionPrinter<FileFormat::MFEM, FEC, Traits::Serial>
    ::print(std::ostream& os)
    {
       this->getObject().getHandle().Save(os);
    }
 
    template <class FEC>
-   void GridFunctionPrinter<GridFunctionFormat::MEDIT, FEC, Traits::Serial>
+   void GridFunctionPrinter<FileFormat::MEDIT, FEC, Traits::Serial>
    ::print(std::ostream& os)
    {
       int vertexCount = this->getObject().getFiniteElementSpace().getMesh().getHandle().GetNV();

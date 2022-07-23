@@ -37,7 +37,7 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshPrinter<MeshFormat::MFEM, Traits::Serial>
+   class MeshPrinter<FileFormat::MFEM, Traits::Serial>
       : public MeshPrinterBase<Traits::Serial>
    {
       public:
@@ -52,7 +52,7 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshPrinter<MeshFormat::GMSH, Traits::Serial>
+   class MeshPrinter<FileFormat::GMSH, Traits::Serial>
       : public MeshPrinterBase<Traits::Serial>
    {
       public:
@@ -64,7 +64,7 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshPrinter<MeshFormat::MEDIT, Traits::Serial>
+   class MeshPrinter<FileFormat::MEDIT, Traits::Serial>
       : public MeshPrinterBase<Traits::Serial>
    {
       public:

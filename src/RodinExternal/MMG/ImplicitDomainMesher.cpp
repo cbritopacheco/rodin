@@ -52,10 +52,11 @@ namespace Rodin::External::MMG
   {
     if (m_rmc)
       MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_rmc, *m_rmc);
-    if (m_split.size() > 0)
+    if (getSplitMap().size() > 0)
     {
-      MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_numberOfMat, m_split.size());
-      for (const auto& v : m_split)
+      assert(getSplitMap().size() == m_uniqueSplit.size());
+      MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_numberOfMat, m_uniqueSplit.size());
+      for (const auto& v : m_uniqueSplit)
       {
         const auto& ref = v.first;
         const auto& split = v.second;
@@ -71,7 +72,8 @@ namespace Rodin::External::MMG
           },
           [&](const Split& s)
           {
-            if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_Split, s.interior, s.exterior))
+            if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_Split,
+                  s.interior, s.exterior))
             {
               Alert::Exception() << "Could not set the multi-material reference lookup."
                                  << Alert::Raise;
@@ -104,10 +106,11 @@ namespace Rodin::External::MMG
       MMG3D_Set_dparameter(mesh, sol, MMG3D_DPARAM_rmc, *m_rmc);
     if (m_isoref)
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isoref, *m_isoref);
-    if (m_split.size() > 0)
+    if (getSplitMap().size() > 0)
     {
-      MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_numberOfMat, m_split.size());
-      for (const auto& v : m_split)
+      mesh->memMax *= 2.0; // Double allowed memory because of bug
+      MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_numberOfMat, m_uniqueSplit.size());
+      for (const auto& v : m_uniqueSplit)
       {
         const auto& ref = v.first;
         const auto& split = v.second;
@@ -123,7 +126,8 @@ namespace Rodin::External::MMG
           },
           [&](const Split& s)
           {
-            if (!MMG3D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_Split, s.interior, s.exterior))
+            if (!MMG3D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_Split,
+                  s.interior, s.exterior))
             {
               Alert::Exception() << "Could not set the multi-material reference lookup."
                                  << Alert::Raise;
@@ -148,7 +152,7 @@ namespace Rodin::External::MMG
       Alert::Warning("Warning RMC option is not supported for surfaces").raise();
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
-    if (m_split.size() > 0)
+    if (getSplitMap().size() > 0)
       Alert::Warning("Warning material splitting is not supported for surfaces").raise();
 
 
@@ -164,5 +168,57 @@ namespace Rodin::External::MMG
     }
     MMGS_Set_dparameter(mesh, sol, MMGS_DPARAM_ls, m_ls);
     return MMGS_mmgsls(mesh, sol, nullptr);
+  }
+
+  void ImplicitDomainMesher::generateUniqueSplit(const std::set<int>& attr)
+  {
+    m_uniqueSplit.clear();
+
+    // Keep track of all references
+    std::set<MaterialReference> existingRefs;
+    existingRefs.insert(attr.begin(), attr.end());
+
+    for (const auto& [ref, split] : getSplitMap())
+    {
+        std::visit(
+            Utility::Overloaded{
+            [&](const Split& s)
+            {
+              existingRefs.insert(s.interior);
+              existingRefs.insert(s.exterior);
+            },
+            [&](const NoSplitT&) {}}, split);
+    }
+
+    // Generate unique splits
+    for (const auto it : getSplitMap())
+    {
+      const auto& ref = it.first;
+      const auto& split = it.second;
+      std::visit(
+          Utility::Overloaded{
+          [&](const Split& s)
+          {
+            MaterialReference intRef;
+            do
+            {
+              intRef = m_idGen(m_rng);
+            } while (existingRefs.count(intRef));
+            existingRefs.insert(intRef);
+
+            MaterialReference extRef;
+            do
+            {
+              extRef = m_idGen(m_rng);
+            } while (existingRefs.count(extRef));
+            existingRefs.insert(extRef);
+
+            m_uniqueSplit.insert({ref, Split{intRef, extRef}});
+          },
+          [&](const NoSplitT&)
+          {
+            m_uniqueSplit.insert({ref, NoSplit});
+          }}, split);
+    }
   }
 }

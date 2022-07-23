@@ -149,7 +149,7 @@ namespace Rodin::External::MMG
         }
 
         auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        box.save(boxp, IO::MeshFormat::MEDIT);
+        box.save(boxp, IO::FileFormat::MEDIT);
 
         if (m_interiorDomains)
         {
@@ -191,7 +191,7 @@ namespace Rodin::External::MMG
         if (retcode != 0)
           Alert::Exception("ISCD::Mshdist invocation failed.").raise();
         else
-          res.load(boxp.replace_extension(".sol"), IO::GridFunctionFormat::MEDIT);
+          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
         return res;
       }
 
@@ -218,7 +218,7 @@ namespace Rodin::External::MMG
         box.save(boxp);
 
         auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        contour.save(contourp, IO::MeshFormat::MEDIT);
+        contour.save(contourp, IO::FileFormat::MEDIT);
 
         int retcode = 1;
         if (box.isSurface())
@@ -245,7 +245,7 @@ namespace Rodin::External::MMG
         if (retcode != 0)
           Alert::Exception("ISCD::Mshdist invocation failed.").raise();
         else
-          res.load(boxp.replace_extension(".sol"), IO::GridFunctionFormat::MEDIT);
+          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
         return res;
       }
 
@@ -294,11 +294,11 @@ namespace Rodin::External::MMG
       void redistance(Variational::GridFunction<FEC, Traits::Serial>& sol)
       {
         auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        sol.getMesh().save(meshp, IO::MeshFormat::MEDIT);
+        sol.getMesh().save(meshp, IO::FileFormat::MEDIT);
 
         boost::filesystem::path solp(meshp);
         solp.replace_extension(".sol");
-        sol.save(solp, IO::GridFunctionFormat::MEDIT);
+        sol.save(solp, IO::FileFormat::MEDIT);
 
         auto name = solp;
         name.replace_extension();
@@ -321,7 +321,7 @@ namespace Rodin::External::MMG
 
         if (retcode != 0)
           Alert::Exception("ISCD::Mshdist invocation failed.").raise();
-        sol.load(solp, IO::GridFunctionFormat::MEDIT);
+        sol.load(solp, IO::FileFormat::MEDIT);
       }
 
       Distancer& surface(bool distTheBoundary = true)

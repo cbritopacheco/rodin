@@ -81,7 +81,7 @@ namespace Rodin
    }
 
    void Mesh<Traits::Serial>::save(
-         const boost::filesystem::path& filename, IO::MeshFormat fmt, int precision) const
+         const boost::filesystem::path& filename, IO::FileFormat fmt, int precision) const
    {
       std::ofstream ofs(filename.c_str());
       if (!ofs)
@@ -93,23 +93,29 @@ namespace Rodin
       ofs.precision(precision);
       switch (fmt)
       {
-         case IO::MeshFormat::MFEM:
+         case IO::FileFormat::MFEM:
          {
-            IO::MeshPrinter<IO::MeshFormat::MFEM, Traits::Serial> printer(*this);
+            IO::MeshPrinter<IO::FileFormat::MFEM, Traits::Serial> printer(*this);
             printer.print(ofs);
             break;
          }
-         case IO::MeshFormat::GMSH:
+         case IO::FileFormat::GMSH:
          {
-            IO::MeshPrinter<IO::MeshFormat::GMSH, Traits::Serial> printer(*this);
+            IO::MeshPrinter<IO::FileFormat::GMSH, Traits::Serial> printer(*this);
             printer.print(ofs);
             break;
          }
-         case IO::MeshFormat::MEDIT:
+         case IO::FileFormat::MEDIT:
          {
-            IO::MeshPrinter<IO::MeshFormat::MEDIT, Traits::Serial> printer(*this);
+            IO::MeshPrinter<IO::FileFormat::MEDIT, Traits::Serial> printer(*this);
             printer.print(ofs);
             break;
+         }
+         default:
+         {
+            Alert::Exception()
+               << "Saving to \"" << fmt << "\" format unssuported."
+               << Alert::Raise;
          }
       }
    }
@@ -192,6 +198,13 @@ namespace Rodin
       return *this;
    }
 
+   MeshBase& MeshBase::edit(std::function<void(BoundaryElementView)> f)
+   {
+      for (int i = 0; i < getBoundaryElementCount(); i++)
+         f(getBoundaryElement(i));
+      return *this;
+   }
+
    MeshBase& MeshBase::edit(std::function<void(ElementView)> f, const std::set<int>& elements)
    {
       for (auto el : elements)
@@ -259,7 +272,7 @@ namespace Rodin
    {}
 
    Mesh<Traits::Serial>&
-   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, IO::MeshFormat fmt)
+   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
    {
       mfem::named_ifgzstream input(filename.c_str());
       if (!input)
@@ -270,23 +283,29 @@ namespace Rodin
       }
       switch (fmt)
       {
-         case IO::MeshFormat::MFEM:
+         case IO::FileFormat::MFEM:
          {
-            IO::MeshLoader<IO::MeshFormat::MFEM, Traits::Serial> loader(*this);
+            IO::MeshLoader<IO::FileFormat::MFEM, Traits::Serial> loader(*this);
             loader.load(input);
             break;
          }
-         case IO::MeshFormat::GMSH:
+         case IO::FileFormat::GMSH:
          {
-            IO::MeshLoader<IO::MeshFormat::GMSH, Traits::Serial> loader(*this);
+            IO::MeshLoader<IO::FileFormat::GMSH, Traits::Serial> loader(*this);
             loader.load(input);
             break;
          }
-         case IO::MeshFormat::MEDIT:
+         case IO::FileFormat::MEDIT:
          {
-            IO::MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial> loader(*this);
+            IO::MeshLoader<IO::FileFormat::MEDIT, Traits::Serial> loader(*this);
             loader.load(input);
             break;
+         }
+         default:
+         {
+            Alert::Exception()
+               << "Loading from \"" << fmt << "\" format unssuported."
+               << Alert::Raise;
          }
       }
 
