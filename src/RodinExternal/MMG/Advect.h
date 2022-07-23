@@ -100,13 +100,13 @@ namespace Rodin::External::MMG
         auto& mesh = m_ls.getFiniteElementSpace().getMesh();
 
         auto meshp = m_advect.tmpnam(".mesh", "RodinMMG");
-        mesh.save(meshp, IO::MeshFormat::MEDIT);
+        mesh.save(meshp, IO::FileFormat::MEDIT);
 
         auto solp = m_advect.tmpnam(".sol", "RodinMMG");
-        m_ls.save(solp, IO::GridFunctionFormat::MEDIT);
+        m_ls.save(solp, IO::FileFormat::MEDIT);
 
         auto dispp = m_advect.tmpnam(".sol", "RodinMMG");
-        m_disp.save(dispp, IO::GridFunctionFormat::MEDIT);
+        m_disp.save(dispp, IO::FileFormat::MEDIT);
 
         auto outp = m_advect.tmpnam(".sol", "RodinMMG");
 
@@ -158,7 +158,7 @@ namespace Rodin::External::MMG
           Alert::Exception(
               "MMG::Advect: ISCD::Advection invocation failed.").raise();
 
-        m_ls.load(outp, IO::GridFunctionFormat::MEDIT);
+        m_ls.load(outp, IO::FileFormat::MEDIT);
 
         m_t += dt;
       }

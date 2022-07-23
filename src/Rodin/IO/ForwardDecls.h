@@ -19,29 +19,23 @@ namespace Rodin::IO
    template <class T>
    class Printer;
 
-   enum class MeshFormat
+   enum class FileFormat
    {
       MFEM,
       GMSH,
       MEDIT
    };
 
-   enum class GridFunctionFormat
-   {
-      MFEM,
-      MEDIT
-   };
-
-   template <MeshFormat fmt, class Trait>
+   template <FileFormat fmt, class Trait>
    class MeshLoader;
 
-   template <MeshFormat fmt, class Trait>
+   template <FileFormat fmt, class Trait>
    class MeshPrinter;
 
-   template <GridFunctionFormat fmt, class FEC, class Trait>
+   template <FileFormat fmt, class FEC, class Trait>
    class GridFunctionLoader;
 
-   template <GridFunctionFormat fmt, class FEC, class Trait>
+   template <FileFormat fmt, class FEC, class Trait>
    class GridFunctionPrinter;
 }
 
