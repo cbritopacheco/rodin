@@ -14,19 +14,19 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 // Parameters
-static constexpr int Gamma = 2;
+static constexpr int Gamma = 6;
 static constexpr int GammaD = 3;
-static constexpr int GammaN = 6;
+static constexpr int GammaN = 2;
 
 static constexpr int SigmaD = 1;
 static constexpr int SigmaN = 2;
 
 static constexpr size_t maxIt = 250;
 
-static constexpr double hmax = 0.05;
-static constexpr double ell = 0.1;
-static constexpr double alpha = 0.1;
-static constexpr double epsilon = 0.01;
+static constexpr double hmax = 0.1;
+static constexpr double alpha = 0.7;
+static constexpr double epsilon = 0.1;
+static constexpr double ell = 0.2;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
 /**
@@ -53,9 +53,10 @@ int main(int, char**)
 
   auto J = [&](GridFunction<H1>& u)
   {
-    return Integral(u).compute() - ell * Omega.getPerimeter(GammaN);
+    return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
 
+  std::ofstream fObj("obj.txt");
   for (size_t i = 0; i < maxIt; i++)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
@@ -79,7 +80,8 @@ int main(int, char**)
     GridFunction dist(Vh);
     distS.transfer(dist);
 
-    auto solver = Solver::CG();
+    Solver::CG solver;
+    solver.setMaxIterations(1000);
 
     auto h = [](double r)
     {
@@ -95,7 +97,7 @@ int main(int, char**)
     // State equation
     Alert::Info() << "    | Solving state equation." << Alert::Raise;
     ScalarFunction f = 1;
-    ScalarFunction g = 2.0;
+    ScalarFunction g = -2.0;
 
     TrialFunction u(Vh);
     TestFunction  v(Vh);
@@ -103,21 +105,27 @@ int main(int, char**)
     state = Integral(Grad(u), Grad(v))
           + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v)
-          - BoundaryIntegral(g, v).over(GammaN);
+          - BoundaryIntegral(g, v).over(GammaN)
+          ;
     solver.solve(state);
 
     // Adjoint equation
+    auto dj = -ScalarFunction(u.getGridFunction()) / Omega.getVolume();
     Alert::Info() << "    | Solving adjoint equation." << Alert::Raise;
     TrialFunction p(Vh);
     TestFunction  q(Vh);
     Problem adjoint(p, q);
     adjoint = Integral(Grad(p), Grad(q))
             + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
-            + Integral(ScalarFunction(u.getGridFunction()), q);
+            - Integral(dj, q);
     solver.solve(adjoint);
 
-    Alert::Info() << "    | Objective: " << J(u.getGridFunction())
+    double objective = J(u.getGridFunction());
+    Alert::Info() << "    | Objective: " << objective
                   << Alert::Raise;
+    fObj << objective << "\n";
+    fObj.flush();
+
 
     // Transfer the functions to the surfacic spaces
     GridFunction uS(VhS), pS(VhS);
@@ -132,15 +140,31 @@ int main(int, char**)
     GridFunction grad(Th);
     gradS.transfer(grad);
 
+    grad *= -1.0;
+
+    Omega.save("grad.mesh");
+    grad.save("grad.gf");
+
     // Advect the distance function with the gradient
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
-    double gInf = std::max(grad.max(), -grad.min());
-    double dt = 4 * hmax / gInf;
+    double gInf = std::max(gradS.max(), -gradS.min());
+    double dt = hmax / gInf;
     MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
 
     // Mesh only the surface part
     Alert::Info() << "    | Meshing the domain." << Alert::Raise;
-    Omega = MMG::ImplicitDomainMesher().noSplit(Gamma).surface().discretize(dist);
+    Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
+                                       .split(GammaD, {GammaD, Gamma})
+                                       .split(Gamma, {GammaD, Gamma})
+                                       .setHMax(hmax)
+                                       .surface()
+                                       .discretize(dist);
+
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+
+    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
+
+    Omega.skin().save("out/dOmega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
   }
 
   return 0;
@@ -165,26 +189,26 @@ GridFunction<H1> getShapeGradient(
   // Conormal calculation
   Problem conormalX(nx, v);
   conormalX = Integral(alpha * Grad(nx), Grad(v))
-          + Integral(nx, v)
-          - Integral(n0.x(), v).over(GammaD);
+            + Integral(nx, v)
+            - Integral(n0.x(), v).over(GammaD);
   solver.solve(conormalX);
 
   Problem conormalY(ny, v);
   conormalY = Integral(alpha * Grad(ny), Grad(v))
-          + Integral(ny, v)
-          - Integral(n0.y(), v).over(GammaD);
+            + Integral(ny, v)
+            - Integral(n0.y(), v).over(GammaD);
   solver.solve(conormalY);
 
   Problem conormalZ(nz, v);
   conormalZ = Integral(alpha * Grad(nz), Grad(v))
-          + Integral(nz, v)
-          - Integral(n0.z(), v).over(GammaD);
+            + Integral(nz, v)
+            - Integral(n0.z(), v).over(GammaD);
   solver.solve(conormalZ);
 
   auto d = VectorFunction{
     nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
   auto conormal = d / Pow(d.x() * d.x() + d.y() * d.y() + d.z() * d.z(), 0.5);
-  auto expr = -ScalarFunction(state) * ScalarFunction(adjoint) - ell;
+  auto expr = 1. / (epsilon * epsilon) * ScalarFunction(state) * ScalarFunction(adjoint) + ell;
 
   TrialFunction gx(scalarFes);
   TrialFunction gy(scalarFes);

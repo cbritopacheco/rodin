@@ -65,7 +65,8 @@ int main(int, char**)
 
 
   Mesh Omega;
-  Omega.load(meshFile, IO::MeshFormat::MEDIT);
+  Omega.load(meshFile, IO::FileFormat::MEDIT);
+
   // Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
 
   FiniteElementSpace<H1> Vh(Omega);
@@ -99,32 +100,21 @@ int main(int, char**)
           double dd = gd(x, c.data(), dim) - rr;
           d = std::min(d, dd);
         }
-        if (d <= rr)
-          return d;
-        else
-          return -d;
+        return d;
       });
 
-  for (const auto& c : cs)
-  {
-    for (int i = 0; i < Omega.getHandle().GetNBE(); i++)
-    {
-      mfem::Array<int> vs;
-      Omega.getHandle().GetBdrElement(i)->GetVertices(vs);
-      double d = std::numeric_limits<double>::max();
-      for (int v = 0; v < vs.Size(); v++)
-      {
-        double dd = gd(Omega.getHandle().GetVertex(vs[v]), c.data(), 3) - rr;
-        d = std::min(d, dd);
-        if (d <= rr)
-          Omega.getHandle().SetBdrAttribute(i, 6);
-        // else
-        // Omega.getHandle().SetBdrAttribute(i, 1);
-      }
-    }
-  }
+  GridFunction dist(Vh);
+  dist.projectOnBoundary(f);
+  Omega.save("dist.mesh");
+  dist.save("dist.gf");
 
-  Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
+  Omega = MMG::ImplicitDomainMesher().split(2, {2, 6})
+                             .noSplit(3)
+                             .setHMax(0.05)
+                             .surface()
+                             .discretize(dist);
+
+  Omega.save("leeel.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }

@@ -102,7 +102,9 @@ int main(int, char**)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     solver.solve(hilbert);
+
     g.getGridFunction().save("g.gf");
+    Omega.save("g.mesh");
 
     // Update objective
     obj.push_back(
@@ -126,7 +128,9 @@ int main(int, char**)
                                        .setHMax(hmax)
                                        .setBoundaryReference(Gamma)
                                        .discretize(dist);
-    // Save mesh
+
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+
     Omega.save("Omega.mesh");
 
     // Test for convergence
