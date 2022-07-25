@@ -11,11 +11,11 @@ using namespace Rodin;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("../resources/gmsh/inductor.msh", IO::MeshFormat::GMSH);
+  mesh.load("../resources/gmsh/inductor.msh", IO::FileFormat::GMSH);
 
   std::cout << "Saved Gmsh file to mfem.mesh in Mfem format" << std::endl;
 
-  mesh.save("mfem.mesh", IO::MeshFormat::MFEM);
+  mesh.save("mfem.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

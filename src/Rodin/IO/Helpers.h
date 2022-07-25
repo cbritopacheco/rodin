@@ -14,10 +14,12 @@
 
 namespace Rodin::IO
 {
-   std::map<std::string, IO::MeshFormat> getMeshFileHeaders();
-   static const std::map<std::string, IO::MeshFormat> MeshFileHeaders = getMeshFileHeaders();
+   std::ostream& operator<<(std::ostream& os, FileFormat fmt);
 
-   std::optional<IO::MeshFormat> getMeshFormat(std::istream& input);
+   std::map<std::string, IO::FileFormat> getMeshFileHeaders();
+   static const std::map<std::string, IO::FileFormat> MeshFileHeaders = getMeshFileHeaders();
+
+   std::optional<IO::FileFormat> getMeshFormat(std::istream& input);
 }
 
 namespace Rodin::IO::Medit

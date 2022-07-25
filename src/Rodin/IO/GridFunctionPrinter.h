@@ -39,7 +39,7 @@ namespace Rodin::IO
    };
 
    template <class FEC>
-   class GridFunctionPrinter<GridFunctionFormat::MFEM, FEC, Traits::Serial>
+   class GridFunctionPrinter<FileFormat::MFEM, FEC, Traits::Serial>
       : public GridFunctionPrinterBase<FEC, Traits::Serial>
    {
       public:
@@ -51,7 +51,7 @@ namespace Rodin::IO
    };
 
    template <class FEC>
-   class GridFunctionPrinter<GridFunctionFormat::MEDIT, FEC, Traits::Serial>
+   class GridFunctionPrinter<FileFormat::MEDIT, FEC, Traits::Serial>
       : public GridFunctionPrinterBase<FEC, Traits::Serial>
    {
       public:
