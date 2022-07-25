@@ -302,6 +302,11 @@ namespace Rodin
                BoundaryElement(std::move(other))
          {}
 
+         int getAttribute() const
+         {
+            return BoundaryElement::getAttribute();
+         }
+
          /**
           * @brief Sets the attribute of the boundary element.
           */

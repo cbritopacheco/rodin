@@ -98,11 +98,11 @@ namespace Rodin::Variational
          GridFunctionBase& setData(std::unique_ptr<double[]> data, int size);
 
          virtual void save(
-               const boost::filesystem::path& filename, IO::GridFunctionFormat fmt,
+               const boost::filesystem::path& filename, IO::FileFormat fmt,
                int precision) const = 0;
 
          virtual GridFunctionBase& load(
-               const boost::filesystem::path& filename, IO::GridFunctionFormat fmt) = 0;
+               const boost::filesystem::path& filename, IO::FileFormat fmt) = 0;
 
          /**
           * @brief Addition of a scalar value.
@@ -384,12 +384,12 @@ namespace Rodin::Variational
 
          void save(
                const boost::filesystem::path& filename,
-               IO::GridFunctionFormat fmt = IO::GridFunctionFormat::MFEM,
+               IO::FileFormat fmt = IO::FileFormat::MFEM,
                int precision = 16) const override;
 
          GridFunction& load(
                const boost::filesystem::path& filename,
-               IO::GridFunctionFormat fmt = IO::GridFunctionFormat::MFEM) override;
+               IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
          FiniteElementSpace<H1, Trait>& getFiniteElementSpace() override
          {

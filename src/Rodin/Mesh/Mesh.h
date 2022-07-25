@@ -186,6 +186,8 @@ namespace Rodin
           */
          MeshBase& edit(std::function<void(ElementView)> f);
 
+         MeshBase& edit(std::function<void(BoundaryElementView)> f);
+
          /**
           * @brief Edits the specified elements in the mesh via the given function.
           * @param[in] f Function which takes an ElementView to modify each
@@ -256,11 +258,11 @@ namespace Rodin
           */
          Mesh& load(
                const boost::filesystem::path& filename,
-               IO::MeshFormat fmt = IO::MeshFormat::MFEM);
+               IO::FileFormat fmt = IO::FileFormat::MFEM);
 
          void save(
                const boost::filesystem::path& filename,
-               IO::MeshFormat fmt = IO::MeshFormat::MFEM, int precison = 16) const;
+               IO::FileFormat fmt = IO::FileFormat::MFEM, int precison = 16) const;
 
          /**
           * @brief Constructs an empty mesh with no elements.

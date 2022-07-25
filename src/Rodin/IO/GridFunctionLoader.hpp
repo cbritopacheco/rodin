@@ -18,7 +18,7 @@
 namespace Rodin::IO
 {
    template <class FEC>
-   void GridFunctionLoader<GridFunctionFormat::MFEM, FEC, Traits::Serial>
+   void GridFunctionLoader<FileFormat::MFEM, FEC, Traits::Serial>
    ::load(std::istream& is)
    {
       auto& gf = GridFunctionLoaderBase<FEC, Traits::Serial>::getObject();
@@ -28,7 +28,7 @@ namespace Rodin::IO
    }
 
    template <class FEC>
-   void GridFunctionLoader<GridFunctionFormat::MEDIT, FEC, Traits::Serial>
+   void GridFunctionLoader<FileFormat::MEDIT, FEC, Traits::Serial>
    ::load(std::istream& is)
    {
       std::string line;

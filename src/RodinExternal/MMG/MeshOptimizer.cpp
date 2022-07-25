@@ -8,7 +8,7 @@
 
 namespace Rodin::External::MMG
 {
-  void MeshOptimizer::optimizeMMG2D(MMG5_pMesh mesh)
+  int MeshOptimizer::optimizeMMG2D(MMG5_pMesh mesh)
   {
     assert(mesh->np > 0 && mesh->nt > 0);
     MMG5_pSol sol = nullptr;
@@ -17,10 +17,10 @@ namespace Rodin::External::MMG
     if (!MMG2D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
     Alert::Exception("Could not set solution size.").raise();
     MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_optim, 1);
-    MMG2D_mmg2dlib(mesh, sol);
+    return MMG2D_mmg2dlib(mesh, sol);
   }
 
-  void MeshOptimizer::optimizeMMG3D(MMG5_pMesh mesh)
+  int MeshOptimizer::optimizeMMG3D(MMG5_pMesh mesh)
   {
     assert(mesh->np > 0 && mesh->ne > 0);
     MMG5_pSol sol = nullptr;
@@ -29,10 +29,10 @@ namespace Rodin::External::MMG
     if (!MMG3D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
     Alert::Exception("Could not set solution size.").raise();
     MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_optim, 1);
-    MMG3D_mmg3dlib(mesh, sol);
+    return MMG3D_mmg3dlib(mesh, sol);
   }
 
-  void MeshOptimizer::optimizeMMGS(MMG5_pMesh mesh)
+  int MeshOptimizer::optimizeMMGS(MMG5_pMesh mesh)
   {
     assert(mesh->np > 0 && mesh->nt > 0);
     MMG5_pSol sol = nullptr;
@@ -41,6 +41,6 @@ namespace Rodin::External::MMG
     if (!MMGS_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
     Alert::Exception("Could not set solution size.").raise();
     MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_optim, 1);
-    MMGS_mmgslib(mesh, sol);
+    return MMGS_mmgslib(mesh, sol);
   }
 }

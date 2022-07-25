@@ -60,20 +60,14 @@ auto getConormal(
 
 int main(int, char**)
 {
-  const char* meshFile = "Omega.mesh";
+  const char* meshFile = "miaow.o.mesh";
   const double pi = std::atan(1) * 4;
 
-  int Interior = 2, Exterior = 3;
-  int Gamma = 4;
 
   Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MEDIT);
 
-
-  // GridFunction f(Vh);
-  // f = VectorFunction{
-  //   [](const double* x, int){ return 3 * x[0] * x[0] + sin(10 * x[1]); },
-  //   [](const double* x, int){ return 3 * x[0] + cos(10 * x[1]); }};
+  // Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
 
   FiniteElementSpace<H1> Vh(Omega);
 
@@ -106,62 +100,21 @@ int main(int, char**)
           double dd = gd(x, c.data(), dim) - rr;
           d = std::min(d, dd);
         }
-        if (d <= rr)
-          return d;
-        else
-          return -d;
+        return d;
       });
 
-  for (const auto& c : cs)
-  {
-    for (int i = 0; i < Omega.getHandle().GetNBE(); i++)
-    {
-      mfem::Array<int> vs;
-      Omega.getHandle().GetBdrElement(i)->GetVertices(vs);
-      double d = std::numeric_limits<double>::max();
-      for (int v = 0; v < vs.Size(); v++)
-      {
-        double dd = gd(Omega.getHandle().GetVertex(vs[v]), c.data(), 3) - rr;
-        d = std::min(d, dd);
-        if (d <= rr)
-          Omega.getHandle().SetBdrAttribute(i, 6);
-        // else
-        // Omega.getHandle().SetBdrAttribute(i, 1);
-      }
-    }
-  }
-
   GridFunction dist(Vh);
-  dist = f;
-
-  Omega.save("Omega.mesh");
+  dist.projectOnBoundary(f);
+  Omega.save("dist.mesh");
   dist.save("dist.gf");
 
-  // Cast(Omega).to<MMG::Mesh3D>().save("mmg.mesh");
-  // Cast(dist).to<MMG::ScalarSolution3D>(mmgMesh).save("mmg.sol");
+  Omega = MMG::ImplicitDomainMesher().split(2, {2, 6})
+                             .noSplit(3)
+                             .setHMax(0.05)
+                             .surface()
+                             .discretize(dist);
 
-  // mmgSol.save("mmg.sol");
-
-  // MMG::Mesh3D mmgMesh;
-  // mmgMesh.load("test.mesh");
-
-  // MMG::ScalarSolution3D mmgDist(mmgMesh);
-  // mmgDist.load("test.sol");
-
-  // auto Omega = Cast(mmgMesh).to<SerialMesh>();
-
-  // FiniteElementSpace<H1> Vh(Omega);
-  // FiniteElementSpace<H1> Th(Omega, 3);
-
-  // auto dist = Cast(mmgDist).to<GridFunction<H1>>(Vh);
-
-
-  // auto skin = Omega.skin();
-  // FiniteElementSpace<H1> VhS(skin);
-  // FiniteElementSpace<H1> ThS(skin, 3);
-  // GridFunction distS(VhS);
-  // dist.transfer(distS);
-
+  Omega.save("leeel.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }

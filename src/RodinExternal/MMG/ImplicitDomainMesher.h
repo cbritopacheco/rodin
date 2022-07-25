@@ -7,6 +7,9 @@
 #ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 #define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 
+#include <boost/unordered_map.hpp>
+#include <boost/random/uniform_int.hpp>
+
 #include "Rodin/Mesh.h"
 #include "Rodin/Variational.h"
 
@@ -26,8 +29,11 @@ namespace Rodin::External::MMG
        * @brief Constructs an ImplicitDomainMesher2D with default values.
        */
       ImplicitDomainMesher()
-        : m_ls(0.0)
+        : m_ls(0.0),
+          m_meshTheSurface(false)
       {}
+
+      ImplicitDomainMesher& surface(bool meshTheSurface = true);
 
       /**
        * @brief Specifies the level set to discretize.
@@ -94,6 +100,11 @@ namespace Rodin::External::MMG
       template <class FEC>
       Rodin::Mesh<Traits::Serial> discretize(Variational::GridFunction<FEC, Traits::Serial>& ls)
       {
+        // if (!m_isoref)
+        //   Alert::Exception("Please set the boundary reference").raise();
+        // if (ls.getFiniteElementSpace().getMesh().getBoundaryAttributes().count(*m_isoref))
+        //   Alert::Exception("Boundary reference already contained in mesh.").raise();
+
         MMG5_pMesh mesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
         MMG5_pSol sol   = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
         copySolution(ls, sol);
@@ -101,27 +112,94 @@ namespace Rodin::External::MMG
         MMG5::setParameters(mesh);
 
         bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
+
+        int retcode = MMG5_STRONGFAILURE;
+
+        if (m_meshTheSurface)
+        {
+          generateUniqueSplit(ls.getFiniteElementSpace().getMesh().getBoundaryAttributes());
+        }
+        else
+        {
+          generateUniqueSplit(ls.getFiniteElementSpace().getMesh().getAttributes());
+        }
+
         switch (mesh->dim)
         {
           case 2:
           {
             assert(!isSurface);
-            discretizeMMG2D(mesh, sol);
+            retcode = discretizeMMG2D(mesh, sol);
             break;
           }
           case 3:
           {
             if (isSurface)
-              discretizeMMGS(mesh, sol);
+            {
+              retcode = discretizeMMGS(mesh, sol);
+            }
             else
-              discretizeMMG3D(mesh, sol);
+            {
+              retcode = discretizeMMG3D(mesh, sol);
+            }
             break;
           }
+        }
+
+        if (retcode != MMG5_SUCCESS)
+        {
+          Alert::Exception()
+            << "Failed to discretize the implicit domain."
+            << Alert::Raise;
         }
 
         auto rodinMesh = meshToRodin(mesh);
         destroySolution(sol);
         destroyMesh(mesh);
+
+        for (const auto it : m_uniqueSplit)
+        {
+          const auto& ref = it.first;
+          const auto& split = it.second;
+
+          std::visit(Utility::Overloaded{
+            [&](const NoSplitT&) {},
+            [&](const Split& s)
+            {
+              if (m_meshTheSurface)
+              {
+                rodinMesh.edit(
+                    [&](BoundaryElementView el)
+                    {
+                      const auto& originalSplit = std::get<Split>(getSplitMap().at(ref));
+                      if (el.getAttribute() == s.interior)
+                        el.setAttribute(originalSplit.interior);
+                      else if (el.getAttribute() == s.exterior)
+                        el.setAttribute(originalSplit.exterior);
+                      else
+                      {
+                      }
+                    });
+              }
+              else
+              {
+                rodinMesh.edit(
+                    [&](ElementView el)
+                    {
+                      const auto& originalSplit = std::get<Split>(getSplitMap().at(ref));
+                      if (el.getAttribute() == s.interior)
+                        el.setAttribute(originalSplit.interior);
+                      else if (el.getAttribute() == s.exterior)
+                        el.setAttribute(originalSplit.exterior);
+                      else
+                      {
+                      }
+                    });
+              }
+            }
+          }, split);
+        }
+
         return rodinMesh;
       }
 
@@ -149,15 +227,27 @@ namespace Rodin::External::MMG
         return *this;
       }
 
+      const SplitMap& getSplitMap() const
+      {
+        return m_split;
+      }
+
     private:
-      void discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol);
-      void discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
-      void discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
+      int discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol);
+      int discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
+      int discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
+
+      void generateUniqueSplit(const std::set<int>& attr);
 
       double m_ls;
       SplitMap m_split;
+      bool m_meshTheSurface;
       std::optional<double> m_rmc;
       std::optional<MaterialReference> m_isoref;
+
+      boost::random::mt19937 m_rng;
+      boost::random::uniform_int_distribution<> m_idGen;
+      SplitMap m_uniqueSplit;
   };
 }
 #endif
