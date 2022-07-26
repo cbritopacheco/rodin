@@ -127,6 +127,8 @@ namespace Rodin::Variational
    class DirichletBC;
 
    // ---- Coefficients ------------------------------------------------------
+   class FunctionBase;
+
    class ScalarFunctionBase;
 
    template <class T>

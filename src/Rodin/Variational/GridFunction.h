@@ -31,13 +31,15 @@
 #include "MatrixFunction.h"
 #include "FiniteElementSpace.h"
 
+#include "Function.h"
+
 
 namespace Rodin::Variational
 {
    /**
     * @brief Abstract class for GridFunction objects.
     */
-   class GridFunctionBase
+   class GridFunctionBase : public FunctionBase
    {
       public:
          GridFunctionBase() = default;
@@ -219,6 +221,46 @@ namespace Rodin::Variational
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
          virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
+
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+         {
+            switch (getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  value.SetSize(1, 1);
+                  value(0, 0) = getHandle().GetValue(trans, ip);
+                  break;
+               }
+               case RangeType::Vector:
+               {
+                  mfem::Vector v;
+                  getHandle().GetVectorValue(trans, ip, v);
+                  value.SetSize(getFiniteElementSpace().getVectorDimension(), 1);
+                  value.GetFromVector(0, v);
+                  break;
+               }
+               case RangeType::Matrix:
+               {
+                  assert(false); // GridFunction cannot be matrix valued
+                  break;
+               }
+            }
+         }
+
+         std::tuple<int, int> getRangeShape() const override
+         {
+            return {getFiniteElementSpace().getVectorDimension(), 1};
+         }
+
+         RangeType getRangeType() const override
+         {
+            auto shape = getRangeShape();
+            assert(std::get<1>(shape) == 1);
+            return std::get<0>(shape) == 1 ? RangeType::Scalar : RangeType::Vector;
+         }
    };
 
    /**

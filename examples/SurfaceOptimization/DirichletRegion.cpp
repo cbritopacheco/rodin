@@ -63,7 +63,8 @@ int main(int, char**)
 
     // Skin the mesh, computing the borders of the new regions
     Alert::Info() << "    | Skinning mesh." << Alert::Raise;
-    auto dOmega = Omega.skin({{GammaD, SigmaD}, {GammaN, SigmaN}});
+    auto dOmega = Omega.skin();
+    dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
 
     // Build finite element spaces
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
@@ -142,9 +143,6 @@ int main(int, char**)
 
     grad *= -1.0;
 
-    Omega.save("grad.mesh");
-    grad.save("grad.gf");
-
     // Advect the distance function with the gradient
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
     double gInf = std::max(gradS.max(), -gradS.min());
@@ -160,11 +158,9 @@ int main(int, char**)
                                        .surface()
                                        .discretize(dist);
 
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
-
     Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
 
-    Omega.skin().save("out/dOmega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    // Omega.skin().save("out/dOmega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
   }
 
   return 0;

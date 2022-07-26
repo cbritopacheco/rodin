@@ -71,7 +71,7 @@ int main(int, char**)
     FiniteElementSpace<H1> Vh(Omega, d);
 
     // Trim the exterior part of the mesh to solve the elasticity system
-    SubMesh trimmed = Omega.trim(Exterior, Gamma);
+    SubMesh trimmed = Omega.trim(Exterior);
 
     // Build a finite element space over the trimmed mesh
     FiniteElementSpace<H1> VhInt(trimmed, d);
@@ -108,7 +108,7 @@ int main(int, char**)
 
     // Update objective
     obj.push_back(
-        compliance(u) + ell.getValue() * Omega.getVolume(Interior));
+        compliance(u) + ell.value() * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
     // Generate signed distance function
@@ -118,16 +118,17 @@ int main(int, char**)
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = 2 * hmax / gInf;
+    double dt = 4 * hmax / gInf;
     MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
-    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                       .split(Exterior, {Interior, Exterior})
+    Omega = MMG::ImplicitDomainMesher().split(Exterior, {Interior, Exterior})
+                                       .noSplit(Interior)
                                        .setRMC(1e-3)
-                                       .setHMax(hmax)
+                                       // .setHMax(hmax)
                                        .setBoundaryReference(Gamma)
                                        .discretize(dist);
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     // Save mesh
     Omega.save("Omega.mesh");

@@ -9,6 +9,7 @@ set(RodinVariational_HEADERS
   FormLanguage.h
   ForwardDecls.h
   Grad.h
+  Function.h
   GridFunction.h
   ShapeFunction.h
   TrialFunction.h

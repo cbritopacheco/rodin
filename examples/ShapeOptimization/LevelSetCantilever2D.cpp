@@ -46,7 +46,7 @@ int main(int, char**)
   Omega.load(meshFile);
 
   Omega.save("Omega0.mesh");
-  std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
+  Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // UMFPack
   auto solver = Solver::UMFPack();
@@ -60,23 +60,27 @@ int main(int, char**)
 
   std::vector<double> obj;
 
+  std::ofstream plt("obj.txt");
+
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
-    // Vector field finite element space over the whole domain
+    Alert::Info() << "----- Iteration: " << i << Alert::Raise;
+
+    Alert::Info() << "    | Trimming mesh." << Alert::Raise;
+    SubMesh trimmed = Omega.trim(Exterior);
+
+    Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
     int d = 2;
     FiniteElementSpace<H1> Vh(Omega, d);
-
-    // Trim the exterior part of the mesh to solve the elasticity system
-    SubMesh trimmed = Omega.trim(Exterior, Gamma);
-
-    // Build a finite element space over the trimmed mesh
     FiniteElementSpace<H1> VhInt(trimmed, d);
 
-    // Elasticity equation
+    Alert::Info() << "    | Solving state equation." << Alert::Raise;
     auto f = VectorFunction{0, -1};
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
+
+    // Elasticity equation
     Problem elasticity(uInt, vInt);
     elasticity = Integral(lambda * Div(uInt), Div(vInt))
                + Integral(
@@ -89,11 +93,12 @@ int main(int, char**)
     GridFunction u(Vh);
     uInt.getGridFunction().transfer(u);
 
-    // Hilbert extension-regularization procedure
+    Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
     auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
+    // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
@@ -103,32 +108,29 @@ int main(int, char**)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
-    g.getGridFunction().save("g.gf");
-    Omega.save("g.mesh");
-
     // Update objective
     obj.push_back(
-        compliance(u) + ell.getValue() * Omega.getVolume(Interior));
-    std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
+        compliance(u) + ell.value() * Omega.getVolume(Interior));
+    Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
 
-    // Generate signed distance function
+    Alert::Info() << "    | Distancing domain." << Alert::Raise;
     FiniteElementSpace<H1> Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
 
     // Advect the level set function
+    Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
     double dt = 4 * hmax / gInf;
     MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
+    Alert::Info() << "    | Meshing the domain." << Alert::Raise;
     Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
                                        .split(Exterior, {Interior, Exterior})
                                        .setRMC(1e-3)
-                                       .setHMax(hmax)
                                        .setBoundaryReference(Gamma)
                                        .discretize(dist);
-
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh");
@@ -136,16 +138,15 @@ int main(int, char**)
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
-      std::cout << "Convergence!" << std::endl;
+      Alert::Info() << "Convergence!" << Alert::Raise;
       break;
     }
 
-    std::ofstream plt("obj.txt", std::ios::trunc);
-    for (size_t i = 0; i < obj.size(); i++)
-      plt << i << "," << obj[i] << "\n";
+    plt << i << "," << obj[i] << "\n";
+    plt.flush();
   }
 
-  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
+  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }
