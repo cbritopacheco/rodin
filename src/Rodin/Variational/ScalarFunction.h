@@ -20,13 +20,16 @@
 #include "FormLanguage/Base.h"
 #include "FormLanguage/ForwardDecls.h"
 
+#include "Function.h"
+
 namespace Rodin::Variational
 {
    /**
     * @brief Abstract base class for objects representing scalar functions.
     */
    class ScalarFunctionBase
-      : public FormLanguage::Buildable<mfem::Coefficient>
+      :  public FunctionBase,
+         public FormLanguage::Buildable<mfem::Coefficient>
    {
       public:
          ScalarFunctionBase() = default;
@@ -122,6 +125,25 @@ namespace Rodin::Variational
          virtual double getValue(
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override
+         {
+            value.SetSize(1, 1);
+            value(0, 0) = getValue(trans, ip);
+         }
+
+         std::tuple<int, int> getRangeShape() const override
+         {
+            return {1, 1};
+         }
+
+         RangeType getRangeType() const override
+         {
+            return RangeType::Scalar;
+         }
+
          virtual ScalarFunctionBase* copy() const noexcept override = 0;
 
       private:
@@ -198,7 +220,7 @@ namespace Rodin::Variational
          {}
 
          constexpr
-         T getValue() const
+         T value() const
          {
             return m_x;
          }
@@ -248,7 +270,7 @@ namespace Rodin::Variational
          /**
           * @returns Constant reference to underlying grid function.
           */
-         const GridFunctionBase& getValue() const
+         const GridFunctionBase& value() const
          {
             return m_u;
          }
@@ -304,7 +326,7 @@ namespace Rodin::Variational
          /**
           * @returns Function used to compute the value of the ScalarFunction
           */
-         std::function<double(const double*, int)> getValue() const
+         std::function<double(const double*, int)> value() const
          {
             return m_f;
          }
@@ -364,7 +386,7 @@ namespace Rodin::Variational
                m_pieces(std::move(other.m_pieces))
          {}
 
-         const std::map<int, double>& getValue() const
+         const std::map<int, double>& value() const
          {
             return m_pieces;
          }

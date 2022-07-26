@@ -30,7 +30,8 @@ namespace Rodin::External::MMG
        */
       ImplicitDomainMesher()
         : m_ls(0.0),
-          m_meshTheSurface(false)
+          m_meshTheSurface(false),
+          m_idGen(0, std::numeric_limits<int16_t>::max())
       {}
 
       ImplicitDomainMesher& surface(bool meshTheSurface = true);
@@ -100,12 +101,15 @@ namespace Rodin::External::MMG
       template <class FEC>
       Rodin::Mesh<Traits::Serial> discretize(Variational::GridFunction<FEC, Traits::Serial>& ls)
       {
-        // if (!m_isoref)
-        //   Alert::Exception("Please set the boundary reference").raise();
         // if (ls.getFiniteElementSpace().getMesh().getBoundaryAttributes().count(*m_isoref))
         //   Alert::Exception("Boundary reference already contained in mesh.").raise();
 
         MMG5_pMesh mesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
+
+        // Erase boundary elements which have the isoref
+        if (m_isoref)
+          deleteRef(mesh, *m_isoref);
+
         MMG5_pSol sol   = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
         copySolution(ls, sol);
 
@@ -153,6 +157,9 @@ namespace Rodin::External::MMG
             << Alert::Raise;
         }
 
+        // Delete zero reference
+        deleteRef(mesh, 0);
+
         auto rodinMesh = meshToRodin(mesh);
         destroySolution(sol);
         destroyMesh(mesh);
@@ -169,32 +176,44 @@ namespace Rodin::External::MMG
               if (m_meshTheSurface)
               {
                 rodinMesh.edit(
-                    [&](BoundaryElementView el)
+                  [&](BoundaryElementView el)
+                  {
+                    auto it = m_originalRefMap.find(el.getAttribute());
+                    if (it != m_originalRefMap.end())
                     {
-                      const auto& originalSplit = std::get<Split>(getSplitMap().at(ref));
+                      MaterialReference originalRef = it->second;
+                      const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
                       if (el.getAttribute() == s.interior)
                         el.setAttribute(originalSplit.interior);
                       else if (el.getAttribute() == s.exterior)
                         el.setAttribute(originalSplit.exterior);
-                      else
-                      {
-                      }
-                    });
+                    }
+                    else
+                    {
+                      // The key must have come from a no split
+                    }
+                  }).update();
               }
               else
               {
                 rodinMesh.edit(
-                    [&](ElementView el)
+                  [&](ElementView el)
+                  {
+                    auto it = m_originalRefMap.find(el.getAttribute());
+                    if (it != m_originalRefMap.end())
                     {
-                      const auto& originalSplit = std::get<Split>(getSplitMap().at(ref));
+                      MaterialReference originalRef = it->second;
+                      const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
                       if (el.getAttribute() == s.interior)
                         el.setAttribute(originalSplit.interior);
                       else if (el.getAttribute() == s.exterior)
                         el.setAttribute(originalSplit.exterior);
-                      else
-                      {
-                      }
-                    });
+                    }
+                    else
+                    {
+                      // The key must have come from a no split
+                    }
+                  }).update();
               }
             }
           }, split);
@@ -239,6 +258,8 @@ namespace Rodin::External::MMG
 
       void generateUniqueSplit(const std::set<int>& attr);
 
+      void deleteRef(MMG5_pMesh mesh, MaterialReference ref);
+
       double m_ls;
       SplitMap m_split;
       bool m_meshTheSurface;
@@ -248,6 +269,7 @@ namespace Rodin::External::MMG
       boost::random::mt19937 m_rng;
       boost::random::uniform_int_distribution<> m_idGen;
       SplitMap m_uniqueSplit;
+      std::map<int, int> m_originalRefMap;
   };
 }
 #endif

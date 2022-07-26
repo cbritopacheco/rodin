@@ -19,6 +19,7 @@
 #include "FormLanguage/Base.h"
 
 #include "Utility.h"
+#include "Function.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
@@ -30,7 +31,8 @@ namespace Rodin::Variational
     * to the 1st entry of the vector.
     */
    class VectorFunctionBase
-      : public FormLanguage::Buildable<mfem::VectorCoefficient>
+      :  public FunctionBase,
+         public FormLanguage::Buildable<mfem::VectorCoefficient>
    {
       public:
          VectorFunctionBase() = default;
@@ -128,6 +130,27 @@ namespace Rodin::Variational
          virtual void getValue(
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
+
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override
+         {
+            mfem::Vector v;
+            getValue(v, trans, ip);
+            value.SetSize(getDimension(), 1);
+            value.GetFromVector(0, v);
+         }
+
+         std::tuple<int, int> getRangeShape() const override
+         {
+            return {getDimension(), 1};
+         }
+
+         RangeType getRangeType() const override
+         {
+            return RangeType::Vector;
+         }
 
          /**
           * @brief Gets the dimension of the vector object.

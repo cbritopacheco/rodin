@@ -205,6 +205,7 @@ namespace Rodin::External::MMG
               intRef = m_idGen(m_rng);
             } while (existingRefs.count(intRef));
             existingRefs.insert(intRef);
+            m_originalRefMap.insert({intRef, ref});
 
             MaterialReference extRef;
             do
@@ -212,6 +213,7 @@ namespace Rodin::External::MMG
               extRef = m_idGen(m_rng);
             } while (existingRefs.count(extRef));
             existingRefs.insert(extRef);
+            m_originalRefMap.insert({extRef, ref});
 
             m_uniqueSplit.insert({ref, Split{intRef, extRef}});
           },
@@ -219,6 +221,54 @@ namespace Rodin::External::MMG
           {
             m_uniqueSplit.insert({ref, NoSplit});
           }}, split);
+    }
+  }
+
+  void ImplicitDomainMesher::deleteRef(MMG5_pMesh mesh, MaterialReference ref)
+  {
+    if (m_meshTheSurface || mesh->dim == 2)
+    {
+      int oldna = mesh->na;
+      std::vector<int> ids;
+      ids.reserve(oldna);
+      for (int i = 1; i <= mesh->na; i++)
+      {
+        if (ref != mesh->edge[i].ref)
+          ids.push_back(i);
+      }
+      int newna = ids.size();
+      MMG5_pEdge edges = nullptr;
+      MMG5_SAFE_MALLOC(edges, newna + 1, MMG5_Edge,
+          Alert::Exception("Failed to reallocate edges.").raise());
+      for (int i = 1; i <= newna; i++)
+        edges[i] = mesh->edge[ids[i - 1]];
+      MMG5_SAFE_FREE(mesh->edge);
+      mesh->na = newna;
+      mesh->edge = edges;
+    }
+    else if (mesh->dim == 3)
+    {
+      int oldnt = mesh->nt;
+      std::vector<int> ids;
+      ids.reserve(oldnt);
+      for (int i = 1; i <= mesh->na; i++)
+      {
+        if (ref != mesh->tria[i].ref)
+          ids.push_back(i);
+      }
+      int newnt = ids.size();
+      MMG5_pTria triangles = nullptr;
+      MMG5_SAFE_MALLOC(triangles, newnt + 1, MMG5_Tria,
+          Alert::Exception("Failed to reallocate triangles.").raise());
+      for (int i = 1; i <= newnt; i++)
+        triangles[i] = mesh->tria[ids[i - 1]];
+      MMG5_SAFE_FREE(mesh->tria);
+      mesh->nt = newnt;
+      mesh->tria = triangles;
+    }
+    else
+    {
+      assert(false); // Unhandled case
     }
   }
 }

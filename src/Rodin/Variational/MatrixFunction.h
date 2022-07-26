@@ -15,13 +15,16 @@
 #include "ForwardDecls.h"
 #include "FormLanguage/Base.h"
 
+#include "Function.h"
+
 namespace Rodin::Variational
 {
    /**
     * @brief Abstract base class for objects representing matrix coefficients.
     */
    class MatrixFunctionBase
-      : public FormLanguage::Buildable<mfem::MatrixCoefficient>
+      :  public FunctionBase,
+         public FormLanguage::Buildable<mfem::MatrixCoefficient>
    {
       public:
          MatrixFunctionBase() = default;
@@ -115,7 +118,17 @@ namespace Rodin::Variational
 
          virtual void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override = 0;
+
+         std::tuple<int, int> getRangeShape() const override
+         {
+            return {getRows(), getColumns()};
+         }
+
+         RangeType getRangeType() const override
+         {
+            return RangeType::Matrix;
+         }
 
          virtual MatrixFunctionBase* copy() const noexcept override = 0;
 

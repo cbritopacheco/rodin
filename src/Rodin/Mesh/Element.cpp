@@ -3,6 +3,13 @@
 
 namespace Rodin
 {
+   // ---- ElementBase -------------------------------------------------------
+   int ElementBase::getAttribute() const
+   {
+      return m_element->GetAttribute();
+   }
+
+   // ---- Element -----------------------------------------------------------
    std::set<int> Element::adjacent() const
    {
       std::set<int> res;
@@ -14,17 +21,6 @@ namespace Rodin
       for (int i = 0; i < adj.RowSize(getIndex()); i++)
          res.insert(elements[i]);
       return res;
-   }
-
-   int ElementBase::getAttribute() const
-   {
-      return m_element->GetAttribute();
-   }
-
-   ElementView& ElementView::setAttribute(int attr)
-   {
-      getMesh().getHandle().SetAttribute(getIndex(), attr);
-      return *this;
    }
 
    double Element::getVolume() const
@@ -43,6 +39,14 @@ namespace Rodin
       return volume;
    }
 
+   // ---- ElementView -------------------------------------------------------
+   ElementView& ElementView::setAttribute(int attr)
+   {
+      getMesh().getHandle().SetAttribute(getIndex(), attr);
+      return *this;
+   }
+
+   // ---- Face --------------------------------------------------------------
    double Face::getArea() const
    {
       mfem::ElementTransformation *et = const_cast<MeshBase&>(getMesh()
@@ -59,9 +63,37 @@ namespace Rodin
       return area;
    }
 
+   std::set<int> Face::elements() const
+   {
+      int e1 = -1, e2 = -1;
+      getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
+      if (e1 >= 0 && e2 >= 0)
+         return {e1, e2};
+      else if (e1 >= 0 && e2 < 0)
+         return {e1};
+      else if (e1 < 0 && e2 >= 0)
+         return {e2};
+      else
+         return {};
+   }
+
+   // ---- BoundaryElement ---------------------------------------------------
+   BoundaryElement::BoundaryElement(
+         const MeshBase& mesh, const mfem::Element* element, int index)
+      : Face(mesh, element, mesh.getHandle().GetBdrFace(index)),
+        m_index(index)
+   {}
+
+   // ---- BoundaryElementView -----------------------------------------------
+   BoundaryElementView::BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index)
+      : BoundaryElement(mesh, element, index),
+        m_mesh(mesh),
+        m_element(element)
+   {}
+
    BoundaryElementView& BoundaryElementView::setAttribute(int attr)
    {
-      FaceView::getMesh().getHandle().SetBdrAttribute(FaceView::getIndex(), attr);
+      getMesh().getHandle().SetBdrAttribute(getIndex(), attr);
       return *this;
    }
 }

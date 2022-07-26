@@ -93,7 +93,7 @@ int main(int, char**)
     cg.solve(hilbert);
 
     // Update objective
-    obj.push_back(compliance(u.getGridFunction()) + ell.getValue() * Omega.getVolume());
+    obj.push_back(compliance(u.getGridFunction()) + ell.value() * Omega.getVolume());
 
     std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
 

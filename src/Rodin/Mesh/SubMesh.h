@@ -37,15 +37,34 @@ namespace Rodin
 
          SubMesh(const SubMesh& other);
 
+         SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
+         {
+            getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
+            return *this;
+         }
+
+         void finalize()
+         {
+            getHandle().FinalizeTopology();
+            getHandle().Finalize();
+            // TODO: Build face map
+         }
+
          /**
-          * @brief Sets the SubMesh to Mesh vertex map
-          * @param[in] Map going from SubMesh to Mesh vertex indices.
+          * @brief Adds an element from the parent mesh to the submesh.
           *
-          * Each key-value pair in the map indicates the correspondence between
-          * vertex indices in the SubMesh and vertex indices in the parent
-          * Mesh.
+          * @param[in] el Element from the parent mesh
           */
-         SubMesh& setVertexMap(boost::bimap<int, int> s2pv);
+         SubMesh& add(const Element& el);
+
+         /**
+          * Adds a bounday element from the parent mesh to the submesh.
+          *
+          * If `this->isSurface() && !getParent().isSurface()` then this will add the
+          * boundary element as an element of the submesh. Otherwise, it gets
+          * added normally as a boundary element.
+          */
+         SubMesh& add(const BoundaryElement& el);
 
          /**
           * @returns Reference to the parent Mesh object
@@ -57,34 +76,21 @@ namespace Rodin
           */
          const boost::bimap<int, int>& getVertexMap() const;
 
+         const boost::bimap<int, int>& getElementMap() const;
+
+         const boost::bimap<int, int>& getBoundaryElementMap() const;
+
          bool isSubMesh() const override
          {
             return true;
          }
-
-         SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
-         {
-            getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
-            return *this;
-         }
-
-         void finalize()
-         {
-            getHandle().Finalize();
-         }
-
-         /**
-          * @brief Adds an element into the mesh
-          *
-          * @param[in] el Element from the parent mesh
-          */
-         SubMesh& add(const ElementBase& el);
 
       private:
          const MeshBase& m_parent;
          boost::bimap<int, int> m_s2pv;
          boost::bimap<int, int> m_s2pf;
          boost::bimap<int, int> m_s2pe;
+         boost::bimap<int, int> m_s2pb;
    };
 }
 

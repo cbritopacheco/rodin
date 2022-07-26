@@ -53,14 +53,6 @@ namespace Rodin
          int getAttribute() const;
 
          /**
-          * @brief Gets the index of the element in the mesh.
-          */
-         int getIndex() const
-         {
-            return m_index;
-         }
-
-         /**
           * @brief Gets the associated mesh to the element.
           */
          const MeshBase& getMesh() const
@@ -71,6 +63,14 @@ namespace Rodin
          const mfem::Element& getHandle() const
          {
             return *m_element;
+         }
+
+         /**
+          * @brief Gets the index of the element in the mesh.
+          */
+         int getIndex() const
+         {
+            return m_index;
          }
 
          /**
@@ -174,8 +174,7 @@ namespace Rodin
     * mesh, i.e. triangles in 3D or lines in 2D.
     *
     * This class is designed so that modifications cannot be made to the
-    * face. If one wishes to modify the face then one must use
-    * FaceView.
+    * face.
     */
    class Face : public ElementBase
    {
@@ -196,6 +195,8 @@ namespace Rodin
             : ElementBase(std::move(other))
          {}
 
+         std::set<int> elements() const;
+
          std::set<int> adjacent() const override
          {
             assert(false);
@@ -208,34 +209,109 @@ namespace Rodin
    };
 
    /**
-    * @brief Class for representing elements of codimension 1 in the
-    * mesh, i.e. triangles in 3D or lines in 2D.
+    * @brief Class for representing boundary elements in the mesh, i.e. face
+    * elements which are at the boundary.
     *
-    * This class is designed so that modifications can be made to the face,
-    * while retaining the functionality of the more general face class.
+    * This class is designed so that modifications can be made to the
+    * boundary element. If one wishes to modify the face then one must use
+    * BoundaryElementView.
     */
-   class FaceView : public Face
+   class BoundaryElement : public Face
    {
       public:
-         FaceView(MeshBase& mesh, mfem::Element* element, int index)
-            : Face(mesh, element, index),
-              m_mesh(mesh),
-              m_element(element)
+         /**
+          *
+          * @param[in] index Boundary index
+          */
+         BoundaryElement(
+               const MeshBase& mesh, const mfem::Element* element, int index);
+
+         BoundaryElement(const BoundaryElement& other)
+            :  Face(other),
+               m_index(other.m_index)
          {}
 
-         FaceView(const FaceView& other)
-            : Face(other),
+         BoundaryElement(BoundaryElement&& other)
+            :  Face(std::move(other)),
+               m_index(other.m_index)
+         {
+            other.m_index = 0;
+         }
+
+         /**
+          * @brief Gets the index of the face element.
+          *
+          * @warning The index returned by this function need not coincide with
+          * the index returned by getBoundaryIndex().
+          */
+         int getFaceIndex() const
+         {
+            return Face::getIndex();
+         }
+
+         /**
+          * @brief Gets the index of the element as a member of the boundary.
+          *
+          * @warning The index returned by this function need not coincide with
+          * the index returned by getFaceIndex().
+          */
+         int getBoundaryIndex() const
+         {
+            return m_index;
+         }
+
+         /**
+          * @brief Gets the index of the element as a member of the boundary.
+          *
+          * Same as getBoundaryIndex().
+          *
+          * @warning The index returned by this function need not coincide with
+          * the index returned by getFaceIndex().
+          */
+         int getIndex() const
+         {
+            return getBoundaryIndex();
+         }
+
+      private:
+         int m_index;
+   };
+
+   /**
+    * @brief Class for representing boundary elements in the mesh, i.e. face
+    * elements which are at the boundary.
+    *
+    * This class is designed so that modifications cannot be made to the
+    * boundary element, while retaining the functionality of the more general
+    * FaceView and BoundaryElement classes.
+    */
+   class BoundaryElementView
+      : public BoundaryElement
+   {
+      public:
+         /**
+          * @param[in] index Boundary element index
+          */
+         BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index);
+
+         BoundaryElementView(const BoundaryElementView& other)
+            : BoundaryElement(other),
               m_mesh(other.m_mesh),
               m_element(other.m_element)
          {}
 
-         FaceView(FaceView&& other)
-            : Face(std::move(other)),
+         BoundaryElementView(BoundaryElementView&& other)
+            : BoundaryElement(std::move(other)),
               m_mesh(other.m_mesh),
               m_element(other.m_element)
          {
-            m_element = nullptr;
+            other.m_element = nullptr;
          }
+
+         /**
+          * @brief Sets the attribute of the boundary element.
+          */
+         BoundaryElementView& setAttribute(int attr);
 
          MeshBase& getMesh()
          {
@@ -250,67 +326,6 @@ namespace Rodin
       private:
          MeshBase& m_mesh;
          mfem::Element* m_element;
-   };
-
-   /**
-    * @brief Class for representing boundary elements in the mesh, i.e. face
-    * elements which are at the boundary.
-    *
-    * This class is designed so that modifications can be made to the
-    * boundary element. If one wishes to modify the face then one must use
-    * BoundaryElementView.
-    */
-   class BoundaryElement : public Face
-   {
-      public:
-         BoundaryElement(const MeshBase& mesh, const mfem::Element* element, int index)
-            : Face(mesh, element, index)
-         {}
-
-         BoundaryElement(const BoundaryElement& other)
-            :  Face(other)
-         {}
-
-         BoundaryElement(BoundaryElement&& other)
-            :  Face(std::move(other))
-         {}
-   };
-
-   /**
-    * @brief Class for representing boundary elements in the mesh, i.e. face
-    * elements which are at the boundary.
-    *
-    * This class is designed so that modifications cannot be made to the
-    * boundary element, while retaining the functionality of the more general
-    * FaceView and BoundaryElement classes.
-    */
-   class BoundaryElementView : public FaceView, public BoundaryElement
-   {
-      public:
-         BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index)
-            : FaceView(mesh, element, index),
-              BoundaryElement(mesh, element, index)
-         {}
-
-         BoundaryElementView(const BoundaryElementView& other)
-            :  FaceView(other),
-               BoundaryElement(other)
-         {}
-
-         BoundaryElementView(BoundaryElementView&& other)
-            :  FaceView(std::move(other)),
-               BoundaryElement(std::move(other))
-         {}
-
-         int getAttribute() const
-         {
-            return BoundaryElement::getAttribute();
-         }
-
-         /**
-          * @brief Sets the attribute of the boundary element.
-          */
-         BoundaryElementView& setAttribute(int attr);
    };
 }
 

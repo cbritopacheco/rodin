@@ -11,15 +11,19 @@ using namespace Rodin;
 
 int main(int, char**)
 {
-  const char* filename = "../resources/mfem/ccl-2d-example.mesh";
+  const char* filename = "../resources/examples/Mesh/skinning.mesh";
   Mesh mesh;
   mesh.load(filename);
 
-  Alert::Info() << "Trimming mesh..." << Alert::Raise;
+  Alert::Info() << "Skinning mesh..." << Alert::Raise;
 
-  auto trimmed = mesh.trim(2);
+  auto skin = mesh.skin();
+  skin.trace({
+      {{3, 6}, 666},
+      {{2, 6}, 777}
+      });
 
-  Alert::Info() << "Saved mesh to trimmed.mesh" << Alert::Raise;
+  Alert::Info() << "Saved mesh to skin.mesh" << Alert::Raise;
 
-  trimmed.save("trimmed.mesh");
+  skin.save("skin.mesh", IO::FileFormat::MEDIT);
 }
