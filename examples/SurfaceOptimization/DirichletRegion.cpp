@@ -29,19 +29,9 @@ static constexpr double epsilon = 0.1;
 static constexpr double ell = 0.2;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
-/**
- * @brief Computes the conormal field.
- * @param[in] Sh Scalar finite element space
- * @oaram[in] Vh Vectorial finite element space
- */
 GridFunction<H1> getShapeGradient(
-    FiniteElementSpace<H1>& scalarFes,
-    FiniteElementSpace<H1>& vecFes,
-    GridFunction<H1>& dist,
-    GridFunction<H1>& state,
-    GridFunction<H1>& adjoint,
-    const ScalarFunctionBase& g,
-    Solver::Solver& solver);
+    FiniteElementSpace<H1>& vecFes, GridFunction<H1>& dist,
+    const FunctionBase& expr, Solver::Solver& solver);
 
 int main(int, char**)
 {
@@ -127,7 +117,6 @@ int main(int, char**)
     fObj << objective << "\n";
     fObj.flush();
 
-
     // Transfer the functions to the surfacic spaces
     GridFunction uS(VhS), pS(VhS);
     u.getGridFunction().transfer(uS);
@@ -135,7 +124,8 @@ int main(int, char**)
 
     // Compute the shape gradient
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto gradS = getShapeGradient(VhS, ThS, distS, uS, pS, g, solver);
+    auto expr = 1. / (epsilon * epsilon) * u.getGridFunction() * p.getGridFunction() + ell;
+    auto gradS = getShapeGradient(ThS, distS, expr, solver);
 
     // Transfer back the vector field to the whole space
     GridFunction grad(Th);
@@ -167,72 +157,29 @@ int main(int, char**)
 }
 
 GridFunction<H1> getShapeGradient(
-    FiniteElementSpace<H1>& scalarFes,
-    FiniteElementSpace<H1>& vecFes,
-    GridFunction<H1>& dist,
-    GridFunction<H1>& state,
-    GridFunction<H1>& adjoint,
-    const ScalarFunctionBase& g,
-    Solver::Solver& solver)
+    FiniteElementSpace<H1>& vecFes, GridFunction<H1>& dist,
+    const FunctionBase& expr, Solver::Solver& solver)
 {
-  auto n0 = VectorFunction{Dx(dist), Dy(dist), Dz(dist)};
+  TrialFunction d(vecFes);
+  TestFunction  v(vecFes);
 
-  TrialFunction nx(scalarFes);
-  TrialFunction ny(scalarFes);
-  TrialFunction nz(scalarFes);
-  TestFunction  v(scalarFes);
+  Problem conormalExt(d, v);
+  conormalExt = Integral(alpha * Jacobian(d), Jacobian(v))
+              + Integral(d, v)
+              - BoundaryIntegral(Grad(dist), v).over(SigmaD);
+  solver.solve(conormalExt);
 
-  // Conormal calculation
-  Problem conormalX(nx, v);
-  conormalX = Integral(alpha * Grad(nx), Grad(v))
-            + Integral(nx, v)
-            - Integral(n0.x(), v).over(GammaD);
-  solver.solve(conormalX);
+  auto sol = d.getGridFunction();
+  auto cn = sol / Pow(sol.x() * sol.x() + sol.y() * sol.y() + sol.z() * sol.z(), 0.5);
 
-  Problem conormalY(ny, v);
-  conormalY = Integral(alpha * Grad(ny), Grad(v))
-            + Integral(ny, v)
-            - Integral(n0.y(), v).over(GammaD);
-  solver.solve(conormalY);
+  TrialFunction grad(vecFes);
+  Problem velExt(grad, v);
+  velExt = Integral(alpha * Jacobian(grad), Jacobian(v))
+         + Integral(grad, v)
+         + Integral(tgv * grad, v).over(GammaN)
+         - BoundaryIntegral(expr * cn, v).over(SigmaD);
+  solver.solve(velExt);
 
-  Problem conormalZ(nz, v);
-  conormalZ = Integral(alpha * Grad(nz), Grad(v))
-            + Integral(nz, v)
-            - Integral(n0.z(), v).over(GammaD);
-  solver.solve(conormalZ);
-
-  auto d = VectorFunction{
-    nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
-  auto conormal = d / Pow(d.x() * d.x() + d.y() * d.y() + d.z() * d.z(), 0.5);
-  auto expr = 1. / (epsilon * epsilon) * ScalarFunction(state) * ScalarFunction(adjoint) + ell;
-
-  TrialFunction gx(scalarFes);
-  TrialFunction gy(scalarFes);
-  TrialFunction gz(scalarFes);
-  Problem velextX(gx, v);
-  velextX = Integral(alpha * Grad(gx), Grad(v))
-          + Integral(gx, v)
-          + Integral(tgv * gx, v).over(GammaN)
-          - BoundaryIntegral(expr * conormal.x(), v).over(SigmaD);
-  solver.solve(velextX);
-
-  Problem velextY(gy, v);
-  velextY = Integral(alpha * Grad(gy), Grad(v))
-          + Integral(gy, v)
-          + Integral(tgv * gy, v).over(GammaN)
-          - BoundaryIntegral(expr * conormal.y(), v).over(SigmaD);
-  solver.solve(velextY);
-
-  Problem velextZ(gz, v);
-  velextZ = Integral(alpha * Grad(gz), Grad(v))
-          + Integral(gz, v)
-          + Integral(tgv * gz, v).over(GammaN)
-          - BoundaryIntegral(expr * conormal.z(), v).over(SigmaD);
-  solver.solve(velextZ);
-
-  GridFunction grad(vecFes);
-  grad = VectorFunction{gx.getGridFunction(), gy.getGridFunction(), gz.getGridFunction()};
-
-  return grad;
+  return grad.getGridFunction();
 }
 

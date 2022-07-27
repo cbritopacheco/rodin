@@ -34,22 +34,33 @@ namespace Rodin::Variational
           * @param[in] u GridFunction in H1 space
           */
          template <class Trait>
-         Derivative(int direction, int component, GridFunction<H1, Trait>& u)
+         Derivative(int direction, int component, const GridFunction<H1, Trait>& u)
             :  m_direction(direction),
                m_component(component),
                m_u(u)
          {}
 
-         Derivative(const Derivative& other) = default;
+         Derivative(const Derivative& other)
+            : ScalarFunctionBase(other),
+              m_direction(other.m_direction),
+              m_component(other.m_component),
+              m_u(other.m_u)
+         {}
 
-         Derivative(Derivative&& other) = default;
+         Derivative(Derivative&& other)
+            : ScalarFunctionBase(std::move(other)),
+              m_direction(other.m_direction),
+              m_component(other.m_component),
+              m_u(other.m_u)
+         {}
 
          double getValue(
                mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint&) const override
+               const mfem::IntegrationPoint& ip) const override
          {
             mfem::DenseMatrix grad;
-            m_u.getHandle().GetVectorGradient(trans, grad);
+            m_u.getHandle().GetVectorGradient(
+                  FunctionBase::getTraceElementTrans(trans, ip), grad);
             return grad(m_component, m_direction);
          }
 
@@ -58,9 +69,9 @@ namespace Rodin::Variational
             return new Derivative(*this);
          }
       private:
-         int m_direction;
-         int m_component;
-         GridFunctionBase& m_u;
+         const int m_direction;
+         const int m_component;
+         const GridFunctionBase& m_u;
    };
 
    /**
@@ -76,7 +87,7 @@ namespace Rodin::Variational
    template <class Trait>
    Derivative Dx(GridFunction<H1, Trait>& u)
    {
-      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      assert(u.getRangeType() == RangeType::Scalar);
       return Derivative(0, 0, u);
    }
 
@@ -93,7 +104,7 @@ namespace Rodin::Variational
    template <class Trait>
    Derivative Dy(GridFunction<H1, Trait>& u)
    {
-      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      assert(u.getRangeType() == RangeType::Scalar);
       return Derivative(1, 0, u);
    }
 
@@ -110,7 +121,7 @@ namespace Rodin::Variational
    template <class Trait>
    Derivative Dz(GridFunction<H1, Trait>& u)
    {
-      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      assert(u.getRangeType() == RangeType::Scalar);
       return Derivative(2, 0, u);
    }
 }

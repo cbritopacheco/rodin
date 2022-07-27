@@ -10,43 +10,7 @@
 #include "Rank3Operator.h"
 #include "FiniteElementSpace.h"
 
-namespace Rodin::Variational::Internal
-{
-   /**
-    * @brief Optimized version for functions whose original representation
-    * is of the form:
-    * @f[
-    *    u(x) = \left(
-    *       \sum^n_{i=1} w_{1, i} \phi_i(x), \ldots, \sum^n_{i=1} w_{d, i} \phi_i(x) \right)
-    * @f]
-    */
-   class ScalarShapeR3O : public Rank3Operator
-   {
-      public:
-         ScalarShapeR3O(mfem::Vector shape, int vdim)
-            : m_shape(shape),
-              m_vdim(vdim)
-         {}
-
-         int GetRows() const override;
-
-         int GetColumns() const override;
-
-         int GetDOFs() const override;
-
-         ScalarShapeR3O& operator*=(double s) override;
-
-         ScalarShapeR3O& operator=(double s) override;
-
-         double operator()(int row, int col, int dof) const override;
-
-         std::unique_ptr<Rank3Operator>
-         VectorDot(const mfem::Vector& rhs) const override;
-      private:
-         mfem::Vector m_shape;
-         int m_vdim;
-   };
-}
+#include "RangeShape.h"
 
 namespace Rodin::Variational
 {
@@ -89,23 +53,32 @@ namespace Rodin::Variational
             return Space;
          }
 
-         virtual ShapeFunctionBase<Space>& getLeaf() = 0;
+         RangeType getRangeType() const
+         {
+            if (getRows() == 1 && getColumns() == 1)
+               return RangeType::Scalar;
+            else if (getRows() > 1 && getColumns() == 1)
+               return RangeType::Vector;
+            else
+               return RangeType::Matrix;
+         }
+
+         RangeShape getRangeShape() const
+         {
+            return {getRows(), getColumns()};
+         }
 
          virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
 
-         virtual int getRows(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const = 0;
+         virtual int getRows() const = 0;
 
          virtual int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const = 0;
 
-         virtual int getColumns(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const = 0;
+         virtual int getColumns() const = 0;
 
-         virtual std::unique_ptr<Rank3Operator> getOperator(
+         virtual std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const = 0;
 
@@ -149,16 +122,12 @@ namespace Rodin::Variational
             return m_fes;
          }
 
-         int getRows(
-               const mfem::FiniteElement&,
-               const mfem::ElementTransformation&) const override
+         int getRows() const override
          {
             return getFiniteElementSpace().getVectorDimension();
          }
 
-         int getColumns(
-               const mfem::FiniteElement&,
-               const mfem::ElementTransformation&) const override
+         int getColumns() const override
          {
             return 1;
          }
@@ -170,7 +139,7 @@ namespace Rodin::Variational
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }
 
-         std::unique_ptr<Rank3Operator> getOperator(
+         std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -179,7 +148,7 @@ namespace Rodin::Variational
             mfem::Vector shape;
             shape.SetSize(dofs);
             fe.CalcPhysShape(trans, shape);
-            return std::unique_ptr<Rank3Operator>(
+            return std::unique_ptr<Internal::Rank3Operator>(
                   new Internal::ScalarShapeR3O(std::move(shape), vdim));
          }
 

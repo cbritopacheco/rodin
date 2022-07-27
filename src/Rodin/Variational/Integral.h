@@ -17,10 +17,9 @@
 #include "ForwardDecls.h"
 #include "FormLanguage.h"
 #include "GridFunction.h"
+#include "Function.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "ScalarFunction.h"
-#include "VectorFunction.h"
 #include "MatrixFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -40,16 +39,12 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Integral<Dot<
-                      ShapeFunctionBase<TrialSpace>,
-                      ShapeFunctionBase<TestSpace>>>
+   class Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
       : public BilinearFormDomainIntegrator
    {
       public:
          using Integrand =
-            Dot<
-               ShapeFunctionBase<TrialSpace>,
-               ShapeFunctionBase<TestSpace>>;
+            Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
 
          /**
           * @brief Integral of the dot product of trial and test operators
@@ -168,39 +163,9 @@ namespace Rodin::Variational
       public:
          using Integrand = ShapeFunctionBase<TestSpace>;
 
-         /**
-          * @brief Integral of the multiplication between a scalar valued function and operator
-          *
-          * Given
-          * @f[
-          * \lambda : \Omega \rightarrow \mathbb{R}, \quad
-          * A : V_h \rightarrow \mathbb{R}
-          * @f]
-          * constructs an instance representing the following integral
-          * @f[
-          *    \int \lambda A(v) \ dx \ .
-          * @f]
-          */
          Integral(
-               const ScalarFunctionBase& lhs,
+               const FunctionBase& lhs,
                const ShapeFunctionBase<TestSpace>& rhs)
-            : Integral(Dot(lhs, rhs))
-         {}
-
-         /**
-          * @brief Integral of the dot product between a vector valued function and operator
-          *
-          * Given
-          * @f[
-          * \vec{\lambda} : \Omega \rightarrow \mathbb{R}^d, \quad
-          * \vec{A} : V_h \rightarrow \mathbb{R}^d
-          * @f]
-          * constructs an instance representing the following integral
-          * @f[
-          *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx \ .
-          * @f]
-          */
-         Integral(const VectorFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -275,9 +240,7 @@ namespace Rodin::Variational
    };
    Integral(const ShapeFunctionBase<TestSpace>&)
       -> Integral<ShapeFunctionBase<TestSpace>>;
-   Integral(const ScalarFunctionBase&, const ShapeFunctionBase<TestSpace>&)
-      -> Integral<ShapeFunctionBase<TestSpace>>;
-   Integral(const VectorFunctionBase&, const ShapeFunctionBase<TestSpace>&)
+   Integral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&)
       -> Integral<ShapeFunctionBase<TestSpace>>;
 
    /**
@@ -345,14 +308,7 @@ namespace Rodin::Variational
          using Integrand = ShapeFunctionBase<TestSpace>;
 
          BoundaryIntegral(
-               const ScalarFunctionBase& lhs,
-               const ShapeFunctionBase<TestSpace>& rhs)
-            :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
-               m_integral(lhs, rhs)
-         {}
-
-         BoundaryIntegral(
-               const VectorFunctionBase& lhs,
+               const FunctionBase& lhs,
                const ShapeFunctionBase<TestSpace>& rhs)
             :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
                m_integral(lhs, rhs)
@@ -389,11 +345,7 @@ namespace Rodin::Variational
    };
    BoundaryIntegral(const ShapeFunctionBase<TestSpace>&)
       -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
-   BoundaryIntegral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
-      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
-   BoundaryIntegral(const VectorFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
-      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
-   BoundaryIntegral(const MatrixFunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
+   BoundaryIntegral(const FunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
       -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
 
    template <>

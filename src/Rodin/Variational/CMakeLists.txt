@@ -64,6 +64,9 @@ set(RodinVariational_SRCS
   ProblemBody.cpp
   Utility.cpp
   Minus.cpp
+  Function.cpp
+  RangeShape.cpp
+  Composition.cpp
   )
 
 add_library(RodinVariational

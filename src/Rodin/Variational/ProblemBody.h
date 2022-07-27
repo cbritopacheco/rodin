@@ -70,8 +70,8 @@ namespace Rodin::Variational
    ProblemBody operator-(
          const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi);
 
-   template <class T, class Value>
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T, Value>& bc)
+   template <class T>
+   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T>& bc)
    {
       ProblemBody res(pb);
       res.getEssentialBoundary().add(bc);

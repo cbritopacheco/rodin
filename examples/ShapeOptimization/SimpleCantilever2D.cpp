@@ -51,8 +51,8 @@ int main(int, char**)
   size_t maxIt = 40;
   double eps = 1e-6;
   double hmax = 0.1;
-  auto ell = ScalarFunction(5);
-  auto alpha = ScalarFunction(4 * hmax * hmax);
+  double ell = 5.0;
+  double alpha = 4 * hmax * hmax;
 
   std::vector<double> obj;
 
@@ -93,7 +93,7 @@ int main(int, char**)
     cg.solve(hilbert);
 
     // Update objective
-    obj.push_back(compliance(u.getGridFunction()) + ell.value() * Omega.getVolume());
+    obj.push_back(compliance(u.getGridFunction()) + ell * Omega.getVolume());
 
     std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
 

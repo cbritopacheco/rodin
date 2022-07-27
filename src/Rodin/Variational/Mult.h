@@ -14,406 +14,74 @@
 #include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-
-#include "GridFunction.h"
+#include "Function.h"
 #include "ScalarFunction.h"
-#include "VectorFunction.h"
-#include "MatrixFunction.h"
-#include "TestFunction.h"
-#include "TrialFunction.h"
+#include "ShapeFunction.h"
+
+#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
    /**
-    * @brief Multiplication of two ScalarFunctionBase instances.
+    * @brief Multiplication of two FunctionBase instances.
     */
    template <>
-   class Mult<ScalarFunctionBase, ScalarFunctionBase>
-      : public ScalarFunctionBase
+   class Mult<FunctionBase, FunctionBase> : public FunctionBase
    {
       public:
-         Mult(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
+         Mult(const FunctionBase& lhs, const FunctionBase& rhs);
 
-         Mult(const Mult& other)
-            :  ScalarFunctionBase(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
+         Mult(const Mult& other);
 
-         Mult(Mult&& other)
-            :  ScalarFunctionBase(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
+         Mult(Mult&& other);
 
-         ScalarFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
+         RangeShape getRangeShape() const override;
 
-         ScalarFunctionBase& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const ScalarFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const ScalarFunctionBase& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            return getLHS().getValue(trans, ip) * getRHS().getValue(trans, ip);
-         }
-
-         Mult* copy() const noexcept override
-         {
-            return new Mult(*this);
-         }
-      private:
-         std::unique_ptr<ScalarFunctionBase> m_lhs;
-         std::unique_ptr<ScalarFunctionBase> m_rhs;
-   };
-   Mult(const ScalarFunctionBase&, const ScalarFunctionBase&)
-      -> Mult<ScalarFunctionBase, ScalarFunctionBase>;
-
-   Mult<ScalarFunctionBase, ScalarFunctionBase>
-   operator*(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
-
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ScalarFunctionBase>>
-   operator*(T lhs, const ScalarFunctionBase& rhs)
-   {
-      return Mult(ScalarFunction(lhs), rhs);
-   }
-
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ScalarFunctionBase>>
-   operator*(const ScalarFunctionBase& rhs, T lhs)
-   {
-      return Mult(rhs, ScalarFunction(lhs));
-   }
-
-   /**
-    * @brief Multiplication of ScalarFunctionBase and VectorFunctionBase.
-    */
-   template <>
-   class Mult<ScalarFunctionBase, VectorFunctionBase>
-      : public VectorFunctionBase
-   {
-      public:
-         Mult(const ScalarFunctionBase& lhs, const VectorFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
-
-         Mult(const Mult& other)
-            :  VectorFunctionBase(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
-
-         Mult(Mult&& other)
-            :  VectorFunctionBase(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
-
-         ScalarFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
-
-         VectorFunctionBase& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const ScalarFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const VectorFunctionBase& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         int getDimension() const override
-         {
-            return getRHS().getDimension();
-         }
-
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            getRHS().getValue(value, trans, ip);
-            value *= getLHS().getValue(trans, ip);
-         }
-
-         Mult* copy() const noexcept override
-         {
-            return new Mult(*this);
-         }
-      private:
-         std::unique_ptr<ScalarFunctionBase> m_lhs;
-         std::unique_ptr<VectorFunctionBase> m_rhs;
-   };
-   Mult(const ScalarFunctionBase&, const VectorFunctionBase&)
-      -> Mult<ScalarFunctionBase, VectorFunctionBase>;
-
-   Mult<ScalarFunctionBase, VectorFunctionBase>
-   operator*(const ScalarFunctionBase& lhs, const VectorFunctionBase& rhs);
-
-   Mult<ScalarFunctionBase, VectorFunctionBase>
-   operator*(const VectorFunctionBase& lhs, const ScalarFunctionBase& rhs);
-
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, VectorFunctionBase>>
-   operator*(T lhs, const VectorFunctionBase& rhs)
-   {
-      return Mult(ScalarFunction(lhs), rhs);
-   }
-
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, VectorFunctionBase>>
-   operator*(const VectorFunctionBase& lhs, T rhs)
-   {
-      return Mult(ScalarFunction(rhs), lhs);
-   }
-
-   /**
-    * @brief Multiplication of ScalarFunctionBase and MatrixFunctionBase.
-    */
-   template <>
-   class Mult<ScalarFunctionBase, MatrixFunctionBase>
-      : public MatrixFunctionBase
-   {
-      public:
-         Mult(const ScalarFunctionBase& lhs, const MatrixFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
-
-         Mult(const Mult& other)
-            :  MatrixFunctionBase(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
-
-         Mult(Mult&& other)
-            :  MatrixFunctionBase(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
-
-         ScalarFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
-
-         MatrixFunctionBase& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const ScalarFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const MatrixFunctionBase& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         int getRows() const override
-         {
-            return getRHS().getRows();
-         }
-
-         int getColumns() const override
-         {
-            return getRHS().getColumns();
-         }
+         Mult& traceOf(const std::set<int>& attrs) override;
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            getRHS().getValue(value, trans, ip);
-            value *= getLHS().getValue(trans, ip);
-         }
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
 
          Mult* copy() const noexcept override
          {
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<ScalarFunctionBase> m_lhs;
-         std::unique_ptr<MatrixFunctionBase> m_rhs;
+         std::unique_ptr<FunctionBase> m_lhs;
+         std::unique_ptr<FunctionBase> m_rhs;
    };
-   Mult(const ScalarFunctionBase&, const MatrixFunctionBase&)
-      -> Mult<ScalarFunctionBase, MatrixFunctionBase>;
+   Mult(const FunctionBase&, const FunctionBase&) -> Mult<FunctionBase, FunctionBase>;
 
-   Mult<ScalarFunctionBase, MatrixFunctionBase>
-   operator*(const ScalarFunctionBase& lhs, const MatrixFunctionBase& rhs);
-
-   Mult<ScalarFunctionBase, MatrixFunctionBase>
-   operator*(const MatrixFunctionBase& lhs, const ScalarFunctionBase& rhs);
+   Mult<FunctionBase, FunctionBase>
+   operator*(const FunctionBase& lhs, const FunctionBase& rhs);
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixFunctionBase>>
-   operator*(T lhs, const MatrixFunctionBase& rhs)
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, FunctionBase>>
+   operator*(T lhs, const FunctionBase& rhs)
    {
       return Mult(ScalarFunction(lhs), rhs);
    }
 
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, MatrixFunctionBase>>
-   operator*(const MatrixFunctionBase& lhs, T rhs)
-   {
-      return Mult(ScalarFunction(rhs), lhs);
-   }
-
-   template <ShapeFunctionSpaceType Space>
-   class Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>
-      : public ShapeFunctionBase<Space>
-   {
-      public:
-         Mult(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
-
-         Mult(const Mult& other)
-            :  ShapeFunctionBase<Space>(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
-
-         Mult(Mult&& other)
-            :  ShapeFunctionBase<Space>(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
-
-         ScalarFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
-
-         ShapeFunctionBase<Space>& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const ScalarFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const ShapeFunctionBase<Space>& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         ShapeFunctionBase<Space>& getLeaf() override
-         {
-            return getRHS().getLeaf();
-         }
-
-         const ShapeFunctionBase<Space>& getLeaf() const override
-         {
-            return getRHS().getLeaf();
-         }
-
-         int getRows(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
-         {
-            return getRHS().getRows(fe, trans);
-         }
-
-         int getColumns(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
-         {
-            return getRHS().getColumns(fe, trans);
-         }
-
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
-         {
-            return getRHS().getDOFs(fe, trans);
-         }
-
-         std::unique_ptr<Rank3Operator> getOperator(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
-         {
-            auto result = getRHS().getOperator(fe, trans);
-            (*result) *= getLHS().getValue(trans, trans.GetIntPoint());
-            return result;
-         }
-
-         FiniteElementSpaceBase& getFiniteElementSpace() override
-         {
-            return getRHS().getFiniteElementSpace();
-         }
-
-         const FiniteElementSpaceBase& getFiniteElementSpace() const override
-         {
-            return getRHS().getFiniteElementSpace();
-         }
-
-         Mult* copy() const noexcept override
-         {
-            return new Mult(*this);
-         }
-      private:
-         std::unique_ptr<ScalarFunctionBase> m_lhs;
-         std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
-   };
-   template <ShapeFunctionSpaceType Space>
-   Mult(const ScalarFunctionBase&, const ShapeFunctionBase<Space>&)
-      -> Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>;
-
-   template <ShapeFunctionSpaceType Space>
-   Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>
-   operator*(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
-   {
-      return Mult(lhs, rhs);
-   }
-
-   template <ShapeFunctionSpaceType Space>
-   Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>
-   operator*(const ShapeFunctionBase<Space>& lhs, const ScalarFunctionBase& rhs)
-   {
-      return Mult(rhs, lhs);
-   }
-
-   template <class T, ShapeFunctionSpaceType Space>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>>
-   operator*(T lhs, const ShapeFunctionBase<Space>& rhs)
-   {
-      return Mult(ScalarFunction(lhs), rhs);
-   }
-
-   template <class T, ShapeFunctionSpaceType Space>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<ScalarFunctionBase, ShapeFunctionBase<Space>>>
-   operator*(const ShapeFunctionBase<Space>& lhs, T rhs)
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, FunctionBase>>
+   operator*(const FunctionBase& lhs, T rhs)
    {
       return Mult(lhs, ScalarFunction(rhs));
    }
 
    template <ShapeFunctionSpaceType Space>
-   class Mult<VectorFunctionBase, ShapeFunctionBase<Space>>
+   class Mult<FunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
-         Mult(const VectorFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
+         Mult(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
+         {
+            if (lhs.getRangeType() != RangeType::Scalar)
+               UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
+         }
 
          Mult(const Mult& other)
             :  ShapeFunctionBase<Space>(other),
@@ -425,75 +93,47 @@ namespace Rodin::Variational
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         VectorFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
-
-         ShapeFunctionBase<Space>& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const VectorFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const ShapeFunctionBase<Space>& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         ShapeFunctionBase<Space>& getLeaf() override
-         {
-            return getRHS().getLeaf();
-         }
-
          const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return getRHS().getLeaf();
+            return m_rhs->getLeaf();
          }
 
-         int getRows(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getRows() const override
          {
-            return getLHS().getDimension();
+            return m_rhs->getRangeShape().height();
          }
 
-         int getColumns(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getColumns() const override
          {
-            return 1;
+            return m_rhs->getRangeShape().width();
          }
 
          int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
          {
-            return getRHS().getDOFs(fe, trans);
+            return m_rhs->getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Rank3Operator> getOperator(
+         std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            auto result = getRHS().getOperator(fe, trans);
-            mfem::Vector v;
-            getLHS().getValue(v, trans, trans.GetIntPoint());
-            return result->ScalarVectorMult(v);
+            auto result = m_rhs->getOperator(fe, trans);
+            mfem::DenseMatrix v;
+            m_lhs->getValue(v, trans, trans.GetIntPoint());
+            (*result) *= v(0, 0);
+            return result;
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
          {
-            return getRHS().getFiniteElementSpace();
+            return m_rhs->getFiniteElementSpace();
          }
 
          const FiniteElementSpaceBase& getFiniteElementSpace() const override
          {
-            return getRHS().getFiniteElementSpace();
+            return m_rhs->getFiniteElementSpace();
          }
 
          Mult* copy() const noexcept override
@@ -501,25 +141,39 @@ namespace Rodin::Variational
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<VectorFunctionBase> m_lhs;
+         std::unique_ptr<FunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
-   Mult(const VectorFunctionBase&, const ShapeFunctionBase<Space>&)
-      -> Mult<VectorFunctionBase, ShapeFunctionBase<Space>>;
+   Mult(const FunctionBase&, const ShapeFunctionBase<Space>&)
+      -> Mult<FunctionBase, ShapeFunctionBase<Space>>;
 
    template <ShapeFunctionSpaceType Space>
-   Mult<VectorFunctionBase, ShapeFunctionBase<Space>>
-   operator*(const VectorFunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
+   Mult<FunctionBase, ShapeFunctionBase<Space>>
+   operator*(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
    {
       return Mult(lhs, rhs);
    }
 
    template <ShapeFunctionSpaceType Space>
-   Mult<VectorFunctionBase, ShapeFunctionBase<Space>>
-   operator*(const ShapeFunctionBase<Space>& lhs, const VectorFunctionBase& rhs)
+   Mult<FunctionBase, ShapeFunctionBase<Space>>
+   operator*(const ShapeFunctionBase<Space>& lhs, const FunctionBase& rhs)
    {
       return Mult(rhs, lhs);
+   }
+
+   template <class T, ShapeFunctionSpaceType Space>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, ShapeFunctionBase<Space>>>
+   operator*(const ShapeFunctionBase<Space>& lhs, T v)
+   {
+      return Mult(ScalarFunction(v), lhs);
+   }
+
+   template <class T, ShapeFunctionSpaceType Space>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, ShapeFunctionBase<Space>>>
+   operator*(T v, const ShapeFunctionBase<Space>& rhs)
+   {
+      return Mult(ScalarFunction(v), rhs);
    }
 }
 

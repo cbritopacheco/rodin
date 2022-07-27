@@ -7,216 +7,36 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 
-#include <memory>
-#include <type_traits>
-
 #include "FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "Function.h"
 #include "ShapeFunction.h"
-#include "ScalarFunction.h"
-#include "VectorFunction.h"
-#include "MatrixFunction.h"
+
+#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
    template <>
-   class Sum<ScalarFunctionBase, ScalarFunctionBase>
-      : public ScalarFunctionBase
+   class Sum<FunctionBase, FunctionBase> : public FunctionBase
    {
       public:
-         Sum(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
+         Sum(const FunctionBase& lhs, const FunctionBase& rhs);
 
-         Sum(const Sum& other)
-            :  ScalarFunctionBase(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
+         Sum(const Sum& other);
 
-         Sum(Sum&& other)
-            :  ScalarFunctionBase(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
+         Sum(Sum&& other);
 
-         ScalarFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
+         Sum& operator+=(const FunctionBase& lhs);
 
-         ScalarFunctionBase& getRHS()
-         {
-            return *m_rhs;
-         }
+         RangeShape getRangeShape() const override;
 
-         const ScalarFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const ScalarFunctionBase& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
-
-         Sum* copy() const noexcept override
-         {
-            return new Sum(*this);
-         }
-
-         Sum& operator+=(const ScalarFunctionBase& lhs)
-         {
-            auto sum = new Sum(lhs, *m_rhs);
-            m_rhs.reset(sum);
-            return *this;
-         }
-
-      private:
-         std::unique_ptr<ScalarFunctionBase> m_lhs;
-         std::unique_ptr<ScalarFunctionBase> m_rhs;
-   };
-   Sum(const ScalarFunctionBase&, const ScalarFunctionBase&)
-      -> Sum<ScalarFunctionBase, ScalarFunctionBase>;
-
-   Sum<ScalarFunctionBase, ScalarFunctionBase>
-   operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
-
-   template <>
-   class Sum<VectorFunctionBase, VectorFunctionBase>
-      : public VectorFunctionBase
-   {
-      public:
-         Sum(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            assert(lhs.getDimension() == rhs.getDimension());
-         }
-
-         Sum(const Sum& other)
-            :  VectorFunctionBase(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
-
-         Sum(Sum&& other)
-            :  VectorFunctionBase(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
-
-         VectorFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
-
-         VectorFunctionBase& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const VectorFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const VectorFunctionBase& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         int getDimension() const override
-         {
-            return m_lhs->getDimension();
-         }
-
-         void getValue(mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            getLHS().getValue(value, trans, ip);
-            mfem::Vector tmp;
-            getRHS().getValue(tmp, trans, ip);
-            value += tmp;
-         }
-
-         Sum& operator+=(const VectorFunctionBase& lhs)
-         {
-            auto sum = new Sum(lhs, *m_rhs);
-            m_rhs.reset(sum);
-            return *this;
-         }
-
-         Sum* copy() const noexcept override
-         {
-            return new Sum(*this);
-         }
-
-      private:
-         std::unique_ptr<VectorFunctionBase> m_lhs;
-         std::unique_ptr<VectorFunctionBase> m_rhs;
-   };
-   Sum(const VectorFunctionBase&, const VectorFunctionBase&)
-      -> Sum<VectorFunctionBase, VectorFunctionBase>;
-
-   Sum<VectorFunctionBase, VectorFunctionBase>
-   operator+(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs);
-
-   /**
-    * @brief %Sum of two MatrixFunctionBase instances.
-    */
-   template <>
-   class Sum<MatrixFunctionBase, MatrixFunctionBase>
-      : public MatrixFunctionBase
-   {
-      public:
-         Sum(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
-
-         Sum(const Sum& other)
-            :  MatrixFunctionBase(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
-
-         Sum(Sum&& other)
-            :  MatrixFunctionBase(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
-
-         MatrixFunctionBase& getLHS()
-         {
-            return *m_lhs;
-         }
-
-         MatrixFunctionBase& getRHS()
-         {
-            return *m_rhs;
-         }
-
-         const MatrixFunctionBase& getLHS() const
-         {
-            return *m_lhs;
-         }
-
-         const MatrixFunctionBase& getRHS() const
-         {
-            return *m_rhs;
-         }
-
-         int getRows() const override;
-
-         int getColumns() const override;
+         Sum& traceOf(const std::set<int>& attrs) override;
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
-
-         Sum& operator+=(const MatrixFunctionBase& lhs)
-         {
-            auto sum = new Sum(lhs, *m_rhs);
-            m_rhs.reset(sum);
-            return *this;
-         }
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
 
          Sum* copy() const noexcept override
          {
@@ -224,13 +44,27 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<MatrixFunctionBase> m_lhs;
-         std::unique_ptr<MatrixFunctionBase> m_rhs;
+         std::unique_ptr<FunctionBase> m_lhs;
+         std::unique_ptr<FunctionBase> m_rhs;
    };
-   Sum(const MatrixFunctionBase&, const MatrixFunctionBase&)
-      -> Sum<MatrixFunctionBase, MatrixFunctionBase>;
-   Sum<MatrixFunctionBase, MatrixFunctionBase>
-   operator+(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs);
+   Sum(const FunctionBase&, const FunctionBase&) -> Sum<FunctionBase, FunctionBase>;
+
+   Sum<FunctionBase, FunctionBase>
+   operator+(const FunctionBase& lhs, const FunctionBase& rhs);
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
+   operator+(const FunctionBase& lhs, T v)
+   {
+      return Sum(lhs, ScalarFunction(v));
+   }
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
+   operator+(T v, const FunctionBase& rhs)
+   {
+      return Sum(ScalarFunction(v), rhs);
+   }
 
    template <ShapeFunctionSpaceType Space>
    class Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>
@@ -241,6 +75,8 @@ namespace Rodin::Variational
             : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {
             assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
+            if (lhs.getRangeShape() != rhs.getRangeShape())
+               RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
          }
 
          Sum(const Sum& other)
@@ -271,30 +107,19 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         ShapeFunctionBase<Space>& getLeaf() override
-         {
-            return getRHS().getLeaf();
-         }
-
          const ShapeFunctionBase<Space>& getLeaf() const override
          {
             return getRHS().getLeaf();
          }
 
-         int getRows(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getRows() const override
          {
-            assert(getLHS().getRows(fe, trans) == getRHS().getRows(fe, trans));
-            return getLHS().getRows(fe, trans);
+            return getLHS().getRows();
          }
 
-         int getColumns(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getColumns() const override
          {
-            assert(getLHS().getColumns(fe, trans) == getRHS().getColumns(fe, trans));
-            return getLHS().getColumns(fe, trans);
+            return getLHS().getColumns();
          }
 
          int getDOFs(
@@ -305,11 +130,12 @@ namespace Rodin::Variational
             return getLHS().getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Rank3Operator> getOperator(
+         std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            return getLHS().getOperator(fe, trans)->OperatorSum(*getRHS().getOperator(fe, trans));
+            return getLHS().getOperator(fe, trans)->OperatorSum(
+                  *getRHS().getOperator(fe, trans));
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -339,13 +165,6 @@ namespace Rodin::Variational
    operator+(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
    {
       return Sum(lhs, rhs);
-   }
-
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Sum<ScalarFunctionBase, ScalarFunctionBase>>
-   operator+(const ScalarFunctionBase& lhs, T v)
-   {
-      return Sum(lhs, ScalarFunction<T>(v));
    }
 }
 

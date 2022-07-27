@@ -4,7 +4,7 @@
 #include <vector>
 #include <mfem.hpp>
 
-namespace Rodin::Variational
+namespace Rodin::Variational::Internal
 {
    /**
     * @brief Rank-3 tensor for discretized functions on finite bases
@@ -165,11 +165,13 @@ namespace Rodin::Variational
          }
 
          DenseRank3Operator(const DenseRank3Operator& other)
-            : m_tensor(other.m_tensor)
+            :  Rank3Operator(other),
+               m_tensor(other.m_tensor)
          {}
 
          DenseRank3Operator(DenseRank3Operator&& other)
-            : m_tensor(std::move(other.m_tensor))
+            :  Rank3Operator(std::move(other)),
+               m_tensor(std::move(other.m_tensor))
          {}
 
          mfem::DenseMatrix& operator()(int dof)
@@ -262,6 +264,83 @@ namespace Rodin::Variational
          }
       private:
          mfem::DenseTensor m_tensor;
+   };
+
+   /**
+    * @brief Optimized version for functions whose original representation
+    * is of the form:
+    * @f[
+    *    u(x) = \left(
+    *       \sum^n_{i=1} w_{1, i} \phi_i(x), \ldots, \sum^n_{i=1} w_{d, i} \phi_i(x) \right)
+    * @f]
+    */
+   class ScalarShapeR3O : public Rank3Operator
+   {
+      public:
+         ScalarShapeR3O(mfem::Vector shape, int vdim)
+            : m_shape(shape),
+              m_vdim(vdim)
+         {}
+
+         int GetRows() const override;
+
+         int GetColumns() const override;
+
+         int GetDOFs() const override;
+
+         ScalarShapeR3O& operator*=(double s) override;
+
+         ScalarShapeR3O& operator=(double s) override;
+
+         double operator()(int row, int col, int dof) const override;
+
+         std::unique_ptr<Rank3Operator>
+         VectorDot(const mfem::Vector& rhs) const override;
+      private:
+         mfem::Vector m_shape;
+         int m_vdim;
+   };
+
+   class JacobianShapeR3O : public Rank3Operator
+   {
+      public:
+         JacobianShapeR3O(mfem::DenseMatrix dshape, int sdim, int vdim)
+            : m_dshape(dshape),
+              m_sdim(sdim),
+              m_vdim(vdim)
+         {}
+
+         JacobianShapeR3O(const JacobianShapeR3O& other)
+            :  Rank3Operator(other),
+               m_dshape(other.m_dshape),
+               m_sdim(other.m_sdim),
+               m_vdim(other.m_vdim)
+         {}
+
+         JacobianShapeR3O(JacobianShapeR3O&& other)
+            :  Rank3Operator(std::move(other)),
+               m_dshape(std::move(other.m_dshape)),
+               m_sdim(other.m_sdim),
+               m_vdim(other.m_vdim)
+         {}
+
+         int GetRows() const override;
+
+         int GetColumns() const override;
+
+         int GetDOFs() const override;
+
+         JacobianShapeR3O& operator=(double s) override;
+
+         JacobianShapeR3O& operator*=(double s) override;
+
+         double operator()(int row, int col, int dof) const override;
+
+         std::unique_ptr<Rank3Operator> Trace() const override;
+
+      private:
+         mfem::DenseMatrix m_dshape;
+         int m_sdim, m_vdim;
    };
 }
 

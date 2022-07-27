@@ -40,19 +40,12 @@ namespace Rodin::Variational::FormLanguage
           */
          virtual Base* copy() const noexcept = 0;
 
-         boost::uuids::uuid getUUID() const
+         const boost::uuids::uuid& getUUID() const
          {
             return m_uuid;
          }
       private:
          const boost::uuids::uuid m_uuid;
-   };
-
-   template <class InternalValue>
-   class Buildable : public Base
-   {
-      public:
-         virtual std::unique_ptr<InternalValue> build() const = 0;
    };
 }
 

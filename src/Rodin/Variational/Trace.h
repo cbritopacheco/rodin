@@ -29,18 +29,20 @@ namespace Rodin::Variational
           * @brief Constructs the Trace of the given matrix
           * @param[in] m Square matrix
           */
-         Trace(const MatrixFunctionBase& m);
+         Trace(const FunctionBase& m);
 
          Trace(const Trace& other);
 
-         double getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override;
+         double getValue(
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
 
          Trace* copy() const noexcept override
          {
             return new Trace(*this);
          }
       private:
-         std::unique_ptr<MatrixFunctionBase> m_matrix;
+         std::unique_ptr<FunctionBase> m_matrix;
    };
 }
 

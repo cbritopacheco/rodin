@@ -104,26 +104,23 @@ namespace Rodin::Variational
       for (const auto& [uuid, tfValue] : getEssentialBoundary().getTFMap())
       {
          assert(m_trialFunctions.count(uuid) == 1);
-         auto& u = m_trialFunctions.at(uuid);
-         auto& bdrAttr = tfValue.attributes;
-         std::visit(
-               [&](auto&& v){ u.get().getGridFunction().projectOnBoundary(*v, bdrAttr); },
-               tfValue.value);
+         const auto& u = m_trialFunctions.at(uuid);
+         const auto& bdrAttr = tfValue.attributes;
+         u.get().getGridFunction().projectOnBoundary(*tfValue.value, bdrAttr);
          m_essTrueDofList.Append(u.get().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr));
       }
 
       for (const auto& [uuid, compMap] : getEssentialBoundary().getTFCompMap())
       {
          assert(m_trialFunctions.count(uuid) == 1);
-         auto& u = m_trialFunctions.at(uuid);
+         const auto& u = m_trialFunctions.at(uuid);
          for (const auto& [component, compValue] : compMap)
          {
-            auto& bdrAttr = compValue.attributes;
-            auto comp = Component(u.get().getGridFunction(), component);
+            const auto& bdrAttr = compValue.attributes;
+            Component comp(u.get().getGridFunction(), component);
             comp.projectOnBoundary(*compValue.value, bdrAttr);
             m_essTrueDofList.Append(
-                  u.get().getFiniteElementSpace().getEssentialTrueDOFs(
-                     bdrAttr, component));
+               u.get().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr, component));
          }
       }
 

@@ -15,13 +15,22 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for bilinear form integrators.
     */
-   class BilinearFormIntegratorBase
-      : public FormLanguage::Buildable<mfem::BilinearFormIntegrator>
+   class BilinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
+         BilinearFormIntegratorBase() = default;
+
+         BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
+            : FormLanguage::Base(other)
+         {}
+
+         BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
+            : FormLanguage::Base(std::move(other))
+         {}
+
          virtual ~BilinearFormIntegratorBase() = default;
 
-         std::unique_ptr<mfem::BilinearFormIntegrator> build() const override;
+         std::unique_ptr<mfem::BilinearFormIntegrator> build() const;
 
          /**
           * @brief Gets reference to trial function.
