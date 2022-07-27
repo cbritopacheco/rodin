@@ -3,6 +3,9 @@
 
 #include <cmath>
 
+#include "RangeShape.h"
+#include "Exceptions.h"
+#include "Function.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
@@ -16,20 +19,24 @@ namespace Rodin::Variational
     *    f(x) = x^p
     * @f$
     */
-   template <class T>
+   template <class Number>
    class Pow : public ScalarFunctionBase
    {
-      static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
+      static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
       public:
          /**
           * @bref Constructs the power object
           * @param[in] s Base value
           * @param[in] p Power
           */
-         Pow(const ScalarFunctionBase& s, T p)
+         Pow(const FunctionBase& s, Number p)
             : m_s(s.copy()),
               m_p(p)
-         {}
+         {
+            if (s.getRangeType() != RangeType::Scalar)
+            {
+            }
+         }
 
          Pow(const Pow& other)
             : ScalarFunctionBase(other),
@@ -47,7 +54,9 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override
          {
-            return std::pow(m_s->getValue(trans, ip), m_p);
+            mfem::DenseMatrix s;
+            m_s->getValue(s, trans, ip);
+            return std::pow(s(0, 0), m_p);
          }
 
          Pow* copy() const noexcept override
@@ -55,9 +64,11 @@ namespace Rodin::Variational
             return new Pow(*this);
          }
       private:
-         std::unique_ptr<ScalarFunctionBase> m_s;
-         T m_p;
+         std::unique_ptr<FunctionBase> m_s;
+         Number m_p;
    };
+   template <class Number>
+   Pow(const FunctionBase&, Number) -> Pow<Number>;
 }
 
 #endif

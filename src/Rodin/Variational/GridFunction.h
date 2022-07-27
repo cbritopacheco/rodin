@@ -32,7 +32,7 @@
 #include "FiniteElementSpace.h"
 
 #include "Function.h"
-
+#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
@@ -44,11 +44,19 @@ namespace Rodin::Variational
       public:
          GridFunctionBase() = default;
 
-         GridFunctionBase(const GridFunctionBase&) = default;
+         GridFunctionBase(const GridFunctionBase& other)
+            : FunctionBase(other)
+         {}
 
-         GridFunctionBase(GridFunctionBase&&) = default;
+         GridFunctionBase(GridFunctionBase&& other)
+            : FunctionBase(std::move(other))
+         {}
 
-         GridFunctionBase& operator=(GridFunctionBase&&) = default;
+         GridFunctionBase& operator=(GridFunctionBase&& other)
+         {
+            FunctionBase::operator=(std::move(other));
+            return *this;
+         }
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
 
@@ -69,6 +77,12 @@ namespace Rodin::Variational
           * data array.
           */
          double min() const;
+
+         Component<FunctionBase> x() const;
+
+         Component<FunctionBase> y() const;
+
+         Component<FunctionBase> z() const;
 
          /**
           * @brief Updates the state after a refinement in the mesh.
@@ -127,68 +141,37 @@ namespace Rodin::Variational
          GridFunctionBase& operator/=(double t);
 
          /**
-          * @brief Projection of a scalar function.
+          * @brief Projection of a function.
           */
-         GridFunctionBase& operator=(const ScalarFunctionBase& v)
+         GridFunctionBase& operator=(const FunctionBase& v)
          {
             return project(v);
          }
 
          /**
-          * @brief Projection of a vector function.
-          */
-         GridFunctionBase& operator=(const VectorFunctionBase& v)
-         {
-            return project(v);
-         }
-
-         /**
-          * @brief Projects a ScalarFunctionBase instance
+          * @brief Projects a FunctionBase instance
           *
-          * This function will project a ScalarFunctionBase instance on the
+          * This function will project a FunctionBase instance on the
           * domain elements with the given attribute.
           *
           * It is a convenience function to call
-          * project(const ScalarFunctionBase&, const std::set<int>&) with one
+          * project(const FunctionBase&, const std::set<int>&) with one
           * attribute.
           */
-         GridFunctionBase& project(const ScalarFunctionBase& v, int attr)
+         GridFunctionBase& project(const FunctionBase& v, int attr)
          {
             return project(v, std::set<int>{attr});
          }
 
          /**
-          * @brief Projects a VectorFunctionBase instance
+          * @brief Projects a FunctionBase instance on the grid function.
           *
-          * This function will project a VectorFunctionBase instance on the
-          * domain elements with the given attribute.
-          *
-          * It is a convenience function to call
-          * project(const VectorFunctionBase&, const std::set<int>&) with one
-          * attribute.
-          */
-         GridFunctionBase& project(const VectorFunctionBase& v, int attr)
-         {
-            return project(v, std::set<int>{attr});
-         }
-
-         /**
-          * @brief Projects a ScalarFunctionBase instance on the grid function.
-          *
-          * This function will project a ScalarFunctionBase instance on the
+          * This function will project a FunctionBase instance on the
           * domain elements with the given attributes. If the attribute set is
           * empty, this function will project over all elements in the mesh.
           */
-         GridFunctionBase& project(const ScalarFunctionBase& s, const std::set<int>& attrs = {});
-
-         /**
-          * @brief Projects a VectorFunctionBase instance on the grid function.
-          *
-          * This function will project a VectorFunctionBase instance on the
-          * domain elements with the given attributes. If the attribute set is
-          * empty, this function will project over all elements in the mesh.
-          */
-         GridFunctionBase& project(const VectorFunctionBase& s, const std::set<int>& attrs = {});
+         GridFunctionBase& project(
+               const FunctionBase& s, const std::set<int>& attrs = {});
 
          /**
           * @brief Transfers the grid function from one finite element space to
@@ -203,7 +186,14 @@ namespace Rodin::Variational
           * @param[in] s Scalar coefficient to project
           * @returns Reference to self
           */
-         GridFunctionBase& project(const Restriction<ScalarFunctionBase>& s);
+         GridFunctionBase& project(const Restriction<FunctionBase>& s);
+
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
+
+         RangeShape getRangeShape() const override;
 
          /**
           * @brief Gets the underlying handle to the mfem::GridFunction object.
@@ -222,45 +212,8 @@ namespace Rodin::Variational
 
          virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
-         {
-            switch (getRangeType())
-            {
-               case RangeType::Scalar:
-               {
-                  value.SetSize(1, 1);
-                  value(0, 0) = getHandle().GetValue(trans, ip);
-                  break;
-               }
-               case RangeType::Vector:
-               {
-                  mfem::Vector v;
-                  getHandle().GetVectorValue(trans, ip, v);
-                  value.SetSize(getFiniteElementSpace().getVectorDimension(), 1);
-                  value.GetFromVector(0, v);
-                  break;
-               }
-               case RangeType::Matrix:
-               {
-                  assert(false); // GridFunction cannot be matrix valued
-                  break;
-               }
-            }
-         }
-
-         std::tuple<int, int> getRangeShape() const override
-         {
-            return {getFiniteElementSpace().getVectorDimension(), 1};
-         }
-
-         RangeType getRangeType() const override
-         {
-            auto shape = getRangeShape();
-            assert(std::get<1>(shape) == 1);
-            return std::get<0>(shape) == 1 ? RangeType::Scalar : RangeType::Vector;
-         }
+      private:
+         FunctionBase* copy() const noexcept override;
    };
 
    /**
@@ -360,67 +313,66 @@ namespace Rodin::Variational
                   GridFunctionBase::project(std::forward<Args>(args)...));
          }
 
-         GridFunction& projectOnBoundary(const ScalarFunctionBase& s, int attr)
-         {
-            return projectOnBoundary(s, std::set<int>{attr});
-         }
-
-         GridFunction& projectOnBoundary(const VectorFunctionBase& v, int attr)
+         GridFunction& projectOnBoundary(const FunctionBase& v, int attr)
          {
             return projectOnBoundary(v, std::set<int>{attr});
          }
 
          GridFunction& projectOnBoundary(
-               const ScalarFunctionBase& s, const std::set<int>& attrs = {})
+               const FunctionBase& s, const std::set<int>& attrs = {})
          {
-            assert(getFiniteElementSpace().getVectorDimension() == 1);
-            auto iv = s.build();
-            int maxBdrAttr = getFiniteElementSpace()
-                            .getMesh()
-                            .getHandle().bdr_attributes.Max();
-            mfem::Array<int> marker(maxBdrAttr);
-            if (attrs.size() == 0)
-            {
-               marker = 1;
-               getHandle().ProjectBdrCoefficient(*iv, marker);
-            }
-            else
-            {
-               marker = 0;
-               for (const auto& attr : attrs)
+            auto va = s.build();
+            std::visit(Utility::Overloaded{
+               [&](Internal::ScalarProxyFunction& iv)
                {
-                  assert(attr - 1 < maxBdrAttr);
-                  marker[attr - 1] = 1;
-               }
-               getHandle().ProjectBdrCoefficient(*iv, marker);
-            }
-            return *this;
-         }
-
-         GridFunction& projectOnBoundary(
-               const VectorFunctionBase& v, const std::set<int>& attrs = {})
-         {
-            assert(getFiniteElementSpace().getVectorDimension() == v.getDimension());
-            auto iv = v.build();
-            int maxBdrAttr = getFiniteElementSpace()
-                            .getMesh()
-                            .getHandle().bdr_attributes.Max();
-            mfem::Array<int> marker(maxBdrAttr);
-            if (attrs.size() == 0)
-            {
-               marker = 1;
-               getHandle().ProjectBdrCoefficient(*iv, marker);
-            }
-            else
-            {
-               marker = 0;
-               for (const auto& attr : attrs)
+                  int maxBdrAttr = getFiniteElementSpace()
+                                  .getMesh()
+                                  .getHandle().bdr_attributes.Max();
+                  mfem::Array<int> marker(maxBdrAttr);
+                  if (attrs.size() == 0)
+                  {
+                     marker = 1;
+                     getHandle().ProjectBdrCoefficient(iv, marker);
+                  }
+                  else
+                  {
+                     marker = 0;
+                     for (const auto& attr : attrs)
+                     {
+                        assert(attr - 1 < maxBdrAttr);
+                        marker[attr - 1] = 1;
+                     }
+                     getHandle().ProjectBdrCoefficient(iv, marker);
+                  }
+               },
+               [&](Internal::VectorProxyFunction& iv)
                {
-                  assert(attr - 1 < maxBdrAttr);
-                  marker[attr - 1] = 1;
+                  int maxBdrAttr = getFiniteElementSpace()
+                                  .getMesh()
+                                  .getHandle().bdr_attributes.Max();
+                  mfem::Array<int> marker(maxBdrAttr);
+                  if (attrs.size() == 0)
+                  {
+                     marker = 1;
+                     getHandle().ProjectBdrCoefficient(iv, marker);
+                  }
+                  else
+                  {
+                     marker = 0;
+                     for (const auto& attr : attrs)
+                     {
+                        assert(attr - 1 < maxBdrAttr);
+                        marker[attr - 1] = 1;
+                     }
+                     getHandle().ProjectBdrCoefficient(iv, marker);
+                  }
+               },
+               [&](Internal::MatrixProxyFunction& iv)
+               {
+                  UnexpectedRangeTypeException(
+                        {RangeType::Scalar, RangeType::Vector}, RangeType::Matrix).raise();
                }
-               getHandle().ProjectBdrCoefficient(*iv, marker);
-            }
+               }, va);
             return *this;
          }
 
@@ -574,6 +526,35 @@ namespace Rodin::Variational
    template <class FEC, class Trait>
    GridFunction(FiniteElementSpace<FEC, Trait>&) -> GridFunction<FEC, Trait>;
 }
+
+namespace Rodin::Variational::Internal
+{
+   class GridFunctionEvaluator : public FunctionBase
+   {
+      public:
+         GridFunctionEvaluator(const GridFunctionBase& gf);
+
+         GridFunctionEvaluator(const GridFunctionEvaluator& other);
+
+         GridFunctionEvaluator(GridFunctionEvaluator&& other);
+
+         RangeShape getRangeShape() const override;
+
+         void getValue(
+               mfem::DenseMatrix& value,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override;
+
+         GridFunctionEvaluator* copy() const noexcept override
+         {
+            return new GridFunctionEvaluator(*this);
+         }
+
+      private:
+         const GridFunctionBase& m_gf;
+   };
+}
+
 
 #include "GridFunction.hpp"
 

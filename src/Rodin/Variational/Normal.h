@@ -21,7 +21,13 @@ namespace Rodin::Variational
          {}
 
          Normal(const Normal& other)
-            : m_dimension(other.m_dimension)
+            :  VectorFunctionBase(other),
+               m_dimension(other.m_dimension)
+         {}
+
+         Normal(Normal&& other)
+            :  VectorFunctionBase(std::move(other)),
+               m_dimension(other.m_dimension)
          {}
 
          int getDimension() const override

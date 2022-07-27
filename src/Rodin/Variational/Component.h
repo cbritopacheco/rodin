@@ -53,91 +53,20 @@ namespace Rodin::Variational
    Component(TrialFunction<FEC, Trait>&, int) -> Component<TrialFunction<FEC, Trait>>;
 
    /**
-    * @brief Represents the component (or entry) of a vectorial GridFunction.
-    */
-   template <class FEC, class Trait>
-   class Component<GridFunction<FEC, Trait>>
-   {
-      public:
-         /**
-          * @brief Constructs the component object from a GridFunction and its
-          * component index.
-          */
-         Component(GridFunction<FEC, Trait>& u, int component)
-            : m_u(u),
-              m_idx(component)
-         {}
-
-         Component(const Component& other)
-            : m_u(other.m_u),
-              m_idx(other.m_component)
-         {}
-
-         Component(Component&& other)
-            : m_u(other.m_u),
-              m_idx(other.m_component)
-         {}
-
-         const GridFunction<FEC, Trait>& getGridFunction() const
-         {
-            return m_u;
-         }
-
-         int getIndex() const
-         {
-            return m_idx;
-         }
-
-         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
-         projectOnBoundary(const ScalarFunctionBase& s, int attr)
-         {
-            return projectOnBoundary(s, std::set<int>{attr});
-         }
-
-         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
-         projectOnBoundary(const ScalarFunctionBase& s, const std::set<int>& attrs = {})
-         {
-            int maxAttr = *m_u.getFiniteElementSpace()
-                              .getMesh()
-                              .getBoundaryAttributes().rbegin();
-            std::vector<mfem::Coefficient*> mfemCoeffs(
-                  m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
-            mfemCoeffs[getIndex()] = s.build().release();
-            if (attrs.size() == 0)
-            {
-               mfem::Array<int> marker(maxAttr);
-               marker = 1;
-               m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-            }
-            else
-            {
-               assert(mfemCoeffs[getIndex()] != nullptr);
-               mfem::Array<int> marker = Utility::set2marker(attrs, maxAttr);
-               m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-            }
-            delete mfemCoeffs[getIndex()];
-            return *this;
-         }
-
-      private:
-         const int m_idx;
-         GridFunction<FEC, Trait>& m_u;
-   };
-   template <class FEC, class Trait>
-   Component(GridFunction<FEC, Trait>&, int) -> Component<GridFunction<FEC, Trait>>;
-
-   /**
-    * @brief Represents the component (or entry) of a VectorFunctionBase
+    * @brief Represents the component (or entry) of a vectorial FunctionBase
     * instance.
     */
    template <>
-   class Component<VectorFunctionBase> : public ScalarFunctionBase
+   class Component<FunctionBase> : public ScalarFunctionBase
    {
       public:
-         Component(const VectorFunctionBase& v, int component)
+         Component(const FunctionBase& v, int component)
             :  m_v(v.copy()),
                m_idx(component)
-         {}
+         {
+            if (v.getRangeType() == RangeType::Vector)
+               UnexpectedRangeTypeException(RangeType::Vector, v.getRangeType()).raise();
+         }
 
          Component(const Component& other)
             :  ScalarFunctionBase(other),
@@ -159,10 +88,10 @@ namespace Rodin::Variational
          double getValue(
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            mfem::Vector v;
-            m_v->getValue(v, trans, ip);
+            mfem::DenseMatrix v;
+            m_v->getValue(v, FunctionBase::getTraceElementTrans(trans, ip), ip);
             assert(m_idx < v.Size());
-            return v(m_idx);
+            return v(m_idx, 0);
          }
 
          Component* copy() const noexcept override
@@ -170,10 +99,81 @@ namespace Rodin::Variational
             return new Component(*this);
          }
       private:
-         std::unique_ptr<VectorFunctionBase> m_v;
+         std::unique_ptr<FunctionBase> m_v;
          const int m_idx;
    };
-   Component(const VectorFunctionBase&, int) -> Component<VectorFunctionBase>;
+   Component(const FunctionBase&, int) -> Component<FunctionBase>;
+
+   /**
+    * @brief Represents the component (or entry) of a vectorial GridFunction.
+    */
+   template <class FEC, class Trait>
+   class Component<GridFunction<FEC, Trait>> : public Component<FunctionBase>
+   {
+      public:
+         /**
+          * @brief Constructs the component object from a GridFunction and its
+          * component index.
+          */
+         Component(GridFunction<FEC, Trait>& u, int component)
+            :  Component<FunctionBase>(u, component),
+               m_u(u)
+         {}
+
+         Component(const Component& other)
+            :  Component<FunctionBase>(other),
+               m_u(other.m_u)
+         {}
+
+         Component(Component&& other)
+            :  Component<FunctionBase>(std::move(other)),
+               m_u(other.m_u)
+         {}
+
+         const GridFunction<FEC, Trait>& getGridFunction() const
+         {
+            return m_u;
+         }
+
+         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
+         projectOnBoundary(const FunctionBase& s, int attr)
+         {
+            return projectOnBoundary(s, std::set<int>{attr});
+         }
+
+         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
+         projectOnBoundary(const FunctionBase& s, const std::set<int>& attrs = {})
+         {
+            if (s.getRangeType() != RangeType::Scalar)
+               UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
+
+            int maxAttr = *m_u.getFiniteElementSpace()
+                              .getMesh()
+                              .getBoundaryAttributes().rbegin();
+            std::vector<mfem::Coefficient*> mfemCoeffs(
+                  m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
+            mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(s);
+            if (attrs.size() == 0)
+            {
+               mfem::Array<int> marker(maxAttr);
+               marker = 1;
+               m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
+            }
+            else
+            {
+               assert(mfemCoeffs[getIndex()] != nullptr);
+               mfem::Array<int> marker = Utility::set2marker(attrs, maxAttr);
+               m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
+            }
+            delete mfemCoeffs[getIndex()];
+            return *this;
+         }
+
+      private:
+         GridFunction<FEC, Trait>& m_u;
+   };
+   template <class FEC, class Trait>
+   Component(GridFunction<FEC, Trait>&, int) -> Component<GridFunction<FEC, Trait>>;
 }
 
 #endif

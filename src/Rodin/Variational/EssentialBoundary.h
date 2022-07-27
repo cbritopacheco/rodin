@@ -21,18 +21,9 @@ namespace Rodin::Variational
     */
    class EssentialBoundary
    {
-      using ScalarValue = std::unique_ptr<ScalarFunctionBase>;
-      using VectorValue = std::unique_ptr<VectorFunctionBase>;
-
-      struct TrialFunctionValue
+      struct Value
       {
-         std::variant<ScalarValue, VectorValue> value;
-         std::set<int> attributes;
-      };
-
-      struct ComponentFunctionValue
-      {
-         ScalarValue value;
+         std::unique_ptr<FunctionBase> value;
          std::set<int> attributes;
       };
 
@@ -45,22 +36,22 @@ namespace Rodin::Variational
             {
                auto uuid = it->first;
                const auto& tfValue = it->second;
-               m_tfVal[uuid].attributes = tfValue.attributes;
-               std::visit(
-                  [&](auto&& v)
-                  {
-                     using T = std::decay_t<decltype(v)>;
-                     m_tfVal[uuid].value.emplace<T>(v->copy());
-                  }, tfValue.value);
+               m_tfVal[uuid] =
+                  Value{
+                     std::unique_ptr<FunctionBase>(tfValue.value->copy()),
+                     tfValue.attributes};
             }
 
             for (const auto& [uuid, valueMap] : other.m_tfCompVal)
+            {
                for (const auto& [idx, compValue] : valueMap)
+               {
                   m_tfCompVal[uuid][idx] =
-                     ComponentFunctionValue{
-                        ScalarValue(compValue.value->copy()),
-                        compValue.attributes
-                     };
+                     Value{
+                        std::unique_ptr<FunctionBase>(compValue.value->copy()),
+                        compValue.attributes};
+               }
+            }
          }
 
          EssentialBoundary(EssentialBoundary&& other)
@@ -69,49 +60,39 @@ namespace Rodin::Variational
          {}
 
          template <class Trait>
-         void add(const DirichletBC<TrialFunction<H1, Trait>, ScalarFunctionBase>& dbc)
+         void add(const DirichletBC<TrialFunction<H1, Trait>>& dbc)
          {
+            assert(dbc.getTrialFunction().getRangeType() == dbc.getValue().getRangeType());
             m_tfVal[dbc.getTrialFunction().getUUID()] =
-               TrialFunctionValue{
-                  ScalarValue(dbc.getValue().copy()),
-                  dbc.getBoundaryAttributes()
-               };
+               Value{
+                  std::unique_ptr<FunctionBase>(dbc.getValue().copy()),
+                  dbc.getBoundaryAttributes()};
          }
 
          template <class Trait>
-         void add(const DirichletBC<TrialFunction<H1, Trait>, VectorFunctionBase>& dbc)
+         void add(const DirichletBC<Component<TrialFunction<H1, Trait>>>& dbc)
          {
-            m_tfVal[dbc.getTrialFunction().getUUID()] =
-               TrialFunctionValue{
-                  VectorValue(dbc.getValue().copy()),
-                  dbc.getBoundaryAttributes()
-               };
-         }
-
-         template <class Trait>
-         void add(const DirichletBC<Component<TrialFunction<H1, Trait>>, ScalarFunctionBase>& dbc)
-         {
+            assert(dbc.getValue().getRangeType() == RangeType::Scalar);
             auto uuid = dbc.getComponent().getTrialFunction().getUUID();
             m_tfCompVal[uuid][dbc.getComponent().getIndex()] =
-               ComponentFunctionValue{
-                  ScalarValue(dbc.getValue().copy()),
-                  dbc.getBoundaryAttributes()
-               };
+               Value{
+                  std::unique_ptr<FunctionBase>(dbc.getValue().copy()),
+                  dbc.getBoundaryAttributes()};
          }
 
-         const std::map<boost::uuids::uuid, TrialFunctionValue>& getTFMap() const
+         const std::map<boost::uuids::uuid, Value>& getTFMap() const
          {
             return m_tfVal;
          }
 
-         const std::map<boost::uuids::uuid, std::map<int, ComponentFunctionValue>>& getTFCompMap() const
+         const std::map<boost::uuids::uuid, std::map<int, Value>>& getTFCompMap() const
          {
             return m_tfCompVal;
          }
 
       private:
-         std::map<boost::uuids::uuid, TrialFunctionValue> m_tfVal;
-         std::map<boost::uuids::uuid, std::map<int, ComponentFunctionValue>> m_tfCompVal;
+         std::map<boost::uuids::uuid, Value> m_tfVal;
+         std::map<boost::uuids::uuid, std::map<int, Value>> m_tfCompVal;
    };
 }
 

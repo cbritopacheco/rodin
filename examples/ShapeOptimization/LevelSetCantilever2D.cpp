@@ -14,19 +14,26 @@ using namespace Rodin::External;
 using namespace Rodin::Variational;
 
 
+// Define interior and exterior for level set discretization
+static constexpr int Interior = 1, Exterior = 2;
+
+// Define boundary attributes
+static constexpr int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
+
+// Lamé coefficients
+static constexpr double mu = 0.3846;
+static constexpr double lambda = 0.5769;
+
+// Optimization parameters
+static constexpr size_t maxIt = 250;
+static constexpr double eps = 1e-6;
+static constexpr double hmax = 0.05;
+static constexpr double ell = 1.0;
+static constexpr double alpha = 4 * hmax * hmax;
+
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
-
-  // Define interior and exterior for level set discretization
-  int Interior = 1, Exterior = 2;
-
-  // Define boundary attributes
-  int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
-
-  // Lamé coefficients
-  auto mu     = ScalarFunction(0.3846),
-       lambda = ScalarFunction(0.5769);
 
   // Compliance
   auto compliance = [&](GridFunction<H1>& w)
@@ -50,13 +57,6 @@ int main(int, char**)
 
   // UMFPack
   auto solver = Solver::UMFPack();
-
-  // Optimization parameters
-  size_t maxIt = 250;
-  double eps = 1e-6;
-  double hmax = 0.05;
-  auto ell = ScalarFunction(1);
-  auto alpha = ScalarFunction(4 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -110,7 +110,7 @@ int main(int, char**)
 
     // Update objective
     obj.push_back(
-        compliance(u) + ell.value() * Omega.getVolume(Interior));
+        compliance(u) + ell * Omega.getVolume(Interior));
     Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
 
     Alert::Info() << "    | Distancing domain." << Alert::Raise;

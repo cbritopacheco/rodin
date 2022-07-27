@@ -58,8 +58,8 @@ int main(int, char**)
   size_t maxIt = 100;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarFunction(4.0);
-  auto alpha = ScalarFunction(4 * hmax * hmax);
+  double ell = 4.0;
+  double alpha = 4 * hmax * hmax;
 
   std::vector<double> obj;
 
@@ -108,7 +108,7 @@ int main(int, char**)
 
     // Update objective
     obj.push_back(
-        compliance(u) + ell.value() * Omega.getVolume(Interior));
+        compliance(u) + ell * Omega.getVolume(Interior));
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
     // Generate signed distance function

@@ -37,8 +37,7 @@ namespace Rodin::Variational
    {
       auto& test = *m_test;
 
-      assert(test.getRows(fe, trans) == 1);
-      assert(test.getColumns(fe, trans) == 1);
+      assert(test.getRangeType() == RangeType::Scalar);
 
       vec.SetSize(test.getDOFs(fe, trans));
       vec = 0.0;
