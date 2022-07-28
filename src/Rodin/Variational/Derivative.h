@@ -38,7 +38,10 @@ namespace Rodin::Variational
             :  m_direction(direction),
                m_component(component),
                m_u(u)
-         {}
+         {
+            if (u.getRangeType() != RangeType::Scalar)
+               UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType());
+         }
 
          Derivative(const Derivative& other)
             : ScalarFunctionBase(other),
@@ -58,10 +61,10 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override
          {
-            mfem::DenseMatrix grad;
-            m_u.getHandle().GetVectorGradient(
+            mfem::Vector grad;
+            m_u.getHandle().GetGradient(
                   FunctionBase::getTraceElementTrans(trans, ip), grad);
-            return grad(m_component, m_direction);
+            return grad(m_direction);
          }
 
          Derivative* copy() const noexcept override

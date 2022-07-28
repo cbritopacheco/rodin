@@ -6,7 +6,6 @@ set(RodinVariational_HEADERS
   Derivative.h
   Dot.h
   FiniteElementSpace.h
-  FormLanguage.h
   ForwardDecls.h
   Grad.h
   Function.h
@@ -34,6 +33,8 @@ set(RodinVariational_HEADERS
   VectorFunction.h
   Utility.h
   Minus.h
+  LinearFormIntegratorSum.h
+  BilinearFormIntegratorSum.h
   )
 
 set(RodinVariational_SRCS
@@ -67,6 +68,8 @@ set(RodinVariational_SRCS
   Function.cpp
   RangeShape.cpp
   Composition.cpp
+  LinearFormIntegratorSum.cpp
+  BilinearFormIntegratorSum.cpp
   )
 
 add_library(RodinVariational
@@ -86,6 +89,4 @@ target_link_libraries(RodinVariational
   Rodin::Mesh
   Rodin::Alert
   Rodin::Utility
-  RodinVariationalFormLanguage)
-
-add_subdirectory(FormLanguage)
+  Rodin::FormLanguage)

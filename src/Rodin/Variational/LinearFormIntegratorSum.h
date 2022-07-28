@@ -10,11 +10,12 @@
 #include <memory>
 #include <utility>
 
-#include "Rodin/Variational/LinearFormIntegrator.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "LinearFormIntegrator.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    class LinearFormIntegratorSum : public FormLanguage::Base
    {

@@ -91,7 +91,7 @@ namespace Rodin::Variational
           * @todo
           */
          virtual BilinearFormBase& from(
-               const FormLanguage::BilinearFormIntegratorSum& bfi) = 0;
+               const BilinearFormIntegratorSum& bfi) = 0;
 
          /**
           * @brief Adds a bilinear integrator to the bilinear form.
@@ -104,7 +104,7 @@ namespace Rodin::Variational
           * @todo
           */
          virtual BilinearFormBase& add(
-               const FormLanguage::BilinearFormIntegratorSum& lsum) = 0;
+               const BilinearFormIntegratorSum& lsum) = 0;
 
          /**
           * @brief Gets the reference to the associated TrialFunction object.
@@ -192,7 +192,7 @@ namespace Rodin::Variational
          /**
           * @todo
           */
-         BilinearForm& operator=(const FormLanguage::BilinearFormIntegratorSum& lsum);
+         BilinearForm& operator=(const BilinearFormIntegratorSum& lsum);
 
          const TrialFunction<TrialFEC, Traits::Serial>& getTrialFunction() const override
          {
@@ -206,11 +206,11 @@ namespace Rodin::Variational
 
          BilinearForm& add(const BilinearFormIntegratorBase& bfi) override;
 
-         BilinearForm& add(const FormLanguage::BilinearFormIntegratorSum& lsum) override;
+         BilinearForm& add(const BilinearFormIntegratorSum& lsum) override;
 
          BilinearForm& from(const BilinearFormIntegratorBase& bfi) override;
 
-         BilinearForm& from(const FormLanguage::BilinearFormIntegratorSum& bfi) override;
+         BilinearForm& from(const BilinearFormIntegratorSum& bfi) override;
 
          mfem::BilinearForm& getHandle() override
          {

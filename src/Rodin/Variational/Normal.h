@@ -18,7 +18,9 @@ namespace Rodin::Variational
           */
          Normal(int dimension)
             : m_dimension(dimension)
-         {}
+         {
+            assert(dimension > 0);
+         }
 
          Normal(const Normal& other)
             :  VectorFunctionBase(other),

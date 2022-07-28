@@ -49,7 +49,8 @@ int main(int, char**)
   Omega.load(meshFile);
 
   Omega.save("Omega0.mesh");
-  std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
+
+  Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // UMFPack
   auto solver = Solver::UMFPack();
@@ -109,7 +110,7 @@ int main(int, char**)
     // Update objective
     obj.push_back(
         compliance(u) + ell * Omega.getVolume(Interior));
-    std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
+    Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
     // Generate signed distance function
     FiniteElementSpace<H1> Dh(Omega);
@@ -136,16 +137,12 @@ int main(int, char**)
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
-      std::cout << "Convergence!" << std::endl;
+      Alert::Info() << "Convergence!" << Alert::Raise;
       break;
     }
-
-    std::ofstream plt("obj.txt", std::ios::trunc);
-    for (size_t i = 0; i < obj.size(); i++)
-      plt << i << "," << obj[i] << "\n";
   }
 
-  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
+  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }

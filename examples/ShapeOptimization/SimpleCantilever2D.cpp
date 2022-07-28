@@ -13,22 +13,31 @@ using namespace Rodin;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
+// Define boundary attributes
+static constexpr int Gamma0 = 1; // Traction free boundary
+static constexpr int GammaD = 2; // Homogenous Dirichlet boundary
+static constexpr int GammaN = 3; // Inhomogenous Neumann boundary
+
+// Lamé coefficients
+static constexpr double mu     = 0.3846;
+static constexpr double lambda = 0.5769;
+
+// Optimization parameters
+static constexpr size_t maxIt = 40;
+static constexpr double eps   = 1e-6;
+static constexpr double hmax  = 0.1;
+static constexpr double ell   = 5.0;
+static constexpr double alpha = 4 * hmax * hmax;
+
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/simple-cantilever2d-example.mesh";
-
-  // Define boundary attributes
-  int Gamma0 = 1, GammaD = 2, GammaN = 3;
 
   // Load mesh
   Mesh Omega;
   Omega.load(meshFile);
   Omega.save("Omega0.mesh");
-  std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
-
-  // Lamé coefficients
-  auto mu     = ScalarFunction(0.3846),
-       lambda = ScalarFunction(0.5769);
+  Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Compliance
   auto compliance = [&](GridFunction<H1>& w)
@@ -47,18 +56,12 @@ int main(int, char**)
   auto cg = Solver::CG().setMaxIterations(500)
                         .setRelativeTolerance(1e-6);
 
-  // Optimization parameters
-  size_t maxIt = 40;
-  double eps = 1e-6;
-  double hmax = 0.1;
-  double ell = 5.0;
-  double alpha = 4 * hmax * hmax;
-
-  std::vector<double> obj;
-
   // Optimization loop
+  std::vector<double> obj;
   for (size_t i = 0; i < maxIt; i++)
   {
+    Alert::Info() << "----- Iteration: " << i << Alert::Raise;
+
     // Finite element spaces
     int d = 2;
     FiniteElementSpace<H1> Vh(Omega, d);
@@ -95,11 +98,14 @@ int main(int, char**)
     // Update objective
     obj.push_back(compliance(u.getGridFunction()) + ell * Omega.getVolume());
 
-    std::cout << "[" << i << "] Objective: " << obj[i] << std::endl;
+    Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
     // Test for convergence
     if (i > 0 && abs(obj[i] - obj[i - 1]) < eps)
+    {
+      Alert::Info() << "Convergence!" << Alert::Raise;
       break;
+    }
 
     // Make the displacement
     double dt = Omega.getMaximumDisplacement(g.getGridFunction());
@@ -121,13 +127,7 @@ int main(int, char**)
     Omega.save("Omega.mesh");
   }
 
-  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
-
-  std::ofstream plt("obj.txt");
-  for (size_t i = 0; i < obj.size(); i++)
-    plt << obj[i] << "\n";
-
-  std::cout << "Saved objective history to obj.txt" << std::endl;
+  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }

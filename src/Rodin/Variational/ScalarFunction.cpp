@@ -40,15 +40,4 @@ namespace Rodin::Variational
       m_nested->getValue(v, trans, ip);
       return v(0, 0);
    }
-
-   Restriction<ScalarFunctionBase> ScalarFunctionBase::restrictTo(int attr)
-   {
-      return restrictTo(std::set<int>{attr});
-   }
-
-   Restriction<ScalarFunctionBase> ScalarFunctionBase::restrictTo(
-         const std::set<int>& attrs)
-   {
-      return Restriction<ScalarFunctionBase>(*this).to(attrs);
-   }
 }

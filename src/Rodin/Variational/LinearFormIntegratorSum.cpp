@@ -6,11 +6,11 @@
  */
 #include "Rodin/Alert.h"
 
-#include "../UnaryMinus.h"
+#include "UnaryMinus.h"
 
 #include "LinearFormIntegratorSum.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    LinearFormIntegratorSum::LinearFormIntegratorSum(
          const LinearFormIntegratorBase& lhs, const LinearFormIntegratorBase& rhs)

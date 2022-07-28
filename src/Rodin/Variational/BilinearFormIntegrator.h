@@ -5,7 +5,7 @@
 #include <memory>
 #include <mfem.hpp>
 
-#include "FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"

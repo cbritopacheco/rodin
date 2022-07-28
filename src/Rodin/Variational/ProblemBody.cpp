@@ -16,7 +16,7 @@ namespace Rodin::Variational
       m_bfiDomainList.emplace_back(bfi.copy());
    }
 
-   ProblemBody::ProblemBody(const FormLanguage::BilinearFormIntegratorSum& bsum)
+   ProblemBody::ProblemBody(const BilinearFormIntegratorSum& bsum)
    {
       m_bfiDomainList.reserve(bsum.getBilinearFormDomainIntegratorList().size());
       for (const auto& p : bsum.getBilinearFormDomainIntegratorList())
@@ -97,8 +97,7 @@ namespace Rodin::Variational
       return res;
    }
 
-   ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
+   ProblemBody operator-(const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
    {
       ProblemBody res(pb);
       // Sign is opposite because we want the LinearFormIntegrator on the LHS
@@ -120,8 +119,7 @@ namespace Rodin::Variational
       return res;
    }
 
-   ProblemBody operator+(
-         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi)
+   ProblemBody operator+(const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
    {
       ProblemBody res(pb);
       for (const auto& p : lfi.getLinearFormDomainIntegratorList())
@@ -133,8 +131,7 @@ namespace Rodin::Variational
       return res;
    }
 
-   ProblemBody operator-(
-         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi)
+   ProblemBody operator-(const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
    {
       ProblemBody res(pb);
       for (const auto& p : lfi.getLinearFormDomainIntegratorList())

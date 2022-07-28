@@ -25,7 +25,7 @@ namespace Rodin::Variational
                {
                   Alert::Warning()
                      << __func__
-                     << " called with an empty trace domain."
+                     << " called with an empty trace domain. May result in segfault."
                      << Alert::Raise;
                   return trans;
                }

@@ -7,7 +7,7 @@
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 
-#include "FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"

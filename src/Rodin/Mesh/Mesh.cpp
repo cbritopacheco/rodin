@@ -385,7 +385,7 @@ namespace Rodin
             }
          }
       }
-      getHandle().SetAttributes();
+      getHandle().FinalizeTopology();
       return *this;
    }
 

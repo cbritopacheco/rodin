@@ -16,8 +16,6 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Mesh.h"
 
-#include "FormLanguage/ForwardDecls.h"
-
 #include "ForwardDecls.h"
 
 #include "ProblemBody.h"

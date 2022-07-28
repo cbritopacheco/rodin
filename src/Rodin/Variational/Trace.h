@@ -37,6 +37,13 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override;
 
+         Trace& traceOf(const std::set<int>& attrs) override
+         {
+            ScalarFunctionBase::traceOf(attrs);
+            m_matrix->traceOf(attrs);
+            return *this;
+         }
+
          Trace* copy() const noexcept override
          {
             return new Trace(*this);
