@@ -31,22 +31,12 @@ static constexpr double hmax = 0.05;
 static constexpr double ell = 1.0;
 static constexpr double alpha = 4 * hmax * hmax;
 
+// Compliance
+double compliance(GridFunction<H1>& w);
+
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
-
-  // Compliance
-  auto compliance = [&](GridFunction<H1>& w)
-  {
-    auto& Vh = w.getFiniteElementSpace();
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
-    BilinearForm  bf(u, v);
-    bf = Integral(lambda * Div(u), Div(v)).over(Interior)
-       + Integral(
-           mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())).over(Interior);
-    return bf(w, w);
-  };
 
   // Load mesh
   Mesh Omega;
@@ -144,4 +134,16 @@ int main(int, char**)
 
   return 0;
 }
+
+double compliance(GridFunction<H1>& w)
+{
+  auto& Vh = w.getFiniteElementSpace();
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+  BilinearForm  bf(u, v);
+  bf = Integral(lambda * Div(u), Div(v)).over(Interior)
+     + Integral(
+         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())).over(Interior);
+  return bf(w, w);
+};
 
