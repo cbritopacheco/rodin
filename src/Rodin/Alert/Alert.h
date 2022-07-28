@@ -91,7 +91,9 @@ namespace Rodin::Alert
          std::enable_if_t<!std::is_same_v<RaiseT, T>, Alert&>
          operator<<(T&& v) noexcept
          {
-            m_what += (std::stringstream() << std::forward<T>(v)).str();
+            std::stringstream ss;
+            ss << std::forward<T>(v);
+            m_what += ss.str();
             return *this;
          }
 
