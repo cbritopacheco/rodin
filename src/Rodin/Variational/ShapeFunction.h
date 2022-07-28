@@ -152,6 +152,8 @@ namespace Rodin::Variational
                   new Internal::ScalarShapeR3O(std::move(shape), vdim));
          }
 
+         virtual const ShapeFunction<H1, Space>& getLeaf() const override = 0;
+
          virtual ShapeFunction* copy() const noexcept override = 0;
 
       private:
