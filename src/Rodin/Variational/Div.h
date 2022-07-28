@@ -52,7 +52,7 @@ namespace Rodin::Variational
 
          const ShapeFunction<H1, Space>& getLeaf() const override
          {
-            return m_u;
+            return m_u.getLeaf();
          }
 
          int getRows() const override
