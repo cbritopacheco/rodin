@@ -54,6 +54,20 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>BoundaryElement <span class="m-thin">class</span>
         </h1>
         <p>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This class is designed so that modifications can be made to the boundary element. If one wishes to modify the face then one must use <a href="class_rodin_1_1_boundary_element_view.html" class="m-doc">BoundaryElementView</a>.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
@@ -72,6 +86,84 @@
             </dt>
             <dd>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</dd>
           </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0849b9241a4f7f8bcd34705a32c4b708" class="m-doc">BoundaryElement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              const mfem::Element* element,
+              int index)</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a06af6c2720bdadcae9280775f4738c0e" class="m-doc">getFaceIndex</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
+            </dt>
+            <dd>Gets the index of the face element.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6d2356f8bc60041782ea20ea80b26cf" class="m-doc">getBoundaryIndex</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
+            </dt>
+            <dd>Gets the index of the element as a member of the boundary.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1678b8fbb78027fe25fd31e6b4001f0e" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
+            </dt>
+            <dd>Gets the index of the element as a member of the boundary.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0849b9241a4f7f8bcd34705a32c4b708"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />BoundaryElement::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0849b9241a4f7f8bcd34705a32c4b708" class="m-doc-self">BoundaryElement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              const mfem::Element* element,
+              int index)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>element</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>index&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Boundary index</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a06af6c2720bdadcae9280775f4738c0e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />BoundaryElement::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06af6c2720bdadcae9280775f4738c0e" class="m-doc-self">getFaceIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the index of the face element.</p>
+<aside class="m-note m-danger"><h4>Warning</h4><p>The index returned by this function need not coincide with the index returned by <a href="class_rodin_1_1_boundary_element.html#ad6d2356f8bc60041782ea20ea80b26cf" class="m-doc">getBoundaryIndex()</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ad6d2356f8bc60041782ea20ea80b26cf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />BoundaryElement::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6d2356f8bc60041782ea20ea80b26cf" class="m-doc-self">getBoundaryIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the index of the element as a member of the boundary.</p>
+<aside class="m-note m-danger"><h4>Warning</h4><p>The index returned by this function need not coincide with the index returned by <a href="class_rodin_1_1_boundary_element.html#a06af6c2720bdadcae9280775f4738c0e" class="m-doc">getFaceIndex()</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1678b8fbb78027fe25fd31e6b4001f0e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />BoundaryElement::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1678b8fbb78027fe25fd31e6b4001f0e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the index of the element as a member of the boundary.</p>
+<p>Same as <a href="class_rodin_1_1_boundary_element.html#ad6d2356f8bc60041782ea20ea80b26cf" class="m-doc">getBoundaryIndex()</a>.</p><aside class="m-note m-danger"><h4>Warning</h4><p>The index returned by this function need not coincide with the index returned by <a href="class_rodin_1_1_boundary_element.html#a06af6c2720bdadcae9280775f4738c0e" class="m-doc">getFaceIndex()</a>.</p></aside>
+          </div></section>
         </section>
       </div>
     </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Transpose&lt;MatrixFunctionBase&gt; class | Rodin</title>
+  <title>Rodin::Variational::Transpose&lt;FunctionBase&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,7 +52,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Transpose&lt;MatrixFunctionBase&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Transpose&lt;FunctionBase&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents the transpose matrix <svg class="m-math" style="width: 1.550em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 14.881705 9.784673">
 <title>
@@ -83,9 +83,7 @@ $ A $
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -162,73 +160,14 @@ $ m \times n $
 <use x='218.106262' y='-1.549746' xlink:href='#eq7-g0-105'/>
 </g>
 </svg></div>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
-            </dt>
-            <dd>Abstract base class for objects representing matrix coefficients.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ab0bfba65ef6801ee782b0ed5416bb97b">
-              <span class="m-doc-wrap-bumper"><a href="#ab0bfba65ef6801ee782b0ed5416bb97b" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&amp; m)</span>
+            <dt id="ad0351d0c7f1b5ff96206b6e24d38a74a">
+              <span class="m-doc-wrap-bumper"><a href="#ad0351d0c7f1b5ff96206b6e24d38a74a" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; m)</span>
             </dt>
             <dd>Constructs the <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a> matrix of the given matrix.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a843f450c28c611a60e9d9e702c5fc021" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the number of rows in the matrix.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6a2824d71cbf1a5764a33a8c1a7d4ce2" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the number of columns in the matrix.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a843f450c28c611a60e9d9e702c5fc021"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />Transpose&lt;MatrixFunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a843f450c28c611a60e9d9e702c5fc021" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the number of rows in the matrix.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Number of rows</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a6a2824d71cbf1a5764a33a8c1a7d4ce2"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />Transpose&lt;MatrixFunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a2824d71cbf1a5764a33a8c1a7d4ce2" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the number of columns in the matrix.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Number of columns</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

@@ -109,8 +109,8 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8602910425d14487aa34a3c512a4c21a" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              IO::MeshFormat fmt = IO::MeshFormat::MFEM) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab4e943b2da7b497c0e6f8534c53a4de7" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              IO::FileFormat fmt = IO::FileFormat::MFEM) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Loads a mesh from file.</dd>
             <dt id="ac3462215a38fbd687febccc809ef1776">
@@ -118,13 +118,11 @@
             </dt>
             <dd>Move assigns the mesh from another mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aeda2178f44774d0de1984f29715cfb11" class="m-doc">trim</a>(</span><span class="m-doc-wrap">int attr,
-              int bdrLabel) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e29d7f5c8dc51c460cab9ca7e1e88e9" class="m-doc">trim</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
             </dt>
             <dd>Trims the elements with the given material reference.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aaa8f79aba121590e033ddf94356525eb" class="m-doc">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs,
-              int bdrLabel) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aade8328aa4572957c2b0bc94b9b3b543" class="m-doc">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;</span>
             </dt>
             <dd>Trims the elements with the given material references.</dd>
             <dt>
@@ -143,13 +141,13 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a8602910425d14487aa34a3c512a4c21a"><div>
+          <section class="m-doc-details" id="ab4e943b2da7b497c0e6f8534c53a4de7"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8602910425d14487aa34a3c512a4c21a" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              IO::MeshFormat fmt = IO::MeshFormat::MFEM)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4e943b2da7b497c0e6f8534c53a4de7" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              IO::FileFormat fmt = IO::FileFormat::MFEM)</span></span>
             </h3>
             <p>Loads a mesh from file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -174,13 +172,12 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aeda2178f44774d0de1984f29715cfb11"><div>
+          <section class="m-doc-details" id="a4e29d7f5c8dc51c460cab9ca7e1e88e9"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeda2178f44774d0de1984f29715cfb11" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">int attr,
-              int bdrLabel)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e29d7f5c8dc51c460cab9ca7e1e88e9" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">int attr)</span></span>
             </h3>
             <p>Trims the elements with the given material reference.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -192,10 +189,6 @@
                   <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Attribute to trim</td>
                 </tr>
-                <tr>
-                  <td>bdrLabel</td>
-                  <td></td>
-                </tr>
               </tbody>
               <tfoot>
                 <tr>
@@ -204,15 +197,14 @@
                 </tr>
               </tfoot>
             </table>
-<p>Convenience function to call <a href="class_rodin_1_1_mesh_3_01_traits_1_1_serial_01_4.html#aaa8f79aba121590e033ddf94356525eb" class="m-doc">trim(const std::<wbr />set&lt;int&gt;&amp;, int)</a> with only one attribute.</p>
+<p>Convenience function to call trim(const std::set&lt;int&gt;&amp;, int) with only one attribute.</p>
           </div></section>
-          <section class="m-doc-details" id="aaa8f79aba121590e033ddf94356525eb"><div>
+          <section class="m-doc-details" id="aade8328aa4572957c2b0bc94b9b3b543"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa8f79aba121590e033ddf94356525eb" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs,
-              int bdrLabel)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt; Rodin::<wbr />Mesh&lt;Traits::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aade8328aa4572957c2b0bc94b9b3b543" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs)</span></span>
             </h3>
             <p>Trims the elements with the given material references.</p>
             <table class="m-table m-fullwidth m-flat">

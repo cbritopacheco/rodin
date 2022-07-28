@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Dot&lt;VectorFunctionBase, ShapeFunctionBase&lt;Space&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::Mult&lt;FunctionBase, FunctionBase&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,19 +51,50 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Dot&lt;VectorFunctionBase, ShapeFunctionBase&lt;Space&gt;&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Mult&lt;FunctionBase, FunctionBase&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <p>Multiplication of two <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instances.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase&lt;Space&gt;</a>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c4cd12d2c8b374ea7685a916e79c1a2" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Base class for operators.</dd>
+            <dd>Sets which attributes will be interpreted as the domain to trace.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0c4cd12d2c8b374ea7685a916e79c1a2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp; Rodin::<wbr />Variational::<wbr />Mult&lt;FunctionBase, FunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0c4cd12d2c8b374ea7685a916e79c1a2" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Sets which attributes will be interpreted as the domain to trace.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>When integrating along interior boundaries sometimes it is necessary to specify which attributes should be interpreted as the respective &quot;interior&quot; domain, since it is not clear which domain attribute can be used to extend the value continuously up to the boundary. To resolve this ambiguity the trace domain is interpreted as the domain which shall be used to make this continuous extension.</p><aside class="m-note m-info"><h4>Note</h4><p>Setting the trace domain of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance does not guarantee that it will taken into consideration when computing its value. That said, it is up to the subclass to decide how it will use this information which can be obtained via the <a href="class_rodin_1_1_variational_1_1_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a> method.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a></p></aside>
+          </div></section>
         </section>
       </div>
     </div>

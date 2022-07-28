@@ -101,6 +101,11 @@
             </dt>
             <dd>Abstract base class for bilinear form integrators.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_component_3_01_function_base_01_4.html" class="m-doc">Component&lt;FunctionBase&gt;</a>
+            </dt>
+            <dd>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class FEC, class Trait&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_component_3_01_grid_function_3_01_f_e_c_00_01_trait_01_4_01_4.html" class="m-doc">Component&lt;GridFunction&lt;FEC, Trait&gt;&gt;</a>
             </dt>
@@ -112,12 +117,7 @@
             <dd>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_component_3_01_vector_function_base_01_4.html" class="m-doc">Component&lt;VectorFunctionBase&gt;</a>
-            </dt>
-            <dd>Represents the component (or entry) of a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_composition_3_01std_1_1function_3_01double_07double_08_4_00_01_scalar_function_base_01_4.html" class="m-doc">Composition&lt;std::function&lt;double(double)&gt;, ScalarFunctionBase&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_composition_3_01std_1_1function_3_01double_07double_08_4_00_01_function_base_01_4.html" class="m-doc">Composition&lt;std::function&lt;double(double)&gt;, FunctionBase&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_composition.html" class="m-doc">Composition</a> of a scalar valued function on the real line and a scalar function on the mesh.</dd>
             <dt>
@@ -125,8 +125,8 @@
             </dt>
             <dd>Function representing the <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> in <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Value, class Trait&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_h1_00_01_trait_01_4_00_01_value_01_4.html" class="m-doc">DirichletBC&lt;TrialFunction&lt;H1, Trait&gt;, Value&gt;</a>
+              <div class="m-doc-template">template&lt;class Trait&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_h1_00_01_trait_01_4_01_4.html" class="m-doc">DirichletBC&lt;TrialFunction&lt;H1, Trait&gt;&gt;</a>
             </dt>
             <dd>Represents a Dirichlet boundary condition.</dd>
             <dt>
@@ -152,39 +152,14 @@ $ u \in H^1 $
 </svg>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_division_3_01_scalar_function_base_00_01_scalar_function_base_01_4.html" class="m-doc">Division&lt;ScalarFunctionBase, ScalarFunctionBase&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_division_3_01_function_base_00_01_function_base_01_4.html" class="m-doc">Division&lt;FunctionBase, FunctionBase&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_division_3_01_vector_function_base_00_01_scalar_function_base_01_4.html" class="m-doc">Division&lt;VectorFunctionBase, ScalarFunctionBase&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_matrix_function_base_00_01_matrix_function_base_01_4.html" class="m-doc">Dot&lt;MatrixFunctionBase, MatrixFunctionBase&gt;</a>
-            </dt>
-            <dd>Represents the dot product between two matrices.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_scalar_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;ScalarFunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
             </dt>
-            <dd>Represents the dot product between insntances of <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_shape_function_base_3_01_trial_space_01_4_00_01_shape_fa34d46558983a5e7897c22c28b42f7dd.html" class="m-doc">Dot&lt;ShapeFunctionBase&lt;TrialSpace&gt;, ShapeFunctionBase&lt;TestSpace&gt;&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between vector value <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> instances.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_vector_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;VectorFunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_vector_function_base_00_01_vector_function_base_01_4.html" class="m-doc">Dot&lt;VectorFunctionBase, VectorFunctionBase&gt;</a>
-            </dt>
-            <dd>Represents the dot product of two vectors.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_essential_boundary.html" class="m-doc">EssentialBoundary</a>
             </dt>
@@ -340,25 +315,15 @@ $ u $
             <dd>Abstract base class for objects representing matrix coefficients.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_scalar_function_base_00_01_matrix_function_base_01_4.html" class="m-doc">Mult&lt;ScalarFunctionBase, MatrixFunctionBase&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_function_base_01_4.html" class="m-doc">Mult&lt;FunctionBase, FunctionBase&gt;</a>
             </dt>
-            <dd>Multiplication of <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_scalar_function_base_00_01_scalar_function_base_01_4.html" class="m-doc">Mult&lt;ScalarFunctionBase, ScalarFunctionBase&gt;</a>
-            </dt>
-            <dd>Multiplication of two <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instances.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_scalar_function_base_00_01_vector_function_base_01_4.html" class="m-doc">Mult&lt;ScalarFunctionBase, VectorFunctionBase&gt;</a>
-            </dt>
-            <dd>Multiplication of <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>.</dd>
+            <dd>Multiplication of two <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instances.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a>
             </dt>
             <dd>Outward unit normal.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>
             </dt>
             <dd>Represent the power function.</dd>
@@ -376,19 +341,10 @@ $ u $
             </dt>
             <dd>Represents the body of a variational problem.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_rank3_operator.html" class="m-doc">Rank3Operator</a>
-            </dt>
-            <dd>Rank-3 tensor for discretized functions on finite bases.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>
             </dt>
             <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>T</code>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_grid_function_base_01_4.html" class="m-doc">ScalarFunction&lt;GridFunctionBase&gt;</a>
-            </dt>
-            <dd>Represents a scalar function which is built from a scalar valued <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01double_01_5_00_01int_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const double*, int)&gt;&gt;</a>
@@ -403,11 +359,6 @@ $ u $
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>
             </dt>
             <dd>Base class for operators.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_sum_3_01_matrix_function_base_00_01_matrix_function_base_01_4.html" class="m-doc">Sum&lt;MatrixFunctionBase, MatrixFunctionBase&gt;</a>
-            </dt>
-            <dd>Sum of two <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a> instances.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a>
             </dt>
@@ -442,7 +393,7 @@ $ A $
 </svg>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_transpose_3_01_matrix_function_base_01_4.html" class="m-doc">Transpose&lt;MatrixFunctionBase&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_transpose_3_01_function_base_01_4.html" class="m-doc">Transpose&lt;FunctionBase&gt;</a>
             </dt>
             <dd>Represents the transpose matrix <svg class="m-math" style="width: 1.550em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 14.881705 9.784673">
 <title>
@@ -477,11 +428,6 @@ $ A $
               class <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>
             </dt>
             <dd>Represents a vector which may be constructed from values which can be converted to objects of type <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_3_01_grid_function_base_01_4.html" class="m-doc">VectorFunction&lt;GridFunctionBase&gt;</a>
-            </dt>
-            <dd>Represents from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> with vector values.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
             </dt>

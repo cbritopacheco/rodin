@@ -120,40 +120,26 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3df9b8d1191b9b9a196fdf4f210cce80" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">double t) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> by a scalar value.</dd>
-            <dt id="a92a75c9ab697dbc6850485bc4fe1e1f5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a92a75c9ab697dbc6850485bc4fe1e1f5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; v) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
+            <dt id="a188fed8e6ff6bad5aa88971c1a935e50">
+              <span class="m-doc-wrap-bumper">auto <a href="#a188fed8e6ff6bad5aa88971c1a935e50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; v) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
-            <dd>Projection of a scalar function.</dd>
-            <dt id="a204ba26817f48014ec4782b9429f256e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a204ba26817f48014ec4782b9429f256e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; v) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
-            </dt>
-            <dd>Projection of a vector function.</dd>
+            <dd>Projection of a function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3da5c5eef8673ca5674d4eb95793b760" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; v,
+              <span class="m-doc-wrap-bumper">auto <a href="#a4a91b5dcc2ed16e1e33900974c92b114" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; v,
               int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
-            <dd>Projects a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance.</dd>
+            <dd>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a734618ecd80633d35d99c23ff7c392a4" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; v,
-              int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
-            </dt>
-            <dd>Projects a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aebe8572035d2fff3e2b67e7567c6da4e" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; s,
+              <span class="m-doc-wrap-bumper">auto <a href="#a7ab3d6fa0d4b8bb0dc40376d9c0480ef" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; s,
               const std::set&lt;int&gt;&amp; attrs = {}) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
-            <dd>Projects a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance on the grid function.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a348a103932d488a98d783c26935c840c" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; s,
-              const std::set&lt;int&gt;&amp; attrs = {}) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
-            </dt>
-            <dd>Projects a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance on the grid function.</dd>
+            <dd>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the grid function.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a8eed82f0cf64f8d29b0350a7ee4bd439" class="m-doc">transfer</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; dst)</span>
             </dt>
             <dd>Transfers the grid function from one finite element space to another.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a46860043ff770833b7b0e602b425cb62" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&gt;&amp; s) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5df1d6f0ca9d58b1da8e5af44aafd73b" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&gt;&amp; s) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
             <dd>Projects the restriction of a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -243,37 +229,21 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a3da5c5eef8673ca5674d4eb95793b760"><div>
+          <section class="m-doc-details" id="a4a91b5dcc2ed16e1e33900974c92b114"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3da5c5eef8673ca5674d4eb95793b760" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; v,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a91b5dcc2ed16e1e33900974c92b114" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; v,
               int attr)</span></span>
             </h3>
-            <p>Projects a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance.</p>
-<p>This function will project a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance on the domain elements with the given attribute.</p><p>It is a convenience function to call <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aebe8572035d2fff3e2b67e7567c6da4e" class="m-doc">project(const ScalarFunctionBase&amp;, const std::<wbr />set&lt;int&gt;&amp;)</a> with one attribute.</p>
+            <p>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance.</p>
+<p>This function will project a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the domain elements with the given attribute.</p><p>It is a convenience function to call <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a7ab3d6fa0d4b8bb0dc40376d9c0480ef" class="m-doc">project(const FunctionBase&amp;, const std::<wbr />set&lt;int&gt;&amp;)</a> with one attribute.</p>
           </div></section>
-          <section class="m-doc-details" id="a734618ecd80633d35d99c23ff7c392a4"><div>
+          <section class="m-doc-details" id="a7ab3d6fa0d4b8bb0dc40376d9c0480ef"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a734618ecd80633d35d99c23ff7c392a4" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; v,
-              int attr)</span></span>
-            </h3>
-            <p>Projects a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance.</p>
-<p>This function will project a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance on the domain elements with the given attribute.</p><p>It is a convenience function to call <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a348a103932d488a98d783c26935c840c" class="m-doc">project(const VectorFunctionBase&amp;, const std::<wbr />set&lt;int&gt;&amp;)</a> with one attribute.</p>
-          </div></section>
-          <section class="m-doc-details" id="aebe8572035d2fff3e2b67e7567c6da4e"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebe8572035d2fff3e2b67e7567c6da4e" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; s,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ab3d6fa0d4b8bb0dc40376d9c0480ef" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; s,
               const std::set&lt;int&gt;&amp; attrs = {})</span></span>
             </h3>
-            <p>Projects a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance on the grid function.</p>
-<p>This function will project a <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> instance on the domain elements with the given attributes. If the attribute set is empty, this function will project over all elements in the mesh.</p>
-          </div></section>
-          <section class="m-doc-details" id="a348a103932d488a98d783c26935c840c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a348a103932d488a98d783c26935c840c" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&amp; s,
-              const std::set&lt;int&gt;&amp; attrs = {})</span></span>
-            </h3>
-            <p>Projects a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance on the grid function.</p>
-<p>This function will project a <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> instance on the domain elements with the given attributes. If the attribute set is empty, this function will project over all elements in the mesh.</p>
+            <p>Projects a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the grid function.</p>
+<p>This function will project a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance on the domain elements with the given attributes. If the attribute set is empty, this function will project over all elements in the mesh.</p>
           </div></section>
           <section class="m-doc-details" id="a8eed82f0cf64f8d29b0350a7ee4bd439"><div>
             <h3>
@@ -292,9 +262,9 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a46860043ff770833b7b0e602b425cb62"><div>
+          <section class="m-doc-details" id="a5df1d6f0ca9d58b1da8e5af44aafd73b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46860043ff770833b7b0e602b425cb62" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&gt;&amp; s)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5df1d6f0ca9d58b1da8e5af44aafd73b" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_restriction.html" class="m-doc">Restriction</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&gt;&amp; s)</span></span>
             </h3>
             <p>Projects the restriction of a scalar coefficient on the given <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
             <table class="m-table m-fullwidth m-flat">
