@@ -94,6 +94,9 @@ namespace Rodin::Variational
          case RangeType::Matrix:
             return Internal::MatrixProxyFunction(*this);
       }
+
+      // The following return is needed to prevent compiler warnings/errors
+      return Internal::ScalarProxyFunction(*this);
    }
 }
 
