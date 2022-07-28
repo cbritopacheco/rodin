@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <ostream>
+#include <cassert>
 
 #include "ForwardDecls.h"
 

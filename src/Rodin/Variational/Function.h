@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_FUNCTION_H
 #define RODIN_VARIATIONAL_FUNCTION_H
 
+#include <set>
 #include <variant>
 #include <type_traits>
 
