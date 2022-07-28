@@ -37,6 +37,8 @@ namespace Rodin::Variational
 
          ProblemBody(const ProblemBody& other);
 
+         ProblemBody(ProblemBody&& other);
+
          EssentialBoundary& getEssentialBoundary();
 
          LFIList& getLinearFormDomainIntegratorList();
