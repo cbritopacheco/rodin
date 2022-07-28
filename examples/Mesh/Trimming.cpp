@@ -17,7 +17,7 @@ int main(int, char**)
 
   Alert::Info() << "Trimming mesh..." << Alert::Raise;
 
-  auto trimmed = mesh.trim(1, 4);
+  auto trimmed = mesh.trim(2);
 
   Alert::Info() << "Saved mesh to trimmed.mesh" << Alert::Raise;
 

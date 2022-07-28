@@ -19,7 +19,7 @@ namespace Rodin::Alert
     * Represents an alert which, when raised, will terminate the program after
     * outputting a message with the reason why.
     */
-   class Exception : public Alert
+   class Exception : public std::exception, public Alert
    {
       public:
          /**
@@ -36,7 +36,20 @@ namespace Rodin::Alert
          /**
           * @brief Copies the Exception message.
           */
-         Exception(const Exception&) = default;
+         Exception(const Exception& other)
+            :  std::exception(other),
+               Alert(other)
+         {}
+
+         Exception(Exception&& other)
+            :  std::exception(std::move(other)),
+               Alert(std::move(other))
+         {}
+
+         const char* what() const noexcept override
+         {
+            return Alert::what();
+         }
 
          /**
           * @brief Raises the exception to the user.
@@ -44,7 +57,7 @@ namespace Rodin::Alert
           * Default behaviour is to output a formatted error message and call
           * std::abort.
           */
-         virtual void raise() const noexcept override;
+         virtual void raise() const override;
    };
 }
 

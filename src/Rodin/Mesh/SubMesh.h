@@ -33,24 +33,38 @@ namespace Rodin
    class SubMesh<Traits::Serial> : public Mesh<Traits::Serial>
    {
       public:
-         using Mesh<Traits::Serial>::Mesh;
+         SubMesh(const MeshBase& parent);
 
          SubMesh(const SubMesh& other);
 
-         /**
-          * @brief Sets the SubMesh to Mesh vertex map
-          * @param[in] Map going from SubMesh to Mesh vertex indices.
-          *
-          * Each key-value pair in the map indicates the correspondence between
-          * vertex indices in the SubMesh and vertex indices in the parent
-          * Mesh.
-          */
-         SubMesh& setVertexMap(boost::bimap<int, int> s2pv);
+         SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
+         {
+            getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
+            return *this;
+         }
+
+         void finalize()
+         {
+            getHandle().FinalizeTopology();
+            getHandle().Finalize();
+            // TODO: Build face map
+         }
 
          /**
-          * @brief Sets the reference to the parent Mesh object
+          * @brief Adds an element from the parent mesh to the submesh.
+          *
+          * @param[in] el Element from the parent mesh
           */
-         SubMesh& setParent(const MeshBase& parent);
+         SubMesh& add(const Element& el);
+
+         /**
+          * Adds a bounday element from the parent mesh to the submesh.
+          *
+          * If `this->isSurface() && !getParent().isSurface()` then this will add the
+          * boundary element as an element of the submesh. Otherwise, it gets
+          * added normally as a boundary element.
+          */
+         SubMesh& add(const BoundaryElement& el);
 
          /**
           * @returns Reference to the parent Mesh object
@@ -62,19 +76,21 @@ namespace Rodin
           */
          const boost::bimap<int, int>& getVertexMap() const;
 
+         const boost::bimap<int, int>& getElementMap() const;
+
+         const boost::bimap<int, int>& getBoundaryElementMap() const;
+
          bool isSubMesh() const override
          {
             return true;
          }
 
-         Mesh<Traits::Serial>& mesh()
-         {
-            return *this;
-         }
-
       private:
-         std::optional<std::reference_wrapper<const MeshBase>> m_parent;
-         std::optional<boost::bimap<int, int>> m_s2pv;
+         const MeshBase& m_parent;
+         boost::bimap<int, int> m_s2pv;
+         boost::bimap<int, int> m_s2pf;
+         boost::bimap<int, int> m_s2pe;
+         boost::bimap<int, int> m_s2pb;
    };
 }
 

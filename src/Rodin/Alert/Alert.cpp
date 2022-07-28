@@ -11,17 +11,19 @@
 namespace Rodin::Alert
 {
    Alert::Alert(const std::string& what)
-   {
-      m_what << what;
-   }
+      : m_what(what)
+   {}
 
    Alert::Alert(const Alert& other)
-   {
-      m_what << other.m_what.rdbuf();
-   }
+      : m_what(other.m_what)
+   {}
 
-   std::string Alert::what() const noexcept
+   Alert::Alert(Alert&& other)
+      : m_what(std::move(other.m_what))
+   {}
+
+   const char* Alert::what() const noexcept
    {
-      return m_what.str();
+      return m_what.c_str();
    }
 }

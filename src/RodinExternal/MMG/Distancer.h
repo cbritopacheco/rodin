@@ -51,6 +51,7 @@ namespace Rodin::External::MMG
       Distancer(Variational::FiniteElementSpace<FEC, Traits::Serial>& fes)
         : m_fes(fes),
           m_scale(true),
+          m_distTheBoundary(false),
           m_ncpu(std::thread::hardware_concurrency()),
           m_mshdist(getISCDMshdistExecutable())
       {}
@@ -140,8 +141,15 @@ namespace Rodin::External::MMG
        */
       Variational::GridFunction<FEC, Traits::Serial> distance(const Mesh<Traits::Serial>& box)
       {
+        if (&box != &m_fes.getMesh())
+        {
+          Alert::Exception()
+            << "Mesh must be the same one as that of the finite element space."
+            << Alert::Raise;
+        }
+
         auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        box.save(boxp, IO::MeshFormat::MEDIT);
+        box.save(boxp, IO::FileFormat::MEDIT);
 
         if (m_interiorDomains)
         {
@@ -162,9 +170,8 @@ namespace Rodin::External::MMG
         {
           retcode = m_mshdist.run(
               boxp.string(),
-              "-fmm",
-              "-surf",
               "-dom",
+              "-surf -fmm",
               "-ncpu", m_ncpu,
               "-v 0"
               );
@@ -174,15 +181,17 @@ namespace Rodin::External::MMG
           retcode = m_mshdist.run(
               boxp.string(),
               "-dom",
+              m_distTheBoundary ? "-surf -fmm" : "",
               "-ncpu", m_ncpu,
-              "-v 0"
+              ""
+              //"-v 0"
               );
         }
         Variational::GridFunction res(m_fes);
         if (retcode != 0)
           Alert::Exception("ISCD::Mshdist invocation failed.").raise();
         else
-          res.load(boxp.replace_extension(".sol"), IO::GridFunctionFormat::MEDIT);
+          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
         return res;
       }
 
@@ -209,51 +218,47 @@ namespace Rodin::External::MMG
         box.save(boxp);
 
         auto contourp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        contour.save(contourp, IO::MeshFormat::MEDIT);
+        contour.save(contourp, IO::FileFormat::MEDIT);
 
         int retcode = 1;
         if (box.isSurface())
         {
-          if (m_scale)
-          {
-            retcode = m_mshdist.run(
-                boxp.string(), contourp.string(),
-                "-ncpu", m_ncpu, "-v 0");
-          }
-          else
-          {
-            retcode = m_mshdist.run(
-                boxp.string(), contourp.string(),
-                "-noscale", "-ncpu", m_ncpu, "-v 0");
-          }
+          retcode = m_mshdist.run(
+              boxp.string(), contourp.string(),
+              "-surf",
+              m_scale ? "" : "-noscale",
+              "-ncpu", m_ncpu,
+              "-v 0"
+              );
         }
         else
         {
-          if (m_scale)
-          {
-            retcode = m_mshdist.run(
-                boxp.string(), contourp.string(),
-                "-surf", "-ncpu", m_ncpu, "-v 0");
-          }
-          else
-          {
-            retcode = m_mshdist.run(
-                boxp.string(), contourp.string(),
-                "-surf", "-noscale", "-ncpu", m_ncpu, "-v 0");
-          }
+          retcode = m_mshdist.run(
+              boxp.string(), contourp.string(),
+              m_distTheBoundary ? "-surf" : "",
+              m_scale ? "" : "-noscale",
+              "-ncpu", m_ncpu,
+              "-v 0");
         }
 
         Variational::GridFunction res(m_fes);
         if (retcode != 0)
           Alert::Exception("ISCD::Mshdist invocation failed.").raise();
         else
-          res.load(boxp.replace_extension(".sol"), IO::GridFunctionFormat::MEDIT);
+          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
         return res;
+      }
+
+      Distancer& surface(bool distTheBoundary = true)
+      {
+        m_distTheBoundary = distTheBoundary;
+        return *this;
       }
 
     private:
       Variational::FiniteElementSpace<FEC, Traits::Serial>& m_fes;
       bool m_scale;
+      bool m_distTheBoundary;
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
       std::optional<std::set<MaterialReference>> m_interiorDomains;
@@ -269,7 +274,11 @@ namespace Rodin::External::MMG
   class Distancer<void>
   {
     public:
-      Distancer();
+      Distancer()
+        : m_ncpu(std::thread::hardware_concurrency()),
+          m_mshdist(getISCDMshdistExecutable()),
+          m_distTheBoundary(false)
+      {}
 
       /**
        * @brief Redistances the level set function.
@@ -285,11 +294,11 @@ namespace Rodin::External::MMG
       void redistance(Variational::GridFunction<FEC, Traits::Serial>& sol)
       {
         auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        sol.getMesh().save(meshp, IO::MeshFormat::MEDIT);
+        sol.getMesh().save(meshp, IO::FileFormat::MEDIT);
 
         boost::filesystem::path solp(meshp);
         solp.replace_extension(".sol");
-        sol.save(solp, IO::GridFunctionFormat::MEDIT);
+        sol.save(solp, IO::FileFormat::MEDIT);
 
         auto name = solp;
         name.replace_extension();
@@ -297,16 +306,28 @@ namespace Rodin::External::MMG
         int retcode = 1;
         if (sol.getMesh().isSurface())
         {
-          retcode = m_mshdist.run(name.string(), "-fmm", "-surf", "-ncpu", m_ncpu, "-v 0");
+          retcode = m_mshdist.run(name.string(),
+              "-surf -fmm",
+              "-ncpu", m_ncpu,
+              "-v 0");
         }
         else
         {
-          retcode = m_mshdist.run(name.string(), "-ncpu", m_ncpu, "-v 0");
+          retcode = m_mshdist.run(name.string(),
+              m_distTheBoundary ? "-surf" : ""
+              "-ncpu", m_ncpu,
+              "-v 0");
         }
 
         if (retcode != 0)
           Alert::Exception("ISCD::Mshdist invocation failed.").raise();
-        sol.load(solp, IO::GridFunctionFormat::MEDIT);
+        sol.load(solp, IO::FileFormat::MEDIT);
+      }
+
+      Distancer& surface(bool distTheBoundary = true)
+      {
+        m_distTheBoundary = distTheBoundary;
+        return *this;
       }
 
       /**
@@ -326,6 +347,7 @@ namespace Rodin::External::MMG
     private:
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
+      bool m_distTheBoundary;
   };
   Distancer() -> Distancer<void>;
 

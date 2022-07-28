@@ -14,9 +14,10 @@
 
 #include "ForwardDecls.h"
 
+#include "Function.h"
 #include "ShapeFunction.h"
-#include "ScalarFunction.h"
-#include "VectorFunction.h"
+
+#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
@@ -38,28 +39,33 @@ namespace Rodin::Variational
     * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
     * | @f$ g @f$            | ScalarFunction                                |
     */
-   template <class Value, class Trait>
-   class DirichletBC<TrialFunction<H1, Trait>, Value> : public FormLanguage::Base
+   template <class Trait>
+   class DirichletBC<TrialFunction<H1, Trait>> : public FormLanguage::Base
    {
-      static_assert(
-            std::is_base_of_v<ScalarFunctionBase, Value> ||
-            std::is_base_of_v<VectorFunctionBase, Value>,
-            "Value must be derived from either ScalarFunctionBase or VectorFunctionBase");
       public:
-         DirichletBC(const TrialFunction<H1, Trait>& u, const Value& v)
+         DirichletBC(const TrialFunction<H1, Trait>& u, const FunctionBase& v)
             : m_u(u), m_value(v.copy())
          {
-            if constexpr (std::is_base_of_v<ScalarFunctionBase, Value>)
+            if (v.getRangeType() != RangeType::Scalar && v.getRangeType() != RangeType::Vector)
             {
-               assert(
-                     u.getFiniteElementSpace().getVectorDimension() == 1);
-            }
-            else if constexpr (std::is_base_of_v<VectorFunctionBase, Value>)
-            {
-               assert(
-                     u.getFiniteElementSpace().getVectorDimension() == v.getDimension());
+               UnexpectedRangeTypeException(
+                     {RangeType::Scalar, RangeType::Vector}, v.getRangeType()).raise();
             }
          }
+
+         DirichletBC(const DirichletBC& other)
+            : FormLanguage::Base(other),
+              m_u(other.m_u),
+              m_value(other.m_value->copy()),
+              m_essBdr(other.m_essBdr)
+         {}
+
+         DirichletBC(DirichletBC&& other)
+            : FormLanguage::Base(std::move(other)),
+              m_u(other.m_u),
+              m_value(std::move(other.m_value)),
+              m_essBdr(std::move(other.m_essBdr))
+         {}
 
          DirichletBC& on(int bdrAtr)
          {
@@ -72,23 +78,11 @@ namespace Rodin::Variational
             return *this;
          }
 
-         DirichletBC(const DirichletBC& other)
-            :  m_u(other.m_u),
-               m_value(other.m_value->copy()),
-               m_essBdr(other.m_essBdr)
-         {}
-
-         DirichletBC(DirichletBC&& other)
-            :  m_u(other.m_u),
-               m_value(std::move(other.m_value)),
-               m_essBdr(std::move(other.m_essBdr))
-         {}
-
          /**
           * @returns Returns reference to the value of the boundary condition
           * at the boundary
           */
-         const Value& getValue() const
+         const FunctionBase& getValue() const
          {
             assert(m_value);
             return *m_value;
@@ -114,23 +108,37 @@ namespace Rodin::Variational
          }
       private:
          const TrialFunction<H1, Trait>& m_u;
-         std::unique_ptr<Value> m_value;
+         std::unique_ptr<FunctionBase> m_value;
          std::set<int> m_essBdr;
    };
-   template <class FEC, class Trait>
-   DirichletBC(const TrialFunction<FEC, Trait>&, const ScalarFunctionBase&)
-      -> DirichletBC<TrialFunction<FEC, Trait>, ScalarFunctionBase>;
-   template <class FEC, class Trait>
-   DirichletBC(const TrialFunction<FEC, Trait>&, const VectorFunctionBase&)
-      -> DirichletBC<TrialFunction<FEC, Trait>, VectorFunctionBase>;
+   template <class Trait>
+   DirichletBC(const TrialFunction<H1, Trait>&, const FunctionBase&)
+      -> DirichletBC<TrialFunction<H1, Trait>>;
 
    template <class Trait>
-   class DirichletBC<Component<TrialFunction<H1, Trait>>, ScalarFunctionBase>
+   class DirichletBC<Component<TrialFunction<H1, Trait>>>
       : public FormLanguage::Base
    {
       public:
-         DirichletBC(const Component<TrialFunction<H1, Trait>>& ux, const ScalarFunctionBase& v)
+         DirichletBC(const Component<TrialFunction<H1, Trait>>& ux, const FunctionBase& v)
             : m_ux(ux), m_value(v.copy())
+         {
+            if (v.getRangeType() != RangeType::Scalar)
+               UnexpectedRangeTypeException(RangeType::Scalar, v.getRangeType());
+         }
+
+         DirichletBC(const DirichletBC& other)
+            :  FormLanguage::Base(other),
+               m_ux(other.m_ux),
+               m_value(other.m_value->copy()),
+               m_essBdr(other.m_essBdr)
+         {}
+
+         DirichletBC(DirichletBC&& other)
+            :  FormLanguage::Base(std::move(other)),
+               m_ux(std::move(other.m_ux)),
+               m_value(std::move(other.m_value)),
+               m_essBdr(std::move(other.m_essBdr))
          {}
 
          DirichletBC& on(int bdrAtr)
@@ -144,23 +152,11 @@ namespace Rodin::Variational
             return *this;
          }
 
-         DirichletBC(const DirichletBC& other)
-            :  m_ux(other.m_ux),
-               m_value(other.m_value->copy()),
-               m_essBdr(other.m_essBdr)
-         {}
-
-         DirichletBC(DirichletBC&& other)
-            :  m_ux(other.m_u),
-               m_value(std::move(other.m_value)),
-               m_essBdr(std::move(other.m_essBdr))
-         {}
-
          /**
           * @returns Returns reference to the value of the boundary condition
           * at the boundary
           */
-         const ScalarFunctionBase& getValue() const
+         const FunctionBase& getValue() const
          {
             assert(m_value);
             return *m_value;
@@ -182,12 +178,12 @@ namespace Rodin::Variational
          }
       private:
          Component<TrialFunction<H1, Trait>> m_ux;
-         std::unique_ptr<ScalarFunctionBase> m_value;
+         std::unique_ptr<FunctionBase> m_value;
          std::set<int> m_essBdr;
    };
-   template <class FEC, class Trait>
-   DirichletBC(const Component<TrialFunction<FEC, Trait>>&, const ScalarFunctionBase&)
-      -> DirichletBC<Component<TrialFunction<FEC, Trait>>, ScalarFunctionBase>;
+   template <class Trait>
+   DirichletBC(const Component<TrialFunction<H1, Trait>>&, const FunctionBase&)
+      -> DirichletBC<Component<TrialFunction<H1, Trait>>>;
 }
 
 #endif

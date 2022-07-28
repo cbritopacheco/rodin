@@ -4,41 +4,76 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Sum.h"
-
 #include "UnaryMinus.h"
+#include "RangeShape.h"
 
 namespace Rodin::Variational
 {
-   double
-   UnaryMinus<ScalarFunctionBase>
-   ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-   const
-   {
-      return -1.0 * getOperand().getValue(trans, ip);
-   }
+   // ---- FunctionBase ------------------------------------------------------
+   UnaryMinus<FunctionBase>::UnaryMinus(const FunctionBase& op)
+      : m_op(op.copy())
+   {}
 
-   UnaryMinus<ScalarFunctionBase>
-   operator-(const ScalarFunctionBase& op)
-   {
-      return UnaryMinus(op);
-   }
+   UnaryMinus<FunctionBase>::UnaryMinus(const UnaryMinus& other)
+      :  FunctionBase(other),
+         m_op(other.m_op->copy())
+   {}
 
-   void
-   UnaryMinus<VectorFunctionBase>
-   ::getValue(
-         mfem::Vector& value,
-         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-   const
+   UnaryMinus<FunctionBase>::UnaryMinus(UnaryMinus&& other)
+      : FunctionBase(std::move(other)),
+        m_op(std::move(other.m_op))
+   {}
+
+   void UnaryMinus<FunctionBase>::getValue(
+         mfem::DenseMatrix& value,
+         mfem::ElementTransformation& trans,
+         const mfem::IntegrationPoint& ip) const
    {
-      getOperand().getValue(value, trans, ip);
+      m_op->getValue(value, trans, ip);
       value.Neg();
    }
 
-   UnaryMinus<VectorFunctionBase>
-   operator-(const VectorFunctionBase& op)
+   RangeShape UnaryMinus<FunctionBase>::getRangeShape() const
+   {
+      return m_op->getRangeShape();
+   }
+
+   UnaryMinus<FunctionBase> operator-(const FunctionBase& op)
    {
       return UnaryMinus(op);
+   }
+
+   // ---- LinearFormIntegratorBase ------------------------------------------
+   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
+      : m_op(op.copy())
+   {}
+
+   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
+      :  LinearFormIntegratorBase(other),
+         m_op(other.m_op->copy())
+   {}
+
+   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
+      : LinearFormIntegratorBase(std::move(other)),
+        m_op(std::move(other.m_op))
+   {}
+
+   const std::set<int>&
+   UnaryMinus<LinearFormIntegratorBase>::getAttributes() const
+   {
+      return m_op->getAttributes();
+   }
+
+   IntegratorRegion
+   UnaryMinus<LinearFormIntegratorBase>::getIntegratorRegion() const
+   {
+      return m_op->getIntegratorRegion();
+   }
+
+   const ShapeFunctionBase<TestSpace>&
+   UnaryMinus<LinearFormIntegratorBase>::getTestFunction() const
+   {
+      return m_op->getTestFunction();
    }
 
    void
@@ -47,7 +82,7 @@ namespace Rodin::Variational
          mfem::ElementTransformation& trans, mfem::Vector& vec)
    const
    {
-      getOperand().getElementVector(fe, trans, vec);
+      m_op->getElementVector(fe, trans, vec);
       vec *= -1.0;
    }
 
@@ -57,14 +92,53 @@ namespace Rodin::Variational
       return UnaryMinus(op);
    }
 
+   // ---- BilinearFormIntegratorBase ----------------------------------------
+   UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
+      : m_op(op.copy())
+   {}
+
+   UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
+      :  BilinearFormIntegratorBase(other),
+         m_op(other.m_op->copy())
+   {}
+
+   UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
+      : BilinearFormIntegratorBase(std::move(other)),
+        m_op(std::move(other.m_op))
+   {}
+
+   const ShapeFunctionBase<TrialSpace>&
+   UnaryMinus<BilinearFormIntegratorBase>::getTrialFunction() const
+   {
+      return m_op->getTrialFunction();
+   }
+
+   const ShapeFunctionBase<TestSpace>&
+   UnaryMinus<BilinearFormIntegratorBase>::getTestFunction() const
+   {
+      return m_op->getTestFunction();
+   }
+
+   const std::set<int>&
+   UnaryMinus<BilinearFormIntegratorBase>::getAttributes() const
+   {
+      return m_op->getAttributes();
+   }
+
+   IntegratorRegion
+   UnaryMinus<BilinearFormIntegratorBase>::getIntegratorRegion() const
+   {
+      return m_op->getIntegratorRegion();
+   }
+
    void
    UnaryMinus<BilinearFormIntegratorBase>
    ::getElementMatrix(
          const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
          mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const
    {
-      getOperand().getElementMatrix(trial, test, trans, mat);
-      mat *= -1.0;
+      m_op->getElementMatrix(trial, test, trans, mat);
+      mat.Neg();
    }
 
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
@@ -72,15 +146,14 @@ namespace Rodin::Variational
       return UnaryMinus(op);
    }
 
-   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
-   operator-(const FormLanguage::LinearFormIntegratorSum& op)
+   UnaryMinus<LinearFormIntegratorSum>
+   operator-(const LinearFormIntegratorSum& op)
    {
-      return UnaryMinus(op);
+      return UnaryMinus<LinearFormIntegratorSum>(op);
    }
 
-   UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
-         const FormLanguage::BilinearFormIntegratorSum& op)
+   UnaryMinus<BilinearFormIntegratorSum> operator-(const BilinearFormIntegratorSum& op)
    {
-      return UnaryMinus(op);
+      return UnaryMinus<BilinearFormIntegratorSum>(op);
    }
 }

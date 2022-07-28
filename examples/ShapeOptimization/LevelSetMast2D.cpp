@@ -49,7 +49,8 @@ int main(int, char**)
   Omega.load(meshFile);
 
   Omega.save("Omega0.mesh");
-  std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
+
+  Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // UMFPack
   auto solver = Solver::UMFPack();
@@ -58,8 +59,8 @@ int main(int, char**)
   size_t maxIt = 100;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarFunction(4.0);
-  auto alpha = ScalarFunction(4 * hmax * hmax);
+  double ell = 4.0;
+  double alpha = 4 * hmax * hmax;
 
   std::vector<double> obj;
 
@@ -71,7 +72,7 @@ int main(int, char**)
     FiniteElementSpace<H1> Vh(Omega, d);
 
     // Trim the exterior part of the mesh to solve the elasticity system
-    SubMesh trimmed = Omega.trim(Exterior, Gamma);
+    SubMesh trimmed = Omega.trim(Exterior);
 
     // Build a finite element space over the trimmed mesh
     FiniteElementSpace<H1> VhInt(trimmed, d);
@@ -108,8 +109,8 @@ int main(int, char**)
 
     // Update objective
     obj.push_back(
-        compliance(u) + ell.getValue() * Omega.getVolume(Interior));
-    std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
+        compliance(u) + ell * Omega.getVolume(Interior));
+    Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
     // Generate signed distance function
     FiniteElementSpace<H1> Dh(Omega);
@@ -118,7 +119,7 @@ int main(int, char**)
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = 2 * hmax / gInf;
+    double dt = 4 * hmax / gInf;
     MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
@@ -128,22 +129,20 @@ int main(int, char**)
                                        .setHMax(hmax)
                                        .setBoundaryReference(Gamma)
                                        .discretize(dist);
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+
     // Save mesh
     Omega.save("Omega.mesh");
 
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
-      std::cout << "Convergence!" << std::endl;
+      Alert::Info() << "Convergence!" << Alert::Raise;
       break;
     }
-
-    std::ofstream plt("obj.txt", std::ios::trunc);
-    for (size_t i = 0; i < obj.size(); i++)
-      plt << i << "," << obj[i] << "\n";
   }
 
-  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
+  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }

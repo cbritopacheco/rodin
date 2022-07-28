@@ -83,53 +83,7 @@ namespace Rodin::Variational
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            const auto& traceDomain = getTraceDomain();
-            switch (trans.ElementType)
-            {
-               case mfem::ElementTransformation::BDR_ELEMENT:
-               {
-                  int fn = trans.mesh->GetBdrFace(trans.ElementNo);
-                  if (trans.mesh->FaceIsInterior(fn))
-                  {
-                     if (traceDomain.empty())
-                     {
-                        Alert::Exception()
-                           << "Integration over an interior boundary element "
-                           << "requires a trace domain."
-                           << Alert::Raise;
-                     }
-
-                     // Extend the values on the trace domain up to the
-                     // interior boundary.
-                     mfem::FaceElementTransformations* ft =
-                        trans.mesh->GetFaceElementTransformations(fn);
-                     ft->SetAllIntPoints(&ip);
-                     if (traceDomain.count(ft->GetElement1Transformation().Attribute))
-                        GetGradient(value, ft->GetElement1Transformation(), ip);
-                     else if (traceDomain.count(ft->GetElement2Transformation().Attribute))
-                        GetGradient(value, ft->GetElement2Transformation(), ip);
-                     else
-                     {
-                        // The boundary over which we are evaluating must be
-                        // the interface between the trace domain and some
-                        // other domain, i.e. it is not the boundary that was
-                        // specified!
-                        Alert::Exception()
-                           << "Boundary element " << trans.ElementNo
-                           << " with attribute " << trans.Attribute
-                           << " is not a boundary of the trace domain."
-                           << Alert::Raise;
-                     }
-                  }
-                  else
-                  {
-                     GetGradient(value, trans, ip);
-                  }
-                  break;
-               }
-               default:
-                  GetGradient(value, trans, ip);
-            }
+            GetGradient(value, FunctionBase::getTraceElementTrans(trans, ip), ip);
          }
 
          VectorFunctionBase* copy() const noexcept override
@@ -149,30 +103,29 @@ namespace Rodin::Variational
       public:
          Grad(ShapeFunction<H1, Space>& u)
             : m_u(u)
-         {
-            assert(m_u.getFiniteElementSpace().getVectorDimension() == 1);
-         }
+         {}
 
-         ShapeFunction<H1, Space>& getLeaf() override
-         {
-            return m_u;
-         }
+         Grad(const Grad& other)
+            : ShapeFunctionBase<Space>(other),
+              m_u(other.m_u)
+         {}
+
+         Grad(Grad&& other)
+            : ShapeFunctionBase<Space>(std::move(other)),
+              m_u(other.m_u)
+         {}
 
          const ShapeFunction<H1, Space>& getLeaf() const override
          {
             return m_u;
          }
 
-         int getRows(
-               const mfem::FiniteElement&,
-               const mfem::ElementTransformation& trans) const override
+         int getRows() const override
          {
-            return trans.GetSpaceDim();
+            return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
          }
 
-         int getColumns(
-               const mfem::FiniteElement&,
-               const mfem::ElementTransformation&) const override
+         int getColumns() const override
          {
             return 1;
          }
@@ -184,7 +137,7 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Rank3Operator> getOperator(
+         std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -193,7 +146,7 @@ namespace Rodin::Variational
             mfem::DenseMatrix dshape;
             dshape.SetSize(dofs, sdim);
             fe.CalcPhysDShape(trans, dshape);
-            return std::unique_ptr<Rank3Operator>(
+            return std::unique_ptr<Internal::Rank3Operator>(
                   new Internal::JacobianShapeR3O(std::move(dshape), sdim, 1));
          }
 

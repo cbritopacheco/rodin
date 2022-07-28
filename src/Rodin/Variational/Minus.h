@@ -4,21 +4,27 @@
 #include <type_traits>
 
 #include "ForwardDecls.h"
+#include "Sum.h"
+#include "UnaryMinus.h"
 
 namespace Rodin::Variational
 {
    template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Sum<ScalarFunctionBase, ScalarFunctionBase>>
-   operator-(const ScalarFunctionBase& lhs, T v)
+   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
+   operator-(const FunctionBase& lhs, T v)
    {
-      return lhs - ScalarFunction(v);
+      return Sum(lhs, UnaryMinus(ScalarFunction(v)));
    }
 
-   Sum<ScalarFunctionBase, ScalarFunctionBase>
-   operator-(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs);
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
+   operator-(T v, const FunctionBase& rhs)
+   {
+      return Sum(ScalarFunction(v), UnaryMinus(rhs));
+   }
 
-   Sum<VectorFunctionBase, VectorFunctionBase>
-   operator-(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs);
+   Sum<FunctionBase, FunctionBase>
+   operator-(const FunctionBase& lhs, const FunctionBase& rhs);
 
    template <ShapeFunctionSpaceType Space>
    Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>

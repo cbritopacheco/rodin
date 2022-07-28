@@ -52,7 +52,7 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshLoader<IO::MeshFormat::MFEM, Traits::Serial>
+   class MeshLoader<IO::FileFormat::MFEM, Traits::Serial>
       : public MeshLoaderBase<Traits::Serial>
    {
       public:
@@ -67,7 +67,7 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshLoader<IO::MeshFormat::GMSH, Traits::Serial>
+   class MeshLoader<IO::FileFormat::GMSH, Traits::Serial>
       : public MeshLoaderBase<Traits::Serial>
    {
       public:
@@ -79,7 +79,7 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshLoader<IO::MeshFormat::MEDIT, Traits::Serial>
+   class MeshLoader<IO::FileFormat::MEDIT, Traits::Serial>
       : public MeshLoaderBase<Traits::Serial>
    {
       public:

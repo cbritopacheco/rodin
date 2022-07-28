@@ -10,48 +10,34 @@
 
 #include "Utility.h"
 #include "Restriction.h"
-#include "GridFunction.h"
+#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
-   std::unique_ptr<mfem::Coefficient> ScalarFunctionBase::build() const
+   // ---- FunctionBase ------------------------------------------------------
+   ScalarFunction<FunctionBase>::ScalarFunction(const FunctionBase& nested)
+      : m_nested(nested.copy())
    {
-      return std::unique_ptr<mfem::Coefficient>(new Internal::ProxyScalarFunction(*this));
+      if (nested.getRangeType() != RangeType::Scalar)
+         UnexpectedRangeTypeException(RangeType::Scalar, nested.getRangeType()).raise();
    }
 
-   Restriction<ScalarFunctionBase> ScalarFunctionBase::restrictTo(int attr)
-   {
-      return restrictTo(std::set<int>{attr});
-   }
+   ScalarFunction<FunctionBase>::ScalarFunction(const ScalarFunction& other)
+      :  ScalarFunctionBase(other),
+         m_nested(other.m_nested->copy())
+   {}
 
-   Restriction<ScalarFunctionBase> ScalarFunctionBase::restrictTo(
-         const std::set<int>& attrs)
-   {
-      return Restriction<ScalarFunctionBase>(*this).to(attrs);
-   }
+   ScalarFunction<FunctionBase>::ScalarFunction(ScalarFunction&& other)
+      : ScalarFunctionBase(std::move(other)),
+        m_nested(std::move(other.m_nested))
+   {}
 
-   // ---- ScalarFunction<GridFunctionBase> ----------------------------------
-   ScalarFunction<GridFunctionBase>::ScalarFunction(const GridFunctionBase& u)
-      : m_u(u)
+   double ScalarFunction<FunctionBase>::getValue(
+         mfem::ElementTransformation& trans,
+         const mfem::IntegrationPoint& ip) const
    {
-      assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      mfem::DenseMatrix v;
+      m_nested->getValue(v, trans, ip);
+      return v(0, 0);
    }
-
-   double ScalarFunction<GridFunctionBase>::getValue(
-         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
-   {
-      mfem::Mesh* gfMesh = m_u.getHandle().FESpace()->GetMesh();
-      if (trans.mesh == gfMesh)
-      {
-         return m_u.getHandle().GetValue(trans, ip);
-      }
-      else
-      {
-         mfem::IntegrationPoint coarseIp;
-         mfem::ElementTransformation* coarseTrans = refinedToCoarse(
-               *gfMesh, trans, ip, coarseIp);
-         return m_u.getHandle().GetValue(*coarseTrans, coarseIp);
-      }
-   }
-
 }

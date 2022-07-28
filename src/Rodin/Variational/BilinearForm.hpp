@@ -10,10 +10,10 @@
 #include <cassert>
 
 #include "Rodin/Alert.h"
-#include "FormLanguage/BilinearFormIntegratorSum.h"
 
 #include "FiniteElementSpace.h"
 #include "BilinearFormIntegrator.h"
+#include "BilinearFormIntegratorSum.h"
 
 #include "BilinearForm.h"
 
@@ -44,7 +44,7 @@ namespace Rodin::Variational
 
    template <class TrialFEC, class TestFEC>
    BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
-   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::operator=(const FormLanguage::BilinearFormIntegratorSum& bfi)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::operator=(const BilinearFormIntegratorSum& bfi)
    {
       from(bfi).assemble();
       return *this;
@@ -71,7 +71,7 @@ namespace Rodin::Variational
 
    template <class TrialFEC, class TestFEC>
    BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
-   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::from(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::from(const BilinearFormIntegratorSum& lsum)
    {
       m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getHandle()));
       m_bfiDomainList.clear();
@@ -82,7 +82,7 @@ namespace Rodin::Variational
 
    template <class TrialFEC, class TestFEC>
    BilinearForm<TrialFEC, TestFEC, Traits::Serial>&
-   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::add(const FormLanguage::BilinearFormIntegratorSum& lsum)
+   BilinearForm<TrialFEC, TestFEC, Traits::Serial>::add(const BilinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getBilinearFormDomainIntegratorList())
          add(*p);
