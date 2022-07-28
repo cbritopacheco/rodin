@@ -33,6 +33,8 @@ namespace Rodin::Variational
 
          Trace(const Trace& other);
 
+         Trace(Trace&& other);
+
          double getValue(
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override;

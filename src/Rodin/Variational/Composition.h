@@ -69,7 +69,7 @@ namespace Rodin::Variational
    auto compose(Lhs&& f, Rhs&& g)
    {
       return Composition(std::forward<Lhs>(f), std::forward<Rhs>(g));
-   };
+   }
 }
 
 #endif

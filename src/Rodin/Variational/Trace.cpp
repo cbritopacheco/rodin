@@ -13,7 +13,13 @@ namespace Rodin::Variational
    }
 
    Trace::Trace(const Trace& other)
-      :  m_matrix(other.m_matrix->copy())
+      :  ScalarFunctionBase(other),
+         m_matrix(other.m_matrix->copy())
+   {}
+
+   Trace::Trace(Trace&& other)
+      :  ScalarFunctionBase(other),
+         m_matrix(std::move(other.m_matrix))
    {}
 
    double Trace::getValue(
