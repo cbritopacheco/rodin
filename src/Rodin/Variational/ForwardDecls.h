@@ -123,11 +123,22 @@ namespace Rodin::Variational
    class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------
-   template <class T, class Value>
+   template <class T>
    class DirichletBC;
 
    // ---- Coefficients ------------------------------------------------------
+   class FunctionBase;
+
    class ScalarFunctionBase;
+
+   class RangeShape;
+
+   enum class RangeType
+   {
+      Scalar,
+      Vector,
+      Matrix
+   };
 
    template <class T>
    class ScalarFunction;
@@ -176,6 +187,10 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Composition;
+
+   // TODO: Refactor or remove these two classes!!!!
+   class LinearFormIntegratorSum;
+   class BilinearFormIntegratorSum;
 }
 
 #endif

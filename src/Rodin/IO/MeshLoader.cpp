@@ -12,7 +12,7 @@
 
 namespace Rodin::IO
 {
-   void MeshLoader<MeshFormat::MFEM, Traits::Serial>::load(std::istream& is)
+   void MeshLoader<FileFormat::MFEM, Traits::Serial>::load(std::istream& is)
    {
       assert(is);
       auto fmt = getMeshFormat(is);
@@ -20,7 +20,7 @@ namespace Rodin::IO
       is.seekg(0, std::ios::beg);
       if (!fmt.has_value())
          Alert::Exception("Unrecognized mesh format.").raise();
-      if (fmt == MeshFormat::MFEM)
+      if (fmt == FileFormat::MFEM)
       {
          getObject() = Rodin::Mesh<Traits::Serial>(mfem::Mesh(is, 0, 1, getFixOrientation()));
       }
@@ -30,7 +30,7 @@ namespace Rodin::IO
       }
    }
 
-   void MeshLoader<MeshFormat::GMSH, Traits::Serial>::load(std::istream& is)
+   void MeshLoader<FileFormat::GMSH, Traits::Serial>::load(std::istream& is)
    {
       assert(is);
       auto fmt = getMeshFormat(is);
@@ -38,7 +38,7 @@ namespace Rodin::IO
       is.seekg(0, std::ios::beg);
       if (!fmt.has_value())
          Alert::Exception("Unrecognized mesh format.").raise();
-      if (fmt == MeshFormat::GMSH)
+      if (fmt == FileFormat::GMSH)
       {
          getObject() = Rodin::Mesh<Traits::Serial>(mfem::Mesh(is, 0, 1, getFixOrientation()));
       }
@@ -48,7 +48,7 @@ namespace Rodin::IO
       }
    }
 
-   void MeshLoader<MeshFormat::MEDIT, Traits::Serial>::load(std::istream& is)
+   void MeshLoader<FileFormat::MEDIT, Traits::Serial>::load(std::istream& is)
    {
       std::string line;
       while (std::getline(is, line))

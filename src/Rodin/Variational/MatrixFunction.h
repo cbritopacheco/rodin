@@ -12,94 +12,40 @@
 #include <mfem.hpp>
 
 #include "Rodin/Alert.h"
+
 #include "ForwardDecls.h"
-#include "FormLanguage/Base.h"
+#include "Function.h"
+#include "RangeShape.h"
 
 namespace Rodin::Variational
 {
    /**
     * @brief Abstract base class for objects representing matrix coefficients.
     */
-   class MatrixFunctionBase
-      : public FormLanguage::Buildable<mfem::MatrixCoefficient>
+   class MatrixFunctionBase : public FunctionBase
    {
       public:
          MatrixFunctionBase() = default;
 
          MatrixFunctionBase(const MatrixFunctionBase& other)
-            : m_traceDomain(other.m_traceDomain)
+            : FunctionBase(other)
          {}
 
          MatrixFunctionBase(MatrixFunctionBase&& other)
-            : m_traceDomain(std::move(other.m_traceDomain))
+            : FunctionBase(std::move(other))
          {}
-
-         /**
-          * @brief Sets an attribute which will be interpreted as the domain to
-          * trace.
-          *
-          * Convenience function to call traceOf(std::set<int>) with only one
-          * attribute.
-          *
-          * @returns Reference to self (for method chaining)
-          */
-         MatrixFunctionBase& traceOf(int attr)
-         {
-            return traceOf(std::set<int>{attr});
-         }
-
-         /**
-          * @brief Sets which attributes will be interpreted as the domain to
-          * trace.
-          * @returns Reference to self (for method chaining)
-          *
-          * When integrating along interior boundaries sometimes it is
-          * necessary to specify which attributes should be interpreted as the
-          * respective "interior" domain, since it is not clear which domain
-          * attribute can be used to extend the value continuously up to the
-          * boundary. To resolve this ambiguity the trace domain is interpreted
-          * as the domain which shall be used to make this continuous
-          * extension.
-          *
-          * @note Setting the trace domain of a MatrixFunctionBase instance
-          * does not guarantee that it will taken into consideration when
-          * computing its value. That said, it is up to the subclass to decide
-          * how it will use this information which can be obtained via the
-          * getTraceDomain() method.
-          *
-          * @see @ref MatrixFunctionBase::getTraceDomain() "getTraceDomain()"
-          *
-          */
-         MatrixFunctionBase& traceOf(std::set<int> attrs)
-         {
-            m_traceDomain = attrs;
-            return *this;
-         }
-
-         /**
-          * @brief Gets the set of attributes which will be interpreted as the
-          * domains to "trace".
-          *
-          * The domains to trace are interpreted as the domains where there
-          * shall be a continuous extension from values to the interior
-          * boundaries. If the trace domain is empty, then this has the
-          * semantic value that it has not been specified yet.
-          */
-         const std::set<int>& getTraceDomain() const
-         {
-            return m_traceDomain;
-         }
-
-         std::unique_ptr<mfem::MatrixCoefficient> build() const override;
 
          virtual ~MatrixFunctionBase() = default;
 
-         /**
-          * @brief Convenience function to get the transpose @f$ A^T @f$ of the
-          * matrix object @f$ A @f$
-          * @returns Transpose coefficient of the matrix instance
-          */
-         virtual Transpose<MatrixFunctionBase> T() const;
+         RangeShape getRangeShape() const override
+         {
+            return {getRows(), getColumns()};
+         }
+
+         RangeType getRangeType() const override
+         {
+            return RangeType::Matrix;
+         }
 
          /**
           * @brief Gets the number of rows in the matrix
@@ -115,44 +61,10 @@ namespace Rodin::Variational
 
          virtual void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override = 0;
 
          virtual MatrixFunctionBase* copy() const noexcept override = 0;
-
-      private:
-         std::set<int> m_traceDomain;
-   };
-}
-
-namespace Rodin::Variational::Internal
-{
-   class ProxyMatrixFunction : public mfem::MatrixCoefficient
-   {
-      public:
-         ProxyMatrixFunction(const MatrixFunctionBase& mat)
-            :  mfem::MatrixCoefficient(mat.getRows(), mat.getColumns()),
-               m_mat(mat)
-         {}
-
-         ProxyMatrixFunction(const ProxyMatrixFunction& other)
-            :  mfem::MatrixCoefficient(other),
-               m_mat(other.m_mat)
-         {}
-
-         ProxyMatrixFunction(ProxyMatrixFunction&& other)
-            :  mfem::MatrixCoefficient(std::move(other)),
-               m_mat(other.m_mat)
-         {}
-
-         void Eval(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) override
-         {
-            m_mat.getValue(value, trans, ip);
-         }
-
-      private:
-         const MatrixFunctionBase& m_mat;
    };
 }
 

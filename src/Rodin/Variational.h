@@ -14,7 +14,6 @@
 
 #include "Variational/ForwardDecls.h"
 
-// ---- Finite elements ------------------------------------------------------
 #include "Variational/H1.h"
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
@@ -28,9 +27,6 @@
 
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
-
-// ---- FormLanguage ---------------------------------------------------------
-#include "Variational/FormLanguage.h"
 
 #include "Variational/Dot.h"
 #include "Variational/Pow.h"
@@ -58,7 +54,6 @@
 #include "Variational/VectorFunction.h"
 #include "Variational/MatrixFunction.h"
 
-// ---- Boundary conditions --------------------------------------------------
 #include "Variational/DirichletBC.h"
 
 #endif

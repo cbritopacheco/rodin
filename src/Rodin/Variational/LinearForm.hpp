@@ -29,8 +29,8 @@ namespace Rodin::Variational
    }
 
    template <class FEC>
-   LinearForm<FEC, Traits::Serial>& LinearForm<FEC, Traits::Serial>::operator=(
-         const FormLanguage::LinearFormIntegratorSum& lsum)
+   LinearForm<FEC, Traits::Serial>& LinearForm<FEC, Traits::Serial>
+   ::operator=(const LinearFormIntegratorSum& lsum)
    {
       from(lsum).assemble();
       return *this;
@@ -111,7 +111,7 @@ namespace Rodin::Variational
 
    template <class FEC>
    LinearForm<FEC, Traits::Serial>&
-   LinearForm<FEC, Traits::Serial>::add(const FormLanguage::LinearFormIntegratorSum& lsum)
+   LinearForm<FEC, Traits::Serial>::add(const LinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getLinearFormDomainIntegratorList())
          add(*p);
@@ -122,7 +122,7 @@ namespace Rodin::Variational
 
    template <class FEC>
    LinearForm<FEC, Traits::Serial>&
-   LinearForm<FEC, Traits::Serial>::from(const FormLanguage::LinearFormIntegratorSum& lsum)
+   LinearForm<FEC, Traits::Serial>::from(const LinearFormIntegratorSum& lsum)
    {
       m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
       m_lfiDomainList.clear();
