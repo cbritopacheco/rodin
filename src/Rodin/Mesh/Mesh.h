@@ -34,17 +34,53 @@ namespace Rodin
    class MeshBase
    {
       public:
-         int getElementCount() const;
+         template <class T>
+         std::enable_if_t<std::is_same_v<Element, T>, int>
+         count() const
+         {
+            return getHandle().GetNE();
+         }
 
-         int getBoundaryElementCount() const;
+         template <class T>
+         std::enable_if_t<std::is_same_v<Face, T>, int>
+         count() const
+         {
+            return getHandle().GetNumFaces();
+         }
 
-         ElementView getElement(int i);
+         template <class T>
+         std::enable_if_t<std::is_same_v<BoundaryElement, T>, int>
+         count() const
+         {
+            return getHandle().GetNBE();
+         }
 
-         Element getElement(int i) const;
+         template <class T>
+         std::enable_if_t<
+            std::is_same_v<Element, T>,
+            ElementView>
+         get(int i);
 
-         BoundaryElementView getBoundaryElement(int i);
+         template <class T>
+         std::enable_if_t<
+            std::is_same_v<BoundaryElement, T>,
+            BoundaryElementView>
+         get(int i);
 
-         BoundaryElement getBoundaryElement(int i) const;
+         template <class T>
+         std::enable_if_t<std::is_same_v<Element, T>,
+            Element>
+         get(int i) const;
+
+         template <class T>
+         std::enable_if_t<std::is_same_v<Face, T>,
+            Face>
+         get(int i) const;
+
+         template <class T>
+         std::enable_if_t<std::is_same_v<BoundaryElement, T>,
+            BoundaryElement>
+         get(int i) const;
 
          /**
           * @brief Gets the dimension of the ambient space
@@ -186,6 +222,8 @@ namespace Rodin
           */
          MeshBase& edit(std::function<void(ElementView)> f);
 
+         MeshBase& edit(std::function<void(BoundaryElementView)> f);
+
          /**
           * @brief Edits the specified elements in the mesh via the given function.
           * @param[in] f Function which takes an ElementView to modify each
@@ -194,6 +232,8 @@ namespace Rodin
           * which will be modified.
           */
          MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
+
+         MeshBase& update();
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
@@ -256,11 +296,11 @@ namespace Rodin
           */
          Mesh& load(
                const boost::filesystem::path& filename,
-               IO::MeshFormat fmt = IO::MeshFormat::MFEM);
+               IO::FileFormat fmt = IO::FileFormat::MFEM);
 
          void save(
                const boost::filesystem::path& filename,
-               IO::MeshFormat fmt = IO::MeshFormat::MFEM, int precison = 16) const;
+               IO::FileFormat fmt = IO::FileFormat::MFEM, int precison = 16) const;
 
          /**
           * @brief Constructs an empty mesh with no elements.
@@ -282,6 +322,10 @@ namespace Rodin
           */
          Mesh& operator=(Mesh&& other) = default;
 
+         SubMesh<Traits::Serial> keep(int attr);
+
+         SubMesh<Traits::Serial> keep(const std::set<int>& attrs);
+
          /**
           * @brief Trims the elements with the given material reference.
           * @param[in] attr Attribute to trim
@@ -292,7 +336,7 @@ namespace Rodin
           * Convenience function to call trim(const std::set<int>&, int) with
           * only one attribute.
           */
-         SubMesh<Traits::Serial> trim(int attr, int bdrLabel);
+         SubMesh<Traits::Serial> trim(int attr);
 
          /**
           * @brief Trims the elements with the given material references.
@@ -305,7 +349,7 @@ namespace Rodin
           * object containing the elements which were not trimmed from the
           * original mesh.
           */
-         SubMesh<Traits::Serial> trim(const std::set<int>& attrs, int bdrLabel);
+         SubMesh<Traits::Serial> trim(const std::set<int>& attrs);
 
          /**
           * @brief Skins the mesh to obtain its boundary mesh
@@ -317,7 +361,9 @@ namespace Rodin
           */
          SubMesh<Traits::Serial> skin();
 
-         SubMesh<Traits::Serial> skin(const std::map<int, int>& bdrAttr);
+         SubMesh<Traits::Serial> extract(const std::set<int>& elements);
+
+         Mesh& trace(const std::map<std::set<int>, int>& boundaries);
 
          virtual bool isSubMesh() const override
          {
@@ -421,5 +467,7 @@ namespace Rodin
    };
 #endif
 }
+
+#include "Mesh.hpp"
 
 #endif

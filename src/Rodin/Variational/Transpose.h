@@ -22,39 +22,35 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Transpose<MatrixFunctionBase> : public MatrixFunctionBase
+   class Transpose<FunctionBase> : public FunctionBase
    {
       public:
          /**
           * @brief Constructs the Transpose matrix of the given matrix.
           */
-         Transpose(const MatrixFunctionBase& m)
+         Transpose(const FunctionBase& m)
             : m_matrix(m.copy())
          {}
 
          Transpose(const Transpose& other)
-            :  MatrixFunctionBase(other),
+            :  FunctionBase(other),
                m_matrix(other.m_matrix->copy())
          {}
 
          Transpose(Transpose&& other)
-            : MatrixFunctionBase(std::move(other)),
+            : FunctionBase(std::move(other)),
               m_matrix(std::move(other.m_matrix))
          {}
 
-         int getRows() const override
+         RangeShape getRangeShape() const override
          {
-            return m_matrix->getColumns();
-         }
-
-         int getColumns() const override
-         {
-            return m_matrix->getRows();
+            return m_matrix->getRangeShape().transpose();
          }
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override
          {
             m_matrix->getValue(value, trans, ip);
             value.Transpose();
@@ -66,10 +62,9 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<MatrixFunctionBase> m_matrix;
+         std::unique_ptr<FunctionBase> m_matrix;
    };
-   Transpose(const MatrixFunctionBase&)
-      -> Transpose<MatrixFunctionBase>;
+   Transpose(const FunctionBase&) -> Transpose<MatrixFunctionBase>;
 
    template <ShapeFunctionSpaceType Space>
    class Transpose<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
@@ -87,28 +82,19 @@ namespace Rodin::Variational
             : m_op(std::move(other))
          {}
 
-         ShapeFunctionBase<Space>& getLeaf() override
-         {
-            return m_op->getLeaf();
-         }
-
          const ShapeFunctionBase<Space>& getLeaf() const override
          {
             return m_op->getLeaf();
          }
 
-         int getRows(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getRows() const override
          {
-            return m_op->getColumns(fe, trans);
+            return m_op->getColumns();
          }
 
-         int getColumns(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getColumns() const override
          {
-            return m_op->getRows(fe, trans);
+            return m_op->getRows();
          }
 
          int getDOFs(
@@ -118,7 +104,7 @@ namespace Rodin::Variational
             return m_op->getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Rank3Operator> getOperator(
+         std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {

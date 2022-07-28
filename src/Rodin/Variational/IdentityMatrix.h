@@ -24,7 +24,9 @@ namespace Rodin::Variational
           */
          IdentityMatrix(int n)
             : m_n(n)
-         {}
+         {
+            assert(n > 0);
+         }
 
          IdentityMatrix(const IdentityMatrix& other)
             :  MatrixFunctionBase(other),

@@ -13,23 +13,29 @@ using namespace Rodin;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
+// Define interior and exterior for level set discretization
+static constexpr int Interior = 1, Exterior = 2;
+
+// Define boundary attributes
+static constexpr int Gamma0 = 1;  // Traction free boundary
+static constexpr int GammaD = 2;  // Homogenous Dirichlet
+static constexpr int GammaN = 3;  // Inhomogenous Neumann
+static constexpr int Gamma  = 4;  // Shape boundary
+
+// Lamé coefficients
+static constexpr double mu     = 0.3846;
+static constexpr double lambda = 0.5769;
+
+// Optimization parameters
+static constexpr size_t maxIt = 250;
+static constexpr double eps   = 1e-6;
+static constexpr double hmax  = 0.05;
+static constexpr double ell   = 2.0;
+static constexpr double alpha = 4 * hmax * hmax;
 
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/levelset-arch2d-example.mesh";
-
-  // Define interior and exterior for level set discretization
-  int Interior = 1, Exterior = 2;
-
-  // Define boundary attributes
-  int Gamma0 = 1,  // Traction free boundary
-      GammaD = 2,  // Homogenous Dirichlet
-      GammaN = 3,  // Inhomogenous Neumann
-      Gamma  = 4;  // Shape boundary
-
-  // Lamé coefficients
-  auto mu     = ScalarFunction(0.3846),
-       lambda = ScalarFunction(0.5769);
 
   // Compliance
   auto compliance = [&](GridFunction<H1>& w)
@@ -49,29 +55,24 @@ int main(int, char**)
   Omega.load(meshFile);
 
   Omega.save("Omega0.mesh");
-  std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
+
+  Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // UMFPack
   auto solver = Solver::UMFPack();
 
-  // Optimization parameters
-  size_t maxIt = 250;
-  double eps = 1e-6;
-  double hmax = 0.05;
-  auto ell = ScalarFunction(2.0);
-  auto alpha = ScalarFunction(4 * hmax * hmax);
-
-  std::vector<double> obj;
-
   // Optimization loop
+  std::vector<double> obj;
   for (size_t i = 0; i < maxIt; i++)
   {
+    Alert::Info() << "----- Iteration: " << i << Alert::Raise;
+
     // Vector field finite element space over the whole domain
     int d = 2;
     FiniteElementSpace<H1> Vh(Omega, d);
 
     // Trim the exterior part of the mesh to solve the elasticity system
-    SubMesh trimmed = Omega.trim(Exterior, Gamma);
+    SubMesh trimmed = Omega.trim(Exterior);
 
     // Build a finite element space over the trimmed mesh
     FiniteElementSpace<H1> VhInt(trimmed, d);
@@ -108,8 +109,8 @@ int main(int, char**)
 
     // Update objective
     obj.push_back(
-        compliance(u) + ell.getValue() * Omega.getVolume(Interior));
-    std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
+        compliance(u) + ell * Omega.getVolume(Interior));
+    Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
     // Generate signed distance function
     FiniteElementSpace<H1> Dh(Omega);
@@ -118,16 +119,17 @@ int main(int, char**)
 
     // Advect the level set function
     double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = 2 * hmax / gInf;
+    double dt = 4 * hmax / gInf;
     MMG::Advect(dist, g.getGridFunction()).step(dt);
 
     // Recover the implicit domain
-    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                       .split(Exterior, {Interior, Exterior})
+    Omega = MMG::ImplicitDomainMesher().split(Exterior, {Interior, Exterior})
+                                       .noSplit(Interior)
                                        .setRMC(1e-3)
                                        .setHMax(hmax)
                                        .setBoundaryReference(Gamma)
                                        .discretize(dist);
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     // Save mesh
     Omega.save("Omega.mesh");
@@ -135,16 +137,12 @@ int main(int, char**)
     // Test for convergence
     if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
     {
-      std::cout << "Convergence!" << std::endl;
+      Alert::Info() << "Convergence!" << Alert::Raise;
       break;
     }
-
-    std::ofstream plt("obj.txt", std::ios::trunc);
-    for (size_t i = 0; i < obj.size(); i++)
-      plt << i << "," << obj[i] << "\n";
   }
 
-  std::cout << "Saved final mesh to Omega.mesh" << std::endl;
+  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }

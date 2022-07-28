@@ -11,7 +11,7 @@
 #include <memory>
 #include <mfem.hpp>
 
-#include "FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 #include "TestFunction.h"
@@ -24,13 +24,23 @@ namespace Rodin::Variational
     * An instance of LinearFormIntegratorBase performs the assembly of the
     * element vector for each finite element.
     */
-   class LinearFormIntegratorBase
-      : public FormLanguage::Buildable<mfem::LinearFormIntegrator>
+   class LinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
+         LinearFormIntegratorBase() = default;
+
+         LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
+            : FormLanguage::Base(other)
+         {}
+
+         LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
+            : FormLanguage::Base(std::move(other))
+         {}
+
          virtual ~LinearFormIntegratorBase() = default;
 
-         virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
+         virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction()
+            const = 0;
 
          /**
           * @brief Gets the attributes of the elements being integrated.
@@ -52,7 +62,7 @@ namespace Rodin::Variational
                const mfem::FiniteElement& fe, mfem::ElementTransformation&
                trans, mfem::Vector& vec) const = 0;
 
-         std::unique_ptr<mfem::LinearFormIntegrator> build() const override;
+         std::unique_ptr<mfem::LinearFormIntegrator> build() const;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
    };

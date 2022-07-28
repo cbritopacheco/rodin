@@ -16,7 +16,7 @@ namespace Rodin::Variational
 {
    template <class Trait>
    GridFunction<H1, Trait>& GridFunction<H1, Trait>
-   ::load(const boost::filesystem::path& filename, IO::GridFunctionFormat fmt)
+   ::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
    {
       mfem::named_ifgzstream input(filename.c_str());
       if (!input)
@@ -28,17 +28,23 @@ namespace Rodin::Variational
 
       switch (fmt)
       {
-         case IO::GridFunctionFormat::MFEM:
+         case IO::FileFormat::MFEM:
          {
-            IO::GridFunctionLoader<IO::GridFunctionFormat::MFEM, H1, Trait> loader(*this);
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, H1, Trait> loader(*this);
             loader.load(input);
             break;
          }
-         case IO::GridFunctionFormat::MEDIT:
+         case IO::FileFormat::MEDIT:
          {
-            IO::GridFunctionLoader<IO::GridFunctionFormat::MEDIT, H1, Trait> loader(*this);
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, H1, Trait> loader(*this);
             loader.load(input);
             break;
+         }
+         default:
+         {
+            Alert::Exception()
+               << "Loading from \"" << fmt << "\" format unssuported."
+               << Alert::Raise;
          }
       }
       return *this;
@@ -46,7 +52,7 @@ namespace Rodin::Variational
 
    template <class Trait>
    void GridFunction<H1, Trait>
-   ::save(const boost::filesystem::path& filename, IO::GridFunctionFormat fmt, int precision)
+   ::save(const boost::filesystem::path& filename, IO::FileFormat fmt, int precision)
    const
    {
       std::ofstream output(filename.c_str());
@@ -60,17 +66,23 @@ namespace Rodin::Variational
       output.precision(precision);
       switch (fmt)
       {
-         case IO::GridFunctionFormat::MFEM:
+         case IO::FileFormat::MFEM:
          {
-            IO::GridFunctionPrinter<IO::GridFunctionFormat::MFEM, H1, Trait> printer(*this);
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, H1, Trait> printer(*this);
             printer.print(output);
             break;
          }
-         case IO::GridFunctionFormat::MEDIT:
+         case IO::FileFormat::MEDIT:
          {
-            IO::GridFunctionPrinter<IO::GridFunctionFormat::MEDIT, H1, Trait> printer(*this);
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, H1, Trait> printer(*this);
             printer.print(output);
             break;
+         }
+         default:
+         {
+            Alert::Exception()
+               << "Saving to \"" << fmt << "\" format unssuported."
+               << Alert::Raise;
          }
       }
    }

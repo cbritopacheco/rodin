@@ -1,18 +1,15 @@
 set(RodinVariationalFormLanguage_HEADERS
   Base.h
   ForwardDecls.h
-  BilinearFormIntegratorSum.h
-  LinearFormIntegratorSum.h
   )
 
 set(RodinVariationalFormLanguage_SRCS
-  BilinearFormIntegratorSum.cpp
-  LinearFormIntegratorSum.cpp
+  Base.cpp
   )
 
 add_library(RodinVariationalFormLanguage
   ${RodinVariationalFormLanguage_SRCS} ${RodinVariationalFormLanguage_HEADERS})
-add_library(Rodin::Variational::FormLanguage ALIAS RodinVariationalFormLanguage)
+add_library(Rodin::FormLanguage ALIAS RodinVariationalFormLanguage)
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariationalFormLanguage

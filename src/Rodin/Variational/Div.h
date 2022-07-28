@@ -32,29 +32,35 @@ namespace Rodin::Variational
          Div(ShapeFunction<H1, Space>& u)
             : m_u(u)
          {
-            assert(m_u.getFiniteElementSpace().getVectorDimension() > 1);
+            if (u.getRangeType() != RangeType::Scalar &&
+                  u.getRangeType() != RangeType::Vector)
+            {
+               UnexpectedRangeTypeException(
+                     {RangeType::Scalar, RangeType::Vector}, u.getRangeType());
+            }
          }
 
-         ShapeFunction<H1, Space>& getLeaf() override
-         {
-            return m_u;
-         }
+         Div(const Div& other)
+            : ShapeFunctionBase<Space>(other),
+              m_u(other.m_u)
+         {}
+
+         Div(Div&& other)
+            : ShapeFunctionBase<Space>(std::move(other)),
+              m_u(other.m_u)
+         {}
 
          const ShapeFunction<H1, Space>& getLeaf() const override
          {
             return m_u;
          }
 
-         int getRows(
-               const mfem::FiniteElement&,
-               const mfem::ElementTransformation&) const override
+         int getRows() const override
          {
             return 1;
          }
 
-         int getColumns(
-               const mfem::FiniteElement&,
-               const mfem::ElementTransformation&) const override
+         int getColumns() const override
          {
             return 1;
          }
@@ -66,7 +72,7 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Rank3Operator> getOperator(
+         std::unique_ptr<Internal::Rank3Operator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {

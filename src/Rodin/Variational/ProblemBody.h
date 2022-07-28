@@ -4,15 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_PROBLEMBODY_H
-#define RODIN_VARIATIONAL_FORMLANGUAGE_PROBLEMBODY_H
+#ifndef RODIN_VARIATIONAL_PROBLEMBODY_H
+#define RODIN_VARIATIONAL_PROBLEMBODY_H
 
 #include <vector>
 #include <memory>
 #include <optional>
 
-
-#include "FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 
@@ -34,9 +33,11 @@ namespace Rodin::Variational
 
          ProblemBody(const BilinearFormIntegratorBase& bfi);
 
-         ProblemBody(const FormLanguage::BilinearFormIntegratorSum& bfi);
+         ProblemBody(const BilinearFormIntegratorSum& bfi);
 
          ProblemBody(const ProblemBody& other);
+
+         ProblemBody(ProblemBody&& other);
 
          EssentialBoundary& getEssentialBoundary();
 
@@ -65,13 +66,13 @@ namespace Rodin::Variational
          const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
    ProblemBody operator+(
-         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi);
+         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
 
    ProblemBody operator-(
-         const ProblemBody& pb, const FormLanguage::LinearFormIntegratorSum& lfi);
+         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
 
-   template <class T, class Value>
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T, Value>& bc)
+   template <class T>
+   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T>& bc)
    {
       ProblemBody res(pb);
       res.getEssentialBoundary().add(bc);

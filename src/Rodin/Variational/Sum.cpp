@@ -4,54 +4,66 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "RangeShape.h"
+#include "Exceptions.h"
+
 #include "Sum.h"
 
 namespace Rodin::Variational
 {
-   double
-   Sum<ScalarFunctionBase, ScalarFunctionBase>
-   ::getValue(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-   const
+   Sum<FunctionBase, FunctionBase>::Sum(const FunctionBase& lhs, const FunctionBase& rhs)
+      : m_lhs(lhs.copy()), m_rhs(rhs.copy())
    {
-      return getLHS().getValue(trans, ip) + getRHS().getValue(trans, ip);
+      if (lhs.getRangeShape() != rhs.getRangeShape())
+         RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
    }
 
-   void
-   Sum<MatrixFunctionBase, MatrixFunctionBase>
-   ::getValue(
+   Sum<FunctionBase, FunctionBase>::Sum(const Sum& other)
+      :  FunctionBase(other),
+         m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+   {}
+
+   Sum<FunctionBase, FunctionBase>::Sum(Sum&& other)
+      :  FunctionBase(std::move(other)),
+         m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+   {}
+
+   Sum<FunctionBase, FunctionBase>&
+   Sum<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   {
+      FunctionBase::traceOf(attrs);
+      m_lhs->traceOf(attrs);
+      m_rhs->traceOf(attrs);
+      return *this;
+   }
+
+   void Sum<FunctionBase, FunctionBase>::getValue(
          mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
+         mfem::ElementTransformation& trans,
+         const mfem::IntegrationPoint& ip) const
    {
-      mfem::DenseMatrix m;
-      m_lhs->getValue(m, trans, ip);
-      m_rhs->getValue(value, trans, ip);
-      value += m;
+      m_lhs->getValue(value, trans, ip);
+      mfem::DenseMatrix tmp;
+      m_rhs->getValue(tmp, trans, ip);
+      value += tmp;
    }
 
-   int Sum<MatrixFunctionBase, MatrixFunctionBase>::getRows() const
+   RangeShape Sum<FunctionBase, FunctionBase>::getRangeShape() const
    {
-      return m_lhs->getRows();
+      assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
+      return m_lhs->getRangeShape();
    }
 
-   int Sum<MatrixFunctionBase, MatrixFunctionBase>::getColumns() const
+   Sum<FunctionBase, FunctionBase>&
+   Sum<FunctionBase, FunctionBase>::operator+=(const FunctionBase& lhs)
    {
-      return m_lhs->getColumns();
+      auto sum = new Sum(lhs, *m_rhs);
+      m_rhs.reset(sum);
+      return *this;
    }
 
-   Sum<ScalarFunctionBase, ScalarFunctionBase>
-   operator+(const ScalarFunctionBase& lhs, const ScalarFunctionBase& rhs)
-   {
-      return Sum(lhs, rhs);
-   }
-
-   Sum<VectorFunctionBase, VectorFunctionBase>
-   operator+(const VectorFunctionBase& lhs, const VectorFunctionBase& rhs)
-   {
-      return Sum(lhs, rhs);
-   }
-
-   Sum<MatrixFunctionBase, MatrixFunctionBase>
-   operator+(const MatrixFunctionBase& lhs, const MatrixFunctionBase& rhs)
+   Sum<FunctionBase, FunctionBase>
+   operator+(const FunctionBase& lhs, const FunctionBase& rhs)
    {
       return Sum(lhs, rhs);
    }
