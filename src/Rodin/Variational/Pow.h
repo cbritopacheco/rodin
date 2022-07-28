@@ -34,8 +34,7 @@ namespace Rodin::Variational
               m_p(p)
          {
             if (s.getRangeType() != RangeType::Scalar)
-            {
-            }
+               UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
          }
 
          Pow(const Pow& other)
@@ -49,6 +48,13 @@ namespace Rodin::Variational
               m_s(std::move(other.m_s)),
               m_p(other.m_p)
          {}
+
+         Pow& traceOf(const std::set<int>& attrs) override
+         {
+            ScalarFunctionBase::traceOf(attrs);
+            m_s->traceOf(attrs);
+            return *this;
+         }
 
          double getValue(
                mfem::ElementTransformation& trans,

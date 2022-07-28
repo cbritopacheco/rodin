@@ -55,6 +55,7 @@ int main(int, char**)
     Alert::Info() << "    | Skinning mesh." << Alert::Raise;
     auto dOmega = Omega.skin();
     dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
+    dOmega.save("trace.mesh", IO::FileFormat::MEDIT);
 
     // Build finite element spaces
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
@@ -83,7 +84,7 @@ int main(int, char**)
       else
         return 1.0 - 1.0 / (1.0 + std::exp(4 * r / (r * r - 1.0)));
     };
-    auto he = compose(h, ScalarFunction(dist) / epsilon) / epsilon;
+    auto he = compose(h, dist / epsilon) / epsilon;
 
     // State equation
     Alert::Info() << "    | Solving state equation." << Alert::Raise;
@@ -96,8 +97,7 @@ int main(int, char**)
     state = Integral(Grad(u), Grad(v))
           + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v)
-          - BoundaryIntegral(g, v).over(GammaN)
-          ;
+          - BoundaryIntegral(g, v).over(GammaN);
     solver.solve(state);
 
     // Adjoint equation
@@ -124,7 +124,7 @@ int main(int, char**)
 
     // Compute the shape gradient
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto expr = 1. / (epsilon * epsilon) * u.getGridFunction() * p.getGridFunction() + ell;
+    auto expr = 1. / (epsilon * epsilon) * uS * pS + ell;
     auto gradS = getShapeGradient(ThS, distS, expr, solver);
 
     // Transfer back the vector field to the whole space
@@ -166,11 +166,11 @@ GridFunction<H1> getShapeGradient(
   Problem conormalExt(d, v);
   conormalExt = Integral(alpha * Jacobian(d), Jacobian(v))
               + Integral(d, v)
-              - BoundaryIntegral(Grad(dist), v).over(SigmaD);
+              - BoundaryIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
   solver.solve(conormalExt);
 
-  auto sol = d.getGridFunction();
-  auto cn = sol / Pow(sol.x() * sol.x() + sol.y() * sol.y() + sol.z() * sol.z(), 0.5);
+  const auto& cnd = d.getGridFunction();
+  const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
 
   TrialFunction grad(vecFes);
   Problem velExt(grad, v);

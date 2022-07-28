@@ -4,20 +4,21 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_UNARYMINUS_H
-#define RODIN_VARIATIONAL_FORMLANGUAGE_UNARYMINUS_H
+#ifndef RODIN_VARIATIONAL_UNARYMINUS_H
+#define RODIN_VARIATIONAL_UNARYMINUS_H
 
 #include "Rodin/Variational/LinearFormIntegrator.h"
 
-#include "FormLanguage/Base.h"
-#include "FormLanguage/LinearFormIntegratorSum.h"
-#include "FormLanguage/BilinearFormIntegratorSum.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
 #include "LinearFormIntegrator.h"
+
+#include "LinearFormIntegratorSum.h"
+#include "BilinearFormIntegratorSum.h"
 
 namespace Rodin::Variational
 {
@@ -82,8 +83,7 @@ namespace Rodin::Variational
    UnaryMinus<LinearFormIntegratorBase> operator-(const LinearFormIntegratorBase& lfi);
 
    template <>
-   class UnaryMinus<FormLanguage::LinearFormIntegratorSum>
-      : public FormLanguage::LinearFormIntegratorSum
+   class UnaryMinus<LinearFormIntegratorSum> : public LinearFormIntegratorSum
    {
       public:
          UnaryMinus(const LinearFormIntegratorSum& op)
@@ -108,8 +108,8 @@ namespace Rodin::Variational
             return new UnaryMinus(*this);
          }
    };
-   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
-   operator-(const FormLanguage::LinearFormIntegratorSum& lfi);
+   UnaryMinus<LinearFormIntegratorSum>
+   operator-(const LinearFormIntegratorSum& lfi);
 
    template <>
    class UnaryMinus<BilinearFormIntegratorBase> : public BilinearFormIntegratorBase
@@ -148,8 +148,8 @@ namespace Rodin::Variational
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op);
 
    template <>
-   class UnaryMinus<FormLanguage::BilinearFormIntegratorSum>
-      : public FormLanguage::BilinearFormIntegratorSum
+   class UnaryMinus<BilinearFormIntegratorSum>
+      : public BilinearFormIntegratorSum
    {
       public:
          UnaryMinus(const BilinearFormIntegratorSum& op)
@@ -174,8 +174,7 @@ namespace Rodin::Variational
             return new UnaryMinus(*this);
          }
    };
-   UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
-         const FormLanguage::BilinearFormIntegratorSum& op);
+   UnaryMinus<BilinearFormIntegratorSum> operator-(const BilinearFormIntegratorSum& op);
 
    template <ShapeFunctionSpaceType Space>
    class UnaryMinus<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>

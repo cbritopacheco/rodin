@@ -15,9 +15,6 @@
 
 #include <mfem.hpp>
 
-#include "FormLanguage/Base.h"
-#include "FormLanguage/ForwardDecls.h"
-
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RangeShape.h"
@@ -62,19 +59,6 @@ namespace Rodin::Variational
          }
 
          /**
-          * @returns Restricts the function to the given attribute.
-          * @param[in] attr Attribute specifying the restriction domain
-          */
-         virtual Restriction<ScalarFunctionBase> restrictTo(int attr);
-
-         /**
-          * @returns Restricts the function to the given attributes.
-          * @param[in] attr Set of attributes specifying the restriction
-          * domain
-          */
-         virtual Restriction<ScalarFunctionBase> restrictTo(const std::set<int>& attrs);
-
-         /**
           * @brief Computes the value at the given transformation and
           * integration point.
           * @returns Value at given transformation and integration point.
@@ -94,6 +78,13 @@ namespace Rodin::Variational
          ScalarFunction(const ScalarFunction& other);
 
          ScalarFunction(ScalarFunction&& other);
+
+         ScalarFunction& traceOf(const std::set<int>& attrs) override
+         {
+            ScalarFunctionBase::traceOf(attrs);
+            m_nested->traceOf(attrs);
+            return *this;
+         }
 
          double getValue(
                mfem::ElementTransformation& trans,
@@ -220,56 +211,6 @@ namespace Rodin::Variational
       -> ScalarFunction<
       std::enable_if_t<std::is_invocable_r_v<double, T, const double*, int>,
       std::function<double(const double*, int)>>>;
-
-   template <>
-   class ScalarFunction<std::map<int, double>>
-      : public ScalarFunctionBase
-   {
-      public:
-         ScalarFunction(const std::map<int, double>& pieces)
-            : m_pieces(pieces),
-              m_mfemCoefficient(pieces.rbegin()->first) // Maximum attribute
-         {
-            int maxAttr = m_pieces.rbegin()->first;
-            for (int i = 1; i <= maxAttr; i++)
-            {
-               auto v = m_pieces.find(i);
-               if (v != m_pieces.end())
-                  m_mfemCoefficient(i) = v->second;
-               else
-                  m_mfemCoefficient(i) = 0.0;
-            }
-         }
-
-         ScalarFunction(const ScalarFunction& other)
-            :  ScalarFunctionBase(other),
-               m_pieces(other.m_pieces)
-         {}
-
-         ScalarFunction(ScalarFunction&& other)
-            :  ScalarFunctionBase(std::move(other)),
-               m_pieces(std::move(other.m_pieces))
-         {}
-
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            return m_mfemCoefficient.Eval(trans, ip);
-         }
-
-         ScalarFunction* copy() const noexcept override
-         {
-            return new ScalarFunction(*this);
-         }
-      private:
-         std::map<int, double> m_pieces;
-         mutable mfem::PWConstCoefficient m_mfemCoefficient;
-   };
-   ScalarFunction(const std::map<int, double>&)
-      -> ScalarFunction<std::map<int, double>>;
-   ScalarFunction(std::initializer_list<std::pair<int, double>>&)
-      -> ScalarFunction<std::map<int, double>>;
 }
 
 #endif

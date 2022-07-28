@@ -12,9 +12,8 @@
 #include <mfem.hpp>
 
 #include "Rodin/Alert.h"
-#include "ForwardDecls.h"
-#include "FormLanguage/Base.h"
 
+#include "ForwardDecls.h"
 #include "Function.h"
 #include "RangeShape.h"
 

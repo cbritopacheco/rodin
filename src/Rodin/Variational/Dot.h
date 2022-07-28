@@ -7,7 +7,7 @@
 #ifndef RODIN_VARIATIONAL_DOT_H
 #define RODIN_VARIATIONAL_DOT_H
 
-#include "FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"

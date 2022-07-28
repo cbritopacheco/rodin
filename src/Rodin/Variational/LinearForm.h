@@ -12,7 +12,7 @@
 #include "ForwardDecls.h"
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
-#include "FormLanguage/LinearFormIntegratorSum.h"
+#include "LinearFormIntegratorSum.h"
 
 namespace Rodin::Variational
 {
@@ -72,7 +72,7 @@ namespace Rodin::Variational
           */
          virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
 
-         virtual LinearFormBase& from(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
+         virtual LinearFormBase& from(const LinearFormIntegratorSum& lsum) = 0;
 
          /**
           * @brief Builds the linear form the given LinearFormIntegratorBase
@@ -82,7 +82,7 @@ namespace Rodin::Variational
           */
          virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi) = 0;
 
-         virtual LinearFormBase& add(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
+         virtual LinearFormBase& add(const LinearFormIntegratorSum& lsum) = 0;
 
          virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
 
@@ -121,7 +121,7 @@ namespace Rodin::Variational
 
          LinearForm& operator=(const LinearFormIntegratorBase& lfi);
 
-         LinearForm& operator=(const FormLanguage::LinearFormIntegratorSum& lsum);
+         LinearForm& operator=(const LinearFormIntegratorSum& lsum);
 
          /**
           * @brief Evaluates the linear form at the function @f$ u @f$.
@@ -135,11 +135,11 @@ namespace Rodin::Variational
 
          LinearForm& add(const LinearFormIntegratorBase& lfi) override;
 
-         LinearForm& add(const FormLanguage::LinearFormIntegratorSum& lsum) override;
+         LinearForm& add(const LinearFormIntegratorSum& lsum) override;
 
          LinearForm& from(const LinearFormIntegratorBase& lfi) override;
 
-         LinearForm& from(const FormLanguage::LinearFormIntegratorSum& lsum) override;
+         LinearForm& from(const LinearFormIntegratorSum& lsum) override;
 
          const TestFunction<FEC, Traits::Serial>& getTestFunction() const override
          {

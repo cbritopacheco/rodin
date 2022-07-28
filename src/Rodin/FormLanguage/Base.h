@@ -1,5 +1,11 @@
-#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_BASE_H
-#define RODIN_VARIATIONAL_FORMLANGUAGE_BASE_H
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_FORMLANGUAGE_BASE_H
+#define RODIN_FORMLANGUAGE_BASE_H
 
 #include <memory>
 #include <cassert>
@@ -7,7 +13,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::FormLanguage
 {
    /**
     * @brief Base class for all classes which are part of Variational::FormLanguage.
@@ -15,22 +21,18 @@ namespace Rodin::Variational::FormLanguage
    class Base
    {
       public:
-         Base()
-            : m_uuid(boost::uuids::random_generator()())
-         {}
+         Base();
 
-         Base(const Base& other)
-            : m_uuid(other.m_uuid)
-         {}
+         Base(const Base& other);
 
-         Base(Base&& other)
-            : m_uuid(std::move(other.m_uuid))
-         {}
+         Base(Base&& other);
 
          /**
           * @brief Virtual destructor.
           */
          virtual ~Base() = default;
+
+         const boost::uuids::uuid& getUUID() const;
 
          /**
           * @internal
@@ -40,10 +42,6 @@ namespace Rodin::Variational::FormLanguage
           */
          virtual Base* copy() const noexcept = 0;
 
-         const boost::uuids::uuid& getUUID() const
-         {
-            return m_uuid;
-         }
       private:
          const boost::uuids::uuid m_uuid;
    };

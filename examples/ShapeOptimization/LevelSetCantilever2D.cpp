@@ -58,11 +58,8 @@ int main(int, char**)
   // UMFPack
   auto solver = Solver::UMFPack();
 
-  std::vector<double> obj;
-
-  std::ofstream plt("obj.txt");
-
   // Optimization loop
+  std::vector<double> obj;
   for (size_t i = 0; i < maxIt; i++)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
@@ -141,9 +138,6 @@ int main(int, char**)
       Alert::Info() << "Convergence!" << Alert::Raise;
       break;
     }
-
-    plt << i << "," << obj[i] << "\n";
-    plt.flush();
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

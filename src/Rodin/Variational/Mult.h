@@ -11,7 +11,7 @@
 #include <type_traits>
 
 #include "Rodin/Alert.h"
-#include "FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"

@@ -187,6 +187,10 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Composition;
+
+   // TODO: Refactor or remove these two classes!!!!
+   class LinearFormIntegratorSum;
+   class BilinearFormIntegratorSum;
 }
 
 #endif

@@ -6,10 +6,10 @@
  */
 #include "Rodin/Alert.h"
 
-#include "../UnaryMinus.h"
+#include "UnaryMinus.h"
 #include "BilinearFormIntegratorSum.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    BilinearFormIntegratorSum::BilinearFormIntegratorSum(
          const BilinearFormIntegratorBase& lhs, const BilinearFormIntegratorBase& rhs)

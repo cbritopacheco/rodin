@@ -10,13 +10,6 @@
 namespace Rodin::Variational::FormLanguage
 {
    class Base;
-
-   template <class InternalValue>
-   class Buildable;
-
-   class LinearFormIntegratorSum;
-
-   class BilinearFormIntegratorSum;
 }
 
 #endif

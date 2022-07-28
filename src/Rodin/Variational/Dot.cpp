@@ -23,7 +23,7 @@ namespace Rodin::Variational
    Dot<FunctionBase, FunctionBase>&
    Dot<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
    {
-      FunctionBase::traceOf(attrs);
+      ScalarFunctionBase::traceOf(attrs);
       m_a->traceOf(attrs);
       m_b->traceOf(attrs);
       return *this;

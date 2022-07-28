@@ -16,7 +16,6 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"
-#include "FormLanguage/Base.h"
 
 #include "Utility.h"
 #include "Function.h"
@@ -140,37 +139,46 @@ namespace Rodin::Variational
          constexpr
          VectorFunction(Values... values)
          {
-            m_coeffs.reserve(sizeof...(Values));
-            makeCoefficientsFromTuple(std::forward_as_tuple(values...));
+            m_fs.reserve(sizeof...(Values));
+            makeFsFromTuple(std::forward_as_tuple(values...));
          }
 
          constexpr
          VectorFunction(const VectorFunction& other)
             : VectorFunctionBase(other)
          {
-            m_coeffs.reserve(sizeof...(Values));
-            for (const auto& v : other.m_coeffs)
-               m_coeffs.emplace_back(v->copy());
+            m_fs.reserve(sizeof...(Values));
+            for (const auto& v : other.m_fs)
+               m_fs.emplace_back(v->copy());
          }
 
          constexpr
          VectorFunction(VectorFunction&& other)
             :  VectorFunctionBase(std::move(other)),
-               m_coeffs(std::move(other.m_coeffs))
+               m_fs(std::move(other.m_fs))
          {}
 
          void getValue(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override
          {
             value.SetSize(static_cast<int>(sizeof...(Values)));
             for (size_t i = 0; i < sizeof...(Values); i++)
-               value(i) = m_coeffs[i]->getValue(trans, ip);
+               value(i) = m_fs[i]->getValue(trans, ip);
          }
 
          int getDimension() const override
          {
             return sizeof...(Values);
+         }
+
+         VectorFunction& traceOf(const std::set<int>& attrs) override
+         {
+            VectorFunctionBase::traceOf(attrs);
+            for (auto& f : m_fs)
+               f->traceOf(attrs);
+            return *this;
          }
 
          VectorFunction* copy() const noexcept override
@@ -181,18 +189,18 @@ namespace Rodin::Variational
       private:
          template<std::size_t I = 0, class ... Tp>
          typename std::enable_if_t<I == sizeof...(Tp)>
-         makeCoefficientsFromTuple(const std::tuple<Tp...>&)
+         makeFsFromTuple(const std::tuple<Tp...>&)
          {}
 
          template<std::size_t I = 0, class ... Tp>
          typename std::enable_if_t<I < sizeof...(Tp)>
-         makeCoefficientsFromTuple(const std::tuple<Tp...>& t)
+         makeFsFromTuple(const std::tuple<Tp...>& t)
          {
-            m_coeffs.emplace_back(new ScalarFunction(std::get<I>(t)));
-            makeCoefficientsFromTuple<I + 1, Tp...>(t);
+            m_fs.emplace_back(new ScalarFunction(std::get<I>(t)));
+            makeFsFromTuple<I + 1, Tp...>(t);
          }
 
-         std::vector<std::unique_ptr<ScalarFunctionBase>> m_coeffs;
+         std::vector<std::unique_ptr<ScalarFunctionBase>> m_fs;
    };
    template <class ... Values>
    VectorFunction(Values&&...) -> VectorFunction<Values...>;

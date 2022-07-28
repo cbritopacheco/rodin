@@ -146,15 +146,14 @@ namespace Rodin::Variational
       return UnaryMinus(op);
    }
 
-   UnaryMinus<FormLanguage::LinearFormIntegratorSum>
-   operator-(const FormLanguage::LinearFormIntegratorSum& op)
+   UnaryMinus<LinearFormIntegratorSum>
+   operator-(const LinearFormIntegratorSum& op)
    {
-      return UnaryMinus<FormLanguage::LinearFormIntegratorSum>(op);
+      return UnaryMinus<LinearFormIntegratorSum>(op);
    }
 
-   UnaryMinus<FormLanguage::BilinearFormIntegratorSum> operator-(
-         const FormLanguage::BilinearFormIntegratorSum& op)
+   UnaryMinus<BilinearFormIntegratorSum> operator-(const BilinearFormIntegratorSum& op)
    {
-      return UnaryMinus<FormLanguage::BilinearFormIntegratorSum>(op);
+      return UnaryMinus<BilinearFormIntegratorSum>(op);
    }
 }

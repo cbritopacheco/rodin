@@ -64,7 +64,7 @@ namespace Rodin::Variational
             :  m_v(v.copy()),
                m_idx(component)
          {
-            if (v.getRangeType() == RangeType::Vector)
+            if (v.getRangeType() != RangeType::Vector)
                UnexpectedRangeTypeException(RangeType::Vector, v.getRangeType()).raise();
          }
 
@@ -85,12 +85,19 @@ namespace Rodin::Variational
             return m_idx;
          }
 
+         Component& traceOf(const std::set<int>& attrs) override
+         {
+            ScalarFunctionBase::traceOf(attrs);
+            m_v->traceOf(attrs);
+            return *this;
+         }
+
          double getValue(
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
             mfem::DenseMatrix v;
-            m_v->getValue(v, FunctionBase::getTraceElementTrans(trans, ip), ip);
-            assert(m_idx < v.Size());
+            m_v->getValue(v, trans, ip);
+            assert(m_idx < v.NumRows());
             return v(m_idx, 0);
          }
 

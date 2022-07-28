@@ -14,7 +14,7 @@
 
 #include "ForwardDecls.h"
 
-namespace Rodin::Variational::FormLanguage
+namespace Rodin::Variational
 {
    class BilinearFormIntegratorSum : public FormLanguage::Base
    {
