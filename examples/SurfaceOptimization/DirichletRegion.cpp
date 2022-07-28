@@ -147,6 +147,7 @@ int main(int, char**)
                                        .setHMax(hmax)
                                        .surface()
                                        .discretize(dist);
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
 
