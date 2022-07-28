@@ -16,7 +16,7 @@ using namespace Rodin::External;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("thks.mesh", IO::MeshFormat::MEDIT);
+  mesh.load("thks.mesh", IO::FileFormat::MEDIT);
 
   FiniteElementSpace<H1> fes(mesh);
 
@@ -28,7 +28,7 @@ int main(int, char**)
                                     .discretize(dist);
 
   mesh.save("mfem.mesh");
-  mesh.save("medit.mesh", IO::MeshFormat::MEDIT);
+  mesh.save("medit.mesh", IO::FileFormat::MEDIT);
   // dist.save("dist.gf");
 
 

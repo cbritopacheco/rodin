@@ -39,7 +39,7 @@ namespace Rodin::IO
 
    // ---- MFEM Format -------------------------------------------------------
    template <class FEC>
-   class GridFunctionLoader<GridFunctionFormat::MFEM, FEC, Traits::Serial>
+   class GridFunctionLoader<FileFormat::MFEM, FEC, Traits::Serial>
       : public GridFunctionLoaderBase<FEC, Traits::Serial>
    {
       public:
@@ -52,7 +52,7 @@ namespace Rodin::IO
 
    // ---- MEDIT Format ------------------------------------------------------
    template <class FEC>
-   class GridFunctionLoader<GridFunctionFormat::MEDIT, FEC, Traits::Serial>
+   class GridFunctionLoader<FileFormat::MEDIT, FEC, Traits::Serial>
       : public GridFunctionLoaderBase<FEC, Traits::Serial>
    {
       public:

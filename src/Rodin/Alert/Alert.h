@@ -67,6 +67,12 @@ namespace Rodin::Alert
          Alert(const Alert& other);
 
          /**
+          * @brief Performs a move of the Alert's message.
+          * @param[in] other Object to move.
+          */
+         Alert(Alert&& other);
+
+         /**
           * @brief Virtual destructor.
           */
          virtual ~Alert() = default;
@@ -75,7 +81,7 @@ namespace Rodin::Alert
           * @brief Gets the description (or reason) for the alert.
           * @returns String containing the message.
           */
-         std::string what() const noexcept;
+         const char* what() const noexcept;
 
          /**
           * @brief Operator overload to aid in the construction of Alert
@@ -85,7 +91,9 @@ namespace Rodin::Alert
          std::enable_if_t<!std::is_same_v<RaiseT, T>, Alert&>
          operator<<(T&& v) noexcept
          {
-            m_what << std::forward<T>(v);
+            std::stringstream ss;
+            ss << std::forward<T>(v);
+            m_what += ss.str();
             return *this;
          }
 
@@ -105,10 +113,10 @@ namespace Rodin::Alert
           * The actual behaviour for raising the Alert is specified in its
           * subclasses by overriding this function.
           */
-         virtual void raise() const noexcept = 0;
+         virtual void raise() const = 0;
 
       private:
-         std::stringstream m_what;
+         std::string m_what;
    };
 }
 

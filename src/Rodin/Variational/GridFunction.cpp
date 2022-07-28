@@ -8,10 +8,13 @@
 
 #include "Rodin/IO/GridFunctionLoader.h"
 
+#include "Exceptions.h"
+
 #include "Sum.h"
 #include "Mult.h"
 #include "Minus.h"
 #include "Division.h"
+#include "Component.h"
 #include "FiniteElementSpace.h"
 
 
@@ -75,75 +78,77 @@ namespace Rodin::Variational
    }
 
    GridFunctionBase& GridFunctionBase::project(
-         const ScalarFunctionBase& s, const std::set<int>& attrs)
+         const FunctionBase& s, const std::set<int>& attrs)
    {
-      assert(getFiniteElementSpace().getVectorDimension() == 1);
-      auto iv = s.build();
-
-      if (attrs.size() == 0)
-         getHandle().ProjectCoefficient(*iv);
-      else
-      {
-         int maxAttr = getFiniteElementSpace()
-                      .getMesh()
-                      .getHandle().attributes.Max();
-         mfem::Array<int> marker(maxAttr);
-         marker = 0;
-         for (const auto& attr : attrs)
+      auto va = s.build();
+      std::visit(Utility::Overloaded{
+         [&](Internal::ScalarProxyFunction& iv)
          {
-            assert(attr - 1 < maxAttr);
-            marker[attr - 1] = 1;
-         }
-         getHandle().ProjectCoefficient(*iv, marker);
-      }
+            if (attrs.size() == 0)
+               getHandle().ProjectCoefficient(iv);
+            else
+            {
+               int maxAttr = getFiniteElementSpace()
+                            .getMesh()
+                            .getHandle().attributes.Max();
+               mfem::Array<int> marker(maxAttr);
+               marker = 0;
+               for (const auto& attr : attrs)
+               {
+                  assert(attr - 1 < maxAttr);
+                  marker[attr - 1] = 1;
+               }
+               getHandle().ProjectCoefficient(iv, marker);
+            }
+         },
+         [&](Internal::VectorProxyFunction& iv)
+         {
+            if (attrs.size() == 0)
+               getHandle().ProjectCoefficient(iv);
+            else
+            {
+               int maxAttr = getFiniteElementSpace()
+                            .getMesh()
+                            .getHandle().attributes.Max();
+               mfem::Array<int> marker(maxAttr);
+               marker = 0;
+               for (const auto& attr : attrs)
+               {
+                  assert(attr - 1 < maxAttr);
+                  marker[attr - 1] = 1;
+               }
+               getHandle().ProjectCoefficient(iv, marker);
+            }
+         },
+         [&](Internal::MatrixProxyFunction& iv)
+         {
+            UnexpectedRangeTypeException(
+                  {RangeType::Scalar, RangeType::Vector}, RangeType::Matrix).raise();
+         }}, va);
       return *this;
    }
 
-   GridFunctionBase& GridFunctionBase::project(
-         const VectorFunctionBase& s, const std::set<int>& attrs)
+   GridFunctionBase& GridFunctionBase::project(const Restriction<FunctionBase>& s)
    {
-      assert(getFiniteElementSpace().getVectorDimension() == s.getDimension());
-      auto iv = s.build();
-
-      if (attrs.size() == 0)
-         getHandle().ProjectCoefficient(*iv);
-      else
-      {
-         int maxAttr = getFiniteElementSpace()
-                      .getMesh()
-                      .getHandle().attributes.Max();
-         mfem::Array<int> marker(maxAttr);
-         marker = 0;
-         for (const auto& attr : attrs)
-         {
-            assert(attr - 1 < maxAttr);
-            marker[attr - 1] = 1;
-         }
-         getHandle().ProjectCoefficient(*iv, marker);
-      }
-      return *this;
-   }
-
-   GridFunctionBase& GridFunctionBase::project(const Restriction<ScalarFunctionBase>& s)
-   {
-      assert(getFiniteElementSpace().getVectorDimension() == 1);
-      auto iv = s.getScalarFunction().build();
-      getHandle() = std::numeric_limits<double>::quiet_NaN();
-      mfem::Array<int> vdofs;
-      mfem::Vector vals;
-      const auto& fes = getFiniteElementSpace().getHandle();
-      const auto& attrs = s.getAttributes();
-      for (int i = 0; i < fes.GetNE(); i++)
-      {
-         if (attrs.count(fes.GetAttribute(i)) > 0)
-         {
-            fes.GetElementVDofs(i, vdofs);
-            vals.SetSize(vdofs.Size());
-            fes.GetFE(i)->Project(
-                  *iv, *fes.GetElementTransformation(i), vals);
-            getHandle().SetSubVector(vdofs, vals);
-         }
-      }
+      assert(false); // Not implemented
+      // assert(getFiniteElementSpace().getVectorDimension() == 1);
+      // auto iv = s.getScalarFunction().build();
+      // getHandle() = std::numeric_limits<double>::quiet_NaN();
+      // mfem::Array<int> vdofs;
+      // mfem::Vector vals;
+      // const auto& fes = getFiniteElementSpace().getHandle();
+      // const auto& attrs = s.getAttributes();
+      // for (int i = 0; i < fes.GetNE(); i++)
+      // {
+      //    if (attrs.count(fes.GetAttribute(i)) > 0)
+      //    {
+      //       fes.GetElementVDofs(i, vdofs);
+      //       vals.SetSize(vdofs.Size());
+      //       fes.GetFE(i)->Project(
+      //             *iv, *fes.GetElementTransformation(i), vals);
+      //       getHandle().SetSubVector(vdofs, vals);
+      //    }
+      // }
       return *this;
    }
 
@@ -233,5 +238,93 @@ namespace Rodin::Variational
          // which can come in useful.
          Alert::Exception("Unimplemented. Sorry.").raise();
       }
+   }
+
+   void GridFunctionBase::getValue(
+         mfem::DenseMatrix& value,
+         mfem::ElementTransformation& trans,
+         const mfem::IntegrationPoint& ip) const
+   {
+      switch (getRangeType())
+      {
+         case RangeType::Scalar:
+         {
+            value.SetSize(1, 1);
+            value(0, 0) = getHandle().GetValue(trans, ip);
+            break;
+         }
+         case RangeType::Vector:
+         {
+            mfem::Vector v;
+            getHandle().GetVectorValue(trans, ip, v);
+            value.UseExternalData(
+                  v.StealData(),
+                  getFiniteElementSpace().getVectorDimension(), 1);
+            value.GetMemory().SetHostPtrOwner(true);
+            break;
+         }
+         case RangeType::Matrix:
+         {
+            assert(false);
+         }
+      }
+   }
+
+   RangeShape GridFunctionBase::getRangeShape() const
+   {
+      return {getFiniteElementSpace().getVectorDimension(), 1};
+   }
+
+   Component<FunctionBase> GridFunctionBase::x() const
+   {
+      assert(getFiniteElementSpace().getVectorDimension() >= 1);
+      return Component(*this, 0);
+   }
+
+   Component<FunctionBase> GridFunctionBase::y() const
+   {
+      assert(getFiniteElementSpace().getVectorDimension() >= 2);
+      return Component(*this, 1);
+   }
+
+   Component<FunctionBase> GridFunctionBase::z() const
+   {
+      assert(getFiniteElementSpace().getVectorDimension() >= 3);
+      return Component(*this, 2);
+   }
+
+   FunctionBase* GridFunctionBase::copy() const noexcept
+   {
+      return new Internal::GridFunctionEvaluator(*this);
+   }
+}
+
+namespace Rodin::Variational::Internal
+{
+   GridFunctionEvaluator::GridFunctionEvaluator(const GridFunctionBase& gf)
+      : m_gf(gf)
+   {}
+
+   GridFunctionEvaluator::GridFunctionEvaluator(const GridFunctionEvaluator& other)
+      : FunctionBase(other),
+        m_gf(other.m_gf)
+   {}
+
+   GridFunctionEvaluator::GridFunctionEvaluator(GridFunctionEvaluator&& other)
+      : FunctionBase(std::move(other)),
+        m_gf(other.m_gf)
+   {}
+
+   RangeShape GridFunctionEvaluator::getRangeShape() const
+   {
+      return m_gf.getRangeShape();
+   }
+
+   void GridFunctionEvaluator::getValue(
+         mfem::DenseMatrix& value,
+         mfem::ElementTransformation& trans,
+         const mfem::IntegrationPoint& ip) const
+   {
+      m_gf.getValue(value, trans, ip);
    }
 }

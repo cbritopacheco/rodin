@@ -12,7 +12,7 @@
 
 namespace Rodin::IO
 {
-   void MeshPrinter<MeshFormat::GMSH, Traits::Serial>::print(std::ostream& os)
+   void MeshPrinter<FileFormat::GMSH, Traits::Serial>::print(std::ostream& os)
    {
       const auto& mfemMesh = getObject().getHandle();
 
@@ -131,7 +131,7 @@ namespace Rodin::IO
       os << "$EndElements\n";
    }
 
-   void MeshPrinter<MeshFormat::MEDIT, Traits::Serial>::print(std::ostream& os)
+   void MeshPrinter<FileFormat::MEDIT, Traits::Serial>::print(std::ostream& os)
    {
       const auto& mfemMesh = getObject().getHandle();
 

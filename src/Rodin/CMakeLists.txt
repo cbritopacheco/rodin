@@ -50,6 +50,7 @@ add_subdirectory(Alert)
 add_subdirectory(Solver)
 add_subdirectory(Utility)
 add_subdirectory(Variational)
+add_subdirectory(FormLanguage)
 
 if (RODIN_WITH_PLOT)
   add_subdirectory(Plot)

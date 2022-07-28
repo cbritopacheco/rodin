@@ -35,23 +35,32 @@ namespace Rodin::External::MMG
         MMG5::setParameters(mmgMesh);
 
         bool isSurface = mesh.isSurface();
+        int retcode = MMG5_STRONGFAILURE;
         switch (mmgMesh->dim)
         {
           case 2:
           {
             assert(!isSurface);
-            optimizeMMG2D(mmgMesh);
+            retcode = optimizeMMG2D(mmgMesh);
             break;
           }
           case 3:
           {
             if (isSurface)
-              optimizeMMGS(mmgMesh);
+              retcode = optimizeMMGS(mmgMesh);
             else
-              optimizeMMG3D(mmgMesh);
+              retcode = optimizeMMG3D(mmgMesh);
             break;
           }
         }
+
+        if (retcode != MMG5_SUCCESS)
+        {
+          Alert::Exception()
+            << "Failed to optimize the mesh."
+            << Alert::Raise;
+        }
+
         mesh = meshToRodin(mmgMesh);
         destroyMesh(mmgMesh);
       }
@@ -81,9 +90,9 @@ namespace Rodin::External::MMG
       }
 
     private:
-      void optimizeMMG2D(MMG5_pMesh mesh);
-      void optimizeMMG3D(MMG5_pMesh mesh);
-      void optimizeMMGS(MMG5_pMesh mesh);
+      int optimizeMMG2D(MMG5_pMesh mesh);
+      int optimizeMMG3D(MMG5_pMesh mesh);
+      int optimizeMMGS(MMG5_pMesh mesh);
   };
 }
 

@@ -1,7 +1,41 @@
-#include "MatrixFunction.h"
-
+#include "Exceptions.h"
 #include "Dot.h"
 
 namespace Rodin::Variational
 {
+   Dot<FunctionBase, FunctionBase>::Dot(const FunctionBase& a, const FunctionBase& b)
+      : m_a(a.copy()), m_b(b.copy())
+   {
+      if (a.getRangeShape() != b.getRangeShape())
+         RangeShapeMismatchException(a.getRangeShape(), b.getRangeShape()).raise();
+   }
+
+   Dot<FunctionBase, FunctionBase>::Dot(const Dot& other)
+      :  ScalarFunctionBase(other),
+         m_a(other.m_a->copy()), m_b(other.m_b->copy())
+   {}
+
+   Dot<FunctionBase, FunctionBase>::Dot(Dot&& other)
+      :  ScalarFunctionBase(std::move(other)),
+         m_a(std::move(other.m_a)), m_b(std::move(other.m_b))
+   {}
+
+   Dot<FunctionBase, FunctionBase>&
+   Dot<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   {
+      ScalarFunctionBase::traceOf(attrs);
+      m_a->traceOf(attrs);
+      m_b->traceOf(attrs);
+      return *this;
+   }
+
+   double Dot<FunctionBase, FunctionBase>::getValue(
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
+   {
+      assert(m_a->getRangeShape() == m_b->getRangeShape());
+      mfem::DenseMatrix a, b;
+      m_a->getValue(a, trans, ip);
+      m_b->getValue(b, trans, ip);
+      return a * b;
+   }
 }
