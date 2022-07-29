@@ -61,7 +61,7 @@ namespace Rodin::Variational
       }
       else
       {
-         assert(&getFiniteElementSpace() == rhs.getFiniteElementSpace());
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
          getHandle() += rhs.getHandle();
       }
       return *this;
@@ -81,7 +81,7 @@ namespace Rodin::Variational
       }
       else
       {
-         assert(&getFiniteElementSpace() == rhs.getFiniteElementSpace());
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
          getHandle() -= rhs.getHandle();
       }
       return *this;
@@ -102,7 +102,7 @@ namespace Rodin::Variational
       }
       else
       {
-         assert(&getFiniteElementSpace() == rhs.getFiniteElementSpace());
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
          getHandle() *= rhs.getHandle();
       }
       return *this;
