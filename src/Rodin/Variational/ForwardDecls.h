@@ -129,6 +129,8 @@ namespace Rodin::Variational
    // ---- Coefficients ------------------------------------------------------
    class FunctionBase;
 
+   class Function;
+
    class ScalarFunctionBase;
 
    class RangeShape;
@@ -140,7 +142,7 @@ namespace Rodin::Variational
       Matrix
    };
 
-   template <class T>
+   template <class ... Values>
    class ScalarFunction;
 
    class VectorFunctionBase;
@@ -187,6 +189,9 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Composition;
+
+   template <class Target, class Callable, class ... Args>
+   class Lift;
 
    // TODO: Refactor or remove these two classes!!!!
    class LinearFormIntegratorSum;
