@@ -73,6 +73,12 @@
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing variational expressions in C++.</span>
+                <ul class="m-doc">
+                  <li>class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> <span class="m-doc"><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of Variational::FormLanguage.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Module for solving variational problems constructed with the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module.</span>
                 <ul class="m-doc">
                   <li>class <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> <span class="m-doc">Conjugate Gradient.</span></li>
@@ -97,7 +103,6 @@
               <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module for implementing variational methods.</span>
                 <ul class="m-doc">
-                  <li>namespace <a href="namespace_rodin_1_1_variational_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing variational expressions in C++.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> <span class="m-doc">Represents a serial bilinear form supported on two finite element spaces originating from two instances of FiniteElementCollection.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_traits_1_1_serial_01_4.html" class="m-doc">BilinearForm&lt;TrialFEC, TestFEC, Traits::Serial&gt;</a> <span class="m-doc">Represents a serial bilinear form supported on two finite element spaces originating from two instances of FiniteElementCollection.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a> <span class="m-doc">Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</span></li>
@@ -212,13 +217,15 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_linear_form_domain_integrator.html" class="m-doc">LinearFormDomainIntegrator</a> <span class="m-doc">Represents a linear form integrator over the interior of the domain.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> <span class="m-doc">Base class for linear form integrators.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a> <span class="m-doc">Abstract base class for objects representing matrix coefficients.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a> <span class="m-doc">Represent the max function.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a> <span class="m-doc">Represent the min function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_function_base_01_4.html" class="m-doc">Mult&lt;FunctionBase, FunctionBase&gt;</a> <span class="m-doc">Multiplication of two <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instances.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a> <span class="m-doc">Outward unit normal.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a> <span class="m-doc">Represent the power function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_c_00_01_test_f_e_c_00_01_operator_type_00_01_traits_1_1_serial_01_4.html" class="m-doc">Problem&lt;TrialFEC, TestFEC, OperatorType, Traits::Serial&gt;</a> <span class="m-doc">Represents a variational problem to be solved.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a> <span class="m-doc">Base class for <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a> <span class="m-doc">Represents the body of a variational problem.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> <span class="m-doc">Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>T</code>.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_number_01_4.html" class="m-doc">ScalarFunction&lt;Number&gt;</a> <span class="m-doc">Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>T</code>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01double_01_5_00_01int_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const double*, int)&gt;&gt;</a> <span class="m-doc">Represents a scalar function given by an arbitrary function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> <span class="m-doc">Abstract base class for objects representing scalar functions.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> <span class="m-doc">Base class for operators.</span></li>
