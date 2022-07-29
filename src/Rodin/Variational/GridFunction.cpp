@@ -53,9 +53,37 @@ namespace Rodin::Variational
       return *this;
    }
 
+   GridFunctionBase& GridFunctionBase::operator+=(const GridFunctionBase& rhs)
+   {
+      if (this == &rhs)
+      {
+         operator*=(2.0);
+      }
+      else
+      {
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+         getHandle() += rhs.getHandle();
+      }
+      return *this;
+   }
+
    GridFunctionBase& GridFunctionBase::operator-=(double t)
    {
       getHandle() -= t;
+      return *this;
+   }
+
+   GridFunctionBase& GridFunctionBase::operator-=(const GridFunctionBase& rhs)
+   {
+      if (this == &rhs)
+      {
+         operator=(0.0);
+      }
+      else
+      {
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+         getHandle() -= rhs.getHandle();
+      }
       return *this;
    }
 
@@ -65,9 +93,38 @@ namespace Rodin::Variational
       return *this;
    }
 
+   GridFunctionBase& GridFunctionBase::operator*=(const GridFunctionBase& rhs)
+   {
+      if (this == &rhs)
+      {
+         for (auto& v : getHandle())
+            v *= v;
+      }
+      else
+      {
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+         getHandle() *= rhs.getHandle();
+      }
+      return *this;
+   }
+
    GridFunctionBase& GridFunctionBase::operator/=(double t)
    {
       getHandle() /= t;
+      return *this;
+   }
+
+   GridFunctionBase& GridFunctionBase::operator/=(const GridFunctionBase& rhs)
+   {
+      if (this == &rhs)
+      {
+         operator=(1.0);
+      }
+      else
+      {
+         assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+         getHandle() /= rhs.getHandle();
+      }
       return *this;
    }
 

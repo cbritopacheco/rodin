@@ -107,7 +107,7 @@ namespace Rodin::Variational
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class Number>
-   class ScalarFunction : public ScalarFunctionBase
+   class ScalarFunction<Number> : public ScalarFunctionBase
    {
       public:
          static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
@@ -209,8 +209,8 @@ namespace Rodin::Variational
    template <class T>
    ScalarFunction(T)
       -> ScalarFunction<
-      std::enable_if_t<std::is_invocable_r_v<double, T, const double*, int>,
-      std::function<double(const double*, int)>>>;
+         std::enable_if_t<std::is_invocable_r_v<double, T, const double*, int>,
+         std::function<double(const double*, int)>>>;
 }
 
 #endif
