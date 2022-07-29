@@ -125,20 +125,28 @@ namespace Rodin::Variational
           */
          GridFunctionBase& operator+=(double t);
 
+         GridFunctionBase& operator+=(const GridFunctionBase& rhs);
+
          /**
           * @brief Substraction of a scalar value.
           */
          GridFunctionBase& operator-=(double t);
+
+         GridFunctionBase& operator-=(const GridFunctionBase& rhs);
 
          /**
           * @brief Multiplication by a scalar value.
           */
          GridFunctionBase& operator*=(double t);
 
+         GridFunctionBase& operator*=(const GridFunctionBase& rhs);
+
          /**
           * @brief Division by a scalar value.
           */
          GridFunctionBase& operator/=(double t);
+
+         GridFunctionBase& operator/=(const GridFunctionBase& rhs);
 
          /**
           * @brief Projection of a function.
