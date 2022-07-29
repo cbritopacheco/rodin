@@ -11,10 +11,10 @@ static constexpr int Gamma0 = 1, GammaD = 2;
 // Optimization parameters
 static constexpr double ell = 1;
 static constexpr double mu = 0.1;
-static constexpr double min = 0.0001;
-static constexpr double max = 1;
-static constexpr double alpha = 0.1;
-static constexpr size_t maxIterations = 25;
+static constexpr double hmin = 0.001;
+static constexpr double hmax = 10;
+static constexpr double alpha = 0.01;
+static constexpr size_t maxIterations = 400;
 
 int main(int, char**)
 {
@@ -23,7 +23,7 @@ int main(int, char**)
   // Load mesh
   Mesh Omega;
   Omega.load(meshFile);
-  // Omega.refine();
+  Omega.refine();
 
   Omega.save("Omega.mesh");
 
@@ -31,7 +31,9 @@ int main(int, char**)
   FiniteElementSpace<H1> Vh(Omega);
 
   GridFunction gamma(Vh);
-  gamma = 0.5;
+  gamma = 0.9;
+
+  double vol = Omega.getVolume();
 
   auto solver = Solver::UMFPack();
 
@@ -46,21 +48,19 @@ int main(int, char**)
     TrialFunction u(Vh);
     TestFunction  v(Vh);
     Problem poisson(u, v);
-    poisson = Integral((min + (max - min) * Pow(gamma, 3)) * Grad(u), Grad(v))
+    poisson = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
             - Integral(f * v)
             + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
     solver.solve(poisson);
-    u.getGridFunction().save("u.gf");
 
     // Adjoint problem
     TrialFunction p(Vh);
     TestFunction  q(Vh);
     Problem adjoint(p, q);
-    adjoint = Integral((min + (max - min) * Pow(gamma, 3)) * Grad(p), Grad(q))
-            + Integral(ScalarFunction(1.0 / Omega.getVolume()), q)
+    adjoint = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
+            + Integral(ScalarFunction(1.0 / vol), q)
             + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
     solver.solve(adjoint);
-    p.getGridFunction().save("p.gf");
 
     // Hilbert extension-regularization
     TrialFunction g(Vh);
@@ -69,15 +69,16 @@ int main(int, char**)
     hilbert = Integral(alpha * Grad(g), Grad(w))
             + Integral(g, w)
             - Integral(
-                ell + 3 * (max - min) * Pow(gamma, 2) *
+                ell + 3 * (hmax - hmin) * Pow(gamma, 2) *
                   Dot(Grad(u.getGridFunction()), Grad(p.getGridFunction())), w)
             + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
     solver.solve(hilbert);
-    p.getGridFunction().save("g.gf");
 
     GridFunction step(Vh);
     step = mu * g.getGridFunction();
-    gamma.getHandle() -= step.getHandle();
+
+    gamma -= step;
+    gamma = Min(1.0, Max(0.0, gamma));
 
     gamma.save("gamma.gf");
   }

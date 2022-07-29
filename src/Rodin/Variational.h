@@ -47,6 +47,9 @@
 #include "Variational/Transpose.h"
 #include "Variational/IdentityMatrix.h"
 
+#include "Variational/Max.h"
+#include "Variational/Min.h"
+
 #include "Variational/Integral.h"
 #include "Variational/Problem.h"
 
