@@ -19,12 +19,12 @@
  */
 
 /**
-  @dir Rodin/Variational/FormLanguage
-  @brief Namespace @ref Rodin::Variational::FormLanguage
+  @dir Rodin/FormLanguage
+  @brief Namespace @ref Rodin::FormLanguage
  */
 
 /**
-  @namespace Rodin::Variational::FormLanguage
+  @namespace Rodin::FormLanguage
   @brief Module for writing variational expressions in C++
  */
 

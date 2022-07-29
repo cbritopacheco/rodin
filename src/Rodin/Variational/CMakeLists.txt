@@ -35,6 +35,8 @@ set(RodinVariational_HEADERS
   Minus.h
   LinearFormIntegratorSum.h
   BilinearFormIntegratorSum.h
+  Min.h
+  Max.cpp
   )
 
 set(RodinVariational_SRCS
@@ -70,6 +72,8 @@ set(RodinVariational_SRCS
   Composition.cpp
   LinearFormIntegratorSum.cpp
   BilinearFormIntegratorSum.cpp
+  Max.cpp
+  Min.cpp
   )
 
 add_library(RodinVariational

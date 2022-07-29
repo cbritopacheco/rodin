@@ -23,10 +23,10 @@ static constexpr int SigmaN = 2;
 
 static constexpr size_t maxIt = 250;
 
-static constexpr double hmax = 0.1;
-static constexpr double alpha = 0.7;
+static constexpr double hmax = 0.05;
+static constexpr double alpha = 0.1;
 static constexpr double epsilon = 0.1;
-static constexpr double ell = 0.2;
+static constexpr double ell = 0.01;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
 GridFunction<H1> getShapeGradient(
@@ -89,7 +89,7 @@ int main(int, char**)
     // State equation
     Alert::Info() << "    | Solving state equation." << Alert::Raise;
     ScalarFunction f = 1;
-    ScalarFunction g = -2.0;
+    ScalarFunction g = -1.0;
 
     TrialFunction u(Vh);
     TestFunction  v(Vh);
@@ -150,8 +150,6 @@ int main(int, char**)
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
-
-    // Omega.skin().save("out/dOmega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
   }
 
   return 0;
@@ -164,11 +162,11 @@ GridFunction<H1> getShapeGradient(
   TrialFunction d(vecFes);
   TestFunction  v(vecFes);
 
-  Problem conormalExt(d, v);
-  conormalExt = Integral(alpha * Jacobian(d), Jacobian(v))
-              + Integral(d, v)
-              - BoundaryIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
-  solver.solve(conormalExt);
+  Problem conormal(d, v);
+  conormal = Integral(alpha * Jacobian(d), Jacobian(v))
+           + Integral(d, v)
+           - BoundaryIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
+  solver.solve(conormal);
 
   const auto& cnd = d.getGridFunction();
   const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
