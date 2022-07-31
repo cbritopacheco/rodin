@@ -10,8 +10,10 @@
 #include <boost/mpi.hpp>
 
 #include <Rodin/Mesh.h>
+#include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
@@ -25,6 +27,8 @@ int main(int argc, char** argv)
   auto p = serMesh.parallelize(world);
   std::cout << "woof: " << world.rank() << ", " << world.size() << std::endl;
   std::cout << "meow: " << p.getMPIComm().rank() << ", " << p.getMPIComm().size() << std::endl;
+
+  FiniteElementSpace<H1, Traits::Parallel> fes(p);
 
   MPI_Finalize();
 
