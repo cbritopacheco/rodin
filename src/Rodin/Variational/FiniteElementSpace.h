@@ -116,6 +116,63 @@ namespace Rodin::Variational
          Mesh<Traits::Serial>& m_mesh;
          mfem::FiniteElementSpace m_fes;
    };
+
+   template <class FEC>
+   class FiniteElementSpace<FEC, Traits::Parallel>
+      : public FiniteElementSpaceBase
+   {
+      public:
+         /**
+          * @brief Constructs a finite element space supported on the give
+          * mesh.
+          * @param[in] mesh Support of finite element space
+          * @param[in] vdim Vector dimensions of the finite element functions
+          * @param[in] order Element order
+          * @param[in] basis Basis of the finite element space
+          */
+         FiniteElementSpace(
+               Mesh<Traits::Parallel>& mesh,
+               int vdim = 1, int order = 1, typename FEC::Basis basis = FEC::DefaultBasis)
+            :  m_mesh(mesh),
+               m_fec(order, mesh.getDimension(), basis),
+               m_fes(&mesh.getHandle(), &m_fec.getHandle(), vdim)
+         {}
+
+         bool isParallel() const override
+         {
+            return true;
+         }
+
+         Mesh<Traits::Parallel>& getMesh() override
+         {
+            return m_mesh;
+         }
+
+         const Mesh<Traits::Parallel>& getMesh() const override
+         {
+            return m_mesh;
+         }
+
+         const FEC& getFiniteElementCollection() const override
+         {
+            return m_fec;
+         }
+
+         mfem::ParFiniteElementSpace& getHandle() override
+         {
+            return m_fes;
+         }
+
+         const mfem::ParFiniteElementSpace& getHandle() const override
+         {
+            return m_fes;
+         }
+
+      private:
+         FEC m_fec;
+         Mesh<Traits::Parallel>& m_mesh;
+         mfem::ParFiniteElementSpace m_fes;
+   };
 }
 
 #endif
