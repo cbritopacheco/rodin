@@ -172,12 +172,12 @@ GridFunction<H1> getShapeGradient(
   const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
 
   TrialFunction grad(vecFes);
-  Problem velExt(grad, v);
-  velExt = Integral(alpha * Jacobian(grad), Jacobian(v))
-         + Integral(grad, v)
-         + Integral(tgv * grad, v).over(GammaN)
-         - BoundaryIntegral(expr * cn, v).over(SigmaD);
-  solver.solve(velExt);
+  Problem hilbert(grad, v);
+  hilbert = Integral(alpha * Jacobian(grad), Jacobian(v))
+          + Integral(grad, v)
+          + Integral(tgv * grad, v).over(GammaN)
+          - BoundaryIntegral(expr * cn, v).over(SigmaD);
+  solver.solve(hilbert);
 
   return grad.getGridFunction();
 }
