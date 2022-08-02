@@ -165,8 +165,7 @@ namespace Rodin::Variational
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
    template <class FEC, class Trait>
-   LinearForm(TestFunction<FEC, Trait>&)
-      -> LinearForm<FEC, Trait>;
+   LinearForm(TestFunction<FEC, Trait>&) -> LinearForm<FEC, Trait>;
 }
 
 #include "LinearForm.hpp"
