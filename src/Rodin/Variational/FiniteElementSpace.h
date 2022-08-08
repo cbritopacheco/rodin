@@ -117,6 +117,7 @@ namespace Rodin::Variational
          mfem::FiniteElementSpace m_fes;
    };
 
+#ifdef RODIN_USE_MPI
    template <class FEC>
    class FiniteElementSpace<FEC, Traits::Parallel>
       : public FiniteElementSpaceBase
@@ -173,6 +174,7 @@ namespace Rodin::Variational
          Mesh<Traits::Parallel>& m_mesh;
          mfem::ParFiniteElementSpace m_fes;
    };
+#endif
 }
 
 #endif
