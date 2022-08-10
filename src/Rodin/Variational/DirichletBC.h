@@ -40,10 +40,10 @@ namespace Rodin::Variational
     * | @f$ g @f$            | ScalarFunction                                |
     */
    template <class Trait>
-   class DirichletBC<TrialFunction<H1, Trait>> : public FormLanguage::Base
+   class DirichletBC<TrialFunction<H1<Trait>>> : public FormLanguage::Base
    {
       public:
-         DirichletBC(const TrialFunction<H1, Trait>& u, const FunctionBase& v)
+         DirichletBC(const TrialFunction<H1<Trait>>& u, const FunctionBase& v)
             : m_u(u), m_value(v.copy())
          {
             if (v.getRangeType() != RangeType::Scalar && v.getRangeType() != RangeType::Vector)
@@ -88,7 +88,7 @@ namespace Rodin::Variational
             return *m_value;
          }
 
-         const TrialFunction<H1, Trait>& getTrialFunction() const
+         const TrialFunction<H1<Trait>>& getTrialFunction() const
          {
             return m_u;
          }
@@ -107,20 +107,20 @@ namespace Rodin::Variational
             return new DirichletBC(*this);
          }
       private:
-         const TrialFunction<H1, Trait>& m_u;
+         const TrialFunction<H1<Trait>>& m_u;
          std::unique_ptr<FunctionBase> m_value;
          std::set<int> m_essBdr;
    };
    template <class Trait>
-   DirichletBC(const TrialFunction<H1, Trait>&, const FunctionBase&)
-      -> DirichletBC<TrialFunction<H1, Trait>>;
+   DirichletBC(const TrialFunction<H1<Trait>>&, const FunctionBase&)
+      -> DirichletBC<TrialFunction<H1<Trait>>>;
 
    template <class Trait>
-   class DirichletBC<Component<TrialFunction<H1, Trait>>>
+   class DirichletBC<Component<TrialFunction<H1<Trait>>>>
       : public FormLanguage::Base
    {
       public:
-         DirichletBC(const Component<TrialFunction<H1, Trait>>& ux, const FunctionBase& v)
+         DirichletBC(const Component<TrialFunction<H1<Trait>>>& ux, const FunctionBase& v)
             : m_ux(ux), m_value(v.copy())
          {
             if (v.getRangeType() != RangeType::Scalar)
@@ -162,7 +162,7 @@ namespace Rodin::Variational
             return *m_value;
          }
 
-         const Component<TrialFunction<H1, Trait>>& getComponent() const
+         const Component<TrialFunction<H1<Trait>>>& getComponent() const
          {
             return m_ux;
          }
@@ -177,13 +177,13 @@ namespace Rodin::Variational
             return new DirichletBC(*this);
          }
       private:
-         Component<TrialFunction<H1, Trait>> m_ux;
+         Component<TrialFunction<H1<Trait>>> m_ux;
          std::unique_ptr<FunctionBase> m_value;
          std::set<int> m_essBdr;
    };
    template <class Trait>
-   DirichletBC(const Component<TrialFunction<H1, Trait>>&, const FunctionBase&)
-      -> DirichletBC<Component<TrialFunction<H1, Trait>>>;
+   DirichletBC(const Component<TrialFunction<H1<Trait>>>&, const FunctionBase&)
+      -> DirichletBC<Component<TrialFunction<H1<Trait>>>>;
 }
 
 #endif

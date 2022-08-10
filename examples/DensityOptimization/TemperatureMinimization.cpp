@@ -28,7 +28,7 @@ int main(int, char**)
   Omega.save("Omega.mesh");
 
   // Build finite element space
-  FiniteElementSpace<H1> Vh(Omega);
+  H1 Vh(Omega);
 
   GridFunction gamma(Vh);
   gamma = 0.9;

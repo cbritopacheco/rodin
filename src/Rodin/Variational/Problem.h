@@ -109,9 +109,8 @@ namespace Rodin::Variational
     * class in the Rodin::Solver namespace.
     *
     */
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   class Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>
-      : public ProblemBase
+   template <class TrialFES, class TestFES, class OperatorType>
+   class Problem : public ProblemBase
    {
       public:
          /**
@@ -131,10 +130,7 @@ namespace Rodin::Variational
           * @param[in,out] u Trial function @f$ u @f$
           * @param[in,out] v Test function @f$ v @f$
           */
-         Problem(
-               TrialFunction<TrialFEC, Traits::Serial>& u,
-               TestFunction<TestFEC, Traits::Serial>& v,
-               OperatorType* = new OperatorType);
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType* = new OperatorType);
 
          Problem& update() override;
 
@@ -177,8 +173,8 @@ namespace Rodin::Variational
          }
 
       private:
-         LinearForm<TrialFEC, Traits::Serial>                m_linearForm;
-         BilinearForm<TrialFEC, TestFEC, Traits::Serial>     m_bilinearForm;
+         LinearForm<TestFES>                m_linearForm;
+         BilinearForm<TrialFES, TestFES>    m_bilinearForm;
 
          mfem::OperatorHandle    m_stiffnessOp;
          mfem::Vector            m_massVector;
@@ -186,24 +182,21 @@ namespace Rodin::Variational
 
          const std::map<
             boost::uuids::uuid,
-            std::reference_wrapper<TrialFunction<TrialFEC, Traits::Serial>>> m_trialFunctions;
+            std::reference_wrapper<TrialFunction<TrialFES>>> m_trialFunctions;
          const std::map<
             boost::uuids::uuid,
-            std::reference_wrapper<TestFunction<TestFEC, Traits::Serial>>> m_testFunctions;
+            std::reference_wrapper<TestFunction<TestFES>>> m_testFunctions;
          std::unique_ptr<ProblemBody> m_pb;
 
          mfem::Array<int> m_essTrueDofList;
    };
-   template <class TrialFEC, class TestFEC>
-   Problem(TrialFunction<TrialFEC, Traits::Serial>&, TestFunction<TestFEC, Traits::Serial>&)
-      -> Problem<TrialFEC, TestFEC, mfem::SparseMatrix, Traits::Serial>;
+   template <class TrialFES, class TestFES>
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
+      -> Problem<TrialFES, TestFES, mfem::SparseMatrix>;
 
-   template <class TrialFEC, class TestFEC, class OperatorType, class Trait>
-   Problem(
-         TrialFunction<TrialFEC, Trait>&,
-         TestFunction<TestFEC, Trait>&,
-         OperatorType*)
-      -> Problem<TrialFEC, TestFEC, OperatorType, Trait>;
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType*)
+      -> Problem<TrialFES, TestFES, OperatorType>;
 }
 
 #include "Problem.hpp"

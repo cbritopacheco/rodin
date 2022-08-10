@@ -13,20 +13,20 @@ namespace Rodin::Variational
     * @tparam Trait Indicates whether the FiniteElementSpace to which the
     * TrialFunction belongs to is parallel or serial
     */
-   template <class FEC, class Trait>
-   class TrialFunction : public ShapeFunction<FEC, TrialSpace>
+   template <class FES>
+   class TrialFunction : public ShapeFunction<FES, TrialSpace>
    {
       public:
-         TrialFunction(FiniteElementSpace<FEC, Trait>& fes)
-            : ShapeFunction<FEC, TrialSpace>(fes)
+         TrialFunction(FES& fes)
+            : ShapeFunction<FES, TrialSpace>(fes)
          {}
 
          TrialFunction(const TrialFunction& other)
-            : ShapeFunction<FEC, TrialSpace>(other)
+            : ShapeFunction<FES, TrialSpace>(other)
          {}
 
          TrialFunction(TrialFunction&& other)
-            : ShapeFunction<FEC, TrialSpace>(std::move(other))
+            : ShapeFunction<FES, TrialSpace>(std::move(other))
          {}
 
          void operator=(const TrialFunction&) = delete;
@@ -39,34 +39,34 @@ namespace Rodin::Variational
             return *this;
          }
 
-         GridFunction<FEC, Trait>& getGridFunction()
+         GridFunction<FES>& getGridFunction()
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         const GridFunction<FEC, Trait>& getGridFunction() const
+         const GridFunction<FES>& getGridFunction() const
          {
             assert(m_gf);
             return *m_gf;
          }
 
-         Component<TrialFunction<FEC, Trait>> x() const
+         Component<TrialFunction<FES>> x() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
-            return Component<TrialFunction<FEC, Trait>>(*this, 0);
+            return Component<TrialFunction<FES>>(*this, 0);
          }
 
-         Component<TrialFunction<FEC, Trait>> y() const
+         Component<TrialFunction<FES>> y() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
-            return Component<TrialFunction<FEC, Trait>>(*this, 1);
+            return Component<TrialFunction<FES>>(*this, 1);
          }
 
-         Component<TrialFunction<FEC, Trait>> z() const
+         Component<TrialFunction<FES>> z() const
          {
             assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
-            return Component<TrialFunction<FEC, Trait>>(*this, 2);
+            return Component<TrialFunction<FES>>(*this, 2);
          }
 
          const TrialFunction& getLeaf() const override
@@ -79,10 +79,11 @@ namespace Rodin::Variational
             return new TrialFunction(*this);
          }
       private:
-         std::optional<GridFunction<FEC, Trait>> m_gf;
+         std::optional<GridFunction<FES>> m_gf;
    };
-   template <class FEC, class Trait>
-   TrialFunction(FiniteElementSpace<FEC, Trait>&) -> TrialFunction<FEC, Trait>;
+
+   template <class FES>
+   TrialFunction(FES&) -> TrialFunction<FES>;
 }
 #endif
 

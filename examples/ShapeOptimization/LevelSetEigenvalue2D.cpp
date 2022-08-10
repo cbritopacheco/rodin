@@ -68,7 +68,7 @@ class EigenSolver
     ~EigenSolver() = default;
 
     // Accessors
-    GridFunction<H1>& getEigenFunction(int index);
+    GridFunction<H1<Traits::Serial>>& getEigenFunction(int index);
 
     double getEigenValue(int index);
     std::vector<double> getEigenValues();
@@ -78,11 +78,11 @@ class EigenSolver
     EigenSolver& setShift(double shift);
 
     // Solves the problem
-    void solve(mfem::SparseMatrix A, mfem::SparseMatrix B, FiniteElementSpace<H1>& fes);
+    void solve(mfem::SparseMatrix A, mfem::SparseMatrix B, H1<Traits::Serial>& fes);
 
   private:
     std::vector<double> m_eigenvalues;
-    std::vector<GridFunction<H1>*> m_eigenfunctions;
+    std::vector<GridFunction<H1<Traits::Serial>>*> m_eigenfunctions;
     unsigned int m_nev;
     double m_shift;
 };
@@ -105,13 +105,13 @@ int main(int argc, char** argv)
   for (size_t i = 0; i < maxIt; i++)
   {
     // Scalar field finite element space over the whole domain
-    FiniteElementSpace<H1> Vh(Omega);
+    H1<Traits::Serial> Vh(Omega);
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior);
 
     // Build a finite element space over the trimmed mesh
-    FiniteElementSpace<H1> VhInt(trimmed);
+    H1<Traits::Serial> VhInt(trimmed);
 
     // Elasticity equation
     TrialFunction uInt(VhInt);
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
             - mu * u * u * n
             - 2 * ell * (Omega.getVolume(Interior) - target_volume) * n;
 
-    FiniteElementSpace<H1> Uh(Omega, 2);
+    H1 Uh(Omega, 2);
     TrialFunction g(Uh);
     TestFunction  v(Uh);
     Problem hilbert(g, v);
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
     // Generate signed distance function
-    FiniteElementSpace<H1> Dh(Omega);
+    H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
 
@@ -204,7 +204,7 @@ EigenSolver::EigenSolver(){
 }
 
 // Accessors
-GridFunction<H1>& EigenSolver::getEigenFunction(int index){
+GridFunction<H1<Traits::Serial>>& EigenSolver::getEigenFunction(int index){
   return *m_eigenfunctions[index];
 }
 
@@ -228,7 +228,7 @@ EigenSolver& EigenSolver::setShift(double shift){
   return *this;
 }
 
-void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, FiniteElementSpace<H1>& fes){
+void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, H1<Traits::Serial>& fes){
 
   // 1. CA and B to Eigen::SparseMatrix
   //WARNING: MAY BE USELESS SINCE SPECTRA HANDLE OTHER MATRICES TYPES
@@ -276,7 +276,7 @@ void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, FiniteElement
     }
     //std::copy(evecs.col(m_nev-i-1).data(), evecs.col(m_nev-i-1).data()+dim, data.get());
 
-    m_eigenfunctions.push_back(new GridFunction<H1>(fes));
+    m_eigenfunctions.push_back(new GridFunction<H1<Traits::Serial>>(fes));
     m_eigenfunctions[i]->setData(std::move(data), dim);
   }
 }

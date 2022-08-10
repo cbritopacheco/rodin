@@ -106,9 +106,11 @@ namespace Rodin::Variational
     * A linear form can be specified by from one or more
     * LinearFormIntegratorBase instances.
     */
-   template <class FEC>
-   class LinearForm<FEC, Traits::Serial> : public LinearFormBase
+   template <class FES>
+   class LinearForm : public LinearFormBase
    {
+      static_assert(std::is_same_v<typename FES::Trait, Traits::Serial>);
+
       public:
          using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
 
@@ -117,7 +119,7 @@ namespace Rodin::Variational
           * space
           * @param[in] fes Reference to the finite element space
           */
-         LinearForm(TestFunction<FEC, Traits::Serial>& v);
+         LinearForm(TestFunction<FES>& v);
 
          LinearForm& operator=(const LinearFormIntegratorBase& lfi);
 
@@ -131,7 +133,7 @@ namespace Rodin::Variational
           *
           * @returns The value which the linear form takes at @f$ u @f$.
           */
-         double operator()(const GridFunction<FEC, Traits::Serial>& u) const;
+         double operator()(const GridFunction<FES>& u) const;
 
          LinearForm& add(const LinearFormIntegratorBase& lfi) override;
 
@@ -141,7 +143,7 @@ namespace Rodin::Variational
 
          LinearForm& from(const LinearFormIntegratorSum& lsum) override;
 
-         const TestFunction<FEC, Traits::Serial>& getTestFunction() const override
+         const TestFunction<FES>& getTestFunction() const override
          {
             return m_v;
          }
@@ -157,15 +159,15 @@ namespace Rodin::Variational
          }
 
       private:
-         TestFunction<FEC, Traits::Serial>& m_v;
+         TestFunction<FES>& m_v;
          std::unique_ptr<mfem::LinearForm> m_lf;
          LFIList m_lfiDomainList;
          LFIList m_lfiBoundaryList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_bdrAttrMarkers;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
-   template <class FEC, class Trait>
-   LinearForm(TestFunction<FEC, Trait>&) -> LinearForm<FEC, Trait>;
+   template <class FES>
+   LinearForm(TestFunction<FES>&) -> LinearForm<FES>;
 }
 
 #include "LinearForm.hpp"

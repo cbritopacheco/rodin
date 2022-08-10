@@ -17,18 +17,18 @@
 
 namespace Rodin::IO
 {
-   template <class FEC>
-   void GridFunctionLoader<FileFormat::MFEM, FEC, Traits::Serial>
+   template <class FES>
+   void GridFunctionLoader<FileFormat::MFEM, FES>
    ::load(std::istream& is)
    {
-      auto& gf = GridFunctionLoaderBase<FEC, Traits::Serial>::getObject();
+      auto& gf = GridFunctionLoaderBase<FES>::getObject();
       gf.getHandle() = mfem::GridFunction(
             &gf.getFiniteElementSpace().getMesh().getHandle(), is);
       gf.getHandle().SetSpace(&gf.getFiniteElementSpace().getHandle());
    }
 
-   template <class FEC>
-   void GridFunctionLoader<FileFormat::MEDIT, FEC, Traits::Serial>
+   template <class FES>
+   void GridFunctionLoader<FileFormat::MEDIT, FES>
    ::load(std::istream& is)
    {
       std::string line;
@@ -43,7 +43,7 @@ namespace Rodin::IO
       std::string kw;
       iss >> kw;
 
-      int version;
+      int version = 0;
       if (Medit::KeywordMap.left.count(kw))
       {
          switch (Medit::KeywordMap.left.at(kw))
@@ -161,7 +161,7 @@ namespace Rodin::IO
                         << Alert::Raise;
                   }
 
-                  int vdim;
+                  int vdim = 0;
                   switch (solType)
                   {
                      case 1:

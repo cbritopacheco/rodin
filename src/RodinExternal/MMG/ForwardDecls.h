@@ -14,7 +14,6 @@ namespace Rodin::External::MMG
   template <class T>
   class Distancer;
 
-  template <class FEC>
   class Advect;
 
   class ISCDProcess;

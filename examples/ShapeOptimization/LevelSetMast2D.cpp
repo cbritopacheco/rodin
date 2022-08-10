@@ -32,7 +32,7 @@ int main(int, char**)
        lambda = ScalarFunction(0.5769);
 
   // Compliance
-  auto compliance = [&](GridFunction<H1>& w)
+  auto compliance = [&](GridFunction<H1<Traits::Serial>>& w)
   {
     auto& Vh = w.getFiniteElementSpace();
     TrialFunction u(Vh);
@@ -69,13 +69,13 @@ int main(int, char**)
   {
     // Vector field finite element space over the whole domain
     int d = 2;
-    FiniteElementSpace<H1> Vh(Omega, d);
+    H1 Vh(Omega, d);
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior);
 
     // Build a finite element space over the trimmed mesh
-    FiniteElementSpace<H1> VhInt(trimmed, d);
+    H1 VhInt(trimmed, d);
 
     // Elasticity equation
     auto f = VectorFunction{0, -1};
@@ -113,7 +113,7 @@ int main(int, char**)
     Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
     // Generate signed distance function
-    FiniteElementSpace<H1> Dh(Omega);
+    H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
 

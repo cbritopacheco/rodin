@@ -13,6 +13,8 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Mesh.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/H1.h"
+#include "Rodin/Variational/GridFunction.h"
 
 #include "MMG5.h"
 #include "Common.h"
@@ -40,15 +42,15 @@ namespace Rodin::External::MMG
    *  d(x, \partial \Omega) := \inf_{y \in \partial \Omega} d(x, y)
    * @f]
    */
-  template <class FEC>
-  class Distancer<Variational::FiniteElementSpace<FEC>>
+  template <>
+  class Distancer<Variational::H1<Traits::Serial>>
   {
     public:
       /**
        * @brief Creates a Distancer2D object with default values.
        * @param[in] fes Finite element space for the distance function
        */
-      Distancer(Variational::FiniteElementSpace<FEC, Traits::Serial>& fes)
+      Distancer(Variational::H1<Traits::Serial>& fes)
         : m_fes(fes),
           m_scale(true),
           m_distTheBoundary(false),
@@ -139,7 +141,7 @@ namespace Rodin::External::MMG
        * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
        * @returns Signed distance function representing @f$ \Omega @f$.
        */
-      Variational::GridFunction<FEC, Traits::Serial> distance(const Mesh<Traits::Serial>& box)
+      Variational::GridFunction<Variational::H1<Traits::Serial>> distance(const Mesh<Traits::Serial>& box)
       {
         if (&box != &m_fes.getMesh())
         {
@@ -210,7 +212,7 @@ namespace Rodin::External::MMG
        * @note The contour mesh is allowed to contain a volume part, in which
        * case only the edge (S) or triangle (3D) information will be retained.
        */
-      Variational::GridFunction<FEC, Traits::Serial> distance(
+      Variational::GridFunction<Variational::H1<Traits::Serial>> distance(
             const Mesh<Traits::Serial>& box,
             const Mesh<Traits::Serial>& contour)
       {
@@ -256,16 +258,15 @@ namespace Rodin::External::MMG
       }
 
     private:
-      Variational::FiniteElementSpace<FEC, Traits::Serial>& m_fes;
+      Variational::H1<Traits::Serial>& m_fes;
       bool m_scale;
       bool m_distTheBoundary;
       unsigned int m_ncpu;
       ISCDProcess m_mshdist;
       std::optional<std::set<MaterialReference>> m_interiorDomains;
   };
-  template <class FEC>
-  Distancer(Variational::FiniteElementSpace<FEC>&)
-    -> Distancer<Variational::FiniteElementSpace<FEC>>;
+  template <class Trait>
+  Distancer(Variational::H1<Trait>&) -> Distancer<Variational::H1<Trait>>;
 
   /**
    * @brief Distancer specialization for redistancing a level set function.
@@ -290,11 +291,10 @@ namespace Rodin::External::MMG
        *
        * @param[in,out] sol Level set function
        */
-      template <class FEC>
-      void redistance(Variational::GridFunction<FEC, Traits::Serial>& sol)
+      void redistance(Variational::GridFunction<Variational::H1<Traits::Serial>>& sol)
       {
         auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
-        sol.getMesh().save(meshp, IO::FileFormat::MEDIT);
+        sol.getFiniteElementSpace().getMesh().save(meshp, IO::FileFormat::MEDIT);
 
         boost::filesystem::path solp(meshp);
         solp.replace_extension(".sol");
@@ -304,7 +304,7 @@ namespace Rodin::External::MMG
         name.replace_extension();
 
         int retcode = 1;
-        if (sol.getMesh().isSurface())
+        if (sol.getFiniteElementSpace().getMesh().isSurface())
         {
           retcode = m_mshdist.run(name.string(),
               "-surf -fmm",
