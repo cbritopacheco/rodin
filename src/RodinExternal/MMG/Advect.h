@@ -34,7 +34,6 @@ namespace Rodin::External::MMG
    * @f]
    * where @f$ u_0 : \mathbb{R}^d \rightarrow \mathbb{R} @f$ is known.
    */
-  template <class FEC>
   class Advect
   {
     public:
@@ -44,8 +43,8 @@ namespace Rodin::External::MMG
        * @param[in] disp Displacement velocity field
        */
       Advect(
-          Variational::GridFunction<FEC, Traits::Serial>& ls,
-          const Variational::GridFunction<FEC, Traits::Serial>& disp)
+          Variational::GridFunction<Variational::H1<Traits::Serial>>& ls,
+          const Variational::GridFunction<Variational::H1<Traits::Serial>>& disp)
         : m_t(0),
           m_avoidTrunc(false),
           m_ex(true),
@@ -173,8 +172,8 @@ namespace Rodin::External::MMG
       double m_t;
       bool m_avoidTrunc, m_ex;
       bool m_advectTheSurface;
-      Variational::GridFunction<FEC, Traits::Serial>& m_ls;
-      const Variational::GridFunction<FEC, Traits::Serial>& m_disp;
+      Variational::GridFunction<Variational::H1<Traits::Serial>>& m_ls;
+      const Variational::GridFunction<Variational::H1<Traits::Serial>>& m_disp;
       ISCDProcess m_advect;
   };
 }

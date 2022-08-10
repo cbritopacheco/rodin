@@ -350,6 +350,80 @@ namespace Rodin::Variational
       return Component(*this, 2);
    }
 
+   template <>
+   GridFunction<H1<Traits::Serial>>&
+   GridFunction<H1<Traits::Serial>>::load(
+         const boost::filesystem::path& filename, IO::FileFormat fmt)
+   {
+      mfem::named_ifgzstream input(filename.c_str());
+      if (!input)
+      {
+         Alert::Exception()
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+      }
+
+      switch (fmt)
+      {
+         case IO::FileFormat::MFEM:
+         {
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, H1<Traits::Serial>> loader(*this);
+            loader.load(input);
+            break;
+         }
+         case IO::FileFormat::MEDIT:
+         {
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, H1<Traits::Serial>> loader(*this);
+            loader.load(input);
+            break;
+         }
+         default:
+         {
+            Alert::Exception()
+               << "Loading from \"" << fmt << "\" format unssuported."
+               << Alert::Raise;
+         }
+      }
+      return *this;
+   }
+
+   template <>
+   void GridFunction<H1<Traits::Serial>>
+   ::save(const boost::filesystem::path& filename, IO::FileFormat fmt, int precision)
+   const
+   {
+      std::ofstream output(filename.c_str());
+      if (!output)
+      {
+         Alert::Exception()
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+      }
+
+      output.precision(precision);
+      switch (fmt)
+      {
+         case IO::FileFormat::MFEM:
+         {
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, H1<Traits::Serial>> printer(*this);
+            printer.print(output);
+            break;
+         }
+         case IO::FileFormat::MEDIT:
+         {
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, H1<Traits::Serial>> printer(*this);
+            printer.print(output);
+            break;
+         }
+         default:
+         {
+            Alert::Exception()
+               << "Saving to \"" << fmt << "\" format unssuported."
+               << Alert::Raise;
+         }
+      }
+   }
+
    FunctionBase* GridFunctionBase::copy() const noexcept
    {
       return new Internal::GridFunctionEvaluator(*this);

@@ -44,7 +44,7 @@ namespace Rodin::Solver
             smoother,
             problem.getMassVector(),
             problem.getInitialGuess(),
-            m_printIterations, m_maxIterations, m_rtol, m_atol);
+            static_cast<int>(m_printIterations), m_maxIterations, m_rtol, m_atol);
 
       problem.recoverSolution();
    }

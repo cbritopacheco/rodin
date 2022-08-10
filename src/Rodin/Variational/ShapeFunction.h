@@ -94,11 +94,11 @@ namespace Rodin::Variational
          virtual ShapeFunctionBase<Space>* copy() const noexcept override = 0;
    };
 
-   template <ShapeFunctionSpaceType Space>
-   class ShapeFunction<H1, Space> : public ShapeFunctionBase<Space>
+   template <ShapeFunctionSpaceType Space, class Trait>
+   class ShapeFunction<H1<Trait>, Space> : public ShapeFunctionBase<Space>
    {
       public:
-         ShapeFunction(FiniteElementSpace<H1>& fes)
+         ShapeFunction(H1<Trait>& fes)
             : m_fes(fes)
          {}
 
@@ -112,12 +112,12 @@ namespace Rodin::Variational
                m_fes(other.m_fes)
          {}
 
-         FiniteElementSpace<H1>& getFiniteElementSpace() override
+         H1<Trait>& getFiniteElementSpace() override
          {
             return m_fes;
          }
 
-         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
+         const H1<Trait>& getFiniteElementSpace() const override
          {
             return m_fes;
          }
@@ -152,12 +152,12 @@ namespace Rodin::Variational
                   new Internal::ScalarShapeR3O(std::move(shape), vdim));
          }
 
-         virtual const ShapeFunction<H1, Space>& getLeaf() const override = 0;
+         virtual const ShapeFunction<H1<Trait>, Space>& getLeaf() const override = 0;
 
          virtual ShapeFunction* copy() const noexcept override = 0;
 
       private:
-         FiniteElementSpace<H1>& m_fes;
+         H1<Trait>& m_fes;
    };
 }
 

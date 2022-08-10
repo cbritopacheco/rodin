@@ -20,43 +20,43 @@
 
 namespace Rodin::IO
 {
-   template <class FEC, class Trait>
-   class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FEC, Trait>>
+   template <class FES>
+   class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES>>
    {
       public:
-         GridFunctionPrinterBase(const Variational::GridFunction<FEC, Trait>& gf)
+         GridFunctionPrinterBase(const Variational::GridFunction<FES>& gf)
             : m_gf(gf)
          {}
 
       protected:
-         const Variational::GridFunction<FEC, Trait>& getObject() const override
+         const Variational::GridFunction<FES>& getObject() const override
          {
             return m_gf;
          }
 
       private:
-         const Variational::GridFunction<FEC, Trait>& m_gf;
+         const Variational::GridFunction<FES>& m_gf;
    };
 
-   template <class FEC>
-   class GridFunctionPrinter<FileFormat::MFEM, FEC, Traits::Serial>
-      : public GridFunctionPrinterBase<FEC, Traits::Serial>
+   template <class FES>
+   class GridFunctionPrinter<FileFormat::MFEM, FES>
+      : public GridFunctionPrinterBase<FES>
    {
       public:
-         GridFunctionPrinter(const Variational::GridFunction<FEC, Traits::Serial>& gf)
-            : GridFunctionPrinterBase<FEC, Traits::Serial>(gf)
+         GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
+            : GridFunctionPrinterBase<FES>(gf)
          {}
 
          void print(std::ostream& os) override;
    };
 
-   template <class FEC>
-   class GridFunctionPrinter<FileFormat::MEDIT, FEC, Traits::Serial>
-      : public GridFunctionPrinterBase<FEC, Traits::Serial>
+   template <class FES>
+   class GridFunctionPrinter<FileFormat::MEDIT, FES>
+      : public GridFunctionPrinterBase<FES>
    {
       public:
-         GridFunctionPrinter(const Variational::GridFunction<FEC, Traits::Serial>& gf)
-            : GridFunctionPrinterBase<FEC, Traits::Serial>(gf)
+         GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
+            : GridFunctionPrinterBase<FES>(gf)
          {}
 
          void print(std::ostream& os) override;

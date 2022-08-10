@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
   // Functions
   int d = 2;
-  FiniteElementSpace<H1> Vh(Omega, d);
+  H1 Vh(Omega, d);
 
   // Lamé coefficients
   auto mu     = ScalarFunction(0.3846),

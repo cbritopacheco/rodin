@@ -28,6 +28,12 @@
 
 namespace Rodin
 {
+   // namespace Context
+   // {
+   //    struct Serial   {};
+   //    struct Parallel {};
+   // }
+
    /**
     * @brief Abstract base class for Mesh objects.
     */

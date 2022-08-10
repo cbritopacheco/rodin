@@ -12,15 +12,15 @@ namespace Rodin::Variational
    /**
     * @brief Represents the component (or entry) of a vectorial TrialFunction.
     */
-   template <class FEC, class Trait>
-   class Component<TrialFunction<FEC, Trait>>
+   template <class FES>
+   class Component<TrialFunction<FES>>
    {
       public:
          /**
           * @brief Constructs the component object from a TrialFunction and its
           * component index.
           */
-         Component(const TrialFunction<FEC, Trait>& u, int component)
+         Component(const TrialFunction<FES>& u, int component)
             : m_u(u),
               m_idx(component)
          {}
@@ -35,7 +35,7 @@ namespace Rodin::Variational
               m_idx(other.m_idx)
          {}
 
-         const TrialFunction<FEC, Trait>& getTrialFunction() const
+         const TrialFunction<FES>& getTrialFunction() const
          {
             return m_u;
          }
@@ -47,10 +47,11 @@ namespace Rodin::Variational
 
       private:
          const int m_idx;
-         const TrialFunction<FEC, Trait>& m_u;
+         const TrialFunction<FES>& m_u;
    };
-   template <class FEC, class Trait>
-   Component(TrialFunction<FEC, Trait>&, int) -> Component<TrialFunction<FEC, Trait>>;
+
+   template <class FES>
+   Component(TrialFunction<FES>&, int) -> Component<TrialFunction<FES>>;
 
    /**
     * @brief Represents the component (or entry) of a vectorial FunctionBase
@@ -93,7 +94,8 @@ namespace Rodin::Variational
          }
 
          double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override
          {
             mfem::DenseMatrix v;
             m_v->getValue(v, trans, ip);
@@ -114,15 +116,15 @@ namespace Rodin::Variational
    /**
     * @brief Represents the component (or entry) of a vectorial GridFunction.
     */
-   template <class FEC, class Trait>
-   class Component<GridFunction<FEC, Trait>> : public Component<FunctionBase>
+   template <class FES>
+   class Component<GridFunction<FES>> : public Component<FunctionBase>
    {
       public:
          /**
           * @brief Constructs the component object from a GridFunction and its
           * component index.
           */
-         Component(GridFunction<FEC, Trait>& u, int component)
+         Component(GridFunction<FES>& u, int component)
             :  Component<FunctionBase>(u, component),
                m_u(u)
          {}
@@ -137,18 +139,18 @@ namespace Rodin::Variational
                m_u(other.m_u)
          {}
 
-         const GridFunction<FEC, Trait>& getGridFunction() const
+         const GridFunction<FES>& getGridFunction() const
          {
             return m_u;
          }
 
-         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
+         std::enable_if_t<Utility::IsSpecialization<FES, H1>::value, Component&>
          projectOnBoundary(const FunctionBase& s, int attr)
          {
             return projectOnBoundary(s, std::set<int>{attr});
          }
 
-         std::enable_if_t<std::is_same_v<FEC, H1>, Component&>
+         std::enable_if_t<Utility::IsSpecialization<FES, H1>::value, Component&>
          projectOnBoundary(const FunctionBase& s, const std::set<int>& attrs = {})
          {
             if (s.getRangeType() != RangeType::Scalar)
@@ -177,10 +179,10 @@ namespace Rodin::Variational
          }
 
       private:
-         GridFunction<FEC, Trait>& m_u;
+         GridFunction<FES>& m_u;
    };
-   template <class FEC, class Trait>
-   Component(GridFunction<FEC, Trait>&, int) -> Component<GridFunction<FEC, Trait>>;
+   template <class FES>
+   Component(GridFunction<FES>&, int) -> Component<GridFunction<FES>>;
 }
 
 #endif

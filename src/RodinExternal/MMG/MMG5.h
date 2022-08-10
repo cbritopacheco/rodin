@@ -43,8 +43,8 @@ namespace Rodin::External::MMG
 
       static void copySolution(const MMG5_pSol src, MMG5_pSol dst);
 
-      template <class FEC>
-      static void copySolution(const MMG5_pSol src, Variational::GridFunction<FEC, Traits::Serial>& dst)
+      template <class FES>
+      static void copySolution(const MMG5_pSol src, Variational::GridFunction<FES>& dst)
       {
         assert(src->type == MMG5_Scalar);
         double* data = new double[src->np];
@@ -55,9 +55,8 @@ namespace Rodin::External::MMG
         dst.getHandle().MakeDataOwner();
       }
 
-      template <class FEC>
-      static void copySolution(
-          Variational::GridFunction<FEC, Traits::Serial>& src, const MMG5_pSol dst)
+      template <class FES>
+      static void copySolution(Variational::GridFunction<FES>& src, const MMG5_pSol dst)
       {
         assert(dst);
         auto [data, size] = src.getData();

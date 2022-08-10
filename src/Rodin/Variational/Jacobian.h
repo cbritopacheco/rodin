@@ -33,7 +33,7 @@ namespace Rodin::Variational
     * This class aids in the calculation of the Jacobian of a GridFunction<H1>.
     */
    template <class Trait>
-   class Jacobian<GridFunction<H1, Trait>> : public MatrixFunctionBase
+   class Jacobian<GridFunction<H1<Trait>>> : public MatrixFunctionBase
    {
       public:
          /**
@@ -41,7 +41,7 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Jacobian(GridFunction<H1, Trait>& u)
+         Jacobian(GridFunction<H1<Trait>>& u)
             :  m_u(u)
          {}
 
@@ -67,7 +67,8 @@ namespace Rodin::Variational
 
          void getValue(
                mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const override
          {
             m_u.getHandle().GetVectorGradient(
                   FunctionBase::getTraceElementTrans(trans, ip), value);
@@ -80,16 +81,16 @@ namespace Rodin::Variational
          }
 
       private:
-         GridFunction<H1, Trait>& m_u;
+         GridFunction<H1<Trait>>& m_u;
    };
    template <class Trait>
-   Jacobian(GridFunction<H1, Trait>&) -> Jacobian<GridFunction<H1, Trait>>;
+   Jacobian(GridFunction<H1<Trait>>&) -> Jacobian<GridFunction<H1<Trait>>>;
 
-   template <ShapeFunctionSpaceType Space>
-   class Jacobian<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
+   template <ShapeFunctionSpaceType Space, class Trait>
+   class Jacobian<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
    {
       public:
-         Jacobian(ShapeFunction<H1, Space>& u)
+         Jacobian(ShapeFunction<H1<Trait>, Space>& u)
             : m_u(u)
          {}
 
@@ -103,17 +104,17 @@ namespace Rodin::Variational
               m_u(other.m_u)
          {}
 
-         FiniteElementSpace<H1>& getFiniteElementSpace() override
+         H1<Trait>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
+         const H1<Trait>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const ShapeFunction<H1, Space>& getLeaf() const override
+         const ShapeFunction<H1<Trait>, Space>& getLeaf() const override
          {
             return m_u.getLeaf();
          }
@@ -154,10 +155,10 @@ namespace Rodin::Variational
             return new Jacobian(*this);
          }
       private:
-         ShapeFunction<H1, Space>& m_u;
+         ShapeFunction<H1<Trait>, Space>& m_u;
    };
-   template <ShapeFunctionSpaceType Space>
-   Jacobian(ShapeFunction<H1, Space>&) -> Jacobian<ShapeFunction<H1, Space>>;
+   template <ShapeFunctionSpaceType Space, class Trait>
+   Jacobian(ShapeFunction<H1<Trait>, Space>&) -> Jacobian<ShapeFunction<H1<Trait>, Space>>;
 }
 
 #endif
