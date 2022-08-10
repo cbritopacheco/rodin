@@ -43,14 +43,14 @@ namespace Rodin::External::MMG
    * @f]
    */
   template <>
-  class Distancer<Variational::H1<Traits::Serial>>
+  class Distancer<Variational::H1<Context::Serial>>
   {
     public:
       /**
        * @brief Creates a Distancer2D object with default values.
        * @param[in] fes Finite element space for the distance function
        */
-      Distancer(Variational::H1<Traits::Serial>& fes)
+      Distancer(Variational::H1<Context::Serial>& fes)
         : m_fes(fes),
           m_scale(true),
           m_distTheBoundary(false),
@@ -141,7 +141,7 @@ namespace Rodin::External::MMG
        * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
        * @returns Signed distance function representing @f$ \Omega @f$.
        */
-      Variational::GridFunction<Variational::H1<Traits::Serial>> distance(const Mesh<Traits::Serial>& box)
+      Variational::GridFunction<Variational::H1<Context::Serial>> distance(const Mesh<Context::Serial>& box)
       {
         if (&box != &m_fes.getMesh())
         {
@@ -212,9 +212,9 @@ namespace Rodin::External::MMG
        * @note The contour mesh is allowed to contain a volume part, in which
        * case only the edge (S) or triangle (3D) information will be retained.
        */
-      Variational::GridFunction<Variational::H1<Traits::Serial>> distance(
-            const Mesh<Traits::Serial>& box,
-            const Mesh<Traits::Serial>& contour)
+      Variational::GridFunction<Variational::H1<Context::Serial>> distance(
+            const Mesh<Context::Serial>& box,
+            const Mesh<Context::Serial>& contour)
       {
         auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
         box.save(boxp);
@@ -258,7 +258,7 @@ namespace Rodin::External::MMG
       }
 
     private:
-      Variational::H1<Traits::Serial>& m_fes;
+      Variational::H1<Context::Serial>& m_fes;
       bool m_scale;
       bool m_distTheBoundary;
       unsigned int m_ncpu;
@@ -291,7 +291,7 @@ namespace Rodin::External::MMG
        *
        * @param[in,out] sol Level set function
        */
-      void redistance(Variational::GridFunction<Variational::H1<Traits::Serial>>& sol)
+      void redistance(Variational::GridFunction<Variational::H1<Context::Serial>>& sol)
       {
         auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
         sol.getFiniteElementSpace().getMesh().save(meshp, IO::FileFormat::MEDIT);

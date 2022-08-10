@@ -29,8 +29,8 @@ static constexpr double epsilon = 0.1;
 static constexpr double ell = 0.01;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
-GridFunction<H1<Traits::Serial>> getShapeGradient(
-    H1<Traits::Serial>& vecFes, GridFunction<H1<Traits::Serial>>& dist,
+GridFunction<H1<Context::Serial>> getShapeGradient(
+    H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
     const FunctionBase& expr, Solver::Solver& solver);
 
 int main(int, char**)
@@ -41,7 +41,7 @@ int main(int, char**)
   Mesh Omega;
   Omega.load(meshFile);
 
-  auto J = [&](GridFunction<H1<Traits::Serial>>& u)
+  auto J = [&](GridFunction<H1<Context::Serial>>& u)
   {
     return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
@@ -155,8 +155,8 @@ int main(int, char**)
   return 0;
 }
 
-GridFunction<H1<Traits::Serial>> getShapeGradient(
-    H1<Traits::Serial>& vecFes, GridFunction<H1<Traits::Serial>>& dist,
+GridFunction<H1<Context::Serial>> getShapeGradient(
+    H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
     const FunctionBase& expr, Solver::Solver& solver)
 {
   TrialFunction d(vecFes);

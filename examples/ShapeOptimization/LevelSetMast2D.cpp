@@ -32,7 +32,7 @@ int main(int, char**)
        lambda = ScalarFunction(0.5769);
 
   // Compliance
-  auto compliance = [&](GridFunction<H1<Traits::Serial>>& w)
+  auto compliance = [&](GridFunction<H1<Context::Serial>>& w)
   {
     auto& Vh = w.getFiniteElementSpace();
     TrialFunction u(Vh);

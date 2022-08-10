@@ -28,11 +28,11 @@
 
 namespace Rodin
 {
-   // namespace Context
-   // {
-   //    struct Serial   {};
-   //    struct Parallel {};
-   // }
+   namespace Context
+   {
+      struct Serial   {};
+      struct Parallel {};
+   }
 
    /**
     * @brief Abstract base class for Mesh objects.
@@ -285,14 +285,14 @@ namespace Rodin
          double getBoundaryElementArea(int i);
    };
 
-   using SerialMesh = Mesh<Traits::Serial>;
+   using SerialMesh = Mesh<Context::Serial>;
 
    /**
     * @brief Represents the subdivision of some domain into faces of (possibly)
     * different geometries.
     */
    template <>
-   class Mesh<Traits::Serial> : public MeshBase
+   class Mesh<Context::Serial> : public MeshBase
    {
       public:
          /**
@@ -328,9 +328,9 @@ namespace Rodin
           */
          Mesh& operator=(Mesh&& other) = default;
 
-         SubMesh<Traits::Serial> keep(int attr);
+         SubMesh<Context::Serial> keep(int attr);
 
-         SubMesh<Traits::Serial> keep(const std::set<int>& attrs);
+         SubMesh<Context::Serial> keep(const std::set<int>& attrs);
 
          /**
           * @brief Trims the elements with the given material reference.
@@ -342,7 +342,7 @@ namespace Rodin
           * Convenience function to call trim(const std::set<int>&, int) with
           * only one attribute.
           */
-         SubMesh<Traits::Serial> trim(int attr);
+         SubMesh<Context::Serial> trim(int attr);
 
          /**
           * @brief Trims the elements with the given material references.
@@ -355,7 +355,7 @@ namespace Rodin
           * object containing the elements which were not trimmed from the
           * original mesh.
           */
-         SubMesh<Traits::Serial> trim(const std::set<int>& attrs);
+         SubMesh<Context::Serial> trim(const std::set<int>& attrs);
 
          /**
           * @brief Skins the mesh to obtain its boundary mesh
@@ -365,9 +365,9 @@ namespace Rodin
           * new SubMesh object. The new mesh will be embedded in the original
           * space dimension.
           */
-         SubMesh<Traits::Serial> skin();
+         SubMesh<Context::Serial> skin();
 
-         SubMesh<Traits::Serial> extract(const std::set<int>& elements);
+         SubMesh<Context::Serial> extract(const std::set<int>& elements);
 
          Mesh& trace(const std::map<std::set<int>, int>& boundaries);
 
@@ -402,17 +402,17 @@ namespace Rodin
           * parallelized mesh. The parallelized mesh is independent of the
           * serial mesh instance.
           */
-         Mesh<Traits::Parallel> parallelize(boost::mpi::communicator comm);
+         Mesh<Context::Parallel> parallelize(boost::mpi::communicator comm);
 #endif
       private:
          mfem::Mesh m_mesh;
    };
 
 #ifdef RODIN_USE_MPI
-   using ParallelMesh = Mesh<Traits::Parallel>;
+   using ParallelMesh = Mesh<Context::Parallel>;
 
    template <>
-   class Mesh<Traits::Parallel> : public MeshBase
+   class Mesh<Context::Parallel> : public MeshBase
    {
       public:
          /**
@@ -424,7 +424,7 @@ namespace Rodin
           * new parallelized mesh. The parallelized mesh is independent of the
           * serial mesh instance.
           */
-         Mesh(boost::mpi::communicator comm, Mesh<Traits::Serial>& serialMesh)
+         Mesh(boost::mpi::communicator comm, Mesh<Context::Serial>& serialMesh)
             :  m_comm(comm),
                m_mesh(mfem::ParMesh(m_comm, serialMesh.getHandle()))
          {}

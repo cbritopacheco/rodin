@@ -109,10 +109,12 @@ namespace Rodin::Variational
    template <class FES>
    class LinearForm : public LinearFormBase
    {
-      static_assert(std::is_same_v<typename FES::Trait, Traits::Serial>);
+      static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
+
+      using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
 
       public:
-         using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
+         using Context = typename FES::Context;
 
          /**
           * @brief Constructs a linear form defined on some finite element

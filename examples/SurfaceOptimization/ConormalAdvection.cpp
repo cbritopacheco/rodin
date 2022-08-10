@@ -19,9 +19,9 @@ using namespace Rodin::External;
  * @oaram[in] Vh Vectorial finite element space
  */
 auto getConormal(
-    H1<Traits::Serial>& scalarFes,
-    H1<Traits::Serial>& vecFes,
-    GridFunction<H1<Traits::Serial>>& dist,
+    H1<Context::Serial>& scalarFes,
+    H1<Context::Serial>& vecFes,
+    GridFunction<H1<Context::Serial>>& dist,
     Solver::Solver& solver, double alpha=0.1)
 {
   auto n0 = VectorFunction{Dx(dist), Dy(dist), Dz(dist)};

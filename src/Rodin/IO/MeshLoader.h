@@ -47,17 +47,17 @@ namespace Rodin::IO
          }
 
       private:
-         Rodin::Mesh<Traits::Serial>& m_mesh;
+         Rodin::Mesh<Context::Serial>& m_mesh;
          bool m_fixOrientation;
    };
 
    template <>
-   class MeshLoader<IO::FileFormat::MFEM, Traits::Serial>
-      : public MeshLoaderBase<Traits::Serial>
+   class MeshLoader<IO::FileFormat::MFEM, Context::Serial>
+      : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Mesh<Traits::Serial>& mesh)
-            : MeshLoaderBase<Traits::Serial>(mesh)
+         MeshLoader(Rodin::Mesh<Context::Serial>& mesh)
+            : MeshLoaderBase<Context::Serial>(mesh)
          {}
 
          void load(std::istream& is) override;
@@ -67,24 +67,24 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshLoader<IO::FileFormat::GMSH, Traits::Serial>
-      : public MeshLoaderBase<Traits::Serial>
+   class MeshLoader<IO::FileFormat::GMSH, Context::Serial>
+      : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Mesh<Traits::Serial>& mesh)
-            : MeshLoaderBase<Traits::Serial>(mesh)
+         MeshLoader(Rodin::Mesh<Context::Serial>& mesh)
+            : MeshLoaderBase<Context::Serial>(mesh)
          {}
 
          void load(std::istream& is) override;
    };
 
    template <>
-   class MeshLoader<IO::FileFormat::MEDIT, Traits::Serial>
-      : public MeshLoaderBase<Traits::Serial>
+   class MeshLoader<IO::FileFormat::MEDIT, Context::Serial>
+      : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Mesh<Traits::Serial>& mesh)
-            : MeshLoaderBase<Traits::Serial>(mesh)
+         MeshLoader(Rodin::Mesh<Context::Serial>& mesh)
+            : MeshLoaderBase<Context::Serial>(mesh)
          {}
 
          void load(std::istream& is) override;

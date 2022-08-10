@@ -153,12 +153,12 @@ namespace Rodin::Variational
             std::is_same_v<TrialFES, TestFES>,
             "Different trial and test spaces are currently not supported.");
 
-      static_assert(std::is_same_v<typename TrialFES::Trait, Traits::Serial>);
+      static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
+
+      using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
 
       public:
-         using Trait = typename TrialFES::Trait;
-
-         using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
+         using Context = typename TrialFES::Context;
 
          /**
           * @brief Constructs a BilinearForm from a TrialFunction and

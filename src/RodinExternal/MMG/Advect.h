@@ -43,8 +43,8 @@ namespace Rodin::External::MMG
        * @param[in] disp Displacement velocity field
        */
       Advect(
-          Variational::GridFunction<Variational::H1<Traits::Serial>>& ls,
-          const Variational::GridFunction<Variational::H1<Traits::Serial>>& disp)
+          Variational::GridFunction<Variational::H1<Context::Serial>>& ls,
+          const Variational::GridFunction<Variational::H1<Context::Serial>>& disp)
         : m_t(0),
           m_avoidTrunc(false),
           m_ex(true),
@@ -172,8 +172,8 @@ namespace Rodin::External::MMG
       double m_t;
       bool m_avoidTrunc, m_ex;
       bool m_advectTheSurface;
-      Variational::GridFunction<Variational::H1<Traits::Serial>>& m_ls;
-      const Variational::GridFunction<Variational::H1<Traits::Serial>>& m_disp;
+      Variational::GridFunction<Variational::H1<Context::Serial>>& m_ls;
+      const Variational::GridFunction<Variational::H1<Context::Serial>>& m_disp;
       ISCDProcess m_advect;
   };
 }
