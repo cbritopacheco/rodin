@@ -18,7 +18,7 @@ int main(int, char**)
   Mesh mesh;
   mesh.load("thks.mesh", IO::FileFormat::MEDIT);
 
-  FiniteElementSpace<H1> fes(mesh);
+  H1 fes(mesh);
 
   auto dist = MMG::Distancer(fes).distance(mesh);
 

@@ -234,17 +234,15 @@ namespace Rodin::Variational
     * explicit.
     */
    template <class Trait>
-   class GridFunction<H1, Trait> : public GridFunctionBase
+   class GridFunction<H1<Trait>> : public GridFunctionBase
    {
-      static_assert(std::is_same_v<Trait, Traits::Serial>,
-            "Parallel GridFunction is not supported yet. Please use Trait = Traits::Serial.");
       public:
          /**
           * @brief Constructs a grid function on a finite element space.
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
-         GridFunction(FiniteElementSpace<H1, Trait>& fes)
+         GridFunction(H1<Trait>& fes)
             :  GridFunctionBase(),
                m_fes(fes),
                m_gf(&fes.getHandle())
@@ -375,7 +373,7 @@ namespace Rodin::Variational
                      getHandle().ProjectBdrCoefficient(iv, marker);
                   }
                },
-               [&](Internal::MatrixProxyFunction& iv)
+               [&](Internal::MatrixProxyFunction&)
                {
                   UnexpectedRangeTypeException(
                         {RangeType::Scalar, RangeType::Vector}, RangeType::Matrix).raise();
@@ -393,126 +391,13 @@ namespace Rodin::Variational
                const boost::filesystem::path& filename,
                IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
-         FiniteElementSpace<H1, Trait>& getFiniteElementSpace() override
+         H1<Trait>& getFiniteElementSpace() override
          {
             return m_fes.get();
          }
 
-         const FiniteElementSpace<H1, Trait>& getFiniteElementSpace() const override
+         const H1<Trait>& getFiniteElementSpace() const override
 
-         {
-            return m_fes.get();
-         }
-
-         mfem::GridFunction& getHandle() override
-         {
-            return m_gf;
-         }
-
-         const mfem::GridFunction& getHandle() const override
-         {
-            return m_gf;
-         }
-      private:
-         std::reference_wrapper<FiniteElementSpace<H1, Trait>> m_fes;
-         mfem::GridFunction m_gf;
-   };
-
-   template <class Trait>
-   class GridFunction<L2, Trait> : public GridFunctionBase
-   {
-      static_assert(std::is_same_v<Trait, Traits::Serial>,
-            "Parallel GridFunction is not supported yet. Please use Trait = Traits::Serial.");
-
-      public:
-         /**
-          * @brief Constructs a grid function on a finite element space.
-          * @param[in] fes Finite element space to which the function belongs
-          * to.
-          */
-         GridFunction(FiniteElementSpace<L2, Trait>& fes)
-            :  GridFunctionBase(),
-               m_fes(fes),
-               m_gf(&fes.getHandle())
-         {
-            m_gf = 0.0;
-         }
-
-         /**
-          * @brief Copies the grid function.
-          * @param[in] other Other grid function to copy.
-          */
-         GridFunction(const GridFunction& other)
-            :  GridFunctionBase(other),
-               m_fes(other.m_fes),
-               m_gf(other.m_gf)
-         {}
-
-         /**
-          * @brief Move constructs the grid function.
-          * @param[in] other Other grid function to move.
-          */
-         GridFunction(GridFunction&& other)
-            :  GridFunctionBase(std::move(other)),
-               m_fes(std::move(other.m_fes)),
-               m_gf(std::move(other.m_gf))
-         {}
-
-         /**
-          * @brief Move assignment operator.
-          */
-         GridFunction& operator=(GridFunction&& other) = default;
-
-         GridFunction& operator=(const GridFunction&)  = delete;
-
-         template <class T>
-         GridFunction& operator=(T&& v)
-         {
-            return static_cast<GridFunction&>(
-                  GridFunctionBase::operator=(std::forward<T>(v)));
-         }
-
-         template <class T>
-         GridFunction& operator+=(T&& v)
-         {
-            return static_cast<GridFunction&>(
-                  GridFunctionBase::operator+=(std::forward<T>(v)));
-         }
-
-         template <class T>
-         GridFunction& operator-=(T&& v)
-         {
-            return static_cast<GridFunction&>(
-                  GridFunctionBase::operator-=(std::forward<T>(v)));
-         }
-
-         template <class T>
-         GridFunction& operator*=(T&& v)
-         {
-            return static_cast<GridFunction&>(
-                  GridFunctionBase::operator*=(std::forward<T>(v)));
-         }
-
-         template <class T>
-         GridFunction& operator/=(T&& v)
-         {
-            return static_cast<GridFunction&>(
-                  GridFunctionBase::operator/=(std::forward<T>(v)));
-         }
-
-         template <class ... Args>
-         GridFunction& project(Args&&... args)
-         {
-            return static_cast<GridFunction&>(
-                  GridFunctionBase::project(std::forward<Args>(args)...));
-         }
-
-         FiniteElementSpace<L2, Trait>& getFiniteElementSpace() override
-         {
-            return m_fes.get();
-         }
-
-         const FiniteElementSpace<L2, Trait>& getFiniteElementSpace() const override
          {
             return m_fes.get();
          }
@@ -527,12 +412,12 @@ namespace Rodin::Variational
             return m_gf;
          }
       private:
-         std::reference_wrapper<FiniteElementSpace<L2, Trait>> m_fes;
+         std::reference_wrapper<H1<Trait>> m_fes;
          mfem::GridFunction m_gf;
    };
 
-   template <class FEC, class Trait>
-   GridFunction(FiniteElementSpace<FEC, Trait>&) -> GridFunction<FEC, Trait>;
+   template <class FES>
+   GridFunction(FES& fes) -> GridFunction<FES>;
 }
 
 namespace Rodin::Variational::Internal

@@ -19,9 +19,9 @@ using namespace Rodin::External;
  * @oaram[in] Vh Vectorial finite element space
  */
 auto getConormal(
-    FiniteElementSpace<H1>& scalarFes,
-    FiniteElementSpace<H1>& vecFes,
-    GridFunction<H1>& dist,
+    H1<Context::Serial>& scalarFes,
+    H1<Context::Serial>& vecFes,
+    GridFunction<H1<Context::Serial>>& dist,
     Solver::Solver& solver, double alpha=0.1)
 {
   auto n0 = VectorFunction{Dx(dist), Dy(dist), Dz(dist)};
@@ -69,7 +69,7 @@ int main(int, char**)
 
   // Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
 
-  FiniteElementSpace<H1> Vh(Omega);
+  H1 Vh(Omega);
 
   // Sphere radius
   double r = 1;

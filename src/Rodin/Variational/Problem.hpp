@@ -16,12 +16,9 @@
 
 namespace Rodin::Variational
 {
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>
-   ::Problem(
-         TrialFunction<TrialFEC, Traits::Serial>& u,
-         TestFunction<TestFEC, Traits::Serial>& v,
-         OperatorType* op)
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem<TrialFES, TestFES, OperatorType>
+   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType* op)
       :  m_bilinearForm(u, v),
          m_linearForm(v),
          m_trialFunctions{{u.getUUID(), std::ref(u)}},
@@ -31,9 +28,9 @@ namespace Rodin::Variational
       m_guess = 0.0;
    }
 
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>&
-   Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>::operator=(const ProblemBody& rhs)
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem<TrialFES, TestFES, OperatorType>&
+   Problem<TrialFES, TestFES, OperatorType>::operator=(const ProblemBody& rhs)
    {
       m_pb.reset(rhs.copy());
 
@@ -55,8 +52,8 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   void Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>::assemble()
+   template <class TrialFES, class TestFES, class OperatorType>
+   void Problem<TrialFES, TestFES, OperatorType>::assemble()
    {
       m_linearForm.assemble();
       m_bilinearForm.assemble();
@@ -79,9 +76,9 @@ namespace Rodin::Variational
              m_massVector);
    }
 
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>&
-   Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>::update()
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem<TrialFES, TestFES, OperatorType>&
+   Problem<TrialFES, TestFES, OperatorType>::update()
    {
       // We don't support PDE systems (yet)
       {
@@ -130,8 +127,8 @@ namespace Rodin::Variational
       return *this;
    }
 
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   void Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>::recoverSolution()
+   template <class TrialFES, class TestFES, class OperatorType>
+   void Problem<TrialFES, TestFES, OperatorType>::recoverSolution()
    {
       auto& [uuid, u] = *m_trialFunctions.begin();
       auto& a = m_bilinearForm;
@@ -140,9 +137,8 @@ namespace Rodin::Variational
             l.getHandle(), u.get().getGridFunction().getHandle());
    }
 
-   template <class TrialFEC, class TestFEC, class OperatorType>
-   EssentialBoundary&
-   Problem<TrialFEC, TestFEC, OperatorType, Traits::Serial>::getEssentialBoundary()
+   template <class TrialFES, class TestFES, class OperatorType>
+   EssentialBoundary& Problem<TrialFES, TestFES, OperatorType>::getEssentialBoundary()
    {
       return m_pb->getEssentialBoundary();
    }

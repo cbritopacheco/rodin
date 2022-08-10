@@ -21,15 +21,15 @@ namespace Rodin::Variational
     *    \text{div} u
     * @f]
     */
-   template <ShapeFunctionSpaceType Space>
-   class Div<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
+   template <ShapeFunctionSpaceType Space, class Trait>
+   class Div<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
    {
       public:
          /**
           * @brief Constructs Div object
           * @param[in] u ShapeFunction to be differentiated
           */
-         Div(ShapeFunction<H1, Space>& u)
+         Div(ShapeFunction<H1<Trait>, Space>& u)
             : m_u(u)
          {
             if (u.getRangeType() != RangeType::Scalar &&
@@ -50,7 +50,7 @@ namespace Rodin::Variational
               m_u(other.m_u)
          {}
 
-         const ShapeFunction<H1, Space>& getLeaf() const override
+         const ShapeFunction<H1<Trait>, Space>& getLeaf() const override
          {
             return m_u.getLeaf();
          }
@@ -85,12 +85,12 @@ namespace Rodin::Variational
             return Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim).Trace();
          }
 
-         FiniteElementSpace<H1>& getFiniteElementSpace() override
+         H1<Trait>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
+         const H1<Trait>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }
@@ -100,10 +100,10 @@ namespace Rodin::Variational
             return new Div(*this);
          }
       private:
-         ShapeFunction<H1, Space>& m_u;
+         ShapeFunction<H1<Trait>, Space>& m_u;
    };
-   template <ShapeFunctionSpaceType Space>
-   Div(ShapeFunction<H1, Space>&) -> Div<ShapeFunction<H1, Space>>;
+   template <ShapeFunctionSpaceType Space, class Trait>
+   Div(ShapeFunction<H1<Trait>, Space>&) -> Div<ShapeFunction<H1<Trait>, Space>>;
 }
 
 #endif
