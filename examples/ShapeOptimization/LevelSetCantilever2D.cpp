@@ -32,7 +32,7 @@ static constexpr double ell = 1.0;
 static constexpr double alpha = 4 * hmax * hmax;
 
 // Compliance
-double compliance(GridFunction<H1>& w);
+double compliance(GridFunction<H1<Context::Serial>>& w);
 
 int main(int, char**)
 {
@@ -59,8 +59,8 @@ int main(int, char**)
 
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
     int d = 2;
-    FiniteElementSpace<H1> Vh(Omega, d);
-    FiniteElementSpace<H1> VhInt(trimmed, d);
+    H1 Vh(Omega, d);
+    H1 VhInt(trimmed, d);
 
     Alert::Info() << "    | Solving state equation." << Alert::Raise;
     auto f = VectorFunction{0, -1};
@@ -101,7 +101,7 @@ int main(int, char**)
     Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
 
     Alert::Info() << "    | Distancing domain." << Alert::Raise;
-    FiniteElementSpace<H1> Dh(Omega);
+    H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
 
@@ -135,7 +135,7 @@ int main(int, char**)
   return 0;
 }
 
-double compliance(GridFunction<H1>& w)
+double compliance(GridFunction<H1<Context::Serial>>& w)
 {
   auto& Vh = w.getFiniteElementSpace();
   TrialFunction u(Vh);

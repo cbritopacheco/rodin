@@ -14,7 +14,7 @@ namespace Rodin::Variational
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class TrialFEC, class TestFEC, class OperatorType, class Trait>
+   template <class TrialFES, class TestFES, class OperatorType>
    class Problem;
 
    class ProblemBody;
@@ -24,18 +24,20 @@ namespace Rodin::Variational
 
    class L2;
 
-   class H1;
 
    // ---- FiniteElementSpace ------------------------------------------------
    class FiniteElementSpaceBase;
 
-   template <class FEC, class Trait = Traits::Serial>
-   class FiniteElementSpace;
+   // template <class FEC, class Trait = Traits::Serial>
+   // class FiniteElementSpace;
+
+   template <class Trait>
+   class H1;
 
    // ---- GridFunction ------------------------------------------------------
    class GridFunctionBase;
 
-   template <class FEC, class Trait = Traits::Serial>
+   template <class FES>
    class GridFunction;
 
    // ---- ShapeFunction -----------------------------------------------------
@@ -57,13 +59,13 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase;
 
-   template <class FEC, ShapeFunctionSpaceType Space>
+   template <class FES, ShapeFunctionSpaceType Space>
    class ShapeFunction;
 
-   template <class FEC, class Trait>
+   template <class FES>
    class TrialFunction;
 
-   template <class FEC, class Trait>
+   template <class FES>
    class TestFunction;
 
    template <class T>
@@ -91,7 +93,7 @@ namespace Rodin::Variational
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 
-   template <class FEC, class Trait>
+   template <class FES>
    class LinearForm;
 
    class LinearFormIntegratorBase;
@@ -106,12 +108,12 @@ namespace Rodin::Variational
    /**
     * @brief Represents a serial bilinear form supported on two finite element
     * spaces originating from two instances of FiniteElementCollection.
-    * @tparam TrialFEC Trial FiniteElementCollection
-    * @tparam TestFEC Test FiniteElementCollection
+    * @tparam TrialFES Trial FiniteElementCollection
+    * @tparam TestFES Test FiniteElementCollection
     * @tparam Trait Indicates if the BilinearForm is in a parallel context. It is
     * one of Traits::Serial or Traits::Parallel.
     */
-   template <class TrialFEC, class TestFEC, class Trait>
+   template <class TrialFES, class TestFES>
    class BilinearForm;
 
    class BilinearFormIntegratorBase;

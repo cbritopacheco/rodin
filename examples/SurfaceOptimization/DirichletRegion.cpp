@@ -29,8 +29,8 @@ static constexpr double epsilon = 0.1;
 static constexpr double ell = 0.01;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
-GridFunction<H1> getShapeGradient(
-    FiniteElementSpace<H1>& vecFes, GridFunction<H1>& dist,
+GridFunction<H1<Context::Serial>> getShapeGradient(
+    H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
     const FunctionBase& expr, Solver::Solver& solver);
 
 int main(int, char**)
@@ -41,7 +41,7 @@ int main(int, char**)
   Mesh Omega;
   Omega.load(meshFile);
 
-  auto J = [&](GridFunction<H1>& u)
+  auto J = [&](GridFunction<H1<Context::Serial>>& u)
   {
     return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
@@ -59,11 +59,11 @@ int main(int, char**)
 
     // Build finite element spaces
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
-    FiniteElementSpace<H1> Vh(Omega);
-    FiniteElementSpace<H1> Th(Omega, Omega.getSpaceDimension());
+    H1 Vh(Omega);
+    H1 Th(Omega, Omega.getSpaceDimension());
 
-    FiniteElementSpace<H1> VhS(dOmega);
-    FiniteElementSpace<H1> ThS(dOmega, dOmega.getSpaceDimension());
+    H1 VhS(dOmega);
+    H1 ThS(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "    | Distancing domain." << Alert::Raise;
     auto distS = MMG::Distancer(VhS).setInteriorDomain(GammaD)
@@ -155,8 +155,8 @@ int main(int, char**)
   return 0;
 }
 
-GridFunction<H1> getShapeGradient(
-    FiniteElementSpace<H1>& vecFes, GridFunction<H1>& dist,
+GridFunction<H1<Context::Serial>> getShapeGradient(
+    H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
     const FunctionBase& expr, Solver::Solver& solver)
 {
   TrialFunction d(vecFes);

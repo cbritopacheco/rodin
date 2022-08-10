@@ -40,7 +40,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Compliance
-  auto compliance = [&](GridFunction<H1>& w)
+  auto compliance = [&](GridFunction<H1<Context::Serial>>& w)
   {
     auto& Vh = w.getFiniteElementSpace();
     TrialFunction u(Vh);
@@ -64,7 +64,7 @@ int main(int, char**)
 
     // Finite element spaces
     int d = 2;
-    FiniteElementSpace<H1> Vh(Omega, d);
+    H1 Vh(Omega, d);
 
     // Pull-down force
     auto f = VectorFunction{0, -1};

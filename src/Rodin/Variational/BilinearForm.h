@@ -146,16 +146,19 @@ namespace Rodin::Variational
     * bf = Integral(u, v);
     * @endcode
     */
-   template <class TrialFEC, class TestFEC>
-   class BilinearForm<TrialFEC, TestFEC, Traits::Serial>
-      : public BilinearFormBase
+   template <class TrialFES, class TestFES>
+   class BilinearForm : public BilinearFormBase
    {
       static_assert(
-            std::is_same_v<TrialFEC, TestFEC>,
+            std::is_same_v<TrialFES, TestFES>,
             "Different trial and test spaces are currently not supported.");
 
+      static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
+
+      using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
+
       public:
-         using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
+         using Context = typename TrialFES::Context;
 
          /**
           * @brief Constructs a BilinearForm from a TrialFunction and
@@ -164,9 +167,7 @@ namespace Rodin::Variational
           * @param[in] u TrialFunction
           * @param[out] v TestFunction
           */
-         BilinearForm(
-               TrialFunction<TrialFEC, Traits::Serial>& u,
-               TestFunction<TestFEC, Traits::Serial>& v);
+         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -179,8 +180,7 @@ namespace Rodin::Variational
           * at @f$ ( u, v ) @f$.
           */
          double operator()(
-               const GridFunction<TrialFEC, Traits::Serial>& u,
-               const GridFunction<TestFEC, Traits::Serial>& v) const;
+               const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const;
 
          /**
           * @brief Builds the bilinear form from a derived instance of
@@ -194,12 +194,12 @@ namespace Rodin::Variational
           */
          BilinearForm& operator=(const BilinearFormIntegratorSum& lsum);
 
-         const TrialFunction<TrialFEC, Traits::Serial>& getTrialFunction() const override
+         const TrialFunction<TrialFES>& getTrialFunction() const override
          {
             return m_u;
          }
 
-         const TestFunction<TestFEC, Traits::Serial>& getTestFunction() const override
+         const TestFunction<TestFES>& getTestFunction() const override
          {
             return m_v;
          }
@@ -223,17 +223,17 @@ namespace Rodin::Variational
          }
 
       private:
-         TrialFunction<TrialFEC, Traits::Serial>& m_u;
-         TestFunction<TestFEC, Traits::Serial>&   m_v;
+         TrialFunction<TrialFES>& m_u;
+         TestFunction<TestFES>&   m_v;
          std::unique_ptr<mfem::BilinearForm> m_bf;
          BFIList m_bfiDomainList;
          BFIList m_bfiBoundaryList;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
          std::vector<std::unique_ptr<mfem::Array<int>>> m_bdrAttrMarkers;
    };
-   template <class TrialFEC, class TestFEC, class Trait>
-   BilinearForm(TrialFunction<TrialFEC, Trait>&, TestFunction<TestFEC, Trait>&)
-      -> BilinearForm<TrialFEC, TestFEC, Trait>;
+   template <class TrialFES, class TestFES>
+   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
+      -> BilinearForm<TrialFES, TestFES>;
 }
 
 #include "BilinearForm.hpp"

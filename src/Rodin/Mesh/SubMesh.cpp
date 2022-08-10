@@ -4,22 +4,22 @@
 
 namespace Rodin
 {
-   SubMesh<Traits::Serial>::SubMesh(const MeshBase& parent)
+   SubMesh<Context::Serial>::SubMesh(const MeshBase& parent)
       : m_parent(parent)
    {}
 
-   SubMesh<Traits::Serial>::SubMesh(const SubMesh& other)
+   SubMesh<Context::Serial>::SubMesh(const SubMesh& other)
       :  Mesh(other),
          m_parent(other.m_parent),
          m_s2pv(other.m_s2pv)
    {}
 
-   const MeshBase& SubMesh<Traits::Serial>::getParent() const
+   const MeshBase& SubMesh<Context::Serial>::getParent() const
    {
       return m_parent;
    }
 
-   SubMesh<Traits::Serial>& SubMesh<Traits::Serial>::add(const Element& el)
+   SubMesh<Context::Serial>& SubMesh<Context::Serial>::add(const Element& el)
    {
       assert(&getParent() == &el.getMesh());
       assert(getDimension() == getParent().getDimension());
@@ -55,7 +55,7 @@ namespace Rodin
       return *this;
    }
 
-   SubMesh<Traits::Serial>& SubMesh<Traits::Serial>::add(const BoundaryElement& el)
+   SubMesh<Context::Serial>& SubMesh<Context::Serial>::add(const BoundaryElement& el)
    {
       assert(&getParent() == &el.getMesh());
       if (isSurface() && !getParent().isSurface())
@@ -115,17 +115,17 @@ namespace Rodin
       return *this;
    }
 
-   const boost::bimap<int, int>& SubMesh<Traits::Serial>::getVertexMap() const
+   const boost::bimap<int, int>& SubMesh<Context::Serial>::getVertexMap() const
    {
       return m_s2pv;
    }
 
-   const boost::bimap<int, int>& SubMesh<Traits::Serial>::getElementMap() const
+   const boost::bimap<int, int>& SubMesh<Context::Serial>::getElementMap() const
    {
       return m_s2pe;
    }
 
-   const boost::bimap<int, int>& SubMesh<Traits::Serial>::getBoundaryElementMap() const
+   const boost::bimap<int, int>& SubMesh<Context::Serial>::getBoundaryElementMap() const
    {
       return m_s2pb;
    }

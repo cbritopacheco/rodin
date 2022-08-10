@@ -19,45 +19,45 @@
 
 namespace Rodin::IO
 {
-   template <class FEC, class Trait>
-   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FEC, Trait>>
+   template <class FES>
+   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES>>
    {
       public:
-         GridFunctionLoaderBase(Variational::GridFunction<FEC, Trait>& gf)
+         GridFunctionLoaderBase(Variational::GridFunction<FES>& gf)
             : m_gf(gf)
          {}
 
       protected:
-         Variational::GridFunction<FEC, Trait>& getObject() override
+         Variational::GridFunction<FES>& getObject() override
          {
             return m_gf;
          }
 
       private:
-         Variational::GridFunction<FEC, Trait>& m_gf;
+         Variational::GridFunction<FES>& m_gf;
    };
 
    // ---- MFEM Format -------------------------------------------------------
-   template <class FEC>
-   class GridFunctionLoader<FileFormat::MFEM, FEC, Traits::Serial>
-      : public GridFunctionLoaderBase<FEC, Traits::Serial>
+   template <class FES>
+   class GridFunctionLoader<FileFormat::MFEM, FES>
+      : public GridFunctionLoaderBase<FES>
    {
       public:
-         GridFunctionLoader(Variational::GridFunction<FEC, Traits::Serial>& gf)
-            : GridFunctionLoaderBase<FEC, Traits::Serial>(gf)
+         GridFunctionLoader(Variational::GridFunction<FES>& gf)
+            : GridFunctionLoaderBase<FES>(gf)
          {}
 
          void load(std::istream& is) override;
    };
 
    // ---- MEDIT Format ------------------------------------------------------
-   template <class FEC>
-   class GridFunctionLoader<FileFormat::MEDIT, FEC, Traits::Serial>
-      : public GridFunctionLoaderBase<FEC, Traits::Serial>
+   template <class FES>
+   class GridFunctionLoader<FileFormat::MEDIT, FES>
+      : public GridFunctionLoaderBase<FES>
    {
       public:
-         GridFunctionLoader(Variational::GridFunction<FEC, Traits::Serial>& gf)
-            : GridFunctionLoaderBase<FEC, Traits::Serial>(gf)
+         GridFunctionLoader(Variational::GridFunction<FES>& gf)
+            : GridFunctionLoaderBase<FES>(gf)
          {}
 
          void load(std::istream& is) override;

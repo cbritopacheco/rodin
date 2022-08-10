@@ -35,7 +35,7 @@ namespace Rodin::Variational
     * @f]
     */
    template <class Trait>
-   class Grad<GridFunction<H1, Trait>> : public VectorFunctionBase
+   class Grad<GridFunction<H1<Trait>>> : public VectorFunctionBase
    {
       void GetGradient(
             mfem::Vector& grad, mfem::ElementTransformation& trans,
@@ -60,7 +60,7 @@ namespace Rodin::Variational
           * @f$ u @f$.
           * @param[in] u Grid function to be differentiated
           */
-         Grad(const GridFunction<H1, Trait>& u)
+         Grad(const GridFunction<H1<Trait>>& u)
             : m_u(u)
          {}
 
@@ -92,16 +92,16 @@ namespace Rodin::Variational
          }
 
       private:
-         const GridFunction<H1, Trait>& m_u;
+         const GridFunction<H1<Trait>>& m_u;
    };
    template <class Trait>
-   Grad(const GridFunction<H1, Trait>&) -> Grad<GridFunction<H1, Trait>>;
+   Grad(const GridFunction<H1<Trait>>&) -> Grad<GridFunction<H1<Trait>>>;
 
-   template <ShapeFunctionSpaceType Space>
-   class Grad<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
+   template <ShapeFunctionSpaceType Space, class Trait>
+   class Grad<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
    {
       public:
-         Grad(ShapeFunction<H1, Space>& u)
+         Grad(ShapeFunction<H1<Trait>, Space>& u)
             : m_u(u)
          {}
 
@@ -115,7 +115,7 @@ namespace Rodin::Variational
               m_u(other.m_u)
          {}
 
-         const ShapeFunction<H1, Space>& getLeaf() const override
+         const ShapeFunction<H1<Trait>, Space>& getLeaf() const override
          {
             return m_u.getLeaf();
          }
@@ -150,12 +150,12 @@ namespace Rodin::Variational
                   new Internal::JacobianShapeR3O(std::move(dshape), sdim, 1));
          }
 
-         FiniteElementSpace<H1>& getFiniteElementSpace() override
+         H1<Trait>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
+         const H1<Trait>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }
@@ -165,10 +165,10 @@ namespace Rodin::Variational
             return new Grad(*this);
          }
       private:
-         ShapeFunction<H1, Space>& m_u;
+         ShapeFunction<H1<Trait>, Space>& m_u;
    };
-   template <ShapeFunctionSpaceType Space>
-   Grad(ShapeFunction<H1, Space>&) -> Grad<ShapeFunction<H1, Space>>;
+   template <ShapeFunctionSpaceType Space, class Trait>
+   Grad(ShapeFunction<H1<Trait>, Space>&) -> Grad<ShapeFunction<H1<Trait>, Space>>;
 }
 
 #endif

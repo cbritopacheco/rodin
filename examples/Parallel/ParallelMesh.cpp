@@ -28,7 +28,7 @@ int main(int argc, char** argv)
   std::cout << "woof: " << world.rank() << ", " << world.size() << std::endl;
   std::cout << "meow: " << p.getMPIComm().rank() << ", " << p.getMPIComm().size() << std::endl;
 
-  FiniteElementSpace<H1, Traits::Parallel> fes(p);
+  H1 fes(p);
 
   MPI_Finalize();
 

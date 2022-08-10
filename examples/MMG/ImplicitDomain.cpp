@@ -18,7 +18,7 @@ int main(int, char**)
   Mesh mesh;
   mesh.load("ls.mesh");
 
-  FiniteElementSpace<H1> fes(mesh);
+  H1 fes(mesh);
   GridFunction ls(fes);
   ls.load("ls.gf");
 
