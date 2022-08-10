@@ -32,7 +32,7 @@ static constexpr double ell = 1.0;
 static constexpr double alpha = 4 * hmax * hmax;
 
 // Compliance
-double compliance(GridFunction<H1<Traits::Serial>>& w);
+double compliance(GridFunction<H1<Context::Serial>>& w);
 
 int main(int, char**)
 {
@@ -135,7 +135,7 @@ int main(int, char**)
   return 0;
 }
 
-double compliance(GridFunction<H1<Traits::Serial>>& w)
+double compliance(GridFunction<H1<Context::Serial>>& w)
 {
   auto& Vh = w.getFiniteElementSpace();
   TrialFunction u(Vh);

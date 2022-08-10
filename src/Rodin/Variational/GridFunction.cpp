@@ -215,14 +215,14 @@ namespace Rodin::Variational
             dst.getFiniteElementSpace().getVectorDimension());
       if (getFiniteElementSpace().getMesh().isSubMesh() && (
             &dst.getFiniteElementSpace().getMesh()) ==
-            &static_cast<const SubMesh<Traits::Serial>&>(
+            &static_cast<const SubMesh<Context::Serial>&>(
                getFiniteElementSpace().getMesh()).getParent())
       {
          // If we are here the this means that we are in a submesh of the
          // underlying target finite element space. Hence we should seek
          // out to copy the grid function at the corresponding nodes
          // given by the vertex map given in the Submesh object.
-         auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
+         auto& submesh = static_cast<const SubMesh<Context::Serial>&>(
                getFiniteElementSpace().getMesh());
          if (&submesh.getParent() == &dst.getFiniteElementSpace().getMesh())
          {
@@ -254,10 +254,10 @@ namespace Rodin::Variational
       }
       else if (dst.getFiniteElementSpace().getMesh().isSubMesh() && (
             &getFiniteElementSpace().getMesh() ==
-            &static_cast<const SubMesh<Traits::Serial>&>(
+            &static_cast<const SubMesh<Context::Serial>&>(
                dst.getFiniteElementSpace().getMesh()).getParent()))
       {
-         auto& submesh = static_cast<const SubMesh<Traits::Serial>&>(
+         auto& submesh = static_cast<const SubMesh<Context::Serial>&>(
                dst.getFiniteElementSpace().getMesh());
          int vdim = getFiniteElementSpace().getVectorDimension();
          const auto& s2pv = submesh.getVertexMap();
@@ -351,8 +351,8 @@ namespace Rodin::Variational
    }
 
    template <>
-   GridFunction<H1<Traits::Serial>>&
-   GridFunction<H1<Traits::Serial>>::load(
+   GridFunction<H1<Context::Serial>>&
+   GridFunction<H1<Context::Serial>>::load(
          const boost::filesystem::path& filename, IO::FileFormat fmt)
    {
       mfem::named_ifgzstream input(filename.c_str());
@@ -367,13 +367,13 @@ namespace Rodin::Variational
       {
          case IO::FileFormat::MFEM:
          {
-            IO::GridFunctionLoader<IO::FileFormat::MFEM, H1<Traits::Serial>> loader(*this);
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, H1<Context::Serial>> loader(*this);
             loader.load(input);
             break;
          }
          case IO::FileFormat::MEDIT:
          {
-            IO::GridFunctionLoader<IO::FileFormat::MEDIT, H1<Traits::Serial>> loader(*this);
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, H1<Context::Serial>> loader(*this);
             loader.load(input);
             break;
          }
@@ -388,7 +388,7 @@ namespace Rodin::Variational
    }
 
    template <>
-   void GridFunction<H1<Traits::Serial>>
+   void GridFunction<H1<Context::Serial>>
    ::save(const boost::filesystem::path& filename, IO::FileFormat fmt, int precision)
    const
    {
@@ -405,13 +405,13 @@ namespace Rodin::Variational
       {
          case IO::FileFormat::MFEM:
          {
-            IO::GridFunctionPrinter<IO::FileFormat::MFEM, H1<Traits::Serial>> printer(*this);
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, H1<Context::Serial>> printer(*this);
             printer.print(output);
             break;
          }
          case IO::FileFormat::MEDIT:
          {
-            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, H1<Traits::Serial>> printer(*this);
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, H1<Context::Serial>> printer(*this);
             printer.print(output);
             break;
          }

@@ -12,6 +12,12 @@
 
 namespace Rodin
 {
+   namespace Context
+   {
+      struct Serial;
+      struct Parallel;
+   }
+
    class MeshBase;
 
    /**
@@ -26,7 +32,7 @@ namespace Rodin
     * - Mesh<Traits::Serial>
     * - Mesh<Traits::Parallel>
     */
-   template <class Trait = Traits::Serial>
+   template <class Trait = Context::Serial>
    class Mesh;
 
    /**

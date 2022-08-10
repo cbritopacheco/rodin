@@ -40,7 +40,7 @@ namespace Rodin::Variational
    class H1 : public FiniteElementSpaceBase
    {
       public:
-         using Trait = TraitTag;
+         using Context = TraitTag;
 
          /**
           * @brief Possible types of bases for the H1 finite element space.
@@ -106,7 +106,7 @@ namespace Rodin::Variational
                Basis m_basis;
          };
 
-         H1(Mesh<Trait>& mesh,
+         H1(Mesh<Context>& mesh,
                int vdim = 1, int order = 1, Basis basis = DefaultBasis)
             :  m_fec(order, mesh.getDimension(), basis),
                m_mesh(mesh),
@@ -118,12 +118,12 @@ namespace Rodin::Variational
             return false;
          }
 
-         Mesh<Trait>& getMesh() override
+         Mesh<Context>& getMesh() override
          {
             return m_mesh;
          }
 
-         const Mesh<Trait>& getMesh() const override
+         const Mesh<Context>& getMesh() const override
          {
             return m_mesh;
          }
@@ -145,7 +145,7 @@ namespace Rodin::Variational
 
       private:
          FEC m_fec;
-         Mesh<Trait>& m_mesh;
+         Mesh<Context>& m_mesh;
          mfem::FiniteElementSpace m_fes;
    };
 

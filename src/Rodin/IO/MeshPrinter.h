@@ -22,26 +22,26 @@ namespace Rodin::IO
    class MeshPrinterBase : public IO::Printer<Rodin::Mesh<Trait>>
    {
       public:
-         MeshPrinterBase(const Rodin::Mesh<Traits::Serial>& mesh)
+         MeshPrinterBase(const Rodin::Mesh<Context::Serial>& mesh)
             : m_mesh(mesh)
          {}
 
       protected:
-         const Rodin::Mesh<Traits::Serial>& getObject() const override
+         const Rodin::Mesh<Context::Serial>& getObject() const override
          {
             return m_mesh;
          }
 
       private:
-         const Rodin::Mesh<Traits::Serial>& m_mesh;
+         const Rodin::Mesh<Context::Serial>& m_mesh;
    };
 
    template <>
-   class MeshPrinter<FileFormat::MFEM, Traits::Serial>
-      : public MeshPrinterBase<Traits::Serial>
+   class MeshPrinter<FileFormat::MFEM, Context::Serial>
+      : public MeshPrinterBase<Context::Serial>
    {
       public:
-         MeshPrinter(const Rodin::Mesh<Traits::Serial>& mesh)
+         MeshPrinter(const Rodin::Mesh<Context::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 
@@ -52,11 +52,11 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshPrinter<FileFormat::GMSH, Traits::Serial>
-      : public MeshPrinterBase<Traits::Serial>
+   class MeshPrinter<FileFormat::GMSH, Context::Serial>
+      : public MeshPrinterBase<Context::Serial>
    {
       public:
-         MeshPrinter(const Rodin::Mesh<Traits::Serial>& mesh)
+         MeshPrinter(const Rodin::Mesh<Context::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 
@@ -64,11 +64,11 @@ namespace Rodin::IO
    };
 
    template <>
-   class MeshPrinter<FileFormat::MEDIT, Traits::Serial>
-      : public MeshPrinterBase<Traits::Serial>
+   class MeshPrinter<FileFormat::MEDIT, Context::Serial>
+      : public MeshPrinterBase<Context::Serial>
    {
       public:
-         MeshPrinter(const Rodin::Mesh<Traits::Serial>& mesh)
+         MeshPrinter(const Rodin::Mesh<Context::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 

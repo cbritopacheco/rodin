@@ -38,7 +38,7 @@ int main(int, char**)
   const char* meshFile = "../resources/mfem/levelset-arch2d-example.mesh";
 
   // Compliance
-  auto compliance = [&](GridFunction<H1<Traits::Serial>>& w)
+  auto compliance = [&](GridFunction<H1<Context::Serial>>& w)
   {
     auto& Vh = w.getFiniteElementSpace();
     TrialFunction u(Vh);

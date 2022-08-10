@@ -99,7 +99,7 @@ namespace Rodin::External::MMG
        * The material reference of the level set (edge) boundary will be 10.
        */
       template <class FES>
-      Rodin::Mesh<Traits::Serial> discretize(Variational::GridFunction<FES>& ls)
+      Rodin::Mesh<Context::Serial> discretize(Variational::GridFunction<FES>& ls)
       {
         // if (ls.getFiniteElementSpace().getMesh().getBoundaryAttributes().count(*m_isoref))
         //   Alert::Exception("Boundary reference already contained in mesh.").raise();

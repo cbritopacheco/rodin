@@ -34,9 +34,9 @@ namespace Rodin::External::MMG
 
       static void destroyMesh(MMG5_pMesh);
 
-      static MMG5_pMesh rodinToMesh(const Rodin::Mesh<Traits::Serial>& src);
+      static MMG5_pMesh rodinToMesh(const Rodin::Mesh<Context::Serial>& src);
 
-      static Rodin::Mesh<Traits::Serial> meshToRodin(const MMG5_pMesh src);
+      static Rodin::Mesh<Context::Serial> meshToRodin(const MMG5_pMesh src);
 
       // ---- Solution methods -----------------------------------------------
       static MMG5_pSol createSolution(MMG5_pMesh mesh, int vdim);
