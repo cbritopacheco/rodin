@@ -34,7 +34,7 @@ namespace Rodin::Variational
           * @param[in] u GridFunction in H1 space
           */
          template <class Trait>
-         Derivative(int direction, int component, const GridFunction<H1, Trait>& u)
+         Derivative(int direction, int component, const GridFunction<H1<Trait>>& u)
             :  m_direction(direction),
                m_component(component),
                m_u(u)
@@ -88,7 +88,7 @@ namespace Rodin::Variational
     * @f$
     */
    template <class Trait>
-   Derivative Dx(GridFunction<H1, Trait>& u)
+   Derivative Dx(GridFunction<H1<Trait>>& u)
    {
       assert(u.getRangeType() == RangeType::Scalar);
       return Derivative(0, 0, u);
@@ -105,7 +105,7 @@ namespace Rodin::Variational
     * @f$
     */
    template <class Trait>
-   Derivative Dy(GridFunction<H1, Trait>& u)
+   Derivative Dy(GridFunction<H1<Trait>>& u)
    {
       assert(u.getRangeType() == RangeType::Scalar);
       return Derivative(1, 0, u);
@@ -122,7 +122,7 @@ namespace Rodin::Variational
     * @f$
     */
    template <class Trait>
-   Derivative Dz(GridFunction<H1, Trait>& u)
+   Derivative Dz(GridFunction<H1<Trait>>& u)
    {
       assert(u.getRangeType() == RangeType::Scalar);
       return Derivative(2, 0, u);

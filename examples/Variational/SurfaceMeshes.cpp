@@ -14,7 +14,7 @@ int main(int, char**)
   Omega.load(meshFile);
 
   // Functions
-  FiniteElementSpace<H1> Vh(Omega);
+  H1 Vh(Omega);
   TrialFunction u(Vh);
   TestFunction  v(Vh);
 

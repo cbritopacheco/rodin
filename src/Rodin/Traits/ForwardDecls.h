@@ -7,19 +7,5 @@
 #ifndef RODIN_TRAITS_FORWARDDECLS_H
 #define RODIN_TRAITS_FORWARDDECLS_H
 
-namespace Rodin::Traits
-{
-   /**
-    * @brief Empty tag type to indicate a parallel context.
-    * @see Serial
-    */
-   struct Parallel {};
-
-   /**
-    * @brief Empty tag type to indicate a serial context.
-    * @see Parallel
-    */
-   struct Serial {};
-}
 
 #endif

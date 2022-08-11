@@ -28,7 +28,7 @@ namespace Rodin::External::MMG
        * Hence, if the edges passing through a vertex have very different
        * sizes, the resulting mesh may be very different from the initial one.
        */
-      void optimize(Mesh<Traits::Serial>& mesh)
+      void optimize(Mesh<Context::Serial>& mesh)
       {
         MMG5_pMesh mmgMesh = rodinToMesh(mesh);
 
