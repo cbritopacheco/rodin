@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::LinearForm&lt;FEC, Traits::Serial&gt; class | Rodin</title>
+  <title>Rodin::Variational::LinearForm class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -51,8 +51,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FEC&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FEC, Traits::Serial&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class FES&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm <span class="m-thin">class</span>
         </h1>
         <p>Represents a linear form defined over some finite element space.</p>
         <nav class="m-block m-default">
@@ -61,7 +61,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -73,9 +72,9 @@
 \[ \begin{aligned} L : V &amp;\rightarrow \mathbb{R}\\ v &amp;\mapsto L(v) \end{aligned} \]
 </title>
 <defs>
+<path id='eq1-g0-82' d='M3.203985-3.753923H3.634371L5.427646-.980324C5.547198-.789041 5.834122-.32279 5.965629-.143462C6.049315 0 6.085181 0 6.360149 0H8.009963C8.225156 0 8.404483 0 8.404483-.215193C8.404483-.310834 8.332752-.394521 8.225156-.418431C7.782814-.514072 7.197011-1.303113 6.910087-1.685679C6.826401-1.80523 6.228643-2.594271 5.427646-3.88543C6.491656-4.076712 7.519801-4.531009 7.519801-5.953674C7.519801-7.615442 5.762391-8.18929 4.351681-8.18929H.597758C.382565-8.18929 .191283-8.18929 .191283-7.974097C.191283-7.770859 .418431-7.770859 .514072-7.770859C1.195517-7.770859 1.255293-7.687173 1.255293-7.089415V-1.099875C1.255293-.502117 1.195517-.418431 .514072-.418431C.418431-.418431 .191283-.418431 .191283-.215193C.191283 0 .382565 0 .597758 0H3.873474C4.088667 0 4.267995 0 4.267995-.215193C4.267995-.418431 4.064757-.418431 3.93325-.418431C3.251806-.418431 3.203985-.514072 3.203985-1.099875V-3.753923ZM5.511333-4.339726C5.846077-4.782067 5.881943-5.415691 5.881943-5.941719C5.881943-6.515567 5.810212-7.149191 5.427646-7.639352C5.917808-7.531756 7.10137-7.161146 7.10137-5.953674C7.10137-5.176588 6.742715-4.566874 5.511333-4.339726ZM3.203985-7.12528C3.203985-7.376339 3.203985-7.770859 3.945205-7.770859C4.961395-7.770859 5.463512-7.352428 5.463512-5.941719C5.463512-4.399502 5.092902-4.172354 3.203985-4.172354V-7.12528ZM1.578082-.418431C1.673724-.633624 1.673724-.968369 1.673724-1.075965V-7.113325C1.673724-7.232877 1.673724-7.555666 1.578082-7.770859H2.940971C2.785554-7.579577 2.785554-7.340473 2.785554-7.161146V-1.075965C2.785554-.956413 2.785554-.633624 2.881196-.418431H1.578082ZM4.124533-3.753923C4.208219-3.765878 4.25604-3.777833 4.351681-3.777833C4.531009-3.777833 4.794022-3.801743 4.97335-3.825654C5.152677-3.53873 6.443836-1.41071 7.436115-.418431H6.276463L4.124533-3.753923Z'/>
 <path id='eq1-g1-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
 <path id='eq1-g1-55' d='M1.135741-2.749689C1.207472-2.749689 1.470486-2.749689 1.470486-2.988792S1.207472-3.227895 1.135741-3.227895V-4.794022C1.135741-4.985305 1.135741-5.212453 .896638-5.212453S.657534-4.985305 .657534-4.794022V-1.183562C.657534-.992279 .657534-.765131 .896638-.765131S1.135741-.992279 1.135741-1.183562V-2.749689Z'/>
-<path id='eq1-g0-82' d='M3.203985-3.753923H3.634371L5.427646-.980324C5.547198-.789041 5.834122-.32279 5.965629-.143462C6.049315 0 6.085181 0 6.360149 0H8.009963C8.225156 0 8.404483 0 8.404483-.215193C8.404483-.310834 8.332752-.394521 8.225156-.418431C7.782814-.514072 7.197011-1.303113 6.910087-1.685679C6.826401-1.80523 6.228643-2.594271 5.427646-3.88543C6.491656-4.076712 7.519801-4.531009 7.519801-5.953674C7.519801-7.615442 5.762391-8.18929 4.351681-8.18929H.597758C.382565-8.18929 .191283-8.18929 .191283-7.974097C.191283-7.770859 .418431-7.770859 .514072-7.770859C1.195517-7.770859 1.255293-7.687173 1.255293-7.089415V-1.099875C1.255293-.502117 1.195517-.418431 .514072-.418431C.418431-.418431 .191283-.418431 .191283-.215193C.191283 0 .382565 0 .597758 0H3.873474C4.088667 0 4.267995 0 4.267995-.215193C4.267995-.418431 4.064757-.418431 3.93325-.418431C3.251806-.418431 3.203985-.514072 3.203985-1.099875V-3.753923ZM5.511333-4.339726C5.846077-4.782067 5.881943-5.415691 5.881943-5.941719C5.881943-6.515567 5.810212-7.149191 5.427646-7.639352C5.917808-7.531756 7.10137-7.161146 7.10137-5.953674C7.10137-5.176588 6.742715-4.566874 5.511333-4.339726ZM3.203985-7.12528C3.203985-7.376339 3.203985-7.770859 3.945205-7.770859C4.961395-7.770859 5.463512-7.352428 5.463512-5.941719C5.463512-4.399502 5.092902-4.172354 3.203985-4.172354V-7.12528ZM1.578082-.418431C1.673724-.633624 1.673724-.968369 1.673724-1.075965V-7.113325C1.673724-7.232877 1.673724-7.555666 1.578082-7.770859H2.940971C2.785554-7.579577 2.785554-7.340473 2.785554-7.161146V-1.075965C2.785554-.956413 2.785554-.633624 2.881196-.418431H1.578082ZM4.124533-3.753923C4.208219-3.765878 4.25604-3.777833 4.351681-3.777833C4.531009-3.777833 4.794022-3.801743 4.97335-3.825654C5.152677-3.53873 6.443836-1.41071 7.436115-.418431H6.276463L4.124533-3.753923Z'/>
 <path id='eq1-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq1-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
 <path id='eq1-g3-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
@@ -108,20 +107,11 @@ $ V $
 <use x='0' y='0' xlink:href='#eq2-g0-86'/>
 </g>
 </svg> is a finite element space.</p><p>A linear form can be specified by from one or more <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instances.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>
-            </dt>
-            <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a3b849341c64b8b2d7836b7314f1043b7">
-              <span class="m-doc-wrap-bumper"><a href="#a3b849341c64b8b2d7836b7314f1043b7" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; v)</span>
+            <dt id="abc9ce771dd35090ed27eb96ac10e9519">
+              <span class="m-doc-wrap-bumper"><a href="#abc9ce771dd35090ed27eb96ac10e9519" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v)</span>
             </dt>
             <dd>Constructs a linear form defined on some finite element space.</dd>
           </dl>
@@ -130,7 +120,7 @@ $ V $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af6e00ff4bd1dca24d3d48c62a47d0118" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a30ae22b146264ed14bfa2577e10fad8f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const -&gt; double</span>
             </dt>
             <dd>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -143,24 +133,16 @@ $ u $
 <use x='0' y='0' xlink:href='#eq3-g0-117'/>
 </g>
 </svg>.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aec0e44eccbed2f5cab316c07fff8879d" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aff292a956836baefda5c180d0860bafe" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af6e00ff4bd1dca24d3d48c62a47d0118"><div>
+          <section class="m-doc-details" id="a30ae22b146264ed14bfa2577e10fad8f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FEC&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FEC, Traits::<wbr />Serial&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6e00ff4bd1dca24d3d48c62a47d0118" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FEC, <a href="struct_rodin_1_1_traits_1_1_serial.html" class="m-doc">Traits::<wbr />Serial</a>&gt;&amp; u) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30ae22b146264ed14bfa2577e10fad8f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const</span></span>
             </h3>
             <p>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -218,58 +200,6 @@ $ L(u) $
 <use x='19.179272' y='0' xlink:href='#eq5-g1-41'/>
 </g>
 </svg>.</p>
-          </div></section>
-          <section class="m-doc-details" id="aec0e44eccbed2f5cab316c07fff8879d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FEC&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FEC, Traits::<wbr />Serial&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0e44eccbed2f5cab316c07fff8879d" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Integrator which will be used to build the linear form.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to this (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="aff292a956836baefda5c180d0860bafe"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FEC&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FEC, Traits::<wbr />Serial&gt;&lt;FEC&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff292a956836baefda5c180d0860bafe" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Integrator which will be used to build the linear form.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to this (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
           </div></section>
         </section>
       </div>
