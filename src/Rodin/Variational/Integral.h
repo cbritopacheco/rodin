@@ -246,14 +246,14 @@ namespace Rodin::Variational
    /**
     * @brief Integral of a GridFunction
     */
-   template <class FEC, class Trait>
-   class Integral<GridFunction<FEC, Trait>> : public FormLanguage::Base
+   template <class FES>
+   class Integral<GridFunction<FES>> : public FormLanguage::Base
    {
       public:
          /**
           * @brief Constructs the integral object
           */
-         Integral(GridFunction<FEC, Trait>& u)
+         Integral(GridFunction<FES>& u)
             : m_u(u),
               m_v(u.getFiniteElementSpace()),
               m_one(u.getFiniteElementSpace()),
@@ -292,14 +292,14 @@ namespace Rodin::Variational
             return new Integral(*this);
          }
       private:
-         TestFunction<FEC, Trait>    m_v;
-         GridFunction<FEC, Trait>&   m_u;
-         GridFunction<FEC, Trait>    m_one;
-         LinearForm<FEC, Trait>      m_lf;
+         TestFunction<FES>    m_v;
+         GridFunction<FES>&   m_u;
+         GridFunction<FES>    m_one;
+         LinearForm<FES>      m_lf;
          bool m_assembled;
    };
-   template <class FEC, class Trait>
-   Integral(GridFunction<FEC, Trait>&) -> Integral<GridFunction<FEC, Trait>>;
+   template <class FES>
+   Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
 
    template <>
    class BoundaryIntegral<ShapeFunctionBase<TestSpace>> : public LinearFormBoundaryIntegrator

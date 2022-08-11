@@ -50,7 +50,7 @@ namespace Rodin
             getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
    }
 
-   void Mesh<Traits::Serial>::save(
+   void Mesh<Context::Serial>::save(
          const boost::filesystem::path& filename, IO::FileFormat fmt, int precision) const
    {
       std::ofstream ofs(filename.c_str());
@@ -65,19 +65,19 @@ namespace Rodin
       {
          case IO::FileFormat::MFEM:
          {
-            IO::MeshPrinter<IO::FileFormat::MFEM, Traits::Serial> printer(*this);
+            IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
             printer.print(ofs);
             break;
          }
          case IO::FileFormat::GMSH:
          {
-            IO::MeshPrinter<IO::FileFormat::GMSH, Traits::Serial> printer(*this);
+            IO::MeshPrinter<IO::FileFormat::GMSH, Context::Serial> printer(*this);
             printer.print(ofs);
             break;
          }
          case IO::FileFormat::MEDIT:
          {
-            IO::MeshPrinter<IO::FileFormat::MEDIT, Traits::Serial> printer(*this);
+            IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(*this);
             printer.print(ofs);
             break;
          }
@@ -231,24 +231,24 @@ namespace Rodin
    }
 
 #ifdef RODIN_USE_MPI
-   Mesh<Traits::Parallel>
-   Mesh<Traits::Serial>::parallelize(boost::mpi::communicator comm)
+   Mesh<Context::Parallel>
+   Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
    {
-      return Mesh<Traits::Parallel>(comm, *this);
+      return Mesh<Context::Parallel>(comm, *this);
    }
 #endif
 
    // ---- Mesh<Serial> ------------------------------------------------------
-   Mesh<Traits::Serial>::Mesh(mfem::Mesh&& mesh)
+   Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
       : m_mesh(std::move(mesh))
    {}
 
-   Mesh<Traits::Serial>::Mesh(const Mesh& other)
+   Mesh<Context::Serial>::Mesh(const Mesh& other)
       : m_mesh(other.m_mesh)
    {}
 
-   Mesh<Traits::Serial>&
-   Mesh<Traits::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
+   Mesh<Context::Serial>&
+   Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
    {
       mfem::named_ifgzstream input(filename.c_str());
       if (!input)
@@ -261,19 +261,19 @@ namespace Rodin
       {
          case IO::FileFormat::MFEM:
          {
-            IO::MeshLoader<IO::FileFormat::MFEM, Traits::Serial> loader(*this);
+            IO::MeshLoader<IO::FileFormat::MFEM, Context::Serial> loader(*this);
             loader.load(input);
             break;
          }
          case IO::FileFormat::GMSH:
          {
-            IO::MeshLoader<IO::FileFormat::GMSH, Traits::Serial> loader(*this);
+            IO::MeshLoader<IO::FileFormat::GMSH, Context::Serial> loader(*this);
             loader.load(input);
             break;
          }
          case IO::FileFormat::MEDIT:
          {
-            IO::MeshLoader<IO::FileFormat::MEDIT, Traits::Serial> loader(*this);
+            IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
             loader.load(input);
             break;
          }
@@ -288,9 +288,9 @@ namespace Rodin
       return *this;
    }
 
-   SubMesh<Traits::Serial> Mesh<Traits::Serial>::extract(const std::set<int>& elements)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::extract(const std::set<int>& elements)
    {
-      SubMesh<Traits::Serial> res(*this);
+      SubMesh<Context::Serial> res(*this);
       res.initialize(getDimension(), getSpaceDimension(), elements.size());
       for (int el : elements)
          res.add(get<Element>(el));
@@ -298,16 +298,16 @@ namespace Rodin
       return res;
    }
 
-   SubMesh<Traits::Serial> Mesh<Traits::Serial>::keep(int attr)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(int attr)
    {
       return keep(std::set<int>{attr});
    }
 
-   SubMesh<Traits::Serial> Mesh<Traits::Serial>::keep(const std::set<int>& attrs)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<int>& attrs)
    {
       assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
 
-      SubMesh<Traits::Serial> res(*this);
+      SubMesh<Context::Serial> res(*this);
       res.initialize(getDimension(), getSpaceDimension());
 
       // Add elements with matching attribute
@@ -336,11 +336,11 @@ namespace Rodin
       return res;
    }
 
-   SubMesh<Traits::Serial> Mesh<Traits::Serial>::skin()
+   SubMesh<Context::Serial> Mesh<Context::Serial>::skin()
    {
       assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
 
-      SubMesh<Traits::Serial> res(*this);
+      SubMesh<Context::Serial> res(*this);
       res.initialize(getSpaceDimension() - 1, getSpaceDimension());
       for (int i = 0; i < count<BoundaryElement>(); i++)
          res.add(get<BoundaryElement>(i));
@@ -348,12 +348,12 @@ namespace Rodin
       return res;
    }
 
-   SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(int attr)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(int attr)
    {
       return trim(std::set<int>{attr});
    }
 
-   SubMesh<Traits::Serial> Mesh<Traits::Serial>::trim(const std::set<int>& attrs)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<int>& attrs)
    {
       std::set<int> complement = getAttributes();
       for (const auto& a : attrs)
@@ -361,7 +361,7 @@ namespace Rodin
       return keep(complement);
    }
 
-   Mesh<Traits::Serial>& Mesh<Traits::Serial>::trace(
+   Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
          const std::map<std::set<int>, int>& boundaries)
    {
       for (int i = 0; i < count<Face>(); i++)
@@ -389,12 +389,12 @@ namespace Rodin
       return *this;
    }
 
-   mfem::Mesh& Mesh<Traits::Serial>::getHandle()
+   mfem::Mesh& Mesh<Context::Serial>::getHandle()
    {
       return m_mesh;
    }
 
-   const mfem::Mesh& Mesh<Traits::Serial>::getHandle() const
+   const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
    {
       return m_mesh;
    }

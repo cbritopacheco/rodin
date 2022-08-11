@@ -30,7 +30,7 @@ namespace Rodin
     *
     */
    template <>
-   class SubMesh<Traits::Serial> : public Mesh<Traits::Serial>
+   class SubMesh<Context::Serial> : public Mesh<Context::Serial>
    {
       public:
          SubMesh(const MeshBase& parent);

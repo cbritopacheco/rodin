@@ -34,17 +34,17 @@ namespace Rodin::External::MMG
 
       static void destroyMesh(MMG5_pMesh);
 
-      static MMG5_pMesh rodinToMesh(const Rodin::Mesh<Traits::Serial>& src);
+      static MMG5_pMesh rodinToMesh(const Rodin::Mesh<Context::Serial>& src);
 
-      static Rodin::Mesh<Traits::Serial> meshToRodin(const MMG5_pMesh src);
+      static Rodin::Mesh<Context::Serial> meshToRodin(const MMG5_pMesh src);
 
       // ---- Solution methods -----------------------------------------------
       static MMG5_pSol createSolution(MMG5_pMesh mesh, int vdim);
 
       static void copySolution(const MMG5_pSol src, MMG5_pSol dst);
 
-      template <class FEC>
-      static void copySolution(const MMG5_pSol src, Variational::GridFunction<FEC, Traits::Serial>& dst)
+      template <class FES>
+      static void copySolution(const MMG5_pSol src, Variational::GridFunction<FES>& dst)
       {
         assert(src->type == MMG5_Scalar);
         double* data = new double[src->np];
@@ -55,9 +55,8 @@ namespace Rodin::External::MMG
         dst.getHandle().MakeDataOwner();
       }
 
-      template <class FEC>
-      static void copySolution(
-          Variational::GridFunction<FEC, Traits::Serial>& src, const MMG5_pSol dst)
+      template <class FES>
+      static void copySolution(Variational::GridFunction<FES>& src, const MMG5_pSol dst)
       {
         assert(dst);
         auto [data, size] = src.getData();

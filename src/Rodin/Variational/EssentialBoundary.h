@@ -60,7 +60,7 @@ namespace Rodin::Variational
          {}
 
          template <class Trait>
-         void add(const DirichletBC<TrialFunction<H1, Trait>>& dbc)
+         void add(const DirichletBC<TrialFunction<H1<Trait>>>& dbc)
          {
             assert(dbc.getTrialFunction().getRangeType() == dbc.getValue().getRangeType());
             m_tfVal[dbc.getTrialFunction().getUUID()] =
@@ -70,7 +70,7 @@ namespace Rodin::Variational
          }
 
          template <class Trait>
-         void add(const DirichletBC<Component<TrialFunction<H1, Trait>>>& dbc)
+         void add(const DirichletBC<Component<TrialFunction<H1<Trait>>>>& dbc)
          {
             assert(dbc.getValue().getRangeType() == RangeType::Scalar);
             auto uuid = dbc.getComponent().getTrialFunction().getUUID();
