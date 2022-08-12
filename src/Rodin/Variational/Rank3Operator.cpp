@@ -66,18 +66,6 @@ namespace Rodin::Variational::Internal
       return std::unique_ptr<Rank3Operator>(result);
    }
 
-   std::unique_ptr<Rank3Operator> Rank3Operator::ScalarVectorMult(
-         const mfem::Vector& lhs) const
-   {
-      assert(GetRows() == 1);
-      assert(GetColumns() == 1);
-      auto result = new DenseRank3Operator(lhs.Size(), 1, GetDOFs());
-      for (int l = 0; l < GetDOFs(); l++)
-         for (int i = 0; i < lhs.Size(); i++)
-            (*result)(i, 0, l) = lhs(i) * (*this)(0, 0, l);
-      return std::unique_ptr<Rank3Operator>(result);
-   }
-
    std::unique_ptr<Rank3Operator> Rank3Operator::LeftMatrixMult(
          const mfem::DenseMatrix& lhs) const
    {
@@ -118,28 +106,6 @@ namespace Rodin::Variational::Internal
                }
             }
          }
-      }
-      return std::unique_ptr<Rank3Operator>(result);
-   }
-
-   std::unique_ptr<Rank3Operator> Rank3Operator::VectorDot(
-         const mfem::Vector& rhs) const
-   {
-      assert(GetRows() == 1 || GetColumns() == 1);
-      auto result = new DenseRank3Operator(1, 1, GetDOFs());
-      (*result) = 0.0;
-      if (GetRows() == 1)
-      {
-         for (int i = 0; i < GetDOFs(); i++)
-            for (int j = 0; j < GetColumns(); j++)
-               (*result)(0, 0, i) += (*this)(0, j, i) * rhs(j);
-      }
-      else
-      {
-         assert(GetColumns() == 1);
-         for (int i = 0; i < GetDOFs(); i++)
-            for (int j = 0; j < GetRows(); j++)
-               (*result)(0, 0, i) += (*this)(j, 0, i) * rhs(j);
       }
       return std::unique_ptr<Rank3Operator>(result);
    }
@@ -275,20 +241,5 @@ namespace Rodin::Variational::Internal
    {
       m_shape = s;
       return *this;
-   }
-
-   std::unique_ptr<Rank3Operator>
-   ScalarShapeR3O::VectorDot(const mfem::Vector& rhs) const
-   {
-      assert(GetRows() == rhs.Size());
-      auto result = new DenseRank3Operator(1, 1, GetDOFs());
-      for (int i = 0; i < m_vdim; i++)
-      {
-         for (int k = 0; k < m_shape.Size(); k++)
-         {
-            (*result)(0, 0, k + i * m_shape.Size()) = m_shape(k) * rhs(i);
-         }
-      }
-      return std::unique_ptr<Rank3Operator>(result);
    }
 }

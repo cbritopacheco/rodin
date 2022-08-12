@@ -48,15 +48,6 @@ namespace Rodin::Variational::Internal
          std::unique_ptr<Rank3Operator> Transpose() const;
 
          /**
-          * @f$ u @f$ with @f$ n @f$ degrees of freedom
-          * @f$ v @f$ with @f$ m @f$ degrees of freedom
-          *
-          * Stiffness matrix of @f$ m \times n @f$.
-          */
-         virtual
-         std::unique_ptr<Rank3Operator> OperatorSum(const Rank3Operator& rhs) const;
-
-         /**
           * @f[
           *    \Lambda A(u)
           * @f]
@@ -65,16 +56,6 @@ namespace Rodin::Variational::Internal
           */
          virtual
          std::unique_ptr<Rank3Operator> ScalarMatrixMult(const mfem::DenseMatrix& lhs) const;
-
-         /**
-          * @f[
-          *    \Lambda A(u)
-          * @f]
-          * with @f$ A(u) \in \mathbb{R} @f$,
-          * @f$ \Lambda \in \mathbb{R}^p @f$.
-          */
-         virtual
-         std::unique_ptr<Rank3Operator> ScalarVectorMult(const mfem::Vector& lhs) const;
 
          /**
           * @f[
@@ -98,16 +79,6 @@ namespace Rodin::Variational::Internal
 
          /**
           * @f[
-          *    \vec{\lambda} \cdot A(u)
-          * @f]
-          * with @f$ A(u) \in \mathbb{R^d} @f$,
-          * @f$ \vec{\lambda} \in \mathbb{R}^{d} @f$.
-          */
-         virtual
-         std::unique_ptr<Rank3Operator> VectorDot(const mfem::Vector& rhs) const;
-
-         /**
-          * @f[
           *    \Lambda : A(u)
           * @f]
           * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$,
@@ -115,6 +86,9 @@ namespace Rodin::Variational::Internal
           */
          virtual
          std::unique_ptr<Rank3Operator> MatrixDot(const mfem::DenseMatrix& rhs) const;
+
+         virtual
+         std::unique_ptr<Rank3Operator> OperatorSum(const Rank3Operator& rhs) const;
 
          /**
           * @f$ u @f$ with @f$ n @f$ degrees of freedom
@@ -294,8 +268,6 @@ namespace Rodin::Variational::Internal
 
          double operator()(int row, int col, int dof) const override;
 
-         std::unique_ptr<Rank3Operator>
-         VectorDot(const mfem::Vector& rhs) const override;
       private:
          mfem::Vector m_shape;
          int m_vdim;
