@@ -130,7 +130,7 @@ namespace Rodin::Variational
             return getLHS().getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         std::unique_ptr<BasisOperator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {

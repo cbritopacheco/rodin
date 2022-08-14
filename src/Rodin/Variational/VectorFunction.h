@@ -69,8 +69,8 @@ namespace Rodin::Variational
          {
             mfem::Vector v;
             getValue(v, trans, ip);
-            value.UseExternalData(v.StealData(), getDimension(), 1);
-            value.GetMemory().SetHostPtrOwner(true);
+            value.GetMemory() = std::move(v.GetMemory());
+            value.SetSize(v.Size(), 1);
          }
 
          RangeShape getRangeShape() const override

@@ -51,7 +51,7 @@ namespace Rodin::Variational
          trans.SetIntPoint(&ip);
          auto testOp = test.getOperator(fe, trans);
          (*testOp) *= trans.Weight() * ip.weight;
-         testOp->AddToVector(vec);
+         testOp->addToVector(vec);
       }
    }
 }

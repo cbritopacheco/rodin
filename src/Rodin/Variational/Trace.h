@@ -22,7 +22,8 @@ namespace Rodin::Variational
     *    \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii}
     * @f]
     */
-   class Trace : public ScalarFunctionBase
+   template <>
+   class Trace<FunctionBase> : public ScalarFunctionBase
    {
       public:
          /**
@@ -53,6 +54,7 @@ namespace Rodin::Variational
       private:
          std::unique_ptr<FunctionBase> m_matrix;
    };
+   Trace(const FunctionBase&) -> Trace<FunctionBase>;
 }
 
 #endif

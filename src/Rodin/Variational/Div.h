@@ -72,7 +72,7 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         std::unique_ptr<BasisOperator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -82,7 +82,7 @@ namespace Rodin::Variational
             mfem::DenseMatrix dshape;
             dshape.SetSize(dofs, sdim);
             fe.CalcPhysDShape(trans, dshape);
-            return Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim).Trace();
+            return JSSFBO(std::move(dshape), sdim, vdim).Trace();
          }
 
          FiniteElementSpace<H1>& getFiniteElementSpace() override
