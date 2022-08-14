@@ -7,7 +7,7 @@
 
 #include "H1.h"
 #include "ForwardDecls.h"
-#include "Rank3Operator.h"
+#include "BasisOperator.h"
 #include "FiniteElementSpace.h"
 
 #include "RangeShape.h"
@@ -78,7 +78,7 @@ namespace Rodin::Variational
 
          virtual int getColumns() const = 0;
 
-         virtual std::unique_ptr<Internal::Rank3Operator> getOperator(
+         virtual std::unique_ptr<BasisOperator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const = 0;
 
@@ -139,7 +139,7 @@ namespace Rodin::Variational
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         std::unique_ptr<BasisOperator> getOperator(
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -148,8 +148,7 @@ namespace Rodin::Variational
             mfem::Vector shape;
             shape.SetSize(dofs);
             fe.CalcPhysShape(trans, shape);
-            return std::unique_ptr<Internal::Rank3Operator>(
-                  new Internal::ScalarShapeR3O(std::move(shape), vdim));
+            return std::unique_ptr<BasisOperator>(new SSFBO(std::move(shape), vdim));
          }
 
          virtual const ShapeFunction<H1, Space>& getLeaf() const override = 0;
