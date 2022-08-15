@@ -78,7 +78,8 @@ namespace Rodin::Variational
 
          virtual int getColumns() const = 0;
 
-         virtual std::unique_ptr<BasisOperator> getOperator(
+         virtual void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const = 0;
 
@@ -139,7 +140,8 @@ namespace Rodin::Variational
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }
 
-         std::unique_ptr<BasisOperator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -148,7 +150,11 @@ namespace Rodin::Variational
             mfem::Vector shape;
             shape.SetSize(dofs);
             fe.CalcPhysShape(trans, shape);
-            return std::unique_ptr<BasisOperator>(new FunctionSBO(std::move(shape), vdim));
+            op = DenseBasisOperator(vdim, 1, vdim * shape.Size());
+            const int n = shape.Size();
+            for (int i = 0; i < vdim; i++)
+               for (int j = 0; j < n; j++)
+                  op(i, 0, j + i * n) = shape(j);
          }
 
          virtual const ShapeFunction<H1, Space>& getLeaf() const override = 0;

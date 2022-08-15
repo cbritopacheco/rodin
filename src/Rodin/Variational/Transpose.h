@@ -71,54 +71,56 @@ namespace Rodin::Variational
    {
       public:
          Transpose(const ShapeFunctionBase<Space>& op)
-            : m_op(op.copy())
+            : m_shape(op.copy())
          {}
 
          Transpose(const Transpose& other)
-            : m_op(other.m_op->copy())
+            : m_shape(other.m_shape->copy())
          {}
 
          Transpose(Transpose&& other)
-            : m_op(std::move(other))
+            : m_shape(std::move(other.m_shape))
          {}
 
          const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return m_op->getLeaf();
+            return m_shape->getLeaf();
          }
 
          int getRows() const override
          {
-            return m_op->getColumns();
+            return m_shape->getColumns();
          }
 
          int getColumns() const override
          {
-            return m_op->getRows();
+            return m_shape->getRows();
          }
 
          int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
          {
-            return m_op->getDOFs(fe, trans);
+            return m_shape->getDOFs(fe, trans);
          }
 
-         std::unique_ptr<BasisOperator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            return m_op->getOperator(fe, trans)->Transpose();
+            m_shape->getOperator(op, fe, trans);
+            op.transpose();
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
          {
-            return m_op->getFiniteElementSpace();
+            return m_shape->getFiniteElementSpace();
          }
 
          const FiniteElementSpaceBase& getFiniteElementSpace() const override
          {
-            return m_op->getFiniteElementSpace();
+            return m_shape->getFiniteElementSpace();
          }
 
          Transpose* copy() const noexcept override
@@ -127,7 +129,7 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<ShapeFunctionBase<Space>> m_op;
+         std::unique_ptr<ShapeFunctionBase<Space>> m_shape;
    };
 }
 

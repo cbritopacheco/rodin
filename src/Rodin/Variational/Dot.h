@@ -45,6 +45,12 @@ namespace Rodin::Variational
 
    /**
     * @brief Dot product between FunctionBase and ShapeFunctionBase.
+    *
+    * @f[
+    *    \Lambda : A(u)
+    * @f]
+    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$,
+    * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
     */
    template <ShapeFunctionSpaceType Space>
    class Dot<FunctionBase, ShapeFunctionBase<Space>>
@@ -104,13 +110,19 @@ namespace Rodin::Variational
             return 1;
          }
 
-         std::unique_ptr<BasisOperator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
             mfem::DenseMatrix v;
             getLHS().getValue(v, trans, trans.GetIntPoint());
-            return getRHS().getOperator(fe, trans)->MatrixDot(v);
+            DenseBasisOperator tmp;
+            getRHS().getOperator(tmp, fe, trans);
+            int opDofs = getDOFs(fe, trans);
+            op = DenseBasisOperator(1, 1, opDofs);
+            for (int i = 0; i < opDofs; i++)
+               op(i) = v * tmp(i);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -138,37 +150,6 @@ namespace Rodin::Variational
    Dot(const ShapeFunctionBase<Space>&, const FunctionBase&)
       -> Dot<FunctionBase, ShapeFunctionBase<Space>>;
 
-   /**
-    * @f$ u @f$ with @f$ n @f$ degrees of freedom
-    * @f$ v @f$ with @f$ m @f$ degrees of freedom
-    *
-    * Stiffness matrix of @f$ m \times n @f$.
-    */
-   template <>
-   class Dot<BasisOperator, BasisOperator>
-   {
-      public:
-         Dot(std::unique_ptr<BasisOperator> lhs, std::unique_ptr<BasisOperator> rhs);
-
-         Dot(const Dot& other);
-
-         Dot(Dot&& other);
-
-         operator mfem::DenseMatrix&()
-         {
-            return m_result;
-         }
-
-         operator const mfem::DenseMatrix&() const
-         {
-            return m_result;
-         }
-
-      private:
-         mfem::DenseMatrix m_result;
-   };
-   Dot(std::unique_ptr<BasisOperator>, std::unique_ptr<BasisOperator>)
-      -> Dot<BasisOperator, BasisOperator>;
 
    template <>
    class Dot<
@@ -222,9 +203,14 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans) const
          {
             assert(m_trial->getRangeShape() == m_test->getRangeShape());
-            return Dot<BasisOperator, BasisOperator>(
-                  m_trial->getOperator(trialElement, trans),
-                  m_test->getOperator(testElement, trans));
+            DenseBasisOperator trialOp, testOp;
+            m_trial->getOperator(trialOp, trialElement, trans);
+            m_test->getOperator(testOp, testElement, trans);
+            mfem::DenseMatrix result(testOp.getDOFs(), trialOp.getDOFs());
+            for (int i = 0; i < testOp.getDOFs(); i++)
+               for (int j = 0; j < trialOp.getDOFs(); j++)
+                  result(i, j) = testOp(i) * trialOp(j);
+            return result;
          }
 
          Dot* copy() const noexcept override

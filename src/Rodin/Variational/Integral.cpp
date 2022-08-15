@@ -49,9 +49,10 @@ namespace Rodin::Variational
       {
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
-         auto testOp = test.getOperator(fe, trans);
-         (*testOp) *= trans.Weight() * ip.weight;
-         testOp->addToVector(vec);
+         DenseBasisOperator testOp;
+         test.getOperator(testOp, fe, trans);
+         testOp *= trans.Weight() * ip.weight;
+         testOp.addToVector(vec);
       }
    }
 }

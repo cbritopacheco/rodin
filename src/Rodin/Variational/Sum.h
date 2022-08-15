@@ -130,12 +130,15 @@ namespace Rodin::Variational
             return getLHS().getDOFs(fe, trans);
          }
 
-         std::unique_ptr<BasisOperator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            return getLHS().getOperator(fe, trans)->OperatorSum(
-                  *getRHS().getOperator(fe, trans));
+            getLHS().getOperator(op, fe, trans);
+            DenseBasisOperator tmp;
+            getRHS().getOperator(tmp, fe, trans);
+            op += tmp;
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
