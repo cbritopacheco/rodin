@@ -145,7 +145,7 @@ namespace Rodin::Variational
             mfem::DenseMatrix dshape;
             dshape.SetSize(dofs, sdim);
             fe.CalcPhysDShape(trans, dshape);
-            return std::unique_ptr<BasisOperator>(new JSSFBO(std::move(dshape), sdim, vdim));
+            return std::unique_ptr<BasisOperator>(new JacobianSBO(std::move(dshape), sdim, vdim));
          }
 
          Jacobian* copy() const noexcept override

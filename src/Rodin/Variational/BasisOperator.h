@@ -26,14 +26,15 @@ namespace Rodin::Variational
    class BasisOperator
    {
       public:
-         /**
-          * @f[
-          *    \text{tr} \ A(u)
-          * @f]
-          * with @f$ A(u) \in \mathbb{R}^{p \times p} @f$.
-          */
-         virtual
-         std::unique_ptr<BasisOperator> Trace() const;
+         BasisOperator() = default;
+
+         BasisOperator(BasisOperator&&) = default;
+
+         BasisOperator(const BasisOperator&) = default;
+
+         BasisOperator& operator=(BasisOperator&&) = default;
+
+         BasisOperator& operator=(const BasisOperator&) = delete;
 
          /**
           * @f[
@@ -87,19 +88,8 @@ namespace Rodin::Variational
          virtual
          std::unique_ptr<BasisOperator> OperatorSum(const BasisOperator& rhs) const;
 
-         /**
-          * @f$ u @f$ with @f$ n @f$ degrees of freedom
-          * @f$ v @f$ with @f$ m @f$ degrees of freedom
-          *
-          * Stiffness matrix of @f$ m \times n @f$.
-          */
-         virtual
-         mfem::DenseMatrix OperatorDot(const BasisOperator& rhs) const;
-
-         constexpr bool isDense() const
-         {
-            return !isSparse();
-         }
+         // virtual
+         // mfem::DenseMatrix OperatorDot(const BasisOperator& rhs) const;
 
          virtual ~BasisOperator() = default;
 
@@ -108,6 +98,8 @@ namespace Rodin::Variational
           */
          virtual void addToVector(mfem::Vector& vec) const;
 
+         virtual bool isDense() const = 0;
+
          virtual bool isSparse() const = 0;
 
          virtual int getRows() const = 0;
@@ -115,8 +107,6 @@ namespace Rodin::Variational
          virtual int getColumns() const = 0;
 
          virtual int getDOFs() const = 0;
-
-         virtual BasisOperator& operator=(double s) = 0;
 
          virtual BasisOperator& operator*=(double s) = 0;
 
@@ -130,7 +120,10 @@ namespace Rodin::Variational
          {}
 
          DenseBasisOperator(int rows, int cols, int dofs)
-            : m_tensor(rows, cols, dofs)
+            :  m_rows(rows),
+               m_cols(cols),
+               m_dofs(dofs),
+               m_data(dofs, mfem::DenseMatrix(rows, cols))
          {
             assert(rows > 0);
             assert(dofs > 0);
@@ -139,44 +132,48 @@ namespace Rodin::Variational
 
          DenseBasisOperator(const DenseBasisOperator& other)
             :  BasisOperator(other),
-               m_tensor(other.m_tensor)
+               m_data(other.m_data)
          {}
 
          DenseBasisOperator(DenseBasisOperator&& other)
             :  BasisOperator(std::move(other)),
-               m_tensor(std::move(other.m_tensor))
+               m_data(std::move(other.m_data))
          {}
+
+         DenseBasisOperator& operator=(DenseBasisOperator&& other)
+         {
+            m_data = std::move(other.m_data);
+            return *this;
+         }
+
+         void setData(std::vector<mfem::DenseMatrix>&& data)
+         {
+            m_data = std::move(data);
+         }
 
          mfem::DenseMatrix& operator()(int dof)
          {
-            return m_tensor(dof);
+            return m_data[dof];
          }
 
          const mfem::DenseMatrix& operator()(int dof) const
          {
-            return m_tensor(dof);
+            return m_data[dof];
          }
 
          int getRows() const override
          {
-            return m_tensor.SizeI();
+            return m_rows;
          }
 
          int getColumns() const override
          {
-            return m_tensor.SizeJ();
+            return m_cols;
          }
 
          int getDOFs() const override
          {
-            return m_tensor.SizeK();
-         }
-
-         DenseBasisOperator& operator=(double s) override
-         {
-            for (int i = 0; i < getDOFs(); i++)
-               (*this)(i) = s;
-            return *this;
+            return m_dofs;
          }
 
          DenseBasisOperator& operator*=(double s) override
@@ -188,26 +185,22 @@ namespace Rodin::Variational
 
          double& operator()(int row, int col, int dof)
          {
-            return m_tensor(row, col, dof);
+            return m_data[dof](row, col);
          }
 
          double operator()(int row, int col, int dof) const override
          {
-            return m_tensor(row, col, dof);
+            return m_data[dof](row, col);
+         }
+
+         bool isDense() const override
+         {
+            return true;
          }
 
          bool isSparse() const override
          {
             return false;
-         }
-
-         std::unique_ptr<BasisOperator> Trace() const override
-         {
-            assert(getRows() == getColumns());
-            auto result = new DenseBasisOperator(1, 1, getDOFs());
-            for (int k = 0; k < getDOFs(); k++)
-               (*result)(0, 0, k) = (*this)(k).Trace();
-            return std::unique_ptr<BasisOperator>(result);
          }
 
          std::unique_ptr<BasisOperator>
@@ -241,49 +234,100 @@ namespace Rodin::Variational
             return std::unique_ptr<BasisOperator>(result);
          }
       private:
-         mfem::DenseTensor m_tensor;
+         int m_rows;
+         int m_cols;
+         int m_dofs;
+         std::vector<mfem::DenseMatrix> m_data;
    };
 
-   // class SparseBasisOperator : public BasisOperator
-   // {
-   //    public:
-   //       class SparsityPattern
-   //       {
-   //          public:
-   //             SparsityPattern(
-   //                   std::set<std::tuple<int>> 
-   //                   int rows, int cols, int dofs);
+   class SparseBasisOperator : public BasisOperator
+   {
+      public:
+         SparseBasisOperator(int rows, int cols, int dofs)
+            :  m_rows(rows),
+               m_columns(cols),
+               m_dofs(dofs)
+         {}
 
-   //          private:
-   //             mfem::Memory<int> m_i;
-   //             mfem::Memory<int> m_j;
-   //             mfem::Memory<int> m_k;
-   //       };
+         SparseBasisOperator(const SparseBasisOperator& other)
+            : BasisOperator(other),
+              m_data(other.m_data)
+         {}
 
-   //       SparseBasisOperator(std::unique_ptr<double[]> data, const SparsityPattern& pattern);
+         SparseBasisOperator(SparseBasisOperator&& other)
+            : BasisOperator(std::move(other)),
+              m_data(std::move(other.m_data))
+         {}
 
-   //       SparsityPattern& getSparsityPattern()
-   //       {
-   //          return m_sparsityPattern;
-   //       }
+         void setData(std::vector<mfem::SparseMatrix>&& data)
+         {
+            m_data = std::move(data);
+         }
 
-   //       const SparsityPattern& getSparsityPattern() const
-   //       {
-   //          return m_sparsityPattern;
-   //       }
+         mfem::SparseMatrix& operator()(int k)
+         {
+            return m_data[k];
+         }
 
-   //       bool isSparse() const override
-   //       {
-   //          return true;
-   //       }
+         const mfem::SparseMatrix& operator()(int k) const
+         {
+            assert(k >= 0);
+            assert(k < getDOFs());
+            return m_data[k];
+         }
 
-   //    private:
-   //       SparsityPattern m_sparsityPattern;
-   //       mfem::Memory<double> m_data;
-   // };
+         double operator()(int row, int col, int dof) const override
+         {
+            assert(row >= 0);
+            assert(col >= 0);
+            assert(dof >= 0);
+            assert(row < getRows());
+            assert(col < getColumns());
+            assert(dof < getDOFs());
+            return m_data[dof](row, col);
+         }
+
+         SparseBasisOperator& operator*=(double s) override
+         {
+            for (auto& sm : m_data)
+               sm *= s;
+            return *this;
+         }
+
+         int getRows() const override
+         {
+            return m_rows;
+         }
+
+         int getColumns() const override
+         {
+            return m_columns;
+         }
+
+         int getDOFs() const override
+         {
+            return m_dofs;
+         }
+
+         bool isDense() const override
+         {
+            return false;
+         }
+
+         bool isSparse() const override
+         {
+            return true;
+         }
+
+      private:
+         int m_rows;
+         int m_columns;
+         int m_dofs;
+         std::vector<mfem::SparseMatrix> m_data;
+   };
 
    /**
-    * @brief Scalar Shape Function Basis Operator (SSFBO)
+    * @brief Function Scalar Basis Operator (FunctionSBO)
     *
     * Optimized version for functions whose original representation
     * is of the form:
@@ -292,115 +336,46 @@ namespace Rodin::Variational
     *       \sum^n_{i=1} w_{1, i} \phi_i(x), \ldots, \sum^n_{i=1} w_{d, i} \phi_i(x) \right)
     * @f]
     */
-   class SSFBO : public BasisOperator
+   class FunctionSBO : public SparseBasisOperator
    {
       public:
-         SSFBO(const mfem::Vector& shape, int vdim)
-            : m_shape(shape),
-              m_vdim(vdim)
-         {}
+         FunctionSBO(mfem::Vector&& shape, int vdim);
 
-         SSFBO(mfem::Vector&& shape, int vdim)
-            : m_shape(std::move(shape)),
-              m_vdim(vdim)
-         {}
+         FunctionSBO(const FunctionSBO& other);
 
-         SSFBO(const SSFBO& other)
-            :  BasisOperator(other),
-               m_shape(other.m_shape),
-               m_vdim(other.m_vdim)
-         {}
+         FunctionSBO(FunctionSBO&& other);
 
-         SSFBO(SSFBO&& other)
-            :  BasisOperator(std::move(other)),
-               m_shape(std::move(other.m_shape)),
-               m_vdim(other.m_vdim)
-         {
-            other.m_vdim = 0;
-         }
-
-         int getRows() const override;
-
-         int getColumns() const override;
-
-         int getDOFs() const override;
-
-         SSFBO& operator*=(double s) override;
-
-         SSFBO& operator=(double s) override;
-
-         double operator()(int row, int col, int dof) const override;
-
-         bool isSparse() const override
-         {
-            return true;
-         }
+         ~FunctionSBO();
 
       private:
          mfem::Vector m_shape;
-         int m_vdim;
+         int* m_colIndex;
+         std::vector<int*> m_rowIndex;
    };
 
    /**
-    * @brief Jacobian of Scalar Shape Function Basis Operator (JSSFBO)
+    * @brief Jacobian of Scalar Basis Operator (JacobianSBO)
     */
-   class JSSFBO : public BasisOperator
+   class JacobianSBO : public SparseBasisOperator
    {
       public:
-         JSSFBO(const mfem::DenseMatrix& dshape, int sdim, int vdim)
-            : m_dshape(dshape),
-              m_sdim(sdim),
-              m_vdim(vdim)
-         {}
+         /**
+          * @brief Constructs the JacobianSBO object.
+          * @param[in] dshape Shape gradients in row-major storage order.
+          */
+         JacobianSBO(mfem::DenseMatrix&& dshape, int sdim, int vdim);
 
-         JSSFBO(mfem::DenseMatrix&& dshape, int sdim, int vdim)
-            : m_sdim(sdim),
-              m_vdim(vdim)
-         {
-            m_dshape.SetSize(dshape.Height(), dshape.Width());
-            m_dshape.GetMemory() = std::move(dshape.GetMemory());
-         }
+         JacobianSBO(const JacobianSBO& other);
 
-         JSSFBO(const JSSFBO& other)
-            :  BasisOperator(other),
-               m_dshape(other.m_dshape),
-               m_sdim(other.m_sdim),
-               m_vdim(other.m_vdim)
-         {}
+         JacobianSBO(JacobianSBO&& other);
 
-         JSSFBO(JSSFBO&& other)
-            :  BasisOperator(std::move(other)),
-               m_sdim(other.m_sdim),
-               m_vdim(other.m_vdim)
-         {
-            m_dshape.SetSize(other.m_dshape.Height(), other.m_dshape.Width());
-            m_dshape.GetMemory() = std::move(other.m_dshape.GetMemory());
-            other.m_sdim = 0;
-            other.m_vdim = 0;
-         }
-
-         int getRows() const override;
-
-         int getColumns() const override;
-
-         int getDOFs() const override;
-
-         JSSFBO& operator=(double s) override;
-
-         JSSFBO& operator*=(double s) override;
-
-         double operator()(int row, int col, int dof) const override;
-
-         bool isSparse() const override
-         {
-            return true;
-         }
-
-         std::unique_ptr<BasisOperator> Trace() const override;
+         ~JacobianSBO();
 
       private:
          mfem::DenseMatrix m_dshape;
          int m_sdim, m_vdim;
+         std::vector<int*> m_colIndex;
+         int* m_rowIndex;
    };
 
 

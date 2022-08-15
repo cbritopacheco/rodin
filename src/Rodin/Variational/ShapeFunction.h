@@ -148,7 +148,7 @@ namespace Rodin::Variational
             mfem::Vector shape;
             shape.SetSize(dofs);
             fe.CalcPhysShape(trans, shape);
-            return std::unique_ptr<BasisOperator>(new SSFBO(std::move(shape), vdim));
+            return std::unique_ptr<BasisOperator>(new FunctionSBO(std::move(shape), vdim));
          }
 
          virtual const ShapeFunction<H1, Space>& getLeaf() const override = 0;

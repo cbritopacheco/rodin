@@ -10,21 +10,6 @@ namespace Rodin::Variational
 
 
    // ---- BasisOperator -----------------------------------------------------
-   std::unique_ptr<BasisOperator> BasisOperator::Trace() const
-   {
-      assert(getRows() == getColumns());
-      auto result = new DenseBasisOperator(1, 1, getDOFs());
-      (*result) = 0;
-      for (int k = 0; k < getDOFs(); k++)
-      {
-         for (int i = 0; i < getRows(); i++)
-         {
-            (*result)(0, 0, k) += (*this)(i, i, k);
-         }
-      }
-      return std::unique_ptr<BasisOperator>(result);
-   }
-
    std::unique_ptr<BasisOperator> BasisOperator::Transpose() const
    {
       auto result = new DenseBasisOperator(getColumns(), getRows(), getDOFs());
@@ -124,9 +109,9 @@ namespace Rodin::Variational
       assert(getRows() == rhs.NumRows());
       assert(getColumns() == rhs.NumCols());
       auto result = new DenseBasisOperator(1, 1, getDOFs());
-      (*result) = 0.0;
       for (int k = 0; k < getDOFs(); k++)
       {
+         (*result)(0, 0, k) = 0.0;
          for (int i = 0; i < getRows(); i++)
          {
             for (int j = 0; j < getColumns(); j++)
@@ -138,27 +123,27 @@ namespace Rodin::Variational
       return std::unique_ptr<BasisOperator>(result);
    }
 
-   mfem::DenseMatrix BasisOperator::OperatorDot(const BasisOperator& rhs) const
-   {
-      assert(getRows() == rhs.getRows());
-      assert(getColumns() == rhs.getColumns());
-      mfem::DenseMatrix result(getDOFs(), rhs.getDOFs());
-      result = 0.0;
-      for (int i = 0; i < getDOFs(); i++)
-      {
-         for (int j = 0; j < rhs.getDOFs(); j++)
-         {
-            for (int l = 0; l < getRows(); l++)
-            {
-               for (int m = 0; m < getColumns(); m++)
-               {
-                  result(i, j) += (*this)(l, m, i) * rhs(l, m, j);
-               }
-            }
-         }
-      }
-      return result;
-   }
+   // mfem::DenseMatrix BasisOperator::OperatorDot(const BasisOperator& rhs) const
+   // {
+   //    assert(getRows() == rhs.getRows());
+   //    assert(getColumns() == rhs.getColumns());
+   //    mfem::DenseMatrix result(getDOFs(), rhs.getDOFs());
+   //    result = 0.0;
+   //    for (int i = 0; i < getDOFs(); i++)
+   //    {
+   //       for (int j = 0; j < rhs.getDOFs(); j++)
+   //       {
+   //          for (int l = 0; l < getRows(); l++)
+   //          {
+   //             for (int m = 0; m < getColumns(); m++)
+   //             {
+   //                result(i, j) += (*this)(l, m, i) * rhs(l, m, j);
+   //             }
+   //          }
+   //       }
+   //    }
+   //    return result;
+   // }
 
    void BasisOperator::addToVector(mfem::Vector& vec) const
    {
@@ -169,87 +154,130 @@ namespace Rodin::Variational
          vdata[i] += (*this)(0, 0, i);
    }
 
-   // ---- JSSFBO ------------------------------------------------------------
-   int JSSFBO::getRows() const
-   {
-      return m_sdim;
-   }
-
-   int JSSFBO::getColumns() const
-   {
-      return m_vdim;
-   }
-
-   int JSSFBO::getDOFs() const
-   {
-      return m_dshape.NumRows() * m_vdim;
-   }
-
-   double JSSFBO::operator()(int row, int col, int dof) const
-   {
-      assert(0 <= row && row < getRows());
-      assert(0 <= col && col < getColumns());
-      assert(0 <= dof && dof < getDOFs());
-      return (static_cast<int>(dof / m_dshape.NumRows()) == col
-            ) * m_dshape(dof % m_dshape.NumRows(), row);
-   }
-
-   JSSFBO& JSSFBO::operator*=(double s)
-   {
-      m_dshape *= s;
-      return *this;
-   }
-
-   JSSFBO& JSSFBO::operator=(double s)
-   {
-      m_dshape = s;
-      return *this;
-   }
-
-   std::unique_ptr<BasisOperator> JSSFBO::Trace() const
-   {
-      assert(getRows() == getColumns());
-      auto result = new DenseBasisOperator(1, 1, getDOFs());
-      for (int k = 0; k < getDOFs(); k++)
-         (*result)(0, 0, k) = m_dshape.GetData()[k];
-      return std::unique_ptr<BasisOperator>(result);
-   }
-
    // ---- SSFBO -------------------------------------------------------------
-   int SSFBO::getRows() const
+   FunctionSBO::FunctionSBO(mfem::Vector&& shape, int vdim)
+      : SparseBasisOperator(vdim, 1, shape.Size() * vdim),
+        m_shape(std::move(shape)),
+        m_colIndex(new int (0)),
+        m_rowIndex(vdim, nullptr)
    {
-      return m_vdim;
+      assert(vdim > 0);
+
+      for (int i = 0; i < vdim; i++)
+      {
+         m_rowIndex[i] = new int[vdim + 1];
+         std::fill_n(m_rowIndex[i], i + 1, 0);
+         std::fill_n(m_rowIndex[i] + i + 1, vdim - i, 1);
+      }
+
+      int n = m_shape.Size();
+      std::vector<mfem::SparseMatrix> data;
+      data.reserve(n * vdim);
+
+      for (int i = 0; i < vdim; i++)
+      {
+         for (int j = 0; j < n; j++)
+         {
+            data.emplace_back(
+                  m_rowIndex[i], m_colIndex, m_shape.GetData() + j, vdim, 1,
+                  false, // Do not own index
+                  false, // Do not own data
+                  false);
+         }
+      }
+      assert(n * vdim > 0);
+      assert(data.size() == static_cast<size_t>(n * vdim));
+      setData(std::move(data));
    }
 
-   int SSFBO::getColumns() const
+   FunctionSBO::FunctionSBO(const FunctionSBO& other)
+      : SparseBasisOperator(other),
+        m_shape(other.m_shape),
+        m_colIndex(new int (0)),
+        m_rowIndex(other.m_rowIndex.size(), nullptr)
    {
-      return 1;
+      const int n = m_shape.Size();
+      for (size_t i = 0; i < other.m_rowIndex.size(); i++)
+      {
+         m_rowIndex[i] = new int[n];
+         std::copy(other.m_rowIndex[i], other.m_rowIndex[i] + n, m_rowIndex[i]);
+      }
    }
 
-   int SSFBO::getDOFs() const
+   FunctionSBO::FunctionSBO(FunctionSBO&& other)
+      : SparseBasisOperator(std::move(other)),
+        m_shape(std::move(other.m_shape)),
+        m_colIndex(other.m_colIndex),
+        m_rowIndex(std::move(other.m_rowIndex))
    {
-      return m_shape.Size() * m_vdim;
+      other.m_colIndex = nullptr;
    }
 
-   double SSFBO::operator()(int row, int col, int dof) const
+   FunctionSBO::~FunctionSBO()
    {
-      assert(0 <= row && row < getRows());
-      assert(col == 0);
-      assert(0 <= dof && dof < getDOFs());
-      return (static_cast<int>(dof / m_shape.Size()) == row) * m_shape(dof % m_shape.Size());
+      if (m_colIndex)
+         delete m_colIndex;
+      for (auto& v : m_rowIndex)
+         delete[] v;
    }
 
-   SSFBO&
-   SSFBO::operator*=(double s)
+   // ---- JSSFBO ------------------------------------------------------------
+   JacobianSBO::JacobianSBO(mfem::DenseMatrix&& dshape, int sdim, int vdim)
+      :  SparseBasisOperator(sdim, vdim, dshape.Height() * vdim),
+         m_sdim(sdim),
+         m_vdim(vdim),
+         m_colIndex(vdim, nullptr),
+         m_rowIndex(new int[sdim + 1])
    {
-      m_shape *= s;
-      return *this;
+      assert(vdim > 0);
+
+      // TODO: JacobianSBO expects the matrix to be in row-major order.
+      // Hence we call transpose on the matrix. However, we should be
+      // able to optimize this call away.
+      dshape.Transpose();
+
+      assert(dshape.Height() == sdim);
+
+      // "Move" the DenseMatrix
+      m_dshape.SetSize(dshape.Height(), dshape.Width());
+      m_dshape.GetMemory() = std::move(dshape.GetMemory());
+      dshape.Reset(nullptr, 0, 0);
+
+      // Build the indices
+      int n = m_dshape.Width();
+
+      std::iota(m_rowIndex, m_rowIndex + sdim + 1, 0);
+      for (int i = 0; i < vdim; i++)
+      {
+         m_colIndex[i] = new int[sdim];
+         std::fill(m_colIndex[i], m_colIndex[i] + sdim, i);
+      }
+
+      std::vector<mfem::SparseMatrix> data;
+      data.reserve(n * vdim);
+
+      for (int i = 0; i < vdim; i++)
+      {
+         for (int j = 0; j < n; j++)
+         {
+            data.emplace_back(
+                  m_rowIndex, m_colIndex[i], m_dshape.GetData() + sdim * j, sdim, vdim,
+                  false, // Do not own index
+                  false, // Do not own data
+                  false);
+         }
+      }
+      assert(n * vdim > 0);
+      assert(data.size() == static_cast<size_t>(n * vdim));
+
+      setData(std::move(data));
    }
 
-   SSFBO&
-   SSFBO::operator=(double s)
+   JacobianSBO::~JacobianSBO()
    {
-      m_shape = s;
-      return *this;
+      if (m_rowIndex)
+         delete[] m_rowIndex;
+      for (auto& v : m_colIndex)
+         delete[] v;
    }
 }

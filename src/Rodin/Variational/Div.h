@@ -9,6 +9,7 @@
 #include "TestFunction.h"
 #include "TrialFunction.h"
 #include "ScalarFunction.h"
+#include "Trace.h"
 
 namespace Rodin::Variational
 {
@@ -82,7 +83,9 @@ namespace Rodin::Variational
             mfem::DenseMatrix dshape;
             dshape.SetSize(dofs, sdim);
             fe.CalcPhysDShape(trans, dshape);
-            return JSSFBO(std::move(dshape), sdim, vdim).Trace();
+            return std::unique_ptr<BasisOperator>(
+                  new Trace(std::unique_ptr<BasisOperator>(
+                     new JacobianSBO(std::move(dshape), sdim, vdim))));
          }
 
          FiniteElementSpace<H1>& getFiniteElementSpace() override
