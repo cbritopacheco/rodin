@@ -115,15 +115,24 @@ namespace Rodin::Variational
             return m_rhs->getDOFs(fe, trans);
          }
 
-         std::unique_ptr<BasisOperator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
-            auto result = m_rhs->getOperator(fe, trans);
-            mfem::DenseMatrix v;
-            m_lhs->getValue(v, trans, trans.GetIntPoint());
-            (*result) *= v(0, 0);
-            return result;
+            switch (m_lhs->getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  m_rhs->getOperator(op, fe, trans);
+                  mfem::DenseMatrix v;
+                  m_lhs->getValue(v, trans, trans.GetIntPoint());
+                  op *= v(0, 0);
+                  break;
+               }
+               default:
+                  assert(false); // Unimplemented
+            }
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override

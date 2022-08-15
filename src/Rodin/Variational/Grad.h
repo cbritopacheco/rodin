@@ -137,7 +137,8 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<BasisOperator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans) const override
          {
@@ -146,7 +147,12 @@ namespace Rodin::Variational
             mfem::DenseMatrix dshape;
             dshape.SetSize(dofs, sdim);
             fe.CalcPhysDShape(trans, dshape);
-            return std::unique_ptr<BasisOperator>(new JacobianSBO(std::move(dshape), sdim, 1));
+            op = DenseBasisOperator(sdim, 1, dshape.NumRows());
+            const int n = dshape.NumRows();
+            assert(dshape.NumCols() == sdim);
+            for (int j = 0; j < n; j++)
+               for (int k = 0; k < sdim; k++)
+                  op(k, 0, j) = dshape(j, k);
          }
 
          FiniteElementSpace<H1>& getFiniteElementSpace() override

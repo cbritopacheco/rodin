@@ -56,53 +56,6 @@ namespace Rodin::Variational
          std::unique_ptr<FunctionBase> m_matrix;
    };
    Trace(const FunctionBase&) -> Trace<FunctionBase>;
-
-
-   /**
-    * @f[
-    *    \text{tr} \ A(u)
-    * @f]
-    * with @f$ A(u) \in \mathbb{R}^{p \times p} @f$.
-    */
-   template <>
-   class Trace<BasisOperator> : public DenseBasisOperator
-   {
-      public:
-         Trace(std::unique_ptr<BasisOperator> op)
-            : DenseBasisOperator(1, 1, op->getDOFs()),
-              m_op(std::move(op))
-         {
-            if (getOperator().isDense())
-            {
-               const auto& dense = static_cast<const DenseBasisOperator&>(getOperator());
-               for (int i = 0; i < getDOFs(); i++)
-                  operator()(0, 0, i) = dense(i).Trace();
-            }
-            else if (getOperator().isSparse())
-            {
-               const auto& sparse = static_cast<const SparseBasisOperator&>(getOperator());
-               for (int i = 0; i < getDOFs(); i++)
-               {
-                  mfem::Vector diag;
-                  sparse(i).GetDiag(diag);
-                  operator()(0, 0, i) = diag.Sum();
-               }
-            }
-            else
-            {
-               assert(false);
-            }
-         }
-
-         BasisOperator& getOperator()
-         {
-            return *m_op;
-         }
-
-      private:
-         std::unique_ptr<BasisOperator> m_op;
-   };
-   Trace(std::unique_ptr<BasisOperator>) -> Trace<BasisOperator>;
 }
 
 #endif
