@@ -314,10 +314,8 @@ namespace Rodin::Variational
          {
             mfem::Vector v;
             getHandle().GetVectorValue(trans, ip, v);
-            value.UseExternalData(
-                  v.StealData(),
-                  getFiniteElementSpace().getVectorDimension(), 1);
-            value.GetMemory().SetHostPtrOwner(true);
+            value.GetMemory() = std::move(v.GetMemory());
+            value.SetSize(getFiniteElementSpace().getVectorDimension(), 1);
             break;
          }
          case RangeType::Matrix:

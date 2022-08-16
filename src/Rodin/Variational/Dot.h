@@ -45,6 +45,12 @@ namespace Rodin::Variational
 
    /**
     * @brief Dot product between FunctionBase and ShapeFunctionBase.
+    *
+    * @f[
+    *    \Lambda : A(u)
+    * @f]
+    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$,
+    * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
     */
    template <ShapeFunctionSpaceType Space>
    class Dot<FunctionBase, ShapeFunctionBase<Space>>
@@ -104,13 +110,21 @@ namespace Rodin::Variational
             return 1;
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp) const override
          {
+            auto& trans = comp.getElementTransformation();
+            const auto& ip = comp.getIntegrationPoint();
             mfem::DenseMatrix v;
-            getLHS().getValue(v, trans, trans.GetIntPoint());
-            return getRHS().getOperator(fe, trans)->MatrixDot(v);
+            getLHS().getValue(v, trans, ip);
+            DenseBasisOperator tmp;
+            getRHS().getOperator(tmp, fe, comp);
+            int opDofs = getDOFs(fe, trans);
+            op.setSize(1, 1, opDofs);
+            for (int i = 0; i < opDofs; i++)
+               op(0, 0, i) = v * tmp(i);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -138,6 +152,7 @@ namespace Rodin::Variational
    Dot(const ShapeFunctionBase<Space>&, const FunctionBase&)
       -> Dot<FunctionBase, ShapeFunctionBase<Space>>;
 
+
    template <>
    class Dot<
       ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
@@ -145,7 +160,7 @@ namespace Rodin::Variational
    {
       public:
          Dot(const ShapeFunctionBase<TrialSpace>& lhs, const ShapeFunctionBase<TestSpace>& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+            : m_trial(lhs.copy()), m_test(rhs.copy())
          {
             if (lhs.getRangeShape() != rhs.getRangeShape())
                RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
@@ -153,47 +168,52 @@ namespace Rodin::Variational
 
          Dot(const Dot& other)
             :  Base(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+               m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
          {}
 
          Dot(Dot&& other)
             :  Base(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+               m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
          {}
 
          ShapeFunctionBase<TrialSpace>& getLHS()
          {
-            assert(m_lhs);
-            return *m_lhs;
+            assert(m_trial);
+            return *m_trial;
          }
 
          ShapeFunctionBase<TestSpace>& getRHS()
          {
-            assert(m_rhs);
-            return *m_rhs;
+            assert(m_test);
+            return *m_test;
          }
 
          const ShapeFunctionBase<TrialSpace>& getLHS() const
          {
-            assert(m_lhs);
-            return *m_lhs;
+            assert(m_trial);
+            return *m_trial;
          }
 
          const ShapeFunctionBase<TestSpace>& getRHS() const
          {
-            assert(m_rhs);
-            return *m_rhs;
+            assert(m_test);
+            return *m_test;
          }
 
          mfem::DenseMatrix getElementMatrix(
-               const mfem::FiniteElement& trialElement, const mfem::FiniteElement& testElement,
-               mfem::ElementTransformation& trans) const
+               const mfem::FiniteElement& trialElement,
+               const mfem::FiniteElement& testElement,
+               ShapeComputator& comp) const
          {
-            auto& trial = getLHS();
-            auto& test  = getRHS();
-            assert(trial.getRangeShape() == test.getRangeShape());
-            return test.getOperator(testElement, trans)->OperatorDot(
-                     *trial.getOperator(trialElement, trans));
+            assert(m_trial->getRangeShape() == m_test->getRangeShape());
+            DenseBasisOperator trialOp, testOp;
+            m_trial->getOperator(trialOp, trialElement, comp);
+            m_test->getOperator(testOp, testElement, comp);
+            mfem::DenseMatrix result(testOp.getDOFs(), trialOp.getDOFs());
+            for (int i = 0; i < testOp.getDOFs(); i++)
+               for (int j = 0; j < trialOp.getDOFs(); j++)
+                  result(i, j) = testOp(i) * trialOp(j);
+            return result;
          }
 
          Dot* copy() const noexcept override
@@ -202,8 +222,8 @@ namespace Rodin::Variational
          }
 
       private:
-         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_lhs;
-         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_rhs;
+         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_trial;
+         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_test;
    };
    Dot(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
       -> Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
