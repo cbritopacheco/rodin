@@ -29,6 +29,7 @@ namespace Rodin::Solver
           */
          CG()
             : m_maxIterations(200),
+              m_printIterations(false),
               m_rtol(1e-12),
               m_atol(0)
          {}
@@ -70,8 +71,8 @@ namespace Rodin::Solver
          void solve(Variational::ProblemBase& problem) override;
 
       private:
-         bool m_printIterations;
          int  m_maxIterations;
+         bool m_printIterations;
          double m_rtol, m_atol;
    };
 }

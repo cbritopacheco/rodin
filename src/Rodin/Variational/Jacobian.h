@@ -9,7 +9,7 @@
 
 #include "H1.h"
 #include "GridFunction.h"
-#include "Rank3Operator.h"
+#include "BasisOperator.h"
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
@@ -136,18 +136,22 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp) const override
          {
-            int dofs = fe.GetDof();
-            int sdim = trans.GetSpaceDim();
-            int vdim = m_u.getFiniteElementSpace().getVectorDimension();
-            mfem::DenseMatrix dshape;
-            dshape.SetSize(dofs, sdim);
-            fe.CalcPhysDShape(trans, dshape);
-            return std::unique_ptr<Internal::Rank3Operator>(
-                  new Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim));
+            auto& trans = comp.getElementTransformation();
+            const auto& dshape = comp.getPhysicalDShape(fe);
+            const int n = dshape.NumRows();
+            const int sdim = trans.GetSpaceDim();
+            const int vdim = m_u.getFiniteElementSpace().getVectorDimension();
+            op.setSize(sdim, vdim, vdim * n);
+            op = 0.0;
+            for (int i = 0; i < vdim; i++)
+               for (int j = 0; j < n; j++)
+                  for (int k = 0; k < sdim; k++)
+                     op(k, i, j + i * n) = dshape(j, k);
          }
 
          Jacobian* copy() const noexcept override
