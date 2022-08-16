@@ -138,17 +138,15 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp) const override
          {
-            int dofs = fe.GetDof();
-            int sdim = trans.GetSpaceDim();
-            int vdim = m_u.getFiniteElementSpace().getVectorDimension();
-            mfem::DenseMatrix dshape;
-            dshape.SetSize(dofs, sdim);
-            fe.CalcPhysDShape(trans, dshape);
-            op = DenseBasisOperator(sdim, vdim, vdim * dshape.NumRows());
+            auto& trans = comp.getElementTransformation();
+            const auto& dshape = comp.getPhysicalDShape(fe);
             const int n = dshape.NumRows();
-            assert(dshape.NumCols() == sdim);
+            const int sdim = trans.GetSpaceDim();
+            const int vdim = m_u.getFiniteElementSpace().getVectorDimension();
+            op.setSize(sdim, vdim, vdim * n);
+            op = 0.0;
             for (int i = 0; i < vdim; i++)
                for (int j = 0; j < n; j++)
                   for (int k = 0; k < sdim; k++)

@@ -113,16 +113,18 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp) const override
          {
+            auto& trans = comp.getElementTransformation();
+            const auto& ip = comp.getIntegrationPoint();
             mfem::DenseMatrix v;
-            getLHS().getValue(v, trans, trans.GetIntPoint());
+            getLHS().getValue(v, trans, ip);
             DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, fe, trans);
+            getRHS().getOperator(tmp, fe, comp);
             int opDofs = getDOFs(fe, trans);
-            op = DenseBasisOperator(1, 1, opDofs);
+            op.setSize(1, 1, opDofs);
             for (int i = 0; i < opDofs; i++)
-               op(i) = v * tmp(i);
+               op(0, 0, i) = v * tmp(i);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -199,13 +201,14 @@ namespace Rodin::Variational
          }
 
          mfem::DenseMatrix getElementMatrix(
-               const mfem::FiniteElement& trialElement, const mfem::FiniteElement& testElement,
-               mfem::ElementTransformation& trans) const
+               const mfem::FiniteElement& trialElement,
+               const mfem::FiniteElement& testElement,
+               ShapeComputator& comp) const
          {
             assert(m_trial->getRangeShape() == m_test->getRangeShape());
             DenseBasisOperator trialOp, testOp;
-            m_trial->getOperator(trialOp, trialElement, trans);
-            m_test->getOperator(testOp, testElement, trans);
+            m_trial->getOperator(trialOp, trialElement, comp);
+            m_test->getOperator(testOp, testElement, comp);
             mfem::DenseMatrix result(testOp.getDOFs(), trialOp.getDOFs());
             for (int i = 0; i < testOp.getDOFs(); i++)
                for (int j = 0; j < trialOp.getDOFs(); j++)
