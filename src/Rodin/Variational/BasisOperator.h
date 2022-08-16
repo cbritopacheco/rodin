@@ -64,7 +64,7 @@ namespace Rodin::Variational
             :  m_rows(rows),
                m_cols(cols),
                m_dofs(dofs),
-               m_data(dofs, mfem::DenseMatrix(rows, cols))
+               m_data(rows, cols, dofs)
          {
             assert(rows > 0);
             assert(dofs > 0);
@@ -91,34 +91,31 @@ namespace Rodin::Variational
             other.m_dofs = 0;
          }
 
-         DenseBasisOperator& operator=(DenseBasisOperator&& other)
-         {
-            m_data = std::move(other.m_data);
-            m_rows = other.m_rows;
-            m_cols = other.m_cols;
-            m_dofs = other.m_dofs;
+         DenseBasisOperator& operator=(DenseBasisOperator&& other) = delete;
 
-            other.m_rows = 0;
-            other.m_cols = 0;
-            other.m_dofs = 0;
-            return *this;
+         void setSize(int i, int j, int k)
+         {
+            m_rows = i;
+            m_cols = j;
+            m_dofs = k;
+            m_data.SetSize(i, j, k);
          }
 
          void transpose()
          {
             std::swap(m_rows, m_cols);
-            for (auto& v : m_data)
-               v.Transpose();
+            for (int i = 0; i < getDOFs(); i++)
+               operator()(i).Transpose();
          }
 
          mfem::DenseMatrix& operator()(int dof)
          {
-            return m_data[dof];
+            return m_data(dof);
          }
 
          const mfem::DenseMatrix& operator()(int dof) const
          {
-            return m_data[dof];
+            return m_data(dof);
          }
 
          int getRows() const override
@@ -134,6 +131,12 @@ namespace Rodin::Variational
          int getDOFs() const override
          {
             return m_dofs;
+         }
+
+         DenseBasisOperator& operator=(double s)
+         {
+            m_data = s;
+            return *this;
          }
 
          DenseBasisOperator& operator+=(const DenseBasisOperator& rhs)
@@ -155,12 +158,12 @@ namespace Rodin::Variational
 
          double& operator()(int row, int col, int dof)
          {
-            return m_data[dof](row, col);
+            return m_data(row, col, dof);
          }
 
          double operator()(int row, int col, int dof) const override
          {
-            return m_data[dof](row, col);
+            return m_data(row, col, dof);
          }
 
          void addToVector(mfem::Vector& vec) const override;
@@ -169,7 +172,7 @@ namespace Rodin::Variational
          int m_rows;
          int m_cols;
          int m_dofs;
-         std::vector<mfem::DenseMatrix> m_data;
+         mfem::DenseTensor m_data;
    };
 }
 

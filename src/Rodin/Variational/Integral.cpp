@@ -24,8 +24,9 @@ namespace Rodin::Variational
       {
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
+         ShapeComputator comp(trans, ip);
          mfem::Add(mat,
-               m_prod.getElementMatrix(trialElement, testElement, trans),
+               m_prod.getElementMatrix(trialElement, testElement, comp),
                trans.Weight() * ip.weight,
                mat);
       }
@@ -50,7 +51,8 @@ namespace Rodin::Variational
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
          DenseBasisOperator testOp;
-         test.getOperator(testOp, fe, trans);
+         ShapeComputator comp(trans, ip);
+         test.getOperator(testOp, fe, comp);
          testOp *= trans.Weight() * ip.weight;
          testOp.addToVector(vec);
       }

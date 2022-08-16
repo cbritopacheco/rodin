@@ -118,15 +118,17 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp) const override
          {
+            auto& trans = comp.getElementTransformation();
+            const auto& ip = comp.getIntegrationPoint();
             switch (m_lhs->getRangeType())
             {
                case RangeType::Scalar:
                {
-                  m_rhs->getOperator(op, fe, trans);
+                  m_rhs->getOperator(op, fe, comp);
                   mfem::DenseMatrix v;
-                  m_lhs->getValue(v, trans, trans.GetIntPoint());
+                  m_lhs->getValue(v, trans, ip);
                   op *= v(0, 0);
                   break;
                }
