@@ -9,6 +9,7 @@
 #include "TestFunction.h"
 #include "TrialFunction.h"
 #include "ScalarFunction.h"
+#include "Trace.h"
 
 namespace Rodin::Variational
 {
@@ -72,17 +73,17 @@ namespace Rodin::Variational
             return m_u.getDOFs(fe, trans);
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp) const override
          {
-            int dofs = fe.GetDof();
-            int sdim = trans.GetSpaceDim();
-            int vdim = m_u.getFiniteElementSpace().getVectorDimension();
-            mfem::DenseMatrix dshape;
-            dshape.SetSize(dofs, sdim);
-            fe.CalcPhysDShape(trans, dshape);
-            return Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim).Trace();
+            auto& trans = comp.getElementTransformation();
+            const auto& dshape = comp.getPhysicalDShape(fe);
+            const int opDofs = getDOFs(fe, trans);
+            op.setSize(1, 1, opDofs);
+            for (int i = 0; i < opDofs; i++)
+               op(0, 0, i) = dshape.GetData()[i];
          }
 
          H1<Trait>& getFiniteElementSpace() override

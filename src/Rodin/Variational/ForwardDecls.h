@@ -189,11 +189,13 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class Dot;
 
+   template <class T>
+   class Trace;
+
    template <class Lhs, class Rhs>
    class Composition;
 
-   template <class Target, class Callable, class ... Args>
-   class Lift;
+   class BasisOperator;
 
    // TODO: Refactor or remove these two classes!!!!
    class LinearFormIntegratorSum;

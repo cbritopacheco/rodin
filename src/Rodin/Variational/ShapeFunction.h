@@ -7,7 +7,7 @@
 
 #include "H1.h"
 #include "ForwardDecls.h"
-#include "Rank3Operator.h"
+#include "BasisOperator.h"
 #include "FiniteElementSpace.h"
 
 #include "RangeShape.h"
@@ -27,6 +27,70 @@ namespace Rodin::Variational
    struct DualSpaceType<TestSpace>
    {
       static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
+   };
+
+   class ShapeComputator
+   {
+      public:
+         ShapeComputator(
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip)
+            : m_trans(trans),
+              m_ip(ip)
+         {}
+
+         const mfem::Vector& getPhysicalShape(const mfem::FiniteElement& el)
+         {
+            auto it = m_physShapeLookup.find(&el);
+            if (it != m_physShapeLookup.end())
+            {
+               return it->second;
+            }
+            else
+            {
+               auto itt =  m_physShapeLookup.insert(it, {&el, mfem::Vector(el.GetDof())});
+               el.CalcPhysShape(m_trans, itt->second);
+               return itt->second;
+            }
+         }
+
+         const mfem::DenseMatrix& getPhysicalDShape(const mfem::FiniteElement& el)
+         {
+            auto it = m_physDShapeLookup.find(&el);
+            if (it != m_physDShapeLookup.end())
+            {
+               return it->second;
+            }
+            else
+            {
+               auto itt =  m_physDShapeLookup.insert(
+                     it, {&el, mfem::DenseMatrix(el.GetDof(), m_trans.GetSpaceDim())});
+               el.CalcPhysDShape(m_trans, itt->second);
+               return itt->second;
+            }
+         }
+
+         mfem::ElementTransformation& getElementTransformation()
+         {
+            return m_trans;
+         }
+
+         const mfem::ElementTransformation& getElementTransformation() const
+         {
+            return m_trans;
+         }
+
+         const mfem::IntegrationPoint& getIntegrationPoint() const
+         {
+            return m_ip;
+         }
+
+      private:
+         mfem::ElementTransformation& m_trans;
+         const mfem::IntegrationPoint& m_ip;
+
+         std::map<const mfem::FiniteElement*, mfem::Vector> m_physShapeLookup;
+         std::map<const mfem::FiniteElement*, mfem::DenseMatrix> m_physDShapeLookup;
    };
 
    /**
@@ -78,9 +142,10 @@ namespace Rodin::Variational
 
          virtual int getColumns() const = 0;
 
-         virtual std::unique_ptr<Internal::Rank3Operator> getOperator(
+         virtual void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const = 0;
+               ShapeComputator& comp) const = 0;
 
          Transpose<ShapeFunctionBase<Space>> T() const
          {
@@ -139,17 +204,20 @@ namespace Rodin::Variational
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }
 
-         std::unique_ptr<Internal::Rank3Operator> getOperator(
+         void getOperator(
+               DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans) const override
+               ShapeComputator& comp
+               ) const override
          {
-            int dofs = fe.GetDof();
-            int vdim = getFiniteElementSpace().getVectorDimension();
-            mfem::Vector shape;
-            shape.SetSize(dofs);
-            fe.CalcPhysShape(trans, shape);
-            return std::unique_ptr<Internal::Rank3Operator>(
-                  new Internal::ScalarShapeR3O(std::move(shape), vdim));
+            const auto& shape = comp.getPhysicalShape(fe);
+            const int n = shape.Size();
+            const int vdim = getFiniteElementSpace().getVectorDimension();
+            op.setSize(vdim, 1, vdim * n);
+            op = 0.0;
+            for (int i = 0; i < vdim; i++)
+               for (int j = 0; j < n; j++)
+                  op(i, 0, j + i * n) = shape(j);
          }
 
          virtual const ShapeFunction<H1<Trait>, Space>& getLeaf() const override = 0;

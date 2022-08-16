@@ -28,7 +28,7 @@ set(RodinVariational_HEADERS
   ScalarFunction.h
   Trace.h
   Transpose.h
-  Rank3Operator.h
+  BasisOperator.h
   Restriction.h
   VectorFunction.h
   Utility.h
@@ -56,7 +56,7 @@ set(RodinVariational_SRCS
   VectorFunction.cpp
   ScalarFunction.cpp
   Restriction.cpp
-  Rank3Operator.cpp
+  BasisOperator.cpp
   Sum.cpp
   UnaryMinus.cpp
   Mult.cpp

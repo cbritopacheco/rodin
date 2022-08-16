@@ -3,6 +3,7 @@
 
 namespace Rodin::Variational
 {
+   // ---- Dot<FunctionBase, FunctionBase> -----------------------------------
    Dot<FunctionBase, FunctionBase>::Dot(const FunctionBase& a, const FunctionBase& b)
       : m_a(a.copy()), m_b(b.copy())
    {
