@@ -32,65 +32,120 @@ namespace Rodin::Variational
    class ShapeComputator
    {
       public:
-         ShapeComputator(
+         using Key =
+            std::tuple<
+               const mfem::FiniteElement*,
+               mfem::ElementTransformation*>;
+
+         template <class Data>
+         struct Value
+         {
+            const mfem::IntegrationPoint* pip;
+            Data data;
+         };
+
+         ShapeComputator() = default;
+
+         const mfem::Vector& getShape(
+               const mfem::FiniteElement& el,
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip)
-            : m_trans(trans),
-              m_ip(ip)
-         {}
-
-         const mfem::Vector& getPhysicalShape(const mfem::FiniteElement& el)
          {
-            auto it = m_physShapeLookup.find(&el);
-            if (it != m_physShapeLookup.end())
+            auto it = m_shapeLookup.find({&el, &trans});
+            if (it != m_shapeLookup.end())
             {
-               return it->second;
+               if (it->second.pip != &ip)
+               {
+                  it->second.pip = &ip;
+                  it->second.data.SetSize(el.GetDof());
+                  el.CalcShape(ip, it->second.data);
+               }
+               return it->second.data;
             }
             else
             {
-               auto itt =  m_physShapeLookup.insert(it, {&el, mfem::Vector(el.GetDof())});
-               el.CalcPhysShape(m_trans, itt->second);
-               return itt->second;
+               auto itt =  m_shapeLookup.insert(
+                     it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
+               el.CalcShape(ip, itt->second.data);
+               return itt->second.data;
             }
          }
 
-         const mfem::DenseMatrix& getPhysicalDShape(const mfem::FiniteElement& el)
+         const mfem::Vector& getPhysicalShape(
+               const mfem::FiniteElement& el,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip)
          {
-            auto it = m_physDShapeLookup.find(&el);
+            auto it = m_physShapeLookup.find({&el, &trans});
+            if (it != m_physShapeLookup.end())
+            {
+               if (it->second.pip != &ip)
+               {
+                  it->second.pip = &ip;
+                  it->second.data.SetSize(el.GetDof());
+                  el.CalcPhysShape(trans, it->second.data);
+               }
+               return it->second.data;
+            }
+            else
+            {
+               auto itt =  m_physShapeLookup.insert(
+                     it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
+               el.CalcPhysShape(trans, itt->second.data);
+               return itt->second.data;
+            }
+         }
+
+         const mfem::DenseMatrix& getDShape(
+               const mfem::FiniteElement& el,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip)
+         {
+            auto it = m_dShapeLookup.find({&el, &trans});
+            if (it != m_dShapeLookup.end())
+            {
+               it->second.pip = &ip;
+               it->second.data.SetSize(el.GetDof(), el.GetDim());
+               el.CalcDShape(ip, it->second.data);
+               return it->second.data;
+            }
+            else
+            {
+               auto itt =  m_dShapeLookup.insert(
+                     it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), el.GetDim())}});
+               el.CalcDShape(ip, itt->second.data);
+               return itt->second.data;
+            }
+         }
+
+         const mfem::DenseMatrix& getPhysicalDShape(
+               const mfem::FiniteElement& el,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip)
+         {
+            auto it = m_physDShapeLookup.find({&el, &trans});
             if (it != m_physDShapeLookup.end())
             {
-               return it->second;
+               it->second.pip = &ip;
+               it->second.data.SetSize(el.GetDof(), trans.GetSpaceDim());
+               el.CalcPhysDShape(trans, it->second.data);
+               return it->second.data;
             }
             else
             {
                auto itt =  m_physDShapeLookup.insert(
-                     it, {&el, mfem::DenseMatrix(el.GetDof(), m_trans.GetSpaceDim())});
-               el.CalcPhysDShape(m_trans, itt->second);
-               return itt->second;
+                     it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), trans.GetSpaceDim())}});
+               el.CalcPhysDShape(trans, itt->second.data);
+               return itt->second.data;
             }
          }
 
-         mfem::ElementTransformation& getElementTransformation()
-         {
-            return m_trans;
-         }
-
-         const mfem::ElementTransformation& getElementTransformation() const
-         {
-            return m_trans;
-         }
-
-         const mfem::IntegrationPoint& getIntegrationPoint() const
-         {
-            return m_ip;
-         }
-
       private:
-         mfem::ElementTransformation& m_trans;
-         const mfem::IntegrationPoint& m_ip;
+         std::map<Key, Value<mfem::Vector>> m_shapeLookup;
+         std::map<Key, Value<mfem::Vector>> m_physShapeLookup;
 
-         std::map<const mfem::FiniteElement*, mfem::Vector> m_physShapeLookup;
-         std::map<const mfem::FiniteElement*, mfem::DenseMatrix> m_physDShapeLookup;
+         std::map<Key, Value<mfem::DenseMatrix>> m_dShapeLookup;
+         std::map<Key, Value<mfem::DenseMatrix>> m_physDShapeLookup;
    };
 
    /**
@@ -100,23 +155,28 @@ namespace Rodin::Variational
    class ShapeFunctionBase : public FormLanguage::Base
    {
       public:
+         constexpr
          ShapeFunctionBase()
             : FormLanguage::Base()
          {}
 
+         constexpr
          ShapeFunctionBase(const ShapeFunctionBase& other)
             : FormLanguage::Base(other)
          {}
 
+         constexpr
          ShapeFunctionBase(ShapeFunctionBase&& other)
             : FormLanguage::Base(std::move(other))
          {}
 
+         constexpr
          ShapeFunctionSpaceType getSpaceType() const
          {
             return Space;
          }
 
+         constexpr
          RangeType getRangeType() const
          {
             if (getRows() == 1 && getColumns() == 1)
@@ -127,6 +187,7 @@ namespace Rodin::Variational
                return RangeType::Matrix;
          }
 
+         constexpr
          RangeShape getRangeShape() const
          {
             return {getRows(), getColumns()};
@@ -145,7 +206,9 @@ namespace Rodin::Variational
          virtual void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               ShapeComputator& comp) const = 0;
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
+               ShapeComputator& compute) const = 0;
 
          Transpose<ShapeFunctionBase<Space>> T() const
          {
@@ -159,30 +222,33 @@ namespace Rodin::Variational
          virtual ShapeFunctionBase<Space>* copy() const noexcept override = 0;
    };
 
-   template <ShapeFunctionSpaceType Space, class Trait>
-   class ShapeFunction<H1<Trait>, Space> : public ShapeFunctionBase<Space>
+   template <ShapeFunctionSpaceType Space, class Context>
+   class ShapeFunction<H1<Context>, Space> : public ShapeFunctionBase<Space>
    {
       public:
-         ShapeFunction(H1<Trait>& fes)
+         constexpr
+         ShapeFunction(H1<Context>& fes)
             : m_fes(fes)
          {}
 
+         constexpr
          ShapeFunction(const ShapeFunction& other)
             :  ShapeFunctionBase<Space>(other),
                m_fes(other.m_fes)
          {}
 
+         constexpr
          ShapeFunction(ShapeFunction&& other)
             :  ShapeFunctionBase<Space>(std::move(other)),
                m_fes(other.m_fes)
          {}
 
-         H1<Trait>& getFiniteElementSpace() override
+         H1<Context>& getFiniteElementSpace() override
          {
             return m_fes;
          }
 
-         const H1<Trait>& getFiniteElementSpace() const override
+         const H1<Context>& getFiniteElementSpace() const override
          {
             return m_fes;
          }
@@ -207,10 +273,12 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               ShapeComputator& comp
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
+               ShapeComputator& compute
                ) const override
          {
-            const auto& shape = comp.getPhysicalShape(fe);
+            const auto& shape = compute.getPhysicalShape(fe, trans, ip);
             const int n = shape.Size();
             const int vdim = getFiniteElementSpace().getVectorDimension();
             op.setSize(vdim, 1, vdim * n);
@@ -220,13 +288,16 @@ namespace Rodin::Variational
                   op(i, 0, j + i * n) = shape(j);
          }
 
-         virtual const ShapeFunction<H1<Trait>, Space>& getLeaf() const override = 0;
+         virtual const ShapeFunction<H1<Context>, Space>& getLeaf() const override = 0;
 
          virtual ShapeFunction* copy() const noexcept override = 0;
 
       private:
-         H1<Trait>& m_fes;
+         H1<Context>& m_fes;
    };
+
+   template <ShapeFunctionSpaceType Space, class Context>
+   using H1ShapeFunction = ShapeFunction<H1<Context>, Space>;
 }
 
 #endif

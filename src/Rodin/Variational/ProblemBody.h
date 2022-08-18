@@ -31,6 +31,8 @@ namespace Rodin::Variational
          using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
          using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
 
+         ProblemBody() = default;
+
          ProblemBody(const BilinearFormIntegratorBase& bfi);
 
          ProblemBody(const BilinearFormIntegratorSum& bfi);
@@ -38,6 +40,16 @@ namespace Rodin::Variational
          ProblemBody(const ProblemBody& other);
 
          ProblemBody(ProblemBody&& other);
+
+         ProblemBody& operator=(ProblemBody&& other)
+         {
+            m_bfiDomainList = std::move(other.m_bfiDomainList);
+            m_bfiBoundaryList = std::move(other.m_bfiBoundaryList);
+            m_lfiDomainList = std::move(other.m_lfiDomainList);
+            m_lfiBoundaryList = std::move(other.m_lfiBoundaryList);
+            m_essBdr = std::move(other.m_essBdr);
+            return *this;
+         }
 
          EssentialBoundary& getEssentialBoundary();
 

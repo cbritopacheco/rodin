@@ -20,6 +20,8 @@ namespace Rodin::FormLanguage
     */
    class Base
    {
+      static boost::uuids::random_generator s_gen;
+
       public:
          Base();
 

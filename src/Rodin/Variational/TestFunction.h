@@ -12,14 +12,17 @@ namespace Rodin::Variational
    class TestFunction : public ShapeFunction<FES, TestSpace>
    {
       public:
+         constexpr
          TestFunction(FES& fes)
             : ShapeFunction<FES, TestSpace>(fes)
          {}
 
+         constexpr
          TestFunction(const TestFunction& other)
             : ShapeFunction<FES, TestSpace>(other)
          {}
 
+         constexpr
          TestFunction(TestFunction&& other)
             : ShapeFunction<FES, TestSpace>(std::move(other))
          {}
