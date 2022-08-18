@@ -182,19 +182,19 @@ namespace Rodin::Variational
                const FunctionBase& s, const std::set<int>& attrs = {});
 
          /**
-          * @brief Transfers the grid function from one finite element space to
-          * another.
-          * @param[in, out] dst Destination GridFunction for the transfer
-          */
-         void transfer(GridFunctionBase& dst);
-
-         /**
           * @brief Projects the restriction of a scalar coefficient on the given GridFunction.
           * @note The GridFunction must be scalar valued.
           * @param[in] s Scalar coefficient to project
           * @returns Reference to self
           */
          GridFunctionBase& project(const Restriction<FunctionBase>& s);
+
+         /**
+          * @brief Transfers the grid function from one finite element space to
+          * another.
+          * @param[in, out] dst Destination GridFunction for the transfer
+          */
+         void transfer(GridFunctionBase& dst);
 
          void getValue(
                mfem::DenseMatrix& value,

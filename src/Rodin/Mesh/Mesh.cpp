@@ -84,7 +84,7 @@ namespace Rodin
          default:
          {
             Alert::Exception()
-               << "Saving to \"" << fmt << "\" format unssuported."
+               << "Saving to \"" << fmt << "\" format unsupported."
                << Alert::Raise;
          }
       }
@@ -280,7 +280,7 @@ namespace Rodin
          default:
          {
             Alert::Exception()
-               << "Loading from \"" << fmt << "\" format unssuported."
+               << "Loading from \"" << fmt << "\" format unsupported."
                << Alert::Raise;
          }
       }

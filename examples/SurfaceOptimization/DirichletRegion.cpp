@@ -101,7 +101,7 @@ int main(int, char**)
     solver.solve(state);
 
     // Adjoint equation
-    auto dj = -ScalarFunction(u.getGridFunction()) / Omega.getVolume();
+    auto dj = -u.getGridFunction() / Omega.getVolume();
     Alert::Info() << "    | Solving adjoint equation." << Alert::Raise;
     TrialFunction p(Vh);
     TestFunction  q(Vh);
@@ -124,8 +124,8 @@ int main(int, char**)
 
     // Compute the shape gradient
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto expr = 1. / (epsilon * epsilon) * uS * pS + ell;
-    auto gradS = getShapeGradient(ThS, distS, expr, solver);
+    auto hadamard = 1. / (epsilon * epsilon) * uS * pS + ell;
+    auto gradS = getShapeGradient(ThS, distS, hadamard, solver);
 
     // Transfer back the vector field to the whole space
     GridFunction grad(Th);
@@ -139,6 +139,13 @@ int main(int, char**)
     double dt = hmax / gInf;
     MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
 
+    // Topological optimization
+    Alert::Info() << "    | Computing topological sensitivity." << Alert::Raise;
+
+    // Compute the topological sensitivity
+    GridFunction topo(Vh);
+    topo = M_PI * u.getGridFunction() * p.getGridFunction();
+
     // Mesh only the surface part
     Alert::Info() << "    | Meshing the domain." << Alert::Raise;
     Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
@@ -150,6 +157,8 @@ int main(int, char**)
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
+
+    // std::exit(1);
   }
 
   return 0;
@@ -171,14 +180,14 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
   const auto& cnd = d.getGridFunction();
   const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
 
-  TrialFunction grad(vecFes);
-  Problem hilbert(grad, v);
-  hilbert = Integral(alpha * Jacobian(grad), Jacobian(v))
-          + Integral(grad, v)
-          + Integral(tgv * grad, v).over(GammaN)
+  TrialFunction g(vecFes);
+  Problem hilbert(g, v);
+  hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+          + Integral(g, v)
+          + Integral(tgv * g, v).over(GammaN)
           - BoundaryIntegral(expr * cn, v).over(SigmaD);
   solver.solve(hilbert);
 
-  return grad.getGridFunction();
+  return g.getGridFunction();
 }
 

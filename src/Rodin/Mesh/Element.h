@@ -200,6 +200,7 @@ namespace Rodin
          std::set<int> adjacent() const override
          {
             assert(false);
+            return {};
          }
 
          /**
