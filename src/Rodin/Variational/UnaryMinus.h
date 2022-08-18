@@ -67,11 +67,11 @@ namespace Rodin::Variational
 
          const ShapeFunctionBase<TestSpace>& getTestFunction() const override;
 
-         bool isSupported(Assembly::Type t) const override;
+         bool isSupported(Linear::Assembly::Type t) const override;
 
-         void getElementVector(const Assembly::Device& as) const override;
+         void getElementVector(const Linear::Assembly::Device& as) const override;
 
-         void getElementVector(const Assembly::Common& as) const override;
+         void getElementVector(const Linear::Assembly::Common& as) const override;
 
          UnaryMinus* copy() const noexcept override
          {
@@ -132,11 +132,7 @@ namespace Rodin::Variational
 
          IntegratorRegion getIntegratorRegion() const override;
 
-         void getElementMatrix(
-               const mfem::FiniteElement& trial,
-               const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans,
-               mfem::DenseMatrix& vec) const override;
+         void getElementMatrix(const Bilinear::Assembly::Common& as) const override;
 
          UnaryMinus* copy() const noexcept override
          {

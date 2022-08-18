@@ -79,10 +79,8 @@ namespace Rodin::Variational
             : BilinearFormDomainIntegrator(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
               m_prod(prod),
               m_intOrder(
-                    [](const mfem::FiniteElement& trial,
-                       const mfem::FiniteElement& test,
-                       mfem::ElementTransformation& trans)
-                    { return trial.GetOrder() + test.GetOrder() + trans.OrderW(); })
+                    [](const Bilinear::Assembly::Common& as)
+                    { return as.trial.GetOrder() + as.test.GetOrder() + as.trans.OrderW(); })
          {}
 
          Integral(const Integral& other)
@@ -103,8 +101,7 @@ namespace Rodin::Variational
           * @returns Reference to self (for method chaining)
           */
          Integral& setIntegrationOrder(
-            std::function<
-               int(const mfem::FiniteElement&, const mfem::FiniteElement&, mfem::ElementTransformation&)> order)
+            std::function<int(const Bilinear::Assembly::Common&)> order)
          {
             m_intOrder = order;
             return *this;
@@ -115,11 +112,9 @@ namespace Rodin::Variational
           * @param[in] order Function which computes the order of integration
           * @returns Reference to self (for method chaining)
           */
-         int getIntegrationOrder(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans) const
+         int getIntegrationOrder(const Bilinear::Assembly::Common& as) const
          {
-            return m_intOrder(trial, test, trans);
+            return m_intOrder(as);
          }
 
          const Integrand& getIntegrand() const
@@ -127,9 +122,7 @@ namespace Rodin::Variational
             return m_prod;
          }
 
-         virtual void getElementMatrix(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override;
+         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const override;
 
          virtual Integral* copy() const noexcept override
          {
@@ -137,8 +130,7 @@ namespace Rodin::Variational
          }
       private:
          Integrand m_prod;
-         std::function<int(
-            const mfem::FiniteElement&, const mfem::FiniteElement&, mfem::ElementTransformation&)> m_intOrder;
+         std::function<int(const Bilinear::Assembly::Common&)> m_intOrder;
    };
    Integral(
          const Dot<ShapeFunctionBase<TrialSpace>,
@@ -200,7 +192,7 @@ namespace Rodin::Variational
             :  LinearFormDomainIntegrator(integrand.getLeaf()),
                m_integrand(integrand.copy()),
                m_intOrder(
-                     [](const Assembly::Common& as)
+                     [](const Linear::Assembly::Common& as)
                      { return as.fe.GetOrder() + as.trans.OrderW(); })
          {}
 
@@ -215,13 +207,13 @@ namespace Rodin::Variational
               m_integrand(std::move(other.m_integrand))
          {}
 
-         Integral& setIntegrationOrder(std::function<int(const Assembly::Common&)> order)
+         Integral& setIntegrationOrder(std::function<int(const Linear::Assembly::Common&)> order)
          {
             m_intOrder = order;
             return *this;
          }
 
-         int getIntegrationOrder(const Assembly::Common& as) const
+         int getIntegrationOrder(const Linear::Assembly::Common& as) const
          {
             return m_intOrder(as);
          }
@@ -232,7 +224,7 @@ namespace Rodin::Variational
             return *m_integrand;
          }
 
-         virtual void getElementVector(const Assembly::Common& as) const override;
+         virtual void getElementVector(const Linear::Assembly::Common& as) const override;
 
          virtual Integral* copy() const noexcept override
          {
@@ -241,7 +233,7 @@ namespace Rodin::Variational
 
       private:
          std::unique_ptr<Integrand> m_integrand;
-         std::function<int(const Assembly::Common&)> m_intOrder;
+         std::function<int(const Linear::Assembly::Common&)> m_intOrder;
    };
    Integral(const ShapeFunctionBase<TestSpace>&) -> Integral<ShapeFunctionBase<TestSpace>>;
    Integral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&) -> Integral<ShapeFunctionBase<TestSpace>>;
@@ -332,7 +324,7 @@ namespace Rodin::Variational
               m_integral(std::move(other.m_integral))
          {}
 
-         void getElementVector(const Assembly::Common& as) const override
+         void getElementVector(const Linear::Assembly::Common& as) const override
          {
             m_integral.getElementVector(as);
          }
@@ -378,11 +370,9 @@ namespace Rodin::Variational
               m_integral(std::move(other.m_integral))
          {}
 
-         void getElementMatrix(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override
+         void getElementMatrix(const Bilinear::Assembly::Common& as) const override
          {
-            return m_integral.getElementMatrix(trial, test, trans, mat);
+            return m_integral.getElementMatrix(as);
          }
 
          BoundaryIntegral* copy() const noexcept override
@@ -430,13 +420,12 @@ namespace Rodin::Variational
             : Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>(integrand)
          {
             setIntegrationOrder(
-                  [](const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-                     mfem::ElementTransformation&)
+                  [](const Bilinear::Assembly::Common& as)
                   {
-                     if (trial.Space() == mfem::FunctionSpace::Pk)
-                        return trial.GetOrder() + test.GetOrder() - 2;
+                     if (as.trial.Space() == mfem::FunctionSpace::Pk)
+                        return as.trial.GetOrder() + as.test.GetOrder() - 2;
                      else
-                        return trial.GetOrder() + test.GetOrder() + trial.GetDim() - 1;
+                        return as.trial.GetOrder() + as.test.GetOrder() + as.trial.GetDim() - 1;
                   });
          }
 
@@ -450,40 +439,38 @@ namespace Rodin::Variational
             : Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>(std::move(other))
          {}
 
-         void getElementMatrix(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override
+         void getElementMatrix(const Bilinear::Assembly::Common& as) const override
          {
-            assert(trial.GetDim() == test.GetDim());
-            const int dim  = trial.GetDim();
-            const int spaceDim = trans.GetSpaceDim();
+            assert(as.trial.GetDim() == as.test.GetDim());
+            const int dim  = as.trial.GetDim();
+            const int spaceDim = as.trans.GetSpaceDim();
             const bool square = (dim == spaceDim);
-            const int order = getIntegrationOrder(trial, test, trans);
+            const int order = getIntegrationOrder(as);
             const mfem::IntegrationRule* ir =
-               trial.Space() == mfem::FunctionSpace::rQk ?
-                  &mfem::RefinedIntRules.Get(trial.GetGeomType(), order) :
-                  &mfem::IntRules.Get(trial.GetGeomType(), order);
+               as.trial.Space() == mfem::FunctionSpace::rQk ?
+                  &mfem::RefinedIntRules.Get(as.trial.GetGeomType(), order) :
+                  &mfem::IntRules.Get(as.trial.GetGeomType(), order);
 
-            if (&trial == &test)
+            if (&as.trial == &as.test)
             {
-               const int nd = trial.GetDof();
+               const int nd = as.trial.GetDof();
 
-               mat.SetSize(nd);
-               mat = 0.0;
+               as.mat.SetSize(nd);
+               as.mat = 0.0;
 
                mfem::DenseMatrix dshape(nd, dim);
                mfem::DenseMatrix dshapedxt(nd, spaceDim);
                for (int i = 0; i < ir->GetNPoints(); i++)
                {
                   const mfem::IntegrationPoint &ip = ir->IntPoint(i);
-                  trial.CalcDShape(ip, dshape);
-                  trans.SetIntPoint(&ip);
+                  as.trial.CalcDShape(ip, dshape);
+                  as.trans.SetIntPoint(&ip);
 
-                  const double tw = trans.Weight();
+                  const double tw = as.trans.Weight();
                   const double w = ip.weight / (square ? tw : tw * tw * tw);
 
-                  mfem::Mult(dshape, trans.AdjugateJacobian(), dshapedxt);
-                  mfem::AddMult_a_AAt(w, dshapedxt, mat);
+                  mfem::Mult(dshape, as.trans.AdjugateJacobian(), dshapedxt);
+                  mfem::AddMult_a_AAt(w, dshapedxt, as.mat);
                }
             }
             else
@@ -585,7 +572,7 @@ namespace Rodin::Variational
             : Integral<ShapeFunctionBase<TestSpace>>(integrand)
          {
             setIntegrationOrder(
-                  [](const Assembly::Common& as)
+                  [](const Linear::Assembly::Common& as)
                   {
                      return 2 * as.fe.GetOrder();
                   });
@@ -594,7 +581,7 @@ namespace Rodin::Variational
                                        .getFiniteElementSpace()
                                        .getHandle().GetFE(0)->GetOrder();
             setIntegrationOrder(
-                  [order](const Assembly::Device&)
+                  [order](const Linear::Assembly::Device&)
                   {
                      return 2 * order;
                   }
@@ -618,13 +605,13 @@ namespace Rodin::Variational
             return static_cast<const Integrand&>(Integral<ShapeFunctionBase<TestSpace>>::getIntegrand());
          }
 
-         bool isSupported(Assembly::Type t) const override
+         bool isSupported(Linear::Assembly::Type t) const override
          {
             switch (t)
             {
-               case Assembly::Type::Common:
+               case Linear::Assembly::Type::Common:
                   return true;
-               case Assembly::Type::Device:
+               case Linear::Assembly::Type::Device:
                   return true;
                default:
                   return false;
@@ -632,47 +619,49 @@ namespace Rodin::Variational
             return false;
          }
 
-         Integral& setIntegrationOrder(std::function<int(const Assembly::Common&)> order)
+         Integral& setIntegrationOrder(std::function<int(const Linear::Assembly::Common&)> order)
          {
             return static_cast<Integral&>(Parent::setIntegrationOrder(order));
          }
 
-         int getIntegrationOrder(const Assembly::Common& as) const
+         int getIntegrationOrder(const Linear::Assembly::Common& as) const
          {
             return Parent::getIntegrationOrder(as);
          }
 
-         Integral& setIntegrationOrder(std::function<int(const Assembly::Device&)> order)
+         Integral& setIntegrationOrder(std::function<int(const Linear::Assembly::Device&)> order)
          {
             m_devIntOrder = order;
             return *this;
          }
 
-         int getIntegrationOrder(const Assembly::Device& as) const
+         int getIntegrationOrder(const Linear::Assembly::Device& as) const
          {
+            assert(m_devIntOrder);
             return m_devIntOrder(as);
          }
 
-         void getElementVector(const Assembly::Device& as) const override
+         void getElementVector(const Linear::Assembly::Device& as) const override
          {
             const FunctionBase& f = getIntegrand().getFunction();
+            const mfem::IntegrationRule *ir =
+               &mfem::IntRules.Get(as.fes.GetFE(0)->GetGeomType(), getIntegrationOrder(as));
+            auto q = f.build();
 
             switch (f.getRangeType())
             {
                case RangeType::Scalar:
                {
-                  const mfem::FiniteElement& fe = *as.fes.GetFE(0);
-                  assert(m_devIntOrder);
-                  const mfem::IntegrationRule *ir =
-                     &mfem::IntRules.Get(fe.GetGeomType(), getIntegrationOrder(as));
-                  auto q = f.build();
-                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q), ir);
+                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q));
+                  lfi.SetIntRule(ir);
                   lfi.AssembleDevice(as.fes, as.markers, as.vec);
                   break;
                }
                case RangeType::Vector:
                {
-                  std::abort();
+                  mfem::VectorDomainLFIntegrator lfi(std::get<Internal::VectorProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleDevice(as.fes, as.markers, as.vec);
                }
                case RangeType::Matrix:
                {
@@ -682,23 +671,28 @@ namespace Rodin::Variational
             }
          }
 
-         void getElementVector(const Assembly::Common& as) const override
+         void getElementVector(const Linear::Assembly::Common& as) const override
          {
             const FunctionBase& f = getIntegrand().getFunction();
 
-            // const mfem::IntegrationRule *ir =
-            //    &mfem::IntRules.Get(as.fe.GetGeomType(), getIntegrationOrder(as));
+            const mfem::IntegrationRule *ir =
+               &mfem::IntRules.Get(as.fe.GetGeomType(), getIntegrationOrder(as));
+            auto q = f.build();
 
             switch (f.getRangeType())
             {
                case RangeType::Scalar:
                {
-                  std::abort();
+                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleRHSElementVect(as.fe, as.trans, as.vec);
                   break;
                }
                case RangeType::Vector:
                {
-                  std::abort();
+                  mfem::VectorDomainLFIntegrator lfi(std::get<Internal::VectorProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleRHSElementVect(as.fe, as.trans, as.vec);
                   break;
                }
                case RangeType::Matrix:
@@ -714,7 +708,7 @@ namespace Rodin::Variational
             return new Integral(*this);
          }
       private:
-         std::function<int(const Assembly::Device&)> m_devIntOrder;
+         std::function<int(const Linear::Assembly::Device&)> m_devIntOrder;
    };
    template <class FES>
    Integral(const FunctionBase&, const ShapeFunction<FES, TestSpace>&)

@@ -53,18 +53,18 @@ namespace Rodin::Variational
           */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
-         virtual void getElementVector(const Assembly::Common& as) const = 0;
+         virtual void getElementVector(const Linear::Assembly::Common& as) const = 0;
 
-         virtual void getElementVector(const Assembly::Device&) const
+         virtual void getElementVector(const Linear::Assembly::Device&) const
          {
             assert(false); // Unimplemented
          }
 
-         virtual bool isSupported(Assembly::Type t) const
+         virtual bool isSupported(Linear::Assembly::Type t) const
          {
             switch (t)
             {
-               case Assembly::Type::Common:
+               case Linear::Assembly::Type::Common:
                   return true;
                default:
                   return false;
@@ -245,18 +245,18 @@ namespace Rodin::Variational::Internal
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans, mfem::Vector& vec) override
          {
-            m_lfi.getElementVector(Assembly::Common{fe, trans, vec});
+            m_lfi.getElementVector(Linear::Assembly::Common{fe, trans, vec});
          }
 
          void AssembleDevice(const mfem::FiniteElementSpace& fes,
                const mfem::Array<int>& markers, mfem::Vector& b) override
          {
-            m_lfi.getElementVector(Assembly::Device{fes, markers, b});
+            m_lfi.getElementVector(Linear::Assembly::Device{fes, markers, b});
          }
 
          bool SupportsDevice() override
          {
-            return m_lfi.isSupported(Assembly::Type::Device);
+            return m_lfi.isSupported(Linear::Assembly::Type::Device);
          }
 
       private:

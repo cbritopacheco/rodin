@@ -11,12 +11,19 @@
 
 namespace Rodin::Variational
 {
-   namespace Assembly
+   namespace Linear::Assembly
    {
       enum class Type;
 
       struct Common;
       struct Device;
+   }
+
+   namespace Bilinear::Assembly
+   {
+      enum class Type;
+
+      struct Common;
    }
 
    // ---- Problem -----------------------------------------------------------

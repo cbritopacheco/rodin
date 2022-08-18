@@ -9,7 +9,9 @@
 
 #include <mfem.hpp>
 
-namespace Rodin::Variational::Assembly
+#include "ForwardDecls.h"
+
+namespace Rodin::Variational::Linear::Assembly
 {
    enum class Type
    {
@@ -29,6 +31,22 @@ namespace Rodin::Variational::Assembly
       const mfem::FiniteElementSpace& fes;
       const mfem::Array<int>& markers;
       mfem::Vector& vec;
+   };
+}
+
+namespace Rodin::Variational::Bilinear::Assembly
+{
+   enum class Type
+   {
+      Common
+   };
+
+   struct Common
+   {
+      const mfem::FiniteElement& trial;
+      const mfem::FiniteElement& test;
+      mfem::ElementTransformation& trans;
+      mfem::DenseMatrix& mat;
    };
 }
 

@@ -24,8 +24,7 @@ namespace Rodin::Variational
 {
    template <class Lhs, class Rhs>
    class Mult
-   {
-   };
+   {};
 
    /**
     * @brief Multiplication of two FunctionBase instances.
