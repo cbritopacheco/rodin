@@ -22,6 +22,11 @@
 
 namespace Rodin::Variational
 {
+   template <class Lhs, class Rhs>
+   class Mult
+   {
+   };
+
    /**
     * @brief Multiplication of two FunctionBase instances.
     */
@@ -71,64 +76,74 @@ namespace Rodin::Variational
       return Mult(lhs, ScalarFunction(rhs));
    }
 
+   /**
+    * @brief Left Multiplication by a FunctionBase of a ShapeFunctionBase
+    *
+    * Represents the following expression:
+    * @f[
+    *    f A(u)
+    * @f]
+    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
+    * $A(u)$ is the shape operator (scalar, vector, or matrix valued).
+    */
    template <ShapeFunctionSpaceType Space>
    class Mult<FunctionBase, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>
    {
       public:
+         constexpr
          Mult(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            if (lhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
-         }
-
-         Mult(const Mult& other)
-            :  ShapeFunctionBase<Space>(other),
-               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+            : m_f(lhs.copy()), m_u(rhs.copy())
          {}
 
+         constexpr
+         Mult(const Mult& other)
+            :  ShapeFunctionBase<Space>(other),
+               m_f(other.m_f->copy()), m_u(other.m_u->copy())
+         {}
+
+         constexpr
          Mult(Mult&& other)
             :  ShapeFunctionBase<Space>(std::move(other)),
-               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+               m_f(std::move(other.m_f)), m_u(std::move(other.m_u))
          {}
 
          const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return m_rhs->getLeaf();
+            return m_u->getLeaf();
          }
 
          int getRows() const override
          {
-            return m_rhs->getRangeShape().height();
+            return m_u->getRangeShape().height();
          }
 
          int getColumns() const override
          {
-            return m_rhs->getRangeShape().width();
+            return m_u->getRangeShape().width();
          }
 
          int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
          {
-            return m_rhs->getDOFs(fe, trans);
+            return m_u->getDOFs(fe, trans);
          }
 
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               ShapeComputator& comp) const override
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
+               ShapeComputator& compute) const override
          {
-            auto& trans = comp.getElementTransformation();
-            const auto& ip = comp.getIntegrationPoint();
-            switch (m_lhs->getRangeType())
+            switch (m_f->getRangeType())
             {
                case RangeType::Scalar:
                {
-                  m_rhs->getOperator(op, fe, comp);
+                  m_u->getOperator(op, fe, trans, ip, compute);
                   mfem::DenseMatrix v;
-                  m_lhs->getValue(v, trans, ip);
+                  m_f->getValue(v, trans, ip);
                   op *= v(0, 0);
                   break;
                }
@@ -139,21 +154,21 @@ namespace Rodin::Variational
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
          {
-            return m_rhs->getFiniteElementSpace();
+            return m_u->getFiniteElementSpace();
          }
 
          const FiniteElementSpaceBase& getFiniteElementSpace() const override
          {
-            return m_rhs->getFiniteElementSpace();
+            return m_u->getFiniteElementSpace();
          }
 
-         Mult* copy() const noexcept override
+         virtual Mult* copy() const noexcept override
          {
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<FunctionBase> m_lhs;
-         std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
+         std::unique_ptr<FunctionBase> m_f;
+         std::unique_ptr<ShapeFunctionBase<Space>> m_u;
    };
    template <ShapeFunctionSpaceType Space>
    Mult(const FunctionBase&, const ShapeFunctionBase<Space>&)
@@ -166,26 +181,120 @@ namespace Rodin::Variational
       return Mult(lhs, rhs);
    }
 
-   template <ShapeFunctionSpaceType Space>
-   Mult<FunctionBase, ShapeFunctionBase<Space>>
-   operator*(const ShapeFunctionBase<Space>& lhs, const FunctionBase& rhs)
-   {
-      return Mult(rhs, lhs);
-   }
-
-   template <class T, ShapeFunctionSpaceType Space>
-   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, ShapeFunctionBase<Space>>>
-   operator*(const ShapeFunctionBase<Space>& lhs, T v)
-   {
-      return Mult(ScalarFunction(v), lhs);
-   }
-
    template <class T, ShapeFunctionSpaceType Space>
    std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, ShapeFunctionBase<Space>>>
    operator*(T v, const ShapeFunctionBase<Space>& rhs)
    {
       return Mult(ScalarFunction(v), rhs);
    }
+
+   /* ||--- OPTIMIZATIONS ----------------------------------------------------
+    * Mult<FunctionBase, ShapeFunctionBase<Space>>
+    * ---------------------------------------------------------------------->>
+    */
+
+   /**
+    * @internal
+    * @brief Left Multiplication of a ShapeFunction by a FunctionBase
+    *
+    * Represents the following expression:
+    * @f[
+    *    f u
+    * @f]
+    * where @f$ f @f$ is a function (scalar or or matrix valued).
+    */
+   template <ShapeFunctionSpaceType Space, class FES>
+   class Mult<FunctionBase, ShapeFunction<FES, Space>>
+      : public Mult<FunctionBase, ShapeFunctionBase<Space>>
+   {
+      public:
+         constexpr
+         Mult(const FunctionBase& lhs, const ShapeFunction<FES, Space>& rhs)
+            : Mult<FunctionBase, ShapeFunctionBase<Space>>(lhs, rhs)
+         {
+            if (lhs.getRangeType() != RangeType::Scalar && lhs.getRangeType() != RangeType::Matrix)
+               UnexpectedRangeTypeException({RangeType::Scalar, RangeType::Matrix}, lhs.getRangeType()).raise();
+         }
+
+         constexpr
+         Mult(const Mult& other)
+            : Mult<FunctionBase, ShapeFunctionBase<Space>>(other)
+         {}
+
+         constexpr
+         Mult(Mult&& other)
+            : Mult<FunctionBase, ShapeFunctionBase<Space>>(std::move(other))
+         {}
+
+         Mult* copy() const noexcept override
+         {
+            return new Mult(*this);
+         }
+   };
+   template <ShapeFunctionSpaceType Space, class FES>
+   Mult(const FunctionBase&, const ShapeFunction<FES, Space>& rhs)
+      -> Mult<FunctionBase, ShapeFunction<FES, Space>>;
+
+   template <ShapeFunctionSpaceType Space, class FES>
+   Mult<FunctionBase, ShapeFunctionBase<Space>>
+   operator*(const FunctionBase& lhs, const ShapeFunction<FES, Space>& rhs)
+   {
+      return Mult(lhs, rhs);
+   }
+
+   /**
+    * @internal
+    * @brief Left Multiplication of the gradient of a ShapeFunction by a FunctionBase
+    *
+    * Represents the following expression:
+    * @f[
+    *    f \nabla u
+    * @f]
+    * where @f$ f @f$ is a function (scalar or matrix valued).
+    */
+   template <ShapeFunctionSpaceType Space, class FES>
+   class Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>
+      : public Mult<FunctionBase, ShapeFunctionBase<Space>>
+   {
+      public:
+         constexpr
+         Mult(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
+            : Mult<FunctionBase, ShapeFunctionBase<Space>>(lhs, rhs)
+         {
+            if (lhs.getRangeType() != RangeType::Scalar && lhs.getRangeType() != RangeType::Matrix)
+               UnexpectedRangeTypeException({RangeType::Scalar, RangeType::Matrix}, lhs.getRangeType()).raise();
+         }
+
+         constexpr
+         Mult(const Mult& other)
+            : Mult<FunctionBase, ShapeFunctionBase<Space>>(other)
+         {}
+
+         constexpr
+         Mult(Mult&& other)
+            : Mult<FunctionBase, ShapeFunctionBase<Space>>(std::move(other))
+         {}
+
+         Mult* copy() const noexcept override
+         {
+            return new Mult(*this);
+         }
+   };
+   template <ShapeFunctionSpaceType Space, class FES>
+   Mult(const FunctionBase&, const Grad<ShapeFunction<FES, Space>>& rhs)
+      -> Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>;
+
+   template <ShapeFunctionSpaceType Space, class FES>
+   Mult<FunctionBase, ShapeFunctionBase<Space>>
+   operator*(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
+   {
+      return Mult(lhs, rhs);
+   }
+
+   /* <<-- OPTIMIZATIONS -----------------------------------------------------
+    * Mult<FunctionBase, ShapeFunctionBase<Space>>
+    * ----------------------------------------------------------------------||
+    */
 }
 
 #endif

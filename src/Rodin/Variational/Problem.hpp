@@ -30,19 +30,19 @@ namespace Rodin::Variational
 
    template <class TrialFES, class TestFES, class OperatorType>
    Problem<TrialFES, TestFES, OperatorType>&
-   Problem<TrialFES, TestFES, OperatorType>::operator=(const ProblemBody& rhs)
+   Problem<TrialFES, TestFES, OperatorType>::operator=(ProblemBody&& rhs)
    {
-      m_pb.reset(rhs.copy());
+      m_pb = std::move(rhs);
 
-      for (auto& bfi : m_pb->getBilinearFormDomainIntegratorList())
+      for (auto& bfi : m_pb.getBilinearFormDomainIntegratorList())
          m_bilinearForm.add(*bfi);
-      for (auto& bfi : m_pb->getBilinearFormBoundaryIntegratorList())
+      for (auto& bfi : m_pb.getBilinearFormBoundaryIntegratorList())
          m_bilinearForm.add(*bfi);
 
       // The LinearFormIntegrator instances have already been moved to the LHS
-      for (auto& lfi : m_pb->getLinearFormDomainIntegratorList())
+      for (auto& lfi : m_pb.getLinearFormDomainIntegratorList())
          m_linearForm.add(*lfi);
-      for (auto& lfi : m_pb->getLinearFormBoundaryIntegratorList())
+      for (auto& lfi : m_pb.getLinearFormBoundaryIntegratorList())
          m_linearForm.add(*lfi);
 
       // Emplace all the solutions
@@ -140,7 +140,7 @@ namespace Rodin::Variational
    template <class TrialFES, class TestFES, class OperatorType>
    EssentialBoundary& Problem<TrialFES, TestFES, OperatorType>::getEssentialBoundary()
    {
-      return m_pb->getEssentialBoundary();
+      return m_pb.getEssentialBoundary();
    }
 }
 

@@ -8,8 +8,10 @@
 
 namespace Rodin::FormLanguage
 {
+   boost::uuids::random_generator Base::s_gen;
+
    Base::Base()
-      : m_uuid(boost::uuids::random_generator()())
+      : m_uuid(s_gen())
    {}
 
    Base::Base(const Base& other)
