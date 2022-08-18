@@ -13,50 +13,6 @@ using namespace Rodin;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-/**
- * @brief Computes the conormal field.
- * @param[in] Sh Scalar finite element space
- * @oaram[in] Vh Vectorial finite element space
- */
-auto getConormal(
-    H1<Context::Serial>& scalarFes,
-    H1<Context::Serial>& vecFes,
-    GridFunction<H1<Context::Serial>>& dist,
-    Solver::Solver& solver, double alpha=0.1)
-{
-  auto n0 = VectorFunction{Dx(dist), Dy(dist), Dz(dist)};
-
-  TrialFunction nx(scalarFes);
-  TrialFunction ny(scalarFes);
-  TrialFunction nz(scalarFes);
-  TestFunction  v(scalarFes);
-
-  Problem velextX(nx, v);
-  velextX = Integral(alpha * Grad(nx), Grad(v))
-          + Integral(nx, v)
-          - Integral(n0.x(), v);
-  solver.solve(velextX);
-
-  Problem velextY(ny, v);
-  velextY = Integral(alpha * Grad(ny), Grad(v))
-          + Integral(ny, v)
-          - Integral(n0.y(), v);
-  solver.solve(velextY);
-
-  Problem velextZ(nz, v);
-  velextZ = Integral(alpha * Grad(nz), Grad(v))
-          + Integral(nz, v)
-          - Integral(n0.z(), v);
-  solver.solve(velextZ);
-
-  auto n = VectorFunction{nx.getGridFunction(), ny.getGridFunction(), nz.getGridFunction()};
-  auto norm = Pow(n.x() * n.x() + n.y() * n.y() + n.z() * n.z(), 0.5);
-
-  GridFunction conormal(vecFes);
-  conormal = n / norm;
-
-  return conormal;
-}
 
 int main(int, char**)
 {

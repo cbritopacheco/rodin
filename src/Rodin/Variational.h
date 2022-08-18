@@ -56,6 +56,7 @@
 #include "Variational/ScalarFunction.h"
 #include "Variational/VectorFunction.h"
 #include "Variational/MatrixFunction.h"
+#include "Variational/BooleanFunction.h"
 
 #include "Variational/DirichletBC.h"
 

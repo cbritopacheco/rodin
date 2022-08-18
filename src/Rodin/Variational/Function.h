@@ -32,9 +32,7 @@ namespace Rodin::Variational
    class FunctionBase : public FormLanguage::Base
    {
       public:
-         FunctionBase()
-            : FormLanguage::Base()
-         {}
+         FunctionBase() = default;
 
          FunctionBase(const FunctionBase& other)
             : FormLanguage::Base(other),

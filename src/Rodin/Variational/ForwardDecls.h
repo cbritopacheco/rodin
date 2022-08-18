@@ -11,6 +11,25 @@
 
 namespace Rodin::Variational
 {
+   class RangeShape;
+
+   enum class RangeType
+   {
+      Scalar,
+      Vector,
+      Matrix
+   };
+
+   /**
+    * Enumeration class to indicate whether the integration should be done
+    * either inside the Domain or on the Boundary.
+    */
+   enum class IntegratorRegion
+   {
+      Domain, ///< Perform the integration over the interior domain
+      Boundary ///< Perform the integration over the boundary of the domain
+   };
+
    namespace Linear::Assembly
    {
       enum class Type;
@@ -26,78 +45,6 @@ namespace Rodin::Variational
       struct Common;
    }
 
-   // ---- Problem -----------------------------------------------------------
-   class ProblemBase;
-
-   template <class TrialFES, class TestFES, class OperatorType>
-   class Problem;
-
-   class ProblemBody;
-
-   // ---- FiniteElementCollection -------------------------------------------
-   class FiniteElementCollectionBase;
-
-   class L2;
-
-
-   // ---- FiniteElementSpace ------------------------------------------------
-   class FiniteElementSpaceBase;
-
-   // template <class FEC, class Trait = Traits::Serial>
-   // class FiniteElementSpace;
-
-   template <class Trait>
-   class H1;
-
-   // ---- GridFunction ------------------------------------------------------
-   class GridFunctionBase;
-
-   template <class FES>
-   class GridFunction;
-
-   // ---- ShapeFunction -----------------------------------------------------
-
-   /**
-    * Enumeration class to indicate whether a derived instance of
-    * ShapeFunctionBase is either a Trial or Test space.
-    */
-   enum class ShapeFunctionSpaceType
-   {
-      Trial, ///< Trial function space
-      Test ///< Test function space
-   };
-
-   static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
-
-   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
-
-   /**
-    * Enumeration class to indicate whether the integration should be done
-    * either inside the Domain or on the Boundary.
-    */
-   enum class IntegratorRegion
-   {
-      Domain, ///< Perform the integration over the interior domain
-      Boundary ///< Perform the integration over the boundary of the domain
-   };
-
-   template <ShapeFunctionSpaceType Space>
-   class ShapeFunctionBase;
-
-   template <class FES, ShapeFunctionSpaceType Space>
-   class ShapeFunction;
-
-   template <class FES>
-   class TrialFunction;
-
-   template <class FES>
-   class TestFunction;
-
-   template <class T>
-   class Component;
-
-
-   // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 
    template <class FES>
@@ -109,7 +56,6 @@ namespace Rodin::Variational
 
    class LinearFormBoundaryIntegrator;
 
-   // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 
    /**
@@ -127,25 +73,53 @@ namespace Rodin::Variational
 
    class BilinearFormDomainIntegrator;
 
-   // ---- Boundary Conditions -----------------------------------------------
-   template <class T>
-   class DirichletBC;
+   class FiniteElementCollectionBase;
 
-   // ---- Coefficients ------------------------------------------------------
+   class FiniteElementSpaceBase;
+
+   class L2;
+
+   template <class Trait>
+   class H1;
+
+   class GridFunctionBase;
+
+   template <class FES>
+   class GridFunction;
+
+   /**
+    * Enumeration class to indicate whether a derived instance of
+    * ShapeFunctionBase is either a Trial or Test space.
+    */
+   enum class ShapeFunctionSpaceType
+   {
+      Trial, ///< Trial function space
+      Test ///< Test function space
+   };
+
+   static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
+
+   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
+
+   class BasisOperator;
+
+   template <ShapeFunctionSpaceType Space>
+   class ShapeFunctionBase;
+
+   template <class FES, ShapeFunctionSpaceType Space>
+   class ShapeFunction;
+
+   template <class FES>
+   class TrialFunction;
+
+   template <class FES>
+   class TestFunction;
+
    class FunctionBase;
 
    class Function;
 
    class ScalarFunctionBase;
-
-   class RangeShape;
-
-   enum class RangeType
-   {
-      Scalar,
-      Vector,
-      Matrix
-   };
 
    template <class ... Values>
    class ScalarFunction;
@@ -159,7 +133,14 @@ namespace Rodin::Variational
 
    class MatrixFunction;
 
-   // ---- Expressions -------------------------------------------------------
+   class BooleanFunctionBase;
+
+   template <class T>
+   class BooleanFunction;
+
+   template <class T>
+   class Component;
+
    template <class T>
    class Transpose;
 
@@ -198,11 +179,30 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class Composition;
 
-   class BasisOperator;
+   template <class Lhs, class Rhs>
+   class LT;
 
-   /**
-    * @brief Integral class
-    */
+   template <class Lhs, class Rhs>
+   class GT;
+
+   template <class Lhs, class Rhs>
+   class EQ;
+
+   template <class Lhs, class Rhs>
+   class LEQ;
+
+   template <class Lhs, class Rhs>
+   class GEQ;
+
+   template <class Lhs, class Rhs>
+   class NEQ;
+
+   template <class Lhs, class Rhs>
+   class AND;
+
+   template <class Lhs, class Rhs>
+   class OR;
+
    template <class Integrand>
    class Integral;
 
@@ -211,6 +211,16 @@ namespace Rodin::Variational
 
    template <class Integrand>
    class BoundaryIntegral;
+
+   template <class T>
+   class DirichletBC;
+
+   class ProblemBase;
+
+   template <class TrialFES, class TestFES, class OperatorType>
+   class Problem;
+
+   class ProblemBody;
 
    // TODO: Refactor or remove these two classes!!!!
    class LinearFormIntegratorSum;
