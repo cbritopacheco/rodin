@@ -9,6 +9,7 @@
 
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
+#include "Assembly.h"
 
 namespace Rodin::Variational
 {
@@ -52,9 +53,19 @@ namespace Rodin::Variational
           */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
-         virtual void getElementMatrix(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const = 0;
+         virtual bool isSupported(Bilinear::Assembly::Type t) const
+         {
+            switch (t)
+            {
+               case Bilinear::Assembly::Type::Common:
+                  return true;
+               default:
+                  return false;
+            }
+            return false;
+         }
+
+         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
    };
@@ -237,14 +248,14 @@ namespace Rodin::Variational::Internal
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            m_bfi.getElementMatrix(fe, fe, trans, mat);
+            m_bfi.getElementMatrix(Bilinear::Assembly::Common{fe, fe, trans, mat});
          }
 
          void AssembleElementMatrix2(
                const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
                   mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            m_bfi.getElementMatrix(trial, test, trans, mat);
+            m_bfi.getElementMatrix(Bilinear::Assembly::Common{trial, test, trans, mat});
          }
       private:
          const BilinearFormIntegratorBase& m_bfi;
