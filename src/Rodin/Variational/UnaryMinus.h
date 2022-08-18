@@ -67,8 +67,11 @@ namespace Rodin::Variational
 
          const ShapeFunctionBase<TestSpace>& getTestFunction() const override;
 
-         void getElementVector(const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) const override;
+         bool isSupported(Assembly::Type t) const override;
+
+         void getElementVector(const Assembly::Device& as) const override;
+
+         void getElementVector(const Assembly::Common& as) const override;
 
          UnaryMinus* copy() const noexcept override
          {

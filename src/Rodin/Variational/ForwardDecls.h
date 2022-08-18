@@ -11,6 +11,14 @@
 
 namespace Rodin::Variational
 {
+   namespace Assembly
+   {
+      enum class Type;
+
+      struct Common;
+      struct Device;
+   }
+
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
@@ -56,6 +64,16 @@ namespace Rodin::Variational
 
    static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
+   /**
+    * Enumeration class to indicate whether the integration should be done
+    * either inside the Domain or on the Boundary.
+    */
+   enum class IntegratorRegion
+   {
+      Domain, ///< Perform the integration over the interior domain
+      Boundary ///< Perform the integration over the boundary of the domain
+   };
+
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase;
 
@@ -71,24 +89,6 @@ namespace Rodin::Variational
    template <class T>
    class Component;
 
-   /**
-    * Enumeration class to indicate whether the integration should be done
-    * either inside the Domain or on the Boundary.
-    */
-   enum class IntegratorRegion
-   {
-      Domain, ///< Perform the integration over the interior domain
-      Boundary ///< Perform the integration over the boundary of the domain
-   };
-
-   /**
-    * @brief Integral class
-    */
-   template <class Integrand>
-   class Integral;
-
-   template <class Integrand>
-   class BoundaryIntegral;
 
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
@@ -119,10 +119,6 @@ namespace Rodin::Variational
    class BilinearFormIntegratorBase;
 
    class BilinearFormDomainIntegrator;
-
-   class DiffusionIntegrator;
-
-   class ElasticityIntegrator;
 
    // ---- Boundary Conditions -----------------------------------------------
    template <class T>
@@ -196,6 +192,18 @@ namespace Rodin::Variational
    class Composition;
 
    class BasisOperator;
+
+   /**
+    * @brief Integral class
+    */
+   template <class Integrand>
+   class Integral;
+
+   template <class Lhs, class Rhs>
+   class Integral<Dot<Grad<Lhs>, Grad<Rhs>>>;
+
+   template <class Integrand>
+   class BoundaryIntegral;
 
    // TODO: Refactor or remove these two classes!!!!
    class LinearFormIntegratorSum;

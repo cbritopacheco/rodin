@@ -76,14 +76,27 @@ namespace Rodin::Variational
       return m_op->getTestFunction();
    }
 
-   void
-   UnaryMinus<LinearFormIntegratorBase>
-   ::getElementVector(const mfem::FiniteElement& fe,
-         mfem::ElementTransformation& trans, mfem::Vector& vec)
+   bool
+   UnaryMinus<LinearFormIntegratorBase>::isSupported(Assembly::Type t)
    const
    {
-      m_op->getElementVector(fe, trans, vec);
-      vec *= -1.0;
+      return m_op->isSupported(t);
+   }
+
+   void
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Assembly::Device& as)
+   const
+   {
+      m_op->getElementVector(as);
+      as.vec *= -1.0;
+   }
+
+   void
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Assembly::Common& as)
+   const
+   {
+      m_op->getElementVector(as);
+      as.vec *= -1.0;
    }
 
    UnaryMinus<LinearFormIntegratorBase>
