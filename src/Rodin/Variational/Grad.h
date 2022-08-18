@@ -101,15 +101,21 @@ namespace Rodin::Variational
    class Grad<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
    {
       public:
+         constexpr
          Grad(ShapeFunction<H1<Trait>, Space>& u)
             : m_u(u)
-         {}
+         {
+            if (u.getRangeType() != RangeType::Scalar)
+               UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType()).raise();
+         }
 
+         constexpr
          Grad(const Grad& other)
             : ShapeFunctionBase<Space>(other),
               m_u(other.m_u)
          {}
 
+         constexpr
          Grad(Grad&& other)
             : ShapeFunctionBase<Space>(std::move(other)),
               m_u(other.m_u)
@@ -140,10 +146,11 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
-               ShapeComputator& comp) const override
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
+               ShapeComputator& compute) const override
          {
-            auto& trans = comp.getElementTransformation();
-            const auto& dshape = comp.getPhysicalDShape(fe);
+            const auto& dshape = compute.getPhysicalDShape(fe, trans, ip);
             const int n = dshape.NumRows();
             const int sdim = trans.GetSpaceDim();
             op.setSize(sdim, 1, n);

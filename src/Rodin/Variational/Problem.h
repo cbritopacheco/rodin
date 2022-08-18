@@ -37,15 +37,6 @@ namespace Rodin::Variational
          virtual EssentialBoundary& getEssentialBoundary() = 0;
 
          /**
-          * @brief Builds the problem using the FormLanguage::ProblemBody
-          * object.
-          *
-          * @param[in] rhs Problem body constructed using expressions from the
-          * Variational::FormLanguage.
-          */
-         virtual ProblemBase& operator=(const ProblemBody& rhs) = 0;
-
-         /**
           * @brief Assembles the underlying linear system to solve.
           */
          virtual void assemble() = 0;
@@ -132,6 +123,8 @@ namespace Rodin::Variational
           */
          Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType* = new OperatorType);
 
+         Problem& operator=(ProblemBody&& rhs);
+
          Problem& update() override;
 
          void assemble() override;
@@ -140,7 +133,6 @@ namespace Rodin::Variational
 
          EssentialBoundary& getEssentialBoundary() override;
 
-         Problem& operator=(const ProblemBody& rhs) override;
 
          OperatorType& getStiffnessMatrix() override
          {
@@ -173,6 +165,8 @@ namespace Rodin::Variational
          }
 
       private:
+         ProblemBody m_pb;
+
          LinearForm<TestFES>                m_linearForm;
          BilinearForm<TrialFES, TestFES>    m_bilinearForm;
 
@@ -186,7 +180,6 @@ namespace Rodin::Variational
          const std::map<
             boost::uuids::uuid,
             std::reference_wrapper<TestFunction<TestFES>>> m_testFunctions;
-         std::unique_ptr<ProblemBody> m_pb;
 
          mfem::Array<int> m_essTrueDofList;
    };

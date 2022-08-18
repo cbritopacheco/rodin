@@ -113,6 +113,9 @@ namespace Rodin::Variational
 
          virtual RangeType getRangeType() const;
 
+         /**
+          * @note It is not necessary to set the size beforehand.
+          */
          virtual void getValue(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;

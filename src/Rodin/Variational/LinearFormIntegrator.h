@@ -14,6 +14,7 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "Assembly.h"
 #include "TestFunction.h"
 
 namespace Rodin::Variational
@@ -52,15 +53,24 @@ namespace Rodin::Variational
           */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
-         /**
-          * @brief Performs the assembly of the element vector.
-          * @param[in] fe Test space finite element
-          * @param[in] trans Element transformation
-          * @param[out] vec Element vector
-          */
-         virtual void getElementVector(
-               const mfem::FiniteElement& fe, mfem::ElementTransformation&
-               trans, mfem::Vector& vec) const = 0;
+         virtual void getElementVector(const Assembly::Common& as) const = 0;
+
+         virtual void getElementVector(const Assembly::Device&) const
+         {
+            assert(false); // Unimplemented
+         }
+
+         virtual bool isSupported(Assembly::Type t) const
+         {
+            switch (t)
+            {
+               case Assembly::Type::Common:
+                  return true;
+               default:
+                  return false;
+            }
+            return false;
+         }
 
          std::unique_ptr<mfem::LinearFormIntegrator> build() const;
 
@@ -117,6 +127,7 @@ namespace Rodin::Variational
             return *this;
          }
 
+
          const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const override
          {
             return *m_v;
@@ -133,6 +144,7 @@ namespace Rodin::Variational
          }
 
          virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
+
       private:
          std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
          std::set<int> m_attrs;
@@ -233,8 +245,20 @@ namespace Rodin::Variational::Internal
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans, mfem::Vector& vec) override
          {
-            m_lfi.getElementVector(fe, trans, vec);
+            m_lfi.getElementVector(Assembly::Common{fe, trans, vec});
          }
+
+         void AssembleDevice(const mfem::FiniteElementSpace& fes,
+               const mfem::Array<int>& markers, mfem::Vector& b) override
+         {
+            m_lfi.getElementVector(Assembly::Device{fes, markers, b});
+         }
+
+         bool SupportsDevice() override
+         {
+            return m_lfi.isSupported(Assembly::Type::Device);
+         }
+
       private:
          const LinearFormIntegratorBase& m_lfi;
    };
