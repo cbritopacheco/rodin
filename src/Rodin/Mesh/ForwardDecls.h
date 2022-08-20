@@ -58,6 +58,8 @@ namespace Rodin
 
    class BoundaryElement;
    class BoundaryElementView;
+
+   class Vertex;
 }
 
 #endif

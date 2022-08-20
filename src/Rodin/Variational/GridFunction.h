@@ -39,17 +39,72 @@ namespace Rodin::Variational
    /**
     * @brief Abstract class for GridFunction objects.
     */
-   class GridFunctionBase : public FunctionBase
+   class GridFunctionBase : public VectorFunctionBase
    {
       public:
+         class GridFunctionValue
+         {
+            public:
+               constexpr
+               GridFunctionValue(double v)
+                  : m_v(v)
+               {}
+
+               constexpr
+               GridFunctionValue(const mfem::Vector& v)
+                  : m_v(v)
+               {}
+
+               constexpr
+               GridFunctionValue(mfem::Vector&& v)
+                  : m_v(std::move(v))
+               {}
+
+               GridFunctionValue(const GridFunctionValue&) = default;
+
+               GridFunctionValue(GridFunctionValue&&) = default;
+
+               inline
+               constexpr
+               operator double() const
+               {
+                  return std::get<double>(m_v);
+               }
+
+               inline
+               constexpr
+               operator mfem::Vector&() &
+               {
+                  return std::get<mfem::Vector>(m_v);
+               }
+
+               inline
+               constexpr
+               operator mfem::Vector&&() &&
+               {
+                  return std::move(std::get<mfem::Vector>(m_v));
+               }
+
+               template <class T>
+               inline
+               constexpr
+               bool contains() const
+               {
+                  return std::holds_alternative<T>(m_v);
+               }
+
+            private:
+               std::variant<double, mfem::Vector> m_v;
+         };
+
          GridFunctionBase() = default;
 
          GridFunctionBase(const GridFunctionBase& other)
-            : FunctionBase(other)
+            : VectorFunctionBase(other)
          {}
 
          GridFunctionBase(GridFunctionBase&& other)
-            : FunctionBase(std::move(other))
+            : VectorFunctionBase(std::move(other))
          {}
 
          GridFunctionBase& operator=(GridFunctionBase&& other)
@@ -59,6 +114,30 @@ namespace Rodin::Variational
          }
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
+
+         GridFunctionValue operator()(const Vertex& v) const
+         {
+            switch (getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  mfem::Vector value;
+                  getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+                  return GridFunctionValue(value(0));
+               }
+               case RangeType::Vector:
+               {
+                  mfem::Vector value;
+                  getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+                  return GridFunctionValue(std::move(value));
+               }
+               case RangeType::Matrix:
+               {
+                  assert(false);
+                  return 0.0;
+               }
+            }
+         }
 
          /**
           * @brief Searches for the maximum value in the grid function data.
@@ -196,12 +275,23 @@ namespace Rodin::Variational
           */
          void transfer(GridFunctionBase& dst);
 
+         std::set<Vertex> where(
+               const BooleanFunctionBase& p,
+               const std::set<int>& attrs = {},
+               std::function<int(mfem::ElementTransformation&)> order =
+                  [](mfem::ElementTransformation&) { return 3; }) const;
+
+
+         RangeType getRangeType() const override;
+
+         RangeShape getRangeShape() const override;
+
          void getValue(
-               mfem::DenseMatrix& value,
+               mfem::Vector& value,
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override;
 
-         RangeShape getRangeShape() const override;
+         int getDimension() const override;
 
          /**
           * @brief Gets the underlying handle to the mfem::GridFunction object.
@@ -221,7 +311,7 @@ namespace Rodin::Variational
          virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
 
       private:
-         FunctionBase* copy() const noexcept override;
+         VectorFunctionBase* copy() const noexcept override;
    };
 
    /**
@@ -422,7 +512,7 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational::Internal
 {
-   class GridFunctionEvaluator : public FunctionBase
+   class GridFunctionEvaluator : public VectorFunctionBase
    {
       public:
          GridFunctionEvaluator(const GridFunctionBase& gf);
@@ -434,9 +524,14 @@ namespace Rodin::Variational::Internal
          RangeShape getRangeShape() const override;
 
          void getValue(
-               mfem::DenseMatrix& value,
+               mfem::Vector& value,
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override;
+
+         int getDimension() const override
+         {
+            return m_gf.getDimension();
+         }
 
          GridFunctionEvaluator* copy() const noexcept override
          {

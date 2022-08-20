@@ -28,6 +28,11 @@ namespace Rodin::Variational
 
          virtual ~BooleanFunctionBase() = default;
 
+         bool operator()(const Vertex& v) const
+         {
+            return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
+         }
+
          void getValue(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans,

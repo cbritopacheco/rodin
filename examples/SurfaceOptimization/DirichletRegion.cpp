@@ -26,7 +26,7 @@ static constexpr size_t maxIt = 250;
 static constexpr double hmax = 0.05;
 static constexpr double alpha = 0.1;
 static constexpr double epsilon = 0.1;
-static constexpr double ell = 0.01;
+static constexpr double ell = 0.4;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
 GridFunction<H1<Context::Serial>> getShapeGradient(
@@ -140,11 +140,44 @@ int main(int, char**)
     MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
 
     // Topological optimization
-    Alert::Info() << "    | Computing topological sensitivity." << Alert::Raise;
+    if (i % 5 == 0)
+    {
+      Alert::Info() << "    | Computing topological sensitivity." << Alert::Raise;
 
-    // Compute the topological sensitivity
-    GridFunction topo(Vh);
-    topo = M_PI * u.getGridFunction() * p.getGridFunction();
+      // Compute the topological sensitivity
+      GridFunction topo(Vh);
+      topo = M_PI * u.getGridFunction() * p.getGridFunction();
+
+      // Geodesic distance
+      auto gd = [&](const Vertex& x, const Vertex& c)
+                {
+                  return std::acos((x(0) * c(0) + x(1) * c(1) + x(2) * c(2)));
+                };
+
+      double s = topo.min();
+      if (s < 0)
+      {
+        auto cs = topo.where(topo < s + 0.001);
+        if (cs.size() > 0)
+        {
+          double rr = 0.2;
+          std::cout << cs.size() << std::endl;
+          auto holes = ScalarFunction(
+              [&](const Vertex& v) -> double
+              {
+                double d = dist(v);
+                for (const auto& c : cs)
+                {
+                  double dd = gd(v, c) - rr;
+                  d = std::min(d, dd);
+                }
+                return d;
+              });
+
+          dist = holes;
+        }
+      }
+    }
 
     // Mesh only the surface part
     Alert::Info() << "    | Meshing the domain." << Alert::Raise;
@@ -157,8 +190,6 @@ int main(int, char**)
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
-
-    // std::exit(1);
   }
 
   return 0;

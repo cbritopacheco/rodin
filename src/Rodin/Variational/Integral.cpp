@@ -30,7 +30,8 @@ namespace Rodin::Variational
       }
    }
 
-   void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(const Linear::Assembly::Common& as) const
+   void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
+         const Linear::Assembly::Common& as) const
    {
       const mfem::FiniteElement& fe = as.fe;
       mfem::ElementTransformation& trans = as.trans;

@@ -37,6 +37,13 @@
 #include "Variational/UnaryMinus.h"
 #include "Variational/Composition.h"
 
+#include "Variational/GT.h"
+#include "Variational/LT.h"
+#include "Variational/GEQ.h"
+#include "Variational/LEQ.h"
+#include "Variational/AND.h"
+#include "Variational/OR.h"
+
 #include "Variational/Div.h"
 #include "Variational/Grad.h"
 #include "Variational/Normal.h"

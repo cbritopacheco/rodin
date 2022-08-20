@@ -16,6 +16,7 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Mesh/Element.h"
 
 namespace Rodin::Variational::Internal
 {
@@ -117,6 +118,13 @@ namespace Rodin::Variational
          virtual void getValue(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
+
+         mfem::DenseMatrix operator()(const Vertex& v) const
+         {
+            mfem::DenseMatrix m;
+            getValue(m, *v.getElementTransformation(), *v.getIntegrationPoint());
+            return m;
+         }
 
          virtual FunctionBase* copy() const noexcept override = 0;
 
