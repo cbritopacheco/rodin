@@ -10,7 +10,7 @@ set(Rodin_HEADERS
 
 # ---- Set compile options for all the submodules ----------------------------
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(LANG CXX OPTIONS -w -O3)
+  rodin_add_compile_options(LANG CXX OPTIONS -w -Ofast)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG CXX

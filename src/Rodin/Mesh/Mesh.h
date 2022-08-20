@@ -221,6 +221,8 @@ namespace Rodin
           */
          std::set<int> where(std::function<bool(const Element&)> condition) const;
 
+         std::set<int> where(std::function<bool(const Vertex&)> condition) const;
+
          /**
           * @brief Edits all elements in the mesh via the given function.
           * @param[in] f Function which takes an ElementView to modify each
