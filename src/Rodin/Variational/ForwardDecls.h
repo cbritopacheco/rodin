@@ -206,9 +206,6 @@ namespace Rodin::Variational
    template <class Integrand>
    class Integral;
 
-   template <class Lhs, class Rhs>
-   class Integral<Dot<Grad<Lhs>, Grad<Rhs>>>;
-
    template <class Integrand>
    class BoundaryIntegral;
 

@@ -55,7 +55,6 @@ int main(int, char**)
     Alert::Info() << "    | Skinning mesh." << Alert::Raise;
     auto dOmega = Omega.skin();
     dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
-    dOmega.save("trace.mesh", IO::FileFormat::MEDIT);
 
     // Build finite element spaces
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
@@ -160,15 +159,13 @@ int main(int, char**)
         auto cs = topo.where(topo < s + 0.001);
         if (cs.size() > 0)
         {
-          double rr = 0.2;
-          std::cout << cs.size() << std::endl;
           auto holes = ScalarFunction(
               [&](const Vertex& v) -> double
               {
                 double d = dist(v);
                 for (const auto& c : cs)
                 {
-                  double dd = gd(v, c) - rr;
+                  double dd = gd(v, c) - 0.2;
                   d = std::min(d, dd);
                 }
                 return d;

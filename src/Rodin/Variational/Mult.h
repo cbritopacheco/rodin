@@ -17,15 +17,12 @@
 #include "Function.h"
 #include "ScalarFunction.h"
 #include "ShapeFunction.h"
+#include "Grad.h"
 
 #include "Exceptions.h"
 
 namespace Rodin::Variational
 {
-   template <class Lhs, class Rhs>
-   class Mult
-   {};
-
    /**
     * @brief Multiplication of two FunctionBase instances.
     */
@@ -33,6 +30,10 @@ namespace Rodin::Variational
    class Mult<FunctionBase, FunctionBase> : public FunctionBase
    {
       public:
+         using Parent = FunctionBase;
+         using LHS = FunctionBase;
+         using RHS = FunctionBase;
+
          Mult(const FunctionBase& lhs, const FunctionBase& rhs);
 
          Mult(const Mult& other);
@@ -43,7 +44,27 @@ namespace Rodin::Variational
 
          Mult& traceOf(const std::set<int>& attrs) override;
 
-         void getValue(
+         virtual FunctionBase& getLHS()
+         {
+            return *m_lhs;
+         }
+
+         virtual FunctionBase& getRHS()
+         {
+            return *m_rhs;
+         }
+
+         virtual const FunctionBase& getLHS() const
+         {
+            return *m_lhs;
+         }
+
+         virtual const FunctionBase& getRHS() const
+         {
+            return *m_rhs;
+         }
+
+         virtual void getValue(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override;
@@ -90,59 +111,93 @@ namespace Rodin::Variational
       : public ShapeFunctionBase<Space>
    {
       public:
+         using Parent = ShapeFunctionBase<Space>;
+         using LHS = FunctionBase;
+         using RHS = ShapeFunctionBase<Space>;
+
          constexpr
          Mult(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
-            : m_f(lhs.copy()), m_u(rhs.copy())
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {}
 
          constexpr
          Mult(const Mult& other)
             :  ShapeFunctionBase<Space>(other),
-               m_f(other.m_f->copy()), m_u(other.m_u->copy())
+               m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          constexpr
          Mult(Mult&& other)
             :  ShapeFunctionBase<Space>(std::move(other)),
-               m_f(std::move(other.m_f)), m_u(std::move(other.m_u))
+               m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
          const ShapeFunctionBase<Space>& getLeaf() const override
          {
-            return m_u->getLeaf();
+            return m_rhs->getLeaf();
          }
 
          int getRows() const override
          {
-            return m_u->getRangeShape().height();
+            return m_rhs->getRangeShape().height();
          }
 
          int getColumns() const override
          {
-            return m_u->getRangeShape().width();
+            return m_rhs->getRangeShape().width();
          }
 
          int getDOFs(
                const mfem::FiniteElement& fe,
                const mfem::ElementTransformation& trans) const override
          {
-            return m_u->getDOFs(fe, trans);
+            return m_rhs->getDOFs(fe, trans);
          }
 
-         void getOperator(
+         FiniteElementSpaceBase& getFiniteElementSpace() override
+         {
+            return m_rhs->getFiniteElementSpace();
+         }
+
+         const FiniteElementSpaceBase& getFiniteElementSpace() const override
+         {
+            return m_rhs->getFiniteElementSpace();
+         }
+
+         virtual FunctionBase& getLHS()
+         {
+            return *m_lhs;
+         }
+
+         virtual ShapeFunctionBase<Space>& getRHS()
+         {
+            return *m_rhs;
+         }
+
+         virtual const FunctionBase& getLHS() const
+         {
+            return *m_lhs;
+         }
+
+         virtual const ShapeFunctionBase<Space>& getRHS() const
+         {
+            return *m_rhs;
+         }
+
+         virtual void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip,
                ShapeComputator& compute) const override
          {
-            switch (m_f->getRangeType())
+            switch (m_lhs->getRangeType())
             {
                case RangeType::Scalar:
                {
-                  m_u->getOperator(op, fe, trans, ip, compute);
+                  m_rhs->getOperator(op, fe, trans, ip, compute);
                   mfem::DenseMatrix v;
-                  m_f->getValue(v, trans, ip);
+                  m_lhs->getValue(v, trans, ip);
                   op *= v(0, 0);
                   break;
                }
@@ -151,23 +206,13 @@ namespace Rodin::Variational
             }
          }
 
-         FiniteElementSpaceBase& getFiniteElementSpace() override
-         {
-            return m_u->getFiniteElementSpace();
-         }
-
-         const FiniteElementSpaceBase& getFiniteElementSpace() const override
-         {
-            return m_u->getFiniteElementSpace();
-         }
-
          virtual Mult* copy() const noexcept override
          {
             return new Mult(*this);
          }
       private:
-         std::unique_ptr<FunctionBase> m_f;
-         std::unique_ptr<ShapeFunctionBase<Space>> m_u;
+         std::unique_ptr<FunctionBase> m_lhs;
+         std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
    };
    template <ShapeFunctionSpaceType Space>
    Mult(const FunctionBase&, const ShapeFunctionBase<Space>&)
@@ -202,40 +247,61 @@ namespace Rodin::Variational
     * @f]
     * where @f$ f @f$ is a function (scalar or or matrix valued).
     */
-   template <ShapeFunctionSpaceType Space, class FES>
+   template <class FES, ShapeFunctionSpaceType Space>
    class Mult<FunctionBase, ShapeFunction<FES, Space>>
       : public Mult<FunctionBase, ShapeFunctionBase<Space>>
    {
       public:
+         using Parent = Mult<FunctionBase, ShapeFunctionBase<Space>>;
+         using LHS = FunctionBase;
+         using RHS = ShapeFunction<FES, Space>;
+
          constexpr
          Mult(const FunctionBase& lhs, const ShapeFunction<FES, Space>& rhs)
-            : Mult<FunctionBase, ShapeFunctionBase<Space>>(lhs, rhs)
-         {
-            if (lhs.getRangeType() != RangeType::Scalar && lhs.getRangeType() != RangeType::Matrix)
-               UnexpectedRangeTypeException({RangeType::Scalar, RangeType::Matrix}, lhs.getRangeType()).raise();
-         }
+            : Parent(lhs, rhs)
+         {}
 
          constexpr
          Mult(const Mult& other)
-            : Mult<FunctionBase, ShapeFunctionBase<Space>>(other)
+            : Parent(other)
          {}
 
          constexpr
          Mult(Mult&& other)
-            : Mult<FunctionBase, ShapeFunctionBase<Space>>(std::move(other))
+            : Parent(std::move(other))
          {}
 
-         Mult* copy() const noexcept override
+         virtual FunctionBase& getLHS() override
+         {
+            return static_cast<FunctionBase&>(Parent::getLHS());
+         }
+
+         virtual const FunctionBase& getLHS() const override
+         {
+            return static_cast<const FunctionBase&>(Parent::getLHS());
+         }
+
+         virtual ShapeFunction<FES, Space>& getRHS() override
+         {
+            return static_cast<ShapeFunction<FES, Space>&>(Parent::getRHS());
+         }
+
+         virtual const ShapeFunction<FES, Space>& getRHS() const override
+         {
+            return static_cast<const ShapeFunction<FES, Space>&>(Parent::getRHS());
+         }
+
+         virtual Mult* copy() const noexcept override
          {
             return new Mult(*this);
          }
    };
-   template <ShapeFunctionSpaceType Space, class FES>
+   template <class FES, ShapeFunctionSpaceType Space>
    Mult(const FunctionBase&, const ShapeFunction<FES, Space>& rhs)
       -> Mult<FunctionBase, ShapeFunction<FES, Space>>;
 
-   template <ShapeFunctionSpaceType Space, class FES>
-   Mult<FunctionBase, ShapeFunctionBase<Space>>
+   template <class FES, ShapeFunctionSpaceType Space>
+   Mult<FunctionBase, ShapeFunction<FES, Space>>
    operator*(const FunctionBase& lhs, const ShapeFunction<FES, Space>& rhs)
    {
       return Mult(lhs, rhs);
@@ -251,40 +317,61 @@ namespace Rodin::Variational
     * @f]
     * where @f$ f @f$ is a function (scalar or matrix valued).
     */
-   template <ShapeFunctionSpaceType Space, class FES>
+   template <class FES, ShapeFunctionSpaceType Space>
    class Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>
       : public Mult<FunctionBase, ShapeFunctionBase<Space>>
    {
       public:
+         using Parent = Mult<FunctionBase, ShapeFunctionBase<Space>>;
+         using LHS = FunctionBase;
+         using RHS = Grad<ShapeFunction<FES, Space>>;
+
          constexpr
          Mult(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
-            : Mult<FunctionBase, ShapeFunctionBase<Space>>(lhs, rhs)
-         {
-            if (lhs.getRangeType() != RangeType::Scalar && lhs.getRangeType() != RangeType::Matrix)
-               UnexpectedRangeTypeException({RangeType::Scalar, RangeType::Matrix}, lhs.getRangeType()).raise();
-         }
+            : Parent(lhs, rhs)
+         {}
 
          constexpr
          Mult(const Mult& other)
-            : Mult<FunctionBase, ShapeFunctionBase<Space>>(other)
+            : Parent(other)
          {}
 
          constexpr
          Mult(Mult&& other)
-            : Mult<FunctionBase, ShapeFunctionBase<Space>>(std::move(other))
+            : Parent(std::move(other))
          {}
 
-         Mult* copy() const noexcept override
+         virtual FunctionBase& getLHS() override
+         {
+            return static_cast<FunctionBase&>(Parent::getLHS());
+         }
+
+         virtual const FunctionBase& getLHS() const override
+         {
+            return static_cast<const FunctionBase&>(Parent::getLHS());
+         }
+
+         virtual Grad<ShapeFunction<FES, Space>>& getRHS() override
+         {
+            return static_cast<Grad<ShapeFunction<FES, Space>>&>(Parent::getRHS());
+         }
+
+         virtual const Grad<ShapeFunction<FES, Space>>& getRHS() const override
+         {
+            return static_cast<const Grad<ShapeFunction<FES, Space>>&>(Parent::getRHS());
+         }
+
+         virtual Mult* copy() const noexcept override
          {
             return new Mult(*this);
          }
    };
-   template <ShapeFunctionSpaceType Space, class FES>
-   Mult(const FunctionBase&, const Grad<ShapeFunction<FES, Space>>& rhs)
+   template <class FES, ShapeFunctionSpaceType Space>
+   Mult(const FunctionBase&, const Grad<ShapeFunction<FES, Space>>&)
       -> Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>;
 
-   template <ShapeFunctionSpaceType Space, class FES>
-   Mult<FunctionBase, ShapeFunctionBase<Space>>
+   template <class FES, ShapeFunctionSpaceType Space>
+   Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>
    operator*(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
    {
       return Mult(lhs, rhs);
