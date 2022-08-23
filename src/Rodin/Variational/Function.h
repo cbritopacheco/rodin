@@ -26,6 +26,12 @@ namespace Rodin::Variational::Internal
    using ScalarProxyFunction = ProxyFunction<RangeType::Scalar>;
    using VectorProxyFunction = ProxyFunction<RangeType::Vector>;
    using MatrixProxyFunction = ProxyFunction<RangeType::Matrix>;
+
+   using MFEMFunction =
+      std::variant<
+         Internal::ScalarProxyFunction,
+         Internal::VectorProxyFunction,
+         Internal::MatrixProxyFunction>;
 }
 
 namespace Rodin::Variational
@@ -128,10 +134,7 @@ namespace Rodin::Variational
 
          virtual FunctionBase* copy() const noexcept override = 0;
 
-         std::variant<
-            Internal::ScalarProxyFunction,
-            Internal::VectorProxyFunction,
-            Internal::MatrixProxyFunction> build() const;
+         Internal::MFEMFunction build() const;
 
       protected:
          mfem::ElementTransformation& getTraceElementTrans(

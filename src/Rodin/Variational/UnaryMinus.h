@@ -61,11 +61,7 @@ namespace Rodin::Variational
 
          UnaryMinus(UnaryMinus&& other);
 
-         const std::set<int>& getAttributes() const override;
-
          IntegratorRegion getIntegratorRegion() const override;
-
-         const ShapeFunctionBase<TestSpace>& getTestFunction() const override;
 
          bool isSupported(Linear::Assembly::Type t) const override;
 
@@ -123,12 +119,6 @@ namespace Rodin::Variational
          UnaryMinus(const UnaryMinus& other);
 
          UnaryMinus(UnaryMinus&& other);
-
-         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const override;
-
-         const ShapeFunctionBase<TestSpace>& getTestFunction() const override;
-
-         const std::set<int>& getAttributes() const override;
 
          IntegratorRegion getIntegratorRegion() const override;
 

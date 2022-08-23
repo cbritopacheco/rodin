@@ -45,7 +45,8 @@ namespace Rodin::Variational
 
    // ---- LinearFormIntegratorBase ------------------------------------------
    UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
-      : m_op(op.copy())
+      :  LinearFormIntegratorBase(op.getTestFunction()),
+         m_op(op.copy())
    {}
 
    UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
@@ -58,22 +59,10 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   const std::set<int>&
-   UnaryMinus<LinearFormIntegratorBase>::getAttributes() const
-   {
-      return m_op->getAttributes();
-   }
-
    IntegratorRegion
    UnaryMinus<LinearFormIntegratorBase>::getIntegratorRegion() const
    {
       return m_op->getIntegratorRegion();
-   }
-
-   const ShapeFunctionBase<TestSpace>&
-   UnaryMinus<LinearFormIntegratorBase>::getTestFunction() const
-   {
-      return m_op->getTestFunction();
    }
 
    bool
@@ -107,7 +96,8 @@ namespace Rodin::Variational
 
    // ---- BilinearFormIntegratorBase ----------------------------------------
    UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
-      : m_op(op.copy())
+      :  BilinearFormIntegratorBase(op.getTrialFunction(), op.getTestFunction()),
+         m_op(op.copy())
    {}
 
    UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
@@ -119,24 +109,6 @@ namespace Rodin::Variational
       : BilinearFormIntegratorBase(std::move(other)),
         m_op(std::move(other.m_op))
    {}
-
-   const ShapeFunctionBase<TrialSpace>&
-   UnaryMinus<BilinearFormIntegratorBase>::getTrialFunction() const
-   {
-      return m_op->getTrialFunction();
-   }
-
-   const ShapeFunctionBase<TestSpace>&
-   UnaryMinus<BilinearFormIntegratorBase>::getTestFunction() const
-   {
-      return m_op->getTestFunction();
-   }
-
-   const std::set<int>&
-   UnaryMinus<BilinearFormIntegratorBase>::getAttributes() const
-   {
-      return m_op->getAttributes();
-   }
 
    IntegratorRegion
    UnaryMinus<BilinearFormIntegratorBase>::getIntegratorRegion() const

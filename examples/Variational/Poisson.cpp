@@ -43,19 +43,9 @@ int main(int, char**)
               .printIterations(true)
               .solve(poisson);
 
-  auto p = u.getGridFunction() > 0.2471;
-
-  GridFunction b(Vh);
-  b = p;
-
-  auto vs = u.getGridFunction().where(p);
-  for (const auto& v : vs)
-    std::cout << v(0) << "," << v(1) << std::endl;
-
   // Save solution
-  b.save("b.gf");
-  u.getGridFunction().save("u.gf");
-  Omega.save("Omega.mesh");
+  // u.getGridFunction().save("u.gf");
+  // Omega.save("Omega.mesh");
 
   return 0;
 }
