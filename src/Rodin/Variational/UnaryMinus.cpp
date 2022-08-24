@@ -45,7 +45,8 @@ namespace Rodin::Variational
 
    // ---- LinearFormIntegratorBase ------------------------------------------
    UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
-      : m_op(op.copy())
+      :  LinearFormIntegratorBase(op.getTestFunction()),
+         m_op(op.copy())
    {}
 
    UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
@@ -58,32 +59,33 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   const std::set<int>&
-   UnaryMinus<LinearFormIntegratorBase>::getAttributes() const
-   {
-      return m_op->getAttributes();
-   }
-
    IntegratorRegion
    UnaryMinus<LinearFormIntegratorBase>::getIntegratorRegion() const
    {
       return m_op->getIntegratorRegion();
    }
 
-   const ShapeFunctionBase<TestSpace>&
-   UnaryMinus<LinearFormIntegratorBase>::getTestFunction() const
+   bool
+   UnaryMinus<LinearFormIntegratorBase>::isSupported(Linear::Assembly::Type t)
+   const
    {
-      return m_op->getTestFunction();
+      return m_op->isSupported(t);
    }
 
    void
-   UnaryMinus<LinearFormIntegratorBase>
-   ::getElementVector(const mfem::FiniteElement& fe,
-         mfem::ElementTransformation& trans, mfem::Vector& vec)
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Device& as)
    const
    {
-      m_op->getElementVector(fe, trans, vec);
-      vec *= -1.0;
+      m_op->getElementVector(as);
+      as.vec *= -1.0;
+   }
+
+   void
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Common& as)
+   const
+   {
+      m_op->getElementVector(as);
+      as.vec *= -1.0;
    }
 
    UnaryMinus<LinearFormIntegratorBase>
@@ -94,7 +96,8 @@ namespace Rodin::Variational
 
    // ---- BilinearFormIntegratorBase ----------------------------------------
    UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
-      : m_op(op.copy())
+      :  BilinearFormIntegratorBase(op.getTrialFunction(), op.getTestFunction()),
+         m_op(op.copy())
    {}
 
    UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
@@ -107,24 +110,6 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   const ShapeFunctionBase<TrialSpace>&
-   UnaryMinus<BilinearFormIntegratorBase>::getTrialFunction() const
-   {
-      return m_op->getTrialFunction();
-   }
-
-   const ShapeFunctionBase<TestSpace>&
-   UnaryMinus<BilinearFormIntegratorBase>::getTestFunction() const
-   {
-      return m_op->getTestFunction();
-   }
-
-   const std::set<int>&
-   UnaryMinus<BilinearFormIntegratorBase>::getAttributes() const
-   {
-      return m_op->getAttributes();
-   }
-
    IntegratorRegion
    UnaryMinus<BilinearFormIntegratorBase>::getIntegratorRegion() const
    {
@@ -133,12 +118,10 @@ namespace Rodin::Variational
 
    void
    UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(
-         const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-         mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const
+   ::getElementMatrix(const Bilinear::Assembly::Common& as) const
    {
-      m_op->getElementMatrix(trial, test, trans, mat);
-      mat.Neg();
+      m_op->getElementMatrix(as);
+      as.mat.Neg();
    }
 
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)

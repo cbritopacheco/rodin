@@ -200,6 +200,7 @@ namespace Rodin
          std::set<int> adjacent() const override
          {
             assert(false);
+            return {};
          }
 
          /**
@@ -326,6 +327,114 @@ namespace Rodin
       private:
          MeshBase& m_mesh;
          mfem::Element* m_element;
+   };
+
+   class Vertex
+   {
+      public:
+         Vertex(mfem::Vector&& v)
+            : m_v(std::move(v)),
+              m_trans(nullptr),
+              m_ip(nullptr)
+         {}
+
+         Vertex(const mfem::Vector& v)
+            : m_v(v),
+              m_trans(nullptr),
+              m_ip(nullptr)
+         {}
+
+         Vertex(const Vertex& other) = default;
+
+         Vertex(Vertex&& other)
+            : m_v(std::move(other.m_v)),
+              m_trans(other.m_trans),
+              m_ip(other.m_ip)
+         {
+            m_trans = nullptr;
+            m_ip = nullptr;
+         }
+
+         int getDimension() const
+         {
+            return m_v.Size();
+         }
+
+         double& operator()(int i)
+         {
+            return m_v(i);
+         }
+
+         const double& operator()(int i) const
+         {
+            return m_v(i);
+         }
+
+         double& x()
+         {
+            return m_v(0);
+         }
+
+         double& y()
+         {
+            return m_v(1);
+         }
+
+         double& z()
+         {
+            return m_v(2);
+         }
+
+         const double& x() const
+         {
+            return m_v(0);
+         }
+
+         const double& y() const
+         {
+            return m_v(1);
+         }
+
+         const double& z() const
+         {
+            return m_v(2);
+         }
+
+         bool operator<(const Vertex& rhs) const
+         {
+            assert(getDimension() == rhs.getDimension());
+            bool r = true;
+            for (int i = 0; i < m_v.Size(); i++)
+               r = r && m_v(i) < rhs.m_v(i);
+            return r;
+         }
+
+         Vertex& setElementTransformation(mfem::ElementTransformation* trans)
+         {
+            m_trans = trans;
+            return *this;
+         }
+
+         Vertex& setIntegrationPoint(const mfem::IntegrationPoint* ip)
+         {
+            m_ip = ip;
+            return *this;
+         }
+
+         mfem::ElementTransformation* getElementTransformation() const
+         {
+            return m_trans;
+         }
+
+         const mfem::IntegrationPoint* getIntegrationPoint() const
+         {
+            return m_ip;
+         }
+
+      private:
+         mfem::Vector m_v;
+         mfem::ElementTransformation* m_trans;
+         const mfem::IntegrationPoint* m_ip;
    };
 }
 

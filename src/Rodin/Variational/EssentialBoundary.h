@@ -59,6 +59,8 @@ namespace Rodin::Variational
               m_tfCompVal(std::move(other.m_tfCompVal))
          {}
 
+         EssentialBoundary& operator=(EssentialBoundary&&) = default;
+
          template <class Trait>
          void add(const DirichletBC<TrialFunction<H1<Trait>>>& dbc)
          {

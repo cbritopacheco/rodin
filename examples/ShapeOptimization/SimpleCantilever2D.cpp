@@ -91,7 +91,7 @@ int main(int, char**)
     Problem hilbert(g, w);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
-            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(w, n)).over(Gamma0)
+            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma0)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
     cg.solve(hilbert);
 

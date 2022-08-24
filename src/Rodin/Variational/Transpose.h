@@ -107,9 +107,11 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
                ShapeComputator& comp) const override
          {
-            m_shape->getOperator(op, fe, comp);
+            m_shape->getOperator(op, fe, trans, ip, comp);
             op.transpose();
          }
 

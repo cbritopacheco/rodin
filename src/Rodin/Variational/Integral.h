@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_INTEGRAL_H
 #define RODIN_VARIATIONAL_INTEGRAL_H
 
+#include <cassert>
 #include <set>
 #include <utility>
 #include <mfem.hpp>
@@ -40,9 +41,11 @@ namespace Rodin::Variational
     */
    template <>
    class Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-      : public BilinearFormDomainIntegrator
+      : public BilinearFormIntegratorBase
    {
       public:
+         using Parent =
+            BilinearFormDomainIntegrator;
          using Integrand =
             Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
 
@@ -57,9 +60,7 @@ namespace Rodin::Variational
           * @param[in] lhs Trial operator @f$ A(u) @f$
           * @param[in] rhs Test operator @f$ B(v) @f$
           */
-         Integral(
-               const ShapeFunctionBase<TrialSpace>& lhs,
-               const ShapeFunctionBase<TestSpace>& rhs)
+         Integral(const ShapeFunctionBase<TrialSpace>& lhs, const ShapeFunctionBase<TestSpace>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -75,23 +76,21 @@ namespace Rodin::Variational
           * @param[in] prod Dot product instance
           */
          Integral(const Integrand& prod)
-            : BilinearFormDomainIntegrator(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
+            : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
               m_prod(prod),
               m_intOrder(
-                    [](const mfem::FiniteElement& trial,
-                       const mfem::FiniteElement& test,
-                       mfem::ElementTransformation& trans)
-                    { return trial.GetOrder() + test.GetOrder() + trans.OrderW(); })
+                    [](const Bilinear::Assembly::Common& as)
+                    { return as.trial.GetOrder() + as.test.GetOrder() + as.trans.OrderW(); })
          {}
 
          Integral(const Integral& other)
-            : BilinearFormDomainIntegrator(other),
+            : BilinearFormIntegratorBase(other),
               m_prod(other.m_prod),
               m_intOrder(other.m_intOrder)
          {}
 
          Integral(Integral&& other)
-            : BilinearFormDomainIntegrator(std::move(other)),
+            : BilinearFormIntegratorBase(std::move(other)),
               m_prod(std::move(other.m_prod)),
               m_intOrder(std::move(other.m_intOrder))
          {}
@@ -102,8 +101,7 @@ namespace Rodin::Variational
           * @returns Reference to self (for method chaining)
           */
          Integral& setIntegrationOrder(
-            std::function<
-               int(const mfem::FiniteElement&, const mfem::FiniteElement&, mfem::ElementTransformation&)> order)
+            std::function<int(const Bilinear::Assembly::Common&)> order)
          {
             m_intOrder = order;
             return *this;
@@ -114,35 +112,51 @@ namespace Rodin::Variational
           * @param[in] order Function which computes the order of integration
           * @returns Reference to self (for method chaining)
           */
-         int getIntegrationOrder(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans) const
+         int getIntegrationOrder(const Bilinear::Assembly::Common& as) const
          {
-            return m_intOrder(trial, test, trans);
+            return m_intOrder(as);
          }
 
-         void getElementMatrix(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override;
+         virtual const Integrand& getIntegrand() const
+         {
+            return m_prod;
+         }
 
-         Integral* copy() const noexcept override
+         virtual IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Domain;
+         }
+
+         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const override;
+
+         virtual Integral* copy() const noexcept override
          {
             return new Integral(*this);
          }
       private:
          Integrand m_prod;
-         std::function<int(
-            const mfem::FiniteElement&, const mfem::FiniteElement&, mfem::ElementTransformation&)> m_intOrder;
+         std::function<int(const Bilinear::Assembly::Common&)> m_intOrder;
    };
-   Integral(
-         const Dot<ShapeFunctionBase<TrialSpace>,
-         ShapeFunctionBase<TestSpace>>&)
+   Integral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
       -> Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
-   Integral(
-         const ShapeFunctionBase<TrialSpace>& lhs,
-         const ShapeFunctionBase<TestSpace>& rhs)
+   Integral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
       -> Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
+   template <>
+   class BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+      : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+   {
+      public:
+         using Parent    = Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+         using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using Parent::Parent;
+         IntegratorRegion getIntegratorRegion() const override { return IntegratorRegion::Boundary; }
+         BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
+   };
+   BoundaryIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
+      -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+   BoundaryIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
+      -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
    /**
     * @brief Integral of a scalar valued test function operator
@@ -157,15 +171,13 @@ namespace Rodin::Variational
     * @f]
     */
    template <>
-   class Integral<ShapeFunctionBase<TestSpace>>
-      : public LinearFormDomainIntegrator
+   class Integral<ShapeFunctionBase<TestSpace>> : public LinearFormIntegratorBase
    {
       public:
+         using Parent = LinearFormDomainIntegrator;
          using Integrand = ShapeFunctionBase<TestSpace>;
 
-         Integral(
-               const FunctionBase& lhs,
-               const ShapeFunctionBase<TestSpace>& rhs)
+         Integral(const FunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -182,66 +194,74 @@ namespace Rodin::Variational
           * @f]
           */
          Integral(const Integrand& integrand)
-            :  LinearFormDomainIntegrator(integrand.getLeaf()),
-               m_test(integrand.copy()),
+            :  LinearFormIntegratorBase(integrand.getLeaf()),
+               m_integrand(integrand.copy()),
                m_intOrder(
-                    [](const mfem::FiniteElement& fe,
-                       mfem::ElementTransformation& trans)
-                    { return fe.GetOrder() + trans.OrderW(); })
+                     [](const Linear::Assembly::Common& as)
+                     { return as.fe.GetOrder() + as.trans.OrderW(); })
          {}
 
          Integral(const Integral& other)
-            : LinearFormDomainIntegrator(other),
-              m_test(other.m_test->copy()),
+            : LinearFormIntegratorBase(other),
+              m_integrand(other.m_integrand->copy()),
               m_intOrder(other.m_intOrder)
          {}
 
          Integral(Integral&& other)
-            : LinearFormDomainIntegrator(std::move(other)),
-              m_test(std::move(other.m_test))
+            : LinearFormIntegratorBase(std::move(other)),
+              m_integrand(std::move(other.m_integrand))
          {}
 
-         /**
-          * @brief Sets the function which calculates the integration order
-          * @param[in] order Function which computes the order of integration
-          * @returns Reference to self (for method chaining)
-          */
-         Integral& setIntegrationOrder(
-            std::function<
-               int(const mfem::FiniteElement&, mfem::ElementTransformation&)> order)
+         Integral& setIntegrationOrder(std::function<int(const Linear::Assembly::Common&)> order)
          {
             m_intOrder = order;
             return *this;
          }
 
-         /**
-          * @brief Sets the function which calculates the integration order
-          * @param[in] order Function which computes the order of integration
-          * @returns Reference to self (for method chaining)
-          */
-         int getIntegrationOrder(
-               const mfem::FiniteElement& fe, mfem::ElementTransformation& trans) const
+         int getIntegrationOrder(const Linear::Assembly::Common& as) const
          {
-            return m_intOrder(fe, trans);
+            return m_intOrder(as);
          }
 
-         void getElementVector(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) const override;
+         virtual const Integrand& getIntegrand() const
+         {
+            assert(m_integrand);
+            return *m_integrand;
+         }
 
-         Integral* copy() const noexcept override
+         virtual IntegratorRegion getIntegratorRegion() const override
+         {
+            return IntegratorRegion::Domain;
+         }
+
+         virtual void getElementVector(const Linear::Assembly::Common& as) const override;
+
+         virtual Integral* copy() const noexcept override
          {
             return new Integral(*this);
          }
+
       private:
-         std::unique_ptr<Integrand> m_test;
-         std::function<int(
-            const mfem::FiniteElement&, mfem::ElementTransformation&)> m_intOrder;
+         std::unique_ptr<Integrand> m_integrand;
+         std::function<int(const Linear::Assembly::Common&)> m_intOrder;
    };
-   Integral(const ShapeFunctionBase<TestSpace>&)
-      -> Integral<ShapeFunctionBase<TestSpace>>;
-   Integral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&)
-      -> Integral<ShapeFunctionBase<TestSpace>>;
+   Integral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&) -> Integral<ShapeFunctionBase<TestSpace>>;
+   Integral(const ShapeFunctionBase<TestSpace>&) -> Integral<ShapeFunctionBase<TestSpace>>;
+
+   template <>
+   class BoundaryIntegral<ShapeFunctionBase<TestSpace>> : public Integral<ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent    = Integral<ShapeFunctionBase<TestSpace>>;
+         using Integrand = ShapeFunctionBase<TestSpace>;
+         using Parent::Parent;
+         IntegratorRegion getIntegratorRegion() const override { return IntegratorRegion::Boundary; }
+         BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
+   };
+   BoundaryIntegral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&)
+      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
+   BoundaryIntegral(const ShapeFunctionBase<TestSpace>&)
+      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
 
    /**
     * @brief Integral of a GridFunction
@@ -250,6 +270,9 @@ namespace Rodin::Variational
    class Integral<GridFunction<FES>> : public FormLanguage::Base
    {
       public:
+         using Parent    = FormLanguage::Base;
+         using Integrand = GridFunction<FES>&;
+
          /**
           * @brief Constructs the integral object
           */
@@ -301,102 +324,464 @@ namespace Rodin::Variational
    template <class FES>
    Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
 
-   template <>
-   class BoundaryIntegral<ShapeFunctionBase<TestSpace>> : public LinearFormBoundaryIntegrator
+   /**
+    * @defgroup IntegralOptimizations Performance specializations of Integral
+    */
+
+   /* ||-- OPTIMIZATIONS -----------------------------------------------------
+    * Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+    * ---------------------------------------------------------------------->>
+    */
+
+   /**
+    * @f[
+    * \int_\Omega \nabla u \cdot \nabla v
+    * @f]
+    */
+   template <class FES>
+   class Integral<Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>>
+      : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
    {
       public:
-         using Integrand = ShapeFunctionBase<TestSpace>;
+         using Parent =
+            Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+         using Integrand =
+            Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>;
 
-         BoundaryIntegral(
-               const FunctionBase& lhs,
-               const ShapeFunctionBase<TestSpace>& rhs)
-            :  LinearFormBoundaryIntegrator(rhs.getLeaf()),
-               m_integral(lhs, rhs)
+         constexpr
+         Integral(const Grad<ShapeFunction<FES, TrialSpace>>& gu, const Grad<ShapeFunction<FES, TestSpace>>& gv)
+            : Integral(Dot(gu, gv))
          {}
 
-         BoundaryIntegral(const Integrand& integrand)
-            :  LinearFormBoundaryIntegrator(integrand.getLeaf()),
-               m_integral(integrand)
-         {}
-
-         BoundaryIntegral(const BoundaryIntegral& other)
-            : LinearFormBoundaryIntegrator(other),
-              m_integral(other.m_integral)
-         {}
-
-         BoundaryIntegral(BoundaryIntegral&& other)
-            : LinearFormBoundaryIntegrator(std::move(other)),
-              m_integral(std::move(other.m_integral))
-         {}
-
-         void getElementVector(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) const override
+         constexpr
+         Integral(const Integrand& integrand)
+            : Parent(integrand)
          {
-            m_integral.getElementVector(fe, trans, vec);
+            setIntegrationOrder(
+                  [](const Bilinear::Assembly::Common& as)
+                  {
+                     if (as.trial.Space() == mfem::FunctionSpace::Pk)
+                        return as.trial.GetOrder() + as.test.GetOrder() - 2;
+                     else
+                        return as.trial.GetOrder() + as.test.GetOrder() + as.trial.GetDim() - 1;
+                  });
          }
 
-         BoundaryIntegral* copy() const noexcept override
+         constexpr
+         Integral(const Integral& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Integral(Integral&& other)
+            : Parent(std::move(other))
+         {}
+
+         const Integrand& getIntegrand() const override
          {
-            return new BoundaryIntegral(*this);
+            return static_cast<const Integrand&>(Parent::getIntegrand());
          }
-      private:
-         Integral<Integrand> m_integral;
+
+         void getElementMatrix(const Bilinear::Assembly::Common& as) const override
+         {
+            if (&as.trial == &as.test)
+            {
+               const int order = getIntegrationOrder(as);
+               const mfem::IntegrationRule* ir =
+                  as.trial.Space() == mfem::FunctionSpace::rQk ?
+                     &mfem::RefinedIntRules.Get(as.trial.GetGeomType(), order) :
+                     &mfem::IntRules.Get(as.trial.GetGeomType(), order);
+               mfem::ConstantCoefficient one(1.0);
+               mfem::DiffusionIntegrator(one, ir).AssembleElementMatrix(as.trial, as.trans, as.mat);
+            }
+            else
+            {
+               assert(false); // Unimplemented
+            }
+         }
+
+         Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
    };
-   BoundaryIntegral(const ShapeFunctionBase<TestSpace>&)
-      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
-   BoundaryIntegral(const FunctionBase& lhs, const ShapeFunctionBase<TestSpace>& rhs)
-      -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
+   template <class FES>
+   Integral(const Grad<ShapeFunction<FES, TrialSpace>>&, const Grad<ShapeFunction<FES, TestSpace>>&)
+      -> Integral<Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>>;
+   template <class FES>
+   Integral(const Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>&)
+      -> Integral<Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>>;
 
-   template <>
-   class BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-      : public BilinearFormBoundaryIntegrator
+   /**
+    * @internal
+    *
+    * Optimized integration of the expression:
+    * @f[
+    *    \int_\Omega (f u) \cdot v \ dx
+    * @f]
+    * where $f$ is a function (scalar or matrix valued).
+    */
+   template <class FES>
+   class Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>
+      : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
    {
       public:
-         using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using Parent =
+            Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+         using Integrand =
+            Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
 
-         BoundaryIntegral(
-               const ShapeFunctionBase<TrialSpace>& lhs,
-               const ShapeFunctionBase<TestSpace>& rhs)
-            :  BilinearFormBoundaryIntegrator(lhs.getLeaf(), rhs.getLeaf()),
-               m_integral(lhs, rhs)
+         constexpr
+         Integral(
+               const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>& fu,
+               const ShapeFunction<FES, TestSpace>& v)
+            : Integral(Dot(fu, v))
          {}
 
-         BoundaryIntegral(const Integrand& integrand)
-            :  BilinearFormBoundaryIntegrator(integrand.getLHS(), integrand.getRHS()),
-               m_integral(integrand)
-         {}
-
-         BoundaryIntegral(const BoundaryIntegral& other)
-            : BilinearFormBoundaryIntegrator(other),
-              m_integral(other.m_integral)
-         {}
-
-         BoundaryIntegral(BoundaryIntegral&& other)
-            : BilinearFormBoundaryIntegrator(std::move(other)),
-              m_integral(std::move(other.m_integral))
-         {}
-
-         void getElementMatrix(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const override
+         constexpr
+         Integral(const Integrand& integrand)
+            : Parent(integrand)
          {
-            return m_integral.getElementMatrix(trial, test, trans, mat);
+            setIntegrationOrder(
+                  [](const Bilinear::Assembly::Common& as)
+                  {
+                     if (as.trial.Space() == mfem::FunctionSpace::Pk)
+                        return as.trial.GetOrder() + as.test.GetOrder() - 2;
+                     else
+                        return as.trial.GetOrder() + as.test.GetOrder() + as.trial.GetDim() - 1;
+                  });
          }
 
-         BoundaryIntegral* copy() const noexcept override
+         constexpr
+         Integral(const Integral& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Integral(Integral&& other)
+            : Parent(std::move(other))
+         {}
+
+         virtual const Integrand& getIntegrand() const override
          {
-            return new BoundaryIntegral(*this);
+            return static_cast<const Integrand&>(Parent::getIntegrand());
          }
 
-      private:
-         Integral<Integrand> m_integral;
+         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const override
+         {
+            const int order = getIntegrationOrder(as);
+            if (&as.trial == &as.test)
+            {
+               const mfem::IntegrationRule* ir =
+                  as.trial.Space() == mfem::FunctionSpace::rQk ?
+                     &mfem::RefinedIntRules.Get(as.trial.GetGeomType(), order) :
+                     &mfem::IntRules.Get(as.trial.GetGeomType(), order);
+               auto q = getIntegrand().getLHS().getLHS().build();
+               switch (getIntegrand().getLHS().getRangeType())
+               {
+                  case RangeType::Scalar:
+                  {
+                     switch (getIntegrand().getLHS().getRHS().getRangeType())
+                     {
+                        case RangeType::Scalar:
+                        {
+                           mfem::MassIntegrator bfi(std::get<Internal::ScalarProxyFunction>(q));
+                           bfi.SetIntRule(ir);
+                           bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
+                           break;
+                        }
+                        case RangeType::Vector:
+                        {
+                           mfem::VectorMassIntegrator bfi(std::get<Internal::ScalarProxyFunction>(q));
+                           bfi.SetIntRule(ir);
+                           bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
+                           break;
+                        }
+                        case RangeType::Matrix:
+                        {
+                           assert(false); // Unsupported
+                           break;
+                        }
+                     }
+                     break;
+                  }
+                  case RangeType::Vector:
+                  {
+                     assert(false); // Unsupported
+                     break;
+                  }
+                  case RangeType::Matrix:
+                  {
+                     switch (getIntegrand().getLHS().getRHS().getRangeType())
+                     {
+                        case RangeType::Scalar:
+                        {
+                           assert(false); // Unsupported
+                           break;
+                        }
+                        case RangeType::Vector:
+                        {
+                           mfem::VectorMassIntegrator bfi(std::get<Internal::MatrixProxyFunction>(q));
+                           bfi.SetIntRule(ir);
+                           bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
+                           break;
+                        }
+                        case RangeType::Matrix:
+                        {
+                           assert(false); // Unsupported
+                           break;
+                        }
+                     }
+                     break;
+                  }
+               }
+            }
+            else
+            {
+               assert(false); // Unimplemented
+            }
+         }
+
+         virtual Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
    };
-   BoundaryIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
-      -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
-   BoundaryIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
-      -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+   template <class FES>
+   Integral(
+         const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>&,
+         const ShapeFunction<FES, TestSpace>&)
+      -> Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
+   template <class FES>
+   Integral(
+         const Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>&)
+      -> Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
 
+   template <class FES>
+   class BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>
+      : public Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>
+   {
+      public:
+         using Parent =
+            Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
+         using Integrand =
+            Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
+         using Parent::Parent;
+         IntegratorRegion getIntegratorRegion() const override { return IntegratorRegion::Boundary; }
+         BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
+   };
+   template <class FES>
+   BoundaryIntegral(
+         const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>&,
+         const ShapeFunction<FES, TestSpace>&)
+      -> BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
+   template <class FES>
+   BoundaryIntegral(
+         const Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>&)
+      -> BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
+
+   /* <<-- OPTIMIZATIONS -----------------------------------------------------
+    * Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+    * ----------------------------------------------------------------------||
+    */
+
+   /* ||-- OPTIMIZATIONS -----------------------------------------------------
+    * Integral<ShapeFunctionBase<TestSpace>>
+    * ---------------------------------------------------------------------->>
+    */
+
+   /**
+    * @internal
+    *
+    * Optimized integration of the expression:
+    * @f[
+    *    \int_\Omega f \cdot v \ dx
+    * @f]
+    * where @f$ f @f$ is a function (scalar, vector or matrix valued).
+    */
+   template <class FES>
+   class Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>
+      : public Integral<ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent      = Integral<ShapeFunctionBase<TestSpace>>;
+         using Integrand   = Dot<FunctionBase, ShapeFunction<FES, TestSpace>>;
+
+         constexpr
+         Integral(const FunctionBase& f, const ShapeFunction<FES, TestSpace>& u)
+            : Integral(Dot(f, u))
+         {}
+
+         constexpr
+         Integral(const Integrand& integrand)
+            : Parent(integrand)
+         {
+            setIntegrationOrder(
+                  [](const Linear::Assembly::Common& as)
+                  {
+                     return 2 * as.fe.GetOrder();
+                  });
+
+            const int order = integrand.getRHS()
+                                       .getFiniteElementSpace()
+                                       .getHandle().GetFE(0)->GetOrder();
+            setIntegrationOrder(
+                  [order](const Linear::Assembly::Device&)
+                  {
+                     return 2 * order;
+                  });
+         }
+
+         constexpr
+         Integral(const Integral& other)
+            : Parent(other),
+              m_devIntOrder(other.m_devIntOrder)
+         {}
+
+         constexpr
+         Integral(Integral&& other)
+            : Parent(std::move(other)),
+              m_devIntOrder(std::move(other.m_devIntOrder))
+         {}
+
+         Integral& setIntegrationOrder(std::function<int(const Linear::Assembly::Common&)> order)
+         {
+            return static_cast<Integral&>(Parent::setIntegrationOrder(order));
+         }
+
+         int getIntegrationOrder(const Linear::Assembly::Common& as) const
+         {
+            return Parent::getIntegrationOrder(as);
+         }
+
+         Integral& setIntegrationOrder(std::function<int(const Linear::Assembly::Device&)> order)
+         {
+            m_devIntOrder = order;
+            return *this;
+         }
+
+         int getIntegrationOrder(const Linear::Assembly::Device& as) const
+         {
+            assert(m_devIntOrder);
+            return m_devIntOrder(as);
+         }
+
+         virtual const Integrand& getIntegrand() const override
+         {
+            return static_cast<const Integrand&>(Parent::getIntegrand());
+         }
+
+         virtual bool isSupported(Linear::Assembly::Type t) const override
+         {
+            switch (t)
+            {
+               case Linear::Assembly::Type::Common:
+                  return true;
+               case Linear::Assembly::Type::Device:
+                  return true;
+            }
+            return false;
+         }
+
+         virtual void getElementVector(const Linear::Assembly::Device& as) const override
+         {
+            const FunctionBase& f = getIntegrand().getLHS();
+            const mfem::IntegrationRule *ir =
+               &mfem::IntRules.Get(as.fes.GetFE(0)->GetGeomType(), getIntegrationOrder(as));
+            auto q = f.build();
+
+            switch (f.getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleDevice(as.fes, as.markers, as.vec);
+                  break;
+               }
+               case RangeType::Vector:
+               {
+                  mfem::VectorDomainLFIntegrator lfi(std::get<Internal::VectorProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleDevice(as.fes, as.markers, as.vec);
+                  break;
+               }
+               case RangeType::Matrix:
+               {
+                  assert(false); // Unsupported
+                  break;
+               }
+            }
+         }
+
+         virtual void getElementVector(const Linear::Assembly::Common& as) const override
+         {
+            const FunctionBase& f = getIntegrand().getLHS();
+
+            const mfem::IntegrationRule *ir =
+               &mfem::IntRules.Get(as.fe.GetGeomType(), getIntegrationOrder(as));
+            auto q = f.build();
+
+            switch (f.getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleRHSElementVect(as.fe, as.trans, as.vec);
+                  break;
+               }
+               case RangeType::Vector:
+               {
+                  mfem::VectorDomainLFIntegrator lfi(std::get<Internal::VectorProxyFunction>(q));
+                  lfi.SetIntRule(ir);
+                  lfi.AssembleRHSElementVect(as.fe, as.trans, as.vec);
+                  break;
+               }
+               case RangeType::Matrix:
+               {
+                  assert(false); // Unsupported
+                  break;
+               }
+            }
+         }
+
+         virtual Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
+      private:
+         std::function<int(const Linear::Assembly::Device&)> m_devIntOrder;
+   };
+   template <class FES>
+   Integral(const FunctionBase&, const ShapeFunction<FES, TestSpace>&)
+      -> Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
+   template <class FES>
+   Integral(const Dot<FunctionBase, ShapeFunction<FES, TestSpace>>&)
+      -> Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
+
+   template <class FES>
+   class BoundaryIntegral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>
+      : public Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>
+   {
+      public:
+         using Parent      = Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
+         using Integrand   = Dot<FunctionBase, ShapeFunction<FES, TestSpace>>;
+         using Parent::Parent;
+         IntegratorRegion getIntegratorRegion() const override { return IntegratorRegion::Boundary; }
+         BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
+   };
+   template <class FES>
+   BoundaryIntegral(const FunctionBase&, const ShapeFunction<FES, TestSpace>&)
+      -> BoundaryIntegral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
+   template <class FES>
+   BoundaryIntegral(const Dot<FunctionBase, ShapeFunction<FES, TestSpace>>&)
+      -> BoundaryIntegral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
+
+   /* <<-- OPTIMIZATIONS -----------------------------------------------------
+    * Integral<ShapeFunctionBase<TestSpace>>
+    * ----------------------------------------------------------------------||
+    */
 }
 
 #endif

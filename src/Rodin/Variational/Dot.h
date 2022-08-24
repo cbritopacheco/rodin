@@ -22,6 +22,9 @@ namespace Rodin::Variational
    class Dot<FunctionBase, FunctionBase> : public ScalarFunctionBase
    {
       public:
+         using LHS = FunctionBase;
+         using RHS = FunctionBase;
+
          Dot(const FunctionBase& a, const FunctionBase& b);
 
          Dot(const Dot& other);
@@ -30,11 +33,31 @@ namespace Rodin::Variational
 
          Dot& traceOf(const std::set<int>& attrs) override;
 
-         double getValue(
+         virtual LHS& getLHS()
+         {
+            return *m_a;
+         }
+
+         virtual RHS& getRHS()
+         {
+            return *m_b;
+         }
+
+         virtual const LHS& getLHS() const
+         {
+            return *m_a;
+         }
+
+         virtual const RHS& getRHS() const
+         {
+            return *m_b;
+         }
+
+         virtual double getValue(
             mfem::ElementTransformation& trans,
             const mfem::IntegrationPoint& ip) const override;
 
-         Dot* copy() const noexcept override
+         virtual Dot* copy() const noexcept override
          {
             return new Dot(*this);
          }
@@ -44,7 +67,7 @@ namespace Rodin::Variational
    Dot(const FunctionBase&, const FunctionBase&) -> Dot<FunctionBase, FunctionBase>;
 
    /**
-    * @brief Dot product between FunctionBase and ShapeFunctionBase.
+    * @brief Dot product between a FunctionBase and a ShapeFunctionBase.
     *
     * @f[
     *    \Lambda : A(u)
@@ -53,37 +76,46 @@ namespace Rodin::Variational
     * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
     */
    template <ShapeFunctionSpaceType Space>
-   class Dot<FunctionBase, ShapeFunctionBase<Space>>
-      : public ShapeFunctionBase<Space>
+   class Dot<FunctionBase, ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
    {
       public:
-         Dot(const ShapeFunctionBase<Space>& lhs, const FunctionBase& rhs)
-            : Dot(rhs, lhs)
+         using Parent = ShapeFunctionBase<Space>;
+         using LHS = FunctionBase;
+         using RHS = ShapeFunctionBase<Space>;
+
+         Dot(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
+            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
          {
             if (lhs.getRangeShape() != rhs.getRangeShape())
                RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
          }
 
-         Dot(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {}
-
          Dot(const Dot& other)
-            :  ShapeFunctionBase<Space>(other),
+            :  Parent(other),
                m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
          {}
 
          Dot(Dot&& other)
-            :  ShapeFunctionBase<Space>(std::move(other)),
+            :  Parent(std::move(other)),
                m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
          {}
 
-         const FunctionBase& getLHS() const
+         virtual LHS& getLHS()
          {
             return *m_lhs;
          }
 
-         const ShapeFunctionBase<Space>& getRHS() const
+         virtual RHS& getRHS()
+         {
+            return *m_rhs;
+         }
+
+         virtual const LHS& getLHS() const
+         {
+            return *m_lhs;
+         }
+
+         virtual const RHS& getRHS() const
          {
             return *m_rhs;
          }
@@ -110,23 +142,6 @@ namespace Rodin::Variational
             return 1;
          }
 
-         void getOperator(
-               DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               ShapeComputator& comp) const override
-         {
-            auto& trans = comp.getElementTransformation();
-            const auto& ip = comp.getIntegrationPoint();
-            mfem::DenseMatrix v;
-            getLHS().getValue(v, trans, ip);
-            DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, fe, comp);
-            int opDofs = getDOFs(fe, trans);
-            op.setSize(1, 1, opDofs);
-            for (int i = 0; i < opDofs; i++)
-               op(0, 0, i) = v * tmp(i);
-         }
-
          FiniteElementSpaceBase& getFiniteElementSpace() override
          {
             return m_rhs->getFiniteElementSpace();
@@ -137,7 +152,24 @@ namespace Rodin::Variational
             return getRHS().getFiniteElementSpace();
          }
 
-         Dot* copy() const noexcept override
+         virtual void getOperator(
+               DenseBasisOperator& op,
+               const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
+               ShapeComputator& compute) const override
+         {
+            mfem::DenseMatrix v;
+            getLHS().getValue(v, trans, ip);
+            DenseBasisOperator tmp;
+            getRHS().getOperator(tmp, fe, trans, ip, compute);
+            int opDofs = getDOFs(fe, trans);
+            op.setSize(1, 1, opDofs);
+            for (int i = 0; i < opDofs; i++)
+               op(0, 0, i) = v * tmp(i);
+         }
+
+         virtual Dot* copy() const noexcept override
          {
             return new Dot(*this);
          }
@@ -148,17 +180,16 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    Dot(const FunctionBase&, const ShapeFunctionBase<Space>&)
       -> Dot<FunctionBase, ShapeFunctionBase<Space>>;
-   template <ShapeFunctionSpaceType Space>
-   Dot(const ShapeFunctionBase<Space>&, const FunctionBase&)
-      -> Dot<FunctionBase, ShapeFunctionBase<Space>>;
-
 
    template <>
-   class Dot<
-      ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+   class Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
       : public FormLanguage::Base
    {
       public:
+         using Parent = FormLanguage::Base;
+         using LHS = ShapeFunctionBase<TrialSpace>;
+         using RHS = ShapeFunctionBase<TestSpace>;
+
          Dot(const ShapeFunctionBase<TrialSpace>& lhs, const ShapeFunctionBase<TestSpace>& rhs)
             : m_trial(lhs.copy()), m_test(rhs.copy())
          {
@@ -176,39 +207,41 @@ namespace Rodin::Variational
                m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
          {}
 
-         ShapeFunctionBase<TrialSpace>& getLHS()
+         virtual LHS& getLHS()
          {
             assert(m_trial);
             return *m_trial;
          }
 
-         ShapeFunctionBase<TestSpace>& getRHS()
+         virtual RHS& getRHS()
          {
             assert(m_test);
             return *m_test;
          }
 
-         const ShapeFunctionBase<TrialSpace>& getLHS() const
+         virtual const LHS& getLHS() const
          {
             assert(m_trial);
             return *m_trial;
          }
 
-         const ShapeFunctionBase<TestSpace>& getRHS() const
+         virtual const RHS& getRHS() const
          {
             assert(m_test);
             return *m_test;
          }
 
-         mfem::DenseMatrix getElementMatrix(
+         virtual mfem::DenseMatrix getElementMatrix(
                const mfem::FiniteElement& trialElement,
                const mfem::FiniteElement& testElement,
-               ShapeComputator& comp) const
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
+               ShapeComputator& compute) const
          {
             assert(m_trial->getRangeShape() == m_test->getRangeShape());
             DenseBasisOperator trialOp, testOp;
-            m_trial->getOperator(trialOp, trialElement, comp);
-            m_test->getOperator(testOp, testElement, comp);
+            m_trial->getOperator(trialOp, trialElement, trans, ip, compute);
+            m_test->getOperator(testOp, testElement, trans, ip, compute);
             mfem::DenseMatrix result(testOp.getDOFs(), trialOp.getDOFs());
             for (int i = 0; i < testOp.getDOFs(); i++)
                for (int j = 0; j < trialOp.getDOFs(); j++)
@@ -216,7 +249,7 @@ namespace Rodin::Variational
             return result;
          }
 
-         Dot* copy() const noexcept override
+         virtual Dot* copy() const noexcept override
          {
             return new Dot(*this);
          }
@@ -227,6 +260,210 @@ namespace Rodin::Variational
    };
    Dot(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
       -> Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+
+   /* ||-- OPTIMIZATIONS -----------------------------------------------------
+    * Dot<FunctionBase, ShapeFunctionBase<Space>>
+    * ---------------------------------------------------------------------->>
+    */
+
+   /**
+    * @internal
+    *
+    * @f[
+    *    f \cdot u
+    * @f]
+    * where $f$ is a function (scalar or vector valued).
+    */
+   template <class FES, ShapeFunctionSpaceType Space>
+   class Dot<FunctionBase, ShapeFunction<FES, Space>>
+      : public Dot<FunctionBase, ShapeFunctionBase<Space>>
+   {
+      public:
+         using Parent = Dot<FunctionBase, ShapeFunctionBase<Space>>;
+         using LHS = FunctionBase;
+         using RHS = ShapeFunction<FES, Space>;
+
+         constexpr
+         Dot(const FunctionBase& f, const ShapeFunction<FES, Space>& u)
+            : Parent(f, u)
+         {}
+
+         constexpr
+         Dot(const Dot& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Dot(Dot&& other)
+            : Parent(other)
+         {}
+
+         virtual LHS& getLHS() override
+         {
+            return static_cast<LHS&>(Parent::getLHS());
+         }
+
+         virtual RHS& getRHS() override
+         {
+            return static_cast<RHS&>(Parent::getRHS());
+         }
+
+         virtual const LHS& getLHS() const override
+         {
+            return static_cast<const LHS&>(Parent::getLHS());
+         }
+
+         virtual const RHS& getRHS() const override
+         {
+            return static_cast<const RHS&>(Parent::getRHS());
+         }
+
+         virtual Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+   };
+   template <class FES, ShapeFunctionSpaceType Space>
+   Dot(const FunctionBase&, const ShapeFunction<FES, Space>&)
+      -> Dot<FunctionBase, ShapeFunction<FES, Space>>;
+
+   /* <<-- OPTIMIZATIONS -----------------------------------------------------
+    * Dot<FunctionBase, ShapeFunctionBase<TestSpace>>
+    * ----------------------------------------------------------------------||
+    */
+
+   /* ||-- OPTIMIZATIONS -----------------------------------------------------
+    * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+    * ---------------------------------------------------------------------->>
+    */
+
+   /**
+    * @internal
+    *
+    * @f[
+    *    (f u) \cdot v
+    * @f]
+    * where $f$ is a function (scalar or vector valued).
+    */
+   template <class FES>
+   class Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>
+      : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using LHS = Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>;
+         using RHS = ShapeFunction<FES, TestSpace>;
+
+         constexpr
+         Dot(const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>& fu,
+               const ShapeFunction<FES, TestSpace>& v)
+            : Parent(fu, v)
+         {}
+
+         constexpr
+         Dot(const Dot& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Dot(Dot&& other)
+            : Parent(other)
+         {}
+
+         virtual LHS& getLHS() override
+         {
+            return static_cast<LHS&>(Parent::getLHS());
+         }
+
+         virtual RHS& getRHS() override
+         {
+            return static_cast<RHS&>(Parent::getRHS());
+         }
+
+         virtual const LHS& getLHS() const override
+         {
+            return static_cast<const LHS&>(Parent::getLHS());
+         }
+
+         virtual const RHS& getRHS() const override
+         {
+            return static_cast<const RHS&>(Parent::getRHS());
+         }
+
+         virtual Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+   };
+   template <class FES>
+   Dot(const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>& f, const ShapeFunction<FES, TestSpace>& u)
+      -> Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
+
+   /**
+    * @internal
+    *
+    * Represents the following expression:
+    * @f[
+    *    \nabla u \cdot \nabla v
+    * @f]
+    */
+   template <class FES>
+   class Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>
+      : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using LHS = Grad<ShapeFunction<FES, TrialSpace>>;
+         using RHS = Grad<ShapeFunction<FES, TestSpace>>;
+
+         constexpr
+         Dot(const Grad<ShapeFunction<FES, TrialSpace>>& nu, const Grad<ShapeFunction<FES, TestSpace>>& nv)
+            : Parent(nu, nv)
+         {}
+
+         constexpr
+         Dot(const Dot& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Dot(Dot&& other)
+            : Parent(std::move(other))
+         {}
+
+         virtual LHS& getLHS() override
+         {
+            return static_cast<LHS&>(Parent::getLHS());
+         }
+
+         virtual RHS& getRHS() override
+         {
+            return static_cast<RHS&>(Parent::getRHS());
+         }
+
+         virtual const LHS& getLHS() const override
+         {
+            return static_cast<const LHS&>(Parent::getLHS());
+         }
+
+         virtual const RHS& getRHS() const override
+         {
+            return static_cast<const RHS&>(Parent::getRHS());
+         }
+
+         virtual Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+   };
+   template <class FES>
+   Dot(const Grad<ShapeFunction<FES, TrialSpace>>&, const Grad<ShapeFunction<FES, TestSpace>>&)
+      -> Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>;
+
+   /* <<-- OPTIMIZATIONS -----------------------------------------------------
+    * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+    * ----------------------------------------------------------------------||
+    */
 }
 
 #endif

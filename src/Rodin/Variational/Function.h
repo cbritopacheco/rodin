@@ -16,6 +16,7 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Mesh/Element.h"
 
 namespace Rodin::Variational::Internal
 {
@@ -25,6 +26,12 @@ namespace Rodin::Variational::Internal
    using ScalarProxyFunction = ProxyFunction<RangeType::Scalar>;
    using VectorProxyFunction = ProxyFunction<RangeType::Vector>;
    using MatrixProxyFunction = ProxyFunction<RangeType::Matrix>;
+
+   using MFEMFunction =
+      std::variant<
+         Internal::ScalarProxyFunction,
+         Internal::VectorProxyFunction,
+         Internal::MatrixProxyFunction>;
 }
 
 namespace Rodin::Variational
@@ -32,9 +39,7 @@ namespace Rodin::Variational
    class FunctionBase : public FormLanguage::Base
    {
       public:
-         FunctionBase()
-            : FormLanguage::Base()
-         {}
+         FunctionBase() = default;
 
          FunctionBase(const FunctionBase& other)
             : FormLanguage::Base(other),
@@ -113,16 +118,23 @@ namespace Rodin::Variational
 
          virtual RangeType getRangeType() const;
 
+         /**
+          * @note It is not necessary to set the size beforehand.
+          */
          virtual void getValue(
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
+         mfem::DenseMatrix operator()(const Vertex& v) const
+         {
+            mfem::DenseMatrix m;
+            getValue(m, *v.getElementTransformation(), *v.getIntegrationPoint());
+            return m;
+         }
+
          virtual FunctionBase* copy() const noexcept override = 0;
 
-         std::variant<
-            Internal::ScalarProxyFunction,
-            Internal::VectorProxyFunction,
-            Internal::MatrixProxyFunction> build() const;
+         Internal::MFEMFunction build() const;
 
       protected:
          mfem::ElementTransformation& getTraceElementTrans(
