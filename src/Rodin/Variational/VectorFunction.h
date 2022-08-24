@@ -78,7 +78,7 @@ namespace Rodin::Variational
             return {getDimension(), 1};
          }
 
-         RangeType getRangeType() const override
+         virtual RangeType getRangeType() const override
          {
             return RangeType::Vector;
          }
@@ -97,7 +97,15 @@ namespace Rodin::Variational
           */
          virtual void getValue(
                mfem::Vector& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip) const = 0;
+
+         mfem::Vector operator()(const Vertex& v) const
+         {
+            mfem::Vector value;
+            getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+            return value;
+         }
 
          /**
           * @brief Gets the dimension of the vector object.

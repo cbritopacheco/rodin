@@ -96,4 +96,6 @@ namespace Rodin
       getMesh().getHandle().SetBdrAttribute(getIndex(), attr);
       return *this;
    }
+
+   // ---- Vertex ------------------------------------------------------------
 }
