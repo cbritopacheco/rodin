@@ -16,7 +16,8 @@ namespace Rodin::Variational
    {
       if (lhs.getRangeType() != RangeType::Scalar && rhs.getRangeType() != RangeType::Scalar)
       {
-         // One of the fields must be scalar valued!
+         // One of the fields must be scalar valued! (Matrix multiplication not
+         // supported yet)
          IncompatibleShapeException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
       }
    }

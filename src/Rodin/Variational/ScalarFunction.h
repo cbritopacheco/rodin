@@ -15,6 +15,7 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Mesh/Element.h"
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RangeShape.h"
@@ -160,20 +161,20 @@ namespace Rodin::Variational
     * function taking `double*` data array and `int` dimension parameter.
     */
    template <>
-   class ScalarFunction<std::function<double(const double*, int)>>
+   class ScalarFunction<std::function<double(const Vertex&)>>
       : public ScalarFunctionBase
    {
       public:
          template <class T>
          ScalarFunction(T&& f)
             : ScalarFunction(
-                  std::function<double(const double*, int)>(std::forward<T>(f)))
+                  std::function<double(const Vertex&)>(std::forward<T>(f)))
          {}
 
          /**
           * @brief Constructs a ScalarFunction from an std::function.
           */
-         ScalarFunction(std::function<double(const double*, int)> f)
+         ScalarFunction(std::function<double(const Vertex&)> f)
             : m_f(f)
          {}
 
@@ -190,10 +191,16 @@ namespace Rodin::Variational
          double getValue(mfem::ElementTransformation& trans, const
                mfem::IntegrationPoint& ip) const override
          {
-            double x[3];
-            mfem::Vector transip(x, 3);
+            mfem::Vector transip;
             trans.Transform(ip, transip);
-            return m_f(transip.GetData(), transip.Size());
+            Vertex v(std::move(transip));
+            v.setElementTransformation(&trans).setIntegrationPoint(&ip);
+            return m_f(v);
+         }
+
+         double operator()(const Vertex& v) const
+         {
+            return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
          }
 
          ScalarFunction* copy() const noexcept override
@@ -202,15 +209,15 @@ namespace Rodin::Variational
          }
 
       private:
-         const std::function<double(const double*, int)> m_f;
+         const std::function<double(const Vertex&)> m_f;
    };
-   ScalarFunction(std::function<double(const double*, int)>)
-      -> ScalarFunction<std::function<double(const double*, int)>>;
+   ScalarFunction(std::function<double(const Vertex&)>)
+      -> ScalarFunction<std::function<double(const Vertex&)>>;
    template <class T>
    ScalarFunction(T)
       -> ScalarFunction<
-         std::enable_if_t<std::is_invocable_r_v<double, T, const double*, int>,
-         std::function<double(const double*, int)>>>;
+         std::enable_if_t<std::is_invocable_r_v<double, T, const Vertex&>,
+         std::function<double(const Vertex&)>>>;
 }
 
 #endif

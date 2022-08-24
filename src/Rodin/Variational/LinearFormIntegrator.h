@@ -28,43 +28,55 @@ namespace Rodin::Variational
    class LinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
-         LinearFormIntegratorBase() = default;
+         LinearFormIntegratorBase(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
+            : m_v(v.copy())
+         {}
 
          LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
-            : FormLanguage::Base(other)
+            : FormLanguage::Base(other),
+              m_v(other.m_v->copy()),
+              m_attrs(other.m_attrs)
          {}
 
          LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
-            : FormLanguage::Base(std::move(other))
+            : FormLanguage::Base(std::move(other)),
+              m_v(std::move(other.m_v)),
+              m_attrs(std::move(other.m_attrs))
          {}
 
          virtual ~LinearFormIntegratorBase() = default;
 
-         virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction()
-            const = 0;
+         const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const
+         {
+            assert(m_v);
+            return *m_v;
+         }
 
          /**
           * @brief Gets the attributes of the elements being integrated.
           */
-         virtual const std::set<int>& getAttributes() const = 0;
+         const std::set<int>& getAttributes() const
+         {
+            return m_attrs;
+         }
 
          /**
           * @brief Gets the integration region.
           */
          virtual IntegratorRegion getIntegratorRegion() const = 0;
 
-         virtual void getElementVector(const Assembly::Common& as) const = 0;
+         virtual void getElementVector(const Linear::Assembly::Common& as) const = 0;
 
-         virtual void getElementVector(const Assembly::Device&) const
+         virtual void getElementVector(const Linear::Assembly::Device&) const
          {
             assert(false); // Unimplemented
          }
 
-         virtual bool isSupported(Assembly::Type t) const
+         virtual bool isSupported(Linear::Assembly::Type t) const
          {
             switch (t)
             {
-               case Assembly::Type::Common:
+               case Linear::Assembly::Type::Common:
                   return true;
                default:
                   return false;
@@ -75,31 +87,7 @@ namespace Rodin::Variational
          std::unique_ptr<mfem::LinearFormIntegrator> build() const;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
-   };
 
-   /**
-    * @brief Represents a linear form integrator over the interior of the domain
-    */
-   class LinearFormDomainIntegrator : public LinearFormIntegratorBase
-   {
-      public:
-         LinearFormDomainIntegrator(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
-            : m_v(v.copy())
-         {}
-
-         LinearFormDomainIntegrator(const LinearFormDomainIntegrator& other)
-            : LinearFormIntegratorBase(other),
-              m_v(other.m_v->copy()),
-              m_attrs(other.m_attrs)
-         {}
-
-         LinearFormDomainIntegrator(LinearFormDomainIntegrator&& other)
-            : LinearFormIntegratorBase(std::move(other)),
-              m_v(std::move(other.m_v)),
-              m_attrs(std::move(other.m_attrs))
-         {}
-
-         virtual ~LinearFormDomainIntegrator() = default;
 
          /**
           * @brief Specifies the material reference over which to integrate.
@@ -108,7 +96,7 @@ namespace Rodin::Variational
           * Specifies the material reference over which the integration should
           * take place.
           */
-         LinearFormDomainIntegrator& over(int attr)
+         LinearFormIntegratorBase& over(int attr)
          {
             return over(std::set<int>{attr});
          }
@@ -120,102 +108,13 @@ namespace Rodin::Variational
           * Specifies the material references over which the integration should
           * take place.
           */
-         LinearFormDomainIntegrator& over(const std::set<int>& attrs)
+         LinearFormIntegratorBase& over(const std::set<int>& attrs)
          {
             assert(attrs.size() > 0);
             m_attrs = attrs;
             return *this;
          }
 
-
-         const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const override
-         {
-            return *m_v;
-         }
-
-         IntegratorRegion getIntegratorRegion() const override
-         {
-            return IntegratorRegion::Domain;
-         }
-
-         const std::set<int>& getAttributes() const override
-         {
-            return m_attrs;
-         }
-
-         virtual LinearFormDomainIntegrator* copy() const noexcept override = 0;
-
-      private:
-         std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
-         std::set<int> m_attrs;
-   };
-
-   /**
-    * @brief Represents a linear form integrator over the boundary of the domain
-    */
-   class LinearFormBoundaryIntegrator : public LinearFormIntegratorBase
-   {
-      public:
-         LinearFormBoundaryIntegrator(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
-            : m_v(v.copy())
-         {}
-
-         LinearFormBoundaryIntegrator(const LinearFormBoundaryIntegrator& other)
-            : LinearFormIntegratorBase(other),
-              m_v(other.m_v->copy()),
-              m_attrs(other.m_attrs)
-         {}
-
-         LinearFormBoundaryIntegrator(LinearFormBoundaryIntegrator&& other)
-            : LinearFormIntegratorBase(std::move(other)),
-              m_v(std::move(other.m_v)),
-              m_attrs(std::move(other.m_attrs))
-         {}
-
-         virtual ~LinearFormBoundaryIntegrator() = default;
-
-         /**
-          * @brief Specifies the material reference over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material reference over which the integration should
-          * take place.
-          */
-         LinearFormBoundaryIntegrator& over(int attr)
-         {
-            return over(std::set<int>{attr});
-         }
-
-         /**
-          * @brief Specifies the material references over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material references over which the integration should
-          * take place.
-          */
-         LinearFormBoundaryIntegrator& over(const std::set<int>& attrs)
-         {
-            assert(attrs.size() > 0);
-            m_attrs = attrs;
-            return *this;
-         }
-
-         const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const override
-         {
-            return *m_v;
-         }
-
-         IntegratorRegion getIntegratorRegion() const override
-         {
-            return IntegratorRegion::Boundary;
-         }
-
-         const std::set<int>& getAttributes() const override
-         {
-            return m_attrs;
-         }
-
-         virtual LinearFormBoundaryIntegrator* copy() const noexcept override = 0;
       private:
          std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
          std::set<int> m_attrs;
@@ -245,18 +144,18 @@ namespace Rodin::Variational::Internal
                const mfem::FiniteElement& fe,
                mfem::ElementTransformation& trans, mfem::Vector& vec) override
          {
-            m_lfi.getElementVector(Assembly::Common{fe, trans, vec});
+            m_lfi.getElementVector(Linear::Assembly::Common{fe, trans, vec});
          }
 
          void AssembleDevice(const mfem::FiniteElementSpace& fes,
                const mfem::Array<int>& markers, mfem::Vector& b) override
          {
-            m_lfi.getElementVector(Assembly::Device{fes, markers, b});
+            m_lfi.getElementVector(Linear::Assembly::Device{fes, markers, b});
          }
 
          bool SupportsDevice() override
          {
-            return m_lfi.isSupported(Assembly::Type::Device);
+            return m_lfi.isSupported(Linear::Assembly::Type::Device);
          }
 
       private:

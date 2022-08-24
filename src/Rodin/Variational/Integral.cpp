@@ -7,32 +7,31 @@ namespace Rodin::Variational
 {
    void
    Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   ::getElementMatrix(
-         const mfem::FiniteElement& trialElement, const mfem::FiniteElement& testElement,
-         mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) const
+   ::getElementMatrix(const Bilinear::Assembly::Common& as) const
    {
       auto& trial = m_prod.getLHS();
       auto& test = m_prod.getRHS();
 
-      mat.SetSize(test.getDOFs(trialElement, trans), trial.getDOFs(testElement, trans));
-      mat = 0.0;
+      as.mat.SetSize(test.getDOFs(as.trial, as.trans), trial.getDOFs(as.test, as.trans));
+      as.mat = 0.0;
 
-      int order = getIntegrationOrder(trialElement, testElement, trans);
+      const int order = getIntegrationOrder(as);
       const mfem::IntegrationRule* ir =
-         &mfem::IntRules.Get(trans.GetGeometryType(), order);
+         &mfem::IntRules.Get(as.trans.GetGeometryType(), order);
       ShapeComputator shapeCompute;
       for (int i = 0; i < ir->GetNPoints(); i++)
       {
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
-         trans.SetIntPoint(&ip);
-         mfem::Add(mat,
-               m_prod.getElementMatrix(trialElement, testElement, trans, ip, shapeCompute),
-               trans.Weight() * ip.weight,
-               mat);
+         as.trans.SetIntPoint(&ip);
+         mfem::Add(as.mat,
+               m_prod.getElementMatrix(as.trial, as.test, as.trans, ip, shapeCompute),
+               as.trans.Weight() * ip.weight,
+               as.mat);
       }
    }
 
-   void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(const Assembly::Common& as) const
+   void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
+         const Linear::Assembly::Common& as) const
    {
       const mfem::FiniteElement& fe = as.fe;
       mfem::ElementTransformation& trans = as.trans;
@@ -45,7 +44,7 @@ namespace Rodin::Variational
       vec.SetSize(test.getDOFs(fe, trans));
       vec = 0.0;
 
-      int order = getIntegrationOrder(as);
+      const int order = getIntegrationOrder(as);
       const mfem::IntegrationRule* ir =
          &mfem::IntRules.Get(trans.GetGeometryType(), order);
 
