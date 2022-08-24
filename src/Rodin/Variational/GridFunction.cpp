@@ -444,7 +444,10 @@ namespace Rodin::Variational
                {
                   mfem::Vector v;
                   trans->Transform(ip, v);
-                  result.emplace(std::move(v));
+                  Vertex vx(std::move(v));
+                  vx.setElementTransformation(trans);
+                  vx.setIntegrationPoint(&ip);
+                  result.insert(std::move(vx));
                }
             }
          }

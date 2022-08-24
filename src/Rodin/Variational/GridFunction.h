@@ -279,7 +279,7 @@ namespace Rodin::Variational
                const BooleanFunctionBase& p,
                const std::set<int>& attrs = {},
                std::function<int(mfem::ElementTransformation&)> order =
-                  [](mfem::ElementTransformation&) { return 3; }) const;
+                  [](mfem::ElementTransformation&) { return 1; }) const;
 
 
          RangeType getRangeType() const override;

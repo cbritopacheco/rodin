@@ -25,9 +25,11 @@ static constexpr size_t maxIt = 250;
 
 static constexpr double hmax = 0.05;
 static constexpr double alpha = 0.1;
-static constexpr double epsilon = 0.1;
-static constexpr double ell = 0.4;
+static constexpr double epsilon = 0.01;
+static constexpr double ell = 0.05;
 static constexpr double tgv = std::numeric_limits<double>::max();
+static constexpr double radius = 3 * hmax;
+static constexpr int topoPeriod = 1;
 
 GridFunction<H1<Context::Serial>> getShapeGradient(
     H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
@@ -35,11 +37,11 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/dirichlet-region-example.mesh";
+  const char* meshFile = "../resources/mmg/dirichlet-region-example.mesh";
 
   // Load and build finite element spaces on the volumetric domain
   Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MEDIT);
 
   auto J = [&](GridFunction<H1<Context::Serial>>& u)
   {
@@ -121,6 +123,9 @@ int main(int, char**)
     u.getGridFunction().transfer(uS);
     p.getGridFunction().transfer(pS);
 
+    u.getGridFunction().save("u.gf");
+    Omega.save("u.mesh");
+
     // Compute the shape gradient
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
     auto hadamard = 1. / (epsilon * epsilon) * uS * pS + ell;
@@ -135,11 +140,11 @@ int main(int, char**)
     // Advect the distance function with the gradient
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
     double gInf = std::max(gradS.max(), -gradS.min());
-    double dt = hmax / gInf;
+    double dt = 2 * hmax / gInf;
     MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
 
     // Topological optimization
-    if (i % 5 == 0)
+    if (i % topoPeriod == 0)
     {
       Alert::Info() << "    | Computing topological sensitivity." << Alert::Raise;
 
@@ -153,24 +158,28 @@ int main(int, char**)
                   return std::acos((x(0) * c(0) + x(1) * c(1) + x(2) * c(2)));
                 };
 
-      double s = topo.min();
-      if (s < 0)
+      double tmin = topo.min();
+      double tmax = topo.max();
+      if (tmin < 0)
       {
-        auto cs = topo.where(topo < s + 0.001);
+        auto cs = topo.where(topo < tmin * (1 - 0.001) + (tmax - tmin) * 0.001);
         if (cs.size() > 0)
         {
+          Alert::Info() << "    | " << cs.size() << " possible hole centers." << Alert::Raise;
+          auto it = std::min_element(cs.begin(), cs.end(),
+              [&](const Vertex& lhs, const Vertex& rhs) -> bool
+              {
+                return topo(lhs) < topo(rhs);
+              });
+
           auto holes = ScalarFunction(
               [&](const Vertex& v) -> double
               {
                 double d = dist(v);
-                for (const auto& c : cs)
-                {
-                  double dd = gd(v, c) - 0.2;
-                  d = std::min(d, dd);
-                }
+                double dd = gd(v, *it) - radius;
+                d = std::min(d, dd);
                 return d;
               });
-
           dist = holes;
         }
       }
@@ -184,8 +193,11 @@ int main(int, char**)
                                        .setHMax(hmax)
                                        .surface()
                                        .discretize(dist);
+
+    Alert::Info() << "    | Optimizing the domain." << Alert::Raise;
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
+    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
     Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
