@@ -26,7 +26,7 @@ static constexpr size_t maxIt = 250;
 static constexpr double hmax = 0.05;
 static constexpr double alpha = 0.1;
 static constexpr double epsilon = 0.1;
-static constexpr double ell = 0.01;
+static constexpr double ell = 0.4;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
 GridFunction<H1<Context::Serial>> getShapeGradient(
@@ -55,7 +55,6 @@ int main(int, char**)
     Alert::Info() << "    | Skinning mesh." << Alert::Raise;
     auto dOmega = Omega.skin();
     dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
-    dOmega.save("trace.mesh", IO::FileFormat::MEDIT);
 
     // Build finite element spaces
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
@@ -101,7 +100,7 @@ int main(int, char**)
     solver.solve(state);
 
     // Adjoint equation
-    auto dj = -ScalarFunction(u.getGridFunction()) / Omega.getVolume();
+    auto dj = -u.getGridFunction() / Omega.getVolume();
     Alert::Info() << "    | Solving adjoint equation." << Alert::Raise;
     TrialFunction p(Vh);
     TestFunction  q(Vh);
@@ -124,8 +123,8 @@ int main(int, char**)
 
     // Compute the shape gradient
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto expr = 1. / (epsilon * epsilon) * uS * pS + ell;
-    auto gradS = getShapeGradient(ThS, distS, expr, solver);
+    auto hadamard = 1. / (epsilon * epsilon) * uS * pS + ell;
+    auto gradS = getShapeGradient(ThS, distS, hadamard, solver);
 
     // Transfer back the vector field to the whole space
     GridFunction grad(Th);
@@ -138,6 +137,44 @@ int main(int, char**)
     double gInf = std::max(gradS.max(), -gradS.min());
     double dt = hmax / gInf;
     MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
+
+    // Topological optimization
+    if (i % 5 == 0)
+    {
+      Alert::Info() << "    | Computing topological sensitivity." << Alert::Raise;
+
+      // Compute the topological sensitivity
+      GridFunction topo(Vh);
+      topo = M_PI * u.getGridFunction() * p.getGridFunction();
+
+      // Geodesic distance
+      auto gd = [&](const Vertex& x, const Vertex& c)
+                {
+                  return std::acos((x(0) * c(0) + x(1) * c(1) + x(2) * c(2)));
+                };
+
+      double s = topo.min();
+      if (s < 0)
+      {
+        auto cs = topo.where(topo < s + 0.001);
+        if (cs.size() > 0)
+        {
+          auto holes = ScalarFunction(
+              [&](const Vertex& v) -> double
+              {
+                double d = dist(v);
+                for (const auto& c : cs)
+                {
+                  double dd = gd(v, c) - 0.2;
+                  d = std::min(d, dd);
+                }
+                return d;
+              });
+
+          dist = holes;
+        }
+      }
+    }
 
     // Mesh only the surface part
     Alert::Info() << "    | Meshing the domain." << Alert::Raise;
@@ -171,14 +208,14 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
   const auto& cnd = d.getGridFunction();
   const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
 
-  TrialFunction grad(vecFes);
-  Problem hilbert(grad, v);
-  hilbert = Integral(alpha * Jacobian(grad), Jacobian(v))
-          + Integral(grad, v)
-          + Integral(tgv * grad, v).over(GammaN)
+  TrialFunction g(vecFes);
+  Problem hilbert(g, v);
+  hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+          + Integral(g, v)
+          + Integral(tgv * g, v).over(GammaN)
           - BoundaryIntegral(expr * cn, v).over(SigmaD);
   solver.solve(hilbert);
 
-  return grad.getGridFunction();
+  return g.getGridFunction();
 }
 

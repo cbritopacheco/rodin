@@ -139,10 +139,11 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                const mfem::FiniteElement& fe,
+               mfem::ElementTransformation& trans,
+               const mfem::IntegrationPoint& ip,
                ShapeComputator& comp) const override
          {
-            auto& trans = comp.getElementTransformation();
-            const auto& dshape = comp.getPhysicalDShape(fe);
+            const auto& dshape = comp.getPhysicalDShape(fe, trans, ip);
             const int n = dshape.NumRows();
             const int sdim = trans.GetSpaceDim();
             const int vdim = m_u.getFiniteElementSpace().getVectorDimension();
