@@ -351,8 +351,8 @@ namespace Rodin
               m_trans(other.m_trans),
               m_ip(other.m_ip)
          {
-            m_trans = nullptr;
-            m_ip = nullptr;
+            other.m_trans = nullptr;
+            other.m_ip = nullptr;
          }
 
          int getDimension() const
@@ -400,13 +400,32 @@ namespace Rodin
             return m_v(2);
          }
 
+         bool operator==(const Vertex& rhs) const
+         {
+            double constexpr epsilon = std::numeric_limits<double>::epsilon();
+            assert(getDimension() == rhs.getDimension());
+            for (int i = 0; i < m_v.Size(); i++)
+            {
+               if (!(fabs(m_v(i) - rhs.m_v(i)) < epsilon))
+                  return false;
+            }
+            return true;
+         }
+
+         /**
+          * @brief Lexicographical comparison
+          */
          bool operator<(const Vertex& rhs) const
          {
             assert(getDimension() == rhs.getDimension());
-            bool r = true;
-            for (int i = 0; i < m_v.Size(); i++)
-               r = r && m_v(i) < rhs.m_v(i);
-            return r;
+            for (int i = 0; i < m_v.Size() - 1; i++)
+            {
+               if (m_v(i) < rhs.m_v(i))
+                  return true;
+               if (rhs.m_v(i) > m_v(i))
+                  return false;
+            }
+            return (m_v(m_v.Size() - 1) < rhs.m_v(rhs.m_v.Size() - 1));
          }
 
          Vertex& setElementTransformation(mfem::ElementTransformation* trans)
