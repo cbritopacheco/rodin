@@ -80,31 +80,73 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_trial_space_01_43dc8669d83d92fc51620283bd1c293ce.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;TrialSpace&gt;, ShapeFunctionBase&lt;TestSpace&gt;&gt;&gt;</a>
             </dt>
-            <dd>Represents an integrator which integrates over the domain elements.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of the dot product of a trial and a test operator.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="afe6c97b3f572e6f7e04edcf7af523b75">
-              <span class="m-doc-wrap-bumper">auto <a href="#afe6c97b3f572e6f7e04edcf7af523b75" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TrialSpace&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets reference to trial function.</dd>
-            <dt id="a643bf95926b1e4d7fda4c43e983ca8f1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a643bf95926b1e4d7fda4c43e983ca8f1" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TestSpace&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets reference to test function.</dd>
-            <dt id="a280cf67bc04b28acf8576e34774b8c3c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a280cf67bc04b28acf8576e34774b8c3c" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a5c213bead5e44e0771475d76f8ff6c49">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c213bead5e44e0771475d76f8ff6c49" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp;</span>
             </dt>
             <dd>Gets the attributes of the elements being integrated.</dd>
+            <dt id="ae3df983b3cd4aef92a07d054be1e7eb4">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae3df983b3cd4aef92a07d054be1e7eb4" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TrialSpace&gt;&amp;</span>
+            </dt>
+            <dd>Gets reference to trial function.</dd>
+            <dt id="ade14b828f1c26040430da71f9b23e503">
+              <span class="m-doc-wrap-bumper">auto <a href="#ade14b828f1c26040430da71f9b23e503" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TestSpace&gt;&amp;</span>
+            </dt>
+            <dd>Gets reference to test function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae9936a092a2b99e357bdd29cf61efd9a" class="m-doc">over</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;</span>
+            </dt>
+            <dd>Specifies the material reference over which to integrate.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1669895adefa7adc43fafb65bf535a89" class="m-doc">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;</span>
+            </dt>
+            <dd>Specifies the material references over which to integrate.</dd>
             <dt id="a4bcc62d6b0e58426f441cf4a4d07e1fc">
               <span class="m-doc-wrap-bumper">auto <a href="#a4bcc62d6b0e58426f441cf4a4d07e1fc" class="m-doc-self">getIntegratorRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_variational.html#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the integration region.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae9936a092a2b99e357bdd29cf61efd9a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9936a092a2b99e357bdd29cf61efd9a" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">int attr)</span></span>
+            </h3>
+            <p>Specifies the material reference over which to integrate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Specifies the material reference over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1669895adefa7adc43fafb65bf535a89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1669895adefa7adc43fafb65bf535a89" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs)</span></span>
+            </h3>
+            <p>Specifies the material references over which to integrate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Specifies the material references over which the integration should take place.</p>
+          </div></section>
         </section>
       </div>
     </div>

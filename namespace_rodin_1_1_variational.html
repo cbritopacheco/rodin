@@ -84,10 +84,6 @@
             </dt>
             <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_domain_integrator.html" class="m-doc">BilinearFormDomainIntegrator</a>
-            </dt>
-            <dd>Represents an integrator which integrates over the domain elements.</dd>
-            <dt>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>
             </dt>
             <dd>Abstract base class for bilinear form integrators.</dd>
@@ -150,7 +146,7 @@ $ u \in H^1 $
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_essential_boundary.html" class="m-doc">EssentialBoundary</a>
             </dt>
@@ -229,10 +225,10 @@ $ H^1(\Omega)^d $
             </dt>
             <dd>Represents the identity matrix function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Integrand&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_grad_3_01_shape_function_3_01_f_e_s_00_013a678baeab3508ec6ea295f779047843.html" class="m-doc">Integral&lt;Dot&lt;Grad&lt;ShapeFunction&lt;FES, TrialSpace&gt;&gt;, Grad&lt;ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> class.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_trial_space_01_43dc8669d83d92fc51620283bd1c293ce.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;TrialSpace&gt;, ShapeFunctionBase&lt;TestSpace&gt;&gt;&gt;</a>
@@ -285,14 +281,6 @@ $ u $
             </dt>
             <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_boundary_integrator.html" class="m-doc">LinearFormBoundaryIntegrator</a>
-            </dt>
-            <dd>Represents a linear form integrator over the boundary of the domain.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_domain_integrator.html" class="m-doc">LinearFormDomainIntegrator</a>
-            </dt>
-            <dd>Represents a linear form integrator over the interior of the domain.</dd>
-            <dt>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
             </dt>
             <dd>Base class for linear form integrators.</dd>
@@ -313,6 +301,11 @@ $ u $
               class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_function_base_01_4.html" class="m-doc">Mult&lt;FunctionBase, FunctionBase&gt;</a>
             </dt>
             <dd>Multiplication of two <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instances.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Mult&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
+            </dt>
+            <dd>Left Multiplication by a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a>
             </dt>
@@ -342,7 +335,7 @@ $ u $
             <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>T</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01double_01_5_00_01int_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const double*, int)&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Vertex&amp;)&gt;&gt;</a>
             </dt>
             <dd>Represents a scalar function given by an arbitrary function.</dd>
             <dt>
@@ -434,13 +427,13 @@ $ A $
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> { </span><span class="m-doc-wrap"><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>,
-              <a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a> }</span>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> { </span><span class="m-doc-wrap"><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2aeae639a70006feff484a39363c977e24" class="m-doc">Domain</a>,
+              <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2ae234de581c9c5ef91322f1469a585f9e" class="m-doc">Boundary</a> }</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> { </span><span class="m-doc-wrap"><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2aeae639a70006feff484a39363c977e24" class="m-doc">Domain</a>,
-              <a href="#a20f84fb55de829443d5c7e8b6eaaf3a2ae234de581c9c5ef91322f1469a585f9e" class="m-doc">Boundary</a> }</span>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> { </span><span class="m-doc-wrap"><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>,
+              <a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a> }</span>
             </dt>
             <dd></dd>
           </dl>
@@ -515,29 +508,6 @@ $ \partial_z u $
         </section>
         <section>
           <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="a6cd58505ac5f9e57b8f353cfeef7d7a4"><div>
-            <h3>
-              enum class Rodin::<wbr />Variational::<wbr /><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc-self">ShapeFunctionSpaceType</a>
-            </h3>
-<p>Enumeration class to indicate whether a derived instance of <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> is either a Trial or <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> space.</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc-self" id="a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d">Trial</a></td>
-                  <td>
-                  <p>Trial function space.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc-self" id="a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b">Test</a></td>
-                  <td>
-                  <p><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function space.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a20f84fb55de829443d5c7e8b6eaaf3a2"><div>
             <h3>
               enum class Rodin::<wbr />Variational::<wbr /><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc-self">IntegratorRegion</a>
@@ -556,6 +526,29 @@ $ \partial_z u $
                   <td><a href="#a20f84fb55de829443d5c7e8b6eaaf3a2ae234de581c9c5ef91322f1469a585f9e" class="m-doc-self" id="a20f84fb55de829443d5c7e8b6eaaf3a2ae234de581c9c5ef91322f1469a585f9e">Boundary</a></td>
                   <td>
                   <p>Perform the integration over the boundary of the domain.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6cd58505ac5f9e57b8f353cfeef7d7a4"><div>
+            <h3>
+              enum class Rodin::<wbr />Variational::<wbr /><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc-self">ShapeFunctionSpaceType</a>
+            </h3>
+<p>Enumeration class to indicate whether a derived instance of <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> is either a Trial or <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> space.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc-self" id="a6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d">Trial</a></td>
+                  <td>
+                  <p>Trial function space.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc-self" id="a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b">Test</a></td>
+                  <td>
+                  <p><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function space.</p>
                   </td>
                 </tr>
               </tbody>

@@ -103,7 +103,7 @@
             <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>T</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01double_01_5_00_01int_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const double*, int)&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Vertex&amp;)&gt;&gt;</a>
             </dt>
             <dd>Represents a scalar function given by an arbitrary function.</dd>
             <dt>
@@ -145,6 +145,12 @@ $ A $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aaebbd1d5de2ad7f8321036ed0077a433" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::DenseMatrix&amp; value,
+              mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af1e892f740ede28b6c161dfef53254ec" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
               const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -153,6 +159,14 @@ $ A $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aaebbd1d5de2ad7f8321036ed0077a433"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />ScalarFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaebbd1d5de2ad7f8321036ed0077a433" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::DenseMatrix&amp; value,
+              mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+<aside class="m-note m-info"><h4>Note</h4><p>It is not necessary to set the size beforehand.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="af1e892f740ede28b6c161dfef53254ec"><div>
             <h3>
               <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />ScalarFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1e892f740ede28b6c161dfef53254ec" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,

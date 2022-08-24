@@ -81,20 +81,17 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_boundary_integrator.html" class="m-doc">LinearFormBoundaryIntegrator</a>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_shape_function_base_3_01_test_space_01_4_01_4.html" class="m-doc">Integral&lt;ShapeFunctionBase&lt;TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Represents a linear form integrator over the boundary of the domain.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_domain_integrator.html" class="m-doc">LinearFormDomainIntegrator</a>
-            </dt>
-            <dd>Represents a linear form integrator over the interior of the domain.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of a scalar valued test function operator.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a280cf67bc04b28acf8576e34774b8c3c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a280cf67bc04b28acf8576e34774b8c3c" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a5c213bead5e44e0771475d76f8ff6c49">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c213bead5e44e0771475d76f8ff6c49" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp;</span>
             </dt>
             <dd>Gets the attributes of the elements being integrated.</dd>
             <dt id="a4bcc62d6b0e58426f441cf4a4d07e1fc">
@@ -102,41 +99,46 @@
             </dt>
             <dd>Gets the integration region.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aa6311a35389e706f1390d8d20ab49d9d" class="m-doc">getElementVector</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
-              mfem::ElementTransformation&amp; trans,
-              mfem::Vector&amp; vec) const <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a14647f11bf763027ca05475f9de6d81f" class="m-doc">over</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
             </dt>
-            <dd>Performs the assembly of the element vector.</dd>
+            <dd>Specifies the material reference over which to integrate.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0cb4ddf06fdd6dc5a5b27368d6b0fb33" class="m-doc">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
+            </dt>
+            <dd>Specifies the material references over which to integrate.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa6311a35389e706f1390d8d20ab49d9d"><div>
+          <section class="m-doc-details" id="a14647f11bf763027ca05475f9de6d81f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6311a35389e706f1390d8d20ab49d9d" class="m-doc-self">getElementVector</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
-              mfem::ElementTransformation&amp; trans,
-              mfem::Vector&amp; vec) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14647f11bf763027ca05475f9de6d81f" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">int attr)</span></span>
             </h3>
-            <p>Performs the assembly of the element vector.</p>
+            <p>Specifies the material reference over which to integrate.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
+              <tfoot>
                 <tr>
-                  <td style="width: 1%">fe&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> space finite element</td>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
                 </tr>
-                <tr>
-                  <td>trans&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_element.html" class="m-doc">Element</a> transformation</td>
-                </tr>
-                <tr>
-                  <td>vec&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td><a href="class_rodin_1_1_element.html" class="m-doc">Element</a> vector</td>
-                </tr>
-              </tbody>
+              </tfoot>
             </table>
+<p>Specifies the material reference over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0cb4ddf06fdd6dc5a5b27368d6b0fb33"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cb4ddf06fdd6dc5a5b27368d6b0fb33" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs)</span></span>
+            </h3>
+            <p>Specifies the material references over which to integrate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Specifies the material references over which the integration should take place.</p>
           </div></section>
         </section>
       </div>

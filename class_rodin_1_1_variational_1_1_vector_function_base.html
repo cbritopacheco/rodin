@@ -98,6 +98,10 @@ $ u $
 </g>
 </svg>.</dd>
             <dt>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>
+            </dt>
+            <dd>Abstract class for <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> objects.</dd>
+            <dt>
               class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a>
             </dt>
             <dd>Outward unit normal.</dd>
@@ -119,6 +123,12 @@ $ u $
             </dt>
             <dd>Convenience function to access the 3rd component of the vector.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aaebbd1d5de2ad7f8321036ed0077a433" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::DenseMatrix&amp; value,
+              mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a65046758e1d47c384e78847ee80de8c7" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">int i) const -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Access the ith component of the vector function.</dd>
@@ -136,6 +146,14 @@ $ u $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aaebbd1d5de2ad7f8321036ed0077a433"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />VectorFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaebbd1d5de2ad7f8321036ed0077a433" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::DenseMatrix&amp; value,
+              mfem::ElementTransformation&amp; trans,
+              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+<aside class="m-note m-info"><h4>Note</h4><p>It is not necessary to set the size beforehand.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a65046758e1d47c384e78847ee80de8c7"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&gt; Rodin::<wbr />Variational::<wbr />VectorFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65046758e1d47c384e78847ee80de8c7" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">int i) const <span class="m-label m-warning">virtual</span></span></span>

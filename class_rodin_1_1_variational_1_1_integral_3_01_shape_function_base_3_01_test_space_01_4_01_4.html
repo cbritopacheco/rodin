@@ -133,9 +133,9 @@ $ V_h $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_domain_integrator.html" class="m-doc">LinearFormDomainIntegrator</a>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
             </dt>
-            <dd>Represents a linear form integrator over the interior of the domain.</dd>
+            <dd>Base class for linear form integrators.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -150,21 +150,10 @@ $ V_h $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af740f99d1dfad17a7bf8e1cc17b19a12" class="m-doc">setIntegrationOrder</a>(</span><span class="m-doc-wrap">std::function&lt;int(const mfem::FiniteElement&amp;, mfem::ElementTransformation&amp;)&gt; order) -&gt; <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;</span>
+            <dt id="a45767f9886bf9b1ced7c1382b2dfb0bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a45767f9886bf9b1ced7c1382b2dfb0bf" class="m-doc-self">getIntegratorRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_variational.html#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Sets the function which calculates the integration order.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fb3456263cb90f95a691c5f2f9b6fd1" class="m-doc">getIntegrationOrder</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
-              mfem::ElementTransformation&amp; trans) const -&gt; int</span>
-            </dt>
-            <dd>Sets the function which calculates the integration order.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a1b155fe48618a82c682ee8cc40cd16d3" class="m-doc">getElementVector</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
-              mfem::ElementTransformation&amp; trans,
-              mfem::Vector&amp; vec) const <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Performs the assembly of the element vector.</dd>
+            <dd>Gets the integration region.</dd>
           </dl>
         </section>
         <section>
@@ -224,80 +213,6 @@ $ V_h $
 <use x='221.610181' y='-10.793007' xlink:href='#eq5-g1-58'/>
 </g>
 </svg></div>
-          </div></section>
-          <section class="m-doc-details" id="af740f99d1dfad17a7bf8e1cc17b19a12"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; Rodin::<wbr />Variational::<wbr />Integral&lt;ShapeFunctionBase&lt;TestSpace&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af740f99d1dfad17a7bf8e1cc17b19a12" class="m-doc-self">setIntegrationOrder</a>(</span><span class="m-doc-wrap">std::function&lt;int(const mfem::FiniteElement&amp;, mfem::ElementTransformation&amp;)&gt; order)</span></span>
-            </h3>
-            <p>Sets the function which calculates the integration order.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">order&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Function which computes the order of integration</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a9fb3456263cb90f95a691c5f2f9b6fd1"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />Integral&lt;ShapeFunctionBase&lt;TestSpace&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fb3456263cb90f95a691c5f2f9b6fd1" class="m-doc-self">getIntegrationOrder</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
-              mfem::ElementTransformation&amp; trans) const</span></span>
-            </h3>
-            <p>Sets the function which calculates the integration order.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a1b155fe48618a82c682ee8cc40cd16d3"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Integral&lt;ShapeFunctionBase&lt;TestSpace&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b155fe48618a82c682ee8cc40cd16d3" class="m-doc-self">getElementVector</a>(</span><span class="m-doc-wrap">const mfem::FiniteElement&amp; fe,
-              mfem::ElementTransformation&amp; trans,
-              mfem::Vector&amp; vec) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Performs the assembly of the element vector.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">fe&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> space finite element</td>
-                </tr>
-                <tr>
-                  <td>trans&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_element.html" class="m-doc">Element</a> transformation</td>
-                </tr>
-                <tr>
-                  <td>vec&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td><a href="class_rodin_1_1_element.html" class="m-doc">Element</a> vector</td>
-                </tr>
-              </tbody>
-            </table>
           </div></section>
         </section>
       </div>
