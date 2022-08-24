@@ -13,64 +13,59 @@ using namespace Rodin;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-
 int main(int, char**)
 {
-  // const char* meshFile = "miaow.o.mesh";
-  // const double pi = std::atan(1) * 4;
+  const char* meshFile = "miaow.mesh";
+  const double pi = std::atan(1) * 4;
 
+  Mesh Omega;
+  Omega.load(meshFile);
 
-  // Mesh Omega;
-  // Omega.load(meshFile, IO::FileFormat::MEDIT);
+  H1 Vh(Omega);
 
-  // // Omega.save("Omega.mesh", IO::MeshFormat::MEDIT);
+  // Sphere radius
+  double r = 1;
 
-  // H1 Vh(Omega);
+  // Hole radius
+  double rr = 0.2;
 
-  // // Sphere radius
-  // double r = 1;
+  // Hole centers on sphere
+  std::vector<std::array<double, 3>> cs = {
+    { r * sin(0) * cos(0), r * sin(0) * sin(0), r * cos(0) }
+    // { r * sin(pi / 2) * cos(pi), r * sin(pi / 2) * sin(pi), r * cos(pi / 2) },
+    // { r * sin(pi / 2) * cos(pi / 2), r * sin(pi / 2) * sin(pi / 2), r * cos(pi / 2) }
+  };
 
-  // // Hole radius
-  // double rr = 0.2;
+  // Geodesic distance
+  auto gd = [&](const Vertex& c, std::array<double, 3> x)
+            {
+              return std::acos((x[0] * c(0) + x[1] * c(1) + x[2] * c(2)));
+            };
 
-  // // Hole centers on sphere
-  // std::vector<std::array<double, 3>> cs = {
-  //   // { r * sin(0) * cos(0), r * sin(0) * sin(0), r * cos(0) },
-  //   { r * sin(pi / 2) * cos(pi), r * sin(pi / 2) * sin(pi), r * cos(pi / 2) },
-  //   { r * sin(pi / 2) * cos(pi / 2), r * sin(pi / 2) * sin(pi / 2), r * cos(pi / 2) }
-  // };
+  // Function for generating holes
+  auto f = ScalarFunction(
+      [&](const Vertex& v) -> double
+      {
+        double d = std::numeric_limits<double>::max();
+        for (const auto& c : cs)
+        {
+          double dd = gd(v, c) - rr;
+          d = std::min(d, dd);
+        }
+        return d;
+      });
 
-  // // Geodesic distance
-  // auto gd = [&](const double* x, const double* c, int)
-  //           {
-  //             return std::acos((x[0] * c[0] + x[1] * c[1] + x[2] * c[2]));
-  //           };
+  GridFunction dist(Vh);
+  dist.projectOnBoundary(f);
 
-  // // Function for generating holes
-  // auto f = ScalarFunction(
-  //     [&](const double* x, int dim) -> double
-  //     {
-  //       double d = std::numeric_limits<double>::max();
-  //       for (const auto& c : cs)
-  //       {
-  //         double dd = gd(x, c.data(), dim) - rr;
-  //         d = std::min(d, dd);
-  //       }
-  //       return d;
-  //     });
+  Omega = MMG::ImplicitDomainMesher()
+                             .split(6, {3, 6})
+                             .noSplit(2)
+                             .setHMax(0.05)
+                             .surface()
+                             .discretize(dist);
 
-  // GridFunction dist(Vh);
-  // dist.projectOnBoundary(f);
-  // Omega.save("dist.mesh");
-  // dist.save("dist.gf");
-
-  // Omega = MMG::ImplicitDomainMesher().split(2, {2, 6})
-  //                            .noSplit(3)
-  //                            .setHMax(0.05)
-  //                            .surface()
-  //                            .discretize(dist);
-
-  // Omega.save("leeel.mesh", IO::FileFormat::MEDIT);
+  Omega.save("leeel.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }
