@@ -27,10 +27,23 @@
 
 namespace Rodin::Variational
 {
+
    /**
-    * @brief Integral of the dot product of a trial and a test operator
+    * @defgroup IntegralSpecializations Integral Template Specializations
+    * @brief This module contains information about the template
+    * specializations of the Integral class.
     *
-    * Given two operators defined over trial and test spaces @f$ U_h @f$ and @f$ V_h @f$,
+    * Throughout this section we utilize @f$ u \in U_h @f$ for the test
+    * function, and @f$ v \in V_h @f$ for the trial function.
+    */
+
+   /**
+    * @ingroup IntegralSpecializations
+    * @brief Represents the expression: @f$ \int_\Omega A(u) : B(v) \ dx @f$
+    *
+    * Represents the Integral of the dot product of a trial and a test
+    * operator. Given two operators defined over trial and test spaces @f$ U_h
+    * @f$ and @f$ V_h @f$,
     * @f[
     *    A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
     * @f]
@@ -159,7 +172,8 @@ namespace Rodin::Variational
       -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
    /**
-    * @brief Integral of a scalar valued test function operator
+    * @ingroup IntegralSpecializations
+    * @brief Represents the expression: @f$ \int_\Omega A(v) \ dx @f$
     *
     * Given an operator defined over a test space @f$ V_h @f$
     * @f[
@@ -264,7 +278,9 @@ namespace Rodin::Variational
       -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
 
    /**
-    * @brief Integral of a GridFunction
+    * @ingroup IntegralSpecializations
+    *
+    * @brief Represents the quantity: @f$ \int_\Omega u \ dx @f$
     */
    template <class FES>
    class Integral<GridFunction<FES>> : public FormLanguage::Base
@@ -324,16 +340,13 @@ namespace Rodin::Variational
    template <class FES>
    Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
 
-   /**
-    * @defgroup IntegralOptimizations Performance specializations of Integral
-    */
-
    /* ||-- OPTIMIZATIONS -----------------------------------------------------
     * Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
     * ---------------------------------------------------------------------->>
     */
 
    /**
+    * @ingroup IntegralSpecializations
     * @f[
     * \int_\Omega \nabla u \cdot \nabla v
     * @f]
@@ -413,8 +426,7 @@ namespace Rodin::Variational
       -> Integral<Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>>;
 
    /**
-    * @internal
-    *
+    * @ingroup IntegralSpecializations
     * Optimized integration of the expression:
     * @f[
     *    \int_\Omega (f u) \cdot v \ dx
@@ -591,8 +603,7 @@ namespace Rodin::Variational
     */
 
    /**
-    * @internal
-    *
+    * @ingroup IntegralSpecializations
     * Optimized integration of the expression:
     * @f[
     *    \int_\Omega f \cdot v \ dx
