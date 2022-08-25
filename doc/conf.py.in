@@ -13,7 +13,8 @@ LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
         ("Examples", 'examples-index'),
         ('Credits', 'credits-index')]),
-    ("Namespaces", 'namespaces', [])
+    ("Namespaces", 'namespaces', []),
+    ("Modules", 'modules', [])
 ]
 LINKS_NAVBAR2 = [
     ("Classes", 'annotated', []),

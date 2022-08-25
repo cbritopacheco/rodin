@@ -25,11 +25,6 @@ namespace Rodin::Variational
 
          Min(double a, const FunctionBase& b);
 
-         /**
-          * @bref Constructs the power object
-          * @param[in] s Base value
-          * @param[in] p Power
-          */
          Min(const FunctionBase& a, const FunctionBase& b);
 
          Min(const Min& other);

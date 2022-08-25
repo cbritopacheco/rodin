@@ -101,7 +101,7 @@ components:
   functions. This is achieved by the following line of code:
 
   @code{.cpp}
-    FiniteElementSpace<H1> Vh(Omega);
+    H1 Vh(Omega);
   @endcode
 
   After creating this space, we construct trial and test functions @f$ u @f$
@@ -123,7 +123,7 @@ components:
   @f]
   where @f$ a(u, v) @f$ and @f$ b(v) @f$ are our respective bilinear and linear
   forms. The left hand side is then used to define the variational problem which we
-  want to solve. In the code this is achieved by the following declaration:
+  want to solve. In the code this is achieved by the following declarations:
 
   @code{.cpp}
     auto f = ScalarFunction(1.0);

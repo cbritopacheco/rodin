@@ -27,11 +27,113 @@ namespace Rodin::Variational::Internal
    using VectorProxyFunction = ProxyFunction<RangeType::Vector>;
    using MatrixProxyFunction = ProxyFunction<RangeType::Matrix>;
 
-   using MFEMFunction =
-      std::variant<
-         Internal::ScalarProxyFunction,
-         Internal::VectorProxyFunction,
-         Internal::MatrixProxyFunction>;
+   class MFEMFunction
+   {
+      public:
+         constexpr
+         MFEMFunction(nullptr_t)
+         {}
+
+         MFEMFunction(mfem::Coefficient* p)
+            :  m_range(RangeType::Scalar),
+               m_v(std::unique_ptr<mfem::Coefficient>(p))
+         {}
+
+         MFEMFunction(mfem::VectorCoefficient* p)
+            :  m_range(RangeType::Vector),
+               m_v(std::unique_ptr<mfem::VectorCoefficient>(p))
+         {}
+
+         MFEMFunction(mfem::MatrixCoefficient* p)
+            :  m_range(RangeType::Matrix),
+               m_v(std::unique_ptr<mfem::MatrixCoefficient>(p))
+         {}
+
+         MFEMFunction(MFEMFunction&& other)
+            :  m_range(std::move(other.m_range)),
+               m_v(std::move(other.m_v))
+         {}
+
+         constexpr
+         RangeType getRangeType() const
+         {
+            assert(m_range);
+            return *m_range;
+         }
+
+         template <RangeType R>
+         constexpr
+         std::enable_if_t<R == RangeType::Scalar, mfem::Coefficient&>
+         get()
+         {
+            assert(m_range);
+            assert(*m_range == R);
+            assert(std::get<std::unique_ptr<mfem::Coefficient>>(m_v));
+            return *std::get<std::unique_ptr<mfem::Coefficient>>(m_v);
+         }
+
+         template <RangeType R>
+         constexpr
+         std::enable_if_t<R == RangeType::Scalar, const mfem::Coefficient&>
+         get() const
+         {
+            assert(m_range);
+            assert(*m_range == R);
+            assert(std::get<std::unique_ptr<mfem::Coefficient>>(m_v));
+            return *std::get<std::unique_ptr<mfem::Coefficient>>(m_v);
+         }
+
+         template <RangeType R>
+         constexpr
+         std::enable_if_t<R == RangeType::Vector, mfem::VectorCoefficient&>
+         get()
+         {
+            assert(m_range);
+            assert(*m_range == R);
+            assert(std::get<std::unique_ptr<mfem::VectorCoefficient>>(m_v));
+            return *std::get<std::unique_ptr<mfem::VectorCoefficient>>(m_v);
+         }
+
+         template <RangeType R>
+         constexpr
+         std::enable_if_t<R == RangeType::Vector, const mfem::VectorCoefficient&>
+         get() const
+         {
+            assert(m_range);
+            assert(*m_range == R);
+            assert(std::get<std::unique_ptr<mfem::VectorCoefficient>>(m_v));
+            return *std::get<std::unique_ptr<mfem::VectorCoefficient>>(m_v);
+         }
+
+         template <RangeType R>
+         constexpr
+         std::enable_if_t<R == RangeType::Matrix, mfem::MatrixCoefficient&>
+         get()
+         {
+            assert(m_range);
+            assert(*m_range == R);
+            assert(std::get<std::unique_ptr<mfem::MatrixCoefficient>>(m_v));
+            return *std::get<std::unique_ptr<mfem::MatrixCoefficient>>(m_v);
+         }
+
+         template <RangeType R>
+         constexpr
+         std::enable_if_t<R == RangeType::Matrix, const mfem::MatrixCoefficient&>
+         get() const
+         {
+            assert(m_range);
+            assert(*m_range == R);
+            assert(std::get<std::unique_ptr<mfem::MatrixCoefficient>>(m_v));
+            return *std::get<std::unique_ptr<mfem::MatrixCoefficient>>(m_v);
+         }
+
+      private:
+         std::optional<RangeType> m_range;
+         std::variant<
+            std::unique_ptr<mfem::Coefficient>,
+            std::unique_ptr<mfem::VectorCoefficient>,
+            std::unique_ptr<mfem::MatrixCoefficient>> m_v;
+   };
 }
 
 namespace Rodin::Variational
@@ -134,7 +236,7 @@ namespace Rodin::Variational
 
          virtual FunctionBase* copy() const noexcept override = 0;
 
-         Internal::MFEMFunction build() const;
+         virtual Internal::MFEMFunction build() const;
 
       protected:
          mfem::ElementTransformation& getTraceElementTrans(

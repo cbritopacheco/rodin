@@ -84,6 +84,9 @@ namespace Rodin::Variational
 
    class GridFunctionBase;
 
+   /**
+    * @brief TODO
+    */
    template <class FES>
    class GridFunction;
 
@@ -203,6 +206,22 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class OR;
 
+   /**
+    * @ingroup IntegralSpecializations
+    * @class Integral
+    * @brief Represents expressions of the integral operator.
+    * @tparam Integrand Type of the integrand
+    *
+    * Represents the integral operator with a templated integrand type:
+    * @f[
+    *    \int \text{Integrand}
+    * @f]
+    *
+    * For an overview of all the possible specializations of the Integral
+    * class, please see @ref IntegralSpecializations.
+    *
+    * @see IntegralSpecializations
+    */
    template <class Integrand>
    class Integral;
 
