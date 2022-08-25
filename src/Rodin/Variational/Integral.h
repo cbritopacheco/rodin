@@ -39,10 +39,9 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
-    * @brief Represents the expression: @f$ \int_\Omega A(u) : B(v) \ dx @f$
+    * @brief Integration of the dot product of a trial and test operators.
     *
-    * Represents the Integral of the dot product of a trial and a test
-    * operator. Given two operators defined over trial and test spaces @f$ U_h
+    * Given two operators defined over trial and test spaces @f$ U_h
     * @f$ and @f$ V_h @f$,
     * @f[
     *    A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
@@ -173,7 +172,7 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
-    * @brief Represents the expression: @f$ \int_\Omega A(v) \ dx @f$
+    * @brief Integration of a test operator.
     *
     * Given an operator defined over a test space @f$ V_h @f$
     * @f[
@@ -279,8 +278,7 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
-    *
-    * @brief Represents the quantity: @f$ \int_\Omega u \ dx @f$
+    * @brief Integration of a GridFunction object.
     */
    template <class FES>
    class Integral<GridFunction<FES>> : public FormLanguage::Base
@@ -347,8 +345,9 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
+    *
     * @f[
-    * \int_\Omega \nabla u \cdot \nabla v
+    * \int_\Omega \nabla u \cdot \nabla v \ dx
     * @f]
     */
    template <class FES>
@@ -427,6 +426,7 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
+    *
     * Optimized integration of the expression:
     * @f[
     *    \int_\Omega (f u) \cdot v \ dx
@@ -604,6 +604,7 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
+    *
     * Optimized integration of the expression:
     * @f[
     *    \int_\Omega f \cdot v \ dx
