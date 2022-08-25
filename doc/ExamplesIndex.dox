@@ -43,6 +43,10 @@
 
   - @subpage examples-mmg-index
 
+  @subsection examples-index-density_optimization Density optimization examples
+
+  - @subpage examples-density_optimization-index
+
   @subsection examples-index-shapeoptimization Shape optimization examples
 
   - @subpage examples-shapeoptimization-index

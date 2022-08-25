@@ -80,23 +80,19 @@ namespace Rodin::Variational
       }
    }
 
-   std::variant<
-      Internal::ScalarProxyFunction,
-      Internal::VectorProxyFunction,
-      Internal::MatrixProxyFunction> FunctionBase::build() const
+   Internal::MFEMFunction FunctionBase::build() const
    {
       switch (getRangeType())
       {
          case RangeType::Scalar:
-            return Internal::ScalarProxyFunction(*this);
+            return Internal::MFEMFunction(new Internal::ScalarProxyFunction(*this));
          case RangeType::Vector:
-            return Internal::VectorProxyFunction(*this);
+            return Internal::MFEMFunction(new Internal::VectorProxyFunction(*this));
          case RangeType::Matrix:
-            return Internal::MatrixProxyFunction(*this);
+            return Internal::MFEMFunction(new Internal::MatrixProxyFunction(*this));
       }
-
       // The following return is needed to prevent compiler warnings/errors
-      return Internal::ScalarProxyFunction(*this);
+      return Internal::MFEMFunction(nullptr);
    }
 }
 
