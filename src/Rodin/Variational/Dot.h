@@ -80,8 +80,7 @@ namespace Rodin::Variational
     * @f[
     *    \Lambda : A(u)
     * @f]
-    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$,
-    * @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
+    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
     */
    template <ShapeFunctionSpaceType Space>
    class Dot<FunctionBase, ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>

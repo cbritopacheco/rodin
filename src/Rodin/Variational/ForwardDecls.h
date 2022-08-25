@@ -173,6 +173,23 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class Division;
 
+   /**
+    * @ingroup DotSpecializations
+    * @brief Represents the dot product between two objects
+    * @tparam Lhs Type of left hand side operand
+    * @tparam Rhs Type of right hand side operand
+    *
+    * Represents the following mathematical expression:
+    * @f[
+    *    \text{LHS} : \text{RHS}
+    * @f]
+    * where @f$ : @f$ denotes the dot product.
+    *
+    * For an overview of all the possible specializations of the Dot
+    * class, please see @ref DotSpecializations.
+    *
+    * @see DotSpecializations
+    */
    template <class Lhs, class Rhs>
    class Dot;
 
@@ -214,7 +231,7 @@ namespace Rodin::Variational
     *
     * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int \text{Integrand}
+    *    \int \text{Integrand} \ .
     * @f]
     *
     * For an overview of all the possible specializations of the Integral
