@@ -32,8 +32,9 @@
               </ol>
             </li>
             <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="3">
+          <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
@@ -143,10 +144,30 @@ $ u \in H^1 $
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a> by <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_00_01_shape_function_3_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Dot&lt;FunctionBase, ShapeFunction&lt;FES, Space&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_grad_3_01_shape_function_3_01_f_e_s_00_01_trial_space_06c0377a9a5bab8278ae23cf15ebaf124.html" class="m-doc">Dot&lt;Grad&lt;ShapeFunction&lt;FES, TrialSpace&gt;&gt;, Grad&lt;ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_mult_3_01_function_base_00_01_grad_3_01_shape_function_4c045c3d0ec74dfdd20f49e957fe647a.html" class="m-doc">Dot&lt;Mult&lt;FunctionBase, Grad&lt;ShapeFunction&lt;FES, TrialSpace&gt;&gt;&gt;, Grad&lt;ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_mult_3_01_function_base_00_01_shape_function_3_01_f_e_s15b216327ed7609b6d60f506f1ad78fd.html" class="m-doc">Dot&lt;Mult&lt;FunctionBase, ShapeFunction&lt;FES, TrialSpace&gt;&gt;, ShapeFunction&lt;FES, TestSpace&gt;&gt;</a>
+            </dt>
+            <dd></dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_essential_boundary.html" class="m-doc">EssentialBoundary</a>
             </dt>
@@ -187,6 +208,11 @@ $ u $
 </g>
 </svg>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>
+            </dt>
+            <dd>TODO.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Trait&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_h1_3_01_trait_01_4_01_4.html" class="m-doc">GridFunction&lt;H1&lt;Trait&gt;&gt;</a>
             </dt>
@@ -225,25 +251,44 @@ $ H^1(\Omega)^d $
             </dt>
             <dd>Represents the identity matrix function.</dd>
             <dt>
+              class <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>
+            </dt>
+            <dd>Represents expressions of the integral operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_function_base_00_01_shape_function_3_01_fe15fa240903c921c8d01c503425af267.html" class="m-doc">Integral&lt;Dot&lt;FunctionBase, ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_grad_3_01_shape_function_3_01_f_e_s_00_013a678baeab3508ec6ea295f779047843.html" class="m-doc">Integral&lt;Dot&lt;Grad&lt;ShapeFunction&lt;FES, TrialSpace&gt;&gt;, Grad&lt;ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_mult_3_01_function_base_00_01_grad_3_01_s57cd19dd7aef0ba98e25ea8f697fe44d.html" class="m-doc">Integral&lt;Dot&lt;Mult&lt;FunctionBase, Grad&lt;ShapeFunction&lt;FES, TrialSpace&gt;&gt;&gt;, Grad&lt;ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_mult_3_01_function_base_00_01_shape_funct9fcc8ef1df90def76bd5dc9ec2905b6e.html" class="m-doc">Integral&lt;Dot&lt;Mult&lt;FunctionBase, ShapeFunction&lt;FES, TrialSpace&gt;&gt;, ShapeFunction&lt;FES, TestSpace&gt;&gt;&gt;</a>
             </dt>
             <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_trial_space_01_43dc8669d83d92fc51620283bd1c293ce.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;TrialSpace&gt;, ShapeFunctionBase&lt;TestSpace&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of the dot product of a trial and a test operator.</dd>
+            <dd>Integration of the dot product of a trial and test operators.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">Integral&lt;GridFunction&lt;FES&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dd>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_integral_3_01_shape_function_base_3_01_test_space_01_4_01_4.html" class="m-doc">Integral&lt;ShapeFunctionBase&lt;TestSpace&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of a scalar valued test function operator.</dd>
+            <dd>Integration of a test operator.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Trait&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_h1_3_01_trait_01_4_01_4_01_4.html" class="m-doc">Jacobian&lt;GridFunction&lt;H1&lt;Trait&gt;&gt;&gt;</a>
@@ -302,6 +347,16 @@ $ u $
             </dt>
             <dd>Multiplication of two <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instances.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_grad_3_01_shape_function_3_01_f_e_s_00_01_space_01_4_01_4_01_4.html" class="m-doc">Mult&lt;FunctionBase, Grad&lt;ShapeFunction&lt;FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Left Multiplication of the gradient of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> by a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_shape_function_3_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Mult&lt;FunctionBase, ShapeFunction&lt;FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Left Multiplication of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> by a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Mult&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
             </dt>
@@ -332,7 +387,7 @@ $ u $
               <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_number_01_4.html" class="m-doc">ScalarFunction&lt;Number&gt;</a>
             </dt>
-            <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>T</code>.</dd>
+            <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Vertex&amp;)&gt;&gt;</a>
