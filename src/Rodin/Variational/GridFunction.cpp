@@ -139,11 +139,12 @@ namespace Rodin::Variational
          const FunctionBase& s, const std::set<int>& attrs)
    {
       auto va = s.build();
-      std::visit(Utility::Overloaded{
-         [&](Internal::ScalarProxyFunction& iv)
+      switch (s.getRangeType())
+      {
+         case RangeType::Scalar:
          {
             if (attrs.size() == 0)
-               getHandle().ProjectCoefficient(iv);
+               getHandle().ProjectCoefficient(va.get<RangeType::Scalar>());
             else
             {
                mfem::Array<int> vdofs;
@@ -153,15 +154,16 @@ namespace Rodin::Variational
                   if (attrs.count(fes.GetAttribute(i)) > 0)
                   {
                      fes.GetElementVDofs(i, vdofs);
-                     getHandle().ProjectCoefficient(iv, vdofs);
+                     getHandle().ProjectCoefficient(va.get<RangeType::Scalar>(), vdofs);
                   }
                }
             }
-         },
-         [&](Internal::VectorProxyFunction& iv)
+            break;
+         }
+         case RangeType::Vector:
          {
             if (attrs.size() == 0)
-               getHandle().ProjectCoefficient(iv);
+               getHandle().ProjectCoefficient(va.get<RangeType::Vector>());
             else
             {
                mfem::Array<int> vdofs;
@@ -171,16 +173,19 @@ namespace Rodin::Variational
                   if (attrs.count(fes.GetAttribute(i)) > 0)
                   {
                      fes.GetElementVDofs(i, vdofs);
-                     getHandle().ProjectCoefficient(iv, vdofs);
+                     getHandle().ProjectCoefficient(va.get<RangeType::Vector>(), vdofs);
                   }
                }
             }
-         },
-         [&](Internal::MatrixProxyFunction& iv)
+            break;
+         }
+         case RangeType::Matrix:
          {
             UnexpectedRangeTypeException(
                   {RangeType::Scalar, RangeType::Vector}, RangeType::Matrix).raise();
-         }}, va);
+            break;
+         }
+      }
       return *this;
    }
 

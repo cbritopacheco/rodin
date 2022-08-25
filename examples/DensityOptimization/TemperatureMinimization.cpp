@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include "Rodin/Mesh.h"
 #include "Rodin/Solver.h"
 #include "Rodin/Variational.h"
@@ -10,11 +16,11 @@ static constexpr int Gamma0 = 1, GammaD = 2;
 
 // Optimization parameters
 static constexpr double ell = 1;
-static constexpr double mu = 0.1;
-static constexpr double hmin = 0.001;
+static constexpr double mu = 0.2;
+static constexpr double hmin = 0.01;
 static constexpr double hmax = 10;
-static constexpr double alpha = 0.01;
-static constexpr size_t maxIterations = 400;
+static constexpr double alpha = 0.05;
+static constexpr size_t maxIterations = 1000;
 
 int main(int, char**)
 {
@@ -23,7 +29,6 @@ int main(int, char**)
   // Load mesh
   Mesh Omega;
   Omega.load(meshFile);
-  Omega.refine();
 
   Omega.save("Omega.mesh");
 

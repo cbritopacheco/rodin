@@ -1,0 +1,21 @@
+/**
+  @page examples-density_optimization-simp_temperature_minimization Temperature minimization
+  @brief Temperature
+
+  @image html SIMPTemperatureMinimization.png width=410px
+
+  @m_keywords{Temperature}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+
+  The full source code may be found below:
+  -   @ref DensityOptimization/TemperatureMinimization.cpp "TemperatureMinimization.cpp"
+
+  @example DensityOptimization/TemperatureMinimization.cpp
+  @m_examplenavigation{examples-density_optimization-simp_temperature_minimization,DensityOptimization/}
+  @m_footernavigation
+  */
+

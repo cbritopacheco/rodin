@@ -24,6 +24,11 @@
 namespace Rodin::Variational
 {
    /**
+    * @defgroup MultSpecializations Mult Template Specializations
+    */
+
+   /**
+    * @ingroup MultSpecializations
     * @brief Multiplication of two FunctionBase instances.
     */
    template <>
@@ -97,6 +102,7 @@ namespace Rodin::Variational
    }
 
    /**
+    * @ingroup MultSpecializations
     * @brief Left Multiplication by a FunctionBase of a ShapeFunctionBase
     *
     * Represents the following expression:
@@ -238,7 +244,7 @@ namespace Rodin::Variational
     */
 
    /**
-    * @internal
+    * @ingroup MultSpecializations
     * @brief Left Multiplication of a ShapeFunction by a FunctionBase
     *
     * Represents the following expression:
@@ -308,7 +314,7 @@ namespace Rodin::Variational
    }
 
    /**
-    * @internal
+    * @ingroup MultSpecializations
     * @brief Left Multiplication of the gradient of a ShapeFunction by a FunctionBase
     *
     * Represents the following expression:

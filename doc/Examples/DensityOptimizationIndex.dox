@@ -1,0 +1,7 @@
+/**
+  @page examples-density_optimization-index Density optimization examples
+  @brief Showcases the usage of the Rodin::Variational module
+
+  - @subpage examples-density_optimization-simp_temperature_minimization
+
+  */
