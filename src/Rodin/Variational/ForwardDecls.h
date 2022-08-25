@@ -203,6 +203,22 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class OR;
 
+   /**
+    * @ingroup IntegralSpecializations
+    * @class Integral
+    * @tparam Integrand Type of the integrand
+    * @brief TODO
+    *
+    * Represents the integral operator with a templated integrand type:
+    * @f[
+    *    \int \text{Integrand}
+    * @f]
+    *
+    * For an overview of all the possible specializations of the Integral
+    * class, please see @ref IntegralSpecializations.
+    *
+    * @see IntegralSpecializations
+    */
    template <class Integrand>
    class Integral;
 
