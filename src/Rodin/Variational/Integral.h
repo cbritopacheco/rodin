@@ -119,11 +119,6 @@ namespace Rodin::Variational
             return *this;
          }
 
-         /**
-          * @brief Sets the function which calculates the integration order
-          * @param[in] order Function which computes the order of integration
-          * @returns Reference to self (for method chaining)
-          */
          int getIntegrationOrder(const Bilinear::Assembly::Common& as) const
          {
             return m_intOrder(as);
@@ -404,7 +399,9 @@ namespace Rodin::Variational
                      &mfem::RefinedIntRules.Get(as.trial.GetGeomType(), order) :
                      &mfem::IntRules.Get(as.trial.GetGeomType(), order);
                mfem::ConstantCoefficient one(1.0);
-               mfem::DiffusionIntegrator(one, ir).AssembleElementMatrix(as.trial, as.trans, as.mat);
+               mfem::DiffusionIntegrator bfi(one);
+               bfi.SetIntRule(ir);
+               bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
             }
             else
             {
@@ -431,7 +428,7 @@ namespace Rodin::Variational
     * @f[
     *    \int_\Omega (f u) \cdot v \ dx
     * @f]
-    * where $f$ is a function (scalar or matrix valued).
+    * where @f$ f @f$ is a function (scalar or matrix valued).
     */
    template <class FES>
    class Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>
@@ -489,7 +486,7 @@ namespace Rodin::Variational
                      &mfem::RefinedIntRules.Get(as.trial.GetGeomType(), order) :
                      &mfem::IntRules.Get(as.trial.GetGeomType(), order);
                auto q = getIntegrand().getLHS().getLHS().build();
-               switch (getIntegrand().getLHS().getRangeType())
+               switch (getIntegrand().getLHS().getLHS().getRangeType())
                {
                   case RangeType::Scalar:
                   {
@@ -497,14 +494,14 @@ namespace Rodin::Variational
                      {
                         case RangeType::Scalar:
                         {
-                           mfem::MassIntegrator bfi(std::get<Internal::ScalarProxyFunction>(q));
+                           mfem::MassIntegrator bfi(q.template get<RangeType::Scalar>());
                            bfi.SetIntRule(ir);
                            bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
                            break;
                         }
                         case RangeType::Vector:
                         {
-                           mfem::VectorMassIntegrator bfi(std::get<Internal::ScalarProxyFunction>(q));
+                           mfem::VectorMassIntegrator bfi(q.template get<RangeType::Scalar>());
                            bfi.SetIntRule(ir);
                            bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
                            break;
@@ -533,7 +530,7 @@ namespace Rodin::Variational
                         }
                         case RangeType::Vector:
                         {
-                           mfem::VectorMassIntegrator bfi(std::get<Internal::MatrixProxyFunction>(q));
+                           mfem::VectorMassIntegrator bfi(q.template get<RangeType::Matrix>());
                            bfi.SetIntRule(ir);
                            bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
                            break;
@@ -592,6 +589,141 @@ namespace Rodin::Variational
          const Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>&)
       -> BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
 
+
+   /**
+    * @ingroup IntegralSpecializations
+    *
+    * Optimized integration of the expression:
+    * @f[
+    *    \int_\Omega (f \nabla u) \cdot \nabla v \ dx
+    * @f]
+    * where @f$ f @f$ is a function (scalar or matrix valued).
+    */
+   template <class FES>
+   class Integral<Dot<
+      Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>,
+      Grad<ShapeFunction<FES, TestSpace>>>>
+         : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+   {
+      public:
+         using Parent =
+            Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+         using Integrand =
+            Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>;
+
+         constexpr
+         Integral(
+               const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>& fgu,
+               const Grad<ShapeFunction<FES, TestSpace>>& gv)
+            : Integral(Dot(fgu, gv))
+         {}
+
+         constexpr
+         Integral(const Integrand& integrand)
+            : Parent(integrand)
+         {
+            setIntegrationOrder(
+                  [](const Bilinear::Assembly::Common& as)
+                  {
+                     if (as.trial.Space() == mfem::FunctionSpace::Pk)
+                        return as.trial.GetOrder() + as.test.GetOrder() - 2;
+                     else
+                        return as.trial.GetOrder() + as.test.GetOrder() + as.trial.GetDim() - 1;
+                  });
+         }
+
+         constexpr
+         Integral(const Integral& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Integral(Integral&& other)
+            : Parent(std::move(other))
+         {}
+
+         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const override
+         {
+            const int order = getIntegrationOrder(as);
+            if (&as.trial == &as.test)
+            {
+               const mfem::IntegrationRule* ir =
+                  as.trial.Space() == mfem::FunctionSpace::rQk ?
+                     &mfem::RefinedIntRules.Get(as.trial.GetGeomType(), order) :
+                     &mfem::IntRules.Get(as.trial.GetGeomType(), order);
+               auto q = getIntegrand().getLHS().getLHS().build();
+               switch (getIntegrand().getLHS().getLHS().getRangeType())
+               {
+                  case RangeType::Scalar:
+                  {
+                     mfem::DiffusionIntegrator bfi(q.template get<RangeType::Scalar>());
+                     bfi.SetIntRule(ir);
+                     bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
+                     break;
+                  }
+                  case RangeType::Vector:
+                  {
+                     assert(false); // Unsupported
+                     break;
+                  }
+                  case RangeType::Matrix:
+                  {
+                     mfem::DiffusionIntegrator bfi(q.template get<RangeType::Matrix>());
+                     bfi.SetIntRule(ir);
+                     bfi.AssembleElementMatrix(as.trial, as.trans, as.mat);
+                     break;
+                  }
+               }
+            }
+            else
+            {
+               assert(false); // Unimplemented
+            }
+         }
+
+         virtual const Integrand& getIntegrand() const override
+         {
+            return static_cast<const Integrand&>(Parent::getIntegrand());
+         }
+
+         virtual Integral* copy() const noexcept override
+         {
+            return new Integral(*this);
+         }
+   };
+   template <class FES>
+   Integral(
+         const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>&,
+         const Grad<ShapeFunction<FES, TestSpace>>&)
+      -> Integral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
+   template <class FES>
+   Integral(
+         const Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>&)
+      -> Integral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
+
+   template <class FES>
+   class BoundaryIntegral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>
+      : public Integral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>
+   {
+      public:
+         using Parent =
+            Integral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
+         using Integrand =
+            Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>;
+         using Parent::Parent;
+         IntegratorRegion getIntegratorRegion() const override { return IntegratorRegion::Boundary; }
+         BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
+   };
+   template <class FES>
+   BoundaryIntegral(
+         const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>&,
+         const Grad<ShapeFunction<FES, TestSpace>>&)
+      -> BoundaryIntegral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
+   template <class FES>
+   BoundaryIntegral(
+         const Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>&)
+      -> BoundaryIntegral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
+
    /* <<-- OPTIMIZATIONS -----------------------------------------------------
     * Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
     * ----------------------------------------------------------------------||
@@ -620,8 +752,8 @@ namespace Rodin::Variational
          using Integrand   = Dot<FunctionBase, ShapeFunction<FES, TestSpace>>;
 
          constexpr
-         Integral(const FunctionBase& f, const ShapeFunction<FES, TestSpace>& u)
-            : Integral(Dot(f, u))
+         Integral(const FunctionBase& f, const ShapeFunction<FES, TestSpace>& v)
+            : Integral(Dot(f, v))
          {}
 
          constexpr
@@ -706,14 +838,14 @@ namespace Rodin::Variational
             {
                case RangeType::Scalar:
                {
-                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q));
+                  mfem::DomainLFIntegrator lfi(q.get<RangeType::Scalar>());
                   lfi.SetIntRule(ir);
                   lfi.AssembleDevice(as.fes, as.markers, as.vec);
                   break;
                }
                case RangeType::Vector:
                {
-                  mfem::VectorDomainLFIntegrator lfi(std::get<Internal::VectorProxyFunction>(q));
+                  mfem::VectorDomainLFIntegrator lfi(q.get<RangeType::Vector>());
                   lfi.SetIntRule(ir);
                   lfi.AssembleDevice(as.fes, as.markers, as.vec);
                   break;
@@ -738,14 +870,14 @@ namespace Rodin::Variational
             {
                case RangeType::Scalar:
                {
-                  mfem::DomainLFIntegrator lfi(std::get<Internal::ScalarProxyFunction>(q));
+                  mfem::DomainLFIntegrator lfi(q.get<RangeType::Scalar>());
                   lfi.SetIntRule(ir);
                   lfi.AssembleRHSElementVect(as.fe, as.trans, as.vec);
                   break;
                }
                case RangeType::Vector:
                {
-                  mfem::VectorDomainLFIntegrator lfi(std::get<Internal::VectorProxyFunction>(q));
+                  mfem::VectorDomainLFIntegrator lfi(q.get<RangeType::Vector>());
                   lfi.SetIntRule(ir);
                   lfi.AssembleRHSElementVect(as.fe, as.trans, as.vec);
                   break;

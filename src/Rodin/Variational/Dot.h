@@ -18,6 +18,13 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup DotSpecializations Dot Template Specializations
+    */
+
+   /**
+    * @ingroup DotSpecializations
+    */
    template <>
    class Dot<FunctionBase, FunctionBase> : public ScalarFunctionBase
    {
@@ -67,6 +74,7 @@ namespace Rodin::Variational
    Dot(const FunctionBase&, const FunctionBase&) -> Dot<FunctionBase, FunctionBase>;
 
    /**
+    * @ingroup DotSpecializations
     * @brief Dot product between a FunctionBase and a ShapeFunctionBase.
     *
     * @f[
@@ -181,6 +189,9 @@ namespace Rodin::Variational
    Dot(const FunctionBase&, const ShapeFunctionBase<Space>&)
       -> Dot<FunctionBase, ShapeFunctionBase<Space>>;
 
+   /**
+    * @ingroup DotSpecializations
+    */
    template <>
    class Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
       : public FormLanguage::Base
@@ -267,12 +278,11 @@ namespace Rodin::Variational
     */
 
    /**
-    * @internal
-    *
+    * @ingroup DotSpecializations
     * @f[
     *    f \cdot u
     * @f]
-    * where $f$ is a function (scalar or vector valued).
+    * where @f$ f @f$ is a function (scalar or vector valued).
     */
    template <class FES, ShapeFunctionSpaceType Space>
    class Dot<FunctionBase, ShapeFunction<FES, Space>>
@@ -338,12 +348,12 @@ namespace Rodin::Variational
     */
 
    /**
-    * @internal
+    * @ingroup DotSpecializations
     *
     * @f[
     *    (f u) \cdot v
     * @f]
-    * where $f$ is a function (scalar or vector valued).
+    * where @f$ f @f$ is a function (scalar or vector valued).
     */
    template <class FES>
    class Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>
@@ -396,11 +406,73 @@ namespace Rodin::Variational
          }
    };
    template <class FES>
-   Dot(const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>& f, const ShapeFunction<FES, TestSpace>& u)
+   Dot(const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>&, const ShapeFunction<FES, TestSpace>&)
       -> Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
 
    /**
-    * @internal
+    * @ingroup DotSpecializations
+    *
+    * @f[
+    *    (f \nabla u) \cdot \nabla v
+    * @f]
+    * where @f$ f @f$ is a function (scalar or matrix valued).
+    */
+   template <class FES>
+   class Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>
+      : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using LHS = Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>;
+         using RHS = Grad<ShapeFunction<FES, TestSpace>>;
+
+         constexpr
+         Dot(const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>& fgu,
+               const Grad<ShapeFunction<FES, TestSpace>>& gv)
+            : Parent(fgu, gv)
+         {}
+
+         constexpr
+         Dot(const Dot& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Dot(Dot&& other)
+            : Parent(other)
+         {}
+
+         virtual LHS& getLHS() override
+         {
+            return static_cast<LHS&>(Parent::getLHS());
+         }
+
+         virtual RHS& getRHS() override
+         {
+            return static_cast<RHS&>(Parent::getRHS());
+         }
+
+         virtual const LHS& getLHS() const override
+         {
+            return static_cast<const LHS&>(Parent::getLHS());
+         }
+
+         virtual const RHS& getRHS() const override
+         {
+            return static_cast<const RHS&>(Parent::getRHS());
+         }
+
+         virtual Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+   };
+   template <class FES>
+   Dot(const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>&, const Grad<ShapeFunction<FES, TestSpace>>&)
+      -> Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>;
+
+   /**
+    * @ingroup DotSpecializations
     *
     * Represents the following expression:
     * @f[

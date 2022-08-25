@@ -102,9 +102,9 @@ namespace Rodin::Variational
    ScalarFunction(const FunctionBase&) -> ScalarFunction<FunctionBase>;
 
    /**
-    * @brief Represents a ScalarFunction of arithmetic type `T`.
+    * @brief Represents a ScalarFunction of arithmetic type `Number`.
     *
-    * @tparam T Arithmetic type
+    * @tparam Number Arithmetic type
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class Number>
@@ -145,6 +145,11 @@ namespace Rodin::Variational
          ScalarFunction* copy() const noexcept override
          {
             return new ScalarFunction(*this);
+         }
+
+         Internal::MFEMFunction build() const override
+         {
+            return Internal::MFEMFunction(new mfem::ConstantCoefficient(m_x));
          }
 
       private:

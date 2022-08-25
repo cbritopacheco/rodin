@@ -418,8 +418,9 @@ namespace Rodin::Variational
                const FunctionBase& s, const std::set<int>& attrs = {})
          {
             auto va = s.build();
-            std::visit(Utility::Overloaded{
-               [&](Internal::ScalarProxyFunction& iv)
+            switch (s.getRangeType())
+            {
+               case RangeType::Scalar:
                {
                   int maxBdrAttr = getFiniteElementSpace()
                                   .getMesh()
@@ -428,7 +429,7 @@ namespace Rodin::Variational
                   if (attrs.size() == 0)
                   {
                      marker = 1;
-                     getHandle().ProjectBdrCoefficient(iv, marker);
+                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Scalar>(), marker);
                   }
                   else
                   {
@@ -438,10 +439,11 @@ namespace Rodin::Variational
                         assert(attr - 1 < maxBdrAttr);
                         marker[attr - 1] = 1;
                      }
-                     getHandle().ProjectBdrCoefficient(iv, marker);
+                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Scalar>(), marker);
                   }
-               },
-               [&](Internal::VectorProxyFunction& iv)
+                  break;
+               }
+               case RangeType::Vector:
                {
                   int maxBdrAttr = getFiniteElementSpace()
                                   .getMesh()
@@ -450,7 +452,7 @@ namespace Rodin::Variational
                   if (attrs.size() == 0)
                   {
                      marker = 1;
-                     getHandle().ProjectBdrCoefficient(iv, marker);
+                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Vector>(), marker);
                   }
                   else
                   {
@@ -460,15 +462,17 @@ namespace Rodin::Variational
                         assert(attr - 1 < maxBdrAttr);
                         marker[attr - 1] = 1;
                      }
-                     getHandle().ProjectBdrCoefficient(iv, marker);
+                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Vector>(), marker);
                   }
-               },
-               [&](Internal::MatrixProxyFunction&)
+                  break;
+               }
+               case RangeType::Matrix:
                {
                   UnexpectedRangeTypeException(
                         {RangeType::Scalar, RangeType::Vector}, RangeType::Matrix).raise();
+                  break;
                }
-               }, va);
+            }
             return *this;
          }
 

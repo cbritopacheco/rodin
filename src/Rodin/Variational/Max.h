@@ -25,11 +25,6 @@ namespace Rodin::Variational
 
          Max(double a, const FunctionBase& b);
 
-         /**
-          * @bref Constructs the power object
-          * @param[in] s Base value
-          * @param[in] p Power
-          */
          Max(const FunctionBase& a, const FunctionBase& b);
 
          Max(const Max& other);
