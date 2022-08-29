@@ -14,6 +14,15 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup ANDSpecializations AND Template Specializations
+    * @see AND
+    */
+
+   /**
+    * @ingroup ANDSpecializations
+    * @brief Logical AND operator between two instances of BooleanFunctionBase
+    */
    template <>
    class AND<BooleanFunctionBase, BooleanFunctionBase> : public BooleanFunctionBase
    {
