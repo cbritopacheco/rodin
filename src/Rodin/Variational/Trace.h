@@ -15,10 +15,15 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Represents the trace @f$ \mathrm{tr}(A) @f$ of some square matrix
-    * @f$ A @f$.
+    * @defgroup TraceSpecializations
+    */
+
+   /**
+    * @ingroup TraceSpecializations
+    * @brief Represents the trace of a FunctionBase operator.
     *
-    * The trace of an @f$ n \times n @f$ matrix @f$ A @f$ is defined as
+    * Given a matrix valued function @f$ A : \Omega \rightarrow \mathbb{R}^{n
+    * \times n} @f$, we define its trace as:
     * @f[
     *    \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii}
     * @f]
