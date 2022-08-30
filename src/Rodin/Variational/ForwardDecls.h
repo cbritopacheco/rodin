@@ -153,7 +153,21 @@ namespace Rodin::Variational
    template <class T>
    class Div;
 
-   template <class T>
+   /**
+    * @brief Represents the Jacobian of a type
+    * @tparam Operand Type of operand
+    *
+    * Represents the Jacobian operator on a templated type:
+    * @f[
+    *    \mathbf{J}_\mathrm{Operand}
+    * @f]
+    *
+    * For an overview of all the possible specializations of the Jacobian
+    * class, please see @ref JacobianSpecializations.
+    *
+    * @see JacobianSpecializations
+    */
+   template <class Operand>
    class Jacobian;
 
    class RestrictionBase;
@@ -173,10 +187,39 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class Division;
 
-   template <class Lhs, class Rhs>
+   /**
+    * @brief Represents the dot product between two objects
+    * @tparam LHS Type of left hand side operand
+    * @tparam RHS Type of right hand side operand
+    *
+    * Represents the following mathematical expression:
+    * @f[
+    *    \mathrm{LHS} : \mathrm{RHS}
+    * @f]
+    *
+    * For an overview of all the possible specializations of the Dot
+    * class, please see @ref DotSpecializations.
+    *
+    * @see DotSpecializations
+    */
+   template <class LHS, class RHS>
    class Dot;
 
-   template <class T>
+   /**
+    * @brief Represents the trace of a matrix function
+    * @tparam Operand Type of operand
+    *
+    * Represents the trace of a matrix valued operand:
+    * @f[
+    *    \mathrm{tr} \left( \mathrm{Operand} \right)
+    * @f]
+    *
+    * For an overview of all the possible specializations of the Dot
+    * class, please see @ref TraceSpecializations.
+    *
+    * @see TraceSpecializations
+    */
+   template <class Operand>
    class Trace;
 
    template <class Lhs, class Rhs>
@@ -200,7 +243,22 @@ namespace Rodin::Variational
    template <class Lhs, class Rhs>
    class NEQ;
 
-   template <class Lhs, class Rhs>
+   /**
+    * @brief Represents the logical AND expression
+    * @tparam LHS Left-hand side type
+    * @tparam RHS Right-hand side type
+    *
+    * Represents the logical AND operation between two templated types:
+    * @f[
+    *    \mathrm{LHS} \land \mathrm{RHS}
+    * @f]
+    *
+    * For an overview of all the possible specializations of the AND class,
+    * please see @ref ANDSpecializations.
+    *
+    * @see ANDSpecializations
+    */
+   template <class LHS, class RHS>
    class AND;
 
    template <class Lhs, class Rhs>
@@ -208,13 +266,12 @@ namespace Rodin::Variational
 
    /**
     * @ingroup IntegralSpecializations
-    * @class Integral
     * @brief Represents expressions of the integral operator.
     * @tparam Integrand Type of the integrand
     *
     * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int \text{Integrand}
+    *    \int \mathrm{Integrand}
     * @f]
     *
     * For an overview of all the possible specializations of the Integral
