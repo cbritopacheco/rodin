@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin</title>
+  <title>Jacobian Template Specializations module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -32,7 +32,7 @@
               </ol>
             </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html" id="m-navbar-current">Modules</a></li>
+            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -51,31 +51,34 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>Modules</h1>
-        <ul class="m-doc">
-          <li>module <a href="group___a_n_d_specializations.html" class="m-doc">AND Template Specializations</a> <span class="m-doc"></span></li>
-          <li>module <a href="group___dot_specializations.html" class="m-doc">Dot Template Specializations</a> <span class="m-doc"></span></li>
-          <li>module <a href="group___integral_specializations.html" class="m-doc">Integral Template Specializations</a> <span class="m-doc">This module contains information about the template specializations of the <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> class.</span></li>
-          <li>module <a href="group___jacobian_specializations.html" class="m-doc">Jacobian Template Specializations</a> <span class="m-doc"></span></li>
-          <li>module <a href="group___mult_specializations.html" class="m-doc">Mult Template Specializations</a> <span class="m-doc"></span></li>
-          <li>module <a href="group___trace_specializations.html" class="m-doc">TraceSpecializations</a> <span class="m-doc"></span></li>
-        </ul>
-        <script>
-        function toggle(e) {
-            e.parentElement.className = e.parentElement.className == 'm-doc-collapsible' ?
-                'm-doc-expansible' : 'm-doc-collapsible';
-            return false;
-        }
-        /* Collapse all nodes marked as such. Doing it via JS instead of
-           directly in markup so disabling it doesn't harm usability. The list
-           is somehow regenerated on every iteration and shrinks as I change
-           the classes. It's not documented anywhere and I'm not sure if this
-           is the same across browsers, so I am going backwards in that list to
-           be sure. */
-        var collapsed = document.getElementsByClassName("collapsed");
-        for(var i = collapsed.length - 1; i >= 0; --i)
-            collapsed[i].className = 'm-doc-expansible';
-        </script>
+        <h1>
+          Jacobian Template Specializations <span class="m-thin">module</span></h1>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Trait&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_h1_3_01_trait_01_4_01_4_01_4.html" class="m-doc">Rodin::Variational::Jacobian&lt;GridFunction&lt;H1&lt;Trait&gt;&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space, class Trait&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_h1_3_01_trait_01_4_00_01_space_01_4_01_4.html" class="m-doc">Rodin::Variational::Jacobian&lt;ShapeFunction&lt;H1&lt;Trait&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

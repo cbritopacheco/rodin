@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::Jacobian class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;class Operand&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Jacobian <span class="m-thin">class</span>
+        </h1>
+        <p>Represents the <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a type.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Operand</td>
+              <td>Type of operand</td>
+            </tr>
+          </tbody>
+        </table>
+<p>Represents the <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator on a templated type:</p><div class="m-math"><svg style="width: 4.081em; height: 1.203em;" viewBox="174.432457 -11.545586 39.179938 11.545586">
+<title>
+\[ \mathbf{J}_\mathrm{Operand} \]
+</title>
+<defs>
+<path id='eq1-g1-79' d='M6.105106-2.701868C6.105106-4.303861 4.837858-5.610959 3.291656-5.610959C1.721544-5.610959 .470237-4.29589 .470237-2.701868C.470237-1.075965 1.769365 .167372 3.283686 .167372C4.829888 .167372 6.105106-1.091905 6.105106-2.701868ZM3.291656-.095641C2.422914-.095641 1.299128-.820922 1.299128-2.82142C1.299128-4.726276 2.462765-5.363885 3.283686-5.363885C4.144458-5.363885 5.276214-4.694396 5.276214-2.82142C5.276214-.797011 4.128518-.095641 3.291656-.095641Z'/>
+<path id='eq1-g1-97' d='M3.347447-2.375093C3.347447-3.156164 2.590286-3.55467 1.865006-3.55467C1.203487-3.55467 .613699-3.299626 .613699-2.773599C.613699-2.534496 .781071-2.391034 .988294-2.391034C1.211457-2.391034 1.362889-2.550436 1.362889-2.765629C1.362889-2.956912 1.243337-3.092403 1.067995-3.132254C1.362889-3.331507 1.793275-3.331507 1.849066-3.331507C2.295392-3.331507 2.741719-3.020672 2.741719-2.367123V-2.12005C2.279452-2.096139 1.745455-2.072229 1.187547-1.841096C.486177-1.538232 .350685-1.075965 .350685-.812951C.350685-.127522 1.155666 .079701 1.705604 .079701C2.287422 .079701 2.646077-.247073 2.82142-.565878C2.86127-.263014 3.068493 .039851 3.419178 .039851C3.498879 .039851 4.176339 .00797 4.176339-.71731V-1.155666H3.929265V-.71731C3.929265-.390535 3.809714-.263014 3.642341-.263014C3.347447-.263014 3.347447-.629639 3.347447-.71731V-2.375093ZM2.741719-1.123786C2.741719-.350685 2.088169-.143462 1.769365-.143462C1.354919-.143462 1.004234-.422416 1.004234-.804981C1.004234-1.331009 1.498381-1.872976 2.741719-1.912827V-1.123786Z'/>
+<path id='eq1-g1-100' d='M2.622167-5.443587V-5.180573C3.164134-5.180573 3.227895-5.124782 3.227895-4.734247V-3.052553C2.948941-3.355417 2.574346-3.514819 2.1599-3.514819C1.163636-3.514819 .278954-2.741719 .278954-1.713574C.278954-.73325 1.075965 .079701 2.080199 .079701C2.550436 .079701 2.940971-.143462 3.203985-.422416V.079701L4.415442 0V-.263014C3.873474-.263014 3.809714-.318804 3.809714-.70934V-5.531258L2.622167-5.443587ZM3.203985-.988294C3.203985-.844832 3.203985-.812951 3.084433-.653549C2.86127-.334745 2.494645-.143462 2.12005-.143462C1.753425-.143462 1.43462-.334745 1.243337-.629639C1.028144-.940473 .988294-1.331009 .988294-1.705604C.988294-2.16787 1.060025-2.494645 1.243337-2.773599C1.43462-3.068493 1.793275-3.291656 2.199751-3.291656C2.582316-3.291656 2.964882-3.100374 3.203985-2.685928V-.988294Z'/>
+<path id='eq1-g1-101' d='M3.291656-1.817186C3.466999-1.817186 3.514819-1.817186 3.514819-2.000498C3.514819-2.709838 3.124284-3.55467 2.000498-3.55467C1.012204-3.55467 .239103-2.733748 .239103-1.745455C.239103-.71731 1.099875 .079701 2.10411 .079701C3.116314 .079701 3.514819-.773101 3.514819-.956413C3.514819-.988294 3.490909-1.067995 3.387298-1.067995C3.299626-1.067995 3.283686-1.012204 3.267746-.964384C2.980822-.191283 2.295392-.167372 2.15193-.167372C1.793275-.167372 1.42665-.334745 1.187547-.70137S.948443-1.578082 .948443-1.817186H3.291656ZM.956413-2.024408C1.028144-3.140224 1.705604-3.331507 2.000498-3.331507C2.933001-3.331507 2.964882-2.207721 2.972852-2.024408H.956413Z'/>
+<path id='eq1-g1-110' d='M3.873474-2.414944C3.873474-3.084433 3.57061-3.514819 2.733748-3.514819C1.944707-3.514819 1.586052-2.940971 1.490411-2.749689H1.482441V-3.514819L.326775-3.427148V-3.164134C.868742-3.164134 .932503-3.108344 .932503-2.717808V-.621669C.932503-.263014 .836862-.263014 .326775-.263014V0C.669489-.02391 1.020174-.02391 1.235367-.02391C1.466501-.02391 1.801245-.02391 2.14396 0V-.263014C1.633873-.263014 1.538232-.263014 1.538232-.621669V-2.064259C1.538232-2.901121 2.175841-3.291656 2.662017-3.291656S3.267746-2.948941 3.267746-2.446824V-.621669C3.267746-.263014 3.172105-.263014 2.662017-.263014V0C3.004732-.02391 3.355417-.02391 3.57061-.02391C3.801743-.02391 4.136488-.02391 4.479203 0V-.263014C3.969116-.263014 3.873474-.263014 3.873474-.621669V-2.414944Z'/>
+<path id='eq1-g1-112' d='M2.096139 1.283188C1.586052 1.283188 1.490411 1.283188 1.490411 .924533V-.390535C1.865006 .01594 2.271482 .079701 2.526526 .079701C3.53873 .079701 4.415442-.70137 4.415442-1.721544C4.415442-2.717808 3.610461-3.514819 2.646077-3.514819C2.335243-3.514819 1.872976-3.435118 1.466501-3.020672V-3.514819L.278954-3.427148V-3.164134C.844832-3.164134 .884682-3.116314 .884682-2.781569V.924533C.884682 1.283188 .789041 1.283188 .278954 1.283188V1.546202C.621669 1.522291 .972354 1.522291 1.187547 1.522291C1.41868 1.522291 1.753425 1.522291 2.096139 1.546202V1.283188ZM1.490411-2.654047C1.673724-2.972852 2.072229-3.267746 2.574346-3.267746C3.188045-3.267746 3.706102-2.590286 3.706102-1.721544C3.706102-.804981 3.132254-.143462 2.486675-.143462C2.207721-.143462 1.841096-.263014 1.586052-.661519C1.490411-.797011 1.490411-.804981 1.490411-.956413V-2.654047Z'/>
+<path id='eq1-g1-114' d='M1.466501-1.817186C1.466501-2.414944 1.713574-3.275716 2.478705-3.291656C2.430884-3.259776 2.351183-3.196015 2.351183-3.012702C2.351183-2.765629 2.542466-2.654047 2.701868-2.654047C2.893151-2.654047 3.060523-2.781569 3.060523-3.012702C3.060523-3.291656 2.805479-3.514819 2.454795-3.514819C1.936737-3.514819 1.586052-3.124284 1.41868-2.677958H1.41071V-3.514819L.278954-3.427148V-3.164134C.820922-3.164134 .884682-3.108344 .884682-2.717808V-.621669C.884682-.263014 .789041-.263014 .278954-.263014V0C.589788-.02391 1.028144-.02391 1.219427-.02391C1.689664-.02391 1.705604-.02391 2.223661 0V-.263014H2.064259C1.482441-.263014 1.466501-.350685 1.466501-.637609V-1.817186Z'/>
+<path id='eq1-g0-74' d='M5.212453-7.687173H6.168867V-8.201245C5.869988-8.177335 4.638605-8.177335 4.25604-8.177335C3.634371-8.177335 2.630137-8.177335 2.044334-8.201245V-7.687173H3.694147V-1.78132C3.694147-.657534 3.144209-.251059 2.52254-.251059C2.438854-.251059 1.888917-.251059 1.422665-.549938C1.853051-.657534 2.056289-1.004234 2.056289-1.362889C2.056289-1.948692 1.590037-2.211706 1.219427-2.211706C.789041-2.211706 .37061-1.912827 .37061-1.362889C.37061-.466252 1.291158 .143462 2.582316 .143462C4.112578 .143462 5.212453-.549938 5.212453-1.78132V-7.687173Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='174.432457' y='-3.343009' xlink:href='#eq1-g0-74'/>
+<use x='181.378641' y='-1.549746' xlink:href='#eq1-g1-79'/>
+<use x='187.965148' y='-1.549746' xlink:href='#eq1-g1-112'/>
+<use x='192.905028' y='-1.549746' xlink:href='#eq1-g1-101'/>
+<use x='196.668746' y='-1.549746' xlink:href='#eq1-g1-114'/>
+<use x='199.968916' y='-1.549746' xlink:href='#eq1-g1-97'/>
+<use x='204.203099' y='-1.549746' xlink:href='#eq1-g1-110'/>
+<use x='208.907747' y='-1.549746' xlink:href='#eq1-g1-100'/>
+</g>
+</svg></div><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> class, please see <a href="group___jacobian_specializations.html" class="m-doc">Jacobian Template Specializations</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="group___jacobian_specializations.html" class="m-doc">Jacobian Template Specializations</a></p></aside>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
