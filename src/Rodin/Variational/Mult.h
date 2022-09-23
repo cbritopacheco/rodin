@@ -25,6 +25,7 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup MultSpecializations Mult Template Specializations
+    * @see Mult
     */
 
    /**

@@ -20,6 +20,7 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup DotSpecializations Dot Template Specializations
+    * @see Dot
     */
 
    /**
