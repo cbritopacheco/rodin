@@ -33,8 +33,8 @@ namespace Rodin::Variational
     * @brief This module contains information about the template
     * specializations of the Integral class.
     *
-    * Throughout this section we utilize @f$ u \in U_h @f$ for the test
-    * function, and @f$ v \in V_h @f$ for the trial function.
+    * Throughout this section we utilize the symbols @f$ u \in U_h @f$ for the
+    * trial function, and @f$ v \in V_h @f$ for the test function.
     */
 
    /**
