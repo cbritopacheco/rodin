@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.15)
 cmake_policy(SET CMP0054 NEW)
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.13)
   cmake_policy(SET CMP0076 NEW)
@@ -21,6 +21,7 @@ option(RODIN_USE_MPI            "Build with MPI support"          OFF)
 option(RODIN_USE_OPENMP         "Build with OpenMP support"       OFF)
 option(RODIN_USE_SUITESPARSE    "Build with SuiteSparse support"  ON)
 option(RODIN_SILENCE_WARNINGS   "Silence warning outputted by Rodin"  OFF)
+option(RODIN_BUILD_PY           "Build Python bindings."          OFF)
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -38,9 +39,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(
-  -fvisibility=hidden
-  -fvisibility-inlines-hidden)
+# add_compile_options(
+#   -fvisibility=hidden
+#   -fvisibility-inlines-hidden)
 
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
@@ -140,6 +141,20 @@ if (RODIN_BUILD_SRC)
 
   if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(examples)
+  endif()
+
+  if (RODIN_BUILD_PY)
+    set(Python3_FIND_REGISTRY LAST)
+    set(Python3_FIND_VIRTUALENV FIRST)
+    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+    execute_process(
+      COMMAND "${PYTHON_EXECUTABLE}" -c
+              "import pybind11; print(pybind11.get_cmake_dir())"
+      OUTPUT_VARIABLE _tmp_dir
+      OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+    add_subdirectory(third-party/pybind11)
+    add_subdirectory(py)
   endif()
 endif()
 

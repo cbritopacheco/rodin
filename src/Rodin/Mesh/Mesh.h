@@ -40,6 +40,8 @@ namespace Rodin
    class MeshBase
    {
       public:
+         virtual ~MeshBase() = default;
+
          template <class T>
          std::enable_if_t<std::is_same_v<Element, T>, int>
          count() const
@@ -298,14 +300,21 @@ namespace Rodin
    {
       public:
          /**
-          * @brief Loads a mesh from file.
+          * @brief Loads a mesh from file in the given format.
           * @param[in] filename Name of file to read
+          * @param[in] fmt Mesh file format
           * @returns Reference to this (for method chaining)
           */
          Mesh& load(
                const boost::filesystem::path& filename,
                IO::FileFormat fmt = IO::FileFormat::MFEM);
 
+         /**
+          * @brief Saves a mesh to file in the given format.
+          * @param[in] filename Name of file to write
+          * @param[in] fmt Mesh file format
+          * @returns Reference to this (for method chaining)
+          */
          void save(
                const boost::filesystem::path& filename,
                IO::FileFormat fmt = IO::FileFormat::MFEM, int precison = 16) const;
@@ -329,6 +338,18 @@ namespace Rodin
           * @brief Move assigns the mesh from another mesh.
           */
          Mesh& operator=(Mesh&& other) = default;
+
+         Mesh& initialize(int dim, int sdim, int nv);
+
+         Mesh& vertex(const std::vector<double>& x);
+
+         Mesh& element(
+               Geometry geom,
+               const std::vector<int>& vs,
+               std::optional<int> attr = {});
+
+         Mesh& finalize();
+
 
          SubMesh<Context::Serial> keep(int attr);
 

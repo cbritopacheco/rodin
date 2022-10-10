@@ -18,7 +18,11 @@ namespace Rodin
       struct Parallel;
    }
 
+   enum class Geometry;
+
    class MeshBase;
+
+   class MeshBuilder;
 
    /**
     * @brief Templated class for Mesh.
