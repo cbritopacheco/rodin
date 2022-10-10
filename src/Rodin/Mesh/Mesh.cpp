@@ -399,6 +399,44 @@ namespace Rodin
       return m_mesh;
    }
 
+   Mesh<Context::Serial>&
+   Mesh<Context::Serial>::initialize(int dim, int sdim, int nv)
+   {
+      m_mesh = mfem::Mesh(dim, nv, 0, 0, sdim);
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
+   {
+      if (static_cast<int>(x.size()) != getSpaceDimension())
+      {
+         Alert::Exception()
+            << "Vertex dimension is different from space dimension"
+            << " (" << x.size() << " != " << getSpaceDimension() << ")"
+            << Alert::Raise;
+      }
+      getHandle().AddVertex(x.data());
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::element(
+         Geometry geom,
+         const std::vector<int>& vs, std::optional<int> attr)
+   {
+      mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
+      el->SetVertices(vs.data());
+      if (attr)
+         el->SetAttribute(*attr);
+      getHandle().AddElement(el);
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::finalize()
+   {
+      getHandle().Finalize(false, true);
+      return *this;
+   }
+
    // ---- Mesh<Parallel> ----------------------------------------------------
 }
 
