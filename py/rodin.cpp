@@ -109,21 +109,7 @@ namespace Rodin
 PYBIND11_MODULE(rodin, m)
 {
   py::module alert = m.def_submodule("alert");
-  // static py::exception<Rodin::Alert::Exception> exc(alert, "Exception");
   py::register_exception<Rodin::Alert::Exception>(alert, "Exception");
-  // py::register_exception_translator(
-  //     [](std::exception_ptr p)
-  //     {
-  //       try
-  //       {
-  //         if (p)
-  //           std::rethrow_exception(p);
-  //       }
-  //       catch (const Rodin::Alert::Exception& e)
-  //       {
-  //         exc(e.what());
-  //       }
-  //     });
 
   // Rodin::IO
   py::module io = m.def_submodule("io");
