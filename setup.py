@@ -1,3 +1,4 @@
+import os
 import sys
 
 try:
@@ -12,8 +13,14 @@ except ImportError:
 
 from setuptools import find_packages
 
+cmake_args_string = os.environ.get("RODIN_CMAKE_ARGS", None)
+if (cmake_args_string is not None):
+    cmake_args = cmake_args_string.split(' ')
+else:
+    cmake_args = None
+
 setup(
-    name="scikit_build_example",
+    name="rodin",
     version="0.0.1",
     description="Rodin Python bindings",
     author="Carlos Brito-Pacheco",
@@ -21,7 +28,7 @@ setup(
     packages=find_packages(where="py"),
     package_dir={"": "py"},
     # cmake_install_dir="rodin/py",
+    cmake_args=cmake_args,
     include_package_data=True,
-    extras_require={"test": ["pytest"]},
     python_requires=">=3.6",
 )

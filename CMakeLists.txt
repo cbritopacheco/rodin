@@ -39,9 +39,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# add_compile_options(
-#   -fvisibility=hidden
-#   -fvisibility-inlines-hidden)
+add_compile_options(
+  -fvisibility=hidden
+  -fvisibility-inlines-hidden)
 
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
@@ -101,7 +101,7 @@ if (RODIN_BUILD_SRC)
   message(STATUS "Configuring Eigen3...")
   set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
   set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/eigen)
+  add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
   unset(BUILD_TESTING)
 
   find_package (Eigen3 3.3 REQUIRED NO_MODULE
@@ -115,7 +115,7 @@ if (RODIN_BUILD_SRC)
   set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   set (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT TRUE)
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
-  add_subdirectory(third-party/spectra)
+  add_subdirectory(third-party/spectra EXCLUDE_FROM_ALL)
   unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
 
   find_package (Spectra 1.0.1 REQUIRED)

@@ -18,9 +18,3 @@ target_link_libraries(CCL
   PUBLIC
   Rodin::Mesh)
 
-add_executable(Builder Builder.cpp)
-target_link_libraries(Builder
-  PUBLIC
-  Rodin::Mesh)
-
-

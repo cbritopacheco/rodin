@@ -57,7 +57,8 @@ add_library(Rodin::External::MMG ALIAS RodinExternalMMG)
 message(STATUS "Configuring mmg ...")
 add_subdirectory(
   ${PROJECT_SOURCE_DIR}/third-party/mmg
-  ${PROJECT_BINARY_DIR}/third-party/mmg)
+  ${PROJECT_BINARY_DIR}/third-party/mmg
+  EXCLUDE_FROM_ALL)
 # The previous call will readily add the mmg targets that we need to link the
 # MMG wrapper. Check MmgTargets.cmake for a list of all the targets available.
 # At the time of writing we have:
