@@ -51,6 +51,13 @@ namespace Rodin::External::MMG
        */
       ImplicitDomainMesher& setRMC(double rmc = 1e-5);
 
+      ImplicitDomainMesher& setBaseReferences(MaterialReference ref)
+      {
+        return setBaseReferences(std::set<MaterialReference>{ref});
+      }
+
+      ImplicitDomainMesher& setBaseReferences(const std::set<MaterialReference>& refs);
+
       /**
        * @brief Sets the material reference for the discretized boundary
        * @f$ \partial \Omega @f$
@@ -123,7 +130,7 @@ namespace Rodin::External::MMG
         {
           generateUniqueSplit(ls.getFiniteElementSpace().getMesh().getBoundaryAttributes());
         }
-        else
+        else if (ls.getFiniteElementSpace().getMesh().getDimension() == 2)
         {
           generateUniqueSplit(ls.getFiniteElementSpace().getMesh().getAttributes());
         }
@@ -264,6 +271,7 @@ namespace Rodin::External::MMG
       SplitMap m_split;
       bool m_meshTheSurface;
       std::optional<double> m_rmc;
+      std::set<int> m_lsBaseReferences;
       std::optional<MaterialReference> m_isoref;
 
       boost::random::mt19937 m_rng;

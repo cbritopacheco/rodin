@@ -30,7 +30,7 @@ int main(int, char**)
   Mesh Omega;
   Omega.load(meshFile);
 
-  Omega.save("Omega.mesh");
+  Omega.save("outDensity/gamma.mesh");
 
   // Build finite element space
   H1 Vh(Omega);
@@ -85,8 +85,11 @@ int main(int, char**)
     gamma -= step;
     gamma = Min(1.0, Max(0.0, gamma));
 
-    gamma.save("gamma.gf");
+    gamma.save("outDensity/gamma." + std::to_string(i) + ".gf");
   }
+
+  Omega.save("gamma.mesh");
+  gamma.save("gamma.gf");
 
   return 0;
 }

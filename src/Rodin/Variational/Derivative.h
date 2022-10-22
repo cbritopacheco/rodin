@@ -63,7 +63,9 @@ namespace Rodin::Variational
          {
             mfem::Vector grad;
             m_u.getHandle().GetGradient(
-                  FunctionBase::getTraceElementTrans(trans, ip), grad);
+                  FunctionBase::getTraceElementTrans(
+                     FunctionBase::getSubMeshElementTrans(
+                        m_u.getFiniteElementSpace().getMesh(), trans, ip), ip), grad);
             return grad(m_direction);
          }
 

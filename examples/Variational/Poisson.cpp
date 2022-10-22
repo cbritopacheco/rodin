@@ -44,8 +44,8 @@ int main(int, char**)
               .solve(poisson);
 
   // Save solution
-  // u.getGridFunction().save("u.gf");
-  // Omega.save("Omega.mesh");
+  u.getGridFunction().save("u.gf");
+  Omega.save("miaow.mesh");
 
   return 0;
 }

@@ -102,7 +102,7 @@ namespace Rodin::Alert
           *
           * This method will call @ref raise().
           */
-         virtual void operator<<(const RaiseT&) noexcept
+         void operator<<(const RaiseT&)
          {
             this->raise();
          }

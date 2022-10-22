@@ -24,7 +24,7 @@ static constexpr int SigmaN = 2;
 static constexpr size_t maxIt = 250;
 
 static constexpr double hmax = 0.05;
-static constexpr double alpha = 0.1;
+static constexpr double alpha = 0.6;
 static constexpr double epsilon = 0.01;
 static constexpr double ell = 0.05;
 static constexpr double tgv = std::numeric_limits<double>::max();
@@ -141,7 +141,7 @@ int main(int, char**)
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
     double gInf = std::max(gradS.max(), -gradS.min());
     double dt = 2 * hmax / gInf;
-    MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
+    MMG::Advect(dist, grad).surface().step(dt);
 
     // Topological optimization
     if (i % topoPeriod == 0)
@@ -205,8 +205,10 @@ int main(int, char**)
 }
 
 GridFunction<H1<Context::Serial>> getShapeGradient(
-    H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
-    const FunctionBase& expr, Solver::Solver& solver)
+    H1<Context::Serial>& vecFes,
+    GridFunction<H1<Context::Serial>>& dist,
+    const FunctionBase& expr,
+    Solver::Solver& solver)
 {
   TrialFunction d(vecFes);
   TestFunction  v(vecFes);

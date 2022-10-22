@@ -33,9 +33,10 @@ namespace Rodin
       return (getSpaceDimension() - 1 == getDimension());
    }
 
-   void MeshBase::refine()
+   MeshBase& MeshBase::refine()
    {
       getHandle().UniformRefinement();
+      return *this;
    }
 
    std::set<int> MeshBase::getAttributes() const
@@ -92,7 +93,7 @@ namespace Rodin
 
    MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
    {
-      assert(u.getFiniteElementSpace().getVectorDimension() == getDimension());
+      assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
       getHandle().MoveNodes(u.getHandle());
       return *this;
    }
@@ -397,6 +398,44 @@ namespace Rodin
    const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
    {
       return m_mesh;
+   }
+
+   Mesh<Context::Serial>&
+   Mesh<Context::Serial>::initialize(int dim, int sdim)
+   {
+      m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
+   {
+      if (static_cast<int>(x.size()) != getSpaceDimension())
+      {
+         Alert::Exception()
+            << "Vertex dimension is different from space dimension"
+            << " (" << x.size() << " != " << getSpaceDimension() << ")"
+            << Alert::Raise;
+      }
+      getHandle().AddVertex(x.data());
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::element(
+         Geometry geom,
+         const std::vector<int>& vs, std::optional<int> attr)
+   {
+      mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
+      el->SetVertices(vs.data());
+      if (attr)
+         el->SetAttribute(*attr);
+      getHandle().AddElement(el);
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::finalize()
+   {
+      getHandle().Finalize(false, true);
+      return *this;
    }
 
    // ---- Mesh<Parallel> ----------------------------------------------------

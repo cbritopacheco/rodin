@@ -83,7 +83,10 @@ namespace Rodin::Variational
                mfem::Vector& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const override
          {
-            GetGradient(value, FunctionBase::getTraceElementTrans(trans, ip), ip);
+            GetGradient(value,
+                  FunctionBase::getTraceElementTrans(
+                     FunctionBase::getSubMeshElementTrans(
+                        m_u.getFiniteElementSpace().getMesh(), trans, ip), ip), ip);
          }
 
          VectorFunctionBase* copy() const noexcept override

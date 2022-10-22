@@ -28,7 +28,7 @@ static constexpr double lambda = 0.5769;
 static constexpr size_t maxIt = 250;
 static constexpr double eps = 1e-6;
 static constexpr double hmax = 0.05;
-static constexpr double ell = 1.0;
+static constexpr double ell = 0.4;
 static constexpr double alpha = 4 * hmax * hmax;
 
 // Compliance
@@ -50,6 +50,7 @@ int main(int, char**)
 
   // Optimization loop
   std::vector<double> obj;
+  std::ofstream fObj("obj.txt", std::ios_base::app);
   for (size_t i = 0; i < maxIt; i++)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
@@ -81,7 +82,7 @@ int main(int, char**)
     uInt.getGridFunction().transfer(u);
 
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
+    auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
@@ -95,19 +96,33 @@ int main(int, char**)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
+    trimmed.save("out/trimmed." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+
     // Update objective
-    obj.push_back(
-        compliance(u) + ell * Omega.getVolume(Interior));
+    double objective = compliance(u) + ell * Omega.getVolume(Interior);
+    obj.push_back(objective);
+    fObj << objective << "\n";
+    fObj.flush();
     Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
 
     Alert::Info() << "    | Distancing domain." << Alert::Raise;
     H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
+    Omega.save("dist.mesh");
+    g.getGridFunction().save("g.gf");
+    dist.save("dist.gf");
 
     // Advect the level set function
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
-    double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
+    GridFunction gNorm(Dh);
+    gNorm = ScalarFunction(
+        [&](const Vertex& v) -> double
+        {
+          mfem::Vector val = g.getGridFunction()(v);
+          return val.Norml2();
+        });
+    double gInf = gNorm.max();
     double dt = 4 * hmax / gInf;
     MMG::Advect(dist, g.getGridFunction()).step(dt);
 

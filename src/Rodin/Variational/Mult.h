@@ -25,6 +25,7 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup MultSpecializations Mult Template Specializations
+    * @see Mult
     */
 
    /**
@@ -313,6 +314,13 @@ namespace Rodin::Variational
       return Mult(lhs, rhs);
    }
 
+   template <class T, class FES, ShapeFunctionSpaceType Space>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, ShapeFunction<FES, Space>>>
+   operator*(T v, const ShapeFunction<FES, Space>& rhs)
+   {
+      return Mult(ScalarFunction(v), rhs);
+   }
+
    /**
     * @ingroup MultSpecializations
     * @brief Left Multiplication of the gradient of a ShapeFunction by a FunctionBase
@@ -381,6 +389,92 @@ namespace Rodin::Variational
    operator*(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
    {
       return Mult(lhs, rhs);
+   }
+
+   template <class T, class FES, ShapeFunctionSpaceType Space>
+   std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>>
+   operator*(T v, const Grad<ShapeFunction<FES, Space>>& rhs)
+   {
+      return Mult(ScalarFunction(v), rhs);
+   }
+
+   /**
+    * @ingroup MultSpecializations
+    * @brief Left Multiplication of the gradient of a ShapeFunction by the
+    * Jacobian of a FunctionBase
+    *
+    * Represents the following expression:
+    * @f[
+    *    f \mathbf{J} u
+    * @f]
+    * where @f$ f @f$ is a function (scalar or matrix valued).
+    */
+   template <class FES, ShapeFunctionSpaceType Space>
+   class Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>
+      : public Mult<FunctionBase, ShapeFunctionBase<Space>>
+   {
+      public:
+         using Parent = Mult<FunctionBase, ShapeFunctionBase<Space>>;
+         using LHS = FunctionBase;
+         using RHS = Jacobian<ShapeFunction<FES, Space>>;
+
+         constexpr
+         Mult(const FunctionBase& lhs, const Jacobian<ShapeFunction<FES, Space>>& rhs)
+            : Parent(lhs, rhs)
+         {}
+
+         constexpr
+         Mult(const Mult& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Mult(Mult&& other)
+            : Parent(std::move(other))
+         {}
+
+         virtual FunctionBase& getLHS() override
+         {
+            return static_cast<FunctionBase&>(Parent::getLHS());
+         }
+
+         virtual const FunctionBase& getLHS() const override
+         {
+            return static_cast<const FunctionBase&>(Parent::getLHS());
+         }
+
+         virtual Jacobian<ShapeFunction<FES, Space>>& getRHS() override
+         {
+            return static_cast<Jacobian<ShapeFunction<FES, Space>>&>(Parent::getRHS());
+         }
+
+         virtual const Jacobian<ShapeFunction<FES, Space>>& getRHS() const override
+         {
+            return static_cast<const Jacobian<ShapeFunction<FES, Space>>&>(Parent::getRHS());
+         }
+
+         virtual Mult* copy() const noexcept override
+         {
+            return new Mult(*this);
+         }
+   };
+   template <class FES, ShapeFunctionSpaceType Space>
+   Mult(const FunctionBase&, const Jacobian<ShapeFunction<FES, Space>>&)
+      -> Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>;
+
+   template <class FES, ShapeFunctionSpaceType Space>
+   Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>
+   operator*(const FunctionBase& lhs, const Jacobian<ShapeFunction<FES, Space>>& rhs)
+   {
+      return Mult(lhs, rhs);
+   }
+
+   template <class T, class FES, ShapeFunctionSpaceType Space>
+   std::enable_if_t<
+      std::is_arithmetic_v<T>, Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>>
+   operator*(T v, const Jacobian<ShapeFunction<FES, Space>>& rhs)
+   {
+      return Mult(ScalarFunction(v), rhs);
    }
 
    /* <<-- OPTIMIZATIONS -----------------------------------------------------
