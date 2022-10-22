@@ -532,6 +532,129 @@ namespace Rodin::Variational
    Dot(const Grad<ShapeFunction<FES, TrialSpace>>&, const Grad<ShapeFunction<FES, TestSpace>>&)
       -> Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>;
 
+   /**
+    * @ingroup DotSpecializations
+    *
+    * Represents the following expression:
+    * @f[
+    *    \mathbf{J} u \cdot \mathbf{J} v
+    * @f]
+    */
+   template <class FES>
+   class Dot<Jacobian<ShapeFunction<FES, TrialSpace>>, Jacobian<ShapeFunction<FES, TestSpace>>>
+      : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using LHS = Jacobian<ShapeFunction<FES, TrialSpace>>;
+         using RHS = Jacobian<ShapeFunction<FES, TestSpace>>;
+
+         constexpr
+         Dot(const Jacobian<ShapeFunction<FES, TrialSpace>>& nu, const Jacobian<ShapeFunction<FES, TestSpace>>& nv)
+            : Parent(nu, nv)
+         {}
+
+         constexpr
+         Dot(const Dot& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Dot(Dot&& other)
+            : Parent(std::move(other))
+         {}
+
+         virtual LHS& getLHS() override
+         {
+            return static_cast<LHS&>(Parent::getLHS());
+         }
+
+         virtual RHS& getRHS() override
+         {
+            return static_cast<RHS&>(Parent::getRHS());
+         }
+
+         virtual const LHS& getLHS() const override
+         {
+            return static_cast<const LHS&>(Parent::getLHS());
+         }
+
+         virtual const RHS& getRHS() const override
+         {
+            return static_cast<const RHS&>(Parent::getRHS());
+         }
+
+         virtual Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+   };
+   template <class FES>
+   Dot(const Jacobian<ShapeFunction<FES, TrialSpace>>&, const Jacobian<ShapeFunction<FES, TestSpace>>&)
+      -> Dot<Jacobian<ShapeFunction<FES, TrialSpace>>, Jacobian<ShapeFunction<FES, TestSpace>>>;
+
+   /**
+    * @ingroup DotSpecializations
+    *
+    * @f[
+    *    (f \mathbf{J} u) \cdot \mathbf{J} v
+    * @f]
+    * where @f$ f @f$ is a function (scalar or matrix valued).
+    */
+   template <class FES>
+   class Dot<Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>, Jacobian<ShapeFunction<FES, TestSpace>>>
+      : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using LHS = Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>;
+         using RHS = Jacobian<ShapeFunction<FES, TestSpace>>;
+
+         constexpr
+         Dot(const Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>& fgu,
+               const Jacobian<ShapeFunction<FES, TestSpace>>& gv)
+            : Parent(fgu, gv)
+         {}
+
+         constexpr
+         Dot(const Dot& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         Dot(Dot&& other)
+            : Parent(other)
+         {}
+
+         virtual LHS& getLHS() override
+         {
+            return static_cast<LHS&>(Parent::getLHS());
+         }
+
+         virtual RHS& getRHS() override
+         {
+            return static_cast<RHS&>(Parent::getRHS());
+         }
+
+         virtual const LHS& getLHS() const override
+         {
+            return static_cast<const LHS&>(Parent::getLHS());
+         }
+
+         virtual const RHS& getRHS() const override
+         {
+            return static_cast<const RHS&>(Parent::getRHS());
+         }
+
+         virtual Dot* copy() const noexcept override
+         {
+            return new Dot(*this);
+         }
+   };
+   template <class FES>
+   Dot(const Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>&, const Jacobian<ShapeFunction<FES, TestSpace>>&)
+      -> Dot<Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>, Jacobian<ShapeFunction<FES, TestSpace>>>;
+
    /* <<-- OPTIMIZATIONS -----------------------------------------------------
     * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
     * ----------------------------------------------------------------------||

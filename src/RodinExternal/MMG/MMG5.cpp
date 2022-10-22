@@ -348,8 +348,8 @@ namespace Rodin::External::MMG
              pt->v[j] = vertices[j] + 1;
 
            pt->ref = src.getHandle().GetAttribute(i - 1);
-           for (int j = 0; j < 3; j++)
-              res->point[pt->v[j]].tag &= ~MG_NUL;
+           // for (int j = 0; j < 3; j++)
+           //    res->point[pt->v[j]].tag &= ~MG_NUL;
          }
       }
       else if (src.getDimension() == 2) // Use MMG2D
@@ -392,7 +392,7 @@ namespace Rodin::External::MMG
             pt->ref = src.getHandle().GetAttribute(i - 1);
             for (int j = 0; j < 3; j++)
             {
-               res->point[pt->v[j]].tag &= ~MG_NUL;
+               // res->point[pt->v[j]].tag &= ~MG_NUL;
                pt->edg[j] = 0;
             }
 
@@ -444,6 +444,7 @@ namespace Rodin::External::MMG
            for (int j = 0; j < 3; j++)
              pt->v[j] = vertices[j] + 1;
            pt->ref = src.getHandle().GetBdrAttribute(i - 1);
+           assert(pt->ref > 0);
          }
 
          // Copy tetrahedra
@@ -458,8 +459,8 @@ namespace Rodin::External::MMG
 
             pt->ref = src.getHandle().GetAttribute(i - 1);
 
-            for (int j = 0; j < 4; j++)
-              res->point[pt->v[j]].tag &= ~MG_NUL;
+            // for (int j = 0; j < 4; j++)
+            //   res->point[pt->v[j]].tag &= ~MG_NUL;
 
             if (MMG5_orvol(res->point, pt->v) < 0.0)
             {

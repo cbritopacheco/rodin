@@ -46,7 +46,6 @@ namespace Rodin::External::MMG
           Variational::GridFunction<Variational::H1<Context::Serial>>& ls,
           const Variational::GridFunction<Variational::H1<Context::Serial>>& disp)
         : m_t(0),
-          m_avoidTrunc(false),
           m_ex(true),
           m_advectTheSurface(false),
           m_ls(ls),
@@ -57,20 +56,6 @@ namespace Rodin::External::MMG
         assert(
             disp.getFiniteElementSpace().getVectorDimension()
             == ls.getFiniteElementSpace().getMesh().getSpaceDimension());
-      }
-
-      /**
-       * @brief Specifies whether to enable or disable truncation of time in the CFL condition.
-       *
-       * If true, avoids truncation of the time period for advection due to
-       * the CFL condition. Otherwise, no action is taken.
-       *
-       * By default it is set to false.
-       */
-      Advect& avoidTimeTruncation(bool avoidTrunc = true)
-      {
-        m_avoidTrunc = avoidTrunc;
-        return *this;
       }
 
       /**
@@ -112,15 +97,6 @@ namespace Rodin::External::MMG
         int retcode = 1;
         if (mesh.isSurface())
         {
-          if (!m_avoidTrunc)
-          {
-            Alert::Warning()
-              << "MMG::Advect: "
-              << "Time truncation is set to not be avoided but"
-              << " this is always avoided for surface meshes."
-              << Alert::Raise;
-          }
-
           retcode = m_advect.run(
               meshp.string(),
               "-surf",
@@ -133,24 +109,33 @@ namespace Rodin::External::MMG
         }
         else
         {
-          if (!m_avoidTrunc && m_advectTheSurface)
+          if (mesh.getSpaceDimension() == 2)
           {
-            Alert::Warning()
-              << "MMG::Advect: "
-              << "Time truncation is set to not be avoided but"
-              << " this is always avoided for surface meshes."
-              << Alert::Raise;
+            retcode = m_advect.run(
+                meshp.string(),
+                "-dt", std::to_string(dt),
+                m_ex ? "" : "-noex",
+                "-c", solp.string(),
+                "-s", dispp.string(),
+                "-o", outp.string()
+                );
           }
-
-          retcode = m_advect.run(
-              meshp.string(),
-              m_advectTheSurface ? "-surf -nocfl" : "",
-              "-dt", std::to_string(dt),
-              m_ex ? "" : "-noex",
-              "-c", solp.string(),
-              "-s", dispp.string(),
-              "-o", outp.string()
-              );
+          else if (mesh.getSpaceDimension() == 3)
+          {
+            retcode = m_advect.run(
+                meshp.string(),
+                "-dt", std::to_string(dt),
+                m_ex ? "" : "-noex",
+                "-c", solp.string(),
+                "-s", dispp.string(),
+                "-o", outp.string(),
+                "-nocfl"
+                );
+          }
+          else
+          {
+            Alert::Exception() << "Invalid dimension" << Alert::Raise;
+          }
         }
 
         if (retcode != 0)
@@ -170,7 +155,7 @@ namespace Rodin::External::MMG
 
     private:
       double m_t;
-      bool m_avoidTrunc, m_ex;
+      bool m_ex;
       bool m_advectTheSurface;
       Variational::GridFunction<Variational::H1<Context::Serial>>& m_ls;
       const Variational::GridFunction<Variational::H1<Context::Serial>>& m_disp;

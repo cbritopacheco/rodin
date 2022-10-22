@@ -56,7 +56,7 @@ namespace Rodin::External::MMG
       }
 
       template <class FES>
-      static void copySolution(Variational::GridFunction<FES>& src, const MMG5_pSol dst)
+      static void copySolution(const Variational::GridFunction<FES>& src, MMG5_pSol dst)
       {
         assert(dst);
         auto [data, size] = src.getData();

@@ -26,7 +26,7 @@ static constexpr size_t maxIt = 250;
 static constexpr double hmax = 0.05;
 static constexpr double alpha = 0.6;
 static constexpr double epsilon = 0.01;
-static constexpr double ell = 0.2;
+static constexpr double ell = 0.05;
 static constexpr double tgv = std::numeric_limits<double>::max();
 static constexpr double radius = 3 * hmax;
 static constexpr int topoPeriod = 1;
@@ -141,7 +141,7 @@ int main(int, char**)
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
     double gInf = std::max(gradS.max(), -gradS.min());
     double dt = 2 * hmax / gInf;
-    MMG::Advect(dist, grad).avoidTimeTruncation().surface().step(dt);
+    MMG::Advect(dist, grad).surface().step(dt);
 
     // Topological optimization
     if (i % topoPeriod == 0)

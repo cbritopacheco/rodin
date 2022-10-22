@@ -41,9 +41,9 @@ namespace Rodin
         return serial().save(filename, fmt, precison);
       }
 
-      PyMesh& initialize(int dim, int sdim, int nvert)
+      PyMesh& initialize(int dim, int sdim)
       {
-        serial().initialize(dim, sdim, nvert);
+        serial().initialize(dim, sdim);
         return *this;
       }
 
@@ -142,7 +142,8 @@ PYBIND11_MODULE(rodin, m)
         py::arg("fmt") = Rodin::IO::FileFormat::MFEM,
         py::arg("precision") = 16)
     .def("is_parallel", &Rodin::PyMesh::isParallel)
-    .def("initialize", &Rodin::PyMesh::initialize)
+    .def("initialize", py::overload_cast<int, int>(&Rodin::PyMesh::initialize),
+        py::arg("dim"), py::arg("sdim"))
     .def("vertex", &Rodin::PyMesh::vertex)
     .def("element", &Rodin::PyMesh::element,
         py::arg("geometry"), py::arg("vertices"), py::arg("attribute") = py::none())

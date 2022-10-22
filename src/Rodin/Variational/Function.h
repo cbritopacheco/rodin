@@ -239,6 +239,10 @@ namespace Rodin::Variational
          virtual Internal::MFEMFunction build() const;
 
       protected:
+         mfem::ElementTransformation& getSubMeshElementTrans(
+               const MeshBase& mesh,
+               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
+
          mfem::ElementTransformation& getTraceElementTrans(
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
 
