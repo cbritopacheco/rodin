@@ -15,7 +15,7 @@ namespace Rodin::External::MMG
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
         Alert::Exception("Could not allocate MMG5_Sol.").raise());
     if (!MMG2D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-    Alert::Exception("Could not set solution size.").raise();
+      Alert::Exception("Could not set solution size.").raise();
     MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_optim, 1);
     return MMG2D_mmg2dlib(mesh, sol);
   }
@@ -27,7 +27,7 @@ namespace Rodin::External::MMG
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
         Alert::Exception("Could not allocate MMG5_Sol.").raise());
     if (!MMG3D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-    Alert::Exception("Could not set solution size.").raise();
+      Alert::Exception("Could not set solution size.").raise();
     MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_optim, 1);
     return MMG3D_mmg3dlib(mesh, sol);
   }
@@ -39,7 +39,7 @@ namespace Rodin::External::MMG
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
         Alert::Exception("Could not allocate MMG5_Sol.").raise());
     if (!MMGS_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-    Alert::Exception("Could not set solution size.").raise();
+      Alert::Exception("Could not set solution size.").raise();
     MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_optim, 1);
     return MMGS_mmgslib(mesh, sol);
   }

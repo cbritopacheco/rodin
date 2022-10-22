@@ -74,7 +74,9 @@ namespace Rodin::Variational
                const mfem::IntegrationPoint& ip) const override
          {
             m_u.getHandle().GetVectorGradient(
-                  FunctionBase::getTraceElementTrans(trans, ip), value);
+                  FunctionBase::getTraceElementTrans(
+                     FunctionBase::getSubMeshElementTrans(
+                        m_u.getFiniteElementSpace().getMesh(), trans, ip), ip), value);
             value.Transpose();
          }
 

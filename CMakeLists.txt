@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.15)
 cmake_policy(SET CMP0054 NEW)
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.13)
   cmake_policy(SET CMP0076 NEW)
@@ -21,6 +21,7 @@ option(RODIN_USE_MPI            "Build with MPI support"          OFF)
 option(RODIN_USE_OPENMP         "Build with OpenMP support"       OFF)
 option(RODIN_USE_SUITESPARSE    "Build with SuiteSparse support"  ON)
 option(RODIN_SILENCE_WARNINGS   "Silence warning outputted by Rodin"  OFF)
+option(RODIN_BUILD_PY           "Build Python bindings."          OFF)
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -100,7 +101,7 @@ if (RODIN_BUILD_SRC)
   message(STATUS "Configuring Eigen3...")
   set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
   set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/eigen)
+  add_subdirectory(third-party/eigen EXCLUDE_FROM_ALL)
   unset(BUILD_TESTING)
 
   find_package (Eigen3 3.3 REQUIRED NO_MODULE
@@ -114,7 +115,7 @@ if (RODIN_BUILD_SRC)
   set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   set (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT TRUE)
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
-  add_subdirectory(third-party/spectra)
+  add_subdirectory(third-party/spectra EXCLUDE_FROM_ALL)
   unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
 
   find_package (Spectra 1.0.1 REQUIRED)
@@ -140,6 +141,20 @@ if (RODIN_BUILD_SRC)
 
   if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(examples)
+  endif()
+
+  if (RODIN_BUILD_PY)
+    set(Python3_FIND_REGISTRY LAST)
+    set(Python3_FIND_VIRTUALENV FIRST)
+    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+    execute_process(
+      COMMAND "${PYTHON_EXECUTABLE}" -c
+              "import pybind11; print(pybind11.get_cmake_dir())"
+      OUTPUT_VARIABLE _tmp_dir
+      OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+    add_subdirectory(third-party/pybind11)
+    add_subdirectory(py)
   endif()
 endif()
 

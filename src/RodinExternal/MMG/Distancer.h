@@ -183,10 +183,9 @@ namespace Rodin::External::MMG
           retcode = m_mshdist.run(
               boxp.string(),
               "-dom",
+              "-fmm",
               m_distTheBoundary ? "-surf -fmm" : "",
-              "-ncpu", m_ncpu,
-              ""
-              //"-v 0"
+              "-ncpu", m_ncpu
               );
         }
         Variational::GridFunction res(m_fes);

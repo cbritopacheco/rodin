@@ -8,25 +8,25 @@
 
 namespace Rodin
 {
+   enum class Geometry
+   {
+      Invalid = mfem::Geometry::INVALID,
+      Point = mfem::Geometry::POINT,
+      Segment = mfem::Geometry::SEGMENT,
+      Triangle = mfem::Geometry::TRIANGLE,
+      Square = mfem::Geometry::SQUARE,
+      Tetrahedron = mfem::Geometry::TETRAHEDRON,
+      Cube = mfem::Geometry::CUBE,
+      Prism = mfem::Geometry::PRISM,
+      Pyramid = mfem::Geometry::PYRAMID
+   };
+
    /**
     * @brief Base class for all geometric elements of the mesh.
     */
    class ElementBase
    {
       public:
-         enum Geometry
-         {
-            Invalid = mfem::Geometry::INVALID,
-            Point = mfem::Geometry::POINT,
-            Segment = mfem::Geometry::SEGMENT,
-            Triangle = mfem::Geometry::TRIANGLE,
-            Square = mfem::Geometry::SQUARE,
-            Tetrahedron = mfem::Geometry::TETRAHEDRON,
-            Cube = mfem::Geometry::CUBE,
-            Prism = mfem::Geometry::PRISM,
-            Pyramid = mfem::Geometry::PYRAMID
-         };
-
          ElementBase(const MeshBase& mesh, const mfem::Element* element, int index)
             :  m_mesh(mesh),
                m_element(element),
@@ -332,16 +332,24 @@ namespace Rodin
    class Vertex
    {
       public:
-         Vertex(mfem::Vector&& v)
-            : m_v(std::move(v)),
-              m_trans(nullptr),
+         Vertex(std::initializer_list<double> l)
+            : m_trans(nullptr),
               m_ip(nullptr)
+         {
+            m_v.SetSize(l.size());
+            m_v = l.begin();
+         }
+
+         Vertex(mfem::Vector&& v)
+            :  m_v(std::move(v)),
+               m_trans(nullptr),
+               m_ip(nullptr)
          {}
 
          Vertex(const mfem::Vector& v)
-            : m_v(v),
-              m_trans(nullptr),
-              m_ip(nullptr)
+            :  m_v(v),
+               m_trans(nullptr),
+               m_ip(nullptr)
          {}
 
          Vertex(const Vertex& other) = default;

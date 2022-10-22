@@ -4,15 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_H
-#define RODIN_MESH_H
+#include "MeshAdaptor.h"
 
-/**
- * @file
- * @brief Top level include for the Rodin mesh utilities.
- */
-#include "Mesh/Mesh.h"
-#include "Mesh/SubMesh.h"
-#include "Mesh/Element.h"
+#include "MMG5.h"
 
-#endif
+namespace Rodin::External::MMG
+{
+  int MeshAdaptor::adaptMMG3D(MMG5_pMesh mesh, MMG5_pSol sol)
+  {
+    assert(mesh->np > 0 && mesh->ne > 0);
+    return MMG3D_mmg3dlib(mesh, sol);
+  }
+}
