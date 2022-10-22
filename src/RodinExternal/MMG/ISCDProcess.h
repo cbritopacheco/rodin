@@ -17,6 +17,8 @@
 
 #include <boost/process.hpp>
 
+#include "Rodin/Alert.h"
+
 #include "Common.h"
 #include "Configure.h"
 
@@ -136,6 +138,16 @@ namespace Rodin::External::MMG
       std::optional<boost::process::ipstream>& getOutputLog()
       {
         return m_out;
+      }
+
+      void printOutputLog(std::ostream& os = std::cout)
+      {
+        if (m_out)
+        {
+          std::string line;
+          while (*m_out && std::getline(*m_out, line))
+            os << line << '\n';
+        }
       }
 
       static boost::filesystem::path tmpnam(

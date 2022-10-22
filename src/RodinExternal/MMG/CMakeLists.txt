@@ -14,6 +14,7 @@ set(RodinExternalMMG_HEADERS
   ISCDProcess.h
   Distancer.h
   MeshOptimizer.h
+  MeshAdaptor.h
   ImplicitDomainMesher.h
   )
 
@@ -22,6 +23,7 @@ set(RodinExternalMMG_SRCS
   Common.cpp
   ISCDProcess.cpp
   MeshOptimizer.cpp
+  MeshAdaptor.cpp
   ImplicitDomainMesher.cpp
   )
 

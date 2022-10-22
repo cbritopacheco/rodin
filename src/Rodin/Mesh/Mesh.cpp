@@ -33,9 +33,10 @@ namespace Rodin
       return (getSpaceDimension() - 1 == getDimension());
    }
 
-   void MeshBase::refine()
+   MeshBase& MeshBase::refine()
    {
       getHandle().UniformRefinement();
+      return *this;
    }
 
    std::set<int> MeshBase::getAttributes() const
@@ -92,7 +93,7 @@ namespace Rodin
 
    MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
    {
-      assert(u.getFiniteElementSpace().getVectorDimension() == getDimension());
+      assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
       getHandle().MoveNodes(u.getHandle());
       return *this;
    }
@@ -400,9 +401,9 @@ namespace Rodin
    }
 
    Mesh<Context::Serial>&
-   Mesh<Context::Serial>::initialize(int dim, int sdim, int nv)
+   Mesh<Context::Serial>::initialize(int dim, int sdim)
    {
-      m_mesh = mfem::Mesh(dim, nv, 0, 0, sdim);
+      m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
       return *this;
    }
 

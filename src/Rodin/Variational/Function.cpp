@@ -10,6 +10,66 @@ namespace Rodin::Variational
       return Transpose<FunctionBase>(*this);
    }
 
+   mfem::ElementTransformation& FunctionBase::getSubMeshElementTrans(
+         const MeshBase& child,
+         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
+   {
+      if (child.isSubMesh())
+      {
+         if (child.isParallel())
+         {
+            // might result in segfault
+            assert(false);
+            return trans;
+         }
+         else
+         {
+            auto& submesh = static_cast<const SubMesh<Context::Serial>&>(child);
+            if (&submesh.getHandle() == trans.mesh)
+            {
+               return trans;
+            }
+            else if (&submesh.getParent().getHandle() == trans.mesh)
+            {
+               switch (trans.ElementType)
+               {
+                  case mfem::ElementTransformation::BDR_ELEMENT:
+                  {
+                     int childElementNo =
+                        submesh.getBoundaryElementMap().right.at(trans.ElementNo);
+                     mfem::ElementTransformation* childTrans =
+                        const_cast<mfem::Mesh&>(
+                              submesh.getHandle()).GetBdrElementTransformation(childElementNo);
+                     childTrans->SetIntPoint(&ip);
+                     return *childTrans;
+                  }
+                  case mfem::ElementTransformation::ELEMENT:
+                  {
+                     int childElementNo =
+                        submesh.getElementMap().right.at(trans.ElementNo);
+                     mfem::ElementTransformation* childTrans =
+                        const_cast<mfem::Mesh&>(
+                           submesh.getParent().getHandle()).GetElementTransformation(childElementNo);
+                     childTrans->SetIntPoint(&ip);
+                     return *childTrans;
+                  }
+                  default:
+                     return trans;
+               }
+            }
+            else
+            {
+               assert(false);
+               return trans;
+            }
+         }
+      }
+      else
+      {
+         return trans;
+      }
+   }
+
    mfem::ElementTransformation& FunctionBase::getTraceElementTrans(
          mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
    {
@@ -33,7 +93,9 @@ namespace Rodin::Variational
                mfem::FaceElementTransformations* ft =
                   trans.mesh->GetFaceElementTransformations(fn);
                ft->SetAllIntPoints(&ip);
+               assert(ft->Elem1);
                auto& trans1 = ft->GetElement1Transformation();
+               assert(ft->Elem2);
                auto& trans2 = ft->GetElement2Transformation();
                if (traceDomain.count(trans1.Attribute))
                   return trans1;

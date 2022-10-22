@@ -116,7 +116,7 @@ namespace Rodin
          /**
           * @brief Performs a uniform refinement over all mesh elements
           */
-         void refine();
+         MeshBase& refine();
 
          /**
           * @brief Gets the labels of the domain elements in the mesh.
@@ -339,7 +339,7 @@ namespace Rodin
           */
          Mesh& operator=(Mesh&& other) = default;
 
-         Mesh& initialize(int dim, int sdim, int nv);
+         Mesh& initialize(int dim, int sdim);
 
          Mesh& vertex(const std::vector<double>& x);
 
