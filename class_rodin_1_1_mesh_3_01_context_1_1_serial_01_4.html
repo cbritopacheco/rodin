@@ -113,7 +113,13 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aa91dcdf3e8a72c659bd89f3a5ef94a7a" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               IO::FileFormat fmt = IO::FileFormat::MFEM) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Loads a mesh from file.</dd>
+            <dd>Loads a mesh from file in the given format.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab4d59526c798866360991d4b2b81723e" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              IO::FileFormat fmt = IO::FileFormat::MFEM,
+              int precison = 16) const</span>
+            </dt>
+            <dd>Saves a mesh to file in the given format.</dd>
             <dt id="ac3462215a38fbd687febccc809ef1776">
               <span class="m-doc-wrap-bumper">auto <a href="#ac3462215a38fbd687febccc809ef1776" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
@@ -150,7 +156,7 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa91dcdf3e8a72c659bd89f3a5ef94a7a" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               IO::FileFormat fmt = IO::FileFormat::MFEM)</span></span>
             </h3>
-            <p>Loads a mesh from file.</p>
+            <p>Loads a mesh from file in the given format.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -161,7 +167,43 @@
                   <td>Name of file to read</td>
                 </tr>
                 <tr>
-                  <td>fmt</td>
+                  <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> file format</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab4d59526c798866360991d4b2b81723e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4d59526c798866360991d4b2b81723e" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              IO::FileFormat fmt = IO::FileFormat::MFEM,
+              int precison = 16) const</span></span>
+            </h3>
+            <p>Saves a mesh to file in the given format.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name of file to write</td>
+                </tr>
+                <tr>
+                  <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> file format</td>
+                </tr>
+                <tr>
+                  <td>precison</td>
                   <td></td>
                 </tr>
               </tbody>
