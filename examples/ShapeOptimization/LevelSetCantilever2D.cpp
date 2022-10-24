@@ -50,7 +50,7 @@ int main(int, char**)
 
   // Optimization loop
   std::vector<double> obj;
-  std::ofstream fObj("obj.txt", std::ios_base::app);
+  std::ofstream fObj("obj.txt");
   for (size_t i = 0; i < maxIt; i++)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
