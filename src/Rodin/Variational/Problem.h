@@ -101,7 +101,7 @@ namespace Rodin::Variational
     *
     */
    template <class TrialFES, class TestFES, class OperatorType>
-   class Problem : public ProblemBase
+   class Problem<TrialFES, TestFES, OperatorType> : public ProblemBase
    {
       public:
          /**
@@ -192,7 +192,11 @@ namespace Rodin::Variational
       -> Problem<TrialFES, TestFES, mfem::SparseMatrix>;
 
    template <class TrialFES, class TestFES, class OperatorType>
-   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType*)
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType&&)
+      -> Problem<TrialFES, TestFES, OperatorType>;
+
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType&)
       -> Problem<TrialFES, TestFES, OperatorType>;
 }
 
