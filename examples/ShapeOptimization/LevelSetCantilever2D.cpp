@@ -78,9 +78,6 @@ int main(int, char**)
     solver.solve(elasticity);
 
     // Transfer solution back to original domain
-    GridFunction u(Vh);
-    uInt.getGridFunction().transfer(u);
-
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
     auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
@@ -104,7 +101,7 @@ int main(int, char**)
     trimmed.save("out/trimmed." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
     // Update objective
-    double objective = compliance(u) + ell * Omega.getVolume(Interior);
+    double objective = compliance(uInt.getGridFunction()) + ell * Omega.getVolume(Interior);
     obj.push_back(objective);
     fObj << objective << "\n";
     fObj.flush();
@@ -161,9 +158,9 @@ double compliance(GridFunction<H1<Context::Serial>>& w)
   TrialFunction u(Vh);
   TestFunction  v(Vh);
   BilinearForm  bf(u, v);
-  bf = Integral(lambda * Div(u), Div(v)).over(Interior)
+  bf = Integral(lambda * Div(u), Div(v))
      + Integral(
-         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())).over(Interior);
+         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
   return bf(w, w);
 };
 
