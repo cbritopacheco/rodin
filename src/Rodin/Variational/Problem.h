@@ -121,7 +121,11 @@ namespace Rodin::Variational
           * @param[in,out] u Trial function @f$ u @f$
           * @param[in,out] v Test function @f$ v @f$
           */
-         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType* = new OperatorType);
+         explicit
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&& = OperatorType());
+
+         explicit
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&);
 
          Problem& operator=(ProblemBody&& rhs);
 
