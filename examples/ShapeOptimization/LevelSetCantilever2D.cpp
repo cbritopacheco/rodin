@@ -86,6 +86,11 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
+    GridFunction normal(Vh);
+    normal.projectOnBoundary(n, Gamma);
+    Omega.save("normal.mesh");
+    normal.save("normal.gf");
+
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  v(Vh);
