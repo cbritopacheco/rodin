@@ -20,38 +20,38 @@
 namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>::BilinearForm(
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::BilinearForm(
          TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
       :  m_u(u), m_v(v),
          m_bf(new mfem::BilinearForm(&m_v.getFiniteElementSpace().getHandle()))
    {}
 
    template <class TrialFES, class TestFES>
-   double BilinearForm<TrialFES, TestFES>::operator()(
+   double BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::operator()(
          const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
    {
       return m_bf->InnerProduct(u.getHandle(), v.getHandle());
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>&
-   BilinearForm<TrialFES, TestFES>::operator=(const BilinearFormIntegratorBase& bfi)
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::operator=(const BilinearFormIntegratorBase& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>&
-   BilinearForm<TrialFES, TestFES>::operator=(const BilinearFormIntegratorSum& bfi)
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::operator=(const BilinearFormIntegratorSum& bfi)
    {
       from(bfi).assemble();
       return *this;
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>&
-   BilinearForm<TrialFES, TestFES>::from(const BilinearFormIntegratorBase& bfi)
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::from(const BilinearFormIntegratorBase& bfi)
    {
       switch (bfi.getIntegratorRegion())
       {
@@ -69,8 +69,8 @@ namespace Rodin::Variational
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>&
-   BilinearForm<TrialFES, TestFES>::from(const BilinearFormIntegratorSum& lsum)
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::from(const BilinearFormIntegratorSum& lsum)
    {
       m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getHandle()));
       m_bfiDomainList.clear();
@@ -80,8 +80,8 @@ namespace Rodin::Variational
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>&
-   BilinearForm<TrialFES, TestFES>::add(const BilinearFormIntegratorSum& lsum)
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::add(const BilinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getBilinearFormDomainIntegratorList())
          add(*p);
@@ -89,8 +89,8 @@ namespace Rodin::Variational
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES>&
-   BilinearForm<TrialFES, TestFES>::add(const BilinearFormIntegratorBase& bfi)
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
+   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::add(const BilinearFormIntegratorBase& bfi)
    {
       assert(
          bfi.getTrialFunction().getLeaf().getUUID()== getTrialFunction().getLeaf().getUUID());
