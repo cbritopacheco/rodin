@@ -171,8 +171,8 @@ namespace Rodin::Variational
       private:
          ProblemBody m_pb;
 
-         LinearForm<TestFES>                m_linearForm;
-         BilinearForm<TrialFES, TestFES>    m_bilinearForm;
+         LinearForm<TestFES, mfem::Vector>                     m_linearForm;
+         BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>   m_bilinearForm;
 
          mfem::OperatorHandle    m_stiffnessOp;
          mfem::Vector            m_massVector;
