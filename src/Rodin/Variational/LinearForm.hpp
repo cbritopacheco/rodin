@@ -15,34 +15,36 @@
 namespace Rodin::Variational
 {
    template <class FES>
-   LinearForm<FES>::LinearForm(TestFunction<FES>& v)
+   LinearForm<FES, mfem::Vector>::LinearForm(TestFunction<FES>& v)
       :  m_v(v),
          m_lf(std::make_unique<mfem::LinearForm>(&v.getFiniteElementSpace().getHandle()))
    {}
 
    template <class FES>
-   LinearForm<FES>&
-   LinearForm<FES>::operator=(const LinearFormIntegratorBase& lfi)
+   LinearForm<FES, mfem::Vector>&
+   LinearForm<FES, mfem::Vector>::operator=(const LinearFormIntegratorBase& lfi)
    {
       from(lfi).assemble();
       return *this;
    }
 
    template <class FES>
-   LinearForm<FES>& LinearForm<FES>::operator=(const LinearFormIntegratorSum& lsum)
+   LinearForm<FES, mfem::Vector>&
+   LinearForm<FES, mfem::Vector>::operator=(const LinearFormIntegratorSum& lsum)
    {
       from(lsum).assemble();
       return *this;
    }
 
    template <class FES>
-   double LinearForm<FES>::operator()(const GridFunction<FES>& u) const
+   double LinearForm<FES, mfem::Vector>::operator()(const GridFunction<FES>& u) const
    {
       return *m_lf * u.getHandle();
    }
 
    template <class FES>
-   LinearForm<FES>& LinearForm<FES>::add(const LinearFormIntegratorBase& lfi)
+   LinearForm<FES, mfem::Vector>&
+   LinearForm<FES, mfem::Vector>::add(const LinearFormIntegratorBase& lfi)
    {
       assert(lfi.getTestFunction().getLeaf().getUUID() == getTestFunction().getLeaf().getUUID());
       switch (lfi.getIntegratorRegion())
@@ -107,7 +109,8 @@ namespace Rodin::Variational
    }
 
    template <class FES>
-   LinearForm<FES>& LinearForm<FES>::add(const LinearFormIntegratorSum& lsum)
+   LinearForm<FES, mfem::Vector>&
+   LinearForm<FES, mfem::Vector>::add(const LinearFormIntegratorSum& lsum)
    {
       for (const auto& p : lsum.getLinearFormDomainIntegratorList())
          add(*p);
@@ -117,7 +120,8 @@ namespace Rodin::Variational
    }
 
    template <class FES>
-   LinearForm<FES>& LinearForm<FES>::from(const LinearFormIntegratorSum& lsum)
+   LinearForm<FES, mfem::Vector>&
+   LinearForm<FES, mfem::Vector>::from(const LinearFormIntegratorSum& lsum)
    {
       m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
       m_lfiDomainList.clear();
@@ -129,7 +133,8 @@ namespace Rodin::Variational
    }
 
    template <class FES>
-   LinearForm<FES>& LinearForm<FES>::from(const LinearFormIntegratorBase& lfi)
+   LinearForm<FES, mfem::Vector>&
+   LinearForm<FES, mfem::Vector>::from(const LinearFormIntegratorBase& lfi)
    {
       assert(lfi.getTestFunction().getLeaf().getUUID() == getTestFunction().getLeaf().getUUID());
       switch (lfi.getIntegratorRegion())

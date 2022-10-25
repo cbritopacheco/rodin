@@ -45,9 +45,10 @@ namespace Rodin::Variational
       struct Common;
    }
 
+   template <class VectorType>
    class LinearFormBase;
 
-   template <class FES>
+   template <class FES, class VectorType>
    class LinearForm;
 
    class LinearFormIntegratorBase;
@@ -56,6 +57,7 @@ namespace Rodin::Variational
 
    class LinearFormBoundaryIntegrator;
 
+   template <class OperatorType>
    class BilinearFormBase;
 
    /**
@@ -66,7 +68,7 @@ namespace Rodin::Variational
     * @tparam Trait Indicates if the BilinearForm is in a parallel context. It is
     * one of Traits::Serial or Traits::Parallel.
     */
-   template <class TrialFES, class TestFES>
+   template <class TrialFES, class TestFES, class OperatorType>
    class BilinearForm;
 
    class BilinearFormIntegratorBase;
