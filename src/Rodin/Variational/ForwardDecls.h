@@ -77,6 +77,7 @@ namespace Rodin::Variational
 
    class FiniteElementSpaceBase;
 
+   template <class Context>
    class L2;
 
    template <class Trait>
