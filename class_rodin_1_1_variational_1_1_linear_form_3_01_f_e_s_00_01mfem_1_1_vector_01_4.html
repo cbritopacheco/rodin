@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::LinearForm class | Rodin</title>
+  <title>Rodin::Variational::LinearForm&lt;FES, mfem::Vector&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -53,7 +53,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FES, mfem::Vector&gt; <span class="m-thin">class</span>
         </h1>
         <p>Represents a linear form defined over some finite element space.</p>
         <nav class="m-block m-default">
@@ -62,6 +62,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -108,6 +109,16 @@ $ V $
 <use x='0' y='0' xlink:href='#eq2-g0-86'/>
 </g>
 </svg> is a finite element space.</p><p>A linear form can be specified by from one or more <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instances.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase&lt;mfem::Vector&gt;</a>
+            </dt>
+            <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -134,6 +145,22 @@ $ u $
 <use x='0' y='0' xlink:href='#eq3-g0-117'/>
 </g>
 </svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9181d7e484b9516f0cc4168dccf07f0e" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c80d375e9b0df3c3cf7a366410fc91e" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
+            <dt id="ac503d89e47b0d10069d77fa944cd1d6a">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac503d89e47b0d10069d77fa944cd1d6a" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
+            <dt id="afdb7a31ec34176e93c7a6f90bf444917">
+              <span class="m-doc-wrap-bumper">auto <a href="#afdb7a31ec34176e93c7a6f90bf444917" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
           </dl>
         </section>
         <section>
@@ -143,7 +170,7 @@ $ u $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30ae22b146264ed14bfa2577e10fad8f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, mfem::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30ae22b146264ed14bfa2577e10fad8f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const</span></span>
             </h3>
             <p>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -201,6 +228,58 @@ $ L(u) $
 <use x='19.179272' y='0' xlink:href='#eq5-g1-41'/>
 </g>
 </svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9181d7e484b9516f0cc4168dccf07f0e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, mfem::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9181d7e484b9516f0cc4168dccf07f0e" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integrator which will be used to build the linear form.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1c80d375e9b0df3c3cf7a366410fc91e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, mfem::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c80d375e9b0df3c3cf7a366410fc91e" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integrator which will be used to build the linear form.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
