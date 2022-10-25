@@ -101,7 +101,7 @@ namespace Rodin::Variational
     *
     */
    template <class TrialFES, class TestFES, class OperatorType>
-   class Problem : public ProblemBase
+   class Problem<TrialFES, TestFES, OperatorType> : public ProblemBase
    {
       public:
          /**
@@ -121,7 +121,11 @@ namespace Rodin::Variational
           * @param[in,out] u Trial function @f$ u @f$
           * @param[in,out] v Test function @f$ v @f$
           */
-         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType* = new OperatorType);
+         explicit
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&& = OperatorType());
+
+         explicit
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&);
 
          Problem& operator=(ProblemBody&& rhs);
 
@@ -188,7 +192,11 @@ namespace Rodin::Variational
       -> Problem<TrialFES, TestFES, mfem::SparseMatrix>;
 
    template <class TrialFES, class TestFES, class OperatorType>
-   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType*)
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType&&)
+      -> Problem<TrialFES, TestFES, OperatorType>;
+
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType&)
       -> Problem<TrialFES, TestFES, OperatorType>;
 }
 

@@ -77,6 +77,7 @@ namespace Rodin::Variational
 
    class FiniteElementSpaceBase;
 
+   template <class Context>
    class L2;
 
    template <class Trait>
@@ -265,7 +266,6 @@ namespace Rodin::Variational
    class OR;
 
    /**
-    * @ingroup IntegralSpecializations
     * @brief Represents expressions of the integral operator.
     * @tparam Integrand Type of the integrand
     *
@@ -290,8 +290,18 @@ namespace Rodin::Variational
 
    class ProblemBase;
 
-   template <class TrialFES, class TestFES, class OperatorType>
+   /**
+    *
+    * @see ProblemSpecializations
+    */
+   template <class ... Parameters>
    class Problem;
+
+   /**
+    * @ingroup ProblemSpecializations
+    */
+   template <class TrialFES, class TestFES, class OperatorType>
+   class Problem<TrialFES, TestFES, OperatorType>;
 
    class ProblemBody;
 

@@ -18,12 +18,24 @@ namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES, class OperatorType>
    Problem<TrialFES, TestFES, OperatorType>
-   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType* op)
+   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&& op)
       :  m_bilinearForm(u, v),
          m_linearForm(v),
          m_trialFunctions{{u.getUUID(), std::ref(u)}},
          m_testFunctions{{v.getUUID(), std::ref(v)}},
-         m_stiffnessOp(op)
+         m_stiffnessOp(new OperatorType(std::move(op)), true)
+   {
+      m_guess = 0.0;
+   }
+
+   template <class TrialFES, class TestFES, class OperatorType>
+   Problem<TrialFES, TestFES, OperatorType>
+   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType& op)
+      :  m_bilinearForm(u, v),
+         m_linearForm(v),
+         m_trialFunctions{{u.getUUID(), std::ref(u)}},
+         m_testFunctions{{v.getUUID(), std::ref(v)}},
+         m_stiffnessOp(&op, false)
    {
       m_guess = 0.0;
    }
