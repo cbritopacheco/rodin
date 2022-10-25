@@ -34,8 +34,9 @@ int main(int, char**)
 
   // Build finite element space
   H1 Vh(Omega);
+  L2 Ph(Omega);
 
-  GridFunction gamma(Vh);
+  GridFunction gamma(Ph);
   gamma = 0.9;
 
   double vol = Omega.getVolume();
@@ -79,12 +80,14 @@ int main(int, char**)
             + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
     solver.solve(hilbert);
 
-    GridFunction step(Vh);
+    GridFunction step(Ph);
     step = mu * g.getGridFunction();
 
     gamma -= step;
     gamma = Min(1.0, Max(0.0, gamma));
 
+    Omega.save("gamma.mesh");
+    gamma.save("gamma.gf");
     gamma.save("outDensity/gamma." + std::to_string(i) + ".gf");
   }
 
