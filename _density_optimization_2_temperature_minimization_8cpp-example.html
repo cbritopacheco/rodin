@@ -93,8 +93,9 @@
 
 <span class="w">  </span><span class="c1">// Build finite element space</span>
 <span class="w">  </span><span class="n">H1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">L2</span><span class="w"> </span><span class="n">Ph</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">gamma</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">gamma</span><span class="p">(</span><span class="n">Ph</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">gamma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.9</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">vol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Omega</span><span class="p">.</span><span class="n">getVolume</span><span class="p">();</span><span class="w"></span>
@@ -138,12 +139,14 @@
 <span class="w">            </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">ScalarFunction</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)).</span><span class="n">on</span><span class="p">(</span><span class="n">GammaD</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">hilbert</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">step</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">step</span><span class="p">(</span><span class="n">Ph</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">g</span><span class="p">.</span><span class="n">getGridFunction</span><span class="p">();</span><span class="w"></span>
 
 <span class="w">    </span><span class="n">gamma</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">step</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">gamma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">Max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">gamma</span><span class="p">));</span><span class="w"></span>
 
+<span class="w">    </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;gamma.mesh&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">gamma</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;gamma.gf&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="n">gamma</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;outDensity/gamma.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.gf&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
 
