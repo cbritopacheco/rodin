@@ -13,13 +13,17 @@
 
 #include "ForwardDecls.h"
 
+#include "FiniteElementSpace.h"
 #include "FiniteElementCollection.h"
 
 namespace Rodin::Variational
 {
-   class L2 : public FiniteElementCollectionBase
+   template <class TraitTag>
+   class L2 : public FiniteElementSpaceBase
    {
       public:
+         using Context = TraitTag;
+
          /**
           * @brief Possible types of bases for the H1 finite element space.
           */
@@ -94,31 +98,82 @@ namespace Rodin::Variational
 
          static constexpr Basis DefaultBasis = Basis::GaussLegendre;
 
-         L2(const int order, const int elemDim, Basis basis)
-            : m_fec(order, elemDim, static_cast<int>(basis))
+         class FEC : public FiniteElementCollectionBase
          {
-            assert(order >= 0);
+            public:
+               FEC(const int order, const int elemDim, Basis basis)
+                  : m_fec(order, elemDim, static_cast<int>(basis))
+               {
+                  assert(order >= 0);
+               }
+
+               Basis getBasisType() const
+               {
+                  return m_basis;
+               }
+
+               mfem::FiniteElementCollection& getHandle()
+               {
+                  return m_fec;
+               }
+
+               const mfem::FiniteElementCollection& getHandle() const
+               {
+                  return m_fec;
+               }
+
+            private:
+               mfem::L2_FECollection m_fec;
+               Basis m_basis;
+         };
+
+         L2(Mesh<Context>& mesh,
+               int vdim = 1, int order = 0, Basis basis = DefaultBasis)
+            :  m_fec(order, mesh.getDimension(), basis),
+               m_mesh(mesh),
+               m_fes(&mesh.getHandle(), &m_fec.getHandle(), vdim)
+         {}
+
+         bool isParallel() const override
+         {
+            return false;
          }
 
-         Basis getBasisType() const
+         Mesh<Context>& getMesh() override
          {
-            return m_basis;
+            return m_mesh;
          }
 
-         mfem::FiniteElementCollection& getHandle()
+         const Mesh<Context>& getMesh() const override
+         {
+            return m_mesh;
+         }
+
+         const FEC& getFiniteElementCollection() const override
          {
             return m_fec;
          }
 
-         const mfem::FiniteElementCollection& getHandle() const
+         mfem::FiniteElementSpace& getHandle() override
          {
-            return m_fec;
+            return m_fes;
+         }
+
+         const mfem::FiniteElementSpace& getHandle() const override
+         {
+            return m_fes;
          }
 
       private:
-         mfem::L2_FECollection m_fec;
-         Basis m_basis;
+         FEC m_fec;
+         Mesh<Context>& m_mesh;
+         mfem::FiniteElementSpace m_fes;
    };
+
+   template <class Context>
+   L2(Mesh<Context>& mesh,
+      int vdim = 1,
+      int order = 1, typename L2<Context>::Basis basis = L2<Context>::DefaultBasis) -> L2<Context>;
 }
 
 #endif

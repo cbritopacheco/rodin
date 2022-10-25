@@ -314,14 +314,129 @@ namespace Rodin::Variational
          VectorFunctionBase* copy() const noexcept override;
    };
 
+   template <class Trait>
+   class GridFunction<L2<Trait>> : public GridFunctionBase
+   {
+      public:
+         /**
+          * @brief Constructs a grid function on an L2 finite element space.
+          * @param[in] fes Finite element space to which the function belongs
+          * to.
+          */
+         GridFunction(L2<Trait>& fes)
+            :  GridFunctionBase(),
+               m_fes(fes),
+               m_gf(&fes.getHandle())
+         {
+            m_gf = 0.0;
+         }
+
+         /**
+          * @brief Copies the grid function.
+          * @param[in] other Other grid function to copy.
+          */
+         GridFunction(const GridFunction& other)
+            :  GridFunctionBase(other),
+               m_fes(other.m_fes),
+               m_gf(other.m_gf)
+         {}
+
+         /**
+          * @brief Move constructs the grid function.
+          * @param[in] other Other grid function to move.
+          */
+         GridFunction(GridFunction&& other)
+            :  GridFunctionBase(std::move(other)),
+               m_fes(std::move(other.m_fes)),
+               m_gf(std::move(other.m_gf))
+         {}
+
+         /**
+          * @brief Move assignment operator.
+          */
+         GridFunction& operator=(GridFunction&& other) = default;
+
+         GridFunction& operator=(const GridFunction&)  = delete;
+
+         template <class T>
+         GridFunction& operator=(T&& v)
+         {
+            return static_cast<GridFunction&>(
+                  GridFunctionBase::operator=(std::forward<T>(v)));
+         }
+
+         template <class T>
+         GridFunction& operator+=(T&& v)
+         {
+            return static_cast<GridFunction&>(
+                  GridFunctionBase::operator+=(std::forward<T>(v)));
+         }
+
+         template <class T>
+         GridFunction& operator-=(T&& v)
+         {
+            return static_cast<GridFunction&>(
+                  GridFunctionBase::operator-=(std::forward<T>(v)));
+         }
+
+         template <class T>
+         GridFunction& operator*=(T&& v)
+         {
+            return static_cast<GridFunction&>(
+                  GridFunctionBase::operator*=(std::forward<T>(v)));
+         }
+
+         template <class T>
+         GridFunction& operator/=(T&& v)
+         {
+            return static_cast<GridFunction&>(
+                  GridFunctionBase::operator/=(std::forward<T>(v)));
+         }
+
+         template <class ... Args>
+         GridFunction& project(Args&&... args)
+         {
+            return static_cast<GridFunction&>(
+                  GridFunctionBase::project(std::forward<Args>(args)...));
+         }
+
+         void save(
+               const boost::filesystem::path& filename,
+               IO::FileFormat fmt = IO::FileFormat::MFEM,
+               int precision = 16) const override;
+
+         GridFunction& load(
+               const boost::filesystem::path& filename,
+               IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+
+         L2<Trait>& getFiniteElementSpace() override
+         {
+            return m_fes.get();
+         }
+
+         const L2<Trait>& getFiniteElementSpace() const override
+
+         {
+            return m_fes.get();
+         }
+
+         mfem::GridFunction& getHandle() override
+         {
+            return m_gf;
+         }
+
+         const mfem::GridFunction& getHandle() const override
+         {
+            return m_gf;
+         }
+      private:
+         std::reference_wrapper<L2<Trait>> m_fes;
+         mfem::GridFunction m_gf;
+   };
+
    /**
-    * @brief Represents a grid function which belongs to some finite element space.
-    *
-    * @tparam FES Finite element collection to which the function belongs.
-    *
-    * @note Note that the FES template parameter is typically inferred when
-    * initializing the grid function, hence it is not necessary to make it
-    * explicit.
+    * @brief Represents a grid function which belongs to an H1 finite element
+    * space.
     */
    template <class Trait>
    class GridFunction<H1<Trait>> : public GridFunctionBase
