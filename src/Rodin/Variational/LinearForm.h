@@ -19,6 +19,7 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for objects of type LinearForm.
     */
+   template <class VectorType>
    class LinearFormBase
    {
       public:
@@ -50,19 +51,13 @@ namespace Rodin::Variational
           * @brief Gets the reference to the (local) associated vector
           * to the LinearForm.
           */
-         mfem::Vector& getVector()
-         {
-            return static_cast<mfem::Vector&>(getHandle());
-         }
+         virtual VectorType& getVector() = 0;
 
          /**
           * @brief Gets the reference to the (local) associated vector
           * to the LinearForm.
           */
-         const mfem::Vector& getVector() const
-         {
-            return static_cast<const mfem::Vector&>(getHandle());
-         }
+         virtual const VectorType& getVector() const = 0;
 
          /**
           * @brief Builds the linear form the given LinearFormIntegratorBase
@@ -107,7 +102,7 @@ namespace Rodin::Variational
     * LinearFormIntegratorBase instances.
     */
    template <class FES>
-   class LinearForm : public LinearFormBase
+   class LinearForm<FES, mfem::Vector> : public LinearFormBase<mfem::Vector>
    {
       static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
 
@@ -115,6 +110,7 @@ namespace Rodin::Variational
 
       public:
          using Context = typename FES::Context;
+         using VectorType = mfem::Vector;
 
          /**
           * @brief Constructs a linear form defined on some finite element
@@ -150,6 +146,24 @@ namespace Rodin::Variational
             return m_v;
          }
 
+         /**
+          * @brief Gets the reference to the (local) associated vector
+          * to the LinearForm.
+          */
+         VectorType& getVector() override
+         {
+            return static_cast<mfem::Vector&>(getHandle());
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated vector
+          * to the LinearForm.
+          */
+         const VectorType& getVector() const override
+         {
+            return static_cast<const mfem::Vector&>(getHandle());
+         }
+
          mfem::LinearForm& getHandle() override
          {
             return *m_lf;
@@ -169,7 +183,7 @@ namespace Rodin::Variational
          std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
    template <class FES>
-   LinearForm(TestFunction<FES>&) -> LinearForm<FES>;
+   LinearForm(TestFunction<FES>&) -> LinearForm<FES, mfem::Vector>;
 }
 
 #include "LinearForm.hpp"

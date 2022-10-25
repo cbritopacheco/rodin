@@ -19,6 +19,7 @@ namespace Rodin::Variational
    /**
     * @brief Abstract base class for objects of type BilinearForm.
     */
+   template <class OperatorType>
    class BilinearFormBase
    {
       public:
@@ -51,20 +52,14 @@ namespace Rodin::Variational
           * to the bilinear form.
           * @returns Reference to the associated sparse matrix.
           */
-         mfem::SparseMatrix& getMatrix()
-         {
-            return getHandle().SpMat();
-         }
+         virtual OperatorType& getMatrix() = 0;
 
          /**
           * @brief Gets the reference to the (local) associated sparse matrix
           * to the bilinear form.
           * @returns Constant reference to the associated sparse matrix.
           */
-         const mfem::SparseMatrix& getMatrix() const
-         {
-            return getHandle().SpMat();
-         }
+         virtual const OperatorType& getMatrix() const = 0;
 
          /**
           * @internal
@@ -147,7 +142,8 @@ namespace Rodin::Variational
     * @endcode
     */
    template <class TrialFES, class TestFES>
-   class BilinearForm : public BilinearFormBase
+   class BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>
+      : public BilinearFormBase<mfem::SparseMatrix>
    {
       static_assert(
             std::is_same_v<TrialFES, TestFES>,
@@ -159,6 +155,7 @@ namespace Rodin::Variational
 
       public:
          using Context = typename TrialFES::Context;
+         using OperatorType = mfem::SparseMatrix;
 
          /**
           * @brief Constructs a BilinearForm from a TrialFunction and
@@ -212,6 +209,26 @@ namespace Rodin::Variational
 
          BilinearForm& from(const BilinearFormIntegratorSum& bfi) override;
 
+         /**
+          * @brief Gets the reference to the (local) associated sparse matrix
+          * to the bilinear form.
+          * @returns Reference to the associated sparse matrix.
+          */
+         OperatorType& getMatrix() override
+         {
+            return getHandle().SpMat();
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated sparse matrix
+          * to the bilinear form.
+          * @returns Constant reference to the associated sparse matrix.
+          */
+         const OperatorType& getMatrix() const override
+         {
+            return getHandle().SpMat();
+         }
+
          mfem::BilinearForm& getHandle() override
          {
             return *m_bf;
@@ -233,7 +250,7 @@ namespace Rodin::Variational
    };
    template <class TrialFES, class TestFES>
    BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-      -> BilinearForm<TrialFES, TestFES>;
+      -> BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>;
 }
 
 #include "BilinearForm.hpp"

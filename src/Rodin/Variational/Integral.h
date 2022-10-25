@@ -324,10 +324,10 @@ namespace Rodin::Variational
             return new Integral(*this);
          }
       private:
-         TestFunction<FES>    m_v;
-         GridFunction<FES>&   m_u;
-         GridFunction<FES>    m_one;
-         LinearForm<FES>      m_lf;
+         TestFunction<FES>                m_v;
+         GridFunction<FES>&               m_u;
+         GridFunction<FES>                m_one;
+         LinearForm<FES, mfem::Vector>    m_lf;
          bool m_assembled;
    };
    template <class FES>
