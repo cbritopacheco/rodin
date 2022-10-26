@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::MatrixFunctionBase class | Rodin</title>
+  <title>Transpose Template Specializations module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,92 +52,34 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>MatrixFunctionBase <span class="m-thin">class</span>
-        </h1>
-        <p>Abstract base class for objects representing matrix coefficients.</p>
+          Transpose Template Specializations <span class="m-thin">module</span></h1>
+        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a> class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a></p></aside>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_identity_matrix.html" class="m-doc">IdentityMatrix</a>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_transpose_3_01_function_base_01_4.html" class="m-doc">Rodin::Variational::Transpose&lt;FunctionBase&gt;</a>
             </dt>
-            <dd>Represents the identity matrix function.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a> of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Trait&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_h1_3_01_trait_01_4_01_4_01_4.html" class="m-doc">Jacobian&lt;GridFunction&lt;H1&lt;Trait&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_transpose_3_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Rodin::Variational::Transpose&lt;ShapeFunctionBase&lt;Space&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> object.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae136945f1b7d621dff33cf6ad1121269" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the number of rows in the matrix.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#add79bdbfe3d3b3413304a6467d492a3a" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the number of columns in the matrix.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#adb9059ce1701f5ceca34fb643241c614" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::DenseMatrix&amp; value,
-              mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ae136945f1b7d621dff33cf6ad1121269"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />MatrixFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae136945f1b7d621dff33cf6ad1121269" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Gets the number of rows in the matrix.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Number of rows</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="add79bdbfe3d3b3413304a6467d492a3a"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />MatrixFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add79bdbfe3d3b3413304a6467d492a3a" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Gets the number of columns in the matrix.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Number of columns</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="adb9059ce1701f5ceca34fb643241c614"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />MatrixFunctionBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb9059ce1701f5ceca34fb643241c614" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::DenseMatrix&amp; value,
-              mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-<aside class="m-note m-info"><h4>Note</h4><p>It is not necessary to set the size beforehand.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::LinearFormIntegratorBase class | Rodin</title>
+  <title>ScalarFunction Template Specializations module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,95 +52,34 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearFormIntegratorBase <span class="m-thin">class</span>
-        </h1>
-        <p>Base class for linear form integrators.</p>
+          ScalarFunction Template Specializations <span class="m-thin">module</span></h1>
+        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>An instance of <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> performs the assembly of the element vector for each finite element.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a></p></aside>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_number_01_4.html" class="m-doc">Rodin::Variational::ScalarFunction&lt;Number&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of Variational::FormLanguage.</dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
+            <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_shape_function_base_3_01_test_space_01_4_01_4.html" class="m-doc">Integral&lt;ShapeFunctionBase&lt;TestSpace&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_vertex_01_6_08_4_01_4.html" class="m-doc">Rodin::Variational::ScalarFunction&lt;std::function&lt;double(const Vertex&amp;)&gt;&gt;</a>
             </dt>
-            <dd>Integration of a test operator.</dd>
+            <dd>Represents a scalar function given by an arbitrary scalar function.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a5c213bead5e44e0771475d76f8ff6c49">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5c213bead5e44e0771475d76f8ff6c49" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const std::set&lt;int&gt;&amp;</span>
-            </dt>
-            <dd>Gets the attributes of the elements being integrated.</dd>
-            <dt id="a4bcc62d6b0e58426f441cf4a4d07e1fc">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4bcc62d6b0e58426f441cf4a4d07e1fc" class="m-doc-self">getIntegratorRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_variational.html#a20f84fb55de829443d5c7e8b6eaaf3a2" class="m-doc">IntegratorRegion</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the integration region.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a14647f11bf763027ca05475f9de6d81f" class="m-doc">over</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
-            </dt>
-            <dd>Specifies the material reference over which to integrate.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0cb4ddf06fdd6dc5a5b27368d6b0fb33" class="m-doc">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
-            </dt>
-            <dd>Specifies the material references over which to integrate.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a14647f11bf763027ca05475f9de6d81f"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14647f11bf763027ca05475f9de6d81f" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">int attr)</span></span>
-            </h3>
-            <p>Specifies the material reference over which to integrate.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Specifies the material reference over which the integration should take place.</p>
-          </div></section>
-          <section class="m-doc-details" id="a0cb4ddf06fdd6dc5a5b27368d6b0fb33"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cb4ddf06fdd6dc5a5b27368d6b0fb33" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs)</span></span>
-            </h3>
-            <p>Specifies the material references over which to integrate.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to self (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Specifies the material references over which the integration should take place.</p>
-          </div></section>
         </section>
       </div>
     </div>

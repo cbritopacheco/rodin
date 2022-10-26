@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::Mult class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="modules.html">Modules</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Mult <span class="m-thin">class</span>
+        </h1>
+        <p>Represents the multiplication operation.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">LHS</td>
+              <td>Type of left hand side operand</td>
+            </tr>
+            <tr>
+              <td>RHS</td>
+              <td>Type of right hand side operand</td>
+            </tr>
+          </tbody>
+        </table>
+<aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a> class, please see <a href="group___mult_specializations.html" class="m-doc">Mult Template Specializations</a>.</p></aside><p>Represents the following mathematical expression:</p><div class="m-math"><svg style="width: 5.951em; height: 0.857em;" viewBox="165.707971 -8.231123 57.127044 8.231127">
+<title>
+\[ \text{LHS} * \text{RHS} \]
+</title>
+<defs>
+<path id='eq1-g0-3' d='M3.287671-5.104857C3.299626-5.272229 3.299626-5.559153 2.988792-5.559153C2.797509-5.559153 2.642092-5.403736 2.677958-5.248319V-5.092902L2.84533-3.239851L1.315068-4.351681C1.207472-4.411457 1.183562-4.435367 1.099875-4.435367C.932503-4.435367 .777086-4.267995 .777086-4.100623C.777086-3.90934 .896638-3.861519 1.016189-3.801743L2.713823-2.988792L1.06401-2.187796C.872727-2.092154 .777086-2.044334 .777086-1.865006S.932503-1.530262 1.099875-1.530262C1.183562-1.530262 1.207472-1.530262 1.506351-1.75741L2.84533-2.725778L2.666002-.71731C2.666002-.466252 2.881196-.406476 2.976837-.406476C3.120299-.406476 3.299626-.490162 3.299626-.71731L3.120299-2.725778L4.65056-1.613948C4.758157-1.554172 4.782067-1.530262 4.865753-1.530262C5.033126-1.530262 5.188543-1.697634 5.188543-1.865006C5.188543-2.044334 5.080946-2.10411 4.937484-2.175841C4.220174-2.534496 4.196264-2.534496 3.251806-2.976837L4.901619-3.777833C5.092902-3.873474 5.188543-3.921295 5.188543-4.100623S5.033126-4.435367 4.865753-4.435367C4.782067-4.435367 4.758157-4.435367 4.459278-4.208219L3.120299-3.239851L3.287671-5.104857Z'/>
+<path id='eq1-g1-72' d='M8.392528 0V-.227148C7.49589-.298879 7.340473-.454296 7.340473-1.303113V-6.611208C7.340473-7.47198 7.47198-7.603487 8.392528-7.687173V-7.914321H5.068991V-7.687173C5.989539-7.603487 6.121046-7.47198 6.121046-6.611208V-4.291905H2.49863V-6.611208C2.49863-7.47198 2.630137-7.603487 3.550685-7.687173V-7.914321H.227148V-7.687173C1.147696-7.603487 1.279203-7.47198 1.279203-6.611208V-1.43462C1.279203-.430386 1.159651-.286924 .227148-.227148V0H3.550685V-.227148C2.654047-.298879 2.49863-.454296 2.49863-1.303113V-3.765878H6.121046V-1.43462C6.121046-.430386 6.001494-.286924 5.068991-.227148V0H8.392528Z'/>
+<path id='eq1-g1-76' d='M7.149191-2.080199H6.850311C6.659029-1.661768 6.503611-1.3868 6.336239-1.195517C5.917808-.6934 5.260274-.466252 4.23213-.466252H3.431133C2.558406-.466252 2.402989-.537983 2.402989-.956413V-6.611208C2.402989-7.460025 2.570361-7.627397 3.514819-7.687173V-7.914321H.143462V-7.687173C1.028144-7.615442 1.183562-7.460025 1.183562-6.611208V-1.303113C1.183562-.454296 1.016189-.286924 .143462-.227148V0H6.575342L7.149191-2.080199Z'/>
+<path id='eq1-g1-82' d='M7.878456 0V-.227148C7.424159-.263014 7.185056-.382565 6.838356-.789041L4.375592-3.813699C5.176588-3.969116 5.535243-4.112578 5.929763-4.435367C6.312329-4.746202 6.539477-5.248319 6.539477-5.810212C6.539477-6.324284 6.38406-6.766625 6.073225-7.113325C5.618929-7.603487 4.62665-7.914321 3.502864-7.914321H.203238V-7.687173C1.099875-7.591532 1.219427-7.460025 1.219427-6.611208V-1.43462C1.219427-.442341 1.099875-.298879 .203238-.227148V0H3.514819V-.227148C2.594271-.286924 2.438854-.442341 2.438854-1.303113V-3.658281L3.108344-3.682192L5.953674 0H7.878456ZM5.236364-5.834122C5.236364-5.236364 4.985305-4.734247 4.554919-4.507098C4.004981-4.196264 3.58655-4.124533 2.438854-4.100623V-7.041594C2.438854-7.376339 2.570361-7.47198 3.048568-7.47198C4.542964-7.47198 5.236364-6.957908 5.236364-5.834122Z'/>
+<path id='eq1-g1-83' d='M5.869988-2.008468C5.869988-3.000747 5.212453-3.765878 3.634371-4.62665C2.379078-5.308095 1.876961-5.834122 1.876961-6.491656S2.379078-7.591532 3.120299-7.591532C3.658281-7.591532 4.160399-7.364384 4.578829-6.933998C4.94944-6.551432 5.116812-6.240598 5.308095-5.535243H5.606974L5.34396-8.081694H5.092902C5.045081-7.81868 4.913574-7.675218 4.710336-7.675218C4.590785-7.675218 4.399502-7.723039 4.184309-7.81868C3.741968-7.986052 3.311582-8.081694 2.893151-8.081694C2.426899-8.081694 1.924782-7.890411 1.542217-7.579577C1.075965-7.197011 .848817-6.682939 .848817-6.025405C.848817-5.080946 1.374844-4.411457 2.713823-3.706102C3.574595-3.239851 4.196264-2.761644 4.495143-2.307347C4.60274-2.139975 4.662516-1.900872 4.662516-1.601993C4.662516-.812951 4.064757-.263014 3.19203-.263014C2.116065-.263014 1.374844-.920548 .777086-2.379078H.502117L.860772 .155417H1.123786C1.135741-.071731 1.279203-.239103 1.458531-.239103C1.590037-.239103 1.793275-.191283 2.020423-.107597C2.47472 .071731 2.952927 .167372 3.431133 .167372C4.817933 .167372 5.869988-.777086 5.869988-2.008468Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='165.707971' y='-.149434' xlink:href='#eq1-g1-76'/>
+<use x='173.01258' y='-.149434' xlink:href='#eq1-g1-72'/>
+<use x='181.644213' y='-.149434' xlink:href='#eq1-g1-83'/>
+<use x='190.947947' y='-.149434' xlink:href='#eq1-g0-3'/>
+<use x='199.582217' y='-.149434' xlink:href='#eq1-g1-82'/>
+<use x='207.556312' y='-.149434' xlink:href='#eq1-g1-72'/>
+<use x='216.187945' y='-.149434' xlink:href='#eq1-g1-83'/>
+</g>
+</svg></div><aside class="m-note m-default"><h4>See also</h4><p><a href="group___mult_specializations.html" class="m-doc">Mult Template Specializations</a></p></aside>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

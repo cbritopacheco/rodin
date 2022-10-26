@@ -55,53 +55,7 @@
           <div class="m-doc-template">template&lt;class ... Values&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorFunction <span class="m-thin">class</span>
         </h1>
-        <p>Represents a vector which may be constructed from values which can be converted to objects of type <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>In general one may construct any <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> by specifying its values in a uniform initialization manner. For example, to construct a <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> with constant entries (1, 2, 3) : <code class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorFunction</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span><span class="w"></span></code> Alternatively, we may construct instances of <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> from any type which is convertible to specializations of <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarFunction</span><span class="p">(</span><span class="mf">3.1416</span><span class="p">);</span><span class="w"></span>
-<span class="k">auto</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorFunction</span><span class="p">{</span><span class="n">Dx</span><span class="p">(</span><span class="n">s</span><span class="p">),</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">};</span><span class="w"></span></pre>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa98b3bcef39cc2d9a2b9b5b3964e06e5" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap">Values... values) <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a vector with the given values.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa98b3bcef39cc2d9a2b9b5b3964e06e5"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class ... Values&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa98b3bcef39cc2d9a2b9b5b3964e06e5" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap">Values... values) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Constructs a vector with the given values.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">values&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Parameter pack of values</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Each value passed must be convertible to any specialization of <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</p>
-          </div></section>
-        </section>
+<aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> class, please see <a href="group___vector_function_specializations.html" class="m-doc">VectorFunction Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___vector_function_specializations.html" class="m-doc">VectorFunction Template Specializations</a></p></aside>
       </div>
     </div>
   </div>
