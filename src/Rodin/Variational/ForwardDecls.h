@@ -331,6 +331,27 @@ namespace Rodin::Variational
    template <class T>
    class BooleanFunction;
 
+   /**
+    * @brief Represents the power function.
+    * @tparam Base Type of the base expression
+    * @tparam Exponent Type of the exponent expression
+    *
+    * Represents the mathematical expression:
+    * @f[
+    *    \text{Base}^\text{Exponent}
+    * @f]
+    * where Base is a type representing the base @f$ b @f$, the Exponent type
+    * represents the exponent @f$ p @f$, and the exponentiation value is @f$
+    * b^p @f$.
+    *
+    * @note For an overview of all the possible specializations of the
+    * Pow class, please see @ref PowSpecializations.
+    *
+    * @see PowSpecializations
+    */
+   template <class Base, class Exponent>
+   class Pow;
+
    template <class T>
    class Component;
 

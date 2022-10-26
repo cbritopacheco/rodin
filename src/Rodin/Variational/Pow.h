@@ -17,21 +17,29 @@
 namespace Rodin::Variational
 {
    /**
+    * @defgroup PowSpecializations Pow Template Specializations
+    * @brief Template specializations of the Pow class.
+    * @see Pow
+    */
+
+   /**
+    * @ingroup PowSpecializations
     * @brief Represent the power function.
     *
-    * This class represents the exponentiation of the base value @f$ x @f$
-    * to the power @f$ p @f$:
+    * This class represents the function @f$ f : \mathbb{R} \rightarrow
+    * \mathbb{R} @f$ defined by the exponentiation of a base value @f$ x \in
+    * \mathbb{R} @f$ to the power @f$ p @f$:
     * @f$
-    *    f(x) = x^p
+    *   f(x) = x^p \ .
     * @f$
     */
    template <class Number>
-   class Pow : public ScalarFunctionBase
+   class Pow<FunctionBase, Number> : public ScalarFunctionBase
    {
       static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
       public:
          /**
-          * @bref Constructs the power object
+          * @brief Constructs the power object
           * @param[in] s Base value
           * @param[in] p Power
           */
@@ -80,7 +88,7 @@ namespace Rodin::Variational
          Number m_p;
    };
    template <class Number>
-   Pow(const FunctionBase&, Number) -> Pow<Number>;
+   Pow(const FunctionBase&, Number) -> Pow<FunctionBase, Number>;
 }
 
 #endif

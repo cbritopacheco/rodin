@@ -28,22 +28,39 @@
 
 namespace Rodin
 {
+   /**
+    * @brief Namespace containing utilities for handling serial and parallel contexts.
+    */
    namespace Context
    {
+      /**
+       * @brief Serial context metadata.
+       */
       struct Serial   {};
+
+      /**
+       * @brief Parallel context metadata.
+       */
       struct Parallel {};
    }
 }
 
 namespace Rodin::Geometry
 {
+   /**
+    * @brief Module for containing utilities for the refinement of meshes.
+    */
    namespace Refinement
    {
+      /**
+       * @brief Type of refinement.
+       */
       enum class Type
       {
-         Conforming,
-         NonConforming,
-         Automatic
+         Conforming,    ///< Conforming refinement
+         NonConforming, ///< Non-conforming refinement
+         Automatic      ///< Automatically determines whether to use conforming
+                        ///or non-conforming refinement
       };
    };
 
