@@ -14,13 +14,13 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Represents the divergence @f \text{div} u @f of a function @f$ u \in H^1 @f$.
-    *
-    * This class represents the sum of the first derivatives of a
-    * vector valued H1 ShapeFunction.
-    * @f[
-    *    \text{div} u
-    * @f]
+    * @defgroup DivSpecializations Div Template Specializations
+    * @brief Template specializations of the Div class.
+    * @see Div
+    */
+
+   /**
+    * @ingroup DivSpecializations
     */
    template <ShapeFunctionSpaceType Space, class Trait>
    class Div<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>

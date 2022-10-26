@@ -22,6 +22,15 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup UnaryMinusSpecializations UnaryMinus Template Specializations
+    * @brief Template specializations of the UnaryMinus class.
+    * @see UnaryMinus
+    */
+
+   /**
+    * @ingroup UnaryMinusSpecializations
+    */
    template <>
    class UnaryMinus<FunctionBase> : public FunctionBase
    {

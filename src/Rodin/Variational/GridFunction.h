@@ -36,9 +36,13 @@
 
 namespace Rodin::Variational
 {
+
    /**
-    * @brief Abstract class for GridFunction objects.
+    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
+    * @brief Template specializations of the GridFunction class.
+    * @see GridFunction
     */
+
    class GridFunctionBase : public VectorFunctionBase
    {
       public:
@@ -314,6 +318,11 @@ namespace Rodin::Variational
          VectorFunctionBase* copy() const noexcept override;
    };
 
+   /**
+    * @ingroup GridFunctionSpecializations
+    * @brief Represents a GridFunction which belongs to an L2 finite element
+    * space.
+    */
    template <class Trait>
    class GridFunction<L2<Trait>> : public GridFunctionBase
    {
@@ -435,7 +444,8 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a grid function which belongs to an H1 finite element
+    * @ingroup GridFunctionSpecializations
+    * @brief Represents a GridFunction which belongs to an H1 finite element
     * space.
     */
    template <class Trait>

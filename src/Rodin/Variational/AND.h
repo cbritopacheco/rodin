@@ -16,6 +16,7 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup ANDSpecializations AND Template Specializations
+    * @brief Template specializations of the AND class.
     * @see AND
     */
 

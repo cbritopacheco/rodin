@@ -13,6 +13,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup BooleanFunctionSpecializations BooleanFunction Template Specializations
+    * @brief Template specializations of the BooleanFunction class.
+    * @see BooleanFunction
+    */
+
    class BooleanFunctionBase : public FunctionBase
    {
       public:
@@ -59,6 +65,9 @@ namespace Rodin::Variational
          virtual BooleanFunctionBase* copy() const noexcept override = 0;
    };
 
+   /**
+    * @ingroup BooleanFunctionSpecializations
+    */
    template <>
    class BooleanFunction<bool> : public BooleanFunctionBase
    {

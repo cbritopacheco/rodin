@@ -17,6 +17,15 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup SumSpecializations Sum Template Specializations
+    * @brief Template specializations of the Sum class.
+    * @see Sum
+    */
+
+   /**
+    * @ingroup SumSpecializations
+    */
    template <>
    class Sum<FunctionBase, FunctionBase> : public FunctionBase
    {
@@ -66,6 +75,9 @@ namespace Rodin::Variational
       return Sum(ScalarFunction(v), rhs);
    }
 
+   /**
+    * @ingroup SumSpecializations
+    */
    template <ShapeFunctionSpaceType Space>
    class Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>
       : public ShapeFunctionBase<Space>

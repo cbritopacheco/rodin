@@ -18,9 +18,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Abstract base class for finite element spaces.
-    */
    class FiniteElementSpaceBase
    {
       public:

@@ -19,12 +19,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Base class for linear form integrators.
-    *
-    * An instance of LinearFormIntegratorBase performs the assembly of the
-    * element vector for each finite element.
-    */
    class LinearFormIntegratorBase : public FormLanguage::Base
    {
       public:

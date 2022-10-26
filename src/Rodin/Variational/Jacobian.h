@@ -18,22 +18,13 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup JacobianSpecializations Jacobian Template Specializations
+    * @brief Template specializations of the Jacobian class.
+    * @see Jacobian
     */
 
    /**
     * @ingroup JacobianSpecializations
     * @brief Jacobian of an H1 GridFunction object.
-    *
-    * For @f$ u : \mathbb{R}^s \rightarrow \mathbb{R}^d @f$, the Jacobian matrix
-    * @f$ \mathbf{J}_u(x) @f$ at any point @f$ x = (x_1, \ldots, x_s) @f$ is
-    * defined by the @f$ s \times d @f$ matrix
-    * @f[
-    * \mathbf{J}_u = \begin{bmatrix}
-    * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_d}{\partial x_1}\\
-    * \vdots & \ddots & \vdots\\
-    * \dfrac{\partial u_1}{\partial x_s} & \ldots & \dfrac{\partial u_d}{\partial x_s}
-    * \end{bmatrix} .
-    * @f]
     */
    template <class Trait>
    class Jacobian<GridFunction<H1<Trait>>> : public MatrixFunctionBase
@@ -93,7 +84,7 @@ namespace Rodin::Variational
 
    /**
     * @ingroup JacobianSpecializations
-    * @briedf Jacobian of an H1 ShapeFunction object.
+    * @brief Jacobian of an H1 ShapeFunction object.
     */
    template <ShapeFunctionSpaceType Space, class Trait>
    class Jacobian<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>

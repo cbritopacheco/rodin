@@ -34,6 +34,16 @@ namespace Rodin
       struct Parallel {};
    }
 
+   namespace Refinement
+   {
+      enum class Type
+      {
+         Conforming,
+         NonConforming,
+         Automatic
+      };
+   };
+
    /**
     * @brief Abstract base class for Mesh objects.
     */
@@ -117,6 +127,11 @@ namespace Rodin
           * @brief Performs a uniform refinement over all mesh elements
           */
          MeshBase& refine();
+
+         MeshBase& refine(
+               std::function<bool(const Element&)> p,
+               Refinement::Type t = Refinement::Type::Automatic,
+               int maxHangingNodesLevel = std::numeric_limits<int>::infinity());
 
          /**
           * @brief Gets the labels of the domain elements in the mesh.

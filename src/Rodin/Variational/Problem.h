@@ -28,9 +28,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Base class for Variational::Problem.
-    */
    class ProblemBase
    {
       public:
@@ -94,11 +91,7 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a variational problem to be solved.
-    *
-    * The problem may then be solved by utilizing any derived instance Solver
-    * class in the Rodin::Solver namespace.
-    *
+    * @ingroup ProblemSpecializations
     */
    template <class TrialFES, class TestFES, class OperatorType>
    class Problem<TrialFES, TestFES, OperatorType> : public ProblemBase

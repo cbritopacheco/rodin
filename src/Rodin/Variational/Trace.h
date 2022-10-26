@@ -16,17 +16,13 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup TraceSpecializations
+    * @brief Template specializations of the Trace class.
+    * @see Trace
     */
 
    /**
     * @ingroup TraceSpecializations
-    * @brief Represents the trace of a FunctionBase operator.
-    *
-    * Given a matrix valued function @f$ A : \Omega \rightarrow \mathbb{R}^{n
-    * \times n} @f$, we define its trace as:
-    * @f[
-    *    \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii}
-    * @f]
+    * @brief Trace of a FunctionBase instance.
     */
    template <>
    class Trace<FunctionBase> : public ScalarFunctionBase
