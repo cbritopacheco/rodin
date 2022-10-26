@@ -17,8 +17,11 @@ namespace Rodin
       struct Serial;
       struct Parallel;
    }
+}
 
-   enum class Geometry;
+namespace Rodin::Geometry
+{
+   enum class Type;
 
    class MeshBase;
 

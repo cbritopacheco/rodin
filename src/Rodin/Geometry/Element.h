@@ -6,9 +6,9 @@
 
 #include "ForwardDecls.h"
 
-namespace Rodin
+namespace Rodin::Geometry
 {
-   enum class Geometry
+   enum class Type
    {
       Invalid = mfem::Geometry::INVALID,
       Point = mfem::Geometry::POINT,
@@ -42,9 +42,9 @@ namespace Rodin
             m_element = nullptr; // This is deallocated by the mfem::Mesh class
          }
 
-         Geometry getGeometry() const
+         Type getGeometry() const
          {
-            return static_cast<Geometry>(m_element->GetGeometryType());
+            return static_cast<Type>(m_element->GetGeometryType());
          }
 
          /**

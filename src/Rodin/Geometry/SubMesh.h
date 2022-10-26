@@ -9,7 +9,7 @@
 #include "ForwardDecls.h"
 #include "Mesh.h"
 
-namespace Rodin
+namespace Rodin::Geometry
 {
    /**
     * @brief A SubMesh object represents a subregion of a Mesh object.

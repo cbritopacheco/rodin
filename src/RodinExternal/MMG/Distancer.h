@@ -11,7 +11,7 @@
 #include <optional>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/H1.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -141,7 +141,8 @@ namespace Rodin::External::MMG
        * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
        * @returns Signed distance function representing @f$ \Omega @f$.
        */
-      Variational::GridFunction<Variational::H1<Context::Serial>> distance(const Mesh<Context::Serial>& box)
+      Variational::GridFunction<Variational::H1<Context::Serial>> distance(
+          const Geometry::Mesh<Context::Serial>& box)
       {
         if (&box != &m_fes.getMesh())
         {
@@ -212,8 +213,8 @@ namespace Rodin::External::MMG
        * case only the edge (S) or triangle (3D) information will be retained.
        */
       Variational::GridFunction<Variational::H1<Context::Serial>> distance(
-            const Mesh<Context::Serial>& box,
-            const Mesh<Context::Serial>& contour)
+            const Geometry::Mesh<Context::Serial>& box,
+            const Geometry::Mesh<Context::Serial>& contour)
       {
         auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
         box.save(boxp);

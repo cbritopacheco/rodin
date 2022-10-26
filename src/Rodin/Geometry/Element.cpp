@@ -1,7 +1,7 @@
 #include "Element.h"
 #include "Mesh.h"
 
-namespace Rodin
+namespace Rodin::Geometry
 {
    // ---- ElementBase -------------------------------------------------------
    int ElementBase::getAttribute() const

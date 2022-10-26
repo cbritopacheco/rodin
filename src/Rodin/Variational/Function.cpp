@@ -1,4 +1,5 @@
 #include "Rodin/Alert.h"
+#include "Rodin/Geometry/SubMesh.h"
 
 #include "Function.h"
 #include "Transpose.h"
@@ -11,7 +12,7 @@ namespace Rodin::Variational
    }
 
    mfem::ElementTransformation& FunctionBase::getSubMeshElementTrans(
-         const MeshBase& child,
+         const Geometry::MeshBase& child,
          mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
    {
       if (child.isSubMesh())
@@ -24,7 +25,7 @@ namespace Rodin::Variational
          }
          else
          {
-            auto& submesh = static_cast<const SubMesh<Context::Serial>&>(child);
+            auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(child);
             if (&submesh.getHandle() == trans.mesh)
             {
                return trans;

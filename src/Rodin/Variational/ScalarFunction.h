@@ -15,7 +15,7 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Mesh/Element.h"
+#include "Rodin/Geometry/Element.h"
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RangeShape.h"
@@ -171,20 +171,20 @@ namespace Rodin::Variational
     * @brief Represents a scalar function given by an arbitrary scalar function.
     */
    template <>
-   class ScalarFunction<std::function<double(const Vertex&)>>
+   class ScalarFunction<std::function<double(const Geometry::Vertex&)>>
       : public ScalarFunctionBase
    {
       public:
          template <class T>
          ScalarFunction(T&& f)
             : ScalarFunction(
-                  std::function<double(const Vertex&)>(std::forward<T>(f)))
+                  std::function<double(const Geometry::Vertex&)>(std::forward<T>(f)))
          {}
 
          /**
           * @brief Constructs a ScalarFunction from an std::function.
           */
-         ScalarFunction(std::function<double(const Vertex&)> f)
+         ScalarFunction(std::function<double(const Geometry::Vertex&)> f)
             : m_f(f)
          {}
 
@@ -203,12 +203,12 @@ namespace Rodin::Variational
          {
             mfem::Vector transip;
             trans.Transform(ip, transip);
-            Vertex v(std::move(transip));
+            Geometry::Vertex v(std::move(transip));
             v.setElementTransformation(&trans).setIntegrationPoint(&ip);
             return m_f(v);
          }
 
-         double operator()(const Vertex& v) const
+         double operator()(const Geometry::Vertex& v) const
          {
             return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
          }
@@ -219,17 +219,17 @@ namespace Rodin::Variational
          }
 
       private:
-         const std::function<double(const Vertex&)> m_f;
+         const std::function<double(const Geometry::Vertex&)> m_f;
    };
 
-   ScalarFunction(std::function<double(const Vertex&)>)
-      -> ScalarFunction<std::function<double(const Vertex&)>>;
+   ScalarFunction(std::function<double(const Geometry::Vertex&)>)
+      -> ScalarFunction<std::function<double(const Geometry::Vertex&)>>;
 
    template <class T>
    ScalarFunction(T)
       -> ScalarFunction<
-         std::enable_if_t<std::is_invocable_r_v<double, T, const Vertex&>,
-         std::function<double(const Vertex&)>>>;
+         std::enable_if_t<std::is_invocable_r_v<double, T, const Geometry::Vertex&>,
+         std::function<double(const Geometry::Vertex&)>>>;
 }
 
 #endif

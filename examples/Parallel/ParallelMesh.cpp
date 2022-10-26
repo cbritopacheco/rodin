@@ -9,10 +9,11 @@
 
 #include <boost/mpi.hpp>
 
-#include <Rodin/Mesh.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 int main(int argc, char** argv)

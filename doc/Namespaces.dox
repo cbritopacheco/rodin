@@ -9,13 +9,23 @@
  */
 
 /**
+  @dir Rodin/Geometry
+  @brief Namespace @ref Rodin::Geometry
+ */
+
+/**
+  @namespace Rodin::Geometry
+  @brief Module for dealing with geometries
+ */
+
+/**
   @dir Rodin/Variational
   @brief Namespace @ref Rodin::Variational
  */
 
 /**
   @namespace Rodin::Variational
-  @brief Module for implementing variational methods
+  @brief Module for writing variational problems in C++
  */
 
 /**
@@ -25,7 +35,7 @@
 
 /**
   @namespace Rodin::FormLanguage
-  @brief Module for writing variational expressions in C++
+  @brief Module for writing formal expressions in C++
  */
 
 

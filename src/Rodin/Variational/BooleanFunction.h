@@ -34,7 +34,7 @@ namespace Rodin::Variational
 
          virtual ~BooleanFunctionBase() = default;
 
-         bool operator()(const Vertex& v) const
+         bool operator()(const Geometry::Vertex& v) const
          {
             return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
          }

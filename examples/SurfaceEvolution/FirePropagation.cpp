@@ -1,13 +1,13 @@
 #include <cmath>
 #include <boost/bimap.hpp>
-#include <boost/math/tools/roots.hpp>
 
-#include "Rodin/Mesh.h"
-#include "Rodin/Variational.h"
-#include "RodinExternal/MMG.h"
+#include <Rodin/Geometry.h>
+#include <Rodin/Variational.h>
+#include <RodinExternal/MMG.h>
 
 using namespace std;
 using namespace Rodin;
+using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 class Environment
@@ -33,43 +33,104 @@ class Environment
       double R0, u0, A, v0;
     };
 
-    struct Flame
+    class Flame
     {
-      Flame(FES& sfes)
-        : m_height(sfes),
-          m_rateOfSpread(sfes)
-      {}
+      public:
+        Flame(Environment& env)
+          : m_env(env),
+            m_height(env.m_sfes),
+            m_tiltAngle(env.m_sfes),
+            m_rateOfSpread(env.m_sfes)
+        {}
 
-      const GridFunction<FES>& getHeight() const
-      {
-        return m_height;
-      }
+        Flame& step(double dt)
+        {
+          double alpha = 0.0;
 
-      const GridFunction<FES>& getRateOfSpread() const
-      {
-        return m_rateOfSpread;
-      }
+          auto p = Grad(m_env.m_terrainHeight);
+
+          double u = m_env.getParameters().u0 / std::cos(alpha);
+
+
+          // Angle between wind and conormal
+          auto phi =
+            ScalarFunction(
+                [&](const Vertex& v) -> double
+                {
+                  return 1.0;
+                });
+
+          // Angle between gradient and conormal
+          auto psi =
+            ScalarFunction(
+                [](const Vertex& v) -> double
+                {
+                  return 1.0;
+                });
+
+          // Compute the tilt angle
+          auto gamma =
+            ScalarFunction(
+              [&](const Vertex& v) -> double
+              {
+                double rhs =
+                  std::tan(alpha) * std::cos(phi(v)) + m_env.getWind()(v) * std::cos(psi(v));
+                return std::atan(rhs);
+              });
+          return *this;
+        }
+
+        const GridFunction<FES>& getHeight() const
+        {
+          return m_height;
+        }
+
+        const GridFunction<FES>& getRateOfSpread() const
+        {
+          return m_rateOfSpread;
+        }
 
       private:
+        Environment& m_env;
         GridFunction<FES> m_height;
+        GridFunction<FES> m_tiltAngle;
         GridFunction<FES> m_rateOfSpread;
     };
 
-    Environment(Mesh<Context>& topography, const Parameters& params)
-      : m_topography(topography),
-        m_ground({0, 0, 0, 0}),
-        m_params(params),
+    Environment(const Parameters& params, Mesh<Context>& topography)
+      : m_params(params),
+        m_topography(topography),
         m_sfes(m_topography),
         m_vfes(m_topography, m_topography.getSpaceDimension()),
         m_wind(m_sfes),
-        m_flame(m_sfes)
+        m_terrainHeight(m_sfes),
+        m_ground({0, 0, 0, 0}),
+        m_groundSlope(m_vfes),
+        m_flame(*this)
     {
       m_terrainMap.insert({1, Terrain::Vegetation});
       m_terrainMap.insert({2, Terrain::Fire});
       m_terrainMap.insert({3, Terrain::Burnt});
+
+      m_terrainHeight =
+        ScalarFunction(
+          [](const Vertex& v) -> double
+          {
+            return v.z();
+          });
+
+      m_groundSlope = Grad(m_terrainHeight);
+
+      m_terrainHeight.save("terrainHeight.gf");
+      topography.save("groundSlope.mesh");
+      m_groundSlope.save("groundSlope.gf");
     }
 
-    void step(double dt);
+    Environment& step(double dt)
+    {
+      m_flame.step(dt);
+      return *this;
+    }
 
     Environment& setGround(const Plane& ground)
     {
@@ -83,20 +144,37 @@ class Environment
       return *this;
     }
 
+    const Flame& getFlame() const
+    {
+      return m_flame;
+    }
+
     const GridFunction<FES>& getWind() const
     {
       return m_wind;
     }
 
+    const Parameters& getParameters() const
+    {
+      return m_params;
+    }
+
   private:
-    Mesh<Context>& m_topography;
-    Plane m_ground;
     Parameters m_params;
+    Mesh<Context>& m_topography;
+
     FES m_sfes;
     FES m_vfes;
+
     GridFunction<FES> m_wind;
-    Flame m_flame;
+
+    GridFunction<FES> m_terrainHeight;
     boost::bimap<int, Terrain> m_terrainMap;
+
+    Plane m_ground;
+    GridFunction<FES> m_groundSlope;
+
+    Flame m_flame;
 };
 
 
@@ -105,38 +183,7 @@ int main()
   const char* meshfile = "topo.mesh";
   Mesh topography;
   topography.load(meshfile);
-  // topography.initialize(2, 3)
-  //           .vertex({-0.5, -0.5, 0})
-  //           .vertex({-0.5,  0.5, 0})
-  //           .vertex({0.5,  -0.5, 0})
-  //           .vertex({0.5,   0.5, 0})
-  //           .element(Geometry::Triangle, {0, 1, 2})
-  //           .element(Geometry::Triangle, {1, 2, 3})
-  //           .finalize()
-  //           .refine()
-  //           .refine()
-  //           .refine()
-  //           .refine()
-  //           .refine()
-  //           .refine()
-  //           ;
-
-  // H1 fes(topography, 3);
-  // GridFunction disp(fes);
-  // disp = VectorFunction{
-  //   0,
-  //   0,
-  //   [](const Vertex& v) -> double
-  //   {
-  //     return std::exp(-40 * (v.x() * v.x() + v.y() * v.y()));
-  //   }
-  // };
-
-  // disp.save("disp.gf");
-  // topography.displace(disp);
-  // topography.save("topo.mesh");
-  Environment environment(topography, {0, 0, 0, 0});
-
+  Environment environment({0, 0, 0, 0}, topography);
   return 0;
 }
 

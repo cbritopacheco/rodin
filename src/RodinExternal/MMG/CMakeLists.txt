@@ -114,9 +114,9 @@ target_link_libraries(RodinExternalMMG
   Mmg::libmmg2d_a
   Mmg::libmmg3d_a
   Mmg::libmmgs_a
-  RodinAlert
-  RodinMesh
-  RodinVariational
+  Rodin::Alert
+  Rodin::Geometry
+  Rodin::Variational
   ${Boost_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT})
 

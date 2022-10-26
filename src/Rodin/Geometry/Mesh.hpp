@@ -11,7 +11,7 @@
 
 #include "Element.h"
 
-namespace Rodin
+namespace Rodin::Geometry
 {
    template <class T>
    std::enable_if_t<std::is_same_v<Element, T>, Element>
