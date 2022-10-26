@@ -20,19 +20,13 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Represents the gradient @f$ \nabla u @f$ of the scalar function
-    * @f$ u @f$.
-    *
-    * For @f$ u : \mathbb{R}^n \rightarrow \mathbb{R} @f$, the gradient
-    * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ at the point
-    * @f$ x = (x_1, \ldots, x_n) @f$ is defined by
-    * @f[
-    *    \nabla u (x) =
-    *    \left[
-    *       \dfrac{\partial u}{\partial x_1}(x), \ldots,
-    *       \dfrac{\partial u}{\partial x_n}(x)
-    *    \right]^T
-    * @f]
+    * @defgroup GradSpecializations Grad Template Specializations
+    * @brief Template specializations of the Grad class.
+    * @see Grad
+    */
+
+   /**
+    * @ingroup GradSpecializations
     */
    template <class Trait>
    class Grad<GridFunction<H1<Trait>>> : public VectorFunctionBase
@@ -100,6 +94,9 @@ namespace Rodin::Variational
    template <class Trait>
    Grad(const GridFunction<H1<Trait>>&) -> Grad<GridFunction<H1<Trait>>>;
 
+   /**
+    * @ingroup GradSpecializations
+    */
    template <ShapeFunctionSpaceType Space, class Trait>
    class Grad<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
    {

@@ -14,6 +14,11 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup CompositionSpecializations Composition Template Specializations
+    * @brief Template specializations of the Composition class.
+    * @see Composition
+    */
 
    /**
     * @brief Composition of a scalar valued function on the real line and a
@@ -22,7 +27,7 @@ namespace Rodin::Variational
     * Represents the composition of two functions @f$ f : \mathbb{R}
     * \rightarrow \mathbb{R} @f$ and @f$ g : \Omega \rightarrow \mathbb{R} @f$:
     * @f[
-    *    (f \circ g)(x) = f(g(x))
+    *    (f \circ g)(x) = f(g(x)) \ .
     * @f]
     */
    template <>

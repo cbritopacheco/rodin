@@ -24,11 +24,11 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Abstract base class for objects representing vector coefficients.
-    *
-    * @note Vectors are zero indexed. This means that the 0-index corresponds
-    * to the 1st entry of the vector.
+    * @defgroup VectorFunctionSpecializations VectorFunction Template Specializations
+    * @brief Template specializations of the VectorFunction class.
+    * @see VectorFunction
     */
+
    class VectorFunctionBase : public FunctionBase
    {
       public:
@@ -117,8 +117,11 @@ namespace Rodin::Variational
    };
 
    /**
-    * @brief Represents a vector which may be constructed from values which can
-    * be converted to objects of type ScalarFunction.
+    * @ingroup VectorFunctionSpecializations
+    * @tparam V Type of first value
+    * @tparam Values Parameter pack of remaining values
+    * @brief Represents a vector function which may be constructed from values
+    * which can be converted to objects of type ScalarFunction.
     *
     * In general one may construct any VectorFunction by specifying its values
     * in a uniform initialization manner. For example, to construct a
@@ -133,8 +136,8 @@ namespace Rodin::Variational
     * auto v = VectorFunction{Dx(s), 42, s};
     * @endcode
     */
-   template <class ... Values>
-   class VectorFunction : public VectorFunctionBase
+   template <class V, class ... Values>
+   class VectorFunction<V, Values...> : public VectorFunctionBase
    {
       public:
          /**
@@ -145,17 +148,17 @@ namespace Rodin::Variational
           * ScalarFunction.
           */
          constexpr
-         VectorFunction(Values... values)
+         VectorFunction(V v, Values... values)
          {
-            m_fs.reserve(sizeof...(Values));
-            makeFsFromTuple(std::forward_as_tuple(values...));
+            m_fs.reserve(1 + sizeof...(Values));
+            makeFsFromTuple(std::forward_as_tuple(v, values...));
          }
 
          constexpr
          VectorFunction(const VectorFunction& other)
             : VectorFunctionBase(other)
          {
-            m_fs.reserve(sizeof...(Values));
+            m_fs.reserve(1 + sizeof...(Values));
             for (const auto& v : other.m_fs)
                m_fs.emplace_back(v->copy());
          }
@@ -171,14 +174,14 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const override
          {
-            value.SetSize(static_cast<int>(sizeof...(Values)));
-            for (size_t i = 0; i < sizeof...(Values); i++)
+            value.SetSize(static_cast<int>(1 + sizeof...(Values)));
+            for (size_t i = 0; i < 1 + sizeof...(Values); i++)
                value(i) = m_fs[i]->getValue(trans, ip);
          }
 
          int getDimension() const override
          {
-            return sizeof...(Values);
+            return 1 + sizeof...(Values);
          }
 
          VectorFunction& traceOf(const std::set<int>& attrs) override

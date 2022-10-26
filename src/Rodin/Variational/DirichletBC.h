@@ -22,7 +22,15 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Represents a Dirichlet boundary condition.
+    * @defgroup DirichletBCSpecializations DirichletBC Template Specializations
+    * @brief Template specializations of the DirichletBC class.
+    * @see DirichletBC
+    */
+
+   /**
+    * @ingroup DirichletBCSpecializations
+    * @brief Represents a Dirichlet boundary condition on an H1 TrialFunction
+    * object.
     *
     * When utilized in a Problem construction, it will impose the Dirichlet
     * condition
@@ -31,13 +39,6 @@ namespace Rodin::Variational
     * @f]
     * on the segment of the boundary @f$ \Gamma_D \subset \partial \Omega @f$
     * specified by the boundary attribute.
-    *
-    * | Detail               | Description                                   |
-    * |----------------------|-----------------------------------------------|
-    * | Spaces supported     | H1                                            |
-    * | Dimensions supported | 1D, 2D, 3D                                    |
-    * | Continuous operator  | @f$ u = g \text{ on } \Gamma_D@f$             |
-    * | @f$ g @f$            | ScalarFunction                                |
     */
    template <class Trait>
    class DirichletBC<TrialFunction<H1<Trait>>> : public FormLanguage::Base
@@ -115,6 +116,9 @@ namespace Rodin::Variational
    DirichletBC(const TrialFunction<H1<Trait>>&, const FunctionBase&)
       -> DirichletBC<TrialFunction<H1<Trait>>>;
 
+   /**
+    * @ingroup DirichletBCSpecializations
+    */
    template <class Trait>
    class DirichletBC<Component<TrialFunction<H1<Trait>>>>
       : public FormLanguage::Base

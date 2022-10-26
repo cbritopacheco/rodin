@@ -23,8 +23,11 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Abstract base class for objects representing scalar functions.
+    * @defgroup ScalarFunctionSpecializations ScalarFunction Template Specializations
+    * @brief Template specializations of the ScalarFunction class.
+    * @see ScalarFunction
     */
+
    class ScalarFunctionBase : public FunctionBase
    {
       public:
@@ -70,6 +73,9 @@ namespace Rodin::Variational
          virtual ScalarFunctionBase* copy() const noexcept override = 0;
    };
 
+   /**
+    * @ingroup ScalarFunctionSpecializations
+    */
    template <>
    class ScalarFunction<FunctionBase> : public ScalarFunctionBase
    {
@@ -102,6 +108,7 @@ namespace Rodin::Variational
    ScalarFunction(const FunctionBase&) -> ScalarFunction<FunctionBase>;
 
    /**
+    * @ingroup ScalarFunctionSpecializations
     * @brief Represents a ScalarFunction of arithmetic type `Number`.
     *
     * @tparam Number Arithmetic type
@@ -160,10 +167,8 @@ namespace Rodin::Variational
       -> ScalarFunction<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
 
    /**
-    * @brief Represents a scalar function given by an arbitrary function.
-    *
-    * This class represents a ScalarFunction whose values are given by any
-    * function taking `double*` data array and `int` dimension parameter.
+    * @ingroup ScalarFunctionSpecializations
+    * @brief Represents a scalar function given by an arbitrary scalar function.
     */
    template <>
    class ScalarFunction<std::function<double(const Vertex&)>>
@@ -216,8 +221,10 @@ namespace Rodin::Variational
       private:
          const std::function<double(const Vertex&)> m_f;
    };
+
    ScalarFunction(std::function<double(const Vertex&)>)
       -> ScalarFunction<std::function<double(const Vertex&)>>;
+
    template <class T>
    ScalarFunction(T)
       -> ScalarFunction<

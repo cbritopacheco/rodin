@@ -13,6 +13,13 @@
 namespace Rodin::Variational
 {
    /**
+    * @defgroup DivisionSpecializations Division Template Specializations
+    * @brief Template specializations of the Division class.
+    * @see Division
+    */
+
+   /**
+    * @ingroup DivSpecializations
     * @brief Division of VectorFunctionBase by ScalarFunctionBase.
     */
    template <>

@@ -20,6 +20,7 @@ namespace Rodin::Variational
 {
    /**
     * @defgroup DotSpecializations Dot Template Specializations
+    * @brief Template specializations of the Dot class.
     * @see Dot
     */
 
@@ -78,10 +79,12 @@ namespace Rodin::Variational
     * @ingroup DotSpecializations
     * @brief Dot product between a FunctionBase and a ShapeFunctionBase.
     *
+    * Represents the mathematical expression:
     * @f[
     *    \Lambda : A(u)
     * @f]
-    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in \mathbb{R}^{p \times q} @f$.
+    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in
+    * \mathbb{R}^{p \times q} @f$.
     */
    template <ShapeFunctionSpaceType Space>
    class Dot<FunctionBase, ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>

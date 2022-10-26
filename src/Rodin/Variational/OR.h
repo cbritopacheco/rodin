@@ -14,6 +14,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup ORSpecializations OR Template Specializations
+    * @brief Template specializations of the OR class.
+    * @see OR
+    */
+
    template <>
    class OR<BooleanFunctionBase, BooleanFunctionBase> : public BooleanFunctionBase
    {

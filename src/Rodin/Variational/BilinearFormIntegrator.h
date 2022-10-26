@@ -13,9 +13,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Abstract base class for bilinear form integrators.
-    */
    class BilinearFormIntegratorBase : public FormLanguage::Base
    {
       public:
