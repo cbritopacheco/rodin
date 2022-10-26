@@ -2,6 +2,7 @@
   @mainpage Rodin
 * *Lightweight and modern C++17 shape, density and topology optimization framework.*
 
+
   @section what-is-rodin What is Rodin?
 
   Rodin is a lightweight and modular shape optimization framework which
@@ -13,6 +14,16 @@
   It is named after the French sculptor [Auguste
   Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
   of modern sculpture.
+
+  @section download-and-build Download and build Rodin
+
+  ```
+  git clone --recursive https://github.com/carlos-brito-pacheco/rodin
+  cd rodin
+  mkdir build && cd build
+  cmake ..
+  make -j4
+  ```
 
   @section how-does-rodin-work How does Rodin work?
 
