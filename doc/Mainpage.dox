@@ -15,7 +15,7 @@
   Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
   of modern sculpture.
 
-  @section download-and-build Download and build Rodin
+  @section download-and-build Download and build
 
   ```
   git clone --recursive https://github.com/carlos-brito-pacheco/rodin
