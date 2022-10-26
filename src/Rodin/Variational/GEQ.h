@@ -14,6 +14,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup GEQSpecializations GEQ Template Specializations
+    * @brief Template specializations of the GEQ class.
+    * @see GEQ
+    */
+
    template <>
    class GEQ<FunctionBase, FunctionBase> : public BooleanFunctionBase
    {

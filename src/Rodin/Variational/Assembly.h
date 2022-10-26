@@ -13,12 +13,6 @@
 
 namespace Rodin::Variational::Linear::Assembly
 {
-   enum class Type
-   {
-      Common,
-      Device
-   };
-
    struct Common
    {
       const mfem::FiniteElement& fe;

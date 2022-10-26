@@ -14,6 +14,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
+    * @brief Template specializations of the ShapeFunction class.
+    * @see ShapeFunction
+    */
+
    template <ShapeFunctionSpaceType Space>
    struct DualSpaceType;
 
@@ -148,9 +154,6 @@ namespace Rodin::Variational
          std::map<Key, Value<mfem::DenseMatrix>> m_physDShapeLookup;
    };
 
-   /**
-    * @brief Base class for operators
-    */
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase : public FormLanguage::Base
    {
@@ -222,6 +225,10 @@ namespace Rodin::Variational
          virtual ShapeFunctionBase<Space>* copy() const noexcept override = 0;
    };
 
+   /**
+    * @ingroup ShapeFunctionSpecializations
+    * @brief H1 ShapeFunction
+    */
    template <ShapeFunctionSpaceType Space, class Context>
    class ShapeFunction<H1<Context>, Space> : public ShapeFunctionBase<Space>
    {
