@@ -30,11 +30,12 @@ namespace Rodin::Variational
 
    /**
     * @defgroup IntegralSpecializations Integral Template Specializations
-    * @brief This module contains information about the template
-    * specializations of the Integral class.
+    * @brief Template specializations of the Integral class.
     *
     * Throughout this section we utilize the symbols @f$ u \in U_h @f$ for the
     * trial function, and @f$ v \in V_h @f$ for the test function.
+    *
+    * @see Integral
     */
 
    /**

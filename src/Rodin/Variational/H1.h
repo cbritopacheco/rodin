@@ -18,24 +18,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ conforming (continuous) finite
-    * element space.
-    *
-    * Given some discretization @f$ \mathcal{T}_h @f$ (e.g. a triangulation)
-    * of @f$ \Omega @f$, instances of this class will represent the finite
-    * element space
-    * @f[
-    *    V_h := \left\{ v : \overline{\Omega} \rightarrow \mathbb{R}^d \mid
-    *       v_{|\tau} \in \mathcal{P}_\tau,
-    *    \ \forall \tau \in \mathcal{T}_h \right\}
-    * @f]
-    * where @f$ \mathcal{P}_\tau \subset H^1(\tau) @f$ and @f$ V_h \subset
-    * C^0(\Omega) @f$ so that @f$ V_h \subset H^1(\Omega)^d @f$, i.e. the
-    * elements are @f$ H^1 @f$ conforming. The space @f$ P_\tau @f$ depends on
-    * the kind of basis chosen.
-    *
-    */
    template <class TraitTag>
    class H1 : public FiniteElementSpaceBase
    {

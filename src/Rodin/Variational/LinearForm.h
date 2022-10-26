@@ -16,9 +16,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Abstract base class for objects of type LinearForm.
-    */
    template <class VectorType>
    class LinearFormBase
    {
@@ -26,7 +23,7 @@ namespace Rodin::Variational
          /**
           * @brief Updates the state after a refinement in the mesh.
           *
-          * This method will update the bilinear form after a call to the
+          * This method will update the linear form after a call to the
           * @ref MeshBase::refine() "refine()" method.
           */
          void update()
@@ -79,6 +76,10 @@ namespace Rodin::Variational
 
          virtual LinearFormBase& add(const LinearFormIntegratorSum& lsum) = 0;
 
+         /**
+          * @brief Gets the test function argument associated to this bilinear
+          * form.
+          */
          virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
 
          virtual mfem::LinearForm& getHandle() = 0;

@@ -7,12 +7,6 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Represents a function which belongs to a trial space
-    * @tparam FEC Finite Element Collection
-    * @tparam Trait Indicates whether the FiniteElementSpace to which the
-    * TrialFunction belongs to is parallel or serial
-    */
    template <class FES>
    class TrialFunction : public ShapeFunction<FES, TrialSpace>
    {

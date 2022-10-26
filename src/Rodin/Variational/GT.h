@@ -14,6 +14,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup GTSpecializations GT Template Specializations
+    * @brief Template specializations of the GT class.
+    * @see GT
+    */
+
    template <>
    class GT<FunctionBase, FunctionBase> : public BooleanFunctionBase
    {

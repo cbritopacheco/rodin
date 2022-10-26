@@ -20,8 +20,11 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Abstract base class for objects representing matrix coefficients.
+    * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
+    * @brief Template specializations of the MatrixFunction class.
+    * @see MatrixFunction
     */
+
    class MatrixFunctionBase : public FunctionBase
    {
       public:

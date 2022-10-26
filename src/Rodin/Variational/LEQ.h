@@ -14,6 +14,12 @@
 
 namespace Rodin::Variational
 {
+   /**
+    * @defgroup LEQSpecializations LEQ Template Specializations
+    * @brief Template specializations of the LEQ class.
+    * @see LEQ
+    */
+
    template <>
    class LEQ<FunctionBase, FunctionBase> : public BooleanFunctionBase
    {

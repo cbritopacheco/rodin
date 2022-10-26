@@ -39,6 +39,40 @@ namespace Rodin
       return *this;
    }
 
+   MeshBase& MeshBase::refine(
+         std::function<bool(const Element&)> p,
+         Refinement::Type t,
+         int maxHangingNodesLevel)
+   {
+      assert(maxHangingNodesLevel >= 1);
+      if (maxHangingNodesLevel == std::numeric_limits<int>::infinity())
+         maxHangingNodesLevel = 0; // interpreted as unlimited in
+                                   // GeneralRefinement()
+      mfem::Array<int> refinementList;
+      for (int i = 0; i < count<Element>(); i++)
+         if (p(get<Element>(i)))
+            refinementList.Append(i);
+      switch (t)
+      {
+         case Refinement::Type::Automatic:
+         {
+            getHandle().GeneralRefinement(refinementList, -1, maxHangingNodesLevel);
+            break;
+         }
+         case Refinement::Type::Conforming:
+         {
+            getHandle().GeneralRefinement(refinementList, 0, maxHangingNodesLevel);
+            break;
+         }
+         case Refinement::Type::NonConforming:
+         {
+            getHandle().GeneralRefinement(refinementList, 1, maxHangingNodesLevel);
+            break;
+         }
+      };
+      return *this;
+   }
+
    std::set<int> MeshBase::getAttributes() const
    {
       return std::set<int>(

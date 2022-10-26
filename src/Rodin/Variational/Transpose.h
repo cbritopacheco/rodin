@@ -13,13 +13,14 @@
 namespace Rodin::Variational
 {
    /**
-    * @brief Represents the transpose matrix @f$ A^T @f$ of some matrix @f$ A @f$.
-    *
-    * For some @f$ n \times m @f$ matrix @f$ A @f$, the transpose matrix @f$
-    * A^T @f$ is an @f$ m \times n @f$ matrix defined by
-    * @f[
-    *    {A^T}_{ij} = A_{ji}
-    * @f]
+    * @defgroup TransposeSpecializations Transpose Template Specializations
+    * @brief Template specializations of the Transpose class.
+    * @see Transpose
+    */
+
+   /**
+    * @brief Transpose of a FunctionBase object.
+    * @ingroup TransposeSpecializations
     */
    template <>
    class Transpose<FunctionBase> : public FunctionBase
@@ -66,6 +67,10 @@ namespace Rodin::Variational
    };
    Transpose(const FunctionBase&) -> Transpose<MatrixFunctionBase>;
 
+   /**
+    * @brief Transpose of a ShapeFunctionBase object.
+    * @ingroup TransposeSpecializations
+    */
    template <ShapeFunctionSpaceType Space>
    class Transpose<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
    {
