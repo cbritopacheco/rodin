@@ -102,7 +102,7 @@ target_include_directories(RodinVariational
 target_link_libraries(RodinVariational
   PUBLIC
   Rodin::IO
-  Rodin::Mesh
   Rodin::Alert
   Rodin::Utility
+  Rodin::Geometry
   Rodin::FormLanguage)

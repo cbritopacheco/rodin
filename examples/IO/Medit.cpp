@@ -1,6 +1,7 @@
-#include <Rodin/Mesh.h>
+#include <Rodin/Geometry.h>
 
 using namespace Rodin;
+using namespace Geometry;
 
 int main(int, char** argv)
 {

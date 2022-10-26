@@ -4,10 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <Rodin/Mesh.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Alert.h>
 
 using namespace Rodin;
+using namespace Geometry;
 
 int main(int, char**)
 {

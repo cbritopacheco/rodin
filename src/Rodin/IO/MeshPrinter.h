@@ -11,7 +11,7 @@
 #include <optional>
 #include <mfem.hpp>
 
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/IO/Printer.h"
 
 #include "ForwardDecls.h"
@@ -19,21 +19,21 @@
 namespace Rodin::IO
 {
    template <class Trait>
-   class MeshPrinterBase : public IO::Printer<Rodin::Mesh<Trait>>
+   class MeshPrinterBase : public IO::Printer<Rodin::Geometry::Mesh<Trait>>
    {
       public:
-         MeshPrinterBase(const Rodin::Mesh<Context::Serial>& mesh)
+         MeshPrinterBase(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : m_mesh(mesh)
          {}
 
       protected:
-         const Rodin::Mesh<Context::Serial>& getObject() const override
+         const Rodin::Geometry::Mesh<Context::Serial>& getObject() const override
          {
             return m_mesh;
          }
 
       private:
-         const Rodin::Mesh<Context::Serial>& m_mesh;
+         const Rodin::Geometry::Mesh<Context::Serial>& m_mesh;
    };
 
    template <>
@@ -41,7 +41,7 @@ namespace Rodin::IO
       : public MeshPrinterBase<Context::Serial>
    {
       public:
-         MeshPrinter(const Rodin::Mesh<Context::Serial>& mesh)
+         MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 
@@ -56,7 +56,7 @@ namespace Rodin::IO
       : public MeshPrinterBase<Context::Serial>
    {
       public:
-         MeshPrinter(const Rodin::Mesh<Context::Serial>& mesh)
+         MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 
@@ -68,7 +68,7 @@ namespace Rodin::IO
       : public MeshPrinterBase<Context::Serial>
    {
       public:
-         MeshPrinter(const Rodin::Mesh<Context::Serial>& mesh)
+         MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : MeshPrinterBase(mesh)
          {}
 

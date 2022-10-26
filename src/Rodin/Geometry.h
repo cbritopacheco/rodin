@@ -4,15 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_H
-#define RODIN_MESH_H
+#ifndef RODIN_GEOMETRY_H
+#define RODIN_GEOMETRY_H
 
 /**
  * @file
- * @brief Top level include for the Rodin mesh utilities.
+ * @brief Top level include for the Rodin geometry utilities.
  */
-#include "Mesh/Mesh.h"
-#include "Mesh/SubMesh.h"
-#include "Mesh/Element.h"
+#include "Geometry/Mesh.h"
+#include "Geometry/SubMesh.h"
+#include "Geometry/Element.h"
 
 #endif

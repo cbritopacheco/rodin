@@ -1,5 +1,5 @@
-#include <Rodin/Mesh.h>
 #include <Rodin/Solver.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 #include <vector>
@@ -13,8 +13,9 @@
 #include <Spectra/SymGEigsShiftSolver.h>
 
 using namespace Rodin;
-using namespace Rodin::Variational;
 using namespace Rodin::External;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
 
 static const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
 
