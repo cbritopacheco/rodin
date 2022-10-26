@@ -9,7 +9,7 @@
 
 #include <functional>
 
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry/Mesh.h"
 
 #include "ForwardDecls.h"
 
@@ -127,7 +127,7 @@ namespace Rodin::Variational
                Basis m_basis;
          };
 
-         L2(Mesh<Context>& mesh,
+         L2(Geometry::Mesh<Context>& mesh,
                int vdim = 1, int order = 0, Basis basis = DefaultBasis)
             :  m_fec(order, mesh.getDimension(), basis),
                m_mesh(mesh),
@@ -139,12 +139,12 @@ namespace Rodin::Variational
             return false;
          }
 
-         Mesh<Context>& getMesh() override
+         Geometry::Mesh<Context>& getMesh() override
          {
             return m_mesh;
          }
 
-         const Mesh<Context>& getMesh() const override
+         const Geometry::Mesh<Context>& getMesh() const override
          {
             return m_mesh;
          }
@@ -166,12 +166,12 @@ namespace Rodin::Variational
 
       private:
          FEC m_fec;
-         Mesh<Context>& m_mesh;
+         Geometry::Mesh<Context>& m_mesh;
          mfem::FiniteElementSpace m_fes;
    };
 
    template <class Context>
-   L2(Mesh<Context>& mesh,
+   L2(Geometry::Mesh<Context>& mesh,
       int vdim = 1,
       int order = 1, typename L2<Context>::Basis basis = L2<Context>::DefaultBasis) -> L2<Context>;
 }

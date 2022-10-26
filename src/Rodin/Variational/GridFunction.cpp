@@ -219,14 +219,14 @@ namespace Rodin::Variational
             dst.getFiniteElementSpace().getVectorDimension());
       if (getFiniteElementSpace().getMesh().isSubMesh() && (
             &dst.getFiniteElementSpace().getMesh()) ==
-            &static_cast<const SubMesh<Context::Serial>&>(
+            &static_cast<const Geometry::SubMesh<Context::Serial>&>(
                getFiniteElementSpace().getMesh()).getParent())
       {
          // If we are here the this means that we are in a submesh of the
          // underlying target finite element space. Hence we should seek
          // out to copy the grid function at the corresponding nodes
          // given by the vertex map given in the Submesh object.
-         auto& submesh = static_cast<const SubMesh<Context::Serial>&>(
+         auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(
                getFiniteElementSpace().getMesh());
          if (&submesh.getParent() == &dst.getFiniteElementSpace().getMesh())
          {
@@ -258,10 +258,10 @@ namespace Rodin::Variational
       }
       else if (dst.getFiniteElementSpace().getMesh().isSubMesh() && (
             &getFiniteElementSpace().getMesh() ==
-            &static_cast<const SubMesh<Context::Serial>&>(
+            &static_cast<const Geometry::SubMesh<Context::Serial>&>(
                dst.getFiniteElementSpace().getMesh()).getParent()))
       {
-         auto& submesh = static_cast<const SubMesh<Context::Serial>&>(
+         auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(
                dst.getFiniteElementSpace().getMesh());
          int vdim = getFiniteElementSpace().getVectorDimension();
          const auto& s2pv = submesh.getVertexMap();
@@ -497,17 +497,17 @@ namespace Rodin::Variational
       }
    }
 
-   std::set<Vertex> GridFunctionBase::where(
+   std::set<Geometry::Vertex> GridFunctionBase::where(
          const BooleanFunctionBase& p,
          const std::set<int>& attrs,
          std::function<int(mfem::ElementTransformation&)> order) const
    {
-      std::set<Vertex> result;
+      std::set<Geometry::Vertex> result;
       const auto& fes = getFiniteElementSpace();
       const auto& mesh = fes.getMesh();
-      for (int i = 0; i < mesh.count<Element>(); i++)
+      for (int i = 0; i < mesh.count<Geometry::Element>(); i++)
       {
-         if (attrs.size() == 0 || attrs.count(mesh.get<Element>(i).getAttribute()))
+         if (attrs.size() == 0 || attrs.count(mesh.get<Geometry::Element>(i).getAttribute()))
          {
             mfem::ElementTransformation* trans =
                fes.getHandle().GetElementTransformation(i);
@@ -523,7 +523,7 @@ namespace Rodin::Variational
                {
                   mfem::Vector v;
                   trans->Transform(ip, v);
-                  Vertex vx(std::move(v));
+                  Geometry::Vertex vx(std::move(v));
                   vx.setElementTransformation(trans);
                   vx.setIntegrationPoint(&ip);
                   result.insert(std::move(vx));

@@ -16,7 +16,7 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-#include "Rodin/Mesh/Element.h"
+#include "Rodin/Geometry/Element.h"
 
 namespace Rodin::Variational::Internal
 {
@@ -227,7 +227,7 @@ namespace Rodin::Variational
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
-         mfem::DenseMatrix operator()(const Vertex& v) const
+         mfem::DenseMatrix operator()(const Geometry::Vertex& v) const
          {
             mfem::DenseMatrix m;
             getValue(m, *v.getElementTransformation(), *v.getIntegrationPoint());
@@ -240,7 +240,7 @@ namespace Rodin::Variational
 
       protected:
          mfem::ElementTransformation& getSubMeshElementTrans(
-               const MeshBase& mesh,
+               const Geometry::MeshBase& mesh,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
 
          mfem::ElementTransformation& getTraceElementTrans(

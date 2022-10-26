@@ -1,8 +1,9 @@
-#include <Rodin/Mesh.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 int main(int, char**)

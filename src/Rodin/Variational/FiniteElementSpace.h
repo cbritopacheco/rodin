@@ -11,7 +11,7 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Utility.h"
 
 #include "ForwardDecls.h"
@@ -41,9 +41,9 @@ namespace Rodin::Variational
 
          virtual bool isParallel() const = 0;
 
-         virtual MeshBase& getMesh() = 0;
+         virtual Geometry::MeshBase& getMesh() = 0;
 
-         virtual const MeshBase& getMesh() const = 0;
+         virtual const Geometry::MeshBase& getMesh() const = 0;
 
          virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 

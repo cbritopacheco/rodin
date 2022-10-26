@@ -7,7 +7,7 @@
 #ifndef RODIN_EXTERNAL_MMG_MESHADAPTOR_H
 #define RODIN_EXTERNAL_MMG_MESHADAPTOR_H
 
-#include "Rodin/Mesh/Mesh.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Variational/GridFunction.h"
 
 #include "MMG5.h"
@@ -27,7 +27,8 @@ namespace Rodin::External::MMG
        * sizes, the resulting mesh may be very different from the initial one.
        */
       template <class FES>
-      void adapt(Mesh<Context::Serial>& mesh, const Variational::GridFunction<FES>& gf)
+      void adapt(
+          Geometry::Mesh<Context::Serial>& mesh, const Variational::GridFunction<FES>& gf)
       {
         MMG5_pMesh mmgMesh = rodinToMesh(mesh);
 

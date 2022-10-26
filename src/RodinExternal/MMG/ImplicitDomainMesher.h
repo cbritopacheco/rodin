@@ -10,7 +10,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/random/uniform_int.hpp>
 
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
 
 #include "MMG5.h"
@@ -106,7 +106,7 @@ namespace Rodin::External::MMG
        * The material reference of the level set (edge) boundary will be 10.
        */
       template <class FES>
-      Rodin::Mesh<Context::Serial> discretize(Variational::GridFunction<FES>& ls)
+      Rodin::Geometry::Mesh<Context::Serial> discretize(Variational::GridFunction<FES>& ls)
       {
         // if (ls.getFiniteElementSpace().getMesh().getBoundaryAttributes().count(*m_isoref))
         //   Alert::Exception("Boundary reference already contained in mesh.").raise();
@@ -183,7 +183,7 @@ namespace Rodin::External::MMG
               if (m_meshTheSurface)
               {
                 rodinMesh.edit(
-                  [&](BoundaryElementView el)
+                  [&](Geometry::BoundaryElementView el)
                   {
                     auto it = m_originalRefMap.find(el.getAttribute());
                     if (it != m_originalRefMap.end())
@@ -204,7 +204,7 @@ namespace Rodin::External::MMG
               else
               {
                 rodinMesh.edit(
-                  [&](ElementView el)
+                  [&](Geometry::ElementView el)
                   {
                     auto it = m_originalRefMap.find(el.getAttribute());
                     if (it != m_originalRefMap.end())

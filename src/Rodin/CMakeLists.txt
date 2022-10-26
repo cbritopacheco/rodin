@@ -2,7 +2,7 @@
 set(Rodin_HEADERS
   Core.h
   Alert.h
-  Mesh.h
+  Geometry.h
   Plot.h
   Solver.h
   Variational.h
@@ -44,11 +44,11 @@ target_include_directories(Rodin
 
 add_subdirectory(Core)
 add_subdirectory(IO)
-add_subdirectory(Mesh)
 add_subdirectory(Test)
 add_subdirectory(Alert)
 add_subdirectory(Solver)
 add_subdirectory(Utility)
+add_subdirectory(Geometry)
 add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
 
