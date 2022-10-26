@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::ElementView class | Rodin</title>
+  <title>Rodin::Geometry namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,38 +52,79 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>ElementView <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Geometry <span class="m-thin">namespace</span>
         </h1>
-        <p>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</p>
+        <p>Module for dealing with geometries.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This class is designed so that modifications can be made to the element, while retaining the functionality of the more general <a href="class_rodin_1_1_element.html" class="m-doc">Element</a> class.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>
-            </dt>
-            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_geometry_1_1_refinement.html" class="m-doc">Refinement</a></dt>
+            <dd>Module for containing utilities for the refinement of meshes.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
-            <dt id="a67394cf59ecb9a4d37194de18eb1421c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a67394cf59ecb9a4d37194de18eb1421c" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>&amp;</span>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>
             </dt>
-            <dd>Sets the attribute of the element.</dd>
+            <dd>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_boundary_element_view.html" class="m-doc">BoundaryElementView</a>
+            </dt>
+            <dd>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>
+            </dt>
+            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_element_base.html" class="m-doc">ElementBase</a>
+            </dt>
+            <dd>Base class for all geometric elements of the mesh.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>
+            </dt>
+            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>
+            </dt>
+            <dd>Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Trait = <a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>
+            </dt>
+            <dd>Templated class for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a>
+            </dt>
+            <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>
+            </dt>
+            <dd>Abstract base class for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Trait&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>
+            </dt>
+            <dd>Templated class for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">SubMesh&lt;Context::Serial&gt;</a>
+            </dt>
+            <dd>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
           </dl>
         </section>
       </div>

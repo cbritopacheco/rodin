@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::MeshBase class | Rodin</title>
+  <title>Rodin::Geometry::MeshBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,9 +52,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>MeshBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>MeshBase <span class="m-thin">class</span>
         </h1>
-        <p>Abstract base class for <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> objects.</p>
+        <p>Abstract base class for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> objects.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -72,7 +72,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a>
             </dt>
             <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
           </dl>
@@ -93,7 +93,7 @@
             </dt>
             <dd>Indicates whether the mesh is a surface or not.</dd>
             <dt id="a6e1ecc9a3871bffd18ae02c108691fb6">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e1ecc9a3871bffd18ae02c108691fb6" class="m-doc-self">refine</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6e1ecc9a3871bffd18ae02c108691fb6" class="m-doc-self">refine</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Performs a uniform refinement over all mesh elements.</dd>
             <dt>
@@ -105,7 +105,7 @@
             </dt>
             <dd>Gets the labels of the boundary elements in the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afef856a04381aa0a8dbfa8f0fdc2d3c7" class="m-doc">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u) -&gt; <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afef856a04381aa0a8dbfa8f0fdc2d3c7" class="m-doc">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Displaces the mesh nodes by the displacement <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -159,20 +159,20 @@ $ u $
             </dt>
             <dd>Gets the sum of the perimeters of the elements given by the specified attribute.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af795fc6351731af5a5a088230199d93e" class="m-doc">ccl</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;, const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; p) const -&gt; std::deque&lt;std::set&lt;int&gt;&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af795fc6351731af5a5a088230199d93e" class="m-doc">ccl</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; p) const -&gt; std::deque&lt;std::set&lt;int&gt;&gt;</span>
             </dt>
             <dd>Performs connected-component labelling.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6003192aff6b595b2f5f5c8965c96b18" class="m-doc">where</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; condition) const -&gt; std::set&lt;int&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6003192aff6b595b2f5f5c8965c96b18" class="m-doc">where</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; condition) const -&gt; std::set&lt;int&gt;</span>
             </dt>
             <dd>Obtains a set of elements satisfying the given condition.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a39427e8035c03aaef411c4e410c4a591" class="m-doc">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f) -&gt; <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39427e8035c03aaef411c4e410c4a591" class="m-doc">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Edits all elements in the mesh via the given function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab0983a1530ab535ac9af62735da66523" class="m-doc">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f,
-              const std::set&lt;int&gt;&amp; elements) -&gt; <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0983a1530ab535ac9af62735da66523" class="m-doc">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f,
+              const std::set&lt;int&gt;&amp; elements) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Edits the specified elements in the mesh via the given function.</dd>
             <dt>
@@ -182,14 +182,14 @@ $ u $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af9f8dcafd94ba8e5fc9b5d548d6d2d45" class="m-doc">isParallel</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Indicates if the <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> object has been parallelized.</dd>
+            <dd>Indicates if the <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> object has been parallelized.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a88934a975de1283c54ed3787cb6dbc32"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88934a975de1283c54ed3787cb6dbc32" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88934a975de1283c54ed3787cb6dbc32" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the dimension of the ambient space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -200,11 +200,11 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh_base.html#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension() const</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension() const</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aecaa5edd74849d7bba186884422c089a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the dimension of the elements.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -215,11 +215,11 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh_base.html#a88934a975de1283c54ed3787cb6dbc32" class="m-doc">getSpaceDimension() const</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a88934a975de1283c54ed3787cb6dbc32" class="m-doc">getSpaceDimension() const</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a5c0ab183385f8806ca268b5c1b31d55d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Indicates whether the mesh is a surface or not.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -234,7 +234,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="ae2c6ab3b88dd786e405569b0a680bea0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2c6ab3b88dd786e405569b0a680bea0" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2c6ab3b88dd786e405569b0a680bea0" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the labels of the domain elements in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -245,11 +245,11 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh_base.html#a456d8bc55a26458ca10d739df783cf80" class="m-doc">getBoundaryAttributes() const</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a456d8bc55a26458ca10d739df783cf80" class="m-doc">getBoundaryAttributes() const</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a456d8bc55a26458ca10d739df783cf80"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a456d8bc55a26458ca10d739df783cf80" class="m-doc-self">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a456d8bc55a26458ca10d739df783cf80" class="m-doc-self">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the labels of the boundary elements in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,11 +260,11 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_mesh_base.html#ae2c6ab3b88dd786e405569b0a680bea0" class="m-doc">getAttributes() const</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ae2c6ab3b88dd786e405569b0a680bea0" class="m-doc">getAttributes() const</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="afef856a04381aa0a8dbfa8f0fdc2d3c7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afef856a04381aa0a8dbfa8f0fdc2d3c7" class="m-doc-self">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afef856a04381aa0a8dbfa8f0fdc2d3c7" class="m-doc-self">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u)</span></span>
             </h3>
             <p>Displaces the mesh nodes by the displacement <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -352,7 +352,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a0a148a8ef01a3ef2485009d50840320d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a148a8ef01a3ef2485009d50840320d" class="m-doc-self">getMaximumDisplacement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a148a8ef01a3ef2485009d50840320d" class="m-doc-self">getMaximumDisplacement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u)</span></span>
             </h3>
             <p>Gets the maximum number <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
 <title>
@@ -442,7 +442,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a6bed02f060b6becbc52d12095d40a38f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bed02f060b6becbc52d12095d40a38f" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bed02f060b6becbc52d12095d40a38f" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the total volume of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -456,7 +456,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a5cb8b51a30edeebcd8b0cf7b9ef3e539"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cb8b51a30edeebcd8b0cf7b9ef3e539" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">int attr)</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cb8b51a30edeebcd8b0cf7b9ef3e539" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">int attr)</span></span>
             </h3>
             <p>Gets the sum of the volumes of the elements given by the specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -480,7 +480,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a629661105b7e3b0c6e1e558c0849e2ee"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a629661105b7e3b0c6e1e558c0849e2ee" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a629661105b7e3b0c6e1e558c0849e2ee" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the total perimeter of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -494,7 +494,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="acddf409f77f7eefa1171f8e24166c848"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acddf409f77f7eefa1171f8e24166c848" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">int attr)</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acddf409f77f7eefa1171f8e24166c848" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">int attr)</span></span>
             </h3>
             <p>Gets the sum of the perimeters of the elements given by the specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -518,7 +518,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="af795fc6351731af5a5a088230199d93e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::deque&lt;std::set&lt;int&gt;&gt; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af795fc6351731af5a5a088230199d93e" class="m-doc-self">ccl</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;, const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; p) const</span></span>
+              <span class="m-doc-wrap-bumper">std::deque&lt;std::set&lt;int&gt;&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af795fc6351731af5a5a088230199d93e" class="m-doc-self">ccl</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; p) const</span></span>
             </h3>
             <p>Performs connected-component labelling.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -542,7 +542,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a6003192aff6b595b2f5f5c8965c96b18"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6003192aff6b595b2f5f5c8965c96b18" class="m-doc-self">where</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; condition) const</span></span>
+              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6003192aff6b595b2f5f5c8965c96b18" class="m-doc-self">where</a>(</span><span class="m-doc-wrap">std::function&lt;bool(const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp;)&gt; condition) const</span></span>
             </h3>
             <p>Obtains a set of elements satisfying the given condition.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -565,7 +565,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a39427e8035c03aaef411c4e410c4a591"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39427e8035c03aaef411c4e410c4a591" class="m-doc-self">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39427e8035c03aaef411c4e410c4a591" class="m-doc-self">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f)</span></span>
             </h3>
             <p>Edits all elements in the mesh via the given function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -575,14 +575,14 @@ $ u $
               <tbody>
                 <tr>
                   <td style="width: 1%">f&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Function which takes an <a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a> to modify each element.</td>
+                  <td>Function which takes an <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a> to modify each element.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
           <section class="m-doc-details" id="ab0983a1530ab535ac9af62735da66523"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0983a1530ab535ac9af62735da66523" class="m-doc-self">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0983a1530ab535ac9af62735da66523" class="m-doc-self">edit</a>(</span><span class="m-doc-wrap">std::function&lt;void(<a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>)&gt; f,
               const std::set&lt;int&gt;&amp; elements)</span></span>
             </h3>
             <p>Edits the specified elements in the mesh via the given function.</p>
@@ -593,7 +593,7 @@ $ u $
               <tbody>
                 <tr>
                   <td style="width: 1%">f&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Function which takes an <a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a> to modify each element.</td>
+                  <td>Function which takes an <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a> to modify each element.</td>
                 </tr>
                 <tr>
                   <td>elements&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -604,7 +604,7 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="a0f3b89fad95e67e618f74858cd5927a3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f3b89fad95e67e618f74858cd5927a3" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f3b89fad95e67e618f74858cd5927a3" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Indicates whether the mesh is a submesh or not.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -615,7 +615,7 @@ $ u $
                 </tr>
               </tfoot>
             </table>
-<p>A <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
+<p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="c1">// Cast is well defined</span>
 <span class="w">   </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span>
@@ -623,14 +623,14 @@ $ u $
           </div></section>
           <section class="m-doc-details" id="af9f8dcafd94ba8e5fc9b5d548d6d2d45"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af9f8dcafd94ba8e5fc9b5d548d6d2d45" class="m-doc-self">isParallel</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af9f8dcafd94ba8e5fc9b5d548d6d2d45" class="m-doc-self">isParallel</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-            <p>Indicates if the <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> object has been parallelized.</p>
+            <p>Indicates if the <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> object has been parallelized.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>True if the <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> has been parallelized, false otherwise.</td>
+                  <td>True if the <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> has been parallelized, false otherwise.</td>
                 </tr>
               </tfoot>
             </table>

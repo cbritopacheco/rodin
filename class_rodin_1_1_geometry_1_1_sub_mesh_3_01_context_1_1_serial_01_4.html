@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::SubMesh&lt;Context::Serial&gt; class | Rodin</title>
+  <title>Rodin::Geometry::SubMesh&lt;Context::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -53,9 +53,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>SubMesh&lt;Context::Serial&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>SubMesh&lt;Context::Serial&gt; <span class="m-thin">class</span>
         </h1>
-        <p>A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object.</p>
+        <p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -68,7 +68,7 @@
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object contains a reference to the parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object. It also contains information regarding the mapping of elements and vertices between the child and parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>.</p><p>A <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
+<p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object contains a reference to the parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object. It also contains information regarding the mapping of elements and vertices between the child and parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</p><p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="c1">// Cast is well defined</span>
 <span class="w">   </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span>
@@ -78,7 +78,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a>
             </dt>
             <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
           </dl>
@@ -87,15 +87,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afa7377850b20dd7f5d9800393add21e5" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp; el) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa7377850b20dd7f5d9800393add21e5" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp; el) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
             </dt>
             <dd>Adds an element from the parent mesh to the submesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a12cb3a484b8679895a415324a837a6d3" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>&amp; el) -&gt; <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a12cb3a484b8679895a415324a837a6d3" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>&amp; el) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp;</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5c68e99e676a33f0c2330cfbb75593fd" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c68e99e676a33f0c2330cfbb75593fd" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd></dd>
             <dt>
@@ -115,7 +115,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa7377850b20dd7f5d9800393add21e5" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_element.html" class="m-doc">Element</a>&amp; el)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa7377850b20dd7f5d9800393add21e5" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>&amp; el)</span></span>
             </h3>
             <p>Adds an element from the parent mesh to the submesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -125,7 +125,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">el&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_element.html" class="m-doc">Element</a> from the parent mesh</td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a> from the parent mesh</td>
                 </tr>
               </tbody>
             </table>
@@ -135,22 +135,22 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a12cb3a484b8679895a415324a837a6d3" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>&amp; el)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a12cb3a484b8679895a415324a837a6d3" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>&amp; el)</span></span>
             </h3>
-<p>Adds a bounday element from the parent mesh to the submesh.</p><p>If <code>this-&gt;<a href="class_rodin_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface()</a> &amp;&amp; !getParent().<a href="class_rodin_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface()</a></code> then this will add the boundary element as an element of the submesh. Otherwise, it gets added normally as a boundary element.</p>
+<p>Adds a bounday element from the parent mesh to the submesh.</p><p>If <code>this-&gt;<a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface()</a> &amp;&amp; !getParent().<a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface()</a></code> then this will add the boundary element as an element of the submesh. Otherwise, it gets added normally as a boundary element.</p>
           </div></section>
           <section class="m-doc-details" id="a5c68e99e676a33f0c2330cfbb75593fd"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c68e99e676a33f0c2330cfbb75593fd" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c68e99e676a33f0c2330cfbb75593fd" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to the parent <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object</td>
+                  <td>Reference to the parent <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object</td>
                 </tr>
               </tfoot>
             </table>
@@ -160,13 +160,13 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const boost::bimap&lt;int, int&gt;&amp; Rodin::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bad9828c7e35f2ea4e8f4ca24f85dc3" class="m-doc-self">getVertexMap</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const boost::bimap&lt;int, int&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bad9828c7e35f2ea4e8f4ca24f85dc3" class="m-doc-self">getVertexMap</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>The <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> vertex map</td>
+                  <td>The <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> vertex map</td>
                 </tr>
               </tfoot>
             </table>
@@ -176,7 +176,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Indicates whether the mesh is a submesh or not.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -187,7 +187,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>A <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
+<p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted into down to access the <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> functionality. For example:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="c1">// Cast is well defined</span>
 <span class="w">   </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w"></span>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::BoundaryElementView class | Rodin</title>
+  <title>Rodin::Geometry::Refinement namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,76 +52,47 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>BoundaryElementView <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Refinement <span class="m-thin">namespace</span>
         </h1>
-        <p>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>This class is designed so that modifications cannot be made to the boundary element, while retaining the functionality of the more general FaceView and <a href="class_rodin_1_1_boundary_element.html" class="m-doc">BoundaryElement</a> classes.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <p>Module for containing utilities for the refinement of meshes.</p>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> { </span><span class="m-doc-wrap"><a href="#a1d1cfd8ffb84e947f82999c682b666a7afdf55b464e5369605167a714769cf3c6" class="m-doc">Conforming</a>,
+              <a href="#a1d1cfd8ffb84e947f82999c682b666a7a761fb754fc3695a50a75c5a8ed6270d1" class="m-doc">NonConforming</a>,
+              <a href="#a1d1cfd8ffb84e947f82999c682b666a7a086247a9b57fde6eefee2a0c4752242d" class="m-doc">Automatic</a> }</span>
             </dt>
-            <dd>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab5900bcf588d096c26056a7761014c2b" class="m-doc">BoundaryElementView</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
-              mfem::Element* element,
-              int index)</span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a72da25488fc38977b376fcd490883840">
-              <span class="m-doc-wrap-bumper">auto <a href="#a72da25488fc38977b376fcd490883840" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_boundary_element_view.html" class="m-doc">BoundaryElementView</a>&amp;</span>
-            </dt>
-            <dd>Sets the attribute of the boundary element.</dd>
+            <dd>Type of refinement.</dd>
           </dl>
         </section>
         <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab5900bcf588d096c26056a7761014c2b"><div>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a1d1cfd8ffb84e947f82999c682b666a7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />BoundaryElementView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5900bcf588d096c26056a7761014c2b" class="m-doc-self">BoundaryElementView</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
-              mfem::Element* element,
-              int index)</span></span>
+              enum class Rodin::<wbr />Geometry::<wbr />Refinement::<wbr /><a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc-self">Type</a>
             </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
+            <p>Type of refinement.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">mesh</td>
-                  <td></td>
+                  <td><a href="#a1d1cfd8ffb84e947f82999c682b666a7afdf55b464e5369605167a714769cf3c6" class="m-doc-self" id="a1d1cfd8ffb84e947f82999c682b666a7afdf55b464e5369605167a714769cf3c6">Conforming</a></td>
+                  <td>
+                  <p>Conforming refinement.</p>
+                  </td>
                 </tr>
                 <tr>
-                  <td>element</td>
-                  <td></td>
+                  <td><a href="#a1d1cfd8ffb84e947f82999c682b666a7a761fb754fc3695a50a75c5a8ed6270d1" class="m-doc-self" id="a1d1cfd8ffb84e947f82999c682b666a7a761fb754fc3695a50a75c5a8ed6270d1">NonConforming</a></td>
+                  <td>
+                  <p>Non-conforming refinement.</p>
+                  </td>
                 </tr>
                 <tr>
-                  <td>index&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Boundary element index</td>
+                  <td><a href="#a1d1cfd8ffb84e947f82999c682b666a7a086247a9b57fde6eefee2a0c4752242d" class="m-doc-self" id="a1d1cfd8ffb84e947f82999c682b666a7a086247a9b57fde6eefee2a0c4752242d">Automatic</a></td>
+                  <td>
+<p>Automatically determines whether to use conforming or non-conforming refinement</p>
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -57,6 +57,13 @@
             <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> <span class="m-doc">The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</span>
             <ul class="m-doc">
               <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> <span class="m-doc">Namespace containing utilities for handling serial and parallel contexts.</span>
+                <ul class="m-doc">
+                  <li>struct <a href="struct_rodin_1_1_context_1_1_parallel.html" class="m-doc">Parallel</a> <span class="m-doc"><a href="struct_rodin_1_1_context_1_1_parallel.html" class="m-doc">Parallel</a> context metadata.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Serial</a> <span class="m-doc"><a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Serial</a> context metadata.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_external.html" class="m-doc">External</a> <span class="m-doc">Third-party library integrations with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
                 <ul class="m-doc">
                   <li class="m-doc-collapsible collapsed">
@@ -74,9 +81,26 @@
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing variational expressions in C++.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing formal expressions in C++.</span>
                 <ul class="m-doc">
                   <li>class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> <span class="m-doc"><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of Variational::FormLanguage.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> <span class="m-doc">Module for dealing with geometries.</span>
+                <ul class="m-doc">
+                  <li>namespace <a href="namespace_rodin_1_1_geometry_1_1_refinement.html" class="m-doc">Refinement</a> <span class="m-doc">Module for containing utilities for the refinement of meshes.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_boundary_element.html" class="m-doc">BoundaryElement</a> <span class="m-doc">Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_boundary_element_view.html" class="m-doc">BoundaryElementView</a> <span class="m-doc">Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a> <span class="m-doc">Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_element_base.html" class="m-doc">ElementBase</a> <span class="m-doc">Base class for all geometric elements of the mesh.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a> <span class="m-doc">Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> <span class="m-doc">Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> <span class="m-doc">Templated class for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a> <span class="m-doc">Represents the subdivision of some domain into faces of (possibly) different geometries.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> <span class="m-doc">Abstract base class for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> objects.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> <span class="m-doc">Templated class for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">SubMesh&lt;Context::Serial&gt;</a> <span class="m-doc">A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</span></li>
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
@@ -96,7 +120,7 @@
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module for implementing variational methods.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module for writing variational problems in C++.</span>
                 <ul class="m-doc">
                   <li>class <a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a> <span class="m-doc">Represents the logical <a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a> expression.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_a_n_d_3_01_boolean_function_base_00_01_boolean_function_base_01_4.html" class="m-doc">AND&lt;BooleanFunctionBase, BooleanFunctionBase&gt;</a> <span class="m-doc">Logical <a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a> operator between two instances of <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>.</span></li>
@@ -227,12 +251,13 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_n_e_q.html" class="m-doc">NEQ</a> <span class="m-doc"></span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a> <span class="m-doc">Outward unit normal.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a> <span class="m-doc"></span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a> <span class="m-doc">Represent the power function.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a> <span class="m-doc">Represents the power function.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_00_01_number_01_4.html" class="m-doc">Pow&lt;FunctionBase, Number&gt;</a> <span class="m-doc">Represent the power function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> <span class="m-doc">Represents a variational problem.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a> <span class="m-doc">Represents the body of a variational problem.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> <span class="m-doc"></span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_number_01_4.html" class="m-doc">ScalarFunction&lt;Number&gt;</a> <span class="m-doc">Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Vertex&amp;)&gt;&gt;</a> <span class="m-doc">Represents a scalar function given by an arbitrary scalar function.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_geometry_1_1_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Geometry::Vertex&amp;)&gt;&gt;</a> <span class="m-doc">Represents a scalar function given by an arbitrary scalar function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> <span class="m-doc">Base class for shape function objects.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_shape_function_3_01_h1_3_01_context_01_4_00_01_space_01_4.html" class="m-doc">ShapeFunction&lt;H1&lt;Context&gt;, Space&gt;</a> <span class="m-doc"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> <span class="m-doc">Base class for shape function objects.</span></li>
@@ -271,18 +296,7 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_vector_function_3_01_v_00_01_values_8_8_8_01_4.html" class="m-doc">VectorFunction&lt;V, Values...&gt;</a> <span class="m-doc">Represents a vector function which may be constructed from values which can be converted to objects of type <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</span></li>
                 </ul>
               </li>
-              <li>class <a href="class_rodin_1_1_boundary_element.html" class="m-doc">BoundaryElement</a> <span class="m-doc">Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</span></li>
-              <li>class <a href="class_rodin_1_1_boundary_element_view.html" class="m-doc">BoundaryElementView</a> <span class="m-doc">Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</span></li>
               <li>class <a href="class_rodin_1_1_cast.html" class="m-doc">Cast</a> <span class="m-doc">Class to help in the casting of objects from a type to another.</span></li>
-              <li>class <a href="class_rodin_1_1_element.html" class="m-doc">Element</a> <span class="m-doc">Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</span></li>
-              <li>class <a href="class_rodin_1_1_element_base.html" class="m-doc">ElementBase</a> <span class="m-doc">Base class for all geometric elements of the mesh.</span></li>
-              <li>class <a href="class_rodin_1_1_element_view.html" class="m-doc">ElementView</a> <span class="m-doc">Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</span></li>
-              <li>class <a href="class_rodin_1_1_face.html" class="m-doc">Face</a> <span class="m-doc">Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</span></li>
-              <li>class <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> <span class="m-doc">Templated class for <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a>.</span></li>
-              <li>class <a href="class_rodin_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::Serial&gt;</a> <span class="m-doc">Represents the subdivision of some domain into faces of (possibly) different geometries.</span></li>
-              <li>class <a href="class_rodin_1_1_mesh_base.html" class="m-doc">MeshBase</a> <span class="m-doc">Abstract base class for <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> objects.</span></li>
-              <li>class <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> <span class="m-doc">Templated class for <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a>.</span></li>
-              <li>class <a href="class_rodin_1_1_sub_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">SubMesh&lt;Context::Serial&gt;</a> <span class="m-doc">A <a href="class_rodin_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_mesh.html" class="m-doc">Mesh</a> object.</span></li>
             </ul>
           </li>
         </ul>

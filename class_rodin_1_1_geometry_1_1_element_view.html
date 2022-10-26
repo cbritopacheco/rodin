@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin</title>
+  <title>Rodin::Geometry::ElementView class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,13 +52,40 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          Rodin
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>ElementView <span class="m-thin">class</span>
         </h1>
-<p><a href="https://github.com/cbritopacheco/rodin/blob/master/LICENSE"><img class="m-image" src="license-BSL--1.0-green" alt="Image" /></a></p><table class="m-table"><thead><tr><th>Branch</th><th>Matrix</th><th>Documentation</th></tr></thead><tbody><tr><td>master</td><td><a href="https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml"><img class="m-image" src="badge.svg?branch=master" alt="Image" /></a></td><td><a href="https://cbritopacheco.github.io/rodin/"><img class="m-image" src="badge.svg" alt="Image" /></a></td></tr><tr><td>develop</td><td><a href="https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml"><img class="m-image" src="badge.svg?branch=develop" alt="Image" /></a></td><td></td></tr></tbody></table><section id="autotoc_md1"><h2><a href="#autotoc_md1">Requirements</a></h2><ul><li><a href="https://cmake.org/">CMake 3.12.0+</a></li><li><a href="https://www.boost.org/">Boost 1.65+</a></li><li><a href="https://people.engr.tamu.edu/davis/suitesparse.html">SuiteSparse</a></li></ul><p>Any of these should be available for quick install from your standard package manager.</p></section><section id="autotoc_md2"><h2><a href="#autotoc_md2">Building the project</a></h2><pre class="m-code"><span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="o">--</span><span class="n">recursive</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//github.com/carlos-brito-pacheco/rodin</span>
-<span class="n">cd</span><span class="w"> </span><span class="n">rodin</span><span class="w"></span>
-<span class="n">mkdir</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">cd</span><span class="w"> </span><span class="n">build</span><span class="w"></span>
-<span class="n">cmake</span><span class="w"> </span><span class="p">..</span><span class="w"></span>
-<span class="n">make</span><span class="w"> </span><span class="o">-</span><span class="n">j4</span><span class="w"></span></pre><section id="autotoc_md3"><h3><a href="#autotoc_md3">CMake Options</a></h3><table class="m-table"><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody><tr><td>RODIN_BUILD_EXAMPLES</td><td>Builds the examples in the <code>examples/</code> directory.</td></tr><tr><td>RODIN_BUILD_DOC</td><td>Builds the documentation using Doxygen</td></tr><tr><td>RODIN_USE_MCSS</td><td>Builds the documentation using Doxygen and m.css</td></tr></tbody></table></section></section><section id="autotoc_md4"><h2><a href="#autotoc_md4">Building the documentation</a></h2><p>See this page to see how to build the documentation.</p></section>
+        <p>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class is designed so that modifications can be made to the element, while retaining the functionality of the more general <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a> class.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>
+            </dt>
+            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a67394cf59ecb9a4d37194de18eb1421c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a67394cf59ecb9a4d37194de18eb1421c" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">int attr) -&gt; <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>&amp;</span>
+            </dt>
+            <dd>Sets the attribute of the element.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

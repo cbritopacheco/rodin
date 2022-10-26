@@ -54,7 +54,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Variational <span class="m-thin">namespace</span>
         </h1>
-        <p>Module for implementing variational methods.</p>
+        <p>Module for writing variational problems in C++.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -462,8 +462,13 @@ $ L^2(\Omega)^d $
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Base, class Exponent&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>
+            </dt>
+            <dd>Represents the power function.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_00_01_number_01_4.html" class="m-doc">Pow&lt;FunctionBase, Number&gt;</a>
             </dt>
             <dd>Represent the power function.</dd>
             <dt>
@@ -487,7 +492,7 @@ $ L^2(\Omega)^d $
             <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Vertex&amp;)&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_geometry_1_1_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Geometry::Vertex&amp;)&gt;&gt;</a>
             </dt>
             <dd>Represents a scalar function given by an arbitrary scalar function.</dd>
             <dt>
