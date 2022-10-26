@@ -14,7 +14,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry.h"
 
 #include "ForwardDecls.h"
 

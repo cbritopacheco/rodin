@@ -15,7 +15,7 @@
 
 #include "Element.h"
 
-namespace Rodin
+namespace Rodin::Geometry
 {
    // ---- MeshBase ----------------------------------------------------------
    int MeshBase::getSpaceDimension() const
@@ -455,7 +455,7 @@ namespace Rodin
    }
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::element(
-         Geometry geom,
+         Type geom,
          const std::vector<int>& vs, std::optional<int> attr)
    {
       mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));

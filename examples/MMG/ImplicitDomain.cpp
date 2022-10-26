@@ -4,14 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <iostream>
-
-#include <Rodin/Mesh.h>
+#include <Rodin/Geometry.h>
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::Variational;
 using namespace Rodin::External;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
 
 int main(int, char**)
 {

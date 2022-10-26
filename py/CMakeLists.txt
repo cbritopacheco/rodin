@@ -4,7 +4,7 @@ add_library(PyRodin MODULE ${PyRodin_SRCS})
 set_property(TARGET PyRodin PROPERTY OUTPUT_NAME rodin)
 target_link_libraries(PyRodin
   PUBLIC
-  Rodin::Mesh
+  Rodin::Geometry
   PRIVATE
   pybind11::module)
 pybind11_extension(PyRodin)

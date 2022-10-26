@@ -297,7 +297,7 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   MMG5_pMesh MMG5::rodinToMesh(const Rodin::Mesh<Context::Serial>& src)
+   MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::Mesh<Context::Serial>& src)
    {
       bool isSurface = src.isSurface();
       assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
@@ -486,7 +486,7 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   Rodin::Mesh<Context::Serial> MMG5::meshToRodin(const MMG5_pMesh src)
+   Rodin::Geometry::Mesh<Context::Serial> MMG5::meshToRodin(const MMG5_pMesh src)
    {
       bool isSurface = isSurfaceMesh(src);
       mfem::Mesh dst;
@@ -609,7 +609,7 @@ namespace Rodin::External::MMG
       }
 
       dst.FinalizeMesh(0, true);
-      return Rodin::Mesh<Context::Serial>(std::move(dst));
+      return Rodin::Geometry::Mesh<Context::Serial>(std::move(dst));
    }
 
    void MMG5::copySolution(const MMG5_pSol src, MMG5_pSol dst)

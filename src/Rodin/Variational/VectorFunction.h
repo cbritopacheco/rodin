@@ -100,7 +100,7 @@ namespace Rodin::Variational
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) const = 0;
 
-         mfem::Vector operator()(const Vertex& v) const
+         mfem::Vector operator()(const Geometry::Vertex& v) const
          {
             mfem::Vector value;
             getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());

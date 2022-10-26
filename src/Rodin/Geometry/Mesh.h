@@ -33,7 +33,10 @@ namespace Rodin
       struct Serial   {};
       struct Parallel {};
    }
+}
 
+namespace Rodin::Geometry
+{
    namespace Refinement
    {
       enum class Type
@@ -359,7 +362,7 @@ namespace Rodin
          Mesh& vertex(const std::vector<double>& x);
 
          Mesh& element(
-               Geometry geom,
+               Type geom,
                const std::vector<int>& vs,
                std::optional<int> attr = {});
 

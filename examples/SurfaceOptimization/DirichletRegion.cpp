@@ -4,14 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <Rodin/Mesh.h>
 #include <Rodin/Solver.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::Variational;
 using namespace Rodin::External;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
 
 // Parameters
 static constexpr int Gamma = 6;

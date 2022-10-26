@@ -12,7 +12,7 @@
 #include <mfem.hpp>
 #include <boost/filesystem.hpp>
 
-#include "Rodin/Mesh.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/IO/Loader.h"
 
 #include "ForwardDecls.h"
@@ -21,10 +21,10 @@
 namespace Rodin::IO
 {
    template <class Trait>
-   class MeshLoaderBase : public IO::Loader<Rodin::Mesh<Trait>>
+   class MeshLoaderBase : public IO::Loader<Rodin::Geometry::Mesh<Trait>>
    {
       public:
-         MeshLoaderBase(Rodin::Mesh<Trait>& mesh)
+         MeshLoaderBase(Rodin::Geometry::Mesh<Trait>& mesh)
             :  m_mesh(mesh),
                m_fixOrientation(true)
          {}
@@ -36,7 +36,7 @@ namespace Rodin::IO
          }
 
       protected:
-         Rodin::Mesh<Trait>& getObject() override
+         Rodin::Geometry::Mesh<Trait>& getObject() override
          {
             return m_mesh;
          }
@@ -47,7 +47,7 @@ namespace Rodin::IO
          }
 
       private:
-         Rodin::Mesh<Context::Serial>& m_mesh;
+         Rodin::Geometry::Mesh<Context::Serial>& m_mesh;
          bool m_fixOrientation;
    };
 
@@ -56,7 +56,7 @@ namespace Rodin::IO
       : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Mesh<Context::Serial>& mesh)
+         MeshLoader(Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : MeshLoaderBase<Context::Serial>(mesh)
          {}
 
@@ -71,7 +71,7 @@ namespace Rodin::IO
       : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Mesh<Context::Serial>& mesh)
+         MeshLoader(Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : MeshLoaderBase<Context::Serial>(mesh)
          {}
 
@@ -83,7 +83,7 @@ namespace Rodin::IO
       : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Mesh<Context::Serial>& mesh)
+         MeshLoader(Rodin::Geometry::Mesh<Context::Serial>& mesh)
             : MeshLoaderBase<Context::Serial>(mesh)
          {}
 

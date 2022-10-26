@@ -19,7 +19,7 @@
 #include "Rodin/Cast.h"
 #include "Rodin/Core.h"
 #include "Rodin/Alert.h"
-#include "Rodin/Mesh/SubMesh.h"
+#include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/IO/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -119,7 +119,7 @@ namespace Rodin::Variational
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
 
-         GridFunctionValue operator()(const Vertex& v) const
+         GridFunctionValue operator()(const Geometry::Vertex& v) const
          {
             switch (getRangeType())
             {
@@ -279,7 +279,7 @@ namespace Rodin::Variational
           */
          void transfer(GridFunctionBase& dst);
 
-         std::set<Vertex> where(
+         std::set<Geometry::Vertex> where(
                const BooleanFunctionBase& p,
                const std::set<int>& attrs = {},
                std::function<int(mfem::ElementTransformation&)> order =

@@ -26,7 +26,7 @@ target_link_libraries(RodinIO
   PRIVATE
   mfem
   PUBLIC
-  Rodin::Mesh
+  Rodin::Geometry
   Rodin::Alert
   Rodin::Variational
   Boost::filesystem)

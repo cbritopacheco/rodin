@@ -2,7 +2,7 @@
 
 #include "Element.h"
 
-namespace Rodin
+namespace Rodin::Geometry
 {
    SubMesh<Context::Serial>::SubMesh(const MeshBase& parent)
       : m_parent(parent)

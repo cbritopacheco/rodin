@@ -11,7 +11,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Mesh/ForwardDecls.h"
+#include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "Common.h"
@@ -34,9 +34,9 @@ namespace Rodin::External::MMG
 
       static void destroyMesh(MMG5_pMesh);
 
-      static MMG5_pMesh rodinToMesh(const Rodin::Mesh<Context::Serial>& src);
+      static MMG5_pMesh rodinToMesh(const Rodin::Geometry::Mesh<Context::Serial>& src);
 
-      static Rodin::Mesh<Context::Serial> meshToRodin(const MMG5_pMesh src);
+      static Rodin::Geometry::Mesh<Context::Serial> meshToRodin(const MMG5_pMesh src);
 
       // ---- Solution methods -----------------------------------------------
       static MMG5_pSol createSolution(MMG5_pMesh mesh, int vdim);
