@@ -31,6 +31,7 @@ namespace Rodin::External::MMG
       ImplicitDomainMesher()
         : m_ls(0.0),
           m_meshTheSurface(false),
+          m_ridgeDetection(false),
           m_idGen(0, std::numeric_limits<int16_t>::max())
       {}
 
@@ -97,6 +98,8 @@ namespace Rodin::External::MMG
        * @returns Reference to self (for method chaining)
        */
       ImplicitDomainMesher& noSplit(const MaterialReference& ref);
+
+      ImplicitDomainMesher& enableRidgeDetection(bool enable = true);
 
       /**
        * @brief Discretizes and optimizes an implicitly defined surface defined
@@ -273,6 +276,7 @@ namespace Rodin::External::MMG
       std::optional<double> m_rmc;
       std::set<int> m_lsBaseReferences;
       std::optional<MaterialReference> m_isoref;
+      bool m_ridgeDetection;
 
       boost::random::mt19937 m_rng;
       boost::random::uniform_int_distribution<> m_idGen;

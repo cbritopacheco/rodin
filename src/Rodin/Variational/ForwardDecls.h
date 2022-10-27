@@ -732,9 +732,9 @@ namespace Rodin::Variational
     *
     * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int_\Omega \mathrm{Integrand}
+    *    \int \mathrm{Integrand}
     * @f]
-    * on a domain @f$ \Omega @f$.
+    * on a volumetric domain.
     *
     * @note For an overview of all the possible specializations of the Integral
     * class, please see @ref IntegralSpecializations.
@@ -749,12 +749,11 @@ namespace Rodin::Variational
     * a domain.
     * @tparam Integrand Type of the integrand
     *
-    * Represents the integral operator on the boundary of domain with a
-    * templated integrand type:
+    * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int_{\partial \Omega} \mathrm{Integrand}
+    *    \int \mathrm{Integrand}
     * @f]
-    * where @f$ \Omega @f$ is a domain.
+    * on the boundary of a volumetric domain.
     *
     * @note For an overview of all the possible specializations of the Integral
     * class, please see @ref BoundaryIntegralSpecializations.
