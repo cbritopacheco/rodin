@@ -9,8 +9,9 @@
 
 /**
  * @file
- * @brief Top level include for the Rodin geometry utilities.
+ * @brief Top level include for the Rodin::Geometry utilities.
  */
+
 #include "Geometry/Mesh.h"
 #include "Geometry/SubMesh.h"
 #include "Geometry/Element.h"
