@@ -133,118 +133,135 @@ namespace Rodin::IO
 
    void MeshPrinter<FileFormat::MEDIT, Context::Serial>::print(std::ostream& os)
    {
-      const auto& mfemMesh = getObject().getHandle();
+      const auto& mesh = getObject();
 
-      int meshDim = mfemMesh.Dimension();
-      int spaceDim = mfemMesh.SpaceDimension();
-
-      os << Medit::Keyword::MeshVersionFormatted << " " << 2
-         << '\n'
-         << Medit::Keyword::Dimension << " " << spaceDim
-         << "\n\n";
+      // Print header
+      os << IO::Medit::Keyword::MeshVersionFormatted << " " << 2
+       << '\n'
+       << IO::Medit::Keyword::Dimension << " " << mesh.getSpaceDimension()
+       << "\n\n";
 
       // Print vertices
-      os << Medit::Keyword::Vertices
+      os << '\n'
+         << IO::Medit::Keyword::Vertices
          << '\n'
-         << mfemMesh.GetNV()
+         << mesh.getHandle().GetNV()
          << '\n';
-      for (int i = 0; i < mfemMesh.GetNV(); i++)
+
+      for (int i = 0; i < mesh.getHandle().GetNV(); i++)
       {
-         const double* coords = mfemMesh.GetVertex(i);
-         for (int j = 0; j < mfemMesh.SpaceDimension(); j++)
+         const double* coords = mesh.getHandle().GetVertex(i);
+         for (int j = 0; j < mesh.getHandle().SpaceDimension(); j++)
             os << coords[j] << " ";
          os << 0 << '\n'; // Dummy reference for all vertices
       }
 
-      // Print triangles
-      os << '\n' << Medit::Keyword::Triangles << '\n';
-      switch (mfemMesh.Dimension())
+      // Print edges
+      switch (mesh.getDimension())
       {
          case 2:
          {
-            os << mfemMesh.GetNE() << '\n';
-            mfem::Array<int> v;
-            for (int i = 0; i < mfemMesh.GetNE(); i++)
+            int nbe = mesh.count<Geometry::BoundaryElement>();
+            os << '\n'
+               << IO::Medit::Keyword::Edges
+               << '\n'
+               << nbe
+               << '\n';
+            for (int i = 0; i < nbe; i++)
             {
-               mfemMesh.GetElementVertices(i, v);
-               os << v[0] + 1 << " "
-                  << v[1] + 1 << " "
-                  << v[2] + 1 << " "
-                  << mfemMesh.GetAttribute(i) << '\n';
+               auto el = mesh.get<Geometry::BoundaryElement>(i);
+               auto vs = el.getVertices();
+               assert(vs.size() == 2);
+               os << vs[0] + 1 << " "
+                  << vs[1] + 1 << " "
+                  << el.getAttribute() << '\n';
             }
-            break;
-         }
-         case 3:
-         {
-            os << mfemMesh.GetNBE() << '\n';
-            mfem::Array<int> v;
-            for (int i = 0; i < mfemMesh.GetNBE(); i++)
-            {
-               mfemMesh.GetBdrElementVertices(i, v);
-               os << v[0] + 1 << " "
-                  << v[1] + 1 << " "
-                  << v[2] + 1 << " "
-                  << mfemMesh.GetBdrAttribute(i) << '\n';
-            }
-            break;
          }
          default:
          {
-            Alert::Exception() << "Bad mesh dimension " << meshDim;
+            break;
          }
+      }
+
+      // Print triangles
+      switch (mesh.getDimension())
+      {
+        case 2:
+        {
+            os << '\n' << IO::Medit::Keyword::Triangles << '\n';
+           int ne = mesh.count<Geometry::Element>();
+           os << ne << '\n';
+           for (int i = 0; i < ne; i++)
+           {
+              auto el = mesh.get<Geometry::Element>(i);
+              auto vs = el.getVertices();
+              assert(vs.size() == 3);
+              os << vs[0] + 1 << " "
+                 << vs[1] + 1 << " "
+                 << vs[2] + 1 << " "
+                 << el.getAttribute() << '\n';
+           }
+           break;
+        }
+        case 3:
+        {
+            os << '\n' << IO::Medit::Keyword::Triangles << '\n';
+            int nbe = mesh.count<Geometry::BoundaryElement>();
+            os << nbe << '\n';
+            for (int i = 0; i < nbe; i++)
+            {
+               auto bel = mesh.get<Geometry::BoundaryElement>(i);
+               auto vs = bel.getVertices();
+               assert(vs.size() == 3);
+               os << vs[0] + 1 << " "
+                  << vs[1] + 1 << " "
+                  << vs[2] + 1 << " "
+                  << bel.getAttribute() << '\n';
+            }
+            break;
+        }
+        default:
+        {
+           Alert::Exception() << "Bad mesh dimension " << mesh.getDimension();
+           break;
+        }
       }
 
       // Print tetrahedra
-      switch (meshDim)
+      switch (mesh.getDimension())
       {
          case 3:
          {
+            int ne = mesh.count<Geometry::Element>();
             os << '\n'
-               << Medit::Keyword::Tetrahedra
+               << IO::Medit::Keyword::Tetrahedra
                << '\n'
-               << mfemMesh.GetNE()
+               << ne
                << '\n';
-            mfem::Array<int> v;
-            for (int i = 0; i < mfemMesh.GetNE(); i++)
+            for (int i = 0; i < ne; i++)
             {
-               mfemMesh.GetElementVertices(i, v);
-               os << v[0] + 1 << " "
-                  << v[1] + 1 << " "
-                  << v[2] + 1 << " "
-                  << v[3] + 1 << " "
-                  << mfemMesh.GetAttribute(i) << '\n';
+               auto el = mesh.get<Geometry::Element>(i);
+               auto vs = el.getVertices();
+               assert(vs.size() == 4);
+               os << vs[0] + 1 << " "
+                  << vs[1] + 1 << " "
+                  << vs[2] + 1 << " "
+                  << vs[3] + 1 << " "
+                  << el.getAttribute() << '\n';
             }
+            break;
          }
          default:
          {
             // Do nothing
+            break;
          }
       }
 
-      // Print edges
-      switch (meshDim)
+      // Print footer
+      if (m_footer)
       {
-         case 2:
-         {
-            os << '\n'
-               << Medit::Keyword::Edges
-               << '\n'
-               << mfemMesh.GetNBE()
-               << '\n';
-            mfem::Array<int> v;
-            for (int i = 0; i < mfemMesh.GetNBE(); i++)
-            {
-               mfemMesh.GetBdrElementVertices(i, v);
-               os << v[0] + 1 << " "
-                  << v[1] + 1 << " "
-                  << mfemMesh.GetBdrAttribute(i) << '\n';
-            }
-         }
-         default:
-         {
-            // Do nothing
-         }
+         os << '\n' << IO::Medit::Keyword::End;
       }
-      os << '\n' << Medit::Keyword::End;
    }
 }

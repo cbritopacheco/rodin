@@ -17,7 +17,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Cast.h"
-#include "Rodin/Core.h"
+#include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/IO/ForwardDecls.h"
@@ -46,59 +46,27 @@ namespace Rodin::Variational
    class GridFunctionBase : public VectorFunctionBase
    {
       public:
-         class GridFunctionValue
+         class GridFunctionValue : public FunctionValue
          {
             public:
                constexpr
                GridFunctionValue(double v)
-                  : m_v(v)
+                  : FunctionValue(v)
                {}
 
                constexpr
                GridFunctionValue(const mfem::Vector& v)
-                  : m_v(v)
+                  : FunctionValue(v)
                {}
 
                constexpr
                GridFunctionValue(mfem::Vector&& v)
-                  : m_v(std::move(v))
+                  : FunctionValue(std::move(v))
                {}
 
                GridFunctionValue(const GridFunctionValue&) = default;
 
                GridFunctionValue(GridFunctionValue&&) = default;
-
-               inline
-               constexpr
-               operator double() const
-               {
-                  return std::get<double>(m_v);
-               }
-
-               inline
-               constexpr
-               operator mfem::Vector&() &
-               {
-                  return std::get<mfem::Vector>(m_v);
-               }
-
-               inline
-               constexpr
-               operator mfem::Vector&&() &&
-               {
-                  return std::move(std::get<mfem::Vector>(m_v));
-               }
-
-               template <class T>
-               inline
-               constexpr
-               bool contains() const
-               {
-                  return std::holds_alternative<T>(m_v);
-               }
-
-            private:
-               std::variant<double, mfem::Vector> m_v;
          };
 
          GridFunctionBase() = default;

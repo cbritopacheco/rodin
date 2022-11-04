@@ -64,5 +64,13 @@ namespace Rodin::Variational
    {
       return Division(lhs, ScalarFunction(rhs));
    }
+
+   template <class T>
+   std::enable_if_t<std::is_arithmetic_v<T>,
+      Division<FunctionBase, FunctionBase>>
+   operator/(T lhs, const FunctionBase& rhs)
+   {
+      return Division(ScalarFunction(lhs), rhs);
+   }
 }
 #endif

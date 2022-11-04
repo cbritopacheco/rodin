@@ -47,6 +47,8 @@ namespace Rodin::Geometry
             return static_cast<Type>(m_element->GetGeometryType());
          }
 
+         virtual std::vector<int> getVertices() const;
+
          /**
           * @brief Gets the attribute of the element.
           */

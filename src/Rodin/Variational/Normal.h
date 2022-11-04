@@ -52,11 +52,18 @@ namespace Rodin::Variational
                (
                   trans.mesh->Dimension() == (trans.mesh->SpaceDimension() - 1) &&
                   trans.ElementType == mfem::ElementTransformation::ELEMENT
+               ) ||
+               // Or we are on a boundary element of a d-mesh in (d + 1)-space,
+               // in which case it is the so-called conormal.
+               (
+                  trans.mesh->Dimension() == (trans.mesh->SpaceDimension() - 1) &&
+                  trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT
                )
             );
             value.SetSize(m_dimension);
             mfem::CalcOrtho(trans.Jacobian(), value);
             const double norm = value.Norml2();
+            assert(norm > 0.0);
             switch (trans.ElementType)
             {
                case mfem::ElementTransformation::BDR_ELEMENT:

@@ -7,7 +7,7 @@
 #ifndef RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
 #define RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
 
-#include "Rodin/Geometry/Mesh.h"
+#include "Mesh.h"
 
 #include "MMG5.h"
 
@@ -28,7 +28,7 @@ namespace Rodin::External::MMG
        * Hence, if the edges passing through a vertex have very different
        * sizes, the resulting mesh may be very different from the initial one.
        */
-      void optimize(Geometry::Mesh<Context::Serial>& mesh)
+      void optimize(MMG::Mesh& mesh)
       {
         MMG5_pMesh mmgMesh = rodinToMesh(mesh);
 
@@ -63,6 +63,12 @@ namespace Rodin::External::MMG
 
         mesh = meshToRodin(mmgMesh);
         destroyMesh(mmgMesh);
+      }
+
+      MeshOptimizer& setAngleDetection(bool b = true)
+      {
+        MMG5::setAngleDetection(b);
+        return *this;
       }
 
       MeshOptimizer& setHMin(double hmin)

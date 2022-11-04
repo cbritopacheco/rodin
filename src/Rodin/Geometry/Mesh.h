@@ -340,7 +340,7 @@ namespace Rodin::Geometry
           * @param[in] fmt Mesh file format
           * @returns Reference to this (for method chaining)
           */
-         Mesh& load(
+         virtual Mesh& load(
                const boost::filesystem::path& filename,
                IO::FileFormat fmt = IO::FileFormat::MFEM);
 
@@ -350,7 +350,7 @@ namespace Rodin::Geometry
           * @param[in] fmt Mesh file format
           * @returns Reference to this (for method chaining)
           */
-         void save(
+         virtual void save(
                const boost::filesystem::path& filename,
                IO::FileFormat fmt = IO::FileFormat::MFEM, int precison = 16) const;
 
@@ -381,10 +381,14 @@ namespace Rodin::Geometry
          Mesh& element(
                Type geom,
                const std::vector<int>& vs,
-               std::optional<int> attr = {});
+               int attr = 1);
+
+         Mesh& boundary(
+               Type geom,
+               const std::vector<int>& vs,
+               int attr = 1);
 
          Mesh& finalize();
-
 
          SubMesh<Context::Serial> keep(int attr);
 

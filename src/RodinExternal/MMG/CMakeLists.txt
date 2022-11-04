@@ -10,20 +10,26 @@ include (ExternalProject)
 # ---- Add main targets ------------------------------------------------------
 set(RodinExternalMMG_HEADERS
   MMG5.h
+  Mesh.h
   Common.h
   ISCDProcess.h
   Distancer.h
-  MeshOptimizer.h
+  MeshLoader.h
+  MeshPrinter.h
   MeshAdaptor.h
+  MeshOptimizer.h
   ImplicitDomainMesher.h
   )
 
 set(RodinExternalMMG_SRCS
   MMG5.cpp
+  Mesh.cpp
   Common.cpp
   ISCDProcess.cpp
-  MeshOptimizer.cpp
+  MeshLoader.cpp
+  MeshPrinter.cpp
   MeshAdaptor.cpp
+  MeshOptimizer.cpp
   ImplicitDomainMesher.cpp
   )
 

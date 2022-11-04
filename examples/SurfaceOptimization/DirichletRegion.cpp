@@ -41,7 +41,7 @@ int main(int, char**)
   const char* meshFile = "../resources/mmg/dirichlet-region-example.mesh";
 
   // Load and build finite element spaces on the volumetric domain
-  Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile, IO::FileFormat::MEDIT);
 
   auto J = [&](GridFunction<H1<Context::Serial>>& u)
