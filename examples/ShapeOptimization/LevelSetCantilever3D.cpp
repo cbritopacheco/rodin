@@ -153,7 +153,7 @@ int main(int, char**)
     // Compute norm of gradient
     GridFunction gNorm(Dh);
     gNorm = ScalarFunction(
-        [&](const Vertex& v) -> double
+        [&](const Point& v) -> double
         {
           mfem::Vector val = g.getGridFunction()(v);
           return val.Norml2();

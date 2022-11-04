@@ -66,7 +66,7 @@ namespace Rodin::Geometry
    class BoundaryElement;
    class BoundaryElementView;
 
-   class Vertex;
+   class Point;
 }
 
 #endif

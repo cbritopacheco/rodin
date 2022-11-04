@@ -331,10 +331,17 @@ namespace Rodin::Geometry
          mfem::Element* m_element;
    };
 
-   class Vertex
+   /**
+    * @brief Represents a spatial point which belongs to some element of a mesh.
+    *
+    * A Point differs from a Vertex in the sense that a Vertex is a node of the
+    * element of a Mesh. On the other hand, a Point represents any coordinates
+    * contained in the Mesh.
+    */
+   class Point
    {
       public:
-         Vertex(std::initializer_list<double> l)
+         Point(std::initializer_list<double> l)
             : m_trans(nullptr),
               m_ip(nullptr)
          {
@@ -342,21 +349,21 @@ namespace Rodin::Geometry
             m_v = l.begin();
          }
 
-         Vertex(mfem::Vector&& v)
+         Point(mfem::Vector&& v)
             :  m_v(std::move(v)),
                m_trans(nullptr),
                m_ip(nullptr)
          {}
 
-         Vertex(const mfem::Vector& v)
+         Point(const mfem::Vector& v)
             :  m_v(v),
                m_trans(nullptr),
                m_ip(nullptr)
          {}
 
-         Vertex(const Vertex& other) = default;
+         Point(const Point& other) = default;
 
-         Vertex(Vertex&& other)
+         Point(Point&& other)
             : m_v(std::move(other.m_v)),
               m_trans(other.m_trans),
               m_ip(other.m_ip)
@@ -410,7 +417,7 @@ namespace Rodin::Geometry
             return m_v(2);
          }
 
-         bool operator==(const Vertex& rhs) const
+         bool operator==(const Point& rhs) const
          {
             double constexpr epsilon = std::numeric_limits<double>::epsilon();
             assert(getDimension() == rhs.getDimension());
@@ -425,7 +432,7 @@ namespace Rodin::Geometry
          /**
           * @brief Lexicographical comparison
           */
-         bool operator<(const Vertex& rhs) const
+         bool operator<(const Point& rhs) const
          {
             assert(getDimension() == rhs.getDimension());
             for (int i = 0; i < m_v.Size() - 1; i++)
@@ -438,13 +445,13 @@ namespace Rodin::Geometry
             return (m_v(m_v.Size() - 1) < rhs.m_v(rhs.m_v.Size() - 1));
          }
 
-         Vertex& setElementTransformation(mfem::ElementTransformation* trans)
+         Point& setElementTransformation(mfem::ElementTransformation* trans)
          {
             m_trans = trans;
             return *this;
          }
 
-         Vertex& setIntegrationPoint(const mfem::IntegrationPoint* ip)
+         Point& setIntegrationPoint(const mfem::IntegrationPoint* ip)
          {
             m_ip = ip;
             return *this;

@@ -122,7 +122,7 @@ int main(int, char**)
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
     GridFunction gNorm(Dh);
     gNorm = ScalarFunction(
-        [&](const Vertex& v) -> double
+        [&](const Point& v) -> double
         {
           mfem::Vector val = g.getGridFunction()(v);
           return val.Norml2();
