@@ -94,13 +94,13 @@ namespace Rodin::Variational
                case RangeType::Scalar:
                {
                   mfem::Vector value;
-                  getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+                  getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
                   return GridFunctionValue(value(0));
                }
                case RangeType::Vector:
                {
                   mfem::Vector value;
-                  getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+                  getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
                   return GridFunctionValue(std::move(value));
                }
                case RangeType::Matrix:
