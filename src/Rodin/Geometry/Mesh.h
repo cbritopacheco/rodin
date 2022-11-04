@@ -62,7 +62,7 @@ namespace Rodin::Geometry
          Automatic      ///< Automatically determines whether to use conforming
                         ///or non-conforming refinement
       };
-   };
+   }
 
    /**
     * @brief Abstract base class for Mesh objects.

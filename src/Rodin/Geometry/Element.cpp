@@ -8,7 +8,7 @@ namespace Rodin::Geometry
    {
       mfem::Array<int> vs;
       m_element->GetVertices(vs);
-      return std::vector(vs.begin(), vs.end());
+      return std::vector<int>(vs.begin(), vs.end());
    }
 
    int ElementBase::getAttribute() const
