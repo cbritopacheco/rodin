@@ -520,14 +520,7 @@ namespace Rodin::Variational
                const mfem::IntegrationPoint& ip = ir->IntPoint(j);
                trans->SetIntPoint(&ip);
                if (p.getValue(*trans, ip))
-               {
-                  mfem::Vector v;
-                  trans->Transform(ip, v);
-                  Geometry::Point vx(std::move(v));
-                  vx.setElementTransformation(trans);
-                  vx.setIntegrationPoint(&ip);
-                  result.insert(std::move(vx));
-               }
+                  result.insert(Geometry::Point(*trans, ip));
             }
          }
       }

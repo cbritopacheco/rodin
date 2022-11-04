@@ -359,7 +359,7 @@ namespace Rodin::Variational
          FunctionValue operator()(const Geometry::Point& v) const
          {
             mfem::DenseMatrix m;
-            getValue(m, *v.getElementTransformation(), *v.getIntegrationPoint());
+            getValue(m, v.getElementTransformation(), v.getIntegrationPoint());
             return FunctionValue(std::move(m), getRangeType());
          }
 

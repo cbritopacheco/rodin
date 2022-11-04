@@ -103,7 +103,7 @@ namespace Rodin::Variational
          FunctionValue::Vector operator()(const Geometry::Point& v) const
          {
             mfem::Vector value;
-            getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+            getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
             return value;
          }
 

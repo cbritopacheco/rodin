@@ -36,7 +36,7 @@ namespace Rodin::Variational
 
          bool operator()(const Geometry::Point& v) const
          {
-            return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
+            return getValue(v.getElementTransformation(), v.getIntegrationPoint());
          }
 
          void getValue(

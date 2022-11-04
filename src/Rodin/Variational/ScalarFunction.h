@@ -201,16 +201,12 @@ namespace Rodin::Variational
          double getValue(mfem::ElementTransformation& trans, const
                mfem::IntegrationPoint& ip) const override
          {
-            mfem::Vector transip;
-            trans.Transform(ip, transip);
-            Geometry::Point v(std::move(transip));
-            v.setElementTransformation(&trans).setIntegrationPoint(&ip);
-            return m_f(v);
+            return m_f(Geometry::Point(trans, ip));
          }
 
          double operator()(const Geometry::Point& v) const
          {
-            return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
+            return getValue(v.getElementTransformation(), v.getIntegrationPoint());
          }
 
          ScalarFunction* copy() const noexcept override
