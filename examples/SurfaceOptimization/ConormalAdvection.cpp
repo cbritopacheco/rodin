@@ -38,14 +38,14 @@ int main(int, char**)
   };
 
   // Geodesic distance
-  auto gd = [&](const Vertex& c, std::array<double, 3> x)
+  auto gd = [&](const Point& c, std::array<double, 3> x)
             {
               return std::acos((x[0] * c(0) + x[1] * c(1) + x[2] * c(2)));
             };
 
   // Function for generating holes
   auto f = ScalarFunction(
-      [&](const Vertex& v) -> double
+      [&](const Point& v) -> double
       {
         double d = std::numeric_limits<double>::max();
         for (const auto& c : cs)

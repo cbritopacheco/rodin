@@ -258,7 +258,7 @@ namespace Rodin::Geometry
           */
          std::set<int> where(std::function<bool(const Element&)> condition) const;
 
-         std::set<int> where(std::function<bool(const Vertex&)> condition) const;
+         std::set<int> where(std::function<bool(const Point&)> condition) const;
 
          /**
           * @brief Edits all elements in the mesh via the given function.

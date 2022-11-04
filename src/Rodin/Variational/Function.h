@@ -356,7 +356,7 @@ namespace Rodin::Variational
           * @brief Evaluates the function on a vertex of the mesh.
           * @param[in] v Vertex belonging to the mesh
           */
-         FunctionValue operator()(const Geometry::Vertex& v) const
+         FunctionValue operator()(const Geometry::Point& v) const
          {
             mfem::DenseMatrix m;
             getValue(m, *v.getElementTransformation(), *v.getIntegrationPoint());

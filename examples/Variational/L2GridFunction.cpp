@@ -20,7 +20,7 @@ int main(int, char**)
   L2 Vh(Omega);
   GridFunction u(Vh);
   u = ScalarFunction(
-      [](const Vertex& v) -> double
+      [](const Point& v) -> double
       {
         return cos(v.x());
       });

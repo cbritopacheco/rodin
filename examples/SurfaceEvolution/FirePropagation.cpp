@@ -66,7 +66,7 @@ class Environment
           auto n = Normal(m_env.getTopography().getSpaceDimension());
           auto phi =
             ScalarFunction(
-                [&](const Vertex& v) -> double
+                [&](const Point& v) -> double
                 {
                   return 1.0;
                 });
@@ -74,7 +74,7 @@ class Environment
           // Angle between wind and conormal
           auto psi =
             ScalarFunction(
-                [](const Vertex& v) -> double
+                [](const Point& v) -> double
                 {
                   return 1.0;
                 });
@@ -82,7 +82,7 @@ class Environment
           // Compute the tilt angle
           auto gamma =
             ScalarFunction(
-              [&](const Vertex& v) -> double
+              [&](const Point& v) -> double
               {
                 assert(alpha.getRangeType() == RangeType::Scalar);
                 double rhs =
@@ -127,7 +127,7 @@ class Environment
 
       m_terrainHeight =
         ScalarFunction(
-          [](const Vertex& v) -> double
+          [](const Point& v) -> double
           {
             return v.z();
           });
@@ -218,7 +218,7 @@ int main()
   GridFunction ls(vh);
   ls =
     ScalarFunction(
-      [](const Vertex& v) -> double
+      [](const Point& v) -> double
       {
         return sqrt(v.x() * v.x() + v.y() * v.y()) - 0.1;
       });

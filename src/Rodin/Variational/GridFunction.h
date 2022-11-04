@@ -87,7 +87,7 @@ namespace Rodin::Variational
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
 
-         GridFunctionValue operator()(const Geometry::Vertex& v) const
+         GridFunctionValue operator()(const Geometry::Point& v) const
          {
             switch (getRangeType())
             {
@@ -247,7 +247,7 @@ namespace Rodin::Variational
           */
          void transfer(GridFunctionBase& dst);
 
-         std::set<Geometry::Vertex> where(
+         std::set<Geometry::Point> where(
                const BooleanFunctionBase& p,
                const std::set<int>& attrs = {},
                std::function<int(mfem::ElementTransformation&)> order =

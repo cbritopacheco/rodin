@@ -154,7 +154,7 @@ int main(int, char**)
       topo = M_PI * u.getGridFunction() * p.getGridFunction();
 
       // Geodesic distance
-      auto gd = [&](const Vertex& x, const Vertex& c)
+      auto gd = [&](const Point& x, const Point& c)
                 {
                   return std::acos((x(0) * c(0) + x(1) * c(1) + x(2) * c(2)));
                 };
@@ -168,13 +168,13 @@ int main(int, char**)
         {
           Alert::Info() << "    | " << cs.size() << " possible hole centers." << Alert::Raise;
           auto it = std::min_element(cs.begin(), cs.end(),
-              [&](const Vertex& lhs, const Vertex& rhs) -> bool
+              [&](const Point& lhs, const Point& rhs) -> bool
               {
                 return topo(lhs) < topo(rhs);
               });
 
           auto holes = ScalarFunction(
-              [&](const Vertex& v) -> double
+              [&](const Point& v) -> double
               {
                 double d = dist(v);
                 double dd = gd(v, *it) - radius;
