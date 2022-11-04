@@ -4,9 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CORE_H
-#define RODIN_CORE_H
+#include "Tangent.h"
 
-#include "Core/Common.h"
-
-#endif
+namespace Rodin::Variational
+{
+   Tangent<FunctionBase> tan(const FunctionBase& op)
+   {
+      return Tangent<FunctionBase>(op);
+   }
+}

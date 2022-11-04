@@ -15,7 +15,17 @@
 
 /**
   @namespace Rodin::Geometry
-  @brief Module for dealing with geometries
+  @brief Module for dealing with geometries.
+ */
+
+/**
+  @dir Rodin/IO
+  @brief Namespace @ref Rodin::IO
+ */
+
+/**
+  @namespace Rodin::IO
+  @brief Module for dealing with I/O functionality.
  */
 
 /**
@@ -25,7 +35,7 @@
 
 /**
   @namespace Rodin::Variational
-  @brief Module for writing variational problems in C++
+  @brief Module for writing variational problems in C++.
  */
 
 /**

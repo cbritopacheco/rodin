@@ -32,7 +32,7 @@ static constexpr double hgrad = 1.6;
 static constexpr double ell = 0.2;
 static double elementStep = 0.5;
 static double hausd = 0.01;
-static double hmax = 0.1;
+static double hmax = 0.2;
 static double hmin = 0.1 * hmax;
 static size_t hmaxIt = maxIt / 2;
 
@@ -41,12 +41,13 @@ double compliance(GridFunction<H1<Context::Serial>>& w);
 
 int main(int, char**)
 {
-  const char* meshFile = "step.0.o.mesh";
+  const char* meshFile = "step.0.mesh";
   // const char* meshFile = "Omega.mesh";
 
   // Load mesh
-  Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile, IO::FileFormat::MEDIT);
+  Omega.save("miaow.mesh", IO::FileFormat::MEDIT);
 
   Omega.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
@@ -63,8 +64,8 @@ int main(int, char**)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
-    hmax = 0.1 - (0.1 - 0.04) * static_cast<double>(std::min(i, hmaxIt)) / hmaxIt;
-    hmin = std::max(0.01 * hmax, hmin);
+    hmax = 0.2 - (0.2 - 0.05) * static_cast<double>(std::min(i, hmaxIt)) / hmaxIt;
+    hmin = std::max(0.1 * hmax, hmin);
     hausd = std::max(0.0001, hausd);
 
     Alert::Info() << "    | Parameters:\n"
@@ -78,21 +79,21 @@ int main(int, char**)
 
     try
     {
-      Alert::Info() << "    | Optimizing the domain." << Alert::Raise;
-      // MMG::MeshOptimizer().setHMax(hmax)
-      //                     .setHMin(hmin)
-      //                     .setGradation(hgrad)
-      //                     .setHausdorff(hausd)
-      //                     .optimize(Omega);
-      Omega.save("optimized.mesh", IO::FileFormat::MEDIT);
+      if (i == 0)
+      {
+        Alert::Info() << "    | Optimizing the domain." << Alert::Raise;
+        MMG::MeshOptimizer().setHMax(hmax)
+                            .setHMin(hmin)
+                            .setGradation(hgrad)
+                            .setHausdorff(hausd)
+                            .setAngleDetection(i == 0)
+                            .optimize(Omega);
+        Omega.save("optimized.mesh", IO::FileFormat::MEDIT);
+      }
     }
     catch (Rodin::Alert::Exception& err)
     {
       Alert::Warning() << " | Failed, skipping iteration." << Alert::Raise;
-      // hmin /= 1.6;
-      // hausd /= 1.2;
-      // elementStep /= 1.6;
-      // continue;
     }
 
     Alert::Info() << "    | Trimming mesh." << Alert::Raise;
@@ -104,24 +105,7 @@ int main(int, char**)
     H1 VhInt(trimmed, d);
 
     Alert::Info() << "    | Solving state equation." << Alert::Raise;
-    // auto f = VectorFunction{0, 0, -1};
-
-    auto f = 10 * VectorFunction(
-        0,
-        [](const Vertex& v) -> double
-        {
-           return v.z() - 0.5;
-        },
-        [](const Vertex& v) -> double
-        {
-          return -v.y() + 0.5;
-        }
-        );
-
-    GridFunction pull(VhInt);
-    pull.projectOnBoundary(f, GammaN);
-    trimmed.save("pull.mesh");
-    pull.save("pull.gf");
+    auto f = VectorFunction{0, 0, -1};
 
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
@@ -135,15 +119,8 @@ int main(int, char**)
                + DirichletBC(uInt, VectorFunction{0, 0, 0}).on(GammaD);
     solver.solve(elasticity);
 
-    // Transfer solution back to original domain
-    GridFunction u(Vh);
-    uInt.getGridFunction().transfer(u);
-
-    uInt.getGridFunction().save("u.gf");
-    trimmed.save("u.mesh");
-
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
+    auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = -Normal(d); // Bug: For some reason orientation does not match up
                          // with that of the 2D case.
@@ -164,7 +141,7 @@ int main(int, char**)
     Omega.save("g.mesh");
 
     // Update objective
-    double objective = compliance(u) + ell * Omega.getVolume(Interior);
+    double objective = compliance(uInt.getGridFunction()) + ell * Omega.getVolume(Interior);
     obj.push_back(objective);
     Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
 
@@ -173,7 +150,7 @@ int main(int, char**)
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
 
-    // Advect the level set function
+    // Compute norm of gradient
     GridFunction gNorm(Dh);
     gNorm = ScalarFunction(
         [&](const Vertex& v) -> double
@@ -182,12 +159,13 @@ int main(int, char**)
           return val.Norml2();
         });
     double linfty = gNorm.max();
-    double dt = elementStep * hmin / gNorm.max();
-    Alert::Info() << "    | Advecting the distance function. || g || = " << linfty
-      << Alert::Raise;
+    double dt = elementStep * hmax / gNorm.max();
 
     try
     {
+      Alert::Info()
+        << "    | Advecting the distance function. || g || = " << linfty
+        << Alert::Raise;
       MMG::Advect(dist, g.getGridFunction()).step(dt);
     }
     catch (Rodin::Alert::Exception& e)
@@ -205,15 +183,16 @@ int main(int, char**)
                                          .setHMin(hmin)
                                          .setHausdorff(hausd)
                                          .setGradation(hgrad)
+                                         .setAngleDetection(false)
                                          .setBaseReferences(GammaD)
                                          .setBoundaryReference(Gamma)
                                          .discretize(dist)
                                           // .split(Interior, {Interior, Exterior})
                                          // .split(Exterior, {Interior, Exterior})
                                          ;
-      elementStep = 1.1 * elementStep > 2.0 ? 2.0 : elementStep * 1.1;
+      elementStep = 1.1 * elementStep > 1.0 ? 1.0 : elementStep * 1.1;
       hausd = 1.1 * hausd > 0.01 ? 0.01 : 1.1 * hausd;
-      hmin = 1.1 * hmin > 0.2 * hmax ? 0.2 * hmax : 1.1 * hmin;
+      hmin = 1.1 * hmin > 0.5 * hmax ? 0.5 * hmax : 1.1 * hmin;
     }
     catch (Rodin::Alert::Exception& err)
     {
@@ -230,13 +209,6 @@ int main(int, char**)
     auto shape = Omega.keep(Interior);
     shape.save("out/trimmed." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
     shape.save("trimmed.mesh");
-
-    // Test for convergence
-    // if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
-    // {
-    //   Alert::Info() << "Convergence!" << Alert::Raise;
-    //   break;
-    // }
 
     fObj << objective << "\n";
     fObj.flush();

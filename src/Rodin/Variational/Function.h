@@ -141,6 +141,131 @@ namespace Rodin::Variational
    class FunctionBase : public FormLanguage::Base
    {
       public:
+         /**
+          * @brief Represents the value of a FunctionBase object when evaluated
+          * on a Mesh Vertex.
+          *
+          * In Rodin, valuations of instances of FunctionBase on mesh vertices
+          * can take the form three possible value types:
+          * - Scalar
+          * - Vector
+          * - Matrix
+          *
+          * The type resolution of the actual type is performed at runtime.
+          */
+         class FunctionValue
+         {
+            public:
+               using Scalar = double; ///< Scalar value type
+               using Vector = mfem::Vector; ///< Vector value type
+               using Matrix = mfem::DenseMatrix; ///< Matrix value type
+
+               constexpr
+               FunctionValue(double v)
+                  : m_v(v)
+               {}
+
+               constexpr
+               FunctionValue(const Vector& v)
+                  : m_v(v)
+               {}
+
+               constexpr
+               FunctionValue(const Matrix& v)
+                  : m_v(v)
+               {}
+
+               constexpr
+               FunctionValue(Vector&& v)
+               {
+                  m_v.emplace<Vector>();
+                  std::get<Vector>(m_v).Swap(v);
+               }
+
+               constexpr
+               FunctionValue(Matrix&& v)
+                  : FunctionValue(std::move(v), RangeType::Matrix)
+               {}
+
+               constexpr
+               FunctionValue(Matrix&& v, RangeType t)
+               {
+                  switch (t)
+                  {
+                     case RangeType::Scalar:
+                     {
+                        m_v = v(0, 0);
+                        break;
+                     }
+                     case RangeType::Vector:
+                     {
+                        m_v.emplace<Vector>(nullptr, v.Size());
+                        std::get<Vector>(m_v).GetMemory() = std::move(v.GetMemory());
+                        break;
+                     }
+                     case RangeType::Matrix:
+                     {
+                        m_v.emplace<Matrix>();
+                        std::get<Matrix>(m_v).Swap(v);
+                        break;
+                     }
+                  }
+               }
+
+               FunctionValue(const FunctionValue&) = default;
+
+               FunctionValue(FunctionValue&&) = default;
+
+               inline
+               constexpr
+               operator double() const
+               {
+                  return std::get<double>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Vector&() &
+               {
+                  return std::get<Vector>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Vector&&() &&
+               {
+                  return std::move(std::get<Vector>(m_v));
+               }
+
+               inline
+               constexpr
+               operator Matrix&() &
+               {
+                  return std::get<Matrix>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Matrix&&() &&
+               {
+                  return std::move(std::get<Matrix>(m_v));
+               }
+
+               /**
+                * @brief Queries which type the FunctionValue %holds.
+                */
+               template <class T>
+               inline
+               constexpr
+               bool holds() const
+               {
+                  return std::holds_alternative<T>(m_v);
+               }
+
+            private:
+               std::variant<double, Vector, Matrix> m_v;
+         };
+
          FunctionBase() = default;
 
          FunctionBase(const FunctionBase& other)
@@ -227,11 +352,15 @@ namespace Rodin::Variational
                mfem::DenseMatrix& value,
                mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
 
-         mfem::DenseMatrix operator()(const Geometry::Vertex& v) const
+         /**
+          * @brief Evaluates the function on a vertex of the mesh.
+          * @param[in] v Vertex belonging to the mesh
+          */
+         FunctionValue operator()(const Geometry::Vertex& v) const
          {
             mfem::DenseMatrix m;
             getValue(m, *v.getElementTransformation(), *v.getIntegrationPoint());
-            return m;
+            return FunctionValue(std::move(m), getRangeType());
          }
 
          virtual FunctionBase* copy() const noexcept override = 0;

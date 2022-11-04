@@ -1,6 +1,6 @@
 # ---- Add main targets ------------------------------------------------------
 set(Rodin_HEADERS
-  Core.h
+  Math.h
   Alert.h
   Geometry.h
   Plot.h
@@ -42,7 +42,7 @@ target_include_directories(Rodin
   ${PROJECT_BINARY_DIR}/src
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-add_subdirectory(Core)
+add_subdirectory(Math)
 add_subdirectory(IO)
 add_subdirectory(Test)
 add_subdirectory(Alert)

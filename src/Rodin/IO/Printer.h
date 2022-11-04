@@ -18,8 +18,6 @@ namespace Rodin::IO
    {
       public:
          virtual void print(std::ostream& os) = 0;
-
-      protected:
          virtual const T& getObject() const = 0;
    };
 }

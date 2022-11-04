@@ -45,7 +45,7 @@ int main(int, char**)
   };
 
   // Load mesh
-  Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile);
 
   Omega.save("Omega0.mesh");

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <boost/bimap.hpp>
 
+#include <Rodin/Math.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
@@ -9,6 +10,7 @@ using namespace std;
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+using namespace Rodin::External;
 
 class Environment
 {
@@ -45,14 +47,23 @@ class Environment
 
         Flame& step(double dt)
         {
-          double alpha = 0.0;
+          const double u0 = m_env.getParameters().u0;
 
+          // Get ground and normal magnitude
+          const auto& ground = m_env.getGround();
+          double mag = std::sqrt(ground.a * ground.a + ground.b * ground.b + ground.c * ground.c);
+
+          // Slope vector
           auto p = Grad(m_env.m_terrainHeight);
 
-          double u = m_env.getParameters().u0 / std::cos(alpha);
+          // Angle between slope and ground
+          auto alpha = (ground.a * p.x() + ground.b * p.y() + ground.c * p.z()) / (mag * Frobenius(p));
 
+          // Bouyancy velocity
+          auto u = u0 / cos(alpha);
 
-          // Angle between wind and conormal
+          // Angle between slope and conormal
+          auto n = Normal(m_env.getTopography().getSpaceDimension());
           auto phi =
             ScalarFunction(
                 [&](const Vertex& v) -> double
@@ -60,7 +71,7 @@ class Environment
                   return 1.0;
                 });
 
-          // Angle between gradient and conormal
+          // Angle between wind and conormal
           auto psi =
             ScalarFunction(
                 [](const Vertex& v) -> double
@@ -73,8 +84,10 @@ class Environment
             ScalarFunction(
               [&](const Vertex& v) -> double
               {
+                assert(alpha.getRangeType() == RangeType::Scalar);
                 double rhs =
-                  std::tan(alpha) * std::cos(phi(v)) + m_env.getWind()(v) * std::cos(psi(v));
+                  std::tan(alpha(v)) * std::cos(phi(v)) + m_env.getWind()(v) * std::cos(psi(v));
+                // assert(abs(rhs) < Core::Constants::pi<double>() / 2.0);
                 return std::atan(rhs);
               });
           return *this;
@@ -144,6 +157,11 @@ class Environment
       return *this;
     }
 
+    const Plane& getGround() const
+    {
+      return m_ground;
+    }
+
     const Flame& getFlame() const
     {
       return m_flame;
@@ -157,6 +175,11 @@ class Environment
     const Parameters& getParameters() const
     {
       return m_params;
+    }
+
+    const Mesh<Context>& getTopography() const
+    {
+      return m_topography;
     }
 
   private:
@@ -181,9 +204,32 @@ class Environment
 int main()
 {
   const char* meshfile = "topo.mesh";
-  Mesh topography;
+  MMG::Mesh topography;
   topography.load(meshfile);
   Environment environment({0, 0, 0, 0}, topography);
+
+  MMG::Mesh test;
+  test.load("miaow.mesh");
+  assert(false);
+
+  MMG::MeshOptimizer().optimize(topography);
+
+  H1 vh(topography);
+  GridFunction ls(vh);
+  ls =
+    ScalarFunction(
+      [](const Vertex& v) -> double
+      {
+        return sqrt(v.x() * v.x() + v.y() * v.y()) - 0.1;
+      });
+
+  auto implicit = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                             .discretize(ls);
+
+  //implicit.save("implicit.mesh");
+  // topography.save("ls.mesh");
+  // ls.save("ls.gf");
+
   return 0;
 }
 

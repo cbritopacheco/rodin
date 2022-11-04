@@ -26,7 +26,7 @@ static constexpr double mu = 0.3846;
 static constexpr double lambda = 0.5769;
 
 // Optimization parameters
-static constexpr size_t maxIt = 250;
+static constexpr size_t maxIt = 300;
 static constexpr double eps = 1e-6;
 static constexpr double hmax = 0.05;
 static constexpr double ell = 0.4;
@@ -40,8 +40,10 @@ int main(int, char**)
   const char* meshFile = "../resources/mfem/levelset-cantilever2d-example.mesh";
 
   // Load mesh
-  Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile);
+
+  MMG::MeshOptimizer().setHMax(hmax / 2.0).optimize(Omega);
 
   Omega.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
@@ -134,18 +136,13 @@ int main(int, char**)
     Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
                                        .split(Exterior, {Interior, Exterior})
                                        .setRMC(1e-3)
+                                       .setAngleDetection(false)
                                        .setBoundaryReference(Gamma)
                                        .discretize(dist);
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+    MMG::MeshOptimizer().setHMax(hmax).setAngleDetection(false).optimize(Omega);
 
     Omega.save("Omega.mesh");
-
-    // Test for convergence
-    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
-    {
-      Alert::Info() << "Convergence!" << Alert::Raise;
-      break;
-    }
+    Omega.save("miaow.mesh", IO::FileFormat::MEDIT);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

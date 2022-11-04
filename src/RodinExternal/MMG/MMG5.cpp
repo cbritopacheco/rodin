@@ -4,9 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <boost/range/adaptor/indexed.hpp>
+
 #include "Rodin/Alert.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/IO/MeshLoader.h"
+
+#include "Mesh.h"
 
 #include "MMG5.h"
 
@@ -44,7 +48,7 @@ namespace Rodin::External::MMG
       }
       res->np = 0;
       res->ver = version;
-      res->dim = dim;
+      res->dim = *spaceDim;
       res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
       res->info.imprim = getMMGVerbosityLevel();
       return res;
@@ -297,13 +301,13 @@ namespace Rodin::External::MMG
       return res;
    }
 
-   MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::Mesh<Context::Serial>& src)
+   MMG5_pMesh MMG5::rodinToMesh(const MMG::Mesh& src)
    {
       bool isSurface = src.isSurface();
       assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
 
       MMG5_pMesh res = createMesh(
-            s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+         s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
 
       res->npi = 0;
       res->nai = 0;
@@ -314,8 +318,8 @@ namespace Rodin::External::MMG
 
       if (isSurface) // Use MMGS
       {
-         res->nt = src.getHandle().GetNE();
-         res->na = src.getHandle().GetNBE();
+         res->nt = src.count<Geometry::Element>();
+         res->na = src.count<Geometry::BoundaryElement>();
 
          MMGS_Set_commonFunc();
          if (!MMGS_zaldy(res))
@@ -444,7 +448,6 @@ namespace Rodin::External::MMG
            for (int j = 0; j < 3; j++)
              pt->v[j] = vertices[j] + 1;
            pt->ref = src.getHandle().GetBdrAttribute(i - 1);
-           assert(pt->ref > 0);
          }
 
          // Copy tetrahedra
@@ -458,9 +461,6 @@ namespace Rodin::External::MMG
               pt->v[j] = vertices[j] + 1;
 
             pt->ref = src.getHandle().GetAttribute(i - 1);
-
-            // for (int j = 0; j < 4; j++)
-            //   res->point[pt->v[j]].tag &= ~MG_NUL;
 
             if (MMG5_orvol(res->point, pt->v) < 0.0)
             {
@@ -483,48 +483,93 @@ namespace Rodin::External::MMG
          Alert::Exception("Unhandled case.").raise();
          return nullptr;
       }
+
+      // Tag corners
+      for (const auto& c : src.getCorners())
+      {
+         assert(c >= 0);
+         assert(c <= res->np);
+         res->point[c + 1].tag |= MG_CRN;
+      }
+
+      // Tag edges
+      if (src.getDimension() == 2)
+      {
+         for (const auto& r : src.getRidges())
+         {
+            assert(r >= 0);
+            assert(r <= res->na);
+            res->edge[r + 1].tag |= MG_GEO;
+         }
+      }
+      else if (src.getDimension() == 3)
+      {
+         res->na = src.getEdges().size();
+
+         assert(!res->edge);
+         MMG5_SAFE_CALLOC(res->edge, res->na + 1, MMG5_Edge,
+               Alert::Exception("Failed to allocate memory for MMG5_pEdge->edge").raise());
+
+         for (const auto& e : src.getEdges() | boost::adaptors::indexed(1))
+         {
+            res->edge[e.index()].a = e.value().endpoints.first + 1;
+            res->edge[e.index()].b = e.value().endpoints.second + 1;
+            res->edge[e.index()].ref = e.value().ref;
+            res->edge[e.index()].tag = MG_NOTAG;
+         }
+
+         for (const auto& r : src.getRidges())
+         {
+            assert(r >= 0);
+            assert(r <= res->na);
+            res->edge[r + 1].tag |= MG_GEO;
+         }
+      }
+      else
+      {
+         assert(false);
+      }
+
       return res;
    }
 
-   Rodin::Geometry::Mesh<Context::Serial> MMG5::meshToRodin(const MMG5_pMesh src)
+   MMG::Mesh MMG5::meshToRodin(const MMG5_pMesh src)
    {
       bool isSurface = isSurfaceMesh(src);
-      mfem::Mesh dst;
+      MMG::Mesh dst;
 
       switch (src->dim) // Switch over space dimension
       {
          case 2:
          {
             assert(!isSurface); // Surface embedded in 2D space not handled yet
-            dst = mfem::Mesh(
-                  src->dim, // Dimension
-                  src->np,  // Vertex count
-                  src->nt,  // Element count,
-                  src->na   // Boundary element count
-                  );
+
+            dst.initialize(src->dim, src->dim);
+
+            // Add points
             for (int i = 1; i <= src->np; i++)
             {
-               dst.AddVertex(
-                     src->point[i].c[0],
-                     src->point[i].c[1],
-                     src->point[i].c[2]);
+               dst.vertex({ src->point[i].c[0], src->point[i].c[1] });
+               if (src->point[i].tag & MG_CRN)
+                  dst.corner(i - 1);
             }
 
+            // Add elements
             for (int i = 1; i <= src->nt; i++)
             {
-               dst.AddTriangle(
-                     src->tria[i].v[0] - 1,
-                     src->tria[i].v[1] - 1,
-                     src->tria[i].v[2] - 1,
+               dst.element(
+                     Geometry::Type::Triangle,
+                     { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1},
                      src->tria[i].ref);
             }
 
+            // Add boundary
             for (int i = 1; i <= src->na; i++)
             {
-               dst.AddBdrSegment(
-                     src->edge[i].a - 1,
-                     src->edge[i].b - 1,
-                     src->edge[i].ref);
+               dst.boundary(
+                     Geometry::Type::Segment,
+                     { src->edge[i].a - 1, src->edge[i].b - 1 },
+                     src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
             }
             break;
          }
@@ -532,72 +577,71 @@ namespace Rodin::External::MMG
          {
             if (isSurface)
             {
-               dst = mfem::Mesh(
-                     src->dim - 1,     // Dimension
-                     src->np,          // Vertex count
-                     src->nt,          // Element count
-                     src->na,          // Boundary element count
-                     src->dim          // Space dim
-                     );
+               dst.initialize(src->dim - 1, src->dim);
+
+               // Add points
                for (int i = 1; i <= src->np; i++)
                {
-                  dst.AddVertex(
-                       src->point[i].c[0],
-                       src->point[i].c[1],
-                       src->point[i].c[2]);
+                  dst.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
+                  if (src->point[i].tag & MG_CRN)
+                     dst.corner(i - 1);
                }
 
+               // Add elements
                for (int i = 1; i <= src->nt; i++)
                {
-                  dst.AddTriangle(
-                        src->tria[i].v[0] - 1,
-                        src->tria[i].v[1] - 1,
-                        src->tria[i].v[2] - 1,
+                  dst.element(
+                        Geometry::Type::Triangle,
+                        { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1},
                         src->tria[i].ref);
                }
 
+               // Add boundary
                for (int i = 1; i <= src->na; i++)
                {
-                  dst.AddBdrSegment(
-                        src->edge[i].a - 1,
-                        src->edge[i].b - 1,
+                  dst.boundary(
+                        Geometry::Type::Segment,
+                        { src->edge[i].a - 1, src->edge[i].b - 1 },
                         src->edge[i].ref);
+                  dst.ridge(i - 1);
                }
             }
             else
             {
-               dst = mfem::Mesh(
-                     src->dim, // Dimension
-                     src->np,  // Vertex count
-                     src->ne,  // Element count
-                     src->nt   // Boundary element count
-                     );
+               dst.initialize(src->dim, src->dim);
+
+               // Add points
                for (int i = 1; i <= src->np; i++)
                {
-                 dst.AddVertex(
-                     src->point[i].c[0],
-                     src->point[i].c[1],
-                     src->point[i].c[2]
-                     );
+                  dst.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
+                  if (src->point[i].tag & MG_CRN)
+                     dst.corner(i - 1);
+               }
+
+               // Add edges
+               for (int i = 1; i <= src->na; i++)
+               {
+                  dst.edge({ src->edge[i].a - 1, src->edge[i].b - 1 },
+                        (src->edge[i].ref == 0 ? 128 : src->edge[i].ref));
+                  if (src->edge[i].tag & MG_GEO)
+                     dst.ridge(i - 1);
                }
 
                for (int i = 1; i <= src->nt; i++)
                {
-                  dst.AddBdrTriangle(
-                        src->tria[i].v[0] - 1,
-                        src->tria[i].v[1] - 1,
-                        src->tria[i].v[2] - 1,
-                        src->tria[i].ref);
+                  dst.boundary(
+                     Geometry::Type::Triangle,
+                     { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1 },
+                     src->tria[i].ref);
                }
 
                for (int i = 1; i <= src->ne; i++)
                {
-                  dst.AddTet(
-                        src->tetra[i].v[0] - 1,
-                        src->tetra[i].v[1] - 1,
-                        src->tetra[i].v[2] - 1,
-                        src->tetra[i].v[3] - 1,
-                        src->tetra[i].ref);
+                  dst.element(
+                     Geometry::Type::Tetrahedron,
+                     { src->tetra[i].v[0] - 1, src->tetra[i].v[1] - 1,
+                        src->tetra[i].v[2] - 1, src->tetra[i].v[3] - 1 },
+                     src->tetra[i].ref);
                }
             }
             break;
@@ -607,9 +651,8 @@ namespace Rodin::External::MMG
             Alert::Exception("Unhandled case").raise();
          }
       }
-
-      dst.FinalizeMesh(0, true);
-      return Rodin::Geometry::Mesh<Context::Serial>(std::move(dst));
+      dst.finalize();
+      return dst;
    }
 
    void MMG5::copySolution(const MMG5_pSol src, MMG5_pSol dst)
@@ -735,6 +778,8 @@ namespace Rodin::External::MMG
                MMG2D_Set_dparameter(
                   mesh, nullptr, MMG2D_DPARAM_hausd, *m_hausd);
             }
+            MMG2D_Set_iparameter(
+                  mesh, nullptr, MMG2D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
             break;
          }
          case 3:
@@ -761,6 +806,8 @@ namespace Rodin::External::MMG
                   MMGS_Set_dparameter(
                      mesh, nullptr, MMGS_DPARAM_hausd, *m_hausd);
                }
+               MMGS_Set_iparameter(
+                     mesh, nullptr, MMGS_IPARAM_angle, static_cast<int>(m_ridgeDetection));
             }
             else
             {
@@ -784,6 +831,8 @@ namespace Rodin::External::MMG
                   MMG3D_Set_dparameter(
                      mesh, nullptr, MMG3D_DPARAM_hausd, *m_hausd);
                }
+               MMG3D_Set_iparameter(
+                     mesh, nullptr, MMG3D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
             }
             break;
             default:

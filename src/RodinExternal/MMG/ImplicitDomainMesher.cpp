@@ -34,12 +34,6 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::enableRidgeDetection(bool enable)
-  {
-    m_ridgeDetection = enable;
-    return *this;
-  }
-
   ImplicitDomainMesher& ImplicitDomainMesher::split(
       const MaterialReference& ref, const Split& s)
   {
@@ -109,7 +103,6 @@ namespace Rodin::External::MMG
       MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_iso, 1);
     }
     MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_ls, m_ls);
-    MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
     return MMG2D_mmg2dls(mesh, sol, nullptr);
   }
 
@@ -130,7 +123,6 @@ namespace Rodin::External::MMG
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
     {
-      Alert::Exception() << "Currently not supported to specify splits." << Alert::Raise;
       mesh->memMax *= 2.0; // Double allowed memory because of bug
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_numberOfMat, m_uniqueSplit.size());
       for (const auto& v : m_uniqueSplit)
@@ -171,8 +163,6 @@ namespace Rodin::External::MMG
 
     MMG3D_Set_dparameter(mesh, sol, MMG3D_DPARAM_ls, m_ls);
 
-    MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
-
     return MMG3D_mmg3dls(mesh, sol, nullptr);
   }
 
@@ -196,7 +186,6 @@ namespace Rodin::External::MMG
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_iso, 1);
     }
     MMGS_Set_dparameter(mesh, sol, MMGS_DPARAM_ls, m_ls);
-    MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_angle, static_cast<int>(m_ridgeDetection));
     return MMGS_mmgsls(mesh, sol, nullptr);
   }
 
@@ -254,7 +243,7 @@ namespace Rodin::External::MMG
     }
   }
 
-  void ImplicitDomainMesher::deleteRef(MMG5_pMesh mesh, MaterialReference ref)
+  void ImplicitDomainMesher::deleteBoundaryRef(MMG5_pMesh mesh, MaterialReference ref)
   {
     if (m_meshTheSurface || mesh->dim == 2)
     {

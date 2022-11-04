@@ -23,6 +23,10 @@ namespace Rodin::External::MMG
   class MMG5
   {
     public:
+      MMG5()
+        : m_ridgeDetection(true)
+      {}
+
       static constexpr int s_meshVersionFormatted = 2;
 
       // ---- Mesh methods ---------------------------------------------------
@@ -34,9 +38,9 @@ namespace Rodin::External::MMG
 
       static void destroyMesh(MMG5_pMesh);
 
-      static MMG5_pMesh rodinToMesh(const Rodin::Geometry::Mesh<Context::Serial>& src);
+      static MMG5_pMesh rodinToMesh(const MMG::Mesh& src);
 
-      static Rodin::Geometry::Mesh<Context::Serial> meshToRodin(const MMG5_pMesh src);
+      static MMG::Mesh meshToRodin(const MMG5_pMesh src);
 
       // ---- Solution methods -----------------------------------------------
       static MMG5_pSol createSolution(MMG5_pMesh mesh, int vdim);
@@ -108,6 +112,12 @@ namespace Rodin::External::MMG
       static void destroySolution(MMG5_pSol sol);
 
     protected:
+      MMG5& setAngleDetection(bool b = true)
+      {
+        m_ridgeDetection = b;
+        return *this;
+      }
+
       /**
        * @brief Sets the minimal edge size.
        *
@@ -220,6 +230,7 @@ namespace Rodin::External::MMG
                             m_hmax,
                             m_hausd,
                             m_hgrad;
+      bool m_ridgeDetection;
   };
 }
 #endif

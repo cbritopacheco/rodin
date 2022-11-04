@@ -35,7 +35,7 @@ int main(int, char**)
   const char* meshFile = "../resources/mfem/simple-cantilever2d-example.mesh";
 
   // Load mesh
-  Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile);
   Omega.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;

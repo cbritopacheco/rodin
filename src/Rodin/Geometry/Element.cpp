@@ -4,6 +4,13 @@
 namespace Rodin::Geometry
 {
    // ---- ElementBase -------------------------------------------------------
+   std::vector<int> ElementBase::getVertices() const
+   {
+      mfem::Array<int> vs;
+      m_element->GetVertices(vs);
+      return std::vector(vs.begin(), vs.end());
+   }
+
    int ElementBase::getAttribute() const
    {
       return m_element->GetAttribute();

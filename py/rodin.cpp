@@ -58,7 +58,7 @@ namespace Rodin
         PyMesh& element(
               Type geom,
               const std::vector<int>& vs,
-              std::optional<int> attr = {})
+              int attr = 1)
         {
           serial().element(geom, vs, attr);
           return *this;
@@ -153,6 +153,6 @@ PYBIND11_MODULE(rodin, m)
         py::arg("dim"), py::arg("sdim"))
     .def("vertex", &Rodin::Geometry::PyMesh::vertex)
     .def("element", &Rodin::Geometry::PyMesh::element,
-        py::arg("geometry"), py::arg("vertices"), py::arg("attribute") = py::none())
+        py::arg("geometry"), py::arg("vertices"), py::arg("attribute") = 1)
     ;
 }

@@ -8,6 +8,7 @@
 #define RODIN_IO_FORWARDDECLS_H
 
 #include <string>
+#include <ostream>
 #include <optional>
 #include <boost/filesystem.hpp>
 
@@ -19,11 +20,14 @@ namespace Rodin::IO
    template <class T>
    class Printer;
 
+   /**
+    * @brief Enumeration class for different file formats.
+    */
    enum class FileFormat
    {
-      MFEM,
-      GMSH,
-      MEDIT
+      MFEM, ///< MFEM file format
+      GMSH, ///< GMSH file format
+      MEDIT ///< MEDIT file format
    };
 
    template <FileFormat fmt, class Trait>
@@ -37,6 +41,8 @@ namespace Rodin::IO
 
    template <FileFormat fmt, class FES>
    class GridFunctionPrinter;
+
+   std::ostream& operator<<(std::ostream& os, FileFormat fmt);
 }
 
 #endif
