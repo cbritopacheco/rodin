@@ -317,6 +317,7 @@ namespace Rodin::Geometry
             Alert::Exception()
                << "Loading from \"" << fmt << "\" format unsupported."
                << Alert::Raise;
+            break;
          }
       }
 

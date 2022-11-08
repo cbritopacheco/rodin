@@ -216,41 +216,6 @@ namespace Rodin::Variational
 
                FunctionValue(FunctionValue&&) = default;
 
-               inline
-               constexpr
-               operator double() const
-               {
-                  return std::get<double>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Vector&() &
-               {
-                  return std::get<Vector>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Vector&&() &&
-               {
-                  return std::move(std::get<Vector>(m_v));
-               }
-
-               inline
-               constexpr
-               operator Matrix&() &
-               {
-                  return std::get<Matrix>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Matrix&&() &&
-               {
-                  return std::move(std::get<Matrix>(m_v));
-               }
-
                /**
                 * @brief Queries which type the FunctionValue %holds.
                 */
@@ -260,6 +225,46 @@ namespace Rodin::Variational
                bool holds() const
                {
                   return std::holds_alternative<T>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Scalar() const
+               {
+                  assert(holds<Scalar>());
+                  return std::get<Scalar>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Vector&() &
+               {
+                  assert(holds<Vector>());
+                  return std::get<Vector>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Vector&&() &&
+               {
+                  assert(holds<Vector>());
+                  return std::move(std::get<Vector>(m_v));
+               }
+
+               inline
+               constexpr
+               operator Matrix&() &
+               {
+                  assert(holds<Matrix>());
+                  return std::get<Matrix>(m_v);
+               }
+
+               inline
+               constexpr
+               operator Matrix&&() &&
+               {
+                  assert(holds<Matrix>());
+                  return std::move(std::get<Matrix>(m_v));
                }
 
             private:
