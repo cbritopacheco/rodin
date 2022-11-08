@@ -22,7 +22,9 @@ namespace Rodin::IO
          Alert::Exception("Unrecognized mesh format.").raise();
       if (fmt == FileFormat::MFEM)
       {
-         getObject() = Rodin::Geometry::Mesh<Context::Serial>(mfem::Mesh(is, 0, 1, getFixOrientation()));
+         getObject() =
+            Rodin::Geometry::Mesh<Context::Serial>(
+                  mfem::Mesh(is, 0, 1, getFixOrientation()));
       }
       else
       {

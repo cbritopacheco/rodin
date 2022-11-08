@@ -115,18 +115,16 @@ namespace Rodin::Variational
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class Number>
-   class ScalarFunction<Number> : public ScalarFunctionBase
+   class ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>
+      : public ScalarFunctionBase
    {
       public:
-         static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
-
          /**
           * @brief Constructs a ScalarFunction from an arithmetic value.
           * @param[in] x Arithmetic value
           */
-         template <typename U = Number>
          constexpr
-         ScalarFunction(typename std::enable_if_t<std::is_arithmetic_v<U>, U> x)
+         ScalarFunction(Number x)
             : m_x(x)
          {}
 
@@ -162,9 +160,9 @@ namespace Rodin::Variational
       private:
          const Number m_x;
    };
-   template <class T>
-   ScalarFunction(const T&)
-      -> ScalarFunction<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
+   template <class Number>
+   ScalarFunction(Number)
+      -> ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>;
 
    /**
     * @ingroup ScalarFunctionSpecializations

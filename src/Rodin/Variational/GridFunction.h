@@ -207,6 +207,12 @@ namespace Rodin::Variational
             return project(v);
          }
 
+         GridFunctionBase& operator=(std::function<double(const Geometry::Point&)> fn)
+         {
+            assert(getFiniteElementSpace().getVectorDimension() == 1);
+            return project(ScalarFunction(fn));
+         }
+
          /**
           * @brief Projects a FunctionBase instance
           *

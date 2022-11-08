@@ -602,8 +602,9 @@ namespace Rodin::External::MMG
                   dst.boundary(
                         Geometry::Type::Segment,
                         { src->edge[i].a - 1, src->edge[i].b - 1 },
-                        src->edge[i].ref);
-                  dst.ridge(i - 1);
+                        src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
+                  if (src->edge[i].tag & MG_GEO)
+                     dst.ridge(i - 1);
                }
             }
             else

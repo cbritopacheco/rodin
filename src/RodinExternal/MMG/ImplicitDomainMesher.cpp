@@ -173,7 +173,7 @@ namespace Rodin::External::MMG
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
-      Alert::Warning("Warning material splitting is not supported for surfaces").raise();
+      Alert::Exception("Material splitting is not supported for surfaces.").raise();
 
     if (m_meshTheSurface)
     {

@@ -120,10 +120,10 @@ namespace Rodin::External::MMG
         }
 
         // Erase boundary elements which have the isoref
-        if (m_isoref)
-          deleteBoundaryRef(mesh, *m_isoref);
+        // if (m_isoref)
+        //   deleteBoundaryRef(mesh, *m_isoref);
 
-        MMG5_pSol sol   = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
+        MMG5_pSol sol = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
         copySolution(ls, sol);
 
         MMG5::setParameters(mesh);
@@ -169,9 +169,6 @@ namespace Rodin::External::MMG
             << "Failed to discretize the implicit domain."
             << Alert::Raise;
         }
-
-        // Delete zero reference
-        // deleteBoundaryRef(mesh, 0);
 
         auto rodinMesh = meshToRodin(mesh);
         destroySolution(sol);
