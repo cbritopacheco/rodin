@@ -43,6 +43,7 @@ set(RodinVariational_HEADERS
   LT.h
   OR.h
   AND.h
+  Tangent.h
   )
 
 set(RodinVariational_SRCS
@@ -86,6 +87,7 @@ set(RodinVariational_SRCS
   LT.cpp
   OR.cpp
   AND.cpp
+  Tangent.cpp
   )
 
 add_library(RodinVariational

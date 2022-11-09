@@ -317,6 +317,7 @@ namespace Rodin::Geometry
             Alert::Exception()
                << "Loading from \"" << fmt << "\" format unsupported."
                << Alert::Raise;
+            break;
          }
       }
 
@@ -456,18 +457,29 @@ namespace Rodin::Geometry
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::element(
          Type geom,
-         const std::vector<int>& vs, std::optional<int> attr)
+         const std::vector<int>& vs, int attr)
    {
       mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
       el->SetVertices(vs.data());
-      if (attr)
-         el->SetAttribute(*attr);
+      el->SetAttribute(attr);
       getHandle().AddElement(el);
+      return *this;
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::boundary(
+         Type geom,
+         const std::vector<int>& vs, int attr)
+   {
+      mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
+      el->SetVertices(vs.data());
+      el->SetAttribute(attr);
+      getHandle().AddBdrElement(el);
       return *this;
    }
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::finalize()
    {
+      getHandle().FinalizeTopology();
       getHandle().Finalize(false, true);
       return *this;
    }

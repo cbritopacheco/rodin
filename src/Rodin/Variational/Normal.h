@@ -57,6 +57,7 @@ namespace Rodin::Variational
             value.SetSize(m_dimension);
             mfem::CalcOrtho(trans.Jacobian(), value);
             const double norm = value.Norml2();
+            assert(norm > 0.0);
             switch (trans.ElementType)
             {
                case mfem::ElementTransformation::BDR_ELEMENT:

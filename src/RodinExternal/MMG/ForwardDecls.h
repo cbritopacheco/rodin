@@ -11,6 +11,8 @@ namespace Rodin::External::MMG
 {
   class MMG5;
 
+  class Mesh;
+
   template <class T>
   class Distancer;
 

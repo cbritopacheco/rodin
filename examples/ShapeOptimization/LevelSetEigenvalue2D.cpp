@@ -93,7 +93,7 @@ class EigenSolver
 int main(int argc, char** argv)
 {
   // Load mesh
-  Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile);
 
   // Solver for hilbertian regularization

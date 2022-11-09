@@ -497,12 +497,12 @@ namespace Rodin::Variational
       }
    }
 
-   std::set<Geometry::Vertex> GridFunctionBase::where(
+   std::set<Geometry::Point> GridFunctionBase::where(
          const BooleanFunctionBase& p,
          const std::set<int>& attrs,
          std::function<int(mfem::ElementTransformation&)> order) const
    {
-      std::set<Geometry::Vertex> result;
+      std::set<Geometry::Point> result;
       const auto& fes = getFiniteElementSpace();
       const auto& mesh = fes.getMesh();
       for (int i = 0; i < mesh.count<Geometry::Element>(); i++)
@@ -520,14 +520,7 @@ namespace Rodin::Variational
                const mfem::IntegrationPoint& ip = ir->IntPoint(j);
                trans->SetIntPoint(&ip);
                if (p.getValue(*trans, ip))
-               {
-                  mfem::Vector v;
-                  trans->Transform(ip, v);
-                  Geometry::Vertex vx(std::move(v));
-                  vx.setElementTransformation(trans);
-                  vx.setIntegrationPoint(&ip);
-                  result.insert(std::move(vx));
-               }
+                  result.insert(Geometry::Point(*trans, ip));
             }
          }
       }

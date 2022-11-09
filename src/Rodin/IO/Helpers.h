@@ -14,8 +14,6 @@
 
 namespace Rodin::IO
 {
-   std::ostream& operator<<(std::ostream& os, FileFormat fmt);
-
    std::map<std::string, IO::FileFormat> getMeshFileHeaders();
    static const std::map<std::string, IO::FileFormat> MeshFileHeaders = getMeshFileHeaders();
 
@@ -31,6 +29,8 @@ namespace Rodin::IO::Medit
       Vertices,
       Triangles,
       Tetrahedra,
+      Corners,
+      Ridges,
       Edges,
       SolAtVertices,
       SolAtEdges,

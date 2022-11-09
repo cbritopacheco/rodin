@@ -123,7 +123,6 @@ namespace Rodin::External::MMG
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
     {
-      Alert::Exception() << "Currently not supported to specify splits." << Alert::Raise;
       mesh->memMax *= 2.0; // Double allowed memory because of bug
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_numberOfMat, m_uniqueSplit.size());
       for (const auto& v : m_uniqueSplit)
@@ -164,8 +163,6 @@ namespace Rodin::External::MMG
 
     MMG3D_Set_dparameter(mesh, sol, MMG3D_DPARAM_ls, m_ls);
 
-    MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_angle, 0);
-
     return MMG3D_mmg3dls(mesh, sol, nullptr);
   }
 
@@ -176,7 +173,7 @@ namespace Rodin::External::MMG
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
-      Alert::Warning("Warning material splitting is not supported for surfaces").raise();
+      Alert::Exception("Material splitting is not supported for surfaces.").raise();
 
     if (m_meshTheSurface)
     {
@@ -246,7 +243,7 @@ namespace Rodin::External::MMG
     }
   }
 
-  void ImplicitDomainMesher::deleteRef(MMG5_pMesh mesh, MaterialReference ref)
+  void ImplicitDomainMesher::deleteBoundaryRef(MMG5_pMesh mesh, MaterialReference ref)
   {
     if (m_meshTheSurface || mesh->dim == 2)
     {
