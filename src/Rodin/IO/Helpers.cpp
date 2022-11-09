@@ -76,6 +76,8 @@ namespace Rodin::IO::Medit
       res.insert({"Dimension",            Keyword::Dimension});
       res.insert({"Vertices",             Keyword::Vertices});
       res.insert({"Edges",                Keyword::Edges});
+      res.insert({"Corners",              Keyword::Corners});
+      res.insert({"Ridges",               Keyword::Ridges});
       res.insert({"Triangles",            Keyword::Triangles});
       res.insert({"Tetrahedra",           Keyword::Tetrahedra});
       res.insert({"SolAtVertices",        Keyword::SolAtVertices});

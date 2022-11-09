@@ -525,7 +525,7 @@ namespace Rodin::Variational
    class Division;
 
    /**
-    * @brief Represents the dot product between two objects
+    * @brief Represents the dot product between two objects.
     * @tparam LHS Type of left hand side operand
     * @tparam RHS Type of right hand side operand
     *
@@ -541,6 +541,54 @@ namespace Rodin::Variational
     */
    template <class LHS, class RHS>
    class Dot;
+
+   /**
+    * @brief Represents the Frobenius norm.
+    * @tparam Operand Type of operand
+    *
+    * Represents the following mathematical expression:
+    * @f[
+    *    || \ \text{Operand} \ ||
+    * @f]
+    * where Operand represents a scalar, vector or matrix @f$ A @f$, whose
+    * Frobenius norm is defined by:
+    * @f[
+    *    || A || = \sqrt{\mathrm{tr}(A^T A)} \ .
+    * @f]
+    *
+    * @note For an overview of all the possible specializations of the
+    * Frobenius class, please see @ref FrobeniusSpecializations.
+    *
+    * @see FrobeniusSpecializations
+    */
+   template <class Operand>
+   class Frobenius;
+
+   /**
+    * @brief Represents the cosine function.
+    * @tparam Operand Type of operand
+    *
+    * Represents the following mathematical expression:
+    * @f[
+    *    \cos{\text{Operand}}
+    * @f]
+    * where Operand represents a scalar.
+    */
+   template <class Operand>
+   class Cosine;
+
+   /**
+    * @brief Represents the tangent function.
+    * @tparam Operand Type of operand
+    *
+    * Represents the following mathematical expression:
+    * @f[
+    *    \tan{\text{Operand}} = \dfrac{\sin{\text{Operand}}}{\cos{\text{Operand}}}
+    * @f]
+    * where Operand represents a scalar.
+    */
+   template <class Operand>
+   class Tangent;
 
    /**
     * @brief Represents the trace of a matrix function
@@ -732,9 +780,9 @@ namespace Rodin::Variational
     *
     * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int_\Omega \mathrm{Integrand}
+    *    \int \mathrm{Integrand}
     * @f]
-    * on a domain @f$ \Omega @f$.
+    * on a volumetric domain.
     *
     * @note For an overview of all the possible specializations of the Integral
     * class, please see @ref IntegralSpecializations.
@@ -749,12 +797,11 @@ namespace Rodin::Variational
     * a domain.
     * @tparam Integrand Type of the integrand
     *
-    * Represents the integral operator on the boundary of domain with a
-    * templated integrand type:
+    * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int_{\partial \Omega} \mathrm{Integrand}
+    *    \int \mathrm{Integrand}
     * @f]
-    * where @f$ \Omega @f$ is a domain.
+    * on the boundary of a volumetric domain.
     *
     * @note For an overview of all the possible specializations of the Integral
     * class, please see @ref BoundaryIntegralSpecializations.

@@ -26,7 +26,6 @@ namespace Rodin::IO
             : m_mesh(mesh)
          {}
 
-      protected:
          const Rodin::Geometry::Mesh<Context::Serial>& getObject() const override
          {
             return m_mesh;
@@ -69,10 +68,20 @@ namespace Rodin::IO
    {
       public:
          MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
-            : MeshPrinterBase(mesh)
+            :  MeshPrinterBase(mesh),
+               m_footer(true)
          {}
 
+         MeshPrinter& footer(bool b = true)
+         {
+            m_footer = b;
+            return *this;
+         }
+
          void print(std::ostream& os) override;
+
+      private:
+         bool m_footer;
    };
 }
 

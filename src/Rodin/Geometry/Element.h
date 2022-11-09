@@ -47,6 +47,8 @@ namespace Rodin::Geometry
             return static_cast<Type>(m_element->GetGeometryType());
          }
 
+         virtual std::vector<int> getVertices() const;
+
          /**
           * @brief Gets the attribute of the element.
           */
@@ -329,139 +331,110 @@ namespace Rodin::Geometry
          mfem::Element* m_element;
    };
 
-   class Vertex
+   /**
+    * @brief Represents a spatial point which belongs to some element of a mesh.
+    *
+    * A Point represents the physical coordinates (as opposed to reference
+    * coordinates) of a point on the mesh.
+    * This class differs from a Vertex in the sense that a Vertex is a node of
+    * some element of a Mesh. In contrast, a Point represents any
+    * coordinates contained in the Mesh.
+    */
+   class Point
    {
       public:
-         Vertex(std::initializer_list<double> l)
-            : m_trans(nullptr),
-              m_ip(nullptr)
+         /**
+          * @brief Constructs the Point object from reference coordinates.
+          * @param[in] trans Element transformation
+          * @param[in] ip Reference coordinates
+          */
+         Point(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+            :  m_trans(trans),
+               m_ip(ip)
          {
-            m_v.SetSize(l.size());
-            m_v = l.begin();
+            m_trans.get().Transform(ip, m_physical);
+            assert(m_physical.Size() == trans.mesh->SpaceDimension());
          }
 
-         Vertex(mfem::Vector&& v)
-            :  m_v(std::move(v)),
-               m_trans(nullptr),
-               m_ip(nullptr)
-         {}
+         Point(const Point&) = default;
 
-         Vertex(const mfem::Vector& v)
-            :  m_v(v),
-               m_trans(nullptr),
-               m_ip(nullptr)
-         {}
+         Point(Point&&) = default;
 
-         Vertex(const Vertex& other) = default;
-
-         Vertex(Vertex&& other)
-            : m_v(std::move(other.m_v)),
-              m_trans(other.m_trans),
-              m_ip(other.m_ip)
-         {
-            other.m_trans = nullptr;
-            other.m_ip = nullptr;
-         }
-
+         /**
+          * @brief Gets the space dimension of the physical coordinates.
+          * @returns Dimension of the physical coordinates.
+          */
          int getDimension() const
          {
-            return m_v.Size();
-         }
-
-         double& operator()(int i)
-         {
-            return m_v(i);
-         }
-
-         const double& operator()(int i) const
-         {
-            return m_v(i);
-         }
-
-         double& x()
-         {
-            return m_v(0);
-         }
-
-         double& y()
-         {
-            return m_v(1);
-         }
-
-         double& z()
-         {
-            return m_v(2);
-         }
-
-         const double& x() const
-         {
-            return m_v(0);
-         }
-
-         const double& y() const
-         {
-            return m_v(1);
-         }
-
-         const double& z() const
-         {
-            return m_v(2);
-         }
-
-         bool operator==(const Vertex& rhs) const
-         {
-            double constexpr epsilon = std::numeric_limits<double>::epsilon();
-            assert(getDimension() == rhs.getDimension());
-            for (int i = 0; i < m_v.Size(); i++)
-            {
-               if (!(fabs(m_v(i) - rhs.m_v(i)) < epsilon))
-                  return false;
-            }
-            return true;
+            return m_trans.get().mesh->SpaceDimension();
          }
 
          /**
-          * @brief Lexicographical comparison
+          * @brief Gets the i-th physical coordinate.
+          * @returns Physical i-th coordinate.
           */
-         bool operator<(const Vertex& rhs) const
+         double operator()(int i) const
+         {
+            return m_physical(i);
+         }
+
+         /**
+          * @brief Gets the @f$ x @f$ physical coordinate.
+          * @returns Physical @f$ x @f$-coordinate.
+          */
+         double x() const
+         {
+            return m_physical(0);
+         }
+
+         /**
+          * @brief Gets the @f$ y @f$ physical coordinate.
+          * @returns Physical @f$ y @f$-coordinate.
+          */
+         double y() const
+         {
+            return m_physical(1);
+         }
+
+         /**
+          * @brief Gets the @f$ z @f$ physical coordinate.
+          * @returns Physical @f$ z @f$-coordinate.
+          */
+         double z() const
+         {
+            return m_physical(2);
+         }
+
+         /**
+          * @brief Lexicographical comparison.
+          */
+         bool operator<(const Point& rhs) const
          {
             assert(getDimension() == rhs.getDimension());
-            for (int i = 0; i < m_v.Size() - 1; i++)
+            for (int i = 0; i < m_physical.Size() - 1; i++)
             {
-               if (m_v(i) < rhs.m_v(i))
+               if (m_physical(i) < rhs.m_physical(i))
                   return true;
-               if (rhs.m_v(i) > m_v(i))
+               if (rhs.m_physical(i) > m_physical(i))
                   return false;
             }
-            return (m_v(m_v.Size() - 1) < rhs.m_v(rhs.m_v.Size() - 1));
+            return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
          }
 
-         Vertex& setElementTransformation(mfem::ElementTransformation* trans)
+         mfem::ElementTransformation& getElementTransformation() const
          {
-            m_trans = trans;
-            return *this;
+            return m_trans.get();
          }
 
-         Vertex& setIntegrationPoint(const mfem::IntegrationPoint* ip)
+         const mfem::IntegrationPoint& getIntegrationPoint() const
          {
-            m_ip = ip;
-            return *this;
-         }
-
-         mfem::ElementTransformation* getElementTransformation() const
-         {
-            return m_trans;
-         }
-
-         const mfem::IntegrationPoint* getIntegrationPoint() const
-         {
-            return m_ip;
+            return m_ip.get();
          }
 
       private:
-         mfem::Vector m_v;
-         mfem::ElementTransformation* m_trans;
-         const mfem::IntegrationPoint* m_ip;
+         mfem::Vector m_physical;
+         std::reference_wrapper<mfem::ElementTransformation> m_trans;
+         std::reference_wrapper<const mfem::IntegrationPoint> m_ip;
    };
 }
 

@@ -4,16 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_GEOMETRY_H
-#define RODIN_GEOMETRY_H
+#include "Cosine.h"
 
-/**
- * @file
- * @brief Top level include for the Rodin::Geometry utilities.
- */
-
-#include "Geometry/Mesh.h"
-#include "Geometry/SubMesh.h"
-#include "Geometry/Element.h"
-
-#endif
+namespace Rodin::Variational
+{
+   Cosine<FunctionBase> cos(const FunctionBase& op)
+   {
+      return Cosine<FunctionBase>(op);
+   }
+}

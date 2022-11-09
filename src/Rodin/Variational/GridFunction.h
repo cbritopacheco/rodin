@@ -17,7 +17,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Cast.h"
-#include "Rodin/Core.h"
+#include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/IO/ForwardDecls.h"
@@ -46,59 +46,27 @@ namespace Rodin::Variational
    class GridFunctionBase : public VectorFunctionBase
    {
       public:
-         class GridFunctionValue
+         class GridFunctionValue : public FunctionValue
          {
             public:
                constexpr
                GridFunctionValue(double v)
-                  : m_v(v)
+                  : FunctionValue(v)
                {}
 
                constexpr
                GridFunctionValue(const mfem::Vector& v)
-                  : m_v(v)
+                  : FunctionValue(v)
                {}
 
                constexpr
                GridFunctionValue(mfem::Vector&& v)
-                  : m_v(std::move(v))
+                  : FunctionValue(std::move(v))
                {}
 
                GridFunctionValue(const GridFunctionValue&) = default;
 
                GridFunctionValue(GridFunctionValue&&) = default;
-
-               inline
-               constexpr
-               operator double() const
-               {
-                  return std::get<double>(m_v);
-               }
-
-               inline
-               constexpr
-               operator mfem::Vector&() &
-               {
-                  return std::get<mfem::Vector>(m_v);
-               }
-
-               inline
-               constexpr
-               operator mfem::Vector&&() &&
-               {
-                  return std::move(std::get<mfem::Vector>(m_v));
-               }
-
-               template <class T>
-               inline
-               constexpr
-               bool contains() const
-               {
-                  return std::holds_alternative<T>(m_v);
-               }
-
-            private:
-               std::variant<double, mfem::Vector> m_v;
          };
 
          GridFunctionBase() = default;
@@ -119,20 +87,20 @@ namespace Rodin::Variational
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
 
-         GridFunctionValue operator()(const Geometry::Vertex& v) const
+         GridFunctionValue operator()(const Geometry::Point& v) const
          {
             switch (getRangeType())
             {
                case RangeType::Scalar:
                {
                   mfem::Vector value;
-                  getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+                  getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
                   return GridFunctionValue(value(0));
                }
                case RangeType::Vector:
                {
                   mfem::Vector value;
-                  getValue(value, *v.getElementTransformation(), *v.getIntegrationPoint());
+                  getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
                   return GridFunctionValue(std::move(value));
                }
                case RangeType::Matrix:
@@ -239,6 +207,12 @@ namespace Rodin::Variational
             return project(v);
          }
 
+         GridFunctionBase& operator=(std::function<double(const Geometry::Point&)> fn)
+         {
+            assert(getFiniteElementSpace().getVectorDimension() == 1);
+            return project(ScalarFunction(fn));
+         }
+
          /**
           * @brief Projects a FunctionBase instance
           *
@@ -279,7 +253,7 @@ namespace Rodin::Variational
           */
          void transfer(GridFunctionBase& dst);
 
-         std::set<Geometry::Vertex> where(
+         std::set<Geometry::Point> where(
                const BooleanFunctionBase& p,
                const std::set<int>& attrs = {},
                std::function<int(mfem::ElementTransformation&)> order =

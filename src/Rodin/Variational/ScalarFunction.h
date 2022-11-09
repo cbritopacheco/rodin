@@ -115,18 +115,16 @@ namespace Rodin::Variational
     * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
     */
    template <class Number>
-   class ScalarFunction<Number> : public ScalarFunctionBase
+   class ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>
+      : public ScalarFunctionBase
    {
       public:
-         static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
-
          /**
           * @brief Constructs a ScalarFunction from an arithmetic value.
           * @param[in] x Arithmetic value
           */
-         template <typename U = Number>
          constexpr
-         ScalarFunction(typename std::enable_if_t<std::is_arithmetic_v<U>, U> x)
+         ScalarFunction(Number x)
             : m_x(x)
          {}
 
@@ -162,29 +160,29 @@ namespace Rodin::Variational
       private:
          const Number m_x;
    };
-   template <class T>
-   ScalarFunction(const T&)
-      -> ScalarFunction<std::enable_if_t<std::is_arithmetic_v<T>, T>>;
+   template <class Number>
+   ScalarFunction(Number)
+      -> ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>;
 
    /**
     * @ingroup ScalarFunctionSpecializations
     * @brief Represents a scalar function given by an arbitrary scalar function.
     */
    template <>
-   class ScalarFunction<std::function<double(const Geometry::Vertex&)>>
+   class ScalarFunction<std::function<double(const Geometry::Point&)>>
       : public ScalarFunctionBase
    {
       public:
          template <class T>
          ScalarFunction(T&& f)
             : ScalarFunction(
-                  std::function<double(const Geometry::Vertex&)>(std::forward<T>(f)))
+                  std::function<double(const Geometry::Point&)>(std::forward<T>(f)))
          {}
 
          /**
           * @brief Constructs a ScalarFunction from an std::function.
           */
-         ScalarFunction(std::function<double(const Geometry::Vertex&)> f)
+         ScalarFunction(std::function<double(const Geometry::Point&)> f)
             : m_f(f)
          {}
 
@@ -201,16 +199,12 @@ namespace Rodin::Variational
          double getValue(mfem::ElementTransformation& trans, const
                mfem::IntegrationPoint& ip) const override
          {
-            mfem::Vector transip;
-            trans.Transform(ip, transip);
-            Geometry::Vertex v(std::move(transip));
-            v.setElementTransformation(&trans).setIntegrationPoint(&ip);
-            return m_f(v);
+            return m_f(Geometry::Point(trans, ip));
          }
 
-         double operator()(const Geometry::Vertex& v) const
+         double operator()(const Geometry::Point& v) const
          {
-            return getValue(*v.getElementTransformation(), *v.getIntegrationPoint());
+            return getValue(v.getElementTransformation(), v.getIntegrationPoint());
          }
 
          ScalarFunction* copy() const noexcept override
@@ -219,17 +213,17 @@ namespace Rodin::Variational
          }
 
       private:
-         const std::function<double(const Geometry::Vertex&)> m_f;
+         const std::function<double(const Geometry::Point&)> m_f;
    };
 
-   ScalarFunction(std::function<double(const Geometry::Vertex&)>)
-      -> ScalarFunction<std::function<double(const Geometry::Vertex&)>>;
+   ScalarFunction(std::function<double(const Geometry::Point&)>)
+      -> ScalarFunction<std::function<double(const Geometry::Point&)>>;
 
    template <class T>
    ScalarFunction(T)
       -> ScalarFunction<
-         std::enable_if_t<std::is_invocable_r_v<double, T, const Geometry::Vertex&>,
-         std::function<double(const Geometry::Vertex&)>>>;
+         std::enable_if_t<std::is_invocable_r_v<double, T, const Geometry::Point&>,
+         std::function<double(const Geometry::Point&)>>>;
 }
 
 #endif

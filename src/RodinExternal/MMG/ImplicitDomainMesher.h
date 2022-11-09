@@ -10,8 +10,9 @@
 #include <boost/unordered_map.hpp>
 #include <boost/random/uniform_int.hpp>
 
-#include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
+
+#include "Mesh.h"
 
 #include "MMG5.h"
 #include "Common.h"
@@ -106,18 +107,23 @@ namespace Rodin::External::MMG
        * The material reference of the level set (edge) boundary will be 10.
        */
       template <class FES>
-      Rodin::Geometry::Mesh<Context::Serial> discretize(Variational::GridFunction<FES>& ls)
+      MMG::Mesh discretize(Variational::GridFunction<FES>& ls)
       {
-        // if (ls.getFiniteElementSpace().getMesh().getBoundaryAttributes().count(*m_isoref))
-        //   Alert::Exception("Boundary reference already contained in mesh.").raise();
-
-        MMG5_pMesh mesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
+        MMG5_pMesh mesh = nullptr;
+        try
+        {
+          mesh = rodinToMesh(
+              dynamic_cast<const MMG::Mesh&>(ls.getFiniteElementSpace().getMesh()));
+        } catch (std::bad_cast&)
+        {
+          Alert::Exception() << "Mesh must be of type MMG::Mesh." << Alert::Raise;
+        }
 
         // Erase boundary elements which have the isoref
-        if (m_isoref)
-          deleteRef(mesh, *m_isoref);
+        // if (m_isoref)
+        //   deleteBoundaryRef(mesh, *m_isoref);
 
-        MMG5_pSol sol   = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
+        MMG5_pSol sol = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
         copySolution(ls, sol);
 
         MMG5::setParameters(mesh);
@@ -163,9 +169,6 @@ namespace Rodin::External::MMG
             << "Failed to discretize the implicit domain."
             << Alert::Raise;
         }
-
-        // Delete zero reference
-        deleteRef(mesh, 0);
 
         auto rodinMesh = meshToRodin(mesh);
         destroySolution(sol);
@@ -229,6 +232,12 @@ namespace Rodin::External::MMG
         return rodinMesh;
       }
 
+      ImplicitDomainMesher& setAngleDetection(bool enable = true)
+      {
+        MMG5::setAngleDetection(enable);
+        return *this;
+      }
+
       ImplicitDomainMesher& setHMin(double hmin)
       {
         MMG5::setHMin(hmin);
@@ -265,7 +274,7 @@ namespace Rodin::External::MMG
 
       void generateUniqueSplit(const std::set<int>& attr);
 
-      void deleteRef(MMG5_pMesh mesh, MaterialReference ref);
+      void deleteBoundaryRef(MMG5_pMesh mesh, MaterialReference ref);
 
       double m_ls;
       SplitMap m_split;

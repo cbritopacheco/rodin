@@ -20,6 +20,15 @@
 
 namespace Rodin::IO
 {
+   /**
+    * @defgroup MeshLoaderSpecializations MeshLoader Template Specializations
+    * @brief Template specializations of the MeshLoader class.
+    * @see MeshLoader
+    */
+
+   /**
+    * @brief Base class for mesh loader objects.
+    */
    template <class Trait>
    class MeshLoaderBase : public IO::Loader<Rodin::Geometry::Mesh<Trait>>
    {
@@ -78,16 +87,45 @@ namespace Rodin::IO
          void load(std::istream& is) override;
    };
 
+   /**
+    * @ingroup MeshLoaderSpecializations
+    * @brief Specialization for loading Serial meshes in the MEDIT file format.
+    *
+    * The MEDIT file format specification can be found by visiting
+    * <a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">this
+    * link</a>.
+    */
    template <>
    class MeshLoader<IO::FileFormat::MEDIT, Context::Serial>
       : public MeshLoaderBase<Context::Serial>
    {
       public:
-         MeshLoader(Rodin::Geometry::Mesh<Context::Serial>& mesh)
+         using Object = Rodin::Geometry::Mesh<Context::Serial>;
+
+         struct IOContext
+         {
+            std::map<Medit::Keyword, std::optional<std::istream::pos_type>> pos;
+            std::map<Medit::Keyword, size_t> count;
+         };
+
+         MeshLoader(Object& mesh)
             : MeshLoaderBase<Context::Serial>(mesh)
          {}
 
          void load(std::istream& is) override;
+
+         IOContext& getContext()
+         {
+            return m_context;
+         }
+
+         const IOContext& getContext() const
+         {
+            return m_context;
+         }
+
+      private:
+         IOContext m_context;
    };
 }
 

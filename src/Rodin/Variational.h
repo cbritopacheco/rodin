@@ -57,6 +57,11 @@
 #include "Variational/Max.h"
 #include "Variational/Min.h"
 
+#include "Variational/Cosine.h"
+#include "Variational/Tangent.h"
+
+#include "Variational/Frobenius.h"
+
 #include "Variational/Integral.h"
 #include "Variational/Problem.h"
 

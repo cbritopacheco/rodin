@@ -10,7 +10,7 @@
 #include <cmath>
 #include <type_traits>
 
-namespace Rodin
+namespace Rodin::Math
 {
   /**
    * @brief Computes the absolute value of a value of type T.
@@ -70,6 +70,24 @@ namespace Rodin
   isInf(const T& x)
   {
     return std::isinf(x);
+  }
+
+  template <class T>
+  constexpr
+  inline
+  std::enable_if_t<!std::is_void_v<decltype(std::cos(std::declval<T>()))>, bool>
+  cos(const T& x)
+  {
+    return std::cos(x);
+  }
+
+  template <class T>
+  constexpr
+  inline
+  std::enable_if_t<!std::is_void_v<decltype(std::tan(std::declval<T>()))>, bool>
+  tan(const T& x)
+  {
+    return std::tan(x);
   }
 }
 
