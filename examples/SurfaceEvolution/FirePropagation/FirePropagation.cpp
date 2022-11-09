@@ -13,6 +13,8 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
+static constexpr double tgv = std::numeric_limits<double>::max();
+
 class Environment
 {
   public:
@@ -26,6 +28,7 @@ class Environment
 
     enum Terrain
     {
+      WorldBorder = 1,
       Vegetation = 2,
       Burnt = 3,
       Fire = 5
@@ -126,7 +129,7 @@ class Environment
           Problem cnd(d, v);
           cnd = Integral(lambda * Jacobian(d), Jacobian(v))
               + Integral(d, v)
-              - BoundaryIntegral(gdist, v).over(Terrain::Fire);
+              + DirichletBC(d, gdist).on(Terrain::Fire);
           solver.solve(cnd);
 
           const auto conormal = d.getGridFunction() / Frobenius(d.getGridFunction());
@@ -137,8 +140,10 @@ class Environment
             {
               auto fn = Dot(p, conormal) / (Frobenius(p) * Frobenius(conormal));
               double fv = fn(v);
-              assert(std::isfinite(fv));
-              return std::acos(fv);
+              if (std::isfinite(fv))
+                return std::acos(fv);
+              else
+                return 0.0;
             };
 
           // Angle between wind and conormal
@@ -148,10 +153,10 @@ class Environment
             {
               auto fn = Dot(wind, conormal) / (Frobenius(wind) * Frobenius(conormal));
               double fv = fn(v);
-              if (!std::isfinite(fv))
-                return 0.0;
-              else
+              if (std::isfinite(fv))
                 return std::acos(fv);
+              else
+                return 0.0;
             };
 
           // Compute the tilt angle
@@ -189,25 +194,12 @@ class Environment
           Problem hilbert(g, w);
           hilbert = Integral(lambda * Jacobian(g), Jacobian(w))
                   + Integral(g, w)
-                  + DirichletBC(g, ScalarFunction(R) * conormal).on(Terrain::Fire);
+                  + DirichletBC(g, VectorFunction{0, 0, 0}).on(Terrain::WorldBorder)
+                  + DirichletBC(g, ScalarFunction(R) * conormal).on(Terrain::Fire)
+                  ;
           solver.solve(hilbert);
 
-          // m_direction.getHandle() = g.getGridFunction().getHandle();
           m_direction.reset(new GridFunction(g.getGridFunction()));
-
-          // m_direction.save("direction.gf");
-          // m_env.m_topography.save("direction.mesh");
-          // assert(false);
-          // m_height =
-          //   [&](const Point& v)
-          //   {
-          //     double u0 = m_env.m_vegetalStratum.u0(v);
-          //     double al = alpha(v);
-          //     double gstar = m_env.getGravity() * (
-          //         m_env.m_vegetalStratum.T(v) / m_env.m_vegetalStratum.Ta(v) - 1.0);
-          //     return u0 * u0 / (gstar * gstar * std::cos(al) * std::cos(al));
-          //   };
-
           return *this;
         }
 
@@ -244,14 +236,16 @@ class Environment
               .setInteriorDomain(Terrain::Burnt)
               .distance(m_topography)));
 
+      // m_topography.save("dist.mesh", IO::FileFormat::MEDIT);
+      // m_fireDist->save("dist.sol", IO::FileFormat::MEDIT);
+
       m_flame.step(dt);
       MMG::Advect(*m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography.save("fire.mesh", IO::FileFormat::MEDIT);
-      m_fireDist->save("fire.sol", IO::FileFormat::MEDIT);
       m_topography = MMG::ImplicitDomainMesher().setHMax(0.05)
+                                                .setHMin(0.002)
+                                                .setHausdorff(0.001)
                                                 .setAngleDetection(false)
-                                                .noSplit(Terrain::Burnt)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
                                                 // .split(Terrain::Vegetation,
@@ -358,10 +352,13 @@ int main()
     };
 
   Environment environment(topography, stratum);
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < 1000; i++)
   {
-    environment.step(0.1);
+    std::cout << "i: " << i << std::endl;
+
+    environment.step(0.01);
     topography.save("out/evolution." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    topography.save("woof.mesh", IO::FileFormat::MEDIT);
     // environment.getFlame().getDirection().save("direction.gf");
   }
 
