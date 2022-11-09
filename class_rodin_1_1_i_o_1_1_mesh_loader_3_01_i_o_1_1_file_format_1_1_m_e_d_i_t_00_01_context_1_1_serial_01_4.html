@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::ScalarFunction&lt;Number&gt; class | Rodin</title>
+  <title>Rodin::IO::MeshLoader&lt;IO::FileFormat::MEDIT, Context::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,95 +52,20 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Number&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ScalarFunction&lt;Number&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshLoader&lt;IO::FileFormat::MEDIT, Context::Serial&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">Number</td>
-              <td>Arithmetic type</td>
-            </tr>
-          </tbody>
-        </table>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://en.cppreference.com/w/cpp/types/is_arithmetic">std::<wbr />is_arithmetic</a></p></aside>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+        <p>Specialization for loading Serial meshes in the MEDIT file format.</p>
+<p>The MEDIT file format specification can be found by visiting <a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">this link</a>.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;typename U = Number&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a9dc8d8f9e45538c4c694c81b12b66962" class="m-doc">ScalarFunction</a>(</span><span class="m-doc-wrap">typename std::enable_if_t&lt;std::is_arithmetic_v&lt;U&gt;, U&gt; x) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Trait&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase&lt;Context::Serial&gt;</a>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> from an arithmetic value.</dd>
+            <dd>Base class for mesh loader objects.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6bc2568a0de4229f1e8f34d56a6ac861" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Computes the value at the given transformation and integration point.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9dc8d8f9e45538c4c694c81b12b66962"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Number&gt;
-                template&lt;typename U = Number&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ScalarFunction&lt;Number&gt;&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9dc8d8f9e45538c4c694c81b12b66962" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">typename std::enable_if_t&lt;std::is_arithmetic_v&lt;U&gt;, U&gt; x) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Constructs a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> from an arithmetic value.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Arithmetic value</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a6bc2568a0de4229f1e8f34d56a6ac861"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Number&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />ScalarFunction&lt;Number&gt;&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bc2568a0de4229f1e8f34d56a6ac861" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Computes the value at the given transformation and integration point.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Value at given transformation and integration point.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

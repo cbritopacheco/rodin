@@ -63,7 +63,6 @@
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -79,6 +78,8 @@
             <dd>Module for writing formal expressions in C++.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a></dt>
             <dd>Module for dealing with geometries.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a></dt>
+            <dd>Module for dealing with I/O functionality.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a></dt>
             <dd>Module for solving variational problems constructed with the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a></dt>
@@ -100,174 +101,6 @@
             </dt>
             <dd>Class to help in the casting of objects from a type to another.</dd>
           </dl>
-        </section>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad3acf21c6d26966105f129297e787488" class="m-doc">abs</a>(</span><span class="m-doc-wrap">const T&amp; x) -&gt; std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::abs(std::declval&lt;T&gt;)))&gt;, T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Computes the absolute value of a value of type T.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e3395ded21ea0d2f530089935d90da0" class="m-doc">sqrt</a>(</span><span class="m-doc-wrap">const T&amp; x) -&gt; std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::sqrt(std::declval&lt;T&gt;)))&gt;, T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Computes the square root of a value of type T.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ebb284806e6209e9b7924e706a6de7e" class="m-doc">isNaN</a>(</span><span class="m-doc-wrap">const T&amp; x) -&gt; std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::isnan(std::declval&lt;T&gt;)))&gt;, bool&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Determines if the floating point number is not-a-number (NaN).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acd2b00e202c0c7787b49d8a224bdad14" class="m-doc">isInf</a>(</span><span class="m-doc-wrap">const T&amp; x) -&gt; std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::isinf(std::declval&lt;T&gt;)))&gt;, bool&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Determines if the floating point number is positive or negative infinity.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ad3acf21c6d26966105f129297e787488"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::abs(std::declval&lt;T&gt;)))&gt;, T&gt; Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad3acf21c6d26966105f129297e787488" class="m-doc-self">abs</a>(</span><span class="m-doc-wrap">const T&amp; x) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Computes the absolute value of a value of type T.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">T</td>
-                  <td>Type of value</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Value</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Absolute of value</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a0e3395ded21ea0d2f530089935d90da0"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::sqrt(std::declval&lt;T&gt;)))&gt;, T&gt; Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e3395ded21ea0d2f530089935d90da0" class="m-doc-self">sqrt</a>(</span><span class="m-doc-wrap">const T&amp; x) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Computes the square root of a value of type T.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">T</td>
-                  <td>Type of value</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Value</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Square root of value</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a2ebb284806e6209e9b7924e706a6de7e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::isnan(std::declval&lt;T&gt;)))&gt;, bool&gt; Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ebb284806e6209e9b7924e706a6de7e" class="m-doc-self">isNaN</a>(</span><span class="m-doc-wrap">const T&amp; x) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Determines if the floating point number is not-a-number (NaN).</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">T</td>
-                  <td>Type of value</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Value</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if value is NaN, false otherwise.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="acd2b00e202c0c7787b49d8a224bdad14"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;!std::is_void_v&lt;decltype(std::isinf(std::declval&lt;T&gt;)))&gt;, bool&gt; Rodin::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd2b00e202c0c7787b49d8a224bdad14" class="m-doc-self">isInf</a>(</span><span class="m-doc-wrap">const T&amp; x) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Determines if the floating point number is positive or negative infinity.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">T</td>
-                  <td>Type of value</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Value</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if value is Inf (or -Inf), false otherwise.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

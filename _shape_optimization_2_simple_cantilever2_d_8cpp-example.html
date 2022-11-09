@@ -95,7 +95,7 @@
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;../resources/mfem/simple-cantilever2d-example.mesh&quot;</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Load mesh</span>
-<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">meshFile</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega0.mesh&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Saved initial mesh to Omega0.mesh&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span><span class="w"></span>

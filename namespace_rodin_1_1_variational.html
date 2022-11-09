@@ -137,6 +137,11 @@
             </dt>
             <dd><a href="class_rodin_1_1_variational_1_1_composition.html" class="m-doc">Composition</a> of a scalar valued function on the real line and a scalar function on the mesh.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Operand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_cosine.html" class="m-doc">Cosine</a>
+            </dt>
+            <dd>Represents the cosine function.</dd>
+            <dt>
               class <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>
             </dt>
             <dd>Function representing the <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> in <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space.</dd>
@@ -218,6 +223,11 @@
               class <a href="class_rodin_1_1_variational_1_1_finite_element_collection_base.html" class="m-doc">FiniteElementCollectionBase</a>
             </dt>
             <dd>Abstract base class for finite element collections.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>
+            </dt>
+            <dd>Represents the <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> norm.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_g_e_q.html" class="m-doc">GEQ</a>
@@ -487,12 +497,12 @@ $ L^2(\Omega)^d $
             <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_number_01_4.html" class="m-doc">ScalarFunction&lt;Number&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_number_00_01std_1_1enable__if__t_3_01std_1_f3eff80e8f1318f05e9709f1072956ac.html" class="m-doc">ScalarFunction&lt;Number, std::enable_if_t&lt;std::is_arithmetic_v&lt;Number&gt;&gt;&gt;</a>
             </dt>
             <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_geometry_1_1_vertex_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Geometry::Vertex&amp;)&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01std_1_1function_3_01double_07const_01_geometry_1_1_point_01_6_08_4_01_4.html" class="m-doc">ScalarFunction&lt;std::function&lt;double(const Geometry::Point&amp;)&gt;&gt;</a>
             </dt>
             <dd>Represents a scalar function given by an arbitrary scalar function.</dd>
             <dt>
@@ -515,6 +525,11 @@ $ L^2(\Omega)^d $
               class <a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a>
             </dt>
             <dd>Represents the sum operation.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_tangent.html" class="m-doc">Tangent</a>
+            </dt>
+            <dd>Represents the tangent function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>
@@ -619,6 +634,10 @@ $ A $
               Rhs&amp;&amp; g) -&gt; auto</span>
             </dt>
             <dd>Composes two functions.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae8cd07da52165e166d81955b7dee798e" class="m-doc">cos</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; op) -&gt; <a href="class_rodin_1_1_variational_1_1_cosine.html" class="m-doc">Cosine</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&gt;</span>
+            </dt>
+            <dd>Convenience function to create objects of type <a href="class_rodin_1_1_variational_1_1_cosine_3_01_function_base_01_4.html" class="m-doc">Cosine&lt;FunctionBase&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Trait&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#acd2d5789c4b5c9f5965cec8f78b6484c" class="m-doc">Dx</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;Trait&gt;&gt;&amp; u) -&gt; <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a></span>
@@ -814,6 +833,23 @@ $ g $
 <use x='241.179873' y='-2.988792' xlink:href='#eq3-g2-41'/>
 </g>
 </svg></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae8cd07da52165e166d81955b7dee798e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_cosine.html" class="m-doc">Cosine</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&gt; Rodin::<wbr />Variational::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8cd07da52165e166d81955b7dee798e" class="m-doc-self">cos</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; op)</span></span>
+            </h3>
+            <p>Convenience function to create objects of type <a href="class_rodin_1_1_variational_1_1_cosine_3_01_function_base_01_4.html" class="m-doc">Cosine&lt;FunctionBase&gt;</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">op&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar function type</td>
                 </tr>
               </tbody>
             </table>
