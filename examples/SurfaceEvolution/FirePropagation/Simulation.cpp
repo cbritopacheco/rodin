@@ -308,7 +308,24 @@ int main()
 {
   const char* meshfile = "topo.mesh";
   MMG::Mesh topography;
-  topography.load(meshfile, IO::FileFormat::MEDIT);
+  topography.load(meshfile);
+  topography.save("medit.mesh", IO::FileFormat::MEDIT);
+
+  std::cout << "optimizing" << std::endl;
+  MMG::MeshOptimizer().optimize(topography);
+  topography.save("optimize.mesh");
+
+  // Make a fire somewhere
+  std::cout << "meshing" << std::endl;
+  H1 sh(topography);
+  GridFunction fire(sh);
+  fire = [](const Point& p) { return std::sqrt(p.x() * p.x() + p.y() * p.y()) - 20; };
+  auto implicit = MMG::ImplicitDomainMesher().setHMax(0.05).discretize(fire);
+  implicit.save("implicit.mesh", IO::FileFormat::MEDIT);
+
+  std::cout << "exiting" << std::endl;
+  std::exit(1);
+
   Environment::VegetalStratum stratum;
 
   stratum.a = 0.05;
