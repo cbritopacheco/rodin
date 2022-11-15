@@ -33,6 +33,16 @@ make -j4
 | RODIN_BUILD_EXAMPLES   | Builds the examples in the `examples/` directory. |
 | RODIN_BUILD_DOC        | Builds the documentation using Doxygen            |
 | RODIN_USE_MCSS         | Builds the documentation using Doxygen and m.css  |
+| RODIN_BUILD_SRC        | Build the Rodin source code                       |
+| RODIN_BUILD_EXAMPLES   | Build the Rodin examples                          |
+| RODIN_BUILD_DOC        | Build the Rodin documentation                     |
+| RODIN_USE_MCSS         | Use m.css style documentation                     |
+| RODIN_WITH_PLOT        | Build the Rodin::Plot module                      |
+| RODIN_USE_MPI          | Build with MPI support                            |
+| RODIN_USE_OPENMP       | Build with OpenMP support                         |
+| RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
+| RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
+| RODIN_BUILD_PY         | Build Python bindings                             |
 
 ## Building the documentation
 
