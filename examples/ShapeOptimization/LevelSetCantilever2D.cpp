@@ -48,8 +48,8 @@ int main(int, char**)
   Omega.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-  // UMFPack
-  auto solver = Solver::UMFPack();
+  // UMFPACK
+  Solver::UMFPack solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -78,18 +78,12 @@ int main(int, char**)
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
-    solver.solve(elasticity);
+    elasticity.solve(solver);
 
-    // Transfer solution back to original domain
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
     auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
-
-    GridFunction normal(Vh);
-    normal.projectOnBoundary(n, Gamma);
-    Omega.save("normal.mesh");
-    normal.save("normal.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
@@ -99,7 +93,7 @@ int main(int, char**)
             + Integral(g, v)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
-    solver.solve(hilbert);
+    hilbert.solve(solver);
 
     trimmed.save("out/trimmed." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
@@ -114,9 +108,6 @@ int main(int, char**)
     H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
-    Omega.save("dist.mesh");
-    g.getGridFunction().save("g.gf");
-    dist.save("dist.gf");
 
     // Advect the level set function
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
@@ -142,7 +133,6 @@ int main(int, char**)
     MMG::MeshOptimizer().setHMax(hmax).setAngleDetection(false).optimize(Omega);
 
     Omega.save("Omega.mesh");
-    Omega.save("miaow.mesh", IO::FileFormat::MEDIT);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

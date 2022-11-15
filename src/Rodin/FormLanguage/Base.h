@@ -34,6 +34,10 @@ namespace Rodin::FormLanguage
           */
          virtual ~Base() = default;
 
+         Base& operator=(const Base&) = delete;
+
+         Base& operator=(Base&&) = delete;
+
          const boost::uuids::uuid& getUUID() const;
 
          /**

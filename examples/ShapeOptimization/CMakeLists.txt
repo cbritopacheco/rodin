@@ -44,13 +44,13 @@ target_link_libraries(LevelSetArch2D
   )
 
 # Commented out because it breaks CI
-add_executable(LevelSetEigenvalue2D LevelSetEigenvalue2D.cpp)
-target_link_libraries(LevelSetEigenvalue2D
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::External::MMG
-  Eigen3::Eigen
-  Spectra::Spectra
-  )
+# add_executable(LevelSetEigenvalue2D LevelSetEigenvalue2D.cpp)
+# target_link_libraries(LevelSetEigenvalue2D
+#   PUBLIC
+#   Rodin::Geometry
+#   Rodin::Solver
+#   Rodin::Variational
+#   Rodin::External::MMG
+#   Eigen3::Eigen
+#   Spectra::Spectra
+#   )

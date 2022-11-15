@@ -25,7 +25,7 @@ namespace Rodin::Variational
          }
          else
          {
-            auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(child);
+            const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(child);
             if (&submesh.getHandle() == trans.mesh)
             {
                return trans;

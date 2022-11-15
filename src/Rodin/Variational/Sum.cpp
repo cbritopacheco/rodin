@@ -7,6 +7,8 @@
 #include "RangeShape.h"
 #include "Exceptions.h"
 
+#include "BilinearFormIntegrator.h"
+
 #include "Sum.h"
 
 namespace Rodin::Variational
@@ -66,5 +68,47 @@ namespace Rodin::Variational
    operator+(const FunctionBase& lhs, const FunctionBase& rhs)
    {
       return Sum(lhs, rhs);
+   }
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const BilinearFormIntegratorBase& lhs,
+         const BilinearFormIntegratorBase& rhs)
+   {
+      FormLanguage::List<BilinearFormIntegratorBase> res;
+      res.add(lhs);
+      res.add(rhs);
+      return res;
+   }
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const BilinearFormIntegratorBase& lhs,
+         const FormLanguage::List<BilinearFormIntegratorBase>& rhs)
+   {
+      FormLanguage::List<BilinearFormIntegratorBase> res(rhs);
+      res.add(lhs);
+      return res;
+   }
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+         const BilinearFormIntegratorBase& rhs)
+   {
+      FormLanguage::List<BilinearFormIntegratorBase> res(lhs);
+      res.add(rhs);
+      return res;
+   }
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+         const FormLanguage::List<BilinearFormIntegratorBase>& rhs)
+   {
+      FormLanguage::List<BilinearFormIntegratorBase> res(lhs);
+      for (const auto& p : rhs)
+         res.add(p);
+      return res;
    }
 }

@@ -1,5 +1,5 @@
-add_executable(FirePropagation FirePropagation.cpp)
-target_link_libraries(FirePropagation
+add_executable(Simulation Simulation.cpp)
+target_link_libraries(Simulation
   PUBLIC
   Rodin::Solver
   Rodin::Geometry

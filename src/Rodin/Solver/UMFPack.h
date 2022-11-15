@@ -12,8 +12,7 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Variational/Problem.h"
-
+#include "ForwardDecls.h"
 #include "Solver.h"
 
 namespace Rodin::Solver
@@ -21,25 +20,39 @@ namespace Rodin::Solver
    /**
     * @brief UMFPack
     */
-   class UMFPack : public Solver
+   template <>
+   class UMFPack<mfem::SparseMatrix, mfem::Vector>
+      : public SolverBase<mfem::SparseMatrix, mfem::Vector>
    {
       public:
+         using OperatorType = mfem::SparseMatrix;
+         using VectorType = mfem::Vector;
+
          /**
           * @brief Constructs the UMFPack object with default parameters.
           */
-         UMFPack(bool useLongInts = false)
-            : m_umfpack(useLongInts)
+         UMFPack()
+            : m_useLongInts(false)
          {}
 
          ~UMFPack() = default;
 
-         UMFPack& useLongInts(bool v = true);
+         UMFPack& useLongInts(bool v = true)
+         {
+            m_useLongInts = v;
+            return *this;
+         }
 
-         void solve(Variational::ProblemBase& problem) override;
+         void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution) const override
+         {
+            mfem::UMFPackSolver umfpack(m_useLongInts);
+            umfpack.Control[UMFPACK_ORDERING] = UMFPACK_ORDERING_METIS;
+            umfpack.SetOperator(stiffness);
+            umfpack.Mult(mass, solution);
+         }
 
       private:
          bool m_useLongInts;
-         mfem::UMFPackSolver m_umfpack;
    };
 }
 

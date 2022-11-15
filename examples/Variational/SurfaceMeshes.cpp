@@ -27,17 +27,15 @@ int main(int, char**)
         return 7 * x(0) * x(1) / l2;
       });
 
+  Solver::CG cg;
+  cg.setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+
   // Reaction-diffusion steady state
   Problem rd(u, v);
   rd = Integral(Grad(u), Grad(v))
      + Integral(u, v)
      - Integral(f, v);
-
-  // Solve problem
-  Solver::CG().setMaxIterations(200)
-              .setRelativeTolerance(1e-12)
-              .printIterations(true)
-              .solve(rd);
+  rd.solve(cg);
 
   // Save solution
   u.getGridFunction().save("u.gf");

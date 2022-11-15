@@ -8,7 +8,8 @@
 #define RODIN_SOLVER_SOLVER_H
 
 #include "Rodin/Configure.h"
-#include "Rodin/Variational/Problem.h"
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Solver
 {
@@ -16,19 +17,20 @@ namespace Rodin::Solver
     * @brief Base class for solving variational problems represented by a
     * Variational::Problem instance.
     */
-   class Solver
+   template <class OperatorType, class VectorType>
+   class SolverBase
    {
       public:
          /**
           * @brief Default virtual destructor.
           */
-         virtual ~Solver() = default;
+         virtual ~SolverBase() = default;
 
          /**
           * @brief Solves the specified Variational::Problem.
           * @param[in,out] problem Variational problem to solve.
           */
-         virtual void solve(Variational::ProblemBase& problem) = 0;
+         virtual void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution) const = 0;
    };
 }
 

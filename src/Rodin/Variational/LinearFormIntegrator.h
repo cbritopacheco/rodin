@@ -55,35 +55,6 @@ namespace Rodin::Variational
          }
 
          /**
-          * @brief Gets the integration region.
-          */
-         virtual IntegratorRegion getIntegratorRegion() const = 0;
-
-         virtual void getElementVector(const Linear::Assembly::Common& as) const = 0;
-
-         virtual void getElementVector(const Linear::Assembly::Device&) const
-         {
-            assert(false); // Unimplemented
-         }
-
-         virtual bool isSupported(Linear::Assembly::Type t) const
-         {
-            switch (t)
-            {
-               case Linear::Assembly::Type::Common:
-                  return true;
-               default:
-                  return false;
-            }
-            return false;
-         }
-
-         std::unique_ptr<mfem::LinearFormIntegrator> build() const;
-
-         virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
-
-
-         /**
           * @brief Specifies the material reference over which to integrate.
           * @returns Reference to self (for method chaining)
           *
@@ -108,6 +79,37 @@ namespace Rodin::Variational
             m_attrs = attrs;
             return *this;
          }
+
+         /**
+          * @internal
+          */
+         std::unique_ptr<mfem::LinearFormIntegrator> build() const;
+
+         /**
+          * @brief Gets the integration region.
+          */
+         virtual IntegratorRegion getIntegratorRegion() const = 0;
+
+         virtual void getElementVector(const Linear::Assembly::Common& as) const = 0;
+
+         virtual void getElementVector(const Linear::Assembly::Device&) const
+         {
+            assert(false); // Unimplemented
+         }
+
+         virtual bool isSupported(Linear::Assembly::Type t) const
+         {
+            switch (t)
+            {
+               case Linear::Assembly::Type::Common:
+                  return true;
+               default:
+                  return false;
+            }
+            return false;
+         }
+
+         virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
       private:
          std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
