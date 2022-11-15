@@ -16,9 +16,9 @@
 namespace Rodin::Variational
 {
    /**
-    * @defgroup CosSpecializations Cos Template Specializations
-    * @brief Template specializations of the Cos class.
-    * @see Cos
+    * @defgroup CosineSpecializations Cosine Template Specializations
+    * @brief Template specializations of the Cosine class.
+    * @see Cosine
     */
 
    /**

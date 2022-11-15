@@ -42,7 +42,8 @@ int main(int, char**)
 
   double vol = Omega.getVolume();
 
-  auto solver = Solver::UMFPack();
+  Solver::CG solver;
+  solver.printIterations(false);
 
   // Optimization loop
   for (size_t i = 0; i < maxIterations; i++)
@@ -58,7 +59,7 @@ int main(int, char**)
     poisson = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
             - Integral(f * v)
             + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
-    solver.solve(poisson);
+    poisson.solve(solver);
 
     // Adjoint problem
     TrialFunction p(Vh);
@@ -67,7 +68,7 @@ int main(int, char**)
     adjoint = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
             + Integral(ScalarFunction(1.0 / vol), q)
             + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
-    solver.solve(adjoint);
+    adjoint.solve(solver);
 
     // Hilbert extension-regularization
     TrialFunction g(Vh);
@@ -79,7 +80,7 @@ int main(int, char**)
                 ell + 3 * (hmax - hmin) * Pow(gamma, 2) *
                   Dot(Grad(u.getGridFunction()), Grad(p.getGridFunction())), w)
             + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
-    solver.solve(hilbert);
+    hilbert.solve(solver);
 
     GridFunction step(Ph);
     step = mu * g.getGridFunction();

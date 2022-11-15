@@ -4,8 +4,7 @@ set(RodinSolver_HEADERS
   )
 
 set(RodinSolver_SRCS
-  CG.cpp
-  )
+  CG.cpp)
 
 # ---- Set targets -----------------------------------------------------------
 add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
@@ -14,8 +13,7 @@ add_library(Rodin::Solver ALIAS RodinSolver)
 # ---- SuiteSparse -----------------------------------------------------------
 if (RODIN_USE_SUITESPARSE)
   target_sources(RodinSolver PRIVATE
-    UMFPack.h
-    UMFPack.cpp)
+    UMFPack.h)
 endif()
 
 # ---- Link targets ----------------------------------------------------------

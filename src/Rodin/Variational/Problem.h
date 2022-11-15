@@ -15,6 +15,7 @@
 
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
+#include "Rodin/Solver/Solver.h"
 
 #include "ForwardDecls.h"
 
@@ -28,10 +29,34 @@
 
 namespace Rodin::Variational
 {
-   class ProblemBase
+   template <class TrialFES, class TestFES>
+   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
+      -> Problem<TrialFES, TestFES, typename TrialFES::Context, mfem::SparseMatrix, mfem::Vector>;
+
+   template <class OperatorType, class VectorType>
+   class ProblemBase : public FormLanguage::Base
    {
       public:
-         virtual EssentialBoundary& getEssentialBoundary() = 0;
+         ProblemBase() = default;
+
+         ProblemBase(ProblemBase&& other) = default;
+
+         ProblemBase(const ProblemBase& other) = default;
+
+         const ProblemBody& getProblemBody() const
+         {
+            return m_pb;
+         }
+
+         virtual ProblemBase& operator=(ProblemBody&& rhs)
+         {
+            m_pb = std::move(rhs);
+            return *this;
+         }
+
+         virtual bool isParallel() const = 0;
+
+         virtual void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
 
          /**
           * @brief Assembles the underlying linear system to solve.
@@ -44,22 +69,12 @@ namespace Rodin::Variational
          virtual ProblemBase& update() = 0;
 
          /**
-          * @brief After solving the problem using a linear solver, this method
-          * must be called to recover the solution.
-          *
-          * After this call, the solution(s) will be contained in the
-          * respective TrialFunction object(s) and can be obtained via
-          * TrialFunction::getGridFunction().
-          */
-         virtual void recoverSolution() = 0;
-
-         /**
           * @returns Reference to the mfem::Operator representing the stiffness
           * matrix.
           *
           * This must be called only after assemble() has been called.
           */
-         virtual mfem::Operator& getStiffnessMatrix() = 0;
+         virtual OperatorType& getStiffnessOperator() = 0;
 
          /**
           * @returns Constant reference to the mfem::Operator representing the stiffness
@@ -67,7 +82,7 @@ namespace Rodin::Variational
           *
           * This must be called only after assemble() has been called.
           */
-         virtual const mfem::Operator& getStiffnessMatrix() const = 0;
+         virtual const OperatorType& getStiffnessOperator() const = 0;
 
          /**
           * @returns Reference to the mfem::Vector representing the mass
@@ -75,7 +90,7 @@ namespace Rodin::Variational
           *
           * This must be called only after assemble() has been called.
           */
-         virtual mfem::Vector& getMassVector() = 0;
+         virtual VectorType& getMassVector() = 0;
 
          /**
           * @returns Constant reference to the mfem::Vector representing the mass
@@ -83,20 +98,45 @@ namespace Rodin::Variational
           *
           * This must be called only after assemble() has been called.
           */
-         virtual const mfem::Vector& getMassVector() const = 0;
+         virtual const VectorType& getMassVector() const = 0;
 
-         virtual mfem::Vector& getInitialGuess() = 0;
+         virtual const EssentialBoundary& getEssentialBoundary() const = 0;
 
-         virtual const mfem::Vector& getInitialGuess() const = 0;
+         virtual ProblemBase* copy() const noexcept override = 0;
+
+      private:
+         ProblemBody m_pb;
    };
 
    /**
     * @ingroup ProblemSpecializations
     */
-   template <class TrialFES, class TestFES, class OperatorType>
-   class Problem<TrialFES, TestFES, OperatorType> : public ProblemBase
+   template <class TrialFES, class TestFES>
+   class Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
+      : public ProblemBase<mfem::Operator, mfem::Vector>
    {
+         static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
+         static_assert(std::is_same_v<typename TestFES::Context, Context::Serial>);
+
+         using OperatorHandle = std::unique_ptr<mfem::Operator>;
+
       public:
+         using Context = Context::Serial;
+         using OperatorType = mfem::Operator;
+         using VectorType = mfem::Vector;
+         using Parent = ProblemBase<mfem::Operator, mfem::Vector>;
+
+         /**
+          * @brief Constructs an empty problem involving the trial function @f$ u @f$
+          * and the test function @f$ v @f$.
+          *
+          * @param[in,out] u Trial function @f$ u @f$
+          * @param[in,out] v Test function @f$ v @f$
+          */
+         explicit
+         constexpr
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
+
          /**
           * @brief Deleted copy constructor.
           */
@@ -107,6 +147,137 @@ namespace Rodin::Variational
           */
          void operator=(const Problem& other) = delete;
 
+         constexpr
+         TrialFunction<TrialFES>& getTrialFunction()
+         {
+            return m_trialFunction;
+         }
+
+         constexpr
+         TestFunction<TestFES>& getTestFunction()
+         {
+            return m_testFunction;
+         }
+
+         constexpr
+         const TrialFunction<TrialFES>& getTrialFunction() const
+         {
+            return m_trialFunction;
+         }
+
+         constexpr
+         const TestFunction<TestFES>& getTestFunction() const
+         {
+            return m_testFunction;
+         }
+
+         constexpr
+         LinearForm<TestFES, Context, VectorType>& getLinearForm()
+         {
+            return m_linearForm;
+         }
+
+         constexpr
+         BilinearForm<TrialFES, TestFES, Context, OperatorType>& getBilinearForm()
+         {
+            return m_bilinearForm;
+         }
+
+         constexpr
+         mfem::Array<int>& getEssentialTrueDOFs()
+         {
+            return m_essTrueDofList;
+         }
+
+         constexpr
+         const mfem::Array<int>& getEssentialTrueDOFs() const
+         {
+            return m_essTrueDofList;
+         }
+
+         constexpr
+         const LinearForm<TestFES, Context, VectorType>& getLinearForm() const
+         {
+            return m_linearForm;
+         }
+
+         constexpr
+         const BilinearForm<TrialFES, TestFES, Context, OperatorType>& getBilinearForm() const
+         {
+            return m_bilinearForm;
+         }
+
+         bool isParallel() const override
+         {
+            return false;
+         }
+
+         void assemble() override;
+
+         Problem& update() override;
+
+         void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) override;
+
+         Problem& operator=(ProblemBody&& rhs) override;
+
+         virtual VectorType& getMassVector() override
+         {
+            return m_massVector;
+         }
+
+         virtual const VectorType& getMassVector() const override
+         {
+            return m_massVector;
+         }
+
+         virtual OperatorType& getStiffnessOperator() override
+         {
+            return *m_stiffnessOp;
+         }
+
+         virtual const OperatorType& getStiffnessOperator() const override
+         {
+            return *m_stiffnessOp;
+         }
+
+         virtual const EssentialBoundary& getEssentialBoundary() const override;
+
+         virtual Problem* copy() const noexcept override
+         {
+            assert(false);
+            return nullptr;
+         }
+
+      private:
+         TrialFunction<TrialFES>& m_trialFunction;
+         TestFunction<TestFES>&   m_testFunction;
+
+         LinearForm<TestFES, Context, VectorType> m_linearForm;
+         BilinearForm<TrialFES, TestFES, Context, OperatorType> m_bilinearForm;
+
+         OperatorHandle       m_stiffnessOp;
+         mfem::Vector         m_massVector;
+         mfem::Vector         m_guess;
+
+         mfem::Array<int>     m_essTrueDofList;
+   };
+
+   /**
+    * @ingroup ProblemSpecializations
+    */
+   template <class TrialFES, class TestFES>
+   class Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+      : public ProblemBase<mfem::SparseMatrix, mfem::Vector>
+   {
+         static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
+         static_assert(std::is_same_v<typename TestFES::Context, Context::Serial>);
+
+      public:
+         using Context = Context::Serial;
+         using OperatorType = mfem::SparseMatrix;
+         using VectorType = mfem::Vector;
+         using Parent = ProblemBase<mfem::SparseMatrix, mfem::Vector>;
+
          /**
           * @brief Constructs an empty problem involving the trial function @f$ u @f$
           * and the test function @f$ v @f$.
@@ -115,82 +286,133 @@ namespace Rodin::Variational
           * @param[in,out] v Test function @f$ v @f$
           */
          explicit
-         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&& = OperatorType());
+         constexpr
+         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
 
-         explicit
-         Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&);
+         /**
+          * @brief Deleted copy constructor.
+          */
+         Problem(const Problem& other) = delete;
 
-         Problem& operator=(ProblemBody&& rhs);
+         /**
+          * @brief Deleted copy assignment operator.
+          */
+         void operator=(const Problem& other) = delete;
 
-         Problem& update() override;
+         constexpr
+         TrialFunction<TrialFES>& getTrialFunction()
+         {
+            return m_trialFunction;
+         }
+
+         constexpr
+         TestFunction<TestFES>& getTestFunction()
+         {
+            return m_testFunction;
+         }
+
+         constexpr
+         const TrialFunction<TrialFES>& getTrialFunction() const
+         {
+            return m_trialFunction;
+         }
+
+         constexpr
+         const TestFunction<TestFES>& getTestFunction() const
+         {
+            return m_testFunction;
+         }
+
+         constexpr
+         LinearForm<TestFES, Context, VectorType>& getLinearForm()
+         {
+            return m_linearForm;
+         }
+
+         constexpr
+         BilinearForm<TrialFES, TestFES, Context, OperatorType>& getBilinearForm()
+         {
+            return m_bilinearForm;
+         }
+
+         constexpr
+         mfem::Array<int>& getEssentialTrueDOFs()
+         {
+            return m_essTrueDofList;
+         }
+
+         constexpr
+         const mfem::Array<int>& getEssentialTrueDOFs() const
+         {
+            return m_essTrueDofList;
+         }
+
+         constexpr
+         const LinearForm<TestFES, Context, VectorType>& getLinearForm() const
+         {
+            return m_linearForm;
+         }
+
+         constexpr
+         const BilinearForm<TrialFES, TestFES, Context, OperatorType>& getBilinearForm() const
+         {
+            return m_bilinearForm;
+         }
+
+         bool isParallel() const override
+         {
+            return false;
+         }
 
          void assemble() override;
 
-         void recoverSolution() override;
+         Problem& update() override;
 
-         EssentialBoundary& getEssentialBoundary() override;
+         void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
+         Problem& operator=(ProblemBody&& rhs) override;
 
-         OperatorType& getStiffnessMatrix() override
-         {
-            return *m_stiffnessOp.As<OperatorType>();
-         }
-
-         const OperatorType& getStiffnessMatrix() const override
-         {
-            return *m_stiffnessOp.As<OperatorType>();
-         }
-
-         mfem::Vector& getMassVector() override
+         virtual VectorType& getMassVector() override
          {
             return m_massVector;
          }
 
-         const mfem::Vector& getMassVector() const override
+         virtual const VectorType& getMassVector() const override
          {
             return m_massVector;
          }
 
-         mfem::Vector& getInitialGuess() override
+         virtual OperatorType& getStiffnessOperator() override
          {
-            return m_guess;
+            return m_stiffnessOp;
          }
 
-         const mfem::Vector& getInitialGuess() const override
+         virtual const OperatorType& getStiffnessOperator() const override
          {
-            return m_guess;
+            return m_stiffnessOp;
+         }
+
+         virtual const EssentialBoundary& getEssentialBoundary() const override;
+
+         virtual Problem* copy() const noexcept override
+         {
+            assert(false);
+            return nullptr;
          }
 
       private:
-         ProblemBody m_pb;
+         TrialFunction<TrialFES>& m_trialFunction;
+         TestFunction<TestFES>&   m_testFunction;
 
-         LinearForm<TestFES, mfem::Vector>                     m_linearForm;
-         BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>   m_bilinearForm;
+         LinearForm<TestFES, Context, VectorType> m_linearForm;
+         BilinearForm<TrialFES, TestFES, Context, OperatorType> m_bilinearForm;
 
-         mfem::OperatorHandle    m_stiffnessOp;
-         mfem::Vector            m_massVector;
-         mfem::Vector            m_guess;
+         mfem::SparseMatrix   m_stiffnessOp;
+         mfem::Vector         m_massVector;
+         mfem::Vector         m_guess;
 
-         const std::map<
-            boost::uuids::uuid,
-            std::reference_wrapper<TrialFunction<TrialFES>>> m_trialFunctions;
-         const std::map<
-            boost::uuids::uuid,
-            std::reference_wrapper<TestFunction<TestFES>>> m_testFunctions;
-
-         mfem::Array<int> m_essTrueDofList;
+         mfem::Array<int>     m_essTrueDofList;
    };
-   template <class TrialFES, class TestFES>
-   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-      -> Problem<TrialFES, TestFES, mfem::SparseMatrix>;
-
-   template <class TrialFES, class TestFES, class OperatorType>
-   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType&&)
-      -> Problem<TrialFES, TestFES, OperatorType>;
-
-   template <class TrialFES, class TestFES, class OperatorType>
-   Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&, OperatorType&)
-      -> Problem<TrialFES, TestFES, OperatorType>;
 }
 
 #include "Problem.hpp"

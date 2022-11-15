@@ -12,8 +12,7 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Variational/Problem.h"
-
+#include "ForwardDecls.h"
 #include "Solver.h"
 
 namespace Rodin::Solver
@@ -21,9 +20,13 @@ namespace Rodin::Solver
    /**
     * @brief Conjugate Gradient
     */
-   class CG : public Solver
+   template <>
+   class CG<mfem::Operator, mfem::Vector> : public SolverBase<mfem::Operator, mfem::Vector>
    {
       public:
+         using OperatorType = mfem::Operator;
+         using VectorType = mfem::Vector;
+
          /**
           * @brief Constructs the CG object with default parameters.
           */
@@ -44,7 +47,11 @@ namespace Rodin::Solver
           * screen.
           * @returns Reference to self (for method chaining)
           */
-         CG& printIterations(bool printIterations);
+         CG& printIterations(bool printIterations)
+         {
+            m_printIterations = printIterations;
+            return *this;
+         }
 
          /**
           * @brief Sets the maximum amount of iterations the solver will
@@ -52,29 +59,149 @@ namespace Rodin::Solver
           * @param[in] maxIterations Maximum amount of iterations
           * @returns Reference to self (for method chaining)
           */
-         CG& setMaxIterations(int maxIterations);
+         CG& setMaxIterations(int maxIterations)
+         {
+            m_maxIterations = maxIterations;
+            return *this;
+         }
 
          /**
           * @brief Sets the relative tolerance of the solver.
           * @param[in] rtol Relative tolerance
           * @returns Reference to self (for method chaining)
           */
-         CG& setRelativeTolerance(double rtol);
+         CG& setRelativeTolerance(double rtol)
+         {
+            m_rtol = rtol;
+            return *this;
+         }
 
          /**
           * @brief Sets the absolute tolerance of the solver.
           * @param[in] atol Absolute tolerance
           * @returns Reference to self (for method chaining)
           */
-         CG& setAbsoluteTolerance(double atol);
+         CG& setAbsoluteTolerance(double atol)
+         {
+            m_atol = atol;
+            return *this;
+         }
 
-         void solve(Variational::ProblemBase& problem) override;
+         virtual
+         void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution)
+         const override
+         {
+            mfem::CGSolver pcg;
+            pcg.SetPrintLevel(static_cast<int>(m_printIterations));
+            pcg.SetMaxIter(m_maxIterations);
+            pcg.SetRelTol(sqrt(m_rtol));
+            pcg.SetAbsTol(sqrt(m_atol));
+            pcg.SetOperator(stiffness);
+            pcg.Mult(mass, solution);
+         }
 
       private:
          int  m_maxIterations;
          bool m_printIterations;
          double m_rtol, m_atol;
    };
+
+   template <>
+   class CG<mfem::SparseMatrix, mfem::Vector>
+      : public SolverBase<mfem::SparseMatrix, mfem::Vector>
+   {
+      public:
+         using OperatorType = mfem::SparseMatrix;
+         using VectorType = mfem::Vector;
+
+         /**
+          * @brief Constructs the CG object with default parameters.
+          */
+         CG()
+            : m_maxIterations(200),
+              m_printIterations(false),
+              m_rtol(1e-12),
+              m_atol(0)
+         {}
+
+         ~CG() = default;
+
+         /**
+          * @brief Sets whether some information will be printed at each
+          * iteration.
+          * @param[in] printIterations If set to true, will print the
+          * iterations. Otherwise, no information will be printed to the
+          * screen.
+          * @returns Reference to self (for method chaining)
+          */
+         CG& printIterations(bool printIterations)
+         {
+            m_printIterations = printIterations;
+            return *this;
+         }
+
+         /**
+          * @brief Sets the maximum amount of iterations the solver will
+          * perform.
+          * @param[in] maxIterations Maximum amount of iterations
+          * @returns Reference to self (for method chaining)
+          */
+         CG& setMaxIterations(int maxIterations)
+         {
+            m_maxIterations = maxIterations;
+            return *this;
+         }
+
+         /**
+          * @brief Sets the relative tolerance of the solver.
+          * @param[in] rtol Relative tolerance
+          * @returns Reference to self (for method chaining)
+          */
+         CG& setRelativeTolerance(double rtol)
+         {
+            m_rtol = rtol;
+            return *this;
+         }
+
+         /**
+          * @brief Sets the absolute tolerance of the solver.
+          * @param[in] atol Absolute tolerance
+          * @returns Reference to self (for method chaining)
+          */
+         CG& setAbsoluteTolerance(double atol)
+         {
+            m_atol = atol;
+            return *this;
+         }
+
+         CG& setPreconditioner(mfem::Solver& smoother)
+         {
+            m_smoother.emplace(std::ref(smoother));
+            return *this;
+         }
+
+         virtual
+         void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution)
+         const override
+         {
+            mfem::CGSolver pcg;
+            pcg.SetPrintLevel(static_cast<int>(m_printIterations));
+            pcg.SetMaxIter(m_maxIterations);
+            pcg.SetRelTol(sqrt(m_rtol));
+            pcg.SetAbsTol(sqrt(m_atol));
+            if (m_smoother)
+               pcg.SetPreconditioner(*m_smoother);
+            pcg.SetOperator(stiffness);
+            pcg.Mult(mass, solution);
+         }
+
+      private:
+         int  m_maxIterations;
+         bool m_printIterations;
+         double m_rtol, m_atol;
+         std::optional<std::reference_wrapper<mfem::Solver>> m_smoother;
+   };
+
 }
 
 #endif

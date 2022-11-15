@@ -34,6 +34,9 @@ int main(int argc, char** argv)
   // Pull force
   auto f = VectorFunction{0, -1};
 
+  Solver::CG cg;
+  cg.setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+
   // Define problem
   TrialFunction u(Vh);
   TestFunction  v(Vh);
@@ -43,12 +46,8 @@ int main(int argc, char** argv)
                  mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+  elasticity.solve(cg);
 
-  // Solve problem
-  Solver::CG().setMaxIterations(200)
-              .setRelativeTolerance(1e-12)
-              .printIterations(true)
-              .solve(elasticity);
 
   // Save solution
   u.getGridFunction().save("u.gf");

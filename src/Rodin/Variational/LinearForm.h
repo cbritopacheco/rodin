@@ -9,26 +9,37 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/FormLanguage/List.h"
+
 #include "ForwardDecls.h"
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
-#include "LinearFormIntegratorSum.h"
 
 namespace Rodin::Variational
 {
    template <class VectorType>
-   class LinearFormBase
+   class LinearFormBase : public FormLanguage::Base
    {
       public:
-         /**
-          * @brief Updates the state after a refinement in the mesh.
-          *
-          * This method will update the linear form after a call to the
-          * @ref MeshBase::refine() "refine()" method.
-          */
-         void update()
+         constexpr
+         LinearFormBase() = default;
+
+         constexpr
+         LinearFormBase(const LinearFormBase& other)
+            :  FormLanguage::Base(other),
+               m_lfis(other.m_lfis)
+         {}
+
+         constexpr
+         LinearFormBase(LinearFormBase&& other)
+            :  FormLanguage::Base(std::move(other)),
+               m_lfis(std::move(other.m_lfis))
+         {}
+
+         constexpr
+         const FormLanguage::List<LinearFormIntegratorBase>& getIntegrators() const
          {
-            return getHandle().Update();
+            return m_lfis;
          }
 
          /**
@@ -39,10 +50,15 @@ namespace Rodin::Variational
           *
           * @see getVector()
           */
-         void assemble()
-         {
-            return getHandle().Assemble();
-         }
+         virtual void assemble() = 0;
+
+         /**
+          * @brief Updates the state after a refinement in the mesh.
+          *
+          * This method will update the linear form after a call to the
+          * @ref MeshBase::refine() "refine()" method.
+          */
+         virtual LinearFormBase& update() = 0;
 
          /**
           * @brief Gets the reference to the (local) associated vector
@@ -62,9 +78,20 @@ namespace Rodin::Variational
           * @param[in] lfi Integrator which will be used to build the linear form.
           * @returns Reference to this (for method chaining)
           */
-         virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
+         virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi)
+         {
+            m_lfis.clear();
+            add(lfi).assemble();
+            return *this;
+         }
 
-         virtual LinearFormBase& from(const LinearFormIntegratorSum& lsum) = 0;
+         virtual LinearFormBase& from(
+               const FormLanguage::List<LinearFormIntegratorBase>& lfi)
+         {
+            m_lfis.clear();
+            add(lfi).assemble();
+            return *this;
+         }
 
          /**
           * @brief Builds the linear form the given LinearFormIntegratorBase
@@ -72,9 +99,31 @@ namespace Rodin::Variational
           * @param[in] lfi Integrator which will be used to build the linear form.
           * @returns Reference to this (for method chaining)
           */
-         virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi) = 0;
+         virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi)
+         {
+            m_lfis.add(lfi);
+            return *this;
+         }
 
-         virtual LinearFormBase& add(const LinearFormIntegratorSum& lsum) = 0;
+         virtual LinearFormBase& add(
+               const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+         {
+            m_lfis.add(lfis);
+            return *this;
+         }
+
+         virtual LinearFormBase& operator=(const LinearFormIntegratorBase& lfi)
+         {
+            from(lfi).assemble();
+            return *this;
+         }
+
+         virtual LinearFormBase& operator=(
+               const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+         {
+            from(lfis).assemble();
+            return *this;
+         }
 
          /**
           * @brief Gets the test function argument associated to this bilinear
@@ -82,9 +131,10 @@ namespace Rodin::Variational
           */
          virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
 
-         virtual mfem::LinearForm& getHandle() = 0;
+         virtual LinearFormBase* copy() const noexcept override = 0;
 
-         virtual const mfem::LinearForm& getHandle() const = 0;
+      private:
+         FormLanguage::List<LinearFormIntegratorBase> m_lfis;
    };
 
    /**
@@ -103,11 +153,9 @@ namespace Rodin::Variational
     * LinearFormIntegratorBase instances.
     */
    template <class FES>
-   class LinearForm<FES, mfem::Vector> : public LinearFormBase<mfem::Vector>
+   class LinearForm<FES, Context::Serial, mfem::Vector> : public LinearFormBase<mfem::Vector>
    {
       static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
-
-      using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
 
       public:
          using Context = typename FES::Context;
@@ -118,11 +166,20 @@ namespace Rodin::Variational
           * space
           * @param[in] fes Reference to the finite element space
           */
+         constexpr
          LinearForm(TestFunction<FES>& v);
 
-         LinearForm& operator=(const LinearFormIntegratorBase& lfi);
+         constexpr
+         LinearForm(const LinearForm& other)
+            :  LinearFormBase(other),
+               m_v(other.m_v)
+         {}
 
-         LinearForm& operator=(const LinearFormIntegratorSum& lsum);
+         constexpr
+         LinearForm(LinearForm&& other)
+            :  LinearFormBase(std::move(other)),
+               m_v(other.m_v)
+         {}
 
          /**
           * @brief Evaluates the linear form at the function @f$ u @f$.
@@ -132,20 +189,12 @@ namespace Rodin::Variational
           *
           * @returns The value which the linear form takes at @f$ u @f$.
           */
+         constexpr
          double operator()(const GridFunction<FES>& u) const;
 
-         LinearForm& add(const LinearFormIntegratorBase& lfi) override;
+         void assemble() override;
 
-         LinearForm& add(const LinearFormIntegratorSum& lsum) override;
-
-         LinearForm& from(const LinearFormIntegratorBase& lfi) override;
-
-         LinearForm& from(const LinearFormIntegratorSum& lsum) override;
-
-         const TestFunction<FES>& getTestFunction() const override
-         {
-            return m_v;
-         }
+         LinearForm& update() override;
 
          /**
           * @brief Gets the reference to the (local) associated vector
@@ -153,7 +202,7 @@ namespace Rodin::Variational
           */
          VectorType& getVector() override
          {
-            return static_cast<mfem::Vector&>(getHandle());
+            return static_cast<mfem::Vector&>(*m_lf);
          }
 
          /**
@@ -162,29 +211,40 @@ namespace Rodin::Variational
           */
          const VectorType& getVector() const override
          {
-            return static_cast<const mfem::Vector&>(getHandle());
+            return static_cast<const mfem::Vector&>(*m_lf);
          }
 
-         mfem::LinearForm& getHandle() override
+         const TestFunction<FES>& getTestFunction() const override
          {
-            return *m_lf;
+            return m_v;
          }
 
-         const mfem::LinearForm& getHandle() const override
+         LinearForm& operator=(
+            const LinearFormIntegratorBase& lfi) override
          {
-            return *m_lf;
+            from(lfi).assemble();
+            return *this;
+         }
+
+         LinearForm& operator=(
+            const FormLanguage::List<LinearFormIntegratorBase>& lfis) override
+         {
+            from(lfis).assemble();
+            return *this;
+         }
+
+         LinearForm* copy() const noexcept override
+         {
+            return new LinearForm(*this);
          }
 
       private:
          TestFunction<FES>& m_v;
+
          std::unique_ptr<mfem::LinearForm> m_lf;
-         LFIList m_lfiDomainList;
-         LFIList m_lfiBoundaryList;
-         std::vector<std::unique_ptr<mfem::Array<int>>> m_bdrAttrMarkers;
-         std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
    };
    template <class FES>
-   LinearForm(TestFunction<FES>&) -> LinearForm<FES, mfem::Vector>;
+   LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, mfem::Vector>;
 }
 
 #include "LinearForm.hpp"

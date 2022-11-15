@@ -59,8 +59,7 @@ int main(int, char**)
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-  // UMFPack
-  auto solver = Solver::UMFPack();
+  Solver::CG solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -88,7 +87,7 @@ int main(int, char**)
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
-    solver.solve(elasticity);
+    elasticity.solve(solver);
 
     // Transfer solution back to original domain
     GridFunction u(Vh);
@@ -106,7 +105,7 @@ int main(int, char**)
             + Integral(g, v)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
-    solver.solve(hilbert);
+    hilbert.solve(solver);
 
     // Update objective
     obj.push_back(

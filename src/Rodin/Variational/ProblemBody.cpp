@@ -11,143 +11,34 @@
 
 namespace Rodin::Variational
 {
-   ProblemBody::ProblemBody(const BilinearFormIntegratorBase& bfi)
-   {
-      m_bfiDomainList.emplace_back(bfi.copy());
-   }
-
-   ProblemBody::ProblemBody(const BilinearFormIntegratorSum& bsum)
-   {
-      m_bfiDomainList.reserve(bsum.getBilinearFormDomainIntegratorList().size());
-      for (const auto& p : bsum.getBilinearFormDomainIntegratorList())
-         m_bfiDomainList.emplace_back(p->copy());
-      for (const auto& p : bsum.getBilinearFormBoundaryIntegratorList())
-         m_bfiBoundaryList.emplace_back(p->copy());
-   }
-
-   ProblemBody::ProblemBody(const ProblemBody& other)
-      :  FormLanguage::Base(other),
-         m_essBdr(other.m_essBdr)
-   {
-      m_bfiDomainList.reserve(other.m_bfiDomainList.size());
-      m_bfiBoundaryList.reserve(other.m_bfiBoundaryList.size());
-      m_lfiDomainList.reserve(other.m_lfiDomainList.size());
-      m_lfiBoundaryList.reserve(other.m_lfiBoundaryList.size());
-
-      for (const auto& v : other.m_bfiDomainList)
-         m_bfiDomainList.emplace_back(v->copy());
-      for (const auto& v : other.m_bfiBoundaryList)
-         m_bfiBoundaryList.emplace_back(v->copy());
-      for (const auto& v : other.m_lfiDomainList)
-         m_lfiDomainList.emplace_back(v->copy());
-      for (const auto& v : other.m_lfiBoundaryList)
-         m_lfiBoundaryList.emplace_back(v->copy());
-   }
-
-   ProblemBody::ProblemBody(ProblemBody&& other)
-      :  FormLanguage::Base(std::move(other)),
-         m_bfiDomainList(std::move(other.m_bfiDomainList)),
-         m_bfiBoundaryList(std::move(other.m_bfiBoundaryList)),
-         m_lfiDomainList(std::move(other.m_lfiDomainList)),
-         m_lfiBoundaryList(std::move(other.m_lfiBoundaryList)),
-         m_essBdr(std::move(other.m_essBdr))
-   {}
-
-   EssentialBoundary& ProblemBody::getEssentialBoundary()
-   {
-      return m_essBdr;
-   }
-
-   ProblemBody::LFIList&
-   ProblemBody::getLinearFormDomainIntegratorList()
-   {
-      return m_lfiDomainList;
-   }
-
-   ProblemBody::LFIList&
-   ProblemBody::getLinearFormBoundaryIntegratorList()
-   {
-      return m_lfiBoundaryList;
-   }
-
-   ProblemBody::BFIList&
-   ProblemBody::getBilinearFormDomainIntegratorList()
-   {
-      return m_bfiDomainList;
-   }
-
-   ProblemBody::BFIList&
-   ProblemBody::getBilinearFormBoundaryIntegratorList()
-   {
-      return m_bfiBoundaryList;
-   }
-
    ProblemBody operator+(
          const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
    {
       ProblemBody res(pb);
-      // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      switch (lfi.getIntegratorRegion())
-      {
-         case IntegratorRegion::Domain:
-         {
-            res.getLinearFormDomainIntegratorList().emplace_back(
-                  new UnaryMinus<LinearFormIntegratorBase>(lfi));
-            break;
-         }
-         case IntegratorRegion::Boundary:
-         {
-            res.getLinearFormBoundaryIntegratorList().emplace_back(
-                  new UnaryMinus<LinearFormIntegratorBase>(lfi));
-            break;
-         }
-         default:
-            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
-      }
+      res.getLFIs().add(lfi);
       return res;
    }
 
    ProblemBody operator-(const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
    {
       ProblemBody res(pb);
-      // Sign is opposite because we want the LinearFormIntegrator on the LHS
-      switch (lfi.getIntegratorRegion())
-      {
-         case IntegratorRegion::Domain:
-         {
-            res.getLinearFormDomainIntegratorList().emplace_back(lfi.copy());
-            break;
-         }
-         case IntegratorRegion::Boundary:
-         {
-            res.getLinearFormBoundaryIntegratorList().emplace_back(lfi.copy());
-            break;
-         }
-         default:
-            Alert::Exception() << "IntegratorRegion not supported" << Alert::Raise;
-      }
+      res.getLFIs().add(UnaryMinus(lfi));
       return res;
    }
 
-   ProblemBody operator+(const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
+   ProblemBody operator+(
+      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis)
    {
       ProblemBody res(pb);
-      for (const auto& p : lfi.getLinearFormDomainIntegratorList())
-         res.getLinearFormDomainIntegratorList().emplace_back(
-               new UnaryMinus<LinearFormIntegratorBase>(*p));
-      for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
-         res.getLinearFormBoundaryIntegratorList().emplace_back(
-               new UnaryMinus<LinearFormIntegratorBase>(*p));
+      res.getLFIs().add(lfis);
       return res;
    }
 
-   ProblemBody operator-(const ProblemBody& pb, const LinearFormIntegratorSum& lfi)
+   ProblemBody operator-(
+      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi)
    {
       ProblemBody res(pb);
-      for (const auto& p : lfi.getLinearFormDomainIntegratorList())
-         res.getLinearFormDomainIntegratorList().emplace_back(p->copy());
-      for (const auto& p : lfi.getLinearFormBoundaryIntegratorList())
-         res.getLinearFormBoundaryIntegratorList().emplace_back(p->copy());
+      res.getLFIs().add(UnaryMinus(lfi));
       return res;
    }
 }

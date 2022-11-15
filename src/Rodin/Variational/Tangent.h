@@ -16,13 +16,13 @@
 namespace Rodin::Variational
 {
    /**
-    * @defgroup TanSpecializations Tan Template Specializations
-    * @brief Template specializations of the Tan class.
-    * @see Tan
+    * @defgroup TangentSpecializations Tangent Template Specializations
+    * @brief Template specializations of the Tangent class.
+    * @see Tangent
     */
 
    /**
-    * @ingroup TanSpecializations
+    * @ingroup TangentSpecializations
     */
    template <>
    class Tangent<FunctionBase> : public ScalarFunctionBase

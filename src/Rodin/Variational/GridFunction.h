@@ -171,6 +171,11 @@ namespace Rodin::Variational
          virtual GridFunctionBase& load(
                const boost::filesystem::path& filename, IO::FileFormat fmt) = 0;
 
+         mfem::Vector& getData()
+         {
+            return getHandle();
+         }
+
          /**
           * @brief Addition of a scalar value.
           */
