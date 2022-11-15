@@ -34,9 +34,8 @@ int main(int argc, char** argv)
   // Pull force
   auto f = VectorFunction{0, -1};
 
-  auto cg = Solver::CG().setMaxIterations(200)
-                        .setRelativeTolerance(1e-12)
-                        .printIterations(true);
+  Solver::CG cg;
+  cg.setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
 
   // Define problem
   TrialFunction u(Vh);
