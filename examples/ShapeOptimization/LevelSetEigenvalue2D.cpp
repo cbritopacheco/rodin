@@ -157,7 +157,7 @@ int main(int argc, char** argv)
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
             - BoundaryIntegral(dJ, v).over(Gamma);
-    solver.solve(hilbert);
+    hilbert.solve(solver);
 
     // Update objective
     obj.push_back(

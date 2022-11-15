@@ -32,9 +32,10 @@ static constexpr double tgv = std::numeric_limits<double>::max();
 static constexpr double radius = 3 * hmax;
 static constexpr int topoPeriod = 1;
 
+template <class Solver>
 GridFunction<H1<Context::Serial>> getShapeGradient(
     H1<Context::Serial>& vecFes, GridFunction<H1<Context::Serial>>& dist,
-    const FunctionBase& expr, Solver::Solver& solver);
+    const FunctionBase& expr, Solver& solver);
 
 int main(int, char**)
 {
@@ -100,7 +101,7 @@ int main(int, char**)
           + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v)
           - BoundaryIntegral(g, v).over(GammaN);
-    solver.solve(state);
+    state.solve(solver);
 
     // Adjoint equation
     auto dj = -u.getGridFunction() / Omega.getVolume();
@@ -111,7 +112,7 @@ int main(int, char**)
     adjoint = Integral(Grad(p), Grad(q))
             + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
             - Integral(dj, q);
-    solver.solve(adjoint);
+    adjoint.solve(solver);
 
     double objective = J(u.getGridFunction());
     Alert::Info() << "    | Objective: " << objective
@@ -205,11 +206,11 @@ int main(int, char**)
   return 0;
 }
 
+template <class Solver>
 GridFunction<H1<Context::Serial>> getShapeGradient(
     H1<Context::Serial>& vecFes,
     GridFunction<H1<Context::Serial>>& dist,
-    const FunctionBase& expr,
-    Solver::Solver& solver)
+    const FunctionBase& expr, Solver& solver)
 {
   TrialFunction d(vecFes);
   TestFunction  v(vecFes);
@@ -218,7 +219,7 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
   conormal = Integral(alpha * Jacobian(d), Jacobian(v))
            + Integral(d, v)
            - BoundaryIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
-  solver.solve(conormal);
+  conormal.solve(solver);
 
   const auto& cnd = d.getGridFunction();
   const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
@@ -229,7 +230,7 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
           + Integral(g, v)
           + Integral(tgv * g, v).over(GammaN)
           - BoundaryIntegral(expr * cn, v).over(SigmaD);
-  solver.solve(hilbert);
+  hilbert.solve(solver);
 
   return g.getGridFunction();
 }

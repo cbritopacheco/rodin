@@ -28,7 +28,7 @@ static constexpr size_t maxIt = 40;
 static constexpr double eps   = 1e-6;
 static constexpr double hmax  = 0.1;
 static constexpr double ell   = 5.0;
-static constexpr double alpha = 4 * hmax * hmax;
+static constexpr double alpha = 4 * hmax;
 
 int main(int, char**)
 {
@@ -53,9 +53,8 @@ int main(int, char**)
     return bf(w, w);
   };
 
-  // Conjugate Gradient solver
-  auto cg = Solver::CG().setMaxIterations(500)
-                        .setRelativeTolerance(1e-6);
+  // UMFPack
+  Solver::UMFPack solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -79,7 +78,7 @@ int main(int, char**)
                    mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-    cg.solve(elasticity);
+    elasticity.solve(solver);
 
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
@@ -94,35 +93,20 @@ int main(int, char**)
             + Integral(g, w)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma0)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
-    cg.solve(hilbert);
+    hilbert.solve(solver);
 
     // Update objective
     obj.push_back(compliance(u.getGridFunction()) + ell * Omega.getVolume());
 
     Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
-    // Test for convergence
-    if (i > 0 && abs(obj[i] - obj[i - 1]) < eps)
-    {
-      Alert::Info() << "Convergence!" << Alert::Raise;
-      break;
-    }
-
     // Make the displacement
     double dt = Omega.getMaximumDisplacement(g.getGridFunction());
-    if (dt < 1e-4)
-    {
-      // If the maximum displacement is too small the mesh will degenerate
-      break;
-    }
-    else
-    {
-      g.getGridFunction() *= hmax * dt;
-      Omega.displace(g.getGridFunction());
+    g.getGridFunction() *= hmax * dt;
+    Omega.displace(g.getGridFunction());
 
-      // Refine the mesh using MMG
-      MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
-    }
+    // Refine the mesh using MMG
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     // Save mesh
     Omega.save("Omega.mesh");

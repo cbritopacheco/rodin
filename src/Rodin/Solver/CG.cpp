@@ -7,46 +7,4 @@
 #include "CG.h"
 
 namespace Rodin::Solver
-{
-   CG& CG::printIterations(bool printIterations)
-   {
-      m_printIterations = printIterations;
-      return *this;
-   }
-
-   CG& CG::setMaxIterations(int maxIterations)
-   {
-      m_maxIterations = maxIterations;
-      return *this;
-   }
-
-   CG& CG::setRelativeTolerance(double rtol)
-   {
-      m_rtol = rtol;
-      return *this;
-   }
-
-   CG& CG::setAbsoluteTolerance(double atol)
-   {
-      m_atol = atol;
-      return *this;
-   }
-
-   void CG::solve(Variational::ProblemBase& problem)
-   {
-      problem.update().assemble();
-
-      mfem::GSSmoother smoother;
-      smoother.SetOperator(problem.getStiffnessMatrix());
-
-      mfem::PCG(
-            problem.getStiffnessMatrix(),
-            smoother,
-            problem.getMassVector(),
-            problem.getInitialGuess(),
-            static_cast<int>(m_printIterations), m_maxIterations, m_rtol, m_atol);
-
-      problem.recoverSolution();
-   }
-}
-
+{}

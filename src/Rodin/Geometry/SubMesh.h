@@ -43,13 +43,6 @@ namespace Rodin::Geometry
             return *this;
          }
 
-         void finalize()
-         {
-            getHandle().FinalizeTopology();
-            getHandle().Finalize();
-            // TODO: Build face map
-         }
-
          /**
           * @brief Adds an element from the parent mesh to the submesh.
           *

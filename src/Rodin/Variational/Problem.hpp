@@ -13,146 +13,265 @@
 #include "DirichletBC.h"
 
 #include "Problem.h"
+#include "UnaryMinus.h"
 
 namespace Rodin::Variational
 {
-   template <class TrialFES, class TestFES, class OperatorType>
-   Problem<TrialFES, TestFES, OperatorType>
-   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType&& op)
+   // ------------------------------------------------------------------------
+   // ---- Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
+   // ------------------------------------------------------------------------
+
+   template <class TrialFES, class TestFES>
+   constexpr
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
+   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
       :  m_bilinearForm(u, v),
          m_linearForm(v),
-         m_trialFunctions{{u.getUUID(), std::ref(u)}},
-         m_testFunctions{{v.getUUID(), std::ref(v)}},
-         m_stiffnessOp(new OperatorType(std::move(op)), true)
+         m_trialFunction(u),
+         m_testFunction(v)
+   {}
+
+   template <class TrialFES, class TestFES>
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>&
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>::operator=(ProblemBody&& rhs)
    {
-      m_guess = 0.0;
-   }
+      Parent::operator=(std::move(rhs));
 
-   template <class TrialFES, class TestFES, class OperatorType>
-   Problem<TrialFES, TestFES, OperatorType>
-   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v, OperatorType& op)
-      :  m_bilinearForm(u, v),
-         m_linearForm(v),
-         m_trialFunctions{{u.getUUID(), std::ref(u)}},
-         m_testFunctions{{v.getUUID(), std::ref(v)}},
-         m_stiffnessOp(&op, false)
-   {
-      m_guess = 0.0;
-   }
+      for (auto& bfi : getProblemBody().getBFIs())
+         getBilinearForm().add(bfi);
 
-   template <class TrialFES, class TestFES, class OperatorType>
-   Problem<TrialFES, TestFES, OperatorType>&
-   Problem<TrialFES, TestFES, OperatorType>::operator=(ProblemBody&& rhs)
-   {
-      m_pb = std::move(rhs);
-
-      for (auto& bfi : m_pb.getBilinearFormDomainIntegratorList())
-         m_bilinearForm.add(*bfi);
-      for (auto& bfi : m_pb.getBilinearFormBoundaryIntegratorList())
-         m_bilinearForm.add(*bfi);
-
-      // The LinearFormIntegrator instances have already been moved to the LHS
-      for (auto& lfi : m_pb.getLinearFormDomainIntegratorList())
-         m_linearForm.add(*lfi);
-      for (auto& lfi : m_pb.getLinearFormBoundaryIntegratorList())
-         m_linearForm.add(*lfi);
-
-      // Emplace all the solutions
-      for (auto& [uuid, u] : m_trialFunctions)
-         u.get().emplaceGridFunction();
+      for (auto& lfi : getProblemBody().getLFIs())
+         getLinearForm().add(UnaryMinus(lfi)); // Negate every linear form
 
       return *this;
    }
 
-   template <class TrialFES, class TestFES, class OperatorType>
-   void Problem<TrialFES, TestFES, OperatorType>::assemble()
+   template <class TrialFES, class TestFES>
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>&
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>::update()
    {
-      m_linearForm.assemble();
-      m_bilinearForm.assemble();
+      // Update all components of the problem
+      getTrialFunction().getFiniteElementSpace().update();
+      getTestFunction().getFiniteElementSpace().update();
+      getTrialFunction().getGridFunction().update();
+      getLinearForm().update();
+      getBilinearForm().update();
 
-      // We don't support PDE systems (yet)
-      {
-         assert(m_trialFunctions.size() == 1);
-         assert(m_testFunctions.size() == 1);
-      }
-
-      auto& [uuid, u] = *m_trialFunctions.begin();
-
-      m_bilinearForm.getHandle()
-       .FormLinearSystem(
-             m_essTrueDofList,
-             u.get().getGridFunction().getHandle(),
-             m_linearForm.getHandle(),
-             m_stiffnessOp,
-             m_guess,
-             m_massVector);
+      return *this;
    }
 
-   template <class TrialFES, class TestFES, class OperatorType>
-   Problem<TrialFES, TestFES, OperatorType>&
-   Problem<TrialFES, TestFES, OperatorType>::update()
+   template <class TrialFES, class TestFES>
+   void
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>::assemble()
    {
-      // We don't support PDE systems (yet)
-      {
-         assert(m_trialFunctions.size() == 1);
-         assert(m_testFunctions.size() == 1);
-      }
-
-      // Update all components of the problem
-      for (auto& [uuid, u] : m_trialFunctions)
-      {
-         u.get().getFiniteElementSpace().update();
-         u.get().getGridFunction().update();
-      }
-      m_linearForm.update();
-      m_bilinearForm.update();
+      // Assemble both sides
+      getLinearForm().assemble();
+      getBilinearForm().assemble();
 
       // Project values onto the essential boundary and compute essential dofs
-      m_essTrueDofList.DeleteAll();
+      getEssentialTrueDOFs().SetSize(0);
 
-      for (const auto& [uuid, tfValue] : getEssentialBoundary().getTFMap())
+      const auto& uuid = getTrialFunction().getUUID();
+      auto tfIt = getEssentialBoundary().getTFMap().find(uuid);
+      if (tfIt != getEssentialBoundary().getTFMap().end())
       {
-         assert(m_trialFunctions.count(uuid) == 1);
-         const auto& u = m_trialFunctions.at(uuid);
+         const auto& tfValue = tfIt->second;
          const auto& bdrAttr = tfValue.attributes;
-         u.get().getGridFunction().projectOnBoundary(*tfValue.value, bdrAttr);
-         m_essTrueDofList.Append(u.get().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr));
+         getTrialFunction().getGridFunction().projectOnBoundary(*tfValue.value, bdrAttr);
+         getEssentialTrueDOFs().Append(getTrialFunction().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr));
       }
 
-      for (const auto& [uuid, compMap] : getEssentialBoundary().getTFCompMap())
+      auto tfCompIt = getEssentialBoundary().getTFCompMap().find(uuid);
+      if (tfCompIt != getEssentialBoundary().getTFCompMap().end())
       {
-         assert(m_trialFunctions.count(uuid) == 1);
-         const auto& u = m_trialFunctions.at(uuid);
+         const auto& compMap = tfCompIt->second;
          for (const auto& [component, compValue] : compMap)
          {
             const auto& bdrAttr = compValue.attributes;
-            Component comp(u.get().getGridFunction(), component);
+            Component comp(getTrialFunction().getGridFunction(), component);
             comp.projectOnBoundary(*compValue.value, bdrAttr);
-            m_essTrueDofList.Append(
-               u.get().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr, component));
+            getEssentialTrueDOFs().Append(
+               getTrialFunction().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr, component));
          }
       }
 
-      m_essTrueDofList.Sort();
-      m_essTrueDofList.Unique();
+      getEssentialTrueDOFs().Sort();
+      getEssentialTrueDOFs().Unique();
+
+      // Form linear system
+      if constexpr (std::is_same_v<TrialFES, TestFES>)
+      {
+         mfem::Operator* ptr = nullptr;
+         getBilinearForm().getOperator()
+            .FormLinearSystem(
+               getEssentialTrueDOFs(),
+               getTrialFunction().getGridFunction().getData(),
+               getLinearForm().getVector(),
+               ptr,
+               m_guess,
+               m_massVector);
+         assert(m_stiffnessOp);
+         m_stiffnessOp.reset(ptr);
+         ptr = nullptr;
+      }
+      else
+      {
+         assert(false); // Not supported yet
+      }
+   }
+
+   template <class TrialFES, class TestFES>
+   void
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
+   ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
+   {
+      // Emplace data
+      getTrialFunction().emplaceGridFunction();
+
+      // Assemble the system
+      assemble();
+
+      // Solve the system
+      solver.solve(getStiffnessOperator(), getMassVector(), m_guess);
+
+      // Recover solution
+      getBilinearForm().getOperator()
+         .RecoverFEMSolution(
+            m_guess,
+            getLinearForm().getVector(),
+            getTrialFunction().getGridFunction().getData());
+
+   }
+
+   template <class TrialFES, class TestFES>
+   const EssentialBoundary&
+   Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
+   ::getEssentialBoundary() const
+   {
+      return getProblemBody().getEssentialBoundary();
+   }
+
+   // ------------------------------------------------------------------------
+   // ---- Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   // ------------------------------------------------------------------------
+
+   template <class TrialFES, class TestFES>
+   constexpr
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+      :  m_bilinearForm(u, v),
+         m_linearForm(v),
+         m_trialFunction(u),
+         m_testFunction(v)
+   {}
+
+   template <class TrialFES, class TestFES>
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>&
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   ::operator=(ProblemBody&& rhs)
+   {
+      Parent::operator=(std::move(rhs));
+
+      for (auto& bfi : getProblemBody().getBFIs())
+         getBilinearForm().add(bfi);
+
+      for (auto& lfi : getProblemBody().getLFIs())
+         getLinearForm().add(UnaryMinus(lfi)); // Negate every linear form
 
       return *this;
    }
 
-   template <class TrialFES, class TestFES, class OperatorType>
-   void Problem<TrialFES, TestFES, OperatorType>::recoverSolution()
+   template <class TrialFES, class TestFES>
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>&
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>::update()
    {
-      auto& [uuid, u] = *m_trialFunctions.begin();
-      auto& a = m_bilinearForm;
-      auto& l = m_linearForm;
-      a.getHandle().RecoverFEMSolution(m_guess,
-            l.getHandle(), u.get().getGridFunction().getHandle());
+      // Update all components of the problem
+      getTrialFunction().getFiniteElementSpace().update();
+      getTestFunction().getFiniteElementSpace().update();
+      getTrialFunction().getGridFunction().update();
+      getLinearForm().update();
+      getBilinearForm().update();
+
+      return *this;
    }
 
-   template <class TrialFES, class TestFES, class OperatorType>
-   EssentialBoundary& Problem<TrialFES, TestFES, OperatorType>::getEssentialBoundary()
+   template <class TrialFES, class TestFES>
+   void
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>::assemble()
    {
-      return m_pb.getEssentialBoundary();
+      // Assemble both sides
+      getLinearForm().assemble();
+      getBilinearForm().assemble();
+
+      // Project values onto the essential boundary and compute essential dofs
+      getEssentialTrueDOFs().SetSize(0);
+
+      const auto& uuid = getTrialFunction().getUUID();
+      auto tfIt = getEssentialBoundary().getTFMap().find(uuid);
+      if (tfIt != getEssentialBoundary().getTFMap().end())
+      {
+         const auto& tfValue = tfIt->second;
+         const auto& bdrAttr = tfValue.attributes;
+         getTrialFunction().getGridFunction().projectOnBoundary(*tfValue.value, bdrAttr);
+         getEssentialTrueDOFs().Append(getTrialFunction().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr));
+      }
+
+      auto tfCompIt = getEssentialBoundary().getTFCompMap().find(uuid);
+      if (tfCompIt != getEssentialBoundary().getTFCompMap().end())
+      {
+         const auto& compMap = tfCompIt->second;
+         for (const auto& [component, compValue] : compMap)
+         {
+            const auto& bdrAttr = compValue.attributes;
+            Component comp(getTrialFunction().getGridFunction(), component);
+            comp.projectOnBoundary(*compValue.value, bdrAttr);
+            getEssentialTrueDOFs().Append(
+               getTrialFunction().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr, component));
+         }
+      }
+
+      getEssentialTrueDOFs().Sort();
+      getEssentialTrueDOFs().Unique();
+
+      // Form linear system
+      getBilinearForm().formLinearSystem(
+            getEssentialTrueDOFs(),
+            getTrialFunction().getGridFunction().getData(),
+            getLinearForm().getVector(),
+            m_stiffnessOp,
+            m_guess,
+            m_massVector);
+   }
+
+   template <class TrialFES, class TestFES>
+   void
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
+   {
+      // Emplace data
+      getTrialFunction().emplaceGridFunction();
+
+      // Assemble the system
+      assemble();
+
+      // Solve the system
+      solver.solve(getStiffnessOperator(), getMassVector(), m_guess);
+
+      // Recover solution
+      getBilinearForm().getOperator()
+         .RecoverFEMSolution(
+            m_guess,
+            getLinearForm().getVector(),
+            getTrialFunction().getGridFunction().getData());
+
+   }
+
+   template <class TrialFES, class TestFES>
+   const EssentialBoundary&
+   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   ::getEssentialBoundary() const
+   {
+      return getProblemBody().getEssentialBoundary();
    }
 }
 

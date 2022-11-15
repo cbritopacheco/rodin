@@ -10,8 +10,10 @@
 namespace Rodin::Variational
 {
    // ---- FunctionBase ------------------------------------------------------
+  
    UnaryMinus<FunctionBase>::UnaryMinus(const FunctionBase& op)
-      : m_op(op.copy())
+      :  FunctionBase(op),
+         m_op(op.copy())
    {}
 
    UnaryMinus<FunctionBase>::UnaryMinus(const UnaryMinus& other)
@@ -45,7 +47,7 @@ namespace Rodin::Variational
 
    // ---- LinearFormIntegratorBase ------------------------------------------
    UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
-      :  LinearFormIntegratorBase(op.getTestFunction()),
+      :  LinearFormIntegratorBase(op),
          m_op(op.copy())
    {}
 
@@ -96,7 +98,7 @@ namespace Rodin::Variational
 
    // ---- BilinearFormIntegratorBase ----------------------------------------
    UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
-      :  BilinearFormIntegratorBase(op.getTrialFunction(), op.getTestFunction()),
+      :  BilinearFormIntegratorBase(op),
          m_op(op.copy())
    {}
 
@@ -129,14 +131,15 @@ namespace Rodin::Variational
       return UnaryMinus(op);
    }
 
-   UnaryMinus<LinearFormIntegratorSum>
-   operator-(const LinearFormIntegratorSum& op)
+   UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
+   operator-(const FormLanguage::List<BilinearFormIntegratorBase>& op)
    {
-      return UnaryMinus<LinearFormIntegratorSum>(op);
+      return UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>(op);
    }
 
-   UnaryMinus<BilinearFormIntegratorSum> operator-(const BilinearFormIntegratorSum& op)
+   UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
+   operator-(const FormLanguage::List<LinearFormIntegratorBase>& op)
    {
-      return UnaryMinus<BilinearFormIntegratorSum>(op);
+      return UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>(op);
    }
 }

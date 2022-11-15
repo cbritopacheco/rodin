@@ -9,6 +9,8 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/FormLanguage/List.h"
+
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
@@ -20,19 +22,37 @@ namespace Rodin::Variational
     * @brief Abstract base class for objects of type BilinearForm.
     */
    template <class OperatorType>
-   class BilinearFormBase
+   class BilinearFormBase : public FormLanguage::Base
    {
       public:
+         constexpr
+         BilinearFormBase() = default;
+
+         constexpr
+         BilinearFormBase(const BilinearFormBase& other)
+            :  FormLanguage::Base(other),
+               m_bfis(other.m_bfis)
+         {}
+
+         constexpr
+         BilinearFormBase(BilinearFormBase&& other)
+            :  FormLanguage::Base(std::move(other)),
+               m_bfis(std::move(other.m_bfis))
+         {}
+
+         constexpr
+         const FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators() const
+         {
+            return m_bfis;
+         }
+
          /**
           * @brief Updates the state after a refinement in the mesh.
           *
           * This method will update the bilinear form after a call to the
           * @ref MeshBase::refine() "refine()" method.
           */
-         void update()
-         {
-            getHandle().Update();
-         }
+         virtual BilinearFormBase& update() = 0;
 
          /**
           * @brief Assembles the bilinear form.
@@ -42,36 +62,21 @@ namespace Rodin::Variational
           *
           * @see getMatrix()
           */
-         void assemble()
-         {
-            getHandle().Assemble();
-         }
+         virtual void assemble() = 0;
 
          /**
           * @brief Gets the reference to the (local) associated sparse matrix
           * to the bilinear form.
           * @returns Reference to the associated sparse matrix.
           */
-         virtual OperatorType& getMatrix() = 0;
+         virtual OperatorType& getOperator() = 0;
 
          /**
           * @brief Gets the reference to the (local) associated sparse matrix
           * to the bilinear form.
           * @returns Constant reference to the associated sparse matrix.
           */
-         virtual const OperatorType& getMatrix() const = 0;
-
-         /**
-          * @internal
-          * @returns Underlying internal reference to bilinear form.
-          */
-         virtual mfem::BilinearForm& getHandle() = 0;
-
-         /**
-          * @internal
-          * @returns Underlying internal constant reference to bilinear form.
-          */
-         virtual const mfem::BilinearForm& getHandle() const = 0;
+         virtual const OperatorType& getOperator() const = 0;
 
          /**
           * @brief Builds the bilinear form the given bilinear integrator
@@ -79,27 +84,52 @@ namespace Rodin::Variational
           * build the bilinear form.
           * @returns Reference to this (for method chaining)
           */
+         virtual BilinearFormBase& from(const BilinearFormIntegratorBase& bfi)
+         {
+            m_bfis.clear();
+            add(bfi).assemble();
+            return *this;
+         }
+
          virtual BilinearFormBase& from(
-               const BilinearFormIntegratorBase& bfi) = 0;
+               const FormLanguage::List<BilinearFormIntegratorBase>& bfi)
+         {
+            m_bfis.clear();
+            add(bfi).assemble();
+            return *this;
+         }
+
+         virtual BilinearFormBase& operator=(const BilinearFormIntegratorBase& bfi)
+         {
+            from(bfi).assemble();
+            return *this;
+         }
 
          /**
           * @todo
           */
-         virtual BilinearFormBase& from(
-               const BilinearFormIntegratorSum& bfi) = 0;
+         virtual BilinearFormBase& operator=(
+               const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
+         {
+            from(bfis).assemble();
+            return *this;
+         }
 
          /**
           * @brief Adds a bilinear integrator to the bilinear form.
           * @returns Reference to this (for method chaining)
           */
-         virtual BilinearFormBase& add(
-               const BilinearFormIntegratorBase& bfi) = 0;
+         virtual BilinearFormBase& add(const BilinearFormIntegratorBase& bfi)
+         {
+            m_bfis.add(bfi);
+            return *this;
+         }
 
-         /**
-          * @todo
-          */
-         virtual BilinearFormBase& add(
-               const BilinearFormIntegratorSum& lsum) = 0;
+         virtual BilinearFormBase& add(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
+         {
+            m_bfis.add(bfis);
+            return *this;
+         }
 
          /**
           * @brief Gets the reference to the associated TrialFunction object.
@@ -112,13 +142,18 @@ namespace Rodin::Variational
           * @returns Reference to this (for method chaining)
           */
          virtual const ShapeFunctionBase<TestSpace>& getTestFunction() const = 0;
+
+         virtual BilinearFormBase* copy() const noexcept override = 0;
+
+      private:
+         FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
    };
 
    /**
     * @brief Represents a serial bilinear form supported on two finite element
     * spaces originating from two instances of FiniteElementCollection.
-    * @tparam TrialFEC Trial FiniteElementCollection
-    * @tparam TestFEC Test FiniteElementCollection
+    * @tparam TrialFES Trial FiniteElementCollection
+    * @tparam TestFES Test FiniteElementCollection
     *
     * An object of type BilinearForm represents a linear map
     * @f[
@@ -142,8 +177,8 @@ namespace Rodin::Variational
     * @endcode
     */
    template <class TrialFES, class TestFES>
-   class BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>
-      : public BilinearFormBase<mfem::SparseMatrix>
+   class BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>
+      : public BilinearFormBase<mfem::Operator>
    {
       static_assert(
             std::is_same_v<TrialFES, TestFES>,
@@ -151,20 +186,35 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
 
-      using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
-
       public:
          using Context = typename TrialFES::Context;
-         using OperatorType = mfem::SparseMatrix;
+         using OperatorType = mfem::Operator;
+         using Parent = BilinearFormBase<mfem::Operator>;
 
          /**
           * @brief Constructs a BilinearForm from a TrialFunction and
           * TestFunction.
           *
-          * @param[in] u TrialFunction
-          * @param[out] v TestFunction
+          * @param[in] u Trial function argument
+          * @param[in] v Test function argument
           */
-         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v);
+         constexpr
+         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+            :  m_u(u), m_v(v)
+         {}
+
+         constexpr
+         BilinearForm(const BilinearForm& other)
+            :  BilinearFormBase(other),
+               m_u(other.m_u), m_v(other.m_v)
+         {}
+
+         constexpr
+         BilinearForm(BilinearForm&& other)
+            :  BilinearFormBase(std::move(other)),
+               m_u(other.m_u), m_v(other.m_v),
+               m_bf(std::move(other.m_bf))
+         {}
 
          /**
           * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
@@ -176,20 +226,25 @@ namespace Rodin::Variational
           * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
           * at @f$ ( u, v ) @f$.
           */
+         constexpr
          double operator()(
                const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const;
 
-         /**
-          * @brief Builds the bilinear form from a derived instance of
-          * BilinearFormIntegratorBase.
-          * @param[in] bfi Bilinear form integrator
-          */
-         BilinearForm& operator=(const BilinearFormIntegratorBase& bfi);
+         constexpr
+         void formLinearSystem(
+               const mfem::Array<int>& essTrueDofs,
+               mfem::Vector& x,
+               mfem::Vector& b,
+               mfem::SparseMatrix& stiffness,
+               mfem::Vector& guess,
+               mfem::Vector& mass)
+         {
+            m_bf->FormLinearSystem(essTrueDofs, x, b, stiffness, guess, mass);
+         }
 
-         /**
-          * @todo
-          */
-         BilinearForm& operator=(const BilinearFormIntegratorSum& lsum);
+         void assemble() override;
+
+         BilinearForm& update() override;
 
          const TrialFunction<TrialFES>& getTrialFunction() const override
          {
@@ -201,22 +256,31 @@ namespace Rodin::Variational
             return m_v;
          }
 
-         BilinearForm& add(const BilinearFormIntegratorBase& bfi) override;
+         BilinearForm& operator=(const BilinearFormIntegratorBase& bfi) override
+         {
+            from(bfi).assemble();
+            return *this;
+         }
 
-         BilinearForm& add(const BilinearFormIntegratorSum& lsum) override;
-
-         BilinearForm& from(const BilinearFormIntegratorBase& bfi) override;
-
-         BilinearForm& from(const BilinearFormIntegratorSum& bfi) override;
+         /**
+          * @todo
+          */
+         BilinearForm& operator=(
+               const FormLanguage::List<BilinearFormIntegratorBase>& bfis) override
+         {
+            from(bfis).assemble();
+            return *this;
+         }
 
          /**
           * @brief Gets the reference to the (local) associated sparse matrix
           * to the bilinear form.
           * @returns Reference to the associated sparse matrix.
           */
-         OperatorType& getMatrix() override
+         virtual OperatorType& getOperator() override
          {
-            return getHandle().SpMat();
+            assert(m_bf->HasSpMat());
+            return m_bf->SpMat();
          }
 
          /**
@@ -224,33 +288,68 @@ namespace Rodin::Variational
           * to the bilinear form.
           * @returns Constant reference to the associated sparse matrix.
           */
-         const OperatorType& getMatrix() const override
+         virtual const OperatorType& getOperator() const override
          {
-            return getHandle().SpMat();
+            assert(m_bf->HasSpMat());
+            return m_bf->SpMat();
          }
 
-         mfem::BilinearForm& getHandle() override
+         virtual BilinearForm* copy() const noexcept override
          {
-            return *m_bf;
-         }
-
-         const mfem::BilinearForm& getHandle() const override
-         {
-            return *m_bf;
+            return new BilinearForm(*this);
          }
 
       private:
          TrialFunction<TrialFES>& m_u;
          TestFunction<TestFES>&   m_v;
+
          std::unique_ptr<mfem::BilinearForm> m_bf;
-         BFIList m_bfiDomainList;
-         BFIList m_bfiBoundaryList;
-         std::vector<std::unique_ptr<mfem::Array<int>>> m_domAttrMarkers;
-         std::vector<std::unique_ptr<mfem::Array<int>>> m_bdrAttrMarkers;
    };
    template <class TrialFES, class TestFES>
    BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-      -> BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>;
+      -> BilinearForm<TrialFES, TestFES, typename TrialFES::Context, mfem::Operator>;
+
+   template <class TrialFES, class TestFES>
+   class BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>
+      : public BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>
+   {
+      public:
+         using Context = typename TrialFES::Context;
+         using OperatorType = mfem::SparseMatrix;
+         using Parent = BilinearForm<TrialFES, TestFES, Context, mfem::Operator>;
+
+         constexpr
+         BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+            : Parent(u, v)
+         {}
+
+         constexpr
+         BilinearForm(const BilinearForm& other)
+            : Parent(other)
+         {}
+
+         constexpr
+         BilinearForm(BilinearForm&& other)
+            : Parent(std::move(other))
+         {}
+
+         virtual OperatorType& getOperator() override
+         {
+            assert(dynamic_cast<mfem::SparseMatrix*>(&Parent::getOperator()));
+            return static_cast<mfem::SparseMatrix&>(Parent::getOperator());
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated sparse matrix
+          * to the bilinear form.
+          * @returns Constant reference to the associated sparse matrix.
+          */
+         virtual const OperatorType& getOperator() const override
+         {
+            assert(dynamic_cast<const mfem::SparseMatrix*>(&Parent::getOperator()));
+            return static_cast<const mfem::SparseMatrix&>(Parent::getOperator());
+         }
+   };
 }
 
 #include "BilinearForm.hpp"

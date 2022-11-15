@@ -97,7 +97,7 @@ namespace Rodin::Variational
     * Represents a linear form @f$ \ell : V_h \rightarrow \mathbb{R} @f$ on a given
     * finite element space @f$ V_h @f$.
     */
-   template <class FES, class VectorType>
+   template <class FES, class Context, class VectorType>
    class LinearForm;
 
    /**
@@ -134,7 +134,7 @@ namespace Rodin::Variational
     * @tparam TrialFES Trial FiniteElementCollection
     * @tparam TestFES Test FiniteElementCollection
     */
-   template <class TrialFES, class TestFES, class OperatorType>
+   template <class TrialFES, class TestFES, class Context, class OperatorType>
    class BilinearForm;
 
    /**
@@ -822,9 +822,12 @@ namespace Rodin::Variational
    template <class Operand>
    class DirichletBC;
 
+   class ProblemBody;
+
    /**
     * @brief Base class for variational problem objects.
     */
+   template <class OperatorType, class VectorType>
    class ProblemBase;
 
    /**
@@ -838,12 +841,6 @@ namespace Rodin::Variational
     */
    template <class ... Parameters>
    class Problem;
-
-   class ProblemBody;
-
-   // TODO: Refactor or remove these two classes!!!!
-   class LinearFormIntegratorSum;
-   class BilinearFormIntegratorSum;
 }
 
 #endif

@@ -13,148 +13,78 @@
 
 #include "FiniteElementSpace.h"
 #include "BilinearFormIntegrator.h"
-#include "BilinearFormIntegratorSum.h"
 
 #include "BilinearForm.h"
 
 namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::BilinearForm(
-         TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-      :  m_u(u), m_v(v),
-         m_bf(new mfem::BilinearForm(&m_v.getFiniteElementSpace().getHandle()))
-   {}
-
-   template <class TrialFES, class TestFES>
-   double BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::operator()(
-         const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
+   constexpr
+   double
+   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>
+   ::operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
    {
+      assert(m_bf);
       return m_bf->InnerProduct(u.getHandle(), v.getHandle());
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::operator=(const BilinearFormIntegratorBase& bfi)
+   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>&
+   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>::update()
    {
-      from(bfi).assemble();
+      assert(m_bf);
+      m_bf->Update();
       return *this;
    }
 
    template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::operator=(const BilinearFormIntegratorSum& bfi)
+   void
+   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>::assemble()
    {
-      from(bfi).assemble();
-      return *this;
-   }
+      m_bf.reset(new mfem::BilinearForm(&m_v.getFiniteElementSpace().getHandle()));
 
-   template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::from(const BilinearFormIntegratorBase& bfi)
-   {
-      switch (bfi.getIntegratorRegion())
+      std::vector<mfem::Array<int>> attrs;
+      attrs.reserve(getIntegrators().size());
+      for (const auto& bfi : getIntegrators())
       {
-         case IntegratorRegion::Domain:
+         switch (bfi.getIntegratorRegion())
          {
-            m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getHandle()));
-            m_domAttrMarkers.clear();
-            add(bfi);
-            break;
-         }
-         default:
-            Alert::Exception() << "IntegratorRegion not supported." << Alert::Raise;
-      }
-      return *this;
-   }
-
-   template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::from(const BilinearFormIntegratorSum& lsum)
-   {
-      m_bf.reset(new mfem::BilinearForm(&m_u.getFiniteElementSpace().getHandle()));
-      m_bfiDomainList.clear();
-      m_domAttrMarkers.clear();
-      add(lsum);
-      return *this;
-   }
-
-   template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::add(const BilinearFormIntegratorSum& lsum)
-   {
-      for (const auto& p : lsum.getBilinearFormDomainIntegratorList())
-         add(*p);
-      return *this;
-   }
-
-   template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>&
-   BilinearForm<TrialFES, TestFES, mfem::SparseMatrix>::add(const BilinearFormIntegratorBase& bfi)
-   {
-      assert(
-         bfi.getTrialFunction().getLeaf().getUUID()== getTrialFunction().getLeaf().getUUID());
-      assert(
-         bfi.getTestFunction().getLeaf().getUUID() == getTestFunction().getLeaf().getUUID());
-
-      switch (bfi.getIntegratorRegion())
-      {
-         case IntegratorRegion::Domain:
-         {
-            auto& l = m_bfiDomainList.emplace_back(bfi.copy());
-            const auto& domAttrs = bfi.getAttributes();
-
-            if (domAttrs.size() == 0)
+            case IntegratorRegion::Boundary:
             {
-               m_bf->AddDomainIntegrator(l->build().release());
-            }
-            else
-            {
-               int size = m_u.getFiniteElementSpace().getMesh().getHandle().attributes.Max();
-               auto data = std::make_unique<mfem::Array<int>>(size);
-               *data = 0;
-               for (const auto& b : domAttrs)
+               if (bfi.getAttributes().size() == 0)
                {
-                  // All domain attributes are one-indexed.
-                  assert(b - 1 < size);
-                  (*data)[b - 1] = 1;
+                  m_bf->AddBoundaryIntegrator(bfi.build().release());
                }
-               m_bf->AddDomainIntegrator(
-                     l->build().release(),
-                     *m_domAttrMarkers.emplace_back(std::move(data)));
-            }
-            break;
-         }
-         case IntegratorRegion::Boundary:
-         {
-            auto& l = m_bfiBoundaryList.emplace_back(bfi.copy());
-            const auto& bdrAttrs = bfi.getAttributes();
-
-            if (bdrAttrs.size() == 0)
-            {
-               m_bf->AddBoundaryIntegrator(l->build().release());
-            }
-            else
-            {
-               int size = m_u.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
-               auto data = std::make_unique<mfem::Array<int>>(size);
-               *data = 0;
-               for (const auto& b : bdrAttrs)
+               else
                {
-                  // All Boundary attributes are one-indexed.
-                  assert(b - 1 < size);
-                  (*data)[b - 1] = 1;
+                  const int size =
+                     m_v.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
+                  m_bf->AddBoundaryIntegrator(
+                        bfi.build().release(),
+                        attrs.emplace_back(Utility::set2marker(bfi.getAttributes(), size)));
                }
-               m_bf->AddBoundaryIntegrator(
-                     l->build().release(),
-                     *m_bdrAttrMarkers.emplace_back(std::move(data)));
+               break;
             }
-            break;
+            case IntegratorRegion::Domain:
+            {
+               if (bfi.getAttributes().size() == 0)
+               {
+                  m_bf->AddDomainIntegrator(bfi.build().release());
+               }
+               else
+               {
+                  const int size =
+                     m_v.getFiniteElementSpace().getMesh().getHandle().attributes.Max();
+                  m_bf->AddDomainIntegrator(
+                        bfi.build().release(),
+                        attrs.emplace_back(Utility::set2marker(bfi.getAttributes(), size)));
+               }
+               break;
+            }
          }
-         default:
-            Alert::Exception() << "IntegratorRegion not supported." << Alert::Raise;
       }
-      return *this;
+
+      m_bf->Assemble();
    }
 }
 

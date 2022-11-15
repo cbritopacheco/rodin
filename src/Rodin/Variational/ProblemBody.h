@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/List.h"
 
 #include "ForwardDecls.h"
 
@@ -28,35 +29,68 @@ namespace Rodin::Variational
    class ProblemBody : public FormLanguage::Base
    {
       public:
-         using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
-         using BFIList = std::vector<std::unique_ptr<BilinearFormIntegratorBase>>;
-
          ProblemBody() = default;
 
-         ProblemBody(const BilinearFormIntegratorBase& bfi);
+         ProblemBody(const BilinearFormIntegratorBase& bfi)
+         {
+            m_bfis.add(bfi);
+         }
 
-         ProblemBody(const BilinearFormIntegratorSum& bfi);
+         ProblemBody(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
+            : m_bfis(bfis)
+         {}
 
-         ProblemBody(const ProblemBody& other);
+         ProblemBody(const ProblemBody& other)
+            :  FormLanguage::Base(other),
+               m_bfis(other.m_bfis),
+               m_lfis(other.m_lfis),
+               m_essBdr(other.m_essBdr)
+         {}
 
-         ProblemBody(ProblemBody&& other);
+         ProblemBody(ProblemBody&& other)
+            :  FormLanguage::Base(std::move(other)),
+               m_bfis(std::move(other.m_bfis)),
+               m_lfis(std::move(other.m_lfis)),
+               m_essBdr(std::move(other.m_essBdr))
+         {}
 
          ProblemBody& operator=(ProblemBody&& other)
          {
-            m_bfiDomainList = std::move(other.m_bfiDomainList);
-            m_bfiBoundaryList = std::move(other.m_bfiBoundaryList);
-            m_lfiDomainList = std::move(other.m_lfiDomainList);
-            m_lfiBoundaryList = std::move(other.m_lfiBoundaryList);
+            m_bfis = std::move(other.m_bfis);
+            m_lfis = std::move(other.m_lfis);
             m_essBdr = std::move(other.m_essBdr);
             return *this;
          }
 
-         EssentialBoundary& getEssentialBoundary();
+         EssentialBoundary& getEssentialBoundary()
+         {
+            return m_essBdr;
+         }
 
-         LFIList& getLinearFormDomainIntegratorList();
-         LFIList& getLinearFormBoundaryIntegratorList();
-         BFIList& getBilinearFormDomainIntegratorList();
-         BFIList& getBilinearFormBoundaryIntegratorList();
+         const EssentialBoundary& getEssentialBoundary() const
+         {
+            return m_essBdr;
+         }
+
+         FormLanguage::List<BilinearFormIntegratorBase>& getBFIs()
+         {
+            return m_bfis;
+         }
+
+         const FormLanguage::List<BilinearFormIntegratorBase>& getBFIs() const
+         {
+            return m_bfis;
+         }
+
+         FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
+         {
+            return m_lfis;
+         }
+
+         const FormLanguage::List<LinearFormIntegratorBase>& getLFIs() const
+         {
+            return m_lfis;
+         }
 
          virtual ProblemBody* copy() const noexcept override
          {
@@ -64,24 +98,22 @@ namespace Rodin::Variational
          }
 
       private:
-         BFIList m_bfiDomainList;
-         BFIList m_bfiBoundaryList;
-         LFIList m_lfiDomainList;
-         LFIList m_lfiBoundaryList;
+         FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
+         FormLanguage::List<LinearFormIntegratorBase>   m_lfis;
          EssentialBoundary m_essBdr;
    };
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
+      const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
+      const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
    ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
+      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi);
 
    ProblemBody operator-(
-         const ProblemBody& pb, const LinearFormIntegratorSum& lfi);
+      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi);
 
    template <class T>
    ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T>& bc)

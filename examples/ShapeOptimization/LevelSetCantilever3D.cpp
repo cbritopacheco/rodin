@@ -117,7 +117,7 @@ int main(int, char**)
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorFunction{0, 0, 0}).on(GammaD);
-    solver.solve(elasticity);
+    elasticity.solve(solver);
 
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
     auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
@@ -135,7 +135,7 @@ int main(int, char**)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN)
             ;
-    solver.solve(hilbert);
+    hilbert.solve(solver);
 
     g.getGridFunction().save("g.gf");
     Omega.save("g.mesh");

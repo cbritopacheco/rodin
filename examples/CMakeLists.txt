@@ -1,9 +1,9 @@
 project(Rodin::Examples)
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  add_compile_options(-w -O3)
+  rodin_add_compile_options(LANG CXX OPTIONS -w -O3)
 else()
-  add_compile_options(-w -g -O0)
+  rodin_add_compile_options(LANG CXX OPTIONS -w -g -O0)
 endif()
 
 if (RODIN_BUILD_EXAMPLES)

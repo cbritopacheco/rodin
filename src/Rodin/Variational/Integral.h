@@ -328,7 +328,7 @@ namespace Rodin::Variational
          TestFunction<FES>                m_v;
          GridFunction<FES>&               m_u;
          GridFunction<FES>                m_one;
-         LinearForm<FES, mfem::Vector>    m_lf;
+         LinearForm<FES, Context::Serial, mfem::Vector>    m_lf;
          bool m_assembled;
    };
    template <class FES>
@@ -410,7 +410,7 @@ namespace Rodin::Variational
             }
          }
 
-         Integral* copy() const noexcept override
+         virtual Integral* copy() const noexcept override
          {
             return new Integral(*this);
          }
