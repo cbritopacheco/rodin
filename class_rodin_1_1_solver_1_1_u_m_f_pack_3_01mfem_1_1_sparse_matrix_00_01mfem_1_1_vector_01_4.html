@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solver::UMFPack class | Rodin</title>
+  <title>Rodin::Solver::UMFPack&lt;mfem::SparseMatrix, mfem::Vector&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,7 +52,8 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>UMFPack <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>UMFPack&lt;mfem::SparseMatrix, mfem::Vector&gt; <span class="m-thin">class</span>
         </h1>
         <p><a href="class_rodin_1_1_solver_1_1_u_m_f_pack.html" class="m-doc">UMFPack</a>.</p>
         <nav class="m-block m-default">
@@ -72,7 +73,8 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_solver_1_1_solver.html" class="m-doc">Solver</a>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;mfem::SparseMatrix, mfem::Vector&gt;</a>
             </dt>
             <dd>Base class for solving variational problems represented by a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a> instance.</dd>
           </dl>
@@ -80,8 +82,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ab481921984938d163ae8a429392e96ea">
-              <span class="m-doc-wrap-bumper"><a href="#ab481921984938d163ae8a429392e96ea" class="m-doc-self">UMFPack</a>(</span><span class="m-doc-wrap">bool useLongInts = false)</span>
+            <dt id="addc346569bb7c5200951c6f416027560">
+              <span class="m-doc-wrap-bumper"><a href="#addc346569bb7c5200951c6f416027560" class="m-doc-self">UMFPack</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_u_m_f_pack.html" class="m-doc">UMFPack</a> object with default parameters.</dd>
           </dl>
@@ -89,31 +91,13 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a244a5612b63ab7c3cc41dd9fce77cdbf" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&amp; problem) <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="af5d91a75c93bbcd76e08fc42f046f1c6">
+              <span class="m-doc-wrap-bumper">void <a href="#af5d91a75c93bbcd76e08fc42f046f1c6" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; stiffness,
+              VectorType&amp; mass,
+              VectorType&amp; solution) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the specified <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a244a5612b63ab7c3cc41dd9fce77cdbf"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />UMFPack::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a244a5612b63ab7c3cc41dd9fce77cdbf" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&amp; problem) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Solves the specified <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">problem&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> problem to solve.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

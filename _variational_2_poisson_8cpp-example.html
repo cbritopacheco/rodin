@@ -94,16 +94,16 @@
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarFunction</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span><span class="w"></span>
 
+<span class="w">  </span><span class="c1">// Use CG for solving</span>
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="w"> </span><span class="n">cg</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">mfem</span><span class="o">::</span><span class="n">GSSmoother</span><span class="w"> </span><span class="n">smoother</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">cg</span><span class="p">.</span><span class="n">setPreconditioner</span><span class="p">(</span><span class="n">smoother</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">).</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">).</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w"></span>
+
 <span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w"></span>
 <span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"></span>
 <span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"></span>
 <span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="n">Gamma</span><span class="p">);</span><span class="w"></span>
-
-<span class="w">  </span><span class="c1">// Solve problem</span>
-<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w"></span>
-<span class="w">              </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span><span class="w"></span>
-<span class="w">              </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"></span>
-<span class="w">              </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">poisson</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">poisson</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cg</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">  </span><span class="c1">// Save solution</span>
 <span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getGridFunction</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span><span class="w"></span>

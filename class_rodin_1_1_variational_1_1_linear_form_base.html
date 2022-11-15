@@ -82,13 +82,13 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ac5c54df7ed3b930268c8d7752c101725" class="m-doc">update</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Updates the state after a refinement in the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aba8462453eb7d166fc69a3e5b877b23e" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the linear form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c8e2e57403596cb2d2ac55af2621b08" class="m-doc">update</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Updates the state after a refinement in the mesh.</dd>
             <dt id="a786a316661c285f049fa3ba6f75a8d7a">
               <span class="m-doc-wrap-bumper">auto <a href="#a786a316661c285f049fa3ba6f75a8d7a" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; VectorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -98,11 +98,11 @@
             </dt>
             <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aeed21a89c10889114d9a5cdeaac11abb" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a96a39625aa4c4c9dbcc10e5e7d13cd0d" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa29e186a4d10f62d02286c2298145161" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4912827fb025ac222e4c14b7b9ca69b1" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
             <dt id="a8cdcec5269221b9e379fc7afa2412df1">
@@ -113,32 +113,32 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ac5c54df7ed3b930268c8d7752c101725"><div>
+          <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class VectorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5c54df7ed3b930268c8d7752c101725" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Updates the state after a refinement in the mesh.</p>
-<p>This method will update the linear form after a call to the refine() method.</p>
-          </div></section>
-          <section class="m-doc-details" id="aba8462453eb7d166fc69a3e5b877b23e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class VectorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba8462453eb7d166fc69a3e5b877b23e" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the linear form.</p>
 <p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_base.html#a786a316661c285f049fa3ba6f75a8d7a" class="m-doc">getVector()</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="aeed21a89c10889114d9a5cdeaac11abb"><div>
+          <section class="m-doc-details" id="a6c8e2e57403596cb2d2ac55af2621b08"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class VectorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeed21a89c10889114d9a5cdeaac11abb" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c8e2e57403596cb2d2ac55af2621b08" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Updates the state after a refinement in the mesh.</p>
+<p>This method will update the linear form after a call to the refine() method.</p>
+          </div></section>
+          <section class="m-doc-details" id="a96a39625aa4c4c9dbcc10e5e7d13cd0d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class VectorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96a39625aa4c4c9dbcc10e5e7d13cd0d" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -159,12 +159,12 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa29e186a4d10f62d02286c2298145161"><div>
+          <section class="m-doc-details" id="a4912827fb025ac222e4c14b7b9ca69b1"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class VectorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa29e186a4d10f62d02286c2298145161" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4912827fb025ac222e4c14b7b9ca69b1" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
             <table class="m-table m-fullwidth m-flat">

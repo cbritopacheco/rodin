@@ -87,13 +87,13 @@
             </dt>
             <dd>Rank-3 tensor operator for discretized functions on finite bases.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class OperatorType&gt;</div>
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class Context, class OperatorType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>
             </dt>
             <dd>Represents a serial bilinear form supported on two finite element spaces originating from two instances of FiniteElementCollection.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_trial_f_e_s_00_01_test_f_e_s_00_01mfem_1_1_sparse_matrix_01_4.html" class="m-doc">BilinearForm&lt;TrialFES, TestFES, mfem::SparseMatrix&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_70873d02a60c1c7471b5da224d221e19.html" class="m-doc">BilinearForm&lt;TrialFES, TestFES, Context::Serial, mfem::Operator&gt;</a>
             </dt>
             <dd>Represents a serial bilinear form supported on two finite element spaces originating from two instances of FiniteElementCollection.</dd>
             <dt>
@@ -400,13 +400,13 @@ $ L^2(\Omega)^d $
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class VectorType&gt;</div>
+              <div class="m-doc-template">template&lt;class FES, class Context, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>
             </dt>
             <dd>Represents a linear form on some finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01mfem_1_1_vector_01_4.html" class="m-doc">LinearForm&lt;FES, mfem::Vector&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_context_1_1_serial_00_01mfem_1_1_vector_01_4.html" class="m-doc">LinearForm&lt;FES, Context::Serial, mfem::Vector&gt;</a>
             </dt>
             <dd>Represents a linear form defined over some finite element space.</dd>
             <dt>
@@ -486,6 +486,11 @@ $ L^2(\Omega)^d $
               class <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>
             </dt>
             <dd>Represents a variational problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>
+            </dt>
+            <dd>Base class for variational problem objects.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>
             </dt>

@@ -73,6 +73,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -128,41 +129,46 @@ $ U_h $
 <use x='7.950255' y='1.793263' xlink:href='#eq3-g0-104'/>
 </g>
 </svg>.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of Variational::FormLanguage.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ac5c54df7ed3b930268c8d7752c101725" class="m-doc">update</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aac07f26bd868a1bbe8684289bf4fc690" class="m-doc">update</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Updates the state after a refinement in the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aba8462453eb7d166fc69a3e5b877b23e" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a303db699724eda57e37f6cc23ef4294a" class="m-doc">getMatrix</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d3973e6853fcabd766421581cc48410" class="m-doc">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the (local) associated sparse matrix to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a56890fd451bf4db7142b03a107a1a1ce" class="m-doc">getMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a58c44f362a5fb585cdade982232dba26" class="m-doc">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the (local) associated sparse matrix to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac37f2058894023d37c3c4176ca897ab6" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1eba26941bbc95bc4922272ca36f536a" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Builds the bilinear form the given bilinear integrator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8a4343151288f07c806becf4dce20017" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_sum.html" class="m-doc">BilinearFormIntegratorSum</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8512a3f926cb0c76945aa825d1024668" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&gt;&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0da404392c209fe5672fad03a9901bcf" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a46f97ba874fcbccde09c0f8052545bfe" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Adds a bilinear integrator to the bilinear form.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adae858ef9ce7db8c3e5f52623ac92cf7" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_sum.html" class="m-doc">BilinearFormIntegratorSum</a>&amp; lsum) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afe6c97b3f572e6f7e04edcf7af523b75" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;TrialSpace&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -175,32 +181,32 @@ $ U_h $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ac5c54df7ed3b930268c8d7752c101725"><div>
+          <section class="m-doc-details" id="aac07f26bd868a1bbe8684289bf4fc690"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5c54df7ed3b930268c8d7752c101725" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac07f26bd868a1bbe8684289bf4fc690" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Updates the state after a refinement in the mesh.</p>
 <p>This method will update the bilinear form after a call to the refine() method.</p>
           </div></section>
-          <section class="m-doc-details" id="aba8462453eb7d166fc69a3e5b877b23e"><div>
+          <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba8462453eb7d166fc69a3e5b877b23e" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the bilinear form.</p>
-<p>This method will assemble the underlying sparse matrix associated the bilinear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a303db699724eda57e37f6cc23ef4294a" class="m-doc">getMatrix()</a></p></aside>
+<p>This method will assemble the underlying sparse matrix associated the bilinear form.</p><aside class="m-note m-default"><h4>See also</h4><p>getMatrix()</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a303db699724eda57e37f6cc23ef4294a"><div>
+          <section class="m-doc-details" id="a7d3973e6853fcabd766421581cc48410"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">OperatorType&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a303db699724eda57e37f6cc23ef4294a" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">OperatorType&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d3973e6853fcabd766421581cc48410" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the reference to the (local) associated sparse matrix to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -212,12 +218,12 @@ $ U_h $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a56890fd451bf4db7142b03a107a1a1ce"><div>
+          <section class="m-doc-details" id="a58c44f362a5fb585cdade982232dba26"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56890fd451bf4db7142b03a107a1a1ce" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58c44f362a5fb585cdade982232dba26" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the reference to the (local) associated sparse matrix to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -229,12 +235,12 @@ $ U_h $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ac37f2058894023d37c3c4176ca897ab6"><div>
+          <section class="m-doc-details" id="a1eba26941bbc95bc4922272ca36f536a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac37f2058894023d37c3c4176ca897ab6" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1eba26941bbc95bc4922272ca36f536a" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Builds the bilinear form the given bilinear integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -255,21 +261,21 @@ $ U_h $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a8a4343151288f07c806becf4dce20017"><div>
+          <section class="m-doc-details" id="a8512a3f926cb0c76945aa825d1024668"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a4343151288f07c806becf4dce20017" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_sum.html" class="m-doc">BilinearFormIntegratorSum</a>&amp; bfi) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8512a3f926cb0c76945aa825d1024668" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&gt;&amp; bfis) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
 <aside class="m-note m-dim"><h4><a href="todo.html#_todo000001" class="m-doc">Todo</a></h4></aside>
           </div></section>
-          <section class="m-doc-details" id="a0da404392c209fe5672fad03a9901bcf"><div>
+          <section class="m-doc-details" id="a46f97ba874fcbccde09c0f8052545bfe"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class OperatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0da404392c209fe5672fad03a9901bcf" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46f97ba874fcbccde09c0f8052545bfe" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -280,15 +286,6 @@ $ U_h $
                 </tr>
               </tfoot>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="adae858ef9ce7db8c3e5f52623ac92cf7"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class OperatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;OperatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adae858ef9ce7db8c3e5f52623ac92cf7" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_sum.html" class="m-doc">BilinearFormIntegratorSum</a>&amp; lsum) <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-<aside class="m-note m-dim"><h4><a href="todo.html#_todo000002" class="m-doc">Todo</a></h4></aside>
           </div></section>
           <section class="m-doc-details" id="afe6c97b3f572e6f7e04edcf7af523b75"><div>
             <h3>
