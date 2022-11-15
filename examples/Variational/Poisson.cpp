@@ -33,16 +33,16 @@ int main(int, char**)
   auto f = ScalarFunction(1.0);
   auto g = ScalarFunction(0.0);
 
+  // Use CG for solving
+  Solver::CG cg;
+  mfem::GSSmoother smoother;
+  cg.setPreconditioner(smoother).setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, g).on(Gamma);
-
-  // Solve problem
-  Solver::CG().setMaxIterations(200)
-              .setRelativeTolerance(1e-12)
-              .printIterations(true)
-              .solve(poisson);
+  poisson.solve(cg);
 
   // Save solution
   u.getGridFunction().save("u.gf");

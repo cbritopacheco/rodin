@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/List.h"
 
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -183,6 +184,47 @@ namespace Rodin::Variational
    {
       return Sum(lhs, rhs);
    }
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const BilinearFormIntegratorBase& lhs,
+         const BilinearFormIntegratorBase& rhs);
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const BilinearFormIntegratorBase& lhs,
+         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+         const BilinearFormIntegratorBase& rhs);
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator+(
+         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+
+   FormLanguage::List<LinearFormIntegratorBase>
+   operator+(
+         const LinearFormIntegratorBase& lhs,
+         const LinearFormIntegratorBase& rhs);
+
+   FormLanguage::List<LinearFormIntegratorBase>
+   operator+(
+         const LinearFormIntegratorBase& lhs,
+         const FormLanguage::List<LinearFormIntegratorBase>& rhs);
+
+   FormLanguage::List<LinearFormIntegratorBase>
+   operator+(
+         const FormLanguage::List<LinearFormIntegratorBase>& lhs,
+         const LinearFormIntegratorBase& rhs);
+
+   FormLanguage::List<LinearFormIntegratorBase>
+   operator+(
+         const FormLanguage::List<LinearFormIntegratorBase>& lhs,
+         const FormLanguage::List<LinearFormIntegratorBase>& rhs);
+
 }
 
 #endif

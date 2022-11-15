@@ -33,8 +33,6 @@ set(RodinVariational_HEADERS
   VectorFunction.h
   Utility.h
   Minus.h
-  LinearFormIntegratorSum.h
-  BilinearFormIntegratorSum.h
   Min.h
   Max.h
   GEQ.h
@@ -77,8 +75,6 @@ set(RodinVariational_SRCS
   Function.cpp
   RangeShape.cpp
   Composition.cpp
-  LinearFormIntegratorSum.cpp
-  BilinearFormIntegratorSum.cpp
   Max.cpp
   Min.cpp
   GEQ.cpp

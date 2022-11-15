@@ -32,6 +32,26 @@ namespace Rodin::Variational
    {
       return Sum(lhs, UnaryMinus(rhs));
    }
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator-(
+         const BilinearFormIntegratorBase& lhs,
+         const BilinearFormIntegratorBase& rhs);
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator-(
+         const BilinearFormIntegratorBase& lhs,
+         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator-(
+         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+         const BilinearFormIntegratorBase& rhs);
+
+   FormLanguage::List<BilinearFormIntegratorBase>
+   operator-(
+         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
 }
 
 #endif
