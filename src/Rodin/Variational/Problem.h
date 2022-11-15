@@ -33,6 +33,15 @@ namespace Rodin::Variational
    Problem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
       -> Problem<TrialFES, TestFES, typename TrialFES::Context, mfem::SparseMatrix, mfem::Vector>;
 
+   /**
+    * @defgroup ProblemSpecializations Problem Template Specializations
+    * @brief Template specializations of the Problem class.
+    * @see Problem
+    */
+
+   /**
+    * @brief Abstract base class for variational problems.
+    */
    template <class OperatorType, class VectorType>
    class ProblemBase : public FormLanguage::Base
    {
@@ -64,7 +73,7 @@ namespace Rodin::Variational
          virtual void assemble() = 0;
 
          /**
-          * @brief Updates the ProblemBase instance after a refinement in the mesh
+          * @brief Updates the instance after a refinement in the mesh.
           */
          virtual ProblemBase& update() = 0;
 
@@ -110,6 +119,8 @@ namespace Rodin::Variational
 
    /**
     * @ingroup ProblemSpecializations
+    * @brief General class to assemble linear systems with `mfem::Operator` and
+    * `mfem::Vector` types in a serial context.
     */
    template <class TrialFES, class TestFES>
    class Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
@@ -130,8 +141,8 @@ namespace Rodin::Variational
           * @brief Constructs an empty problem involving the trial function @f$ u @f$
           * and the test function @f$ v @f$.
           *
-          * @param[in,out] u Trial function @f$ u @f$
-          * @param[in,out] v Test function @f$ v @f$
+          * @param[in,out] u Trial function
+          * @param[in,out] v %Test function
           */
          explicit
          constexpr
@@ -264,6 +275,8 @@ namespace Rodin::Variational
 
    /**
     * @ingroup ProblemSpecializations
+    * @brief General class to assemble linear systems with `mfem::SparseMatrix`
+    * and `mfem::Vector` types in a serial context.
     */
    template <class TrialFES, class TestFES>
    class Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
@@ -282,8 +295,8 @@ namespace Rodin::Variational
           * @brief Constructs an empty problem involving the trial function @f$ u @f$
           * and the test function @f$ v @f$.
           *
-          * @param[in,out] u Trial function @f$ u @f$
-          * @param[in,out] v Test function @f$ v @f$
+          * @param[in,out] u Trial function
+          * @param[in,out] v %Test function
           */
          explicit
          constexpr
