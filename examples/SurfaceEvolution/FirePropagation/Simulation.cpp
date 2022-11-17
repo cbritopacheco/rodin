@@ -95,7 +95,7 @@ class Environment
       public:
         Flame(Environment& env)
           : m_env(env),
-            m_direction(new GridFunction(*env.m_vfes))
+            m_direction(env.m_vfes)
         {}
 
         Flame& step(double dt)
@@ -103,7 +103,7 @@ class Environment
           assert(dt > 0);
 
           // Slope vector
-          auto p = Grad(*m_env.m_terrainHeight);
+          auto p = Grad(m_env.m_terrainHeight);
           p.traceOf(Terrain::Burnt);
 
           // Angle between slope and ground
@@ -118,11 +118,10 @@ class Environment
 
           Solver::UMFPack solver;
 
-          TrialFunction d(*m_env.m_vfes);
-          TestFunction  v(*m_env.m_vfes);
+          TrialFunction d(m_env.m_vfes);
+          TestFunction  v(m_env.m_vfes);
 
-          const auto& dist = *m_env.m_fireDist;
-          Grad gdist(dist);
+          Grad gdist(m_env.m_fireDist);
           gdist.traceOf(Terrain::Vegetation);
 
           double lambda = 100;
@@ -189,79 +188,64 @@ class Environment
               }
             };
 
-          // TrialFunction g(*m_env.m_vfes);
-          // TestFunction  w(*m_env.m_vfes);
-          // Problem hilbert(g, w);
-          // hilbert = Integral(lambda * Jacobian(g), Jacobian(w))
-          //         + Integral(g, w)
-          //         - BoundaryIntegral(conormal, w).over(Terrain::Fire)
-          //         // + DirichletBC(g, VectorFunction{0, 0, 0}).on(Terrain::WorldBorder)
-          //         //+ DirichletBC(g, ScalarFunction(R) * conormal).on(Terrain::Fire)
-          //         ;
-          // hilbert.solve(solver);
-
-          GridFunction disp(*m_env.m_vfes);
+          GridFunction disp(m_env.m_vfes);
           disp = ScalarFunction(R) * conormal;
-
-          m_direction.reset(new GridFunction(std::move(disp)));
+          m_direction = std::move(disp);
           return *this;
         }
 
         const GridFunction<FES>& getDirection() const
         {
-          return *m_direction;
+          return m_direction;
         }
 
       private:
         Environment& m_env;
-        std::unique_ptr<GridFunction<FES>> m_direction;
+        GridFunction<FES> m_direction;
     };
 
     Environment(MMG::Mesh& topography, const VegetalStratum& vegetalStratum)
       : m_topography(topography),
-        m_sfes(new FES(m_topography)),
-        m_vfes(new FES(m_topography, m_topography.getSpaceDimension())),
+        m_sfes(m_topography),
+        m_vfes(m_topography, m_topography.getSpaceDimension()),
         m_wind(new VectorFunction{0.0, 0.0, 0.0}),
-        m_terrainHeight(new GridFunction(*m_sfes)),
+        m_terrainHeight(m_sfes),
         m_vegetalStratum(vegetalStratum),
         m_flame(*this),
         m_gravity(-9.8),
-        m_fireDist(new GridFunction(*m_sfes)),
+        m_fireDist(m_sfes),
         m_elapsedTime(0.0)
     {
-      *m_terrainHeight = [](const Point& v) { return v.z(); };
+      m_terrainHeight = [](const Point& v) { return v.z(); };
     }
 
     Environment& step(double dt)
     {
-      m_fireDist.reset(
-          new GridFunction(
-            MMG::Distancer(*m_sfes)
-              .setInteriorDomain(Terrain::Burnt)
-              .distance(m_topography)));
+      m_fireDist = MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
+                                         .distance(m_topography);
 
       m_flame.step(dt);
 
       m_topography.save("direction.mesh");
       m_flame.getDirection().save("direction.gf");
 
-      MMG::Advect(*m_fireDist, m_flame.getDirection()).step(dt);
+      MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
       m_topography = MMG::ImplicitDomainMesher().setHMax(200)
-                                                .setHausdorff(50)
+                                                .setHausdorff(30)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
                                                 // .split(Terrain::Vegetation,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
                                                 .setBoundaryReference(Terrain::Fire)
-                                                .discretize(*m_fireDist);
+                                                .discretize(m_fireDist);
 
       // Rebuild finite element spaces with new topography
-      m_sfes.reset(new FES(m_topography));
-      m_vfes.reset(new FES(m_topography, m_topography.getSpaceDimension()));
-      m_terrainHeight.reset(new GridFunction(*m_sfes));
-      *m_terrainHeight = [](const Point& v) { return v.z(); };
+      m_sfes = FES(m_topography);
+      m_vfes = FES(m_topography, m_topography.getSpaceDimension());
+      m_terrainHeight = GridFunction(m_sfes);
+      m_terrainHeight = [](const Point& v) { return v.z(); };
       m_elapsedTime += dt;
       return *this;
     }
@@ -289,12 +273,12 @@ class Environment
   private:
     MMG::Mesh& m_topography;
 
-    std::unique_ptr<FES> m_sfes;
-    std::unique_ptr<FES> m_vfes;
+    FES m_sfes;
+    FES m_vfes;
 
     std::unique_ptr<VectorFunctionBase> m_wind;
 
-    std::unique_ptr<GridFunction<FES>> m_terrainHeight;
+    GridFunction<FES> m_terrainHeight;
 
     VegetalStratum m_vegetalStratum;
 
@@ -302,7 +286,7 @@ class Environment
 
     const double m_gravity;
 
-    std::unique_ptr<GridFunction<FES>> m_fireDist;
+    GridFunction<FES> m_fireDist;
 
     double m_elapsedTime;
 };
@@ -338,8 +322,8 @@ int main()
   MMG::Mesh topography;
   topography.load(meshfile, IO::FileFormat::MEDIT);
 
-  MMG::MeshOptimizer().setHausdorff(50).setHMax(500).optimize(topography);
-  topography.save("optimize.mesh");
+  // MMG::MeshOptimizer().setHausdorff(50).setHMax(500).optimize(topography);
+  // topography.save("optimize.mesh");
 
   Environment::VegetalStratum stratum;
 
