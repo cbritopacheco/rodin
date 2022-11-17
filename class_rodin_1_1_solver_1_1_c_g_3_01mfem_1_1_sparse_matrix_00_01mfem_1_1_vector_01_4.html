@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solver::CG&lt;mfem::Operator, mfem::Vector&gt; class | Rodin</title>
+  <title>Rodin::Solver::CG&lt;mfem::SparseMatrix, mfem::Vector&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -53,9 +53,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>CG&lt;mfem::Operator, mfem::Vector&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>CG&lt;mfem::SparseMatrix, mfem::Vector&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Conjugate Gradient for use with <code>mfem::Operator</code> and <code>mfem::Vector</code>.</p>
+        <p>Conjugate Gradient for use with <code>mfem::SparseMatrix</code> and <code>mfem::Vector</code>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -74,7 +74,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;mfem::Operator, mfem::Vector&gt;</a>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;mfem::SparseMatrix, mfem::Vector&gt;</a>
             </dt>
             <dd>Base class for solving variational problems represented by a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a> instance.</dd>
           </dl>
@@ -122,7 +122,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />Operator, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06d4103877ae59e09592692ed9610074" class="m-doc-self">printIterations</a>(</span><span class="m-doc-wrap">bool printIterations)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />SparseMatrix, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06d4103877ae59e09592692ed9610074" class="m-doc-self">printIterations</a>(</span><span class="m-doc-wrap">bool printIterations)</span></span>
             </h3>
             <p>Sets whether some information will be printed at each iteration.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -148,7 +148,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />Operator, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c3ebb909823ae9ebacf9c1f5dc8b5a2" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">int maxIterations)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />SparseMatrix, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c3ebb909823ae9ebacf9c1f5dc8b5a2" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">int maxIterations)</span></span>
             </h3>
             <p>Sets the maximum amount of iterations the solver will perform.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -174,7 +174,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />Operator, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5dcfe1ef38370bc8165e7dbdd158d87" class="m-doc-self">setRelativeTolerance</a>(</span><span class="m-doc-wrap">double rtol)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />SparseMatrix, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5dcfe1ef38370bc8165e7dbdd158d87" class="m-doc-self">setRelativeTolerance</a>(</span><span class="m-doc-wrap">double rtol)</span></span>
             </h3>
             <p>Sets the relative tolerance of the solver.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -200,7 +200,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />Operator, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0da64d024e5930bd0aa2317c62431c2f" class="m-doc-self">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap">double atol)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;mfem::<wbr />SparseMatrix, mfem::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0da64d024e5930bd0aa2317c62431c2f" class="m-doc-self">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap">double atol)</span></span>
             </h3>
             <p>Sets the absolute tolerance of the solver.</p>
             <table class="m-table m-fullwidth m-flat">
