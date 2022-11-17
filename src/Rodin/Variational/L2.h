@@ -101,38 +101,86 @@ namespace Rodin::Variational
          class FEC : public FiniteElementCollectionBase
          {
             public:
+               constexpr
                FEC(const int order, const int elemDim, Basis basis)
-                  : m_fec(order, elemDim, static_cast<int>(basis))
+                  : m_fec(new mfem::L2_FECollection(order, elemDim, static_cast<int>(basis)))
                {
                   assert(order >= 0);
                }
 
+               constexpr
+               FEC(FEC&& other)
+                  :  FiniteElementCollectionBase(std::move(other)),
+                     m_fec(std::move(other.m_fec)),
+                     m_basis(std::move(other.m_basis))
+               {}
+
+               constexpr
+               FEC& operator=(FEC&& other)
+               {
+                  FiniteElementCollectionBase::operator=(std::move(other));
+                  m_fec = std::move(other.m_fec);
+                  m_basis = std::move(other.m_basis);
+                  return *this;
+               }
+
+               constexpr
                Basis getBasisType() const
                {
                   return m_basis;
                }
 
-               mfem::FiniteElementCollection& getHandle()
+               mfem::FiniteElementCollection& getHandle() override
                {
-                  return m_fec;
+                  assert(m_fec);
+                  return *m_fec;
                }
 
-               const mfem::FiniteElementCollection& getHandle() const
+               const mfem::FiniteElementCollection& getHandle() const override
                {
-                  return m_fec;
+                  assert(m_fec);
+                  return *m_fec;
                }
 
             private:
-               mfem::L2_FECollection m_fec;
+               std::unique_ptr<mfem::L2_FECollection> m_fec;
                Basis m_basis;
          };
 
+         constexpr
          L2(Geometry::Mesh<Context>& mesh,
                int vdim = 1, int order = 0, Basis basis = DefaultBasis)
             :  m_fec(order, mesh.getDimension(), basis),
                m_mesh(mesh),
-               m_fes(&mesh.getHandle(), &m_fec.getHandle(), vdim)
+               m_fes(new mfem::FiniteElementSpace(
+                        &mesh.getHandle(), &m_fec.getHandle(), vdim))
          {}
+
+         constexpr
+         L2(const L2& other)
+            :  FiniteElementSpaceBase(other),
+               m_fec(other.m_fec),
+               m_mesh(other.m_mesh),
+               m_fes(new mfem::FiniteElementSpace(*other.m_fes))
+         {}
+
+         constexpr
+         L2(L2&& other)
+            :  FiniteElementSpaceBase(std::move(other)),
+               m_fec(std::move(other.m_fec)),
+               m_mesh(std::move(other.m_mesh)),
+               m_fes(std::move(other.m_fes))
+         {}
+
+         constexpr
+         L2& operator=(L2&& other)
+         {
+            FiniteElementSpaceBase::operator=(std::move(other));
+            m_fec = std::move(other.m_fec);
+            m_mesh = std::move(other.m_mesh);
+            m_fes = std::move(other.m_fes);
+            return *this;
+         }
 
          bool isParallel() const override
          {
@@ -156,18 +204,20 @@ namespace Rodin::Variational
 
          mfem::FiniteElementSpace& getHandle() override
          {
-            return m_fes;
+            assert(m_fes);
+            return *m_fes;
          }
 
          const mfem::FiniteElementSpace& getHandle() const override
          {
-            return m_fes;
+            assert(m_fes);
+            return *m_fes;
          }
 
       private:
          FEC m_fec;
-         Geometry::Mesh<Context>& m_mesh;
-         mfem::FiniteElementSpace m_fes;
+         std::reference_wrapper<Geometry::Mesh<Context>> m_mesh;
+         std::unique_ptr<mfem::FiniteElementSpace> m_fes;
    };
 
    template <class Context>

@@ -21,6 +21,18 @@ namespace Rodin::Variational
    class FiniteElementSpaceBase
    {
       public:
+         constexpr
+         FiniteElementSpaceBase() = default;
+
+         constexpr
+         FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
+
+         constexpr
+         FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
+
+         constexpr
+         FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
+
          void update();
 
          /**
