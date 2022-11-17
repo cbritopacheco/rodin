@@ -116,20 +116,20 @@ class Environment
               return Math::Constants::pi<double>() / 2.0 - angle;
             };
 
-          Solver::CG solver;
+          Solver::UMFPack solver;
 
           TrialFunction d(*m_env.m_vfes);
           TestFunction  v(*m_env.m_vfes);
 
           const auto& dist = *m_env.m_fireDist;
-          auto gdist = Grad(dist);
-          gdist.traceOf(Terrain::Burnt);
+          Grad gdist(dist);
+          gdist.traceOf(Terrain::Vegetation);
 
-          double lambda = 1.0;
+          double lambda = 100;
           Problem cnd(d, v);
           cnd = Integral(lambda * Jacobian(d), Jacobian(v))
               + Integral(d, v)
-              + DirichletBC(d, gdist).on(Terrain::Fire);
+              - Integral(gdist, v);
           cnd.solve(solver);
 
           const auto conormal = d.getGridFunction() / Frobenius(d.getGridFunction());
@@ -189,17 +189,21 @@ class Environment
               }
             };
 
-          TrialFunction g(*m_env.m_vfes);
-          TestFunction  w(*m_env.m_vfes);
-          Problem hilbert(g, w);
-          hilbert = Integral(lambda * Jacobian(g), Jacobian(w))
-                  + Integral(g, w)
-                  + DirichletBC(g, VectorFunction{0, 0, 0}).on(Terrain::WorldBorder)
-                  + DirichletBC(g, ScalarFunction(R) * conormal).on(Terrain::Fire)
-                  ;
-          hilbert.solve(solver);
+          // TrialFunction g(*m_env.m_vfes);
+          // TestFunction  w(*m_env.m_vfes);
+          // Problem hilbert(g, w);
+          // hilbert = Integral(lambda * Jacobian(g), Jacobian(w))
+          //         + Integral(g, w)
+          //         - BoundaryIntegral(conormal, w).over(Terrain::Fire)
+          //         // + DirichletBC(g, VectorFunction{0, 0, 0}).on(Terrain::WorldBorder)
+          //         //+ DirichletBC(g, ScalarFunction(R) * conormal).on(Terrain::Fire)
+          //         ;
+          // hilbert.solve(solver);
 
-          m_direction.reset(new GridFunction(g.getGridFunction()));
+          GridFunction disp(*m_env.m_vfes);
+          disp = ScalarFunction(R) * conormal;
+
+          m_direction.reset(new GridFunction(std::move(disp)));
           return *this;
         }
 
@@ -236,15 +240,15 @@ class Environment
               .setInteriorDomain(Terrain::Burnt)
               .distance(m_topography)));
 
-      // m_topography.save("dist.mesh", IO::FileFormat::MEDIT);
-      // m_fireDist->save("dist.sol", IO::FileFormat::MEDIT);
-
       m_flame.step(dt);
+
+      m_topography.save("direction.mesh");
+      m_flame.getDirection().save("direction.gf");
+
       MMG::Advect(*m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(0.05)
-                                                .setHMin(0.002)
-                                                .setHausdorff(0.001)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(200)
+                                                .setHausdorff(50)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
@@ -306,25 +310,36 @@ class Environment
 
 int main()
 {
-  const char* meshfile = "topo.mesh";
+  // const char* meshfile = "topo.mesh";
+  // MMG::Mesh topography;
+  // topography.load(meshfile);
+
+  // std::cout << "optimizing" << std::endl;
+  // MMG::MeshOptimizer().setHausdorff(50).setHMax(200).optimize(topography);
+  // topography.save("optimize.mesh");
+
+  // // Make a fire somewhere
+  // std::cout << "meshing" << std::endl;
+  // H1 sh(topography);
+  // GridFunction fire(sh);
+  // fire =
+  //   [](const Point& p)
+  //   {
+  //     return std::sqrt((p.x() - 2.5e4) * (p.x() - 2.5e4) + (p.y() - 2.5e4) * (p.y() - 2.5e4)) - 300;
+  //   };
+  // fire.save("fire.mesh");
+  // auto implicit = MMG::ImplicitDomainMesher().setHausdorff(50).setHMax(200).setBoundaryReference(5).discretize(fire);
+  // implicit.save("implicit.mesh", IO::FileFormat::MEDIT);
+
+  // std::cout << "exiting" << std::endl;
+  // std::exit(1);
+
+  const char* meshfile = "implicit.mesh";
   MMG::Mesh topography;
-  topography.load(meshfile);
-  topography.save("medit.mesh", IO::FileFormat::MEDIT);
+  topography.load(meshfile, IO::FileFormat::MEDIT);
 
-  std::cout << "optimizing" << std::endl;
-  MMG::MeshOptimizer().optimize(topography);
+  MMG::MeshOptimizer().setHausdorff(50).setHMax(500).optimize(topography);
   topography.save("optimize.mesh");
-
-  // Make a fire somewhere
-  std::cout << "meshing" << std::endl;
-  H1 sh(topography);
-  GridFunction fire(sh);
-  fire = [](const Point& p) { return std::sqrt(p.x() * p.x() + p.y() * p.y()) - 20; };
-  auto implicit = MMG::ImplicitDomainMesher().setHMax(0.05).discretize(fire);
-  implicit.save("implicit.mesh", IO::FileFormat::MEDIT);
-
-  std::cout << "exiting" << std::endl;
-  std::exit(1);
 
   Environment::VegetalStratum stratum;
 
@@ -369,11 +384,11 @@ int main()
     };
 
   Environment environment(topography, stratum);
-  for (int i = 0; i < 1000; i++)
+  for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
     std::cout << "i: " << i << std::endl;
 
-    environment.step(0.01);
+    environment.step(60.0);
     topography.save("out/evolution." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
     topography.save("woof.mesh", IO::FileFormat::MEDIT);
     // environment.getFlame().getDirection().save("direction.gf");
