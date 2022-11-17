@@ -95,8 +95,6 @@ int main(int, char**)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     hilbert.solve(solver);
 
-    trimmed.save("out/trimmed." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
-
     // Update objective
     double objective = compliance(uInt.getGridFunction()) + ell * Omega.getVolume(Interior);
     obj.push_back(objective);

@@ -25,10 +25,10 @@ namespace Rodin::Variational
    constexpr
    Problem<TrialFES, TestFES, Context::Serial, mfem::Operator, mfem::Vector>
    ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-      :  m_bilinearForm(u, v),
+      :  m_trialFunction(u),
+         m_testFunction(v),
          m_linearForm(v),
-         m_trialFunction(u),
-         m_testFunction(v)
+         m_bilinearForm(u, v)
    {}
 
    template <class TrialFES, class TestFES>
@@ -159,10 +159,10 @@ namespace Rodin::Variational
    constexpr
    Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
    ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-      :  m_bilinearForm(u, v),
+      :  m_trialFunction(u),
+         m_testFunction(v),
          m_linearForm(v),
-         m_trialFunction(u),
-         m_testFunction(v)
+         m_bilinearForm(u, v)
    {}
 
    template <class TrialFES, class TestFES>

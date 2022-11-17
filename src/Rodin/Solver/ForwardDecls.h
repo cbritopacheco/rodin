@@ -7,14 +7,12 @@
 #ifndef RODIN_SOLVER_FORWARDDECLS_H
 #define RODIN_SOLVER_FORWARDDECLS_H
 
-#include <mfem.hpp>
-
 namespace Rodin::Solver
 {
-   template <class OperatorType = mfem::SparseMatrix, class VectorType = mfem::Vector>
+   template <class OperatorType, class VectorType>
    class UMFPack;
 
-   template <class OperatorType = mfem::SparseMatrix, class VectorType = mfem::Vector>
+   template <class OperatorType, class VectorType>
    class CG;
 
    template <class OperatorType, class VectorType>

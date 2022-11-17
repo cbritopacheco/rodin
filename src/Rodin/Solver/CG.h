@@ -17,8 +17,18 @@
 
 namespace Rodin::Solver
 {
+   CG() -> CG<mfem::SparseMatrix, mfem::Vector>;
+
    /**
-    * @brief Conjugate Gradient
+    * @defgroup CGSpecializations CG Template Specializations
+    * @brief Template specializations of the CG class.
+    * @see CG
+    */
+
+   /**
+    * @ingroup CGSpecializations
+    * @brief Conjugate Gradient for use with `mfem::Operator` and
+    * `mfem::Vector`.
     */
    template <>
    class CG<mfem::Operator, mfem::Vector> : public SolverBase<mfem::Operator, mfem::Vector>
@@ -106,6 +116,11 @@ namespace Rodin::Solver
          double m_rtol, m_atol;
    };
 
+   /**
+    * @ingroup CGSpecializations
+    * @brief Conjugate Gradient for use with `mfem::SparseMatrix` and
+    * `mfem::Vector`.
+    */
    template <>
    class CG<mfem::SparseMatrix, mfem::Vector>
       : public SolverBase<mfem::SparseMatrix, mfem::Vector>

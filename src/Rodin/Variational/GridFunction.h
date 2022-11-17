@@ -311,28 +311,31 @@ namespace Rodin::Variational
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
+         constexpr
          GridFunction(L2<Trait>& fes)
             :  GridFunctionBase(),
                m_fes(fes),
-               m_gf(&fes.getHandle())
+               m_gf(new mfem::GridFunction(&fes.getHandle()))
          {
-            m_gf = 0.0;
+            *m_gf = 0.0;
          }
 
          /**
           * @brief Copies the grid function.
           * @param[in] other Other grid function to copy.
           */
+         constexpr
          GridFunction(const GridFunction& other)
             :  GridFunctionBase(other),
                m_fes(other.m_fes),
-               m_gf(other.m_gf)
+               m_gf(new mfem::GridFunction(*other.m_gf))
          {}
 
          /**
           * @brief Move constructs the grid function.
           * @param[in] other Other grid function to move.
           */
+         constexpr
          GridFunction(GridFunction&& other)
             :  GridFunctionBase(std::move(other)),
                m_fes(std::move(other.m_fes)),
@@ -342,11 +345,19 @@ namespace Rodin::Variational
          /**
           * @brief Move assignment operator.
           */
-         GridFunction& operator=(GridFunction&& other) = default;
+         constexpr
+         GridFunction& operator=(GridFunction&& other)
+         {
+            GridFunctionBase::operator=(std::move(other));
+            m_fes = std::move(other.m_fes);
+            m_gf = std::move(other.m_gf);
+            return *this;
+         }
 
          GridFunction& operator=(const GridFunction&)  = delete;
 
          template <class T>
+         constexpr
          GridFunction& operator=(T&& v)
          {
             return static_cast<GridFunction&>(
@@ -354,6 +365,7 @@ namespace Rodin::Variational
          }
 
          template <class T>
+         constexpr
          GridFunction& operator+=(T&& v)
          {
             return static_cast<GridFunction&>(
@@ -361,6 +373,7 @@ namespace Rodin::Variational
          }
 
          template <class T>
+         constexpr
          GridFunction& operator-=(T&& v)
          {
             return static_cast<GridFunction&>(
@@ -368,6 +381,7 @@ namespace Rodin::Variational
          }
 
          template <class T>
+         constexpr
          GridFunction& operator*=(T&& v)
          {
             return static_cast<GridFunction&>(
@@ -375,6 +389,7 @@ namespace Rodin::Variational
          }
 
          template <class T>
+         constexpr
          GridFunction& operator/=(T&& v)
          {
             return static_cast<GridFunction&>(
@@ -382,6 +397,7 @@ namespace Rodin::Variational
          }
 
          template <class ... Args>
+         constexpr
          GridFunction& project(Args&&... args)
          {
             return static_cast<GridFunction&>(
@@ -410,16 +426,16 @@ namespace Rodin::Variational
 
          mfem::GridFunction& getHandle() override
          {
-            return m_gf;
+            return *m_gf;
          }
 
          const mfem::GridFunction& getHandle() const override
          {
-            return m_gf;
+            return *m_gf;
          }
       private:
          std::reference_wrapper<L2<Trait>> m_fes;
-         mfem::GridFunction m_gf;
+         std::unique_ptr<mfem::GridFunction> m_gf;
    };
 
    /**
@@ -436,28 +452,31 @@ namespace Rodin::Variational
           * @param[in] fes Finite element space to which the function belongs
           * to.
           */
+         constexpr
          GridFunction(H1<Trait>& fes)
             :  GridFunctionBase(),
                m_fes(fes),
-               m_gf(&fes.getHandle())
+               m_gf(new mfem::GridFunction(&fes.getHandle()))
          {
-            m_gf = 0.0;
+            *m_gf = 0.0;
          }
 
          /**
           * @brief Copies the grid function.
           * @param[in] other Other grid function to copy.
           */
+         constexpr
          GridFunction(const GridFunction& other)
             :  GridFunctionBase(other),
                m_fes(other.m_fes),
-               m_gf(other.m_gf)
+               m_gf(new mfem::GridFunction(*other.m_gf))
          {}
 
          /**
           * @brief Move constructs the grid function.
           * @param[in] other Other grid function to move.
           */
+         constexpr
          GridFunction(GridFunction&& other)
             :  GridFunctionBase(std::move(other)),
                m_fes(std::move(other.m_fes)),
@@ -467,7 +486,14 @@ namespace Rodin::Variational
          /**
           * @brief Move assignment operator.
           */
-         GridFunction& operator=(GridFunction&& other) = default;
+         constexpr
+         GridFunction& operator=(GridFunction&& other)
+         {
+            GridFunctionBase::operator=(std::move(other));
+            m_fes = std::move(other.m_fes);
+            m_gf = std::move(other.m_gf);
+            return *this;
+         }
 
          GridFunction& operator=(const GridFunction&)  = delete;
 
@@ -602,16 +628,18 @@ namespace Rodin::Variational
 
          mfem::GridFunction& getHandle() override
          {
-            return m_gf;
+            assert(m_gf);
+            return *m_gf;
          }
 
          const mfem::GridFunction& getHandle() const override
          {
-            return m_gf;
+            assert(m_gf);
+            return *m_gf;
          }
       private:
          std::reference_wrapper<H1<Trait>> m_fes;
-         mfem::GridFunction m_gf;
+         std::unique_ptr<mfem::GridFunction> m_gf;
    };
 
    template <class FES>

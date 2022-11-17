@@ -17,8 +17,17 @@
 
 namespace Rodin::Solver
 {
+   UMFPack() -> UMFPack<mfem::SparseMatrix, mfem::Vector>;
+
    /**
-    * @brief UMFPack
+    * @defgroup UMFPackSpecializations UMFPack Template Specializations
+    * @brief Template specializations of the UMFPack class.
+    * @see UMFPack
+    */
+
+   /**
+    * @ingroup UMFPackSpecializations
+    * @brief UMFPack for use with `mfem::SparseMatrix` and `mfem::Vector`.
     */
    template <>
    class UMFPack<mfem::SparseMatrix, mfem::Vector>
