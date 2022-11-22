@@ -67,7 +67,7 @@ namespace Rodin::Variational
     * @f]
     * this class represents the integral of their dot product:
     * @f[
-    *    \int_\Omega A(u) : B(v) \ dx
+    *    \int_{\mathcal{T}_h} A(u) : B(v) \ dx
     * @f]
     */
    template <>
@@ -173,6 +173,10 @@ namespace Rodin::Variational
    Integral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
       -> Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
+   /**
+    * @ingroup BoundaryIntegralSpecializations
+    * @brief Boundary integration of the dot product of a trial and test operators.
+    */
    template <>
    class BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
       : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
@@ -188,6 +192,38 @@ namespace Rodin::Variational
       -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
    BoundaryIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
       -> BoundaryIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+
+   /**
+    * @ingroup InterfaceIntegralSpecializations
+    * @brief Interface integration of the dot product of a trial and test operators.
+    *
+    * Given two operators defined over trial and test spaces @f$ U_h
+    * @f$ and @f$ V_h @f$,
+    * @f[
+    *    A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
+    * @f]
+    * this class represents the integral of their dot product:
+    * @f[
+    *    \int_{\mathcal{I}_h} A(u) : B(v) \ dx
+    * @f]
+    * over the interface @f$ \mathcal{I}_h @f$ of the triangulation @f$
+    * \mathcal{T}_h @f$.
+    */
+   template <>
+   class InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+      : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
+   {
+      public:
+         using Parent    = Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+         using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
+         using Parent::Parent;
+         Geometry::Region getRegion() const override { return Geometry::Region::Interface; }
+         InterfaceIntegral* copy() const noexcept override { return new InterfaceIntegral(*this); }
+   };
+   InterfaceIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
+      -> InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+   InterfaceIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
+      -> InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
    /**
     * @ingroup IntegralSpecializations
@@ -361,134 +397,6 @@ namespace Rodin::Variational
    };
    template <class FES>
    Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
-
-   /**
-    * @ingroup InterfaceIntegralSpecializations
-    * @brief Integration of the dot product of a trial and test operators.
-    *
-    * Given two operators defined over trial and test spaces @f$ U_h
-    * @f$ and @f$ V_h @f$,
-    * @f[
-    *    A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
-    * @f]
-    * this class represents the integral of their dot product:
-    * @f[
-    *    \int_{\mathcal{I}_h} A(u) : B(v) \ dx
-    * @f]
-    * over the interface @f$ \mathcal{I}_h @f$ of the triangulation @f$
-    * \mathcal{T}_h @f$.
-    */
-   template <>
-   class InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-      : public BilinearFormIntegratorBase
-   {
-      public:
-         using Parent = BilinearFormIntegratorBase;
-         using Integrand =
-            Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-
-         /**
-          * @brief Integral of the dot product of trial and test operators
-          *
-          * Constructs an instance representing the following integral:
-          * @f[
-          *    \int_\Omega A(u) : B(v) \ dx
-          * @f]
-          *
-          * @param[in] lhs Trial operator @f$ A(u) @f$
-          * @param[in] rhs Test operator @f$ B(v) @f$
-          */
-         InterfaceIntegral(
-               const ShapeFunctionBase<TrialSpace>& lhs,
-               const ShapeFunctionBase<TestSpace>& rhs)
-            : InterfaceIntegral(Dot(lhs, rhs))
-         {}
-
-         /**
-          * @brief Integral of the dot product of trial and test operators
-          *
-          * Constructs the following object representing the following
-          * integral:
-          * @f[
-          *    \int_\Omega A(u) : B(v) \ dx
-          * @f]
-          *
-          * @param[in] prod Dot product instance
-          */
-         InterfaceIntegral(const Integrand& prod)
-            :  Parent(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
-               m_prod(prod),
-               m_intOrder(
-                     [](const BilinearFormIntegratorBase& bfi, const Bilinear::Assembly::Native& as)
-                     {
-                        return 0;
-                        // const auto& trial = m_prod.getLHS()
-                        //                           .getFiniteElementSpace()
-                        //                           .getFiniteElement(as.element);
-                        // const auto& test = m_prod.getRHS()
-                        //                          .getFiniteElementSpace()
-                        //                          .getFiniteElement(as.element);
-                        // return
-                        //    std::max(data.trial1.GetOrder(), data.trial2.GetOrder()) +
-                        //    std::max(test1.GetOrder(), test2.GetOrder()) +
-                        //    data.trans.OrderW();
-                     })
-         {}
-
-         InterfaceIntegral(const InterfaceIntegral& other)
-            : Parent(other),
-              m_prod(other.m_prod),
-              m_intOrder(other.m_intOrder)
-         {}
-
-         InterfaceIntegral(InterfaceIntegral&& other)
-            : Parent(std::move(other)),
-              m_prod(std::move(other.m_prod)),
-              m_intOrder(std::move(other.m_intOrder))
-         {}
-
-         /**
-          * @brief Sets the function which calculates the integration order
-          * @param[in] order Function which computes the order of integration
-          * @returns Reference to self (for method chaining)
-          */
-         InterfaceIntegral& setIntegrationOrder(
-            std::function<int(const BilinearFormIntegratorBase& bfi, const Bilinear::Assembly::Native&)> order)
-         {
-            m_intOrder = order;
-            return *this;
-         }
-
-         int getIntegrationOrder(const BilinearFormIntegratorBase& bfi, const Bilinear::Assembly::Native& as) const
-         {
-            return m_intOrder(bfi, as);
-         }
-
-         virtual const Integrand& getIntegrand() const
-         {
-            return m_prod;
-         }
-
-         virtual Geometry::Region getRegion() const override
-         {
-            return Geometry::Region::Interface;
-         }
-
-         virtual void getElementMatrix(const Bilinear::Assembly::Native& as) const override;
-
-         virtual InterfaceIntegral* copy() const noexcept override
-         {
-            return new InterfaceIntegral(*this);
-         }
-
-      private:
-         Integrand m_prod;
-         std::function<int(const BilinearFormIntegratorBase&, const Bilinear::Assembly::Native&)> m_intOrder;
-   };
-   InterfaceIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
-      -> InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
-   InterfaceIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
-      -> InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
 
    /* ||-- OPTIMIZATIONS -----------------------------------------------------
     * Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>

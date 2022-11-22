@@ -31,37 +31,6 @@ namespace Rodin::Variational
       }
    }
 
-   void
-   InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   ::getElementMatrix(const Bilinear::Assembly::Native& as) const
-   {
-      assert(false);
-      // auto& trial = m_prod.getLHS();
-      // auto& test = m_prod.getRHS();
-
-      // const auto& data = std::get<Bilinear::Assembly::Native::Interface>(as.data);
-
-      // as.mat.SetSize(
-      //       test.getDOFs(data.test1, data.test2, data.trans)
-      //       test.getDOFs(data.test1, data.trans) + test.getDOFs(data.test2, data.trans),
-      //       trial.getDOFs(data.trial1, data.trans) + trial.getDOFs(data.trial2, data.trans));
-      // as.mat = 0.0;
-
-      // const int order = getIntegrationOrder(as);
-      // const mfem::IntegrationRule* ir =
-      //    &mfem::IntRules.Get(data.trans.GetGeometryType(), order);
-
-      // mfem::DenseMatrix mat;
-      // ShapeComputator shapeCompute;
-      // for (int i = 0; i < ir->GetNPoints(); i++)
-      // {
-      //    const mfem::IntegrationPoint& ip = ir->IntPoint(i);
-      //    data.trans.SetIntPoint(&ip);
-      //    m_prod.getElementMatrix(mat, shapeCompute, data);
-      //    mfem::Add(as.mat, mat, data.trans.Weight() * ip.weight, as.mat);
-      // }
-   }
-
    void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
          const Linear::Assembly::Native& as) const
    {

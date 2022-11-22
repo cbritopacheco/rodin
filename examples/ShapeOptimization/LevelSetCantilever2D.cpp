@@ -129,7 +129,7 @@ int main(int, char**)
                                        .setBoundaryReference(Gamma)
                                        .setBaseReferences(GammaD)
                                        .discretize(dist);
-    MMG::MeshOptimizer().setHMax(hmax).setAngleDetection(false).optimize(Omega);
+    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh");
   }

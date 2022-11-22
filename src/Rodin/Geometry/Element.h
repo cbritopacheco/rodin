@@ -299,9 +299,6 @@ namespace Rodin::Geometry
           * @brief Gets the index of the element as a member of the boundary.
           *
           * Same as getBoundaryIndex().
-          *
-          * @warning The index returned by this function need not coincide with
-          * the index returned by getFaceIndex().
           */
          int getIndex() const
          {
