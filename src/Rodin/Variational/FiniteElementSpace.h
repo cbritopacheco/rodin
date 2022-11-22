@@ -57,6 +57,8 @@ namespace Rodin::Variational
 
          virtual const Geometry::MeshBase& getMesh() const = 0;
 
+         virtual const mfem::FiniteElement& getFiniteElement(const Geometry::ElementBase& element) const = 0;
+
          virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 
          virtual mfem::FiniteElementSpace& getHandle() = 0;

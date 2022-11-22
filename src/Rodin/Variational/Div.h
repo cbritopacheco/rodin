@@ -66,22 +66,20 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::ElementBase& element) const override
          {
-            return m_u.getDOFs(fe, trans);
+            return m_u.getDOFs(element);
          }
 
          void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& comp) const override
+               ShapeComputator& compute,
+               const Geometry::ElementBase& element) const override
          {
-            const auto& dshape = comp.getPhysicalDShape(fe, trans, ip);
-            const int opDofs = getDOFs(fe, trans);
+            auto& trans = element.getTransformation();
+            const auto& fe = getFiniteElementSpace().getFiniteElement(element);
+            const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
+            const int opDofs = getDOFs(element);
             op.setSize(1, 1, opDofs);
             for (int i = 0; i < opDofs; i++)
                op(0, 0, i) = dshape.GetData()[i];

@@ -47,8 +47,6 @@ namespace Rodin::Geometry
             return static_cast<Type>(m_element->GetGeometryType());
          }
 
-         virtual std::vector<int> getVertices() const;
-
          /**
           * @brief Gets the attribute of the element.
           */
@@ -75,6 +73,13 @@ namespace Rodin::Geometry
             return m_index;
          }
 
+         virtual std::vector<int> getVertices() const;
+
+         /**
+          * @brief Returns the region which the element belongs to.
+          */
+         virtual Region getRegion() const = 0;
+
          /**
           * @brief Gets the set of spatially adjacent elements (of the same
           * dimension).
@@ -83,11 +88,15 @@ namespace Rodin::Geometry
           */
          virtual std::set<int> adjacent() const = 0;
 
+         virtual mfem::ElementTransformation& getTransformation() const = 0;
+
       private:
          const MeshBase& m_mesh;
          const mfem::Element* m_element;
          int m_index;
    };
+
+   bool operator<(const ElementBase& lhs, const ElementBase& rhs);
 
    /**
     * @brief Class for representing elements of the highest dimension in the
@@ -117,7 +126,14 @@ namespace Rodin::Geometry
           */
          double getVolume() const;
 
+         Region getRegion() const override
+         {
+            return Region::Domain;
+         }
+
          std::set<int> adjacent() const override;
+
+         virtual mfem::ElementTransformation& getTransformation() const override;
    };
 
    /**
@@ -168,7 +184,6 @@ namespace Rodin::Geometry
       private:
          MeshBase& m_mesh;
          mfem::Element* m_element;
-
    };
 
    /**
@@ -197,6 +212,13 @@ namespace Rodin::Geometry
             : ElementBase(std::move(other))
          {}
 
+         /**
+          * @brief Gets the area of the face element.
+          */
+         double getArea() const;
+
+         mfem::FaceElementTransformations& getTransformations() const;
+
          std::set<int> elements() const;
 
          std::set<int> adjacent() const override
@@ -205,10 +227,20 @@ namespace Rodin::Geometry
             return {};
          }
 
-         /**
-          * @brief Gets the area of the face element.
-          */
-         double getArea() const;
+         Region getRegion() const override;
+
+         virtual std::set<Element> getElements() const;
+
+         virtual mfem::ElementTransformation& getTransformation() const override;
+   };
+
+   class Interface : public Face
+   {
+      public:
+         virtual Region getRegion() const override
+         {
+            return Region::Interface;
+         }
    };
 
    /**
@@ -275,6 +307,13 @@ namespace Rodin::Geometry
          {
             return getBoundaryIndex();
          }
+
+         Region getRegion() const override
+         {
+            return Region::Boundary;
+         }
+
+         virtual mfem::ElementTransformation& getTransformation() const override;
 
       private:
          int m_index;
@@ -343,6 +382,10 @@ namespace Rodin::Geometry
    class Point
    {
       public:
+         Point(const mfem::IntegrationPoint& ip)
+            : m_ip(ip)
+         {}
+
          /**
           * @brief Constructs the Point object from reference coordinates.
           * @param[in] trans Element transformation
@@ -352,7 +395,8 @@ namespace Rodin::Geometry
             :  m_trans(trans),
                m_ip(ip)
          {
-            m_trans.get().Transform(ip, m_physical);
+            assert(&trans.GetIntPoint() == &ip);
+            m_trans->get().Transform(ip, m_physical);
             assert(m_physical.Size() == trans.mesh->SpaceDimension());
          }
 
@@ -360,20 +404,34 @@ namespace Rodin::Geometry
 
          Point(Point&&) = default;
 
+         constexpr bool transformed() const
+         {
+            return m_trans.has_value();
+         }
+
+         constexpr Point& transform(mfem::ElementTransformation& trans)
+         {
+            trans.SetIntPoint(&m_ip.get());
+            m_trans.emplace(trans);
+            m_trans->get().Transform(m_ip, m_physical);
+            return *this;
+         }
+
          /**
           * @brief Gets the space dimension of the physical coordinates.
           * @returns Dimension of the physical coordinates.
           */
-         int getDimension() const
+         constexpr int getDimension() const
          {
-            return m_trans.get().mesh->SpaceDimension();
+            assert(m_trans);
+            return m_trans->get().mesh->SpaceDimension();
          }
 
          /**
           * @brief Gets the i-th physical coordinate.
           * @returns Physical i-th coordinate.
           */
-         double operator()(int i) const
+         constexpr double operator()(int i) const
          {
             return m_physical(i);
          }
@@ -382,7 +440,7 @@ namespace Rodin::Geometry
           * @brief Gets the @f$ x @f$ physical coordinate.
           * @returns Physical @f$ x @f$-coordinate.
           */
-         double x() const
+         constexpr double x() const
          {
             return m_physical(0);
          }
@@ -391,7 +449,7 @@ namespace Rodin::Geometry
           * @brief Gets the @f$ y @f$ physical coordinate.
           * @returns Physical @f$ y @f$-coordinate.
           */
-         double y() const
+         constexpr double y() const
          {
             return m_physical(1);
          }
@@ -400,7 +458,7 @@ namespace Rodin::Geometry
           * @brief Gets the @f$ z @f$ physical coordinate.
           * @returns Physical @f$ z @f$-coordinate.
           */
-         double z() const
+         constexpr double z() const
          {
             return m_physical(2);
          }
@@ -408,7 +466,7 @@ namespace Rodin::Geometry
          /**
           * @brief Lexicographical comparison.
           */
-         bool operator<(const Point& rhs) const
+         constexpr bool operator<(const Point& rhs) const
          {
             assert(getDimension() == rhs.getDimension());
             for (int i = 0; i < m_physical.Size() - 1; i++)
@@ -421,11 +479,14 @@ namespace Rodin::Geometry
             return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
          }
 
+         constexpr
          mfem::ElementTransformation& getElementTransformation() const
          {
-            return m_trans.get();
+            assert(m_trans);
+            return m_trans.value().get();
          }
 
+         constexpr
          const mfem::IntegrationPoint& getIntegrationPoint() const
          {
             return m_ip.get();
@@ -433,7 +494,7 @@ namespace Rodin::Geometry
 
       private:
          mfem::Vector m_physical;
-         std::reference_wrapper<mfem::ElementTransformation> m_trans;
+         std::optional<std::reference_wrapper<mfem::ElementTransformation>> m_trans;
          std::reference_wrapper<const mfem::IntegrationPoint> m_ip;
    };
 }

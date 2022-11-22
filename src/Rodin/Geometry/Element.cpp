@@ -3,6 +3,11 @@
 
 namespace Rodin::Geometry
 {
+   bool operator<(const ElementBase& lhs, const ElementBase& rhs)
+   {
+      return lhs.getIndex() < rhs.getIndex();
+   }
+
    // ---- ElementBase -------------------------------------------------------
    std::vector<int> ElementBase::getVertices() const
    {
@@ -46,6 +51,11 @@ namespace Rodin::Geometry
       return volume;
    }
 
+   mfem::ElementTransformation& Element::getTransformation() const
+   {
+      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetElementTransformation(getIndex());
+   }
+
    // ---- ElementView -------------------------------------------------------
    ElementView& ElementView::setAttribute(int attr)
    {
@@ -84,12 +94,50 @@ namespace Rodin::Geometry
          return {};
    }
 
+   std::set<Element> Face::getElements() const
+   {
+      int e1 = -1, e2 = -1;
+      getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
+      if (e1 >= 0 && e2 >= 0)
+         return { Element(getMesh(), getMesh().getHandle().GetElement(e1), e1),
+                  Element(getMesh(), getMesh().getHandle().GetElement(e2), e2) };
+      else if (e1 >= 0 && e2 < 0)
+         return { Element(getMesh(), getMesh().getHandle().GetElement(e1), e1) };
+      else if (e1 < 0 && e2 >= 0)
+         return { Element(getMesh(), getMesh().getHandle().GetElement(e2), e2) };
+      else
+         return {};
+   }
+
+   Region Face::getRegion() const
+   {
+      if (getMesh().getHandle().FaceIsInterior(getIndex()))
+         return Region::Interface;
+      else
+         return Region::Boundary;
+   }
+
+   mfem::ElementTransformation& Face::getTransformation() const
+   {
+      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetFaceTransformation(Face::getIndex());
+   }
+
+   mfem::FaceElementTransformations& Face::getTransformations() const
+   {
+      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetFaceElementTransformations(Face::getIndex());
+   }
+
    // ---- BoundaryElement ---------------------------------------------------
    BoundaryElement::BoundaryElement(
          const MeshBase& mesh, const mfem::Element* element, int index)
       : Face(mesh, element, mesh.getHandle().GetBdrFace(index)),
         m_index(index)
    {}
+
+   mfem::ElementTransformation& BoundaryElement::getTransformation() const
+   {
+      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetBdrElementTransformation(getBoundaryIndex());
+   }
 
    // ---- BoundaryElementView -----------------------------------------------
    BoundaryElementView::BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index)

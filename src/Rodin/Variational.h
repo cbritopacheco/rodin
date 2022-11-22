@@ -49,6 +49,8 @@
 #include "Variational/Normal.h"
 #include "Variational/Jacobian.h"
 #include "Variational/Derivative.h"
+#include "Variational/Jump.h"
+#include "Variational/Average.h"
 
 #include "Variational/Trace.h"
 #include "Variational/Transpose.h"

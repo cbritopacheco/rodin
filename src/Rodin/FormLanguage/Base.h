@@ -9,6 +9,8 @@
 
 #include <memory>
 #include <cassert>
+#include <typeinfo>
+#include <sstream>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -39,6 +41,11 @@ namespace Rodin::FormLanguage
          Base& operator=(Base&&) = delete;
 
          const boost::uuids::uuid& getUUID() const;
+
+         virtual const char* getName() const
+         {
+            return "Rodin::FormLanguage::Base";
+         }
 
          /**
           * @internal

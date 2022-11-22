@@ -159,6 +159,19 @@ namespace Rodin::Variational
             return m_mesh;
          }
 
+         const mfem::FiniteElement& getFiniteElement(const Geometry::ElementBase& element) const override
+         {
+            switch (element.getRegion())
+            {
+               case Geometry::Region::Domain:
+                  return *m_fes->GetFE(element.getIndex());
+               case Geometry::Region::Interface:
+                  return *m_fes->GetFaceElement(element.getIndex());
+               case Geometry::Region::Boundary:
+                  return *m_fes->GetBE(element.getIndex());
+            }
+         }
+
          const FEC& getFiniteElementCollection() const override
          {
             return m_fec;

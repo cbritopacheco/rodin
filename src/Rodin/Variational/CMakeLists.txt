@@ -5,6 +5,7 @@ set(RodinVariational_HEADERS
   EssentialBoundary.h
   Derivative.h
   Dot.h
+  Jump.h
   FiniteElementSpace.h
   ForwardDecls.h
   Grad.h

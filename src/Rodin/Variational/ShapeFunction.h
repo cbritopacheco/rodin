@@ -3,12 +3,15 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/FormLanguage/Base.h"
 
 #include "H1.h"
 #include "ForwardDecls.h"
 #include "BasisOperator.h"
 #include "FiniteElementSpace.h"
+#include "Integrator.h"
+#include "Assembly.h"
 
 #include "RangeShape.h"
 
@@ -196,27 +199,24 @@ namespace Rodin::Variational
             return {getRows(), getColumns()};
          }
 
-         virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
-
-         virtual int getRows() const = 0;
-
-         virtual int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const = 0;
-
-         virtual int getColumns() const = 0;
-
-         virtual void getOperator(
-               DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const = 0;
-
+         constexpr
          Transpose<ShapeFunctionBase<Space>> T() const
          {
             return Transpose<ShapeFunctionBase<Space>>(*this);
          }
+
+         virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
+
+         virtual int getRows() const = 0;
+
+         virtual int getColumns() const = 0;
+
+         virtual int getDOFs(const Geometry::ElementBase& element) const = 0;
+
+         virtual void getOperator(
+               DenseBasisOperator& op,
+               ShapeComputator& compute,
+               const Geometry::ElementBase& element) const = 0;
 
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
@@ -227,14 +227,16 @@ namespace Rodin::Variational
 
    /**
     * @ingroup ShapeFunctionSpecializations
-    * @brief H1 ShapeFunction
+    * @brief L2 ShapeFunction
     */
-   template <ShapeFunctionSpaceType Space, class Context>
-   class ShapeFunction<H1<Context>, Space> : public ShapeFunctionBase<Space>
+   template <ShapeFunctionSpaceType Space, class ... Ts>
+   class ShapeFunction<L2<Ts...>, Space> : public ShapeFunctionBase<Space>
    {
       public:
+         using FES = L2<Ts...>;
+
          constexpr
-         ShapeFunction(H1<Context>& fes)
+         ShapeFunction(FES& fes)
             : m_fes(fes)
          {}
 
@@ -250,14 +252,14 @@ namespace Rodin::Variational
                m_fes(other.m_fes)
          {}
 
-         H1<Context>& getFiniteElementSpace() override
+         FES& getFiniteElementSpace() override
          {
-            return m_fes;
+            return m_fes.get();
          }
 
-         const H1<Context>& getFiniteElementSpace() const override
+         const FES& getFiniteElementSpace() const override
          {
-            return m_fes;
+            return m_fes.get();
          }
 
          int getRows() const override
@@ -270,22 +272,23 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation&) const override
+         int getDOFs(const Geometry::ElementBase& element) const override
          {
+            const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
          }
 
          void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute
-               ) const override
+               ShapeComputator& compute,
+               const Geometry::Point& point,
+               const Geometry::Element& element) const override
          {
-            const auto& shape = compute.getPhysicalShape(fe, trans, ip);
+            const auto& shape =
+               compute.getPhysicalShape(
+                     getFiniteElementSpace().getFiniteElement(element),
+                     element.getTransformation(),
+                     element.getTransformation().GetIntPoint());
             const int n = shape.Size();
             const int vdim = getFiniteElementSpace().getVectorDimension();
             op.setSize(vdim, 1, vdim * n);
@@ -295,16 +298,93 @@ namespace Rodin::Variational
                   op(i, 0, j + i * n) = shape(j);
          }
 
-         virtual const ShapeFunction<H1<Context>, Space>& getLeaf() const override = 0;
+         virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
 
          virtual ShapeFunction* copy() const noexcept override = 0;
 
       private:
-         H1<Context>& m_fes;
+         std::reference_wrapper<FES> m_fes;
    };
 
-   template <ShapeFunctionSpaceType Space, class Context>
-   using H1ShapeFunction = ShapeFunction<H1<Context>, Space>;
+   /**
+    * @ingroup ShapeFunctionSpecializations
+    * @brief H1 ShapeFunction
+    */
+   template <ShapeFunctionSpaceType Space, class ... Ts>
+   class ShapeFunction<H1<Ts...>, Space> : public ShapeFunctionBase<Space>
+   {
+      public:
+         using FES = H1<Ts...>;
+
+         constexpr
+         ShapeFunction(FES& fes)
+            : m_fes(fes)
+         {}
+
+         constexpr
+         ShapeFunction(const ShapeFunction& other)
+            :  ShapeFunctionBase<Space>(other),
+               m_fes(other.m_fes)
+         {}
+
+         constexpr
+         ShapeFunction(ShapeFunction&& other)
+            :  ShapeFunctionBase<Space>(std::move(other)),
+               m_fes(other.m_fes)
+         {}
+
+         FES& getFiniteElementSpace() override
+         {
+            return m_fes.get();
+         }
+
+         const FES& getFiniteElementSpace() const override
+         {
+            return m_fes.get();
+         }
+
+         int getRows() const override
+         {
+            return getFiniteElementSpace().getVectorDimension();
+         }
+
+         int getColumns() const override
+         {
+            return 1;
+         }
+
+         int getDOFs(const Geometry::ElementBase& element) const override
+         {
+            const auto& fe = getFiniteElementSpace().getFiniteElement(element);
+            return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
+         }
+
+         void getOperator(
+               DenseBasisOperator& op,
+               ShapeComputator& compute,
+               const Geometry::ElementBase& element) const override
+         {
+            const auto& shape =
+               compute.getPhysicalShape(
+                     getFiniteElementSpace().getFiniteElement(element),
+                     element.getTransformation(),
+                     element.getTransformation().GetIntPoint());
+            const int n = shape.Size();
+            const int vdim = getFiniteElementSpace().getVectorDimension();
+            op.setSize(vdim, 1, vdim * n);
+            op = 0.0;
+            for (int i = 0; i < vdim; i++)
+               for (int j = 0; j < n; j++)
+                  op(i, 0, j + i * n) = shape(j);
+         }
+
+         virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
+
+         virtual ShapeFunction* copy() const noexcept override = 0;
+
+      private:
+         std::reference_wrapper<FES> m_fes;
+   };
 }
 
 #endif

@@ -9,13 +9,16 @@
 
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
+#include "Integrator.h"
 #include "Assembly.h"
 
 namespace Rodin::Variational
 {
-   class BilinearFormIntegratorBase : public FormLanguage::Base
+   class BilinearFormIntegratorBase : public Integrator
    {
       public:
+         using Parent = Integrator;
+
          BilinearFormIntegratorBase(
                const ShapeFunctionBase<TrialSpace>& u,
                const ShapeFunctionBase<TestSpace>& v)
@@ -23,13 +26,13 @@ namespace Rodin::Variational
          {}
 
          BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
-            :  FormLanguage::Base(other),
+            :  Parent(other),
                m_u(other.m_u->copy()), m_v(other.m_v->copy()),
                m_attrs(other.m_attrs)
          {}
 
          BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
-            :  FormLanguage::Base(std::move(other)),
+            :  Parent(std::move(other)),
                m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
                m_attrs(std::move(other.m_attrs))
          {}
@@ -86,20 +89,20 @@ namespace Rodin::Variational
             return *this;
          }
 
+         Integrator::Type getType() const override
+         {
+            return Integrator::Type::Bilinear;
+         }
+
          std::unique_ptr<mfem::BilinearFormIntegrator> build() const;
 
          virtual ~BilinearFormIntegratorBase() = default;
-
-         /**
-          * @brief Gets the integration region.
-          */
-         virtual IntegratorRegion getIntegratorRegion() const = 0;
 
          virtual bool isSupported(Bilinear::Assembly::Type t) const
          {
             switch (t)
             {
-               case Bilinear::Assembly::Type::Common:
+               case Bilinear::Assembly::Type::Native:
                   return true;
                default:
                   return false;
@@ -107,7 +110,7 @@ namespace Rodin::Variational
             return false;
          }
 
-         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const = 0;
+         virtual void getElementMatrix(const Bilinear::Assembly::Native& as) const = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
@@ -138,18 +141,49 @@ namespace Rodin::Variational::Internal
          {}
 
          void AssembleElementMatrix(
-               const mfem::FiniteElement& fe,
+               const mfem::FiniteElement&,
                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            m_bfi.getElementMatrix(Bilinear::Assembly::Common{fe, fe, trans, mat});
+            if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
+            {
+               const auto& element = m_bfi.getTrialFunction()
+                                          .getFiniteElementSpace()
+                                          .getMesh()
+                                          .get<Geometry::BoundaryElement>(trans.ElementNo);
+               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+            }
+            else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
+            {
+               const auto& element = m_bfi.getTrialFunction()
+                                          .getFiniteElementSpace()
+                                          .getMesh()
+                                          .get<Geometry::Element>(trans.ElementNo);
+               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+            }
          }
 
          void AssembleElementMatrix2(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
+               const mfem::FiniteElement&, const mfem::FiniteElement&,
                   mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
          {
-            m_bfi.getElementMatrix(Bilinear::Assembly::Common{trial, test, trans, mat});
+            if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
+            {
+               const auto& element = m_bfi.getTrialFunction()
+                                          .getFiniteElementSpace()
+                                          .getMesh()
+                                          .get<Geometry::BoundaryElement>(trans.ElementNo);
+               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+            }
+            else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
+            {
+               const auto& element = m_bfi.getTrialFunction()
+                                          .getFiniteElementSpace()
+                                          .getMesh()
+                                          .get<Geometry::Element>(trans.ElementNo);
+               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+            }
          }
+
       private:
          const BilinearFormIntegratorBase& m_bfi;
    };

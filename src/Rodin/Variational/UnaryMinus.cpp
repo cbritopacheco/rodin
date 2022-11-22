@@ -10,7 +10,7 @@
 namespace Rodin::Variational
 {
    // ---- FunctionBase ------------------------------------------------------
-  
+
    UnaryMinus<FunctionBase>::UnaryMinus(const FunctionBase& op)
       :  FunctionBase(op),
          m_op(op.copy())
@@ -61,10 +61,10 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   IntegratorRegion
-   UnaryMinus<LinearFormIntegratorBase>::getIntegratorRegion() const
+   Geometry::Region
+   UnaryMinus<LinearFormIntegratorBase>::getRegion() const
    {
-      return m_op->getIntegratorRegion();
+      return m_op->getRegion();
    }
 
    bool
@@ -83,7 +83,7 @@ namespace Rodin::Variational
    }
 
    void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Common& as)
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Native& as)
    const
    {
       m_op->getElementVector(as);
@@ -112,18 +112,18 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   IntegratorRegion
-   UnaryMinus<BilinearFormIntegratorBase>::getIntegratorRegion() const
+   Geometry::Region
+   UnaryMinus<BilinearFormIntegratorBase>::getRegion() const
    {
-      return m_op->getIntegratorRegion();
+      return m_op->getRegion();
    }
 
    void
    UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(const Bilinear::Assembly::Common& as) const
+   ::getElementMatrix(const Bilinear::Assembly::Native& as) const
    {
       m_op->getElementMatrix(as);
-      as.mat.Neg();
+      as.matrix.Neg();
    }
 
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
