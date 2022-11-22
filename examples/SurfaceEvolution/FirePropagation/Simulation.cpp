@@ -116,7 +116,9 @@ class Environment
               return Math::Constants::pi<double>() / 2.0 - angle;
             };
 
-          Solver::UMFPack solver;
+          mfem::GSSmoother smoother;
+          Solver::CG solver;
+          solver.setPreconditioner(smoother);
 
           TrialFunction d(m_env.m_vfes);
           TestFunction  v(m_env.m_vfes);
@@ -231,8 +233,8 @@ class Environment
 
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(300)
-                                                .setHausdorff(30)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(50)
+                                                .setHausdorff(5)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
@@ -241,10 +243,8 @@ class Environment
                                                 .setBoundaryReference(Terrain::Fire)
                                                 .discretize(m_fireDist);
 
-      MMG::MeshOptimizer()
-        .setAngleDetection(false)
-        .setHausdorff(50).setHMax(300)
-        .optimize(m_topography);
+      // MMG::MeshOptimizer().setAngleDetection(false).setHausdorff(10).setHMax(20)
+      //   .optimize(m_topography);
 
       // Rebuild finite element spaces with new topography
       m_sfes = FES(m_topography);
@@ -327,8 +327,8 @@ int main()
   MMG::Mesh topography;
   topography.load(meshfile, IO::FileFormat::MEDIT);
 
-  // MMG::MeshOptimizer().setHausdorff(50).setHMax(500).optimize(topography);
-  // topography.save("optimize.mesh");
+  MMG::MeshOptimizer().setHausdorff(5).setHMax(50).optimize(topography);
+  topography.save("optimize.mesh");
 
   Environment::VegetalStratum stratum;
 
