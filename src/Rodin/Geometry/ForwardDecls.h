@@ -23,6 +23,13 @@ namespace Rodin::Geometry
 {
    enum class Type;
 
+   enum class Region
+   {
+      Domain,
+      Boundary,
+      Interface
+   };
+
    class MeshBase;
 
    class MeshBuilder;

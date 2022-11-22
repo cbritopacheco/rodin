@@ -135,24 +135,20 @@ namespace Rodin::Variational
             return getLHS().getColumns();
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::ElementBase& element) const override
          {
-            assert(getLHS().getDOFs(fe, trans) == getRHS().getDOFs(fe, trans));
-            return getLHS().getDOFs(fe, trans);
+            assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
+            return getLHS().getDOFs(element);
          }
 
          void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const override
+               ShapeComputator& compute,
+               const Geometry::ElementBase& element) const override
          {
-            getLHS().getOperator(op, fe, trans, ip, compute);
+            getLHS().getOperator(op, compute, element);
             DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, fe, trans, ip, compute);
+            getRHS().getOperator(tmp, compute, element);
             op += tmp;
          }
 

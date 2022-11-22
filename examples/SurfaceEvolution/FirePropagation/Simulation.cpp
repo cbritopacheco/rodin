@@ -231,7 +231,7 @@ class Environment
 
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(200)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(300)
                                                 .setHausdorff(30)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
@@ -240,6 +240,11 @@ class Environment
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
                                                 .setBoundaryReference(Terrain::Fire)
                                                 .discretize(m_fireDist);
+
+      MMG::MeshOptimizer()
+        .setAngleDetection(false)
+        .setHausdorff(50).setHMax(300)
+        .optimize(m_topography);
 
       // Rebuild finite element spaces with new topography
       m_sfes = FES(m_topography);

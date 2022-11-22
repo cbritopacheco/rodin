@@ -47,9 +47,9 @@ namespace Rodin::Variational
       attrs.reserve(getIntegrators().size());
       for (const auto& bfi : getIntegrators())
       {
-         switch (bfi.getIntegratorRegion())
+         switch (bfi.getRegion())
          {
-            case IntegratorRegion::Boundary:
+            case Geometry::Region::Boundary:
             {
                if (bfi.getAttributes().size() == 0)
                {
@@ -65,7 +65,7 @@ namespace Rodin::Variational
                }
                break;
             }
-            case IntegratorRegion::Domain:
+            case Geometry::Region::Domain:
             {
                if (bfi.getAttributes().size() == 0)
                {

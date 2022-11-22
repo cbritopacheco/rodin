@@ -14,26 +14,29 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-#include "Assembly.h"
+#include "Integrator.h"
 #include "TestFunction.h"
+#include "Assembly.h"
 
 namespace Rodin::Variational
 {
-   class LinearFormIntegratorBase : public FormLanguage::Base
+   class LinearFormIntegratorBase : public Integrator
    {
       public:
+         using Parent = Integrator;
+
          LinearFormIntegratorBase(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
             : m_v(v.copy())
          {}
 
          LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
-            : FormLanguage::Base(other),
+            : Parent(other),
               m_v(other.m_v->copy()),
               m_attrs(other.m_attrs)
          {}
 
          LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
-            : FormLanguage::Base(std::move(other)),
+            : Parent(std::move(other)),
               m_v(std::move(other.m_v)),
               m_attrs(std::move(other.m_attrs))
          {}
@@ -85,12 +88,12 @@ namespace Rodin::Variational
           */
          std::unique_ptr<mfem::LinearFormIntegrator> build() const;
 
-         /**
-          * @brief Gets the integration region.
-          */
-         virtual IntegratorRegion getIntegratorRegion() const = 0;
+         Integrator::Type getType() const override
+         {
+            return Integrator::Type::Linear;
+         }
 
-         virtual void getElementVector(const Linear::Assembly::Common& as) const = 0;
+         virtual void getElementVector(const Linear::Assembly::Native& as) const = 0;
 
          virtual void getElementVector(const Linear::Assembly::Device&) const
          {
@@ -101,7 +104,7 @@ namespace Rodin::Variational
          {
             switch (t)
             {
-               case Linear::Assembly::Type::Common:
+               case Linear::Assembly::Type::Native:
                   return true;
                default:
                   return false;
@@ -137,13 +140,29 @@ namespace Rodin::Variational::Internal
          {}
 
          void AssembleRHSElementVect(
-               const mfem::FiniteElement& fe,
+               const mfem::FiniteElement&,
                mfem::ElementTransformation& trans, mfem::Vector& vec) override
          {
-            m_lfi.getElementVector(Linear::Assembly::Common{fe, trans, vec});
+            if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
+            {
+               const auto& element = m_lfi.getTestFunction()
+                                          .getFiniteElementSpace()
+                                          .getMesh()
+                                          .get<Geometry::BoundaryElement>(trans.ElementNo);
+               m_lfi.getElementVector(Linear::Assembly::Native{vec, element});
+            }
+            else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
+            {
+               const auto& element = m_lfi.getTestFunction()
+                                          .getFiniteElementSpace()
+                                          .getMesh()
+                                          .get<Geometry::Element>(trans.ElementNo);
+               m_lfi.getElementVector(Linear::Assembly::Native{vec, element});
+            }
          }
 
-         void AssembleDevice(const mfem::FiniteElementSpace& fes,
+         void AssembleDevice(
+               const mfem::FiniteElementSpace& fes,
                const mfem::Array<int>& markers, mfem::Vector& b) override
          {
             m_lfi.getElementVector(Linear::Assembly::Device{fes, markers, b});

@@ -7,17 +7,26 @@
 #ifndef RODIN_VARIATIONAL_ASSEMBLY_H
 #define RODIN_VARIATIONAL_ASSEMBLY_H
 
+#include <variant>
+
 #include <mfem.hpp>
+
+#include "Rodin/Geometry/Element.h"
 
 #include "ForwardDecls.h"
 
 namespace Rodin::Variational::Linear::Assembly
 {
-   struct Common
+   enum class Type
    {
-      const mfem::FiniteElement& fe;
-      mfem::ElementTransformation& trans;
+      Native, ///< Enumerator corresponding to Linear::Assembly::Native
+      Device ///< Enumerator corresponding to Linear::Assembly::Device
+   };
+
+   struct Native
+   {
       mfem::Vector& vec;
+      const Geometry::ElementBase& element;
    };
 
    struct Device
@@ -32,15 +41,13 @@ namespace Rodin::Variational::Bilinear::Assembly
 {
    enum class Type
    {
-      Common
+      Native
    };
 
-   struct Common
+   struct Native
    {
-      const mfem::FiniteElement& trial;
-      const mfem::FiniteElement& test;
-      mfem::ElementTransformation& trans;
-      mfem::DenseMatrix& mat;
+      mfem::DenseMatrix& matrix;
+      const Geometry::ElementBase& element;
    };
 }
 

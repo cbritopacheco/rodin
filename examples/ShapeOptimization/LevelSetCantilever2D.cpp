@@ -127,6 +127,7 @@ int main(int, char**)
                                        .setRMC(1e-3)
                                        .setAngleDetection(false)
                                        .setBoundaryReference(Gamma)
+                                       .setBaseReferences(GammaD)
                                        .discretize(dist);
     MMG::MeshOptimizer().setHMax(hmax).setAngleDetection(false).optimize(Omega);
 

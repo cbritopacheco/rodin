@@ -155,11 +155,9 @@ namespace Rodin::Variational
             return m_rhs->getRangeShape().width();
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::ElementBase& element) const override
          {
-            return m_rhs->getDOFs(fe, trans);
+            return m_rhs->getDOFs(element);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -192,20 +190,20 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         virtual void getOperator(
+         void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const override
+               ShapeComputator& compute,
+               const Geometry::ElementBase& element) const override
          {
+            auto& trans = element.getTransformation();
+            const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             switch (m_lhs->getRangeType())
             {
                case RangeType::Scalar:
                {
-                  m_rhs->getOperator(op, fe, trans, ip, compute);
+                  m_rhs->getOperator(op, compute, element);
                   mfem::DenseMatrix v;
-                  m_lhs->getValue(v, trans, ip);
+                  m_lhs->getValue(v, trans, trans.GetIntPoint());
                   op *= v(0, 0);
                   break;
                }
