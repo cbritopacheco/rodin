@@ -319,7 +319,7 @@ namespace Rodin::External::MMG
       if (isSurface) // Use MMGS
       {
          res->nt = src.count<Geometry::Element>();
-         res->na = src.count<Geometry::BoundaryElement>();
+         res->na = src.count<Geometry::Boundary>();
 
          MMGS_Set_commonFunc();
          if (!MMGS_zaldy(res))

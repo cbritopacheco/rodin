@@ -87,7 +87,7 @@ namespace Rodin::Geometry
          }
 
          template <class T>
-         std::enable_if_t<std::is_same_v<BoundaryElement, T>, int>
+         std::enable_if_t<std::is_same_v<Boundary, T>, int>
          count() const
          {
             return getHandle().GetNBE();
@@ -101,8 +101,8 @@ namespace Rodin::Geometry
 
          template <class T>
          std::enable_if_t<
-            std::is_same_v<BoundaryElement, T>,
-            BoundaryElementView>
+            std::is_same_v<Boundary, T>,
+            BoundaryView>
          get(int i);
 
          template <class T>
@@ -116,8 +116,8 @@ namespace Rodin::Geometry
          get(int i) const;
 
          template <class T>
-         std::enable_if_t<std::is_same_v<BoundaryElement, T>,
-            BoundaryElement>
+         std::enable_if_t<std::is_same_v<Boundary, T>,
+            Boundary>
          get(int i) const;
 
          /**
@@ -267,7 +267,7 @@ namespace Rodin::Geometry
           */
          MeshBase& edit(std::function<void(ElementView)> f);
 
-         MeshBase& edit(std::function<void(BoundaryElementView)> f);
+         MeshBase& edit(std::function<void(BoundaryView)> f);
 
          /**
           * @brief Edits the specified elements in the mesh via the given function.

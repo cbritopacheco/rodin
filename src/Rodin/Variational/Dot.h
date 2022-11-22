@@ -142,7 +142,7 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(const Geometry::ElementBase& element) const override
+         int getDOFs(const Geometry::SimplexBase& element) const override
          {
             return getRHS().getDOFs(element);
          }
@@ -165,7 +165,7 @@ namespace Rodin::Variational
          virtual void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::ElementBase& element) const override
+               const Geometry::SimplexBase& element) const override
          {
             mfem::DenseMatrix v;
             getLHS().getValue(v, element.getTransformation(), element.getTransformation().GetIntPoint());
@@ -246,7 +246,7 @@ namespace Rodin::Variational
          virtual void getElementMatrix(
                mfem::DenseMatrix& result,
                ShapeComputator& compute,
-               const Geometry::ElementBase& element) const
+               const Geometry::SimplexBase& element) const
          {
             assert(element.getRegion() != Geometry::Region::Interface);
             assert(m_trial->getRangeShape() == m_test->getRangeShape());

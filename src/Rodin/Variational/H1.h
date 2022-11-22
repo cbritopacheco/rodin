@@ -159,7 +159,7 @@ namespace Rodin::Variational
             return m_mesh;
          }
 
-         const mfem::FiniteElement& getFiniteElement(const Geometry::ElementBase& element) const override
+         const mfem::FiniteElement& getFiniteElement(const Geometry::SimplexBase& element) const override
          {
             switch (element.getRegion())
             {

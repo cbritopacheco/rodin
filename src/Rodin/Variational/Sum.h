@@ -135,7 +135,7 @@ namespace Rodin::Variational
             return getLHS().getColumns();
          }
 
-         int getDOFs(const Geometry::ElementBase& element) const override
+         int getDOFs(const Geometry::SimplexBase& element) const override
          {
             assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
             return getLHS().getDOFs(element);
@@ -144,7 +144,7 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::ElementBase& element) const override
+               const Geometry::SimplexBase& element) const override
          {
             getLHS().getOperator(op, compute, element);
             DenseBasisOperator tmp;

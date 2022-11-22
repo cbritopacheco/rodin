@@ -186,7 +186,7 @@ namespace Rodin::External::MMG
               if (m_meshTheSurface)
               {
                 rodinMesh.edit(
-                  [&](Geometry::BoundaryElementView el)
+                  [&](Geometry::BoundaryView el)
                   {
                     auto it = m_originalRefMap.find(el.getAttribute());
                     if (it != m_originalRefMap.end())

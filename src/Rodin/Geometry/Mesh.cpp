@@ -182,7 +182,7 @@ namespace Rodin::Geometry
    double MeshBase::getPerimeter(int attr)
    {
       double totalVolume = 0;
-      for (int i = 0; i < count<BoundaryElement>(); i++)
+      for (int i = 0; i < count<Boundary>(); i++)
          totalVolume += getBoundaryElementArea(i) * (getHandle().GetBdrAttribute(i) == attr);
       return totalVolume;
    }
@@ -203,10 +203,10 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   MeshBase& MeshBase::edit(std::function<void(BoundaryElementView)> f)
+   MeshBase& MeshBase::edit(std::function<void(BoundaryView)> f)
    {
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         f(get<BoundaryElement>(i));
+      for (int i = 0; i < count<Boundary>(); i++)
+         f(get<Boundary>(i));
       return *this;
    }
 
@@ -355,9 +355,9 @@ namespace Rodin::Geometry
       }
 
       // Add the boundary elements
-      for (int i = 0; i < count<BoundaryElement>(); i++)
+      for (int i = 0; i < count<Boundary>(); i++)
       {
-         const auto& be = get<BoundaryElement>(i);
+         const auto& be = get<Boundary>(i);
          const auto& elems = be.elements();
          for (const auto& el : elems)
          {
@@ -378,8 +378,8 @@ namespace Rodin::Geometry
 
       SubMesh<Context::Serial> res(*this);
       res.initialize(getSpaceDimension() - 1, getSpaceDimension());
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         res.add(get<BoundaryElement>(i));
+      for (int i = 0; i < count<Boundary>(); i++)
+         res.add(get<Boundary>(i));
       res.finalize();
       return res;
    }

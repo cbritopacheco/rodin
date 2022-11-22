@@ -26,7 +26,7 @@ namespace Rodin::Variational::Linear::Assembly
    struct Native
    {
       mfem::Vector& vec;
-      const Geometry::ElementBase& element;
+      const Geometry::SimplexBase& element;
    };
 
    struct Device
@@ -47,7 +47,7 @@ namespace Rodin::Variational::Bilinear::Assembly
    struct Native
    {
       mfem::DenseMatrix& matrix;
-      const Geometry::ElementBase& element;
+      const Geometry::SimplexBase& element;
    };
 }
 
