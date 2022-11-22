@@ -55,7 +55,7 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   SubMesh<Context::Serial>& SubMesh<Context::Serial>::add(const BoundaryElement& el)
+   SubMesh<Context::Serial>& SubMesh<Context::Serial>::add(const Boundary& el)
    {
       assert(&getParent() == &el.getMesh());
       if (isSurface() && !getParent().isSurface())

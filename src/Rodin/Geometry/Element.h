@@ -24,20 +24,20 @@ namespace Rodin::Geometry
    /**
     * @brief Base class for all geometric elements of the mesh.
     */
-   class ElementBase
+   class SimplexBase
    {
       public:
-         ElementBase(const MeshBase& mesh, const mfem::Element* element, int index)
+         SimplexBase(const MeshBase& mesh, const mfem::Element* element, int index)
             :  m_mesh(mesh),
                m_element(element),
                m_index(index)
          {}
 
-         ElementBase(const ElementBase&) = default;
+         SimplexBase(const SimplexBase&) = default;
 
-         ElementBase(ElementBase&&) = default;
+         SimplexBase(SimplexBase&&) = default;
 
-         virtual ~ElementBase()
+         virtual ~SimplexBase()
          {
             m_element = nullptr; // This is deallocated by the mfem::Mesh class
          }
@@ -96,7 +96,7 @@ namespace Rodin::Geometry
          int m_index;
    };
 
-   bool operator<(const ElementBase& lhs, const ElementBase& rhs);
+   bool operator<(const SimplexBase& lhs, const SimplexBase& rhs);
 
    /**
     * @brief Class for representing elements of the highest dimension in the
@@ -106,19 +106,19 @@ namespace Rodin::Geometry
     * element. If one wishes to modify the element then one must use
     * ElementView.
     */
-   class Element : public ElementBase
+   class Element : public SimplexBase
    {
       public:
          Element(const MeshBase& mesh, const mfem::Element* element, int index)
-            : ElementBase(mesh, element, index)
+            : SimplexBase(mesh, element, index)
          {}
 
          Element(const Element& other)
-            : ElementBase(other)
+            : SimplexBase(other)
          {}
 
          Element(Element&& other)
-            : ElementBase(std::move(other))
+            : SimplexBase(std::move(other))
          {}
 
          /**
@@ -193,23 +193,23 @@ namespace Rodin::Geometry
     * This class is designed so that modifications cannot be made to the
     * face.
     */
-   class Face : public ElementBase
+   class Face : public SimplexBase
    {
       public:
          Face(const MeshBase& mesh, const mfem::Element* element, int index)
-            : ElementBase(mesh, element, index)
+            : SimplexBase(mesh, element, index)
          {}
 
          Face(MeshBase& mesh, mfem::Element* element, int index)
-            : ElementBase(mesh, element, index)
+            : SimplexBase(mesh, element, index)
          {}
 
          Face(const Face& other)
-            : ElementBase(other)
+            : SimplexBase(other)
          {}
 
          Face(Face&& other)
-            : ElementBase(std::move(other))
+            : SimplexBase(std::move(other))
          {}
 
          /**
@@ -251,22 +251,22 @@ namespace Rodin::Geometry
     * boundary element. If one wishes to modify the face then one must use
     * BoundaryElementView.
     */
-   class BoundaryElement : public Face
+   class Boundary : public Face
    {
       public:
          /**
           *
           * @param[in] index Boundary index
           */
-         BoundaryElement(
+         Boundary(
                const MeshBase& mesh, const mfem::Element* element, int index);
 
-         BoundaryElement(const BoundaryElement& other)
+         Boundary(const Boundary& other)
             :  Face(other),
                m_index(other.m_index)
          {}
 
-         BoundaryElement(BoundaryElement&& other)
+         Boundary(Boundary&& other)
             :  Face(std::move(other)),
                m_index(other.m_index)
          {
@@ -322,25 +322,25 @@ namespace Rodin::Geometry
     *
     * This class is designed so that modifications cannot be made to the
     * boundary element, while retaining the functionality of the more general
-    * FaceView and BoundaryElement classes.
+    * FaceView and Boundary classes.
     */
-   class BoundaryElementView
-      : public BoundaryElement
+   class BoundaryView
+      : public Boundary
    {
       public:
          /**
           * @param[in] index Boundary element index
           */
-         BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index);
+         BoundaryView(MeshBase& mesh, mfem::Element* element, int index);
 
-         BoundaryElementView(const BoundaryElementView& other)
-            : BoundaryElement(other),
+         BoundaryView(const BoundaryView& other)
+            : Boundary(other),
               m_mesh(other.m_mesh),
               m_element(other.m_element)
          {}
 
-         BoundaryElementView(BoundaryElementView&& other)
-            : BoundaryElement(std::move(other)),
+         BoundaryView(BoundaryView&& other)
+            : Boundary(std::move(other)),
               m_mesh(other.m_mesh),
               m_element(other.m_element)
          {
@@ -350,7 +350,7 @@ namespace Rodin::Geometry
          /**
           * @brief Sets the attribute of the boundary element.
           */
-         BoundaryElementView& setAttribute(int attr);
+         BoundaryView& setAttribute(int attr);
 
          MeshBase& getMesh()
          {

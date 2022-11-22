@@ -30,20 +30,20 @@ namespace Rodin::Geometry
    }
 
    template <class T>
-   std::enable_if_t<std::is_same_v<BoundaryElement, T>,
-      BoundaryElement>
+   std::enable_if_t<std::is_same_v<Boundary, T>,
+      Boundary>
    MeshBase::get(int i) const
    {
-      return BoundaryElement(*this, getHandle().GetBdrElement(i), i);
+      return Boundary(*this, getHandle().GetBdrElement(i), i);
    }
 
    template <class T>
    std::enable_if_t<
-      std::is_same_v<BoundaryElement, T>,
-      BoundaryElementView>
+      std::is_same_v<Boundary, T>,
+      BoundaryView>
    MeshBase::get(int i)
    {
-      return BoundaryElementView(*this, getHandle().GetBdrElement(i), i);
+      return BoundaryView(*this, getHandle().GetBdrElement(i), i);
    }
 
    template <class T>

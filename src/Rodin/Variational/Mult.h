@@ -155,7 +155,7 @@ namespace Rodin::Variational
             return m_rhs->getRangeShape().width();
          }
 
-         int getDOFs(const Geometry::ElementBase& element) const override
+         int getDOFs(const Geometry::SimplexBase& element) const override
          {
             return m_rhs->getDOFs(element);
          }
@@ -193,7 +193,7 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::ElementBase& element) const override
+               const Geometry::SimplexBase& element) const override
          {
             auto& trans = element.getTransformation();
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);

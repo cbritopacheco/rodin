@@ -149,7 +149,7 @@ namespace Rodin::Variational::Internal
                const auto& element = m_bfi.getTrialFunction()
                                           .getFiniteElementSpace()
                                           .getMesh()
-                                          .get<Geometry::BoundaryElement>(trans.ElementNo);
+                                          .get<Geometry::Boundary>(trans.ElementNo);
                m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
             }
             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
@@ -171,7 +171,7 @@ namespace Rodin::Variational::Internal
                const auto& element = m_bfi.getTrialFunction()
                                           .getFiniteElementSpace()
                                           .getMesh()
-                                          .get<Geometry::BoundaryElement>(trans.ElementNo);
+                                          .get<Geometry::Boundary>(trans.ElementNo);
                m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
             }
             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)

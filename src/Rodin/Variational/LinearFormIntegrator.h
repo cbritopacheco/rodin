@@ -148,7 +148,7 @@ namespace Rodin::Variational::Internal
                const auto& element = m_lfi.getTestFunction()
                                           .getFiniteElementSpace()
                                           .getMesh()
-                                          .get<Geometry::BoundaryElement>(trans.ElementNo);
+                                          .get<Geometry::Boundary>(trans.ElementNo);
                m_lfi.getElementVector(Linear::Assembly::Native{vec, element});
             }
             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)

@@ -161,7 +161,7 @@ namespace Rodin::IO
       {
          case 2:
          {
-            int nbe = mesh.count<Geometry::BoundaryElement>();
+            int nbe = mesh.count<Geometry::Boundary>();
             os << '\n'
                << IO::Medit::Keyword::Edges
                << '\n'
@@ -169,7 +169,7 @@ namespace Rodin::IO
                << '\n';
             for (int i = 0; i < nbe; i++)
             {
-               auto el = mesh.get<Geometry::BoundaryElement>(i);
+               auto el = mesh.get<Geometry::Boundary>(i);
                auto vs = el.getVertices();
                assert(vs.size() == 2);
                os << vs[0] + 1 << " "
@@ -206,11 +206,11 @@ namespace Rodin::IO
         case 3:
         {
             os << '\n' << IO::Medit::Keyword::Triangles << '\n';
-            int nbe = mesh.count<Geometry::BoundaryElement>();
+            int nbe = mesh.count<Geometry::Boundary>();
             os << nbe << '\n';
             for (int i = 0; i < nbe; i++)
             {
-               auto bel = mesh.get<Geometry::BoundaryElement>(i);
+               auto bel = mesh.get<Geometry::Boundary>(i);
                auto vs = bel.getVertices();
                assert(vs.size() == 3);
                os << vs[0] + 1 << " "

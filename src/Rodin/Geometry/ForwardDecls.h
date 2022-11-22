@@ -62,7 +62,7 @@ namespace Rodin::Geometry
    template <class Trait>
    class SubMesh;
 
-   class ElementBase;
+   class SimplexBase;
 
    class Element;
    class ElementView;
@@ -70,8 +70,8 @@ namespace Rodin::Geometry
    class Face;
    class FaceView;
 
-   class BoundaryElement;
-   class BoundaryElementView;
+   class Boundary;
+   class BoundaryView;
 
    class Point;
 }

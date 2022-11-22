@@ -57,7 +57,7 @@ namespace Rodin::Geometry
           * boundary element as an element of the submesh. Otherwise, it gets
           * added normally as a boundary element.
           */
-         SubMesh& add(const BoundaryElement& el);
+         SubMesh& add(const Boundary& el);
 
          /**
           * @returns Reference to the parent Mesh object

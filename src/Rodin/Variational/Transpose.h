@@ -102,7 +102,7 @@ namespace Rodin::Variational
             return m_shape->getRows();
          }
 
-         int getDOFs(const Geometry::ElementBase& element) const override
+         int getDOFs(const Geometry::SimplexBase& element) const override
          {
             return m_shape->getDOFs(element);
          }
@@ -110,7 +110,7 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::ElementBase& element) const override
+               const Geometry::SimplexBase& element) const override
          {
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             m_shape->getOperator(op, compute, element);

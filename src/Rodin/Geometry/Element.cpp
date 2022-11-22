@@ -3,20 +3,20 @@
 
 namespace Rodin::Geometry
 {
-   bool operator<(const ElementBase& lhs, const ElementBase& rhs)
+   bool operator<(const SimplexBase& lhs, const SimplexBase& rhs)
    {
       return lhs.getIndex() < rhs.getIndex();
    }
 
    // ---- ElementBase -------------------------------------------------------
-   std::vector<int> ElementBase::getVertices() const
+   std::vector<int> SimplexBase::getVertices() const
    {
       mfem::Array<int> vs;
       m_element->GetVertices(vs);
       return std::vector<int>(vs.begin(), vs.end());
    }
 
-   int ElementBase::getAttribute() const
+   int SimplexBase::getAttribute() const
    {
       return m_element->GetAttribute();
    }
@@ -128,25 +128,25 @@ namespace Rodin::Geometry
    }
 
    // ---- BoundaryElement ---------------------------------------------------
-   BoundaryElement::BoundaryElement(
+   Boundary::Boundary(
          const MeshBase& mesh, const mfem::Element* element, int index)
       : Face(mesh, element, mesh.getHandle().GetBdrFace(index)),
         m_index(index)
    {}
 
-   mfem::ElementTransformation& BoundaryElement::getTransformation() const
+   mfem::ElementTransformation& Boundary::getTransformation() const
    {
       return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetBdrElementTransformation(getBoundaryIndex());
    }
 
    // ---- BoundaryElementView -----------------------------------------------
-   BoundaryElementView::BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index)
-      : BoundaryElement(mesh, element, index),
+   BoundaryView::BoundaryView(MeshBase& mesh, mfem::Element* element, int index)
+      : Boundary(mesh, element, index),
         m_mesh(mesh),
         m_element(element)
    {}
 
-   BoundaryElementView& BoundaryElementView::setAttribute(int attr)
+   BoundaryView& BoundaryView::setAttribute(int attr)
    {
       getMesh().getHandle().SetBdrAttribute(getIndex(), attr);
       return *this;
