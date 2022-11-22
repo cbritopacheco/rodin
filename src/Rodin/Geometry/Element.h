@@ -404,12 +404,12 @@ namespace Rodin::Geometry
 
          Point(Point&&) = default;
 
-         constexpr bool transformed() const
+         bool transformed() const
          {
             return m_trans.has_value();
          }
 
-         constexpr Point& transform(mfem::ElementTransformation& trans)
+         Point& transform(mfem::ElementTransformation& trans)
          {
             trans.SetIntPoint(&m_ip.get());
             m_trans.emplace(trans);
@@ -421,7 +421,7 @@ namespace Rodin::Geometry
           * @brief Gets the space dimension of the physical coordinates.
           * @returns Dimension of the physical coordinates.
           */
-         constexpr int getDimension() const
+         int getDimension() const
          {
             assert(m_trans);
             return m_trans->get().mesh->SpaceDimension();
@@ -431,7 +431,7 @@ namespace Rodin::Geometry
           * @brief Gets the i-th physical coordinate.
           * @returns Physical i-th coordinate.
           */
-         constexpr double operator()(int i) const
+         double operator()(int i) const
          {
             return m_physical(i);
          }
@@ -440,7 +440,7 @@ namespace Rodin::Geometry
           * @brief Gets the @f$ x @f$ physical coordinate.
           * @returns Physical @f$ x @f$-coordinate.
           */
-         constexpr double x() const
+         double x() const
          {
             return m_physical(0);
          }
@@ -449,7 +449,7 @@ namespace Rodin::Geometry
           * @brief Gets the @f$ y @f$ physical coordinate.
           * @returns Physical @f$ y @f$-coordinate.
           */
-         constexpr double y() const
+         double y() const
          {
             return m_physical(1);
          }
@@ -458,7 +458,7 @@ namespace Rodin::Geometry
           * @brief Gets the @f$ z @f$ physical coordinate.
           * @returns Physical @f$ z @f$-coordinate.
           */
-         constexpr double z() const
+         double z() const
          {
             return m_physical(2);
          }
@@ -466,7 +466,7 @@ namespace Rodin::Geometry
          /**
           * @brief Lexicographical comparison.
           */
-         constexpr bool operator<(const Point& rhs) const
+         bool operator<(const Point& rhs) const
          {
             assert(getDimension() == rhs.getDimension());
             for (int i = 0; i < m_physical.Size() - 1; i++)
@@ -479,14 +479,12 @@ namespace Rodin::Geometry
             return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
          }
 
-         constexpr
          mfem::ElementTransformation& getElementTransformation() const
          {
             assert(m_trans);
             return m_trans.value().get();
          }
 
-         constexpr
          const mfem::IntegrationPoint& getIntegrationPoint() const
          {
             return m_ip.get();
