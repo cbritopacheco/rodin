@@ -235,6 +235,7 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::SimplexBase& element) const override
          {
+            assert(element.getRegion() == Geometry::Region::Domain);
             auto& trans = element.getTransformation();
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());

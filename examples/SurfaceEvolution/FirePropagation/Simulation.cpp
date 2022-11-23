@@ -323,7 +323,8 @@ int main()
   // std::cout << "exiting" << std::endl;
   // std::exit(1);
 
-  const char* meshfile = "implicit.mesh";
+  // const char* meshfile = "implicit.mesh";
+  const char* meshfile = "out/evolution.86.mesh";
   MMG::Mesh topography;
   topography.load(meshfile, IO::FileFormat::MEDIT);
 
@@ -373,7 +374,7 @@ int main()
     };
 
   Environment environment(topography, stratum);
-  for (int i = 0; i < std::numeric_limits<int>::max(); i++)
+  for (int i = 87; i < std::numeric_limits<int>::max(); i++)
   {
     std::cout << "i: " << i << std::endl;
 
