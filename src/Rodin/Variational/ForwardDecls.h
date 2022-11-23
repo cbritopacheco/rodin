@@ -128,30 +128,34 @@ namespace Rodin::Variational
    class FiniteElementSpaceBase;
 
    /**
-    * @brief Arbitrary order @f$ L^2(\Omega)^d @f$ conforming (continuous) finite
-    * element space.
-    * @tparam Type of context for the finite element space
+    * @brief Arbitrary order @f$ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) @f$
+    * broken Sobolev space.
+    * @tparam Context Type of context for the finite element space
+    *
+    * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
+    * instances of this class will represent the finite element space:
+    * @f[
+    *    H^1(\mathcal{T}_h)^d := \left\{ v \in L^2(\Omega)^d : \forall \tau \in
+    *    \mathcal{T}_h, \ v |_\tau \in H^1 (\tau)^d \right\}
+    * @f]
     */
    template <class Context>
    class L2;
 
    /**
-    * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ conforming (continuous) finite
-    * element space.
-    * @tparam Type of context for the finite element space
+    * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ continuous finite element
+    * space.
+    * @tparam Context Type of context for the finite element space
     *
-    * Given some discretization @f$ \mathcal{T}_h @f$ (e.g. a triangulation)
-    * of @f$ \Omega @f$, instances of this class will represent the finite
-    * element space
+    * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
+    * instances of this class will represent the finite element space:
     * @f[
     *    V_h := \left\{ v : \overline{\Omega} \rightarrow \mathbb{R}^d \mid
-    *       v_{|\tau} \in \mathcal{P}_\tau,
-    *    \ \forall \tau \in \mathcal{T}_h \right\}
+    *    \forall \tau \in \mathcal{T}_h , \ v|_\tau \in \mathcal{P}_\tau
+    *    \right\}
     * @f]
-    * where @f$ \mathcal{P}_\tau \subset H^1(\tau) @f$ and @f$ V_h \subset
-    * C^0(\Omega) @f$ so that @f$ V_h \subset H^1(\Omega)^d @f$, i.e. the
-    * elements are @f$ H^1 @f$ conforming. The space @f$ P_\tau @f$ depends on
-    * the kind of basis chosen.
+    * where @f$ \mathcal{P}_\tau \subset H^1(\tau)^d @f$ such that @f$ V_h \subset
+    * C^0(\Omega)^d @f$.
     *
     */
    template <class Context>

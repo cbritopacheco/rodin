@@ -46,11 +46,15 @@ namespace Rodin::Variational
             return m_u.get().getRows();
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::SimplexBase& element) const override
          {
-            return m_u.get().getDOFs(fe, trans);
+            assert(dynamic_cast<const Geometry::Interface*>(&element));
+            const auto& incident =
+               static_cast<const Geometry::Interface&>(element).getElements();
+            assert(incident.size() == 2);
+            auto first = incident.begin();
+            auto second = std::next(first);
+            return m_u.get().getDOFs(*first) + m_u.get().getDOFs(*second);
          }
 
          int getColumns() const override
@@ -58,17 +62,54 @@ namespace Rodin::Variational
             return m_u.get().getColumns();
          }
 
-         // void getOperator(
-         //       DenseBasisOperator& op,
-         //       ShapeComputator& compute,
-         //       const Bilinear::Assembly::Native::Interface& data) override
-         // {
-         //    getOperator(op, fe, trans.GetElement1Transformation(), ip1, compute);
-         //    DenseBasisOperator tmp;
-         //    getOperator(tmp, fe, trans.GetElement2Transformation(), ip2, compute);
-         //    op += tmp;
-         //    op *= 0.5;
-         // }
+         void getOperator(
+               DenseBasisOperator& op,
+               ShapeComputator& compute,
+               const Geometry::SimplexBase& element) override
+         {
+            switch (element.getRegion())
+            {
+               case Geometry::Region::Interface:
+               {
+                  assert(dynamic_cast<const Geometry::Interface*>(&element));
+                  const auto& incident = static_cast<const Geometry::Interface&>(element).getElements();
+                  assert(incident.size() == 2);
+                  auto first = incident.begin();
+                  auto second = std::next(first);
+
+                  first->getTransformation().SetIntPoint(&element.getTransformation().GetIntPoint());
+                  second->getTransformation().SetIntPoint(&element.getTransformation().GetIntPoint());
+
+                  const int ndofs1 = m_u.get().getDOFs(*first);
+                  const int ndofs2 = m_u.get().getDOFs(*second);
+
+                  DenseBasisOperator op1;
+                  m_u.get().getOperator(op1, compute, first);
+                  op1 *= 0.5;
+
+                  DenseBasisOperator op2;
+                  m_u.get().getOperator(op2, compute, second);
+                  op1 *= 0.5;
+
+                  DenseBasisOperator res;
+                  res.setSize(getRows(), getColumns(), ndofs1 + ndofs2);
+                  res = 0.0;
+
+                  for (int i = 0; i < ndofs1; i++)
+                     res(i) = std::move(op1(i));
+
+                  for (int i = 0; i < ndofs2; i++)
+                     res(i + ndofs1) = std::move(op2(i));
+
+                  break;
+               }
+               default:
+               {
+                  assert(false);
+                  break;
+               }
+            }
+         }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
          {
