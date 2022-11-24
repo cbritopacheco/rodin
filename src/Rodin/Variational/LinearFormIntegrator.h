@@ -93,24 +93,12 @@ namespace Rodin::Variational
             return Integrator::Type::Linear;
          }
 
-         virtual void getElementVector(const Linear::Assembly::Native& as) const = 0;
-
-         virtual void getElementVector(const Linear::Assembly::Device&) const
-         {
-            assert(false); // Unimplemented
-         }
-
-         virtual bool isSupported(Linear::Assembly::Type t) const
-         {
-            switch (t)
-            {
-               case Linear::Assembly::Type::Native:
-                  return true;
-               default:
-                  return false;
-            }
-            return false;
-         }
+         /**
+          * @brief Performs the assembly of the element vector for the given
+          * element.
+          */
+         virtual mfem::Vector getElementVector(
+               const Geometry::SimplexBase& element) const = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
@@ -149,7 +137,7 @@ namespace Rodin::Variational::Internal
                                           .getFiniteElementSpace()
                                           .getMesh()
                                           .get<Geometry::Boundary>(trans.ElementNo);
-               m_lfi.getElementVector(Linear::Assembly::Native{vec, element});
+               vec = m_lfi.getElementVector(element);
             }
             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
             {
@@ -157,20 +145,8 @@ namespace Rodin::Variational::Internal
                                           .getFiniteElementSpace()
                                           .getMesh()
                                           .get<Geometry::Element>(trans.ElementNo);
-               m_lfi.getElementVector(Linear::Assembly::Native{vec, element});
+               vec = m_lfi.getElementVector(element);
             }
-         }
-
-         void AssembleDevice(
-               const mfem::FiniteElementSpace& fes,
-               const mfem::Array<int>& markers, mfem::Vector& b) override
-         {
-            m_lfi.getElementVector(Linear::Assembly::Device{fes, markers, b});
-         }
-
-         bool SupportsDevice() override
-         {
-            return m_lfi.isSupported(Linear::Assembly::Type::Device);
          }
 
       private:

@@ -144,6 +144,11 @@ namespace Rodin::Variational
             return *this;
          }
 
+         int getSize() const override
+         {
+            return getHandle().GetVSize();
+         }
+
          bool isParallel() const override
          {
             return false;
@@ -159,7 +164,38 @@ namespace Rodin::Variational
             return m_mesh;
          }
 
-         const mfem::FiniteElement& getFiniteElement(const Geometry::SimplexBase& element) const override
+         const FEC& getFiniteElementCollection() const override
+         {
+            return m_fec;
+         }
+
+         mfem::Array<int> getDOFs(
+               const Geometry::SimplexBase& element) const override
+         {
+            mfem::Array<int> res;
+            switch (element.getRegion())
+            {
+               case Geometry::Region::Domain:
+               {
+                  m_fes->GetElementVDofs(element.getIndex(), res);
+                  break;
+               }
+               case Geometry::Region::Boundary:
+               {
+                  m_fes->GetBdrElementVDofs(element.getIndex(), res);
+                  break;
+               }
+               case Geometry::Region::Interface:
+               {
+                  m_fes->GetFaceVDofs(element.getIndex(), res);
+                  break;
+               }
+            }
+            return res;
+         }
+
+         const mfem::FiniteElement& getFiniteElement(
+               const Geometry::SimplexBase& element) const override
          {
             switch (element.getRegion())
             {
@@ -170,11 +206,6 @@ namespace Rodin::Variational
                case Geometry::Region::Boundary:
                   return *m_fes->GetBE(element.getIndex());
             }
-         }
-
-         const FEC& getFiniteElementCollection() const override
-         {
-            return m_fec;
          }
 
          mfem::FiniteElementSpace& getHandle() override

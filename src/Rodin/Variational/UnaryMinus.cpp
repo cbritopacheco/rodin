@@ -67,27 +67,13 @@ namespace Rodin::Variational
       return m_op->getRegion();
    }
 
-   bool
-   UnaryMinus<LinearFormIntegratorBase>::isSupported(Linear::Assembly::Type t)
+   mfem::Vector
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Geometry::SimplexBase& element)
    const
    {
-      return m_op->isSupported(t);
-   }
-
-   void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Device& as)
-   const
-   {
-      m_op->getElementVector(as);
-      as.vec *= -1.0;
-   }
-
-   void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Native& as)
-   const
-   {
-      m_op->getElementVector(as);
-      as.vec *= -1.0;
+      mfem::Vector vec = m_op->getElementVector(element);
+      vec *= -1.0;
+      return vec;
    }
 
    UnaryMinus<LinearFormIntegratorBase>
@@ -118,12 +104,13 @@ namespace Rodin::Variational
       return m_op->getRegion();
    }
 
-   void
+   mfem::DenseMatrix
    UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(const Bilinear::Assembly::Native& as) const
+   ::getElementMatrix(const Geometry::SimplexBase& element) const
    {
-      m_op->getElementMatrix(as);
-      as.matrix.Neg();
+      mfem::DenseMatrix op = m_op->getElementMatrix(element);
+      op.Neg();
+      return op;
    }
 
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)

@@ -5,19 +5,21 @@
 
 namespace Rodin::Variational
 {
-   void
+   mfem::DenseMatrix
    Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   ::getElementMatrix(const Bilinear::Assembly::Native& as) const
+   ::getElementMatrix(const Geometry::SimplexBase& element) const
    {
+      mfem::DenseMatrix mat;
+
       auto& trial = m_prod.getLHS();
       auto& test = m_prod.getRHS();
 
-      as.matrix.SetSize(test.getDOFs(as.element), trial.getDOFs(as.element));
-      as.matrix = 0.0;
+      mat.SetSize(test.getDOFs(element), trial.getDOFs(element));
+      mat = 0.0;
 
-      mfem::ElementTransformation& trans = as.element.getTransformation();
+      mfem::ElementTransformation& trans = element.getTransformation();
 
-      const int order = getIntegrationOrder(*this, as);
+      const int order = getIntegrationOrder(trial.getFiniteElementSpace(), test.getFiniteElementSpace(), element);
       const mfem::IntegrationRule* ir = &mfem::IntRules.Get(trans.GetGeometryType(), order);
 
       mfem::DenseMatrix tmp;
@@ -26,26 +28,28 @@ namespace Rodin::Variational
       {
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
-         m_prod.getElementMatrix(tmp, shapeCompute, as.element);
-         mfem::Add(as.matrix, tmp, trans.Weight() * ip.weight, as.matrix);
+         m_prod.getElementMatrix(tmp, shapeCompute, element);
+         mfem::Add(mat, tmp, trans.Weight() * ip.weight, mat);
       }
+
+      return mat;
    }
 
-   void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
-         const Linear::Assembly::Native& as) const
+   mfem::Vector Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
+         const Geometry::SimplexBase& element) const
    {
-      mfem::Vector& vec = as.vec;
+      mfem::Vector vec;
 
       auto& test = *m_integrand;
 
       assert(test.getRangeType() == RangeType::Scalar);
 
-      vec.SetSize(test.getDOFs(as.element));
+      vec.SetSize(test.getDOFs(element));
       vec = 0.0;
 
-      mfem::ElementTransformation& trans = as.element.getTransformation();
+      mfem::ElementTransformation& trans = element.getTransformation();
 
-      const int order = getIntegrationOrder(*this, as);
+      const int order = getIntegrationOrder(test.getFiniteElementSpace(), element);
       const mfem::IntegrationRule* ir =
          &mfem::IntRules.Get(trans.GetGeometryType(), order);
 
@@ -55,9 +59,11 @@ namespace Rodin::Variational
          const mfem::IntegrationPoint &ip = ir->IntPoint(i);
          trans.SetIntPoint(&ip);
          DenseBasisOperator testOp;
-         test.getOperator(testOp, compute, as.element);
+         test.getOperator(testOp, compute, element);
          testOp *= trans.Weight() * ip.weight;
          testOp.addToVector(vec);
       }
+
+      return vec;
    }
 }
