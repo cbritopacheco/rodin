@@ -51,13 +51,19 @@ namespace Rodin::Variational
 
          mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
 
+         virtual int getSize() const = 0;
+
          virtual bool isParallel() const = 0;
 
          virtual Geometry::MeshBase& getMesh() = 0;
 
          virtual const Geometry::MeshBase& getMesh() const = 0;
 
-         virtual const mfem::FiniteElement& getFiniteElement(const Geometry::SimplexBase& element) const = 0;
+         virtual mfem::Array<int> getDOFs(
+               const Geometry::SimplexBase& element) const = 0;
+
+         virtual const mfem::FiniteElement& getFiniteElement(
+               const Geometry::SimplexBase& element) const = 0;
 
          virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 

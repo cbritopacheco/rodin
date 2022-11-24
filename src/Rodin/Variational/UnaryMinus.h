@@ -74,11 +74,7 @@ namespace Rodin::Variational
 
          Geometry::Region getRegion() const override;
 
-         bool isSupported(Linear::Assembly::Type t) const override;
-
-         void getElementVector(const Linear::Assembly::Device& as) const override;
-
-         void getElementVector(const Linear::Assembly::Native& as) const override;
+         mfem::Vector getElementVector(const Geometry::SimplexBase& element) const override;
 
          UnaryMinus* copy() const noexcept override
          {
@@ -104,7 +100,7 @@ namespace Rodin::Variational
 
          Geometry::Region getRegion() const override;
 
-         void getElementMatrix(const Bilinear::Assembly::Native& as) const override;
+         mfem::DenseMatrix getElementMatrix(const Geometry::SimplexBase& element) const override;
 
          UnaryMinus* copy() const noexcept override
          {

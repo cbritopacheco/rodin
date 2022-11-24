@@ -68,7 +68,7 @@ namespace Rodin::Geometry
          /**
           * @brief Gets the index of the element in the mesh.
           */
-         int getIndex() const
+         virtual int getIndex() const
          {
             return m_index;
          }
@@ -258,8 +258,7 @@ namespace Rodin::Geometry
           *
           * @param[in] index Boundary index
           */
-         Boundary(
-               const MeshBase& mesh, const mfem::Element* element, int index);
+         Boundary(const MeshBase& mesh, const mfem::Element* element, int index);
 
          Boundary(const Boundary& other)
             :  Face(other),
@@ -300,7 +299,7 @@ namespace Rodin::Geometry
           *
           * Same as getBoundaryIndex().
           */
-         int getIndex() const
+         int getIndex() const override
          {
             return getBoundaryIndex();
          }

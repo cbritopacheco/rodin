@@ -110,7 +110,11 @@ namespace Rodin::Variational
             return false;
          }
 
-         virtual void getElementMatrix(const Bilinear::Assembly::Native& as) const = 0;
+         /**
+          * @brief Performs the assembly of the element matrix for the given
+          * element.
+          */
+         virtual mfem::DenseMatrix getElementMatrix(const Geometry::SimplexBase& element) const = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
@@ -150,7 +154,7 @@ namespace Rodin::Variational::Internal
                                           .getFiniteElementSpace()
                                           .getMesh()
                                           .get<Geometry::Boundary>(trans.ElementNo);
-               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+               mat = m_bfi.getElementMatrix(element);
             }
             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
             {
@@ -158,7 +162,7 @@ namespace Rodin::Variational::Internal
                                           .getFiniteElementSpace()
                                           .getMesh()
                                           .get<Geometry::Element>(trans.ElementNo);
-               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+               mat = m_bfi.getElementMatrix(element);
             }
          }
 
@@ -172,7 +176,7 @@ namespace Rodin::Variational::Internal
                                           .getFiniteElementSpace()
                                           .getMesh()
                                           .get<Geometry::Boundary>(trans.ElementNo);
-               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+               mat = m_bfi.getElementMatrix(element);
             }
             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
             {
@@ -180,7 +184,7 @@ namespace Rodin::Variational::Internal
                                           .getFiniteElementSpace()
                                           .getMesh()
                                           .get<Geometry::Element>(trans.ElementNo);
-               m_bfi.getElementMatrix(Bilinear::Assembly::Native{mat, element});
+               mat = m_bfi.getElementMatrix(element);
             }
          }
 
