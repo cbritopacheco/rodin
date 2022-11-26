@@ -34,8 +34,7 @@ int main(int argc, char** argv)
   // Pull force
   auto f = VectorFunction{0, -1};
 
-  Solver::CG cg;
-  cg.setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+  Solver::UMFPack solver;
 
   // Define problem
   TrialFunction u(Vh);
@@ -46,11 +45,11 @@ int main(int argc, char** argv)
                  mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  elasticity.solve(cg);
+  elasticity.solve(solver);
 
 
   // Save solution
-  u.getGridFunction().save("u.gf");
+  u.getSolution().save("u.gf");
   Omega.save("Omega.mesh");
 
   return 0;

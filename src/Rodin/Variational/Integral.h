@@ -382,10 +382,7 @@ namespace Rodin::Variational
           */
          double compute()
          {
-            if (m_assembled)
-               m_lf.update();
-            else
-               m_lf.assemble();
+            m_lf.assemble();
             m_assembled = true;
             return m_lf(m_one);
          }

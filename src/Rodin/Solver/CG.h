@@ -98,7 +98,7 @@ namespace Rodin::Solver
          }
 
          virtual
-         void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution)
+         void solve(OperatorType& A, VectorType& X, VectorType& B)
          const override
          {
             mfem::CGSolver pcg;
@@ -106,8 +106,8 @@ namespace Rodin::Solver
             pcg.SetMaxIter(m_maxIterations);
             pcg.SetRelTol(sqrt(m_rtol));
             pcg.SetAbsTol(sqrt(m_atol));
-            pcg.SetOperator(stiffness);
-            pcg.Mult(mass, solution);
+            pcg.SetOperator(A);
+            pcg.Mult(B, X);
          }
 
       private:
@@ -196,7 +196,7 @@ namespace Rodin::Solver
          }
 
          virtual
-         void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution)
+         void solve(OperatorType& A, VectorType& x, VectorType& b)
          const override
          {
             mfem::CGSolver pcg;
@@ -206,8 +206,8 @@ namespace Rodin::Solver
             pcg.SetAbsTol(sqrt(m_atol));
             if (m_smoother)
                pcg.SetPreconditioner(*m_smoother);
-            pcg.SetOperator(stiffness);
-            pcg.Mult(mass, solution);
+            pcg.SetOperator(A);
+            pcg.Mult(b, x);
          }
 
       private:

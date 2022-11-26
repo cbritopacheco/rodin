@@ -81,7 +81,7 @@ int main(int, char**)
     elasticity.solve(solver);
 
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
+    auto e = 0.5 * (Jacobian(uInt.getSolution()) + Jacobian(uInt.getSolution()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
@@ -96,7 +96,7 @@ int main(int, char**)
     hilbert.solve(solver);
 
     // Update objective
-    double objective = compliance(uInt.getGridFunction()) + ell * Omega.getVolume(Interior);
+    double objective = compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior);
     obj.push_back(objective);
     fObj << objective << "\n";
     fObj.flush();
@@ -113,12 +113,12 @@ int main(int, char**)
     gNorm = ScalarFunction(
         [&](const Point& v) -> double
         {
-          mfem::Vector val = g.getGridFunction()(v);
+          mfem::Vector val = g.getSolution()(v);
           return val.Norml2();
         });
     double gInf = gNorm.max();
     double dt = 4 * hmax / gInf;
-    MMG::Advect(dist, g.getGridFunction()).step(dt);
+    MMG::Advect(dist, g.getSolution()).step(dt);
 
     // Recover the implicit domain
     Alert::Info() << "    | Meshing the domain." << Alert::Raise;

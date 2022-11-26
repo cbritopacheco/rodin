@@ -98,18 +98,6 @@ namespace Rodin::Variational
 
          virtual ~BilinearFormIntegratorBase() = default;
 
-         virtual bool isSupported(Bilinear::Assembly::Type t) const
-         {
-            switch (t)
-            {
-               case Bilinear::Assembly::Type::Native:
-                  return true;
-               default:
-                  return false;
-            }
-            return false;
-         }
-
          /**
           * @brief Performs the assembly of the element matrix for the given
           * element.

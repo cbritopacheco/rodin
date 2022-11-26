@@ -91,7 +91,7 @@ int main(int, char**)
 
     // Transfer solution back to original domain
     GridFunction u(Vh);
-    uInt.getGridFunction().transfer(u);
+    uInt.getSolution().transfer(u);
 
     // Hilbert extension-regularization procedure
     auto e = 0.5 * (Jacobian(u).traceOf(Interior) + Jacobian(u).traceOf(Interior).T());
@@ -118,9 +118,9 @@ int main(int, char**)
                                   .distance(Omega);
 
     // Advect the level set function
-    double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
+    double gInf = std::max(g.getSolution().max(), -g.getSolution().min());
     double dt = 4 * hmax / gInf;
-    MMG::Advect(dist, g.getGridFunction()).step(dt);
+    MMG::Advect(dist, g.getSolution()).step(dt);
 
     // Recover the implicit domain
     Omega = MMG::ImplicitDomainMesher().split(Exterior, {Interior, Exterior})

@@ -32,15 +32,6 @@ namespace Rodin::Variational
    }
 
    template <class FES>
-   LinearForm<FES, Context::Serial, mfem::Vector>&
-   LinearForm<FES, Context::Serial, mfem::Vector>::update()
-   {
-      assert(m_lf);
-      m_lf->Update();
-      return *this;
-   }
-
-   template <class FES>
    void
    LinearForm<FES, Context::Serial, mfem::Vector>::assemble()
    {

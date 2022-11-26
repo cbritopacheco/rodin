@@ -30,7 +30,7 @@ namespace Rodin::Solver
           * @brief Solves the specified Variational::Problem.
           * @param[in,out] problem Variational problem to solve.
           */
-         virtual void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution) const = 0;
+         virtual void solve(OperatorType& A, VectorType& X, VectorType& B) const = 0;
    };
 }
 

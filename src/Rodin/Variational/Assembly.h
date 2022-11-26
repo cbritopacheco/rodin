@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_ASSEMBLY_H
 
 #include <variant>
+#include <ostream>
 
 #include <mfem.hpp>
 
@@ -15,40 +16,14 @@
 
 #include "ForwardDecls.h"
 
-namespace Rodin::Variational::Linear::Assembly
+namespace Rodin::Variational
 {
-   enum class Type
-   {
-      Native, ///< Enumerator corresponding to Linear::Assembly::Native
-      Device ///< Enumerator corresponding to Linear::Assembly::Device
-   };
-
-   struct Native
-   {
-      mfem::Vector& vec;
-      const Geometry::SimplexBase& element;
-   };
-
-   struct Device
-   {
-      const mfem::FiniteElementSpace& fes;
-      const mfem::Array<int>& markers;
-      mfem::Vector& vec;
-   };
-}
-
-namespace Rodin::Variational::Bilinear::Assembly
-{
-   enum class Type
+   enum class Backend
    {
       Native
    };
 
-   struct Native
-   {
-      mfem::DenseMatrix& matrix;
-      const Geometry::SimplexBase& element;
-   };
+   std::ostream& operator<<(std::ostream& os, const Backend& backend);
 }
 
 #endif
