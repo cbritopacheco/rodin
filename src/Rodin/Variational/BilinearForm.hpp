@@ -20,71 +20,64 @@ namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES>
    constexpr
-   double
-   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>
+   double BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>
    ::operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
    {
-      assert(m_bf);
-      return m_bf->InnerProduct(u.getHandle(), v.getHandle());
-   }
-
-   template <class TrialFES, class TestFES>
-   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>&
-   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>::update()
-   {
-      assert(m_bf);
-      m_bf->Update();
-      return *this;
+      assert(m_operator);
+      return m_operator->InnerProduct(u.getHandle(), v.getHandle());
    }
 
    template <class TrialFES, class TestFES>
    void
-   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::Operator>::assemble()
+   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>::assemble()
    {
-      m_bf.reset(new mfem::BilinearForm(&m_v.getFiniteElementSpace().getHandle()));
+      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
+      const auto& testFes = getTestFunction().getFiniteElementSpace();
 
-      std::vector<mfem::Array<int>> attrs;
-      attrs.reserve(getIntegrators().size());
+      assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
+            &getTestFunction().getFiniteElementSpace().getMesh());
+
+      const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
+
+      m_operator.reset(new OperatorType(testFes.getSize(), trialFes.getSize()));
+      *m_operator = 0.0;
+
       for (const auto& bfi : getIntegrators())
       {
          switch (bfi.getRegion())
          {
-            case Geometry::Region::Boundary:
+            case Geometry::Region::Domain:
             {
-               if (bfi.getAttributes().size() == 0)
+               for (int i = 0; i < mesh.template count<Geometry::Element>(); i++)
                {
-                  m_bf->AddBoundaryIntegrator(bfi.build().release());
-               }
-               else
-               {
-                  const int size =
-                     m_v.getFiniteElementSpace().getMesh().getHandle().bdr_attributes.Max();
-                  m_bf->AddBoundaryIntegrator(
-                        bfi.build().release(),
-                        attrs.emplace_back(Utility::set2marker(bfi.getAttributes(), size)));
+                  const auto& element = mesh.template get<Geometry::Element>(i);
+                  if (bfi.getAttributes().size() == 0
+                        || bfi.getAttributes().count(element.getAttribute()))
+                  {
+                     m_operator->AddSubMatrix(
+                           testFes.getDOFs(element),
+                           trialFes.getDOFs(element),
+                           bfi.getElementMatrix(element));
+                  }
                }
                break;
             }
-            case Geometry::Region::Domain:
+            case Geometry::Region::Boundary:
             {
-               if (bfi.getAttributes().size() == 0)
-               {
-                  m_bf->AddDomainIntegrator(bfi.build().release());
-               }
-               else
-               {
-                  const int size =
-                     m_v.getFiniteElementSpace().getMesh().getHandle().attributes.Max();
-                  m_bf->AddDomainIntegrator(
-                        bfi.build().release(),
-                        attrs.emplace_back(Utility::set2marker(bfi.getAttributes(), size)));
-               }
+               assert(false);
+               // mat.AddSubMatrix(
+               //       testFes.getDOFs(element),
+               //       testFes.getDOFs(element),
+               //       bfi.getElementMatrix(element), true);
+               break;
+            }
+            case Geometry::Region::Interface:
+            {
+               assert(false);
                break;
             }
          }
       }
-
-      m_bf->Assemble();
    }
 }
 

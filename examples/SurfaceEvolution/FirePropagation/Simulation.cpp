@@ -133,7 +133,7 @@ class Environment
               - Integral(gdist, v);
           cnd.solve(solver);
 
-          const auto conormal = d.getGridFunction() / Frobenius(d.getGridFunction());
+          const auto conormal = d.getSolution() / Frobenius(d.getSolution());
 
           // Angle between slope and conormal
           auto phi =
@@ -192,6 +192,7 @@ class Environment
 
           GridFunction disp(m_env.m_vfes);
           disp = ScalarFunction(R) * conormal;
+
           m_direction = std::move(disp);
           return *this;
         }
@@ -233,8 +234,8 @@ class Environment
 
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(50)
-                                                .setHausdorff(5)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(200)
+                                                .setHausdorff(20)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
@@ -323,12 +324,12 @@ int main()
   // std::cout << "exiting" << std::endl;
   // std::exit(1);
 
-  // const char* meshfile = "implicit.mesh";
-  const char* meshfile = "out/evolution.86.mesh";
+  const char* meshfile = "implicit.mesh";
+  // const char* meshfile = "out/evolution.86.mesh";
   MMG::Mesh topography;
   topography.load(meshfile, IO::FileFormat::MEDIT);
 
-  MMG::MeshOptimizer().setHausdorff(5).setHMax(50).optimize(topography);
+  MMG::MeshOptimizer().setHausdorff(20).setHMax(200).optimize(topography);
   topography.save("optimize.mesh");
 
   Environment::VegetalStratum stratum;
@@ -374,7 +375,7 @@ int main()
     };
 
   Environment environment(topography, stratum);
-  for (int i = 87; i < std::numeric_limits<int>::max(); i++)
+  for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
     std::cout << "i: " << i << std::endl;
 

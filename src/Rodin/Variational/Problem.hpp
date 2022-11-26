@@ -54,8 +54,6 @@ namespace Rodin::Variational
       getTrialFunction().getFiniteElementSpace().update();
       getTestFunction().getFiniteElementSpace().update();
       getTrialFunction().getGridFunction().update();
-      getLinearForm().update();
-      getBilinearForm().update();
 
       return *this;
    }
@@ -98,9 +96,13 @@ namespace Rodin::Variational
       getEssentialTrueDOFs().Sort();
       getEssentialTrueDOFs().Unique();
 
+      auto& trialFes = getTrialFunction().getFiniteElementSpace();
+      auto& testFes = getTestFunction().getFiniteElementSpace();
+
       // Form linear system
       if constexpr (std::is_same_v<TrialFES, TestFES>)
       {
+         assert(&trialFes == &testFes);
          mfem::Operator* ptr = nullptr;
          getBilinearForm().getOperator()
             .FormLinearSystem(
@@ -116,6 +118,18 @@ namespace Rodin::Variational
       }
       else
       {
+         mfem::Operator* ptr = nullptr;
+         getBilinearForm().getOperator()
+            .FormRectangularLinearSystem(
+               getEssentialTrueDOFs(), getEssentialTrueDOFs(),
+               getTrialFunction().getGridFunction().getData(),
+               getLinearForm().getVector(),
+               ptr,
+               m_guess,
+               m_massVector);
+         assert(m_stiffnessOp);
+         m_stiffnessOp.reset(ptr);
+         ptr = nullptr;
          assert(false); // Not supported yet
       }
    }
@@ -188,9 +202,7 @@ namespace Rodin::Variational
       // Update all components of the problem
       getTrialFunction().getFiniteElementSpace().update();
       getTestFunction().getFiniteElementSpace().update();
-      getTrialFunction().getGridFunction().update();
-      getLinearForm().update();
-      getBilinearForm().update();
+      getTrialFunction().getSolution().update();
 
       return *this;
    }
@@ -212,7 +224,7 @@ namespace Rodin::Variational
       {
          const auto& tfValue = tfIt->second;
          const auto& bdrAttr = tfValue.attributes;
-         getTrialFunction().getGridFunction().projectOnBoundary(*tfValue.value, bdrAttr);
+         getTrialFunction().getSolution().projectOnBoundary(*tfValue.value, bdrAttr);
          getEssentialTrueDOFs().Append(getTrialFunction().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr));
       }
 
@@ -223,7 +235,7 @@ namespace Rodin::Variational
          for (const auto& [component, compValue] : compMap)
          {
             const auto& bdrAttr = compValue.attributes;
-            Component comp(getTrialFunction().getGridFunction(), component);
+            Component comp(getTrialFunction().getSolution(), component);
             comp.projectOnBoundary(*compValue.value, bdrAttr);
             getEssentialTrueDOFs().Append(
                getTrialFunction().getFiniteElementSpace().getEssentialTrueDOFs(bdrAttr, component));
@@ -233,14 +245,29 @@ namespace Rodin::Variational
       getEssentialTrueDOFs().Sort();
       getEssentialTrueDOFs().Unique();
 
-      // Form linear system
-      getBilinearForm().formLinearSystem(
-            getEssentialTrueDOFs(),
-            getTrialFunction().getGridFunction().getData(),
-            getLinearForm().getVector(),
-            m_stiffnessOp,
-            m_guess,
-            m_massVector);
+      auto& trialFes = getTrialFunction().getFiniteElementSpace();
+      auto& testFes = getTestFunction().getFiniteElementSpace();
+
+      if constexpr (std::is_same_v<TrialFES, TestFES>)
+      {
+         assert(&trialFes == &testFes);
+
+         // Form linear system
+         m_stiffnessOp.Swap(getBilinearForm().getOperator());
+         m_tmp.reset(new mfem::BilinearForm(&trialFes.getHandle()));
+         m_tmp->Assemble();
+         m_tmp->SpMat().Swap(m_stiffnessOp);
+         m_tmp->FormLinearSystem(
+                    getEssentialTrueDOFs(),
+                    getTrialFunction().getSolution().getHandle(),
+                    getLinearForm().getVector(),
+                    m_stiffnessOp, m_guess, m_massVector);
+         m_tmp->SpMat().Swap(m_stiffnessOp);
+      }
+      else
+      {
+         assert(false); // Not supported yet
+      }
    }
 
    template <class TrialFES, class TestFES>
@@ -249,21 +276,19 @@ namespace Rodin::Variational
    ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
    {
       // Emplace data
-      getTrialFunction().emplaceGridFunction();
+      getTrialFunction().emplace();
 
       // Assemble the system
       assemble();
 
-      // Solve the system
-      solver.solve(getStiffnessOperator(), getMassVector(), m_guess);
+      // Solve the system Ax = b
+      solver.solve(getStiffnessOperator(), m_guess, getMassVector());
 
       // Recover solution
-      getBilinearForm().getOperator()
-         .RecoverFEMSolution(
+      m_tmp->RecoverFEMSolution(
             m_guess,
             getLinearForm().getVector(),
-            getTrialFunction().getGridFunction().getData());
-
+            getTrialFunction().getSolution().getHandle());
    }
 
    template <class TrialFES, class TestFES>

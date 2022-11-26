@@ -351,13 +351,13 @@ namespace Rodin::Variational
          constexpr
          mfem::Array<int>& getEssentialTrueDOFs()
          {
-            return m_essTrueDofList;
+            return m_trialEssTrueDofList;
          }
 
          constexpr
          const mfem::Array<int>& getEssentialTrueDOFs() const
          {
-            return m_essTrueDofList;
+            return m_trialEssTrueDofList;
          }
 
          constexpr
@@ -420,11 +420,13 @@ namespace Rodin::Variational
          LinearForm<TestFES, Context, VectorType> m_linearForm;
          BilinearForm<TrialFES, TestFES, Context, OperatorType> m_bilinearForm;
 
-         mfem::SparseMatrix   m_stiffnessOp;
-         mfem::Vector         m_massVector;
-         mfem::Vector         m_guess;
+         OperatorType      m_stiffnessOp;
+         mfem::Vector      m_massVector;
+         mfem::Vector      m_guess;
 
-         mfem::Array<int>     m_essTrueDofList;
+         mfem::Array<int>     m_trialEssTrueDofList;
+
+         std::unique_ptr<mfem::BilinearForm> m_tmp;
    };
 }
 

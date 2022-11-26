@@ -26,47 +26,7 @@ namespace Rodin::Variational
       Matrix
    };
 
-   /**
-    * @brief Namespace containing utilities for the assembly of LinearForm
-    * objects.
-    */
-   namespace Linear::Assembly
-   {
-      /**
-       * @brief Type of assembly to be performed for LinearForm objects.
-       */
-      enum class Type;
-
-      /**
-       * @brief Struct containg the necessary data to perform a common
-       * assembly.
-       */
-      struct Native;
-
-      /**
-       * @brief Struct containg the necessary data to perform assembly on a
-       * device.
-       */
-      struct Device;
-   }
-
-   /**
-    * @brief Namespace containing utilities for the assembly of BilinearForm
-    * objects.
-    */
-   namespace Bilinear::Assembly
-   {
-      /**
-       * @brief Type of assembly to be performed for BilinearForm objects.
-       */
-      enum class Type;
-
-      /**
-       * @brief Struct containg the necessary data to perform a common
-       * assembly.
-       */
-      struct Native;
-   }
+   enum class Backend;
 
    /**
     * @brief Base class for linear form objects.
@@ -111,6 +71,15 @@ namespace Rodin::Variational
     * spaces originating from two instances of FiniteElementCollection.
     * @tparam TrialFES Trial FiniteElementCollection
     * @tparam TestFES Test FiniteElementCollection
+    *
+    * An object of type BilinearForm represents a bilinear map:
+    * @f[
+    * \begin{aligned}
+    *    a : U \times V &\rightarrow \mathbb{R}\\
+    *        (u, v) &\mapsto a(u, v)
+    * \end{aligned}
+    * @f]
+    * where @f$ U @f$ and @f$ V @f$ are finite element spaces.
     */
    template <class TrialFES, class TestFES, class Context, class OperatorType>
    class BilinearForm;

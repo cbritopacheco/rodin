@@ -52,12 +52,12 @@ namespace Rodin::Solver
             return *this;
          }
 
-         void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution) const override
+         void solve(OperatorType& A, VectorType& x, VectorType& b) const override
          {
             mfem::UMFPackSolver umfpack(m_useLongInts);
             umfpack.Control[UMFPACK_ORDERING] = UMFPACK_ORDERING_METIS;
-            umfpack.SetOperator(stiffness);
-            umfpack.Mult(mass, solution);
+            umfpack.SetOperator(A);
+            umfpack.Mult(b, x);
          }
 
       private:

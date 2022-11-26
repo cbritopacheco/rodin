@@ -38,6 +38,6 @@ int main(int, char**)
   rd.solve(cg);
 
   // Save solution
-  u.getGridFunction().save("u.gf");
+  u.getSolution().save("u.gf");
   Omega.save("Omega.mesh");
 }

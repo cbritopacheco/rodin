@@ -53,14 +53,6 @@ namespace Rodin::Variational
          virtual void assemble() = 0;
 
          /**
-          * @brief Updates the state after a refinement in the mesh.
-          *
-          * This method will update the linear form after a call to the
-          * @ref MeshBase::refine() "refine()" method.
-          */
-         virtual LinearFormBase& update() = 0;
-
-         /**
           * @brief Gets the reference to the (local) associated vector
           * to the LinearForm.
           */
@@ -193,8 +185,6 @@ namespace Rodin::Variational
          double operator()(const GridFunction<FES>& u) const;
 
          void assemble() override;
-
-         LinearForm& update() override;
 
          /**
           * @brief Gets the reference to the (local) associated vector

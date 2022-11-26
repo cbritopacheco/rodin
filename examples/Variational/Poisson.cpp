@@ -34,18 +34,20 @@ int main(int, char**)
   auto g = ScalarFunction(0.0);
 
   // Use CG for solving
-  Solver::CG cg;
-  mfem::GSSmoother smoother;
-  cg.setPreconditioner(smoother).setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+  // Solver::CG cg;
+  // mfem::GSSmoother smoother;
+  // cg.setPreconditioner(smoother).setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+  //
+  Solver::UMFPack solver;
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, g).on(Gamma);
-  poisson.solve(cg);
+  poisson.solve(solver);
 
   // Save solution
-  u.getGridFunction().save("u.gf");
+  u.getSolution().save("u.gf");
   Omega.save("miaow.mesh");
 
   return 0;

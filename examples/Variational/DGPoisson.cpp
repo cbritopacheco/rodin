@@ -45,7 +45,7 @@ int main(int, char**)
   poisson.solve(cg);
 
   // Save solution
-  u.getGridFunction().save("u.gf");
+  u.getSolution().save("u.gf");
   Omega.save("miaow.mesh");
 
   return 0;
