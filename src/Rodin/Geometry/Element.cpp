@@ -162,11 +162,6 @@ namespace Rodin::Geometry
       return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetFaceTransformation(Face::getIndex());
    }
 
-   mfem::FaceElementTransformations& Face::getTransformations() const
-   {
-      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetFaceElementTransformations(Face::getIndex());
-   }
-
    // ---- BoundaryElement ---------------------------------------------------
    Boundary::Boundary(
          const MeshBase& mesh, const mfem::Element* element, int index)
