@@ -21,7 +21,7 @@ option(RODIN_USE_MPI            "Build with MPI support"          OFF)
 option(RODIN_USE_OPENMP         "Build with OpenMP support"       OFF)
 option(RODIN_USE_SUITESPARSE    "Build with SuiteSparse support"  ON)
 option(RODIN_SILENCE_WARNINGS   "Silence warning outputted by Rodin"  OFF)
-option(RODIN_BUILD_PY           "Build Python bindings."          OFF)
+option(RODIN_WITH_PY            "Build Python bindings."          OFF)
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -146,7 +146,7 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(examples)
   endif()
 
-  if (RODIN_BUILD_PY)
+  if (RODIN_WITH_PY)
     set(Python3_FIND_REGISTRY LAST)
     set(Python3_FIND_VIRTUALENV FIRST)
     find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)

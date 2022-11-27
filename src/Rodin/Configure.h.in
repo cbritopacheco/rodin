@@ -1,7 +1,10 @@
 #ifndef RODIN_CONFIGURE_H
 #define RODIN_CONFIGURE_H
 
+#cmakedefine RODIN_WITH_PY
+#cmakedefine RODIN_WITH_PLOT
 #cmakedefine RODIN_USE_MPI
+#cmakedefine RODIN_USE_OPENMP
 #cmakedefine RODIN_USE_SUITESPARSE
 #cmakedefine RODIN_SILENCE_WARNINGS
 

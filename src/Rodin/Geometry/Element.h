@@ -222,8 +222,6 @@ namespace Rodin::Geometry
           */
          double getArea() const;
 
-         mfem::FaceElementTransformations& getTransformations() const;
-
          std::set<int> elements() const;
 
          std::set<int> adjacent() const override
