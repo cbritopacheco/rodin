@@ -13,7 +13,6 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
-#include "Assembly.h"
 
 #include "Exceptions.h"
 

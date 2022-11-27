@@ -10,8 +10,6 @@
 #include "ForwardDecls.h"
 #include "BasisOperator.h"
 #include "FiniteElementSpace.h"
-#include "Integrator.h"
-#include "Assembly.h"
 
 #include "RangeShape.h"
 

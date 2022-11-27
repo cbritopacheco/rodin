@@ -16,6 +16,7 @@
 #include "TestFunction.h"
 #include "BilinearFormIntegrator.h"
 
+
 namespace Rodin::Variational
 {
    /**
@@ -25,20 +26,26 @@ namespace Rodin::Variational
    class BilinearFormBase : public FormLanguage::Base
    {
       public:
+         using NativeAssembly = Assembly::Native<BilinearFormBase>;
+         using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
+
          constexpr
          BilinearFormBase()
-            :  m_backend(Backend::Native)
-         {}
+         {
+            m_assembly.reset(new NativeAssembly);
+         }
 
          constexpr
          BilinearFormBase(const BilinearFormBase& other)
             :  FormLanguage::Base(other),
+               m_assembly(other.m_assembly->copy()),
                m_bfis(other.m_bfis)
          {}
 
          constexpr
          BilinearFormBase(BilinearFormBase&& other)
             :  FormLanguage::Base(std::move(other)),
+               m_assembly(std::move(other.m_assembly)),
                m_bfis(std::move(other.m_bfis))
          {}
 
@@ -48,15 +55,15 @@ namespace Rodin::Variational
             return m_bfis;
          }
 
-         Backend getBackend() const
+         BilinearFormBase& setAssembly(const Assembly::AssemblyBase<BilinearFormBase>& assembly)
          {
-            return m_backend;
+            m_assembly.reset(assembly.copy());
+            return *this;
          }
 
-         BilinearFormBase& setBackend(Backend backend)
+         const Assembly::AssemblyBase<BilinearFormBase>& getAssembly() const
          {
-            m_backend = backend;
-            return *this;
+            return *m_assembly;
          }
 
          /**
@@ -151,7 +158,7 @@ namespace Rodin::Variational
          virtual BilinearFormBase* copy() const noexcept override = 0;
 
       private:
-         Backend m_backend;
+         std::unique_ptr<Assembly::AssemblyBase<BilinearFormBase>> m_assembly;
          FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
    };
 
@@ -268,7 +275,6 @@ namespace Rodin::Variational
          TrialFunction<TrialFES>& m_u;
          TestFunction<TestFES>&   m_v;
 
-         std::unique_ptr<OperatorType> m_elims;
          std::unique_ptr<OperatorType> m_operator;
    };
 

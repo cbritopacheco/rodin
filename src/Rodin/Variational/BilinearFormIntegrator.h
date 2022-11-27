@@ -10,7 +10,6 @@
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 #include "Integrator.h"
-#include "Assembly.h"
 
 namespace Rodin::Variational
 {

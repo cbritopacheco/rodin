@@ -16,6 +16,7 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/poisson-example.mesh";
+  // const char* meshFile = "miaow.mesh";
 
   // Define boundary attributes
   int Gamma = 1;
@@ -33,11 +34,6 @@ int main(int, char**)
   auto f = ScalarFunction(1.0);
   auto g = ScalarFunction(0.0);
 
-  // Use CG for solving
-  // Solver::CG cg;
-  // mfem::GSSmoother smoother;
-  // cg.setPreconditioner(smoother).setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
-  //
   Solver::UMFPack solver;
 
   Problem poisson(u, v);
@@ -48,7 +44,7 @@ int main(int, char**)
 
   // Save solution
   u.getSolution().save("u.gf");
-  Omega.save("miaow.mesh");
+  Omega.save("Omega.mesh");
 
   return 0;
 }

@@ -109,16 +109,18 @@ namespace Rodin::Geometry
    class Element : public SimplexBase
    {
       public:
-         Element(const MeshBase& mesh, const mfem::Element* element, int index)
-            : SimplexBase(mesh, element, index)
-         {}
+         Element(const MeshBase& mesh, const mfem::Element* element, int index);
 
          Element(const Element& other)
-            : SimplexBase(other)
-         {}
+            :  SimplexBase(other)
+         {
+            m_trans.reset(new mfem::IsoparametricTransformation);
+            *m_trans = *other.m_trans;
+         }
 
          Element(Element&& other)
-            : SimplexBase(std::move(other))
+            :  SimplexBase(std::move(other)),
+               m_trans(std::move(other.m_trans))
          {}
 
          /**
@@ -134,6 +136,9 @@ namespace Rodin::Geometry
          std::set<int> adjacent() const override;
 
          virtual mfem::ElementTransformation& getTransformation() const override;
+
+      private:
+         std::unique_ptr<mfem::IsoparametricTransformation> m_trans;
    };
 
    /**

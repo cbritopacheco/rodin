@@ -22,6 +22,45 @@ namespace Rodin::Geometry
    }
 
    // ---- Element -----------------------------------------------------------
+   Element::Element(const MeshBase& mesh, const mfem::Element* element, int index)
+      :  SimplexBase(mesh, element, index)
+   {
+      m_trans.reset(new mfem::IsoparametricTransformation);
+      m_trans->Attribute = getAttribute();
+      m_trans->ElementNo = getIndex();
+      m_trans->ElementType = mfem::ElementTransformation::ELEMENT;
+      m_trans->mesh = nullptr; // THIS FIELD IS NOT ACTUALLY USED FOR ANYTHING
+      m_trans->Reset();
+
+      const mfem::Mesh& meshHandle = getMesh().getHandle();
+      const mfem::GridFunction* nodes = meshHandle.GetNodes();
+      assert(!nodes);
+      if (!nodes)
+      {
+         meshHandle.GetPointMatrix(getIndex(), m_trans->GetPointMat());
+         m_trans->SetFE(meshHandle.GetTransformationFEforElementType(
+                  meshHandle.GetElementType(getIndex())));
+      }
+      else
+      {
+         mfem::DenseMatrix &pm = m_trans->GetPointMat();
+         mfem::Array<int> vdofs;
+         nodes->FESpace()->GetElementVDofs(getIndex(), vdofs);
+         nodes->HostRead();
+         int spaceDim = getMesh().getSpaceDimension();
+         int n = vdofs.Size() / spaceDim;
+         pm.SetSize(spaceDim, n);
+         for (int k = 0; k < spaceDim; k++)
+         {
+            for (int j = 0; j < n; j++)
+            {
+               pm(k,j) = (*nodes)(vdofs[n*k+j]);
+            }
+         }
+         m_trans->SetFE(nodes->FESpace()->GetFE(getIndex()));
+      }
+   }
+
    std::set<int> Element::adjacent() const
    {
       std::set<int> res;
@@ -53,7 +92,8 @@ namespace Rodin::Geometry
 
    mfem::ElementTransformation& Element::getTransformation() const
    {
-      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetElementTransformation(getIndex());
+      assert(m_trans);
+      return *m_trans;
    }
 
    // ---- ElementView -------------------------------------------------------

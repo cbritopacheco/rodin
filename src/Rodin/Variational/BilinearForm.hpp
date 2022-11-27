@@ -31,53 +31,14 @@ namespace Rodin::Variational
    void
    BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>::assemble()
    {
-      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      const auto& testFes = getTestFunction().getFiniteElementSpace();
-
       assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
             &getTestFunction().getFiniteElementSpace().getMesh());
-
+      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
+      const auto& testFes = getTestFunction().getFiniteElementSpace();
       const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
-
-      m_operator.reset(new OperatorType(testFes.getSize(), trialFes.getSize()));
-      *m_operator = 0.0;
-
-      for (const auto& bfi : getIntegrators())
-      {
-         switch (bfi.getRegion())
-         {
-            case Geometry::Region::Domain:
-            {
-               for (int i = 0; i < mesh.template count<Geometry::Element>(); i++)
-               {
-                  const auto& element = mesh.template get<Geometry::Element>(i);
-                  if (bfi.getAttributes().size() == 0
-                        || bfi.getAttributes().count(element.getAttribute()))
-                  {
-                     m_operator->AddSubMatrix(
-                           testFes.getDOFs(element),
-                           trialFes.getDOFs(element),
-                           bfi.getElementMatrix(element));
-                  }
-               }
-               break;
-            }
-            case Geometry::Region::Boundary:
-            {
-               assert(false);
-               // mat.AddSubMatrix(
-               //       testFes.getDOFs(element),
-               //       testFes.getDOFs(element),
-               //       bfi.getElementMatrix(element), true);
-               break;
-            }
-            case Geometry::Region::Interface:
-            {
-               assert(false);
-               break;
-            }
-         }
-      }
+      m_operator.reset(
+            new OperatorType(
+               getAssembly().execute({mesh, trialFes, testFes, getIntegrators()})));
    }
 }
 
