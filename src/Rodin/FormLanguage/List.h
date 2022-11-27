@@ -99,6 +99,16 @@ namespace Rodin::FormLanguage
             return *this;
          }
 
+         constexpr reference at(size_t i)
+         {
+            return *m_list.at(i);
+         }
+
+         constexpr const_reference at(size_t i) const
+         {
+            return *m_list.at(i);
+         }
+
          constexpr List& add(const T& v)
          {
             m_list.emplace_back(v.copy());

@@ -16,7 +16,6 @@
 #include "ForwardDecls.h"
 #include "Integrator.h"
 #include "TestFunction.h"
-#include "Assembly.h"
 
 namespace Rodin::Variational
 {

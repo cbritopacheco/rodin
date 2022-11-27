@@ -1,5 +1,4 @@
 set(RodinVariational_HEADERS
-  Assembly.h
   BilinearForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
@@ -44,10 +43,10 @@ set(RodinVariational_HEADERS
   OR.h
   AND.h
   Tangent.h
-  )
+  Assembly/AssemblyBase.h
+  Assembly/Native.h)
 
 set(RodinVariational_SRCS
-  Assembly.cpp
   FiniteElementSpace.cpp
   EssentialBoundary.cpp
   LinearFormIntegrator.cpp
@@ -87,11 +86,18 @@ set(RodinVariational_SRCS
   OR.cpp
   AND.cpp
   Tangent.cpp
+  Assembly/AssemblyBase.cpp
+  Assembly/Native.cpp
   )
 
 add_library(RodinVariational
   ${RodinVariational_SRCS} ${RodinVariational_HEADERS})
 add_library(Rodin::Variational ALIAS RodinVariational)
+
+if (RODIN_USE_OPENMP)
+  target_sources(RodinVariational PUBLIC Assembly/OpenMP.h Assembly/OpenMP.cpp)
+  target_link_libraries(RodinVariational PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariational

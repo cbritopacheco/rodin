@@ -26,8 +26,6 @@ namespace Rodin::Variational
       Matrix
    };
 
-   enum class Backend;
-
    /**
     * @brief Base class for linear form objects.
     * @tparam VectorType Type of vector which will be assembled
@@ -847,6 +845,18 @@ namespace Rodin::Variational
     */
    template <class ... Parameters>
    class Problem;
+
+   namespace Assembly
+   {
+      template <class Operand>
+      class AssemblyBase;
+
+      template <class Operand>
+      class Native;
+
+      template <class Operand>
+      class OpenMP;
+   }
 }
 
 #endif
