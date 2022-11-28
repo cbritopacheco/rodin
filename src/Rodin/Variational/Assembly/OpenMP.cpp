@@ -1,3 +1,5 @@
+#ifdef RODIN_USE_OPENMP
+
 #include <omp.h>
 
 #include "Rodin/Variational/FiniteElementSpace.h"
@@ -69,3 +71,4 @@ namespace Rodin::Variational::Assembly
    }
 }
 
+#endif
