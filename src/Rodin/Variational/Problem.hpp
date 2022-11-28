@@ -11,7 +11,6 @@
 
 #include "Rodin/Utility.h"
 #include "Assembly/Native.h"
-#include "Assembly/OpenMP.h"
 
 #include "GridFunction.h"
 #include "DirichletBC.h"
@@ -69,7 +68,6 @@ namespace Rodin::Variational
    {
       // Assemble both sides
       getLinearForm().assemble();
-      getBilinearForm().setAssembly(BilinearFormBase<OperatorType>::OpenMPAssembly());
       getBilinearForm().assemble();
 
       // Emplace data
