@@ -34,7 +34,7 @@ namespace Rodin::Geometry
 
       const mfem::Mesh& meshHandle = getMesh().getHandle();
       const mfem::GridFunction* nodes = meshHandle.GetNodes();
-      assert(!nodes);
+
       if (!nodes)
       {
          meshHandle.GetPointMatrix(getIndex(), m_trans->GetPointMat());
@@ -167,11 +167,71 @@ namespace Rodin::Geometry
          const MeshBase& mesh, const mfem::Element* element, int index)
       : Face(mesh, element, mesh.getHandle().GetBdrFace(index)),
         m_index(index)
-   {}
-
-   mfem::ElementTransformation& Boundary::getTransformation() const
    {
-      return *const_cast<mfem::Mesh&>(getMesh().getHandle()).GetBdrElementTransformation(getBoundaryIndex());
+      m_trans.reset(new mfem::IsoparametricTransformation);
+      m_trans->Attribute = getAttribute();
+      m_trans->ElementNo = getIndex(); // boundary element number
+      m_trans->ElementType = mfem::ElementTransformation::BDR_ELEMENT;
+      m_trans->mesh = nullptr;
+      mfem::DenseMatrix& pm = m_trans->GetPointMat();
+      m_trans->Reset();
+
+      const mfem::Mesh& meshHandle = getMesh().getHandle();
+      const mfem::GridFunction* nodes = meshHandle.GetNodes();
+
+      if (!nodes)
+      {
+         meshHandle.GetBdrPointMatrix(getIndex(), pm);
+         m_trans->SetFE(
+               meshHandle.GetTransformationFEforElementType(
+                  meshHandle.GetBdrElementType(getIndex())));
+      }
+      else
+      {
+         const mfem::FiniteElement* bdr_el = nodes->FESpace()->GetBE(getIndex());
+         nodes->HostRead();
+         if (bdr_el)
+         {
+            int spaceDim = mesh.getSpaceDimension();
+            mfem::Array<int> vdofs;
+            nodes->FESpace()->GetBdrElementVDofs(getIndex(), vdofs);
+            int n = vdofs.Size() / spaceDim;
+            pm.SetSize(spaceDim, n);
+            for (int k = 0; k < spaceDim; k++)
+            {
+               for (int j = 0; j < n; j++)
+               {
+                  pm(k,j) = (*nodes)(vdofs[n*k+j]);
+               }
+            }
+            m_trans->SetFE(bdr_el);
+         }
+         else // L2 Nodes (e.g., periodic mesh)
+         {
+            assert(false);
+            // int elem_id, face_info;
+            // mfem::FaceElementTransformations FaceElemTr;
+            // meshHandle.GetBdrElementAdjacentElement2(getIndex(), elem_id, face_info);
+            // meshHandle.GetLocalFaceTransformation(
+            //       meshHandle.GetBdrElementType(getIndex()),
+            //       meshHandle.GetElementType(elem_id),
+            //       &FaceElemTr.Loc1.Transf, face_info);
+            // // NOTE: FaceElemTr.Loc1 is overwritten here -- used as a temporary
+
+            // mfem::Geometry::Type face_geom = meshHandle.GetBdrElementBaseGeometry(getIndex());
+            // const mfem::FiniteElement *face_el =
+            //    nodes->FESpace()->GetTraceElement(elem_id, face_geom);
+            // MFEM_VERIFY(dynamic_cast<const mfem::NodalFiniteElement*>(face_el),
+            //             "Mesh requires nodal Finite Element.");
+            // mfem::IntegrationRule eir(face_el->GetDof());
+            // FaceElemTr.Loc1.Transf.ElementNo = elem_id;
+            // FaceElemTr.Loc1.Transf.mesh = nullptr;
+            // FaceElemTr.Loc1.Transf.ElementType = mfem::ElementTransformation::ELEMENT;
+            // FaceElemTr.Loc1.Transform(face_el->GetNodes(), eir);
+            // nodes->GetVectorValues(FaceElemTr.Loc1.Transf, eir, pm);
+            // m_trans->SetFE(face_el);
+         }
+      }
    }
 
    // ---- BoundaryElementView -----------------------------------------------

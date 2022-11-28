@@ -312,10 +312,24 @@ namespace Rodin::Geometry
             return Region::Boundary;
          }
 
-         virtual mfem::ElementTransformation& getTransformation() const override;
+         mfem::ElementTransformation& getFaceTransformation() const
+         {
+            return Face::getTransformation();
+         }
+
+         mfem::ElementTransformation& getBoundaryTransformation() const
+         {
+            return *m_trans;
+         }
+
+         virtual mfem::ElementTransformation& getTransformation() const override
+         {
+            return getBoundaryTransformation();
+         }
 
       private:
          int m_index;
+         std::unique_ptr<mfem::IsoparametricTransformation> m_trans;
    };
 
    /**
