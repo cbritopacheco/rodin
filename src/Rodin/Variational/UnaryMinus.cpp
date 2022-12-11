@@ -26,15 +26,6 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   void UnaryMinus<FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      m_op->getValue(value, trans, ip);
-      value.Neg();
-   }
-
    RangeShape UnaryMinus<FunctionBase>::getRangeShape() const
    {
       return m_op->getRangeShape();
@@ -68,7 +59,7 @@ namespace Rodin::Variational
    }
 
    mfem::Vector
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Geometry::SimplexBase& element)
+   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Geometry::Simplex& element)
    const
    {
       mfem::Vector vec = m_op->getElementVector(element);
@@ -106,7 +97,7 @@ namespace Rodin::Variational
 
    mfem::DenseMatrix
    UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(const Geometry::SimplexBase& element) const
+   ::getElementMatrix(const Geometry::Simplex& element) const
    {
       mfem::DenseMatrix op = m_op->getElementMatrix(element);
       op.Neg();

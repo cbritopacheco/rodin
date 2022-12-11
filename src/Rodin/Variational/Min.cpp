@@ -54,18 +54,6 @@ namespace Rodin::Variational
       return *this;
    }
 
-   double Min::getValue(
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix a;
-      m_a->getValue(a, trans, ip);
-
-      mfem::DenseMatrix b;
-      m_b->getValue(b, trans, ip);
-      return std::min(a(0, 0), b(0, 0));
-   }
-
    Min* Min::copy() const noexcept
    {
       return new Min(*this);

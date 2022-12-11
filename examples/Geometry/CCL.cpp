@@ -26,15 +26,15 @@ int main(int, char**)
 
   Alert::Info() << ccs.size() << " components found." << Alert::Raise;
 
-  for (size_t i = 0; i < ccs.size(); i++)
-  {
-    const auto& cc = ccs[i];
-    mesh.edit(
-        [&](ElementView element)
-        {
-          element.setAttribute(i + 1);
-        }, cc);
-  }
+  // for (size_t i = 0; i < ccs.size(); i++)
+  // {
+  //   const auto& cc = ccs[i];
+  //   mesh.edit(
+  //       [&](ElementView element)
+  //       {
+  //         element.setAttribute(i + 1);
+  //       }, cc);
+  // }
 
   Alert::Info() << "Saved mesh to ccl.mesh" << Alert::Raise;
 

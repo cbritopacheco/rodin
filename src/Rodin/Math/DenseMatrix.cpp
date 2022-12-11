@@ -4,14 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_MESH_HPP
-#define RODIN_MESH_MESH_HPP
+#include "DenseMatrix.h"
 
-#include "Mesh.h"
-
-#include "Element.h"
-
-namespace Rodin::Geometry
+namespace Rodin::Math
 {}
-
-#endif

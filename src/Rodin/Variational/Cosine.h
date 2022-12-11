@@ -54,13 +54,9 @@ namespace Rodin::Variational
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix s;
-            m_v->getValue(s, trans, ip);
-            return Math::cos(s(0, 0));
+            return Math::cos(m_v->getValue(p).scalar());
          }
 
          Cosine* copy() const noexcept override

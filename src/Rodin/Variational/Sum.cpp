@@ -39,17 +39,6 @@ namespace Rodin::Variational
       return *this;
    }
 
-   void Sum<FunctionBase, FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      m_lhs->getValue(value, trans, ip);
-      mfem::DenseMatrix tmp;
-      m_rhs->getValue(tmp, trans, ip);
-      value += tmp;
-   }
-
    RangeShape Sum<FunctionBase, FunctionBase>::getRangeShape() const
    {
       assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());

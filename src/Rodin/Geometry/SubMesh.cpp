@@ -30,13 +30,13 @@ namespace Rodin::Geometry
       el.getHandle().GetVertices(pv);
 
       mfem::Array<int> sv(pv.Size());
-      for (int i = 0; i < sv.Size(); i++)
+      for (size_t i = 0; i < sv.Size(); i++)
       {
          int pvid = pv[i];
          if (m_s2pv.right.count(pvid) == 0) // Only add vertex if it is not in the map
          {
             sv[i] = getHandle().AddVertex(getParent().getHandle().GetVertex(pvid));
-            m_s2pv.insert({sv[i], pvid});
+            m_s2pv.insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
          }
          else // Else get the id of the vertex in the submesh
          {
@@ -49,7 +49,7 @@ namespace Rodin::Geometry
          getHandle().NewElement(el.getHandle().GetGeometryType());
       newEl->SetVertices(sv);
       newEl->SetAttribute(el.getAttribute());
-      int seid = getHandle().AddElement(newEl);
+      size_t seid = getHandle().AddElement(newEl);
       m_s2pe.insert({seid, el.getIndex()});
 
       return *this;
@@ -74,7 +74,7 @@ namespace Rodin::Geometry
             if (m_s2pv.right.count(pvid) == 0) // Only add vertex if it is not in the map
             {
                sv[i] = getHandle().AddVertex(getParent().getHandle().GetVertex(pvid));
-               m_s2pv.insert({sv[i], pvid});
+               m_s2pv.insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
             }
             else // Else get the id of the vertex in the submesh
             {
@@ -88,7 +88,7 @@ namespace Rodin::Geometry
          pel->SetVertices(sv);
          pel->SetAttribute(el.getAttribute());
          int seid = getHandle().AddElement(pel);
-         m_s2pe.insert({seid, el.getIndex()});
+         m_s2pe.insert({static_cast<size_t>(seid), el.getIndex()});
       }
       else
       {
@@ -110,22 +110,22 @@ namespace Rodin::Geometry
          newEl->SetVertices(sv);
          newEl->SetAttribute(el.getAttribute());
          int sbid = getHandle().AddBdrElement(newEl);
-         m_s2pb.insert({sbid, el.getIndex()});
+         m_s2pb.insert({static_cast<size_t>(sbid), el.getIndex()});
       }
       return *this;
    }
 
-   const boost::bimap<int, int>& SubMesh<Context::Serial>::getVertexMap() const
+   const boost::bimap<size_t, size_t>& SubMesh<Context::Serial>::getVertexMap() const
    {
       return m_s2pv;
    }
 
-   const boost::bimap<int, int>& SubMesh<Context::Serial>::getElementMap() const
+   const boost::bimap<size_t, size_t>& SubMesh<Context::Serial>::getElementMap() const
    {
       return m_s2pe;
    }
 
-   const boost::bimap<int, int>& SubMesh<Context::Serial>::getBoundaryElementMap() const
+   const boost::bimap<size_t, size_t>& SubMesh<Context::Serial>::getBoundaryElementMap() const
    {
       return m_s2pb;
    }

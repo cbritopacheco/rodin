@@ -53,29 +53,6 @@ namespace Rodin::Variational
       return *this;
    }
 
-   void Mult<FunctionBase, FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      double s;
-      if (m_lhs->getRangeType() == RangeType::Scalar)
-      {
-         mfem::DenseMatrix tmp;
-         m_lhs->getValue(tmp, trans, ip);
-         s = tmp(0, 0);
-         m_rhs->getValue(value, trans, ip);
-      }
-      else
-      {
-         mfem::DenseMatrix tmp;
-         m_rhs->getValue(tmp, trans, ip);
-         s = tmp(0, 0);
-         m_lhs->getValue(value, trans, ip);
-      }
-      value *= s;
-   }
-
    Mult<FunctionBase, FunctionBase>
    operator*(const FunctionBase& lhs, const FunctionBase& rhs)
    {

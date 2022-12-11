@@ -1,10 +1,10 @@
-add_executable(ConormalAdvection ConormalAdvection.cpp)
-target_link_libraries(ConormalAdvection
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::External::MMG)
+# add_executable(ConormalAdvection ConormalAdvection.cpp)
+# target_link_libraries(ConormalAdvection
+#   PUBLIC
+#   Rodin::Geometry
+#   Rodin::Solver
+#   Rodin::Variational
+#   Rodin::External::MMG)
 
 # add_executable(NeumannRegion NeumannRegion.cpp)
 # target_link_libraries(NeumannRegion
@@ -14,10 +14,10 @@ target_link_libraries(ConormalAdvection
 #   Rodin::Variational
 #   Rodin::External::MMG)
 
-add_executable(DirichletRegion DirichletRegion.cpp)
-target_link_libraries(DirichletRegion
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::External::MMG)
+# add_executable(DirichletRegion DirichletRegion.cpp)
+# target_link_libraries(DirichletRegion
+#   PUBLIC
+#   Rodin::Geometry
+#   Rodin::Solver
+#   Rodin::Variational
+#   Rodin::External::MMG)

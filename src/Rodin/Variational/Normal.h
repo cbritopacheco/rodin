@@ -1,8 +1,9 @@
 #ifndef RODIN_VARIATIONAL_NORMAL_H
 #define RODIN_VARIATIONAL_NORMAL_H
 
-#include "ForwardDecls.h"
+#include "Rodin/Geometry/Mesh.h"
 
+#include "ForwardDecls.h"
 #include "VectorFunction.h"
 
 namespace Rodin::Variational
@@ -37,20 +38,21 @@ namespace Rodin::Variational
             return m_dimension;
          }
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint&) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
+            FunctionValue::Vector value;
+            const auto& element = p.getElement();
+            auto& trans = element.getTransformation();
+            const auto& mesh = element.getMesh();
             assert(
                // We are on a boundary element of a d-mesh in d-space
                (
-                  trans.mesh->Dimension() == trans.mesh->SpaceDimension() &&
+                  mesh.getDimension() == mesh.getSpaceDimension() &&
                   trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT
                ) ||
                // Or we are on an element of a d-mesh in (d + 1)-space.
                (
-                  trans.mesh->Dimension() == (trans.mesh->SpaceDimension() - 1) &&
+                  mesh.getDimension() == (mesh.getSpaceDimension() - 1) &&
                   trans.ElementType == mfem::ElementTransformation::ELEMENT
                )
             );
@@ -63,8 +65,8 @@ namespace Rodin::Variational
                case mfem::ElementTransformation::BDR_ELEMENT:
                {
                   value /= norm * (
-                        1.0 - 2.0 * trans.mesh->FaceIsInterior(
-                           trans.mesh->GetBdrFace(trans.ElementNo)));
+                        1.0 - 2.0 * mesh.getHandle().FaceIsInterior(
+                           mesh.getHandle().GetBdrFace(trans.ElementNo)));
                   break;
                }
                default:
@@ -72,6 +74,7 @@ namespace Rodin::Variational
                   value /= norm;
                }
             }
+            return value;
          }
 
          Normal* copy() const noexcept override

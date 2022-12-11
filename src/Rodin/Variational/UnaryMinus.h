@@ -42,10 +42,10 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         void getValue(
-            mfem::DenseMatrix& value,
-            mfem::ElementTransformation& trans,
-            const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            return -m_op->getValue(p);
+         }
 
          UnaryMinus* copy() const noexcept override
          {
@@ -74,7 +74,7 @@ namespace Rodin::Variational
 
          Geometry::Region getRegion() const override;
 
-         mfem::Vector getElementVector(const Geometry::SimplexBase& element) const override;
+         mfem::Vector getElementVector(const Geometry::Simplex& element) const override;
 
          UnaryMinus* copy() const noexcept override
          {
@@ -100,7 +100,7 @@ namespace Rodin::Variational
 
          Geometry::Region getRegion() const override;
 
-         mfem::DenseMatrix getElementMatrix(const Geometry::SimplexBase& element) const override;
+         mfem::DenseMatrix getElementMatrix(const Geometry::Simplex& element) const override;
 
          UnaryMinus* copy() const noexcept override
          {

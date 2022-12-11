@@ -45,17 +45,9 @@ namespace Rodin::Variational
               m_rhs(std::move(other.m_rhs))
          {}
 
-         bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix lhs;
-            m_lhs->getValue(lhs, trans, ip);
-
-            mfem::DenseMatrix rhs;
-            m_rhs->getValue(rhs, trans, ip);
-
-            return lhs(0, 0) < rhs(0, 0);
+            return m_lhs->getValue(p).scalar() < m_rhs->getValue(p).scalar();
          }
 
          LT* copy() const noexcept override

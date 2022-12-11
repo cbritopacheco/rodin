@@ -21,13 +21,4 @@ namespace Rodin::Variational
       :  ScalarFunctionBase(other),
          m_matrix(std::move(other.m_matrix))
    {}
-
-   double Trace<FunctionBase>::getValue(
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix mat;
-      m_matrix->getValue(mat, trans, ip);
-      return mat.Trace();
-   }
 }

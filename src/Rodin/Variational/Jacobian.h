@@ -59,16 +59,110 @@ namespace Rodin::Variational
             return m_u.getFiniteElementSpace().getVectorDimension();
          }
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            m_u.getHandle().GetVectorGradient(
-                  FunctionBase::getTraceElementTrans(
-                     FunctionBase::getSubMeshElementTrans(
-                        m_u.getFiniteElementSpace().getMesh(), trans, ip), ip), value);
-            value.Transpose();
+            FunctionValue::Matrix grad;
+            switch (p.getElement().getRegion())
+            {
+               case Geometry::Region::Domain:
+               {
+                  assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
+                  const auto& element = p.getElement();
+                  auto& trans = element.getTransformation();
+                  m_u.getHandle().GetVectorGradient(trans, grad);
+                  break;
+               }
+               case Geometry::Region::Boundary:
+               {
+                  assert(dynamic_cast<const Geometry::Boundary*>(&p.getElement()));
+                  const auto& boundary = static_cast<const Geometry::Boundary&>(p.getElement());
+                  const auto& mesh = p.getElement().getMesh();
+                  if (&mesh == &m_u.getFiniteElementSpace().getMesh())
+                  {
+                     auto& ft = boundary.getFaceTransformations();
+                     ft.SetAllIntPoints(&p.getElement().getTransformation().GetIntPoint());
+                     if (ft.Elem1 && (
+                           getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem1->Attribute)))
+                        m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                     else if (ft.Elem2 && (
+                           getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem2->Attribute)))
+                        m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                     else
+                        assert(false);
+                  }
+                  else if (mesh.isSubMesh())
+                  {
+                     assert(false);
+                     // Element's mesh is the child
+                     // const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
+                     // const auto& parent = submesh.getParent();
+
+                     // submesh.getBoundaryElementMap().left.at(boundary.getIndex()):
+
+                     // auto& ft = boundary.getFaceTransformations();
+                     // assert(ft.Elem1);
+                     // auto& trans1 = ft.GetElement1Transformation();
+                     // assert(ft.Elem2);
+                     // auto& trans2 = ft.GetElement2Transformation();
+
+                     // if (&parent == &m_u.getFiniteElementSpace().getMesh())
+                     // {
+                     //    submesh.getBoundaryElementMap().left.at(trans1.ElementNo);
+
+                     //    if (getTraceDomain().count(trans1.Attribute))
+                     //    {
+                     //       int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
+                     //       trans1.ElementNo = parentIdx;
+                     //       m_u.getHandle().GetVectorGradient(trans1, grad);
+                     //    }
+                     //    else if (getTraceDomain().count(trans2.Attribute))
+                     //    {
+                     //       int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
+                     //       trans2.ElementNo = parentIdx;
+                     //       m_u.getHandle().GetVectorGradient(trans2, grad);
+                     //    }
+                     //    else
+                     //       assert(false);
+                     // }
+                     // else
+                     // {
+                     //    assert(false);
+                     // }
+                  }
+                  else if (m_u.getFiniteElementSpace().getMesh().isSubMesh())
+                  {
+                     assert(false);
+                     // Element's mesh is the parent
+                     // const auto& submesh =
+                     //    static_cast<const Geometry::SubMesh<Context::Serial>&>(
+                     //          m_u.getFiniteElementSpace().getMesh());
+                     // assert(&mesh == &submesh.getParent());
+                     // const auto& child = submesh.get<Geometry::Boundary>(
+                     //       submesh.getBoundaryElementMap().right.at(boundary.getIndex()));
+                     // auto& ft = child.getFaceTransformations();
+                     // ft.SetAllIntPoints(&p.getElement().getTransformation().GetIntPoint());
+                     // if (ft.Elem1 && (
+                     //       getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem1->Attribute)))
+                     //    m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                     // else if (ft.Elem2 && (
+                     //       getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem2->Attribute)))
+                     //    m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                     // else
+                     //    assert(false);
+                  }
+                  else
+                  {
+                     assert(false);
+                  }
+                  break;
+               }
+               case Geometry::Region::Interface:
+               {
+                  assert(false);
+                  break;
+               }
+            }
+            return grad;
          }
 
          Jacobian* copy() const noexcept override
@@ -129,16 +223,16 @@ namespace Rodin::Variational
             return m_u.getFiniteElementSpace().getVectorDimension();
          }
 
-         int getDOFs(const Geometry::SimplexBase& element) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
             return m_u.getDOFs(element);
          }
 
          void getOperator(
-               DenseBasisOperator& op,
-               ShapeComputator& compute,
-               const Geometry::SimplexBase& element) const override
+               DenseBasisOperator& op, ShapeComputator& compute,
+               const Geometry::Point& p) const override
          {
+            const auto& element = p.getElement();
             auto& trans = element.getTransformation();
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());

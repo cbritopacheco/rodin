@@ -57,15 +57,67 @@ namespace Rodin::Variational
               m_u(other.m_u)
          {}
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
             mfem::Vector grad;
-            m_u.getHandle().GetGradient(
-                  FunctionBase::getTraceElementTrans(
-                     FunctionBase::getSubMeshElementTrans(
-                        m_u.getFiniteElementSpace().getMesh(), trans, ip), ip), grad);
+            switch (p.getElement().getRegion())
+            {
+               case Geometry::Region::Domain:
+               {
+                  assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
+                  const auto& element = p.getElement();
+                  auto& trans = element.getTransformation();
+                  m_u.getHandle().GetGradient(trans, grad);
+                  break;
+               }
+               case Geometry::Region::Boundary:
+               {
+                  assert(dynamic_cast<const Geometry::Boundary*>(&p.getElement()));
+                  const auto& boundary = static_cast<const Geometry::Boundary&>(p.getElement());
+                  auto& ft = boundary.getFaceTransformations();
+                  assert(ft.Elem1);
+                  auto& trans1 = ft.GetElement1Transformation();
+                  assert(ft.Elem2);
+                  auto& trans2 = ft.GetElement2Transformation();
+                  const auto& mesh = p.getElement().getMesh();
+                  if (mesh.isSubMesh())
+                  {
+                     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
+                     const auto& parent = submesh.getParent();
+
+                     if (getTraceDomain().count(trans1.Attribute))
+                     {
+                        int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
+                        trans1.ElementNo = parentIdx;
+                        m_u.getHandle().GetGradient(trans1, grad);
+                     }
+                     else if (getTraceDomain().count(trans2.Attribute))
+                     {
+                        int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
+                        const auto& parentElement = parent.getElement(parentIdx);
+                        assert(parentElement);
+                        m_u.getHandle().GetGradient(parentElement->getTransformation(), grad);
+                     }
+                     else
+                        assert(false);
+                  }
+                  else
+                  {
+                     if (getTraceDomain().count(trans1.Attribute))
+                        m_u.getHandle().GetGradient(trans1, grad);
+                     else if (getTraceDomain().count(trans2.Attribute))
+                        m_u.getHandle().GetGradient(trans2, grad);
+                     else
+                        assert(false);
+                  }
+                  break;
+               }
+               case Geometry::Region::Interface:
+               {
+                  assert(false);
+                  break;
+               }
+            }
             return grad(m_direction);
          }
 

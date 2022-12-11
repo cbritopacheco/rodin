@@ -19,6 +19,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RangeShape.h"
+#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
@@ -43,13 +44,9 @@ namespace Rodin::Variational
 
          virtual ~ScalarFunctionBase() = default;
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue::Scalar operator()(const Geometry::Point& p) const
          {
-            value.SetSize(1, 1);
-            value(0, 0) = getValue(trans, ip);
+            return getValue(p).scalar();
          }
 
          RangeShape getRangeShape() const override
@@ -62,14 +59,6 @@ namespace Rodin::Variational
             return RangeType::Scalar;
          }
 
-         /**
-          * @brief Computes the value at the given transformation and
-          * integration point.
-          * @returns Value at given transformation and integration point.
-          */
-         virtual double getValue(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
-
          virtual ScalarFunctionBase* copy() const noexcept override = 0;
    };
 
@@ -80,11 +69,22 @@ namespace Rodin::Variational
    class ScalarFunction<FunctionBase> : public ScalarFunctionBase
    {
       public:
-         ScalarFunction(const FunctionBase& nested);
+         ScalarFunction(const FunctionBase& nested)
+            : m_nested(nested.copy())
+         {
+            if (nested.getRangeType() != RangeType::Scalar)
+               UnexpectedRangeTypeException(RangeType::Scalar, nested.getRangeType()).raise();
+         }
 
-         ScalarFunction(const ScalarFunction& other);
+         ScalarFunction(const ScalarFunction& other)
+            :  ScalarFunctionBase(other),
+               m_nested(other.m_nested->copy())
+         {}
 
-         ScalarFunction(ScalarFunction&& other);
+         ScalarFunction(ScalarFunction&& other)
+            : ScalarFunctionBase(std::move(other)),
+              m_nested(std::move(other.m_nested))
+         {}
 
          ScalarFunction& traceOf(const std::set<int>& attrs) override
          {
@@ -93,9 +93,10 @@ namespace Rodin::Variational
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& v) const override
+         {
+            return m_nested->getValue(v);
+         }
 
          ScalarFunction* copy() const noexcept override
          {
@@ -140,11 +141,9 @@ namespace Rodin::Variational
               m_x(other.m_x)
          {}
 
-         double getValue(
-               mfem::ElementTransformation&,
-               const mfem::IntegrationPoint&) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            return m_x;
+            return FunctionValue(static_cast<FunctionValue::Scalar>(m_x));
          }
 
          ScalarFunction* copy() const noexcept override
@@ -152,7 +151,7 @@ namespace Rodin::Variational
             return new ScalarFunction(*this);
          }
 
-         Internal::MFEMFunction build() const override
+         Internal::MFEMFunction build(const Geometry::MeshBase&) const override
          {
             return Internal::MFEMFunction(new mfem::ConstantCoefficient(m_x));
          }
@@ -196,15 +195,9 @@ namespace Rodin::Variational
               m_f(std::move(other.m_f))
          {}
 
-         double getValue(mfem::ElementTransformation& trans, const
-               mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& v) const override
          {
-            return m_f(Geometry::Point(trans, ip));
-         }
-
-         double operator()(const Geometry::Point& v) const
-         {
-            return getValue(v.getElementTransformation(), v.getIntegrationPoint());
+            return m_f(v);
          }
 
          ScalarFunction* copy() const noexcept override

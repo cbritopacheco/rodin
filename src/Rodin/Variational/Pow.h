@@ -70,13 +70,9 @@ namespace Rodin::Variational
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix s;
-            m_s->getValue(s, trans, ip);
-            return std::pow(s(0, 0), m_p);
+            return std::pow(m_s->getValue(p).scalar(), m_p);
          }
 
          Pow* copy() const noexcept override
