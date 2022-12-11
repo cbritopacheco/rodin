@@ -93,15 +93,13 @@ namespace Rodin::Variational
             return Integrator::Type::Bilinear;
          }
 
-         std::unique_ptr<mfem::BilinearFormIntegrator> build() const;
-
          virtual ~BilinearFormIntegratorBase() = default;
 
          /**
           * @brief Performs the assembly of the element matrix for the given
           * element.
           */
-         virtual mfem::DenseMatrix getElementMatrix(const Geometry::SimplexBase& element) const = 0;
+         virtual mfem::DenseMatrix getElementMatrix(const Geometry::Simplex& element) const = 0;
 
          virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
@@ -112,72 +110,73 @@ namespace Rodin::Variational
    };
 }
 
-namespace Rodin::Variational::Internal
-{
-   class ProxyBilinearFormIntegrator : public mfem::BilinearFormIntegrator
-  {
-      public:
-         ProxyBilinearFormIntegrator(const BilinearFormIntegratorBase& bfi)
-            : m_bfi(bfi)
-         {}
-
-         ProxyBilinearFormIntegrator(const ProxyBilinearFormIntegrator& other)
-            : mfem::BilinearFormIntegrator(other),
-              m_bfi(other.m_bfi)
-         {}
-
-         ProxyBilinearFormIntegrator(ProxyBilinearFormIntegrator&& other)
-            : mfem::BilinearFormIntegrator(std::move(other)),
-              m_bfi(other.m_bfi)
-         {}
-
-         void AssembleElementMatrix(
-               const mfem::FiniteElement&,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
-         {
-            if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
-            {
-               const auto& element = m_bfi.getTrialFunction()
-                                          .getFiniteElementSpace()
-                                          .getMesh()
-                                          .get<Geometry::Boundary>(trans.ElementNo);
-               mat = m_bfi.getElementMatrix(element);
-            }
-            else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
-            {
-               const auto& element = m_bfi.getTrialFunction()
-                                          .getFiniteElementSpace()
-                                          .getMesh()
-                                          .get<Geometry::Element>(trans.ElementNo);
-               mat = m_bfi.getElementMatrix(element);
-            }
-         }
-
-         void AssembleElementMatrix2(
-               const mfem::FiniteElement&, const mfem::FiniteElement&,
-                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
-         {
-            if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
-            {
-               const auto& element = m_bfi.getTrialFunction()
-                                          .getFiniteElementSpace()
-                                          .getMesh()
-                                          .get<Geometry::Boundary>(trans.ElementNo);
-               mat = m_bfi.getElementMatrix(element);
-            }
-            else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
-            {
-               const auto& element = m_bfi.getTrialFunction()
-                                          .getFiniteElementSpace()
-                                          .getMesh()
-                                          .get<Geometry::Element>(trans.ElementNo);
-               mat = m_bfi.getElementMatrix(element);
-            }
-         }
-
-      private:
-         const BilinearFormIntegratorBase& m_bfi;
-   };
-}
+// namespace Rodin::Variational::Internal
+// {
+//    class ProxyBilinearFormIntegrator : public mfem::BilinearFormIntegrator
+//   {
+//       public:
+//          ProxyBilinearFormIntegrator(const BilinearFormIntegratorBase& bfi)
+//             : m_bfi(bfi)
+//          {}
+// 
+//          ProxyBilinearFormIntegrator(const ProxyBilinearFormIntegrator& other)
+//             : mfem::BilinearFormIntegrator(other),
+//               m_bfi(other.m_bfi)
+//          {}
+// 
+//          ProxyBilinearFormIntegrator(ProxyBilinearFormIntegrator&& other)
+//             : mfem::BilinearFormIntegrator(std::move(other)),
+//               m_bfi(other.m_bfi)
+//          {}
+// 
+//          void AssembleElementMatrix(
+//                const mfem::FiniteElement&,
+//                mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+//          {
+//             if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
+//             {
+//                const auto& element = m_bfi.getTrialFunction()
+//                                           .getFiniteElementSpace()
+//                                           .getMesh()
+//                                           .getElement(trans.ElementNo)
+//                                           .get<Geometry::Boundary>(trans.ElementNo);
+//                mat = m_bfi.getElementMatrix(element);
+//             }
+//             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
+//             {
+//                const auto& element = m_bfi.getTrialFunction()
+//                                           .getFiniteElementSpace()
+//                                           .getMesh()
+//                                           .get<Geometry::Element>(trans.ElementNo);
+//                mat = m_bfi.getElementMatrix(element);
+//             }
+//          }
+// 
+//          void AssembleElementMatrix2(
+//                const mfem::FiniteElement&, const mfem::FiniteElement&,
+//                   mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
+//          {
+//             if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
+//             {
+//                const auto& element = m_bfi.getTrialFunction()
+//                                           .getFiniteElementSpace()
+//                                           .getMesh()
+//                                           .get<Geometry::Boundary>(trans.ElementNo);
+//                mat = m_bfi.getElementMatrix(element);
+//             }
+//             else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
+//             {
+//                const auto& element = m_bfi.getTrialFunction()
+//                                           .getFiniteElementSpace()
+//                                           .getMesh()
+//                                           .get<Geometry::Element>(trans.ElementNo);
+//                mat = m_bfi.getElementMatrix(element);
+//             }
+//          }
+// 
+//       private:
+//          const BilinearFormIntegratorBase& m_bfi;
+//    };
+// }
 
 #endif

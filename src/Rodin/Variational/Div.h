@@ -66,7 +66,7 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(const Geometry::SimplexBase& element) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
             return m_u.getDOFs(element);
          }
@@ -74,9 +74,10 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::SimplexBase& element) const override
+               const Geometry::Point& p) const override
          {
-            auto& trans = element.getTransformation();
+            const auto& element = p.getElement();
+            auto& trans = p.getElement().getTransformation();
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
             const int opDofs = getDOFs(element);

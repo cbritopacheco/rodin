@@ -208,7 +208,7 @@ namespace Rodin::Variational
          }
 
          mfem::Array<int> getDOFs(
-               const Geometry::SimplexBase& element) const override
+               const Geometry::Simplex& element) const override
          {
             mfem::Array<int> res;
             switch (element.getRegion())
@@ -233,7 +233,7 @@ namespace Rodin::Variational
          }
 
          const mfem::FiniteElement& getFiniteElement(
-               const Geometry::SimplexBase& element) const override
+               const Geometry::Simplex& element) const override
          {
             switch (element.getRegion())
             {

@@ -35,6 +35,7 @@ namespace Rodin::Variational
    void
    LinearForm<FES, Context::Serial, mfem::Vector>::assemble()
    {
+      assert(false);
       m_lf.reset(new mfem::LinearForm(&m_v.getFiniteElementSpace().getHandle()));
 
       std::vector<mfem::Array<int>> attrs;
@@ -77,7 +78,6 @@ namespace Rodin::Variational
             }
          }
       }
-
       m_lf->Assemble();
    }
 }

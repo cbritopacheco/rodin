@@ -171,7 +171,7 @@ int main(int, char**)
           auto it = std::min_element(cs.begin(), cs.end(),
               [&](const Point& lhs, const Point& rhs) -> bool
               {
-                return topo(lhs) < topo(rhs);
+                return topo(lhs).scalar() < topo(rhs).scalar();
               });
 
           auto holes = ScalarFunction(

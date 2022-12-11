@@ -37,10 +37,10 @@ namespace Rodin::Variational
 
          Division& traceOf(const std::set<int>& attrs) override;
 
-         void getValue(
-            mfem::DenseMatrix& value,
-            mfem::ElementTransformation& trans,
-            const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            return static_cast<double>(m_lhs->getValue(p)) / static_cast<double>(m_rhs->getValue(p));
+         }
 
          Division* copy() const noexcept override
          {

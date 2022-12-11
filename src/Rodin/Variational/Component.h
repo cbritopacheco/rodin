@@ -93,14 +93,11 @@ namespace Rodin::Variational
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix v;
-            m_v->getValue(v, trans, ip);
-            assert(m_idx < v.NumRows());
-            return v(m_idx, 0);
+            FunctionValue::Vector v = m_v->getValue(p);
+            assert(m_idx < v.Size());
+            return v(m_idx);
          }
 
          Component* copy() const noexcept override
@@ -161,7 +158,8 @@ namespace Rodin::Variational
                               .getBoundaryAttributes().rbegin();
             std::vector<mfem::Coefficient*> mfemCoeffs(
                   m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
-            mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(s);
+            mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(
+                  m_u.getFiniteElementSpace().getMesh(), s);
             if (attrs.size() == 0)
             {
                mfem::Array<int> marker(maxAttr);

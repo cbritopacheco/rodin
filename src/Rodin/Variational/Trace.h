@@ -38,9 +38,10 @@ namespace Rodin::Variational
 
          Trace(Trace&& other);
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            return m_matrix->getValue(p).matrix().Trace();
+         }
 
          Trace& traceOf(const std::set<int>& attrs) override
          {

@@ -14,6 +14,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Utility/Overloaded.h"
 
 #include "ForwardDecls.h"
 #include "Rodin/Geometry/Element.h"
@@ -138,139 +139,223 @@ namespace Rodin::Variational::Internal
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Represents the value of a FunctionBase object when evaluated
+    * on a Mesh Vertex.
+    *
+    * In Rodin, valuations of instances of FunctionBase on mesh vertices
+    * can take the form three possible value types:
+    * - Scalar
+    * - Vector
+    * - Matrix
+    *
+    * The type resolution of the actual type is performed at runtime.
+    */
+   class FunctionValue
+   {
+      public:
+         using Scalar   = double; ///< Scalar value type
+         using Boolean  = bool; ///< Scalar value type
+         using Vector   = mfem::Vector; ///< Vector value type
+         using Matrix   = mfem::DenseMatrix; ///< Matrix value type
+
+         constexpr
+         FunctionValue() = delete;
+
+         constexpr
+         FunctionValue(Scalar v)
+            : m_v(v)
+         {}
+
+         constexpr
+         FunctionValue(Boolean v)
+            : m_v(v)
+         {}
+
+         constexpr
+         FunctionValue(Vector&& v)
+         {
+            m_v.emplace<Vector>();
+            std::get<Vector>(m_v).Swap(v);
+         }
+
+         constexpr
+         FunctionValue(Matrix&& v)
+         {
+            m_v.emplace<mfem::DenseMatrix>();
+            std::get<mfem::DenseMatrix>(m_v).Swap(v);
+         }
+
+         FunctionValue(const FunctionValue&) = default;
+
+         FunctionValue(FunctionValue&&) = default;
+
+         /**
+          * @brief Queries which type the FunctionValue %holds.
+          */
+         template <class T>
+         inline
+         constexpr
+         bool holds() const
+         {
+            return std::holds_alternative<T>(m_v);
+         }
+
+         inline
+         constexpr
+         operator Boolean() const
+         {
+            assert(holds<Boolean>());
+            return std::get<Boolean>(m_v);
+         }
+
+         inline
+         constexpr
+         operator Scalar() const
+         {
+            assert(holds<Scalar>());
+            return std::get<Scalar>(m_v);
+         }
+
+         inline
+         constexpr
+         operator Vector&() &
+         {
+            assert(holds<Vector>());
+            return std::get<Vector>(m_v);
+         }
+
+         inline
+         constexpr
+         operator Vector&&() &&
+         {
+            assert(holds<Vector>());
+            return std::move(std::get<Vector>(m_v));
+         }
+
+         inline
+         constexpr
+         operator Matrix&() &
+         {
+            assert(holds<Matrix>());
+            return std::get<Matrix>(m_v);
+         }
+
+         inline
+         constexpr
+         operator Matrix&&() &&
+         {
+            assert(holds<Matrix>());
+            return std::move(std::get<Matrix>(m_v));
+         }
+
+         inline
+         constexpr
+         Boolean boolean() const
+         {
+            assert(holds<Boolean>());
+            return std::get<Boolean>(m_v);
+         }
+
+         inline
+         constexpr
+         Scalar scalar() const
+         {
+            assert(holds<Scalar>());
+            return std::get<Scalar>(m_v);
+         }
+
+         inline
+         constexpr
+         Vector& vector() &
+         {
+            assert(holds<Vector>());
+            return std::get<Vector>(m_v);
+         }
+
+         inline
+         constexpr
+         const Vector& vector() const &
+         {
+            assert(holds<Vector>());
+            return std::get<Vector>(m_v);
+         }
+
+         inline
+         constexpr
+         Vector&& vector() &&
+         {
+            assert(holds<Vector>());
+            return std::move(std::get<Vector>(m_v));
+         }
+
+         inline
+         constexpr
+         Matrix& matrix() &
+         {
+            assert(holds<Matrix>());
+            return std::get<Matrix>(m_v);
+         }
+
+         inline
+         constexpr
+         const Matrix& matrix() const &
+         {
+            assert(holds<Matrix>());
+            return std::get<Matrix>(m_v);
+         }
+
+         inline
+         constexpr
+         Matrix&& matrix() &&
+         {
+            assert(holds<Matrix>());
+            return std::move(std::get<Matrix>(m_v));
+         }
+
+         inline
+         constexpr
+         FunctionValue& operator-()
+         {
+            *this *= -1.0;
+            return *this;
+         }
+
+         inline
+         constexpr
+         FunctionValue& operator+=(const FunctionValue& s)
+         {
+            std::visit(Utility::Overloaded{
+                  [&](Scalar& v) { v += s.scalar(); },
+                  [&](Vector& v) { v += s.vector(); },
+                  [&](Matrix& v) { v += s.matrix(); },
+                  [&](Boolean& v) { v += s.boolean(); }} , m_v);
+            return *this;
+         }
+
+         inline
+         constexpr
+         FunctionValue& operator*=(Scalar s)
+         {
+            std::visit([&](auto& v) { v *= s; } , m_v);
+            return *this;
+         }
+
+         inline
+         constexpr
+         FunctionValue& operator/=(Scalar s)
+         {
+            std::visit([&](auto& v) { v *= (1.0 / s); } , m_v);
+            return *this;
+         }
+
+      private:
+         std::variant<Scalar, Boolean, Vector, Matrix> m_v;
+   };
+
    class FunctionBase : public FormLanguage::Base
    {
       public:
-         /**
-          * @brief Represents the value of a FunctionBase object when evaluated
-          * on a Mesh Vertex.
-          *
-          * In Rodin, valuations of instances of FunctionBase on mesh vertices
-          * can take the form three possible value types:
-          * - Scalar
-          * - Vector
-          * - Matrix
-          *
-          * The type resolution of the actual type is performed at runtime.
-          */
-         class FunctionValue
-         {
-            public:
-               using Scalar = double; ///< Scalar value type
-               using Vector = mfem::Vector; ///< Vector value type
-               using Matrix = mfem::DenseMatrix; ///< Matrix value type
-
-               constexpr
-               FunctionValue(double v)
-                  : m_v(v)
-               {}
-
-               constexpr
-               FunctionValue(const Vector& v)
-                  : m_v(v)
-               {}
-
-               constexpr
-               FunctionValue(const Matrix& v)
-                  : m_v(v)
-               {}
-
-               constexpr
-               FunctionValue(Vector&& v)
-               {
-                  m_v.emplace<Vector>();
-                  std::get<Vector>(m_v).Swap(v);
-               }
-
-               constexpr
-               FunctionValue(Matrix&& v)
-                  : FunctionValue(std::move(v), RangeType::Matrix)
-               {}
-
-               constexpr
-               FunctionValue(Matrix&& v, RangeType t)
-               {
-                  switch (t)
-                  {
-                     case RangeType::Scalar:
-                     {
-                        m_v = v(0, 0);
-                        break;
-                     }
-                     case RangeType::Vector:
-                     {
-                        m_v.emplace<Vector>(nullptr, v.Size());
-                        std::get<Vector>(m_v).GetMemory() = std::move(v.GetMemory());
-                        break;
-                     }
-                     case RangeType::Matrix:
-                     {
-                        m_v.emplace<Matrix>();
-                        std::get<Matrix>(m_v).Swap(v);
-                        break;
-                     }
-                  }
-               }
-
-               FunctionValue(const FunctionValue&) = default;
-
-               FunctionValue(FunctionValue&&) = default;
-
-               /**
-                * @brief Queries which type the FunctionValue %holds.
-                */
-               template <class T>
-               inline
-               constexpr
-               bool holds() const
-               {
-                  return std::holds_alternative<T>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Scalar() const
-               {
-                  assert(holds<Scalar>());
-                  return std::get<Scalar>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Vector&() &
-               {
-                  assert(holds<Vector>());
-                  return std::get<Vector>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Vector&&() &&
-               {
-                  assert(holds<Vector>());
-                  return std::move(std::get<Vector>(m_v));
-               }
-
-               inline
-               constexpr
-               operator Matrix&() &
-               {
-                  assert(holds<Matrix>());
-                  return std::get<Matrix>(m_v);
-               }
-
-               inline
-               constexpr
-               operator Matrix&&() &&
-               {
-                  assert(holds<Matrix>());
-                  return std::move(std::get<Matrix>(m_v));
-               }
-
-            private:
-               std::variant<double, Vector, Matrix> m_v;
-         };
-
          FunctionBase() = default;
 
          FunctionBase(const FunctionBase& other)
@@ -353,9 +438,7 @@ namespace Rodin::Variational
          /**
           * @note It is not necessary to set the size beforehand.
           */
-         virtual void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const = 0;
+         virtual FunctionValue getValue(const Geometry::Point& p) const = 0;
 
          /**
           * @brief Evaluates the function on a vertex of the mesh.
@@ -363,22 +446,12 @@ namespace Rodin::Variational
           */
          FunctionValue operator()(const Geometry::Point& v) const
          {
-            mfem::DenseMatrix m;
-            getValue(m, v.getElementTransformation(), v.getIntegrationPoint());
-            return FunctionValue(std::move(m), getRangeType());
+            return getValue(v);
          }
 
          virtual FunctionBase* copy() const noexcept override = 0;
 
-         virtual Internal::MFEMFunction build() const;
-
-      protected:
-         mfem::ElementTransformation& getSubMeshElementTrans(
-               const Geometry::MeshBase& mesh,
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
-
-         mfem::ElementTransformation& getTraceElementTrans(
-               mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const;
+         virtual Internal::MFEMFunction build(const Geometry::MeshBase& mesh) const;
 
       private:
          std::set<int> m_traceDomain;
@@ -391,7 +464,7 @@ namespace Rodin::Variational::Internal
    class ProxyFunction<RangeType::Scalar> : public mfem::Coefficient
    {
       public:
-         ProxyFunction(const FunctionBase& s);
+         ProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase& s);
 
          ProxyFunction(const ProxyFunction& other);
 
@@ -402,6 +475,7 @@ namespace Rodin::Variational::Internal
                const mfem::IntegrationPoint& ip) override;
 
       private:
+         const Geometry::MeshBase& m_mesh;
          const FunctionBase& m_s;
    };
 
@@ -409,7 +483,7 @@ namespace Rodin::Variational::Internal
    class ProxyFunction<RangeType::Vector> : public mfem::VectorCoefficient
    {
       public:
-         ProxyFunction(const FunctionBase& s);
+         ProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase& s);
 
          ProxyFunction(const ProxyFunction& other);
 
@@ -421,6 +495,7 @@ namespace Rodin::Variational::Internal
                const mfem::IntegrationPoint& ip) override;
 
       private:
+         const Geometry::MeshBase& m_mesh;
          const FunctionBase& m_s;
    };
 
@@ -428,7 +503,7 @@ namespace Rodin::Variational::Internal
    class ProxyFunction<RangeType::Matrix> : public mfem::MatrixCoefficient
    {
       public:
-         ProxyFunction(const FunctionBase& s);
+         ProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase& s);
 
          ProxyFunction(const ProxyFunction& other);
 
@@ -439,6 +514,7 @@ namespace Rodin::Variational::Internal
                mfem::ElementTransformation& trans,
                const mfem::IntegrationPoint& ip) override;
       private:
+         const Geometry::MeshBase& m_mesh;
          const FunctionBase& m_s;
    };
 }

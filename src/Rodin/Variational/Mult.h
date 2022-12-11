@@ -71,10 +71,29 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         virtual void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         virtual FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            FunctionValue::Scalar s;
+            if (m_lhs->getRangeType() == RangeType::Scalar)
+            {
+               s = m_lhs->getValue(p);
+               FunctionValue value = m_rhs->getValue(p);
+               value *= s;
+               return value;
+            }
+            else if (m_rhs->getRangeType() == RangeType::Scalar)
+            {
+               s = m_rhs->getValue(p);
+               FunctionValue value = m_lhs->getValue(p);
+               value *= s;
+               return value;
+            }
+            else
+            {
+               assert(false);
+               return 0.0;
+            }
+         }
 
          Mult* copy() const noexcept override
          {
@@ -155,7 +174,7 @@ namespace Rodin::Variational
             return m_rhs->getRangeShape().width();
          }
 
-         int getDOFs(const Geometry::SimplexBase& element) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
             return m_rhs->getDOFs(element);
          }
@@ -193,18 +212,15 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::SimplexBase& element) const override
+               const Geometry::Point& p) const override
          {
-            auto& trans = element.getTransformation();
-            const auto& fe = getFiniteElementSpace().getFiniteElement(element);
+            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getElement());
             switch (m_lhs->getRangeType())
             {
                case RangeType::Scalar:
                {
-                  m_rhs->getOperator(op, compute, element);
-                  mfem::DenseMatrix v;
-                  m_lhs->getValue(v, trans, trans.GetIntPoint());
-                  op *= v(0, 0);
+                  m_rhs->getOperator(op, compute, p);
+                  op *= m_lhs->getValue(p).scalar();
                   break;
                }
                default:

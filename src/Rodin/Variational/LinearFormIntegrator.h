@@ -97,7 +97,7 @@ namespace Rodin::Variational
           * element.
           */
          virtual mfem::Vector getElementVector(
-               const Geometry::SimplexBase& element) const = 0;
+               const Geometry::Simplex& element) const = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
@@ -130,22 +130,23 @@ namespace Rodin::Variational::Internal
                const mfem::FiniteElement&,
                mfem::ElementTransformation& trans, mfem::Vector& vec) override
          {
-            if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
-            {
-               const auto& element = m_lfi.getTestFunction()
-                                          .getFiniteElementSpace()
-                                          .getMesh()
-                                          .get<Geometry::Boundary>(trans.ElementNo);
-               vec = m_lfi.getElementVector(element);
-            }
-            else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
-            {
-               const auto& element = m_lfi.getTestFunction()
-                                          .getFiniteElementSpace()
-                                          .getMesh()
-                                          .get<Geometry::Element>(trans.ElementNo);
-               vec = m_lfi.getElementVector(element);
-            }
+            assert(false);
+            // if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
+            // {
+            //    const auto& element = m_lfi.getTestFunction()
+            //                               .getFiniteElementSpace()
+            //                               .getMesh()
+            //                               .get<Geometry::Boundary>(trans.ElementNo);
+            //    vec = m_lfi.getElementVector(element);
+            // }
+            // else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
+            // {
+            //    const auto& element = m_lfi.getTestFunction()
+            //                               .getFiniteElementSpace()
+            //                               .getMesh()
+            //                               .get<Geometry::Element>(trans.ElementNo);
+            //    vec = m_lfi.getElementVector(element);
+            // }
          }
 
       private:

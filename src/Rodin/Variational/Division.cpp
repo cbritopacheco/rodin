@@ -45,17 +45,6 @@ namespace Rodin::Variational
       return m_lhs->getRangeShape();
    }
 
-   void Division<FunctionBase, FunctionBase>::getValue(
-      mfem::DenseMatrix& value,
-      mfem::ElementTransformation& trans,
-      const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix s;
-      m_rhs->getValue(s, trans, ip);
-      m_lhs->getValue(value, trans, ip);
-      value *= 1.0 / s(0, 0);
-   }
-
    Division<FunctionBase, FunctionBase>
    operator/(const FunctionBase& lhs, const FunctionBase& rhs)
    {

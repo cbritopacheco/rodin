@@ -43,10 +43,12 @@ namespace Rodin::Variational
 
          Sum& traceOf(const std::set<int>& attrs) override;
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            FunctionValue res = m_lhs->getValue(p);
+            res += m_rhs->getValue(p);
+            return res;
+         }
 
          Sum* copy() const noexcept override
          {
@@ -135,7 +137,7 @@ namespace Rodin::Variational
             return getLHS().getColumns();
          }
 
-         int getDOFs(const Geometry::SimplexBase& element) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
             assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
             return getLHS().getDOFs(element);
@@ -144,11 +146,11 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::SimplexBase& element) const override
+               const Geometry::Point& p) const override
          {
-            getLHS().getOperator(op, compute, element);
+            getLHS().getOperator(op, compute, p);
             DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, compute, element);
+            getRHS().getOperator(tmp, compute, p);
             op += tmp;
          }
 

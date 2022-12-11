@@ -49,13 +49,9 @@ namespace Rodin::Variational
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix s;
-            m_v->getValue(s, trans, ip);
-            return s.FNorm();
+            return m_v->getValue(p).matrix().FNorm();
          }
 
          Frobenius* copy() const noexcept override

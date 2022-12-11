@@ -48,14 +48,14 @@ namespace Rodin::Variational
             return m_n;
          }
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation&, const mfem::IntegrationPoint&) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
+            FunctionValue::Matrix value;
             value.SetSize(m_n);
             value = 0.0;
             for (int i = 0; i < m_n; i++)
                value(i, i) = 1.0;
+            return value;
          }
 
          IdentityMatrix* copy() const noexcept override

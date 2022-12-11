@@ -138,7 +138,7 @@ namespace Rodin::Variational
    GridFunctionBase& GridFunctionBase::project(
          const FunctionBase& s, const std::set<int>& attrs)
    {
-      auto va = s.build();
+      auto va = s.build(getFiniteElementSpace().getMesh());
       switch (s.getRangeType())
       {
          case RangeType::Scalar:
@@ -213,115 +213,25 @@ namespace Rodin::Variational
       return *this;
    }
 
-   void GridFunctionBase::transfer(GridFunctionBase& dst)
+   FunctionValue GridFunctionBase::getValue(const Geometry::Point& p) const
    {
-      assert(getFiniteElementSpace().getVectorDimension() ==
-            dst.getFiniteElementSpace().getVectorDimension());
-      if (getFiniteElementSpace().getMesh().isSubMesh() && (
-            &dst.getFiniteElementSpace().getMesh()) ==
-            &static_cast<const Geometry::SubMesh<Context::Serial>&>(
-               getFiniteElementSpace().getMesh()).getParent())
-      {
-         // If we are here the this means that we are in a submesh of the
-         // underlying target finite element space. Hence we should seek
-         // out to copy the grid function at the corresponding nodes
-         // given by the vertex map given in the Submesh object.
-         auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(
-               getFiniteElementSpace().getMesh());
-         if (&submesh.getParent() == &dst.getFiniteElementSpace().getMesh())
-         {
-            int vdim = getFiniteElementSpace().getVectorDimension();
-            const auto& s2pv = submesh.getVertexMap();
-            int nv = getFiniteElementSpace().getHandle().GetNV();
-            int pnv = dst.getFiniteElementSpace().getHandle().GetNV();
-
-            assert(getFiniteElementSpace().getHandle().GetOrdering() ==
-                     getFiniteElementSpace().getHandle().GetOrdering());
-            switch(getFiniteElementSpace().getHandle().GetOrdering())
-            {
-               case mfem::Ordering::byNODES:
-               {
-                  for (int i = 0; i < vdim; i++)
-                     for (int j = 0; j < nv; j++)
-                        dst.getHandle()[s2pv.left.at(j) + i * pnv] = getHandle()[j + i * nv];
-                  return;
-               }
-               case mfem::Ordering::byVDIM:
-               {
-                  for (int i = 0; i < nv; i++)
-                     for (int j = 0; j < vdim; j++)
-                        dst.getHandle()[s2pv.left.at(i) * vdim + j] = getHandle()[i * vdim + j];
-                  return;
-               }
-            }
-         }
-      }
-      else if (dst.getFiniteElementSpace().getMesh().isSubMesh() && (
-            &getFiniteElementSpace().getMesh() ==
-            &static_cast<const Geometry::SubMesh<Context::Serial>&>(
-               dst.getFiniteElementSpace().getMesh()).getParent()))
-      {
-         auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(
-               dst.getFiniteElementSpace().getMesh());
-         int vdim = getFiniteElementSpace().getVectorDimension();
-         const auto& s2pv = submesh.getVertexMap();
-         int nv = getFiniteElementSpace().getHandle().GetNV();
-         int pnv = dst.getFiniteElementSpace().getHandle().GetNV();
-
-         assert(getFiniteElementSpace().getHandle().GetOrdering() ==
-                  getFiniteElementSpace().getHandle().GetOrdering());
-         switch(getFiniteElementSpace().getHandle().GetOrdering())
-         {
-            case mfem::Ordering::byNODES:
-            {
-               for (int i = 0; i < vdim; i++)
-                  for (int j = 0; j < nv; j++)
-                     if (s2pv.right.count(j))
-                        dst.getHandle()[s2pv.right.at(j) + i * pnv] = getHandle()[j + i * nv];
-               return;
-            }
-            case mfem::Ordering::byVDIM:
-            {
-               for (int i = 0; i < nv; i++)
-                  for (int j = 0; j < vdim; j++)
-                     if (s2pv.right.count(i))
-                        dst.getHandle()[s2pv.right.at(i) * vdim + j] = getHandle()[i * vdim + j];
-               return;
-            }
-         }
-      }
-      else
-      {
-         // If the meshes are equal or where obtained from refinements
-         // one could use the mfem functionality to make a GridTransfer.
-         // Alternatively, if the mesh is equal but the finite element
-         // spaces are not, mfem also contains the TransferOperator class
-         // which can come in useful.
-         Alert::Exception("Unimplemented. Sorry.").raise();
-      }
-   }
-
-   void GridFunctionBase::getValue(
-         mfem::Vector& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
+      auto& trans = p.getElement().getTransformation();
       switch (getRangeType())
       {
          case RangeType::Scalar:
          {
-            value.SetSize(1);
-            value(0) = getHandle().GetValue(trans, ip);
-            break;
+            return getHandle().GetValue(trans, trans.GetIntPoint());
          }
          case RangeType::Vector:
          {
-            getHandle().GetVectorValue(trans, ip, value);
-            break;
+            FunctionValue::Vector value;
+            getHandle().GetVectorValue(trans, trans.GetIntPoint(), value);
+            return value;
          }
          case RangeType::Matrix:
          {
             assert(false);
+            return 0.0;
          }
       }
    }
@@ -498,33 +408,30 @@ namespace Rodin::Variational
    }
 
    std::set<Geometry::Point> GridFunctionBase::where(
-         const BooleanFunctionBase& p,
+         const BooleanFunctionBase& pred,
          const std::set<int>& attrs,
          std::function<int(mfem::ElementTransformation&)> order) const
    {
-      std::set<Geometry::Point> result;
-      const auto& fes = getFiniteElementSpace();
-      const auto& mesh = fes.getMesh();
-      for (int i = 0; i < mesh.count<Geometry::Element>(); i++)
-      {
-         if (attrs.size() == 0 || attrs.count(mesh.get<Geometry::Element>(i).getAttribute()))
-         {
-            mfem::ElementTransformation* trans =
-               fes.getHandle().GetElementTransformation(i);
-
-            const mfem::IntegrationRule* ir =
-               &mfem::IntRules.Get(trans->GetGeometryType(), order(*trans));
-
-            for (int j = 0; j < ir->GetNPoints(); j++)
-            {
-               const mfem::IntegrationPoint& ip = ir->IntPoint(j);
-               trans->SetIntPoint(&ip);
-               if (p.getValue(*trans, ip))
-                  result.insert(Geometry::Point(*trans, ip));
-            }
-         }
-      }
-      return result;
+      // std::set<Geometry::Point> result;
+      // const auto& fes = getFiniteElementSpace();
+      // const auto& mesh = fes.getMesh();
+      assert(false);
+      // for (int i = 0; i < mesh.count<Geometry::Element>(); i++)
+      // {
+      //    if (attrs.size() == 0 || attrs.count(mesh.get<Geometry::Element>(i).getAttribute()))
+      //    {
+      //       const auto& element = mesh.get<Geometry::Element>(i);
+      //       auto& trans = element.getTransformation();
+      //       for (const auto& p : element.getIntegrationRule(order(trans)))
+      //       {
+      //          const auto& ip = trans.GetIntPoint();
+      //          trans.SetIntPoint(&ip);
+      //          if (pred.getValue(p)) result.insert(p);
+      //       }
+      //    }
+      // }
+      // return result;
+      return {};
    }
 
    int GridFunctionBase::getDimension() const
@@ -557,32 +464,3 @@ namespace Rodin::Variational
    }
 }
 
-namespace Rodin::Variational::Internal
-{
-   GridFunctionEvaluator::GridFunctionEvaluator(const GridFunctionBase& gf)
-      : m_gf(gf)
-   {}
-
-   GridFunctionEvaluator::GridFunctionEvaluator(const GridFunctionEvaluator& other)
-      : VectorFunctionBase(other),
-        m_gf(other.m_gf)
-   {}
-
-   GridFunctionEvaluator::GridFunctionEvaluator(GridFunctionEvaluator&& other)
-      : VectorFunctionBase(std::move(other)),
-        m_gf(other.m_gf)
-   {}
-
-   RangeShape GridFunctionEvaluator::getRangeShape() const
-   {
-      return m_gf.getRangeShape();
-   }
-
-   void GridFunctionEvaluator::getValue(
-         mfem::Vector& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      m_gf.getValue(value, trans, ip);
-   }
-}

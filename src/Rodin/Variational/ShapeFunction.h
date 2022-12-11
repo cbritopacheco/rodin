@@ -209,12 +209,12 @@ namespace Rodin::Variational
 
          virtual int getColumns() const = 0;
 
-         virtual int getDOFs(const Geometry::SimplexBase& element) const = 0;
+         virtual int getDOFs(const Geometry::Simplex& element) const = 0;
 
          virtual void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::SimplexBase& element) const = 0;
+               const Geometry::Point& p) const = 0;
 
          virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
@@ -270,7 +270,7 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(const Geometry::SimplexBase& element) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
@@ -352,7 +352,7 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(const Geometry::SimplexBase& element) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
@@ -361,8 +361,9 @@ namespace Rodin::Variational
          void getOperator(
                DenseBasisOperator& op,
                ShapeComputator& compute,
-               const Geometry::SimplexBase& element) const override
+               const Geometry::Point& p) const override
          {
+            const auto& element = p.getElement();
             const auto& shape =
                compute.getPhysicalShape(
                      getFiniteElementSpace().getFiniteElement(element),

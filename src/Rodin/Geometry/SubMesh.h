@@ -37,11 +37,11 @@ namespace Rodin::Geometry
 
          SubMesh(const SubMesh& other);
 
-         SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
-         {
-            getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
-            return *this;
-         }
+         // SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
+         // {
+         //    getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
+         //    return *this;
+         // }
 
          /**
           * @brief Adds an element from the parent mesh to the submesh.
@@ -67,11 +67,11 @@ namespace Rodin::Geometry
          /**
           * @returns The SubMesh to Mesh vertex map
           */
-         const boost::bimap<int, int>& getVertexMap() const;
+         const boost::bimap<size_t, size_t>& getVertexMap() const;
 
-         const boost::bimap<int, int>& getElementMap() const;
+         const boost::bimap<size_t, size_t>& getElementMap() const;
 
-         const boost::bimap<int, int>& getBoundaryElementMap() const;
+         const boost::bimap<size_t, size_t>& getBoundaryElementMap() const;
 
          bool isSubMesh() const override
          {
@@ -80,10 +80,10 @@ namespace Rodin::Geometry
 
       private:
          const MeshBase& m_parent;
-         boost::bimap<int, int> m_s2pv;
-         boost::bimap<int, int> m_s2pf;
-         boost::bimap<int, int> m_s2pe;
-         boost::bimap<int, int> m_s2pb;
+         boost::bimap<size_t, size_t> m_s2pv;
+         boost::bimap<size_t, size_t> m_s2pf;
+         boost::bimap<size_t, size_t> m_s2pe;
+         boost::bimap<size_t, size_t> m_s2pb;
    };
 }
 

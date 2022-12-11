@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_MESH_H
-#define RODIN_MESH_MESH_H
+#ifndef RODIN_GEOMETRY_MESH_H
+#define RODIN_GEOMETRY_MESH_H
 
 #include <set>
 #include <string>
@@ -15,16 +15,18 @@
 
 #include "Rodin/Configure.h"
 
-#ifdef RODIN_USE_MPI
-#include <boost/mpi.hpp>
-#endif
-
 #include <boost/filesystem.hpp>
 
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
+#include "SimplexRTree.h"
+#include "SimplexIterator.h"
+
+#ifdef RODIN_USE_MPI
+#include <boost/mpi.hpp>
+#endif
 
 namespace Rodin
 {
@@ -48,23 +50,6 @@ namespace Rodin
 namespace Rodin::Geometry
 {
    /**
-    * @brief Module for containing utilities for the refinement of meshes.
-    */
-   namespace Refinement
-   {
-      /**
-       * @brief Type of refinement.
-       */
-      enum class Type
-      {
-         Conforming,    ///< Conforming refinement
-         NonConforming, ///< Non-conforming refinement
-         Automatic      ///< Automatically determines whether to use conforming
-                        ///or non-conforming refinement
-      };
-   }
-
-   /**
     * @brief Abstract base class for Mesh objects.
     */
    class MeshBase
@@ -72,100 +57,41 @@ namespace Rodin::Geometry
       public:
          virtual ~MeshBase() = default;
 
-         template <class T>
-         std::enable_if_t<std::is_same_v<Element, T>, int>
-         count() const
-         {
-            return getHandle().GetNE();
-         }
+         virtual MeshSimplexIterator begin(size_t dimension) noexcept = 0;
 
-         template <class T>
-         std::enable_if_t<std::is_same_v<Face, T>, int>
-         count() const
-         {
-            return getHandle().GetNumFaces();
-         }
+         virtual const MeshSimplexIterator begin(size_t dimension) const noexcept = 0;
 
-         template <class T>
-         std::enable_if_t<std::is_same_v<Boundary, T>, int>
-         count() const
-         {
-            return getHandle().GetNBE();
-         }
+         virtual const MeshSimplexIterator cbegin(size_t dimension) const noexcept = 0;
 
-         template <class T>
-         std::enable_if_t<
-            std::is_same_v<Element, T>,
-            ElementView>
-         get(int i);
+         virtual MeshSimplexIterator end(size_t dimension) noexcept = 0;
 
-         template <class T>
-         std::enable_if_t<
-            std::is_same_v<Boundary, T>,
-            BoundaryView>
-         get(int i);
+         virtual const MeshSimplexIterator end(size_t dimension) const noexcept = 0;
 
-         template <class T>
-         std::enable_if_t<std::is_same_v<Element, T>,
-            Element>
-         get(int i) const;
+         virtual const MeshSimplexIterator cend(size_t dimension) const noexcept = 0;
 
-         template <class T>
-         std::enable_if_t<std::is_same_v<Face, T>,
-            Face>
-         get(int i) const;
+         virtual MeshBoundaryIterator getBoundary() const = 0;
 
-         template <class T>
-         std::enable_if_t<std::is_same_v<Boundary, T>,
-            Boundary>
-         get(int i) const;
+         virtual MeshInterfaceIterator getInterface() const = 0;
 
-         /**
-          * @brief Gets the dimension of the ambient space
-          * @returns Dimension of the space which the mesh is embedded in
-          * @see getDimension() const
-          */
-         int getSpaceDimension() const;
+         virtual size_t getElementCount() const = 0;
 
-         /**
-          * @brief Gets the dimension of the elements.
-          * @returns Dimension of the elements.
-          * @see getSpaceDimension() const
-          */
-         int getDimension() const;
+         virtual size_t getCount(size_t dim) const = 0;
 
-         /**
-          * @brief Indicates whether the mesh is a surface or not.
-          * @returns True if mesh is a surface, false otherwise.
-          *
-          * A surface mesh is a mesh of codimension 1. That is, the difference
-          * between its space dimension and dimension is 1.
-          */
-         bool isSurface() const;
+         virtual size_t getCount(Region region) const = 0;
 
-         /**
-          * @brief Performs a uniform refinement over all mesh elements
-          */
-         MeshBase& refine();
+         virtual MeshElementIterator getElement(size_t idx = 0) const = 0;
 
-         MeshBase& refine(
-               std::function<bool(const Element&)> p,
-               Refinement::Type t = Refinement::Type::Automatic,
-               int maxHangingNodesLevel = std::numeric_limits<int>::infinity());
+         virtual MeshFaceIterator getFace(size_t idx = 0) const = 0;
 
-         /**
-          * @brief Gets the labels of the domain elements in the mesh.
-          * @returns Set of all the attributes in the mesh object.
-          * @see getBoundaryAttributes() const
-          */
-         std::set<int> getAttributes() const;
+         virtual MeshVertexIterator getVertex(size_t idx = 0) const = 0;
 
-         /**
-          * @brief Gets the labels of the boundary elements in the mesh.
-          * @returns Set of all the boundary attributes in the mesh object.
-          * @see getAttributes() const
-          */
-         std::set<int> getBoundaryAttributes() const;
+         virtual MeshSimplexIterator getSimplex(size_t idx, size_t dimension) const = 0;
+
+         virtual bool isInterface(Index faceIdx) const = 0;
+
+         virtual bool isBoundary(Index faceIdx) const = 0;
+
+         MeshBase& update();
 
          /**
           * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -186,6 +112,101 @@ namespace Rodin::Geometry
          MeshBase& displace(const Variational::GridFunctionBase& u);
 
          /**
+          * @brief Edits all elements in the mesh via the given function.
+          * @param[in] f Function which takes an ElementView to modify each
+          * element.
+          */
+         // MeshBase& edit(std::function<void(const MeshElementIterator)> f);
+
+         /**
+          * @brief Performs connected-component labelling.
+          * @param[in] p Function which returns true if two adjacent elements
+          * belong to the same component, false otherwise.
+          * @returns List of sets, each set representing a component containing
+          * the indices of its elements.
+          *
+          * @note Both elements passed to the function will always be adjacent
+          * to each other, i.e. it is not necessary to verify this is the case.
+          */
+         std::deque<std::set<int>> ccl(
+               std::function<bool(const Element&, const Element&)> p) const;
+
+         /**
+          * @brief Edits the specified elements in the mesh via the given function.
+          * @param[in] f Function which takes an ElementView to modify each
+          * element.
+          * @param[in] elements Set of indices corresponding to the elements
+          * which will be modified.
+          */
+         // MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
+
+         /**
+          * @brief Obtains a set of elements satisfying the given condition.
+          * @param[in] condition Function which returns true if the element
+          * satisfies the condition.
+          * @returns Set containing the element indices satisfying the
+          * condition.
+          */
+         // std::set<int> where(std::function<bool(const Element&)> condition) const;
+
+         // std::set<int> where(std::function<bool(const Point&)> condition) const;
+
+         /**
+          * @brief Indicates whether the mesh is a surface or not.
+          * @returns True if mesh is a surface, false otherwise.
+          *
+          * A surface mesh is a mesh of codimension 1. That is, the difference
+          * between its space dimension and dimension is 1.
+          */
+         bool isSurface() const;
+
+         /**
+          * @brief Gets the total volume of the mesh.
+          * @returns Sum of all element volumes.
+          */
+         double getVolume();
+
+         /**
+          * @brief Gets the sum of the volumes of the elements given by the
+          * specified attribute.
+          * @param[in] attr Attribute of elements
+          * @returns Sum of element volumes with given attribute
+          * @note If the element attribute does not exist then this function
+          * will return 0 as the volume.
+          */
+         double getVolume(Attribute attr);
+
+         /**
+          * @brief Gets the total perimeter of the mesh.
+          * @returns Sum of all element perimeters.
+          */
+         double getPerimeter();
+
+         /**
+          * @brief Gets the sum of the perimeters of the elements given by the
+          * specified attribute.
+          * @param[in] attr Attribute of elements
+          * @returns Sum of element perimeters with given attribute
+          * @note If the element attribute does not exist then this function
+          * will return 0 as the perimeter.
+          */
+         double getPerimeter(Attribute attr);
+
+         /**
+          * @brief Gets the labels of the domain elements in the mesh.
+          * @returns Set of all the attributes in the mesh object.
+          * @see getBoundaryAttributes() const
+          */
+         std::set<int> getAttributes() const;
+
+         /**
+          * @brief Gets the labels of the boundary elements in the mesh.
+          * @returns Set of all the boundary attributes in the mesh object.
+          * @see getAttributes() const
+          */
+         std::set<int> getBoundaryAttributes() const;
+
+         /**
           * @brief Gets the maximum number @f$ t @f$ by which the mesh will
           * remain valid, when displacing by @f$ u @f$.
           * @param[in] u Displacement at each node
@@ -204,81 +225,38 @@ namespace Rodin::Geometry
           */
          double getMaximumDisplacement(const Variational::GridFunctionBase& u);
 
-         /**
-          * @brief Gets the total volume of the mesh.
-          * @returns Sum of all element volumes.
-          */
-         double getVolume();
+         bool operator==(const MeshBase& other) const
+         {
+            return this == &other;
+         }
+
+         bool operator!=(const MeshBase& other) const
+         {
+            return this != &other;
+         }
 
          /**
-          * @brief Gets the sum of the volumes of the elements given by the
-          * specified attribute.
-          * @param[in] attr Attribute of elements
-          * @returns Sum of element volumes with given attribute
-          * @note If the element attribute does not exist then this function
-          * will return 0 as the volume.
+          * @brief Gets the dimension of the elements.
+          * @returns Dimension of the elements.
+          * @see getSpaceDimension() const
           */
-         double getVolume(int attr);
+         virtual size_t getDimension() const;
 
          /**
-          * @brief Gets the total perimeter of the mesh.
-          * @returns Sum of all element perimeters.
+          * @brief Gets the dimension of the ambient space
+          * @returns Dimension of the space which the mesh is embedded in
+          * @see getDimension() const
           */
-         double getPerimeter();
+         virtual size_t getSpaceDimension() const;
 
          /**
-          * @brief Gets the sum of the perimeters of the elements given by the
-          * specified attribute.
-          * @param[in] attr Attribute of elements
-          * @returns Sum of element perimeters with given attribute
-          * @note If the element attribute does not exist then this function
-          * will return 0 as the perimeter.
+          * @brief Indicates if the MeshBase object has been parallelized.
+          * @returns True if the MeshBase has been parallelized, false
+          * otherwise.
+          * @see Mesh<Traits::Parallel>
+          * @see Mesh<Traits::Serial>::parallelize()
           */
-         double getPerimeter(int attr);
-
-         /**
-          * @brief Performs connected-component labelling.
-          * @param[in] p Function which returns true if two adjacent elements
-          * belong to the same component, false otherwise.
-          * @returns List of sets, each set representing a component containing
-          * the indices of its elements.
-          *
-          * @note Both elements passed to the function will always be adjacent
-          * to each other, i.e. it is not necessary to verify this is the case.
-          */
-         std::deque<std::set<int>> ccl(
-               std::function<bool(const Element&, const Element&)> p) const;
-
-         /**
-          * @brief Obtains a set of elements satisfying the given condition.
-          * @param[in] condition Function which returns true if the element
-          * satisfies the condition.
-          * @returns Set containing the element indices satisfying the
-          * condition.
-          */
-         std::set<int> where(std::function<bool(const Element&)> condition) const;
-
-         std::set<int> where(std::function<bool(const Point&)> condition) const;
-
-         /**
-          * @brief Edits all elements in the mesh via the given function.
-          * @param[in] f Function which takes an ElementView to modify each
-          * element.
-          */
-         MeshBase& edit(std::function<void(ElementView)> f);
-
-         MeshBase& edit(std::function<void(BoundaryView)> f);
-
-         /**
-          * @brief Edits the specified elements in the mesh via the given function.
-          * @param[in] f Function which takes an ElementView to modify each
-          * element.
-          * @param[in] elements Set of indices corresponding to the elements
-          * which will be modified.
-          */
-         MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
-
-         MeshBase& update();
+         virtual bool isParallel() const = 0;
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
@@ -296,15 +274,6 @@ namespace Rodin::Geometry
           *
           */
          virtual bool isSubMesh() const = 0;
-
-         /**
-          * @brief Indicates if the MeshBase object has been parallelized.
-          * @returns True if the MeshBase has been parallelized, false
-          * otherwise.
-          * @see Mesh<Traits::Parallel>
-          * @see Mesh<Traits::Serial>::parallelize()
-          */
-         virtual bool isParallel() const = 0;
 
          /**
           * @internal
@@ -335,6 +304,42 @@ namespace Rodin::Geometry
    {
       public:
          /**
+          * @brief Constructs an empty mesh with no elements.
+          */
+         Mesh() = default;
+
+         /**
+          * @brief Move constructs the mesh from another mesh.
+          */
+         Mesh(Mesh&& other) = default;
+
+         /**
+          * @brief Performs a deep copy of another mesh.
+          */
+         Mesh(const Mesh& other);
+
+         /**
+          * @brief Move assigns the mesh from another mesh.
+          */
+         Mesh& operator=(Mesh&& other) = default;
+
+         virtual Mesh& initialize(int dim, int sdim);
+
+         virtual Mesh& vertex(const std::vector<double>& x);
+
+         virtual Mesh& element(
+               Type geom,
+               const std::vector<int>& vs,
+               int attr = 1);
+
+         virtual Mesh& boundary(
+               Type geom,
+               const std::vector<int>& vs,
+               int attr = 1);
+
+         virtual Mesh& finalize();
+
+         /**
           * @brief Loads a mesh from file in the given format.
           * @param[in] filename Name of file to read
           * @param[in] fmt Mesh file format
@@ -355,44 +360,14 @@ namespace Rodin::Geometry
                IO::FileFormat fmt = IO::FileFormat::MFEM, int precison = 16) const;
 
          /**
-          * @brief Constructs an empty mesh with no elements.
+          * @brief Skins the mesh to obtain its boundary mesh
+          * @returns SubMesh object to the boundary region of the mesh
+          *
+          * This function will "skin" the mesh to return the mesh boundary as a
+          * new SubMesh object. The new mesh will be embedded in the original
+          * space dimension.
           */
-         Mesh() = default;
-
-         /**
-          * @brief Move constructs the mesh from another mesh.
-          */
-         Mesh(Mesh&& other) = default;
-
-         /**
-          * @brief Performs a deep copy of another mesh.
-          */
-         Mesh(const Mesh& other);
-
-         /**
-          * @brief Move assigns the mesh from another mesh.
-          */
-         Mesh& operator=(Mesh&& other) = default;
-
-         Mesh& initialize(int dim, int sdim);
-
-         Mesh& vertex(const std::vector<double>& x);
-
-         Mesh& element(
-               Type geom,
-               const std::vector<int>& vs,
-               int attr = 1);
-
-         Mesh& boundary(
-               Type geom,
-               const std::vector<int>& vs,
-               int attr = 1);
-
-         Mesh& finalize();
-
-         SubMesh<Context::Serial> keep(int attr);
-
-         SubMesh<Context::Serial> keep(const std::set<int>& attrs);
+         virtual SubMesh<Context::Serial> skin();
 
          /**
           * @brief Trims the elements with the given material reference.
@@ -402,7 +377,7 @@ namespace Rodin::Geometry
           * Convenience function to call trim(const std::set<int>&, int) with
           * only one attribute.
           */
-         SubMesh<Context::Serial> trim(int attr);
+         virtual SubMesh<Context::Serial> trim(int attr);
 
          /**
           * @brief Trims the elements with the given material references.
@@ -413,42 +388,21 @@ namespace Rodin::Geometry
           * object containing the elements which were not trimmed from the
           * original mesh.
           */
-         SubMesh<Context::Serial> trim(const std::set<int>& attrs);
+         virtual SubMesh<Context::Serial> trim(const std::set<int>& attrs);
 
-         /**
-          * @brief Skins the mesh to obtain its boundary mesh
-          * @returns SubMesh object to the boundary region of the mesh
-          *
-          * This function will "skin" the mesh to return the mesh boundary as a
-          * new SubMesh object. The new mesh will be embedded in the original
-          * space dimension.
-          */
-         SubMesh<Context::Serial> skin();
+         virtual SubMesh<Context::Serial> keep(int attr);
 
-         SubMesh<Context::Serial> extract(const std::set<int>& elements);
+         virtual SubMesh<Context::Serial> keep(const std::set<int>& attrs);
 
-         Mesh& trace(const std::map<std::set<int>, int>& boundaries);
+         virtual SubMesh<Context::Serial> extract(const std::set<int>& elements);
 
-         virtual bool isSubMesh() const override
-         {
-            return false;
-         }
-
-         bool isParallel() const override
-         {
-            return false;
-         }
-
-         mfem::Mesh& getHandle() override;
-
-         const mfem::Mesh& getHandle() const override;
+         virtual Mesh& trace(const std::map<std::set<int>, int>& boundaries);
 
          /**
           * @internal
           * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
           */
-         explicit
-         Mesh(mfem::Mesh&& mesh);
+         explicit Mesh(mfem::Mesh&& mesh);
 
 #ifdef RODIN_USE_MPI
          /**
@@ -462,8 +416,63 @@ namespace Rodin::Geometry
           */
          Mesh<Context::Parallel> parallelize(boost::mpi::communicator comm);
 #endif
+
+         MeshSimplexIterator begin(size_t dimension) noexcept override;
+
+         const MeshSimplexIterator begin(size_t dimension) const noexcept override;
+
+         const MeshSimplexIterator cbegin(size_t dimension) const noexcept override;
+
+         MeshSimplexIterator end(size_t dimension) noexcept override;
+
+         const MeshSimplexIterator end(size_t dimension) const noexcept override;
+
+         const MeshSimplexIterator cend(size_t dimension) const noexcept override;
+
+         size_t getElementCount() const override;
+
+         size_t getCount(size_t dim) const override;
+
+         size_t getCount(Region region) const override;
+
+         MeshBoundaryIterator getBoundary() const override;
+
+         MeshInterfaceIterator getInterface() const override;
+
+         MeshElementIterator getElement(size_t idx = 0) const override;
+
+         MeshFaceIterator getFace(size_t idx = 0) const override;
+
+         MeshVertexIterator getVertex(size_t idx = 0) const override;
+
+         MeshSimplexIterator getSimplex(size_t idx, size_t dimension) const override;
+
+         bool isInterface(Index faceIdx) const override;
+
+         bool isBoundary(Index faceIdx) const override;
+
+         bool isParallel() const override
+         {
+            return false;
+         }
+
+         mfem::Mesh& getHandle() override;
+
+         const mfem::Mesh& getHandle() const override;
+
+         const SimplexRTree& getSimplexRTree() const
+         {
+            return m_rtree;
+         }
+
+         virtual bool isSubMesh() const override
+         {
+            return false;
+         }
+
       private:
          mfem::Mesh m_mesh;
+         SimplexRTree m_rtree;
    };
 
 #ifdef RODIN_USE_MPI

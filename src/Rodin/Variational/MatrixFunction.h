@@ -40,6 +40,11 @@ namespace Rodin::Variational
 
          virtual ~MatrixFunctionBase() = default;
 
+         FunctionValue::Matrix operator()(const Geometry::Point& p) const
+         {
+            return getValue(p).matrix();
+         }
+
          RangeShape getRangeShape() const override
          {
             return {getRows(), getColumns()};
@@ -61,11 +66,6 @@ namespace Rodin::Variational
           * @returns Number of columns
           */
          virtual int getColumns() const = 0;
-
-         virtual void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override = 0;
 
          virtual MatrixFunctionBase* copy() const noexcept override = 0;
    };
