@@ -70,7 +70,7 @@ namespace Rodin::Geometry
           */
          const MeshBase& getMesh() const;
 
-         SimplexVertexIterator getVertices() const;
+         VertexIterator getVertices() const;
 
          mfem::ElementTransformation& getTransformation() const;
 
@@ -112,7 +112,7 @@ namespace Rodin::Geometry
             :  Simplex(std::move(other))
          {}
 
-         AdjacentElementIterator getAdjacent() const;
+         ElementIterator getAdjacent() const;
 
          Region getRegion() const override
          {
@@ -136,7 +136,7 @@ namespace Rodin::Geometry
             : Simplex(std::move(other))
          {}
 
-         virtual FaceElementIterator getIncident() const;
+         virtual ElementIterator getIncident() const;
 
          virtual mfem::FaceElementTransformations& getFaceTransformations() const
          {

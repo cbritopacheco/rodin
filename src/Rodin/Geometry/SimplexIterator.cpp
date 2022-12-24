@@ -12,16 +12,16 @@ namespace Rodin::Geometry::Internal
    mfem::Element* makeGeometry(mfem::Geometry::Type t);
 
    std::unique_ptr<mfem::Element>
-   makeMeshElement(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type);
+   makeElement(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type);
 
    std::unique_ptr<mfem::ElementTransformation>
-   makeMeshElementTransformation(const MeshBase& mesh, Index index, Attribute attr);
+   makeElementTransformation(const MeshBase& mesh, Index index, Attribute attr);
 
    std::unique_ptr<mfem::Element>
-   makeMeshFace(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type);
+   makeFace(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type);
 
    std::unique_ptr<mfem::ElementTransformation>
-   makeMeshFaceTransformation(const MeshBase& mesh, Index index, Attribute attr);
+   makeFaceTransformation(const MeshBase& mesh, Index index, Attribute attr);
 
    mfem::Element* makeGeometry(mfem::Geometry::Type t)
    {
@@ -78,7 +78,7 @@ namespace Rodin::Geometry::Internal
    }
 
    std::unique_ptr<mfem::Element>
-   makeMeshElement(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type)
+   makeElement(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type)
    {
       // Build element object
       mfem::Element* element = makeGeometry(type);
@@ -90,7 +90,7 @@ namespace Rodin::Geometry::Internal
    }
 
    std::unique_ptr<mfem::Element>
-   makeMeshFace(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type)
+   makeFace(const MeshBase& mesh, Index index, Attribute attr, mfem::Geometry::Type type)
    {
       // Build element object
       mfem::Element* element = makeGeometry(type);
@@ -101,7 +101,7 @@ namespace Rodin::Geometry::Internal
       return std::unique_ptr<mfem::Element>(element);
    }
 
-   std::unique_ptr<mfem::ElementTransformation> makeMeshElementTransformation(
+   std::unique_ptr<mfem::ElementTransformation> makeElementTransformation(
          const MeshBase& mesh, Index index, Attribute attr)
    {
       mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
@@ -128,7 +128,7 @@ namespace Rodin::Geometry::Internal
       return std::unique_ptr<mfem::ElementTransformation>(trans);
    }
 
-   std::unique_ptr<mfem::ElementTransformation> makeMeshFaceTransformation(
+   std::unique_ptr<mfem::ElementTransformation> makeFaceTransformation(
          const MeshBase& mesh, Index index, Attribute attr)
    {
       mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
@@ -173,97 +173,114 @@ namespace Rodin::Geometry::Internal
 
 namespace Rodin::Geometry
 {
-   // ---- MeshSimplexIterator -----------------------------------------------
-   MeshSimplexIterator::MeshSimplexIterator(Data data)
-      : m_data(std::move(data))
+   // ---- SimplexIterator ---------------------------------------------------
+   SimplexIterator::SimplexIterator(Data data)
+      : m_data(std::move(data)),
+        m_it(m_data.indices.begin())
    {
-      update(generate());
+      if (m_data.indices.size() > 0)
+      {
+         update(generate());
+      }
+      else
+      {
+         assert(m_data.indices.begin() == m_data.indices.end());
+         assert(m_it == m_data.indices.end());
+      }
    }
 
-   MeshSimplexIterator::MeshSimplexIterator(const MeshSimplexIterator& other)
-      : m_data(other.m_data)
+   SimplexIterator::SimplexIterator(const SimplexIterator& other)
+      : m_data(other.m_data),
+        m_it(other.m_it)
    {
-      update(generate());
+      if (m_data.indices.size() > 0)
+      {
+         update(generate());
+      }
+      else
+      {
+         assert(m_data.indices.begin() == m_data.indices.end());
+         assert(m_it == m_data.indices.end());
+      }
    }
 
-   MeshSimplexIterator::MeshSimplexIterator(MeshSimplexIterator&& other)
+   SimplexIterator::SimplexIterator(SimplexIterator&& other)
       : m_data(std::move(other.m_data)),
+        m_it(std::move(other.m_it)),
         m_simplex(std::move(other.m_simplex))
    {}
 
-   bool MeshSimplexIterator::end() const
+   bool SimplexIterator::end() const
    {
-      return m_data.it == m_data.end;
+      return m_it == m_data.indices.end();
    }
 
-   MeshSimplexIterator& MeshSimplexIterator::operator++()
+   SimplexIterator& SimplexIterator::operator++()
    {
-      m_data.it++;
+      m_it++;
       update(generate());
       return *this;
    }
 
-   MeshSimplexIterator MeshSimplexIterator::operator++(int)
+   SimplexIterator SimplexIterator::operator++(int)
    {
       auto r = *this;
       ++(*this);
       return r;
    }
 
-   bool MeshSimplexIterator::operator==(const MeshSimplexIterator& other) const
+   bool SimplexIterator::operator==(const SimplexIterator& other) const
    {
-      return getData().it == other.getData().it && other.m_data.mesh.get() == other.m_data.mesh.get();
+      assert(m_data.mesh.get() == other.m_data.mesh.get());
+      return m_it == other.m_it;
    }
 
-   bool MeshSimplexIterator::operator!=(const MeshSimplexIterator& other) const
+   bool SimplexIterator::operator!=(const SimplexIterator& other) const
    {
-      return getData().it != other.getData().it && other.m_data.mesh.get() != other.m_data.mesh.get();
+      assert(m_data.mesh.get() == other.m_data.mesh.get());
+      return m_it != other.m_it;
    }
 
-   Simplex& MeshSimplexIterator::operator*() const noexcept
+   Simplex& SimplexIterator::operator*() const noexcept
    {
       assert(m_simplex);
       return *m_simplex;
    }
 
-   Simplex* MeshSimplexIterator::operator->() const noexcept
+   Simplex* SimplexIterator::operator->() const noexcept
    {
       return m_simplex.get();
    }
 
-   void MeshSimplexIterator::update(Simplex* simplex)
+   void SimplexIterator::update(Simplex* simplex)
    {
-      m_simplex.reset(generate());
+      m_simplex.reset(simplex);
    }
 
-   Simplex* MeshSimplexIterator::generate() const
+   Simplex* SimplexIterator::generate() const
    {
+      if (end()) return nullptr;
+      const auto& index = *m_it;
       const auto& data = getData();
-      if (getData().it->getDimension() == getData().mesh.get().getDimension())
+      const auto& dimension = data.dimension;
+      const auto& mesh = data.mesh.get();
+      if (dimension == mesh.getDimension())
       {
-         auto element =
-            Internal::makeMeshElement(
-               data.mesh.get(), data.it->getIndex(), data.it->getAttribute(),
-               static_cast<mfem::Geometry::Type>(data.it->getType()));
-         auto trans =
-            Internal::makeMeshElementTransformation(
-                  data.mesh.get(), data.it->getIndex(), data.it->getAttribute());
-         return new Element(
-               {data.it->getIndex(), data.mesh.get(), std::move(element), std::move(trans)});
+         const auto& attribute = mesh.getAttribute(dimension, index);
+         const auto& geometry = mesh.getHandle().GetElementGeometry(index);
+         auto element = Internal::makeElement(mesh, index, attribute, geometry);
+         auto trans = Internal::makeElementTransformation(mesh, index, attribute);
+         return new Element({index, mesh, std::move(element), std::move(trans)});
       }
-      else if (getData().it->getDimension() == getData().mesh.get().getDimension() - 1)
+      else if (dimension == mesh.getDimension() - 1)
       {
-         auto element =
-            Internal::makeMeshFace(
-               data.mesh.get(), data.it->getIndex(), data.it->getAttribute(),
-               static_cast<mfem::Geometry::Type>(data.it->getType()));
-         auto trans =
-            Internal::makeMeshFaceTransformation(
-                  data.mesh.get(), data.it->getIndex(), data.it->getAttribute());
-         return new Face(
-               {data.it->getIndex(), data.mesh.get(), std::move(element), std::move(trans)});
+         const auto& attribute = mesh.getAttribute(dimension, index);
+         const auto& geometry = mesh.getHandle().GetFaceGeometry(index);
+         auto element = Internal::makeFace(mesh, index, attribute, geometry);
+         auto trans = Internal::makeFaceTransformation(mesh, index, attribute);
+         return new Face({index, mesh, std::move(element), std::move(trans)});
       }
-      else if (getData().it->getDimension() == 0)
+      else if (dimension == 0)
       {
          assert(false);
          return nullptr;
@@ -275,218 +292,167 @@ namespace Rodin::Geometry
       }
    }
 
-   // ---- MeshElementIterator -----------------------------------------------
-   MeshElementIterator::MeshElementIterator(const MeshElementIterator& other)
-      : MeshSimplexIterator(other)
+   // ---- ElementIterator ---------------------------------------------------
+   ElementIterator::ElementIterator(Data data)
+      : SimplexIterator(std::move(data))
    {}
 
-   MeshElementIterator::MeshElementIterator(MeshElementIterator&& other)
-      : MeshSimplexIterator(std::move(other))
+   ElementIterator::ElementIterator(const ElementIterator& other)
+      : SimplexIterator(other)
    {}
 
-   Element& MeshElementIterator::operator*() const noexcept
+   ElementIterator::ElementIterator(ElementIterator&& other)
+      : SimplexIterator(std::move(other))
+   {}
+
+   Element& ElementIterator::operator*() const noexcept
    {
-      assert(dynamic_cast<Element*>(&MeshSimplexIterator::operator*()));
-      return static_cast<Element&>(MeshSimplexIterator::operator*());
+      assert(dynamic_cast<Element*>(&SimplexIterator::operator*()));
+      return static_cast<Element&>(SimplexIterator::operator*());
    }
 
-   Element* MeshElementIterator::operator->() const noexcept
+   Element* ElementIterator::operator->() const noexcept
    {
-      assert(dynamic_cast<Element*>(MeshSimplexIterator::operator->()));
-      return static_cast<Element*>(MeshSimplexIterator::operator->());
+      assert(dynamic_cast<Element*>(SimplexIterator::operator->()));
+      return static_cast<Element*>(SimplexIterator::operator->());
    }
 
-   Element* MeshElementIterator::generate() const
+   Element* ElementIterator::generate() const
    {
+      if (end()) return nullptr;
+      const auto& it = getInternalIterator();
+      assert(it != getData().indices.end());
+      const auto& index = *it;
       const auto& data = getData();
-      auto element =
-         Internal::makeMeshElement(
-            data.mesh.get(), data.it->getIndex(), data.it->getAttribute(),
-            static_cast<mfem::Geometry::Type>(data.it->getType()));
-      auto trans =
-         Internal::makeMeshElementTransformation(
-               data.mesh.get(), data.it->getIndex(), data.it->getAttribute());
-      return new Element({data.it->getIndex(), data.mesh.get(), std::move(element), std::move(trans)});
+      const auto& mesh = data.mesh.get();
+      const auto& dimension = data.dimension;
+      const auto& attribute = mesh.getAttribute(dimension, index);
+      const auto& geometry = mesh.getHandle().GetElementGeometry(index);
+      auto element = Internal::makeElement(mesh, index, attribute, geometry);
+      auto trans = Internal::makeElementTransformation(mesh, index, attribute);
+      return new Element({index, mesh, std::move(element), std::move(trans)});
    }
 
    // ---- FaceIterator ------------------------------------------------------
-   MeshFaceIterator::MeshFaceIterator(Data data)
-      : MeshSimplexIterator(std::move(data))
+   FaceIterator::FaceIterator(Data data)
+      : SimplexIterator(std::move(data))
    {}
 
-   MeshFaceIterator::MeshFaceIterator(const MeshFaceIterator& other)
-      : MeshSimplexIterator(other)
+   FaceIterator::FaceIterator(const FaceIterator& other)
+      : SimplexIterator(other)
    {}
 
-   MeshFaceIterator::MeshFaceIterator(MeshFaceIterator&& other)
-      : MeshSimplexIterator(std::move(other))
+   FaceIterator::FaceIterator(FaceIterator&& other)
+      : SimplexIterator(std::move(other))
    {}
 
-   Face& MeshFaceIterator::operator*() const noexcept
+   Face& FaceIterator::operator*() const noexcept
    {
-      assert(dynamic_cast<Face*>(&MeshSimplexIterator::operator*()));
-      return static_cast<Face&>(MeshSimplexIterator::operator*());
+      assert(dynamic_cast<Face*>(&SimplexIterator::operator*()));
+      return static_cast<Face&>(SimplexIterator::operator*());
    }
 
-   Face* MeshFaceIterator::operator->() const noexcept
+   Face* FaceIterator::operator->() const noexcept
    {
-      assert(dynamic_cast<Face*>(MeshSimplexIterator::operator->()));
-      return static_cast<Face*>(MeshSimplexIterator::operator->());
+      assert(dynamic_cast<Face*>(SimplexIterator::operator->()));
+      return static_cast<Face*>(SimplexIterator::operator->());
    }
 
-   Face* MeshFaceIterator::generate() const
+   Face* FaceIterator::generate() const
    {
+      if (end()) return nullptr;
+      const auto& it = getInternalIterator();
+      assert(it != getData().indices.end());
+      const auto& index = *it;
       const auto& data = getData();
-      auto element =
-         Internal::makeMeshFace(
-            data.mesh.get(), data.it->getIndex(), data.it->getAttribute(),
-            static_cast<mfem::Geometry::Type>(data.it->getType()));
-      auto trans =
-         Internal::makeMeshFaceTransformation(
-               data.mesh.get(), data.it->getIndex(), data.it->getAttribute());
-      return new Face({data.it->getIndex(), data.mesh.get(), std::move(element), std::move(trans)});
+      const auto& mesh = data.mesh.get();
+      const auto& dimension = data.dimension;
+      const auto& attribute = mesh.getAttribute(dimension, index);
+      const auto& geometry = mesh.getHandle().GetFaceGeometry(index);
+      auto element = Internal::makeFace(mesh, index, attribute, geometry);
+      auto trans = Internal::makeFaceTransformation(mesh, index, attribute);
+      return new Face({index, mesh, std::move(element), std::move(trans)});
    }
 
    // ---- BoundaryIterator --------------------------------------------------
-   MeshBoundaryIterator::MeshBoundaryIterator(Data params)
-      : MeshFaceIterator(std::move(params))
+   BoundaryIterator::BoundaryIterator(Data params)
+      : FaceIterator(std::move(params))
    {}
 
-   MeshBoundaryIterator::MeshBoundaryIterator(const MeshBoundaryIterator& other)
-      : MeshFaceIterator(other)
+   BoundaryIterator::BoundaryIterator(const BoundaryIterator& other)
+      : FaceIterator(other)
    {}
 
-   MeshBoundaryIterator::MeshBoundaryIterator(MeshBoundaryIterator&& other)
-      : MeshFaceIterator(std::move(other))
+   BoundaryIterator::BoundaryIterator(BoundaryIterator&& other)
+      : FaceIterator(std::move(other))
    {}
 
-   Boundary& MeshBoundaryIterator::operator*() const noexcept
+   Boundary& BoundaryIterator::operator*() const noexcept
    {
-      assert(dynamic_cast<Boundary*>(&MeshFaceIterator::operator*()));
-      return static_cast<Boundary&>(MeshFaceIterator::operator*());
+      assert(dynamic_cast<Boundary*>(&FaceIterator::operator*()));
+      return static_cast<Boundary&>(FaceIterator::operator*());
    }
 
-   Boundary* MeshBoundaryIterator::operator->() const noexcept
+   Boundary* BoundaryIterator::operator->() const noexcept
    {
-      assert(dynamic_cast<Boundary*>(MeshSimplexIterator::operator->()));
-      return static_cast<Boundary*>(MeshSimplexIterator::operator->());
+      assert(dynamic_cast<Boundary*>(SimplexIterator::operator->()));
+      return static_cast<Boundary*>(SimplexIterator::operator->());
    }
 
-   Boundary* MeshBoundaryIterator::generate() const
+   Boundary* BoundaryIterator::generate() const
    {
+      if (end()) return nullptr;
+      const auto& it = getInternalIterator();
+      assert(it != getData().indices.end());
+      const auto& index = *it;
       const auto& data = getData();
-      auto element =
-         Internal::makeMeshFace(
-            data.mesh.get(), data.it->getIndex(), data.it->getAttribute(),
-            static_cast<mfem::Geometry::Type>(data.it->getType()));
-      auto trans =
-         Internal::makeMeshFaceTransformation(
-               data.mesh.get(), data.it->getIndex(), data.it->getAttribute());
-      assert(data.mesh.get().isBoundary(data.it->getIndex()));
-      return new Boundary({data.it->getIndex(), data.mesh.get(), std::move(element), std::move(trans)});
+      const auto& mesh = data.mesh.get();
+      const auto& dimension = data.dimension;
+      const auto& attribute = mesh.getAttribute(dimension, index);
+      const auto& geometry = mesh.getHandle().GetFaceGeometry(index);
+      auto element = Internal::makeFace(mesh, index, attribute, geometry);
+      auto trans = Internal::makeFaceTransformation(mesh, index, attribute);
+      return new Boundary({index, mesh, std::move(element), std::move(trans)});
    }
 
-   // ---- InterfaceIterator --------------------------------------------------
-   MeshInterfaceIterator::MeshInterfaceIterator(Data params)
-      : MeshFaceIterator(std::move(params))
+   // ---- InterfaceIterator -------------------------------------------------
+   InterfaceIterator::InterfaceIterator(Data params)
+      : FaceIterator(std::move(params))
    {}
 
-   MeshInterfaceIterator::MeshInterfaceIterator(const MeshInterfaceIterator& other)
-      : MeshFaceIterator(other)
+   InterfaceIterator::InterfaceIterator(const InterfaceIterator& other)
+      : FaceIterator(other)
    {}
 
-   MeshInterfaceIterator::MeshInterfaceIterator(MeshInterfaceIterator&& other)
-      : MeshFaceIterator(std::move(other))
+   InterfaceIterator::InterfaceIterator(InterfaceIterator&& other)
+      : FaceIterator(std::move(other))
    {}
 
-   Interface& MeshInterfaceIterator::operator*() const noexcept
+   Interface& InterfaceIterator::operator*() const noexcept
    {
-      assert(dynamic_cast<Interface*>(&MeshFaceIterator::operator*()));
-      return static_cast<Interface&>(MeshFaceIterator::operator*());
+      assert(dynamic_cast<Interface*>(&FaceIterator::operator*()));
+      return static_cast<Interface&>(FaceIterator::operator*());
    }
 
-   Interface* MeshInterfaceIterator::operator->() const noexcept
+   Interface* InterfaceIterator::operator->() const noexcept
    {
-      assert(dynamic_cast<Interface*>(MeshSimplexIterator::operator->()));
-      return static_cast<Interface*>(MeshSimplexIterator::operator->());
+      assert(dynamic_cast<Interface*>(SimplexIterator::operator->()));
+      return static_cast<Interface*>(SimplexIterator::operator->());
    }
 
-   Interface* MeshInterfaceIterator::generate() const
+   Interface* InterfaceIterator::generate() const
    {
+      if (end()) return nullptr;
+      const auto& it = getInternalIterator();
+      assert(it != getData().indices.end());
+      const auto& index = *it;
       const auto& data = getData();
-      auto element =
-         Internal::makeMeshFace(
-            data.mesh.get(), data.it->getIndex(), data.it->getAttribute(),
-            static_cast<mfem::Geometry::Type>(data.it->getType()));
-      auto trans =
-         Internal::makeMeshFaceTransformation(
-               data.mesh.get(), data.it->getIndex(), data.it->getAttribute());
-      assert(data.mesh.get().isInterface(data.it->getIndex()));
-      return new Interface(
-            {data.it->getIndex(), data.mesh.get(), std::move(element), std::move(trans)});
-   }
-
-   FaceElementIterator::FaceElementIterator(const FaceElementIterator& other)
-      : m_data(other.m_data)
-   {
-      update(generate());
-   }
-
-   void FaceElementIterator::update(Element* simplex)
-   {
-      m_element.reset(simplex);
-   }
-
-   Element* FaceElementIterator::generate() const
-   {
-      Attribute attr = m_data.mesh.get().getHandle().GetAttribute(*m_it);
-      auto element =
-         Internal::makeMeshFace(
-            m_data.mesh,
-            *m_it,
-            attr,
-            m_data.mesh.get().getHandle().GetElementGeometry(*m_it));
-      auto trans =
-         Internal::makeMeshFaceTransformation(m_data.mesh.get(), *m_it, attr);
-      return new Element({*m_it, m_data.mesh, std::move(element), std::move(trans)});
-   }
-
-   bool FaceElementIterator::end() const
-   {
-      return m_it == m_data.faceIndices.end();
-   }
-
-   FaceElementIterator& FaceElementIterator::operator++()
-   {
-      m_it++;
-      return *this;
-   }
-
-   FaceElementIterator FaceElementIterator::operator++(int)
-   {
-      auto r = *this;
-      ++(*this);
-      return r;
-   }
-
-   bool FaceElementIterator::operator==(const FaceElementIterator& other) const
-   {
-      return m_it == other.m_it;
-   }
-
-   bool FaceElementIterator::operator!=(const FaceElementIterator& other) const
-   {
-      return m_it != other.m_it;
-   }
-
-   Element& FaceElementIterator::operator*() const noexcept
-   {
-      assert(m_element);
-      return *m_element;
-   }
-
-   Element* FaceElementIterator::operator->() const noexcept
-   {
-      return m_element.get();
+      const auto& mesh = data.mesh.get();
+      const auto& dimension = data.dimension;
+      const auto& attribute = mesh.getAttribute(dimension, index);
+      const auto& geometry = mesh.getHandle().GetFaceGeometry(index);
+      auto element = Internal::makeFace(mesh, index, attribute, geometry);
+      auto trans = Internal::makeFaceTransformation(mesh, index, attribute);
+      return new Interface({index, mesh, std::move(element), std::move(trans)});
    }
 }

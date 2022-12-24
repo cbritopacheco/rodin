@@ -63,6 +63,7 @@ namespace Rodin::Variational
 
          const Assembly::AssemblyBase<BilinearFormBase>& getAssembly() const
          {
+            assert(m_assembly);
             return *m_assembly;
          }
 
@@ -274,7 +275,6 @@ namespace Rodin::Variational
       private:
          TrialFunction<TrialFES>& m_u;
          TestFunction<TestFES>&   m_v;
-
          std::unique_ptr<OperatorType> m_operator;
    };
 

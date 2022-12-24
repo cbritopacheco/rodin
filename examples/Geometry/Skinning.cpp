@@ -18,13 +18,13 @@ int main(int, char**)
 
   Alert::Info() << "Skinning mesh..." << Alert::Raise;
 
-  auto skin = mesh.skin();
-  skin.trace({
-      {{3, 6}, 666},
-      {{2, 6}, 777}
-      });
+  // auto skin = mesh.skin();
+  // skin.trace({
+  //     {{3, 6}, 666},
+  //     {{2, 6}, 777}
+  //     });
 
   Alert::Info() << "Saved mesh to skin.mesh" << Alert::Raise;
 
-  skin.save("skin.mesh", IO::FileFormat::MEDIT);
+  // skin.save("skin.mesh", IO::FileFormat::MEDIT);
 }

@@ -41,6 +41,32 @@ namespace Rodin::Variational::Assembly
             return new Native(*this);
          }
    };
+
+   template <>
+   class Native<LinearFormBase<mfem::Vector>>
+      : public AssemblyBase<LinearFormBase<mfem::Vector>>
+   {
+      public:
+         using Parent = AssemblyBase<LinearFormBase<mfem::Vector>>;
+         using VectorType = mfem::Vector;
+
+         Native() = default;
+
+         Native(const Native& other)
+            : Parent(other)
+         {}
+
+         Native(Native&& other)
+            : Parent(std::move(other))
+         {}
+
+         VectorType execute(const Input& input) const override;
+
+         Native* copy() const noexcept override
+         {
+            return new Native(*this);
+         }
+   };
 }
 
 #endif

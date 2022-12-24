@@ -48,7 +48,7 @@ namespace Rodin::Geometry
    }
 
    void Mesh<Context::Serial>::save(
-         const boost::filesystem::path& filename, IO::FileFormat fmt, int precision) const
+         const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precision) const
    {
       std::ofstream ofs(filename.c_str());
       if (!ofs)
@@ -105,7 +105,7 @@ namespace Rodin::Geometry
    double MeshBase::getVolume()
    {
       double totalVolume = 0;
-      for (auto it = begin(getDimension()); !it.end(); it++)
+      for (auto it = getElement(); !it.end(); ++it)
          totalVolume += it->getVolume();
       return totalVolume;
    }
@@ -113,7 +113,7 @@ namespace Rodin::Geometry
    double MeshBase::getVolume(Attribute attr)
    {
       double totalVolume = 0;
-      for (auto it = getElement(getDimension()); !it.end(); it++)
+      for (auto it = getElement(); !it.end(); ++it)
       {
          if (it->getAttribute() == attr)
             totalVolume += it->getVolume();
@@ -124,7 +124,7 @@ namespace Rodin::Geometry
    double MeshBase::getPerimeter()
    {
       double totalVolume = 0;
-      for (auto it = getBoundary(); !it.end(); it++)
+      for (auto it = getBoundary(); !it.end(); ++it)
          totalVolume += it->getVolume();
       return totalVolume;
    }
@@ -132,48 +132,13 @@ namespace Rodin::Geometry
    double MeshBase::getPerimeter(Attribute attr)
    {
       double totalVolume = 0;
-      for (auto it = getBoundary(); !it.end(); it++)
+      for (auto it = getBoundary(); !it.end(); ++it)
       {
          if (it->getAttribute() == attr)
             totalVolume += it->getVolume();
       }
       return totalVolume;
    }
-
-   // std::set<int> MeshBase::where(std::function<bool(const Element&)> p) const
-   // {
-   //    std::set<int> res;
-   //    for (int i = 0; i < count<Element>(); i++)
-   //       if (p(get<Element>(i)))
-   //          res.insert(i);
-   //    return res;
-   // }
-
-   // MeshBase& MeshBase::edit(std::function<void(ElementView)> f)
-   // {
-   //    for (int i = 0; i < count<Element>(); i++)
-   //       f(get<Element>(i));
-   //    return *this;
-   // }
-
-   // MeshBase& MeshBase::edit(std::function<void(BoundaryView)> f)
-   // {
-   //    for (int i = 0; i < count<Boundary>(); i++)
-   //       f(get<Boundary>(i));
-   //    return *this;
-   // }
-
-   // MeshBase& MeshBase::edit(std::function<void(ElementView)> f, const std::set<int>& elements)
-   // {
-   //    for (auto el : elements)
-   //    {
-   //       assert(el >= 0);
-   //       assert(el < count<Element>());
-
-   //       f(get<Element>(el));
-   //    }
-   //    return *this;
-   // }
 
    MeshBase& MeshBase::update()
    {
@@ -236,69 +201,6 @@ namespace Rodin::Geometry
       : m_mesh(other.m_mesh)
    {}
 
-   MeshSimplexIterator
-   Mesh<Context::Serial>::begin(size_t dimension) noexcept
-   {
-      assert(false);
-      // return SimplexIterator(*this, dimension, 0);
-   }
-
-   const MeshSimplexIterator
-   Mesh<Context::Serial>::begin(size_t dimension) const noexcept
-   {
-      assert(false);
-      // return SimplexIterator(*this, dimension, 0);
-   }
-
-   const MeshSimplexIterator
-   Mesh<Context::Serial>::cbegin(size_t dimension) const noexcept
-   {
-      assert(false);
-      // return SimplexIterator(*this, dimension, 0);
-   }
-
-   MeshSimplexIterator
-   Mesh<Context::Serial>::end(size_t dimension) noexcept
-   {
-      assert(false);
-      // return SimplexIterator(*this, dimension, getCount(dimension), false);
-   }
-
-   const MeshSimplexIterator
-   Mesh<Context::Serial>::end(size_t dimension) const noexcept
-   {
-      assert(false);
-      // return SimplexIterator(*this, dimension, getCount(dimension), false);
-   }
-
-   const MeshSimplexIterator
-   Mesh<Context::Serial>::cend(size_t dimension) const noexcept
-   {
-      assert(false);
-      // return SimplexIterator(*this, dimension, getCount(dimension), false);
-   }
-
-   size_t Mesh<Context::Serial>::getCount(Region region) const
-   {
-      switch (region)
-      {
-         case Region::Domain:
-         {
-            return getHandle().GetNE();
-         }
-         case Region::Boundary:
-         {
-            assert(false);
-            return 0;
-         }
-         case Region::Interface:
-         {
-            assert(false);
-            return 0;
-         }
-      }
-   }
-
    size_t Mesh<Context::Serial>::getCount(size_t dimension) const
    {
       if (dimension == getDimension())
@@ -325,34 +227,59 @@ namespace Rodin::Geometry
       return getCount(getDimension());
    }
 
-   MeshBoundaryIterator Mesh<Context::Serial>::getBoundary() const
+   BoundaryIterator Mesh<Context::Serial>::getBoundary() const
+   {
+      size_t dimension = getDimension() - 1;
+      std::vector<Index> indices;
+      indices.reserve(getHandle().GetNBE());
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+      {
+         int idx = getHandle().GetBdrFace(i);
+         if (!getHandle().FaceIsInterior(idx))
+            indices.push_back(idx);
+      }
+      return BoundaryIterator({dimension, *this, std::move(indices)});
+   }
+
+   InterfaceIterator Mesh<Context::Serial>::getInterface() const
+   {
+      size_t dimension = getDimension() - 1;
+      std::vector<Index> indices;
+      indices.reserve(getHandle().GetNumFaces());
+      for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
+      {
+         if (getHandle().FaceIsInterior(idx))
+            indices.push_back(idx);
+      }
+      return InterfaceIterator({dimension, *this, std::move(indices)});
+   }
+
+   ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
+   {
+      size_t dimension = getDimension();
+      std::vector<Index> indices(getCount(dimension));
+      std::iota(indices.begin(), indices.end(), idx);
+      return ElementIterator({dimension, *this, std::move(indices)});
+   }
+
+   FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
+   {
+      size_t dimension = getDimension() - 1;
+      std::vector<Index> indices(getCount(dimension));
+      std::iota(indices.begin(), indices.end(), idx);
+      return FaceIterator({dimension, *this, std::move(indices)});
+   }
+
+   VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
    {
       assert(false);
    }
 
-   MeshInterfaceIterator Mesh<Context::Serial>::getInterface() const
+   SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
    {
-      assert(false);
-   }
-
-   MeshElementIterator Mesh<Context::Serial>::getElement(size_t idx) const
-   {
-      assert(false);
-   }
-
-   MeshFaceIterator Mesh<Context::Serial>::getFace(size_t idx) const
-   {
-      assert(false);
-   }
-
-   MeshVertexIterator Mesh<Context::Serial>::getVertex(size_t idx) const
-   {
-      assert(false);
-   }
-
-   MeshSimplexIterator Mesh<Context::Serial>::getSimplex(size_t idx, size_t dimension) const
-   {
-      assert(false);
+      std::vector<Index> indices(getCount(dimension));
+      std::iota(indices.begin(), indices.end(), idx);
+      return SimplexIterator({dimension, *this, std::move(indices)});
    }
 
    bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
@@ -363,6 +290,35 @@ namespace Rodin::Geometry
    bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
    {
       return !getHandle().FaceIsInterior(faceIdx);
+   }
+
+   Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
+   {
+      if (dimension == getDimension())
+      {
+         return getHandle().GetAttribute(index);
+      }
+      else if (dimension == getDimension() - 1)
+      {
+         if (m_f2b.count(index))
+         {
+            return getHandle().GetBdrAttribute(m_f2b.at(index));
+         }
+         else
+         {
+            return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+         }
+      }
+      else if (dimension == 0)
+      {
+         assert(false);
+         return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+      }
+      else
+      {
+         assert(false);
+         return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+      }
    }
 
    Mesh<Context::Serial>&
@@ -407,17 +363,6 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::extract(const std::set<int>& elements)
-   {
-      // SubMesh<Context::Serial> res(*this);
-      // res.initialize(getDimension(), getSpaceDimension(), elements.size());
-      // for (int el : elements)
-      //    res.add(get<Element>(el));
-      // res.finalize();
-      // return res;
-      assert(false);
-   }
-
    SubMesh<Context::Serial> Mesh<Context::Serial>::keep(int attr)
    {
       return keep(std::set<int>{attr});
@@ -426,48 +371,32 @@ namespace Rodin::Geometry
    SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<int>& attrs)
    {
       // assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-
-      // SubMesh<Context::Serial> res(*this);
-      // res.initialize(getDimension(), getSpaceDimension());
-
-      // // Add elements with matching attribute
-      // for (int i = 0; i < count<Element>(); i++)
-      // {
-      //    const auto& el = get<Element>(i);
-      //    if (attrs.count(el.getAttribute()))
-      //       res.add(el);
-      // }
-
-      // // Add the boundary elements
-      // for (int i = 0; i < count<Boundary>(); i++)
-      // {
-      //    const auto& be = get<Boundary>(i);
-      //    const auto& elems = be.elements();
-      //    for (const auto& el : elems)
-      //    {
-      //       if (attrs.count(get<Element>(el).getAttribute()))
-      //       {
-      //          res.add(be);
-      //          break;
-      //       }
-      //    }
-      // }
-      // res.finalize();
-      // return res;
       assert(false);
+      SubMesh<Context::Serial> res(*this);
+      res.initialize(getDimension(), getSpaceDimension());
+      std::vector<Index> indices;
+      for (auto it = getElement(); !it.end(); ++it)
+      {
+         if (attrs.count(it->getAttribute()))
+            indices.push_back(it->getIndex());
+      }
+      for (auto bit = getBoundary(); !bit.end(); ++bit)
+      {
+         for (auto eit = bit->getIncident(); !eit.end(); ++eit)
+         {
+            if (attrs.count(eit->getAttribute()))
+               indices.push_back(eit->getIndex());
+         }
+      }
+      res.include(getDimension(), indices);
+      res.finalize();
+      return res;
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::skin()
+   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
    {
       assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-
       assert(false);
-      // SubMesh<Context::Serial> res(*this);
-      // res.initialize(getSpaceDimension() - 1, getSpaceDimension());
-      // for (int i = 0; i < count<Boundary>(); i++)
-      //    res.add(get<Boundary>(i));
-      // res.finalize();
-      // return res;
    }
 
    SubMesh<Context::Serial> Mesh<Context::Serial>::trim(int attr)
@@ -483,35 +412,6 @@ namespace Rodin::Geometry
       return keep(complement);
    }
 
-   Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
-         const std::map<std::set<int>, int>& boundaries)
-   {
-      // for (int i = 0; i < count<Face>(); i++)
-      // {
-      //    const auto& fc = get<Face>(i);
-      //    const auto& elems = fc.elements();
-      //    if (elems.size() == 2)
-      //    {
-      //       std::set<int> k{
-      //          get<Element>(*elems.begin()).getAttribute(),
-      //          get<Element>(*std::next(elems.begin())).getAttribute()
-      //       };
-      //       auto it = boundaries.find(k);
-      //       if (it != boundaries.end())
-      //       {
-      //          mfem::Element* be =
-      //             getHandle().NewElement(fc.getHandle().GetGeometryType());
-      //          be->SetVertices(fc.getHandle().GetVertices());
-      //          be->SetAttribute(it->second);
-      //          getHandle().AddBdrElement(be);
-      //       }
-      //    }
-      // }
-      // getHandle().FinalizeTopology();
-      // return *this;
-      assert(false);
-   }
-
    mfem::Mesh& Mesh<Context::Serial>::getHandle()
    {
       return m_mesh;
@@ -523,7 +423,7 @@ namespace Rodin::Geometry
    }
 
    Mesh<Context::Serial>&
-   Mesh<Context::Serial>::initialize(int dim, int sdim)
+   Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
    {
       m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
       return *this;
@@ -531,7 +431,7 @@ namespace Rodin::Geometry
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
    {
-      if (static_cast<int>(x.size()) != getSpaceDimension())
+      if (x.size() != getSpaceDimension())
       {
          Alert::Exception()
             << "Vertex dimension is different from space dimension"
@@ -544,7 +444,7 @@ namespace Rodin::Geometry
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::element(
          Type geom,
-         const std::vector<int>& vs, int attr)
+         const std::vector<int>& vs, Attribute attr)
    {
       mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
       el->SetVertices(vs.data());
@@ -553,9 +453,9 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   Mesh<Context::Serial>& Mesh<Context::Serial>::boundary(
+   Mesh<Context::Serial>& Mesh<Context::Serial>::face(
          Type geom,
-         const std::vector<int>& vs, int attr)
+         const std::vector<int>& vs, Attribute attr)
    {
       mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
       el->SetVertices(vs.data());
@@ -568,9 +468,9 @@ namespace Rodin::Geometry
    {
       getHandle().FinalizeTopology();
       getHandle().Finalize(false, true);
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
       return *this;
    }
-
-   // ---- Mesh<Parallel> ----------------------------------------------------
 }
 

@@ -37,27 +37,7 @@ namespace Rodin::Geometry
 
          SubMesh(const SubMesh& other);
 
-         // SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
-         // {
-         //    getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
-         //    return *this;
-         // }
-
-         /**
-          * @brief Adds an element from the parent mesh to the submesh.
-          *
-          * @param[in] el Element from the parent mesh
-          */
-         SubMesh& add(const Element& el);
-
-         /**
-          * Adds a bounday element from the parent mesh to the submesh.
-          *
-          * If `this->isSurface() && !getParent().isSurface()` then this will add the
-          * boundary element as an element of the submesh. Otherwise, it gets
-          * added normally as a boundary element.
-          */
-         SubMesh& add(const Boundary& el);
+         SubMesh& include(size_t dim, const std::vector<Index>& simplices);
 
          /**
           * @returns Reference to the parent Mesh object
@@ -81,9 +61,8 @@ namespace Rodin::Geometry
       private:
          const MeshBase& m_parent;
          boost::bimap<size_t, size_t> m_s2pv;
-         boost::bimap<size_t, size_t> m_s2pf;
          boost::bimap<size_t, size_t> m_s2pe;
-         boost::bimap<size_t, size_t> m_s2pb;
+         boost::bimap<size_t, size_t> m_s2pf;
    };
 }
 

@@ -8,4 +8,6 @@
 #cmakedefine RODIN_USE_SUITESPARSE
 #cmakedefine RODIN_SILENCE_WARNINGS
 
+#define RODIN_DEFAULT_SIMPLEX_ATTRIBUTE 1
+
 #endif

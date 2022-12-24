@@ -21,7 +21,6 @@
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
-#include "SimplexRTree.h"
 #include "SimplexIterator.h"
 
 #ifdef RODIN_USE_MPI
@@ -57,39 +56,27 @@ namespace Rodin::Geometry
       public:
          virtual ~MeshBase() = default;
 
-         virtual MeshSimplexIterator begin(size_t dimension) noexcept = 0;
+         virtual BoundaryIterator getBoundary() const = 0;
 
-         virtual const MeshSimplexIterator begin(size_t dimension) const noexcept = 0;
-
-         virtual const MeshSimplexIterator cbegin(size_t dimension) const noexcept = 0;
-
-         virtual MeshSimplexIterator end(size_t dimension) noexcept = 0;
-
-         virtual const MeshSimplexIterator end(size_t dimension) const noexcept = 0;
-
-         virtual const MeshSimplexIterator cend(size_t dimension) const noexcept = 0;
-
-         virtual MeshBoundaryIterator getBoundary() const = 0;
-
-         virtual MeshInterfaceIterator getInterface() const = 0;
+         virtual InterfaceIterator getInterface() const = 0;
 
          virtual size_t getElementCount() const = 0;
 
          virtual size_t getCount(size_t dim) const = 0;
 
-         virtual size_t getCount(Region region) const = 0;
+         virtual ElementIterator getElement(size_t idx = 0) const = 0;
 
-         virtual MeshElementIterator getElement(size_t idx = 0) const = 0;
+         virtual FaceIterator getFace(size_t idx = 0) const = 0;
 
-         virtual MeshFaceIterator getFace(size_t idx = 0) const = 0;
+         virtual VertexIterator getVertex(size_t idx = 0) const = 0;
 
-         virtual MeshVertexIterator getVertex(size_t idx = 0) const = 0;
-
-         virtual MeshSimplexIterator getSimplex(size_t idx, size_t dimension) const = 0;
+         virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
 
          virtual bool isInterface(Index faceIdx) const = 0;
 
          virtual bool isBoundary(Index faceIdx) const = 0;
+
+         virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
          MeshBase& update();
 
@@ -288,9 +275,6 @@ namespace Rodin::Geometry
           * @returns Constant reference to the underlying mfem::Mesh.
           */
          virtual const mfem::Mesh& getHandle() const = 0;
-
-      private:
-         double getBoundaryElementArea(int i);
    };
 
    using SerialMesh = Mesh<Context::Serial>;
@@ -323,19 +307,19 @@ namespace Rodin::Geometry
           */
          Mesh& operator=(Mesh&& other) = default;
 
-         virtual Mesh& initialize(int dim, int sdim);
+         virtual Mesh& initialize(size_t dim, size_t sdim);
 
          virtual Mesh& vertex(const std::vector<double>& x);
+
+         virtual Mesh& face(
+               Type geom,
+               const std::vector<int>& vs,
+               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
          virtual Mesh& element(
                Type geom,
                const std::vector<int>& vs,
-               int attr = 1);
-
-         virtual Mesh& boundary(
-               Type geom,
-               const std::vector<int>& vs,
-               int attr = 1);
+               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
          virtual Mesh& finalize();
 
@@ -357,7 +341,7 @@ namespace Rodin::Geometry
           */
          virtual void save(
                const boost::filesystem::path& filename,
-               IO::FileFormat fmt = IO::FileFormat::MFEM, int precison = 16) const;
+               IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const;
 
          /**
           * @brief Skins the mesh to obtain its boundary mesh
@@ -367,7 +351,7 @@ namespace Rodin::Geometry
           * new SubMesh object. The new mesh will be embedded in the original
           * space dimension.
           */
-         virtual SubMesh<Context::Serial> skin();
+         virtual SubMesh<Context::Serial> skin() const;
 
          /**
           * @brief Trims the elements with the given material reference.
@@ -394,10 +378,6 @@ namespace Rodin::Geometry
 
          virtual SubMesh<Context::Serial> keep(const std::set<int>& attrs);
 
-         virtual SubMesh<Context::Serial> extract(const std::set<int>& elements);
-
-         virtual Mesh& trace(const std::map<std::set<int>, int>& boundaries);
-
          /**
           * @internal
           * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
@@ -417,35 +397,21 @@ namespace Rodin::Geometry
          Mesh<Context::Parallel> parallelize(boost::mpi::communicator comm);
 #endif
 
-         MeshSimplexIterator begin(size_t dimension) noexcept override;
-
-         const MeshSimplexIterator begin(size_t dimension) const noexcept override;
-
-         const MeshSimplexIterator cbegin(size_t dimension) const noexcept override;
-
-         MeshSimplexIterator end(size_t dimension) noexcept override;
-
-         const MeshSimplexIterator end(size_t dimension) const noexcept override;
-
-         const MeshSimplexIterator cend(size_t dimension) const noexcept override;
-
          size_t getElementCount() const override;
 
          size_t getCount(size_t dim) const override;
 
-         size_t getCount(Region region) const override;
+         BoundaryIterator getBoundary() const override;
 
-         MeshBoundaryIterator getBoundary() const override;
+         InterfaceIterator getInterface() const override;
 
-         MeshInterfaceIterator getInterface() const override;
+         ElementIterator getElement(size_t idx = 0) const override;
 
-         MeshElementIterator getElement(size_t idx = 0) const override;
+         FaceIterator getFace(size_t idx = 0) const override;
 
-         MeshFaceIterator getFace(size_t idx = 0) const override;
+         VertexIterator getVertex(size_t idx = 0) const override;
 
-         MeshVertexIterator getVertex(size_t idx = 0) const override;
-
-         MeshSimplexIterator getSimplex(size_t idx, size_t dimension) const override;
+         SimplexIterator getSimplex(size_t dimension, size_t idx) const override;
 
          bool isInterface(Index faceIdx) const override;
 
@@ -460,19 +426,16 @@ namespace Rodin::Geometry
 
          const mfem::Mesh& getHandle() const override;
 
-         const SimplexRTree& getSimplexRTree() const
-         {
-            return m_rtree;
-         }
-
          virtual bool isSubMesh() const override
          {
             return false;
          }
 
+         Attribute getAttribute(size_t dimension, Index index) const override;
+
       private:
          mfem::Mesh m_mesh;
-         SimplexRTree m_rtree;
+         std::map<Index, Index> m_f2b;
    };
 
 #ifdef RODIN_USE_MPI
