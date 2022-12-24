@@ -70,34 +70,27 @@ namespace Rodin::Variational::Internal
          mfem::ElementTransformation& trans,
          const mfem::IntegrationPoint& ip)
    {
-      // double res;
+      double res = 0;
       switch (trans.ElementType)
       {
          case mfem::ElementTransformation::ELEMENT:
          {
-            // res = m_s.getValue(
-            //    Geometry::Point(
-            //       m_mesh.get<Geometry::Element>(trans.ElementNo), ip)).scalar();
+            res = m_s.getValue(Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).scalar();
             break;
          }
          case mfem::ElementTransformation::BDR_ELEMENT:
          {
-            // res = m_s.getValue(
-            //          Geometry::Point(
-            //             m_mesh.get<Geometry::Boundary>(trans.ElementNo), ip)).scalar();
+            int faceIdx = m_mesh.getHandle().GetBdrFace(trans.ElementNo);
+            res = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).scalar();
             break;
          }
          case mfem::ElementTransformation::FACE:
          {
-            // res = m_s.getValue(
-            //          Geometry::Point(
-            //             m_mesh.get<Geometry::Face>(trans.ElementNo), ip)).scalar();
+            res = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).scalar();
             break;
          }
       }
-      // return res;
-      assert(false);
-      return 0;
+      return res;
    }
 
    ProxyFunction<RangeType::Vector>::ProxyFunction(
@@ -132,27 +125,21 @@ namespace Rodin::Variational::Internal
       {
          case mfem::ElementTransformation::ELEMENT:
          {
-            //value = m_s.getValue(
-            //      Geometry::Point(
-            //         m_mesh.get<Geometry::Element>(trans.ElementNo), ip)).vector();
+            value = m_s.getValue(Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).vector();
             break;
          }
          case mfem::ElementTransformation::BDR_ELEMENT:
          {
-            // value = m_s.getValue(
-            //       Geometry::Point(
-            //          m_mesh.get<Geometry::Boundary>(trans.ElementNo), ip)).vector();
+            int faceIdx = m_mesh.getHandle().GetBdrFace(trans.ElementNo);
+            value = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).vector();
             break;
          }
          case mfem::ElementTransformation::FACE:
          {
-            // value = m_s.getValue(
-            //       Geometry::Point(
-            //          m_mesh.get<Geometry::Face>(trans.ElementNo), ip)).vector();
+            value = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).vector();
             break;
          }
       }
-      assert(false);
    }
 
    ProxyFunction<RangeType::Matrix>::ProxyFunction(
@@ -184,26 +171,18 @@ namespace Rodin::Variational::Internal
       {
          case mfem::ElementTransformation::ELEMENT:
          {
-            assert(false);
-            // value = m_s.getValue(
-            //       Geometry::Point(
-            //          m_mesh.get<Geometry::Element>(trans.ElementNo), ip)).matrix();
+            value = m_s.getValue(Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).matrix();
             break;
          }
          case mfem::ElementTransformation::BDR_ELEMENT:
          {
-            assert(false);
-            // value = m_s.getValue(
-            //       Geometry::Point(
-            //          m_mesh.get<Geometry::Boundary>(trans.ElementNo), ip)).matrix();
+            int faceIdx = m_mesh.getHandle().GetBdrFace(trans.ElementNo);
+            value = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).matrix();
             break;
          }
          case mfem::ElementTransformation::FACE:
          {
-            assert(false);
-            // value = m_s.getValue(
-            //       Geometry::Point(
-            //          m_mesh.get<Geometry::Face>(trans.ElementNo), ip)).matrix();
+            value = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).matrix();
             break;
          }
       }

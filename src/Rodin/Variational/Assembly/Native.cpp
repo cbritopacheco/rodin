@@ -99,6 +99,7 @@ namespace Rodin::Variational::Assembly
                for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
                {
                   const auto& element = *it;
+                  std::cout << "miaow: " << element.getAttribute() << std::endl;
                   if (lfi.getAttributes().size() == 0
                         || lfi.getAttributes().count(element.getAttribute()))
                   {

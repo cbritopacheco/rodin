@@ -146,43 +146,43 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   std::deque<std::set<int>> MeshBase::ccl(
-         std::function<bool(const Element&, const Element&)> p) const
-   {
-      std::set<int> visited;
-      std::deque<int> searchQueue;
-      std::deque<std::set<int>> res;
+   // std::deque<std::set<int>> MeshBase::ccl(
+   //       std::function<bool(const Element&, const Element&)> p) const
+   // {
+   //    std::set<int> visited;
+   //    std::deque<int> searchQueue;
+   //    std::deque<std::set<int>> res;
 
-      // Perform the labelling
-      assert(false);
-      // for (int i = 0; i < count<Element>(); i++)
-      // {
-      //    if (!visited.count(i))
-      //    {
-      //       res.push_back({});
-      //       searchQueue.push_back(i);
-      //       while (searchQueue.size() > 0)
-      //       {
-      //          int el = searchQueue.back();
-      //          searchQueue.pop_back();
-      //          auto result = visited.insert(el);
-      //          bool inserted = result.second;
-      //          if (inserted)
-      //          {
-      //             res.back().insert(el);
-      //             for (int n : get<Element>(el).adjacent())
-      //             {
-      //                if (p(get<Element>(el), get<Element>(n)))
-      //                {
-      //                   searchQueue.push_back(n);
-      //                }
-      //             }
-      //          }
-      //       }
-      //    }
-      // }
-      return res;
-   }
+   //    // Perform the labelling
+   //    assert(false);
+   //    // for (int i = 0; i < count<Element>(); i++)
+   //    // {
+   //    //    if (!visited.count(i))
+   //    //    {
+   //    //       res.push_back({});
+   //    //       searchQueue.push_back(i);
+   //    //       while (searchQueue.size() > 0)
+   //    //       {
+   //    //          int el = searchQueue.back();
+   //    //          searchQueue.pop_back();
+   //    //          auto result = visited.insert(el);
+   //    //          bool inserted = result.second;
+   //    //          if (inserted)
+   //    //          {
+   //    //             res.back().insert(el);
+   //    //             for (int n : get<Element>(el).adjacent())
+   //    //             {
+   //    //                if (p(get<Element>(el), get<Element>(n)))
+   //    //                {
+   //    //                   searchQueue.push_back(n);
+   //    //                }
+   //    //             }
+   //    //          }
+   //    //       }
+   //    //    }
+   //    // }
+   //    return res;
+   // }
 
 #ifdef RODIN_USE_MPI
    Mesh<Context::Parallel>
@@ -195,11 +195,10 @@ namespace Rodin::Geometry
    // ---- Mesh<Serial> ------------------------------------------------------
    Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
       : m_mesh(std::move(mesh))
-   {}
-
-   Mesh<Context::Serial>::Mesh(const Mesh& other)
-      : m_mesh(other.m_mesh)
-   {}
+   {
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
+   }
 
    size_t Mesh<Context::Serial>::getCount(size_t dimension) const
    {
@@ -290,9 +289,10 @@ namespace Rodin::Geometry
       }
       else if (dimension == getDimension() - 1)
       {
-         if (m_f2b.count(index))
+         auto it = m_f2b.find(index);
+         if (it != m_f2b.end())
          {
-            return getHandle().GetBdrAttribute(m_f2b.at(index));
+            return getHandle().GetBdrAttribute(it->second);
          }
          else
          {

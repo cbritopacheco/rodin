@@ -59,18 +59,25 @@ namespace Rodin::Variational
 
          FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::Vector grad;
-            switch (p.getElement().getRegion())
+            FunctionValue::Vector grad;
+            const auto& element = p.getElement();
+            const auto& mesh = m_u.getFiniteElementSpace().getMesh();
+            if (element.getDimension() == mesh.getDimension())
             {
-               case Geometry::Region::Domain:
+               assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
+               const auto& element = p.getElement();
+               auto& trans = element.getTransformation();
+               m_u.getHandle().GetGradient(trans, grad);
+            }
+            else if (element.getDimension() == mesh.getDimension() - 1)
+            {
+               assert(dynamic_cast<const Geometry::Face*>(&p.getElement()));
+               const auto& face = static_cast<const Geometry::Face&>(p.getElement());
+               if (face.isInterface())
                {
-                  assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
-                  const auto& element = p.getElement();
-                  auto& trans = element.getTransformation();
-                  m_u.getHandle().GetGradient(trans, grad);
-                  break;
+                  assert(false);
                }
-               case Geometry::Region::Boundary:
+               else if (face.isBoundary())
                {
                   assert(dynamic_cast<const Geometry::Boundary*>(&p.getElement()));
                   const auto& boundary = static_cast<const Geometry::Boundary&>(p.getElement());
@@ -95,7 +102,7 @@ namespace Rodin::Variational
                      {
                         int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
                         const auto& parentElement = parent.getElement(parentIdx);
-                        assert(parentElement);
+                        assert(!parentElement.end());
                         m_u.getHandle().GetGradient(parentElement->getTransformation(), grad);
                      }
                      else
@@ -110,13 +117,15 @@ namespace Rodin::Variational
                      else
                         assert(false);
                   }
-                  break;
                }
-               case Geometry::Region::Interface:
+               else
                {
                   assert(false);
-                  break;
                }
+            }
+            else
+            {
+               assert(false);
             }
             return grad(m_direction);
          }

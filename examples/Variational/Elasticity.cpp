@@ -34,7 +34,9 @@ int main(int argc, char** argv)
   // Pull force
   auto f = VectorFunction{0, -1};
 
-  Solver::UMFPack solver;
+  Solver::CG solver;
+  mfem::GSSmoother smooth;
+  solver.printIterations(true).setPreconditioner(smooth);
 
   // Define problem
   TrialFunction u(Vh);

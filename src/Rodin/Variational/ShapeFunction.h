@@ -282,7 +282,6 @@ namespace Rodin::Variational
                const Geometry::Point& point,
                const Geometry::Element& element) const override
          {
-            assert(element.getRegion() == Geometry::Region::Domain);
             const auto& shape =
                compute.getPhysicalShape(
                      getFiniteElementSpace().getFiniteElement(element),

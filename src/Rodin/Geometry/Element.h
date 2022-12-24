@@ -37,26 +37,39 @@ namespace Rodin::Geometry
       public:
          struct Data
          {
-            Index index;
-            std::reference_wrapper<const MeshBase> mesh;
             std::unique_ptr<mfem::Element> element;
             std::unique_ptr<mfem::ElementTransformation> trans;
          };
 
-         Simplex(Data data)
-            : m_data(std::move(data))
+         Simplex(size_t dimension, Index index, const MeshBase& mesh, Data data)
+            :  m_dimension(dimension), m_index(index), m_mesh(mesh),
+               m_data(std::move(data))
          {}
 
          Simplex(Simplex&&) = default;
 
          virtual ~Simplex() = default;
 
+         size_t getDimension() const
+         {
+            return m_dimension;
+         }
+
          /**
           * @brief Gets the index of the simplex in the mesh.
           */
-         Index getIndex() const;
+         Index getIndex() const
+         {
+            return m_index;
+         }
 
-         double getVolume() const;
+         /**
+          * @brief Gets the associated mesh to the simplex.
+          */
+         const MeshBase& getMesh() const
+         {
+            return m_mesh.get();
+         }
 
          Type getGeometry() const;
 
@@ -65,19 +78,11 @@ namespace Rodin::Geometry
           */
          Attribute getAttribute() const;
 
-         /**
-          * @brief Gets the associated mesh to the element.
-          */
-         const MeshBase& getMesh() const;
+         double getVolume() const;
 
          VertexIterator getVertices() const;
 
          mfem::ElementTransformation& getTransformation() const;
-
-         /**
-          * @brief Returns the region which the simplex belongs to.
-          */
-         virtual Region getRegion() const = 0;
 
          virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
@@ -88,6 +93,9 @@ namespace Rodin::Geometry
          }
 
       private:
+         const size_t m_dimension;
+         const Index m_index;
+         std::reference_wrapper<const MeshBase> m_mesh;
          Data m_data;
    };
 
@@ -104,20 +112,13 @@ namespace Rodin::Geometry
    class Element : public Simplex
    {
       public:
-         Element(Data data)
-            : Simplex(std::move(data))
-         {}
+         Element(Index index, const MeshBase& mesh, Data data);
 
          Element(Element&& other)
             :  Simplex(std::move(other))
          {}
 
          ElementIterator getAdjacent() const;
-
-         Region getRegion() const override
-         {
-            return Region::Domain;
-         }
    };
 
    /**
@@ -130,21 +131,25 @@ namespace Rodin::Geometry
    class Face : public Simplex
    {
       public:
-         Face(Data data);
+         Face(Index index, const MeshBase& mesh, Data data);
 
          Face(Face&& other)
             : Simplex(std::move(other))
          {}
 
-         virtual ElementIterator getIncident() const;
+         bool isBoundary() const;
 
-         virtual mfem::FaceElementTransformations& getFaceTransformations() const
+         bool isInterface() const;
+
+         FaceIterator getAdjacent() const;
+
+         ElementIterator getIncident() const;
+
+         mfem::FaceElementTransformations& getFaceTransformations() const
          {
             assert(m_localTrans);
             return *m_localTrans;
          }
-
-         virtual Region getRegion() const override;
 
       private:
          std::unique_ptr<mfem::FaceElementTransformations> m_localTrans;
@@ -153,18 +158,13 @@ namespace Rodin::Geometry
    class Interface final : public Face
    {
       public:
-         Interface(Data data)
-            : Face(std::move(data))
+         Interface(Index index, const MeshBase& mesh, Data data)
+            : Face(index, mesh, std::move(data))
          {}
 
          Interface(Interface&& other)
             : Face(std::move(other))
          {}
-
-         Region getRegion() const override
-         {
-            return Region::Interface;
-         }
    };
 
    /**
@@ -178,27 +178,18 @@ namespace Rodin::Geometry
    class Boundary final : public Face
    {
       public:
-         Boundary(Data data)
-            : Face(std::move(data))
+         Boundary(Index index, const MeshBase& mesh, Data data)
+            : Face(index, mesh, std::move(data))
          {}
 
          Boundary(Boundary&& other)
             :  Face(std::move(other))
          {}
-
-         Region getRegion() const override
-         {
-            return Region::Boundary;
-         }
    };
 
    class Vertex : public Simplex
    {
       public:
-         Vertex(Data data);
-
-         Vertex(Vertex&& other);
-
          double x() const
          {
             return operator()(0);

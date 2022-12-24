@@ -269,11 +269,9 @@ namespace Rodin::Variational
          }
 
          virtual void getElementMatrix(
-               mfem::DenseMatrix& result,
-               ShapeComputator& compute,
+               mfem::DenseMatrix& result, ShapeComputator& compute,
                const Geometry::Point& p) const
          {
-            assert(p.getElement().getRegion() != Geometry::Region::Interface);
             assert(m_trial->getRangeShape() == m_test->getRangeShape());
             DenseBasisOperator trialOp, testOp;
             m_trial->getOperator(trialOp, compute, p);
