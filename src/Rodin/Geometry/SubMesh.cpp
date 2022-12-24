@@ -19,99 +19,109 @@ namespace Rodin::Geometry
       return m_parent;
    }
 
-   SubMesh<Context::Serial>& SubMesh<Context::Serial>::add(const Element& el)
+   SubMesh<Context::Serial>&
+   SubMesh<Context::Serial>::include(size_t dim, const std::vector<Index>& simplices)
    {
-      assert(&getParent() == &el.getMesh());
-      assert(getDimension() == getParent().getDimension());
-      assert(getSpaceDimension() == getParent().getSpaceDimension());
-
-      // Add element vertices to the resulting mesh
-      mfem::Array<int> pv;
-      el.getHandle().GetVertices(pv);
-
-      mfem::Array<int> sv(pv.Size());
-      for (size_t i = 0; i < sv.Size(); i++)
+      if (dim == getDimension())
       {
-         int pvid = pv[i];
-         if (m_s2pv.right.count(pvid) == 0) // Only add vertex if it is not in the map
+         for (const auto& simplex : simplices)
          {
-            sv[i] = getHandle().AddVertex(getParent().getHandle().GetVertex(pvid));
-            m_s2pv.insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
-         }
-         else // Else get the id of the vertex in the submesh
-         {
-            sv[i] = m_s2pv.right.at(pvid);
+            auto el = getParent().getElement(simplex);
+
+            // Add element vertices to the resulting mesh
+            mfem::Array<int> pv;
+            el->getHandle().GetVertices(pv);
+
+            mfem::Array<int> sv(pv.Size());
+            for (size_t i = 0; i < sv.Size(); i++)
+            {
+               int pvid = pv[i];
+               if (m_s2pv.right.count(pvid) == 0) // Only add vertex if it is not in the map
+               {
+                  sv[i] = getHandle().AddVertex(getParent().getHandle().GetVertex(pvid));
+                  m_s2pv.insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
+               }
+               else // Else get the id of the vertex in the submesh
+               {
+                  sv[i] = m_s2pv.right.at(pvid);
+               }
+            }
+
+            // Add element with the new vertex ordering
+            mfem::Element* newEl =
+               getHandle().NewElement(el->getHandle().GetGeometryType());
+            newEl->SetVertices(sv);
+            newEl->SetAttribute(el->getAttribute());
+            size_t seid = getHandle().AddElement(newEl);
+            m_s2pe.insert({seid, el->getIndex()});
          }
       }
-
-      // Add element with the new vertex ordering
-      mfem::Element* newEl =
-         getHandle().NewElement(el.getHandle().GetGeometryType());
-      newEl->SetVertices(sv);
-      newEl->SetAttribute(el.getAttribute());
-      size_t seid = getHandle().AddElement(newEl);
-      m_s2pe.insert({seid, el.getIndex()});
-
-      return *this;
-   }
-
-   SubMesh<Context::Serial>& SubMesh<Context::Serial>::add(const Boundary& el)
-   {
-      assert(&getParent() == &el.getMesh());
-      if (isSurface() && !getParent().isSurface())
+      else if (dim == getDimension() - 1)
       {
-         assert(getDimension() == getParent().getDimension() - 1);
-         assert(getSpaceDimension() == getParent().getSpaceDimension());
-
-         // Add element vertices to the resulting mesh
-         mfem::Array<int> pv;
-         el.getHandle().GetVertices(pv);
-
-         mfem::Array<int> sv(pv.Size());
-         for (int i = 0; i < sv.Size(); i++)
+         for (const auto& simplex : simplices)
          {
-            int pvid = pv[i];
-            if (m_s2pv.right.count(pvid) == 0) // Only add vertex if it is not in the map
+            auto el = getParent().getFace(simplex);
+            if (isSurface() && !getParent().isSurface())
             {
-               sv[i] = getHandle().AddVertex(getParent().getHandle().GetVertex(pvid));
-               m_s2pv.insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
+               assert(getDimension() == getParent().getDimension() - 1);
+               assert(getSpaceDimension() == getParent().getSpaceDimension());
+
+               // Add element vertices to the resulting mesh
+               mfem::Array<int> pv;
+               el->getHandle().GetVertices(pv);
+
+               mfem::Array<int> sv(pv.Size());
+               for (int i = 0; i < sv.Size(); i++)
+               {
+                  int pvid = pv[i];
+                  if (m_s2pv.right.count(pvid) == 0) // Only add vertex if it is not in the map
+                  {
+                     sv[i] = getHandle().AddVertex(getParent().getHandle().GetVertex(pvid));
+                     m_s2pv.insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
+                  }
+                  else // Else get the id of the vertex in the submesh
+                  {
+                     sv[i] = m_s2pv.right.at(pvid);
+                  }
+               }
+
+               // Add element with the new vertex ordering
+               mfem::Element* pel =
+                  getHandle().NewElement(el->getHandle().GetGeometryType());
+               pel->SetVertices(sv);
+               pel->SetAttribute(el->getAttribute());
+               int seid = getHandle().AddElement(pel);
+               m_s2pe.insert({static_cast<size_t>(seid), el->getIndex()});
             }
-            else // Else get the id of the vertex in the submesh
+            else
             {
-               sv[i] = m_s2pv.right.at(pvid);
+               assert(getDimension() == getParent().getDimension());
+               assert(getSpaceDimension() == getParent().getSpaceDimension());
+
+               // Parent vertices
+               mfem::Array<int> pv;
+               el->getHandle().GetVertices(pv);
+
+               // Get vertex ordering
+               mfem::Array<int> sv(pv.Size());
+               for (int i = 0; i < sv.Size(); i++)
+                  sv[i] = m_s2pv.right.at(pv[i]);
+
+               // Add element with the new vertex ordering
+               mfem::Element* newEl =
+                  getHandle().NewElement(el->getHandle().GetGeometryType());
+               newEl->SetVertices(sv);
+               newEl->SetAttribute(el->getAttribute());
+               int sbid = getHandle().AddBdrElement(newEl);
+               m_s2pf.insert({static_cast<size_t>(sbid), el->getIndex()});
             }
          }
-
-         // Add element with the new vertex ordering
-         mfem::Element* pel =
-            getHandle().NewElement(el.getHandle().GetGeometryType());
-         pel->SetVertices(sv);
-         pel->SetAttribute(el.getAttribute());
-         int seid = getHandle().AddElement(pel);
-         m_s2pe.insert({static_cast<size_t>(seid), el.getIndex()});
       }
       else
       {
-         assert(getDimension() == getParent().getDimension());
-         assert(getSpaceDimension() == getParent().getSpaceDimension());
-
-         // Parent vertices
-         mfem::Array<int> pv;
-         el.getHandle().GetVertices(pv);
-
-         // Get vertex ordering
-         mfem::Array<int> sv(pv.Size());
-         for (int i = 0; i < sv.Size(); i++)
-            sv[i] = m_s2pv.right.at(pv[i]);
-
-         // Add element with the new vertex ordering
-         mfem::Element* newEl =
-            getHandle().NewElement(el.getHandle().GetGeometryType());
-         newEl->SetVertices(sv);
-         newEl->SetAttribute(el.getAttribute());
-         int sbid = getHandle().AddBdrElement(newEl);
-         m_s2pb.insert({static_cast<size_t>(sbid), el.getIndex()});
+         assert(false);
       }
+
       return *this;
    }
 
@@ -127,6 +137,6 @@ namespace Rodin::Geometry
 
    const boost::bimap<size_t, size_t>& SubMesh<Context::Serial>::getBoundaryElementMap() const
    {
-      return m_s2pb;
+      return m_s2pf;
    }
 }

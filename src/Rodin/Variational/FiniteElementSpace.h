@@ -38,9 +38,9 @@ namespace Rodin::Variational
          /**
           * @returns Order of the highest dimensional finite element.
           */
-         int getOrder() const;
+         size_t getOrder() const;
 
-         int getNumberOfDofs() const;
+         size_t getNumberOfDofs() const;
 
          /**
           * @brief Gets the vector dimensions

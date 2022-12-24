@@ -34,7 +34,8 @@ int main(int, char**)
   auto f = ScalarFunction(1.0);
   auto g = ScalarFunction(0.0);
 
-  Solver::UMFPack solver;
+  Solver::CG solver;
+  solver.printIterations(true);
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))

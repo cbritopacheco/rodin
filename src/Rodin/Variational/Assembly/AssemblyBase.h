@@ -43,6 +43,29 @@ namespace Rodin::Variational::Assembly
 
          virtual AssemblyBase* copy() const noexcept = 0;
    };
+
+   template <class OperatorType>
+   class AssemblyBase<LinearFormBase<OperatorType>>
+      : public FormLanguage::Base
+   {
+      public:
+         struct Input
+         {
+            const Geometry::MeshBase& mesh;
+            const FiniteElementSpaceBase& fes;
+            const FormLanguage::List<LinearFormIntegratorBase>& lfis;
+         };
+
+         AssemblyBase() = default;
+
+         AssemblyBase(const AssemblyBase&) = default;
+
+         AssemblyBase(AssemblyBase&&) = default;
+
+         virtual OperatorType execute(const Input& data) const = 0;
+
+         virtual AssemblyBase* copy() const noexcept = 0;
+   };
 }
 
 #endif

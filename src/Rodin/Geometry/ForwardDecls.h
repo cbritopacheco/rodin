@@ -25,7 +25,6 @@ namespace Rodin::Geometry
 {
    using Index = std::size_t;
    using Attribute = std::size_t;
-   using Dimension = std::size_t;
 
    enum class Type;
 
@@ -50,27 +49,17 @@ namespace Rodin::Geometry
 
    class Point;
 
-   class SimplexVertexIterator;
+   class SimplexIterator;
 
-   class AdjacentSimplexIterator;
+   class ElementIterator;
 
-   class AdjacentElementIterator;
+   class FaceIterator;
 
-   class AdjacentFaceIterator;
+   class InterfaceIterator;
 
-   class FaceElementIterator;
+   class BoundaryIterator;
 
-   class MeshSimplexIterator;
-
-   class MeshElementIterator;
-
-   class MeshFaceIterator;
-
-   class MeshInterfaceIterator;
-
-   class MeshBoundaryIterator;
-
-   class MeshVertexIterator;
+   class VertexIterator;
 
    class PointIterator;
 

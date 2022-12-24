@@ -60,7 +60,7 @@ namespace Rodin::Geometry
       return volume;
    }
 
-   SimplexVertexIterator Simplex::getVertices() const
+   VertexIterator Simplex::getVertices() const
    {
       // mfem::Array<int> vs;
       // m_data.element->GetVertices(vs);
@@ -69,7 +69,7 @@ namespace Rodin::Geometry
    }
 
    // ---- Element -----------------------------------------------------------
-   AdjacentElementIterator Element::getAdjacent() const
+   ElementIterator Element::getAdjacent() const
    {
       assert(false);
    }
@@ -79,7 +79,7 @@ namespace Rodin::Geometry
       : Simplex(std::move(data))
    {}
 
-   FaceElementIterator Face::getIncident() const
+   ElementIterator Face::getIncident() const
    {
       assert(false);
    }
