@@ -26,6 +26,8 @@ namespace Rodin::Geometry
    using Index = std::size_t;
    using Attribute = std::size_t;
 
+   class IndexGenerator;
+
    enum class Type;
 
    enum class Region
@@ -60,8 +62,6 @@ namespace Rodin::Geometry
    class BoundaryIterator;
 
    class VertexIterator;
-
-   class PointIterator;
 
    class MeshBase;
 
