@@ -16,7 +16,27 @@
 
 namespace Rodin::Geometry
 {
-   class SimplexIterator
+   class SimplexIteratorBase
+   {
+      public:
+         virtual ~SimplexIteratorBase() = default;
+
+         virtual bool end() const = 0;
+
+         virtual SimplexIteratorBase& operator++() = 0;
+
+         virtual Simplex& operator*() const noexcept = 0;
+
+         virtual Simplex* operator->() const noexcept = 0;
+
+         virtual size_t getDimension() const = 0;
+
+         virtual const MeshBase& getMesh() const = 0;
+
+         virtual const IndexGeneratorBase& getIndexGenerator() const = 0;
+   };
+
+   class SimplexIterator final : public SimplexIteratorBase
    {
       public:
          SimplexIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
@@ -25,31 +45,32 @@ namespace Rodin::Geometry
 
          SimplexIterator(SimplexIterator&& other);
 
-         virtual ~SimplexIterator() = default;
+         bool end() const override;
 
-         operator bool() const
-         {
-            return end();
-         }
+         SimplexIterator& operator++() override;
 
-         virtual bool end() const;
+         Simplex& operator*() const noexcept override;
 
-         virtual SimplexIterator& operator++();
+         Simplex* operator->() const noexcept override;
 
-         virtual Simplex& operator*() const noexcept;
-
-         virtual Simplex* operator->() const noexcept;
-
-      protected:
-         size_t getDimension() const
+         size_t getDimension() const override
          {
             return m_dimension;
          }
 
-         const MeshBase& getMesh() const
+         const MeshBase& getMesh() const override
          {
             return m_mesh.get();
          }
+
+         const IndexGeneratorBase& getIndexGenerator() const override
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+      private:
+         Simplex* generate() const;
 
          IndexGeneratorBase& getIndexGenerator()
          {
@@ -57,94 +78,190 @@ namespace Rodin::Geometry
             return *m_gen;
          }
 
-         const IndexGeneratorBase& getIndexGenerator() const
-         {
-            assert(m_gen);
-            return *m_gen;
-         }
-
-         virtual void update(Simplex* simplex);
-
-         virtual Simplex* generate() const;
-
-      private:
          const size_t m_dimension;
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
          std::unique_ptr<Simplex> m_simplex;
    };
 
-   class ElementIterator : public SimplexIterator
+   class ElementIterator final : public SimplexIteratorBase
    {
       public:
          ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+
          ElementIterator(const ElementIterator& other);
+
          ElementIterator(ElementIterator&& other);
 
-         virtual Element& operator*() const noexcept override;
-         virtual Element* operator->() const noexcept override;
+         bool end() const override;
 
-      protected:
-         virtual Element* generate() const override;
+         ElementIterator& operator++() override;
+
+         Element& operator*() const noexcept override;
+
+         Element* operator->() const noexcept override;
+
+         size_t getDimension() const override;
+
+         const MeshBase& getMesh() const override
+         {
+            return m_mesh.get();
+         }
+
+         const IndexGeneratorBase& getIndexGenerator() const override
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+      private:
+         Element* generate() const;
+
+         IndexGeneratorBase& getIndexGenerator()
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+         std::reference_wrapper<const MeshBase> m_mesh;
+         std::unique_ptr<IndexGeneratorBase> m_gen;
+         std::unique_ptr<Element> m_simplex;
    };
 
-   class FaceIterator : public SimplexIterator
+   class FaceIterator : public SimplexIteratorBase
    {
       public:
-         using ParentGeometry = SimplexIterator;
-
          FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+
          FaceIterator(const FaceIterator& other);
+
          FaceIterator(FaceIterator&& other);
 
-         virtual Face& operator*() const noexcept override;
-         virtual Face* operator->() const noexcept override;
+         bool end() const override;
 
-      protected:
-         virtual Face* generate() const override;
+         FaceIterator& operator++() override;
+
+         Face& operator*() const noexcept override;
+
+         Face* operator->() const noexcept override;
+
+         size_t getDimension() const override;
+
+         const MeshBase& getMesh() const override
+         {
+            return m_mesh.get();
+         }
+
+         const IndexGeneratorBase& getIndexGenerator() const override
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+      private:
+         Face* generate() const;
+
+         IndexGeneratorBase& getIndexGenerator()
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+         std::reference_wrapper<const MeshBase> m_mesh;
+         std::unique_ptr<IndexGeneratorBase> m_gen;
+         std::unique_ptr<Face> m_simplex;
    };
 
-   class VertexIterator final : public SimplexIterator
-   {
-      public:
-         VertexIterator(const MeshBase& mesh, IndexGeneratorBase gen);
-         VertexIterator(const VertexIterator& other);
-         VertexIterator(VertexIterator&& other);
-
-         // virtual Vertex& operator*() const noexcept override;
-         // virtual Vertex* operator->() const noexcept override;
-
-      protected:
-         // virtual Vertex* generate() const override;
-   };
-
-   class BoundaryIterator final : public FaceIterator
+   class BoundaryIterator final : public SimplexIteratorBase
    {
       public:
          BoundaryIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+
          BoundaryIterator(const BoundaryIterator& other);
+
          BoundaryIterator(BoundaryIterator&& other);
 
+         bool end() const override;
+
+         BoundaryIterator& operator++() override;
+
          Boundary& operator*() const noexcept override;
+
          Boundary* operator->() const noexcept override;
 
-      protected:
-         Boundary* generate() const override;
+         size_t getDimension() const override;
+
+         const MeshBase& getMesh() const override
+         {
+            return m_mesh.get();
+         }
+
+         const IndexGeneratorBase& getIndexGenerator() const override
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+      private:
+         Boundary* generate() const;
+
+         IndexGeneratorBase& getIndexGenerator()
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+         std::reference_wrapper<const MeshBase> m_mesh;
+         std::unique_ptr<IndexGeneratorBase> m_gen;
+         std::unique_ptr<Boundary> m_simplex;
    };
 
-   class InterfaceIterator final : public FaceIterator
+   class InterfaceIterator final : public SimplexIteratorBase
    {
       public:
          InterfaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+
          InterfaceIterator(const InterfaceIterator& other);
+
          InterfaceIterator(InterfaceIterator&& other);
 
+         bool end() const override;
+
+         InterfaceIterator& operator++() override;
+
          Interface& operator*() const noexcept override;
+
          Interface* operator->() const noexcept override;
 
-      protected:
-         Interface* generate() const override;
+         size_t getDimension() const override;
+
+         const MeshBase& getMesh() const override
+         {
+            return m_mesh.get();
+         }
+
+         const IndexGeneratorBase& getIndexGenerator() const override
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+      private:
+         Interface* generate() const;
+
+         IndexGeneratorBase& getIndexGenerator()
+         {
+            assert(m_gen);
+            return *m_gen;
+         }
+
+         std::reference_wrapper<const MeshBase> m_mesh;
+         std::unique_ptr<IndexGeneratorBase> m_gen;
+         std::unique_ptr<Interface> m_simplex;
    };
+
+   class VertexIterator : public SimplexIteratorBase
+   {};
 }
 
 #endif

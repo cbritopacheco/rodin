@@ -62,105 +62,72 @@ namespace Rodin::Variational
          FunctionValue getValue(const Geometry::Point& p) const override
          {
             FunctionValue::Matrix grad;
-            switch (p.getElement().getRegion())
+            const auto& element = p.getElement();
+            const auto& mesh = m_u.getFiniteElementSpace().getMesh();
+            if (element.getDimension() == mesh.getDimension())
             {
-               case Geometry::Region::Domain:
+               assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
+               const auto& element = p.getElement();
+               auto& trans = element.getTransformation();
+               m_u.getHandle().GetVectorGradient(trans, grad);
+            }
+            else if (element.getDimension() == mesh.getDimension() - 1)
+            {
+               assert(dynamic_cast<const Geometry::Face*>(&p.getElement()));
+               const auto& face = static_cast<const Geometry::Face&>(p.getElement());
+               if (face.isInterface())
                {
-                  assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
-                  const auto& element = p.getElement();
-                  auto& trans = element.getTransformation();
-                  m_u.getHandle().GetVectorGradient(trans, grad);
-                  break;
+                  assert(false);
                }
-               case Geometry::Region::Boundary:
+               else if (face.isBoundary())
                {
                   assert(dynamic_cast<const Geometry::Boundary*>(&p.getElement()));
                   const auto& boundary = static_cast<const Geometry::Boundary&>(p.getElement());
+                  auto& ft = boundary.getFaceTransformations();
+                  assert(ft.Elem1);
+                  auto& trans1 = ft.GetElement1Transformation();
+                  assert(ft.Elem2);
+                  auto& trans2 = ft.GetElement2Transformation();
                   const auto& mesh = p.getElement().getMesh();
-                  if (&mesh == &m_u.getFiniteElementSpace().getMesh())
+                  if (mesh.isSubMesh())
                   {
-                     auto& ft = boundary.getFaceTransformations();
-                     ft.SetAllIntPoints(&p.getElement().getTransformation().GetIntPoint());
-                     if (ft.Elem1 && (
-                           getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem1->Attribute)))
-                        m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
-                     else if (ft.Elem2 && (
-                           getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem2->Attribute)))
-                        m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
+                     const auto& parent = submesh.getParent();
+
+                     if (getTraceDomain().count(trans1.Attribute))
+                     {
+                        int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
+                        trans1.ElementNo = parentIdx;
+                        m_u.getHandle().GetVectorGradient(trans1, grad);
+                     }
+                     else if (getTraceDomain().count(trans2.Attribute))
+                     {
+                        int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
+                        const auto& parentElement = parent.getElement(parentIdx);
+                        assert(!parentElement.end());
+                        m_u.getHandle().GetVectorGradient(parentElement->getTransformation(), grad);
+                     }
                      else
                         assert(false);
                   }
-                  else if (mesh.isSubMesh())
-                  {
-                     assert(false);
-                     // Element's mesh is the child
-                     // const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
-                     // const auto& parent = submesh.getParent();
-
-                     // submesh.getBoundaryElementMap().left.at(boundary.getIndex()):
-
-                     // auto& ft = boundary.getFaceTransformations();
-                     // assert(ft.Elem1);
-                     // auto& trans1 = ft.GetElement1Transformation();
-                     // assert(ft.Elem2);
-                     // auto& trans2 = ft.GetElement2Transformation();
-
-                     // if (&parent == &m_u.getFiniteElementSpace().getMesh())
-                     // {
-                     //    submesh.getBoundaryElementMap().left.at(trans1.ElementNo);
-
-                     //    if (getTraceDomain().count(trans1.Attribute))
-                     //    {
-                     //       int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
-                     //       trans1.ElementNo = parentIdx;
-                     //       m_u.getHandle().GetVectorGradient(trans1, grad);
-                     //    }
-                     //    else if (getTraceDomain().count(trans2.Attribute))
-                     //    {
-                     //       int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
-                     //       trans2.ElementNo = parentIdx;
-                     //       m_u.getHandle().GetVectorGradient(trans2, grad);
-                     //    }
-                     //    else
-                     //       assert(false);
-                     // }
-                     // else
-                     // {
-                     //    assert(false);
-                     // }
-                  }
-                  else if (m_u.getFiniteElementSpace().getMesh().isSubMesh())
-                  {
-                     assert(false);
-                     // Element's mesh is the parent
-                     // const auto& submesh =
-                     //    static_cast<const Geometry::SubMesh<Context::Serial>&>(
-                     //          m_u.getFiniteElementSpace().getMesh());
-                     // assert(&mesh == &submesh.getParent());
-                     // const auto& child = submesh.get<Geometry::Boundary>(
-                     //       submesh.getBoundaryElementMap().right.at(boundary.getIndex()));
-                     // auto& ft = child.getFaceTransformations();
-                     // ft.SetAllIntPoints(&p.getElement().getTransformation().GetIntPoint());
-                     // if (ft.Elem1 && (
-                     //       getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem1->Attribute)))
-                     //    m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
-                     // else if (ft.Elem2 && (
-                     //       getTraceDomain().size() == 0 || getTraceDomain().count(ft.Elem2->Attribute)))
-                     //    m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
-                     // else
-                     //    assert(false);
-                  }
                   else
                   {
-                     assert(false);
+                     if (getTraceDomain().count(trans1.Attribute))
+                        m_u.getHandle().GetVectorGradient(trans1, grad);
+                     else if (getTraceDomain().count(trans2.Attribute))
+                        m_u.getHandle().GetVectorGradient(trans2, grad);
+                     else
+                        assert(false);
                   }
-                  break;
                }
-               case Geometry::Region::Interface:
+               else
                {
                   assert(false);
-                  break;
                }
+            }
+            else
+            {
+               assert(false);
             }
             return grad;
          }

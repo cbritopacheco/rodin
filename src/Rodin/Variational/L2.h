@@ -211,23 +211,17 @@ namespace Rodin::Variational
                const Geometry::Simplex& element) const override
          {
             mfem::Array<int> res;
-            switch (element.getRegion())
+            if (element.getDimension() == getMesh().getDimension())
             {
-               case Geometry::Region::Domain:
-               {
-                  m_fes->GetElementVDofs(element.getIndex(), res);
-                  break;
-               }
-               case Geometry::Region::Boundary:
-               {
-                  m_fes->GetBdrElementVDofs(element.getIndex(), res);
-                  break;
-               }
-               case Geometry::Region::Interface:
-               {
-                  m_fes->GetFaceVDofs(element.getIndex(), res);
-                  break;
-               }
+               m_fes->GetElementVDofs(element.getIndex(), res);
+            }
+            else if (element.getDimension() == getMesh().getDimension() - 1)
+            {
+               m_fes->GetFaceVDofs(element.getIndex(), res);
+            }
+            else
+            {
+               assert(false);
             }
             return res;
          }
@@ -235,14 +229,17 @@ namespace Rodin::Variational
          const mfem::FiniteElement& getFiniteElement(
                const Geometry::Simplex& element) const override
          {
-            switch (element.getRegion())
+            if (element.getDimension() == getMesh().getDimension())
             {
-               case Geometry::Region::Domain:
-                  return *m_fes->GetFE(element.getIndex());
-               case Geometry::Region::Interface:
-                  return *m_fes->GetFaceElement(element.getIndex());
-               case Geometry::Region::Boundary:
-                  return *m_fes->GetBE(element.getIndex());
+               return *m_fes->GetFE(element.getIndex());
+            }
+            else if (element.getDimension() == getMesh().getDimension() - 1)
+            {
+               return *m_fes->GetFaceElement(element.getIndex());
+            }
+            else
+            {
+               assert(false);
             }
          }
 

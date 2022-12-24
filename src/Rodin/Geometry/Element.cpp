@@ -9,11 +9,6 @@ namespace Rodin::Geometry
    }
 
    // ---- Simplex -----------------------------------------------------------
-   Index Simplex::getIndex() const
-   {
-      return m_data.index;
-   }
-
    Type Simplex::getGeometry() const
    {
       return static_cast<Type>(m_data.element->GetType());
@@ -22,11 +17,6 @@ namespace Rodin::Geometry
    Attribute Simplex::getAttribute() const
    {
       return m_data.element->GetAttribute();
-   }
-
-   const MeshBase& Simplex::getMesh() const
-   {
-      return m_data.mesh.get();
    }
 
    mfem::ElementTransformation& Simplex::getTransformation() const
@@ -69,27 +59,38 @@ namespace Rodin::Geometry
    }
 
    // ---- Element -----------------------------------------------------------
+   Element::Element(Index index, const MeshBase& mesh, Data data)
+      : Simplex(mesh.getDimension(), index, mesh, std::move(data))
+   {}
+
    ElementIterator Element::getAdjacent() const
    {
       assert(false);
    }
 
    // ---- Face --------------------------------------------------------------
-   Face::Face(Data data)
-      : Simplex(std::move(data))
+   Face::Face(Index index, const MeshBase& mesh, Data data)
+      : Simplex(mesh.getDimension() - 1, index, mesh, std::move(data))
    {}
 
-   ElementIterator Face::getIncident() const
+   bool Face::isBoundary() const
+   {
+      return getMesh().isBoundary(getIndex());
+   }
+
+   bool Face::isInterface() const
+   {
+      return getMesh().isInterface(getIndex());
+   }
+
+   FaceIterator Face::getAdjacent() const
    {
       assert(false);
    }
 
-   Region Face::getRegion() const
+   ElementIterator Face::getIncident() const
    {
-      if (getMesh().isInterface(getIndex()))
-         return Region::Interface;
-      else
-         return Region::Boundary;
+      assert(false);
    }
 
    // std::set<int> Face::elements() const

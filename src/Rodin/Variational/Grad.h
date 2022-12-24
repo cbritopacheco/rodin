@@ -59,17 +59,24 @@ namespace Rodin::Variational
          FunctionValue getValue(const Geometry::Point& p) const override
          {
             FunctionValue::Vector grad;
-            switch (p.getElement().getRegion())
+            const auto& element = p.getElement();
+            const auto& mesh = m_u.getFiniteElementSpace().getMesh();
+            if (element.getDimension() == mesh.getDimension())
             {
-               case Geometry::Region::Domain:
+               assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
+               const auto& element = p.getElement();
+               auto& trans = element.getTransformation();
+               m_u.getHandle().GetGradient(trans, grad);
+            }
+            else if (element.getDimension() == mesh.getDimension() - 1)
+            {
+               assert(dynamic_cast<const Geometry::Face*>(&p.getElement()));
+               const auto& face = static_cast<const Geometry::Face&>(p.getElement());
+               if (face.isInterface())
                {
-                  assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
-                  const auto& element = p.getElement();
-                  auto& trans = element.getTransformation();
-                  m_u.getHandle().GetGradient(trans, grad);
-                  break;
+                  assert(false);
                }
-               case Geometry::Region::Boundary:
+               else if (face.isBoundary())
                {
                   assert(dynamic_cast<const Geometry::Boundary*>(&p.getElement()));
                   const auto& boundary = static_cast<const Geometry::Boundary&>(p.getElement());
@@ -79,7 +86,28 @@ namespace Rodin::Variational
                   assert(ft.Elem2);
                   auto& trans2 = ft.GetElement2Transformation();
                   const auto& mesh = p.getElement().getMesh();
-                  if (&mesh == &m_u.getFiniteElementSpace().getMesh())
+                  if (mesh.isSubMesh())
+                  {
+                     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
+                     const auto& parent = submesh.getParent();
+
+                     if (getTraceDomain().count(trans1.Attribute))
+                     {
+                        int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
+                        trans1.ElementNo = parentIdx;
+                        m_u.getHandle().GetGradient(trans1, grad);
+                     }
+                     else if (getTraceDomain().count(trans2.Attribute))
+                     {
+                        int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
+                        const auto& parentElement = parent.getElement(parentIdx);
+                        assert(!parentElement.end());
+                        m_u.getHandle().GetGradient(parentElement->getTransformation(), grad);
+                     }
+                     else
+                        assert(false);
+                  }
+                  else
                   {
                      if (getTraceDomain().count(trans1.Attribute))
                         m_u.getHandle().GetGradient(trans1, grad);
@@ -88,81 +116,15 @@ namespace Rodin::Variational
                      else
                         assert(false);
                   }
-                  else if (mesh.isSubMesh())
-                  {
-                     // Element's mesh is the child
-                     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
-                     const auto& parent = submesh.getParent();
-
-                     if (&parent == &m_u.getFiniteElementSpace().getMesh())
-                     {
-                        submesh.getElementMap().left.at(trans1.ElementNo);
-
-                        if (getTraceDomain().count(trans1.Attribute))
-                        {
-                           int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
-                           trans1.ElementNo = parentIdx;
-                           m_u.getHandle().GetGradient(trans1, grad);
-                        }
-                        else if (getTraceDomain().count(trans2.Attribute))
-                        {
-                           int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
-                           trans2.ElementNo = parentIdx;
-                           m_u.getHandle().GetGradient(trans2, grad);
-                        }
-                        else
-                           assert(false);
-                     }
-                     else
-                     {
-                        assert(false);
-                     }
-                  }
-                  else if (m_u.getFiniteElementSpace().getMesh().isSubMesh())
-                  {
-                     // Element's mesh is the parent
-
-                     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(
-                           m_u.getFiniteElementSpace().getMesh());
-                     const auto& parent = submesh.getParent();
-                     if (&parent == &mesh)
-                     {
-                        auto it1 = submesh.getElementMap().right.find(trans1.ElementNo);
-                        auto it2 = submesh.getElementMap().right.find(trans2.ElementNo);
-
-                        if (it1 != submesh.getElementMap().right.end() &&
-                              (getTraceDomain().size() == 0 || getTraceDomain().count(trans1.Attribute)))
-                        {
-                           int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
-                           trans1.ElementNo = parentIdx;
-                           m_u.getHandle().GetGradient(trans1, grad);
-                        }
-                        else if (it2 != submesh.getElementMap().right.end() &&
-                              (getTraceDomain().size() == 0 || getTraceDomain().count(trans2.Attribute)))
-                        {
-                           int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
-                           trans2.ElementNo = parentIdx;
-                           m_u.getHandle().GetGradient(trans2, grad);
-                        }
-                        else
-                           assert(false);
-                     }
-                     else
-                     {
-                        assert(false);
-                     }
-                  }
-                  else
-                  {
-                     assert(false);
-                  }
-                  break;
                }
-               case Geometry::Region::Interface:
+               else
                {
                   assert(false);
-                  break;
                }
+            }
+            else
+            {
+               assert(false);
             }
             return grad;
          }
@@ -319,7 +281,6 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::Simplex& element) const override
          {
-            assert(element.getRegion() == Geometry::Region::Domain);
             auto& trans = element.getTransformation();
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());

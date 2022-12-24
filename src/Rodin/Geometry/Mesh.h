@@ -105,18 +105,18 @@ namespace Rodin::Geometry
           */
          // MeshBase& edit(std::function<void(const MeshElementIterator)> f);
 
-         /**
-          * @brief Performs connected-component labelling.
-          * @param[in] p Function which returns true if two adjacent elements
-          * belong to the same component, false otherwise.
-          * @returns List of sets, each set representing a component containing
-          * the indices of its elements.
-          *
-          * @note Both elements passed to the function will always be adjacent
-          * to each other, i.e. it is not necessary to verify this is the case.
-          */
-         std::deque<std::set<int>> ccl(
-               std::function<bool(const Element&, const Element&)> p) const;
+         // /**
+         //  * @brief Performs connected-component labelling.
+         //  * @param[in] p Function which returns true if two adjacent elements
+         //  * belong to the same component, false otherwise.
+         //  * @returns List of sets, each set representing a component containing
+         //  * the indices of its elements.
+         //  *
+         //  * @note Both elements passed to the function will always be adjacent
+         //  * to each other, i.e. it is not necessary to verify this is the case.
+         //  */
+         // std::deque<std::set<int>> ccl(
+         //       std::function<bool(const Element&, const Element&)> p) const;
 
          /**
           * @brief Edits the specified elements in the mesh via the given function.
@@ -300,7 +300,7 @@ namespace Rodin::Geometry
          /**
           * @brief Performs a deep copy of another mesh.
           */
-         Mesh(const Mesh& other);
+         Mesh(const Mesh& other) = default;
 
          /**
           * @brief Move assigns the mesh from another mesh.
