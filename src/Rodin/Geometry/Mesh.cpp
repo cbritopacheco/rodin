@@ -229,7 +229,6 @@ namespace Rodin::Geometry
 
    BoundaryIterator Mesh<Context::Serial>::getBoundary() const
    {
-      size_t dimension = getDimension() - 1;
       std::vector<Index> indices;
       indices.reserve(getHandle().GetNBE());
       for (int i = 0; i < getHandle().GetNBE(); i++)
@@ -238,12 +237,11 @@ namespace Rodin::Geometry
          if (!getHandle().FaceIsInterior(idx))
             indices.push_back(idx);
       }
-      return BoundaryIterator({dimension, *this, std::move(indices)});
+      return BoundaryIterator(*this, VectorIndexGenerator(std::move(indices)));
    }
 
    InterfaceIterator Mesh<Context::Serial>::getInterface() const
    {
-      size_t dimension = getDimension() - 1;
       std::vector<Index> indices;
       indices.reserve(getHandle().GetNumFaces());
       for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
@@ -251,23 +249,17 @@ namespace Rodin::Geometry
          if (getHandle().FaceIsInterior(idx))
             indices.push_back(idx);
       }
-      return InterfaceIterator({dimension, *this, std::move(indices)});
+      return InterfaceIterator(*this, VectorIndexGenerator(std::move(indices)));
    }
 
    ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
    {
-      size_t dimension = getDimension();
-      std::vector<Index> indices(getCount(dimension));
-      std::iota(indices.begin(), indices.end(), idx);
-      return ElementIterator({dimension, *this, std::move(indices)});
+      return ElementIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension())));
    }
 
    FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
    {
-      size_t dimension = getDimension() - 1;
-      std::vector<Index> indices(getCount(dimension));
-      std::iota(indices.begin(), indices.end(), idx);
-      return FaceIterator({dimension, *this, std::move(indices)});
+      return FaceIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension() - 1)));
    }
 
    VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
@@ -277,9 +269,7 @@ namespace Rodin::Geometry
 
    SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
    {
-      std::vector<Index> indices(getCount(dimension));
-      std::iota(indices.begin(), indices.end(), idx);
-      return SimplexIterator({dimension, *this, std::move(indices)});
+      return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));
    }
 
    bool Mesh<Context::Serial>::isInterface(Index faceIdx) const

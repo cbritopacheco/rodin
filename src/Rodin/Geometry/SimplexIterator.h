@@ -10,28 +10,22 @@
 #include <memory>
 #include <utility>
 
-#include "ForwardDecls.h"
+#include "IndexGenerator.h"
 #include "Element.h"
+#include "ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
    class SimplexIterator
    {
-      using InternalIterator = std::vector<Index>::iterator;
-
       public:
-         struct Data
-         {
-            const size_t dimension;
-            std::reference_wrapper<const MeshBase> mesh;
-            std::vector<Index> indices;
-         };
-
-         SimplexIterator(Data params);
+         SimplexIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
 
          SimplexIterator(const SimplexIterator& other);
 
          SimplexIterator(SimplexIterator&& other);
+
+         virtual ~SimplexIterator() = default;
 
          operator bool() const
          {
@@ -40,14 +34,6 @@ namespace Rodin::Geometry
 
          virtual bool end() const;
 
-         virtual ~SimplexIterator() = default;
-
-         virtual SimplexIterator operator++(int);
-
-         virtual bool operator==(const SimplexIterator& other) const;
-
-         virtual bool operator!=(const SimplexIterator& other) const;
-
          virtual SimplexIterator& operator++();
 
          virtual Simplex& operator*() const noexcept;
@@ -55,24 +41,26 @@ namespace Rodin::Geometry
          virtual Simplex* operator->() const noexcept;
 
       protected:
-         Data& getData()
+         size_t getDimension() const
          {
-            return m_data;
+            return m_dimension;
          }
 
-         const Data& getData() const
+         const MeshBase& getMesh() const
          {
-            return m_data;
+            return m_mesh.get();
          }
 
-         InternalIterator& getInternalIterator()
+         IndexGeneratorBase& getIndexGenerator()
          {
-            return m_it;
+            assert(m_gen);
+            return *m_gen;
          }
 
-         const InternalIterator& getInternalIterator() const
+         const IndexGeneratorBase& getIndexGenerator() const
          {
-            return m_it;
+            assert(m_gen);
+            return *m_gen;
          }
 
          virtual void update(Simplex* simplex);
@@ -80,15 +68,16 @@ namespace Rodin::Geometry
          virtual Simplex* generate() const;
 
       private:
-         Data m_data;
-         InternalIterator m_it;
+         const size_t m_dimension;
+         std::reference_wrapper<const MeshBase> m_mesh;
+         std::unique_ptr<IndexGeneratorBase> m_gen;
          std::unique_ptr<Simplex> m_simplex;
    };
 
    class ElementIterator : public SimplexIterator
    {
       public:
-         ElementIterator(Data data);
+         ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
          ElementIterator(const ElementIterator& other);
          ElementIterator(ElementIterator&& other);
 
@@ -104,7 +93,7 @@ namespace Rodin::Geometry
       public:
          using ParentGeometry = SimplexIterator;
 
-         FaceIterator(Data params);
+         FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
          FaceIterator(const FaceIterator& other);
          FaceIterator(FaceIterator&& other);
 
@@ -118,7 +107,7 @@ namespace Rodin::Geometry
    class VertexIterator final : public SimplexIterator
    {
       public:
-         VertexIterator(Data data);
+         VertexIterator(const MeshBase& mesh, IndexGeneratorBase gen);
          VertexIterator(const VertexIterator& other);
          VertexIterator(VertexIterator&& other);
 
@@ -132,7 +121,7 @@ namespace Rodin::Geometry
    class BoundaryIterator final : public FaceIterator
    {
       public:
-         BoundaryIterator(Data params);
+         BoundaryIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
          BoundaryIterator(const BoundaryIterator& other);
          BoundaryIterator(BoundaryIterator&& other);
 
@@ -146,7 +135,7 @@ namespace Rodin::Geometry
    class InterfaceIterator final : public FaceIterator
    {
       public:
-         InterfaceIterator(Data params);
+         InterfaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
          InterfaceIterator(const InterfaceIterator& other);
          InterfaceIterator(InterfaceIterator&& other);
 
