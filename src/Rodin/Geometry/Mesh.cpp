@@ -261,11 +261,6 @@ namespace Rodin::Geometry
       return FaceIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension() - 1)));
    }
 
-   VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
-   {
-      assert(false);
-   }
-
    SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
    {
       return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));

@@ -260,8 +260,30 @@ namespace Rodin::Geometry
          std::unique_ptr<Interface> m_simplex;
    };
 
-   class VertexIterator : public SimplexIteratorBase
-   {};
+   // class VertexIterator : public SimplexIteratorBase
+   // {
+   //    public:
+   //       bool end() const override;
+
+   //       VertexIterator& operator++() override;
+
+   //       Vertex& operator*() const noexcept override;
+
+   //       Vertex* operator->() const noexcept override;
+
+   //       size_t getDimension() const override;
+
+   //       const MeshBase& getMesh() const override
+   //       {
+   //          return m_mesh.get();
+   //       }
+
+   //       const IndexGeneratorBase& getIndexGenerator() const override
+   //       {
+   //          assert(m_gen);
+   //          return *m_gen;
+   //       }
+   // };
 }
 
 #endif
