@@ -68,7 +68,7 @@ namespace Rodin::Geometry
 
          virtual FaceIterator getFace(size_t idx = 0) const = 0;
 
-         virtual VertexIterator getVertex(size_t idx = 0) const = 0;
+         // virtual VertexIterator getVertex(size_t idx = 0) const = 0;
 
          virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
 
@@ -409,7 +409,7 @@ namespace Rodin::Geometry
 
          FaceIterator getFace(size_t idx = 0) const override;
 
-         VertexIterator getVertex(size_t idx = 0) const override;
+         // VertexIterator getVertex(size_t idx = 0) const override;
 
          SimplexIterator getSimplex(size_t dimension, size_t idx) const override;
 
