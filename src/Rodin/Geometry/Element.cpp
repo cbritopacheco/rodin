@@ -50,13 +50,13 @@ namespace Rodin::Geometry
       return volume;
    }
 
-   VertexIterator Simplex::getVertices() const
-   {
-      // mfem::Array<int> vs;
-      // m_data.element->GetVertices(vs);
-      // return std::vector<int>(vs.begin(), vs.end());
-      assert(false);
-   }
+   // VertexIterator Simplex::getVertices() const
+   // {
+   //    // mfem::Array<int> vs;
+   //    // m_data.element->GetVertices(vs);
+   //    // return std::vector<int>(vs.begin(), vs.end());
+   //    assert(false);
+   // }
 
    // ---- Element -----------------------------------------------------------
    Element::Element(Index index, const MeshBase& mesh, Data data)

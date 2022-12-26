@@ -13,57 +13,76 @@ namespace Rodin::Variational::Assembly
       OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
       res = 0.0;
 
+      FormLanguage::List<BilinearFormIntegratorBase> domainBFIs;
+      FormLanguage::List<BilinearFormIntegratorBase> boundaryBFIs;
+      FormLanguage::List<BilinearFormIntegratorBase> interfaceBFIs;
+
       for (const auto& bfi : input.bfis)
       {
          switch (bfi.getRegion())
          {
-            case Geometry::Region::Domain:
+            case Integrator::Region::Domain:
             {
-               for (auto it = input.mesh.getElement(); !it.end(); ++it)
-               {
-                  const auto& element = *it;
-                  if (bfi.getAttributes().size() == 0
-                        || bfi.getAttributes().count(element.getAttribute()))
-                  {
-                     res.AddSubMatrix(
-                           input.testFES.getDOFs(element),
-                           input.trialFES.getDOFs(element),
-                           bfi.getElementMatrix(element));
-                  }
-               }
+               domainBFIs.add(bfi);
                break;
             }
-            case Geometry::Region::Boundary:
+            case Integrator::Region::Boundary:
             {
-               for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
-               {
-                  const auto& element = *it;
-                  if (bfi.getAttributes().size() == 0
-                        || bfi.getAttributes().count(element.getAttribute()))
-                  {
-                     res.AddSubMatrix(
-                           input.testFES.getDOFs(element),
-                           input.trialFES.getDOFs(element),
-                           bfi.getElementMatrix(element));
-                  }
-               }
+               boundaryBFIs.add(bfi);
                break;
             }
-            case Geometry::Region::Interface:
+            case Integrator::Region::Interface:
             {
-               for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-               {
-                  const auto& element = *it;
-                  if (bfi.getAttributes().size() == 0
-                        || bfi.getAttributes().count(element.getAttribute()))
-                  {
-                     res.AddSubMatrix(
-                           input.testFES.getDOFs(element),
-                           input.trialFES.getDOFs(element),
-                           bfi.getElementMatrix(element));
-                  }
-               }
+               interfaceBFIs.add(bfi);
                break;
+            }
+         }
+      }
+
+      for (auto it = input.mesh.getElement(); !it.end(); ++it)
+      {
+         for (const auto& bfi : domainBFIs)
+         {
+            const auto& element = *it;
+            if (bfi.getAttributes().size() == 0 ||
+                  bfi.getAttributes().count(element.getAttribute()))
+            {
+               res.AddSubMatrix(
+                     input.testFES.getDOFs(element),
+                     input.trialFES.getDOFs(element),
+                     bfi.getMatrix(element));
+            }
+         }
+      }
+
+      for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+      {
+         for (const auto& bfi : boundaryBFIs)
+         {
+            const auto& boundary = *it;
+            if (bfi.getAttributes().size() == 0 ||
+                  bfi.getAttributes().count(boundary.getAttribute()))
+            {
+               res.AddSubMatrix(
+                     input.testFES.getDOFs(boundary),
+                     input.trialFES.getDOFs(boundary),
+                     bfi.getMatrix(boundary));
+            }
+         }
+      }
+
+      for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+      {
+         for (const auto& bfi : interfaceBFIs)
+         {
+            const auto& interface = *it;
+            if (bfi.getAttributes().size() == 0 ||
+                  bfi.getAttributes().count(interface.getAttribute()))
+            {
+               res.AddSubMatrix(
+                     input.testFES.getDOFs(interface),
+                     input.trialFES.getDOFs(interface),
+                     bfi.getMatrix(interface));
             }
          }
       }
@@ -77,53 +96,70 @@ namespace Rodin::Variational::Assembly
       VectorType res(input.fes.getSize());
       res = 0.0;
 
+      FormLanguage::List<LinearFormIntegratorBase> domainLFIs;
+      FormLanguage::List<LinearFormIntegratorBase> boundaryLFIs;
+      FormLanguage::List<LinearFormIntegratorBase> interfaceLFIs;
+
       for (const auto& lfi : input.lfis)
       {
          switch (lfi.getRegion())
          {
-            case Geometry::Region::Domain:
+            case Integrator::Region::Domain:
             {
-               for (auto it = input.mesh.getElement(); !it.end(); ++it)
-               {
-                  const auto& element = *it;
-                  if (lfi.getAttributes().size() == 0
-                        || lfi.getAttributes().count(element.getAttribute()))
-                  {
-                     res.AddElementVector(input.fes.getDOFs(element), lfi.getElementVector(element));
-                  }
-               }
+               domainLFIs.add(lfi);
                break;
             }
-            case Geometry::Region::Boundary:
+            case Integrator::Region::Boundary:
             {
-               for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
-               {
-                  const auto& element = *it;
-                  std::cout << "miaow: " << element.getAttribute() << std::endl;
-                  if (lfi.getAttributes().size() == 0
-                        || lfi.getAttributes().count(element.getAttribute()))
-                  {
-                     res.AddElementVector(input.fes.getDOFs(element), lfi.getElementVector(element));
-                  }
-               }
+               boundaryLFIs.add(lfi);
                break;
             }
-            case Geometry::Region::Interface:
+            case Integrator::Region::Interface:
             {
-               for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-               {
-                  const auto& element = *it;
-                  if (lfi.getAttributes().size() == 0
-                        || lfi.getAttributes().count(element.getAttribute()))
-                  {
-                     res.AddElementVector(input.fes.getDOFs(element), lfi.getElementVector(element));
-                  }
-               }
+               interfaceLFIs.add(lfi);
                break;
             }
          }
       }
 
+      for (auto it = input.mesh.getElement(); !it.end(); ++it)
+      {
+         for (const auto& lfi : domainLFIs)
+         {
+            const auto& element = *it;
+            if (lfi.getAttributes().size() == 0
+                  || lfi.getAttributes().count(element.getAttribute()))
+            {
+               res.AddElementVector(input.fes.getDOFs(element), lfi.getVector(element));
+            }
+         }
+      }
+
+      for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+      {
+         for (const auto& lfi : boundaryLFIs)
+         {
+            const auto& element = *it;
+            if (lfi.getAttributes().size() == 0
+                  || lfi.getAttributes().count(element.getAttribute()))
+            {
+               res.AddElementVector(input.fes.getDOFs(element), lfi.getVector(element));
+            }
+         }
+      }
+
+      for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+      {
+         for (const auto& lfi : interfaceLFIs)
+         {
+            const auto& element = *it;
+            if (lfi.getAttributes().size() == 0
+                  || lfi.getAttributes().count(element.getAttribute()))
+            {
+               res.AddElementVector(input.fes.getDOFs(element), lfi.getVector(element));
+            }
+         }
+      }
       return res;
    }
 }

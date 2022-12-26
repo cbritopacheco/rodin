@@ -30,13 +30,6 @@ namespace Rodin::Geometry
 
    enum class Type;
 
-   enum class Region
-   {
-      Domain,
-      Boundary,
-      Interface
-   };
-
    class Simplex;
 
    class Element;

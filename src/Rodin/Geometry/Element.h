@@ -80,7 +80,7 @@ namespace Rodin::Geometry
 
          double getVolume() const;
 
-         VertexIterator getVertices() const;
+         // VertexIterator getVertices() const;
 
          mfem::ElementTransformation& getTransformation() const;
 
@@ -228,12 +228,12 @@ namespace Rodin::Geometry
 
          /**
           * @brief Constructs the Point object from reference coordinates.
-          * @param[in] element Element to which point belongs to
+          * @param[in] simplex Simplex to which point belongs to
           * @param[in] ip Reference coordinates
           */
-         Point(const Simplex& element, const mfem::IntegrationPoint& ip);
+         Point(const Simplex& simplex, const mfem::IntegrationPoint& ip);
 
-         Point(const Simplex& element, mfem::IntegrationPoint&& ip);
+         Point(const Simplex& simplex, mfem::IntegrationPoint&& ip);
 
          Point(const Point&) = default;
 
@@ -348,7 +348,7 @@ namespace Rodin::Geometry
             return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
          }
 
-         const Simplex& getElement() const
+         const Simplex& getSimplex() const
          {
             return m_element;
          }

@@ -21,6 +21,13 @@ namespace Rodin::Variational
       public:
          using Parent = FormLanguage::Base;
 
+         enum class Region
+         {
+            Domain,
+            Boundary,
+            Interface
+         };
+
          enum class Type
          {
             Linear,
@@ -39,7 +46,7 @@ namespace Rodin::Variational
 
          virtual Type getType() const = 0;
 
-         virtual Geometry::Region getRegion() const = 0;
+         virtual Region getRegion() const = 0;
 
          virtual Integrator* copy() const noexcept override = 0;
    };

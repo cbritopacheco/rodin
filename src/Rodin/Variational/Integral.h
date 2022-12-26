@@ -157,12 +157,12 @@ namespace Rodin::Variational
             return m_prod;
          }
 
-         virtual Geometry::Region getRegion() const override
+         virtual Region getRegion() const override
          {
-            return Geometry::Region::Domain;
+            return Region::Domain;
          }
 
-         virtual mfem::DenseMatrix getElementMatrix(
+         virtual mfem::DenseMatrix getMatrix(
                const Geometry::Simplex& element) const override;
 
          virtual Integral* copy() const noexcept override
@@ -190,7 +190,7 @@ namespace Rodin::Variational
          using Parent    = Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
          using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
          using Parent::Parent;
-         Geometry::Region getRegion() const override { return Geometry::Region::Boundary; }
+         Region getRegion() const override { return Region::Boundary; }
          BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
    };
    BoundaryIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
@@ -222,7 +222,7 @@ namespace Rodin::Variational
          using Parent    = Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
          using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
          using Parent::Parent;
-         Geometry::Region getRegion() const override { return Geometry::Region::Interface; }
+         Region getRegion() const override { return Region::Interface; }
          InterfaceIntegral* copy() const noexcept override { return new InterfaceIntegral(*this); }
    };
    InterfaceIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
@@ -307,12 +307,12 @@ namespace Rodin::Variational
             return *m_integrand;
          }
 
-         virtual Geometry::Region getRegion() const override
+         virtual Region getRegion() const override
          {
-            return Geometry::Region::Domain;
+            return Region::Domain;
          }
 
-         virtual mfem::Vector getElementVector(
+         virtual mfem::Vector getVector(
                const Geometry::Simplex& element) const override;
 
          virtual Integral* copy() const noexcept override
@@ -334,7 +334,7 @@ namespace Rodin::Variational
          using Parent    = Integral<ShapeFunctionBase<TestSpace>>;
          using Integrand = ShapeFunctionBase<TestSpace>;
          using Parent::Parent;
-         Geometry::Region getRegion() const override { return Geometry::Region::Boundary; }
+         Region getRegion() const override { return Region::Boundary; }
          BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
    };
    BoundaryIntegral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&)
@@ -460,7 +460,7 @@ namespace Rodin::Variational
             return static_cast<const Integrand&>(Parent::getIntegrand());
          }
 
-         mfem::DenseMatrix getElementMatrix(const Geometry::Simplex& element) const override
+         mfem::DenseMatrix getMatrix(const Geometry::Simplex& element) const override
          {
             const auto& trial = getIntegrand().getLHS()
                                               .getFiniteElementSpace()
@@ -562,7 +562,7 @@ namespace Rodin::Variational
             return static_cast<const Integrand&>(Parent::getIntegrand());
          }
 
-         virtual mfem::DenseMatrix getElementMatrix(
+         virtual mfem::DenseMatrix getMatrix(
                const Geometry::Simplex& element) const override
          {
             const auto& trial = getIntegrand().getLHS()
@@ -676,7 +676,7 @@ namespace Rodin::Variational
          using Integrand =
             Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
          using Parent::Parent;
-         Geometry::Region getRegion() const override { return Geometry::Region::Boundary; }
+         Integrator::Region getRegion() const override { return Integrator::Region::Boundary; }
          BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
    };
    template <class FES>
@@ -745,7 +745,7 @@ namespace Rodin::Variational
             : Parent(std::move(other))
          {}
 
-         virtual mfem::DenseMatrix getElementMatrix(
+         virtual mfem::DenseMatrix getMatrix(
                const Geometry::Simplex& element) const override
          {
             mfem::DenseMatrix mat;
@@ -827,7 +827,7 @@ namespace Rodin::Variational
          using Integrand =
             Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>;
          using Parent::Parent;
-         Geometry::Region getRegion() const override { return Geometry::Region::Boundary; }
+         Integrator::Region getRegion() const override { return Integrator::Region::Boundary; }
          BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
    };
    template <class FES>
@@ -896,7 +896,7 @@ namespace Rodin::Variational
             : Parent(std::move(other))
          {}
 
-         virtual mfem::DenseMatrix getElementMatrix(
+         virtual mfem::DenseMatrix getMatrix(
                const Geometry::Simplex& element) const override
          {
             mfem::DenseMatrix mat;
@@ -1037,7 +1037,7 @@ namespace Rodin::Variational
             return static_cast<const Integrand&>(Parent::getIntegrand());
          }
 
-         virtual mfem::Vector getElementVector(const Geometry::Simplex& element) const override
+         virtual mfem::Vector getVector(const Geometry::Simplex& element) const override
          {
             const FunctionBase& f = getIntegrand().getLHS();
 
@@ -1095,7 +1095,7 @@ namespace Rodin::Variational
          using Parent      = Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
          using Integrand   = Dot<FunctionBase, ShapeFunction<FES, TestSpace>>;
          using Parent::Parent;
-         Geometry::Region getRegion() const override { return Geometry::Region::Boundary; }
+         Integrator::Region getRegion() const override { return Integrator::Region::Boundary; }
          BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
    };
    template <class FES>

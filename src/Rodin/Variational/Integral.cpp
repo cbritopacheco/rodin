@@ -7,7 +7,7 @@ namespace Rodin::Variational
 {
    mfem::DenseMatrix
    Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   ::getElementMatrix(const Geometry::Simplex& element) const
+   ::getMatrix(const Geometry::Simplex& element) const
    {
       mfem::DenseMatrix mat;
 
@@ -26,14 +26,14 @@ namespace Rodin::Variational
       ShapeComputator shapeCompute;
       for (const auto& p : element.getIntegrationRule(order))
       {
-         m_prod.getElementMatrix(tmp, shapeCompute, p);
+         m_prod.getMatrix(tmp, shapeCompute, p);
          mfem::Add(mat, tmp, trans.Weight() * trans.GetIntPoint().weight, mat);
       }
 
       return mat;
    }
 
-   mfem::Vector Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
+   mfem::Vector Integral<ShapeFunctionBase<TestSpace>>::getVector(
          const Geometry::Simplex& element) const
    {
       mfem::Vector vec;

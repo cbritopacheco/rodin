@@ -168,7 +168,7 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::Point& p) const override
          {
-            const int opDofs = getRHS().getDOFs(p.getElement());
+            const int opDofs = getRHS().getDOFs(p.getSimplex());
             op.setSize(1, 1, opDofs);
             switch (getLHS().getRangeType())
             {
@@ -268,7 +268,7 @@ namespace Rodin::Variational
             return *m_test;
          }
 
-         virtual void getElementMatrix(
+         virtual void getMatrix(
                mfem::DenseMatrix& result, ShapeComputator& compute,
                const Geometry::Point& p) const
          {

@@ -41,7 +41,7 @@ namespace Rodin::Variational
          FunctionValue getValue(const Geometry::Point& p) const override
          {
             FunctionValue::Vector value;
-            const auto& element = p.getElement();
+            const auto& element = p.getSimplex();
             auto& trans = element.getTransformation();
             const auto& mesh = element.getMesh();
             assert(

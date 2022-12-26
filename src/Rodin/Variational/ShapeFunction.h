@@ -362,7 +362,7 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::Point& p) const override
          {
-            const auto& element = p.getElement();
+            const auto& element = p.getSimplex();
             const auto& shape =
                compute.getPhysicalShape(
                      getFiniteElementSpace().getFiniteElement(element),
