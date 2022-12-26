@@ -51,7 +51,7 @@ namespace Rodin::Variational
          /**
           * @brief Gets the attributes of the elements being integrated.
           */
-         const std::set<int>& getAttributes() const
+         const std::set<Geometry::Attribute>& getAttributes() const
          {
             return m_attrs;
          }
@@ -63,9 +63,9 @@ namespace Rodin::Variational
           * Specifies the material reference over which the integration should
           * take place.
           */
-         LinearFormIntegratorBase& over(int attr)
+         LinearFormIntegratorBase& over(Geometry::Attribute attr)
          {
-            return over(std::set<int>{attr});
+            return over(std::set<Geometry::Attribute>{attr});
          }
 
          /**
@@ -75,7 +75,7 @@ namespace Rodin::Variational
           * Specifies the material references over which the integration should
           * take place.
           */
-         LinearFormIntegratorBase& over(const std::set<int>& attrs)
+         LinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
          {
             assert(attrs.size() > 0);
             m_attrs = attrs;
@@ -96,61 +96,14 @@ namespace Rodin::Variational
           * @brief Performs the assembly of the element vector for the given
           * element.
           */
-         virtual mfem::Vector getElementVector(
+         virtual mfem::Vector getVector(
                const Geometry::Simplex& element) const = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
       private:
          std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
-         std::set<int> m_attrs;
-   };
-}
-
-namespace Rodin::Variational::Internal
-{
-   class ProxyLinearFormIntegrator : public mfem::LinearFormIntegrator
-   {
-      public:
-         ProxyLinearFormIntegrator(const LinearFormIntegratorBase& lfi)
-            : m_lfi(lfi)
-         {}
-
-         ProxyLinearFormIntegrator(const ProxyLinearFormIntegrator& other)
-            : mfem::LinearFormIntegrator(other),
-              m_lfi(other.m_lfi)
-         {}
-
-         ProxyLinearFormIntegrator(ProxyLinearFormIntegrator&& other)
-            : mfem::LinearFormIntegrator(std::move(other)),
-              m_lfi(other.m_lfi)
-         {}
-
-         void AssembleRHSElementVect(
-               const mfem::FiniteElement&,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) override
-         {
-            assert(false);
-            // if (trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT)
-            // {
-            //    const auto& element = m_lfi.getTestFunction()
-            //                               .getFiniteElementSpace()
-            //                               .getMesh()
-            //                               .get<Geometry::Boundary>(trans.ElementNo);
-            //    vec = m_lfi.getElementVector(element);
-            // }
-            // else if (trans.ElementType == mfem::ElementTransformation::ELEMENT)
-            // {
-            //    const auto& element = m_lfi.getTestFunction()
-            //                               .getFiniteElementSpace()
-            //                               .getMesh()
-            //                               .get<Geometry::Element>(trans.ElementNo);
-            //    vec = m_lfi.getElementVector(element);
-            // }
-         }
-
-      private:
-         const LinearFormIntegratorBase& m_lfi;
+         std::set<Geometry::Attribute> m_attrs;
    };
 }
 

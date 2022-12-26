@@ -110,7 +110,7 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::Point& p) const override
          {
-            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getElement());
+            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
             m_shape->getOperator(op, compute, p);
             op.transpose();
          }

@@ -7,9 +7,4 @@
 #include "LinearFormIntegrator.h"
 
 namespace Rodin::Variational
-{
-   std::unique_ptr<mfem::LinearFormIntegrator> LinearFormIntegratorBase::build() const
-   {
-      return std::make_unique<Internal::ProxyLinearFormIntegrator>(*this);
-   }
-}
+{}

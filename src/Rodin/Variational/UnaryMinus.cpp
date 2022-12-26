@@ -52,17 +52,16 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   Geometry::Region
-   UnaryMinus<LinearFormIntegratorBase>::getRegion() const
+   Integrator::Region UnaryMinus<LinearFormIntegratorBase>::getRegion() const
    {
       return m_op->getRegion();
    }
 
    mfem::Vector
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Geometry::Simplex& element)
+   UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Simplex& element)
    const
    {
-      mfem::Vector vec = m_op->getElementVector(element);
+      mfem::Vector vec = m_op->getVector(element);
       vec *= -1.0;
       return vec;
    }
@@ -89,7 +88,7 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   Geometry::Region
+   Integrator::Region
    UnaryMinus<BilinearFormIntegratorBase>::getRegion() const
    {
       return m_op->getRegion();
@@ -97,9 +96,9 @@ namespace Rodin::Variational
 
    mfem::DenseMatrix
    UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(const Geometry::Simplex& element) const
+   ::getMatrix(const Geometry::Simplex& element) const
    {
-      mfem::DenseMatrix op = m_op->getElementMatrix(element);
+      mfem::DenseMatrix op = m_op->getMatrix(element);
       op.Neg();
       return op;
    }

@@ -215,7 +215,7 @@ namespace Rodin::Variational
 
    FunctionValue GridFunctionBase::getValue(const Geometry::Point& p) const
    {
-      auto& trans = p.getElement().getTransformation();
+      auto& trans = p.getSimplex().getTransformation();
       switch (getRangeType())
       {
          case RangeType::Scalar:

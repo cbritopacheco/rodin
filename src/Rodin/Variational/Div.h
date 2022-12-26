@@ -76,8 +76,8 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::Point& p) const override
          {
-            const auto& element = p.getElement();
-            auto& trans = p.getElement().getTransformation();
+            const auto& element = p.getSimplex();
+            auto& trans = p.getSimplex().getTransformation();
             const auto& fe = getFiniteElementSpace().getFiniteElement(element);
             const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
             const int opDofs = getDOFs(element);

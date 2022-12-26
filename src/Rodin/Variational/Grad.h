@@ -59,33 +59,33 @@ namespace Rodin::Variational
          FunctionValue getValue(const Geometry::Point& p) const override
          {
             FunctionValue::Vector grad;
-            const auto& element = p.getElement();
+            const auto& element = p.getSimplex();
             const auto& mesh = m_u.getFiniteElementSpace().getMesh();
             if (element.getDimension() == mesh.getDimension())
             {
-               assert(dynamic_cast<const Geometry::Element*>(&p.getElement()));
-               const auto& element = p.getElement();
+               assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
+               const auto& element = p.getSimplex();
                auto& trans = element.getTransformation();
                m_u.getHandle().GetGradient(trans, grad);
             }
             else if (element.getDimension() == mesh.getDimension() - 1)
             {
-               assert(dynamic_cast<const Geometry::Face*>(&p.getElement()));
-               const auto& face = static_cast<const Geometry::Face&>(p.getElement());
+               assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
+               const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
                if (face.isInterface())
                {
                   assert(false);
                }
                else if (face.isBoundary())
                {
-                  assert(dynamic_cast<const Geometry::Boundary*>(&p.getElement()));
-                  const auto& boundary = static_cast<const Geometry::Boundary&>(p.getElement());
+                  assert(dynamic_cast<const Geometry::Boundary*>(&p.getSimplex()));
+                  const auto& boundary = static_cast<const Geometry::Boundary&>(p.getSimplex());
                   auto& ft = boundary.getFaceTransformations();
                   assert(ft.Elem1);
                   auto& trans1 = ft.GetElement1Transformation();
                   assert(ft.Elem2);
                   auto& trans2 = ft.GetElement2Transformation();
-                  const auto& mesh = p.getElement().getMesh();
+                  const auto& mesh = p.getSimplex().getMesh();
                   if (mesh.isSubMesh())
                   {
                      const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
@@ -194,8 +194,8 @@ namespace Rodin::Variational
                ShapeComputator& compute,
                const Geometry::Point& p) const override
          {
-            auto& trans = p.getElement().getTransformation();
-            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getElement());
+            auto& trans = p.getSimplex().getTransformation();
+            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
             const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
             const int n = dshape.NumRows();
             const int sdim = trans.GetSpaceDim();
