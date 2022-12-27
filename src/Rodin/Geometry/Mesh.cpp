@@ -35,15 +35,15 @@ namespace Rodin::Geometry
       return (getSpaceDimension() - 1 == getDimension());
    }
 
-   std::set<int> MeshBase::getAttributes() const
+   std::set<Attribute> MeshBase::getAttributes() const
    {
-      return std::set<int>(
+      return std::set<Attribute>(
             getHandle().attributes.begin(), getHandle().attributes.end());
    }
 
-   std::set<int> MeshBase::getBoundaryAttributes() const
+   std::set<Attribute> MeshBase::getBoundaryAttributes() const
    {
-      return std::set<int>(
+      return std::set<Attribute>(
             getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
    }
 
@@ -221,11 +221,6 @@ namespace Rodin::Geometry
       return 0;
    }
 
-   size_t Mesh<Context::Serial>::getElementCount() const
-   {
-      return getCount(getDimension());
-   }
-
    BoundaryIterator Mesh<Context::Serial>::getBoundary() const
    {
       std::vector<Index> indices;
@@ -348,30 +343,20 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(int attr)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr)
    {
-      return keep(std::set<int>{attr});
+      return keep(std::set<Attribute>{attr});
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<int>& attrs)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
    {
-      // assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-      assert(false);
       SubMesh<Context::Serial> res(*this);
       res.initialize(getDimension(), getSpaceDimension());
-      std::vector<Index> indices;
-      for (auto it = getElement(); !it.end(); ++it)
+      std::set<Index> indices;
+      for (Index i = 0; i < getCount(getDimension()); i++)
       {
-         if (attrs.count(it->getAttribute()))
-            indices.push_back(it->getIndex());
-      }
-      for (auto bit = getBoundary(); !bit.end(); ++bit)
-      {
-         for (auto eit = bit->getIncident(); !eit.end(); ++eit)
-         {
-            if (attrs.count(eit->getAttribute()))
-               indices.push_back(eit->getIndex());
-         }
+         if (attrs.count(getAttribute(getDimension(), i)))
+            indices.insert(i);
       }
       res.include(getDimension(), indices);
       res.finalize();
@@ -384,14 +369,14 @@ namespace Rodin::Geometry
       assert(false);
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(int attr)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
    {
-      return trim(std::set<int>{attr});
+      return trim(std::set<Attribute>{attr});
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<int>& attrs)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<Attribute>& attrs)
    {
-      std::set<int> complement = getAttributes();
+      std::set<Attribute> complement = getAttributes();
       for (const auto& a : attrs)
          complement.erase(a);
       return keep(complement);

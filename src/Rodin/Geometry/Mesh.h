@@ -60,8 +60,6 @@ namespace Rodin::Geometry
 
          virtual InterfaceIterator getInterface() const = 0;
 
-         virtual size_t getElementCount() const = 0;
-
          virtual size_t getCount(size_t dim) const = 0;
 
          virtual ElementIterator getElement(size_t idx = 0) const = 0;
@@ -77,6 +75,26 @@ namespace Rodin::Geometry
          virtual bool isBoundary(Index faceIdx) const = 0;
 
          virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
+
+         Attribute getElementAttribute(Index index) const
+         {
+            return getAttribute(getDimension(), index);
+         }
+
+         Attribute getFaceAttribute(Index index) const
+         {
+            return getAttribute(getDimension() - 1, index);
+         }
+
+         size_t getElementCount() const
+         {
+            return getCount(getDimension());
+         }
+
+         size_t getFaceCount() const
+         {
+            return getCount(getDimension() - 1);
+         }
 
          MeshBase& update();
 
@@ -184,14 +202,14 @@ namespace Rodin::Geometry
           * @returns Set of all the attributes in the mesh object.
           * @see getBoundaryAttributes() const
           */
-         std::set<int> getAttributes() const;
+         std::set<Attribute> getAttributes() const;
 
          /**
           * @brief Gets the labels of the boundary elements in the mesh.
           * @returns Set of all the boundary attributes in the mesh object.
           * @see getAttributes() const
           */
-         std::set<int> getBoundaryAttributes() const;
+         std::set<Attribute> getBoundaryAttributes() const;
 
          /**
           * @brief Gets the maximum number @f$ t @f$ by which the mesh will
@@ -358,10 +376,10 @@ namespace Rodin::Geometry
           * @param[in] attr Attribute to trim
           * @returns SubMesh object to the remaining region of the mesh
           *
-          * Convenience function to call trim(const std::set<int>&, int) with
+          * Convenience function to call trim(const std::set<Attribute>&) with
           * only one attribute.
           */
-         virtual SubMesh<Context::Serial> trim(int attr);
+         virtual SubMesh<Context::Serial> trim(Attribute attr);
 
          /**
           * @brief Trims the elements with the given material references.
@@ -372,11 +390,13 @@ namespace Rodin::Geometry
           * object containing the elements which were not trimmed from the
           * original mesh.
           */
-         virtual SubMesh<Context::Serial> trim(const std::set<int>& attrs);
+         virtual SubMesh<Context::Serial> trim(const std::set<Attribute>& attrs);
 
-         virtual SubMesh<Context::Serial> keep(int attr);
+         virtual SubMesh<Context::Serial> keep(Attribute attr);
 
-         virtual SubMesh<Context::Serial> keep(const std::set<int>& attrs);
+         virtual SubMesh<Context::Serial> keep(const std::set<Attribute>& attrs);
+
+         // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
          /**
           * @internal
@@ -396,8 +416,6 @@ namespace Rodin::Geometry
           */
          Mesh<Context::Parallel> parallelize(boost::mpi::communicator comm);
 #endif
-
-         size_t getElementCount() const override;
 
          size_t getCount(size_t dim) const override;
 
