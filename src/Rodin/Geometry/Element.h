@@ -35,6 +35,11 @@ namespace Rodin::Geometry
    class Simplex
    {
       public:
+         enum class Property
+         {
+            Attribute
+         };
+
          struct Data
          {
             std::unique_ptr<mfem::Element> element;

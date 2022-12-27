@@ -273,7 +273,7 @@ namespace Rodin::External::MMG
       int discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
       int discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
 
-      void generateUniqueSplit(const std::set<int>& attr);
+      void generateUniqueSplit(const std::set<Geometry::Attribute>& attr);
 
       void deleteBoundaryRef(MMG5_pMesh mesh, MaterialReference ref);
 

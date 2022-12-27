@@ -37,7 +37,7 @@ namespace Rodin::Geometry
 
          SubMesh(const SubMesh& other);
 
-         SubMesh& include(size_t dim, const std::vector<Index>& simplices);
+         SubMesh& include(size_t dim, const std::set<Index>& simplices);
 
          /**
           * @returns Reference to the parent Mesh object
@@ -50,8 +50,6 @@ namespace Rodin::Geometry
          const boost::bimap<size_t, size_t>& getVertexMap() const;
 
          const boost::bimap<size_t, size_t>& getElementMap() const;
-
-         const boost::bimap<size_t, size_t>& getBoundaryElementMap() const;
 
          bool isSubMesh() const override
          {
