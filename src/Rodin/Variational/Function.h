@@ -341,7 +341,7 @@ namespace Rodin::Variational
                   [&](Scalar& v) { v *= s; },
                   [&](Vector& v) { v *= s; },
                   [&](Matrix& v) { v *= s; },
-                  [&](Boolean& v) { v *= s; }} , m_v);
+                  [&](Boolean& v) { v = v && static_cast<Boolean>(s); }} , m_v);
             return *this;
          }
 
@@ -353,7 +353,7 @@ namespace Rodin::Variational
                   [&](Scalar& v) { v *= (1.0 / s); },
                   [&](Vector& v) { v *= (1.0 / s); },
                   [&](Matrix& v) { v *= (1.0 / s); },
-                  [&](Boolean& v) { v *= (1.0 / s); }} , m_v);
+                  [&](Boolean& v) { v = v && static_cast<Boolean>(1.0 / s); }} , m_v);
             return *this;
          }
 
