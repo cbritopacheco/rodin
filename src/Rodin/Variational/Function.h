@@ -337,7 +337,11 @@ namespace Rodin::Variational
          constexpr
          FunctionValue& operator*=(Scalar s)
          {
-            std::visit([&](auto& v) { v *= s; } , m_v);
+            std::visit(Utility::Overloaded{
+                  [&](Scalar& v) { v *= s; },
+                  [&](Vector& v) { v *= s; },
+                  [&](Matrix& v) { v *= s; },
+                  [&](Boolean& v) { v *= s; }} , m_v);
             return *this;
          }
 
@@ -345,7 +349,11 @@ namespace Rodin::Variational
          constexpr
          FunctionValue& operator/=(Scalar s)
          {
-            std::visit([&](auto& v) { v *= (1.0 / s); } , m_v);
+            std::visit(Utility::Overloaded{
+                  [&](Scalar& v) { v *= (1.0 / s); },
+                  [&](Vector& v) { v *= (1.0 / s); },
+                  [&](Matrix& v) { v *= (1.0 / s); },
+                  [&](Boolean& v) { v *= (1.0 / s); }} , m_v);
             return *this;
          }
 

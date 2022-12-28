@@ -20,9 +20,7 @@ namespace Rodin::Geometry
             : m_mesh(mesh)
          {}
 
-         MeshSelect& where()
-         {
-         }
+         MeshSelect& where(Attribute attr);
 
          const MeshBase& getMesh() const
          {

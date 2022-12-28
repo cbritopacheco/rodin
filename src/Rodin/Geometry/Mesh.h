@@ -56,48 +56,6 @@ namespace Rodin::Geometry
       public:
          virtual ~MeshBase() = default;
 
-         virtual BoundaryIterator getBoundary() const = 0;
-
-         virtual InterfaceIterator getInterface() const = 0;
-
-         virtual size_t getCount(size_t dim) const = 0;
-
-         virtual ElementIterator getElement(size_t idx = 0) const = 0;
-
-         virtual FaceIterator getFace(size_t idx = 0) const = 0;
-
-         // virtual VertexIterator getVertex(size_t idx = 0) const = 0;
-
-         virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
-
-         virtual bool isInterface(Index faceIdx) const = 0;
-
-         virtual bool isBoundary(Index faceIdx) const = 0;
-
-         virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
-
-         Attribute getElementAttribute(Index index) const
-         {
-            return getAttribute(getDimension(), index);
-         }
-
-         Attribute getFaceAttribute(Index index) const
-         {
-            return getAttribute(getDimension() - 1, index);
-         }
-
-         size_t getElementCount() const
-         {
-            return getCount(getDimension());
-         }
-
-         size_t getFaceCount() const
-         {
-            return getCount(getDimension() - 1);
-         }
-
-         MeshBase& update();
-
          /**
           * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
           * @param[in] u Displacement at each node
@@ -116,11 +74,11 @@ namespace Rodin::Geometry
           */
          MeshBase& displace(const Variational::GridFunctionBase& u);
 
-         /**
-          * @brief Edits all elements in the mesh via the given function.
-          * @param[in] f Function which takes an ElementView to modify each
-          * element.
-          */
+         // /**
+         //  * @brief Edits all elements in the mesh via the given function.
+         //  * @param[in] f Function which takes an ElementView to modify each
+         //  * element.
+         //  */
          // MeshBase& edit(std::function<void(const MeshElementIterator)> f);
 
          // /**
@@ -136,22 +94,22 @@ namespace Rodin::Geometry
          // std::deque<std::set<int>> ccl(
          //       std::function<bool(const Element&, const Element&)> p) const;
 
-         /**
-          * @brief Edits the specified elements in the mesh via the given function.
-          * @param[in] f Function which takes an ElementView to modify each
-          * element.
-          * @param[in] elements Set of indices corresponding to the elements
-          * which will be modified.
-          */
+         // /**
+         //  * @brief Edits the specified elements in the mesh via the given function.
+         //  * @param[in] f Function which takes an ElementView to modify each
+         //  * element.
+         //  * @param[in] elements Set of indices corresponding to the elements
+         //  * which will be modified.
+         //  */
          // MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
 
-         /**
-          * @brief Obtains a set of elements satisfying the given condition.
-          * @param[in] condition Function which returns true if the element
-          * satisfies the condition.
-          * @returns Set containing the element indices satisfying the
-          * condition.
-          */
+         // /**
+         //  * @brief Obtains a set of elements satisfying the given condition.
+         //  * @param[in] condition Function which returns true if the element
+         //  * satisfies the condition.
+         //  * @returns Set containing the element indices satisfying the
+         //  * condition.
+         //  */
          // std::set<int> where(std::function<bool(const Element&)> condition) const;
 
          // std::set<int> where(std::function<bool(const Point&)> condition) const;
@@ -164,6 +122,26 @@ namespace Rodin::Geometry
           * between its space dimension and dimension is 1.
           */
          bool isSurface() const;
+
+         size_t getFaceCount() const
+         {
+            return getCount(getDimension() - 1);
+         }
+
+         size_t getElementCount() const
+         {
+            return getCount(getDimension());
+         }
+
+         Attribute getFaceAttribute(Index index) const
+         {
+            return getAttribute(getDimension() - 1, index);
+         }
+
+         Attribute getElementAttribute(Index index) const
+         {
+            return getAttribute(getDimension(), index);
+         }
 
          /**
           * @brief Gets the total volume of the mesh.
@@ -240,6 +218,12 @@ namespace Rodin::Geometry
             return this != &other;
          }
 
+         // /**
+         //  * @deprecated
+         //  */
+         // [[deprecated]]
+         // virtual InterfaceIterator getInterfaceByAttribute(const std::set<Attribute>& attrs) const = 0;
+
          /**
           * @brief Gets the dimension of the elements.
           * @returns Dimension of the elements.
@@ -253,15 +237,6 @@ namespace Rodin::Geometry
           * @see getDimension() const
           */
          virtual size_t getSpaceDimension() const;
-
-         /**
-          * @brief Indicates if the MeshBase object has been parallelized.
-          * @returns True if the MeshBase has been parallelized, false
-          * otherwise.
-          * @see Mesh<Traits::Parallel>
-          * @see Mesh<Traits::Serial>::parallelize()
-          */
-         virtual bool isParallel() const = 0;
 
          /**
           * @brief Indicates whether the mesh is a submesh or not.
@@ -279,6 +254,35 @@ namespace Rodin::Geometry
           *
           */
          virtual bool isSubMesh() const = 0;
+
+         /**
+          * @brief Indicates if the MeshBase object has been parallelized.
+          * @returns True if the MeshBase has been parallelized, false
+          * otherwise.
+          * @see Mesh<Traits::Parallel>
+          * @see Mesh<Traits::Serial>::parallelize()
+          */
+         virtual bool isParallel() const = 0;
+
+         virtual bool isInterface(Index faceIdx) const = 0;
+
+         virtual bool isBoundary(Index faceIdx) const = 0;
+
+         virtual BoundaryIterator getBoundary() const = 0;
+
+         virtual InterfaceIterator getInterface() const = 0;
+
+         virtual size_t getCount(size_t dim) const = 0;
+
+         virtual ElementIterator getElement(size_t idx = 0) const = 0;
+
+         virtual FaceIterator getFace(size_t idx = 0) const = 0;
+
+         // virtual VertexIterator getVertex(size_t idx = 0) const = 0;
+
+         virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
+
+         virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
          /**
           * @internal

@@ -140,12 +140,6 @@ namespace Rodin::Geometry
       return totalVolume;
    }
 
-   MeshBase& MeshBase::update()
-   {
-      getHandle().SetAttributes();
-      return *this;
-   }
-
    // std::deque<std::set<int>> MeshBase::ccl(
    //       std::function<bool(const Element&, const Element&)> p) const
    // {
