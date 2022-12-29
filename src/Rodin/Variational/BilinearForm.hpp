@@ -11,10 +11,12 @@
 
 #include "Rodin/Alert.h"
 
-#include "FiniteElementSpace.h"
-#include "BilinearFormIntegrator.h"
+#include "Assembly/AssemblyBase.h"
 
 #include "BilinearForm.h"
+#include "BilinearFormIntegrator.h"
+#include "FiniteElementSpace.h"
+
 
 namespace Rodin::Variational
 {
