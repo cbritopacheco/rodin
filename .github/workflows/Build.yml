@@ -68,7 +68,7 @@ jobs:
           submodules: recursive
       - name: Install dependencies
         run: >-
-          rm '/usr/local/bin/2to3' && brew update && brew install
+          brew update && brew link --overwrite python@3.10 && brew install
           mesalib-glw
           lcov
           sdl2
