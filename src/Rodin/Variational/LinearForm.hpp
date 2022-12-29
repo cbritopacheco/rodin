@@ -8,9 +8,13 @@
 #define RODIN_VARIATIONAL_LINEARFORM_HPP
 
 #include "Rodin/Alert.h"
-#include "FiniteElementSpace.h"
+
+#include "Assembly/AssemblyBase.h"
 
 #include "LinearForm.h"
+#include "LinearFormIntegrator.h"
+#include "FiniteElementSpace.h"
+
 
 namespace Rodin::Variational
 {
