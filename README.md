@@ -7,6 +7,16 @@
 | master      | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg)](https://cbritopacheco.github.io/rodin/) |
 | develop     | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml) | |
 
+## Building the project
+
+```
+git clone --recursive https://github.com/carlos-brito-pacheco/rodin
+cd rodin
+mkdir build && cd build
+cmake ..
+make -j4
+```
+
 ## Features
 
 ### Embedded DSL for FEM modelling
@@ -72,17 +82,7 @@ List of features and modules that are in the works:
 Any of these should be available for quick install from your standard package
 manager.
 
-## Building the project
-
-```
-git clone --recursive https://github.com/carlos-brito-pacheco/rodin
-cd rodin
-mkdir build && cd build
-cmake ..
-make -j4
-```
-
-### CMake Options
+## CMake Options
 
 | Option                 | Description                                       |
 |------------------------|---------------------------------------------------|
