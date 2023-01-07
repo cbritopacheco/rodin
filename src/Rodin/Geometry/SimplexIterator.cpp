@@ -171,15 +171,11 @@ namespace Rodin::Geometry
    // ---- SimplexIterator ---------------------------------------------------
    SimplexIterator::SimplexIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
       : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    SimplexIterator::SimplexIterator(const SimplexIterator& other)
       : m_dimension(other.m_dimension), m_mesh(other.m_mesh), m_gen(other.m_gen->copy())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    SimplexIterator::SimplexIterator(SimplexIterator&& other)
       : m_dimension(other.m_dimension), m_mesh(other.m_mesh), m_gen(std::move(other.m_gen)),
@@ -194,18 +190,18 @@ namespace Rodin::Geometry
    SimplexIterator& SimplexIterator::operator++()
    {
       ++getIndexGenerator();
-      m_simplex.reset(generate());
       return *this;
    }
 
    Simplex& SimplexIterator::operator*() const noexcept
    {
-      assert(m_simplex);
+      m_simplex.reset(generate());
       return *m_simplex;
    }
 
    Simplex* SimplexIterator::operator->() const noexcept
    {
+      m_simplex.reset(generate());
       return m_simplex.get();
    }
 
@@ -247,15 +243,11 @@ namespace Rodin::Geometry
    // ---- ElementIterator ---------------------------------------------------
    ElementIterator::ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
       : m_mesh(mesh), m_gen(std::move(gen).move())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    ElementIterator::ElementIterator(const ElementIterator& other)
       : m_mesh(other.m_mesh), m_gen(other.m_gen->copy())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    ElementIterator::ElementIterator(ElementIterator&& other)
       : m_mesh(other.m_mesh), m_gen(std::move(other.m_gen))
@@ -269,18 +261,18 @@ namespace Rodin::Geometry
    ElementIterator& ElementIterator::operator++()
    {
       ++getIndexGenerator();
-      m_simplex.reset(generate());
       return *this;
    }
 
    Element& ElementIterator::operator*() const noexcept
    {
-      assert(m_simplex);
+      m_simplex.reset(generate());
       return *m_simplex;
    }
 
    Element* ElementIterator::operator->() const noexcept
    {
+      m_simplex.reset(generate());
       return m_simplex.get();
    }
 
@@ -306,15 +298,11 @@ namespace Rodin::Geometry
    // ---- FaceIterator ------------------------------------------------------
    FaceIterator::FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
       : m_mesh(mesh), m_gen(std::move(gen).move())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    FaceIterator::FaceIterator(const FaceIterator& other)
       : m_mesh(other.m_mesh), m_gen(other.m_gen->copy())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    FaceIterator::FaceIterator(FaceIterator&& other)
       : m_mesh(other.m_mesh), m_gen(std::move(other.m_gen))
@@ -328,17 +316,18 @@ namespace Rodin::Geometry
    FaceIterator& FaceIterator::operator++()
    {
       ++getIndexGenerator();
-      m_simplex.reset(generate());
       return *this;
    }
 
    Face& FaceIterator::operator*() const noexcept
    {
+      m_simplex.reset(generate());
       return *m_simplex;
    }
 
    Face* FaceIterator::operator->() const noexcept
    {
+      m_simplex.reset(generate());
       return m_simplex.get();
    }
 
@@ -364,15 +353,11 @@ namespace Rodin::Geometry
    // ---- BoundaryIterator --------------------------------------------------
    BoundaryIterator::BoundaryIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
       : m_mesh(mesh), m_gen(std::move(gen).move())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    BoundaryIterator::BoundaryIterator(const BoundaryIterator& other)
       : m_mesh(other.m_mesh), m_gen(other.m_gen->copy())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    BoundaryIterator::BoundaryIterator(BoundaryIterator&& other)
       : m_mesh(other.m_mesh), m_gen(std::move(other.m_gen))
@@ -386,17 +371,18 @@ namespace Rodin::Geometry
    BoundaryIterator& BoundaryIterator::operator++()
    {
       ++getIndexGenerator();
-      m_simplex.reset(generate());
       return *this;
    }
 
    Boundary& BoundaryIterator::operator*() const noexcept
    {
+      m_simplex.reset(generate());
       return *m_simplex;
    }
 
    Boundary* BoundaryIterator::operator->() const noexcept
    {
+      m_simplex.reset(generate());
       return m_simplex.get();
    }
 
@@ -422,15 +408,11 @@ namespace Rodin::Geometry
    // ---- InterfaceIterator -------------------------------------------------
    InterfaceIterator::InterfaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
       : m_mesh(mesh), m_gen(std::move(gen).move())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    InterfaceIterator::InterfaceIterator(const InterfaceIterator& other)
       : m_mesh(other.m_mesh), m_gen(other.m_gen->copy())
-   {
-      m_simplex.reset(generate());
-   }
+   {}
 
    InterfaceIterator::InterfaceIterator(InterfaceIterator&& other)
       : m_mesh(other.m_mesh), m_gen(std::move(other.m_gen))
@@ -444,17 +426,18 @@ namespace Rodin::Geometry
    InterfaceIterator& InterfaceIterator::operator++()
    {
       ++getIndexGenerator();
-      m_simplex.reset(generate());
       return *this;
    }
 
    Interface& InterfaceIterator::operator*() const noexcept
    {
+      m_simplex.reset(generate());
       return *m_simplex;
    }
 
    Interface* InterfaceIterator::operator->() const noexcept
    {
+      m_simplex.reset(generate());
       return m_simplex.get();
    }
 

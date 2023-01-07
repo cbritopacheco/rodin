@@ -74,55 +74,81 @@ namespace Rodin::Variational
             else if (element.getDimension() == mesh.getDimension() - 1)
             {
                assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
-               const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
-               if (face.isInterface())
-               {
-                  assert(false);
-               }
-               else if (face.isBoundary())
-               {
-                  assert(dynamic_cast<const Geometry::Boundary*>(&p.getSimplex()));
-                  const auto& boundary = static_cast<const Geometry::Boundary&>(p.getSimplex());
-                  auto& ft = boundary.getFaceTransformations();
-                  assert(ft.Elem1);
-                  auto& trans1 = ft.GetElement1Transformation();
-                  assert(ft.Elem2);
-                  auto& trans2 = ft.GetElement2Transformation();
-                  const auto& mesh = p.getSimplex().getMesh();
-                  if (mesh.isSubMesh())
-                  {
-                     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
-                     const auto& parent = submesh.getParent();
 
-                     if (getTraceDomain().count(trans1.Attribute))
-                     {
-                        int parentIdx = submesh.getElementMap().left.at(trans1.ElementNo);
-                        trans1.ElementNo = parentIdx;
-                        m_u.getHandle().GetVectorGradient(trans1, grad);
-                     }
-                     else if (getTraceDomain().count(trans2.Attribute))
-                     {
-                        int parentIdx = submesh.getElementMap().left.at(trans2.ElementNo);
-                        const auto& parentElement = parent.getElement(parentIdx);
-                        assert(!parentElement.end());
-                        m_u.getHandle().GetVectorGradient(parentElement->getTransformation(), grad);
-                     }
-                     else
-                        assert(false);
+               const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
+               const auto& mesh = p.getSimplex().getMesh();
+
+               auto& ft = face.getFaceTransformations();
+               if (ft.Elem1 && ft.Elem1->ElementType == mfem::FaceElementTransformations::BDR_ELEMENT)
+               {
+                  ft.Elem1No = mesh.getHandle().GetBdrFace(ft.Elem1No);
+                  ft.Elem1->ElementNo = ft.Elem1No;
+                  ft.Elem1->ElementType = mfem::FaceElementTransformations::FACE;
+                  ft.SetAllIntPoints(&p.getIntegrationPoint());
+               }
+               if (ft.Elem2 && ft.Elem2->ElementType == mfem::FaceElementTransformations::BDR_ELEMENT)
+               {
+                  ft.Elem2No = mesh.getHandle().GetBdrFace(ft.Elem2No);
+                  ft.Elem2->ElementNo = ft.Elem2No;
+                  ft.Elem2->ElementType = mfem::FaceElementTransformations::FACE;
+                  ft.SetAllIntPoints(&p.getIntegrationPoint());
+               }
+
+               if (mesh.isSubMesh())
+               {
+                  const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
+                  if (ft.Elem1 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem1->Attribute)))
+                  {
+                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft.Elem1No);
+                     ft.Elem1->ElementNo = parentIdx;
+                     ft.Elem1No = parentIdx;
+                     ft.SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                  }
+                  else if (ft.Elem2 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem2->Attribute)))
+                  {
+                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft.Elem2No);
+                     ft.Elem2->ElementNo = parentIdx;
+                     ft.Elem2No = parentIdx;
+                     ft.SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                  }
+                  else if (face.isBoundary())
+                  {
+                     assert(ft.Elem1);
+                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft.Elem1No);
+                     ft.Elem1->ElementNo = parentIdx;
+                     ft.Elem1No = parentIdx;
+                     ft.SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
                   }
                   else
                   {
-                     if (getTraceDomain().count(trans1.Attribute))
-                        m_u.getHandle().GetVectorGradient(trans1, grad);
-                     else if (getTraceDomain().count(trans2.Attribute))
-                        m_u.getHandle().GetVectorGradient(trans2, grad);
-                     else
-                        assert(false);
+                     assert(false);
                   }
                }
                else
                {
-                  assert(false);
+                  if (ft.Elem1 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem1No)))
+                  {
+                     ft.SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                  }
+                  else if (ft.Elem2 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem2No)))
+                  {
+                     ft.SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                  }
+                  else if (face.isBoundary())
+                  {
+                     ft.SetAllIntPoints(&p.getIntegrationPoint());
+                     assert(ft.Elem1);
+                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                  }
+                  else
+                  {
+                     assert(false);
+                  }
                }
             }
             else

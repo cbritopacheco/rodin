@@ -17,7 +17,7 @@ namespace Rodin::Variational
          /**
           * @brief Constructs the outward unit normal.
           */
-         Normal(int dimension)
+         Normal(size_t dimension)
             : m_dimension(dimension)
          {
             assert(dimension > 0);
@@ -41,38 +41,34 @@ namespace Rodin::Variational
          FunctionValue getValue(const Geometry::Point& p) const override
          {
             FunctionValue::Vector value;
-            const auto& element = p.getSimplex();
-            auto& trans = element.getTransformation();
-            const auto& mesh = element.getMesh();
+            const auto& simplex = p.getSimplex();
+            auto& trans = simplex.getTransformation();
+            const auto& mesh = simplex.getMesh();
             assert(
-               // We are on a boundary element of a d-mesh in d-space
+               // We are on a face of a d-mesh in d-space
                (
-                  mesh.getDimension() == mesh.getSpaceDimension() &&
-                  trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT
+                  (mesh.getDimension() == mesh.getSpaceDimension()) &&
+                  simplex.getDimension() == mesh.getDimension() - 1
                ) ||
                // Or we are on an element of a d-mesh in (d + 1)-space.
                (
-                  mesh.getDimension() == (mesh.getSpaceDimension() - 1) &&
-                  trans.ElementType == mfem::ElementTransformation::ELEMENT
+                  (mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
+                  simplex.getDimension() == mesh.getDimension()
                )
             );
             value.SetSize(m_dimension);
             mfem::CalcOrtho(trans.Jacobian(), value);
             const double norm = value.Norml2();
             assert(norm > 0.0);
-            switch (trans.ElementType)
+            if (simplex.getDimension() == mesh.getDimension() - 1)
             {
-               case mfem::ElementTransformation::BDR_ELEMENT:
-               {
-                  value /= norm * (
-                        1.0 - 2.0 * mesh.getHandle().FaceIsInterior(
-                           mesh.getHandle().GetBdrFace(trans.ElementNo)));
-                  break;
-               }
-               default:
-               {
-                  value /= norm;
-               }
+               assert(dynamic_cast<const Geometry::Face*>(&simplex));
+               const auto& face = static_cast<const Geometry::Face&>(simplex);
+               value /= norm * (1.0 - 2.0 * face.isInterface());
+            }
+            else
+            {
+               value /= norm;
             }
             return value;
          }
@@ -82,7 +78,7 @@ namespace Rodin::Variational
             return new Normal(*this);
          }
       private:
-         const int m_dimension;
+         const size_t m_dimension;
    };
 }
 

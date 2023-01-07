@@ -17,7 +17,7 @@ namespace Rodin
    namespace Context
    {
       struct Serial;
-      struct Parallel;
+      struct MPI;
    }
 }
 

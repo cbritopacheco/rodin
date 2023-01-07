@@ -21,6 +21,11 @@ namespace Rodin::Geometry
       public:
          virtual ~SimplexIteratorBase() = default;
 
+         virtual Index getIndex() const
+         {
+            return *getIndexGenerator();
+         }
+
          virtual bool end() const = 0;
 
          virtual SimplexIteratorBase& operator++() = 0;
@@ -81,7 +86,7 @@ namespace Rodin::Geometry
          const size_t m_dimension;
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
-         std::unique_ptr<Simplex> m_simplex;
+         mutable std::unique_ptr<Simplex> m_simplex;
    };
 
    class ElementIterator final : public SimplexIteratorBase
@@ -125,7 +130,7 @@ namespace Rodin::Geometry
 
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
-         std::unique_ptr<Element> m_simplex;
+         mutable std::unique_ptr<Element> m_simplex;
    };
 
    class FaceIterator : public SimplexIteratorBase
@@ -169,7 +174,7 @@ namespace Rodin::Geometry
 
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
-         std::unique_ptr<Face> m_simplex;
+         mutable std::unique_ptr<Face> m_simplex;
    };
 
    class BoundaryIterator final : public SimplexIteratorBase
@@ -213,7 +218,7 @@ namespace Rodin::Geometry
 
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
-         std::unique_ptr<Boundary> m_simplex;
+         mutable std::unique_ptr<Boundary> m_simplex;
    };
 
    class InterfaceIterator final : public SimplexIteratorBase
@@ -257,7 +262,7 @@ namespace Rodin::Geometry
 
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
-         std::unique_ptr<Interface> m_simplex;
+         mutable std::unique_ptr<Interface> m_simplex;
    };
 
    // class VertexIterator : public SimplexIteratorBase

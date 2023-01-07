@@ -71,7 +71,11 @@ namespace Rodin::Geometry
    // ---- Face --------------------------------------------------------------
    Face::Face(Index index, const MeshBase& mesh, Data data)
       : Simplex(mesh.getDimension() - 1, index, mesh, std::move(data))
-   {}
+   {
+      m_localTrans.reset(
+            new mfem::FaceElementTransformations(
+               *const_cast<MeshBase&>(mesh).getHandle().GetFaceElementTransformations(index)));
+   }
 
    bool Face::isBoundary() const
    {

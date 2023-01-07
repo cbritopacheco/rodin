@@ -39,50 +39,69 @@ namespace Rodin::Variational::Assembly
          }
       }
 
-      for (auto it = input.mesh.getElement(); !it.end(); ++it)
+      if (domainBFIs.size() > 0)
       {
-         for (const auto& bfi : domainBFIs)
+         for (auto it = input.mesh.getElement(); !it.end(); ++it)
          {
-            const auto& element = *it;
-            if (bfi.getAttributes().size() == 0 ||
-                  bfi.getAttributes().count(element.getAttribute()))
+            std::optional<Geometry::Element> cached;
+            for (const auto& bfi : domainBFIs)
             {
-               res.AddSubMatrix(
-                     input.testFES.getDOFs(element),
-                     input.trialFES.getDOFs(element),
-                     bfi.getMatrix(element));
+               const Geometry::Attribute attr = input.mesh.getElementAttribute(it.getIndex());
+               if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+               {
+                  if (!cached.has_value())
+                     cached.emplace(std::move(*it));
+                  assert(cached.has_value());
+                  const auto& element = cached.value();
+                  res.AddSubMatrix(
+                        input.testFES.getDOFs(element), input.trialFES.getDOFs(element),
+                        bfi.getMatrix(element));
+               }
             }
          }
       }
 
-      for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+      if (boundaryBFIs.size() > 0)
       {
-         for (const auto& bfi : boundaryBFIs)
+         for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
          {
-            const auto& boundary = *it;
-            if (bfi.getAttributes().size() == 0 ||
-                  bfi.getAttributes().count(boundary.getAttribute()))
+            std::optional<Geometry::Boundary> cached;
+            for (const auto& bfi : boundaryBFIs)
             {
-               res.AddSubMatrix(
-                     input.testFES.getDOFs(boundary),
-                     input.trialFES.getDOFs(boundary),
-                     bfi.getMatrix(boundary));
+               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+               if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+               {
+                  if (!cached.has_value())
+                     cached.emplace(std::move(*it));
+                  assert(cached.has_value());
+                  const auto& boundary = cached.value();
+                  res.AddSubMatrix(
+                        input.testFES.getDOFs(boundary), input.trialFES.getDOFs(boundary),
+                        bfi.getMatrix(boundary));
+               }
             }
          }
       }
 
-      for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+      if (interfaceBFIs.size() > 0)
       {
-         for (const auto& bfi : interfaceBFIs)
+         for (auto it = input.mesh.getInterface(); !it.end(); ++it)
          {
-            const auto& interface = *it;
-            if (bfi.getAttributes().size() == 0 ||
-                  bfi.getAttributes().count(interface.getAttribute()))
+            std::optional<Geometry::Interface> cached;
+            for (const auto& bfi : interfaceBFIs)
             {
-               res.AddSubMatrix(
-                     input.testFES.getDOFs(interface),
-                     input.trialFES.getDOFs(interface),
-                     bfi.getMatrix(interface));
+               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+               if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+               {
+                  if (!cached.has_value())
+                     cached.emplace(std::move(*it));
+                  assert(cached.has_value());
+                  const auto& interface = cached.value();
+                  res.AddSubMatrix(
+                        input.testFES.getDOFs(interface),
+                        input.trialFES.getDOFs(interface),
+                        bfi.getMatrix(interface));
+               }
             }
          }
       }
@@ -122,41 +141,65 @@ namespace Rodin::Variational::Assembly
          }
       }
 
-      for (auto it = input.mesh.getElement(); !it.end(); ++it)
+      if (domainLFIs.size() > 0)
       {
-         for (const auto& lfi : domainLFIs)
+         for (auto it = input.mesh.getElement(); !it.end(); ++it)
          {
-            const auto& element = *it;
-            if (lfi.getAttributes().size() == 0
-                  || lfi.getAttributes().count(element.getAttribute()))
+            std::optional<Geometry::Element> cached;
+            for (const auto& lfi : domainLFIs)
             {
-               res.AddElementVector(input.fes.getDOFs(element), lfi.getVector(element));
+               const Geometry::Attribute attr = input.mesh.getElementAttribute(it.getIndex());
+               if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+               {
+                  if (!cached.has_value())
+                     cached.emplace(std::move(*it));
+                  assert(cached.has_value());
+                  const auto& element = cached.value();
+                  res.AddElementVector(
+                     input.fes.getDOFs(element), lfi.getVector(element));
+               }
             }
          }
       }
 
-      for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+      if (boundaryLFIs.size() > 0)
       {
-         for (const auto& lfi : boundaryLFIs)
+         for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
          {
-            const auto& element = *it;
-            if (lfi.getAttributes().size() == 0
-                  || lfi.getAttributes().count(element.getAttribute()))
+            std::optional<Geometry::Boundary> cached;
+            for (const auto& lfi : boundaryLFIs)
             {
-               res.AddElementVector(input.fes.getDOFs(element), lfi.getVector(element));
+               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+               if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+               {
+                  if (!cached.has_value())
+                     cached.emplace(std::move(*it));
+                  assert(cached.has_value());
+                  const auto& boundary = cached.value();
+                  res.AddElementVector(
+                     input.fes.getDOFs(boundary), lfi.getVector(boundary));
+               }
             }
          }
       }
 
-      for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+      if (interfaceLFIs.size() > 0)
       {
-         for (const auto& lfi : interfaceLFIs)
+         for (auto it = input.mesh.getInterface(); !it.end(); ++it)
          {
-            const auto& element = *it;
-            if (lfi.getAttributes().size() == 0
-                  || lfi.getAttributes().count(element.getAttribute()))
+            std::optional<Geometry::Interface> cached;
+            for (const auto& lfi : interfaceLFIs)
             {
-               res.AddElementVector(input.fes.getDOFs(element), lfi.getVector(element));
+               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+               if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+               {
+                  if (!cached.has_value())
+                     cached.emplace(std::move(*it));
+                  assert(cached.has_value());
+                  const auto& boundary = cached.value();
+                  res.AddElementVector(
+                     input.fes.getDOFs(boundary), lfi.getVector(boundary));
+               }
             }
          }
       }
