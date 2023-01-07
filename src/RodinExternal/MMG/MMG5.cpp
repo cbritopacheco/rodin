@@ -303,235 +303,234 @@ namespace Rodin::External::MMG
 
    MMG5_pMesh MMG5::rodinToMesh(const MMG::Mesh& src)
    {
-      assert(false);
-      // bool isSurface = src.isSurface();
-      // assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
+      bool isSurface = src.isSurface();
+      assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
 
-      // MMG5_pMesh res = createMesh(
-      //    s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+      MMG5_pMesh res = createMesh(
+         s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
 
-      // res->npi = 0;
-      // res->nai = 0;
-      // res->nti = 0;
-      // res->xp  = 0;
+      res->npi = 0;
+      res->nai = 0;
+      res->nti = 0;
+      res->xp  = 0;
 
-      // res->np = src.getHandle().GetNV();
+      res->np = src.getHandle().GetNV();
 
-      // if (isSurface) // Use MMGS
-      // {
-      //    res->nt = src.count<Geometry::Element>();
-      //    res->na = src.count<Geometry::Boundary>();
+      if (isSurface) // Use MMGS
+      {
+         res->nt = src.getElementCount();
+         res->na = src.getHandle().GetNBE();
 
-      //    MMGS_Set_commonFunc();
-      //    if (!MMGS_zaldy(res))
-      //       Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
+         MMGS_Set_commonFunc();
+         if (!MMGS_zaldy(res))
+            Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
 
-      //    // Copy points
-      //    for (int i = 1; i <= res->np; i++)
-      //    {
-      //      const double* coords = src.getHandle().GetVertex(i - 1);
-      //      std::copy(coords, coords + 3, res->point[i].c);
-      //    }
+         // Copy points
+         for (int i = 1; i <= res->np; i++)
+         {
+           const double* coords = src.getHandle().GetVertex(i - 1);
+           std::copy(coords, coords + 3, res->point[i].c);
+         }
 
-      //    // Copy edges
-      //    for (int i = 1; i <= res->na; i++)
-      //    {
-      //       mfem::Array<int> vertices;
-      //       src.getHandle().GetBdrElementVertices(i - 1, vertices);
-      //       res->edge[i].a = vertices[0] + 1;
-      //       res->edge[i].b = vertices[1] + 1;
-      //       res->edge[i].ref = src.getHandle().GetBdrAttribute(i - 1);
-      //    }
+         // Copy edges
+         for (int i = 1; i <= res->na; i++)
+         {
+            mfem::Array<int> vertices;
+            src.getHandle().GetBdrElementVertices(i - 1, vertices);
+            res->edge[i].a = vertices[0] + 1;
+            res->edge[i].b = vertices[1] + 1;
+            res->edge[i].ref = src.getHandle().GetBdrAttribute(i - 1);
+         }
 
-      //    // Copy triangles
-      //    for (int i = 1; i <= res->nt; i++)
-      //    {
-      //      MMG5_pTria pt = &res->tria[i];
-      //      mfem::Array<int> vertices;
-      //      src.getHandle().GetElementVertices(i - 1, vertices);
-      //      for (int j = 0; j < 3; j++)
-      //        pt->v[j] = vertices[j] + 1;
+         // Copy triangles
+         for (int i = 1; i <= res->nt; i++)
+         {
+           MMG5_pTria pt = &res->tria[i];
+           mfem::Array<int> vertices;
+           src.getHandle().GetElementVertices(i - 1, vertices);
+           for (int j = 0; j < 3; j++)
+             pt->v[j] = vertices[j] + 1;
 
-      //      pt->ref = src.getHandle().GetAttribute(i - 1);
-      //      // for (int j = 0; j < 3; j++)
-      //      //    res->point[pt->v[j]].tag &= ~MG_NUL;
-      //    }
-      // }
-      // else if (src.getDimension() == 2) // Use MMG2D
-      // {
-      //    res->nt = src.getHandle().GetNE();
-      //    res->na = src.getHandle().GetNBE();
+           pt->ref = src.getHandle().GetAttribute(i - 1);
+           // for (int j = 0; j < 3; j++)
+           //    res->point[pt->v[j]].tag &= ~MG_NUL;
+         }
+      }
+      else if (src.getDimension() == 2) // Use MMG2D
+      {
+         res->nt = src.getHandle().GetNE();
+         res->na = src.getHandle().GetNBE();
 
-      //    MMG2D_Set_commonFunc();
-      //    if (!MMG2D_zaldy(res))
-      //       Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
+         MMG2D_Set_commonFunc();
+         if (!MMG2D_zaldy(res))
+            Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
 
-      //    // Copy points
-      //    for (int i = 1; i <= res->np; i++)
-      //    {
-      //      const double* coords = src.getHandle().GetVertex(i - 1);
-      //      std::copy(coords, coords + 3, res->point[i].c);
-      //    }
+         // Copy points
+         for (int i = 1; i <= res->np; i++)
+         {
+           const double* coords = src.getHandle().GetVertex(i - 1);
+           std::copy(coords, coords + 3, res->point[i].c);
+         }
 
-      //    // Copy edges
-      //    for (int i = 1; i <= res->na; i++)
-      //    {
-      //       mfem::Array<int> vertices;
-      //       src.getHandle().GetBdrElementVertices(i - 1, vertices);
-      //       res->edge[i].a = vertices[0] + 1;
-      //       res->edge[i].b = vertices[1] + 1;
-      //       res->edge[i].ref = src.getHandle().GetBdrAttribute(i - 1);
-      //       res->edge[i].tag |= MG_REF + MG_BDY;
-      //    }
+         // Copy edges
+         for (int i = 1; i <= res->na; i++)
+         {
+            mfem::Array<int> vertices;
+            src.getHandle().GetBdrElementVertices(i - 1, vertices);
+            res->edge[i].a = vertices[0] + 1;
+            res->edge[i].b = vertices[1] + 1;
+            res->edge[i].ref = src.getHandle().GetBdrAttribute(i - 1);
+            res->edge[i].tag |= MG_REF + MG_BDY;
+         }
 
-      //    // Copy triangles
-      //    int reorientedCount = 0;
-      //    for (int i = 1; i <= res->nt; i++)
-      //    {
-      //       MMG5_pTria pt = &res->tria[i];
-      //       mfem::Array<int> vertices;
-      //       src.getHandle().GetElementVertices(i - 1, vertices);
-      //       for (int j = 0; j < 3; j++)
-      //         pt->v[j] = vertices[j] + 1;
+         // Copy triangles
+         int reorientedCount = 0;
+         for (int i = 1; i <= res->nt; i++)
+         {
+            MMG5_pTria pt = &res->tria[i];
+            mfem::Array<int> vertices;
+            src.getHandle().GetElementVertices(i - 1, vertices);
+            for (int j = 0; j < 3; j++)
+              pt->v[j] = vertices[j] + 1;
 
-      //       pt->ref = src.getHandle().GetAttribute(i - 1);
-      //       for (int j = 0; j < 3; j++)
-      //       {
-      //          // res->point[pt->v[j]].tag &= ~MG_NUL;
-      //          pt->edg[j] = 0;
-      //       }
+            pt->ref = src.getHandle().GetAttribute(i - 1);
+            for (int j = 0; j < 3; j++)
+            {
+               // res->point[pt->v[j]].tag &= ~MG_NUL;
+               pt->edg[j] = 0;
+            }
 
-      //       // Check orientation
-      //       double orientation = MMG2D_quickarea(
-      //             res->point[pt->v[0]].c,
-      //             res->point[pt->v[1]].c,
-      //             res->point[pt->v[2]].c);
+            // Check orientation
+            double orientation = MMG2D_quickarea(
+                  res->point[pt->v[0]].c,
+                  res->point[pt->v[1]].c,
+                  res->point[pt->v[2]].c);
 
-      //       if(orientation < 0)
-      //       {
-      //         int tmp = pt->v[2];
-      //         pt->v[2] = pt->v[1];
-      //         pt->v[1] = tmp;
-      //         reorientedCount++;
-      //         Alert::Warning()
-      //           << "Element reoriented: " << i << Alert::Raise;
-      //       }
-      //     }
-      //     if (reorientedCount > 0)
-      //     {
-      //       Alert::Warning()
-      //         << "Number of elements reoriented: " << std::to_string(reorientedCount)
-      //         << Alert::Raise;
-      //     }
-      // }
-      // else if (src.getDimension() == 3) // Use MMG3D
-      // {
-      //    res->ne = src.getHandle().GetNE();
-      //    res->nt = src.getHandle().GetNBE();
+            if(orientation < 0)
+            {
+              int tmp = pt->v[2];
+              pt->v[2] = pt->v[1];
+              pt->v[1] = tmp;
+              reorientedCount++;
+              Alert::Warning()
+                << "Element reoriented: " << i << Alert::Raise;
+            }
+          }
+          if (reorientedCount > 0)
+          {
+            Alert::Warning()
+              << "Number of elements reoriented: " << std::to_string(reorientedCount)
+              << Alert::Raise;
+          }
+      }
+      else if (src.getDimension() == 3) // Use MMG3D
+      {
+         res->ne = src.getHandle().GetNE();
+         res->nt = src.getHandle().GetNBE();
 
-      //    MMG3D_Set_commonFunc();
-      //    if (!MMG3D_zaldy(res))
-      //       Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
+         MMG3D_Set_commonFunc();
+         if (!MMG3D_zaldy(res))
+            Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
 
-      //    // Copy points
-      //    for (int i = 1; i <= res->np; i++)
-      //    {
-      //      const double* coords = src.getHandle().GetVertex(i - 1);
-      //      std::copy(coords, coords + 3, res->point[i].c);
-      //    }
+         // Copy points
+         for (int i = 1; i <= res->np; i++)
+         {
+           const double* coords = src.getHandle().GetVertex(i - 1);
+           std::copy(coords, coords + 3, res->point[i].c);
+         }
 
-      //    // Copy triangles
-      //    for (int i = 1; i <= res->nt; i++)
-      //    {
-      //      MMG5_pTria pt = &res->tria[i];
-      //      mfem::Array<int> vertices;
-      //      src.getHandle().GetBdrElementVertices(i - 1, vertices);
-      //      for (int j = 0; j < 3; j++)
-      //        pt->v[j] = vertices[j] + 1;
-      //      pt->ref = src.getHandle().GetBdrAttribute(i - 1);
-      //    }
+         // Copy triangles
+         for (int i = 1; i <= res->nt; i++)
+         {
+           MMG5_pTria pt = &res->tria[i];
+           mfem::Array<int> vertices;
+           src.getHandle().GetBdrElementVertices(i - 1, vertices);
+           for (int j = 0; j < 3; j++)
+             pt->v[j] = vertices[j] + 1;
+           pt->ref = src.getHandle().GetBdrAttribute(i - 1);
+         }
 
-      //    // Copy tetrahedra
-      //    int reorientedCount = 0;
-      //    for (int i = 1; i <= res->ne; i++)
-      //    {
-      //       MMG5_pTetra pt = &res->tetra[i];
-      //       mfem::Array<int> vertices;
-      //       src.getHandle().GetElementVertices(i - 1, vertices);
-      //       for (int j = 0; j < 4; j++)
-      //         pt->v[j] = vertices[j] + 1;
+         // Copy tetrahedra
+         int reorientedCount = 0;
+         for (int i = 1; i <= res->ne; i++)
+         {
+            MMG5_pTetra pt = &res->tetra[i];
+            mfem::Array<int> vertices;
+            src.getHandle().GetElementVertices(i - 1, vertices);
+            for (int j = 0; j < 4; j++)
+              pt->v[j] = vertices[j] + 1;
 
-      //       pt->ref = src.getHandle().GetAttribute(i - 1);
+            pt->ref = src.getHandle().GetAttribute(i - 1);
 
-      //       if (MMG5_orvol(res->point, pt->v) < 0.0)
-      //       {
-      //         reorientedCount++;
-      //         int aux = pt->v[2];
-      //         pt->v[2] = pt->v[3];
-      //         pt->v[3] = aux;
-      //         Alert::Warning() << "Element reoriented: " << i << Alert::Raise;
-      //       }
-      //       if (reorientedCount > 0)
-      //       {
-      //         Alert::Warning()
-      //           << "Number of elements reoriented: " << std::to_string(reorientedCount)
-      //           << Alert::Raise;
-      //       }
-      //    }
-      // }
-      // else
-      // {
-      //    Alert::Exception("Unhandled case.").raise();
-      //    return nullptr;
-      // }
+            if (MMG5_orvol(res->point, pt->v) < 0.0)
+            {
+              reorientedCount++;
+              int aux = pt->v[2];
+              pt->v[2] = pt->v[3];
+              pt->v[3] = aux;
+              Alert::Warning() << "Element reoriented: " << i << Alert::Raise;
+            }
+            if (reorientedCount > 0)
+            {
+              Alert::Warning()
+                << "Number of elements reoriented: " << std::to_string(reorientedCount)
+                << Alert::Raise;
+            }
+         }
+      }
+      else
+      {
+         Alert::Exception("Unhandled case.").raise();
+         return nullptr;
+      }
 
-      // // Tag corners
-      // for (const auto& c : src.getCorners())
-      // {
-      //    assert(c >= 0);
-      //    assert(c <= res->np);
-      //    res->point[c + 1].tag |= MG_CRN;
-      // }
+      // Tag corners
+      for (const auto& c : src.getCorners())
+      {
+         assert(c >= 0);
+         assert(c <= res->np);
+         res->point[c + 1].tag |= MG_CRN;
+      }
 
-      // // Tag edges
-      // if (src.getDimension() == 2)
-      // {
-      //    for (const auto& r : src.getRidges())
-      //    {
-      //       assert(r >= 0);
-      //       assert(r <= res->na);
-      //       res->edge[r + 1].tag |= MG_GEO;
-      //    }
-      // }
-      // else if (src.getDimension() == 3)
-      // {
-      //    res->na = src.getEdges().size();
+      // Tag edges
+      if (src.getDimension() == 2)
+      {
+         for (const auto& r : src.getRidges())
+         {
+            assert(r >= 0);
+            assert(r <= res->na);
+            res->edge[r + 1].tag |= MG_GEO;
+         }
+      }
+      else if (src.getDimension() == 3)
+      {
+         res->na = src.getEdges().size();
 
-      //    assert(!res->edge);
-      //    MMG5_SAFE_CALLOC(res->edge, res->na + 1, MMG5_Edge,
-      //          Alert::Exception("Failed to allocate memory for MMG5_pEdge->edge").raise());
+         assert(!res->edge);
+         MMG5_SAFE_CALLOC(res->edge, res->na + 1, MMG5_Edge,
+               Alert::Exception("Failed to allocate memory for MMG5_pEdge->edge").raise());
 
-      //    for (const auto& e : src.getEdges() | boost::adaptors::indexed(1))
-      //    {
-      //       res->edge[e.index()].a = e.value().endpoints.first + 1;
-      //       res->edge[e.index()].b = e.value().endpoints.second + 1;
-      //       res->edge[e.index()].ref = e.value().ref;
-      //       res->edge[e.index()].tag = MG_NOTAG;
-      //    }
+         for (const auto& e : src.getEdges() | boost::adaptors::indexed(1))
+         {
+            res->edge[e.index()].a = e.value().endpoints.first + 1;
+            res->edge[e.index()].b = e.value().endpoints.second + 1;
+            res->edge[e.index()].ref = e.value().ref;
+            res->edge[e.index()].tag = MG_NOTAG;
+         }
 
-      //    for (const auto& r : src.getRidges())
-      //    {
-      //       assert(r >= 0);
-      //       assert(r <= res->na);
-      //       res->edge[r + 1].tag |= MG_GEO;
-      //    }
-      // }
-      // else
-      // {
-      //    assert(false);
-      // }
+         for (const auto& r : src.getRidges())
+         {
+            assert(r >= 0);
+            assert(r <= res->na);
+            res->edge[r + 1].tag |= MG_GEO;
+         }
+      }
+      else
+      {
+         assert(false);
+      }
 
-      // return res;
+      return res;
    }
 
    MMG::Mesh MMG5::meshToRodin(const MMG5_pMesh src)

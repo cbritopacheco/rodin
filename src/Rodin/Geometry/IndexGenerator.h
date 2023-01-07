@@ -13,6 +13,12 @@
 #include "ForwardDecls.h"
 #include "Element.h"
 
+namespace Rodin
+{
+   struct DefaultSentinelT {};
+   inline constexpr DefaultSentinelT DefaultSentinel;
+}
+
 namespace Rodin::Geometry
 {
    class IndexGeneratorBase

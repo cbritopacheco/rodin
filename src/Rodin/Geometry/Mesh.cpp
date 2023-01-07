@@ -178,15 +178,15 @@ namespace Rodin::Geometry
    //    return res;
    // }
 
+   // ---- Mesh<Serial> ------------------------------------------------------
 #ifdef RODIN_USE_MPI
-   Mesh<Context::Parallel>
+   Mesh<Context::MPI>
    Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
    {
-      return Mesh<Context::Parallel>(comm, *this);
+      return Mesh<Context::MPI>(comm, *this);
    }
 #endif
 
-   // ---- Mesh<Serial> ------------------------------------------------------
    Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
       : m_mesh(std::move(mesh))
    {

@@ -139,7 +139,8 @@ namespace Rodin::Geometry
          Face(Index index, const MeshBase& mesh, Data data);
 
          Face(Face&& other)
-            : Simplex(std::move(other))
+            : Simplex(std::move(other)),
+              m_localTrans(std::move(other.m_localTrans))
          {}
 
          bool isBoundary() const;
@@ -150,6 +151,10 @@ namespace Rodin::Geometry
 
          ElementIterator getIncident() const;
 
+         /**
+          * @deprecated
+          */
+         [[deprecated]]
          mfem::FaceElementTransformations& getFaceTransformations() const
          {
             assert(m_localTrans);
@@ -356,6 +361,11 @@ namespace Rodin::Geometry
          const Simplex& getSimplex() const
          {
             return m_element;
+         }
+
+         [[deprecated]] const mfem::IntegrationPoint& getIntegrationPoint() const
+         {
+            return m_ip;
          }
 
       private:

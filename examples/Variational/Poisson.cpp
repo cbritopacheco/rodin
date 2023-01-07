@@ -26,9 +26,9 @@ int main(int, char**)
   Omega.load(meshFile);
 
   // Functions
-  H1 Vh(Omega);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
+  H1 vh(Omega);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
   // Define problem
   auto f = ScalarFunction(1.0);

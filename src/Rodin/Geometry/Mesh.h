@@ -42,7 +42,7 @@ namespace Rodin
       /**
        * @brief Parallel context metadata.
        */
-      struct Parallel {};
+      struct MPI {};
    }
 }
 
@@ -218,12 +218,6 @@ namespace Rodin::Geometry
             return this != &other;
          }
 
-         // /**
-         //  * @deprecated
-         //  */
-         // [[deprecated]]
-         // virtual InterfaceIterator getInterfaceByAttribute(const std::set<Attribute>& attrs) const = 0;
-
          /**
           * @brief Gets the dimension of the elements.
           * @returns Dimension of the elements.
@@ -254,15 +248,6 @@ namespace Rodin::Geometry
           *
           */
          virtual bool isSubMesh() const = 0;
-
-         /**
-          * @brief Indicates if the MeshBase object has been parallelized.
-          * @returns True if the MeshBase has been parallelized, false
-          * otherwise.
-          * @see Mesh<Traits::Parallel>
-          * @see Mesh<Traits::Serial>::parallelize()
-          */
-         virtual bool isParallel() const = 0;
 
          virtual bool isInterface(Index faceIdx) const = 0;
 
@@ -439,11 +424,6 @@ namespace Rodin::Geometry
 
          bool isBoundary(Index faceIdx) const override;
 
-         bool isParallel() const override
-         {
-            return false;
-         }
-
          mfem::Mesh& getHandle() override;
 
          const mfem::Mesh& getHandle() const override;
@@ -461,10 +441,8 @@ namespace Rodin::Geometry
    };
 
 #ifdef RODIN_USE_MPI
-   using ParallelMesh = Mesh<Context::Parallel>;
-
    template <>
-   class Mesh<Context::Parallel> : public MeshBase
+   class Mesh<Context::MPI> : public MeshBase
    {
       public:
          /**
@@ -503,11 +481,6 @@ namespace Rodin::Geometry
          virtual bool isSubMesh() const override
          {
             return false;
-         }
-
-         bool isParallel() const override
-         {
-            return true;
          }
 
          mfem::ParMesh& getHandle() override
