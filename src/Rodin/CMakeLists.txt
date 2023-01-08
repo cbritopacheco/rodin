@@ -31,6 +31,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
     -Wno-error=pedantic
+    -Wno-error=sign-compare
     -Wno-error=cast-function-type
     -Wno-error=deprecated-declarations
     -Wno-error=zero-as-null-pointer-constant)
