@@ -35,7 +35,7 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         Division& traceOf(const std::set<int>& attrs) override;
+         Division& traceOf(Geometry::Attribute attr) override;
 
          FunctionValue getValue(const Geometry::Point& p) const override
          {

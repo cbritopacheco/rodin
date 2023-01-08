@@ -40,7 +40,7 @@ namespace Rodin::Variational
 
          Dot(Dot&& other);
 
-         Dot& traceOf(const std::set<int>& attrs) override;
+         Dot& traceOf(Geometry::Attribute attrs) override;
 
          virtual LHS& getLHS()
          {

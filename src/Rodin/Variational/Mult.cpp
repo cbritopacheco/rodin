@@ -45,11 +45,11 @@ namespace Rodin::Variational
    }
 
    Mult<FunctionBase, FunctionBase>&
-   Mult<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Mult<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attr)
    {
-      FunctionBase::traceOf(attrs);
-      m_lhs->traceOf(attrs);
-      m_rhs->traceOf(attrs);
+      FunctionBase::traceOf(attr);
+      m_lhs->traceOf(attr);
+      m_rhs->traceOf(attr);
       return *this;
    }
 

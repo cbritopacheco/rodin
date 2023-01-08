@@ -215,7 +215,7 @@ namespace Rodin::Geometry
       return 0;
    }
 
-   BoundaryIterator Mesh<Context::Serial>::getBoundary() const
+   FaceIterator Mesh<Context::Serial>::getBoundary() const
    {
       std::vector<Index> indices;
       indices.reserve(getHandle().GetNBE());
@@ -225,10 +225,10 @@ namespace Rodin::Geometry
          if (!getHandle().FaceIsInterior(idx))
             indices.push_back(idx);
       }
-      return BoundaryIterator(*this, VectorIndexGenerator(std::move(indices)));
+      return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
    }
 
-   InterfaceIterator Mesh<Context::Serial>::getInterface() const
+   FaceIterator Mesh<Context::Serial>::getInterface() const
    {
       std::vector<Index> indices;
       indices.reserve(getHandle().GetNumFaces());
@@ -237,7 +237,7 @@ namespace Rodin::Geometry
          if (getHandle().FaceIsInterior(idx))
             indices.push_back(idx);
       }
-      return InterfaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+      return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
    }
 
    ElementIterator Mesh<Context::Serial>::getElement(Index idx) const

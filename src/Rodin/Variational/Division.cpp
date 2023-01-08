@@ -32,11 +32,11 @@ namespace Rodin::Variational
    {}
 
    Division<FunctionBase, FunctionBase>&
-   Division<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Division<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attr)
    {
-      FunctionBase::traceOf(attrs);
-      m_lhs->traceOf(attrs);
-      m_rhs->traceOf(attrs);
+      FunctionBase::traceOf(attr);
+      m_lhs->traceOf(attr);
+      m_rhs->traceOf(attr);
       return *this;
    }
 

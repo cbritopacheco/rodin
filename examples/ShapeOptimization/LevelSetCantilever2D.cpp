@@ -16,10 +16,10 @@ using namespace Rodin::Variational;
 
 
 // Define interior and exterior for level set discretization
-static constexpr int Interior = 1, Exterior = 2;
+static constexpr Attribute Interior = 1, Exterior = 2;
 
 // Define boundary attributes
-static constexpr int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
+static constexpr Attribute Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
 // Lamé coefficients
 static constexpr double mu = 0.3846;
@@ -65,6 +65,7 @@ int main(int, char**)
     int d = 2;
     H1 Vh(Omega, d);
     H1 VhInt(trimmed, d);
+    Omega.save("miaow.mesh");
 
     Alert::Info() << "    | Solving state equation." << Alert::Raise;
     auto f = VectorFunction{0, -1};
@@ -81,7 +82,11 @@ int main(int, char**)
     elasticity.solve(solver);
 
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto e = 0.5 * (Jacobian(uInt.getSolution()) + Jacobian(uInt.getSolution()).T());
+
+    auto jac = Jacobian(uInt.getSolution());
+    jac.traceOf(Interior);
+
+    auto e = 0.5 * (jac + jac.T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
@@ -91,7 +96,7 @@ int main(int, char**)
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
+            - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     hilbert.solve(solver);
 
@@ -101,7 +106,6 @@ int main(int, char**)
     fObj << objective << "\n";
     fObj.flush();
     Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
-
     Alert::Info() << "    | Distancing domain." << Alert::Raise;
     H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)

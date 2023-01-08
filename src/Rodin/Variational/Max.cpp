@@ -46,7 +46,7 @@ namespace Rodin::Variational
         m_b(std::move(other.m_b))
    {}
 
-   Max& Max::traceOf(const std::set<int>& attrs)
+   Max& Max::traceOf(Geometry::Attribute attrs)
    {
       ScalarFunctionBase::traceOf(attrs);
       m_a->traceOf(attrs);

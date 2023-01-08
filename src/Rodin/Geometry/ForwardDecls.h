@@ -38,10 +38,6 @@ namespace Rodin::Geometry
 
    class Vertex;
 
-   class Interface;
-
-   class Boundary;
-
    class Point;
 
    class SimplexIterator;
@@ -49,10 +45,6 @@ namespace Rodin::Geometry
    class ElementIterator;
 
    class FaceIterator;
-
-   class InterfaceIterator;
-
-   class BoundaryIterator;
 
    class VertexIterator;
 

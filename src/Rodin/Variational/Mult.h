@@ -49,7 +49,7 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         Mult& traceOf(const std::set<int>& attrs) override;
+         Mult& traceOf(Geometry::Attribute attr) override;
 
          virtual FunctionBase& getLHS()
          {

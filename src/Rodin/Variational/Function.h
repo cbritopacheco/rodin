@@ -378,7 +378,7 @@ namespace Rodin::Variational
 
          FunctionBase& operator=(FunctionBase&& other)
          {
-            m_traceDomain = std::move(other.m_traceDomain);
+            m_traceDomain = other.m_traceDomain;
             return *this;
          }
 
@@ -391,35 +391,9 @@ namespace Rodin::Variational
           *
           * @returns Reference to self (for method chaining)
           */
-         virtual FunctionBase& traceOf(int attr)
+         virtual FunctionBase& traceOf(Geometry::Attribute attr)
          {
-            return traceOf(std::set<int>{attr});
-         }
-
-         /**
-          * @brief Sets which attributes will be interpreted as the domain to
-          * trace.
-          * @returns Reference to self (for method chaining)
-          *
-          * When integrating along interior boundaries sometimes it is
-          * necessary to specify which attributes should be interpreted as the
-          * respective "interior" domain, since it is not clear which domain
-          * attribute can be used to extend the value continuously up to the
-          * boundary. To resolve this ambiguity the trace domain is interpreted
-          * as the domain which shall be used to make this continuous
-          * extension.
-          *
-          * @note Setting the trace domain of a FunctionBase instance
-          * does not guarantee that it will taken into consideration when
-          * computing its value. That said, it is up to the subclass to decide
-          * how it will use this information which can be obtained via the
-          * getTraceDomain() method.
-          *
-          * @see @ref getTraceDomain() "getTraceDomain()"
-          */
-         virtual FunctionBase& traceOf(const std::set<int>& attrs)
-         {
-            m_traceDomain = attrs;
+            m_traceDomain = attr;
             return *this;
          }
 
@@ -432,7 +406,7 @@ namespace Rodin::Variational
           * boundaries. If the trace domain is empty, then this has the
           * semantic value that it has not been specified yet.
           */
-         const std::set<int>& getTraceDomain() const
+         Geometry::Attribute getTraceDomain() const
          {
             return m_traceDomain;
          }
@@ -462,7 +436,7 @@ namespace Rodin::Variational
          virtual Internal::MFEMFunction build(const Geometry::MeshBase& mesh) const;
 
       private:
-         std::set<int> m_traceDomain;
+         Geometry::Attribute m_traceDomain;
    };
 }
 

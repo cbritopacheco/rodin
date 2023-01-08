@@ -43,7 +43,7 @@ namespace Rodin::Variational
             return m_matrix->getValue(p).matrix().Trace();
          }
 
-         Trace& traceOf(const std::set<int>& attrs) override
+         Trace& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_matrix->traceOf(attrs);

@@ -328,6 +328,21 @@ namespace Rodin::Variational
    Integral(const ShapeFunctionBase<TestSpace>&) -> Integral<ShapeFunctionBase<TestSpace>>;
 
    template <>
+   class FaceIntegral<ShapeFunctionBase<TestSpace>> : public Integral<ShapeFunctionBase<TestSpace>>
+   {
+      public:
+         using Parent    = Integral<ShapeFunctionBase<TestSpace>>;
+         using Integrand = ShapeFunctionBase<TestSpace>;
+         using Parent::Parent;
+         Region getRegion() const override { return Region::Faces; }
+         FaceIntegral* copy() const noexcept override { return new FaceIntegral(*this); }
+   };
+   FaceIntegral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&)
+      -> FaceIntegral<ShapeFunctionBase<TestSpace>>;
+   FaceIntegral(const ShapeFunctionBase<TestSpace>&)
+      -> FaceIntegral<ShapeFunctionBase<TestSpace>>;
+
+   template <>
    class BoundaryIntegral<ShapeFunctionBase<TestSpace>> : public Integral<ShapeFunctionBase<TestSpace>>
    {
       public:
