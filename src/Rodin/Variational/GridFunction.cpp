@@ -233,7 +233,13 @@ namespace Rodin::Variational
             assert(false);
             return 0.0;
          }
+         default:
+         {
+            assert(false);
+            return NAN;
+         }
       }
+      return NAN;
    }
 
    RangeShape GridFunctionBase::getRangeShape() const
