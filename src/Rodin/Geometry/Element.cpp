@@ -140,7 +140,7 @@ namespace Rodin::Geometry
       : m_element(element), m_ip(std::move(ip))
    {}
 
-   int Point::getDimension(Coordinates coords) const
+   size_t Point::getDimension(Coordinates coords) const
    {
       switch (coords)
       {
@@ -151,6 +151,11 @@ namespace Rodin::Geometry
          case Coordinates::Reference:
          {
             return m_element.get().getMesh().getDimension();
+         }
+         default:
+         {
+            assert(false);
+            return 0;
          }
       }
    }

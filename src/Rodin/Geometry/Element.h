@@ -213,7 +213,7 @@ namespace Rodin::Geometry
           * @brief Gets the space dimension of the physical coordinates.
           * @returns Dimension of the physical coordinates.
           */
-         int getDimension(Coordinates coords = Coordinates::Physical) const;
+         size_t getDimension(Coordinates coords = Coordinates::Physical) const;
 
          /**
           * @brief Gets the i-th physical coordinate.
