@@ -586,6 +586,10 @@ namespace Rodin::Variational
    template <class LHS, class RHS>
    class Composition;
 
+
+   template <class Operand>
+   class TraceOperator;
+
    /**
     * @tparam LHS Type of left hand side operand
     * @tparam RHS Type of right hand side operand
@@ -747,6 +751,9 @@ namespace Rodin::Variational
     */
    template <class Integrand>
    class Integral;
+
+   template <class Integrand>
+   class FaceIntegral;
 
    /**
     * @brief Represents expressions of the integral operator on the boundary of

@@ -66,35 +66,36 @@ namespace Rodin::Geometry
    ElementIterator Element::getAdjacent() const
    {
       assert(false);
+      return ElementIterator(getMesh(), EmptyIndexGenerator());
    }
 
    // ---- Face --------------------------------------------------------------
    Face::Face(Index index, const MeshBase& mesh, Data data)
-      : Simplex(mesh.getDimension() - 1, index, mesh, std::move(data))
-   {
-      m_localTrans.reset(
-            new mfem::FaceElementTransformations(
-               *const_cast<MeshBase&>(mesh).getHandle().GetFaceElementTransformations(index)));
-   }
+      : Simplex(mesh.getDimension() - 1, index, mesh, std::move(data)),
+        m_isBoundary(mesh.isBoundary(index)),
+        m_isInterface(mesh.isInterface(index))
+   {}
 
    bool Face::isBoundary() const
    {
-      return getMesh().isBoundary(getIndex());
+      return m_isBoundary;
    }
 
    bool Face::isInterface() const
    {
-      return getMesh().isInterface(getIndex());
+      return m_isInterface;
    }
 
    FaceIterator Face::getAdjacent() const
    {
       assert(false);
+      return FaceIterator(getMesh(), EmptyIndexGenerator());
    }
 
    ElementIterator Face::getIncident() const
    {
       assert(false);
+      return ElementIterator(getMesh(), EmptyIndexGenerator());
    }
 
    // std::set<int> Face::elements() const

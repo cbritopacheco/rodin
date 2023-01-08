@@ -63,7 +63,7 @@ namespace Rodin::Variational
               m_p(other.m_p)
          {}
 
-         Pow& traceOf(const std::set<int>& attrs) override
+         Pow& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_s->traceOf(attrs);

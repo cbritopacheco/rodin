@@ -86,7 +86,7 @@ namespace Rodin::Variational
               m_nested(std::move(other.m_nested))
          {}
 
-         ScalarFunction& traceOf(const std::set<int>& attrs) override
+         ScalarFunction& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_nested->traceOf(attrs);

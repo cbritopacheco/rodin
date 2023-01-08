@@ -14,6 +14,7 @@ namespace Rodin::Variational::Assembly
       res = 0.0;
 
       FormLanguage::List<BilinearFormIntegratorBase> domainBFIs;
+      FormLanguage::List<BilinearFormIntegratorBase> facesBFIs;
       FormLanguage::List<BilinearFormIntegratorBase> boundaryBFIs;
       FormLanguage::List<BilinearFormIntegratorBase> interfaceBFIs;
 
@@ -24,6 +25,11 @@ namespace Rodin::Variational::Assembly
             case Integrator::Region::Domain:
             {
                domainBFIs.add(bfi);
+               break;
+            }
+            case Integrator::Region::Faces:
+            {
+               facesBFIs.add(bfi);
                break;
             }
             case Integrator::Region::Boundary:
@@ -61,46 +67,61 @@ namespace Rodin::Variational::Assembly
          }
       }
 
-      if (boundaryBFIs.size() > 0)
+      if (facesBFIs.size() > 0 || boundaryBFIs.size() > 0 || interfaceBFIs.size() > 0)
       {
-         for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+         for (auto it = input.mesh.getFace(); !it.end(); ++it)
          {
-            std::optional<Geometry::Boundary> cached;
-            for (const auto& bfi : boundaryBFIs)
+            const auto& idx = it.getIndex();
+            std::optional<Geometry::Face> cached;
+            const Geometry::Attribute attr = input.mesh.getFaceAttribute(idx);
+
+            for (const auto& bfi : facesBFIs)
             {
-               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
                if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                {
                   if (!cached.has_value())
                      cached.emplace(std::move(*it));
                   assert(cached.has_value());
-                  const auto& boundary = cached.value();
+                  const auto& face = cached.value();
                   res.AddSubMatrix(
-                        input.testFES.getDOFs(boundary), input.trialFES.getDOFs(boundary),
-                        bfi.getMatrix(boundary));
+                        input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
+                        bfi.getMatrix(face));
                }
             }
-         }
-      }
 
-      if (interfaceBFIs.size() > 0)
-      {
-         for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-         {
-            std::optional<Geometry::Interface> cached;
-            for (const auto& bfi : interfaceBFIs)
+            if (input.mesh.isBoundary(idx))
             {
-               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
-               if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+               for (const auto& bfi : boundaryBFIs)
                {
-                  if (!cached.has_value())
-                     cached.emplace(std::move(*it));
-                  assert(cached.has_value());
-                  const auto& interface = cached.value();
-                  res.AddSubMatrix(
-                        input.testFES.getDOFs(interface),
-                        input.trialFES.getDOFs(interface),
-                        bfi.getMatrix(interface));
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+                  {
+                     if (!cached.has_value())
+                        cached.emplace(std::move(*it));
+                     assert(cached.has_value());
+                     const auto& face = cached.value();
+                     res.AddSubMatrix(
+                           input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
+                           bfi.getMatrix(face));
+                  }
+               }
+            }
+
+            if (input.mesh.isInterface(idx))
+            {
+               for (const auto& bfi : interfaceBFIs)
+               {
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+                  {
+                     if (!cached.has_value())
+                        cached.emplace(std::move(*it));
+                     assert(cached.has_value());
+                     const auto& face = cached.value();
+                     res.AddSubMatrix(
+                           input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
+                           bfi.getMatrix(face));
+                  }
                }
             }
          }
@@ -116,6 +137,7 @@ namespace Rodin::Variational::Assembly
       res = 0.0;
 
       FormLanguage::List<LinearFormIntegratorBase> domainLFIs;
+      FormLanguage::List<LinearFormIntegratorBase> facesLFIs;
       FormLanguage::List<LinearFormIntegratorBase> boundaryLFIs;
       FormLanguage::List<LinearFormIntegratorBase> interfaceLFIs;
 
@@ -126,6 +148,11 @@ namespace Rodin::Variational::Assembly
             case Integrator::Region::Domain:
             {
                domainLFIs.add(lfi);
+               break;
+            }
+            case Integrator::Region::Faces:
+            {
+               facesLFIs.add(lfi);
                break;
             }
             case Integrator::Region::Boundary:
@@ -162,43 +189,55 @@ namespace Rodin::Variational::Assembly
          }
       }
 
-      if (boundaryLFIs.size() > 0)
+      if (facesLFIs.size() > 0 || boundaryLFIs.size() > 0 || interfaceLFIs.size() > 0)
       {
-         for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+         for (auto it = input.mesh.getFace(); !it.end(); ++it)
          {
-            std::optional<Geometry::Boundary> cached;
-            for (const auto& lfi : boundaryLFIs)
+            const auto& idx = it.getIndex();
+            std::optional<Geometry::Face> cached;
+            const Geometry::Attribute attr = input.mesh.getFaceAttribute(idx);
+
+            for (const auto& bfi : facesLFIs)
             {
-               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
-               if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+               if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                {
                   if (!cached.has_value())
                      cached.emplace(std::move(*it));
                   assert(cached.has_value());
-                  const auto& boundary = cached.value();
-                  res.AddElementVector(
-                     input.fes.getDOFs(boundary), lfi.getVector(boundary));
+                  const auto& face = cached.value();
+                  res.AddElementVector(input.fes.getDOFs(face), bfi.getVector(face));
                }
             }
-         }
-      }
 
-      if (interfaceLFIs.size() > 0)
-      {
-         for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-         {
-            std::optional<Geometry::Interface> cached;
-            for (const auto& lfi : interfaceLFIs)
+            if (input.mesh.isBoundary(idx))
             {
-               const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
-               if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+               for (const auto& lfi : boundaryLFIs)
                {
-                  if (!cached.has_value())
-                     cached.emplace(std::move(*it));
-                  assert(cached.has_value());
-                  const auto& boundary = cached.value();
-                  res.AddElementVector(
-                     input.fes.getDOFs(boundary), lfi.getVector(boundary));
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+                  {
+                     if (!cached.has_value())
+                        cached.emplace(std::move(*it));
+                     assert(cached.has_value());
+                     const auto& face = cached.value();
+                     res.AddElementVector(input.fes.getDOFs(face), lfi.getVector(face));
+                  }
+               }
+            }
+
+            if (input.mesh.isInterface(idx))
+            {
+               for (const auto& lfi : interfaceLFIs)
+               {
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
+                  {
+                     if (!cached.has_value())
+                        cached.emplace(std::move(*it));
+                     assert(cached.has_value());
+                     const auto& face = cached.value();
+                     res.AddElementVector(input.fes.getDOFs(face), lfi.getVector(face));
+                  }
                }
             }
          }

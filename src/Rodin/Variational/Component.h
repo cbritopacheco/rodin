@@ -86,7 +86,7 @@ namespace Rodin::Variational
             return m_idx;
          }
 
-         Component& traceOf(const std::set<int>& attrs) override
+         Component& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_v->traceOf(attrs);

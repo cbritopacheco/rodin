@@ -161,7 +161,7 @@ namespace Rodin::Variational
             return 1 + sizeof...(Values);
          }
 
-         VectorFunction& traceOf(const std::set<int>& attrs) override
+         VectorFunction& traceOf(Geometry::Attribute attrs) override
          {
             VectorFunctionBase::traceOf(attrs);
             for (auto& f : m_fs)

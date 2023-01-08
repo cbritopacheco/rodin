@@ -140,61 +140,21 @@ namespace Rodin::Geometry
 
          Face(Face&& other)
             : Simplex(std::move(other)),
-              m_localTrans(std::move(other.m_localTrans))
+              m_isBoundary(std::move(other.m_isBoundary)),
+              m_isInterface(std::move(other.m_isInterface))
          {}
-
-         bool isBoundary() const;
-
-         bool isInterface() const;
 
          FaceIterator getAdjacent() const;
 
          ElementIterator getIncident() const;
 
-         /**
-          * @deprecated
-          */
-         [[deprecated]]
-         mfem::FaceElementTransformations& getFaceTransformations() const
-         {
-            assert(m_localTrans);
-            return *m_localTrans;
-         }
+         bool isBoundary() const;
+
+         bool isInterface() const;
 
       private:
-         std::unique_ptr<mfem::FaceElementTransformations> m_localTrans;
-   };
-
-   class Interface final : public Face
-   {
-      public:
-         Interface(Index index, const MeshBase& mesh, Data data)
-            : Face(index, mesh, std::move(data))
-         {}
-
-         Interface(Interface&& other)
-            : Face(std::move(other))
-         {}
-   };
-
-   /**
-    * @brief Class for representing boundary elements in the mesh, i.e. face
-    * elements which are at the boundary.
-    *
-    * This class is designed so that modifications can be made to the
-    * boundary element. If one wishes to modify the face then one must use
-    * BoundaryElementView.
-    */
-   class Boundary final : public Face
-   {
-      public:
-         Boundary(Index index, const MeshBase& mesh, Data data)
-            : Face(index, mesh, std::move(data))
-         {}
-
-         Boundary(Boundary&& other)
-            :  Face(std::move(other))
-         {}
+         const bool m_isBoundary;
+         const bool m_isInterface;
    };
 
    class Vertex : public Simplex

@@ -31,7 +31,7 @@ namespace Rodin::Variational
    {}
 
    Sum<FunctionBase, FunctionBase>&
-   Sum<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Sum<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attrs)
    {
       FunctionBase::traceOf(attrs);
       m_lhs->traceOf(attrs);

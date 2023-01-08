@@ -47,7 +47,7 @@ namespace Rodin::Variational
                m_v(std::move(other.m_v))
          {}
 
-         Cosine& traceOf(const std::set<int>& attrs) override
+         Cosine& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_v->traceOf(attrs);

@@ -46,6 +46,7 @@ rodin_add_compile_options(
   -fvisibility-inlines-hidden)
 
 if (RODIN_BUILD_SRC)
+  set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
   if (RODIN_USE_SUITESPARSE)
     set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
@@ -58,7 +59,6 @@ if (RODIN_BUILD_SRC)
 
   if (RODIN_USE_OPENMP)
     find_package(OpenMP REQUIRED)
-    set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
     set(MFEM_USE_OPENMP ON CACHE BOOL TRUE FORCE)
   endif()
 

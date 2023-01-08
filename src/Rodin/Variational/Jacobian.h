@@ -62,65 +62,86 @@ namespace Rodin::Variational
          FunctionValue getValue(const Geometry::Point& p) const override
          {
             FunctionValue::Matrix grad;
-            const auto& element = p.getSimplex();
-            const auto& mesh = m_u.getFiniteElementSpace().getMesh();
-            if (element.getDimension() == mesh.getDimension())
+            const auto& simplex = p.getSimplex();
+            const auto& simplexMesh = simplex.getMesh();
+            const auto& fesMesh = m_u.getFiniteElementSpace().getMesh();
+            if (simplex.getDimension() == fesMesh.getDimension())
             {
                assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
                const auto& element = p.getSimplex();
                auto& trans = element.getTransformation();
                m_u.getHandle().GetVectorGradient(trans, grad);
             }
-            else if (element.getDimension() == mesh.getDimension() - 1)
+            else if (simplex.getDimension() == fesMesh.getDimension() - 1)
             {
                assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
-
                const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
-               const auto& mesh = p.getSimplex().getMesh();
-
-               auto& ft = face.getFaceTransformations();
-               if (ft.Elem1 && ft.Elem1->ElementType == mfem::FaceElementTransformations::BDR_ELEMENT)
+               mfem::FaceElementTransformations* ft =
+                  const_cast<Geometry::MeshBase&>(simplexMesh).getHandle()
+                  .GetFaceElementTransformations(face.getIndex());
+               if (simplexMesh.isSubMesh())
                {
-                  ft.Elem1No = mesh.getHandle().GetBdrFace(ft.Elem1No);
-                  ft.Elem1->ElementNo = ft.Elem1No;
-                  ft.Elem1->ElementType = mfem::FaceElementTransformations::FACE;
-                  ft.SetAllIntPoints(&p.getIntegrationPoint());
-               }
-               if (ft.Elem2 && ft.Elem2->ElementType == mfem::FaceElementTransformations::BDR_ELEMENT)
-               {
-                  ft.Elem2No = mesh.getHandle().GetBdrFace(ft.Elem2No);
-                  ft.Elem2->ElementNo = ft.Elem2No;
-                  ft.Elem2->ElementType = mfem::FaceElementTransformations::FACE;
-                  ft.SetAllIntPoints(&p.getIntegrationPoint());
-               }
-
-               if (mesh.isSubMesh())
-               {
-                  const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(mesh);
-                  if (ft.Elem1 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem1->Attribute)))
+                  const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
+                  assert(submesh.getParent() == fesMesh);
+                  if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
                   {
-                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft.Elem1No);
-                     ft.Elem1->ElementNo = parentIdx;
-                     ft.Elem1No = parentIdx;
-                     ft.SetAllIntPoints(&p.getIntegrationPoint());
-                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
+                     ft->Elem1->ElementNo = parentIdx;
+                     ft->Elem1No = parentIdx;
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
                   }
-                  else if (ft.Elem2 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem2->Attribute)))
+                  else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
                   {
-                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft.Elem2No);
-                     ft.Elem2->ElementNo = parentIdx;
-                     ft.Elem2No = parentIdx;
-                     ft.SetAllIntPoints(&p.getIntegrationPoint());
-                     m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
+                     ft->Elem2->ElementNo = parentIdx;
+                     ft->Elem2No = parentIdx;
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
                   }
                   else if (face.isBoundary())
                   {
-                     assert(ft.Elem1);
-                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft.Elem1No);
-                     ft.Elem1->ElementNo = parentIdx;
-                     ft.Elem1No = parentIdx;
-                     ft.SetAllIntPoints(&p.getIntegrationPoint());
-                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                     assert(ft->Elem1);
+                     Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
+                     ft->Elem1->ElementNo = parentIdx;
+                     ft->Elem1No = parentIdx;
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+                  }
+                  else
+                  {
+                     assert(false);
+                  }
+               }
+               else if (fesMesh.isSubMesh())
+               {
+                  const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
+                  assert(submesh.getParent() == simplexMesh);
+                  const auto& s2pe = submesh.getElementMap();
+                  if (ft->Elem1 && s2pe.right.count(ft->Elem1No) && getTraceDomain() == ft->Elem1->Attribute)
+                  {
+                     Geometry::Index idx = s2pe.right.at(ft->Elem1No);
+                     ft->Elem1->ElementNo = idx;
+                     ft->Elem1No = idx;
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+                  }
+                  else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) && getTraceDomain() == ft->Elem2->Attribute)
+                  {
+                     Geometry::Index idx = s2pe.right.at(ft->Elem2No);
+                     ft->Elem2->ElementNo = idx;
+                     ft->Elem2No = idx;
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+                  }
+                  else if (face.isBoundary())
+                  {
+                     assert(ft->Elem1);
+                     Geometry::Index idx = s2pe.right.at(ft->Elem1No);
+                     ft->Elem1->ElementNo = idx;
+                     ft->Elem1No = idx;
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
                   }
                   else
                   {
@@ -129,21 +150,21 @@ namespace Rodin::Variational
                }
                else
                {
-                  if (ft.Elem1 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem1No)))
+                  if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
                   {
-                     ft.SetAllIntPoints(&p.getIntegrationPoint());
-                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
                   }
-                  else if (ft.Elem2 && getTraceDomain().count(mesh.getFaceAttribute(ft.Elem2No)))
+                  else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
                   {
-                     ft.SetAllIntPoints(&p.getIntegrationPoint());
-                     m_u.getHandle().GetVectorGradient(*ft.Elem2, grad);
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
                   }
                   else if (face.isBoundary())
                   {
-                     ft.SetAllIntPoints(&p.getIntegrationPoint());
-                     assert(ft.Elem1);
-                     m_u.getHandle().GetVectorGradient(*ft.Elem1, grad);
+                     ft->SetAllIntPoints(&p.getIntegrationPoint());
+                     assert(ft->Elem1);
+                     m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
                   }
                   else
                   {

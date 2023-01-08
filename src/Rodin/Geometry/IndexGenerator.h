@@ -32,6 +32,45 @@ namespace Rodin::Geometry
          virtual IndexGeneratorBase* move() && noexcept = 0;
    };
 
+   class EmptyIndexGenerator final : public IndexGeneratorBase
+   {
+      public:
+         constexpr EmptyIndexGenerator() = default;
+
+         constexpr EmptyIndexGenerator(EmptyIndexGenerator&& other)
+            :  IndexGeneratorBase(std::move(other))
+         {}
+
+         constexpr EmptyIndexGenerator(const EmptyIndexGenerator& other)
+            :  IndexGeneratorBase(other)
+         {}
+
+         bool end() const override
+         {
+            return true;
+         }
+
+         EmptyIndexGenerator& operator++() override
+         {
+            return *this;
+         }
+
+         Index operator*() const noexcept override
+         {
+            return 0;
+         }
+
+         EmptyIndexGenerator* copy() & noexcept override
+         {
+            return new EmptyIndexGenerator(*this);
+         }
+
+         EmptyIndexGenerator* move() && noexcept override
+         {
+            return new EmptyIndexGenerator(std::move(*this));
+         }
+   };
+
    class BoundedIndexGenerator final : public IndexGeneratorBase
    {
       public:

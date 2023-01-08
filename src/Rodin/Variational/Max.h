@@ -31,7 +31,7 @@ namespace Rodin::Variational
 
          Max(Max&& other);
 
-         Max& traceOf(const std::set<int>& attrs) override;
+         Max& traceOf(Geometry::Attribute attrs) override;
 
          FunctionValue getValue(const Geometry::Point& p) const override
          {

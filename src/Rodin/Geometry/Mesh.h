@@ -253,9 +253,9 @@ namespace Rodin::Geometry
 
          virtual bool isBoundary(Index faceIdx) const = 0;
 
-         virtual BoundaryIterator getBoundary() const = 0;
+         virtual FaceIterator getBoundary() const = 0;
 
-         virtual InterfaceIterator getInterface() const = 0;
+         virtual FaceIterator getInterface() const = 0;
 
          virtual size_t getCount(size_t dim) const = 0;
 
@@ -408,9 +408,9 @@ namespace Rodin::Geometry
 
          size_t getCount(size_t dim) const override;
 
-         BoundaryIterator getBoundary() const override;
+         FaceIterator getBoundary() const override;
 
-         InterfaceIterator getInterface() const override;
+         FaceIterator getInterface() const override;
 
          ElementIterator getElement(size_t idx = 0) const override;
 

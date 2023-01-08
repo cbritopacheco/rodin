@@ -24,6 +24,7 @@ namespace Rodin::Variational
          enum class Region
          {
             Domain,
+            Faces,
             Boundary,
             Interface
          };
