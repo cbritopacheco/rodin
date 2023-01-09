@@ -89,12 +89,7 @@ int main(int, char**)
     auto e = 0.5 * (jac + jac.T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
-
-    GridFunction normal(Vh);
-    normal.projectOnBoundary(n, Gamma);
-    Omega.save("normal.mesh");
-    normal.save("normal.gf");
-    std::exit(1);
+    n.traceOf(Interior);
 
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
