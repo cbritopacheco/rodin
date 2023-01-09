@@ -90,6 +90,12 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
+    GridFunction normal(Vh);
+    normal.projectOnBoundary(n, Gamma);
+    Omega.save("normal.mesh");
+    normal.save("normal.gf");
+    std::exit(1);
+
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  v(Vh);
@@ -99,6 +105,8 @@ int main(int, char**)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     hilbert.solve(solver);
+    g.getSolution().save("g.gf");
+    Omega.save("g.mesh");
 
     // Update objective
     double objective = compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior);
