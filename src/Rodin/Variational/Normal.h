@@ -42,36 +42,72 @@ namespace Rodin::Variational
          {
             FunctionValue::Vector value;
             const auto& simplex = p.getSimplex();
-            auto& trans = simplex.getTransformation();
             const auto& mesh = simplex.getMesh();
-            assert(
-               // We are on a face of a d-mesh in d-space
-               (
-                  (mesh.getDimension() == mesh.getSpaceDimension()) &&
-                  simplex.getDimension() == mesh.getDimension() - 1
-               ) ||
+            auto& trans = simplex.getTransformation();
+
+            if ((mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
+                  simplex.getDimension() == mesh.getDimension())
+            {
                // Or we are on an element of a d-mesh in (d + 1)-space.
-               (
-                  (mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
-                  simplex.getDimension() == mesh.getDimension()
-               )
-            );
-            value.SetSize(m_dimension);
-            mfem::CalcOrtho(trans.Jacobian(), value);
-            const double norm = value.Norml2();
-            assert(norm > 0.0);
-            assert(std::isfinite(norm));
-            // if (simplex.getDimension() == mesh.getDimension() - 1)
-            // {
-            //    assert(dynamic_cast<const Geometry::Face*>(&simplex));
-            //    // const auto& face = static_cast<const Geometry::Face&>(simplex);
-            //    // value /= norm * (1.0 - 2.0 * face.isInterface());
-            // }
-            // else
-            // {
-            //    value /= norm;
-            // }
-            value /= norm;
+               value.SetSize(m_dimension);
+               mfem::CalcOrtho(trans.Jacobian(), value);
+               const double norm = value.Norml2();
+               assert(norm > 0.0);
+               assert(std::isfinite(norm));
+               value /= norm;
+            }
+            else if ((mesh.getDimension() == mesh.getSpaceDimension()) &&
+                  simplex.getDimension() == mesh.getDimension() - 1)
+            {
+               // We are on a face of a d-mesh in d-space
+               if (mesh.isBoundary(simplex.getIndex()))
+               {
+                  mfem::FaceElementTransformations* ft =
+                     const_cast<Geometry::MeshBase&>(mesh).getHandle()
+                     .GetFaceElementTransformations(simplex.getIndex());
+                  value.SetSize(m_dimension);
+                  ft->SetAllIntPoints(&p.getIntegrationPoint());
+                  assert(ft->Elem1);
+                  mfem::CalcOrtho(trans.Jacobian(), value);
+                  const double norm = value.Norml2();
+                  assert(norm > 0.0);
+                  assert(std::isfinite(norm));
+                  value /= norm;
+               }
+               else
+               {
+                  mfem::FaceElementTransformations* ft =
+                     const_cast<Geometry::MeshBase&>(mesh).getHandle()
+                     .GetFaceElementTransformations(simplex.getIndex());
+                  value.SetSize(m_dimension);
+                  ft->SetAllIntPoints(&p.getIntegrationPoint());
+                  if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+                  {
+                     mfem::CalcOrtho(trans.Jacobian(), value);
+                     const double norm = value.Norml2();
+                     assert(norm > 0.0);
+                     assert(std::isfinite(norm));
+                     value /= norm;
+                  }
+                  else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+                  {
+                     mfem::CalcOrtho(trans.Jacobian(), value);
+                     const double norm = value.Norml2();
+                     assert(norm > 0.0);
+                     assert(std::isfinite(norm));
+                     value /= -norm;
+                  }
+                  else
+                  {
+                     assert(false);
+                  }
+               }
+            }
+            else
+            {
+               assert(false);
+               return FunctionValue::Vector{0, 0};
+            }
             return value;
          }
 
