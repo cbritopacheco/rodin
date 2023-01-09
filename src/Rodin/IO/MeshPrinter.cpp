@@ -133,136 +133,131 @@ namespace Rodin::IO
 
    void MeshPrinter<FileFormat::MEDIT, Context::Serial>::print(std::ostream& os)
    {
-      // const auto& mesh = getObject();
+      const auto& mesh = getObject();
 
-      // // Print header
-      // os << IO::Medit::Keyword::MeshVersionFormatted << " " << 2
-      //  << '\n'
-      //  << IO::Medit::Keyword::Dimension << " " << mesh.getSpaceDimension()
-      //  << "\n\n";
+      // Print header
+      os << IO::Medit::Keyword::MeshVersionFormatted << " " << 2
+       << '\n'
+       << IO::Medit::Keyword::Dimension << " " << mesh.getSpaceDimension()
+       << "\n\n";
 
-      // // Print vertices
-      // os << '\n'
-      //    << IO::Medit::Keyword::Vertices
-      //    << '\n'
-      //    << mesh.getHandle().GetNV()
-      //    << '\n';
+      // Print vertices
+      os << '\n'
+         << IO::Medit::Keyword::Vertices
+         << '\n'
+         << mesh.getHandle().GetNV()
+         << '\n';
 
-      // for (int i = 0; i < mesh.getHandle().GetNV(); i++)
-      // {
-      //    const double* coords = mesh.getHandle().GetVertex(i);
-      //    for (int j = 0; j < mesh.getHandle().SpaceDimension(); j++)
-      //       os << coords[j] << " ";
-      //    os << 0 << '\n'; // Dummy reference for all vertices
-      // }
+      for (int i = 0; i < mesh.getHandle().GetNV(); i++)
+      {
+         const double* coords = mesh.getHandle().GetVertex(i);
+         for (int j = 0; j < mesh.getHandle().SpaceDimension(); j++)
+            os << coords[j] << " ";
+         os << 0 << '\n'; // Dummy reference for all vertices
+      }
 
-      // // Print edges
-      // switch (mesh.getDimension())
-      // {
-      //    case 2:
-      //    {
-      //       int nbe = mesh.count<Geometry::Boundary>();
-      //       os << '\n'
-      //          << IO::Medit::Keyword::Edges
-      //          << '\n'
-      //          << nbe
-      //          << '\n';
-      //       for (int i = 0; i < nbe; i++)
-      //       {
-      //          auto el = mesh.get<Geometry::Boundary>(i);
-      //          auto vs = el.getVertices();
-      //          assert(vs.size() == 2);
-      //          os << vs[0] + 1 << " "
-      //             << vs[1] + 1 << " "
-      //             << el.getAttribute() << '\n';
-      //       }
-      //    }
-      //    default:
-      //    {
-      //       break;
-      //    }
-      // }
+      // Print edges
+      switch (mesh.getDimension())
+      {
+         case 2:
+         {
+            int nbe = mesh.getHandle().GetNBE();
+            os << '\n'
+               << IO::Medit::Keyword::Edges
+               << '\n'
+               << nbe
+               << '\n';
 
-      // // Print triangles
-      // switch (mesh.getDimension())
-      // {
-      //   case 2:
-      //   {
-      //       os << '\n' << IO::Medit::Keyword::Triangles << '\n';
-      //      int ne = mesh.count<Geometry::Element>();
-      //      os << ne << '\n';
-      //      for (int i = 0; i < ne; i++)
-      //      {
-      //         auto el = mesh.get<Geometry::Element>(i);
-      //         auto vs = el.getVertices();
-      //         assert(vs.size() == 3);
-      //         os << vs[0] + 1 << " "
-      //            << vs[1] + 1 << " "
-      //            << vs[2] + 1 << " "
-      //            << el.getAttribute() << '\n';
-      //      }
-      //      break;
-      //   }
-      //   case 3:
-      //   {
-      //       os << '\n' << IO::Medit::Keyword::Triangles << '\n';
-      //       int nbe = mesh.count<Geometry::Boundary>();
-      //       os << nbe << '\n';
-      //       for (int i = 0; i < nbe; i++)
-      //       {
-      //          auto bel = mesh.get<Geometry::Boundary>(i);
-      //          auto vs = bel.getVertices();
-      //          assert(vs.size() == 3);
-      //          os << vs[0] + 1 << " "
-      //             << vs[1] + 1 << " "
-      //             << vs[2] + 1 << " "
-      //             << bel.getAttribute() << '\n';
-      //       }
-      //       break;
-      //   }
-      //   default:
-      //   {
-      //      Alert::Exception() << "Bad mesh dimension " << mesh.getDimension();
-      //      break;
-      //   }
-      // }
+            for (int i = 0; i < nbe; i++)
+            {
+               auto vs = mesh.getHandle().GetBdrElement(i)->GetVertices();
+               os << vs[0] + 1 << " "
+                  << vs[1] + 1 << " "
+                  << mesh.getHandle().GetBdrAttribute(i) << '\n';
+            }
+         }
+         default:
+         {
+            break;
+         }
+      }
 
-      // // Print tetrahedra
-      // switch (mesh.getDimension())
-      // {
-      //    case 3:
-      //    {
-      //       int ne = mesh.count<Geometry::Element>();
-      //       os << '\n'
-      //          << IO::Medit::Keyword::Tetrahedra
-      //          << '\n'
-      //          << ne
-      //          << '\n';
-      //       for (int i = 0; i < ne; i++)
-      //       {
-      //          auto el = mesh.get<Geometry::Element>(i);
-      //          auto vs = el.getVertices();
-      //          assert(vs.size() == 4);
-      //          os << vs[0] + 1 << " "
-      //             << vs[1] + 1 << " "
-      //             << vs[2] + 1 << " "
-      //             << vs[3] + 1 << " "
-      //             << el.getAttribute() << '\n';
-      //       }
-      //       break;
-      //    }
-      //    default:
-      //    {
-      //       // Do nothing
-      //       break;
-      //    }
-      // }
+      // Print triangles
+      switch (mesh.getDimension())
+      {
+        case 2:
+        {
+            os << '\n' << IO::Medit::Keyword::Triangles << '\n';
+           int ne = mesh.getElementCount();
+           os << ne << '\n';
+           for (int i = 0; i < ne; i++)
+           {
+              auto vs = mesh.getHandle().GetElement(i)->GetVertices();
+              os << vs[0] + 1 << " "
+                 << vs[1] + 1 << " "
+                 << vs[2] + 1 << " "
+                 << mesh.getHandle().GetAttribute(i) << '\n';
+           }
+           break;
+        }
+        case 3:
+        {
+            os << '\n' << IO::Medit::Keyword::Triangles << '\n';
+            int nbe = mesh.getHandle().GetNBE();
+            os << nbe << '\n';
+            for (int i = 0; i < nbe; i++)
+            {
+               auto vs = mesh.getHandle().GetBdrElement(i)->GetVertices();
+               os << vs[0] + 1 << " "
+                  << vs[1] + 1 << " "
+                  << vs[2] + 1 << " "
+                  << mesh.getHandle().GetBdrAttribute(i) << '\n';
+            }
+            break;
+        }
+        default:
+        {
+           Alert::Exception() << "Bad mesh dimension " << mesh.getDimension();
+           break;
+        }
+      }
 
-      // // Print footer
-      // if (m_footer)
-      // {
-      //    os << '\n' << IO::Medit::Keyword::End;
-      // }
-      assert(false);
+      // Print tetrahedra
+      switch (mesh.getDimension())
+      {
+         case 3:
+         {
+            int ne = mesh.getElementCount();
+            os << '\n'
+               << IO::Medit::Keyword::Tetrahedra
+               << '\n'
+               << ne
+               << '\n';
+            for (int i = 0; i < ne; i++)
+            {
+               auto it = mesh.getElement(i);
+               assert(false);
+               // auto vs = el.getVertices();
+               // assert(vs.size() == 4);
+               // os << vs[0] + 1 << " "
+               //    << vs[1] + 1 << " "
+               //    << vs[2] + 1 << " "
+               //    << vs[3] + 1 << " "
+               //    << el.getAttribute() << '\n';
+            }
+            break;
+         }
+         default:
+         {
+            // Do nothing
+            break;
+         }
+      }
+
+      // Print footer
+      if (m_footer)
+      {
+         os << '\n' << IO::Medit::Keyword::End;
+      }
    }
 }

@@ -295,6 +295,30 @@ namespace Rodin::Geometry
       }
    }
 
+   Mesh<Context::Serial>& Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
+   {
+      if (dimension == getDimension())
+      {
+         getHandle().SetAttribute(index, attr);
+      }
+      else if (dimension == getDimension() - 1)
+      {
+         auto it = m_f2b.find(index);
+         if (it != m_f2b.end())
+         {
+            getHandle().SetBdrAttribute(it->second, attr);
+         }
+         else
+         {
+            assert(false);
+         }
+      }
+      else
+      {
+      }
+      return *this;
+   }
+
    Mesh<Context::Serial>&
    Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
    {

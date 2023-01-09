@@ -178,57 +178,58 @@ namespace Rodin::External::MMG
         {
           const auto& ref = it.first;
           const auto& split = it.second;
-          assert(false);
-
-          // std::visit(Utility::Overloaded{
-          //   [&](const NoSplitT&) {},
-          //   [&](const Split& s)
-          //   {
-          //     if (m_meshTheSurface)
-          //     {
-          //       rodinMesh.edit(
-          //         [&](Geometry::BoundaryView el)
-          //         {
-          //           auto it = m_originalRefMap.find(el.getAttribute());
-          //           if (it != m_originalRefMap.end())
-          //           {
-          //             MaterialReference originalRef = it->second;
-          //             const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
-          //             if (el.getAttribute() == s.interior)
-          //               el.setAttribute(originalSplit.interior);
-          //             else if (el.getAttribute() == s.exterior)
-          //               el.setAttribute(originalSplit.exterior);
-          //           }
-          //           else
-          //           {
-          //             // The key must have come from a no split
-          //           }
-          //         }).update();
-          //     }
-          //     else
-          //     {
-          //       rodinMesh.edit(
-          //         [&](Geometry::ElementView el)
-          //         {
-          //           auto it = m_originalRefMap.find(el.getAttribute());
-          //           if (it != m_originalRefMap.end())
-          //           {
-          //             MaterialReference originalRef = it->second;
-          //             const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
-          //             if (el.getAttribute() == s.interior)
-          //               el.setAttribute(originalSplit.interior);
-          //             else if (el.getAttribute() == s.exterior)
-          //               el.setAttribute(originalSplit.exterior);
-          //           }
-          //           else
-          //           {
-          //             // The key must have come from a no split
-          //           }
-          //         }).update();
-          //     }
-          //   }
-          // }, split);
+          std::visit(Utility::Overloaded{
+            [&](const NoSplitT&) {},
+            [&](const Split& s)
+            {
+              if (m_meshTheSurface)
+              {
+                for (auto bit = rodinMesh.getBoundary(); !bit.end(); ++bit)
+                {
+                  const Geometry::Index idx = bit.getIndex();
+                  const Geometry::Attribute attr = rodinMesh.getFaceAttribute(idx);
+                  auto it = m_originalRefMap.find(attr);
+                  if (it != m_originalRefMap.end())
+                  {
+                    MaterialReference originalRef = it->second;
+                    const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
+                    if (attr == s.interior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension() - 1, idx, originalSplit.interior);
+                    else if (attr == s.exterior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension() - 1, idx, originalSplit.exterior);
+                  }
+                  else
+                  {
+                    // The key must have come from a no split
+                  }
+                }
+              }
+              else
+              {
+                for (auto eit = rodinMesh.getElement(); !eit.end(); ++eit)
+                {
+                  const Geometry::Index idx = eit.getIndex();
+                  const Geometry::Attribute attr = rodinMesh.getElementAttribute(idx);
+                  auto it = m_originalRefMap.find(attr);
+                  if (it != m_originalRefMap.end())
+                  {
+                    MaterialReference originalRef = it->second;
+                    const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
+                    if (attr == s.interior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension(), idx, originalSplit.interior);
+                    else if (attr == s.exterior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension(), idx, originalSplit.exterior);
+                  }
+                  else
+                  {
+                    // The key must have come from a no split
+                  }
+                }
+              }
+            }
+          }, split);
         }
+        rodinMesh.getHandle().SetAttributes();
 
         return rodinMesh;
       }

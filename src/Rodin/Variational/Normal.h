@@ -60,16 +60,18 @@ namespace Rodin::Variational
             mfem::CalcOrtho(trans.Jacobian(), value);
             const double norm = value.Norml2();
             assert(norm > 0.0);
-            if (simplex.getDimension() == mesh.getDimension() - 1)
-            {
-               assert(dynamic_cast<const Geometry::Face*>(&simplex));
-               const auto& face = static_cast<const Geometry::Face&>(simplex);
-               value /= norm * (1.0 - 2.0 * face.isInterface());
-            }
-            else
-            {
-               value /= norm;
-            }
+            assert(std::isfinite(norm));
+            // if (simplex.getDimension() == mesh.getDimension() - 1)
+            // {
+            //    assert(dynamic_cast<const Geometry::Face*>(&simplex));
+            //    // const auto& face = static_cast<const Geometry::Face&>(simplex);
+            //    // value /= norm * (1.0 - 2.0 * face.isInterface());
+            // }
+            // else
+            // {
+            //    value /= norm;
+            // }
+            value /= norm;
             return value;
          }
 

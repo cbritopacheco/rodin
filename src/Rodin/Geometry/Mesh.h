@@ -75,13 +75,6 @@ namespace Rodin::Geometry
          MeshBase& displace(const Variational::GridFunctionBase& u);
 
          // /**
-         //  * @brief Edits all elements in the mesh via the given function.
-         //  * @param[in] f Function which takes an ElementView to modify each
-         //  * element.
-         //  */
-         // MeshBase& edit(std::function<void(const MeshElementIterator)> f);
-
-         // /**
          //  * @brief Performs connected-component labelling.
          //  * @param[in] p Function which returns true if two adjacent elements
          //  * belong to the same component, false otherwise.
@@ -269,6 +262,8 @@ namespace Rodin::Geometry
 
          virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
+         virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
+
          /**
           * @internal
           * @brief Gets the underlying handle for the internal mesh.
@@ -349,6 +344,8 @@ namespace Rodin::Geometry
          virtual void save(
                const boost::filesystem::path& filename,
                IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const;
+
+         virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
 
          /**
           * @brief Skins the mesh to obtain its boundary mesh
