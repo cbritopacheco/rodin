@@ -51,7 +51,26 @@ namespace Rodin::Variational
 
          FunctionValue getValue(const Geometry::Point& p) const override
          {
-            return m_v->getValue(p).matrix().FNorm();
+            switch (m_v->getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  return std::abs(m_v->getValue(p).scalar());
+               }
+               case RangeType::Vector:
+               {
+                  return m_v->getValue(p).vector().Norml2();
+               }
+               case RangeType::Matrix:
+               {
+                  return m_v->getValue(p).matrix().FNorm();
+               }
+               default:
+               {
+                  assert(false);
+                  return 0.0;
+               }
+            }
          }
 
          Frobenius* copy() const noexcept override
