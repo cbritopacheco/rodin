@@ -39,7 +39,9 @@ namespace Rodin::Variational
 
          FunctionValue getValue(const Geometry::Point& p) const override
          {
-            return static_cast<double>(m_lhs->getValue(p)) / static_cast<double>(m_rhs->getValue(p));
+            auto v = m_lhs->getValue(p);
+            v /= m_rhs->getValue(p).scalar();
+            return v;
          }
 
          Division* copy() const noexcept override

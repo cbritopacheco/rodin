@@ -65,7 +65,27 @@ namespace Rodin::Variational
          virtual FunctionValue getValue(const Geometry::Point& p) const override
          {
             assert(m_a->getRangeShape() == m_b->getRangeShape());
-            return m_a->getValue(p).matrix() * m_b->getValue(p).matrix();
+            assert(m_a->getRangeType() == m_b->getRangeType());
+            switch (m_a->getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  return m_a->getValue(p).scalar() * m_b->getValue(p).scalar();
+               }
+               case RangeType::Vector:
+               {
+                  return m_a->getValue(p).vector() * m_b->getValue(p).vector();
+               }
+               case RangeType::Matrix:
+               {
+                  return m_a->getValue(p).matrix() * m_b->getValue(p).matrix();
+               }
+               default:
+               {
+                  assert(false);
+                  return 0.0;
+               }
+            }
          }
 
          virtual Dot* copy() const noexcept override

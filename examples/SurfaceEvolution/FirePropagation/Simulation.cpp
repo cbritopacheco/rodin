@@ -116,24 +116,10 @@ class Environment
               return Math::Constants::pi<double>() / 2.0 - angle;
             };
 
-          mfem::GSSmoother smoother;
-          Solver::CG solver;
-          solver.setPreconditioner(smoother);
-
-          TrialFunction d(m_env.m_vfes);
-          TestFunction  v(m_env.m_vfes);
-
           Grad gdist(m_env.m_fireDist);
           gdist.traceOf(Terrain::Vegetation);
 
-          double lambda = 100;
-          Problem cnd(d, v);
-          cnd = Integral(lambda * Jacobian(d), Jacobian(v))
-              + Integral(d, v)
-              - Integral(gdist, v);
-          cnd.solve(solver);
-
-          const auto conormal = d.getSolution() / Frobenius(d.getSolution());
+          const auto conormal = gdist / Frobenius(gdist);
 
           // Angle between slope and conormal
           auto phi =
@@ -324,13 +310,13 @@ int main()
   // std::cout << "exiting" << std::endl;
   // std::exit(1);
 
-  const char* meshfile = "implicit.mesh";
-  // const char* meshfile = "out/evolution.86.mesh";
+  // const char* meshfile = "topography.mesh";
+  const char* meshfile = "out/evolution.2.mesh";
   MMG::Mesh topography;
   topography.load(meshfile, IO::FileFormat::MEDIT);
 
   MMG::MeshOptimizer().setHausdorff(20).setHMax(200).optimize(topography);
-  topography.save("optimize.mesh");
+  topography.save("optimize.mesh", IO::FileFormat::MEDIT);
 
   Environment::VegetalStratum stratum;
 
@@ -381,7 +367,6 @@ int main()
 
     environment.step(60.0);
     topography.save("out/evolution." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
-    topography.save("woof.mesh", IO::FileFormat::MEDIT);
     // environment.getFlame().getDirection().save("direction.gf");
   }
 
