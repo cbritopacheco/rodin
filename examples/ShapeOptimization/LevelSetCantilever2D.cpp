@@ -156,5 +156,5 @@ double compliance(GridFunction<H1<Context::Serial>>& w)
      + Integral(
          mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
   return bf(w, w);
-};
+}
 
