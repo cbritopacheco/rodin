@@ -66,6 +66,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
+      - name: actions/setup-python#577
+        run: |
+          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
       - name: Install dependencies
         run: >-
           brew update  && brew install
