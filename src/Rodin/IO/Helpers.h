@@ -7,6 +7,7 @@
 #ifndef RODIN_IO_HELPERS_H
 #define RODIN_IO_HELPERS_H
 
+#include <map>
 #include <ostream>
 #include <boost/bimap.hpp>
 
