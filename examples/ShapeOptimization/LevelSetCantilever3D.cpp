@@ -120,10 +120,13 @@ int main(int, char**)
     elasticity.solve(solver);
 
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto e = 0.5 * (Jacobian(uInt.getSolution()) + Jacobian(uInt.getSolution()).T());
+    auto jac = Jacobian(uInt.getSolution());
+    jac.traceOf(Interior);
+
+    auto e = 0.5 * (jac + jac.T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-    auto n = -Normal(d); // Bug: For some reason orientation does not match up
-                         // with that of the 2D case.
+    auto n = Normal(d);
+    n.traceOf(Interior);
 
     // Hilbert extension-regularization procedure
     double alpha = elementStep * hmax;
