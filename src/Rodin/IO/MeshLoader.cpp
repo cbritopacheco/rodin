@@ -324,7 +324,7 @@ namespace Rodin::IO
                   {
                      case 2: // Planar mesh
                      {
-                        mesh.boundary(
+                        mesh.face(
                               Geometry::Type::Segment,
                               {v1 - 1, v2 - 1},
                               ref == 0 ? 128 : ref); // Zero-reference is
@@ -335,7 +335,7 @@ namespace Rodin::IO
                      {
                         if (isSurfaceMesh)
                         {
-                           mesh.boundary(
+                           mesh.face(
                                  Geometry::Type::Segment,
                                  {v1 - 1, v2 - 1},
                                  ref == 0 ? 128 : ref); // Zero-reference is
@@ -382,7 +382,7 @@ namespace Rodin::IO
                         }
                         else
                         {
-                           mesh.boundary(
+                           mesh.face(
                               Geometry::Type::Triangle,
                               {v1 - 1, v2 - 1, v3 - 1}, ref);
                         }

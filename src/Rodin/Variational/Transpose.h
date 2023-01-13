@@ -48,13 +48,11 @@ namespace Rodin::Variational
             return m_matrix->getRangeShape().transpose();
          }
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            m_matrix->getValue(value, trans, ip);
-            value.Transpose();
+            FunctionValue::Matrix m = m_matrix->getValue(p).matrix();
+            m.Transpose();
+            return FunctionValue(std::move(m));
          }
 
          Transpose* copy() const noexcept override
@@ -102,21 +100,18 @@ namespace Rodin::Variational
             return m_shape->getRows();
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
-            return m_shape->getDOFs(fe, trans);
+            return m_shape->getDOFs(element);
          }
 
          void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& comp) const override
+               ShapeComputator& compute,
+               const Geometry::Point& p) const override
          {
-            m_shape->getOperator(op, fe, trans, ip, comp);
+            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
+            m_shape->getOperator(op, compute, p);
             op.transpose();
          }
 

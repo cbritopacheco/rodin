@@ -84,7 +84,7 @@ int main(int, char**)
     TrialFunction g(Vh);
     TestFunction  w(Vh);
 
-    auto e = 0.5 * (Jacobian(u.getGridFunction()) + Jacobian(u.getGridFunction()).T());
+    auto e = 0.5 * (Jacobian(u.getSolution()) + Jacobian(u.getSolution()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = Normal(d);
 
@@ -96,14 +96,14 @@ int main(int, char**)
     hilbert.solve(solver);
 
     // Update objective
-    obj.push_back(compliance(u.getGridFunction()) + ell * Omega.getVolume());
+    obj.push_back(compliance(u.getSolution()) + ell * Omega.getVolume());
 
     Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
 
     // Make the displacement
-    double dt = Omega.getMaximumDisplacement(g.getGridFunction());
-    g.getGridFunction() *= hmax * dt;
-    Omega.displace(g.getGridFunction());
+    double dt = Omega.getMaximumDisplacement(g.getSolution());
+    g.getSolution() *= hmax * dt;
+    Omega.displace(g.getSolution());
 
     // Refine the mesh using MMG
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);

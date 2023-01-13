@@ -10,7 +10,12 @@ set(Rodin_HEADERS
 
 # ---- Set compile options for all the submodules ----------------------------
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(LANG CXX OPTIONS -w -O3)
+  rodin_add_compile_options(
+    LANG CXX
+    OPTIONS
+    -w
+    -O3
+    -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG CXX
@@ -26,7 +31,9 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
     -Wno-error=pedantic
+    -Wno-error=sign-compare
     -Wno-error=cast-function-type
+    -Wno-error=deprecated-declarations
     -Wno-error=zero-as-null-pointer-constant)
 endif()
 

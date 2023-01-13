@@ -116,22 +116,10 @@ class Environment
               return Math::Constants::pi<double>() / 2.0 - angle;
             };
 
-          Solver::UMFPack solver;
-
-          TrialFunction d(m_env.m_vfes);
-          TestFunction  v(m_env.m_vfes);
-
           Grad gdist(m_env.m_fireDist);
           gdist.traceOf(Terrain::Vegetation);
 
-          double lambda = 100;
-          Problem cnd(d, v);
-          cnd = Integral(lambda * Jacobian(d), Jacobian(v))
-              + Integral(d, v)
-              - Integral(gdist, v);
-          cnd.solve(solver);
-
-          const auto conormal = d.getGridFunction() / Frobenius(d.getGridFunction());
+          const auto conormal = gdist / Frobenius(gdist);
 
           // Angle between slope and conormal
           auto phi =
@@ -190,6 +178,7 @@ class Environment
 
           GridFunction disp(m_env.m_vfes);
           disp = ScalarFunction(R) * conormal;
+
           m_direction = std::move(disp);
           return *this;
         }
@@ -232,7 +221,7 @@ class Environment
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
       m_topography = MMG::ImplicitDomainMesher().setHMax(200)
-                                                .setHausdorff(30)
+                                                .setHausdorff(20)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
@@ -240,6 +229,9 @@ class Environment
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
                                                 .setBoundaryReference(Terrain::Fire)
                                                 .discretize(m_fireDist);
+
+      // MMG::MeshOptimizer().setAngleDetection(false).setHausdorff(10).setHMax(20)
+      //   .optimize(m_topography);
 
       // Rebuild finite element spaces with new topography
       m_sfes = FES(m_topography);
@@ -318,12 +310,13 @@ int main()
   // std::cout << "exiting" << std::endl;
   // std::exit(1);
 
-  const char* meshfile = "implicit.mesh";
+  // const char* meshfile = "topography.mesh";
+  const char* meshfile = "out/evolution.2.mesh";
   MMG::Mesh topography;
   topography.load(meshfile, IO::FileFormat::MEDIT);
 
-  // MMG::MeshOptimizer().setHausdorff(50).setHMax(500).optimize(topography);
-  // topography.save("optimize.mesh");
+  MMG::MeshOptimizer().setHausdorff(20).setHMax(200).optimize(topography);
+  topography.save("optimize.mesh", IO::FileFormat::MEDIT);
 
   Environment::VegetalStratum stratum;
 
@@ -374,7 +367,6 @@ int main()
 
     environment.step(60.0);
     topography.save("out/evolution." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
-    topography.save("woof.mesh", IO::FileFormat::MEDIT);
     // environment.getFlame().getDirection().save("direction.gf");
   }
 

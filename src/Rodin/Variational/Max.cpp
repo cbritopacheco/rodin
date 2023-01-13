@@ -46,24 +46,12 @@ namespace Rodin::Variational
         m_b(std::move(other.m_b))
    {}
 
-   Max& Max::traceOf(const std::set<int>& attrs)
+   Max& Max::traceOf(Geometry::Attribute attrs)
    {
       ScalarFunctionBase::traceOf(attrs);
       m_a->traceOf(attrs);
       m_b->traceOf(attrs);
       return *this;
-   }
-
-   double Max::getValue(
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix a;
-      m_a->getValue(a, trans, ip);
-
-      mfem::DenseMatrix b;
-      m_b->getValue(b, trans, ip);
-      return std::max(a(0, 0), b(0, 0));
    }
 
    Max* Max::copy() const noexcept

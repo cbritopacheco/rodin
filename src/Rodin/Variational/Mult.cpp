@@ -45,35 +45,12 @@ namespace Rodin::Variational
    }
 
    Mult<FunctionBase, FunctionBase>&
-   Mult<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Mult<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attr)
    {
-      FunctionBase::traceOf(attrs);
-      m_lhs->traceOf(attrs);
-      m_rhs->traceOf(attrs);
+      FunctionBase::traceOf(attr);
+      m_lhs->traceOf(attr);
+      m_rhs->traceOf(attr);
       return *this;
-   }
-
-   void Mult<FunctionBase, FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      double s;
-      if (m_lhs->getRangeType() == RangeType::Scalar)
-      {
-         mfem::DenseMatrix tmp;
-         m_lhs->getValue(tmp, trans, ip);
-         s = tmp(0, 0);
-         m_rhs->getValue(value, trans, ip);
-      }
-      else
-      {
-         mfem::DenseMatrix tmp;
-         m_rhs->getValue(tmp, trans, ip);
-         s = tmp(0, 0);
-         m_lhs->getValue(value, trans, ip);
-      }
-      value *= s;
    }
 
    Mult<FunctionBase, FunctionBase>

@@ -104,7 +104,7 @@ int main(int, char**)
     state.solve(solver);
 
     // Adjoint equation
-    auto dj = -u.getGridFunction() / Omega.getVolume();
+    auto dj = -u.getSolution() / Omega.getVolume();
     Alert::Info() << "    | Solving adjoint equation." << Alert::Raise;
     TrialFunction p(Vh);
     TestFunction  q(Vh);
@@ -114,7 +114,7 @@ int main(int, char**)
             - Integral(dj, q);
     adjoint.solve(solver);
 
-    double objective = J(u.getGridFunction());
+    double objective = J(u.getSolution());
     Alert::Info() << "    | Objective: " << objective
                   << Alert::Raise;
     fObj << objective << "\n";
@@ -122,10 +122,10 @@ int main(int, char**)
 
     // Transfer the functions to the surfacic spaces
     GridFunction uS(VhS), pS(VhS);
-    u.getGridFunction().transfer(uS);
-    p.getGridFunction().transfer(pS);
+    u.getSolution().transfer(uS);
+    p.getSolution().transfer(pS);
 
-    u.getGridFunction().save("u.gf");
+    u.getSolution().save("u.gf");
     Omega.save("u.mesh");
 
     // Compute the shape gradient
@@ -152,7 +152,7 @@ int main(int, char**)
 
       // Compute the topological sensitivity
       GridFunction topo(Vh);
-      topo = M_PI * u.getGridFunction() * p.getGridFunction();
+      topo = M_PI * u.getSolution() * p.getSolution();
 
       // Geodesic distance
       auto gd = [&](const Point& x, const Point& c)
@@ -171,7 +171,7 @@ int main(int, char**)
           auto it = std::min_element(cs.begin(), cs.end(),
               [&](const Point& lhs, const Point& rhs) -> bool
               {
-                return topo(lhs) < topo(rhs);
+                return topo(lhs).scalar() < topo(rhs).scalar();
               });
 
           auto holes = ScalarFunction(
@@ -221,7 +221,7 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
            - BoundaryIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
   conormal.solve(solver);
 
-  const auto& cnd = d.getGridFunction();
+  const auto& cnd = d.getSolution();
   const auto cn = cnd / Pow(cnd.x() * cnd.x() + cnd.y() * cnd.y() + cnd.z() * cnd.z(), 0.5);
 
   TrialFunction g(vecFes);
@@ -232,6 +232,6 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
           - BoundaryIntegral(expr * cn, v).over(SigmaD);
   hilbert.solve(solver);
 
-  return g.getGridFunction();
+  return g.getSolution();
 }
 

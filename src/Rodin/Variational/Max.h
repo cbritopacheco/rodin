@@ -31,11 +31,12 @@ namespace Rodin::Variational
 
          Max(Max&& other);
 
-         Max& traceOf(const std::set<int>& attrs) override;
+         Max& traceOf(Geometry::Attribute attrs) override;
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            return std::max(m_a->getValue(p).scalar(), m_b->getValue(p).scalar());
+         }
 
          Max* copy() const noexcept override;
 

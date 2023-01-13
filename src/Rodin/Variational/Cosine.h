@@ -47,20 +47,16 @@ namespace Rodin::Variational
                m_v(std::move(other.m_v))
          {}
 
-         Cosine& traceOf(const std::set<int>& attrs) override
+         Cosine& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_v->traceOf(attrs);
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix s;
-            m_v->getValue(s, trans, ip);
-            return Math::cos(s(0, 0));
+            return Math::cos(m_v->getValue(p).scalar());
          }
 
          Cosine* copy() const noexcept override

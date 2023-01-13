@@ -78,12 +78,12 @@ int main(int, char**)
             + Integral(g, w)
             - Integral(
                 ell + 3 * (hmax - hmin) * Pow(gamma, 2) *
-                  Dot(Grad(u.getGridFunction()), Grad(p.getGridFunction())), w)
+                  Dot(Grad(u.getSolution()), Grad(p.getSolution())), w)
             + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
     hilbert.solve(solver);
 
     GridFunction step(Ph);
-    step = mu * g.getGridFunction();
+    step = mu * g.getSolution();
 
     gamma -= step;
     gamma = Min(1.0, Max(0.0, gamma));

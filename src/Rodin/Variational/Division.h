@@ -35,12 +35,14 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         Division& traceOf(const std::set<int>& attrs) override;
+         Division& traceOf(Geometry::Attribute attr) override;
 
-         void getValue(
-            mfem::DenseMatrix& value,
-            mfem::ElementTransformation& trans,
-            const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            auto v = m_lhs->getValue(p);
+            v /= m_rhs->getValue(p).scalar();
+            return v;
+         }
 
          Division* copy() const noexcept override
          {

@@ -34,18 +34,9 @@ namespace Rodin::Variational
 
          virtual ~BooleanFunctionBase() = default;
 
-         bool operator()(const Geometry::Point& v) const
+         FunctionValue::Boolean operator()(const Geometry::Point& p) const
          {
-            return getValue(v.getElementTransformation(), v.getIntegrationPoint());
-         }
-
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            value.SetSize(1, 1);
-            value(0, 0) = getValue(trans, ip);
+            return getValue(p);
          }
 
          RangeShape getRangeShape() const override
@@ -58,10 +49,6 @@ namespace Rodin::Variational
             return RangeType::Scalar;
          }
 
-         virtual bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const = 0;
-
          virtual BooleanFunctionBase* copy() const noexcept override = 0;
    };
 
@@ -69,10 +56,10 @@ namespace Rodin::Variational
     * @ingroup BooleanFunctionSpecializations
     */
    template <>
-   class BooleanFunction<bool> : public BooleanFunctionBase
+   class BooleanFunction<FunctionValue::Boolean> : public BooleanFunctionBase
    {
       public:
-         BooleanFunction(bool v)
+         BooleanFunction(FunctionValue::Boolean v)
             : m_v(v)
          {}
 
@@ -86,9 +73,7 @@ namespace Rodin::Variational
               m_v(other.m_v)
          {}
 
-         bool getValue(
-               mfem::ElementTransformation&,
-               const mfem::IntegrationPoint&) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
             return m_v;
          }
@@ -99,9 +84,9 @@ namespace Rodin::Variational
          }
 
       private:
-         bool m_v;
+         FunctionValue::Boolean m_v;
    };
-   BooleanFunction(bool) -> BooleanFunction<bool>;
+   BooleanFunction(FunctionValue::Boolean) -> BooleanFunction<FunctionValue::Boolean>;
 }
 
 #endif

@@ -57,15 +57,10 @@ namespace Rodin::Variational
               m_u(other.m_u)
          {}
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::Vector grad;
-            m_u.getHandle().GetGradient(
-                  FunctionBase::getTraceElementTrans(
-                     FunctionBase::getSubMeshElementTrans(
-                        m_u.getFiniteElementSpace().getMesh(), trans, ip), ip), grad);
+            assert(false);
+            FunctionValue::Vector grad;
             return grad(m_direction);
          }
 

@@ -23,44 +23,30 @@ namespace Rodin::FormLanguage
          using reference = T&;
          using const_reference = const T&;
 
-         class iterator
+         class Iterator
          {
             using internal_iterator = typename std::vector<std::unique_ptr<T>>::iterator;
-
             public:
-               explicit constexpr iterator(internal_iterator it) : m_it(it) {}
-               constexpr iterator& operator++()
-               { m_it++; return *this; }
-               constexpr iterator operator++(int)
-               { iterator r = *this; ++(*this); return r; }
-               constexpr bool operator==(iterator other) const
-               { return m_it == other.m_it; }
-               constexpr bool operator!=(iterator other) const
-               { return !(*this == other); }
-               constexpr reference operator*() const
-               { assert(*m_it); return static_cast<reference>(**m_it); }
-
+               explicit constexpr Iterator(internal_iterator it) : m_it(it) {}
+               constexpr Iterator& operator++() { m_it++; return *this; }
+               constexpr Iterator operator++(int) { Iterator r = *this; ++(*this); return r; }
+               constexpr bool operator==(const Iterator& other) const { return m_it == other.m_it; }
+               constexpr bool operator!=(const Iterator& other) const { return !(*this == other); }
+               constexpr reference operator*() const { assert(*m_it); return static_cast<reference>(**m_it); }
             private:
                internal_iterator m_it;
          };
 
-         class const_iterator
+         class ConstIterator
          {
             using internal_const_iterator = typename std::vector<std::unique_ptr<T>>::const_iterator;
-
             public:
-               explicit constexpr const_iterator(internal_const_iterator it) : m_it(it) {}
-               constexpr const_iterator& operator++()
-               { m_it++; return *this; }
-               constexpr const_iterator operator++(int)
-               { const_iterator r = *this; ++(*this); return r; }
-               constexpr bool operator==(const_iterator other) const
-               { return m_it == other.m_it; }
-               constexpr bool operator!=(const_iterator other) const
-               { return !(*this == other); }
-               constexpr const_reference operator*() const
-               { assert(*m_it); return static_cast<const_reference>(**m_it); }
-
+               explicit constexpr ConstIterator(internal_const_iterator it) : m_it(it) {}
+               constexpr ConstIterator& operator++() { m_it++; return *this; }
+               constexpr ConstIterator operator++(int) { ConstIterator r = *this; ++(*this); return r; }
+               constexpr bool operator==(const ConstIterator& other) const { return m_it == other.m_it; }
+               constexpr bool operator!=(const ConstIterator& other) const { return !(*this == other); }
+               constexpr const_reference operator*() const { assert(*m_it); return static_cast<const_reference>(**m_it); }
             private:
                internal_const_iterator m_it;
          };
@@ -99,6 +85,16 @@ namespace Rodin::FormLanguage
             return *this;
          }
 
+         constexpr reference at(size_t i)
+         {
+            return *m_list.at(i);
+         }
+
+         constexpr const_reference at(size_t i) const
+         {
+            return *m_list.at(i);
+         }
+
          constexpr List& add(const T& v)
          {
             m_list.emplace_back(v.copy());
@@ -124,34 +120,34 @@ namespace Rodin::FormLanguage
             return m_list.size();
          }
 
-         constexpr iterator begin() noexcept
+         constexpr Iterator begin() noexcept
          {
-            return iterator(m_list.begin());
+            return Iterator(m_list.begin());
          }
 
-         constexpr iterator end() noexcept
+         constexpr Iterator end() noexcept
          {
-            return iterator(m_list.end());
+            return Iterator(m_list.end());
          }
 
-         constexpr const_iterator begin() const noexcept
+         constexpr ConstIterator begin() const noexcept
          {
-            return const_iterator(m_list.begin());
+            return ConstIterator(m_list.begin());
          }
 
-         constexpr const_iterator end() const noexcept
+         constexpr ConstIterator end() const noexcept
          {
-            return const_iterator(m_list.end());
+            return ConstIterator(m_list.end());
          }
 
-         constexpr const_iterator cbegin() const noexcept
+         constexpr ConstIterator cbegin() const noexcept
          {
-            return const_iterator(m_list.cbegin());
+            return ConstIterator(m_list.cbegin());
          }
 
-         constexpr const_iterator cend() const noexcept
+         constexpr ConstIterator cend() const noexcept
          {
-            return const_iterator(m_list.cend());
+            return ConstIterator(m_list.cend());
          }
 
          virtual List* copy() const noexcept override

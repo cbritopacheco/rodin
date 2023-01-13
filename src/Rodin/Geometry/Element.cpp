@@ -3,106 +3,160 @@
 
 namespace Rodin::Geometry
 {
-   // ---- ElementBase -------------------------------------------------------
-   std::vector<int> ElementBase::getVertices() const
+   bool operator<(const Simplex& lhs, const Simplex& rhs)
    {
-      mfem::Array<int> vs;
-      m_element->GetVertices(vs);
-      return std::vector<int>(vs.begin(), vs.end());
+      return lhs.getIndex() < rhs.getIndex();
    }
 
-   int ElementBase::getAttribute() const
+   // ---- Simplex -----------------------------------------------------------
+   Type Simplex::getGeometry() const
    {
-      return m_element->GetAttribute();
+      return static_cast<Type>(m_data.element->GetType());
    }
 
-   // ---- Element -----------------------------------------------------------
-   std::set<int> Element::adjacent() const
+   Attribute Simplex::getAttribute() const
    {
-      std::set<int> res;
-      // This call does not actually modify the Element object. Only the Mesh
-      // object. Hence we const_cast to access the ElementToElementTable table
-      // method.
-      const auto& adj = const_cast<MeshBase&>(getMesh()).getHandle().ElementToElementTable();
-      const int* elements = adj.GetRow(getIndex());
-      for (int i = 0; i < adj.RowSize(getIndex()); i++)
-         res.insert(elements[i]);
+      return m_data.element->GetAttribute();
+   }
+
+   mfem::ElementTransformation& Simplex::getTransformation() const
+   {
+      return *m_data.trans;
+   }
+
+   std::vector<Geometry::Point> Simplex::getIntegrationRule(int order) const
+   {
+      const mfem::IntegrationRule* ir =
+         &mfem::IntRules.Get(getTransformation().GetGeometryType(), order);
+      std::vector<Geometry::Point> res;
+      res.reserve(ir->GetNPoints());
+      for (int i = 0; i < ir->GetNPoints(); i++)
+         res.emplace_back(*this, ir->IntPoint(i));
       return res;
    }
 
-   double Element::getVolume() const
+   double Simplex::getVolume() const
    {
-      mfem::ElementTransformation *et = const_cast<MeshBase&>(getMesh()
-            ).getHandle().GetElementTransformation(getIndex());
-      const mfem::IntegrationRule &ir = mfem::IntRules.Get(
-            getHandle().GetGeometryType(), et->OrderJ());
+      mfem::ElementTransformation& trans = getTransformation();
+      const mfem::IntegrationRule& ir =
+         mfem::IntRules.Get(static_cast<int>(getGeometry()), trans.OrderJ());
       double volume = 0.0;
       for (int j = 0; j < ir.GetNPoints(); j++)
       {
          const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-         et->SetIntPoint(&ip);
-         volume += ip.weight * et->Weight();
+         trans.SetIntPoint(&ip);
+         volume += ip.weight * trans.Weight();
       }
       return volume;
    }
 
-   // ---- ElementView -------------------------------------------------------
-   ElementView& ElementView::setAttribute(int attr)
+   // VertexIterator Simplex::getVertices() const
+   // {
+   //    // mfem::Array<int> vs;
+   //    // m_data.element->GetVertices(vs);
+   //    // return std::vector<int>(vs.begin(), vs.end());
+   //    assert(false);
+   // }
+
+   // ---- Element -----------------------------------------------------------
+   Element::Element(Index index, const MeshBase& mesh, Data data)
+      : Simplex(mesh.getDimension(), index, mesh, std::move(data))
+   {}
+
+   ElementIterator Element::getAdjacent() const
    {
-      getMesh().getHandle().SetAttribute(getIndex(), attr);
-      return *this;
+      assert(false);
+      return ElementIterator(getMesh(), EmptyIndexGenerator());
    }
 
    // ---- Face --------------------------------------------------------------
-   double Face::getArea() const
+   Face::Face(Index index, const MeshBase& mesh, Data data)
+      : Simplex(mesh.getDimension() - 1, index, mesh, std::move(data)),
+        m_isBoundary(mesh.isBoundary(index)),
+        m_isInterface(mesh.isInterface(index))
+   {}
+
+   bool Face::isBoundary() const
    {
-      mfem::ElementTransformation *et = const_cast<MeshBase&>(getMesh()
-            ).getHandle().GetFaceTransformation(getIndex());
-      const mfem::IntegrationRule &ir = mfem::IntRules.Get(
-            getHandle().GetGeometryType(), et->OrderJ());
-      double area = 0.0;
-      for (int j = 0; j < ir.GetNPoints(); j++)
+      return m_isBoundary;
+   }
+
+   bool Face::isInterface() const
+   {
+      return m_isInterface;
+   }
+
+   FaceIterator Face::getAdjacent() const
+   {
+      assert(false);
+      return FaceIterator(getMesh(), EmptyIndexGenerator());
+   }
+
+   ElementIterator Face::getIncident() const
+   {
+      assert(false);
+      return ElementIterator(getMesh(), EmptyIndexGenerator());
+   }
+
+   // std::set<int> Face::elements() const
+   // {
+   //    int e1 = -1, e2 = -1;
+   //    getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
+   //    if (e1 >= 0 && e2 >= 0)
+   //       return {e1, e2};
+   //    else if (e1 >= 0 && e2 < 0)
+   //       return {e1};
+   //    else if (e1 < 0 && e2 >= 0)
+   //       return {e2};
+   //    else
+   //       return {};
+   // }
+
+   // std::set<Element> Face::getElements() const
+   // {
+   //    int e1 = -1, e2 = -1;
+   //    getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
+   //    if (e1 >= 0 && e2 >= 0)
+   //       return { Element(getMesh(), getMesh().getHandle().GetElement(e1), e1),
+   //                Element(getMesh(), getMesh().getHandle().GetElement(e2), e2) };
+   //    else if (e1 >= 0 && e2 < 0)
+   //       return { Element(getMesh(), getMesh().getHandle().GetElement(e1), e1) };
+   //    else if (e1 < 0 && e2 >= 0)
+   //       return { Element(getMesh(), getMesh().getHandle().GetElement(e2), e2) };
+   //    else
+   //       return {};
+   // }
+
+   // ---- Point -------------------------------------------------------------
+   Point::Point(const Simplex& element, const mfem::IntegrationPoint& ip)
+      : m_element(element), m_ip(ip)
+   {
+      m_element.get().getTransformation().SetIntPoint(&m_ip);
+      m_element.get().getTransformation().Transform(m_ip, m_physical);
+      assert(static_cast<size_t>(m_physical.Size()) == element.getMesh().getSpaceDimension());
+   }
+
+   Point::Point(const Simplex& element, mfem::IntegrationPoint&& ip)
+      : m_element(element), m_ip(std::move(ip))
+   {}
+
+   size_t Point::getDimension(Coordinates coords) const
+   {
+      switch (coords)
       {
-         const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-         et->SetIntPoint(&ip);
-         area += ip.weight * et->Weight();
+         case Coordinates::Physical:
+         {
+            return m_element.get().getMesh().getSpaceDimension();
+         }
+         case Coordinates::Reference:
+         {
+            return m_element.get().getMesh().getDimension();
+         }
+         default:
+         {
+            assert(false);
+            return 0;
+         }
       }
-      return area;
    }
-
-   std::set<int> Face::elements() const
-   {
-      int e1 = -1, e2 = -1;
-      getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
-      if (e1 >= 0 && e2 >= 0)
-         return {e1, e2};
-      else if (e1 >= 0 && e2 < 0)
-         return {e1};
-      else if (e1 < 0 && e2 >= 0)
-         return {e2};
-      else
-         return {};
-   }
-
-   // ---- BoundaryElement ---------------------------------------------------
-   BoundaryElement::BoundaryElement(
-         const MeshBase& mesh, const mfem::Element* element, int index)
-      : Face(mesh, element, mesh.getHandle().GetBdrFace(index)),
-        m_index(index)
-   {}
-
-   // ---- BoundaryElementView -----------------------------------------------
-   BoundaryElementView::BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index)
-      : BoundaryElement(mesh, element, index),
-        m_mesh(mesh),
-        m_element(element)
-   {}
-
-   BoundaryElementView& BoundaryElementView::setAttribute(int attr)
-   {
-      getMesh().getHandle().SetBdrAttribute(getIndex(), attr);
-      return *this;
-   }
-
-   // ---- Vertex ------------------------------------------------------------
 }

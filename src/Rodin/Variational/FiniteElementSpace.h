@@ -38,9 +38,9 @@ namespace Rodin::Variational
          /**
           * @returns Order of the highest dimensional finite element.
           */
-         int getOrder() const;
+         size_t getOrder() const;
 
-         int getNumberOfDofs() const;
+         size_t getNumberOfDofs() const;
 
          /**
           * @brief Gets the vector dimensions
@@ -51,11 +51,19 @@ namespace Rodin::Variational
 
          mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
 
+         virtual int getSize() const = 0;
+
          virtual bool isParallel() const = 0;
 
          virtual Geometry::MeshBase& getMesh() = 0;
 
          virtual const Geometry::MeshBase& getMesh() const = 0;
+
+         virtual mfem::Array<int> getDOFs(
+               const Geometry::Simplex& element) const = 0;
+
+         virtual const mfem::FiniteElement& getFiniteElement(
+               const Geometry::Simplex& element) const = 0;
 
          virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 

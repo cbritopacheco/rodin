@@ -10,7 +10,7 @@
 namespace Rodin::Variational
 {
    // ---- FunctionBase ------------------------------------------------------
-  
+
    UnaryMinus<FunctionBase>::UnaryMinus(const FunctionBase& op)
       :  FunctionBase(op),
          m_op(op.copy())
@@ -25,15 +25,6 @@ namespace Rodin::Variational
       : FunctionBase(std::move(other)),
         m_op(std::move(other.m_op))
    {}
-
-   void UnaryMinus<FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      m_op->getValue(value, trans, ip);
-      value.Neg();
-   }
 
    RangeShape UnaryMinus<FunctionBase>::getRangeShape() const
    {
@@ -61,33 +52,18 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   IntegratorRegion
-   UnaryMinus<LinearFormIntegratorBase>::getIntegratorRegion() const
+   Integrator::Region UnaryMinus<LinearFormIntegratorBase>::getRegion() const
    {
-      return m_op->getIntegratorRegion();
+      return m_op->getRegion();
    }
 
-   bool
-   UnaryMinus<LinearFormIntegratorBase>::isSupported(Linear::Assembly::Type t)
+   mfem::Vector
+   UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Simplex& element)
    const
    {
-      return m_op->isSupported(t);
-   }
-
-   void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Device& as)
-   const
-   {
-      m_op->getElementVector(as);
-      as.vec *= -1.0;
-   }
-
-   void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Common& as)
-   const
-   {
-      m_op->getElementVector(as);
-      as.vec *= -1.0;
+      mfem::Vector vec = m_op->getVector(element);
+      vec *= -1.0;
+      return vec;
    }
 
    UnaryMinus<LinearFormIntegratorBase>
@@ -112,18 +88,19 @@ namespace Rodin::Variational
         m_op(std::move(other.m_op))
    {}
 
-   IntegratorRegion
-   UnaryMinus<BilinearFormIntegratorBase>::getIntegratorRegion() const
+   Integrator::Region
+   UnaryMinus<BilinearFormIntegratorBase>::getRegion() const
    {
-      return m_op->getIntegratorRegion();
+      return m_op->getRegion();
    }
 
-   void
+   mfem::DenseMatrix
    UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(const Bilinear::Assembly::Common& as) const
+   ::getMatrix(const Geometry::Simplex& element) const
    {
-      m_op->getElementMatrix(as);
-      as.mat.Neg();
+      mfem::DenseMatrix op = m_op->getMatrix(element);
+      op.Neg();
+      return op;
    }
 
    UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)

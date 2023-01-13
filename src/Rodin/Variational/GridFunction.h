@@ -43,40 +43,17 @@ namespace Rodin::Variational
     * @see GridFunction
     */
 
-   class GridFunctionBase : public VectorFunctionBase
+   class GridFunctionBase : public FunctionBase
    {
       public:
-         class GridFunctionValue : public FunctionValue
-         {
-            public:
-               constexpr
-               GridFunctionValue(double v)
-                  : FunctionValue(v)
-               {}
-
-               constexpr
-               GridFunctionValue(const mfem::Vector& v)
-                  : FunctionValue(v)
-               {}
-
-               constexpr
-               GridFunctionValue(mfem::Vector&& v)
-                  : FunctionValue(std::move(v))
-               {}
-
-               GridFunctionValue(const GridFunctionValue&) = default;
-
-               GridFunctionValue(GridFunctionValue&&) = default;
-         };
-
          GridFunctionBase() = default;
 
          GridFunctionBase(const GridFunctionBase& other)
-            : VectorFunctionBase(other)
+            : FunctionBase(other)
          {}
 
          GridFunctionBase(GridFunctionBase&& other)
-            : VectorFunctionBase(std::move(other))
+            : FunctionBase(std::move(other))
          {}
 
          GridFunctionBase& operator=(GridFunctionBase&& other)
@@ -86,30 +63,6 @@ namespace Rodin::Variational
          }
 
          GridFunctionBase& operator=(const GridFunctionBase&) = delete;
-
-         GridFunctionValue operator()(const Geometry::Point& v) const
-         {
-            switch (getRangeType())
-            {
-               case RangeType::Scalar:
-               {
-                  mfem::Vector value;
-                  getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
-                  return GridFunctionValue(value(0));
-               }
-               case RangeType::Vector:
-               {
-                  mfem::Vector value;
-                  getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
-                  return GridFunctionValue(std::move(value));
-               }
-               case RangeType::Matrix:
-               {
-                  assert(false);
-                  return 0.0;
-               }
-            }
-         }
 
          /**
           * @brief Searches for the maximum value in the grid function data.
@@ -170,11 +123,6 @@ namespace Rodin::Variational
 
          virtual GridFunctionBase& load(
                const boost::filesystem::path& filename, IO::FileFormat fmt) = 0;
-
-         mfem::Vector& getData()
-         {
-            return getHandle();
-         }
 
          /**
           * @brief Addition of a scalar value.
@@ -251,13 +199,6 @@ namespace Rodin::Variational
           */
          GridFunctionBase& project(const Restriction<FunctionBase>& s);
 
-         /**
-          * @brief Transfers the grid function from one finite element space to
-          * another.
-          * @param[in, out] dst Destination GridFunction for the transfer
-          */
-         void transfer(GridFunctionBase& dst);
-
          std::set<Geometry::Point> where(
                const BooleanFunctionBase& p,
                const std::set<int>& attrs = {},
@@ -269,12 +210,9 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override;
 
-         int getDimension() const override;
+         int getDimension() const;
 
          /**
           * @brief Gets the underlying handle to the mfem::GridFunction object.
@@ -547,7 +485,7 @@ namespace Rodin::Variational
          GridFunction& projectOnBoundary(
                const FunctionBase& s, const std::set<int>& attrs = {})
          {
-            auto va = s.build();
+            auto va = s.build(getFiniteElementSpace().getMesh());
             switch (s.getRangeType())
             {
                case RangeType::Scalar:
@@ -559,7 +497,7 @@ namespace Rodin::Variational
                   if (attrs.size() == 0)
                   {
                      marker = 1;
-                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Scalar>(), marker);
+                     getHandle().ProjectBdrCoefficient(va.template get<RangeType::Scalar>(), marker);
                   }
                   else
                   {
@@ -569,7 +507,7 @@ namespace Rodin::Variational
                         assert(attr - 1 < maxBdrAttr);
                         marker[attr - 1] = 1;
                      }
-                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Scalar>(), marker);
+                     getHandle().ProjectBdrCoefficient(va.template get<RangeType::Scalar>(), marker);
                   }
                   break;
                }
@@ -582,7 +520,7 @@ namespace Rodin::Variational
                   if (attrs.size() == 0)
                   {
                      marker = 1;
-                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Vector>(), marker);
+                     getHandle().ProjectBdrCoefficient(va.template get<RangeType::Vector>(), marker);
                   }
                   else
                   {
@@ -592,7 +530,7 @@ namespace Rodin::Variational
                         assert(attr - 1 < maxBdrAttr);
                         marker[attr - 1] = 1;
                      }
-                     getHandle().ProjectBdrCoefficient(va.get<RangeType::Vector>(), marker);
+                     getHandle().ProjectBdrCoefficient(va.template get<RangeType::Vector>(), marker);
                   }
                   break;
                }
@@ -651,18 +589,29 @@ namespace Rodin::Variational::Internal
    class GridFunctionEvaluator : public VectorFunctionBase
    {
       public:
-         GridFunctionEvaluator(const GridFunctionBase& gf);
+         GridFunctionEvaluator(const GridFunctionBase& gf)
+            : m_gf(gf)
+         {}
 
-         GridFunctionEvaluator(const GridFunctionEvaluator& other);
+         GridFunctionEvaluator(const GridFunctionEvaluator& other)
+            : VectorFunctionBase(other),
+              m_gf(other.m_gf)
+         {}
 
-         GridFunctionEvaluator(GridFunctionEvaluator&& other);
+         GridFunctionEvaluator(GridFunctionEvaluator&& other)
+            : VectorFunctionBase(std::move(other)),
+              m_gf(other.m_gf)
+         {}
 
-         RangeShape getRangeShape() const override;
+         RangeShape getRangeShape() const override
+         {
+            return m_gf.getRangeShape();
+         }
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            return m_gf.getValue(p);
+         }
 
          int getDimension() const override
          {

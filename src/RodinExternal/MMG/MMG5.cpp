@@ -318,8 +318,8 @@ namespace Rodin::External::MMG
 
       if (isSurface) // Use MMGS
       {
-         res->nt = src.count<Geometry::Element>();
-         res->na = src.count<Geometry::BoundaryElement>();
+         res->nt = src.getElementCount();
+         res->na = src.getHandle().GetNBE();
 
          MMGS_Set_commonFunc();
          if (!MMGS_zaldy(res))
@@ -566,7 +566,7 @@ namespace Rodin::External::MMG
             // Add boundary
             for (int i = 1; i <= src->na; i++)
             {
-               dst.boundary(
+               dst.face(
                      Geometry::Type::Segment,
                      { src->edge[i].a - 1, src->edge[i].b - 1 },
                      src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
@@ -599,7 +599,7 @@ namespace Rodin::External::MMG
                // Add boundary
                for (int i = 1; i <= src->na; i++)
                {
-                  dst.boundary(
+                  dst.face(
                         Geometry::Type::Segment,
                         { src->edge[i].a - 1, src->edge[i].b - 1 },
                         src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
@@ -630,7 +630,7 @@ namespace Rodin::External::MMG
 
                for (int i = 1; i <= src->nt; i++)
                {
-                  dst.boundary(
+                  dst.face(
                      Geometry::Type::Triangle,
                      { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1 },
                      src->tria[i].ref);

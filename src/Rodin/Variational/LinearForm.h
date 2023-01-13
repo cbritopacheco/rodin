@@ -21,8 +21,13 @@ namespace Rodin::Variational
    class LinearFormBase : public FormLanguage::Base
    {
       public:
+         using NativeAssembly = Assembly::Native<LinearFormBase>;
+
          constexpr
-         LinearFormBase() = default;
+         LinearFormBase()
+         {
+            m_assembly.reset(new NativeAssembly);
+         }
 
          constexpr
          LinearFormBase(const LinearFormBase& other)
@@ -42,6 +47,18 @@ namespace Rodin::Variational
             return m_lfis;
          }
 
+         LinearFormBase& setAssembly(const Assembly::AssemblyBase<LinearFormBase>& assembly)
+         {
+            m_assembly.reset(assembly.copy());
+            return *this;
+         }
+
+         const Assembly::AssemblyBase<LinearFormBase>& getAssembly() const
+         {
+            assert(m_assembly);
+            return *m_assembly;
+         }
+
          /**
           * @brief Assembles the linear form.
           *
@@ -51,14 +68,6 @@ namespace Rodin::Variational
           * @see getVector()
           */
          virtual void assemble() = 0;
-
-         /**
-          * @brief Updates the state after a refinement in the mesh.
-          *
-          * This method will update the linear form after a call to the
-          * @ref MeshBase::refine() "refine()" method.
-          */
-         virtual LinearFormBase& update() = 0;
 
          /**
           * @brief Gets the reference to the (local) associated vector
@@ -126,7 +135,7 @@ namespace Rodin::Variational
          }
 
          /**
-          * @brief Gets the test function argument associated to this bilinear
+          * @brief Gets the test function argument associated to this linear
           * form.
           */
          virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
@@ -134,6 +143,7 @@ namespace Rodin::Variational
          virtual LinearFormBase* copy() const noexcept override = 0;
 
       private:
+         std::unique_ptr<Assembly::AssemblyBase<LinearFormBase>> m_assembly;
          FormLanguage::List<LinearFormIntegratorBase> m_lfis;
    };
 
@@ -194,15 +204,14 @@ namespace Rodin::Variational
 
          void assemble() override;
 
-         LinearForm& update() override;
-
          /**
           * @brief Gets the reference to the (local) associated vector
           * to the LinearForm.
           */
          VectorType& getVector() override
          {
-            return static_cast<mfem::Vector&>(*m_lf);
+            assert(m_vector);
+            return *m_vector;
          }
 
          /**
@@ -211,7 +220,8 @@ namespace Rodin::Variational
           */
          const VectorType& getVector() const override
          {
-            return static_cast<const mfem::Vector&>(*m_lf);
+            assert(m_vector);
+            return *m_vector;
          }
 
          const TestFunction<FES>& getTestFunction() const override
@@ -240,8 +250,7 @@ namespace Rodin::Variational
 
       private:
          TestFunction<FES>& m_v;
-
-         std::unique_ptr<mfem::LinearForm> m_lf;
+         std::unique_ptr<VectorType> m_vector;
    };
    template <class FES>
    LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, mfem::Vector>;

@@ -7,6 +7,8 @@
 #ifndef RODIN_MESH_FORWARDDECLS_H
 #define RODIN_MESH_FORWARDDECLS_H
 
+#include <utility>
+
 #include "Rodin/Traits.h"
 #include "Rodin/Configure.h"
 
@@ -15,17 +17,38 @@ namespace Rodin
    namespace Context
    {
       struct Serial;
-      struct Parallel;
+      struct MPI;
    }
 }
 
 namespace Rodin::Geometry
 {
+   using Index = std::size_t;
+   using Attribute = std::size_t;
+
+   class IndexGenerator;
+
    enum class Type;
 
-   class MeshBase;
+   class Simplex;
 
-   class MeshBuilder;
+   class Element;
+
+   class Face;
+
+   class Vertex;
+
+   class Point;
+
+   class SimplexIterator;
+
+   class ElementIterator;
+
+   class FaceIterator;
+
+   class VertexIterator;
+
+   class MeshBase;
 
    /**
     * @brief Templated class for Mesh.
@@ -54,19 +77,6 @@ namespace Rodin::Geometry
     */
    template <class Trait>
    class SubMesh;
-
-   class ElementBase;
-
-   class Element;
-   class ElementView;
-
-   class Face;
-   class FaceView;
-
-   class BoundaryElement;
-   class BoundaryElementView;
-
-   class Point;
 }
 
 #endif

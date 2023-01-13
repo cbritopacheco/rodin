@@ -5,58 +5,59 @@
 
 namespace Rodin::Variational
 {
-   void
+   mfem::DenseMatrix
    Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   ::getElementMatrix(const Bilinear::Assembly::Common& as) const
+   ::getMatrix(const Geometry::Simplex& element) const
    {
+      mfem::DenseMatrix mat;
+
       auto& trial = m_prod.getLHS();
       auto& test = m_prod.getRHS();
 
-      as.mat.SetSize(test.getDOFs(as.trial, as.trans), trial.getDOFs(as.test, as.trans));
-      as.mat = 0.0;
+      auto& trans = element.getTransformation();
 
-      const int order = getIntegrationOrder(as);
-      const mfem::IntegrationRule* ir =
-         &mfem::IntRules.Get(as.trans.GetGeometryType(), order);
+      mat.SetSize(test.getDOFs(element), trial.getDOFs(element));
+      mat = 0.0;
+
+      const int order = getIntegrationOrder(
+            trial.getFiniteElementSpace(), test.getFiniteElementSpace(), element);
+
+      mfem::DenseMatrix tmp;
       ShapeComputator shapeCompute;
-      for (int i = 0; i < ir->GetNPoints(); i++)
+      for (const auto& p : element.getIntegrationRule(order))
       {
-         const mfem::IntegrationPoint &ip = ir->IntPoint(i);
-         as.trans.SetIntPoint(&ip);
-         mfem::Add(as.mat,
-               m_prod.getElementMatrix(as.trial, as.test, as.trans, ip, shapeCompute),
-               as.trans.Weight() * ip.weight,
-               as.mat);
+         m_prod.getMatrix(tmp, shapeCompute, p);
+         mfem::Add(mat, tmp, trans.Weight() * trans.GetIntPoint().weight, mat);
       }
+
+      return mat;
    }
 
-   void Integral<ShapeFunctionBase<TestSpace>>::getElementVector(
-         const Linear::Assembly::Common& as) const
+   mfem::Vector Integral<ShapeFunctionBase<TestSpace>>::getVector(
+         const Geometry::Simplex& element) const
    {
-      const mfem::FiniteElement& fe = as.fe;
-      mfem::ElementTransformation& trans = as.trans;
-      mfem::Vector& vec = as.vec;
+      mfem::Vector vec;
 
       auto& test = *m_integrand;
 
+      auto& trans = element.getTransformation();
+
       assert(test.getRangeType() == RangeType::Scalar);
 
-      vec.SetSize(test.getDOFs(fe, trans));
+      vec.SetSize(test.getDOFs(element));
       vec = 0.0;
 
-      const int order = getIntegrationOrder(as);
-      const mfem::IntegrationRule* ir =
-         &mfem::IntRules.Get(trans.GetGeometryType(), order);
+      const int order = getIntegrationOrder(test.getFiniteElementSpace(), element);
 
       ShapeComputator compute;
-      for (int i = 0; i < ir->GetNPoints(); i++)
+      for (const auto& p : element.getIntegrationRule(order))
       {
-         const mfem::IntegrationPoint &ip = ir->IntPoint(i);
-         trans.SetIntPoint(&ip);
          DenseBasisOperator testOp;
-         test.getOperator(testOp, fe, trans, ip, compute);
-         testOp *= trans.Weight() * ip.weight;
+         test.getOperator(testOp, compute, p);
+         testOp *= trans.Weight() * trans.GetIntPoint().weight;
          testOp.addToVector(vec);
       }
+
+      return vec;
    }
 }

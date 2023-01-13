@@ -27,62 +27,6 @@ namespace Rodin::Variational
    };
 
    /**
-    * Enumeration class to indicate whether the integration should be done
-    * either inside the Domain or on the Boundary.
-    */
-   enum class IntegratorRegion
-   {
-      Domain, ///< Perform the integration over the interior domain
-      Boundary ///< Perform the integration over the boundary of the domain
-   };
-
-   /**
-    * @brief Namespace containing utilities for the assembly of LinearForm
-    * objects.
-    */
-   namespace Linear::Assembly
-   {
-      /**
-       * @brief Type of assembly to be performed for LinearForm objects.
-       */
-      enum class Type
-      {
-         Common, ///< Enumerator corresponding to Linear::Assembly::Common
-         Device ///< Enumerator corresponding to Linear::Assembly::Device
-      };
-
-      /**
-       * @brief Struct containg the necessary data to perform a common
-       * assembly.
-       */
-      struct Common;
-
-      /**
-       * @brief Struct containg the necessary data to perform assembly on a
-       * device.
-       */
-      struct Device;
-   }
-
-   /**
-    * @brief Namespace containing utilities for the assembly of BilinearForm
-    * objects.
-    */
-   namespace Bilinear::Assembly
-   {
-      /**
-       * @brief Type of assembly to be performed for BilinearForm objects.
-       */
-      enum class Type;
-
-      /**
-       * @brief Struct containg the necessary data to perform a common
-       * assembly.
-       */
-      struct Common;
-   }
-
-   /**
     * @brief Base class for linear form objects.
     * @tparam VectorType Type of vector which will be assembled
     */
@@ -100,6 +44,8 @@ namespace Rodin::Variational
    template <class FES, class Context, class VectorType>
    class LinearForm;
 
+   class Integrator;
+
    /**
     * @brief Base class for linear form integrators.
     *
@@ -107,16 +53,6 @@ namespace Rodin::Variational
     * element vector for each finite element.
     */
    class LinearFormIntegratorBase;
-
-   /**
-    * @brief Represents linear form integrators over a sub-domain in the mesh.
-    */
-   class LinearFormDomainIntegrator;
-
-   /**
-    * @brief Represents linear form integrators over the boundary of the mesh.
-    */
-   class LinearFormBoundaryIntegrator;
 
    /**
     * @brief Base class for bilinear form objects.
@@ -133,6 +69,15 @@ namespace Rodin::Variational
     * spaces originating from two instances of FiniteElementCollection.
     * @tparam TrialFES Trial FiniteElementCollection
     * @tparam TestFES Test FiniteElementCollection
+    *
+    * An object of type BilinearForm represents a bilinear map:
+    * @f[
+    * \begin{aligned}
+    *    a : U \times V &\rightarrow \mathbb{R}\\
+    *        (u, v) &\mapsto a(u, v)
+    * \end{aligned}
+    * @f]
+    * where @f$ U @f$ and @f$ V @f$ are finite element spaces.
     */
    template <class TrialFES, class TestFES, class Context, class OperatorType>
    class BilinearForm;
@@ -142,11 +87,6 @@ namespace Rodin::Variational
     */
    class BilinearFormIntegratorBase;
 
-   /**
-    * @brief Represents bilinear form integrators over a sub-domain in the mesh.
-    */
-   class BilinearFormDomainIntegrator;
-
    class FiniteElementCollectionBase;
 
    /**
@@ -155,30 +95,34 @@ namespace Rodin::Variational
    class FiniteElementSpaceBase;
 
    /**
-    * @brief Arbitrary order @f$ L^2(\Omega)^d @f$ conforming (continuous) finite
-    * element space.
-    * @tparam Type of context for the finite element space
+    * @brief Arbitrary order @f$ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) @f$
+    * broken Sobolev space.
+    * @tparam Context Type of context for the finite element space
+    *
+    * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
+    * instances of this class will represent the finite element space:
+    * @f[
+    *    H^1(\mathcal{T}_h)^d := \left\{ v \in L^2(\Omega)^d : \forall \tau \in
+    *    \mathcal{T}_h, \ v |_\tau \in H^1 (\tau)^d \right\}
+    * @f]
     */
    template <class Context>
    class L2;
 
    /**
-    * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ conforming (continuous) finite
-    * element space.
-    * @tparam Type of context for the finite element space
+    * @brief Arbitrary order @f$ H^1(\Omega)^d @f$ continuous finite element
+    * space.
+    * @tparam Context Type of context for the finite element space
     *
-    * Given some discretization @f$ \mathcal{T}_h @f$ (e.g. a triangulation)
-    * of @f$ \Omega @f$, instances of this class will represent the finite
-    * element space
+    * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
+    * instances of this class will represent the finite element space:
     * @f[
     *    V_h := \left\{ v : \overline{\Omega} \rightarrow \mathbb{R}^d \mid
-    *       v_{|\tau} \in \mathcal{P}_\tau,
-    *    \ \forall \tau \in \mathcal{T}_h \right\}
+    *    \forall \tau \in \mathcal{T}_h , \ v|_\tau \in \mathcal{P}_\tau
+    *    \right\}
     * @f]
-    * where @f$ \mathcal{P}_\tau \subset H^1(\tau) @f$ and @f$ V_h \subset
-    * C^0(\Omega) @f$ so that @f$ V_h \subset H^1(\Omega)^d @f$, i.e. the
-    * elements are @f$ H^1 @f$ conforming. The space @f$ P_\tau @f$ depends on
-    * the kind of basis chosen.
+    * where @f$ \mathcal{P}_\tau \subset H^1(\tau)^d @f$ such that @f$ V_h \subset
+    * C^0(\Omega)^d @f$.
     *
     */
    template <class Context>
@@ -330,6 +274,12 @@ namespace Rodin::Variational
     */
    template <class T>
    class BooleanFunction;
+
+   template <class Operand>
+   class Jump;
+
+   template <class Operand>
+   class Average;
 
    /**
     * @brief Represents the power function.
@@ -636,6 +586,10 @@ namespace Rodin::Variational
    template <class LHS, class RHS>
    class Composition;
 
+
+   template <class Operand>
+   class TraceOperator;
+
    /**
     * @tparam LHS Type of left hand side operand
     * @tparam RHS Type of right hand side operand
@@ -780,9 +734,15 @@ namespace Rodin::Variational
     *
     * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int \mathrm{Integrand}
+    *    \int_{\mathcal{T}_h} \mathrm{Integrand}
     * @f]
-    * on a volumetric domain.
+    * on a triangulation @f$ \mathcal{T}_h @f$ of a domain @f$ \Omega @f$. The
+    * domain integral is defined as the sum of all members of the
+    * triangulation:
+    * @f[
+    *    \int_{\mathcal{T}_h} \mathrm{Integrand} := \sum_{T \in \mathcal{T}_h}
+    *    \int_T \mathrm{Integrand} \ .
+    * @f]
     *
     * @note For an overview of all the possible specializations of the Integral
     * class, please see @ref IntegralSpecializations.
@@ -792,6 +752,9 @@ namespace Rodin::Variational
    template <class Integrand>
    class Integral;
 
+   template <class Integrand>
+   class FaceIntegral;
+
    /**
     * @brief Represents expressions of the integral operator on the boundary of
     * a domain.
@@ -799,17 +762,65 @@ namespace Rodin::Variational
     *
     * Represents the integral operator with a templated integrand type:
     * @f[
-    *    \int \mathrm{Integrand}
+    *    \int_{\mathcal{B}_h} \mathrm{Integrand}
     * @f]
-    * on the boundary of a volumetric domain.
+    * on the boundary @f$ \mathcal{B}_h @f$ of a triangulation @f$
+    * \mathcal{T}_h @f$ a domain @f$ \Omega @f$ with boundary @f$ \partial
+    * \Omega @f$. The boundary @f$ \mathcal{B}_h @f$ is defined as the union of
+    * the boundary faces:
+    * @f[
+    *    \mathcal{B}_h := \left\{ \partial T \cap \partial \Omega : T \in
+    *    \mathcal{T}_h \right\} \ .
+    * @f]
+    * Then the boundary integral is just the sum of integrals over each member
+    * of the boundary:
+    * @f[
+    *    \int_{\mathcal{B}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{B}_h}
+    *    \int_F \mathrm{Integrand} \ .
+    * @f]
     *
-    * @note For an overview of all the possible specializations of the Integral
-    * class, please see @ref BoundaryIntegralSpecializations.
+    * @note For an overview of all the possible specializations of the
+    * BoundaryIntegral class, please see @ref BoundaryIntegralSpecializations.
     *
     * @see BoundaryIntegralSpecializations
     */
    template <class Integrand>
    class BoundaryIntegral;
+
+   /**
+    * @brief Represents expressions of the integral operator on the interface
+    * of a domain.
+    * @tparam Integrand Type of the integrand
+    *
+    * Represents the integral operator with a templated integrand type:
+    * @f[
+    *    \int_{\mathcal{I}_h} \mathrm{Integrand}
+    * @f]
+    * on the interface @f$ \mathcal{I}_h @f$ of a triangulation @f$
+    * \mathcal{T}_h @f$ of a domain @f$ \Omega @f$. The interface @f$
+    * \mathcal{I}_h @f$ is defined as the union of interfaces between elements:
+    * @f[
+    *    \mathcal{I}_h := \left\{ \partial T_1 \cap \partial T_2 : T_1, T_2 \in
+    *    \mathcal{T}_h \right\} \ .
+    * @f]
+    * Then then the interface integral is just the sum of integrals over each
+    * member of the interface:
+    * @f[
+    *    \int_{\mathcal{I}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{I}_h}
+    *    \int_F \mathrm{Integrand} \ .
+    * @f]
+    *
+    * @note Note that an interface @f$ F \in \mathcal{I}_h @f$ can only be a
+    * face that is interior to the mesh, i.e. it is not part of the boundary.
+    *
+    * @note For an overview of all the possible specializations of the
+    * InterfaceIntegral class, please see @ref
+    * InterfaceIntegralSpecializations.
+    *
+    * @see InterfaceIntegralSpecializations
+    */
+   template <class Integrand>
+   class InterfaceIntegral;
 
    /**
     * @tparam Operand Type of operand
@@ -841,6 +852,18 @@ namespace Rodin::Variational
     */
    template <class ... Parameters>
    class Problem;
+
+   namespace Assembly
+   {
+      template <class Operand>
+      class AssemblyBase;
+
+      template <class Operand>
+      class Native;
+
+      template <class Operand>
+      class OpenMP;
+   }
 }
 
 #endif

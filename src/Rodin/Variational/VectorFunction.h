@@ -62,17 +62,6 @@ namespace Rodin::Variational
 
          virtual ~VectorFunctionBase() = default;
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            mfem::Vector v;
-            getValue(v, trans, ip);
-            value.GetMemory() = std::move(v.GetMemory());
-            value.SetSize(v.Size(), 1);
-         }
-
          RangeShape getRangeShape() const override
          {
             return {getDimension(), 1};
@@ -90,21 +79,9 @@ namespace Rodin::Variational
           */
          virtual Component<FunctionBase> operator()(int i) const;
 
-         /**
-          * @brief Computes the value at the given transformation and
-          * integration point.
-          * @returns Value at given transformation and integration point.
-          */
-         virtual void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const = 0;
-
-         FunctionValue::Vector operator()(const Geometry::Point& v) const
+         FunctionValue::Vector operator()(const Geometry::Point& p) const
          {
-            mfem::Vector value;
-            getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
-            return value;
+            return getValue(p).vector();
          }
 
          /**
@@ -169,14 +146,14 @@ namespace Rodin::Variational
                m_fs(std::move(other.m_fs))
          {}
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
+            FunctionValue::Vector value;
             value.SetSize(static_cast<int>(1 + sizeof...(Values)));
+            assert(m_fs.size() == 1 + sizeof...(Values));
             for (size_t i = 0; i < 1 + sizeof...(Values); i++)
-               value(i) = m_fs[i]->getValue(trans, ip);
+               value(i) = m_fs[i]->getValue(p);
+            return value;
          }
 
          int getDimension() const override
@@ -184,7 +161,7 @@ namespace Rodin::Variational
             return 1 + sizeof...(Values);
          }
 
-         VectorFunction& traceOf(const std::set<int>& attrs) override
+         VectorFunction& traceOf(Geometry::Attribute attrs) override
          {
             VectorFunctionBase::traceOf(attrs);
             for (auto& f : m_fs)
