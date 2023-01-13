@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Geometry::ElementBase class | Rodin</title>
+  <title>Rodin::Variational::TraceOperator&lt;FunctionBase&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,72 +52,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>ElementBase <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>TraceOperator&lt;FunctionBase&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Base class for all geometric elements of the mesh.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a>
-            </dt>
-            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>
-            </dt>
-            <dd>Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a6473c7d827873a20eeaf6121119a30c8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6473c7d827873a20eeaf6121119a30c8" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
-            </dt>
-            <dd>Gets the attribute of the element.</dd>
-            <dt id="a775a932670cf697a44e5a89df24e287c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a775a932670cf697a44e5a89df24e287c" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
-            </dt>
-            <dd>Gets the associated mesh to the element.</dd>
-            <dt id="a1678b8fbb78027fe25fd31e6b4001f0e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1678b8fbb78027fe25fd31e6b4001f0e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
-            </dt>
-            <dd>Gets the index of the element in the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a16a0188ba7087a564462ea245939d976" class="m-doc">adjacent</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;int&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the set of spatially adjacent elements (of the same dimension).</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a16a0188ba7087a564462ea245939d976"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />Geometry::<wbr />ElementBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16a0188ba7087a564462ea245939d976" class="m-doc-self">adjacent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Gets the set of spatially adjacent elements (of the same dimension).</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Set of integer indices corresponding to the spatially adjacent elements of the same dimension.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-        </section>
+        <p><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> operator.</p>
       </div>
     </div>
   </div>
@@ -162,7 +100,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

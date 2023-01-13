@@ -149,10 +149,6 @@ $ u $
               <span class="m-doc-wrap-bumper">void <a href="#a1995c774d971ab0041610829222607a5" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the linear form.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a516cc704d3a336388b3580fb44036883" class="m-doc">update</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Updates the state after a refinement in the mesh.</dd>
             <dt id="ac503d89e47b0d10069d77fa944cd1d6a">
               <span class="m-doc-wrap-bumper">auto <a href="#ac503d89e47b0d10069d77fa944cd1d6a" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -161,6 +157,10 @@ $ u $
               <span class="m-doc-wrap-bumper">auto <a href="#afdb7a31ec34176e93c7a6f90bf444917" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
+            <dt id="a5ca94360b579c7d2c3e501aba1dc497b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5ca94360b579c7d2c3e501aba1dc497b" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the test function argument associated to this linear form.</dd>
           </dl>
         </section>
         <section>
@@ -239,16 +239,6 @@ $ L(u) $
             <p>Assembles the linear form.</p>
 <p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_context_1_1_serial_00_01mfem_1_1_vector_01_4.html#ac503d89e47b0d10069d77fa944cd1d6a" class="m-doc">getVector()</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a516cc704d3a336388b3580fb44036883"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Serial, mfem::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a516cc704d3a336388b3580fb44036883" class="m-doc-self">update</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Updates the state after a refinement in the mesh.</p>
-<p>This method will update the linear form after a call to the refine() method.</p>
-          </div></section>
         </section>
       </div>
     </div>
@@ -294,7 +284,7 @@ $ L(u) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

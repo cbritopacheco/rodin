@@ -55,67 +55,15 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Element <span class="m-thin">class</span>
         </h1>
         <p>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>This class is designed so that modifications cannot be made to the element. If one wishes to modify the element then one must use <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>.</p>
+<p>This class is designed so that modifications cannot be made to the element. If one wishes to modify the element then one must use ElementView.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_element_base.html" class="m-doc">ElementBase</a>
+              class <a href="class_rodin_1_1_geometry_1_1_simplex.html" class="m-doc">Simplex</a>
             </dt>
             <dd>Base class for all geometric elements of the mesh.</dd>
           </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_element_view.html" class="m-doc">ElementView</a>
-            </dt>
-            <dd>Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a8acb34dcba9ba1dcf80f5ee0445e639f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8acb34dcba9ba1dcf80f5ee0445e639f" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
-            </dt>
-            <dd>Computes the volume of the element.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0ec30fe5cba2ed6909da7e5c38cfcf7b" class="m-doc">adjacent</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;int&gt; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the set of spatially adjacent elements (of the same dimension).</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0ec30fe5cba2ed6909da7e5c38cfcf7b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />Geometry::<wbr />Element::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ec30fe5cba2ed6909da7e5c38cfcf7b" class="m-doc-self">adjacent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the set of spatially adjacent elements (of the same dimension).</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Set of integer indices corresponding to the spatially adjacent elements of the same dimension.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>
@@ -161,7 +109,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -82,26 +82,25 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad733c90a1d4a9c81b1f3df087aa08a28" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a638004bc226f0c803e526a797b11642a" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">Geometry::Attribute attr) -&gt; <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Sets which attributes will be interpreted as the domain to trace.</dd>
+            <dd>Sets an attribute which will be interpreted as the domain to trace.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const -&gt; double <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a321a2e83e19c56de811af3b4e5a66d34" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Computes the value at the given transformation and integration point.</dd>
+            <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ad733c90a1d4a9c81b1f3df087aa08a28"><div>
+          <section class="m-doc-details" id="a638004bc226f0c803e526a797b11642a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad733c90a1d4a9c81b1f3df087aa08a28" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const std::set&lt;int&gt;&amp; attrs) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a638004bc226f0c803e526a797b11642a" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">Geometry::Attribute attr) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Sets which attributes will be interpreted as the domain to trace.</p>
+            <p>Sets an attribute which will be interpreted as the domain to trace.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -110,25 +109,16 @@
                 </tr>
               </tfoot>
             </table>
-<p>When integrating along interior boundaries sometimes it is necessary to specify which attributes should be interpreted as the respective &quot;interior&quot; domain, since it is not clear which domain attribute can be used to extend the value continuously up to the boundary. To resolve this ambiguity the trace domain is interpreted as the domain which shall be used to make this continuous extension.</p><aside class="m-note m-info"><h4>Note</h4><p>Setting the trace domain of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance does not guarantee that it will taken into consideration when computing its value. That said, it is up to the subclass to decide how it will use this information which can be obtained via the <a href="class_rodin_1_1_variational_1_1_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a> method.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_function_base.html#a3d346522fa20da0b303cb46cbfb97409" class="m-doc">getTraceDomain()</a></p></aside>
+<p>Convenience function to call traceOf(std::set&lt;int&gt;) with only one attribute.</p>
           </div></section>
-          <section class="m-doc-details" id="a66c9660fd8bb2cfa3325b6fe9f3cd670"><div>
+          <section class="m-doc-details" id="a321a2e83e19c56de811af3b4e5a66d34"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66c9660fd8bb2cfa3325b6fe9f3cd670" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a321a2e83e19c56de811af3b4e5a66d34" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Computes the value at the given transformation and integration point.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Value at given transformation and integration point.</td>
-                </tr>
-              </tfoot>
-            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>It is not necessary to set the size beforehand.</p></aside>
           </div></section>
         </section>
       </div>
@@ -175,7 +165,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

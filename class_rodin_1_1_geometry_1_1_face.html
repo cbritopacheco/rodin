@@ -55,67 +55,15 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Face <span class="m-thin">class</span>
         </h1>
         <p>Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
 <p>This class is designed so that modifications cannot be made to the face.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_element_base.html" class="m-doc">ElementBase</a>
+              class <a href="class_rodin_1_1_geometry_1_1_simplex.html" class="m-doc">Simplex</a>
             </dt>
             <dd>Base class for all geometric elements of the mesh.</dd>
           </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_boundary_element.html" class="m-doc">BoundaryElement</a>
-            </dt>
-            <dd>Class for representing boundary elements in the mesh, i.e. face elements which are at the boundary.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aaf972ce3158675e1ceb9fb8f94b27cce" class="m-doc">adjacent</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;int&gt; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the set of spatially adjacent elements (of the same dimension).</dd>
-            <dt id="a2bdb101059f665944bf06fc38eb2db50">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2bdb101059f665944bf06fc38eb2db50" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
-            </dt>
-            <dd>Gets the area of the face element.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aaf972ce3158675e1ceb9fb8f94b27cce"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;int&gt; Rodin::<wbr />Geometry::<wbr />Face::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf972ce3158675e1ceb9fb8f94b27cce" class="m-doc-self">adjacent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the set of spatially adjacent elements (of the same dimension).</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Set of integer indices corresponding to the spatially adjacent elements of the same dimension.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>
@@ -161,7 +109,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

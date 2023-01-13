@@ -133,7 +133,15 @@ $ v $
             </dt>
             <dd></dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad78a22705a3bcc5751d1450752864661" class="m-doc">getMassVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab536a0fd8a4c1b4a1dacb50084f90c95" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) -&gt; OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aceb5587e660e462d282316057c3f625c" class="m-doc">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const OperatorType&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
           </dl>
@@ -202,6 +210,23 @@ $ v $
             </table>
 <p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_1_seri1e30180ba4058399899fdded4998fe53.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
           </div></section>
+          <section class="m-doc-details" id="ad78a22705a3bcc5751d1450752864661"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const VectorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Context::<wbr />Serial, mfem::<wbr />SparseMatrix, mfem::<wbr />Vector&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad78a22705a3bcc5751d1450752864661" class="m-doc-self">getMassVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the mfem::Vector representing the mass vector, i.e. the RHS of the weak formulation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_1_seri1e30180ba4058399899fdded4998fe53.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
           <section class="m-doc-details" id="ab536a0fd8a4c1b4a1dacb50084f90c95"><div>
             <h3>
               <div class="m-doc-template">
@@ -214,6 +239,23 @@ $ v $
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Reference to the mfem::Operator representing the stiffness matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This must be called only after <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_1_seri1e30180ba4058399899fdded4998fe53.html#a1995c774d971ab0041610829222607a5" class="m-doc">assemble()</a> has been called.</p>
+          </div></section>
+          <section class="m-doc-details" id="aceb5587e660e462d282316057c3f625c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const OperatorType&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;TrialFES, TestFES, Context::<wbr />Serial, mfem::<wbr />SparseMatrix, mfem::<wbr />Vector&gt;&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aceb5587e660e462d282316057c3f625c" class="m-doc-self">getStiffnessOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Constant reference to the mfem::Operator representing the stiffness matrix, i.e. the LHS of the weak formulation.</td>
                 </tr>
               </tfoot>
             </table>
@@ -264,7 +306,7 @@ $ v $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

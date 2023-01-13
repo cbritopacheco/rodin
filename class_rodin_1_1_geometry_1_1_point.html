@@ -67,12 +67,12 @@
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> represents the physical coordinates (as opposed to reference coordinates) of a point on the mesh. This class differs from a Vertex in the sense that a Vertex is a node of some element of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>. In contrast, a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> represents any coordinates contained in the <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</p>
+<p>A <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> represents the physical coordinates (as opposed to reference coordinates) of a point on the mesh. This class differs from a <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> in the sense that a <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> is a node of some element of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>. In contrast, a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> represents any coordinates contained in the <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#abcd20dff78eea8b57f0ed4b05b0f71f7" class="m-doc">Point</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              <span class="m-doc-wrap-bumper"><a href="#ac370d88f5d966c4aab5bd94d16a063b0" class="m-doc">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_simplex.html" class="m-doc">Simplex</a>&amp; simplex,
               const mfem::IntegrationPoint&amp; ip)</span>
             </dt>
             <dd>Constructs the <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> object from reference coordinates.</dd>
@@ -82,15 +82,16 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac38f5f57c32771d1461008d3622aa137" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const -&gt; size_t</span>
             </dt>
             <dd>Gets the space dimension of the physical coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a20a96231b8aad4e3a5b3f93dbdcdebb3" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">int i) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adaeed66f03908fde1a7ef85a42b973c5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">int i,
+              Coordinates coords = Coordinates::Physical) const -&gt; double</span>
             </dt>
             <dd>Gets the i-th physical coordinate.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a833e1cf314b7b7a5537b2b6a56fee6a5" class="m-doc">x</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4741fe361131913b145c32a98f6b3883" class="m-doc">x</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const -&gt; double</span>
             </dt>
             <dd>Gets the <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
@@ -104,7 +105,7 @@ $ x $
 </g>
 </svg> physical coordinate.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aca424ddaf2902c1cde483f37813d4278" class="m-doc">y</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2715c4f82f37e80f7f6943400f06b3d" class="m-doc">y</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const -&gt; double</span>
             </dt>
             <dd>Gets the <svg class="m-math" style="width: 0.639em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.136656 7.47198">
 <title>
@@ -118,7 +119,7 @@ $ y $
 </g>
 </svg> physical coordinate.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae7bc7213001e326be4d4eb2d8a035c34" class="m-doc">z</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a9d6bf0eac674bda15cb7f64f56ccb0" class="m-doc">z</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const -&gt; double</span>
             </dt>
             <dd>Gets the <svg class="m-math" style="width: 0.622em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.970618 5.147373">
 <title>
@@ -139,9 +140,9 @@ $ z $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="abcd20dff78eea8b57f0ed4b05b0f71f7"><div>
+          <section class="m-doc-details" id="ac370d88f5d966c4aab5bd94d16a063b0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abcd20dff78eea8b57f0ed4b05b0f71f7" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">mfem::ElementTransformation&amp; trans,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac370d88f5d966c4aab5bd94d16a063b0" class="m-doc-self">Point</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_simplex.html" class="m-doc">Simplex</a>&amp; simplex,
               const mfem::IntegrationPoint&amp; ip)</span></span>
             </h3>
             <p>Constructs the <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> object from reference coordinates.</p>
@@ -151,8 +152,8 @@ $ z $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">trans&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a> transformation</td>
+                  <td style="width: 1%">simplex&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_simplex.html" class="m-doc">Simplex</a> to which point belongs to</td>
                 </tr>
                 <tr>
                   <td>ip&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -161,9 +162,9 @@ $ z $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aecaa5edd74849d7bba186884422c089a"><div>
+          <section class="m-doc-details" id="ac38f5f57c32771d1461008d3622aa137"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecaa5edd74849d7bba186884422c089a" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac38f5f57c32771d1461008d3622aa137" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const</span></span>
             </h3>
             <p>Gets the space dimension of the physical coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -175,9 +176,10 @@ $ z $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a20a96231b8aad4e3a5b3f93dbdcdebb3"><div>
+          <section class="m-doc-details" id="adaeed66f03908fde1a7ef85a42b973c5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20a96231b8aad4e3a5b3f93dbdcdebb3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">int i) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adaeed66f03908fde1a7ef85a42b973c5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">int i,
+              Coordinates coords = Coordinates::Physical) const</span></span>
             </h3>
             <p>Gets the i-th physical coordinate.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -189,9 +191,9 @@ $ z $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a833e1cf314b7b7a5537b2b6a56fee6a5"><div>
+          <section class="m-doc-details" id="a4741fe361131913b145c32a98f6b3883"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a833e1cf314b7b7a5537b2b6a56fee6a5" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4741fe361131913b145c32a98f6b3883" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const</span></span>
             </h3>
             <p>Gets the <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
@@ -223,9 +225,9 @@ $ x $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aca424ddaf2902c1cde483f37813d4278"><div>
+          <section class="m-doc-details" id="ac2715c4f82f37e80f7f6943400f06b3d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca424ddaf2902c1cde483f37813d4278" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2715c4f82f37e80f7f6943400f06b3d" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const</span></span>
             </h3>
             <p>Gets the <svg class="m-math" style="width: 0.639em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.136656 7.47198">
 <title>
@@ -257,9 +259,9 @@ $ y $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae7bc7213001e326be4d4eb2d8a035c34"><div>
+          <section class="m-doc-details" id="a2a9d6bf0eac674bda15cb7f64f56ccb0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7bc7213001e326be4d4eb2d8a035c34" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />Point::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2a9d6bf0eac674bda15cb7f64f56ccb0" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">Coordinates coords = Coordinates::Physical) const</span></span>
             </h3>
             <p>Gets the <svg class="m-math" style="width: 0.622em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.970618 5.147373">
 <title>
@@ -336,7 +338,7 @@ $ z $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

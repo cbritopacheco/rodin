@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Context::Parallel struct | Rodin</title>
+  <title>Rodin::Variational::FunctionValue class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -52,9 +52,53 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_context.html">Context</a>::<wbr/></span>Parallel <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FunctionValue <span class="m-thin">class</span>
         </h1>
-        <p><a href="struct_rodin_1_1_context_1_1_parallel.html" class="m-doc">Parallel</a> context metadata.</p>
+        <p>Represents the value of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> object when evaluated on a Mesh Vertex.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, valuations of instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> on mesh vertices can take the form three possible value types:</p><ul><li>Scalar</li><li>Vector</li><li>Matrix</li></ul><p>The type resolution of the actual type is performed at runtime.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a8c2981f3f834be9448a6ab06c28748eb">
+              using <a href="#a8c2981f3f834be9448a6ab06c28748eb" class="m-doc-self">Scalar</a> = double
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a717a190167959b837148d927a5d380ba">
+              using <a href="#a717a190167959b837148d927a5d380ba" class="m-doc-self">Boolean</a> = bool
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a63599afc2bca4fd0f3531faa6ed779f1">
+              using <a href="#a63599afc2bca4fd0f3531faa6ed779f1" class="m-doc-self">Vector</a> = mfem::Vector
+            </dt>
+            <dd>Vector value type.</dd>
+            <dt id="ace33d975f6e56e6a5490abce522b2054">
+              using <a href="#ace33d975f6e56e6a5490abce522b2054" class="m-doc-self">Matrix</a> = mfem::DenseMatrix
+            </dt>
+            <dd>Matrix value type.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a85ec26149a93b3b2eef81cec4f70d231">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a85ec26149a93b3b2eef81cec4f70d231" class="m-doc-self">holds</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Queries which type the <a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> holds.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>
@@ -99,7 +143,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -70,8 +70,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a1b4b38b1c7fb95615aff4744ff970266">
-              <span class="m-doc-wrap-bumper"><a href="#a1b4b38b1c7fb95615aff4744ff970266" class="m-doc-self">Normal</a>(</span><span class="m-doc-wrap">int dimension)</span>
+            <dt id="a0a9a50198b179ac41d0378fe4d0f929c">
+              <span class="m-doc-wrap-bumper"><a href="#a0a9a50198b179ac41d0378fe4d0f929c" class="m-doc-self">Normal</a>(</span><span class="m-doc-wrap">size_t dimension)</span>
             </dt>
             <dd>Constructs the outward unit normal.</dd>
           </dl>
@@ -84,11 +84,9 @@
             </dt>
             <dd>Gets the dimension of the vector object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a1a41424d5a09962e9c24e2de2d074ebe" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">mfem::Vector&amp; value,
-              mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a321a2e83e19c56de811af3b4e5a66d34" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Computes the value at the given transformation and integration point.</dd>
+            <dd></dd>
           </dl>
         </section>
         <section>
@@ -107,21 +105,11 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a1a41424d5a09962e9c24e2de2d074ebe"><div>
+          <section class="m-doc-details" id="a321a2e83e19c56de811af3b4e5a66d34"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Normal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a41424d5a09962e9c24e2de2d074ebe" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">mfem::Vector&amp; value,
-              mfem::ElementTransformation&amp; trans,
-              const mfem::IntegrationPoint&amp; ip) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> Rodin::<wbr />Variational::<wbr />Normal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a321a2e83e19c56de811af3b4e5a66d34" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Computes the value at the given transformation and integration point.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Value at given transformation and integration point.</td>
-                </tr>
-              </tfoot>
-            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>It is not necessary to set the size beforehand.</p></aside>
           </div></section>
         </section>
       </div>
@@ -168,7 +156,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.17 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>
