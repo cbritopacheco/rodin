@@ -49,11 +49,9 @@ namespace Rodin::Variational
               m_rhs(std::move(other.m_rhs))
          {}
 
-         bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            return m_lhs->getValue(trans, ip) && m_rhs->getValue(trans, ip);
+            return m_lhs->getValue(p).boolean() && m_rhs->getValue(p).boolean();
          }
 
          AND* copy() const noexcept override

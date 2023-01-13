@@ -32,28 +32,17 @@ namespace Rodin::Variational
    {}
 
    Division<FunctionBase, FunctionBase>&
-   Division<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Division<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attr)
    {
-      FunctionBase::traceOf(attrs);
-      m_lhs->traceOf(attrs);
-      m_rhs->traceOf(attrs);
+      FunctionBase::traceOf(attr);
+      m_lhs->traceOf(attr);
+      m_rhs->traceOf(attr);
       return *this;
    }
 
    RangeShape Division<FunctionBase, FunctionBase>::getRangeShape() const
    {
       return m_lhs->getRangeShape();
-   }
-
-   void Division<FunctionBase, FunctionBase>::getValue(
-      mfem::DenseMatrix& value,
-      mfem::ElementTransformation& trans,
-      const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix s;
-      m_rhs->getValue(s, trans, ip);
-      m_lhs->getValue(value, trans, ip);
-      value *= 1.0 / s(0, 0);
    }
 
    Division<FunctionBase, FunctionBase>

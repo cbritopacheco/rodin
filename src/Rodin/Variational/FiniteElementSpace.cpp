@@ -8,7 +8,7 @@
 
 namespace Rodin::Variational
 {
-   int FiniteElementSpaceBase::getNumberOfDofs() const
+   size_t FiniteElementSpaceBase::getNumberOfDofs() const
    {
       return getHandle().GetNDofs();
    }

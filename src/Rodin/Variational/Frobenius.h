@@ -42,20 +42,35 @@ namespace Rodin::Variational
                m_v(std::move(other.m_v))
          {}
 
-         Frobenius& traceOf(const std::set<int>& attrs) override
+         Frobenius& traceOf(Geometry::Attribute attrs) override
          {
             ScalarFunctionBase::traceOf(attrs);
             m_v->traceOf(attrs);
             return *this;
          }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix s;
-            m_v->getValue(s, trans, ip);
-            return s.FNorm();
+            switch (m_v->getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  return std::abs(m_v->getValue(p).scalar());
+               }
+               case RangeType::Vector:
+               {
+                  return m_v->getValue(p).vector().Norml2();
+               }
+               case RangeType::Matrix:
+               {
+                  return m_v->getValue(p).matrix().FNorm();
+               }
+               default:
+               {
+                  assert(false);
+                  return 0.0;
+               }
+            }
          }
 
          Frobenius* copy() const noexcept override

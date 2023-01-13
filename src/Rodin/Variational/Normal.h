@@ -1,8 +1,9 @@
 #ifndef RODIN_VARIATIONAL_NORMAL_H
 #define RODIN_VARIATIONAL_NORMAL_H
 
-#include "ForwardDecls.h"
+#include "Rodin/Geometry/Mesh.h"
 
+#include "ForwardDecls.h"
 #include "VectorFunction.h"
 
 namespace Rodin::Variational
@@ -16,7 +17,7 @@ namespace Rodin::Variational
          /**
           * @brief Constructs the outward unit normal.
           */
-         Normal(int dimension)
+         Normal(size_t dimension)
             : m_dimension(dimension)
          {
             assert(dimension > 0);
@@ -37,41 +38,77 @@ namespace Rodin::Variational
             return m_dimension;
          }
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint&) const override
+         FunctionValue getValue(const Geometry::Point& p) const override
          {
-            assert(
-               // We are on a boundary element of a d-mesh in d-space
-               (
-                  trans.mesh->Dimension() == trans.mesh->SpaceDimension() &&
-                  trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT
-               ) ||
-               // Or we are on an element of a d-mesh in (d + 1)-space.
-               (
-                  trans.mesh->Dimension() == (trans.mesh->SpaceDimension() - 1) &&
-                  trans.ElementType == mfem::ElementTransformation::ELEMENT
-               )
-            );
-            value.SetSize(m_dimension);
-            mfem::CalcOrtho(trans.Jacobian(), value);
-            const double norm = value.Norml2();
-            assert(norm > 0.0);
-            switch (trans.ElementType)
+            FunctionValue::Vector value;
+            const auto& simplex = p.getSimplex();
+            const auto& mesh = simplex.getMesh();
+            auto& trans = simplex.getTransformation();
+
+            if ((mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
+                  simplex.getDimension() == mesh.getDimension())
             {
-               case mfem::ElementTransformation::BDR_ELEMENT:
+               // Or we are on an element of a d-mesh in (d + 1)-space.
+               value.SetSize(m_dimension);
+               mfem::CalcOrtho(trans.Jacobian(), value);
+               const double norm = value.Norml2();
+               assert(norm > 0.0);
+               assert(std::isfinite(norm));
+               value /= norm;
+            }
+            else if ((mesh.getDimension() == mesh.getSpaceDimension()) &&
+                  simplex.getDimension() == mesh.getDimension() - 1)
+            {
+               // We are on a face of a d-mesh in d-space
+               if (mesh.isBoundary(simplex.getIndex()))
                {
-                  value /= norm * (
-                        1.0 - 2.0 * trans.mesh->FaceIsInterior(
-                           trans.mesh->GetBdrFace(trans.ElementNo)));
-                  break;
-               }
-               default:
-               {
+                  mfem::FaceElementTransformations* ft =
+                     const_cast<Geometry::MeshBase&>(mesh).getHandle()
+                     .GetFaceElementTransformations(simplex.getIndex());
+                  value.SetSize(m_dimension);
+                  ft->SetAllIntPoints(&p.getIntegrationPoint());
+                  assert(ft->Elem1);
+                  mfem::CalcOrtho(trans.Jacobian(), value);
+                  const double norm = value.Norml2();
+                  assert(norm > 0.0);
+                  assert(std::isfinite(norm));
                   value /= norm;
                }
+               else
+               {
+                  mfem::FaceElementTransformations* ft =
+                     const_cast<Geometry::MeshBase&>(mesh).getHandle()
+                     .GetFaceElementTransformations(simplex.getIndex());
+                  value.SetSize(m_dimension);
+                  ft->SetAllIntPoints(&p.getIntegrationPoint());
+                  if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+                  {
+                     mfem::CalcOrtho(trans.Jacobian(), value);
+                     const double norm = value.Norml2();
+                     assert(norm > 0.0);
+                     assert(std::isfinite(norm));
+                     value /= norm;
+                  }
+                  else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+                  {
+                     mfem::CalcOrtho(trans.Jacobian(), value);
+                     const double norm = value.Norml2();
+                     assert(norm > 0.0);
+                     assert(std::isfinite(norm));
+                     value /= -norm;
+                  }
+                  else
+                  {
+                     assert(false);
+                  }
+               }
             }
+            else
+            {
+               assert(false);
+               return FunctionValue::Vector{0, 0};
+            }
+            return value;
          }
 
          Normal* copy() const noexcept override
@@ -79,7 +116,7 @@ namespace Rodin::Variational
             return new Normal(*this);
          }
       private:
-         const int m_dimension;
+         const size_t m_dimension;
    };
 }
 

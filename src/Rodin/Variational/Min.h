@@ -31,11 +31,12 @@ namespace Rodin::Variational
 
          Min(Min&& other);
 
-         Min& traceOf(const std::set<int>& attrs) override;
+         Min& traceOf(Geometry::Attribute attrs) override;
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            return std::min(m_a->getValue(p).scalar(), m_b->getValue(p).scalar());
+         }
 
          Min* copy() const noexcept override;
 

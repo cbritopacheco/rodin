@@ -31,21 +31,21 @@ namespace Rodin::Variational
          void operator=(TrialFunction&&) = delete;
 
          constexpr
-         TrialFunction& emplaceGridFunction()
+         TrialFunction& emplace()
          {
             m_gf.emplace(this->getFiniteElementSpace());
             return *this;
          }
 
          constexpr
-         GridFunction<FES>& getGridFunction()
+         GridFunction<FES>& getSolution()
          {
             assert(m_gf);
             return *m_gf;
          }
 
          constexpr
-         const GridFunction<FES>& getGridFunction() const
+         const GridFunction<FES>& getSolution() const
          {
             assert(m_gf);
             return *m_gf;

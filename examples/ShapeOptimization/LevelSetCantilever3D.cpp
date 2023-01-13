@@ -120,10 +120,13 @@ int main(int, char**)
     elasticity.solve(solver);
 
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto e = 0.5 * (Jacobian(uInt.getGridFunction()) + Jacobian(uInt.getGridFunction()).T());
+    auto jac = Jacobian(uInt.getSolution());
+    jac.traceOf(Interior);
+
+    auto e = 0.5 * (jac + jac.T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-    auto n = -Normal(d); // Bug: For some reason orientation does not match up
-                         // with that of the 2D case.
+    auto n = Normal(d);
+    n.traceOf(Interior);
 
     // Hilbert extension-regularization procedure
     double alpha = elementStep * hmax;
@@ -137,11 +140,11 @@ int main(int, char**)
             ;
     hilbert.solve(solver);
 
-    g.getGridFunction().save("g.gf");
+    g.getSolution().save("g.gf");
     Omega.save("g.mesh");
 
     // Update objective
-    double objective = compliance(uInt.getGridFunction()) + ell * Omega.getVolume(Interior);
+    double objective = compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior);
     obj.push_back(objective);
     Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
 
@@ -155,7 +158,7 @@ int main(int, char**)
     gNorm = ScalarFunction(
         [&](const Point& v) -> double
         {
-          mfem::Vector val = g.getGridFunction()(v);
+          mfem::Vector val = g.getSolution()(v);
           return val.Norml2();
         });
     double linfty = gNorm.max();
@@ -166,7 +169,7 @@ int main(int, char**)
       Alert::Info()
         << "    | Advecting the distance function. || g || = " << linfty
         << Alert::Raise;
-      MMG::Advect(dist, g.getGridFunction()).step(dt);
+      MMG::Advect(dist, g.getSolution()).step(dt);
     }
     catch (Rodin::Alert::Exception& e)
     {

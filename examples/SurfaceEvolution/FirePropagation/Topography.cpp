@@ -42,8 +42,8 @@ int main(int, char**)
       Geometry::Type::Triangle, {1, 2, 3});
   topography.finalize();
 
-  for (int i = 0; i < 8; i++)
-    topography.refine();
+  // for (int i = 0; i < 8; i++)
+  //   topography.refine();
 
   srand(std::time(0));
   FastNoiseLite gen(rand());
@@ -52,9 +52,9 @@ int main(int, char**)
   auto noise = [&](double x, double y) { return gen.GetNoise(x, y) / 2.0 + 0.5; };
 
   double elVol = 0;
-  for (int i = 0; i < topography.count<Element>(); i++)
-    elVol += topography.get<Element>(i).getVolume();
-  elVol /= topography.count<Element>();
+  // for (int i = 0; i < topography.count<Element>(); i++)
+  //   elVol += topography.get<Element>(i).getVolume();
+  // elVol /= topography.count<Element>();
 
   double maxElevation = std::max_element(
       octaves.begin(), octaves.end(),

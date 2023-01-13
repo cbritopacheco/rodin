@@ -144,6 +144,11 @@ namespace Rodin::Variational
             return *this;
          }
 
+         int getSize() const override
+         {
+            return getHandle().GetVSize();
+         }
+
          bool isParallel() const override
          {
             return false;
@@ -162,6 +167,40 @@ namespace Rodin::Variational
          const FEC& getFiniteElementCollection() const override
          {
             return m_fec;
+         }
+
+         mfem::Array<int> getDOFs(const Geometry::Simplex& element) const override
+         {
+            mfem::Array<int> res;
+            if (element.getDimension() == getMesh().getDimension())
+            {
+               m_fes->GetElementVDofs(element.getIndex(), res);
+            }
+            else if (element.getDimension() == getMesh().getDimension() - 1)
+            {
+               m_fes->GetFaceVDofs(element.getIndex(), res);
+            }
+            else
+            {
+               assert(false);
+            }
+            return res;
+         }
+
+         const mfem::FiniteElement& getFiniteElement(const Geometry::Simplex& element) const override
+         {
+            if (element.getDimension() == getMesh().getDimension())
+            {
+               return *m_fes->GetFE(element.getIndex());
+            }
+            else if (element.getDimension() == getMesh().getDimension() - 1)
+            {
+               return *m_fes->GetFaceElement(element.getIndex());
+            }
+            else
+            {
+               assert(false);
+            }
          }
 
          mfem::FiniteElementSpace& getHandle() override

@@ -31,23 +31,12 @@ namespace Rodin::Variational
    {}
 
    Sum<FunctionBase, FunctionBase>&
-   Sum<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Sum<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attrs)
    {
       FunctionBase::traceOf(attrs);
       m_lhs->traceOf(attrs);
       m_rhs->traceOf(attrs);
       return *this;
-   }
-
-   void Sum<FunctionBase, FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      m_lhs->getValue(value, trans, ip);
-      mfem::DenseMatrix tmp;
-      m_rhs->getValue(tmp, trans, ip);
-      value += tmp;
    }
 
    RangeShape Sum<FunctionBase, FunctionBase>::getRangeShape() const

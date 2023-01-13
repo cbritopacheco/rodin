@@ -1,7 +1,14 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_MESH_ELEMENT_H
 #define RODIN_MESH_ELEMENT_H
 
 #include <set>
+#include <array>
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
@@ -21,73 +28,83 @@ namespace Rodin::Geometry
       Pyramid = mfem::Geometry::PYRAMID
    };
 
+
    /**
     * @brief Base class for all geometric elements of the mesh.
     */
-   class ElementBase
+   class Simplex
    {
       public:
-         ElementBase(const MeshBase& mesh, const mfem::Element* element, int index)
-            :  m_mesh(mesh),
-               m_element(element),
-               m_index(index)
+         enum class Property
+         {
+            Attribute
+         };
+
+         struct Data
+         {
+            std::unique_ptr<mfem::Element> element;
+            std::unique_ptr<mfem::ElementTransformation> trans;
+         };
+
+         Simplex(size_t dimension, Index index, const MeshBase& mesh, Data data)
+            :  m_dimension(dimension), m_index(index), m_mesh(mesh),
+               m_data(std::move(data))
          {}
 
-         ElementBase(const ElementBase&) = default;
+         Simplex(Simplex&&) = default;
 
-         ElementBase(ElementBase&&) = default;
+         virtual ~Simplex() = default;
 
-         virtual ~ElementBase()
+         size_t getDimension() const
          {
-            m_element = nullptr; // This is deallocated by the mfem::Mesh class
-         }
-
-         Type getGeometry() const
-         {
-            return static_cast<Type>(m_element->GetGeometryType());
-         }
-
-         virtual std::vector<int> getVertices() const;
-
-         /**
-          * @brief Gets the attribute of the element.
-          */
-         int getAttribute() const;
-
-         /**
-          * @brief Gets the associated mesh to the element.
-          */
-         const MeshBase& getMesh() const
-         {
-            return m_mesh;
-         }
-
-         const mfem::Element& getHandle() const
-         {
-            return *m_element;
+            return m_dimension;
          }
 
          /**
-          * @brief Gets the index of the element in the mesh.
+          * @brief Gets the index of the simplex in the mesh.
           */
-         int getIndex() const
+         Index getIndex() const
          {
             return m_index;
          }
 
          /**
-          * @brief Gets the set of spatially adjacent elements (of the same
-          * dimension).
-          * @returns Set of integer indices corresponding to the spatially
-          * adjacent elements of the same dimension.
+          * @brief Gets the associated mesh to the simplex.
           */
-         virtual std::set<int> adjacent() const = 0;
+         const MeshBase& getMesh() const
+         {
+            return m_mesh.get();
+         }
+
+         Type getGeometry() const;
+
+         /**
+          * @brief Gets the attribute of the simplex.
+          */
+         Attribute getAttribute() const;
+
+         double getVolume() const;
+
+         // VertexIterator getVertices() const;
+
+         mfem::ElementTransformation& getTransformation() const;
+
+         virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
+
+         const mfem::Element& getHandle() const
+         {
+            assert(m_data.element);
+            return *m_data.element;
+         }
 
       private:
-         const MeshBase& m_mesh;
-         const mfem::Element* m_element;
-         int m_index;
+         const size_t m_dimension;
+         const Index m_index;
+         std::reference_wrapper<const MeshBase> m_mesh;
+         Data m_data;
    };
+
+   bool operator<(const Simplex& lhs, const Simplex& rhs);
 
    /**
     * @brief Class for representing elements of the highest dimension in the
@@ -97,78 +114,16 @@ namespace Rodin::Geometry
     * element. If one wishes to modify the element then one must use
     * ElementView.
     */
-   class Element : public ElementBase
+   class Element : public Simplex
    {
       public:
-         Element(const MeshBase& mesh, const mfem::Element* element, int index)
-            : ElementBase(mesh, element, index)
-         {}
-
-         Element(const Element& other)
-            : ElementBase(other)
-         {}
+         Element(Index index, const MeshBase& mesh, Data data);
 
          Element(Element&& other)
-            : ElementBase(std::move(other))
+            :  Simplex(std::move(other))
          {}
 
-         /**
-          * @brief Computes the volume of the element.
-          */
-         double getVolume() const;
-
-         std::set<int> adjacent() const override;
-   };
-
-   /**
-    * @brief Class for representing elements of the highest dimension in the
-    * mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.
-    *
-    * This class is designed so that modifications can be made to the element,
-    * while retaining the functionality of the more general Element class.
-    */
-   class ElementView : public Element
-   {
-      public:
-         ElementView(MeshBase& mesh, mfem::Element* element, int index)
-            : Element(mesh, element, index),
-              m_mesh(mesh),
-              m_element(element)
-         {}
-
-         ElementView(const ElementView& other)
-            : Element(other),
-              m_mesh(other.m_mesh),
-              m_element(other.m_element)
-         {}
-
-         ElementView(ElementView&& other)
-            : Element(std::move(other)),
-              m_mesh(other.m_mesh),
-              m_element(other.m_element)
-         {
-            other.m_element = nullptr;
-         }
-
-         /**
-          * @brief Sets the attribute of the element.
-          */
-         ElementView& setAttribute(int attr);
-
-         MeshBase& getMesh()
-         {
-            return m_mesh;
-         }
-
-         mfem::Element& getHandle()
-         {
-            return *m_element;
-         }
-
-      private:
-         MeshBase& m_mesh;
-         mfem::Element* m_element;
-
+         ElementIterator getAdjacent() const;
    };
 
    /**
@@ -178,157 +133,49 @@ namespace Rodin::Geometry
     * This class is designed so that modifications cannot be made to the
     * face.
     */
-   class Face : public ElementBase
+   class Face : public Simplex
    {
       public:
-         Face(const MeshBase& mesh, const mfem::Element* element, int index)
-            : ElementBase(mesh, element, index)
-         {}
-
-         Face(MeshBase& mesh, mfem::Element* element, int index)
-            : ElementBase(mesh, element, index)
-         {}
-
-         Face(const Face& other)
-            : ElementBase(other)
-         {}
+         Face(Index index, const MeshBase& mesh, Data data);
 
          Face(Face&& other)
-            : ElementBase(std::move(other))
+            : Simplex(std::move(other)),
+              m_isBoundary(std::move(other.m_isBoundary)),
+              m_isInterface(std::move(other.m_isInterface))
          {}
 
-         std::set<int> elements() const;
+         FaceIterator getAdjacent() const;
 
-         std::set<int> adjacent() const override
-         {
-            assert(false);
-            return {};
-         }
+         ElementIterator getIncident() const;
 
-         /**
-          * @brief Gets the area of the face element.
-          */
-         double getArea() const;
-   };
+         bool isBoundary() const;
 
-   /**
-    * @brief Class for representing boundary elements in the mesh, i.e. face
-    * elements which are at the boundary.
-    *
-    * This class is designed so that modifications can be made to the
-    * boundary element. If one wishes to modify the face then one must use
-    * BoundaryElementView.
-    */
-   class BoundaryElement : public Face
-   {
-      public:
-         /**
-          *
-          * @param[in] index Boundary index
-          */
-         BoundaryElement(
-               const MeshBase& mesh, const mfem::Element* element, int index);
-
-         BoundaryElement(const BoundaryElement& other)
-            :  Face(other),
-               m_index(other.m_index)
-         {}
-
-         BoundaryElement(BoundaryElement&& other)
-            :  Face(std::move(other)),
-               m_index(other.m_index)
-         {
-            other.m_index = 0;
-         }
-
-         /**
-          * @brief Gets the index of the face element.
-          *
-          * @warning The index returned by this function need not coincide with
-          * the index returned by getBoundaryIndex().
-          */
-         int getFaceIndex() const
-         {
-            return Face::getIndex();
-         }
-
-         /**
-          * @brief Gets the index of the element as a member of the boundary.
-          *
-          * @warning The index returned by this function need not coincide with
-          * the index returned by getFaceIndex().
-          */
-         int getBoundaryIndex() const
-         {
-            return m_index;
-         }
-
-         /**
-          * @brief Gets the index of the element as a member of the boundary.
-          *
-          * Same as getBoundaryIndex().
-          *
-          * @warning The index returned by this function need not coincide with
-          * the index returned by getFaceIndex().
-          */
-         int getIndex() const
-         {
-            return getBoundaryIndex();
-         }
+         bool isInterface() const;
 
       private:
-         int m_index;
+         const bool m_isBoundary;
+         const bool m_isInterface;
    };
 
-   /**
-    * @brief Class for representing boundary elements in the mesh, i.e. face
-    * elements which are at the boundary.
-    *
-    * This class is designed so that modifications cannot be made to the
-    * boundary element, while retaining the functionality of the more general
-    * FaceView and BoundaryElement classes.
-    */
-   class BoundaryElementView
-      : public BoundaryElement
+   class Vertex : public Simplex
    {
       public:
-         /**
-          * @param[in] index Boundary element index
-          */
-         BoundaryElementView(MeshBase& mesh, mfem::Element* element, int index);
-
-         BoundaryElementView(const BoundaryElementView& other)
-            : BoundaryElement(other),
-              m_mesh(other.m_mesh),
-              m_element(other.m_element)
-         {}
-
-         BoundaryElementView(BoundaryElementView&& other)
-            : BoundaryElement(std::move(other)),
-              m_mesh(other.m_mesh),
-              m_element(other.m_element)
+         double x() const
          {
-            other.m_element = nullptr;
+            return operator()(0);
          }
 
-         /**
-          * @brief Sets the attribute of the boundary element.
-          */
-         BoundaryElementView& setAttribute(int attr);
-
-         MeshBase& getMesh()
+         double y() const
          {
-            return m_mesh;
+            return operator()(1);
          }
 
-         mfem::Element& getHandle()
+         double z() const
          {
-            return *m_element;
+            return operator()(2);
          }
 
-      private:
-         MeshBase& m_mesh;
-         mfem::Element* m_element;
+         virtual double operator()(size_t i) const;
    };
 
    /**
@@ -343,18 +190,20 @@ namespace Rodin::Geometry
    class Point
    {
       public:
+         enum class Coordinates
+         {
+            Reference,
+            Physical
+         };
+
          /**
           * @brief Constructs the Point object from reference coordinates.
-          * @param[in] trans Element transformation
+          * @param[in] simplex Simplex to which point belongs to
           * @param[in] ip Reference coordinates
           */
-         Point(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-            :  m_trans(trans),
-               m_ip(ip)
-         {
-            m_trans.get().Transform(ip, m_physical);
-            assert(m_physical.Size() == trans.mesh->SpaceDimension());
-         }
+         Point(const Simplex& simplex, const mfem::IntegrationPoint& ip);
+
+         Point(const Simplex& simplex, mfem::IntegrationPoint&& ip);
 
          Point(const Point&) = default;
 
@@ -364,45 +213,93 @@ namespace Rodin::Geometry
           * @brief Gets the space dimension of the physical coordinates.
           * @returns Dimension of the physical coordinates.
           */
-         int getDimension() const
-         {
-            return m_trans.get().mesh->SpaceDimension();
-         }
+         size_t getDimension(Coordinates coords = Coordinates::Physical) const;
 
          /**
           * @brief Gets the i-th physical coordinate.
           * @returns Physical i-th coordinate.
           */
-         double operator()(int i) const
+         double operator()(int i, Coordinates coords = Coordinates::Physical) const
          {
-            return m_physical(i);
+            switch (coords)
+            {
+               case Coordinates::Physical:
+               {
+                  assert(m_physical.Size() > i);
+                  return m_physical(i);
+               }
+               case Coordinates::Reference:
+               {
+                  double p[3];
+                  m_ip.Get(p, getDimension(coords));
+                  return p[i];
+               }
+            }
          }
 
          /**
           * @brief Gets the @f$ x @f$ physical coordinate.
           * @returns Physical @f$ x @f$-coordinate.
           */
-         double x() const
+         double x(Coordinates coords = Coordinates::Physical) const
          {
-            return m_physical(0);
+            switch (coords)
+            {
+               case Coordinates::Physical:
+               {
+                  assert(m_physical.Size() > 0);
+                  return m_physical(0);
+               }
+               case Coordinates::Reference:
+               {
+                  return m_ip.x;
+               }
+            }
          }
 
          /**
           * @brief Gets the @f$ y @f$ physical coordinate.
           * @returns Physical @f$ y @f$-coordinate.
           */
-         double y() const
+         double y(Coordinates coords = Coordinates::Physical) const
          {
-            return m_physical(1);
+            switch (coords)
+            {
+               case Coordinates::Physical:
+               {
+                  assert(m_physical.Size() > 1);
+                  return m_physical(1);
+               }
+               case Coordinates::Reference:
+               {
+                  return m_ip.y;
+               }
+            }
          }
 
          /**
           * @brief Gets the @f$ z @f$ physical coordinate.
           * @returns Physical @f$ z @f$-coordinate.
           */
-         double z() const
+         double z(Coordinates coords = Coordinates::Physical) const
          {
-            return m_physical(2);
+            switch (coords)
+            {
+               case Coordinates::Physical:
+               {
+                  assert(m_physical.Size() > 2);
+                  return m_physical(2);
+               }
+               case Coordinates::Reference:
+               {
+                  return m_ip.z;
+               }
+            }
+         }
+
+         double w() const
+         {
+            return m_ip.weight;
          }
 
          /**
@@ -421,20 +318,20 @@ namespace Rodin::Geometry
             return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
          }
 
-         mfem::ElementTransformation& getElementTransformation() const
+         const Simplex& getSimplex() const
          {
-            return m_trans.get();
+            return m_element;
          }
 
-         const mfem::IntegrationPoint& getIntegrationPoint() const
+         [[deprecated]] const mfem::IntegrationPoint& getIntegrationPoint() const
          {
-            return m_ip.get();
+            return m_ip;
          }
 
       private:
          mfem::Vector m_physical;
-         std::reference_wrapper<mfem::ElementTransformation> m_trans;
-         std::reference_wrapper<const mfem::IntegrationPoint> m_ip;
+         std::reference_wrapper<const Simplex> m_element;
+         mfem::IntegrationPoint m_ip;
    };
 }
 

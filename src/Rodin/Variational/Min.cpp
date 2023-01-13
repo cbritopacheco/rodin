@@ -46,24 +46,12 @@ namespace Rodin::Variational
         m_b(std::move(other.m_b))
    {}
 
-   Min& Min::traceOf(const std::set<int>& attrs)
+   Min& Min::traceOf(Geometry::Attribute attrs)
    {
       ScalarFunctionBase::traceOf(attrs);
       m_a->traceOf(attrs);
       m_b->traceOf(attrs);
       return *this;
-   }
-
-   double Min::getValue(
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix a;
-      m_a->getValue(a, trans, ip);
-
-      mfem::DenseMatrix b;
-      m_b->getValue(b, trans, ip);
-      return std::min(a(0, 0), b(0, 0));
    }
 
    Min* Min::copy() const noexcept

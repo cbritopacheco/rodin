@@ -14,26 +14,28 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-#include "Assembly.h"
+#include "Integrator.h"
 #include "TestFunction.h"
 
 namespace Rodin::Variational
 {
-   class LinearFormIntegratorBase : public FormLanguage::Base
+   class LinearFormIntegratorBase : public Integrator
    {
       public:
+         using Parent = Integrator;
+
          LinearFormIntegratorBase(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
             : m_v(v.copy())
          {}
 
          LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
-            : FormLanguage::Base(other),
+            : Parent(other),
               m_v(other.m_v->copy()),
               m_attrs(other.m_attrs)
          {}
 
          LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
-            : FormLanguage::Base(std::move(other)),
+            : Parent(std::move(other)),
               m_v(std::move(other.m_v)),
               m_attrs(std::move(other.m_attrs))
          {}
@@ -49,7 +51,7 @@ namespace Rodin::Variational
          /**
           * @brief Gets the attributes of the elements being integrated.
           */
-         const std::set<int>& getAttributes() const
+         const std::set<Geometry::Attribute>& getAttributes() const
          {
             return m_attrs;
          }
@@ -61,9 +63,9 @@ namespace Rodin::Variational
           * Specifies the material reference over which the integration should
           * take place.
           */
-         LinearFormIntegratorBase& over(int attr)
+         LinearFormIntegratorBase& over(Geometry::Attribute attr)
          {
-            return over(std::set<int>{attr});
+            return over(std::set<Geometry::Attribute>{attr});
          }
 
          /**
@@ -73,7 +75,7 @@ namespace Rodin::Variational
           * Specifies the material references over which the integration should
           * take place.
           */
-         LinearFormIntegratorBase& over(const std::set<int>& attrs)
+         LinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
          {
             assert(attrs.size() > 0);
             m_attrs = attrs;
@@ -85,77 +87,23 @@ namespace Rodin::Variational
           */
          std::unique_ptr<mfem::LinearFormIntegrator> build() const;
 
+         Integrator::Type getType() const override
+         {
+            return Integrator::Type::Linear;
+         }
+
          /**
-          * @brief Gets the integration region.
+          * @brief Performs the assembly of the element vector for the given
+          * element.
           */
-         virtual IntegratorRegion getIntegratorRegion() const = 0;
-
-         virtual void getElementVector(const Linear::Assembly::Common& as) const = 0;
-
-         virtual void getElementVector(const Linear::Assembly::Device&) const
-         {
-            assert(false); // Unimplemented
-         }
-
-         virtual bool isSupported(Linear::Assembly::Type t) const
-         {
-            switch (t)
-            {
-               case Linear::Assembly::Type::Common:
-                  return true;
-               default:
-                  return false;
-            }
-            return false;
-         }
+         virtual mfem::Vector getVector(
+               const Geometry::Simplex& element) const = 0;
 
          virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
       private:
          std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
-         std::set<int> m_attrs;
-   };
-}
-
-namespace Rodin::Variational::Internal
-{
-   class ProxyLinearFormIntegrator : public mfem::LinearFormIntegrator
-   {
-      public:
-         ProxyLinearFormIntegrator(const LinearFormIntegratorBase& lfi)
-            : m_lfi(lfi)
-         {}
-
-         ProxyLinearFormIntegrator(const ProxyLinearFormIntegrator& other)
-            : mfem::LinearFormIntegrator(other),
-              m_lfi(other.m_lfi)
-         {}
-
-         ProxyLinearFormIntegrator(ProxyLinearFormIntegrator&& other)
-            : mfem::LinearFormIntegrator(std::move(other)),
-              m_lfi(other.m_lfi)
-         {}
-
-         void AssembleRHSElementVect(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::Vector& vec) override
-         {
-            m_lfi.getElementVector(Linear::Assembly::Common{fe, trans, vec});
-         }
-
-         void AssembleDevice(const mfem::FiniteElementSpace& fes,
-               const mfem::Array<int>& markers, mfem::Vector& b) override
-         {
-            m_lfi.getElementVector(Linear::Assembly::Device{fes, markers, b});
-         }
-
-         bool SupportsDevice() override
-         {
-            return m_lfi.isSupported(Linear::Assembly::Type::Device);
-         }
-
-      private:
-         const LinearFormIntegratorBase& m_lfi;
+         std::set<Geometry::Attribute> m_attrs;
    };
 }
 

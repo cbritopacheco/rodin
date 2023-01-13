@@ -161,20 +161,19 @@ namespace Rodin::IO
       {
          case 2:
          {
-            int nbe = mesh.count<Geometry::BoundaryElement>();
+            int nbe = mesh.getHandle().GetNBE();
             os << '\n'
                << IO::Medit::Keyword::Edges
                << '\n'
                << nbe
                << '\n';
+
             for (int i = 0; i < nbe; i++)
             {
-               auto el = mesh.get<Geometry::BoundaryElement>(i);
-               auto vs = el.getVertices();
-               assert(vs.size() == 2);
+               auto vs = mesh.getHandle().GetBdrElement(i)->GetVertices();
                os << vs[0] + 1 << " "
                   << vs[1] + 1 << " "
-                  << el.getAttribute() << '\n';
+                  << mesh.getHandle().GetBdrAttribute(i) << '\n';
             }
          }
          default:
@@ -189,34 +188,30 @@ namespace Rodin::IO
         case 2:
         {
             os << '\n' << IO::Medit::Keyword::Triangles << '\n';
-           int ne = mesh.count<Geometry::Element>();
+           int ne = mesh.getElementCount();
            os << ne << '\n';
            for (int i = 0; i < ne; i++)
            {
-              auto el = mesh.get<Geometry::Element>(i);
-              auto vs = el.getVertices();
-              assert(vs.size() == 3);
+              auto vs = mesh.getHandle().GetElement(i)->GetVertices();
               os << vs[0] + 1 << " "
                  << vs[1] + 1 << " "
                  << vs[2] + 1 << " "
-                 << el.getAttribute() << '\n';
+                 << mesh.getHandle().GetAttribute(i) << '\n';
            }
            break;
         }
         case 3:
         {
             os << '\n' << IO::Medit::Keyword::Triangles << '\n';
-            int nbe = mesh.count<Geometry::BoundaryElement>();
+            int nbe = mesh.getHandle().GetNBE();
             os << nbe << '\n';
             for (int i = 0; i < nbe; i++)
             {
-               auto bel = mesh.get<Geometry::BoundaryElement>(i);
-               auto vs = bel.getVertices();
-               assert(vs.size() == 3);
+               auto vs = mesh.getHandle().GetBdrElement(i)->GetVertices();
                os << vs[0] + 1 << " "
                   << vs[1] + 1 << " "
                   << vs[2] + 1 << " "
-                  << bel.getAttribute() << '\n';
+                  << mesh.getHandle().GetBdrAttribute(i) << '\n';
             }
             break;
         }
@@ -232,7 +227,7 @@ namespace Rodin::IO
       {
          case 3:
          {
-            int ne = mesh.count<Geometry::Element>();
+            int ne = mesh.getElementCount();
             os << '\n'
                << IO::Medit::Keyword::Tetrahedra
                << '\n'
@@ -240,14 +235,15 @@ namespace Rodin::IO
                << '\n';
             for (int i = 0; i < ne; i++)
             {
-               auto el = mesh.get<Geometry::Element>(i);
-               auto vs = el.getVertices();
-               assert(vs.size() == 4);
-               os << vs[0] + 1 << " "
-                  << vs[1] + 1 << " "
-                  << vs[2] + 1 << " "
-                  << vs[3] + 1 << " "
-                  << el.getAttribute() << '\n';
+               auto it = mesh.getElement(i);
+               assert(false);
+               // auto vs = el.getVertices();
+               // assert(vs.size() == 4);
+               // os << vs[0] + 1 << " "
+               //    << vs[1] + 1 << " "
+               //    << vs[2] + 1 << " "
+               //    << vs[3] + 1 << " "
+               //    << el.getAttribute() << '\n';
             }
             break;
          }

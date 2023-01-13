@@ -41,12 +41,14 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         Sum& traceOf(const std::set<int>& attrs) override;
+         Sum& traceOf(Geometry::Attribute attrs) override;
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            FunctionValue res = m_lhs->getValue(p);
+            res += m_rhs->getValue(p);
+            return res;
+         }
 
          Sum* copy() const noexcept override
          {
@@ -135,24 +137,20 @@ namespace Rodin::Variational
             return getLHS().getColumns();
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
-            assert(getLHS().getDOFs(fe, trans) == getRHS().getDOFs(fe, trans));
-            return getLHS().getDOFs(fe, trans);
+            assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
+            return getLHS().getDOFs(element);
          }
 
          void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const override
+               ShapeComputator& compute,
+               const Geometry::Point& p) const override
          {
-            getLHS().getOperator(op, fe, trans, ip, compute);
+            getLHS().getOperator(op, compute, p);
             DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, fe, trans, ip, compute);
+            getRHS().getOperator(tmp, compute, p);
             op += tmp;
          }
 

@@ -189,7 +189,7 @@ namespace Rodin::External::MMG
     return MMGS_mmgsls(mesh, sol, nullptr);
   }
 
-  void ImplicitDomainMesher::generateUniqueSplit(const std::set<int>& attr)
+  void ImplicitDomainMesher::generateUniqueSplit(const std::set<Geometry::Attribute>& attr)
   {
     m_uniqueSplit.clear();
 

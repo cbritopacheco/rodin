@@ -32,7 +32,7 @@ namespace Rodin::External::MMG
    }
 
    void Mesh::save(
-       const boost::filesystem::path& filename, IO::FileFormat fmt, int precison) const
+       const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precison) const
    {
       if (fmt == IO::FileFormat::MEDIT)
       {

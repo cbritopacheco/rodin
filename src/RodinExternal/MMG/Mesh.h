@@ -51,7 +51,7 @@ namespace Rodin::External::MMG
       void save(
           const boost::filesystem::path& filename,
           IO::FileFormat fmt = IO::FileFormat::MFEM,
-          int precison = 16) const override;
+          size_t precison = 16) const override;
 
       Mesh& load(
           const boost::filesystem::path& filename,

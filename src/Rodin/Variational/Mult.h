@@ -49,7 +49,7 @@ namespace Rodin::Variational
 
          RangeShape getRangeShape() const override;
 
-         Mult& traceOf(const std::set<int>& attrs) override;
+         Mult& traceOf(Geometry::Attribute attr) override;
 
          virtual FunctionBase& getLHS()
          {
@@ -71,10 +71,29 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         virtual void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+         virtual FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            FunctionValue::Scalar s;
+            if (m_lhs->getRangeType() == RangeType::Scalar)
+            {
+               s = m_lhs->getValue(p);
+               FunctionValue value = m_rhs->getValue(p);
+               value *= s;
+               return value;
+            }
+            else if (m_rhs->getRangeType() == RangeType::Scalar)
+            {
+               s = m_rhs->getValue(p);
+               FunctionValue value = m_lhs->getValue(p);
+               value *= s;
+               return value;
+            }
+            else
+            {
+               assert(false);
+               return 0.0;
+            }
+         }
 
          Mult* copy() const noexcept override
          {
@@ -155,11 +174,9 @@ namespace Rodin::Variational
             return m_rhs->getRangeShape().width();
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
-            return m_rhs->getDOFs(fe, trans);
+            return m_rhs->getDOFs(element);
          }
 
          FiniteElementSpaceBase& getFiniteElementSpace() override
@@ -192,21 +209,18 @@ namespace Rodin::Variational
             return *m_rhs;
          }
 
-         virtual void getOperator(
+         void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const override
+               ShapeComputator& compute,
+               const Geometry::Point& p) const override
          {
+            const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
             switch (m_lhs->getRangeType())
             {
                case RangeType::Scalar:
                {
-                  m_rhs->getOperator(op, fe, trans, ip, compute);
-                  mfem::DenseMatrix v;
-                  m_lhs->getValue(v, trans, ip);
-                  op *= v(0, 0);
+                  m_rhs->getOperator(op, compute, p);
+                  op *= m_lhs->getValue(p).scalar();
                   break;
                }
                default:

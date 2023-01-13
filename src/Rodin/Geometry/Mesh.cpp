@@ -14,16 +14,18 @@
 #include "SubMesh.h"
 
 #include "Element.h"
+#include "SimplexIterator.h"
+
 
 namespace Rodin::Geometry
 {
    // ---- MeshBase ----------------------------------------------------------
-   int MeshBase::getSpaceDimension() const
+   size_t MeshBase::getSpaceDimension() const
    {
       return getHandle().SpaceDimension();
    }
 
-   int MeshBase::getDimension() const
+   size_t MeshBase::getDimension() const
    {
       return getHandle().Dimension();
    }
@@ -33,60 +35,20 @@ namespace Rodin::Geometry
       return (getSpaceDimension() - 1 == getDimension());
    }
 
-   MeshBase& MeshBase::refine()
+   std::set<Attribute> MeshBase::getAttributes() const
    {
-      getHandle().UniformRefinement();
-      return *this;
-   }
-
-   MeshBase& MeshBase::refine(
-         std::function<bool(const Element&)> p,
-         Refinement::Type t,
-         int maxHangingNodesLevel)
-   {
-      assert(maxHangingNodesLevel >= 1);
-      if (maxHangingNodesLevel == std::numeric_limits<int>::infinity())
-         maxHangingNodesLevel = 0; // interpreted as unlimited in
-                                   // GeneralRefinement()
-      mfem::Array<int> refinementList;
-      for (int i = 0; i < count<Element>(); i++)
-         if (p(get<Element>(i)))
-            refinementList.Append(i);
-      switch (t)
-      {
-         case Refinement::Type::Automatic:
-         {
-            getHandle().GeneralRefinement(refinementList, -1, maxHangingNodesLevel);
-            break;
-         }
-         case Refinement::Type::Conforming:
-         {
-            getHandle().GeneralRefinement(refinementList, 0, maxHangingNodesLevel);
-            break;
-         }
-         case Refinement::Type::NonConforming:
-         {
-            getHandle().GeneralRefinement(refinementList, 1, maxHangingNodesLevel);
-            break;
-         }
-      };
-      return *this;
-   }
-
-   std::set<int> MeshBase::getAttributes() const
-   {
-      return std::set<int>(
+      return std::set<Attribute>(
             getHandle().attributes.begin(), getHandle().attributes.end());
    }
 
-   std::set<int> MeshBase::getBoundaryAttributes() const
+   std::set<Attribute> MeshBase::getBoundaryAttributes() const
    {
-      return std::set<int>(
+      return std::set<Attribute>(
             getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
    }
 
    void Mesh<Context::Serial>::save(
-         const boost::filesystem::path& filename, IO::FileFormat fmt, int precision) const
+         const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precision) const
    {
       std::ofstream ofs(filename.c_str());
       if (!ofs)
@@ -143,144 +105,219 @@ namespace Rodin::Geometry
    double MeshBase::getVolume()
    {
       double totalVolume = 0;
-      for (int i = 0; i < count<Element>(); i++)
-         totalVolume += getHandle().GetElementVolume(i);
+      for (auto it = getElement(); !it.end(); ++it)
+         totalVolume += it->getVolume();
       return totalVolume;
    }
 
-   double MeshBase::getVolume(int attr)
+   double MeshBase::getVolume(Attribute attr)
    {
       double totalVolume = 0;
-      for (int i = 0; i < count<Element>(); i++)
-         totalVolume += getHandle().GetElementVolume(i) * (getHandle().GetAttribute(i) == attr);
-      return totalVolume;
-   }
-
-   double MeshBase::getBoundaryElementArea(int i)
-   {
-      mfem::ElementTransformation *et = getHandle().GetBdrElementTransformation(i);
-      const mfem::IntegrationRule &ir = mfem::IntRules.Get(
-            getHandle().GetBdrElementBaseGeometry(i), et->OrderJ());
-      double area = 0.0;
-      for (int j = 0; j < ir.GetNPoints(); j++)
+      for (auto it = getElement(); !it.end(); ++it)
       {
-         const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-         et->SetIntPoint(&ip);
-         area += ip.weight * et->Weight();
+         if (it->getAttribute() == attr)
+            totalVolume += it->getVolume();
       }
-      return area;
+      return totalVolume;
    }
 
    double MeshBase::getPerimeter()
    {
-      double totalArea = 0;
-      for (int i = 0; i < count<Element>(); i++)
-         totalArea += getBoundaryElementArea(i);
-      return totalArea;
-   }
-
-   double MeshBase::getPerimeter(int attr)
-   {
       double totalVolume = 0;
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         totalVolume += getBoundaryElementArea(i) * (getHandle().GetBdrAttribute(i) == attr);
+      for (auto it = getBoundary(); !it.end(); ++it)
+         totalVolume += it->getVolume();
       return totalVolume;
    }
 
-   std::set<int> MeshBase::where(std::function<bool(const Element&)> p) const
+   double MeshBase::getPerimeter(Attribute attr)
    {
-      std::set<int> res;
-      for (int i = 0; i < count<Element>(); i++)
-         if (p(get<Element>(i)))
-            res.insert(i);
-      return res;
-   }
-
-   MeshBase& MeshBase::edit(std::function<void(ElementView)> f)
-   {
-      for (int i = 0; i < count<Element>(); i++)
-         f(get<Element>(i));
-      return *this;
-   }
-
-   MeshBase& MeshBase::edit(std::function<void(BoundaryElementView)> f)
-   {
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         f(get<BoundaryElement>(i));
-      return *this;
-   }
-
-   MeshBase& MeshBase::edit(std::function<void(ElementView)> f, const std::set<int>& elements)
-   {
-      for (auto el : elements)
+      double totalVolume = 0;
+      for (auto it = getBoundary(); !it.end(); ++it)
       {
-         assert(el >= 0);
-         assert(el < count<Element>());
-
-         f(get<Element>(el));
+         if (it->getAttribute() == attr)
+            totalVolume += it->getVolume();
       }
-      return *this;
+      return totalVolume;
    }
 
-   MeshBase& MeshBase::update()
-   {
-      getHandle().SetAttributes();
-      return *this;
-   }
+   // std::deque<std::set<int>> MeshBase::ccl(
+   //       std::function<bool(const Element&, const Element&)> p) const
+   // {
+   //    std::set<int> visited;
+   //    std::deque<int> searchQueue;
+   //    std::deque<std::set<int>> res;
 
-   std::deque<std::set<int>> MeshBase::ccl(
-         std::function<bool(const Element&, const Element&)> p) const
-   {
-      std::set<int> visited;
-      std::deque<int> searchQueue;
-      std::deque<std::set<int>> res;
+   //    // Perform the labelling
+   //    assert(false);
+   //    // for (int i = 0; i < count<Element>(); i++)
+   //    // {
+   //    //    if (!visited.count(i))
+   //    //    {
+   //    //       res.push_back({});
+   //    //       searchQueue.push_back(i);
+   //    //       while (searchQueue.size() > 0)
+   //    //       {
+   //    //          int el = searchQueue.back();
+   //    //          searchQueue.pop_back();
+   //    //          auto result = visited.insert(el);
+   //    //          bool inserted = result.second;
+   //    //          if (inserted)
+   //    //          {
+   //    //             res.back().insert(el);
+   //    //             for (int n : get<Element>(el).adjacent())
+   //    //             {
+   //    //                if (p(get<Element>(el), get<Element>(n)))
+   //    //                {
+   //    //                   searchQueue.push_back(n);
+   //    //                }
+   //    //             }
+   //    //          }
+   //    //       }
+   //    //    }
+   //    // }
+   //    return res;
+   // }
 
-      // Perform the labelling
-      for (int i = 0; i < count<Element>(); i++)
-      {
-         if (!visited.count(i))
-         {
-            res.push_back({});
-            searchQueue.push_back(i);
-            while (searchQueue.size() > 0)
-            {
-               int el = searchQueue.back();
-               searchQueue.pop_back();
-               auto result = visited.insert(el);
-               bool inserted = result.second;
-               if (inserted)
-               {
-                  res.back().insert(el);
-                  for (int n : get<Element>(el).adjacent())
-                  {
-                     if (p(get<Element>(el), get<Element>(n)))
-                     {
-                        searchQueue.push_back(n);
-                     }
-                  }
-               }
-            }
-         }
-      }
-      return res;
-   }
-
+   // ---- Mesh<Serial> ------------------------------------------------------
 #ifdef RODIN_USE_MPI
-   Mesh<Context::Parallel>
+   Mesh<Context::MPI>
    Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
    {
-      return Mesh<Context::Parallel>(comm, *this);
+      return Mesh<Context::MPI>(comm, *this);
    }
 #endif
 
-   // ---- Mesh<Serial> ------------------------------------------------------
    Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
       : m_mesh(std::move(mesh))
-   {}
+   {
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
+   }
 
-   Mesh<Context::Serial>::Mesh(const Mesh& other)
-      : m_mesh(other.m_mesh)
-   {}
+   size_t Mesh<Context::Serial>::getCount(size_t dimension) const
+   {
+      if (dimension == getDimension())
+      {
+         return m_mesh.GetNE();
+      }
+      else if (dimension == getDimension() - 1)
+      {
+         return m_mesh.GetNumFaces();
+      }
+      else if (dimension == 0)
+      {
+         return m_mesh.GetNV();
+      }
+      else
+      {
+         assert(false);
+      }
+      return 0;
+   }
+
+   FaceIterator Mesh<Context::Serial>::getBoundary() const
+   {
+      std::vector<Index> indices;
+      indices.reserve(getHandle().GetNBE());
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+      {
+         int idx = getHandle().GetBdrFace(i);
+         if (!getHandle().FaceIsInterior(idx))
+            indices.push_back(idx);
+      }
+      return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+   }
+
+   FaceIterator Mesh<Context::Serial>::getInterface() const
+   {
+      std::vector<Index> indices;
+      indices.reserve(getHandle().GetNumFaces());
+      for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
+      {
+         if (getHandle().FaceIsInterior(idx))
+            indices.push_back(idx);
+      }
+      return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+   }
+
+   ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
+   {
+      return ElementIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension())));
+   }
+
+   FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
+   {
+      return FaceIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension() - 1)));
+   }
+
+   SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
+   {
+      return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));
+   }
+
+   bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
+   {
+      return getHandle().FaceIsInterior(faceIdx);
+   }
+
+   bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
+   {
+      return !getHandle().FaceIsInterior(faceIdx);
+   }
+
+   Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
+   {
+      if (dimension == getDimension())
+      {
+         return getHandle().GetAttribute(index);
+      }
+      else if (dimension == getDimension() - 1)
+      {
+         auto it = m_f2b.find(index);
+         if (it != m_f2b.end())
+         {
+            return getHandle().GetBdrAttribute(it->second);
+         }
+         else
+         {
+            return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+         }
+      }
+      else if (dimension == 0)
+      {
+         assert(false);
+         return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+      }
+      else
+      {
+         assert(false);
+         return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+      }
+   }
+
+   Mesh<Context::Serial>& Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
+   {
+      if (dimension == getDimension())
+      {
+         getHandle().SetAttribute(index, attr);
+      }
+      else if (dimension == getDimension() - 1)
+      {
+         auto it = m_f2b.find(index);
+         if (it != m_f2b.end())
+         {
+            getHandle().SetBdrAttribute(it->second, attr);
+         }
+         else
+         {
+            assert(false);
+         }
+      }
+      else
+      {
+      }
+      return *this;
+   }
 
    Mesh<Context::Serial>&
    Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
@@ -324,105 +361,43 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::extract(const std::set<int>& elements)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr)
    {
-      SubMesh<Context::Serial> res(*this);
-      res.initialize(getDimension(), getSpaceDimension(), elements.size());
-      for (int el : elements)
-         res.add(get<Element>(el));
-      res.finalize();
-      return res;
+      return keep(std::set<Attribute>{attr});
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(int attr)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
    {
-      return keep(std::set<int>{attr});
-   }
-
-   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<int>& attrs)
-   {
-      assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-
       SubMesh<Context::Serial> res(*this);
       res.initialize(getDimension(), getSpaceDimension());
-
-      // Add elements with matching attribute
-      for (int i = 0; i < count<Element>(); i++)
+      std::set<Index> indices;
+      for (Index i = 0; i < getCount(getDimension()); i++)
       {
-         const auto& el = get<Element>(i);
-         if (attrs.count(el.getAttribute()))
-            res.add(el);
+         if (attrs.count(getAttribute(getDimension(), i)))
+            indices.insert(i);
       }
-
-      // Add the boundary elements
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-      {
-         const auto& be = get<BoundaryElement>(i);
-         const auto& elems = be.elements();
-         for (const auto& el : elems)
-         {
-            if (attrs.count(get<Element>(el).getAttribute()))
-            {
-               res.add(be);
-               break;
-            }
-         }
-      }
+      res.include(getDimension(), indices);
       res.finalize();
       return res;
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::skin()
+   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
    {
       assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-
-      SubMesh<Context::Serial> res(*this);
-      res.initialize(getSpaceDimension() - 1, getSpaceDimension());
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         res.add(get<BoundaryElement>(i));
-      res.finalize();
-      return res;
+      assert(false);
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(int attr)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
    {
-      return trim(std::set<int>{attr});
+      return trim(std::set<Attribute>{attr});
    }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<int>& attrs)
+   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<Attribute>& attrs)
    {
-      std::set<int> complement = getAttributes();
+      std::set<Attribute> complement = getAttributes();
       for (const auto& a : attrs)
          complement.erase(a);
       return keep(complement);
-   }
-
-   Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
-         const std::map<std::set<int>, int>& boundaries)
-   {
-      for (int i = 0; i < count<Face>(); i++)
-      {
-         const auto& fc = get<Face>(i);
-         const auto& elems = fc.elements();
-         if (elems.size() == 2)
-         {
-            std::set<int> k{
-               get<Element>(*elems.begin()).getAttribute(),
-               get<Element>(*std::next(elems.begin())).getAttribute()
-            };
-            auto it = boundaries.find(k);
-            if (it != boundaries.end())
-            {
-               mfem::Element* be =
-                  getHandle().NewElement(fc.getHandle().GetGeometryType());
-               be->SetVertices(fc.getHandle().GetVertices());
-               be->SetAttribute(it->second);
-               getHandle().AddBdrElement(be);
-            }
-         }
-      }
-      getHandle().FinalizeTopology();
-      return *this;
    }
 
    mfem::Mesh& Mesh<Context::Serial>::getHandle()
@@ -436,7 +411,7 @@ namespace Rodin::Geometry
    }
 
    Mesh<Context::Serial>&
-   Mesh<Context::Serial>::initialize(int dim, int sdim)
+   Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
    {
       m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
       return *this;
@@ -444,7 +419,7 @@ namespace Rodin::Geometry
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
    {
-      if (static_cast<int>(x.size()) != getSpaceDimension())
+      if (x.size() != getSpaceDimension())
       {
          Alert::Exception()
             << "Vertex dimension is different from space dimension"
@@ -457,7 +432,7 @@ namespace Rodin::Geometry
 
    Mesh<Context::Serial>& Mesh<Context::Serial>::element(
          Type geom,
-         const std::vector<int>& vs, int attr)
+         const std::vector<int>& vs, Attribute attr)
    {
       mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
       el->SetVertices(vs.data());
@@ -466,9 +441,9 @@ namespace Rodin::Geometry
       return *this;
    }
 
-   Mesh<Context::Serial>& Mesh<Context::Serial>::boundary(
+   Mesh<Context::Serial>& Mesh<Context::Serial>::face(
          Type geom,
-         const std::vector<int>& vs, int attr)
+         const std::vector<int>& vs, Attribute attr)
    {
       mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
       el->SetVertices(vs.data());
@@ -481,9 +456,9 @@ namespace Rodin::Geometry
    {
       getHandle().FinalizeTopology();
       getHandle().Finalize(false, true);
+      for (int i = 0; i < getHandle().GetNBE(); i++)
+         m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
       return *this;
    }
-
-   // ---- Mesh<Parallel> ----------------------------------------------------
 }
 

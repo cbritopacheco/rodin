@@ -26,10 +26,13 @@ namespace Rodin::Variational
    class BasisOperator
    {
       public:
+         constexpr
          BasisOperator() = default;
 
+         constexpr
          BasisOperator(BasisOperator&&) = default;
 
+         constexpr
          BasisOperator(const BasisOperator&) = default;
 
          BasisOperator& operator=(BasisOperator&&) = default;
@@ -57,8 +60,7 @@ namespace Rodin::Variational
    class DenseBasisOperator : public BasisOperator
    {
       public:
-         DenseBasisOperator()
-         {}
+         DenseBasisOperator() = default;
 
          DenseBasisOperator(int rows, int cols, int dofs)
             :  m_rows(rows),
@@ -136,6 +138,16 @@ namespace Rodin::Variational
          DenseBasisOperator& operator=(double s)
          {
             m_data = s;
+            return *this;
+         }
+
+         DenseBasisOperator& operator-=(const DenseBasisOperator& rhs)
+         {
+            assert(getRows() == rhs.getRows());
+            assert(getColumns() == rhs.getColumns());
+            assert(getDOFs() == rhs.getDOFs());
+            for (int i = 0; i < getDOFs(); i++)
+               operator()(i) -= rhs(i);
             return *this;
          }
 

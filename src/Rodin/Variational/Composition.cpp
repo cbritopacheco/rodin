@@ -32,13 +32,5 @@ namespace Rodin::Variational
       :  ScalarFunctionBase(std::move(other)),
          m_f(std::move(other.m_f)), m_g(std::move(other.m_g))
    {}
-
-   double Composition<std::function<double(double)>, FunctionBase>::getValue(
-         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
-   {
-      mfem::DenseMatrix v;
-      m_g->getValue(v, trans, ip);
-      return m_f(v(0, 0));
-   }
 }
 

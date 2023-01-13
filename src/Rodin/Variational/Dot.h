@@ -40,7 +40,7 @@ namespace Rodin::Variational
 
          Dot(Dot&& other);
 
-         Dot& traceOf(const std::set<int>& attrs) override;
+         Dot& traceOf(Geometry::Attribute attrs) override;
 
          virtual LHS& getLHS()
          {
@@ -62,9 +62,31 @@ namespace Rodin::Variational
             return *m_b;
          }
 
-         virtual double getValue(
-            mfem::ElementTransformation& trans,
-            const mfem::IntegrationPoint& ip) const override;
+         virtual FunctionValue getValue(const Geometry::Point& p) const override
+         {
+            assert(m_a->getRangeShape() == m_b->getRangeShape());
+            assert(m_a->getRangeType() == m_b->getRangeType());
+            switch (m_a->getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  return m_a->getValue(p).scalar() * m_b->getValue(p).scalar();
+               }
+               case RangeType::Vector:
+               {
+                  return m_a->getValue(p).vector() * m_b->getValue(p).vector();
+               }
+               case RangeType::Matrix:
+               {
+                  return m_a->getValue(p).matrix() * m_b->getValue(p).matrix();
+               }
+               default:
+               {
+                  assert(false);
+                  return 0.0;
+               }
+            }
+         }
 
          virtual Dot* copy() const noexcept override
          {
@@ -141,11 +163,9 @@ namespace Rodin::Variational
             return 1;
          }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
+         int getDOFs(const Geometry::Simplex& element) const override
          {
-            return getRHS().getDOFs(fe, trans);
+            return getRHS().getDOFs(element);
          }
 
          int getColumns() const override
@@ -165,25 +185,48 @@ namespace Rodin::Variational
 
          virtual void getOperator(
                DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const override
+               ShapeComputator& compute,
+               const Geometry::Point& p) const override
          {
-            mfem::DenseMatrix v;
-            getLHS().getValue(v, trans, ip);
-            DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, fe, trans, ip, compute);
-            int opDofs = getDOFs(fe, trans);
+            const int opDofs = getRHS().getDOFs(p.getSimplex());
             op.setSize(1, 1, opDofs);
-            for (int i = 0; i < opDofs; i++)
-               op(0, 0, i) = v * tmp(i);
+            switch (getLHS().getRangeType())
+            {
+               case RangeType::Scalar:
+               {
+                  FunctionValue::Scalar v = getLHS().getValue(p);
+                  DenseBasisOperator tmp;
+                  getRHS().getOperator(tmp, compute, p);
+                  for (int i = 0; i < opDofs; i++)
+                     op(0, 0, i) = v * tmp(0, 0, i);
+                  break;
+               }
+               case RangeType::Vector:
+               {
+                  FunctionValue::Vector v = getLHS().getValue(p);
+                  DenseBasisOperator tmp;
+                  getRHS().getOperator(tmp, compute, p);
+                  for (int i = 0; i < opDofs; i++)
+                     op(0, 0, i) = v * tmp(i).Data();
+                  break;
+               }
+               case RangeType::Matrix:
+               {
+                  FunctionValue::Matrix v = getLHS().getValue(p);
+                  DenseBasisOperator tmp;
+                  getRHS().getOperator(tmp, compute, p);
+                  for (int i = 0; i < opDofs; i++)
+                     op(0, 0, i) = v * tmp(i);
+                  break;
+               }
+            }
          }
 
          virtual Dot* copy() const noexcept override
          {
             return new Dot(*this);
          }
+
       private:
          std::unique_ptr<FunctionBase> m_lhs;
          std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
@@ -245,22 +288,18 @@ namespace Rodin::Variational
             return *m_test;
          }
 
-         virtual mfem::DenseMatrix getElementMatrix(
-               const mfem::FiniteElement& trialElement,
-               const mfem::FiniteElement& testElement,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const
+         virtual void getMatrix(
+               mfem::DenseMatrix& result, ShapeComputator& compute,
+               const Geometry::Point& p) const
          {
             assert(m_trial->getRangeShape() == m_test->getRangeShape());
             DenseBasisOperator trialOp, testOp;
-            m_trial->getOperator(trialOp, trialElement, trans, ip, compute);
-            m_test->getOperator(testOp, testElement, trans, ip, compute);
-            mfem::DenseMatrix result(testOp.getDOFs(), trialOp.getDOFs());
+            m_trial->getOperator(trialOp, compute, p);
+            m_test->getOperator(testOp, compute, p);
+            result.SetSize(testOp.getDOFs(), trialOp.getDOFs());
             for (int i = 0; i < testOp.getDOFs(); i++)
                for (int j = 0; j < trialOp.getDOFs(); j++)
                   result(i, j) = testOp(i) * trialOp(j);
-            return result;
          }
 
          virtual Dot* copy() const noexcept override

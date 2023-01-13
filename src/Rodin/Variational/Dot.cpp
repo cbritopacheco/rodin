@@ -22,21 +22,11 @@ namespace Rodin::Variational
    {}
 
    Dot<FunctionBase, FunctionBase>&
-   Dot<FunctionBase, FunctionBase>::traceOf(const std::set<int>& attrs)
+   Dot<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attrs)
    {
       ScalarFunctionBase::traceOf(attrs);
       m_a->traceOf(attrs);
       m_b->traceOf(attrs);
       return *this;
-   }
-
-   double Dot<FunctionBase, FunctionBase>::getValue(
-         mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip) const
-   {
-      assert(m_a->getRangeShape() == m_b->getRangeShape());
-      mfem::DenseMatrix a, b;
-      m_a->getValue(a, trans, ip);
-      m_b->getValue(b, trans, ip);
-      return a * b;
    }
 }
