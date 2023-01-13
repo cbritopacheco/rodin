@@ -12,7 +12,7 @@
 1. [Building the project](#building-the-project)
 2. [Features](#features)
 3. [Requirements](#requirements)
-4. [CMake Options](cmake-options)
+4. [CMake Options](#cmake-options)
 5. [Building the documentation](#building-the-documentation)
 
 
