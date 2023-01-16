@@ -33,6 +33,22 @@ make -j4
 Rodin comes with a native C++17 domain specific language (DSL) for assembling
 and solving variational formulations.
 
+For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
+```math
+\left\{
+\begin{aligned}
+ -\Delta u &= f && \text{in } \Omega\\
+ u &= 0 && \text{on } \Gamma
+\end{aligned}
+\right.,
+```
+has the associated weak formulation:
+```math
+\text{Find} \ u \in H_0^1(\Omega) \quad \text{s.t.} \quad \forall v \in H^0_1(\Omega), \quad \int_\Omega \nabla u \cdot \nabla v \ dx = \int_\Omega f v \ dx,
+```
+
+which can be quickly implemented via the following lines of code:
+
 ```c++
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -65,16 +81,20 @@ int main(int, char**)
 
 #### MMG
 
-```c++
-MMG::Mesh Omega;
-Omega.load(meshFile, IO::FileFormat::MEDIT);
+- Loading the mesh:
+  ```c++
+  MMG::Mesh Omega;
+  Omega.load(meshFile, IO::FileFormat::MEDIT);
+  ```
 
-MMG::MeshOptimizer().setHMax(hmax) // maximal edge size
-                    .setHMin(hmin) // minimal edge size
-                    .setGradation(hgrad) // ratio between two edges
-                    .setHausdorff(hausd) // curvature refinement
-                    .optimize(Omega);
-```
+- Optimizing the mesh:
+  ```c++
+  MMG::MeshOptimizer().setHMax(hmax) // maximal edge size
+                      .setHMin(hmin) // minimal edge size
+                      .setGradation(hgrad) // ratio between two edges
+                      .setHausdorff(hausd) // curvature refinement
+                      .optimize(Omega);
+  ```
 
 ## Roadmap
 

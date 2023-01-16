@@ -1,10 +1,12 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: If you use this software, please cite it as below.
+abstract: C++17 finite element method and shape optimization framework.
 authors:
   - family-names: Brito-Pacheco
     given-names: Carlos
     orcid: https://orcid.org/0000-0002-5913-2847
-title: "Rodin"
+title: Rodin
 version: 0.0.1
 date-released: 2023-01-01
-# doi: 10.5281/zenodo.1234
+license: Boost Software License - Version 1.0
+url: "https://github.com/cbritopacheco/rodin"
