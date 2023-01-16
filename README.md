@@ -7,6 +7,15 @@
 | master      | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg)](https://cbritopacheco.github.io/rodin/) |
 | develop     | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml) | |
 
+## Table of Contents
+
+1. [Building the project](#building-the-project)
+2. [Features](#features)
+3. [Requirements](#requirements)
+4. [CMake Options](#cmake-options)
+5. [Building the documentation](#building-the-documentation)
+
+
 ## Building the project
 
 ```
