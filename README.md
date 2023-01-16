@@ -11,9 +11,10 @@
 
 1. [Building the project](#building-the-project)
 2. [Features](#features)
-3. [Requirements](#requirements)
-4. [CMake Options](#cmake-options)
-5. [Building the documentation](#building-the-documentation)
+3. [Third-Party integrations](#third-party-integrations)
+5. [Requirements](#requirements)
+6. [CMake options](#cmake-options)
+7. [Building the documentation](#building-the-documentation)
 
 
 ## Building the project
@@ -73,9 +74,11 @@ int main(int, char**)
 }
 ```
 
-### Third-Party integrations
+## Third-Party integrations
 
-#### MMG
+### MMG
+
+[MMG](https://github.com/MmgTools/mmg) is an open source software for bidimensional and tridimensional surface and volume remeshing.
 
 - Loading the mesh:
   ```c++
@@ -107,7 +110,7 @@ List of features and modules that are in the works:
 Any of these should be available for quick install from your standard package
 manager.
 
-## CMake Options
+## CMake options
 
 | Option                 | Description                                       |
 |------------------------|---------------------------------------------------|
