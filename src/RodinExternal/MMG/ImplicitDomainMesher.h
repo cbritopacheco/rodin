@@ -186,7 +186,7 @@ namespace Rodin::External::MMG
               {
                 for (auto bit = rodinMesh.getBoundary(); !bit.end(); ++bit)
                 {
-                  const Geometry::Index idx = bit.getIndex();
+                  const Geometry::Index idx = bit->getIndex();
                   const Geometry::Attribute attr = rodinMesh.getFaceAttribute(idx);
                   auto it = m_originalRefMap.find(attr);
                   if (it != m_originalRefMap.end())
@@ -208,7 +208,7 @@ namespace Rodin::External::MMG
               {
                 for (auto eit = rodinMesh.getElement(); !eit.end(); ++eit)
                 {
-                  const Geometry::Index idx = eit.getIndex();
+                  const Geometry::Index idx = eit->getIndex();
                   const Geometry::Attribute attr = rodinMesh.getElementAttribute(idx);
                   auto it = m_originalRefMap.find(attr);
                   if (it != m_originalRefMap.end())

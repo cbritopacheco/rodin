@@ -58,7 +58,8 @@ int main(int, char**)
     // Skin the mesh, computing the borders of the new regions
     Alert::Info() << "    | Skinning mesh." << Alert::Raise;
     auto dOmega = Omega.skin();
-    dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
+    assert(false);
+    // dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
 
     // Build finite element spaces
     Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
@@ -69,11 +70,8 @@ int main(int, char**)
     H1 ThS(dOmega, dOmega.getSpaceDimension());
 
     Alert::Info() << "    | Distancing domain." << Alert::Raise;
-    auto distS = MMG::Distancer(VhS).setInteriorDomain(GammaD)
-                                    .distance(dOmega);
-
-    GridFunction dist(Vh);
-    distS.transfer(dist);
+    auto dist = MMG::Distancer(VhS).setInteriorDomain(GammaD)
+                                   .distance(dOmega);
 
     Solver::CG solver;
     solver.setMaxIterations(1000);
@@ -120,28 +118,18 @@ int main(int, char**)
     fObj << objective << "\n";
     fObj.flush();
 
-    // Transfer the functions to the surfacic spaces
-    GridFunction uS(VhS), pS(VhS);
-    u.getSolution().transfer(uS);
-    p.getSolution().transfer(pS);
-
     u.getSolution().save("u.gf");
     Omega.save("u.mesh");
 
     // Compute the shape gradient
     Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
-    auto hadamard = 1. / (epsilon * epsilon) * uS * pS + ell;
-    auto gradS = getShapeGradient(ThS, distS, hadamard, solver);
-
-    // Transfer back the vector field to the whole space
-    GridFunction grad(Th);
-    gradS.transfer(grad);
-
+    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
+    auto grad = getShapeGradient(ThS, dist, hadamard, solver);
     grad *= -1.0;
 
     // Advect the distance function with the gradient
     Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
-    double gInf = std::max(gradS.max(), -gradS.min());
+    double gInf = std::max(grad.max(), -grad.min());
     double dt = 2 * hmax / gInf;
     MMG::Advect(dist, grad).surface().step(dt);
 
@@ -218,7 +206,7 @@ GridFunction<H1<Context::Serial>> getShapeGradient(
   Problem conormal(d, v);
   conormal = Integral(alpha * Jacobian(d), Jacobian(v))
            + Integral(d, v)
-           - BoundaryIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
+           - FaceIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
   conormal.solve(solver);
 
   const auto& cnd = d.getSolution();
