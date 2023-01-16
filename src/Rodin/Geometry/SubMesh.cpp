@@ -26,11 +26,9 @@ namespace Rodin::Geometry
       {
          for (const auto& simplex : simplices)
          {
-            auto el = getParent().getElement(simplex);
-
             // Add element vertices to the resulting mesh
             mfem::Array<int> pv;
-            el->getHandle().GetVertices(pv);
+            getParent().getHandle().GetElementVertices(simplex, pv);
 
             mfem::Array<int> sv(pv.Size());
             for (int i = 0; i < sv.Size(); i++)
@@ -49,11 +47,11 @@ namespace Rodin::Geometry
 
             // Add element with the new vertex ordering
             mfem::Element* newEl =
-               getHandle().NewElement(el->getHandle().GetGeometryType());
+               getHandle().NewElement(getParent().getHandle().GetElementGeometry(simplex));
             newEl->SetVertices(sv);
-            newEl->SetAttribute(el->getAttribute());
+            newEl->SetAttribute(getParent().getElementAttribute(simplex));
             size_t seid = getHandle().AddElement(newEl);
-            m_s2pe.insert({seid, el->getIndex()});
+            m_s2pe.insert({seid, simplex});
          }
 
          for (int i = 0; i < getParent().getHandle().GetNBE(); i++)
