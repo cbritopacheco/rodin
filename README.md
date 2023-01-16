@@ -56,17 +56,13 @@ which can be quickly implemented via the following lines of code:
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+const Geometry::Attribute Gamma = 1;
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/poisson-example.mesh";
-  int Gamma = 1;
-  Mesh Omega;
-  Omega.load(meshFile);
+  Mesh Omega; Omega.load("../resources/mfem/poisson-example.mesh");
   H1 Vh(Omega);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-  ScalarFunction f(1.0);
-  ScalarFunction g(0.0);
+  TrialFunction u(Vh); TestFunction  v(Vh);
+  ScalarFunction f(1.0); ScalarFunction g(0.0);
   Solver::UMFPack solver;
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
