@@ -40,16 +40,14 @@ namespace Rodin::Geometry
             Attribute
          };
 
-         struct Data
-         {
-            std::unique_ptr<mfem::Element> element;
-            std::unique_ptr<mfem::ElementTransformation> trans;
-         };
+         Simplex(
+               size_t dimension,
+               Index index,
+               const MeshBase& mesh,
+               const std::vector<Index>& vertices,
+               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-         Simplex(size_t dimension, Index index, const MeshBase& mesh, Data data)
-            :  m_dimension(dimension), m_index(index), m_mesh(mesh),
-               m_data(std::move(data))
-         {}
+         Simplex(const Simplex&) = delete;
 
          Simplex(Simplex&&) = default;
 
@@ -68,6 +66,20 @@ namespace Rodin::Geometry
             return m_index;
          }
 
+
+         Type getGeometry() const
+         {
+            return m_type;
+         }
+
+         /**
+          * @brief Gets the attribute of the simplex.
+          */
+         Attribute getAttribute() const
+         {
+            return m_attr;
+         }
+
          /**
           * @brief Gets the associated mesh to the simplex.
           */
@@ -75,13 +87,6 @@ namespace Rodin::Geometry
          {
             return m_mesh.get();
          }
-
-         Type getGeometry() const;
-
-         /**
-          * @brief Gets the attribute of the simplex.
-          */
-         Attribute getAttribute() const;
 
          double getVolume() const;
 
@@ -91,17 +96,14 @@ namespace Rodin::Geometry
 
          virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
-         const mfem::Element& getHandle() const
-         {
-            assert(m_data.element);
-            return *m_data.element;
-         }
-
       private:
          const size_t m_dimension;
          const Index m_index;
          std::reference_wrapper<const MeshBase> m_mesh;
-         Data m_data;
+         std::vector<Index> m_vertices;
+         Attribute m_attr;
+         Geometry::Type m_type;
+         mutable std::unique_ptr<mfem::ElementTransformation> m_trans;
    };
 
    bool operator<(const Simplex& lhs, const Simplex& rhs);
@@ -117,7 +119,12 @@ namespace Rodin::Geometry
    class Element : public Simplex
    {
       public:
-         Element(Index index, const MeshBase& mesh, Data data);
+         Element(
+               Index index,
+               const MeshBase& mesh, const std::vector<Index>& vertices,
+               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+         Element(const Element&) = delete;
 
          Element(Element&& other)
             :  Simplex(std::move(other))
@@ -136,12 +143,15 @@ namespace Rodin::Geometry
    class Face : public Simplex
    {
       public:
-         Face(Index index, const MeshBase& mesh, Data data);
+         Face(
+               Index index,
+               const MeshBase& mesh, const std::vector<Index>& vertices,
+               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+         Face(const Face&) = delete;
 
          Face(Face&& other)
-            : Simplex(std::move(other)),
-              m_isBoundary(std::move(other.m_isBoundary)),
-              m_isInterface(std::move(other.m_isInterface))
+            : Simplex(std::move(other))
          {}
 
          FaceIterator getAdjacent() const;
@@ -151,10 +161,6 @@ namespace Rodin::Geometry
          bool isBoundary() const;
 
          bool isInterface() const;
-
-      private:
-         const bool m_isBoundary;
-         const bool m_isInterface;
    };
 
    class Vertex : public Simplex
