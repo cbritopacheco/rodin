@@ -49,16 +49,12 @@ namespace Rodin::Variational::Assembly
       {
          for (auto it = input.mesh.getElement(); !it.end(); ++it)
          {
-            std::optional<Geometry::Element> cached;
+            const auto& element = *it;
+            const Geometry::Attribute attr = element.getAttribute();
             for (const auto& bfi : domainBFIs)
             {
-               const Geometry::Attribute attr = input.mesh.getElementAttribute(it.getIndex());
                if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                {
-                  if (!cached.has_value())
-                     cached.emplace(std::move(*it));
-                  assert(cached.has_value());
-                  const auto& element = cached.value();
                   res.AddSubMatrix(
                         input.testFES.getDOFs(element), input.trialFES.getDOFs(element),
                         bfi.getMatrix(element));
@@ -71,35 +67,25 @@ namespace Rodin::Variational::Assembly
       {
          for (auto it = input.mesh.getFace(); !it.end(); ++it)
          {
-            const auto& idx = it.getIndex();
-            std::optional<Geometry::Face> cached;
-            const Geometry::Attribute attr = input.mesh.getFaceAttribute(idx);
-
+            const auto& face = *it;
+            const Geometry::Attribute attr = face.getAttribute();
             for (const auto& bfi : facesBFIs)
             {
                if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                {
-                  if (!cached.has_value())
-                     cached.emplace(std::move(*it));
-                  assert(cached.has_value());
-                  const auto& face = cached.value();
                   res.AddSubMatrix(
                         input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
                         bfi.getMatrix(face));
                }
             }
 
-            if (input.mesh.isBoundary(idx))
+            if (face.isBoundary())
             {
                for (const auto& bfi : boundaryBFIs)
                {
-                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
                   if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                   {
-                     if (!cached.has_value())
-                        cached.emplace(std::move(*it));
-                     assert(cached.has_value());
-                     const auto& face = cached.value();
                      res.AddSubMatrix(
                            input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
                            bfi.getMatrix(face));
@@ -107,17 +93,13 @@ namespace Rodin::Variational::Assembly
                }
             }
 
-            if (input.mesh.isInterface(idx))
+            if (face.isInterface())
             {
                for (const auto& bfi : interfaceBFIs)
                {
-                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
                   if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                   {
-                     if (!cached.has_value())
-                        cached.emplace(std::move(*it));
-                     assert(cached.has_value());
-                     const auto& face = cached.value();
                      res.AddSubMatrix(
                            input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
                            bfi.getMatrix(face));
@@ -172,16 +154,12 @@ namespace Rodin::Variational::Assembly
       {
          for (auto it = input.mesh.getElement(); !it.end(); ++it)
          {
-            std::optional<Geometry::Element> cached;
+            const auto& element = *it;
+            const Geometry::Attribute attr = element.getAttribute();
             for (const auto& lfi : domainLFIs)
             {
-               const Geometry::Attribute attr = input.mesh.getElementAttribute(it.getIndex());
                if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
                {
-                  if (!cached.has_value())
-                     cached.emplace(std::move(*it));
-                  assert(cached.has_value());
-                  const auto& element = cached.value();
                   res.AddElementVector(
                      input.fes.getDOFs(element), lfi.getVector(element));
                }
@@ -193,49 +171,34 @@ namespace Rodin::Variational::Assembly
       {
          for (auto it = input.mesh.getFace(); !it.end(); ++it)
          {
-            const auto& idx = it.getIndex();
-            std::optional<Geometry::Face> cached;
-            const Geometry::Attribute attr = input.mesh.getFaceAttribute(idx);
-
+            const auto& face = *it;
+            const Geometry::Attribute attr = face.getAttribute();
             for (const auto& bfi : facesLFIs)
             {
                if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
                {
-                  if (!cached.has_value())
-                     cached.emplace(std::move(*it));
-                  assert(cached.has_value());
-                  const auto& face = cached.value();
                   res.AddElementVector(input.fes.getDOFs(face), bfi.getVector(face));
                }
             }
 
-            if (input.mesh.isBoundary(idx))
+            if (face.isBoundary())
             {
                for (const auto& lfi : boundaryLFIs)
                {
-                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
                   if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
                   {
-                     if (!cached.has_value())
-                        cached.emplace(std::move(*it));
-                     assert(cached.has_value());
-                     const auto& face = cached.value();
                      res.AddElementVector(input.fes.getDOFs(face), lfi.getVector(face));
                   }
                }
             }
 
-            if (input.mesh.isInterface(idx))
+            if (face.isInterface())
             {
                for (const auto& lfi : interfaceLFIs)
                {
-                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it.getIndex());
+                  const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
                   if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
                   {
-                     if (!cached.has_value())
-                        cached.emplace(std::move(*it));
-                     assert(cached.has_value());
-                     const auto& face = cached.value();
                      res.AddElementVector(input.fes.getDOFs(face), lfi.getVector(face));
                   }
                }

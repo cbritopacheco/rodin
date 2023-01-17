@@ -9,19 +9,106 @@ namespace Rodin::Geometry
    }
 
    // ---- Simplex -----------------------------------------------------------
-   Type Simplex::getGeometry() const
+   Simplex::Simplex(
+         size_t dimension,
+         Index index,
+         const MeshBase& mesh,
+         const std::vector<Index>& vertices,
+         Attribute attr)
+      :  m_dimension(dimension), m_index(index), m_mesh(mesh),
+         m_vertices(vertices), m_attr(attr)
    {
-      return static_cast<Type>(m_data.element->GetType());
-   }
-
-   Attribute Simplex::getAttribute() const
-   {
-      return m_data.element->GetAttribute();
+      if (m_dimension == mesh.getDimension())
+      {
+         m_type = static_cast<Geometry::Type>(mesh.getHandle().GetElementGeometry(index));
+      }
+      else if (m_dimension == mesh.getDimension() - 1)
+      {
+         m_type = static_cast<Geometry::Type>(mesh.getHandle().GetFaceGeometry(index));
+      }
+      else if (m_dimension == 0)
+      {
+         m_type = Geometry::Type::Point;
+      }
+      else
+      {
+         assert(false);
+      }
    }
 
    mfem::ElementTransformation& Simplex::getTransformation() const
    {
-      return *m_data.trans;
+      if (!m_trans)
+      {
+         const auto& mesh = getMesh();
+         const auto index = getIndex();
+         const auto dimension = getDimension();
+         const auto attribute = getAttribute();
+         if (dimension == getMesh().getDimension())
+         {
+            mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+            trans->Attribute = attribute;
+            trans->ElementNo = index;
+            trans->ElementType = mfem::ElementTransformation::ELEMENT;
+            trans->mesh = nullptr;
+            trans->Reset();
+            const mfem::Mesh& meshHandle = mesh.getHandle();
+            const mfem::GridFunction* nodes = meshHandle.GetNodes();
+            if (!nodes)
+            {
+               meshHandle.GetPointMatrix(getIndex(), trans->GetPointMat());
+               trans->SetFE(
+                     meshHandle.GetTransformationFEforElementType(
+                        meshHandle.GetElementType(getIndex())));
+            }
+            else
+            {
+               assert(false);
+            }
+            m_trans.reset(trans);
+         }
+         else if (dimension == getMesh().getDimension() - 1)
+         {
+            mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+            trans->Attribute = attribute;
+            trans->ElementNo = index;
+            trans->ElementType = mfem::ElementTransformation::FACE;
+            trans->mesh = nullptr;
+            mfem::DenseMatrix& pm = trans->GetPointMat();
+            trans->Reset();
+            const mfem::Mesh& meshHandle = mesh.getHandle();
+            const mfem::GridFunction* nodes = meshHandle.GetNodes();
+            const size_t spaceDim = mesh.getSpaceDimension();
+            if (!nodes)
+            {
+
+               mfem::Array<int> v;
+               meshHandle.GetFaceVertices(index, v);
+               const int nv = v.Size();
+               pm.SetSize(spaceDim, nv);
+               for (size_t i = 0; i < spaceDim; i++)
+                  for (int j = 0; j < nv; j++)
+                     pm(i, j) = meshHandle.GetVertex(v[j])[i];
+               trans->SetFE(
+                     meshHandle.GetTransformationFEforElementType(
+                        meshHandle.GetFaceElementType(index)));
+            }
+            else
+            {
+               assert(false);
+            }
+            m_trans.reset(trans);
+         }
+         else if (dimension == 0)
+         {
+            assert(false);
+         }
+         else
+         {
+            assert(false);
+         }
+      }
+      return *m_trans;
    }
 
    std::vector<Geometry::Point> Simplex::getIntegrationRule(int order) const
@@ -59,8 +146,10 @@ namespace Rodin::Geometry
    // }
 
    // ---- Element -----------------------------------------------------------
-   Element::Element(Index index, const MeshBase& mesh, Data data)
-      : Simplex(mesh.getDimension(), index, mesh, std::move(data))
+   Element::Element(
+         Index index,
+         const MeshBase& mesh, const std::vector<Index>& vertices, Attribute attr)
+      : Simplex(mesh.getDimension(), index, mesh, vertices, attr)
    {}
 
    ElementIterator Element::getAdjacent() const
@@ -70,20 +159,20 @@ namespace Rodin::Geometry
    }
 
    // ---- Face --------------------------------------------------------------
-   Face::Face(Index index, const MeshBase& mesh, Data data)
-      : Simplex(mesh.getDimension() - 1, index, mesh, std::move(data)),
-        m_isBoundary(mesh.isBoundary(index)),
-        m_isInterface(mesh.isInterface(index))
+   Face::Face(
+         Index index,
+         const MeshBase& mesh, const std::vector<Index>& vertices, Attribute attr)
+      : Simplex(mesh.getDimension() - 1, index, mesh, vertices, attr)
    {}
 
    bool Face::isBoundary() const
    {
-      return m_isBoundary;
+      return getMesh().isBoundary(getIndex());
    }
 
    bool Face::isInterface() const
    {
-      return m_isInterface;
+      return getMesh().isInterface(getIndex());
    }
 
    FaceIterator Face::getAdjacent() const

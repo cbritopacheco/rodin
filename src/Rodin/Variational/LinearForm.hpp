@@ -31,7 +31,7 @@ namespace Rodin::Variational
    LinearForm<FES, Context::Serial, mfem::Vector>
    ::operator()(const GridFunction<FES>& u) const
    {
-      return m_vector * u.getHandle();
+      return *m_vector * u.getHandle();
    }
 
    template <class FES>

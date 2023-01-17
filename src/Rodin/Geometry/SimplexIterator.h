@@ -21,11 +21,6 @@ namespace Rodin::Geometry
       public:
          virtual ~SimplexIteratorBase() = default;
 
-         virtual Index getIndex() const
-         {
-            return *getIndexGenerator();
-         }
-
          virtual bool end() const = 0;
 
          virtual SimplexIteratorBase& operator++() = 0;
@@ -46,9 +41,9 @@ namespace Rodin::Geometry
       public:
          SimplexIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-         SimplexIterator(const SimplexIterator& other);
+         SimplexIterator(const SimplexIterator&) = delete;
 
-         SimplexIterator(SimplexIterator&& other);
+         SimplexIterator(SimplexIterator&&) = default;
 
          bool end() const override;
 
@@ -86,6 +81,7 @@ namespace Rodin::Geometry
          const size_t m_dimension;
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
+         mutable bool m_dirty;
          mutable std::unique_ptr<Simplex> m_simplex;
    };
 
@@ -94,9 +90,9 @@ namespace Rodin::Geometry
       public:
          ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-         ElementIterator(const ElementIterator& other);
+         ElementIterator(const ElementIterator&) = delete;
 
-         ElementIterator(ElementIterator&& other);
+         ElementIterator(ElementIterator&& other) = default;
 
          bool end() const override;
 
@@ -130,6 +126,7 @@ namespace Rodin::Geometry
 
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
+         mutable bool m_dirty;
          mutable std::unique_ptr<Element> m_simplex;
    };
 
@@ -138,9 +135,9 @@ namespace Rodin::Geometry
       public:
          FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-         FaceIterator(const FaceIterator& other);
+         FaceIterator(const FaceIterator&) = delete;
 
-         FaceIterator(FaceIterator&& other);
+         FaceIterator(FaceIterator&&) = default;
 
          bool end() const override;
 
@@ -174,6 +171,7 @@ namespace Rodin::Geometry
 
          std::reference_wrapper<const MeshBase> m_mesh;
          std::unique_ptr<IndexGeneratorBase> m_gen;
+         mutable bool m_dirty;
          mutable std::unique_ptr<Face> m_simplex;
    };
 
