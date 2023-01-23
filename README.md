@@ -45,7 +45,7 @@ For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, 
 ```
 has the associated weak formulation:
 ```math
-\text{Find} \ u \in H_0^1(\Omega) \quad \text{s.t.} \quad \forall v \in H^0_1(\Omega), \quad \int_\Omega \nabla u \cdot \nabla v \ dx = \int_\Omega f v \ dx,
+\text{Find} \ u \in H^1(\Omega) \quad \text{s.t.} \quad \forall v \in H^1_0(\Omega), \quad \int_\Omega \nabla u \cdot \nabla v \ dx = \int_\Omega f v \ dx, \quad \text{with } \quad H^1_0(\Omega) := \{ v \in H^1(\Omega) \mid v = 0 \text{ on } \Gamma \}
 ```
 
 which can be quickly implemented via the following lines of code:
