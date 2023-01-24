@@ -36,7 +36,10 @@ int main(int, char**)
   // Use CG for solving
   Solver::CG cg;
   mfem::GSSmoother smoother;
-  cg.setPreconditioner(smoother).setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+  cg.setPreconditioner(smoother)
+    .setMaxIterations(200)
+    .setRelativeTolerance(1e-12)
+    .printIterations(true);
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))

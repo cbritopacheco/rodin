@@ -53,11 +53,6 @@ namespace Rodin::Geometry
 
          virtual ~Simplex() = default;
 
-         size_t getDimension() const
-         {
-            return m_dimension;
-         }
-
          /**
           * @brief Gets the index of the simplex in the mesh.
           */
@@ -70,6 +65,13 @@ namespace Rodin::Geometry
          Type getGeometry() const
          {
             return m_type;
+         }
+
+         double getVolume() const;
+
+         size_t getDimension() const
+         {
+            return m_dimension;
          }
 
          /**
@@ -88,11 +90,13 @@ namespace Rodin::Geometry
             return m_mesh.get();
          }
 
-         double getVolume() const;
+         // virtual VertexIterator getVertices() const;
 
-         // VertexIterator getVertices() const;
+         virtual SimplexIterator getAdjacent() const;
 
-         mfem::ElementTransformation& getTransformation() const;
+         virtual SimplexIterator getIncident() const;
+
+         [[deprecated]] mfem::ElementTransformation& getTransformation() const;
 
          virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
@@ -129,8 +133,6 @@ namespace Rodin::Geometry
          Element(Element&& other)
             :  Simplex(std::move(other))
          {}
-
-         ElementIterator getAdjacent() const;
    };
 
    /**
@@ -153,10 +155,6 @@ namespace Rodin::Geometry
          Face(Face&& other)
             : Simplex(std::move(other))
          {}
-
-         FaceIterator getAdjacent() const;
-
-         ElementIterator getIncident() const;
 
          bool isBoundary() const;
 

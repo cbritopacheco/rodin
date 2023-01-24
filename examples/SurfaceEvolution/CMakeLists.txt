@@ -1,1 +1,2 @@
 add_subdirectory(FirePropagation)
+add_subdirectory(ConormalAdvection)
