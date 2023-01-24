@@ -8,8 +8,8 @@
 
 namespace Rodin::Variational
 {
-   Tangent<FunctionBase> tan(const FunctionBase& op)
-   {
-      return Tangent<FunctionBase>(op);
-   }
+  Tangent<FunctionBase> tan(const FunctionBase& op)
+  {
+    return Tangent<FunctionBase>(op);
+  }
 }

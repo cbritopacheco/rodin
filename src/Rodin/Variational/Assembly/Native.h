@@ -16,57 +16,57 @@
 
 namespace Rodin::Variational::Assembly
 {
-   template <>
-   class Native<BilinearFormBase<mfem::SparseMatrix>>
-      : public AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>
-   {
-      public:
-         using Parent = AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>;
-         using OperatorType = mfem::SparseMatrix;
+  template <>
+  class Native<BilinearFormBase<mfem::SparseMatrix>>
+    : public AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>
+  {
+    public:
+      using Parent = AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>;
+      using OperatorType = mfem::SparseMatrix;
 
-         Native() = default;
+      Native() = default;
 
-         Native(const Native& other)
-            : Parent(other)
-         {}
+      Native(const Native& other)
+        : Parent(other)
+      {}
 
-         Native(Native&& other)
-            : Parent(std::move(other))
-         {}
+      Native(Native&& other)
+        : Parent(std::move(other))
+      {}
 
-         OperatorType execute(const Input& input) const override;
+      OperatorType execute(const Input& input) const override;
 
-         Native* copy() const noexcept override
-         {
-            return new Native(*this);
-         }
-   };
+      Native* copy() const noexcept override
+      {
+        return new Native(*this);
+      }
+  };
 
-   template <>
-   class Native<LinearFormBase<mfem::Vector>>
-      : public AssemblyBase<LinearFormBase<mfem::Vector>>
-   {
-      public:
-         using Parent = AssemblyBase<LinearFormBase<mfem::Vector>>;
-         using VectorType = mfem::Vector;
+  template <>
+  class Native<LinearFormBase<mfem::Vector>>
+    : public AssemblyBase<LinearFormBase<mfem::Vector>>
+  {
+    public:
+      using Parent = AssemblyBase<LinearFormBase<mfem::Vector>>;
+      using VectorType = mfem::Vector;
 
-         Native() = default;
+      Native() = default;
 
-         Native(const Native& other)
-            : Parent(other)
-         {}
+      Native(const Native& other)
+        : Parent(other)
+      {}
 
-         Native(Native&& other)
-            : Parent(std::move(other))
-         {}
+      Native(Native&& other)
+        : Parent(std::move(other))
+      {}
 
-         VectorType execute(const Input& input) const override;
+      VectorType execute(const Input& input) const override;
 
-         Native* copy() const noexcept override
-         {
-            return new Native(*this);
-         }
-   };
+      Native* copy() const noexcept override
+      {
+        return new Native(*this);
+      }
+  };
 }
 
 #endif

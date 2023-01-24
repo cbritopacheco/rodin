@@ -19,56 +19,56 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
-    * @brief Template specializations of the MatrixFunction class.
-    * @see MatrixFunction
-    */
+  /**
+   * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
+   * @brief Template specializations of the MatrixFunction class.
+   * @see MatrixFunction
+   */
 
-   class MatrixFunctionBase : public FunctionBase
-   {
-      public:
-         MatrixFunctionBase() = default;
+  class MatrixFunctionBase : public FunctionBase
+  {
+    public:
+      MatrixFunctionBase() = default;
 
-         MatrixFunctionBase(const MatrixFunctionBase& other)
-            : FunctionBase(other)
-         {}
+      MatrixFunctionBase(const MatrixFunctionBase& other)
+        : FunctionBase(other)
+      {}
 
-         MatrixFunctionBase(MatrixFunctionBase&& other)
-            : FunctionBase(std::move(other))
-         {}
+      MatrixFunctionBase(MatrixFunctionBase&& other)
+        : FunctionBase(std::move(other))
+      {}
 
-         virtual ~MatrixFunctionBase() = default;
+      virtual ~MatrixFunctionBase() = default;
 
-         FunctionValue::Matrix operator()(const Geometry::Point& p) const
-         {
-            return getValue(p).matrix();
-         }
+      FunctionValue::Matrix operator()(const Geometry::Point& p) const
+      {
+        return getValue(p).matrix();
+      }
 
-         RangeShape getRangeShape() const override
-         {
-            return {getRows(), getColumns()};
-         }
+      RangeShape getRangeShape() const override
+      {
+        return {getRows(), getColumns()};
+      }
 
-         RangeType getRangeType() const override
-         {
-            return RangeType::Matrix;
-         }
+      RangeType getRangeType() const override
+      {
+        return RangeType::Matrix;
+      }
 
-         /**
-          * @brief Gets the number of rows in the matrix
-          * @returns Number of rows
-          */
-         virtual int getRows() const = 0;
+      /**
+       * @brief Gets the number of rows in the matrix
+       * @returns Number of rows
+       */
+      virtual int getRows() const = 0;
 
-         /**
-          * @brief Gets the number of columns in the matrix
-          * @returns Number of columns
-          */
-         virtual int getColumns() const = 0;
+      /**
+       * @brief Gets the number of columns in the matrix
+       * @returns Number of columns
+       */
+      virtual int getColumns() const = 0;
 
-         virtual MatrixFunctionBase* copy() const noexcept override = 0;
-   };
+      virtual MatrixFunctionBase* copy() const noexcept override = 0;
+  };
 }
 
 #endif

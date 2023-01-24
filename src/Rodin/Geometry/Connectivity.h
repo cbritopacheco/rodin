@@ -13,24 +13,24 @@
 
 namespace Rodin::Geometry
 {
-   class Connectivity
-   {
-      public:
-         Connectivity(size_t d, size_t dp)
-            : m_d(d), m_dp(dp)
-         {}
+  class Connectivity
+  {
+    public:
+      Connectivity(size_t d, size_t dp)
+        : m_d(d), m_dp(dp)
+      {}
 
-         void build(size_t d);
+      void build(size_t d);
 
-         void transpose(size_t d, size_t dp);
+      void transpose(size_t d, size_t dp);
 
-         void intersection(size_t d, size_t dp);
+      void intersection(size_t d, size_t dp);
 
-      private:
-         size_t m_d, m_dp;
-         std::vector<Index> m_indices;
-         std::vector<size_t> m_offsets;
-   };
+    private:
+      size_t m_d, m_dp;
+      std::vector<Index> m_indices;
+      std::vector<size_t> m_offsets;
+  };
 }
 
 #endif

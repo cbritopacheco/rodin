@@ -28,8 +28,8 @@ int main(int argc, char** argv)
   H1 Vh(Omega, d);
 
   // Lamé coefficients
-  auto mu     = ScalarFunction(0.3846),
-       lambda = ScalarFunction(0.5769);
+  auto mu    = ScalarFunction(0.3846),
+     lambda = ScalarFunction(0.5769);
 
   // Pull force
   auto f = VectorFunction{0, -1};
@@ -43,10 +43,10 @@ int main(int argc, char** argv)
   TestFunction  v(Vh);
   Problem elasticity(u, v);
   elasticity = Integral(lambda * Div(u), Div(v))
-             + Integral(
-                 mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
-             - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+         + Integral(
+            mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
+         - BoundaryIntegral(f, v).over(GammaN)
+         + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
   elasticity.solve(solver);
 
 

@@ -8,41 +8,41 @@
 
 namespace Rodin::Variational
 {
-   template <class FES>
-   class TestFunction : public ShapeFunction<FES, TestSpace>
-   {
-      public:
-         constexpr
-         TestFunction(FES& fes)
-            : ShapeFunction<FES, TestSpace>(fes)
-         {}
+  template <class FES>
+  class TestFunction : public ShapeFunction<FES, TestSpace>
+  {
+    public:
+      constexpr
+      TestFunction(FES& fes)
+        : ShapeFunction<FES, TestSpace>(fes)
+      {}
 
-         constexpr
-         TestFunction(const TestFunction& other)
-            : ShapeFunction<FES, TestSpace>(other)
-         {}
+      constexpr
+      TestFunction(const TestFunction& other)
+        : ShapeFunction<FES, TestSpace>(other)
+      {}
 
-         constexpr
-         TestFunction(TestFunction&& other)
-            : ShapeFunction<FES, TestSpace>(std::move(other))
-         {}
+      constexpr
+      TestFunction(TestFunction&& other)
+        : ShapeFunction<FES, TestSpace>(std::move(other))
+      {}
 
-         void operator=(const TestFunction&) = delete;
+      void operator=(const TestFunction&) = delete;
 
-         void operator=(TestFunction&&) = delete;
+      void operator=(TestFunction&&) = delete;
 
-         const TestFunction& getLeaf() const override
-         {
-            return *this;
+      const TestFunction& getLeaf() const override
+      {
+        return *this;
 
-         }
+      }
 
-         TestFunction* copy() const noexcept override
-         {
-            return new TestFunction(*this);
-         }
-   };
-   template <class FES>
-   TestFunction(FES& fes) -> TestFunction<FES>;
+      TestFunction* copy() const noexcept override
+      {
+        return new TestFunction(*this);
+      }
+  };
+  template <class FES>
+  TestFunction(FES& fes) -> TestFunction<FES>;
 }
 #endif

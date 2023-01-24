@@ -12,18 +12,18 @@
 
 namespace Rodin::Alert
 {
-   Exception::Exception(const std::string& what)
-      : Alert(what)
-   {}
+  Exception::Exception(const std::string& what)
+    : Alert(what)
+  {}
 
-   void Exception::raise() const
-   {
-      // std::cerr << rang::fg::red
-      //           << "Error: "
-      //           << rang::fg::reset
-      //           << what()
-      //           << std::endl;
-      throw *this;
-   }
+  void Exception::raise() const
+  {
+    // std::cerr << rang::fg::red
+    //        << "Error: "
+    //        << rang::fg::reset
+    //        << what()
+    //        << std::endl;
+    throw *this;
+  }
 }
 

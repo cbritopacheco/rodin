@@ -20,9 +20,9 @@ int main(int, char**)
 
   // auto skin = mesh.skin();
   // skin.trace({
-  //     {{3, 6}, 666},
-  //     {{2, 6}, 777}
-  //     });
+  //    {{3, 6}, 666},
+  //    {{2, 6}, 777}
+  //    });
 
   Alert::Info() << "Saved mesh to skin.mesh" << Alert::Raise;
 

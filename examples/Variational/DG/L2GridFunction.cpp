@@ -20,10 +20,10 @@ int main(int, char**)
   L2 Vh(Omega);
   GridFunction u(Vh);
   u = ScalarFunction(
-      [](const Point& v) -> double
-      {
-        return cos(v.x());
-      });
+    [](const Point& v) -> double
+    {
+      return cos(v.x());
+    });
   Omega.save("l2.mesh");
   u.save("l2.gf");
   return 0;

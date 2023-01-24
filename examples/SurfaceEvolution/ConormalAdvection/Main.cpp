@@ -26,16 +26,16 @@ int main()
   size_t N = 100;
   for (size_t i = 0; i < N; i++)
   {
-    // fout << err << "\n";
-    fout.flush();
+   // fout << err << "\n";
+   fout.flush();
   }
 
   Omega = MMG::ImplicitDomainMesher()
-                             .split(6, {3, 6})
-                             .noSplit(2)
-                             .setHMax(0.05)
-                             .surface()
-                             .discretize(dist);
+                    .split(6, {3, 6})
+                    .noSplit(2)
+                    .setHMax(0.05)
+                    .surface()
+                    .discretize(dist);
 
   return 0;
 }

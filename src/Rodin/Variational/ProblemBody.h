@@ -23,105 +23,105 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Represents the body of a variational problem.
-    */
-   class ProblemBody : public FormLanguage::Base
-   {
-      public:
-         ProblemBody() = default;
+  /**
+   * @brief Represents the body of a variational problem.
+   */
+  class ProblemBody : public FormLanguage::Base
+  {
+    public:
+      ProblemBody() = default;
 
-         ProblemBody(const BilinearFormIntegratorBase& bfi)
-         {
-            m_bfis.add(bfi);
-         }
+      ProblemBody(const BilinearFormIntegratorBase& bfi)
+      {
+        m_bfis.add(bfi);
+      }
 
-         ProblemBody(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
-            : m_bfis(bfis)
-         {}
+      ProblemBody(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
+        : m_bfis(bfis)
+      {}
 
-         ProblemBody(const ProblemBody& other)
-            :  FormLanguage::Base(other),
-               m_bfis(other.m_bfis),
-               m_lfis(other.m_lfis),
-               m_essBdr(other.m_essBdr)
-         {}
+      ProblemBody(const ProblemBody& other)
+        :  FormLanguage::Base(other),
+          m_bfis(other.m_bfis),
+          m_lfis(other.m_lfis),
+          m_essBdr(other.m_essBdr)
+      {}
 
-         ProblemBody(ProblemBody&& other)
-            :  FormLanguage::Base(std::move(other)),
-               m_bfis(std::move(other.m_bfis)),
-               m_lfis(std::move(other.m_lfis)),
-               m_essBdr(std::move(other.m_essBdr))
-         {}
+      ProblemBody(ProblemBody&& other)
+        :  FormLanguage::Base(std::move(other)),
+          m_bfis(std::move(other.m_bfis)),
+          m_lfis(std::move(other.m_lfis)),
+          m_essBdr(std::move(other.m_essBdr))
+      {}
 
-         ProblemBody& operator=(ProblemBody&& other)
-         {
-            m_bfis = std::move(other.m_bfis);
-            m_lfis = std::move(other.m_lfis);
-            m_essBdr = std::move(other.m_essBdr);
-            return *this;
-         }
+      ProblemBody& operator=(ProblemBody&& other)
+      {
+        m_bfis = std::move(other.m_bfis);
+        m_lfis = std::move(other.m_lfis);
+        m_essBdr = std::move(other.m_essBdr);
+        return *this;
+      }
 
-         EssentialBoundary& getEssentialBoundary()
-         {
-            return m_essBdr;
-         }
+      EssentialBoundary& getEssentialBoundary()
+      {
+        return m_essBdr;
+      }
 
-         const EssentialBoundary& getEssentialBoundary() const
-         {
-            return m_essBdr;
-         }
+      const EssentialBoundary& getEssentialBoundary() const
+      {
+        return m_essBdr;
+      }
 
-         FormLanguage::List<BilinearFormIntegratorBase>& getBFIs()
-         {
-            return m_bfis;
-         }
+      FormLanguage::List<BilinearFormIntegratorBase>& getBFIs()
+      {
+        return m_bfis;
+      }
 
-         const FormLanguage::List<BilinearFormIntegratorBase>& getBFIs() const
-         {
-            return m_bfis;
-         }
+      const FormLanguage::List<BilinearFormIntegratorBase>& getBFIs() const
+      {
+        return m_bfis;
+      }
 
-         FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
-         {
-            return m_lfis;
-         }
+      FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
+      {
+        return m_lfis;
+      }
 
-         const FormLanguage::List<LinearFormIntegratorBase>& getLFIs() const
-         {
-            return m_lfis;
-         }
+      const FormLanguage::List<LinearFormIntegratorBase>& getLFIs() const
+      {
+        return m_lfis;
+      }
 
-         virtual ProblemBody* copy() const noexcept override
-         {
-            return new ProblemBody(*this);
-         }
+      virtual ProblemBody* copy() const noexcept override
+      {
+        return new ProblemBody(*this);
+      }
 
-      private:
-         FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
-         FormLanguage::List<LinearFormIntegratorBase>   m_lfis;
-         EssentialBoundary m_essBdr;
-   };
+    private:
+      FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
+      FormLanguage::List<LinearFormIntegratorBase>  m_lfis;
+      EssentialBoundary m_essBdr;
+  };
 
-   ProblemBody operator+(
-      const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
+  ProblemBody operator+(
+    const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
-   ProblemBody operator-(
-      const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
+  ProblemBody operator-(
+    const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
 
-   ProblemBody operator+(
-      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi);
+  ProblemBody operator+(
+    const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi);
 
-   ProblemBody operator-(
-      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi);
+  ProblemBody operator-(
+    const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi);
 
-   template <class T>
-   ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T>& bc)
-   {
-      ProblemBody res(pb);
-      res.getEssentialBoundary().add(bc);
-      return res;
-   }
+  template <class T>
+  ProblemBody operator+(const ProblemBody& pb, const DirichletBC<T>& bc)
+  {
+    ProblemBody res(pb);
+    res.getEssentialBoundary().add(bc);
+    return res;
+  }
 }
 
 #endif

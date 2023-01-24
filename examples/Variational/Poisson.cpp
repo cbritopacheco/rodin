@@ -39,8 +39,8 @@ int main(int, char**)
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g).on(Gamma);
+       - Integral(f, v)
+       + DirichletBC(u, g).on(Gamma);
   poisson.solve(solver);
 
   // Save solution
