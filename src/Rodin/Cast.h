@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Traits.h"
 #include "Rodin/Utility/Overloaded.h"
 
 namespace Rodin
