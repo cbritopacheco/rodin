@@ -50,6 +50,8 @@ namespace Rodin::Variational
 
     int getDOFs(const Geometry::Simplex& element) const override
     {
+      assert(false);
+      return 0;
       // assert(dynamic_cast<const Geometry::Interface*>(&element));
       // const auto& incident =
       //  static_cast<const Geometry::Interface&>(element).getElements();

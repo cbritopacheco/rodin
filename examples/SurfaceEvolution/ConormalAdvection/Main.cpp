@@ -10,32 +10,31 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
+const char* meshFile =
+  "../resources/examples/SurfaceEvolution/ConormalAdvection/Surface.mesh";
+
 int main()
 {
-  const char* meshFile = "miaow.mesh";
+  Mesh th;
+  th.load(meshFile);
+  H1 vh(th);
 
-  Mesh Omega;
-  Omega.load(meshFile);
+  GridFunction dist(vh);
+  MMG::Distancer(vh).setInteriorDomain(1).distance(th);
 
-  H1 Vh(Omega);
-
-  GridFunction dist(Vh);
-  // dist.projectOnBoundary(f);
   std::ofstream fout("obj.txt");
 
   size_t N = 100;
   for (size_t i = 0; i < N; i++)
   {
-   // fout << err << "\n";
-   fout.flush();
+    // fout << err << "\n";
+    fout.flush();
   }
 
-  Omega = MMG::ImplicitDomainMesher()
-                    .split(6, {3, 6})
-                    .noSplit(2)
+  th = MMG::ImplicitDomainMesher().split(6, {3, 6})
+                                     .noSplit(2)
                     .setHMax(0.05)
                     .surface()
                     .discretize(dist);
-
   return 0;
 }
