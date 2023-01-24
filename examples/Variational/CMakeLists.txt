@@ -6,14 +6,6 @@ target_link_libraries(Poisson
   Rodin::Variational
   )
 
-add_executable(DGPoisson DGPoisson.cpp)
-target_link_libraries(DGPoisson
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  )
-
 add_executable(Elasticity Elasticity.cpp)
 target_link_libraries(Elasticity
   PUBLIC
@@ -22,19 +14,12 @@ target_link_libraries(Elasticity
   Rodin::Variational
   )
 
-
-add_executable(L2GridFunction L2GridFunction.cpp)
-target_link_libraries(L2GridFunction
+add_executable(SurfaceMesh SurfaceMesh.cpp)
+target_link_libraries(SurfaceMesh
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
   )
 
-add_executable(SurfaceMeshes SurfaceMeshes.cpp)
-target_link_libraries(SurfaceMeshes
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  )
+add_subdirectory(DG)

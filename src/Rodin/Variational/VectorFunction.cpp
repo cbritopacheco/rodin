@@ -11,29 +11,29 @@
 
 namespace Rodin::Variational
 {
-   Component<FunctionBase> VectorFunctionBase::operator()(int i) const
-   {
-      assert(0 <= i);
-      assert(i < getDimension());
-      return Component(*this, i);
-   }
+  Component<FunctionBase> VectorFunctionBase::operator()(int i) const
+  {
+    assert(0 <= i);
+    assert(i < getDimension());
+    return Component(*this, i);
+  }
 
-   Component<FunctionBase> VectorFunctionBase::x() const
-   {
-      assert(getDimension() >= 1);
-      return Component<FunctionBase>(*this, 0);
-   }
+  Component<FunctionBase> VectorFunctionBase::x() const
+  {
+    assert(getDimension() >= 1);
+    return Component<FunctionBase>(*this, 0);
+  }
 
-   Component<FunctionBase> VectorFunctionBase::y() const
-   {
-      assert(getDimension() >= 2);
-      return Component<FunctionBase>(*this, 1);
-   }
+  Component<FunctionBase> VectorFunctionBase::y() const
+  {
+    assert(getDimension() >= 2);
+    return Component<FunctionBase>(*this, 1);
+  }
 
-   Component<FunctionBase> VectorFunctionBase::z() const
-   {
-      assert(getDimension() >= 3);
-      return Component<FunctionBase>(*this, 2);
-   }
+  Component<FunctionBase> VectorFunctionBase::z() const
+  {
+    assert(getDimension() >= 3);
+    return Component<FunctionBase>(*this, 2);
+  }
 }
 

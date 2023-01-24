@@ -17,26 +17,26 @@ namespace Rodin::Plot::Geometry
 
   template<class T, class OtherGeometry>
   struct has_intersect_method<T, OtherGeometry,
-    std::void_t<decltype(std::declval<T>().intersect(
-          std::declval<const OtherGeometry&>()))>>
-      : std::true_type{};
+   std::void_t<decltype(std::declval<T>().intersect(
+       std::declval<const OtherGeometry&>()))>>
+    : std::true_type{};
 
   template<class T, class OtherGeometry, class = void>
   struct has_distance_method : std::false_type{};
 
   template<class T, class OtherGeometry>
   struct has_distance_method<T, OtherGeometry,
-    std::void_t<decltype(std::declval<T>().distance(
-          std::declval<const OtherGeometry&>()))>>
-      : std::true_type{};
+   std::void_t<decltype(std::declval<T>().distance(
+       std::declval<const OtherGeometry&>()))>>
+    : std::true_type{};
 
   template<class T, class OtherGeometry, class = void>
   struct has_connect_method : std::false_type{};
 
   template<class T, class OtherGeometry>
   struct has_connect_method<T, OtherGeometry,
-    std::void_t<decltype(std::declval<T>().connect(
-          std::declval<const OtherGeometry&>()))>>
-      : std::true_type{};
+   std::void_t<decltype(std::declval<T>().connect(
+       std::declval<const OtherGeometry&>()))>>
+    : std::true_type{};
 }
 #endif

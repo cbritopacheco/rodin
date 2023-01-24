@@ -56,89 +56,89 @@ int main(int, char**)
   std::ofstream fObj("obj.txt");
   for (size_t i = 0; i < maxIt; i++)
   {
-    Alert::Info() << "----- Iteration: " << i << Alert::Raise;
+   Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
-    Alert::Info() << "    | Trimming mesh." << Alert::Raise;
-    SubMesh trimmed = Omega.trim(Exterior);
+   Alert::Info() << "   | Trimming mesh." << Alert::Raise;
+   SubMesh trimmed = Omega.trim(Exterior);
 
-    Alert::Info() << "    | Building finite element spaces." << Alert::Raise;
-    int d = 2;
-    H1 Vh(Omega, d);
-    H1 VhInt(trimmed, d);
-    Omega.save("miaow.mesh");
+   Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
+   int d = 2;
+   H1 Vh(Omega, d);
+   H1 VhInt(trimmed, d);
+   Omega.save("miaow.mesh");
 
-    Alert::Info() << "    | Solving state equation." << Alert::Raise;
-    auto f = VectorFunction{0, -1};
-    TrialFunction uInt(VhInt);
-    TestFunction  vInt(VhInt);
+   Alert::Info() << "   | Solving state equation." << Alert::Raise;
+   auto f = VectorFunction{0, -1};
+   TrialFunction uInt(VhInt);
+   TestFunction  vInt(VhInt);
 
-    // Elasticity equation
-    Problem elasticity(uInt, vInt);
-    elasticity = Integral(lambda * Div(uInt), Div(vInt))
-               + Integral(
-                   mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
-               - BoundaryIntegral(f, vInt).over(GammaN)
-               + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
-    elasticity.solve(solver);
+   // Elasticity equation
+   Problem elasticity(uInt, vInt);
+   elasticity = Integral(lambda * Div(uInt), Div(vInt))
+          + Integral(
+             mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
+          - BoundaryIntegral(f, vInt).over(GammaN)
+          + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
+   elasticity.solve(solver);
 
-    Alert::Info() << "    | Computing shape gradient." << Alert::Raise;
+   Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
 
-    auto jac = Jacobian(uInt.getSolution());
-    jac.traceOf(Interior);
+   auto jac = Jacobian(uInt.getSolution());
+   jac.traceOf(Interior);
 
-    auto e = 0.5 * (jac + jac.T());
-    auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-    auto n = Normal(d);
-    n.traceOf(Interior);
+   auto e = 0.5 * (jac + jac.T());
+   auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+   auto n = Normal(d);
+   n.traceOf(Interior);
 
-    // Hilbert extension-regularization procedure
-    TrialFunction g(Vh);
-    TestFunction  v(Vh);
-    Problem hilbert(g, v);
-    hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
-            + Integral(g, v)
-            - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
-            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
-    hilbert.solve(solver);
-    g.getSolution().save("g.gf");
-    Omega.save("g.mesh");
+   // Hilbert extension-regularization procedure
+   TrialFunction g(Vh);
+   TestFunction  v(Vh);
+   Problem hilbert(g, v);
+   hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+        + Integral(g, v)
+        - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
+        + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
+   hilbert.solve(solver);
+   g.getSolution().save("g.gf");
+   Omega.save("g.mesh");
 
-    // Update objective
-    double objective = compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior);
-    obj.push_back(objective);
-    fObj << objective << "\n";
-    fObj.flush();
-    Alert::Info() << "    | Objective: " << obj.back() << Alert::Raise;
-    Alert::Info() << "    | Distancing domain." << Alert::Raise;
-    H1 Dh(Omega);
-    auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
-                                  .distance(Omega);
+   // Update objective
+   double objective = compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior);
+   obj.push_back(objective);
+   fObj << objective << "\n";
+   fObj.flush();
+   Alert::Info() << "   | Objective: " << obj.back() << Alert::Raise;
+   Alert::Info() << "   | Distancing domain." << Alert::Raise;
+   H1 Dh(Omega);
+   auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
+                       .distance(Omega);
 
-    // Advect the level set function
-    Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
-    GridFunction gNorm(Dh);
-    gNorm = ScalarFunction(
-        [&](const Point& v) -> double
-        {
-          mfem::Vector val = g.getSolution()(v);
-          return val.Norml2();
-        });
-    double gInf = gNorm.max();
-    double dt = 4 * hmax / gInf;
-    MMG::Advect(dist, g.getSolution()).step(dt);
+   // Advect the level set function
+   Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
+   GridFunction gNorm(Dh);
+   gNorm = ScalarFunction(
+      [&](const Point& v) -> double
+      {
+       mfem::Vector val = g.getSolution()(v);
+       return val.Norml2();
+      });
+   double gInf = gNorm.max();
+   double dt = 4 * hmax / gInf;
+   MMG::Advect(dist, g.getSolution()).step(dt);
 
-    // Recover the implicit domain
-    Alert::Info() << "    | Meshing the domain." << Alert::Raise;
-    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                       .split(Exterior, {Interior, Exterior})
-                                       .setRMC(1e-3)
-                                       .setAngleDetection(false)
-                                       .setBoundaryReference(Gamma)
-                                       .setBaseReferences(GammaD)
-                                       .discretize(dist);
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+   // Recover the implicit domain
+   Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+   Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                          .split(Exterior, {Interior, Exterior})
+                          .setRMC(1e-3)
+                          .setAngleDetection(false)
+                          .setBoundaryReference(Gamma)
+                          .setBaseReferences(GammaD)
+                          .discretize(dist);
+   MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
-    Omega.save("Omega.mesh");
+   Omega.save("Omega.mesh");
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
@@ -153,8 +153,8 @@ double compliance(GridFunction<H1<Context::Serial>>& w)
   TestFunction  v(Vh);
   BilinearForm  bf(u, v);
   bf = Integral(lambda * Div(u), Div(v))
-     + Integral(
-         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+    + Integral(
+      mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
   return bf(w, w);
 }
 

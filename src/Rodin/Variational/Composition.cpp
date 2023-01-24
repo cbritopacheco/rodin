@@ -11,26 +11,26 @@
 
 namespace Rodin::Variational
 {
-   Composition<std::function<double(double)>, FunctionBase>
-   ::Composition(std::function<double(double)> f, const FunctionBase& g)
-      : m_f(f), m_g(g.copy())
-   {
-      if (g.getRangeType() != RangeType::Scalar)
-      {
-         UnexpectedRangeTypeException(RangeType::Scalar, g.getRangeType()).raise();
-      }
-   }
+  Composition<std::function<double(double)>, FunctionBase>
+  ::Composition(std::function<double(double)> f, const FunctionBase& g)
+    : m_f(f), m_g(g.copy())
+  {
+    if (g.getRangeType() != RangeType::Scalar)
+    {
+      UnexpectedRangeTypeException(RangeType::Scalar, g.getRangeType()).raise();
+    }
+  }
 
-   Composition<std::function<double(double)>, FunctionBase>
-   ::Composition(const Composition& other)
-      :  ScalarFunctionBase(other),
-         m_f(other.m_f), m_g(other.m_g->copy())
-   {}
+  Composition<std::function<double(double)>, FunctionBase>
+  ::Composition(const Composition& other)
+    :  ScalarFunctionBase(other),
+      m_f(other.m_f), m_g(other.m_g->copy())
+  {}
 
-   Composition<std::function<double(double)>, FunctionBase>
-   ::Composition(Composition&& other)
-      :  ScalarFunctionBase(std::move(other)),
-         m_f(std::move(other.m_f)), m_g(std::move(other.m_g))
-   {}
+  Composition<std::function<double(double)>, FunctionBase>
+  ::Composition(Composition&& other)
+    :  ScalarFunctionBase(std::move(other)),
+      m_f(std::move(other.m_f)), m_g(std::move(other.m_g))
+  {}
 }
 

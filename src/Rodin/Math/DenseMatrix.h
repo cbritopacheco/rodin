@@ -14,22 +14,22 @@ namespace Rodin::Math
 {
   class DenseMatrix : public Eigen::MatrixX<double>
   {
-    public:
-      using Parent = Eigen::MatrixX<double>;
+   public:
+    using Parent = Eigen::MatrixX<double>;
 
-      DenseMatrix() = default;
+    DenseMatrix() = default;
 
-      template <typename OtherDerived>
-      DenseMatrix(const Eigen::MatrixBase<OtherDerived>& other)
-        : Parent(other)
-      {}
+    template <typename OtherDerived>
+    DenseMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+      : Parent(other)
+    {}
 
-      template <typename OtherDerived>
-      DenseMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-      {
-          this->Parent::operator=(other);
-          return *this;
-      }
+    template <typename OtherDerived>
+    DenseMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    {
+       this->Parent::operator=(other);
+       return *this;
+    }
   };
 }
 

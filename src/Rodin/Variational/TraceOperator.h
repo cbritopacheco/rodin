@@ -14,42 +14,42 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup TraceOperatorSpecializations TraceOperator Template Specializations
-    * @brief Template specializations of the TraceOperator class.
-    * @see TraceOperator
-    */
+  /**
+   * @defgroup TraceOperatorSpecializations TraceOperator Template Specializations
+   * @brief Template specializations of the TraceOperator class.
+   * @see TraceOperator
+   */
 
-   /**
-    * @ingroup TraceOperatorSpecializations
-    * @brief Trace operator
-    */
-   template <>
-   class TraceOperator<FunctionBase> : public FunctionBase
-   {
-      public:
-         TraceOperator(const FunctionBase& fn, Geometry::Attribute attr)
-            : m_fn(fn.copy()),
-              m_attr(attr)
-         {}
+  /**
+   * @ingroup TraceOperatorSpecializations
+   * @brief Trace operator
+   */
+  template <>
+  class TraceOperator<FunctionBase> : public FunctionBase
+  {
+    public:
+      TraceOperator(const FunctionBase& fn, Geometry::Attribute attr)
+        : m_fn(fn.copy()),
+          m_attr(attr)
+      {}
 
-         TraceOperator(const TraceOperator& other)
-            :  FunctionBase(other),
-               m_fn(other.m_fn->copy()),
-               m_attr(other.m_attr)
-         {}
+      TraceOperator(const TraceOperator& other)
+        :  FunctionBase(other),
+          m_fn(other.m_fn->copy()),
+          m_attr(other.m_attr)
+      {}
 
-         TraceOperator(TraceOperator&& other)
-            :  FunctionBase(std::move(other)),
-               m_fn(std::move(other.m_fn)),
-               m_attr(other.m_attr)
-         {}
+      TraceOperator(TraceOperator&& other)
+        :  FunctionBase(std::move(other)),
+          m_fn(std::move(other.m_fn)),
+          m_attr(other.m_attr)
+      {}
 
-      private:
-         std::unique_ptr<FunctionBase> m_fn;
-         Geometry::Attribute m_attr;
-   };
-   // TraceOperator(const FunctionBase&, Geometry::Attribute) -> TraceOperator<FunctionBase>;
+    private:
+      std::unique_ptr<FunctionBase> m_fn;
+      Geometry::Attribute m_attr;
+  };
+  // TraceOperator(const FunctionBase&, Geometry::Attribute) -> TraceOperator<FunctionBase>;
 }
 
 #endif

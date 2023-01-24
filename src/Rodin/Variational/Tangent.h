@@ -15,61 +15,61 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup TangentSpecializations Tangent Template Specializations
-    * @brief Template specializations of the Tangent class.
-    * @see Tangent
-    */
+  /**
+   * @defgroup TangentSpecializations Tangent Template Specializations
+   * @brief Template specializations of the Tangent class.
+   * @see Tangent
+   */
 
-   /**
-    * @ingroup TangentSpecializations
-    */
-   template <>
-   class Tangent<FunctionBase> : public ScalarFunctionBase
-   {
-      public:
-         using Operand = FunctionBase;
+  /**
+   * @ingroup TangentSpecializations
+   */
+  template <>
+  class Tangent<FunctionBase> : public ScalarFunctionBase
+  {
+    public:
+      using Operand = FunctionBase;
 
-         Tangent(const FunctionBase& v)
-            : m_v(v.copy())
-         {
-            if (v.getRangeType() != RangeType::Scalar)
-               throw UnexpectedRangeTypeException(RangeType::Scalar, v.getRangeType());
-         }
+      Tangent(const FunctionBase& v)
+        : m_v(v.copy())
+      {
+        if (v.getRangeType() != RangeType::Scalar)
+          throw UnexpectedRangeTypeException(RangeType::Scalar, v.getRangeType());
+      }
 
-         Tangent(const Tangent& other)
-            :  ScalarFunctionBase(other),
-               m_v(other.m_v->copy())
-         {}
+      Tangent(const Tangent& other)
+        :  ScalarFunctionBase(other),
+          m_v(other.m_v->copy())
+      {}
 
-         Tangent(Tangent&& other)
-            :  ScalarFunctionBase(std::move(other)),
-               m_v(std::move(other.m_v))
-         {}
+      Tangent(Tangent&& other)
+        :  ScalarFunctionBase(std::move(other)),
+          m_v(std::move(other.m_v))
+      {}
 
-         Tangent& traceOf(Geometry::Attribute attrs) override
-         {
-            ScalarFunctionBase::traceOf(attrs);
-            m_v->traceOf(attrs);
-            return *this;
-         }
+      Tangent& traceOf(Geometry::Attribute attrs) override
+      {
+        ScalarFunctionBase::traceOf(attrs);
+        m_v->traceOf(attrs);
+        return *this;
+      }
 
-         FunctionValue getValue(const Geometry::Point& p) const override
-         {
-            return Math::tan(m_v->getValue(p).scalar());
-         }
+      FunctionValue getValue(const Geometry::Point& p) const override
+      {
+        return Math::tan(m_v->getValue(p).scalar());
+      }
 
-         Tangent* copy() const noexcept override
-         {
-            return new Tangent(*this);
-         }
+      Tangent* copy() const noexcept override
+      {
+        return new Tangent(*this);
+      }
 
-      private:
-         std::unique_ptr<FunctionBase> m_v;
-   };
-   Tangent(const FunctionBase&) -> Tangent<FunctionBase>;
+    private:
+      std::unique_ptr<FunctionBase> m_v;
+  };
+  Tangent(const FunctionBase&) -> Tangent<FunctionBase>;
 
-   Tangent<FunctionBase> tan(const FunctionBase&);
+  Tangent<FunctionBase> tan(const FunctionBase&);
 
 }
 

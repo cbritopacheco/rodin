@@ -8,9 +8,9 @@
 
 namespace Rodin::Variational
 {
-   LEQ<FunctionBase, FunctionBase>
-   operator<=(const FunctionBase& lhs, const FunctionBase& rhs)
-   {
-      return LEQ(lhs, rhs);
-   }
+  LEQ<FunctionBase, FunctionBase>
+  operator<=(const FunctionBase& lhs, const FunctionBase& rhs)
+  {
+    return LEQ(lhs, rhs);
+  }
 }

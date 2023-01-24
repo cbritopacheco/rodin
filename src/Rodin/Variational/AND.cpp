@@ -8,22 +8,22 @@
 
 namespace Rodin::Variational
 {
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
-   {
-      return AND(lhs, rhs);
-   }
+  AND<BooleanFunctionBase, BooleanFunctionBase>
+  operator&&(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
+  {
+    return AND(lhs, rhs);
+  }
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(bool lhs, const BooleanFunctionBase& rhs)
-   {
-      return AND(BooleanFunction(lhs), rhs);
-   }
+  AND<BooleanFunctionBase, BooleanFunctionBase>
+  operator&&(bool lhs, const BooleanFunctionBase& rhs)
+  {
+    return AND(BooleanFunction(lhs), rhs);
+  }
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(const BooleanFunctionBase& lhs, bool rhs)
-   {
-      return AND(lhs, BooleanFunction(rhs));
-   }
+  AND<BooleanFunctionBase, BooleanFunctionBase>
+  operator&&(const BooleanFunctionBase& lhs, bool rhs)
+  {
+    return AND(lhs, BooleanFunction(rhs));
+  }
 }
 

@@ -12,7 +12,7 @@ namespace Rodin::External::MMG
 {
   int MeshAdaptor::adaptMMG3D(MMG5_pMesh mesh, MMG5_pSol sol)
   {
-    assert(mesh->np > 0 && mesh->ne > 0);
-    return MMG3D_mmg3dlib(mesh, sol);
+   assert(mesh->np > 0 && mesh->ne > 0);
+   return MMG3D_mmg3dlib(mesh, sol);
   }
 }

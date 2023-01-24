@@ -14,22 +14,22 @@ namespace Rodin::Math
 {
   class Vector : public Eigen::VectorX<double>
   {
-    public:
-      using Parent = Eigen::VectorX<double>;
+   public:
+    using Parent = Eigen::VectorX<double>;
 
-      Vector() = default;
+    Vector() = default;
 
-      template <typename OtherDerived>
-      Vector(const Eigen::MatrixBase<OtherDerived>& other)
-        : Parent(other)
-      {}
+    template <typename OtherDerived>
+    Vector(const Eigen::MatrixBase<OtherDerived>& other)
+      : Parent(other)
+    {}
 
-      template <typename OtherDerived>
-      Vector& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-      {
-          this->Parent::operator=(other);
-          return *this;
-      }
+    template <typename OtherDerived>
+    Vector& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    {
+       this->Parent::operator=(other);
+       return *this;
+    }
   };
 }
 

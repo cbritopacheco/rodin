@@ -19,21 +19,21 @@ int main(int, char**)
   Alert::Info() << "Performing CCL on mesh attributes..." << Alert::Raise;
 
   // auto ccs = mesh.ccl(
-  //     [](const Element& el1, const Element& el2)
-  //     {
-  //       return el1.getAttribute() == el2.getAttribute();
-  //     });
+  //    [](const Element& el1, const Element& el2)
+  //    {
+  //     return el1.getAttribute() == el2.getAttribute();
+  //    });
 
   // Alert::Info() << ccs.size() << " components found." << Alert::Raise;
 
   // for (size_t i = 0; i < ccs.size(); i++)
   // {
-  //   const auto& cc = ccs[i];
-  //   mesh.edit(
-  //       [&](ElementView element)
-  //       {
-  //         element.setAttribute(i + 1);
-  //       }, cc);
+  //  const auto& cc = ccs[i];
+  //  mesh.edit(
+  //     [&](ElementView element)
+  //     {
+  //      element.setAttribute(i + 1);
+  //     }, cc);
   // }
 
   Alert::Info() << "Saved mesh to ccl.mesh" << Alert::Raise;

@@ -13,20 +13,20 @@
 
 namespace Rodin::Alert
 {
-   Warning::Warning(const std::string& what)
-      : Alert(what)
-   {}
+  Warning::Warning(const std::string& what)
+    : Alert(what)
+  {}
 
-   void Warning::raise() const noexcept
-   {
+  void Warning::raise() const noexcept
+  {
 #ifdef RODIN_SILENCE_WARNINGS
 #else
-      std::cerr << rang::fg::yellow
-                << "Warning: "
-                << rang::fg::reset
-                << what()
-                << std::endl;
+    std::cerr << rang::fg::yellow
+           << "Warning: "
+           << rang::fg::reset
+           << what()
+           << std::endl;
 #endif
-   }
+  }
 }
 

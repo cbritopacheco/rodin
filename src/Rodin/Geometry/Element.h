@@ -15,330 +15,328 @@
 
 namespace Rodin::Geometry
 {
-   enum class Type
-   {
-      Invalid = mfem::Geometry::INVALID,
-      Point = mfem::Geometry::POINT,
-      Segment = mfem::Geometry::SEGMENT,
-      Triangle = mfem::Geometry::TRIANGLE,
-      Square = mfem::Geometry::SQUARE,
-      Tetrahedron = mfem::Geometry::TETRAHEDRON,
-      Cube = mfem::Geometry::CUBE,
-      Prism = mfem::Geometry::PRISM,
-      Pyramid = mfem::Geometry::PYRAMID
-   };
+  enum class Type
+  {
+    Invalid = mfem::Geometry::INVALID,
+    Point = mfem::Geometry::POINT,
+    Segment = mfem::Geometry::SEGMENT,
+    Triangle = mfem::Geometry::TRIANGLE,
+    Square = mfem::Geometry::SQUARE,
+    Tetrahedron = mfem::Geometry::TETRAHEDRON,
+    Cube = mfem::Geometry::CUBE,
+    Prism = mfem::Geometry::PRISM,
+    Pyramid = mfem::Geometry::PYRAMID
+  };
 
 
-   /**
-    * @brief Base class for all geometric elements of the mesh.
-    */
-   class Simplex
-   {
-      public:
-         enum class Property
-         {
-            Attribute
-         };
+  /**
+   * @brief Base class for all geometric elements of the mesh.
+   */
+  class Simplex
+  {
+    public:
+      enum class Property
+      {
+        Attribute
+      };
 
-         Simplex(
-               size_t dimension,
-               Index index,
-               const MeshBase& mesh,
-               const std::vector<Index>& vertices,
-               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      Simplex(
+          size_t dimension,
+          Index index,
+          const MeshBase& mesh,
+          const std::vector<Index>& vertices,
+          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-         Simplex(const Simplex&) = delete;
+      Simplex(const Simplex&) = delete;
 
-         Simplex(Simplex&&) = default;
+      Simplex(Simplex&&) = default;
 
-         virtual ~Simplex() = default;
+      virtual ~Simplex() = default;
 
-         size_t getDimension() const
-         {
-            return m_dimension;
-         }
-
-         /**
-          * @brief Gets the index of the simplex in the mesh.
-          */
-         Index getIndex() const
-         {
-            return m_index;
-         }
+      /**
+       * @brief Gets the index of the simplex in the mesh.
+       */
+      Index getIndex() const
+      {
+        return m_index;
+      }
 
 
-         Type getGeometry() const
-         {
-            return m_type;
-         }
+      Type getGeometry() const
+      {
+        return m_type;
+      }
 
-         /**
-          * @brief Gets the attribute of the simplex.
-          */
-         Attribute getAttribute() const
-         {
-            return m_attr;
-         }
+      double getVolume() const;
 
-         /**
-          * @brief Gets the associated mesh to the simplex.
-          */
-         const MeshBase& getMesh() const
-         {
-            return m_mesh.get();
-         }
+      size_t getDimension() const
+      {
+        return m_dimension;
+      }
 
-         double getVolume() const;
+      /**
+       * @brief Gets the attribute of the simplex.
+       */
+      Attribute getAttribute() const
+      {
+        return m_attr;
+      }
 
-         // VertexIterator getVertices() const;
+      /**
+       * @brief Gets the associated mesh to the simplex.
+       */
+      const MeshBase& getMesh() const
+      {
+        return m_mesh.get();
+      }
 
-         mfem::ElementTransformation& getTransformation() const;
+      // virtual VertexIterator getVertices() const;
 
-         virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
+      virtual SimplexIterator getAdjacent() const;
 
-      private:
-         const size_t m_dimension;
-         const Index m_index;
-         std::reference_wrapper<const MeshBase> m_mesh;
-         std::vector<Index> m_vertices;
-         Attribute m_attr;
-         Geometry::Type m_type;
-         mutable std::unique_ptr<mfem::ElementTransformation> m_trans;
-   };
+      virtual SimplexIterator getIncident() const;
 
-   bool operator<(const Simplex& lhs, const Simplex& rhs);
+      [[deprecated]] mfem::ElementTransformation& getTransformation() const;
 
-   /**
-    * @brief Class for representing elements of the highest dimension in the
-    * mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.
-    *
-    * This class is designed so that modifications cannot be made to the
-    * element. If one wishes to modify the element then one must use
-    * ElementView.
-    */
-   class Element : public Simplex
-   {
-      public:
-         Element(
-               Index index,
-               const MeshBase& mesh, const std::vector<Index>& vertices,
-               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
-         Element(const Element&) = delete;
+    private:
+      const size_t m_dimension;
+      const Index m_index;
+      std::reference_wrapper<const MeshBase> m_mesh;
+      std::vector<Index> m_vertices;
+      Attribute m_attr;
+      Geometry::Type m_type;
+      mutable std::unique_ptr<mfem::ElementTransformation> m_trans;
+  };
 
-         Element(Element&& other)
-            :  Simplex(std::move(other))
-         {}
+  bool operator<(const Simplex& lhs, const Simplex& rhs);
 
-         ElementIterator getAdjacent() const;
-   };
+  /**
+   * @brief Class for representing elements of the highest dimension in the
+   * mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.
+   *
+   * This class is designed so that modifications cannot be made to the
+   * element. If one wishes to modify the element then one must use
+   * ElementView.
+   */
+  class Element : public Simplex
+  {
+    public:
+      Element(
+          Index index,
+          const MeshBase& mesh, const std::vector<Index>& vertices,
+          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-   /**
-    * @brief Class for representing elements of codimension 1 in the
-    * mesh, i.e. triangles in 3D or lines in 2D.
-    *
-    * This class is designed so that modifications cannot be made to the
-    * face.
-    */
-   class Face : public Simplex
-   {
-      public:
-         Face(
-               Index index,
-               const MeshBase& mesh, const std::vector<Index>& vertices,
-               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      Element(const Element&) = delete;
 
-         Face(const Face&) = delete;
+      Element(Element&& other)
+        :  Simplex(std::move(other))
+      {}
+  };
 
-         Face(Face&& other)
-            : Simplex(std::move(other))
-         {}
+  /**
+   * @brief Class for representing elements of codimension 1 in the
+   * mesh, i.e. triangles in 3D or lines in 2D.
+   *
+   * This class is designed so that modifications cannot be made to the
+   * face.
+   */
+  class Face : public Simplex
+  {
+    public:
+      Face(
+          Index index,
+          const MeshBase& mesh, const std::vector<Index>& vertices,
+          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-         FaceIterator getAdjacent() const;
+      Face(const Face&) = delete;
 
-         ElementIterator getIncident() const;
+      Face(Face&& other)
+        : Simplex(std::move(other))
+      {}
 
-         bool isBoundary() const;
+      bool isBoundary() const;
 
-         bool isInterface() const;
-   };
+      bool isInterface() const;
+  };
 
-   class Vertex : public Simplex
-   {
-      public:
-         double x() const
-         {
-            return operator()(0);
-         }
+  class Vertex : public Simplex
+  {
+    public:
+      double x() const
+      {
+        return operator()(0);
+      }
 
-         double y() const
-         {
-            return operator()(1);
-         }
+      double y() const
+      {
+        return operator()(1);
+      }
 
-         double z() const
-         {
-            return operator()(2);
-         }
+      double z() const
+      {
+        return operator()(2);
+      }
 
-         virtual double operator()(size_t i) const;
-   };
+      virtual double operator()(size_t i) const;
+  };
 
-   /**
-    * @brief Represents a spatial point which belongs to some element of a mesh.
-    *
-    * A Point represents the physical coordinates (as opposed to reference
-    * coordinates) of a point on the mesh.
-    * This class differs from a Vertex in the sense that a Vertex is a node of
-    * some element of a Mesh. In contrast, a Point represents any
-    * coordinates contained in the Mesh.
-    */
-   class Point
-   {
-      public:
-         enum class Coordinates
-         {
-            Reference,
-            Physical
-         };
+  /**
+   * @brief Represents a spatial point which belongs to some element of a mesh.
+   *
+   * A Point represents the physical coordinates (as opposed to reference
+   * coordinates) of a point on the mesh.
+   * This class differs from a Vertex in the sense that a Vertex is a node of
+   * some element of a Mesh. In contrast, a Point represents any
+   * coordinates contained in the Mesh.
+   */
+  class Point
+  {
+    public:
+      enum class Coordinates
+      {
+        Reference,
+        Physical
+      };
 
-         /**
-          * @brief Constructs the Point object from reference coordinates.
-          * @param[in] simplex Simplex to which point belongs to
-          * @param[in] ip Reference coordinates
-          */
-         Point(const Simplex& simplex, const mfem::IntegrationPoint& ip);
+      /**
+       * @brief Constructs the Point object from reference coordinates.
+       * @param[in] simplex Simplex to which point belongs to
+       * @param[in] ip Reference coordinates
+       */
+      Point(const Simplex& simplex, const mfem::IntegrationPoint& ip);
 
-         Point(const Simplex& simplex, mfem::IntegrationPoint&& ip);
+      Point(const Simplex& simplex, mfem::IntegrationPoint&& ip);
 
-         Point(const Point&) = default;
+      Point(const Point&) = default;
 
-         Point(Point&&) = default;
+      Point(Point&&) = default;
 
-         /**
-          * @brief Gets the space dimension of the physical coordinates.
-          * @returns Dimension of the physical coordinates.
-          */
-         size_t getDimension(Coordinates coords = Coordinates::Physical) const;
+      /**
+       * @brief Gets the space dimension of the physical coordinates.
+       * @returns Dimension of the physical coordinates.
+       */
+      size_t getDimension(Coordinates coords = Coordinates::Physical) const;
 
-         /**
-          * @brief Gets the i-th physical coordinate.
-          * @returns Physical i-th coordinate.
-          */
-         double operator()(int i, Coordinates coords = Coordinates::Physical) const
-         {
-            switch (coords)
-            {
-               case Coordinates::Physical:
-               {
-                  assert(m_physical.Size() > i);
-                  return m_physical(i);
-               }
-               case Coordinates::Reference:
-               {
-                  double p[3];
-                  m_ip.Get(p, getDimension(coords));
-                  return p[i];
-               }
-            }
-         }
+      /**
+       * @brief Gets the i-th physical coordinate.
+       * @returns Physical i-th coordinate.
+       */
+      double operator()(int i, Coordinates coords = Coordinates::Physical) const
+      {
+        switch (coords)
+        {
+          case Coordinates::Physical:
+          {
+            assert(m_physical.Size() > i);
+            return m_physical(i);
+          }
+          case Coordinates::Reference:
+          {
+            double p[3];
+            m_ip.Get(p, getDimension(coords));
+            return p[i];
+          }
+        }
+      }
 
-         /**
-          * @brief Gets the @f$ x @f$ physical coordinate.
-          * @returns Physical @f$ x @f$-coordinate.
-          */
-         double x(Coordinates coords = Coordinates::Physical) const
-         {
-            switch (coords)
-            {
-               case Coordinates::Physical:
-               {
-                  assert(m_physical.Size() > 0);
-                  return m_physical(0);
-               }
-               case Coordinates::Reference:
-               {
-                  return m_ip.x;
-               }
-            }
-         }
+      /**
+       * @brief Gets the @f$ x @f$ physical coordinate.
+       * @returns Physical @f$ x @f$-coordinate.
+       */
+      double x(Coordinates coords = Coordinates::Physical) const
+      {
+        switch (coords)
+        {
+          case Coordinates::Physical:
+          {
+            assert(m_physical.Size() > 0);
+            return m_physical(0);
+          }
+          case Coordinates::Reference:
+          {
+            return m_ip.x;
+          }
+        }
+      }
 
-         /**
-          * @brief Gets the @f$ y @f$ physical coordinate.
-          * @returns Physical @f$ y @f$-coordinate.
-          */
-         double y(Coordinates coords = Coordinates::Physical) const
-         {
-            switch (coords)
-            {
-               case Coordinates::Physical:
-               {
-                  assert(m_physical.Size() > 1);
-                  return m_physical(1);
-               }
-               case Coordinates::Reference:
-               {
-                  return m_ip.y;
-               }
-            }
-         }
+      /**
+       * @brief Gets the @f$ y @f$ physical coordinate.
+       * @returns Physical @f$ y @f$-coordinate.
+       */
+      double y(Coordinates coords = Coordinates::Physical) const
+      {
+        switch (coords)
+        {
+          case Coordinates::Physical:
+          {
+            assert(m_physical.Size() > 1);
+            return m_physical(1);
+          }
+          case Coordinates::Reference:
+          {
+            return m_ip.y;
+          }
+        }
+      }
 
-         /**
-          * @brief Gets the @f$ z @f$ physical coordinate.
-          * @returns Physical @f$ z @f$-coordinate.
-          */
-         double z(Coordinates coords = Coordinates::Physical) const
-         {
-            switch (coords)
-            {
-               case Coordinates::Physical:
-               {
-                  assert(m_physical.Size() > 2);
-                  return m_physical(2);
-               }
-               case Coordinates::Reference:
-               {
-                  return m_ip.z;
-               }
-            }
-         }
+      /**
+       * @brief Gets the @f$ z @f$ physical coordinate.
+       * @returns Physical @f$ z @f$-coordinate.
+       */
+      double z(Coordinates coords = Coordinates::Physical) const
+      {
+        switch (coords)
+        {
+          case Coordinates::Physical:
+          {
+            assert(m_physical.Size() > 2);
+            return m_physical(2);
+          }
+          case Coordinates::Reference:
+          {
+            return m_ip.z;
+          }
+        }
+      }
 
-         double w() const
-         {
-            return m_ip.weight;
-         }
+      double w() const
+      {
+        return m_ip.weight;
+      }
 
-         /**
-          * @brief Lexicographical comparison.
-          */
-         bool operator<(const Point& rhs) const
-         {
-            assert(getDimension() == rhs.getDimension());
-            for (int i = 0; i < m_physical.Size() - 1; i++)
-            {
-               if (m_physical(i) < rhs.m_physical(i))
-                  return true;
-               if (rhs.m_physical(i) > m_physical(i))
-                  return false;
-            }
-            return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
-         }
+      /**
+       * @brief Lexicographical comparison.
+       */
+      bool operator<(const Point& rhs) const
+      {
+        assert(getDimension() == rhs.getDimension());
+        for (int i = 0; i < m_physical.Size() - 1; i++)
+        {
+          if (m_physical(i) < rhs.m_physical(i))
+            return true;
+          if (rhs.m_physical(i) > m_physical(i))
+            return false;
+        }
+        return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
+      }
 
-         const Simplex& getSimplex() const
-         {
-            return m_element;
-         }
+      const Simplex& getSimplex() const
+      {
+        return m_element;
+      }
 
-         [[deprecated]] const mfem::IntegrationPoint& getIntegrationPoint() const
-         {
-            return m_ip;
-         }
+      [[deprecated]] const mfem::IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_ip;
+      }
 
-      private:
-         mfem::Vector m_physical;
-         std::reference_wrapper<const Simplex> m_element;
-         mfem::IntegrationPoint m_ip;
-   };
+    private:
+      mfem::Vector m_physical;
+      std::reference_wrapper<const Simplex> m_element;
+      mfem::IntegrationPoint m_ip;
+  };
 }
 
 #endif

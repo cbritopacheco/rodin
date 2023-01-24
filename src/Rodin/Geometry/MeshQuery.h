@@ -13,23 +13,23 @@
 
 namespace Rodin::Geometry
 {
-   class MeshSelect
-   {
-      public:
-         MeshSelect(const MeshBase& mesh)
-            : m_mesh(mesh)
-         {}
+  class MeshSelect
+  {
+    public:
+      MeshSelect(const MeshBase& mesh)
+        : m_mesh(mesh)
+      {}
 
-         MeshSelect& where(Attribute attr);
+      MeshSelect& where(Attribute attr);
 
-         const MeshBase& getMesh() const
-         {
-            return m_mesh.get();
-         }
+      const MeshBase& getMesh() const
+      {
+        return m_mesh.get();
+      }
 
-      private:
-         std::reference_wrapper<const MeshBase> m_mesh;
-   };
+    private:
+      std::reference_wrapper<const MeshBase> m_mesh;
+  };
 }
 
 #endif

@@ -14,16 +14,16 @@
 namespace Rodin::Plot::Backend::Bases
 {
   class BaseDrawable3D
-    : public Renderer::Object3D, public Magnum::SceneGraph::Drawable3D
+   : public Renderer::Object3D, public Magnum::SceneGraph::Drawable3D
   {
-    public:
-      BaseDrawable3D(
-          Renderer::Object3D* parent,
-          Magnum::SceneGraph::DrawableGroup3D* group
-          )
-      : Renderer::Object3D{parent},
-        Magnum::SceneGraph::Drawable3D{*this, group}
-    {}
+   public:
+    BaseDrawable3D(
+       Renderer::Object3D* parent,
+       Magnum::SceneGraph::DrawableGroup3D* group
+       )
+    : Renderer::Object3D{parent},
+      Magnum::SceneGraph::Drawable3D{*this, group}
+   {}
   };
 }
 
