@@ -36,6 +36,23 @@ namespace Rodin::Geometry
       }
    }
 
+   // VertexIterator Simplex::getVertices() const
+   // {
+   //    assert(false);
+   // }
+
+   SimplexIterator Simplex::getAdjacent() const
+   {
+      assert(false);
+      return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
+   }
+
+   SimplexIterator Simplex::getIncident() const
+   {
+      assert(false);
+      return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
+   }
+
    mfem::ElementTransformation& Simplex::getTransformation() const
    {
       if (!m_trans)
@@ -152,12 +169,6 @@ namespace Rodin::Geometry
       : Simplex(mesh.getDimension(), index, mesh, vertices, attr)
    {}
 
-   ElementIterator Element::getAdjacent() const
-   {
-      assert(false);
-      return ElementIterator(getMesh(), EmptyIndexGenerator());
-   }
-
    // ---- Face --------------------------------------------------------------
    Face::Face(
          Index index,
@@ -174,47 +185,6 @@ namespace Rodin::Geometry
    {
       return getMesh().isInterface(getIndex());
    }
-
-   FaceIterator Face::getAdjacent() const
-   {
-      assert(false);
-      return FaceIterator(getMesh(), EmptyIndexGenerator());
-   }
-
-   ElementIterator Face::getIncident() const
-   {
-      assert(false);
-      return ElementIterator(getMesh(), EmptyIndexGenerator());
-   }
-
-   // std::set<int> Face::elements() const
-   // {
-   //    int e1 = -1, e2 = -1;
-   //    getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
-   //    if (e1 >= 0 && e2 >= 0)
-   //       return {e1, e2};
-   //    else if (e1 >= 0 && e2 < 0)
-   //       return {e1};
-   //    else if (e1 < 0 && e2 >= 0)
-   //       return {e2};
-   //    else
-   //       return {};
-   // }
-
-   // std::set<Element> Face::getElements() const
-   // {
-   //    int e1 = -1, e2 = -1;
-   //    getMesh().getHandle().GetFaceElements(Face::getIndex(), &e1, &e2);
-   //    if (e1 >= 0 && e2 >= 0)
-   //       return { Element(getMesh(), getMesh().getHandle().GetElement(e1), e1),
-   //                Element(getMesh(), getMesh().getHandle().GetElement(e2), e2) };
-   //    else if (e1 >= 0 && e2 < 0)
-   //       return { Element(getMesh(), getMesh().getHandle().GetElement(e1), e1) };
-   //    else if (e1 < 0 && e2 >= 0)
-   //       return { Element(getMesh(), getMesh().getHandle().GetElement(e2), e2) };
-   //    else
-   //       return {};
-   // }
 
    // ---- Point -------------------------------------------------------------
    Point::Point(const Simplex& element, const mfem::IntegrationPoint& ip)
