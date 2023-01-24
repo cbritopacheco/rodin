@@ -15,35 +15,35 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Represent the min function.
-    */
-   class Min : public ScalarFunctionBase
-   {
-      public:
-         Min(const FunctionBase& a, double b);
+  /**
+   * @brief Represent the min function.
+   */
+  class Min : public ScalarFunctionBase
+  {
+    public:
+      Min(const FunctionBase& a, double b);
 
-         Min(double a, const FunctionBase& b);
+      Min(double a, const FunctionBase& b);
 
-         Min(const FunctionBase& a, const FunctionBase& b);
+      Min(const FunctionBase& a, const FunctionBase& b);
 
-         Min(const Min& other);
+      Min(const Min& other);
 
-         Min(Min&& other);
+      Min(Min&& other);
 
-         Min& traceOf(Geometry::Attribute attrs) override;
+      Min& traceOf(Geometry::Attribute attrs) override;
 
-         FunctionValue getValue(const Geometry::Point& p) const override
-         {
-            return std::min(m_a->getValue(p).scalar(), m_b->getValue(p).scalar());
-         }
+      FunctionValue getValue(const Geometry::Point& p) const override
+      {
+        return std::min(m_a->getValue(p).scalar(), m_b->getValue(p).scalar());
+      }
 
-         Min* copy() const noexcept override;
+      Min* copy() const noexcept override;
 
-      private:
-         std::unique_ptr<FunctionBase> m_a;
-         std::unique_ptr<FunctionBase> m_b;
-   };
+    private:
+      std::unique_ptr<FunctionBase> m_a;
+      std::unique_ptr<FunctionBase> m_b;
+  };
 }
 
 #endif

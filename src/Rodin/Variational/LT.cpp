@@ -8,10 +8,10 @@
 
 namespace Rodin::Variational
 {
-   LT<FunctionBase, FunctionBase>
-   operator<(const FunctionBase& lhs, const FunctionBase& rhs)
-   {
-      return LT(lhs, rhs);
-   }
+  LT<FunctionBase, FunctionBase>
+  operator<(const FunctionBase& lhs, const FunctionBase& rhs)
+  {
+    return LT(lhs, rhs);
+  }
 }
 

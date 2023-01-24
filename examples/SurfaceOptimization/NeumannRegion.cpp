@@ -19,12 +19,12 @@ using namespace Rodin::External;
  * @oaram[in] Vh Vectorial finite element space
  */
 GridFunction<H1> getShapeGradient(
-    FiniteElementSpace<H1>& scalarFes,
-    FiniteElementSpace<H1>& vecFes,
-    GridFunction<H1>& dist,
-    GridFunction<H1>& adjoint,
-    const ScalarFunctionBase& g,
-    Solver::Solver& solver, double ell, double alpha=0.1);
+   FiniteElementSpace<H1>& scalarFes,
+   FiniteElementSpace<H1>& vecFes,
+   GridFunction<H1>& dist,
+   GridFunction<H1>& adjoint,
+   const ScalarFunctionBase& g,
+   Solver::Solver& solver, double ell, double alpha=0.1);
 
 int main(int, char**)
 {
@@ -42,7 +42,7 @@ int main(int, char**)
 
   auto J = [&](GridFunction<H1>& u)
   {
-    return Integral(u).compute() - ell * Omega.getPerimeter(GammaN);
+   return Integral(u).compute() - ell * Omega.getPerimeter(GammaN);
   };
 
   FiniteElementSpace<H1> Vh(Omega);
@@ -59,9 +59,9 @@ int main(int, char**)
   TestFunction  v(Vh);
   Problem state(u, v);
   state = Integral(Grad(u), Grad(v))
-        - Integral(f, v)
-        - BoundaryIntegral(g, v).over(GammaN)
-        + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
+      - Integral(f, v)
+      - BoundaryIntegral(g, v).over(GammaN)
+      + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
   solver.solve(state);
 
   // Adjoint equation
@@ -69,8 +69,8 @@ int main(int, char**)
   TestFunction  q(Vh);
   Problem adjoint(p, q);
   adjoint = Integral(Grad(p), Grad(q))
-          - Integral(q)
-          + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
+       - Integral(q)
+       + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
   solver.solve(adjoint);
 
   // Shape gradient
@@ -105,12 +105,12 @@ int main(int, char**)
 }
 
 GridFunction<H1> getShapeGradient(
-    FiniteElementSpace<H1>& scalarFes,
-    FiniteElementSpace<H1>& vecFes,
-    GridFunction<H1>& dist,
-    GridFunction<H1>& adjoint,
-    const ScalarFunctionBase& g,
-    Solver::Solver& solver, double ell, double alpha)
+   FiniteElementSpace<H1>& scalarFes,
+   FiniteElementSpace<H1>& vecFes,
+   GridFunction<H1>& dist,
+   GridFunction<H1>& adjoint,
+   const ScalarFunctionBase& g,
+   Solver::Solver& solver, double ell, double alpha)
 {
   auto d0 = VectorFunction{Dx(dist), Dy(dist), Dz(dist)};
   auto n0 = d0 / (Pow(d0.x() * d0.x() + d0.y() * d0.y() + d0.z() * d0.z(), 0.5) + ScalarFunction(0.01));
@@ -123,20 +123,20 @@ GridFunction<H1> getShapeGradient(
   auto expr = ScalarFunction(adjoint) * g - ScalarFunction(ell);
   Problem velextX(nx, v);
   velextX = Integral(alpha * Grad(nx), Grad(v))
-          + Integral(nx, v)
-          - Integral(expr * n0.x(), v);
+       + Integral(nx, v)
+       - Integral(expr * n0.x(), v);
   solver.solve(velextX);
 
   Problem velextY(ny, v);
   velextY = Integral(alpha * Grad(ny), Grad(v))
-          + Integral(ny, v)
-          - Integral(expr * n0.y(), v);
+       + Integral(ny, v)
+       - Integral(expr * n0.y(), v);
   solver.solve(velextY);
 
   Problem velextZ(nz, v);
   velextZ = Integral(alpha * Grad(nz), Grad(v))
-          + Integral(nz, v)
-          - Integral(expr * n0.z(), v);
+       + Integral(nz, v)
+       - Integral(expr * n0.z(), v);
   solver.solve(velextZ);
 
   GridFunction grad(vecFes);

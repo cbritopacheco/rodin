@@ -4,8 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_TRAITS_FORWARDDECLS_H
-#define RODIN_TRAITS_FORWARDDECLS_H
+#ifndef RODIN_CONTEXT_FORWARDDECLS_H
+#define RODIN_CONTEXT_FORWARDDECLS_H
 
+namespace Rodin::Context
+{
+  struct Serial;
+  struct MPI;
+}
 
 #endif

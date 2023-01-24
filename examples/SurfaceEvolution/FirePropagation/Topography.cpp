@@ -23,11 +23,11 @@ int main(int, char**)
   constexpr double flatness = 4.0;
 
   std::vector<Octave> octaves = {
-    {500.0, 500},
-    {1000.0, 1000},
-    {2000.0, 1000},
-    {3000.0, 2000},
-    {4000.0, 3000},
+   {500.0, 500},
+   {1000.0, 1000},
+   {2000.0, 1000},
+   {3000.0, 2000},
+   {4000.0, 3000},
   };
 
   MMG::Mesh topography;
@@ -37,13 +37,13 @@ int main(int, char**)
   topography.vertex({0, height, 0});
   topography.vertex({width, height, 0});
   topography.element(
-      Geometry::Type::Triangle, {0, 1, 2});
+    Geometry::Type::Triangle, {0, 1, 2});
   topography.element(
-      Geometry::Type::Triangle, {1, 2, 3});
+    Geometry::Type::Triangle, {1, 2, 3});
   topography.finalize();
 
   // for (int i = 0; i < 8; i++)
-  //   topography.refine();
+  //  topography.refine();
 
   srand(std::time(0));
   FastNoiseLite gen(rand());
@@ -53,35 +53,35 @@ int main(int, char**)
 
   double elVol = 0;
   // for (int i = 0; i < topography.count<Element>(); i++)
-  //   elVol += topography.get<Element>(i).getVolume();
+  //  elVol += topography.get<Element>(i).getVolume();
   // elVol /= topography.count<Element>();
 
   double maxElevation = std::max_element(
-      octaves.begin(), octaves.end(),
-      [](auto&& lhs, auto& rhs)
-      { return lhs.elevation < rhs.elevation; })->elevation;
+    octaves.begin(), octaves.end(),
+    [](auto&& lhs, auto& rhs)
+    { return lhs.elevation < rhs.elevation; })->elevation;
 
   double totalElevation = 0.0;
   for (const auto& octave : octaves)
-    totalElevation += octave.elevation;
+   totalElevation += octave.elevation;
 
   H1 vh(topography, topography.getSpaceDimension());
   GridFunction displacement(vh);
   displacement =
-    VectorFunction{0, 0,
-      [&](const Point& p)
+   VectorFunction{0, 0,
+    [&](const Point& p)
+    {
+      double nx = p.x(), ny = p.y();
+      double e = 0.0;
+      for (const auto& octave : octaves)
       {
-        double nx = p.x(), ny = p.y();
-        double e = 0.0;
-        for (const auto& octave : octaves)
-        {
-          double f = elVol / (octave.period * octave.period);
-          e += octave.elevation * noise(f * nx, f * ny);
-        }
-        e /= totalElevation;
-        assert(e < 1.0 + std::numeric_limits<double>::epsilon());
-        return maxElevation * std::pow(e, flatness);
-      }};
+       double f = elVol / (octave.period * octave.period);
+       e += octave.elevation * noise(f * nx, f * ny);
+      }
+      e /= totalElevation;
+      assert(e < 1.0 + std::numeric_limits<double>::epsilon());
+      return maxElevation * std::pow(e, flatness);
+    }};
   topography.displace(displacement);
 
   H1 sh(topography);

@@ -15,20 +15,20 @@ namespace Rodin::Plot::Backend::Bases
 {
   class BaseEvent
   {
-    public:
-      BaseEvent(std::uint32_t timestamp) : m_timestamp(timestamp)
-      {}
+   public:
+    BaseEvent(std::uint32_t timestamp) : m_timestamp(timestamp)
+    {}
 
-      std::uint32_t getTimestamp() const
-      {
-        return m_timestamp;
-      }
+    std::uint32_t getTimestamp() const
+    {
+      return m_timestamp;
+    }
 
-      virtual ~BaseEvent()
-      {}
+    virtual ~BaseEvent()
+    {}
 
-    private:
-      std::uint32_t m_timestamp;
+   private:
+    std::uint32_t m_timestamp;
   };
 }
 

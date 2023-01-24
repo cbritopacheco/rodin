@@ -17,47 +17,47 @@
 
 namespace Rodin::FormLanguage
 {
-   /**
-    * @brief Base class for all classes which are part of Variational::FormLanguage.
-    */
-   class Base
-   {
-      static boost::uuids::random_generator s_gen;
+  /**
+   * @brief Base class for all classes which are part of Variational::FormLanguage.
+   */
+  class Base
+  {
+    static boost::uuids::random_generator s_gen;
 
-      public:
-         Base();
+    public:
+      Base();
 
-         Base(const Base& other);
+      Base(const Base& other);
 
-         Base(Base&& other);
+      Base(Base&& other);
 
-         /**
-          * @brief Virtual destructor.
-          */
-         virtual ~Base() = default;
+      /**
+       * @brief Virtual destructor.
+       */
+      virtual ~Base() = default;
 
-         Base& operator=(const Base&) = delete;
+      Base& operator=(const Base&) = delete;
 
-         Base& operator=(Base&&) = delete;
+      Base& operator=(Base&&) = delete;
 
-         const boost::uuids::uuid& getUUID() const;
+      const boost::uuids::uuid& getUUID() const;
 
-         virtual const char* getName() const
-         {
-            return "Rodin::FormLanguage::Base";
-         }
+      virtual const char* getName() const
+      {
+        return "Rodin::FormLanguage::Base";
+      }
 
-         /**
-          * @internal
-          * @brief Copies the object and returns a non-owning pointer to the
-          * copied object.
-          * @returns Non-owning pointer to the copied object.
-          */
-         virtual Base* copy() const noexcept = 0;
+      /**
+       * @internal
+       * @brief Copies the object and returns a non-owning pointer to the
+       * copied object.
+       * @returns Non-owning pointer to the copied object.
+       */
+      virtual Base* copy() const noexcept = 0;
 
-      private:
-         const boost::uuids::uuid m_uuid;
-   };
+    private:
+      const boost::uuids::uuid m_uuid;
+  };
 }
 
 #endif

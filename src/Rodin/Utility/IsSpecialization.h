@@ -11,11 +11,11 @@
 
 namespace Rodin::Utility
 {
-   template <class Test, template<class...> class Ref>
-   struct IsSpecialization : std::false_type {};
+  template <class Test, template<class...> class Ref>
+  struct IsSpecialization : std::false_type {};
 
-   template<template<class...> class Ref, class... Args>
-   struct IsSpecialization<Ref<Args...>, Ref> : std::true_type {};
+  template<template<class...> class Ref, class... Args>
+  struct IsSpecialization<Ref<Args...>, Ref> : std::true_type {};
 }
 
 #endif

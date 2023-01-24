@@ -14,50 +14,50 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup TraceSpecializations
-    * @brief Template specializations of the Trace class.
-    * @see Trace
-    */
+  /**
+   * @defgroup TraceSpecializations
+   * @brief Template specializations of the Trace class.
+   * @see Trace
+   */
 
-   /**
-    * @ingroup TraceSpecializations
-    * @brief Trace of a FunctionBase instance.
-    */
-   template <>
-   class Trace<FunctionBase> : public ScalarFunctionBase
-   {
-      public:
-         /**
-          * @brief Constructs the Trace of the given matrix
-          * @param[in] m Square matrix
-          */
-         Trace(const FunctionBase& m);
+  /**
+   * @ingroup TraceSpecializations
+   * @brief Trace of a FunctionBase instance.
+   */
+  template <>
+  class Trace<FunctionBase> : public ScalarFunctionBase
+  {
+    public:
+      /**
+       * @brief Constructs the Trace of the given matrix
+       * @param[in] m Square matrix
+       */
+      Trace(const FunctionBase& m);
 
-         Trace(const Trace& other);
+      Trace(const Trace& other);
 
-         Trace(Trace&& other);
+      Trace(Trace&& other);
 
-         FunctionValue getValue(const Geometry::Point& p) const override
-         {
-            return m_matrix->getValue(p).matrix().Trace();
-         }
+      FunctionValue getValue(const Geometry::Point& p) const override
+      {
+        return m_matrix->getValue(p).matrix().Trace();
+      }
 
-         Trace& traceOf(Geometry::Attribute attrs) override
-         {
-            ScalarFunctionBase::traceOf(attrs);
-            m_matrix->traceOf(attrs);
-            return *this;
-         }
+      Trace& traceOf(Geometry::Attribute attrs) override
+      {
+        ScalarFunctionBase::traceOf(attrs);
+        m_matrix->traceOf(attrs);
+        return *this;
+      }
 
-         Trace* copy() const noexcept override
-         {
-            return new Trace(*this);
-         }
-      private:
-         std::unique_ptr<FunctionBase> m_matrix;
-   };
-   Trace(const FunctionBase&) -> Trace<FunctionBase>;
+      Trace* copy() const noexcept override
+      {
+        return new Trace(*this);
+      }
+    private:
+      std::unique_ptr<FunctionBase> m_matrix;
+  };
+  Trace(const FunctionBase&) -> Trace<FunctionBase>;
 }
 
 #endif

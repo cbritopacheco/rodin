@@ -6,7 +6,7 @@
 
 namespace Rodin::Utility
 {
-   mfem::Array<int> set2marker(const std::set<int>& s, int size);
+  mfem::Array<int> set2marker(const std::set<int>& s, int size);
 }
 
 #endif

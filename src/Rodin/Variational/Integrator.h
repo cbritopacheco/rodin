@@ -16,41 +16,41 @@
 
 namespace Rodin::Variational
 {
-   class Integrator : public FormLanguage::Base
-   {
-      public:
-         using Parent = FormLanguage::Base;
+  class Integrator : public FormLanguage::Base
+  {
+    public:
+      using Parent = FormLanguage::Base;
 
-         enum class Region
-         {
-            Domain,
-            Faces,
-            Boundary,
-            Interface
-         };
+      enum class Region
+      {
+        Domain,
+        Faces,
+        Boundary,
+        Interface
+      };
 
-         enum class Type
-         {
-            Linear,
-            Bilinear
-         };
+      enum class Type
+      {
+        Linear,
+        Bilinear
+      };
 
-         Integrator() = default;
+      Integrator() = default;
 
-         Integrator(const Integrator& other)
-            : Parent(other)
-         {}
+      Integrator(const Integrator& other)
+        : Parent(other)
+      {}
 
-         Integrator(Integrator&& other)
-            : Parent(std::move(other))
-         {}
+      Integrator(Integrator&& other)
+        : Parent(std::move(other))
+      {}
 
-         virtual Type getType() const = 0;
+      virtual Type getType() const = 0;
 
-         virtual Region getRegion() const = 0;
+      virtual Region getRegion() const = 0;
 
-         virtual Integrator* copy() const noexcept override = 0;
-   };
+      virtual Integrator* copy() const noexcept override = 0;
+  };
 }
 
 #endif

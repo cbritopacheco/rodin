@@ -13,19 +13,19 @@ namespace Rodin::Plot::Backend::Event
 {
   class MouseEvent : public Backend::Bases::BaseEvent
   {
-    public:
-    enum Button
-    {
-      LEFT    = SDL_BUTTON_LEFT,
-      MIDDLE  = SDL_BUTTON_MIDDLE,
-      RIGHT   = SDL_BUTTON_RIGHT,
-      X1      = SDL_BUTTON_X1,
-      X2      = SDL_BUTTON_X2
-    };
+   public:
+   enum Button
+   {
+    LEFT   = SDL_BUTTON_LEFT,
+    MIDDLE  = SDL_BUTTON_MIDDLE,
+    RIGHT  = SDL_BUTTON_RIGHT,
+    X1    = SDL_BUTTON_X1,
+    X2    = SDL_BUTTON_X2
+   };
 
-    MouseEvent(std::uint32_t timestamp)
-      : BaseEvent(timestamp)
-    {}
+   MouseEvent(std::uint32_t timestamp)
+    : BaseEvent(timestamp)
+   {}
   };
 }
 

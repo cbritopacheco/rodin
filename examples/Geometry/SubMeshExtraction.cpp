@@ -19,8 +19,8 @@ int main(int, char**)
   Alert::Info() << "Extracting mesh..." << Alert::Raise;
 
   // auto trimmed =
-  //   mesh.extract(
-  //     mesh.where([] (const Element& el) { return el.getAttribute() == 1; }));
+  //  mesh.extract(
+  //    mesh.where([] (const Element& el) { return el.getAttribute() == 1; }));
 
   // Alert::Info() << "Saved mesh to trimmed.mesh" << Alert::Raise;
 

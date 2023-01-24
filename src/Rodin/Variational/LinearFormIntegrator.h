@@ -19,92 +19,92 @@
 
 namespace Rodin::Variational
 {
-   class LinearFormIntegratorBase : public Integrator
-   {
-      public:
-         using Parent = Integrator;
+  class LinearFormIntegratorBase : public Integrator
+  {
+    public:
+      using Parent = Integrator;
 
-         LinearFormIntegratorBase(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
-            : m_v(v.copy())
-         {}
+      LinearFormIntegratorBase(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
+        : m_v(v.copy())
+      {}
 
-         LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
-            : Parent(other),
-              m_v(other.m_v->copy()),
-              m_attrs(other.m_attrs)
-         {}
+      LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
+        : Parent(other),
+          m_v(other.m_v->copy()),
+          m_attrs(other.m_attrs)
+      {}
 
-         LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
-            : Parent(std::move(other)),
-              m_v(std::move(other.m_v)),
-              m_attrs(std::move(other.m_attrs))
-         {}
+      LinearFormIntegratorBase(LinearFormIntegratorBase&& other)
+        : Parent(std::move(other)),
+          m_v(std::move(other.m_v)),
+          m_attrs(std::move(other.m_attrs))
+      {}
 
-         virtual ~LinearFormIntegratorBase() = default;
+      virtual ~LinearFormIntegratorBase() = default;
 
-         const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const
-         {
-            assert(m_v);
-            return *m_v;
-         }
+      const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const
+      {
+        assert(m_v);
+        return *m_v;
+      }
 
-         /**
-          * @brief Gets the attributes of the elements being integrated.
-          */
-         const std::set<Geometry::Attribute>& getAttributes() const
-         {
-            return m_attrs;
-         }
+      /**
+       * @brief Gets the attributes of the elements being integrated.
+       */
+      const std::set<Geometry::Attribute>& getAttributes() const
+      {
+        return m_attrs;
+      }
 
-         /**
-          * @brief Specifies the material reference over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material reference over which the integration should
-          * take place.
-          */
-         LinearFormIntegratorBase& over(Geometry::Attribute attr)
-         {
-            return over(std::set<Geometry::Attribute>{attr});
-         }
+      /**
+       * @brief Specifies the material reference over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material reference over which the integration should
+       * take place.
+       */
+      LinearFormIntegratorBase& over(Geometry::Attribute attr)
+      {
+        return over(std::set<Geometry::Attribute>{attr});
+      }
 
-         /**
-          * @brief Specifies the material references over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material references over which the integration should
-          * take place.
-          */
-         LinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
-         {
-            assert(attrs.size() > 0);
-            m_attrs = attrs;
-            return *this;
-         }
+      /**
+       * @brief Specifies the material references over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material references over which the integration should
+       * take place.
+       */
+      LinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
+      {
+        assert(attrs.size() > 0);
+        m_attrs = attrs;
+        return *this;
+      }
 
-         /**
-          * @internal
-          */
-         std::unique_ptr<mfem::LinearFormIntegrator> build() const;
+      /**
+       * @internal
+       */
+      std::unique_ptr<mfem::LinearFormIntegrator> build() const;
 
-         Integrator::Type getType() const override
-         {
-            return Integrator::Type::Linear;
-         }
+      Integrator::Type getType() const override
+      {
+        return Integrator::Type::Linear;
+      }
 
-         /**
-          * @brief Performs the assembly of the element vector for the given
-          * element.
-          */
-         virtual mfem::Vector getVector(
-               const Geometry::Simplex& element) const = 0;
+      /**
+       * @brief Performs the assembly of the element vector for the given
+       * element.
+       */
+      virtual mfem::Vector getVector(
+          const Geometry::Simplex& element) const = 0;
 
-         virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
+      virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
-      private:
-         std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
-         std::set<Geometry::Attribute> m_attrs;
-   };
+    private:
+      std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
+      std::set<Geometry::Attribute> m_attrs;
+  };
 }
 
 #endif

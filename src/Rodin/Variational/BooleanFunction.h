@@ -13,80 +13,80 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup BooleanFunctionSpecializations BooleanFunction Template Specializations
-    * @brief Template specializations of the BooleanFunction class.
-    * @see BooleanFunction
-    */
+  /**
+   * @defgroup BooleanFunctionSpecializations BooleanFunction Template Specializations
+   * @brief Template specializations of the BooleanFunction class.
+   * @see BooleanFunction
+   */
 
-   class BooleanFunctionBase : public FunctionBase
-   {
-      public:
-         BooleanFunctionBase() = default;
+  class BooleanFunctionBase : public FunctionBase
+  {
+    public:
+      BooleanFunctionBase() = default;
 
-         BooleanFunctionBase(const BooleanFunctionBase& other)
-            : FunctionBase(other)
-         {}
+      BooleanFunctionBase(const BooleanFunctionBase& other)
+        : FunctionBase(other)
+      {}
 
-         BooleanFunctionBase(BooleanFunctionBase&& other)
-            : FunctionBase(std::move(other))
-         {}
+      BooleanFunctionBase(BooleanFunctionBase&& other)
+        : FunctionBase(std::move(other))
+      {}
 
-         virtual ~BooleanFunctionBase() = default;
+      virtual ~BooleanFunctionBase() = default;
 
-         FunctionValue::Boolean operator()(const Geometry::Point& p) const
-         {
-            return getValue(p);
-         }
+      FunctionValue::Boolean operator()(const Geometry::Point& p) const
+      {
+        return getValue(p);
+      }
 
-         RangeShape getRangeShape() const override
-         {
-            return {1, 1};
-         }
+      RangeShape getRangeShape() const override
+      {
+        return {1, 1};
+      }
 
-         RangeType getRangeType() const override
-         {
-            return RangeType::Scalar;
-         }
+      RangeType getRangeType() const override
+      {
+        return RangeType::Scalar;
+      }
 
-         virtual BooleanFunctionBase* copy() const noexcept override = 0;
-   };
+      virtual BooleanFunctionBase* copy() const noexcept override = 0;
+  };
 
-   /**
-    * @ingroup BooleanFunctionSpecializations
-    */
-   template <>
-   class BooleanFunction<FunctionValue::Boolean> : public BooleanFunctionBase
-   {
-      public:
-         BooleanFunction(FunctionValue::Boolean v)
-            : m_v(v)
-         {}
+  /**
+   * @ingroup BooleanFunctionSpecializations
+   */
+  template <>
+  class BooleanFunction<FunctionValue::Boolean> : public BooleanFunctionBase
+  {
+    public:
+      BooleanFunction(FunctionValue::Boolean v)
+        : m_v(v)
+      {}
 
-         BooleanFunction(const BooleanFunction& other)
-            : BooleanFunctionBase(other),
-              m_v(other.m_v)
-         {}
+      BooleanFunction(const BooleanFunction& other)
+        : BooleanFunctionBase(other),
+          m_v(other.m_v)
+      {}
 
-         BooleanFunction(BooleanFunction&& other)
-            : BooleanFunctionBase(std::move(other)),
-              m_v(other.m_v)
-         {}
+      BooleanFunction(BooleanFunction&& other)
+        : BooleanFunctionBase(std::move(other)),
+          m_v(other.m_v)
+      {}
 
-         FunctionValue getValue(const Geometry::Point& p) const override
-         {
-            return m_v;
-         }
+      FunctionValue getValue(const Geometry::Point& p) const override
+      {
+        return m_v;
+      }
 
-         BooleanFunction* copy() const noexcept override
-         {
-            return new BooleanFunction(*this);
-         }
+      BooleanFunction* copy() const noexcept override
+      {
+        return new BooleanFunction(*this);
+      }
 
-      private:
-         FunctionValue::Boolean m_v;
-   };
-   BooleanFunction(FunctionValue::Boolean) -> BooleanFunction<FunctionValue::Boolean>;
+    private:
+      FunctionValue::Boolean m_v;
+  };
+  BooleanFunction(FunctionValue::Boolean) -> BooleanFunction<FunctionValue::Boolean>;
 }
 
 #endif

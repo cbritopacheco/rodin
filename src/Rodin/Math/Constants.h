@@ -12,17 +12,17 @@
 
 namespace Rodin::Math::Constants
 {
-    /**
-     * @brief Computes the number @f$ \pi @f$ to machine precision.
-     */
-    template <class T>
-    constexpr
-    inline
-    std::enable_if_t<std::is_arithmetic_v<T>, T>
-    pi()
-    {
-      return static_cast<T>(std::acos(-1));
-    }
+   /**
+    * @brief Computes the number @f$ \pi @f$ to machine precision.
+    */
+   template <class T>
+   constexpr
+   inline
+   std::enable_if_t<std::is_arithmetic_v<T>, T>
+   pi()
+   {
+    return static_cast<T>(std::acos(-1));
+   }
 }
 
 #endif

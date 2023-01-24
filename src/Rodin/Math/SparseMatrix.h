@@ -14,22 +14,22 @@ namespace Rodin::Math
 {
   class SparseMatrix : public Eigen::SparseMatrix<double>
   {
-    public:
-      using Parent = Eigen::SparseMatrix<double>;
+   public:
+    using Parent = Eigen::SparseMatrix<double>;
 
-      SparseMatrix() = default;
+    SparseMatrix() = default;
 
-      template <typename OtherDerived>
-      SparseMatrix(const Eigen::MatrixBase<OtherDerived>& other)
-        : Parent(other)
-      {}
+    template <typename OtherDerived>
+    SparseMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+      : Parent(other)
+    {}
 
-      template <typename OtherDerived>
-      SparseMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-      {
-          this->Parent::operator=(other);
-          return *this;
-      }
+    template <typename OtherDerived>
+    SparseMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    {
+       this->Parent::operator=(other);
+       return *this;
+    }
   };
 }
 

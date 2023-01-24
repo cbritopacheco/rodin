@@ -47,9 +47,9 @@ Eigen::SparseMatrix<double> mfemToEigenSparse(mfem::SparseMatrix m)
   double* m_data = m.GetData();
 
   for(int r = 0; r < m.NumRows(); ++r){
-    for(int j=m_I[r]; j<m_I[r+1]; ++j){
-      tripletList.push_back(Triplet(r, m_J[j], m_data[j])); // ???? Inverse row and column since Eigen is CSC
-    }
+   for(int j=m_I[r]; j<m_I[r+1]; ++j){
+    tripletList.push_back(Triplet(r, m_J[j], m_data[j])); // ???? Inverse row and column since Eigen is CSC
+   }
   }
   Eigen::SparseMatrix<double> m_sparse(m.NumRows(), m.NumCols());
   m_sparse.setFromTriplets(tripletList.begin(), tripletList.end()); //SEGFAULT
@@ -62,30 +62,30 @@ class EigenSolver
 {
 
   public:
-    // Constructors
-    EigenSolver();
+   // Constructors
+   EigenSolver();
 
-    // Destructor
-    ~EigenSolver() = default;
+   // Destructor
+   ~EigenSolver() = default;
 
-    // Accessors
-    GridFunction<H1<Context::Serial>>& getEigenFunction(int index);
+   // Accessors
+   GridFunction<H1<Context::Serial>>& getEigenFunction(int index);
 
-    double getEigenValue(int index);
-    std::vector<double> getEigenValues();
+   double getEigenValue(int index);
+   std::vector<double> getEigenValues();
 
-    // Options
-    EigenSolver& setNumEV(unsigned int nev);
-    EigenSolver& setShift(double shift);
+   // Options
+   EigenSolver& setNumEV(unsigned int nev);
+   EigenSolver& setShift(double shift);
 
-    // Solves the problem
-    void solve(mfem::SparseMatrix A, mfem::SparseMatrix B, H1<Context::Serial>& fes);
+   // Solves the problem
+   void solve(mfem::SparseMatrix A, mfem::SparseMatrix B, H1<Context::Serial>& fes);
 
   private:
-    std::vector<double> m_eigenvalues;
-    std::vector<GridFunction<H1<Context::Serial>>*> m_eigenfunctions;
-    unsigned int m_nev;
-    double m_shift;
+   std::vector<double> m_eigenvalues;
+   std::vector<GridFunction<H1<Context::Serial>>*> m_eigenfunctions;
+   unsigned int m_nev;
+   double m_shift;
 };
 
 
@@ -105,93 +105,93 @@ int main(int argc, char** argv)
   std::vector<double> obj;
   for (size_t i = 0; i < maxIt; i++)
   {
-    // Scalar field finite element space over the whole domain
-    H1<Context::Serial> Vh(Omega);
+   // Scalar field finite element space over the whole domain
+   H1<Context::Serial> Vh(Omega);
 
-    // Trim the exterior part of the mesh to solve the elasticity system
-    SubMesh trimmed = Omega.trim(Exterior);
+   // Trim the exterior part of the mesh to solve the elasticity system
+   SubMesh trimmed = Omega.trim(Exterior);
 
-    // Build a finite element space over the trimmed mesh
-    H1<Context::Serial> VhInt(trimmed);
+   // Build a finite element space over the trimmed mesh
+   H1<Context::Serial> VhInt(trimmed);
 
-    // Elasticity equation
-    TrialFunction uInt(VhInt);
-    TestFunction  vInt(VhInt);
+   // Elasticity equation
+   TrialFunction uInt(VhInt);
+   TestFunction  vInt(VhInt);
 
-    // A
-    Problem stiffness(uInt, vInt);
-    stiffness = Integral(Grad(uInt), Grad(vInt));
-    stiffness.update().assemble();
+   // A
+   Problem stiffness(uInt, vInt);
+   stiffness = Integral(Grad(uInt), Grad(vInt));
+   stiffness.update().assemble();
 
-    // B
-    Problem mass(uInt, vInt);
-    mass = Integral(uInt, vInt);
-    mass.update().assemble();
+   // B
+   Problem mass(uInt, vInt);
+   mass = Integral(uInt, vInt);
+   mass.update().assemble();
 
-    auto& m1 = stiffness.getStiffnessMatrix();
-    auto& m2 = mass.getStiffnessMatrix();
+   auto& m1 = stiffness.getStiffnessMatrix();
+   auto& m2 = mass.getStiffnessMatrix();
 
-    // Solve eigenvalue problem
-    EigenSolver ES;
-    ES.setShift(1.0).setNumEV(k+4).solve(m1, m2, VhInt);
+   // Solve eigenvalue problem
+   EigenSolver ES;
+   ES.setShift(1.0).setNumEV(k+4).solve(m1, m2, VhInt);
 
-    // Get solution and transfer to original domain
-    GridFunction u(Vh);
-    ES.getEigenFunction(k).transfer(u);
-    double mu = ES.getEigenValue(k);
+   // Get solution and transfer to original domain
+   GridFunction u(Vh);
+   ES.getEigenFunction(k).transfer(u);
+   double mu = ES.getEigenValue(k);
 
-    // Hilbert extension-regularization procedure
-    auto n = Normal(2);
+   // Hilbert extension-regularization procedure
+   auto n = Normal(2);
 
-    auto gu = Grad(u);
-    gu.traceOf(Interior);
+   auto gu = Grad(u);
+   gu.traceOf(Interior);
 
-    auto dJ = Dot(gu, gu) * n
-            - mu * u * u * n
-            - 2 * ell * (Omega.getVolume(Interior) - target_volume) * n;
+   auto dJ = Dot(gu, gu) * n
+        - mu * u * u * n
+        - 2 * ell * (Omega.getVolume(Interior) - target_volume) * n;
 
-    H1 Uh(Omega, 2);
-    TrialFunction g(Uh);
-    TestFunction  v(Uh);
-    Problem hilbert(g, v);
-    hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
-            + Integral(g, v)
-            - BoundaryIntegral(dJ, v).over(Gamma);
-    hilbert.solve(solver);
+   H1 Uh(Omega, 2);
+   TrialFunction g(Uh);
+   TestFunction  v(Uh);
+   Problem hilbert(g, v);
+   hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+        + Integral(g, v)
+        - BoundaryIntegral(dJ, v).over(Gamma);
+   hilbert.solve(solver);
 
-    // Update objective
-    obj.push_back(
-        mu * Omega.getVolume(Interior));
-    std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
+   // Update objective
+   obj.push_back(
+      mu * Omega.getVolume(Interior));
+   std::cout << "[" << i << "] Objective: " << obj.back() << std::endl;
 
-    // Generate signed distance function
-    H1 Dh(Omega);
-    auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
-                                  .distance(Omega);
+   // Generate signed distance function
+   H1 Dh(Omega);
+   auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
+                       .distance(Omega);
 
-    // Advect the level set function
-    double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
-    double dt = 4 * hmax / gInf;
-    MMG::Advect(dist, g.getGridFunction()).step(dt);
+   // Advect the level set function
+   double gInf = std::max(g.getGridFunction().max(), -g.getGridFunction().min());
+   double dt = 4 * hmax / gInf;
+   MMG::Advect(dist, g.getGridFunction()).step(dt);
 
-    // Recover the implicit domain
-    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                       .split(Exterior, {Interior, Exterior})
-                                       .setRMC(1e-3)
-                                       .setHMax(hmax)
-                                       .setBoundaryReference(Gamma)
-                                       .discretize(dist);
+   // Recover the implicit domain
+   Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                          .split(Exterior, {Interior, Exterior})
+                          .setRMC(1e-3)
+                          .setHMax(hmax)
+                          .setBoundaryReference(Gamma)
+                          .discretize(dist);
 
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+   MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
-    Omega.save("Omega.mesh");
+   Omega.save("Omega.mesh");
 
-    // Test for convergence
-    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
-    {
-      std::cout << "Convergence!" << std::endl;
-      break;
-    }
+   // Test for convergence
+   if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
+   {
+    std::cout << "Convergence!" << std::endl;
+    break;
+   }
   }
 
   return 0;
@@ -210,7 +210,7 @@ GridFunction<H1<Context::Serial>>& EigenSolver::getEigenFunction(int index){
 }
 
 double EigenSolver::getEigenValue(int index){
-    return m_eigenvalues[index];
+   return m_eigenvalues[index];
 }
 
 std::vector<double> EigenSolver::getEigenValues(){
@@ -247,7 +247,7 @@ void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, H1<Context::S
   // Construct the generalized eigensolver object
   int ncv = 2*m_nev+1;
   Spectra::SymGEigsShiftSolver<OpType, BOpType, Spectra::GEigsMode::ShiftInvert>
-    geigs(op, Bop, m_nev, ncv, m_shift);
+   geigs(op, Bop, m_nev, ncv, m_shift);
 
 
   // Initialize and compute
@@ -259,8 +259,8 @@ void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, H1<Context::S
   Eigen::MatrixXd evecs;
   if (geigs.info() == Spectra::CompInfo::Successful)
   {
-      evalues = geigs.eigenvalues();
-      evecs = geigs.eigenvectors();
+    evalues = geigs.eigenvalues();
+    evecs = geigs.eigenvectors();
   }
 
 
@@ -269,15 +269,15 @@ void EigenSolver::solve(mfem::SparseMatrix A,mfem::SparseMatrix B, H1<Context::S
   int dim = evecs.rows();
 
   for(int i = 0; i < m_nev; i++){
-    m_eigenvalues.push_back(evalues[m_nev-i-1]);
+   m_eigenvalues.push_back(evalues[m_nev-i-1]);
 
-    std::unique_ptr<double[]> data(new double[dim]);
-    for(int j=0; j<dim; j++){
-      data[j] = evecs.col(m_nev-i-1)[j];
-    }
-    //std::copy(evecs.col(m_nev-i-1).data(), evecs.col(m_nev-i-1).data()+dim, data.get());
+   std::unique_ptr<double[]> data(new double[dim]);
+   for(int j=0; j<dim; j++){
+    data[j] = evecs.col(m_nev-i-1)[j];
+   }
+   //std::copy(evecs.col(m_nev-i-1).data(), evecs.col(m_nev-i-1).data()+dim, data.get());
 
-    m_eigenfunctions.push_back(new GridFunction<H1<Context::Serial>>(fes));
-    m_eigenfunctions[i]->setData(std::move(data), dim);
+   m_eigenfunctions.push_back(new GridFunction<H1<Context::Serial>>(fes));
+   m_eigenfunctions[i]->setData(std::move(data), dim);
   }
 }
