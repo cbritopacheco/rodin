@@ -12,16 +12,16 @@
 
 namespace Rodin::Utility
 {
-   namespace Internal
-   {
-      template <class T, std::size_t = sizeof(T)>
-      std::true_type IsCompleteTypeImpl(T *);
+  namespace Internal
+  {
+    template <class T, std::size_t = sizeof(T)>
+    std::true_type IsCompleteTypeImpl(T *);
 
-      std::false_type IsCompleteTypeImpl(...);
-   }
+    std::false_type IsCompleteTypeImpl(...);
+  }
 
-   template <class T>
-   using IsCompleteType = decltype(Internal::IsCompleteTypeImpl(std::declval<T*>()));
+  template <class T>
+  using IsCompleteType = decltype(Internal::IsCompleteTypeImpl(std::declval<T*>()));
 
 }
 

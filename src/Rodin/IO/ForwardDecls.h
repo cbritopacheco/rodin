@@ -14,35 +14,35 @@
 
 namespace Rodin::IO
 {
-   template <class T>
-   class Loader;
+  template <class T>
+  class Loader;
 
-   template <class T>
-   class Printer;
+  template <class T>
+  class Printer;
 
-   /**
-    * @brief Enumeration class for different file formats.
-    */
-   enum class FileFormat
-   {
-      MFEM, ///< MFEM file format
-      GMSH, ///< GMSH file format
-      MEDIT ///< MEDIT file format
-   };
+  /**
+   * @brief Enumeration class for different file formats.
+   */
+  enum class FileFormat
+  {
+    MFEM, ///< MFEM file format
+    GMSH, ///< GMSH file format
+    MEDIT ///< MEDIT file format
+  };
 
-   template <FileFormat fmt, class Trait>
-   class MeshLoader;
+  template <FileFormat fmt, class Trait>
+  class MeshLoader;
 
-   template <FileFormat fmt, class Trait>
-   class MeshPrinter;
+  template <FileFormat fmt, class Trait>
+  class MeshPrinter;
 
-   template <FileFormat fmt, class FES>
-   class GridFunctionLoader;
+  template <FileFormat fmt, class FES>
+  class GridFunctionLoader;
 
-   template <FileFormat fmt, class FES>
-   class GridFunctionPrinter;
+  template <FileFormat fmt, class FES>
+  class GridFunctionPrinter;
 
-   std::ostream& operator<<(std::ostream& os, FileFormat fmt);
+  std::ostream& operator<<(std::ostream& os, FileFormat fmt);
 }
 
 #endif

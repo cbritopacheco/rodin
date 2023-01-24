@@ -15,13 +15,13 @@
 namespace Rodin::Plot::Backend::Bases
 {
   class BaseCamera3D
-    : public Renderer::Object3D, public Magnum::SceneGraph::Camera3D
+   : public Renderer::Object3D, public Magnum::SceneGraph::Camera3D
   {
-    public:
-      BaseCamera3D(Renderer::Object3D* parent)
-        : Renderer::Object3D(parent),
-          Magnum::SceneGraph::Camera3D(*this)
-      {}
+   public:
+    BaseCamera3D(Renderer::Object3D* parent)
+      : Renderer::Object3D(parent),
+       Magnum::SceneGraph::Camera3D(*this)
+    {}
   };
 }
 

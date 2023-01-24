@@ -14,69 +14,69 @@
 
 namespace Rodin
 {
-   namespace Context
-   {
-      struct Serial;
-      struct MPI;
-   }
+  namespace Context
+  {
+    struct Serial;
+    struct MPI;
+  }
 }
 
 namespace Rodin::Geometry
 {
-   using Index = std::size_t;
-   using Attribute = std::size_t;
+  using Index = std::size_t;
+  using Attribute = std::size_t;
 
-   class IndexGenerator;
+  class IndexGenerator;
 
-   enum class Type;
+  enum class Type;
 
-   class Simplex;
+  class Simplex;
 
-   class Element;
+  class Element;
 
-   class Face;
+  class Face;
 
-   class Vertex;
+  class Vertex;
 
-   class Point;
+  class Point;
 
-   class SimplexIterator;
+  class SimplexIterator;
 
-   class ElementIterator;
+  class ElementIterator;
 
-   class FaceIterator;
+  class FaceIterator;
 
-   class VertexIterator;
+  class VertexIterator;
 
-   class MeshBase;
+  class MeshBase;
 
-   /**
-    * @brief Templated class for Mesh.
-    * @tparam Trait Indicates whether if Mesh is in a parallel context. It is
-    * one of Traits::Serial or Traits::Parallel.
-    *
-    * The Mesh class represents an n-dimensional support for instances of type
-    * GridFunctionBase or ShapeFunctionBase.
-    *
-    * There are two possible specializations:
-    * - Mesh<Traits::Serial>
-    * - Mesh<Traits::Parallel>
-    */
-   template <class Trait = Context::Serial>
-   class Mesh;
+  /**
+   * @brief Templated class for Mesh.
+   * @tparam Trait Indicates whether if Mesh is in a parallel context. It is
+   * one of Traits::Serial or Traits::Parallel.
+   *
+   * The Mesh class represents an n-dimensional support for instances of type
+   * GridFunctionBase or ShapeFunctionBase.
+   *
+   * There are two possible specializations:
+   * - Mesh<Traits::Serial>
+   * - Mesh<Traits::Parallel>
+   */
+  template <class Trait = Context::Serial>
+  class Mesh;
 
-   /**
-    * @brief Templated class for SubMesh.
-    *
-    * @tparam Trait Indicates whether the Mesh is in a parallel context. It is
-    * one of Traits::Serial or Traits::Parallel.
-    *
-    * There are two possible specializations:
-    * - SubMesh<Traits::Serial>
-    * - SubMesh<Traits::Parallel>
-    */
-   template <class Trait>
-   class SubMesh;
+  /**
+   * @brief Templated class for SubMesh.
+   *
+   * @tparam Trait Indicates whether the Mesh is in a parallel context. It is
+   * one of Traits::Serial or Traits::Parallel.
+   *
+   * There are two possible specializations:
+   * - SubMesh<Traits::Serial>
+   * - SubMesh<Traits::Parallel>
+   */
+  template <class Trait>
+  class SubMesh;
 }
 
 #endif

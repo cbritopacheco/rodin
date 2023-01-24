@@ -14,66 +14,66 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup ANDSpecializations AND Template Specializations
-    * @brief Template specializations of the AND class.
-    * @see AND
-    */
+  /**
+   * @defgroup ANDSpecializations AND Template Specializations
+   * @brief Template specializations of the AND class.
+   * @see AND
+   */
 
-   /**
-    * @ingroup ANDSpecializations
-    * @brief Logical AND operator between two instances of BooleanFunctionBase
-    */
-   template <>
-   class AND<BooleanFunctionBase, BooleanFunctionBase> : public BooleanFunctionBase
-   {
-      public:
-         AND(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            if (lhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
-            if (rhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, rhs.getRangeType()).raise();
-         }
+  /**
+   * @ingroup ANDSpecializations
+   * @brief Logical AND operator between two instances of BooleanFunctionBase
+   */
+  template <>
+  class AND<BooleanFunctionBase, BooleanFunctionBase> : public BooleanFunctionBase
+  {
+    public:
+      AND(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      {
+        if (lhs.getRangeType() != RangeType::Scalar)
+          UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
+        if (rhs.getRangeType() != RangeType::Scalar)
+          UnexpectedRangeTypeException(RangeType::Scalar, rhs.getRangeType()).raise();
+      }
 
-         AND(const AND& other)
-            : BooleanFunctionBase(other),
-              m_lhs(other.m_lhs->copy()),
-              m_rhs(other.m_rhs->copy())
-         {}
+      AND(const AND& other)
+        : BooleanFunctionBase(other),
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
+      {}
 
-         AND(AND&& other)
-            : BooleanFunctionBase(std::move(other)),
-              m_lhs(std::move(other.m_lhs)),
-              m_rhs(std::move(other.m_rhs))
-         {}
+      AND(AND&& other)
+        : BooleanFunctionBase(std::move(other)),
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
+      {}
 
-         FunctionValue getValue(const Geometry::Point& p) const override
-         {
-            return m_lhs->getValue(p).boolean() && m_rhs->getValue(p).boolean();
-         }
+      FunctionValue getValue(const Geometry::Point& p) const override
+      {
+        return m_lhs->getValue(p).boolean() && m_rhs->getValue(p).boolean();
+      }
 
-         AND* copy() const noexcept override
-         {
-            return new AND(*this);
-         }
+      AND* copy() const noexcept override
+      {
+        return new AND(*this);
+      }
 
-      private:
-         std::unique_ptr<BooleanFunctionBase> m_lhs;
-         std::unique_ptr<BooleanFunctionBase> m_rhs;
-   };
-   AND(const BooleanFunctionBase&, const BooleanFunctionBase&)
-      -> AND<BooleanFunctionBase, BooleanFunctionBase>;
+    private:
+      std::unique_ptr<BooleanFunctionBase> m_lhs;
+      std::unique_ptr<BooleanFunctionBase> m_rhs;
+  };
+  AND(const BooleanFunctionBase&, const BooleanFunctionBase&)
+    -> AND<BooleanFunctionBase, BooleanFunctionBase>;
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(const BooleanFunctionBase&, const BooleanFunctionBase&);
+  AND<BooleanFunctionBase, BooleanFunctionBase>
+  operator&&(const BooleanFunctionBase&, const BooleanFunctionBase&);
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(bool lhs, const BooleanFunctionBase& rhs);
+  AND<BooleanFunctionBase, BooleanFunctionBase>
+  operator&&(bool lhs, const BooleanFunctionBase& rhs);
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(const BooleanFunctionBase& lhs, bool rhs);
+  AND<BooleanFunctionBase, BooleanFunctionBase>
+  operator&&(const BooleanFunctionBase& lhs, bool rhs);
 }
 
 #endif

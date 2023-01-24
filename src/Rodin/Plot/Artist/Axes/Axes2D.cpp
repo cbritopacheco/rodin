@@ -14,55 +14,55 @@
 namespace Rodin::Plot::Artist::Axes
 {
   Axes2D::Axes2D(
-      Figure& fig,
-      Magnum::Math::Vector2<int> bottomLeft,
-      Magnum::Math::Vector2<int> size,
-      bool frameEnabled)
-    : BaseAxes(fig, bottomLeft, size, frameEnabled),
-      m_camera(m_scene.addChild<Backend::Renderer::Object2D>())
+    Figure& fig,
+    Magnum::Math::Vector2<int> bottomLeft,
+    Magnum::Math::Vector2<int> size,
+    bool frameEnabled)
+   : BaseAxes(fig, bottomLeft, size, frameEnabled),
+    m_camera(m_scene.addChild<Backend::Renderer::Object2D>())
   {
-    setXLimits({-1, 1});
-    setYLimits({-1, 1});
+   setXLimits({-1, 1});
+   setYLimits({-1, 1});
   }
 
   void Axes2D::drawContent()
   {
-    m_camera.setProjectionMatrix(
-        Magnum::Math::Matrix3<float>::projection({
-            getXLimits().right - getXLimits().left,
-            getYLimits().top - getYLimits().bottom
-          })
-        );
-    m_camera.getObject2D().setTransformation(
-        Magnum::Math::Matrix3<float>::translation(
-        {
-          (getXLimits().right + getXLimits().left) / 2.0f,
-          (getYLimits().top + getYLimits().bottom) / 2.0f
-        })
+   m_camera.setProjectionMatrix(
+      Magnum::Math::Matrix3<float>::projection({
+        getXLimits().right - getXLimits().left,
+        getYLimits().top - getYLimits().bottom
+       })
       );
-    m_camera.draw(getDrawableGroup());
+   m_camera.getObject2D().setTransformation(
+      Magnum::Math::Matrix3<float>::translation(
+      {
+       (getXLimits().right + getXLimits().left) / 2.0f,
+       (getYLimits().top + getYLimits().bottom) / 2.0f
+      })
+    );
+   m_camera.draw(getDrawableGroup());
   }
 
   void Axes2D::handle(const Backend::Event::MouseMotionEvent& e)
   {
-    if (e.isButtonPressed(Backend::Event::MouseEvent::LEFT))
-    {
-      auto xlim = getXLimits();
-      auto ylim = getYLimits();
-      auto axesSize = getSize();
+   if (e.isButtonPressed(Backend::Event::MouseEvent::LEFT))
+   {
+    auto xlim = getXLimits();
+    auto ylim = getYLimits();
+    auto axesSize = getSize();
 
-      float dx = e.getMotionX() * (xlim.right - xlim.left) / axesSize.x(),
-            dy = e.getMotionY() * (ylim.top - ylim.bottom) / axesSize.y();
+    float dx = e.getMotionX() * (xlim.right - xlim.left) / axesSize.x(),
+        dy = e.getMotionY() * (ylim.top - ylim.bottom) / axesSize.y();
 
-      xlim.left -= dx;
-      xlim.right -= dx;
-      ylim.bottom -= dy;
-      ylim.top -= dy;
+    xlim.left -= dx;
+    xlim.right -= dx;
+    ylim.bottom -= dy;
+    ylim.top -= dy;
 
-      setXLimits(xlim);
-      setYLimits(ylim);
-      getFigure().getPlot().setCursor(GUI::Cursor::SizeAll);
-    }
+    setXLimits(xlim);
+    setYLimits(ylim);
+    getFigure().getPlot().setCursor(GUI::Cursor::SizeAll);
+   }
   }
 
   void Axes2D::handle(const Backend::Event::MouseButtonEvent& e)
@@ -71,34 +71,34 @@ namespace Rodin::Plot::Artist::Axes
 
   void Axes2D::handle(const Backend::Event::MouseWheelEvent& e)
   {
-    auto xlim = getXLimits();
-    auto ylim = getYLimits();
-    auto axesSize = getSize();
+   auto xlim = getXLimits();
+   auto ylim = getYLimits();
+   auto axesSize = getSize();
 
-    float dx = e.getY() * (xlim.right - xlim.left) / axesSize.x(),
-          dy = e.getY() * (ylim.top - ylim.bottom) / axesSize.y();
+   float dx = e.getY() * (xlim.right - xlim.left) / axesSize.x(),
+       dy = e.getY() * (ylim.top - ylim.bottom) / axesSize.y();
 
-    xlim.left   -= dx;
-    xlim.right  += dx;
-    ylim.bottom -= dy;
-    ylim.top    += dy;
+   xlim.left  -= dx;
+   xlim.right  += dx;
+   ylim.bottom -= dy;
+   ylim.top   += dy;
 
-    setXLimits(xlim);
-    setYLimits(ylim);
+   setXLimits(xlim);
+   setYLimits(ylim);
   }
 
   Backend::Renderer::Object2D& Axes2D::getObject2D()
   {
-    return m_scene;
+   return m_scene;
   }
 
   Backend::Renderer::DrawableGroup2D& Axes2D::getDrawableGroup()
   {
-    return m_drawables;
+   return m_drawables;
   }
 
   const Backend::Renderer::DrawableGroup2D& Axes2D::getDrawableGroup() const
   {
-    return m_drawables;
+   return m_drawables;
   }
 }

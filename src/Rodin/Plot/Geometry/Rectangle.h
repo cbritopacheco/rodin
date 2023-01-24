@@ -16,42 +16,42 @@ namespace Rodin::Plot::Geometry
   template <class T>
   class Rectangle
   {
-    public:
-      enum Corner
-      {
-        BottomLeft,
-        BottomRight,
-        TopLeft,
-        TopRight
-      };
+   public:
+    enum Corner
+    {
+      BottomLeft,
+      BottomRight,
+      TopLeft,
+      TopRight
+    };
 
-      constexpr
-      Rectangle(const Point2D<T>& bottomLeft, const Point2D<T>& topRight);
+    constexpr
+    Rectangle(const Point2D<T>& bottomLeft, const Point2D<T>& topRight);
 
-      inline
-      constexpr
-      bool contains(const Point2D<T>& p) const;
+    inline
+    constexpr
+    bool contains(const Point2D<T>& p) const;
 
-      template <Corner c>
-      inline
-      constexpr
-      Point2D<T> getCorner() const;
+    template <Corner c>
+    inline
+    constexpr
+    Point2D<T> getCorner() const;
 
-      inline
-      constexpr
-      T height() const;
+    inline
+    constexpr
+    T height() const;
 
-      inline
-      constexpr
-      T width() const;
+    inline
+    constexpr
+    T width() const;
 
-      inline
-      constexpr
-      T area() const;
+    inline
+    constexpr
+    T area() const;
 
-    private:
-      Point2D<T>  m_bottomLeft,
-                  m_topRight;
+   private:
+    Point2D<T>  m_bottomLeft,
+            m_topRight;
   };
 }
 

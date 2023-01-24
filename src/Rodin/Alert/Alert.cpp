@@ -10,20 +10,20 @@
 
 namespace Rodin::Alert
 {
-   Alert::Alert(const std::string& what)
-      : m_what(what)
-   {}
+  Alert::Alert(const std::string& what)
+    : m_what(what)
+  {}
 
-   Alert::Alert(const Alert& other)
-      : m_what(other.m_what)
-   {}
+  Alert::Alert(const Alert& other)
+    : m_what(other.m_what)
+  {}
 
-   Alert::Alert(Alert&& other)
-      : m_what(std::move(other.m_what))
-   {}
+  Alert::Alert(Alert&& other)
+    : m_what(std::move(other.m_what))
+  {}
 
-   const char* Alert::what() const noexcept
-   {
-      return m_what.c_str();
-   }
+  const char* Alert::what() const noexcept
+  {
+    return m_what.c_str();
+  }
 }

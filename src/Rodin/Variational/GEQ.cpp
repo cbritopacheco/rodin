@@ -8,9 +8,9 @@
 
 namespace Rodin::Variational
 {
-   GEQ<FunctionBase, FunctionBase>
-   operator>=(const FunctionBase& lhs, const FunctionBase& rhs)
-   {
-      return GEQ(lhs, rhs);
-   }
+  GEQ<FunctionBase, FunctionBase>
+  operator>=(const FunctionBase& lhs, const FunctionBase& rhs)
+  {
+    return GEQ(lhs, rhs);
+  }
 }

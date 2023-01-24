@@ -37,14 +37,14 @@ int main(int, char**)
   Solver::CG cg;
   mfem::GSSmoother smoother;
   cg.setPreconditioner(smoother)
-    .setMaxIterations(200)
-    .setRelativeTolerance(1e-12)
-    .printIterations(true);
+   .setMaxIterations(200)
+   .setRelativeTolerance(1e-12)
+   .printIterations(true);
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g).on(Gamma);
+       - Integral(f, v)
+       + DirichletBC(u, g).on(Gamma);
   poisson.solve(cg);
 
   // Save solution

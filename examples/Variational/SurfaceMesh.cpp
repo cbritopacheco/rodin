@@ -21,11 +21,11 @@ int main(int, char**)
 
   // Right hand side
   auto f = ScalarFunction(
-      [](const Point& x)
-      {
-        double l2 = x(0) * x(0) + x(1) * x(1) + x(2) * x(2);
-        return 7 * x(0) * x(1) / l2;
-      });
+    [](const Point& x)
+    {
+      double l2 = x(0) * x(0) + x(1) * x(1) + x(2) * x(2);
+      return 7 * x(0) * x(1) / l2;
+    });
 
   Solver::CG cg;
   cg.setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
@@ -33,8 +33,8 @@ int main(int, char**)
   // Reaction-diffusion steady state
   Problem rd(u, v);
   rd = Integral(Grad(u), Grad(v))
-     + Integral(u, v)
-     - Integral(f, v);
+    + Integral(u, v)
+    - Integral(f, v);
   rd.solve(cg);
 
   // Save solution

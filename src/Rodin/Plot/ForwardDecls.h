@@ -11,40 +11,40 @@ namespace Rodin::Plot
 {
   namespace Backend
   {
-    namespace Bases
-    {
-      class BaseArtist2D;
-      class BaseTopLevelArtist2D;
-      class BaseAxes;
-      class BaseFigure;
-      class BaseEvent;
-      class BaseDrawable2D;
-    }
+   namespace Bases
+   {
+    class BaseArtist2D;
+    class BaseTopLevelArtist2D;
+    class BaseAxes;
+    class BaseFigure;
+    class BaseEvent;
+    class BaseDrawable2D;
+   }
 
-    namespace Renderer
+   namespace Renderer
+   {
+    namespace Drawables
     {
-      namespace Drawables
-      {
-        class Line2D;
-      }
+      class Line2D;
     }
+   }
   }
 
   class Plot;
 
   namespace Artist
   {
-    class Figure;
+   class Figure;
 
-    namespace Axes
-    {
-      class Axes2D;
-    }
+   namespace Axes
+   {
+    class Axes2D;
+   }
 
-    namespace Lines
-    {
-      class Line2D;
-    }
+   namespace Lines
+   {
+    class Line2D;
+   }
   }
 }
 

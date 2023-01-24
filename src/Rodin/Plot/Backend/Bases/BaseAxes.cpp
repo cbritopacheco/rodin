@@ -13,78 +13,78 @@
 namespace Rodin::Plot::Backend::Bases
 {
   BaseAxes::BaseAxes(
-      Artist::Figure& figure,
-      Magnum::Math::Vector2<int> bottomLeft,
-      Magnum::Math::Vector2<int> size,
-      bool frameEnabled)
-    : m_figure(figure),
-      m_bottomLeft(bottomLeft),
-      m_size(size),
-      m_frameEnabled(frameEnabled)
+    Artist::Figure& figure,
+    Magnum::Math::Vector2<int> bottomLeft,
+    Magnum::Math::Vector2<int> size,
+    bool frameEnabled)
+   : m_figure(figure),
+    m_bottomLeft(bottomLeft),
+    m_size(size),
+    m_frameEnabled(frameEnabled)
   {}
 
   Magnum::Math::Vector2<int> BaseAxes::getBottomLeft() const
   {
-    return m_bottomLeft;
+   return m_bottomLeft;
   }
 
   Magnum::Math::Vector2<int> BaseAxes::getSize() const
   {
-    return m_size;
+   return m_size;
   }
 
   Artist::Figure& BaseAxes::getFigure()
   {
-    return m_figure;
+   return m_figure;
   }
 
   const Artist::Figure& BaseAxes::getFigure() const
   {
-    return m_figure;
+   return m_figure;
   }
 
   bool BaseAxes::isFrameEnabled() const
   {
-    return m_frameEnabled;
+   return m_frameEnabled;
   }
 
   BaseAxes::XLimits BaseAxes::getXLimits() const
   {
-    return m_xlim;
+   return m_xlim;
   }
 
   BaseAxes::YLimits BaseAxes::getYLimits() const
   {
-    return m_ylim;
+   return m_ylim;
   }
 
   BaseAxes& BaseAxes::enableFrame(bool v)
   {
-    m_frameEnabled = v;
-    return *this;
+   m_frameEnabled = v;
+   return *this;
   }
 
   BaseAxes& BaseAxes::setXLimits(const XLimits& xlim)
   {
-    assert(xlim.left < xlim.right);
-    m_xlim = xlim;
-    return *this;
+   assert(xlim.left < xlim.right);
+   m_xlim = xlim;
+   return *this;
   }
 
   BaseAxes& BaseAxes::setYLimits(const YLimits& ylim)
   {
-    assert(ylim.bottom < ylim.top);
-    m_ylim = ylim;
-    return *this;
+   assert(ylim.bottom < ylim.top);
+   m_ylim = ylim;
+   return *this;
   }
 
   Geometry::Rectangle<int> BaseAxes::getBoundingBox() const
   {
-    return Geometry::Rectangle<int>(
-        getBottomLeft(),
-        {
-          getBottomLeft().x() + getSize().x(),
-          getBottomLeft().y() + getSize().y()
-        });
+   return Geometry::Rectangle<int>(
+      getBottomLeft(),
+      {
+       getBottomLeft().x() + getSize().x(),
+       getBottomLeft().y() + getSize().y()
+      });
   }
 }

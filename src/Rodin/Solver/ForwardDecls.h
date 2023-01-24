@@ -9,14 +9,14 @@
 
 namespace Rodin::Solver
 {
-   template <class OperatorType, class VectorType>
-   class UMFPack;
+  template <class OperatorType, class VectorType>
+  class UMFPack;
 
-   template <class OperatorType, class VectorType>
-   class CG;
+  template <class OperatorType, class VectorType>
+  class CG;
 
-   template <class OperatorType, class VectorType>
-   class SolverBase;
+  template <class OperatorType, class VectorType>
+  class SolverBase;
 }
 
 #endif

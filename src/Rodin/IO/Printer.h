@@ -13,13 +13,13 @@
 
 namespace Rodin::IO
 {
-   template <class T>
-   class Printer
-   {
-      public:
-         virtual void print(std::ostream& os) = 0;
-         virtual const T& getObject() const = 0;
-   };
+  template <class T>
+  class Printer
+  {
+    public:
+      virtual void print(std::ostream& os) = 0;
+      virtual const T& getObject() const = 0;
+  };
 }
 
 #endif

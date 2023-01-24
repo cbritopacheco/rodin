@@ -15,44 +15,44 @@
 
 namespace Rodin::IO
 {
-   std::map<std::string, IO::FileFormat> getMeshFileHeaders();
-   static const std::map<std::string, IO::FileFormat> MeshFileHeaders = getMeshFileHeaders();
+  std::map<std::string, IO::FileFormat> getMeshFileHeaders();
+  static const std::map<std::string, IO::FileFormat> MeshFileHeaders = getMeshFileHeaders();
 
-   std::optional<IO::FileFormat> getMeshFormat(std::istream& input);
+  std::optional<IO::FileFormat> getMeshFormat(std::istream& input);
 }
 
 namespace Rodin::IO::Medit
 {
-   enum class Keyword
-   {
-      MeshVersionFormatted,
-      Dimension,
-      Vertices,
-      Triangles,
-      Tetrahedra,
-      Corners,
-      Ridges,
-      Edges,
-      SolAtVertices,
-      SolAtEdges,
-      SolAtTriangles,
-      SolAtQuadrilaterals,
-      SolAtTetrahedra,
-      SolAtPentahedra,
-      SolAtHexahedra,
-      End
-   };
+  enum class Keyword
+  {
+    MeshVersionFormatted,
+    Dimension,
+    Vertices,
+    Triangles,
+    Tetrahedra,
+    Corners,
+    Ridges,
+    Edges,
+    SolAtVertices,
+    SolAtEdges,
+    SolAtTriangles,
+    SolAtQuadrilaterals,
+    SolAtTetrahedra,
+    SolAtPentahedra,
+    SolAtHexahedra,
+    End
+  };
 
-   enum SolutionType
-   {
-      Scalar = 1,
-      Vector = 2,
-      Tensor = 3
-   };
+  enum SolutionType
+  {
+    Scalar = 1,
+    Vector = 2,
+    Tensor = 3
+  };
 
-   boost::bimap<std::string, Keyword> getKeywordMap();
-   static const boost::bimap<std::string, Keyword> KeywordMap = getKeywordMap();
+  boost::bimap<std::string, Keyword> getKeywordMap();
+  static const boost::bimap<std::string, Keyword> KeywordMap = getKeywordMap();
 
-   std::ostream& operator<<(std::ostream& os, Keyword kw);
+  std::ostream& operator<<(std::ostream& os, Keyword kw);
 }
 #endif

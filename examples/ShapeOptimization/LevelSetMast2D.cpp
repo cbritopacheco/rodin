@@ -53,88 +53,88 @@ int main(int, char**)
   // Optimization loop
   for (size_t i = 0; i < maxIt; i++)
   {
-    // Vector field finite element space over the whole domain
-    int d = 2;
-    H1 Vh(Omega, d);
+   // Vector field finite element space over the whole domain
+   int d = 2;
+   H1 Vh(Omega, d);
 
-    // Trim the exterior part of the mesh to solve the elasticity system
-    SubMesh trimmed = Omega.trim(Exterior);
+   // Trim the exterior part of the mesh to solve the elasticity system
+   SubMesh trimmed = Omega.trim(Exterior);
 
-    // Build a finite element space over the trimmed mesh
-    H1 VhInt(trimmed, d);
+   // Build a finite element space over the trimmed mesh
+   H1 VhInt(trimmed, d);
 
-    // Elasticity equation
-    auto f = VectorFunction{0, -1};
-    TrialFunction uInt(VhInt);
-    TestFunction  vInt(VhInt);
-    Problem elasticity(uInt, vInt);
-    elasticity = Integral(lambda * Div(uInt), Div(vInt))
-               + Integral(
-                   mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
-               - BoundaryIntegral(f, vInt).over(GammaN)
-               + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
-    elasticity.solve(solver);
+   // Elasticity equation
+   auto f = VectorFunction{0, -1};
+   TrialFunction uInt(VhInt);
+   TestFunction  vInt(VhInt);
+   Problem elasticity(uInt, vInt);
+   elasticity = Integral(lambda * Div(uInt), Div(vInt))
+          + Integral(
+             mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
+          - BoundaryIntegral(f, vInt).over(GammaN)
+          + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
+   elasticity.solve(solver);
 
-    // Hilbert extension-regularization procedure
-    auto jac = Jacobian(uInt.getSolution());
-    jac.traceOf(Interior);
+   // Hilbert extension-regularization procedure
+   auto jac = Jacobian(uInt.getSolution());
+   jac.traceOf(Interior);
 
-    auto e = 0.5 * (jac + jac.T());
-    auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-    auto n = Normal(d);
-    n.traceOf(Interior);
+   auto e = 0.5 * (jac + jac.T());
+   auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
+   auto n = Normal(d);
+   n.traceOf(Interior);
 
-    TrialFunction g(Vh);
-    TestFunction  v(Vh);
-    Problem hilbert(g, v);
-    hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
-            + Integral(g, v)
-            - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
-            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
-    hilbert.solve(solver);
+   TrialFunction g(Vh);
+   TestFunction  v(Vh);
+   Problem hilbert(g, v);
+   hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+        + Integral(g, v)
+        - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
+        + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
+   hilbert.solve(solver);
 
-    // Update objective
-    obj.push_back(
-        compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior));
-    Alert::Info() << "    | Objective: " << obj[i] << Alert::Raise;
+   // Update objective
+   obj.push_back(
+      compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior));
+   Alert::Info() << "   | Objective: " << obj[i] << Alert::Raise;
 
-    // Generate signed distance function
-    H1 Dh(Omega);
-    auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
-                                  .distance(Omega);
+   // Generate signed distance function
+   H1 Dh(Omega);
+   auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
+                       .distance(Omega);
 
-    // Advect the level set function
-    Alert::Info() << "    | Advecting the distance function." << Alert::Raise;
-    GridFunction gNorm(Dh);
-    gNorm = ScalarFunction(
-        [&](const Point& v) -> double
-        {
-          mfem::Vector val = g.getSolution()(v);
-          return val.Norml2();
-        });
-    double gInf = gNorm.max();
-    double dt = 4 * hmax / gInf;
-    MMG::Advect(dist, g.getSolution()).step(dt);
+   // Advect the level set function
+   Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
+   GridFunction gNorm(Dh);
+   gNorm = ScalarFunction(
+      [&](const Point& v) -> double
+      {
+       mfem::Vector val = g.getSolution()(v);
+       return val.Norml2();
+      });
+   double gInf = gNorm.max();
+   double dt = 4 * hmax / gInf;
+   MMG::Advect(dist, g.getSolution()).step(dt);
 
-    // Recover the implicit domain
-    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                       .split(Exterior, {Interior, Exterior})
-                                       .setRMC(1e-3)
-                                       .setAngleDetection(false)
-                                       .setBoundaryReference(Gamma)
-                                       .setBaseReferences(GammaD)
-                                       .discretize(dist);
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+   // Recover the implicit domain
+   Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                          .split(Exterior, {Interior, Exterior})
+                          .setRMC(1e-3)
+                          .setAngleDetection(false)
+                          .setBoundaryReference(Gamma)
+                          .setBaseReferences(GammaD)
+                          .discretize(dist);
+   MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
-    // Save mesh
-    Omega.save("Omega.mesh");
+   // Save mesh
+   Omega.save("Omega.mesh");
 
-    // Test for convergence
-    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
-    {
-      Alert::Info() << "Convergence!" << Alert::Raise;
-      break;
-    }
+   // Test for convergence
+   if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)
+   {
+    Alert::Info() << "Convergence!" << Alert::Raise;
+    break;
+   }
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
@@ -149,8 +149,8 @@ double compliance(GridFunction<H1<Context::Serial>>& w)
   TestFunction  v(Vh);
   BilinearForm  bf(u, v);
   bf = Integral(lambda * Div(u), Div(v))
-     + Integral(
-         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+    + Integral(
+      mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
   return bf(w, w);
 }
 

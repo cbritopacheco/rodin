@@ -8,8 +8,8 @@
 
 namespace Rodin::Variational
 {
-   Cosine<FunctionBase> cos(const FunctionBase& op)
-   {
-      return Cosine<FunctionBase>(op);
-   }
+  Cosine<FunctionBase> cos(const FunctionBase& op)
+  {
+    return Cosine<FunctionBase>(op);
+  }
 }

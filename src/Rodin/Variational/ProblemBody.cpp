@@ -11,34 +11,34 @@
 
 namespace Rodin::Variational
 {
-   ProblemBody operator+(
-         const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
-   {
-      ProblemBody res(pb);
-      res.getLFIs().add(lfi);
-      return res;
-   }
+  ProblemBody operator+(
+      const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody res(pb);
+    res.getLFIs().add(lfi);
+    return res;
+  }
 
-   ProblemBody operator-(const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
-   {
-      ProblemBody res(pb);
-      res.getLFIs().add(UnaryMinus(lfi));
-      return res;
-   }
+  ProblemBody operator-(const ProblemBody& pb, const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody res(pb);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
 
-   ProblemBody operator+(
-      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis)
-   {
-      ProblemBody res(pb);
-      res.getLFIs().add(lfis);
-      return res;
-   }
+  ProblemBody operator+(
+    const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+  {
+    ProblemBody res(pb);
+    res.getLFIs().add(lfis);
+    return res;
+  }
 
-   ProblemBody operator-(
-      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi)
-   {
-      ProblemBody res(pb);
-      res.getLFIs().add(UnaryMinus(lfi));
-      return res;
-   }
+  ProblemBody operator-(
+    const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfi)
+  {
+    ProblemBody res(pb);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
 }

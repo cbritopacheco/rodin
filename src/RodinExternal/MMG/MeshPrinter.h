@@ -15,20 +15,20 @@ namespace Rodin::External::MMG
 {
   class MeshPrinter : public IO::Printer<MMG::Mesh>
   {
-    public:
-       MeshPrinter(const MMG::Mesh& mesh)
-          : m_mesh(mesh)
-       {}
+   public:
+     MeshPrinter(const MMG::Mesh& mesh)
+       : m_mesh(mesh)
+     {}
 
-       void print(std::ostream& os) override;
+     void print(std::ostream& os) override;
 
-       const MMG::Mesh& getObject() const override
-       {
-          return m_mesh;
-       }
+     const MMG::Mesh& getObject() const override
+     {
+       return m_mesh;
+     }
 
-    private:
-       const MMG::Mesh& m_mesh;
+   private:
+     const MMG::Mesh& m_mesh;
   };
 }
 

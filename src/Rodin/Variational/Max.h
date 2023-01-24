@@ -15,35 +15,35 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Represent the max function.
-    */
-   class Max : public ScalarFunctionBase
-   {
-      public:
-         Max(const FunctionBase& a, double b);
+  /**
+   * @brief Represent the max function.
+   */
+  class Max : public ScalarFunctionBase
+  {
+    public:
+      Max(const FunctionBase& a, double b);
 
-         Max(double a, const FunctionBase& b);
+      Max(double a, const FunctionBase& b);
 
-         Max(const FunctionBase& a, const FunctionBase& b);
+      Max(const FunctionBase& a, const FunctionBase& b);
 
-         Max(const Max& other);
+      Max(const Max& other);
 
-         Max(Max&& other);
+      Max(Max&& other);
 
-         Max& traceOf(Geometry::Attribute attrs) override;
+      Max& traceOf(Geometry::Attribute attrs) override;
 
-         FunctionValue getValue(const Geometry::Point& p) const override
-         {
-            return std::max(m_a->getValue(p).scalar(), m_b->getValue(p).scalar());
-         }
+      FunctionValue getValue(const Geometry::Point& p) const override
+      {
+        return std::max(m_a->getValue(p).scalar(), m_b->getValue(p).scalar());
+      }
 
-         Max* copy() const noexcept override;
+      Max* copy() const noexcept override;
 
-      private:
-         std::unique_ptr<FunctionBase> m_a;
-         std::unique_ptr<FunctionBase> m_b;
-   };
+    private:
+      std::unique_ptr<FunctionBase> m_a;
+      std::unique_ptr<FunctionBase> m_b;
+  };
 }
 
 #endif

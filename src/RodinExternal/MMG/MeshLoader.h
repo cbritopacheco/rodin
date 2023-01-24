@@ -15,20 +15,20 @@ namespace Rodin::External::MMG
 {
   class MeshLoader : public IO::Loader<MMG::Mesh>
   {
-    public:
-       MeshLoader(MMG::Mesh& mesh)
-          : m_mesh(mesh)
-       {}
+   public:
+     MeshLoader(MMG::Mesh& mesh)
+       : m_mesh(mesh)
+     {}
 
-       void load(std::istream& is) override;
+     void load(std::istream& is) override;
 
-       MMG::Mesh& getObject() override
-       {
-          return m_mesh;
-       }
+     MMG::Mesh& getObject() override
+     {
+       return m_mesh;
+     }
 
-    private:
-       MMG::Mesh& m_mesh;
+   private:
+     MMG::Mesh& m_mesh;
   };
 }
 

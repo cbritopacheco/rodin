@@ -48,49 +48,49 @@ int main(int, char**)
   // Optimization loop
   for (size_t i = 0; i < maxIterations; i++)
   {
-    Alert::Info() << "Iteration: " << i << Alert::Raise;
+   Alert::Info() << "Iteration: " << i << Alert::Raise;
 
-    // Poisson problem
-    ScalarFunction f(1.0);
+   // Poisson problem
+   ScalarFunction f(1.0);
 
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
-    Problem poisson(u, v);
-    poisson = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
-            - Integral(f * v)
-            + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
-    poisson.solve(solver);
+   TrialFunction u(Vh);
+   TestFunction  v(Vh);
+   Problem poisson(u, v);
+   poisson = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
+        - Integral(f * v)
+        + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
+   poisson.solve(solver);
 
-    // Adjoint problem
-    TrialFunction p(Vh);
-    TestFunction  q(Vh);
-    Problem adjoint(p, q);
-    adjoint = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
-            + Integral(ScalarFunction(1.0 / vol), q)
-            + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
-    adjoint.solve(solver);
+   // Adjoint problem
+   TrialFunction p(Vh);
+   TestFunction  q(Vh);
+   Problem adjoint(p, q);
+   adjoint = Integral((hmin + (hmax - hmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
+        + Integral(ScalarFunction(1.0 / vol), q)
+        + DirichletBC(p, ScalarFunction(0.0)).on(GammaD);
+   adjoint.solve(solver);
 
-    // Hilbert extension-regularization
-    TrialFunction g(Vh);
-    TestFunction  w(Vh);
-    Problem hilbert(g, w);
-    hilbert = Integral(alpha * Grad(g), Grad(w))
-            + Integral(g, w)
-            - Integral(
-                ell + 3 * (hmax - hmin) * Pow(gamma, 2) *
-                  Dot(Grad(u.getSolution()), Grad(p.getSolution())), w)
-            + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
-    hilbert.solve(solver);
+   // Hilbert extension-regularization
+   TrialFunction g(Vh);
+   TestFunction  w(Vh);
+   Problem hilbert(g, w);
+   hilbert = Integral(alpha * Grad(g), Grad(w))
+        + Integral(g, w)
+        - Integral(
+           ell + 3 * (hmax - hmin) * Pow(gamma, 2) *
+            Dot(Grad(u.getSolution()), Grad(p.getSolution())), w)
+        + DirichletBC(g, ScalarFunction(0.0)).on(GammaD);
+   hilbert.solve(solver);
 
-    GridFunction step(Ph);
-    step = mu * g.getSolution();
+   GridFunction step(Ph);
+   step = mu * g.getSolution();
 
-    gamma -= step;
-    gamma = Min(1.0, Max(0.0, gamma));
+   gamma -= step;
+   gamma = Min(1.0, Max(0.0, gamma));
 
-    Omega.save("gamma.mesh");
-    gamma.save("gamma.gf");
-    gamma.save("outDensity/gamma." + std::to_string(i) + ".gf");
+   Omega.save("gamma.mesh");
+   gamma.save("gamma.gf");
+   gamma.save("outDensity/gamma." + std::to_string(i) + ".gf");
   }
 
   Omega.save("gamma.mesh");

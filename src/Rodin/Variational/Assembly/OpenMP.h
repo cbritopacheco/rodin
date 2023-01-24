@@ -18,31 +18,31 @@
 
 namespace Rodin::Variational::Assembly
 {
-   template <>
-   class OpenMP<BilinearFormBase<mfem::SparseMatrix>>
-      : public AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>
-   {
-      public:
-         using Parent = AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>;
-         using OperatorType = mfem::SparseMatrix;
+  template <>
+  class OpenMP<BilinearFormBase<mfem::SparseMatrix>>
+    : public AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>
+  {
+    public:
+      using Parent = AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>;
+      using OperatorType = mfem::SparseMatrix;
 
-         OpenMP() = default;
+      OpenMP() = default;
 
-         OpenMP(const OpenMP& other)
-            : Parent(other)
-         {}
+      OpenMP(const OpenMP& other)
+        : Parent(other)
+      {}
 
-         OpenMP(OpenMP&& other)
-            : Parent(std::move(other))
-         {}
+      OpenMP(OpenMP&& other)
+        : Parent(std::move(other))
+      {}
 
-         OperatorType execute(const Input& input) const override;
+      OperatorType execute(const Input& input) const override;
 
-         OpenMP* copy() const noexcept override
-         {
-            return new OpenMP(*this);
-         }
-   };
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
+  };
 }
 
 #endif

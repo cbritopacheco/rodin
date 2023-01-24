@@ -5,9 +5,9 @@
 
 namespace Rodin::Variational
 {
-   Sum<FunctionBase, FunctionBase>
-   operator-(const FunctionBase& lhs, const FunctionBase& rhs)
-   {
-      return Sum(lhs, UnaryMinus(rhs));
-   }
+  Sum<FunctionBase, FunctionBase>
+  operator-(const FunctionBase& lhs, const FunctionBase& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 }
