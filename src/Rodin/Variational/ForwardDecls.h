@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
-#include "Rodin/Traits.h"
-
 namespace Rodin::Variational
 {
   /**

@@ -14,91 +14,91 @@
 namespace Rodin::External::MMG
 {
   /**
-  * @brief Improves the mesh quality, mantaining the mean edge lenghts of the mesh.
-  */
+   * @brief Improves the mesh quality, mantaining the mean edge lenghts of the mesh.
+   */
   class MeshOptimizer : public MMG5
   {
-   public:
-    MeshOptimizer() = default;
+    public:
+      MeshOptimizer() = default;
 
-    /**
-     * @brief Performs the optimization of the mesh.
-     * @param[in, out] mesh Mesh to optimize
-     * @note The mean of the edge lengths is preserved at the vertices.
-     * Hence, if the edges passing through a vertex have very different
-     * sizes, the resulting mesh may be very different from the initial one.
-     */
-    void optimize(MMG::Mesh& mesh)
-    {
-      MMG5_pMesh mmgMesh = rodinToMesh(mesh);
-
-      MMG5::setParameters(mmgMesh);
-
-      bool isSurface = mesh.isSurface();
-      int retcode = MMG5_STRONGFAILURE;
-      switch (mmgMesh->dim)
+      /**
+       * @brief Performs the optimization of the mesh.
+       * @param[in, out] mesh Mesh to optimize
+       * @note The mean of the edge lengths is preserved at the vertices.
+       * Hence, if the edges passing through a vertex have very different
+       * sizes, the resulting mesh may be very different from the initial one.
+       */
+      void optimize(MMG::Mesh& mesh)
       {
-       case 2:
-       {
-        assert(!isSurface);
-        retcode = optimizeMMG2D(mmgMesh);
-        break;
-       }
-       case 3:
-       {
-        if (isSurface)
-          retcode = optimizeMMGS(mmgMesh);
-        else
-          retcode = optimizeMMG3D(mmgMesh);
-        break;
-       }
+        MMG5_pMesh mmgMesh = rodinToMesh(mesh);
+
+        MMG5::setParameters(mmgMesh);
+
+        bool isSurface = mesh.isSurface();
+        int retcode = MMG5_STRONGFAILURE;
+        switch (mmgMesh->dim)
+        {
+          case 2:
+          {
+            assert(!isSurface);
+            retcode = optimizeMMG2D(mmgMesh);
+            break;
+          }
+          case 3:
+          {
+            if (isSurface)
+              retcode = optimizeMMGS(mmgMesh);
+            else
+              retcode = optimizeMMG3D(mmgMesh);
+            break;
+          }
+        }
+
+        if (retcode != MMG5_SUCCESS)
+        {
+          Alert::Exception()
+            << "Failed to optimize the mesh."
+            << Alert::Raise;
+        }
+
+        mesh = meshToRodin(mmgMesh);
+        destroyMesh(mmgMesh);
       }
 
-      if (retcode != MMG5_SUCCESS)
+      MeshOptimizer& setAngleDetection(bool b = true)
       {
-       Alert::Exception()
-        << "Failed to optimize the mesh."
-        << Alert::Raise;
+        MMG5::setAngleDetection(b);
+        return *this;
       }
 
-      mesh = meshToRodin(mmgMesh);
-      destroyMesh(mmgMesh);
-    }
+      MeshOptimizer& setHMin(double hmin)
+      {
+        MMG5::setHMin(hmin);
+        return *this;
+      }
 
-    MeshOptimizer& setAngleDetection(bool b = true)
-    {
-      MMG5::setAngleDetection(b);
-      return *this;
-    }
+      MeshOptimizer& setHMax(double hmax)
+      {
+        MMG5::setHMax(hmax);
+        return *this;
+      }
 
-    MeshOptimizer& setHMin(double hmin)
-    {
-      MMG5::setHMin(hmin);
-      return *this;
-    }
+      MeshOptimizer& setHausdorff(double hausd)
+      {
+        MMG5::setHausdorff(hausd);
+        return *this;
+      }
 
-    MeshOptimizer& setHMax(double hmax)
-    {
-      MMG5::setHMax(hmax);
-      return *this;
-    }
+      MeshOptimizer& setGradation(double hgrad)
+      {
+        MMG5::setGradation(hgrad);
+        return *this;
+      }
 
-    MeshOptimizer& setHausdorff(double hausd)
-    {
-      MMG5::setHausdorff(hausd);
-      return *this;
-    }
-
-    MeshOptimizer& setGradation(double hgrad)
-    {
-      MMG5::setGradation(hgrad);
-      return *this;
-    }
-
-   private:
-    int optimizeMMG2D(MMG5_pMesh mesh);
-    int optimizeMMG3D(MMG5_pMesh mesh);
-    int optimizeMMGS(MMG5_pMesh mesh);
+    private:
+      int optimizeMMG2D(MMG5_pMesh mesh);
+      int optimizeMMG3D(MMG5_pMesh mesh);
+      int optimizeMMGS(MMG5_pMesh mesh);
   };
 }
 

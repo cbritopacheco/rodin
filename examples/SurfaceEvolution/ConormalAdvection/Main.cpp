@@ -11,30 +11,33 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 const char* meshFile =
-  "../resources/examples/SurfaceEvolution/ConormalAdvection/Surface.mesh";
+  "../resources/examples/SurfaceOptimization/Ball.mesh";
 
 int main()
 {
-  Mesh th;
-  th.load(meshFile);
-  H1 vh(th);
+  MMG::Mesh th;
+  th.load(meshFile, IO::FileFormat::MEDIT);
+  MMG::MeshOptimizer().setHMin(0.05).optimize(th);
+  th.save("test.mesh", IO::FileFormat::MFEM);
 
-  GridFunction dist(vh);
-  MMG::Distancer(vh).setInteriorDomain(1).distance(th);
+  // H1 vh(th);
 
-  std::ofstream fout("obj.txt");
+  // GridFunction dist(vh);
+  // MMG::Distancer(vh).setInteriorDomain(1).distance(th);
 
-  size_t N = 100;
-  for (size_t i = 0; i < N; i++)
-  {
-    // fout << err << "\n";
-    fout.flush();
-  }
+  // std::ofstream fout("obj.txt");
 
-  th = MMG::ImplicitDomainMesher().split(6, {3, 6})
-                                     .noSplit(2)
-                    .setHMax(0.05)
-                    .surface()
-                    .discretize(dist);
+  // size_t N = 100;
+  // for (size_t i = 0; i < N; i++)
+  // {
+  //   // fout << err << "\n";
+  //   fout.flush();
+  // }
+
+  // th = MMG::ImplicitDomainMesher().split(6, {3, 6})
+  //                                    .noSplit(2)
+  //                   .setHMax(0.05)
+  //                   .surface()
+  //                   .discretize(dist);
   return 0;
 }

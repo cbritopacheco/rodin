@@ -9,17 +9,8 @@
 
 #include <utility>
 
-#include "Rodin/Traits.h"
 #include "Rodin/Configure.h"
-
-namespace Rodin
-{
-  namespace Context
-  {
-    struct Serial;
-    struct MPI;
-  }
-}
+#include "Rodin/Context/ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
@@ -52,15 +43,6 @@ namespace Rodin::Geometry
 
   /**
    * @brief Templated class for Mesh.
-   * @tparam Trait Indicates whether if Mesh is in a parallel context. It is
-   * one of Traits::Serial or Traits::Parallel.
-   *
-   * The Mesh class represents an n-dimensional support for instances of type
-   * GridFunctionBase or ShapeFunctionBase.
-   *
-   * There are two possible specializations:
-   * - Mesh<Traits::Serial>
-   * - Mesh<Traits::Parallel>
    */
   template <class Trait = Context::Serial>
   class Mesh;
