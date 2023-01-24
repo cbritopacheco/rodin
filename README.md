@@ -39,9 +39,9 @@ For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, 
 \left\{
 \begin{aligned}
  -\Delta u &= f && \text{in } \Omega\\
- u &= 0 && \text{on } \Gamma
+ u &= 0 && \text{on } \Gamma \ ,
 \end{aligned}
-\right.,
+\right.
 ```
 has the associated weak formulation:
 ```math
