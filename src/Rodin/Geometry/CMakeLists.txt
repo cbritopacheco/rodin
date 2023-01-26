@@ -1,15 +1,17 @@
 set(RodinGeometry_HEADERS
-  Element.h
-  SimplexIterator.h
   Mesh.h
+  Element.h
   SubMesh.h
+  SimplexIterator.h
   )
 
 set(RodinGeometry_SRCS
-  Element.cpp
-  SimplexIterator.cpp
   Mesh.cpp
+  Element.cpp
   SubMesh.cpp
+  MeshBuilder.cpp
+  SubMeshBuilder.cpp
+  SimplexIterator.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)

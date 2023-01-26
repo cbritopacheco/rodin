@@ -137,16 +137,16 @@ namespace Rodin::IO
 
     // Print header
     os << IO::Medit::Keyword::MeshVersionFormatted << " " << 2
-     << '\n'
-     << IO::Medit::Keyword::Dimension << " " << mesh.getSpaceDimension()
-     << "\n\n";
+       << '\n'
+       << IO::Medit::Keyword::Dimension << " " << mesh.getSpaceDimension()
+       << "\n\n";
 
     // Print vertices
     os << '\n'
-      << IO::Medit::Keyword::Vertices
-      << '\n'
-      << mesh.getHandle().GetNV()
-      << '\n';
+       << IO::Medit::Keyword::Vertices
+       << '\n'
+       << mesh.getHandle().GetNV()
+       << '\n';
 
     for (int i = 0; i < mesh.getHandle().GetNV(); i++)
     {
@@ -194,9 +194,9 @@ namespace Rodin::IO
         {
           auto vs = mesh.getHandle().GetElement(i)->GetVertices();
           os << vs[0] + 1 << " "
-            << vs[1] + 1 << " "
-            << vs[2] + 1 << " "
-            << mesh.getHandle().GetAttribute(i) << '\n';
+             << vs[1] + 1 << " "
+             << vs[2] + 1 << " "
+             << mesh.getHandle().GetAttribute(i) << '\n';
         }
         break;
       }
@@ -209,9 +209,9 @@ namespace Rodin::IO
         {
           auto vs = mesh.getHandle().GetBdrElement(i)->GetVertices();
           os << vs[0] + 1 << " "
-            << vs[1] + 1 << " "
-            << vs[2] + 1 << " "
-            << mesh.getHandle().GetBdrAttribute(i) << '\n';
+             << vs[1] + 1 << " "
+             << vs[2] + 1 << " "
+             << mesh.getHandle().GetBdrAttribute(i) << '\n';
         }
         break;
       }
@@ -236,14 +236,12 @@ namespace Rodin::IO
         for (int i = 0; i < ne; i++)
         {
           auto it = mesh.getElement(i);
-          assert(false);
-          // auto vs = el.getVertices();
-          // assert(vs.size() == 4);
-          // os << vs[0] + 1 << " "
-          //   << vs[1] + 1 << " "
-          //   << vs[2] + 1 << " "
-          //   << vs[3] + 1 << " "
-          //   << el.getAttribute() << '\n';
+          auto vs = mesh.getHandle().GetElement(i)->GetVertices();
+          os << vs[0] + 1 << " "
+             << vs[1] + 1 << " "
+             << vs[2] + 1 << " "
+             << vs[3] + 1 << " "
+             << mesh.getHandle().GetAttribute(i) << '\n';
         }
         break;
       }

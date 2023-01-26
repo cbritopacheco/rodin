@@ -33,7 +33,17 @@ namespace Rodin::Geometry
   class MeshBase
   {
     public:
+      class BuilderBase
+      {
+        public:
+          virtual ~BuilderBase() = default;
+
+          virtual void finalize() = 0;
+      };
+
       virtual ~MeshBase() = default;
+
+      virtual MeshBase& scale(double c) = 0;
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -204,6 +214,14 @@ namespace Rodin::Geometry
        */
       virtual size_t getSpaceDimension() const;
 
+      virtual MeshBase& load(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
+
+      virtual void save(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
+
       /**
        * @brief Indicates whether the mesh is a submesh or not.
        * @returns True if mesh is a submesh, false otherwise.
@@ -270,6 +288,41 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
+      class Builder : public BuilderBase
+      {
+        public:
+          Builder();
+
+          Builder(const Builder&) = delete;
+
+          Builder(Builder&&) = default;
+
+          Builder& operator=(const Builder&) = delete;
+
+          Builder& operator=(Builder&&) = default;
+
+          Builder& setMesh(Mesh<Context::Serial>& mesh);
+
+          Builder& vertex(
+              const std::vector<double>& x);
+
+          Builder& face(
+              Type geom,
+              const std::vector<Index>& vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+          Builder& element(
+              Type geom,
+              const std::vector<Index>& vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+          void finalize() override;
+
+        private:
+          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_mesh;
+          std::map<std::pair<size_t, size_t>, Connectivity> m_connectivity;
+      };
+
       /**
       * @brief Constructs an empty mesh with no elements.
       */
@@ -286,25 +339,17 @@ namespace Rodin::Geometry
       Mesh(const Mesh& other) = default;
 
       /**
+      * @internal
+      * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
+      */
+      explicit Mesh(mfem::Mesh&& mesh);
+
+      /**
       * @brief Move assigns the mesh from another mesh.
       */
       Mesh& operator=(Mesh&& other) = default;
 
-      virtual Mesh& initialize(size_t dim, size_t sdim);
-
-      virtual Mesh& vertex(const std::vector<double>& x);
-
-      virtual Mesh& face(
-        Type geom,
-        const std::vector<int>& vs,
-        Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
-
-      virtual Mesh& element(
-        Type geom,
-        const std::vector<int>& vs,
-        Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
-
-      virtual Mesh& finalize();
+      Mesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -314,7 +359,7 @@ namespace Rodin::Geometry
       */
       virtual Mesh& load(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM);
+        IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
       /**
       * @brief Saves a mesh to file in the given format.
@@ -324,7 +369,9 @@ namespace Rodin::Geometry
       */
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const;
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
+
+      virtual Mesh& scale(double c) override;
 
       virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
 
@@ -365,56 +412,47 @@ namespace Rodin::Geometry
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
-      /**
-      * @internal
-      * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
-      */
-      explicit Mesh(mfem::Mesh&& mesh);
+      virtual size_t getCount(size_t dim) const override;
 
-      size_t getCount(size_t dim) const override;
+      virtual FaceIterator getBoundary() const override;
 
-      FaceIterator getBoundary() const override;
+      virtual FaceIterator getInterface() const override;
 
-      FaceIterator getInterface() const override;
+      virtual ElementIterator getElement(size_t idx = 0) const override;
 
-      ElementIterator getElement(size_t idx = 0) const override;
-
-      FaceIterator getFace(size_t idx = 0) const override;
+      virtual FaceIterator getFace(size_t idx = 0) const override;
 
       // VertexIterator getVertex(size_t idx = 0) const override;
 
-      SimplexIterator getSimplex(size_t dimension, size_t idx) const override;
+      virtual SimplexIterator getSimplex(size_t dimension, size_t idx) const override;
 
       virtual bool isSubMesh() const override
       {
         return false;
       }
 
-      bool isInterface(Index faceIdx) const override;
+      virtual bool isInterface(Index faceIdx) const override;
 
-      bool isBoundary(Index faceIdx) const override;
+      virtual bool isBoundary(Index faceIdx) const override;
 
-      Attribute getAttribute(size_t dimension, Index index) const override;
+      virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      const Connectivity& getConnectivity(size_t d, size_t dp) const override
+      virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
       {
         return m_connectivity.at({d, dp});
-      }
-
-      template <class ContextType>
-      Mesh<ContextType> parallelize(ContextType ctx)
-      {
-        return Mesh<ContextType>(*this, std::move(ctx));
       }
 
       mfem::Mesh& getHandle() override;
 
       const mfem::Mesh& getHandle() const override;
 
+    protected:
+      std::map<Index, Index> m_f2b;
+
     private:
       mfem::Mesh m_mesh;
       std::map<std::pair<size_t, size_t>, Connectivity> m_connectivity;
-      std::map<Index, Index> m_f2b;
+
   };
 }
 

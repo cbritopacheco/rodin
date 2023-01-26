@@ -7,3 +7,11 @@ target_link_libraries(Main
   Rodin::External::MMG
   )
 
+add_executable(Error Error.cpp)
+target_link_libraries(Error
+  PUBLIC
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::External::MMG
+  )

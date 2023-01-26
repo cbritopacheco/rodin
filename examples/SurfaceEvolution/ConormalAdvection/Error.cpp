@@ -12,17 +12,21 @@ using namespace Rodin::External;
 
 constexpr double dt = 0.01;
 constexpr size_t maxIt = 100;
+constexpr double azimuth = 0.1;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
   "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
+
+double phi(double t, const Point& x);
 
 int main()
 {
   // Load mesh
   MMG::Mesh th;
   th.load(meshFile, IO::FileFormat::MEDIT);
+  th.save("test.mfem.mesh");
 
-  // Evolution
+  std::ofstream fout("err.txt");
   for (size_t i = 0; i < maxIt; i++)
   {
     // Build finite element space on the mesh
@@ -42,6 +46,10 @@ int main()
     // Advect
     MMG::Advect(dist, conormal).step(dt);
 
+    GridFunction diff(vh);
+    diff = Pow(dist - 1, 2);
+    double error = Integral(diff);
+
     // Generate mesh to subdomain
     th = MMG::ImplicitDomainMesher().setAngleDetection(false)
                                     .setHMax(0.05)
@@ -50,6 +58,15 @@ int main()
 
     // Save results
     th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    fout << error << '\n' << std::flush;
   }
   return 0;
 }
+
+double phi(double t, const Point& x)
+{
+  auto sint = std::sin(t);
+  auto cost = std::cos(t);
+  return sqrt(2 * sint * sint + cost * cost) - 1;
+}
+

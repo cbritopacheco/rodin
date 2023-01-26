@@ -53,8 +53,17 @@ namespace Rodin::External::MMG
     if (fmt == IO::FileFormat::MEDIT)
     {
       std::ifstream in(filename.c_str());
-      MMG::MeshLoader loader(*this);
-      loader.load(in);
+      if (in)
+      {
+        MMG::MeshLoader loader(*this);
+        loader.load(in);
+      }
+      else
+      {
+        Alert::Exception()
+          << "Failed to open " << filename << " for reading."
+          << Alert::Raise;
+      }
     }
     else
     {
