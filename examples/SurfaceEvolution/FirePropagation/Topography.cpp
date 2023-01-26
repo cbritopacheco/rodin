@@ -31,16 +31,14 @@ int main(int, char**)
   };
 
   MMG::Mesh topography;
-  topography.initialize(2, 3);
-  topography.vertex({0, 0, 0});
-  topography.vertex({width, 0, 0});
-  topography.vertex({0, height, 0});
-  topography.vertex({width, height, 0});
-  topography.element(
-    Geometry::Type::Triangle, {0, 1, 2});
-  topography.element(
-    Geometry::Type::Triangle, {1, 2, 3});
-  topography.finalize();
+  topography.initialize(2, 3)
+            .vertex({0, 0, 0})
+            .vertex({width, 0, 0})
+            .vertex({0, height, 0})
+            .vertex({width, height, 0})
+            .element(Geometry::Type::Triangle, {0, 1, 2})
+            .element(Geometry::Type::Triangle, {1, 2, 3})
+            .finalize();
 
   // for (int i = 0; i < 8; i++)
   //  topography.refine();

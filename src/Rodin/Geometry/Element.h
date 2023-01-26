@@ -96,7 +96,7 @@ namespace Rodin::Geometry
 
       virtual SimplexIterator getIncident() const;
 
-      [[deprecated]] mfem::ElementTransformation& getTransformation() const;
+      mfem::ElementTransformation& getTransformation() const;
 
       virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 

@@ -59,6 +59,9 @@ namespace Rodin::Geometry
    */
   template <class Trait>
   class SubMesh;
+
+  template <class Trait>
+  class SubMeshBuilder;
 }
 
 #endif

@@ -47,8 +47,19 @@ namespace Rodin::Geometry
         getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
   }
 
+  // ---- Mesh<Context::Serial> ----------------------------------------------
+  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(double c)
+  {
+    mfem::Vector vs;
+    getHandle().GetVertices(vs);
+    vs *= c;
+    getHandle().SetVertices(vs);
+    return *this;
+  }
+
   void Mesh<Context::Serial>::save(
-      const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precision) const
+      const boost::filesystem::path& filename,
+      IO::FileFormat fmt, size_t precision) const
   {
     std::ofstream ofs(filename.c_str());
     if (!ofs)
@@ -295,7 +306,8 @@ namespace Rodin::Geometry
     }
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
+  Mesh<Context::Serial>& Mesh<Context::Serial>
+  ::setAttribute(size_t dimension, Index index, Attribute attr)
   {
     if (dimension == getDimension())
     {
@@ -369,22 +381,38 @@ namespace Rodin::Geometry
   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
   {
     SubMesh<Context::Serial> res(*this);
-    res.initialize(getDimension(), getSpaceDimension());
     std::set<Index> indices;
     for (Index i = 0; i < getCount(getDimension()); i++)
     {
       if (attrs.count(getAttribute(getDimension(), i)))
         indices.insert(i);
     }
-    res.include(getDimension(), indices);
-    res.finalize();
+    res.initialize(getDimension())
+       .include(getDimension(), indices)
+       .finalize();
     return res;
+  }
+
+  Mesh<Context::Serial>::Builder
+  Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
+  {
+    getHandle() = mfem::Mesh(dim, 0, 0, 0, sdim);
+    Mesh<Context::Serial>::Builder build;
+    build.setMesh(*this);
+    return build;
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
   {
     assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-    assert(false);
+    SubMesh<Context::Serial> res(*this);
+    std::set<Index> indices;
+    for (auto it = getBoundary(); !it.end(); ++it)
+      indices.insert(it->getIndex());
+    res.initialize(getDimension() - 1)
+       .include(getDimension() - 1, indices)
+       .finalize();
+    return res;
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
@@ -408,57 +436,6 @@ namespace Rodin::Geometry
   const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
   {
     return m_mesh;
-  }
-
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
-  {
-    m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
-  {
-    if (x.size() != getSpaceDimension())
-    {
-      Alert::Exception()
-        << "Vertex dimension is different from space dimension"
-        << " (" << x.size() << " != " << getSpaceDimension() << ")"
-        << Alert::Raise;
-    }
-    getHandle().AddVertex(x.data());
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::element(
-      Type geom,
-      const std::vector<int>& vs, Attribute attr)
-  {
-    mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
-    el->SetVertices(vs.data());
-    el->SetAttribute(attr);
-    getHandle().AddElement(el);
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::face(
-      Type geom,
-      const std::vector<int>& vs, Attribute attr)
-  {
-    mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
-    el->SetVertices(vs.data());
-    el->SetAttribute(attr);
-    getHandle().AddBdrElement(el);
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::finalize()
-  {
-    getHandle().FinalizeTopology();
-    getHandle().Finalize(false, true);
-    for (int i = 0; i < getHandle().GetNBE(); i++)
-      m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
-    return *this;
   }
 }
 

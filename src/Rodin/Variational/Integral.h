@@ -389,6 +389,11 @@ namespace Rodin::Variational
 
       Integral(Integral&& other) = default;
 
+      operator double()
+      {
+        return compute();
+      }
+
       /**
        * @brief Integrates the expression and returns the value
        * @returns Value of integral

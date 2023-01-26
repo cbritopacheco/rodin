@@ -113,6 +113,7 @@ namespace Rodin::IO
     assert(version >= 2 && version <= 3);
 
     Rodin::Geometry::Mesh<Context::Serial> mesh;
+    Rodin::Geometry::Mesh<Context::Serial>::Builder build;
 
     int spaceDim = 0;
     while (std::getline(is, line))
@@ -237,22 +238,22 @@ namespace Rodin::IO
     bool isSurfaceMesh;
     if (spaceDim == 3 && m_context.count.at(Medit::Keyword::Tetrahedra) == 0)
     {
-      mesh.initialize(spaceDim - 1, spaceDim);
+      build = mesh.initialize(spaceDim - 1, spaceDim);
       isSurfaceMesh = true;
     }
     else if (spaceDim == 2 && m_context.count.at(Medit::Keyword::Triangles) == 0)
     {
-      mesh.initialize(spaceDim - 1, spaceDim);
+      build = mesh.initialize(spaceDim - 1, spaceDim);
       isSurfaceMesh = true;
     }
     else if (spaceDim == 3)
     {
-      mesh.initialize(spaceDim, spaceDim);
+      build = mesh.initialize(spaceDim, spaceDim);
       isSurfaceMesh = false;
     }
     else if (spaceDim == 2)
     {
-      mesh.initialize(spaceDim, spaceDim);
+      build = mesh.initialize(spaceDim, spaceDim);
       isSurfaceMesh = false;
     }
     else
@@ -291,7 +292,7 @@ namespace Rodin::IO
               double x, y;
               lss >> x >> y;
               // We ignore the reference
-              mesh.vertex({x, y});
+              build.vertex({x, y});
             }
           }
           else if (spaceDim == 3)
@@ -304,7 +305,7 @@ namespace Rodin::IO
               double x, y, z;
               lss >> x >> y >> z;
               // We ignore the reference
-              mesh.vertex({x, y, z});
+              build.vertex({x, y, z});
             }
           }
           break;
@@ -318,13 +319,13 @@ namespace Rodin::IO
             if(!std::getline(is, line))
               Alert::Exception("Bad mesh format.").raise();
             std::istringstream lss(line);
-            int v1, v2, ref;
+            size_t v1, v2, ref;
             lss >> v1 >> v2 >> ref;
             switch (spaceDim)
             {
               case 2: // Planar mesh
               {
-                mesh.face(
+                build.face(
                     Geometry::Type::Segment,
                     {v1 - 1, v2 - 1},
                     ref == 0 ? 128 : ref); // Zero-reference is
@@ -335,7 +336,7 @@ namespace Rodin::IO
               {
                 if (isSurfaceMesh)
                 {
-                  mesh.face(
+                  build.face(
                       Geometry::Type::Segment,
                       {v1 - 1, v2 - 1},
                       ref == 0 ? 128 : ref); // Zero-reference is
@@ -361,13 +362,13 @@ namespace Rodin::IO
             if(!std::getline(is, line))
               Alert::Exception("Bad mesh format.").raise();
             std::istringstream lss(line);
-            int v1, v2, v3, ref;
+            size_t v1, v2, v3, ref;
             lss >> v1 >> v2 >> v3 >> ref;
             switch (spaceDim)
             {
               case 2:
               {
-                mesh.element(
+                build.element(
                   Geometry::Type::Triangle,
                   {v1 - 1, v2 - 1, v3 - 1}, ref);
                 break;
@@ -376,13 +377,13 @@ namespace Rodin::IO
               {
                 if (isSurfaceMesh)
                 {
-                  mesh.element(
+                  build.element(
                     Geometry::Type::Triangle,
                     {v1 - 1, v2 - 1, v3 - 1}, ref);
                 }
                 else
                 {
-                  mesh.face(
+                  build.face(
                     Geometry::Type::Triangle,
                     {v1 - 1, v2 - 1, v3 - 1}, ref);
                 }
@@ -406,9 +407,9 @@ namespace Rodin::IO
             if(!std::getline(is, line))
               Alert::Exception("Bad mesh format.").raise();
             std::istringstream lss(line);
-            int v1, v2, v3, v4, ref;
+            size_t v1, v2, v3, v4, ref;
             lss >> v1 >> v2 >> v3 >> v4 >> ref;
-            mesh.element(
+            build.element(
                 Geometry::Type::Tetrahedron,
                 {v1 - 1, v2 - 1, v3 - 1, v4 - 1}, ref);
           }
@@ -420,7 +421,7 @@ namespace Rodin::IO
         }
       }
     }
-    mesh.finalize();
+    build.finalize();
     getObject() = std::move(mesh);
   }
 }
