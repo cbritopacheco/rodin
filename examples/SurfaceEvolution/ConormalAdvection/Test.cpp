@@ -10,9 +10,10 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
+constexpr double T = M_PI;
 constexpr double dt = 0.01;
-constexpr size_t maxIt = 100;
-constexpr double azimuth = 0.3;
+constexpr size_t maxIt = T / dt;
+constexpr double azimuth = 0.1;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
   "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
@@ -38,33 +39,41 @@ int main()
     H1 vh(th);
     H1 uh(th, th.getSpaceDimension());
 
+    auto phit = ScalarFunction([&](const Point& p) -> double { return phi(t, p); });
+
     // Distance the subdomain
     GridFunction dist(vh);
-    dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
-                             .distance(th);
+
+    if (i == 0)
+    {
+      dist = phit;
+    }
+    else
+    {
+      dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
+                               .distance(th);
+    }
+
+    // Compute L2 error
+    GridFunction diff(vh);
+    diff = Pow(dist - phit, 2);
+    double error = Integral(diff).compute();
+    diff.save("diff.gf");
 
     // Compute gradient of signed distance function
     Grad gd(dist);
     GridFunction conormal(uh);
     conormal = gd / Frobenius(gd);
+    conormal.save("conormal.gf");
 
     // Advect
     MMG::Advect(dist, conormal).step(dt);
     dist.getFiniteElementSpace().getMesh().save("miaow.mesh");
     dist.save("miaow.gf");
 
-    GridFunction diff(vh);
-    auto phit = ScalarFunction([&](const Point& p) -> double { return phi(t, p); });
-    diff = phit;
-    diff.save("diff.gf");
-    std::exit(1);
-
-    diff = Pow(dist - phit, 2);
-    double error = Integral(diff);
-
     // Generate mesh to subdomain
     th = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                    .setHMax(0.05)
+                                    .setHMax(0.02)
                                     .setHausdorff(0.01)
                                     .discretize(dist);
 
@@ -72,6 +81,7 @@ int main()
     th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
     Alert::Info() << "l2: " << error << '\n' << Alert::Raise;
     fout << error << '\n' << std::flush;
+    t += dt;
   }
   return 0;
 }
@@ -87,11 +97,6 @@ double phi(double t, const Point& p)
   assert(0 <= alpha && alpha <= M_PI);
   const double beta = std::atan2(y, x) + M_PI;
   assert(0 <= beta && beta <= 2 * M_PI);
-  const double dom =
-    std::sin(alpha) * std::sin(azimuth + t) + std::cos(alpha) * std::cos(azimuth + t);
-  assert(-1.0 <= dom && dom <= 1.0);
-  const double res = std::acos(dom);
-  assert(std::isfinite(res));
-  return -Math::sgn(azimuth + t - alpha) * res;
+  return alpha - t - azimuth;
 }
 
