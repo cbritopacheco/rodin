@@ -89,6 +89,14 @@ namespace Rodin::Math
   {
    return std::tan(x);
   }
+
+  template <typename T>
+  constexpr
+  inline
+  T sgn(const T& x)
+  {
+    return (T(0) < x) - (x < T(0));
+  }
 }
 
 #endif

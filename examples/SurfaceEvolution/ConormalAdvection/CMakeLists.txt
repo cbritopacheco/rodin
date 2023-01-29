@@ -7,8 +7,8 @@ target_link_libraries(Main
   Rodin::External::MMG
   )
 
-add_executable(Error Error.cpp)
-target_link_libraries(Error
+add_executable(Test Test.cpp)
+target_link_libraries(Test
   PUBLIC
   Rodin::Solver
   Rodin::Geometry
