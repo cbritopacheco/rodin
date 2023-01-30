@@ -20,16 +20,6 @@
 namespace Rodin::Geometry
 {
   // ---- MeshBase ----------------------------------------------------------
-  size_t MeshBase::getSpaceDimension() const
-  {
-    return getHandle().SpaceDimension();
-  }
-
-  size_t MeshBase::getDimension() const
-  {
-    return getHandle().Dimension();
-  }
-
   bool MeshBase::isSurface() const
   {
     return (getSpaceDimension() - 1 == getDimension());
@@ -48,6 +38,16 @@ namespace Rodin::Geometry
   }
 
   // ---- Mesh<Context::Serial> ----------------------------------------------
+  size_t Mesh<Context::Serial>::getDimension() const
+  {
+    return m_dim;
+  }
+
+  size_t Mesh<Context::Serial>::getSpaceDimension() const
+  {
+    return m_sdim;
+  }
+
   Mesh<Context::Serial>& Mesh<Context::Serial>::scale(double c)
   {
     mfem::Vector vs;
@@ -199,7 +199,7 @@ namespace Rodin::Geometry
 #endif
 
   Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
-    : m_mesh(std::move(mesh))
+    : m_dim(mesh.Dimension()), m_sdim(mesh.SpaceDimension()), m_impl(std::move(mesh))
   {
     for (int i = 0; i < getHandle().GetNBE(); i++)
       m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
@@ -209,15 +209,15 @@ namespace Rodin::Geometry
   {
     if (dimension == getDimension())
     {
-      return m_mesh.GetNE();
+      return m_impl.GetNE();
     }
     else if (dimension == getDimension() - 1)
     {
-      return m_mesh.GetNumFaces();
+      return m_impl.GetNumFaces();
     }
     else if (dimension == 0)
     {
-      return m_mesh.GetNV();
+      return m_impl.GetNV();
     }
     else
     {
@@ -253,12 +253,17 @@ namespace Rodin::Geometry
 
   ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
   {
-    return ElementIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension())));
+    return ElementIterator(*this, BoundedIndexGenerator(idx, getElementCount()));
   }
 
   FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
   {
-    return FaceIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension() - 1)));
+    return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
+  }
+
+  VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
+  {
+    return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
   }
 
   SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
@@ -296,7 +301,6 @@ namespace Rodin::Geometry
     }
     else if (dimension == 0)
     {
-      assert(false);
       return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
     }
     else
@@ -387,7 +391,7 @@ namespace Rodin::Geometry
       if (attrs.count(getAttribute(getDimension(), i)))
         indices.insert(i);
     }
-    res.initialize(getDimension())
+    res.initialize(getDimension(), getSpaceDimension())
        .include(getDimension(), indices)
        .finalize();
     return res;
@@ -396,9 +400,10 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder
   Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
   {
-    getHandle() = mfem::Mesh(dim, 0, 0, 0, sdim);
+    m_dim = dim;
+    m_sdim = sdim;
     Mesh<Context::Serial>::Builder build;
-    build.setMesh(*this);
+    build.setReference(*this);
     return build;
   }
 
@@ -409,7 +414,7 @@ namespace Rodin::Geometry
     std::set<Index> indices;
     for (auto it = getBoundary(); !it.end(); ++it)
       indices.insert(it->getIndex());
-    res.initialize(getDimension() - 1)
+    res.initialize(getDimension() - 1, getSpaceDimension())
        .include(getDimension() - 1, indices)
        .finalize();
     return res;
@@ -430,12 +435,12 @@ namespace Rodin::Geometry
 
   mfem::Mesh& Mesh<Context::Serial>::getHandle()
   {
-    return m_mesh;
+    return m_impl;
   }
 
   const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
   {
-    return m_mesh;
+    return m_impl;
   }
 }
 

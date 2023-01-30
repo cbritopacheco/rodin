@@ -1,5 +1,6 @@
 # ---- Add main targets ------------------------------------------------------
 set(Rodin_HEADERS
+  Array.h
   Math.h
   Alert.h
   Geometry.h
@@ -40,6 +41,7 @@ endif()
 add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
 target_sources(Rodin INTERFACE ${Rodin_HEADERS})
+target_link_libraries(Rodin INTERFACE Eigen3::Eigen)
 
 configure_file(Configure.h.in Configure.h @ONLY)
 

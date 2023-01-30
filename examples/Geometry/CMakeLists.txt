@@ -18,3 +18,7 @@ target_link_libraries(CCL
   PUBLIC
   Rodin::Geometry)
 
+add_executable(Connectivity Connectivity.cpp)
+target_link_libraries(Connectivity
+  PUBLIC
+  Rodin::Geometry)

@@ -182,4 +182,56 @@ namespace Rodin::Geometry
     assert(vs.Size() > 0);
     return new Face(index, mesh, std::vector<Index>(vs.begin(), vs.end()), attribute);
   }
+
+  // ---- VertexIterator ------------------------------------------------------
+  VertexIterator::VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
+    : m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
+  {}
+
+  bool VertexIterator::end() const
+  {
+    return getIndexGenerator().end();
+  }
+
+  VertexIterator& VertexIterator::operator++()
+  {
+    ++getIndexGenerator();
+    m_dirty = true;
+    return *this;
+  }
+
+  Vertex& VertexIterator::operator*() const noexcept
+  {
+    if (!m_simplex || m_dirty)
+      m_simplex.reset(generate());
+    m_dirty = false;
+    return *m_simplex;
+  }
+
+  Vertex* VertexIterator::operator->() const noexcept
+  {
+    if (!m_simplex || m_dirty)
+      m_simplex.reset(generate());
+    m_dirty = false;
+    return m_simplex.get();
+  }
+
+  constexpr size_t VertexIterator::getDimension() const
+  {
+    return 0;
+  }
+
+  Vertex* VertexIterator::generate() const
+  {
+    if (end()) return nullptr;
+    const auto& gen = getIndexGenerator();
+    const auto& index = *gen;
+    const auto& mesh = getMesh();
+    const auto& dimension = getDimension();
+    const auto& attribute = mesh.getAttribute(dimension, index);
+    Math::Vector coordinates(mesh.getSpaceDimension());
+    assert(coordinates.size() > 0);
+    std::copy_n(mesh.getHandle().GetVertex(index), coordinates.size(), coordinates.begin());
+    return new Vertex(index, mesh, coordinates, attribute);
+  }
 }

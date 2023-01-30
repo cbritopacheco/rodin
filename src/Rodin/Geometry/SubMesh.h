@@ -44,20 +44,20 @@ namespace Rodin::Geometry
         public:
           Builder();
 
-          Builder& setMesh(SubMesh<Context::Serial>& mesh)
-          {
-            m_mesh.emplace(mesh);
-            m_indices.resize(mesh.getDimension() + 1);
-            return *this;
-          }
+          Builder& setReference(
+              Mesh<Context::Serial>::Builder&& build, SubMesh<Context::Serial>& mesh);
 
           Builder& include(size_t dim, std::set<Index> indices);
 
           void finalize() override;
 
         private:
-          std::optional<std::reference_wrapper<SubMesh<Context::Serial>>> m_mesh;
-          std::vector<std::set<Index>> m_indices;
+          std::optional<std::reference_wrapper<SubMesh<Context::Serial>>> m_ref;
+
+          std::optional<Mesh<Context::Serial>::Builder> m_mbuild;
+          std::vector<Index> m_sidx;
+
+          std::vector<boost::bimap<Index, Index>> m_s2ps;
       };
 
       SubMesh(const MeshBase& parent);
@@ -71,7 +71,6 @@ namespace Rodin::Geometry
       SubMesh& operator=(SubMesh&& other)
       {
         MeshBase::operator=(std::move(other));
-        m_mesh = std::move(other.m_mesh);
         m_parent = std::move(other.m_parent);
         m_s2ps = std::move(other.m_s2ps);
         return *this;
@@ -97,12 +96,9 @@ namespace Rodin::Geometry
         return m_s2ps.at(getDimension());
       }
 
-      SubMesh<Context::Serial>::Builder initialize(size_t dim);
-
-      Mesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim) = delete;
+      SubMesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
 
     private:
-      Mesh<Context::Serial> m_mesh;
       std::reference_wrapper<const MeshBase> m_parent;
       std::vector<boost::bimap<Index, Index>> m_s2ps;
   };

@@ -186,7 +186,20 @@ namespace Rodin::Geometry
     return getMesh().isInterface(getIndex());
   }
 
-  // ---- Point -------------------------------------------------------------
+  // ---- Vertex -------------------------------------------------------------
+  Vertex::Vertex(
+      Index index,
+      const MeshBase& mesh, const Math::Vector& coordinates, Attribute attr)
+    : Simplex(0, index, mesh, {index}, attr), m_coordinates(coordinates)
+  {}
+
+  double Vertex::operator()(size_t i) const
+  {
+    assert(i < m_coordinates.size());
+    return m_coordinates(i);
+  }
+
+  // ---- Point --------------------------------------------------------------
   Point::Point(const Simplex& element, const mfem::IntegrationPoint& ip)
     : m_element(element), m_ip(ip)
   {

@@ -1,6 +1,7 @@
 set(RodinMath_HEADERS
   Constants.h
   Common.h
+  Vector.h
   DenseMatrix.h)
 
 set(RodinMath_SRCS
@@ -26,6 +27,5 @@ target_link_libraries(RodinMath PUBLIC Eigen3::Eigen)
 
 target_include_directories(RodinMath
   INTERFACE
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  )
+  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 

@@ -26,12 +26,12 @@ namespace Rodin::Geometry
   }
 
   SubMesh<Context::Serial>::Builder
-  SubMesh<Context::Serial>::initialize(size_t dim)
+  SubMesh<Context::Serial>::initialize(size_t dim, size_t sdim)
   {
-    m_s2ps.resize(dim + 1);
-    getHandle() = mfem::Mesh(dim, 0, 0, 0, getParent().getSpaceDimension());
+    assert(sdim == getParent().getSpaceDimension());
     SubMesh<Context::Serial>::Builder build;
-    build.setMesh(*this);
+    auto mbuild = Mesh<Context::Serial>::initialize(dim, getParent().getSpaceDimension());
+    build.setReference(std::move(mbuild), *this);
     return build;
   }
 }

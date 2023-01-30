@@ -12,83 +12,81 @@ namespace Rodin::Geometry
   {}
 
   SubMesh<Context::Serial>::Builder&
+  SubMesh<Context::Serial>::Builder::setReference(
+      Mesh<Context::Serial>::Builder&& build, SubMesh<Context::Serial>& mesh)
+  {
+    const size_t dim = mesh.getDimension();
+    m_mbuild.emplace(std::move(build));
+    m_ref.emplace(std::ref(mesh));
+    m_s2ps.resize(dim + 1);
+    m_sidx.resize(dim + 1, 0);
+    return *this;
+  }
+
+  SubMesh<Context::Serial>::Builder&
   SubMesh<Context::Serial>::Builder::include(size_t dim, std::set<Index> indices)
   {
-    assert(m_mesh.has_value());
-    assert(dim < m_indices.size());
-    auto& mesh = m_mesh->get();
-    assert(mesh.m_s2ps.size() == mesh.getDimension() + 1);
-    auto& parent = m_mesh->get().getParent();
-    if (dim == mesh.getDimension())
+    assert(m_ref.has_value());
+    auto& ref = m_ref->get();
+
+    assert(m_mbuild.has_value());
+    auto& build = m_mbuild.value();
+
+    assert(m_s2ps.size() == ref.getDimension() + 1);
+    const auto& parent = m_ref->get().getParent();
+
+    if (dim == ref.getDimension())
     {
       for (const auto& idx : indices)
       {
         auto simplex = parent.getSimplex(dim, idx);
 
         // Add simplex vertices to the resulting mesh
-        mfem::Array<int> pvs;
-        if (dim == parent.getDimension())
-        {
-          parent.getHandle().GetElementVertices(idx, pvs);
-        }
-        else if (dim == parent.getDimension() - 1)
-        {
-          parent.getHandle().GetFaceVertices(idx, pvs);
-        }
-        else
-        {
-          assert(false);
-        }
+        const Array<Index>& pvs =
+          parent.getConnectivity(dim, 0).getIncidence(idx);
 
-        mfem::Array<int> sv(pvs.Size());
-        for (int i = 0; i < sv.Size(); i++)
+        Array<Index> vs(pvs.size());
+        for (Index i = 0; i < static_cast<Index>(vs.size()); i++)
         {
-          int pvid = pvs[i];
-          if (mesh.m_s2ps[0].right.count(pvid) == 0) // Only add vertex if it is not in the map
+          Index pvidx = pvs[i];
+          if (m_s2ps[0].right.count(pvidx) == 0) // Only add vertex if it is not in the map
           {
-            sv[i] = mesh.getHandle().AddVertex(parent.getHandle().GetVertex(pvid));
-            mesh.m_s2ps[0].insert({static_cast<size_t>(sv[i]), static_cast<size_t>(pvid)});
+            build.vertex(parent.getVertex(pvidx)->coordinates());
+            vs[i] = m_sidx[0]++;
+            m_s2ps[0].insert({ vs[i], pvidx });
           }
           else // Else get the id of the vertex in the submesh
           {
-            sv[i] = mesh.m_s2ps[0].right.at(pvid);
+            vs[i] = m_s2ps[0].right.at(pvidx);
           }
         }
 
         // Add element with the new vertex ordering
-        mfem::Element* newEl =
-          mesh.getHandle().NewElement(static_cast<int>(simplex->getGeometry()));
-        newEl->SetVertices(sv);
-        newEl->SetAttribute(simplex->getAttribute());
-        size_t seid = mesh.getHandle().AddElement(newEl);
-        mesh.m_s2ps[dim].insert({seid, idx});
+        build.element(simplex->getGeometry(), vs, simplex->getAttribute());
+        m_s2ps[dim].insert({ m_sidx[dim]++, idx });
       }
 
-      if (dim == parent.getDimension()) // we are not in the surface case
+      if (dim == parent.getDimension()) // We are not in the surface case
       {
-        for (int i = 0; i < parent.getHandle().GetNBE(); i++)
+        for (auto it = parent.getBoundary(); !it.end(); ++it)
         {
-          Index faceIdx = parent.getHandle().GetBdrFace(i);
-          Attribute attr = parent.getFaceAttribute(faceIdx);
           int el1 = -1, el2 = -1;
-          parent.getHandle().GetFaceElements(faceIdx, &el1, &el2);
+          parent.getHandle().GetFaceElements(it->getIndex(), &el1, &el2);
           if (indices.count(el1) || indices.count(el2))
           {
             assert(el1 >= 0 || el2 >= 0);
-            mfem::Array<int> vs;
-            parent.getHandle().GetFaceVertices(faceIdx, vs);
-            for (int j = 0; j < vs.Size(); j++)
-              vs[j] = mesh.m_s2ps[0].right.at(vs[j]);
-            mfem::Element* newEl =
-              mesh.getHandle().NewElement(parent.getHandle().GetFaceGeometry(faceIdx));
-            newEl->SetVertices(vs);
-            newEl->SetAttribute(attr);
-            mesh.getHandle().AddBdrElement(newEl);
+            mfem::Array<int> pvs;
+            parent.getHandle().GetFaceVertices(it->getIndex(), pvs);
+            Array<Index> vs(pvs.Size());
+            for (int i = 0; i < pvs.Size(); i++)
+              vs[i] = m_s2ps[0].right.at(pvs[i]);
+            build.face(it->getGeometry(), vs, it->getAttribute());
+            m_sidx[ref.getDimension() - 1]++;
           }
         }
       }
     }
-    else if (dim == mesh.getDimension() - 1)
+    else if (dim == ref.getDimension() - 1)
     {
       assert(false);
     }
@@ -96,19 +94,19 @@ namespace Rodin::Geometry
     {
       assert(false);
     }
-    m_indices[dim] = std::move(indices);
     return *this;
   }
 
   void SubMesh<Context::Serial>::Builder::finalize()
   {
-    assert(m_mesh.has_value());
-    auto& mesh = m_mesh->get();
+    assert(m_ref.has_value());
+    auto& ref = m_ref->get();
 
+    assert(m_mbuild.has_value());
+    auto& build = m_mbuild.value();
 
-    mesh.getHandle().FinalizeTopology();
-    mesh.getHandle().Finalize(false, true);
-    for (int i = 0; i < mesh.getHandle().GetNBE(); i++)
-      mesh.m_f2b[mesh.getHandle().GetBdrElementEdgeIndex(i)] = i;
+    build.finalize();
+
+    ref.m_s2ps = std::move(m_s2ps);
   }
 }
