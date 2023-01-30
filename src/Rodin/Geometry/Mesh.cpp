@@ -13,7 +13,7 @@
 #include "Mesh.h"
 #include "SubMesh.h"
 
-#include "Element.h"
+#include "Simplex.h"
 #include "SimplexIterator.h"
 
 

@@ -1,13 +1,13 @@
 set(RodinGeometry_HEADERS
   Mesh.h
-  Element.h
   SubMesh.h
+  Simplex.h
   SimplexIterator.h
   )
 
 set(RodinGeometry_SRCS
   Mesh.cpp
-  Element.cpp
+  Simplex.cpp
   SubMesh.cpp
   MeshBuilder.cpp
   SubMeshBuilder.cpp

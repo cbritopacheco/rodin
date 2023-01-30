@@ -15,8 +15,10 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Geometry/Element.h"
+#include "Rodin/Geometry/Simplex.h"
+
 #include "ForwardDecls.h"
+
 #include "Function.h"
 #include "RangeShape.h"
 #include "Exceptions.h"
