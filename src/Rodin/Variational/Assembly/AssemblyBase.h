@@ -12,7 +12,7 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Geometry/Element.h"
+#include "Rodin/Geometry/Simplex.h"
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Variational/FiniteElementSpace.h"

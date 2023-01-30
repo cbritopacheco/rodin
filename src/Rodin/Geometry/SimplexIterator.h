@@ -10,9 +10,10 @@
 #include <memory>
 #include <utility>
 
-#include "IndexGenerator.h"
-#include "Element.h"
 #include "ForwardDecls.h"
+
+#include "Simplex.h"
+#include "IndexGenerator.h"
 
 namespace Rodin::Geometry
 {

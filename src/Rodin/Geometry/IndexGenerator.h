@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "ForwardDecls.h"
-#include "Element.h"
+#include "Simplex.h"
 
 namespace Rodin
 {

@@ -1,6 +1,6 @@
 #include "SubMesh.h"
 
-#include "Element.h"
+#include "Simplex.h"
 
 namespace Rodin::Geometry
 {
