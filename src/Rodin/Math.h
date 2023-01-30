@@ -8,6 +8,7 @@
 #define RODIN_MATH_H
 
 #include "Math/Common.h"
+#include "Math/Vector.h"
 #include "Math/Constants.h"
 
 #endif

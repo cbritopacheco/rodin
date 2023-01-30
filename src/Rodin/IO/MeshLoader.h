@@ -34,7 +34,7 @@ namespace Rodin::IO
   {
     public:
       MeshLoaderBase(Rodin::Geometry::Mesh<Trait>& mesh)
-        :  m_mesh(mesh),
+        : m_mesh(mesh),
           m_fixOrientation(true)
       {}
 

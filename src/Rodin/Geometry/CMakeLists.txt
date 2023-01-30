@@ -25,6 +25,7 @@ target_link_libraries(RodinGeometry
   mfem
   PUBLIC
   Rodin::IO
+  Rodin::Math
   Rodin::Alert
   Rodin::Variational
   Boost::filesystem)

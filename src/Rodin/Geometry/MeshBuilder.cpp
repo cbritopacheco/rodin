@@ -14,93 +14,75 @@ namespace Rodin::Geometry
   {}
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setMesh(Mesh<Context::Serial>& mesh)
+  Mesh<Context::Serial>::Builder::setReference(Mesh<Context::Serial>& mesh)
   {
-    m_mesh = mesh;
-    m_connectivity.emplace(
-        std::pair(mesh.getDimension(), 0), Connectivity(mesh.getDimension(), 0));
+    size_t dim = mesh.getDimension();
+    size_t sdim = mesh.getSpaceDimension();
+    m_ref.emplace(std::ref(mesh));
+    m_connectivity.resize(dim + 1);
+    for (size_t i = 0; i < m_connectivity.size(); i++)
+    {
+      m_connectivity[i].reserve(m_connectivity.size());
+      for (size_t j = 0; j < m_connectivity.size(); j++)
+      {
+        m_connectivity[i].push_back(Connectivity(i, j));
+      }
+    }
+    m_impl = mfem::Mesh(dim, 0, 0, 0, sdim);
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::vertex(const std::vector<double>& x)
+  Mesh<Context::Serial>::Builder::vertex(const Math::Vector& x)
   {
-    assert(m_mesh.has_value());
-    auto& mesh = m_mesh->get();
-    auto sdim = mesh.getSpaceDimension();
-    if (x.size() != sdim)
+    auto sdim = m_impl.SpaceDimension();
+    assert(x.size() >= 0);
+    if (static_cast<decltype(sdim)>(x.size()) != sdim)
     {
       Alert::Exception()
         << "Vertex dimension is different from space dimension"
         << " (" << x.size() << " != " << sdim << ")"
         << Alert::Raise;
     }
-    mesh.getHandle().AddVertex(x.data());
+    m_impl.AddVertex(x.data());
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::element(
-      Type geom,
-      const std::vector<Index>& vs, Attribute attr)
+  Mesh<Context::Serial>::Builder::element(Type geom, const Array<Index>& vs, Attribute attr)
   {
-    assert(m_mesh.has_value());
-    auto& mesh = m_mesh->get();
-    mfem::Element* el = mesh.getHandle().NewElement(static_cast<int>(geom));
-    for (int i = 0; i < el->GetNVertices(); i++)
-      el->GetVertices()[i] = vs[i];
+    assert(m_ref.has_value());
+    const auto& ref = m_ref->get();
+    mfem::Element* el = m_impl.NewElement(static_cast<int>(geom));
+    std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
     el->SetAttribute(attr);
-    mesh.getHandle().AddElement(el);
+    const Index idx = m_impl.AddElement(el);
+    m_connectivity[ref.getDimension()][0].connect(idx, vs);
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::face(
-      Type geom,
-      const std::vector<Index>& vs, Attribute attr)
+  Mesh<Context::Serial>::Builder::face(Type geom, const Array<Index>& vs, Attribute attr)
   {
-    assert(m_mesh.has_value());
-    auto& mesh = m_mesh->get();
-    mfem::Element* el = mesh.getHandle().NewElement(static_cast<int>(geom));
-    for (int i = 0; i < el->GetNVertices(); i++)
-      el->GetVertices()[i] = vs[i];
+    mfem::Element* el = m_impl.NewElement(static_cast<int>(geom));
+    std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
     el->SetAttribute(attr);
-    mesh.getHandle().AddBdrElement(el);
+    m_impl.AddBdrElement(el);
     return *this;
   }
 
   void Mesh<Context::Serial>::Builder::finalize()
   {
-    assert(m_mesh.has_value());
-    auto& mesh = m_mesh->get();
+    m_impl.FinalizeTopology();
+    m_impl.Finalize(false, true);
 
-    mesh.m_connectivity = std::move(m_connectivity);
+    assert(m_ref.has_value());
+    auto& ref = m_ref->get();
 
-    mesh.getHandle().FinalizeTopology();
-    mesh.getHandle().Finalize(false, true);
+    ref.getHandle() = std::move(m_impl);
+    ref.m_connectivity = std::move(m_connectivity);
 
-    std::vector<Index> indices;
-    std::vector<size_t> offsets(mesh.getHandle().GetNE() + 1);
-    offsets[0] = 0;
-
-    for (int i = 0; i < mesh.getHandle().GetNE(); i++)
-    {
-      auto offset = mesh.getHandle().GetElement(i)->GetNVertices();
-      for (int j = 0; j < offset; j++)
-        indices.push_back(mesh.getHandle().GetElement(i)->GetVertices()[j]);
-      offsets[i + 1] = offsets[i] + offset;
-    }
-
-    mesh.m_connectivity.clear();
-    auto [it, inserted] = mesh.m_connectivity.emplace(
-        std::pair(mesh.getDimension(), 0),
-        Connectivity(mesh.getDimension(), 0));
-    assert(inserted);
-
-    it->second.setOffsets(offsets);
-    it->second.setOffsets(indices);
-
-    for (int i = 0; i < mesh.getHandle().GetNBE(); i++)
-      mesh.m_f2b[mesh.getHandle().GetBdrElementEdgeIndex(i)] = i;
+    for (int i = 0; i < ref.getHandle().GetNBE(); i++)
+      ref.m_f2b[ref.getHandle().GetBdrElementEdgeIndex(i)] = i;
   }
 }

@@ -9,6 +9,8 @@
 
 #include <vector>
 
+#include "Rodin/Array.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
@@ -25,9 +27,13 @@ namespace Rodin::Geometry
   class Connectivity
   {
     public:
-      Connectivity(size_t d, size_t dp)
-        : m_left(d), m_right(dp), m_offsets{0}
+      Connectivity(size_t d, size_t dp, size_t n = 0)
+        : m_left(d), m_right(dp), m_connectivity(n)
       {}
+
+      Connectivity(const Connectivity&) = default;
+
+      Connectivity(Connectivity&&) = default;
 
       size_t getLeft() const
       {
@@ -39,23 +45,23 @@ namespace Rodin::Geometry
         return m_right;
       }
 
-      Connectivity& connect(const std::vector<Index>& incidence)
+      size_t getSize() const
       {
-        m_offsets.push_back(incidence.size());
-        for (const auto& idx : incidence)
-          m_indices.push_back(idx);
+        return m_connectivity.size();
+      }
+
+      Connectivity& setSize(size_t size)
+      {
+        m_connectivity.resize(size);
         return *this;
       }
 
-      Connectivity& setIndices(std::vector<Index> indices)
+      Connectivity& connect(Index idx, const Array<Index>& incidence)
       {
-        m_indices = std::move(indices);
-        return *this;
-      }
-
-      Connectivity& setOffsets(std::vector<size_t> offsets)
-      {
-        m_offsets = std::move(offsets);
+        if (idx + 1 > m_connectivity.size())
+          m_connectivity.resize(idx + 1);
+        assert(idx < m_connectivity.size());
+        m_connectivity[idx] = incidence;
         return *this;
       }
 
@@ -63,14 +69,10 @@ namespace Rodin::Geometry
        * @brief Gets the indices of the simplices of dimension @f$ d' @f$,
        * incident to the simplex @f$ (d, i) @f$.
        */
-      std::vector<Index> getIncidence(Index idx) const
+      const Array<Index>& getIncidence(Index idx) const
       {
-        assert(idx + 1 < m_offsets.size());
-        std::vector<Index> res(m_offsets[idx + 1] - m_offsets[idx]);
-        size_t j = 0;
-        for (size_t i = m_offsets[idx]; i < m_offsets[idx + 1]; i++)
-          res[j++] = m_indices[i];
-        return res;
+        assert(idx < getSize());
+        return m_connectivity[idx];
       }
 
       void build(size_t d)
@@ -90,8 +92,7 @@ namespace Rodin::Geometry
 
     private:
       size_t m_left, m_right;
-      std::vector<Index> m_indices;
-      std::vector<size_t> m_offsets;
+      std::vector<Array<Index>> m_connectivity;
   };
 }
 

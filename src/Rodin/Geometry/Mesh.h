@@ -13,10 +13,11 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Configure.h"
-
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Configure.h"
+
+#include "Rodin/Math.h"
 #include "Rodin/Context.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -104,6 +105,11 @@ namespace Rodin::Geometry
        * between its space dimension and dimension is 1.
        */
       bool isSurface() const;
+
+      size_t getVertexCount() const
+      {
+        return getCount(0);
+      }
 
       size_t getFaceCount() const
       {
@@ -205,14 +211,14 @@ namespace Rodin::Geometry
        * @returns Dimension of the elements.
        * @see getSpaceDimension() const
        */
-      virtual size_t getDimension() const;
+      virtual size_t getDimension() const = 0;
 
       /**
        * @brief Gets the dimension of the ambient space
        * @returns Dimension of the space which the mesh is embedded in
        * @see getDimension() const
        */
-      virtual size_t getSpaceDimension() const;
+      virtual size_t getSpaceDimension() const = 0;
 
       virtual MeshBase& load(
         const boost::filesystem::path& filename,
@@ -249,11 +255,11 @@ namespace Rodin::Geometry
 
       virtual size_t getCount(size_t dim) const = 0;
 
-      virtual ElementIterator getElement(size_t idx = 0) const = 0;
+      virtual ElementIterator getElement(Index idx = 0) const = 0;
 
-      virtual FaceIterator getFace(size_t idx = 0) const = 0;
+      virtual FaceIterator getFace(Index idx = 0) const = 0;
 
-      // virtual VertexIterator getVertex(size_t idx = 0) const = 0;
+      virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
       virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
 
@@ -301,32 +307,31 @@ namespace Rodin::Geometry
 
           Builder& operator=(Builder&&) = default;
 
-          Builder& setMesh(Mesh<Context::Serial>& mesh);
+          Builder& setReference(Mesh<Context::Serial>& mesh);
 
-          Builder& vertex(
-              const std::vector<double>& x);
+          Builder& vertex(const Math::Vector& x);
 
-          Builder& face(
-              Type geom,
-              const std::vector<Index>& vs,
+          Builder& face(Type geom, const Array<Index>& vs,
               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-          Builder& element(
-              Type geom,
-              const std::vector<Index>& vs,
+          Builder& element(Type geom, const Array<Index>& vs,
               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
           void finalize() override;
 
         private:
-          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_mesh;
-          std::map<std::pair<size_t, size_t>, Connectivity> m_connectivity;
+          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
+
+          std::vector<std::vector<Connectivity>> m_connectivity;
+          mfem::Mesh m_impl;
       };
 
       /**
       * @brief Constructs an empty mesh with no elements.
       */
-      Mesh() = default;
+      Mesh()
+        : m_dim(0), m_sdim(0)
+      {}
 
       /**
       * @brief Move constructs the mesh from another mesh.
@@ -418,13 +423,13 @@ namespace Rodin::Geometry
 
       virtual FaceIterator getInterface() const override;
 
-      virtual ElementIterator getElement(size_t idx = 0) const override;
+      virtual ElementIterator getElement(Index idx = 0) const override;
 
-      virtual FaceIterator getFace(size_t idx = 0) const override;
+      virtual FaceIterator getFace(Index idx = 0) const override;
 
-      // VertexIterator getVertex(size_t idx = 0) const override;
+      virtual VertexIterator getVertex(Index idx = 0) const override;
 
-      virtual SimplexIterator getSimplex(size_t dimension, size_t idx) const override;
+      virtual SimplexIterator getSimplex(size_t dimension, Index idx) const override;
 
       virtual bool isSubMesh() const override
       {
@@ -435,11 +440,18 @@ namespace Rodin::Geometry
 
       virtual bool isBoundary(Index faceIdx) const override;
 
+      virtual size_t getDimension() const override;
+
+      virtual size_t getSpaceDimension() const override;
+
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
       virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
       {
-        return m_connectivity.at({d, dp});
+        assert(d == getDimension());
+        assert(dp == 0);
+        // Other dimensions not implemented yet
+        return m_connectivity[d][dp];
       }
 
       mfem::Mesh& getHandle() override;
@@ -447,12 +459,12 @@ namespace Rodin::Geometry
       const mfem::Mesh& getHandle() const override;
 
     protected:
-      std::map<Index, Index> m_f2b;
 
     private:
-      mfem::Mesh m_mesh;
-      std::map<std::pair<size_t, size_t>, Connectivity> m_connectivity;
-
+      size_t m_dim, m_sdim;
+      std::vector<std::vector<Connectivity>> m_connectivity;
+      std::map<Index, Index> m_f2b;
+      mfem::Mesh m_impl;
   };
 }
 

@@ -1,36 +1,36 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2023.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MATH_VECTOR_H
-#define RODIN_MATH_VECTOR_H
+#ifndef RODIN_ARRAY_H
+#define RODIN_ARRAY_H
 
-#include <vector>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-namespace Rodin::Math
+namespace Rodin
 {
-  class Vector : public Eigen::VectorX<double>
+  template <class Scalar>
+  class Array : public Eigen::ArrayX<Scalar>
   {
     public:
-      using Parent = Eigen::VectorX<double>;
+      using Parent = Eigen::ArrayX<Scalar>;
 
-      Vector(std::initializer_list<Parent::Scalar> l)
+      Array(std::initializer_list<typename Parent::Scalar> l)
         : Parent(l.size())
       {
         std::copy(l.begin(), l.end(), Parent::begin());
       }
 
       template <class ... Args>
-      Vector(Args&&... args)
+      Array(Args&&... args)
         : Parent(std::forward<Args>(args)...)
       {}
 
       template <class ... Args>
-      Vector& operator=(Args&&... args)
+      Array& operator=(Args&&... args)
       {
          this->Parent::operator=(std::forward<Args>(args)...);
          return *this;
@@ -39,3 +39,4 @@ namespace Rodin::Math
 }
 
 #endif
+
