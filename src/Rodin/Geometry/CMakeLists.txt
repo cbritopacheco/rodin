@@ -1,15 +1,17 @@
 set(RodinGeometry_HEADERS
-  Element.h
-  SimplexIterator.h
   Mesh.h
   SubMesh.h
+  Simplex.h
+  SimplexIterator.h
   )
 
 set(RodinGeometry_SRCS
-  Element.cpp
-  SimplexIterator.cpp
   Mesh.cpp
+  Simplex.cpp
   SubMesh.cpp
+  MeshBuilder.cpp
+  SubMeshBuilder.cpp
+  SimplexIterator.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
@@ -23,6 +25,7 @@ target_link_libraries(RodinGeometry
   mfem
   PUBLIC
   Rodin::IO
+  Rodin::Math
   Rodin::Alert
   Rodin::Variational
   Boost::filesystem)

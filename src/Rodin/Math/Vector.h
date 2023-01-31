@@ -7,6 +7,7 @@
 #ifndef RODIN_MATH_VECTOR_H
 #define RODIN_MATH_VECTOR_H
 
+#include <vector>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
@@ -14,22 +15,26 @@ namespace Rodin::Math
 {
   class Vector : public Eigen::VectorX<double>
   {
-   public:
-    using Parent = Eigen::VectorX<double>;
+    public:
+      using Parent = Eigen::VectorX<double>;
 
-    Vector() = default;
+      Vector(std::initializer_list<Parent::Scalar> l)
+        : Parent(l.size())
+      {
+        std::copy(l.begin(), l.end(), Parent::begin());
+      }
 
-    template <typename OtherDerived>
-    Vector(const Eigen::MatrixBase<OtherDerived>& other)
-      : Parent(other)
-    {}
+      template <class ... Args>
+      Vector(Args&&... args)
+        : Parent(std::forward<Args>(args)...)
+      {}
 
-    template <typename OtherDerived>
-    Vector& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-    {
-       this->Parent::operator=(other);
-       return *this;
-    }
+      template <class ... Args>
+      Vector& operator=(Args&&... args)
+      {
+         this->Parent::operator=(std::forward<Args>(args)...);
+         return *this;
+      }
   };
 }
 
