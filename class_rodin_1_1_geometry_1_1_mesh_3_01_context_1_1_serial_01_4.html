@@ -92,8 +92,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a51021126098595338e367d7ee42aa24c">
-              <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a2a23c7c0c4e0da252b7bc0e13b6f81d8">
+              <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Constructs an empty mesh with no elements.</dd>
             <dt id="ae742cf54ce51fc6aaaa0fc6fbd16a638">
@@ -114,14 +114,14 @@
             </dt>
             <dd>Move assigns the mesh from another mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa91dcdf3e8a72c659bd89f3a5ef94a7a" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1962e48a45f98d10c944aa494d129cc2" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads a mesh from file in the given format.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a9909465d7192de1a063a8e1a3c02c1d3" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <span class="m-doc-wrap-bumper">void <a href="#acb8e6d12922ae66d122b5caf3aba7e9d" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>,
-              size_t precison = 16) const <span class="m-label m-flat m-warning">virtual</span></span>
+              size_t precison = 16) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Saves a mesh to file in the given format.</dd>
             <dt>
@@ -140,17 +140,25 @@
               <span class="m-doc-wrap-bumper">auto <a href="#acd63496fbf1f2d60dddc6aa7d11c733b" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Indicates whether the mesh is a submesh or not.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the dimension of the elements.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the dimension of the ambient space.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa91dcdf3e8a72c659bd89f3a5ef94a7a"><div>
+          <section class="m-doc-details" id="a1962e48a45f98d10c944aa494d129cc2"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa91dcdf3e8a72c659bd89f3a5ef94a7a" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1962e48a45f98d10c944aa494d129cc2" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads a mesh from file in the given format.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -175,14 +183,14 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a9909465d7192de1a063a8e1a3c02c1d3"><div>
+          <section class="m-doc-details" id="acb8e6d12922ae66d122b5caf3aba7e9d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9909465d7192de1a063a8e1a3c02c1d3" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb8e6d12922ae66d122b5caf3aba7e9d" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>,
-              size_t precison = 16) const <span class="m-label m-warning">virtual</span></span></span>
+              size_t precison = 16) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Saves a mesh to file in the given format.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -304,6 +312,42 @@
 <span class="w">  </span><span class="c1">// Cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="p">}</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a6f7b22045efba4c92b80c545b2100c1f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the dimension of the elements.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dimension of the elements.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc">getSpaceDimension() const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aed88568a450d0ecedcc6be7d794d61f5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the dimension of the ambient space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dimension of the space which the mesh is embedded in</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension() const</a></p></aside>
           </div></section>
         </section>
       </div>
