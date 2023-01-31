@@ -27,13 +27,15 @@ if __name__ == '__main__':
                         help='Name of file to plot.')
     args = parser.parse_args()
 
-    data = pd.read_csv(args.filename, header=None)
+    data = pd.read_csv(args.filename)
     data = pd.DataFrame(data)
 
-    plt.plot(data)
+    plt.plot(data.iloc[:, 0], data.iloc[:, 1])
     plt.grid(alpha=0.1, aa=True)
-    plt.xlabel('Iterations')
-    plt.ylabel('Objective')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel(data.columns[0], fontsize=18)
+    plt.ylabel(data.columns[1], fontsize=18)
     plt.savefig(args.filename + '.svg', format='svg')
     plt.show()
 
