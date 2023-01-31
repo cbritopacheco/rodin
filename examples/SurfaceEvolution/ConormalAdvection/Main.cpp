@@ -10,34 +10,46 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-const char* meshFile =
-  "../resources/examples/SurfaceOptimization/Ball.mesh";
+constexpr double dt = 0.01;
+constexpr size_t maxIt = 100;
+constexpr Geometry::Attribute sphereCap = 3;
+constexpr char meshFile[] =
+  "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
 
 int main()
 {
+  // Load mesh
   MMG::Mesh th;
   th.load(meshFile, IO::FileFormat::MEDIT);
-  MMG::MeshOptimizer().setHMin(0.05).optimize(th);
-  th.save("test.mesh", IO::FileFormat::MFEM);
 
-  // H1 vh(th);
+  // Evolution
+  for (size_t i = 0; i < maxIt; i++)
+  {
+    // Build finite element space on the mesh
+    H1 vh(th);
+    H1 uh(th, th.getSpaceDimension());
 
-  // GridFunction dist(vh);
-  // MMG::Distancer(vh).setInteriorDomain(1).distance(th);
+    // Distance the subdomain
+    GridFunction dist(vh);
+    dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
+                             .distance(th);
 
-  // std::ofstream fout("obj.txt");
+    // Compute gradient of signed distance function
+    Grad gd(dist);
+    GridFunction conormal(uh);
+    conormal = gd / Frobenius(gd);
 
-  // size_t N = 100;
-  // for (size_t i = 0; i < N; i++)
-  // {
-  //   // fout << err << "\n";
-  //   fout.flush();
-  // }
+    // Advect
+    MMG::Advect(dist, conormal).step(dt);
 
-  // th = MMG::ImplicitDomainMesher().split(6, {3, 6})
-  //                                    .noSplit(2)
-  //                   .setHMax(0.05)
-  //                   .surface()
-  //                   .discretize(dist);
+    // Generate mesh to subdomain
+    th = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                    .setHMax(0.05)
+                                    .setHausdorff(0.01)
+                                    .discretize(dist);
+
+    // Save results
+    th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+  }
   return 0;
 }

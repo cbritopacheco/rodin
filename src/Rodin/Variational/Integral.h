@@ -357,15 +357,35 @@ namespace Rodin::Variational
   BoundaryIntegral(const ShapeFunctionBase<TestSpace>&)
     -> BoundaryIntegral<ShapeFunctionBase<TestSpace>>;
 
+  class GridFunctionIntegralBase : public FormLanguage::Base
+  {
+    public:
+      using Parent   = FormLanguage::Base;
+
+      GridFunctionIntegralBase() = default;
+
+      GridFunctionIntegralBase(const GridFunctionIntegralBase& other)
+        : FormLanguage::Base(other)
+      {}
+
+      GridFunctionIntegralBase(GridFunctionIntegralBase&& other)
+        : FormLanguage::Base(std::move(other))
+      {}
+
+      virtual double compute() = 0;
+
+      virtual GridFunctionIntegralBase* copy() const noexcept override = 0;
+  };
+
   /**
    * @ingroup IntegralSpecializations
    * @brief Integration of a GridFunction object.
    */
   template <class FES>
-  class Integral<GridFunction<FES>> : public FormLanguage::Base
+  class Integral<GridFunction<FES>> : public GridFunctionIntegralBase
   {
     public:
-      using Parent   = FormLanguage::Base;
+      using Parent    = GridFunctionIntegralBase;
       using Integrand = GridFunction<FES>&;
 
       /**
@@ -384,10 +404,22 @@ namespace Rodin::Variational
       }
 
       Integral(const Integral& other)
-        : Integral(other.m_u)
+        : GridFunctionIntegralBase(other),
+          m_u(other.m_u),
+          m_v(other.m_u.get().getFiniteElementSpace()),
+          m_one(other.m_u.get().getFiniteElementSpace()),
+          m_lf(m_v),
+          m_assembled(false)
       {}
 
-      Integral(Integral&& other) = default;
+      Integral(Integral&& other)
+        : GridFunctionIntegralBase(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_v(std::move(other.m_v)),
+          m_one(std::move(other.m_one)),
+          m_lf(std::move(other.m_lf)),
+          m_assembled(std::move(other.m_assembled))
+      {}
 
       /**
        * @brief Integrates the expression and returns the value
@@ -395,7 +427,7 @@ namespace Rodin::Variational
        *
        * This method does not cache the integrated value.
        */
-      double compute()
+      double compute() override
       {
         m_lf.assemble();
         m_assembled = true;
@@ -407,10 +439,10 @@ namespace Rodin::Variational
         return new Integral(*this);
       }
     private:
-      TestFunction<FES>           m_v;
-      GridFunction<FES>&          m_u;
-      GridFunction<FES>           m_one;
-      LinearForm<FES, Context::Serial, mfem::Vector>   m_lf;
+      std::reference_wrapper<GridFunction<FES>>         m_u;
+      TestFunction<FES>                                 m_v;
+      GridFunction<FES>                                 m_one;
+      LinearForm<FES, Context::Serial, mfem::Vector>    m_lf;
       bool m_assembled;
   };
   template <class FES>

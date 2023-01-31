@@ -111,8 +111,8 @@ namespace Rodin::Variational
 
       constexpr
       H1(Geometry::Mesh<Context>& mesh,
-          int vdim = 1, int order = 1, Basis basis = DefaultBasis)
-        :  m_fec(order, mesh.getDimension(), basis),
+          const size_t vdim = 1, const size_t order = 1, Basis basis = DefaultBasis)
+        : m_fec(order, mesh.getDimension(), basis),
           m_mesh(mesh),
           m_fes(new mfem::FiniteElementSpace(
                 &mesh.getHandle(), &m_fec.getHandle(), vdim))
@@ -120,7 +120,7 @@ namespace Rodin::Variational
 
       constexpr
       H1(const H1& other)
-        :  FiniteElementSpaceBase(other),
+        : FiniteElementSpaceBase(other),
           m_fec(other.m_fec),
           m_mesh(other.m_mesh),
           m_fes(new mfem::FiniteElementSpace(*other.m_fes))
@@ -128,7 +128,7 @@ namespace Rodin::Variational
 
       constexpr
       H1(H1&& other)
-        :  FiniteElementSpaceBase(std::move(other)),
+        : FiniteElementSpaceBase(std::move(other)),
           m_fec(std::move(other.m_fec)),
           m_mesh(std::move(other.m_mesh)),
           m_fes(std::move(other.m_fes))
@@ -223,8 +223,8 @@ namespace Rodin::Variational
 
   template <class Trait>
   H1(Geometry::Mesh<Trait>& mesh,
-    int vdim = 1,
-    int order = 1, typename H1<Trait>::Basis basis = H1<Trait>::DefaultBasis) -> H1<Trait>;
+    size_t vdim = 1,
+    size_t order = 1, typename H1<Trait>::Basis basis = H1<Trait>::DefaultBasis) -> H1<Trait>;
 }
 
 #endif

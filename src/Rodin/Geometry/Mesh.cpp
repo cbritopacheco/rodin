@@ -13,23 +13,13 @@
 #include "Mesh.h"
 #include "SubMesh.h"
 
-#include "Element.h"
+#include "Simplex.h"
 #include "SimplexIterator.h"
 
 
 namespace Rodin::Geometry
 {
   // ---- MeshBase ----------------------------------------------------------
-  size_t MeshBase::getSpaceDimension() const
-  {
-    return getHandle().SpaceDimension();
-  }
-
-  size_t MeshBase::getDimension() const
-  {
-    return getHandle().Dimension();
-  }
-
   bool MeshBase::isSurface() const
   {
     return (getSpaceDimension() - 1 == getDimension());
@@ -47,8 +37,29 @@ namespace Rodin::Geometry
         getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
   }
 
+  // ---- Mesh<Context::Serial> ----------------------------------------------
+  size_t Mesh<Context::Serial>::getDimension() const
+  {
+    return m_dim;
+  }
+
+  size_t Mesh<Context::Serial>::getSpaceDimension() const
+  {
+    return m_sdim;
+  }
+
+  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(double c)
+  {
+    mfem::Vector vs;
+    getHandle().GetVertices(vs);
+    vs *= c;
+    getHandle().SetVertices(vs);
+    return *this;
+  }
+
   void Mesh<Context::Serial>::save(
-      const boost::filesystem::path& filename, IO::FileFormat fmt, size_t precision) const
+      const boost::filesystem::path& filename,
+      IO::FileFormat fmt, size_t precision) const
   {
     std::ofstream ofs(filename.c_str());
     if (!ofs)
@@ -188,7 +199,7 @@ namespace Rodin::Geometry
 #endif
 
   Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
-    : m_mesh(std::move(mesh))
+    : m_dim(mesh.Dimension()), m_sdim(mesh.SpaceDimension()), m_impl(std::move(mesh))
   {
     for (int i = 0; i < getHandle().GetNBE(); i++)
       m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
@@ -198,15 +209,15 @@ namespace Rodin::Geometry
   {
     if (dimension == getDimension())
     {
-      return m_mesh.GetNE();
+      return m_impl.GetNE();
     }
     else if (dimension == getDimension() - 1)
     {
-      return m_mesh.GetNumFaces();
+      return m_impl.GetNumFaces();
     }
     else if (dimension == 0)
     {
-      return m_mesh.GetNV();
+      return m_impl.GetNV();
     }
     else
     {
@@ -242,12 +253,17 @@ namespace Rodin::Geometry
 
   ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
   {
-    return ElementIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension())));
+    return ElementIterator(*this, BoundedIndexGenerator(idx, getElementCount()));
   }
 
   FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
   {
-    return FaceIterator(*this, BoundedIndexGenerator(idx, getCount(getDimension() - 1)));
+    return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
+  }
+
+  VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
+  {
+    return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
   }
 
   SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
@@ -285,7 +301,6 @@ namespace Rodin::Geometry
     }
     else if (dimension == 0)
     {
-      assert(false);
       return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
     }
     else
@@ -295,7 +310,8 @@ namespace Rodin::Geometry
     }
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
+  Mesh<Context::Serial>& Mesh<Context::Serial>
+  ::setAttribute(size_t dimension, Index index, Attribute attr)
   {
     if (dimension == getDimension())
     {
@@ -369,22 +385,39 @@ namespace Rodin::Geometry
   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
   {
     SubMesh<Context::Serial> res(*this);
-    res.initialize(getDimension(), getSpaceDimension());
     std::set<Index> indices;
     for (Index i = 0; i < getCount(getDimension()); i++)
     {
       if (attrs.count(getAttribute(getDimension(), i)))
         indices.insert(i);
     }
-    res.include(getDimension(), indices);
-    res.finalize();
+    res.initialize(getDimension(), getSpaceDimension())
+       .include(getDimension(), indices)
+       .finalize();
     return res;
+  }
+
+  Mesh<Context::Serial>::Builder
+  Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
+  {
+    m_dim = dim;
+    m_sdim = sdim;
+    Mesh<Context::Serial>::Builder build;
+    build.setReference(*this);
+    return build;
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
   {
     assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-    assert(false);
+    SubMesh<Context::Serial> res(*this);
+    std::set<Index> indices;
+    for (auto it = getBoundary(); !it.end(); ++it)
+      indices.insert(it->getIndex());
+    res.initialize(getDimension() - 1, getSpaceDimension())
+       .include(getDimension() - 1, indices)
+       .finalize();
+    return res;
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
@@ -402,63 +435,12 @@ namespace Rodin::Geometry
 
   mfem::Mesh& Mesh<Context::Serial>::getHandle()
   {
-    return m_mesh;
+    return m_impl;
   }
 
   const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
   {
-    return m_mesh;
-  }
-
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
-  {
-    m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
-  {
-    if (x.size() != getSpaceDimension())
-    {
-      Alert::Exception()
-        << "Vertex dimension is different from space dimension"
-        << " (" << x.size() << " != " << getSpaceDimension() << ")"
-        << Alert::Raise;
-    }
-    getHandle().AddVertex(x.data());
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::element(
-      Type geom,
-      const std::vector<int>& vs, Attribute attr)
-  {
-    mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
-    el->SetVertices(vs.data());
-    el->SetAttribute(attr);
-    getHandle().AddElement(el);
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::face(
-      Type geom,
-      const std::vector<int>& vs, Attribute attr)
-  {
-    mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
-    el->SetVertices(vs.data());
-    el->SetAttribute(attr);
-    getHandle().AddBdrElement(el);
-    return *this;
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::finalize()
-  {
-    getHandle().FinalizeTopology();
-    getHandle().Finalize(false, true);
-    for (int i = 0; i < getHandle().GetNBE(); i++)
-      m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
-    return *this;
+    return m_impl;
   }
 }
 

@@ -9,8 +9,6 @@
 
 #include "Mesh.h"
 
-#include "Element.h"
-
 namespace Rodin::Geometry
 {}
 

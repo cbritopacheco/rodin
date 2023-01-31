@@ -4,12 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_ELEMENT_H
-#define RODIN_MESH_ELEMENT_H
+#ifndef RODIN_MESH_SIMPLEX_H
+#define RODIN_MESH_SIMPLEX_H
 
 #include <set>
 #include <array>
 #include <mfem.hpp>
+
+#include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
 
@@ -96,7 +98,7 @@ namespace Rodin::Geometry
 
       virtual SimplexIterator getIncident() const;
 
-      [[deprecated]] mfem::ElementTransformation& getTransformation() const;
+      mfem::ElementTransformation& getTransformation() const;
 
       virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
@@ -164,22 +166,39 @@ namespace Rodin::Geometry
   class Vertex : public Simplex
   {
     public:
+      Vertex(
+          Index index,
+          const MeshBase& mesh,
+          const Math::Vector& coordinates,
+          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
       double x() const
       {
+        assert(0 < m_coordinates.size());
         return operator()(0);
       }
 
       double y() const
       {
+        assert(1 < m_coordinates.size());
         return operator()(1);
       }
 
       double z() const
       {
+        assert(2 < m_coordinates.size());
         return operator()(2);
       }
 
-      virtual double operator()(size_t i) const;
+      double operator()(size_t i) const;
+
+      const Math::Vector& coordinates() const
+      {
+        return m_coordinates;
+      }
+
+    private:
+      Math::Vector m_coordinates;
   };
 
   /**

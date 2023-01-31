@@ -543,46 +543,45 @@ namespace Rodin::External::MMG
       case 2:
       {
         assert(!isSurface); // Surface embedded in 2D space not handled yet
-
-        dst.initialize(src->dim, src->dim);
-
+        auto build = dst.initialize(src->dim, src->dim);
         // Add points
         for (int i = 1; i <= src->np; i++)
         {
-          dst.vertex({ src->point[i].c[0], src->point[i].c[1] });
+          build.vertex({ src->point[i].c[0], src->point[i].c[1] });
           if (src->point[i].tag & MG_CRN)
             dst.corner(i - 1);
         }
-
         // Add elements
         for (int i = 1; i <= src->nt; i++)
         {
-          dst.element(
+          build.element(
               Geometry::Type::Triangle,
-              { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1},
+              { static_cast<size_t>(src->tria[i].v[0] - 1),
+                static_cast<size_t>(src->tria[i].v[1] - 1),
+                static_cast<size_t>(src->tria[i].v[2] - 1) },
               src->tria[i].ref);
         }
-
         // Add boundary
         for (int i = 1; i <= src->na; i++)
         {
-          dst.face(
+          build.face(
               Geometry::Type::Segment,
-              { src->edge[i].a - 1, src->edge[i].b - 1 },
+              { static_cast<size_t>(src->edge[i].a - 1),
+                static_cast<size_t>(src->edge[i].b - 1) },
               src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
         }
+        build.finalize();
         break;
       }
       case 3:
       {
         if (isSurface)
         {
-          dst.initialize(src->dim - 1, src->dim);
-
+          auto build = dst.initialize(src->dim - 1, src->dim);
           // Add points
           for (int i = 1; i <= src->np; i++)
           {
-            dst.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
+            build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
             if (src->point[i].tag & MG_CRN)
               dst.corner(i - 1);
           }
@@ -590,31 +589,34 @@ namespace Rodin::External::MMG
           // Add elements
           for (int i = 1; i <= src->nt; i++)
           {
-            dst.element(
+            build.element(
                 Geometry::Type::Triangle,
-                { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1},
+                { static_cast<size_t>(src->tria[i].v[0] - 1),
+                  static_cast<size_t>(src->tria[i].v[1] - 1),
+                  static_cast<size_t>(src->tria[i].v[2] - 1) },
                 src->tria[i].ref);
           }
 
           // Add boundary
           for (int i = 1; i <= src->na; i++)
           {
-            dst.face(
+            build.face(
                 Geometry::Type::Segment,
-                { src->edge[i].a - 1, src->edge[i].b - 1 },
+                { static_cast<size_t>(src->edge[i].a - 1),
+                  static_cast<size_t>(src->edge[i].b - 1) },
                 src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
             if (src->edge[i].tag & MG_GEO)
               dst.ridge(i - 1);
           }
+          build.finalize();
         }
         else
         {
-          dst.initialize(src->dim, src->dim);
-
+          auto build = dst.initialize(src->dim, src->dim);
           // Add points
           for (int i = 1; i <= src->np; i++)
           {
-            dst.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
+            build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
             if (src->point[i].tag & MG_CRN)
               dst.corner(i - 1);
           }
@@ -630,20 +632,25 @@ namespace Rodin::External::MMG
 
           for (int i = 1; i <= src->nt; i++)
           {
-            dst.face(
+            build.face(
               Geometry::Type::Triangle,
-              { src->tria[i].v[0] - 1, src->tria[i].v[1] - 1, src->tria[i].v[2] - 1 },
+              { static_cast<size_t>(src->tria[i].v[0] - 1),
+                static_cast<size_t>(src->tria[i].v[1] - 1),
+                static_cast<size_t>(src->tria[i].v[2] - 1) },
               src->tria[i].ref);
           }
 
           for (int i = 1; i <= src->ne; i++)
           {
-            dst.element(
+            build.element(
               Geometry::Type::Tetrahedron,
-              { src->tetra[i].v[0] - 1, src->tetra[i].v[1] - 1,
-                src->tetra[i].v[2] - 1, src->tetra[i].v[3] - 1 },
-              src->tetra[i].ref);
+              { static_cast<size_t>(src->tetra[i].v[0] - 1),
+                static_cast<size_t>(src->tetra[i].v[1] - 1),
+                static_cast<size_t>(src->tetra[i].v[2] - 1),
+                static_cast<size_t>(src->tetra[i].v[3] - 1) },
+                src->tetra[i].ref);
           }
+          build.finalize();
         }
         break;
       }
@@ -652,7 +659,6 @@ namespace Rodin::External::MMG
         Alert::Exception("Unhandled case").raise();
       }
     }
-    dst.finalize();
     return dst;
   }
 

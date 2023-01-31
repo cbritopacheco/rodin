@@ -13,10 +13,11 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Configure.h"
-
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Configure.h"
+
+#include "Rodin/Math.h"
 #include "Rodin/Context.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -33,7 +34,17 @@ namespace Rodin::Geometry
   class MeshBase
   {
     public:
+      class BuilderBase
+      {
+        public:
+          virtual ~BuilderBase() = default;
+
+          virtual void finalize() = 0;
+      };
+
       virtual ~MeshBase() = default;
+
+      virtual MeshBase& scale(double c) = 0;
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -94,6 +105,11 @@ namespace Rodin::Geometry
        * between its space dimension and dimension is 1.
        */
       bool isSurface() const;
+
+      size_t getVertexCount() const
+      {
+        return getCount(0);
+      }
 
       size_t getFaceCount() const
       {
@@ -195,14 +211,22 @@ namespace Rodin::Geometry
        * @returns Dimension of the elements.
        * @see getSpaceDimension() const
        */
-      virtual size_t getDimension() const;
+      virtual size_t getDimension() const = 0;
 
       /**
        * @brief Gets the dimension of the ambient space
        * @returns Dimension of the space which the mesh is embedded in
        * @see getDimension() const
        */
-      virtual size_t getSpaceDimension() const;
+      virtual size_t getSpaceDimension() const = 0;
+
+      virtual MeshBase& load(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
+
+      virtual void save(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
 
       /**
        * @brief Indicates whether the mesh is a submesh or not.
@@ -231,11 +255,11 @@ namespace Rodin::Geometry
 
       virtual size_t getCount(size_t dim) const = 0;
 
-      virtual ElementIterator getElement(size_t idx = 0) const = 0;
+      virtual ElementIterator getElement(Index idx = 0) const = 0;
 
-      virtual FaceIterator getFace(size_t idx = 0) const = 0;
+      virtual FaceIterator getFace(Index idx = 0) const = 0;
 
-      // virtual VertexIterator getVertex(size_t idx = 0) const = 0;
+      virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
       virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
 
@@ -270,10 +294,44 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
+      class Builder : public BuilderBase
+      {
+        public:
+          Builder();
+
+          Builder(const Builder&) = delete;
+
+          Builder(Builder&&) = default;
+
+          Builder& operator=(const Builder&) = delete;
+
+          Builder& operator=(Builder&&) = default;
+
+          Builder& setReference(Mesh<Context::Serial>& mesh);
+
+          Builder& vertex(const Math::Vector& x);
+
+          Builder& face(Type geom, const Array<Index>& vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+          Builder& element(Type geom, const Array<Index>& vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+          void finalize() override;
+
+        private:
+          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
+
+          std::vector<std::vector<Connectivity>> m_connectivity;
+          mfem::Mesh m_impl;
+      };
+
       /**
       * @brief Constructs an empty mesh with no elements.
       */
-      Mesh() = default;
+      Mesh()
+        : m_dim(0), m_sdim(0)
+      {}
 
       /**
       * @brief Move constructs the mesh from another mesh.
@@ -286,25 +344,17 @@ namespace Rodin::Geometry
       Mesh(const Mesh& other) = default;
 
       /**
+      * @internal
+      * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
+      */
+      explicit Mesh(mfem::Mesh&& mesh);
+
+      /**
       * @brief Move assigns the mesh from another mesh.
       */
       Mesh& operator=(Mesh&& other) = default;
 
-      virtual Mesh& initialize(size_t dim, size_t sdim);
-
-      virtual Mesh& vertex(const std::vector<double>& x);
-
-      virtual Mesh& face(
-        Type geom,
-        const std::vector<int>& vs,
-        Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
-
-      virtual Mesh& element(
-        Type geom,
-        const std::vector<int>& vs,
-        Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
-
-      virtual Mesh& finalize();
+      Mesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -314,7 +364,7 @@ namespace Rodin::Geometry
       */
       virtual Mesh& load(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM);
+        IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
       /**
       * @brief Saves a mesh to file in the given format.
@@ -324,7 +374,9 @@ namespace Rodin::Geometry
       */
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const;
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
+
+      virtual Mesh& scale(double c) override;
 
       virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
 
@@ -365,56 +417,54 @@ namespace Rodin::Geometry
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
-      /**
-      * @internal
-      * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
-      */
-      explicit Mesh(mfem::Mesh&& mesh);
+      virtual size_t getCount(size_t dim) const override;
 
-      size_t getCount(size_t dim) const override;
+      virtual FaceIterator getBoundary() const override;
 
-      FaceIterator getBoundary() const override;
+      virtual FaceIterator getInterface() const override;
 
-      FaceIterator getInterface() const override;
+      virtual ElementIterator getElement(Index idx = 0) const override;
 
-      ElementIterator getElement(size_t idx = 0) const override;
+      virtual FaceIterator getFace(Index idx = 0) const override;
 
-      FaceIterator getFace(size_t idx = 0) const override;
+      virtual VertexIterator getVertex(Index idx = 0) const override;
 
-      // VertexIterator getVertex(size_t idx = 0) const override;
-
-      SimplexIterator getSimplex(size_t dimension, size_t idx) const override;
+      virtual SimplexIterator getSimplex(size_t dimension, Index idx) const override;
 
       virtual bool isSubMesh() const override
       {
         return false;
       }
 
-      bool isInterface(Index faceIdx) const override;
+      virtual bool isInterface(Index faceIdx) const override;
 
-      bool isBoundary(Index faceIdx) const override;
+      virtual bool isBoundary(Index faceIdx) const override;
 
-      Attribute getAttribute(size_t dimension, Index index) const override;
+      virtual size_t getDimension() const override;
 
-      const Connectivity& getConnectivity(size_t d, size_t dp) const override
+      virtual size_t getSpaceDimension() const override;
+
+      virtual Attribute getAttribute(size_t dimension, Index index) const override;
+
+      virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
       {
-        return m_connectivity.at({d, dp});
-      }
-
-      template <class ContextType>
-      Mesh<ContextType> parallelize(ContextType ctx)
-      {
-        return Mesh<ContextType>(*this, std::move(ctx));
+        assert(d == getDimension());
+        assert(dp == 0);
+        // Other dimensions not implemented yet
+        return m_connectivity[d][dp];
       }
 
       mfem::Mesh& getHandle() override;
 
       const mfem::Mesh& getHandle() const override;
 
+    protected:
+
     private:
-      mfem::Mesh m_mesh;
-      std::map<std::pair<size_t, size_t>, Connectivity> m_connectivity;
+      size_t m_dim, m_sdim;
+      std::vector<std::vector<Connectivity>> m_connectivity;
       std::map<Index, Index> m_f2b;
+      mfem::Mesh m_impl;
   };
 }
 

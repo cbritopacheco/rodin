@@ -13,11 +13,11 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Geometry/Simplex.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Utility/Overloaded.h"
 
 #include "ForwardDecls.h"
-#include "Rodin/Geometry/Element.h"
 
 namespace Rodin::Variational::Internal
 {
