@@ -10,36 +10,60 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-constexpr double T = M_PI;
-constexpr double dt = 0.01;
-constexpr size_t maxIt = T / dt;
-constexpr double azimuth = 0.1;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
   "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
 
-double phi(double t, const Point& p);
-
-int main()
+struct Experiment
 {
+  const double azimuth;
+  const double hmax;
+  const double c;
+  const double T;
+  const double hausd;
+};
+
+std::vector<Experiment> experiments =
+{
+  {0.1, 1, 0.1, M_PI, 0.01},
+  {0.1, 1, 0.01, M_PI, 0.01},
+  {0.1, 0.1, 0.1, M_PI, 0.01},
+  {0.1, 0.1, 0.01, M_PI, 0.01},
+  {0.1, 0.02, 0.1, M_PI, 0.01},
+  {0.1, 0.02, 0.01, M_PI, 0.01}
+};
+
+double phi(double t, const Point& p, const double azimuth);
+
+int main(int argc, char** argv)
+{
+  const size_t experimentId = std::atoi(argv[1]);
+  Experiment experiment = experiments[experimentId - 1];
+
+  const double dt = experiment.c * experiment.hmax;
+  const size_t maxIt = (experiment.T - experiment.azimuth) / dt;
+
   // Load mesh
   MMG::Mesh th;
   th.load(meshFile, IO::FileFormat::MEDIT);
 
-  std::ofstream fout("err.txt");
+  std::ofstream fout("L2Error_" + std::to_string(experimentId) + ".csv");
+  fout << "t,$\\mathcal{E}(t)$\n" << std::flush;
   double t = 0;
   for (size_t i = 0; i < maxIt; i++)
   {
-    Alert::Info() << "--------------\n"
-                  << "i: " << i << '\n'
-                  << "t: " << t << '\n'
-                  << Alert::Raise;
+    // Alert::Info() << "--------------\n"
+    //               << "i: " << i << " / " << maxIt << '\n'
+    //               << "t: " << t << '\n'
+    //               << Alert::Raise;
 
     // Build finite element space on the mesh
     H1 vh(th);
     H1 uh(th, th.getSpaceDimension());
 
-    auto phit = ScalarFunction([&](const Point& p) -> double { return phi(t, p); });
+    auto phit = ScalarFunction(
+        [&](const Point& p) -> double
+        { return phi(t, p, experiment.azimuth); });
 
     // Distance the subdomain
     GridFunction dist(vh);
@@ -58,35 +82,30 @@ int main()
     GridFunction diff(vh);
     diff = Pow(dist - phit, 2);
     double error = Integral(diff).compute();
-    diff.save("diff.gf");
+    fout << t << "," << error << '\n' << std::flush;
 
     // Compute gradient of signed distance function
     Grad gd(dist);
     GridFunction conormal(uh);
     conormal = gd / Frobenius(gd);
-    conormal.save("conormal.gf");
 
     // Advect
     MMG::Advect(dist, conormal).step(dt);
-    dist.getFiniteElementSpace().getMesh().save("miaow.mesh");
-    dist.save("miaow.gf");
 
     // Generate mesh to subdomain
     th = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                    .setHMax(0.02)
-                                    .setHausdorff(0.01)
+                                    .setHMax(experiment.hmax)
+                                    .setHausdorff(experiment.hausd)
                                     .discretize(dist);
 
-    // Save results
-    th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
-    Alert::Info() << "l2: " << error << '\n' << Alert::Raise;
-    fout << error << '\n' << std::flush;
+    // th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    // Alert::Info() << "l2: " << error << '\n' << Alert::Raise;
     t += dt;
   }
   return 0;
 }
 
-double phi(double t, const Point& p)
+double phi(double t, const Point& p, const double azimuth)
 {
   const double x = p.x();
   const double y = p.y();
