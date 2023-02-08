@@ -15,6 +15,7 @@ python plot.py <filename>
 import numpy as np
 from matplotlib import pyplot as plt
 plt.style.use('grayscale')
+import numpy as np
 import pandas as pd
 import argparse
 
@@ -30,7 +31,10 @@ if __name__ == '__main__':
     data = pd.read_csv(args.filename)
     data = pd.DataFrame(data)
 
-    plt.plot(data.iloc[:, 0], data.iloc[:, 1])
+    x, y = data.iloc[1:, 0], data.iloc[1:, 1]
+    m, b = np.polyfit(np.log10(x), np.log10(y), 1)
+    print('m: %f, b: %f' % (m, b))
+    plt.plot(x, y)
     plt.grid(alpha=0.1, aa=True)
     plt.xscale('log')
     plt.yscale('log')

@@ -87,6 +87,8 @@ namespace Rodin::Variational
 
   class FiniteElementCollectionBase;
 
+  class FiniteElement;
+
   /**
    * @brief Base class for finite element spaces.
    */
