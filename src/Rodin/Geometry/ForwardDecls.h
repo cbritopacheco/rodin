@@ -21,6 +21,8 @@ namespace Rodin::Geometry
 
   enum class Type;
 
+  class Transformation;
+
   class Simplex;
 
   class Element;

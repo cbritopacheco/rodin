@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_SIMPLEX_H
-#define RODIN_MESH_SIMPLEX_H
+#ifndef RODIN_GEOMETRY_SIMPLEX_H
+#define RODIN_GEOMETRY_SIMPLEX_H
 
 #include <set>
 #include <array>
@@ -202,13 +202,17 @@ namespace Rodin::Geometry
   };
 
   /**
-   * @brief Represents a spatial point which belongs to some element of a mesh.
+   * @brief Represents a spatial point on a simplex.
    *
-   * A Point represents the physical coordinates (as opposed to reference
-   * coordinates) of a point on the mesh.
-   * This class differs from a Vertex in the sense that a Vertex is a node of
-   * some element of a Mesh. In contrast, a Point represents any
-   * coordinates contained in the Mesh.
+   * This class represents the point:
+   * @f[
+   *   p = x(r)
+   * @f]
+   * on some simplex @f$ \tau \in \mathcal{T}_h @f$ belonging to
+   * some discrete mesh @f$ \mathcal{T}_h @f$. Here @f$ p \in \tau @f$ denotes
+   * the physical coordinates of the point, while @f$ x : K \rightarrow \tau
+   * @f$ represents the transformation taking reference coordinates @f$ r \in K
+   * @f$, for a reference geometry @f$ K @f$.
    */
   class Point
   {
@@ -218,6 +222,8 @@ namespace Rodin::Geometry
         Reference,
         Physical
       };
+
+      // Point(Coordinates type, const Transformation& trans, const Math::Vector& coords);
 
       /**
        * @brief Constructs the Point object from reference coordinates.
@@ -352,7 +358,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      mfem::Vector m_physical;
+      mutable mfem::Vector m_physical;
       std::reference_wrapper<const Simplex> m_element;
       mfem::IntegrationPoint m_ip;
   };

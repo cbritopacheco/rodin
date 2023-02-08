@@ -27,22 +27,22 @@ namespace Rodin::Variational
   template <>
   struct DualSpaceType<TrialSpace>
   {
-   static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Test;
+    static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Test;
   };
 
   template <>
   struct DualSpaceType<TestSpace>
   {
-   static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
+    static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
   };
 
   class ShapeComputator
   {
-   public:
-    using Key =
-      std::tuple<
-       const mfem::FiniteElement*,
-       mfem::ElementTransformation*>;
+    public:
+      using Key =
+        std::tuple<
+        const mfem::FiniteElement*,
+              mfem::ElementTransformation*>;
 
     template <class Data>
     struct Value
@@ -54,74 +54,74 @@ namespace Rodin::Variational
     ShapeComputator() = default;
 
     const mfem::Vector& getShape(
-       const mfem::FiniteElement& el,
-       mfem::ElementTransformation& trans,
-       const mfem::IntegrationPoint& ip)
+        const mfem::FiniteElement& el,
+        mfem::ElementTransformation& trans,
+        const mfem::IntegrationPoint& ip)
     {
       auto it = m_shapeLookup.find({&el, &trans});
       if (it != m_shapeLookup.end())
       {
-       if (it->second.pip != &ip)
-       {
-        it->second.pip = &ip;
-        it->second.data.SetSize(el.GetDof());
-        el.CalcShape(ip, it->second.data);
-       }
-       return it->second.data;
+        if (it->second.pip != &ip)
+        {
+          it->second.pip = &ip;
+          it->second.data.SetSize(el.GetDof());
+          el.CalcShape(ip, it->second.data);
+        }
+        return it->second.data;
       }
       else
       {
-       auto itt =  m_shapeLookup.insert(
-          it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
-       el.CalcShape(ip, itt->second.data);
-       return itt->second.data;
+        auto itt =  m_shapeLookup.insert(
+            it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
+        el.CalcShape(ip, itt->second.data);
+        return itt->second.data;
       }
     }
 
     const mfem::Vector& getPhysicalShape(
-       const mfem::FiniteElement& el,
-       mfem::ElementTransformation& trans,
-       const mfem::IntegrationPoint& ip)
+        const mfem::FiniteElement& el,
+        mfem::ElementTransformation& trans,
+        const mfem::IntegrationPoint& ip)
     {
       auto it = m_physShapeLookup.find({&el, &trans});
       if (it != m_physShapeLookup.end())
       {
-       if (it->second.pip != &ip)
-       {
-        it->second.pip = &ip;
-        it->second.data.SetSize(el.GetDof());
-        el.CalcPhysShape(trans, it->second.data);
-       }
-       return it->second.data;
+        if (it->second.pip != &ip)
+        {
+          it->second.pip = &ip;
+          it->second.data.SetSize(el.GetDof());
+          el.CalcPhysShape(trans, it->second.data);
+        }
+        return it->second.data;
       }
       else
       {
-       auto itt =  m_physShapeLookup.insert(
-          it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
-       el.CalcPhysShape(trans, itt->second.data);
-       return itt->second.data;
+        auto itt =  m_physShapeLookup.insert(
+            it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
+        el.CalcPhysShape(trans, itt->second.data);
+        return itt->second.data;
       }
     }
 
     const mfem::DenseMatrix& getDShape(
-       const mfem::FiniteElement& el,
-       mfem::ElementTransformation& trans,
-       const mfem::IntegrationPoint& ip)
+        const mfem::FiniteElement& el,
+        mfem::ElementTransformation& trans,
+        const mfem::IntegrationPoint& ip)
     {
       auto it = m_dShapeLookup.find({&el, &trans});
       if (it != m_dShapeLookup.end())
       {
-       it->second.pip = &ip;
-       it->second.data.SetSize(el.GetDof(), el.GetDim());
-       el.CalcDShape(ip, it->second.data);
-       return it->second.data;
+        it->second.pip = &ip;
+        it->second.data.SetSize(el.GetDof(), el.GetDim());
+        el.CalcDShape(ip, it->second.data);
+        return it->second.data;
       }
       else
       {
-       auto itt =  m_dShapeLookup.insert(
-          it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), el.GetDim())}});
-       el.CalcDShape(ip, itt->second.data);
-       return itt->second.data;
+        auto itt =  m_dShapeLookup.insert(
+            it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), el.GetDim())}});
+        el.CalcDShape(ip, itt->second.data);
+        return itt->second.data;
       }
     }
 
@@ -133,17 +133,17 @@ namespace Rodin::Variational
       auto it = m_physDShapeLookup.find({&el, &trans});
       if (it != m_physDShapeLookup.end())
       {
-       it->second.pip = &ip;
-       it->second.data.SetSize(el.GetDof(), trans.GetSpaceDim());
-       el.CalcPhysDShape(trans, it->second.data);
-       return it->second.data;
+        it->second.pip = &ip;
+        it->second.data.SetSize(el.GetDof(), trans.GetSpaceDim());
+        el.CalcPhysDShape(trans, it->second.data);
+        return it->second.data;
       }
       else
       {
-       auto itt =  m_physDShapeLookup.insert(
-          it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), trans.GetSpaceDim())}});
-       el.CalcPhysDShape(trans, itt->second.data);
-       return itt->second.data;
+        auto itt =  m_physDShapeLookup.insert(
+            it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), trans.GetSpaceDim())}});
+        el.CalcPhysDShape(trans, itt->second.data);
+        return itt->second.data;
       }
     }
 
@@ -158,69 +158,69 @@ namespace Rodin::Variational
   template <ShapeFunctionSpaceType Space>
   class ShapeFunctionBase : public FormLanguage::Base
   {
-   public:
-    constexpr
-    ShapeFunctionBase()
-      : FormLanguage::Base()
-    {}
+    public:
+      constexpr
+      ShapeFunctionBase()
+        : FormLanguage::Base()
+      {}
 
-    constexpr
-    ShapeFunctionBase(const ShapeFunctionBase& other)
-      : FormLanguage::Base(other)
-    {}
+      constexpr
+      ShapeFunctionBase(const ShapeFunctionBase& other)
+        : FormLanguage::Base(other)
+      {}
 
-    constexpr
-    ShapeFunctionBase(ShapeFunctionBase&& other)
-      : FormLanguage::Base(std::move(other))
-    {}
+      constexpr
+      ShapeFunctionBase(ShapeFunctionBase&& other)
+        : FormLanguage::Base(std::move(other))
+      {}
 
-    constexpr
-    ShapeFunctionSpaceType getSpaceType() const
-    {
-      return Space;
-    }
+      constexpr
+      ShapeFunctionSpaceType getSpaceType() const
+      {
+        return Space;
+      }
 
-    constexpr
-    RangeType getRangeType() const
-    {
-      if (getRows() == 1 && getColumns() == 1)
-       return RangeType::Scalar;
-      else if (getRows() > 1 && getColumns() == 1)
-       return RangeType::Vector;
-      else
-       return RangeType::Matrix;
-    }
+      constexpr
+      RangeType getRangeType() const
+      {
+        if (getRows() == 1 && getColumns() == 1)
+          return RangeType::Scalar;
+        else if (getRows() > 1 && getColumns() == 1)
+          return RangeType::Vector;
+        else
+          return RangeType::Matrix;
+      }
 
-    constexpr
-    RangeShape getRangeShape() const
-    {
-      return {getRows(), getColumns()};
-    }
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return {getRows(), getColumns()};
+      }
 
-    constexpr
-    Transpose<ShapeFunctionBase<Space>> T() const
-    {
-      return Transpose<ShapeFunctionBase<Space>>(*this);
-    }
+      constexpr
+      Transpose<ShapeFunctionBase<Space>> T() const
+      {
+        return Transpose<ShapeFunctionBase<Space>>(*this);
+      }
 
-    virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
+      virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
 
-    virtual int getRows() const = 0;
+      virtual int getRows() const = 0;
 
-    virtual int getColumns() const = 0;
+      virtual int getColumns() const = 0;
 
-    virtual int getDOFs(const Geometry::Simplex& element) const = 0;
+      virtual int getDOFs(const Geometry::Simplex& element) const = 0;
 
-    virtual void getOperator(
-       DenseBasisOperator& op,
-       ShapeComputator& compute,
-       const Geometry::Point& p) const = 0;
+      virtual void getOperator(
+          DenseBasisOperator& op,
+          ShapeComputator& compute,
+          const Geometry::Point& p) const = 0;
 
-    virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
+      virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
-    virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
+      virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
 
-    virtual ShapeFunctionBase<Space>* copy() const noexcept override = 0;
+      virtual ShapeFunctionBase<Space>* copy() const noexcept override = 0;
   };
 
   /**
@@ -276,25 +276,25 @@ namespace Rodin::Variational
       return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
     }
 
-    void getOperator(
-       DenseBasisOperator& op,
-       ShapeComputator& compute,
-       const Geometry::Point& point,
-       const Geometry::Element& element) const override
-    {
-      const auto& shape =
-       compute.getPhysicalShape(
-          getFiniteElementSpace().getFiniteElement(element),
-          element.getTransformation(),
-          element.getTransformation().GetIntPoint());
-      const int n = shape.Size();
-      const int vdim = getFiniteElementSpace().getVectorDimension();
-      op.setSize(vdim, 1, vdim * n);
-      op = 0.0;
-      for (int i = 0; i < vdim; i++)
-       for (int j = 0; j < n; j++)
-        op(i, 0, j + i * n) = shape(j);
-    }
+    // void getOperator(
+    //    DenseBasisOperator& op,
+    //    ShapeComputator& compute,
+    //    const Geometry::Point& point,
+    //    const Geometry::Element& element) const override
+    // {
+    //   const auto& shape =
+    //    compute.getPhysicalShape(
+    //       getFiniteElementSpace().getFiniteElement(element),
+    //       element.getTransformation(),
+    //       element.getTransformation().GetIntPoint());
+    //   const int n = shape.Size();
+    //   const int vdim = getFiniteElementSpace().getVectorDimension();
+    //   op.setSize(vdim, 1, vdim * n);
+    //   op = 0.0;
+    //   for (int i = 0; i < vdim; i++)
+    //    for (int j = 0; j < n; j++)
+    //     op(i, 0, j + i * n) = shape(j);
+    // }
 
     virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
 
