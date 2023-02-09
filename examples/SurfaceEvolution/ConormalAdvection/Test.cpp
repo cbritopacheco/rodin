@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 
   Experiment experiment = experiments[experimentId - 1];
 
-  const bool physical = true;
+  const bool physical = false;
   double dt = NAN;
   if (physical)
     dt = experiment.c * experiment.hmax;
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
                                     .setHausdorff(experiment.hausd)
                                     .discretize(dist);
 
-    // th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
 
     if (t + std::numeric_limits<double>::epsilon() > experiment.T)
       break;
