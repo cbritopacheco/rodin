@@ -19,7 +19,9 @@ namespace Rodin::Variational
   class FiniteElement
   {
     public:
-      FiniteElement(const Geometry::Simplex& simplex, const mfem::FiniteElement* handle)
+      FiniteElement(
+          const Geometry::Simplex& simplex,
+          const mfem::FiniteElement* handle)
         : m_simplex(simplex), m_handle(handle)
       {}
 
