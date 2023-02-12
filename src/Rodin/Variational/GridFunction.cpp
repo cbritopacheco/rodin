@@ -225,10 +225,10 @@ namespace Rodin::Variational
       }
       case RangeType::Vector:
       {
-        Math::Vector value;
-        Utility::Wrap<Math::Vector&, mfem::Vector> wrapped(value);
-        getHandle().GetVectorValue(trans, trans.GetIntPoint(), wrapped);
-        return value;
+        mfem::Vector value;
+        getHandle().GetVectorValue(trans, trans.GetIntPoint(), value);
+        Math::Vector res = Eigen::Map<Math::Vector>(value.GetData(), value.Size());
+        return res;
       }
       case RangeType::Matrix:
       {
