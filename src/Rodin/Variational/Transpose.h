@@ -50,9 +50,8 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Matrix m = m_matrix->getValue(p).matrix();
-        m.Transpose();
-        return FunctionValue(std::move(m));
+        Math::Matrix res = m_matrix->getValue(p).matrix().transpose();
+        return res;
       }
 
       Transpose* copy() const noexcept override
@@ -105,14 +104,11 @@ namespace Rodin::Variational
         return m_shape->getDOFs(element);
       }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
       {
         const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
-        m_shape->getOperator(op, compute, p);
-        op.transpose();
+        return m_shape->getOperator(compute, p).shuffle(std::array<int, 3>{0, 2, 1});
       }
 
       FiniteElementSpaceBase& getFiniteElementSpace() override

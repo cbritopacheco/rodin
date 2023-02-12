@@ -32,13 +32,11 @@ namespace Rodin::Variational
    */
   template <>
   class Composition<
-    std::function<FunctionValue::Scalar(FunctionValue::Scalar)>, FunctionBase>
+    std::function<Scalar(Scalar)>, FunctionBase>
     : public ScalarFunctionBase
   {
     public:
-      Composition(
-          std::function<FunctionValue::Scalar(FunctionValue::Scalar)> f,
-          const FunctionBase& g);
+      Composition(std::function<Scalar(Scalar)> f, const FunctionBase& g);
 
       Composition(const Composition& other);
 
@@ -55,18 +53,15 @@ namespace Rodin::Variational
       }
 
     private:
-      std::function<FunctionValue::Scalar(FunctionValue::Scalar)> m_f;
+      std::function<Scalar(Scalar)> m_f;
       std::unique_ptr<FunctionBase> m_g;
   };
   template <class Lhs>
-  Composition(const Lhs&, const FunctionBase&)
-    ->
+  Composition(const Lhs&, const FunctionBase&) ->
     Composition<
     std::enable_if_t<
-      std::is_invocable_r_v<
-        FunctionValue::Scalar, Lhs, FunctionValue::Scalar>,
-        std::function<FunctionValue::Scalar(FunctionValue::Scalar)>>,
-        FunctionBase>;
+      std::is_invocable_r_v<Scalar, Lhs, Scalar>,
+      std::function<Scalar(Scalar)>>, FunctionBase>;
 
   /**
    * @brief Composes two functions

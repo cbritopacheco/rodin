@@ -23,7 +23,10 @@ add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
 add_library(Rodin::Math ALIAS RodinMath)
 
 # ---- Link targets ----------------------------------------------------------
-target_link_libraries(RodinMath PUBLIC Eigen3::Eigen)
+target_link_libraries(RodinMath
+  PUBLIC
+  Rodin
+  Eigen3::Eigen)
 
 target_include_directories(RodinMath
   INTERFACE

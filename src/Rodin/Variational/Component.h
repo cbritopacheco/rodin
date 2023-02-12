@@ -95,8 +95,8 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Vector v = m_v->getValue(p);
-        assert(m_idx < v.Size());
+        Math::Vector v = m_v->getValue(p);
+        assert(m_idx < v.size());
         return v(m_idx);
       }
 

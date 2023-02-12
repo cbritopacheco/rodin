@@ -25,22 +25,35 @@ namespace Rodin::FormLanguage
     static boost::uuids::random_generator s_gen;
 
     public:
-      Base();
+      inline
+      Base()
+        : m_uuid(s_gen())
+      {}
 
-      Base(const Base& other);
+      inline
+      Base(const Base& other)
+        : m_uuid(other.m_uuid)
+      {}
 
-      Base(Base&& other);
-
-      /**
-       * @brief Virtual destructor.
-       */
-      virtual ~Base() = default;
+      inline
+      Base(Base&& other)
+        : m_uuid(std::move(other.m_uuid))
+      {}
 
       Base& operator=(const Base&) = delete;
 
       Base& operator=(Base&&) = delete;
 
-      const boost::uuids::uuid& getUUID() const;
+      inline
+      const boost::uuids::uuid& getUUID() const
+      {
+        return m_uuid;
+      }
+
+      /**
+       * @brief Virtual destructor.
+       */
+      virtual ~Base() = default;
 
       virtual const char* getName() const
       {

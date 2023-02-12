@@ -196,7 +196,7 @@ namespace Rodin::Geometry
 
   double Vertex::operator()(size_t i) const
   {
-    assert(i < m_coordinates.size());
+    assert(i < static_cast<size_t>(m_coordinates.size()));
     return m_coordinates(i);
   }
 

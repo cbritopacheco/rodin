@@ -99,7 +99,7 @@ namespace Rodin::Variational
        * @brief Performs the assembly of the element matrix for the given
        * element.
        */
-      virtual mfem::DenseMatrix getMatrix(const Geometry::Simplex& element) const = 0;
+      virtual Math::Matrix getMatrix(const Geometry::Simplex& element) const = 0;
 
       virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
 

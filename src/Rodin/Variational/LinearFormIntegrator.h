@@ -96,7 +96,7 @@ namespace Rodin::Variational
        * @brief Performs the assembly of the element vector for the given
        * element.
        */
-      virtual mfem::Vector getVector(
+      virtual Math::Vector getVector(
           const Geometry::Simplex& element) const = 0;
 
       virtual LinearFormIntegratorBase* copy() const noexcept override = 0;

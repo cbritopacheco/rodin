@@ -7,6 +7,7 @@
 #include "GridFunction.h"
 
 #include "Rodin/IO/GridFunctionLoader.h"
+#include "Rodin/Utility/MFEM.h"
 
 #include "Exceptions.h"
 
@@ -224,8 +225,9 @@ namespace Rodin::Variational
       }
       case RangeType::Vector:
       {
-        FunctionValue::Vector value;
-        getHandle().GetVectorValue(trans, trans.GetIntPoint(), value);
+        Math::Vector value;
+        Utility::Wrap<Math::Vector&, mfem::Vector> wrapped(value);
+        getHandle().GetVectorValue(trans, trans.GetIntPoint(), wrapped);
         return value;
       }
       case RangeType::Matrix:

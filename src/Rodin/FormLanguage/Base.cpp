@@ -9,22 +9,5 @@
 namespace Rodin::FormLanguage
 {
   boost::uuids::random_generator Base::s_gen;
-
-  Base::Base()
-    : m_uuid(s_gen())
-  {}
-
-  Base::Base(const Base& other)
-    : m_uuid(other.m_uuid)
-  {}
-
-  Base::Base(Base&& other)
-    : m_uuid(std::move(other.m_uuid))
-  {}
-
-  const boost::uuids::uuid& Base::getUUID() const
-  {
-    return m_uuid;
-  }
 }
 

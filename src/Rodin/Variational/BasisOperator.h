@@ -1,18 +1,23 @@
-#ifndef RODIN_VARIATIONAL_BASISOPERATOR_H
-#define RODIN_VARIATIONAL_BASISOPERATOR_H
+#ifndef RODIN_VARIATIONAL_TENSORBASIS_H
+#define RODIN_VARIATIONAL_TENSORBASIS_H
 
-#include <vector>
-#include <mfem.hpp>
+#include <cassert>
+
+#include "Rodin/Math/Tensor.h"
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/DenseMatrix.h"
 
 namespace Rodin::Variational
 {
   /**
-   * @brief Rank-3 tensor operator for discretized functions on finite bases
+   * @brief Represents a tensor basis for functions defined on finite element
+   * spaces.
    *
    * Let @f$ u \in V_h @f$ be a function which has a basis representation
-   * consisting of @f$ n @f$ degrees of freedom.
-   *
-   * This tensor should be regarded as a multi-dimensional array:
+   * consisting of @f$ n @f$ degrees of freedom. If the value of @f$ u @f$ at a
+   * point is a rank-@f$ n @f$ tensor, then this class represents a rank-@f$ (n
+   * + 1) @f$ tensor @f$ T @f$. In this manner, the tensor @f$ T @f$ may be
+   * visualized as a multidimensional array:
    * @f[
    *   T =
    *   \begin{bmatrix}
@@ -21,171 +26,12 @@ namespace Rodin::Variational
    *     T_n
    *   \end{bmatrix}
    * @f]
-   * where each @f$ T_i @f$ is a matrix of dimensions @f$ p \times q @f$.
+   * where each @f$ T_k @f$ is a tensor of rank-@f$ n @f$ and we call it the
+   * _k-th degree of freedom_.
+   *
+   * @note Currently, @f$ u @f$ is allowed to take rank-2 values only.
    */
-  class BasisOperator
-  {
-    public:
-      constexpr
-      BasisOperator() = default;
-
-      constexpr
-      BasisOperator(BasisOperator&&) = default;
-
-      constexpr
-      BasisOperator(const BasisOperator&) = default;
-
-      BasisOperator& operator=(BasisOperator&&) = default;
-
-      BasisOperator& operator=(const BasisOperator&) = delete;
-
-      virtual ~BasisOperator() = default;
-
-      /**
-       * @brief Adds to element vector.
-       */
-      virtual void addToVector(mfem::Vector& vec) const = 0;
-
-      virtual int getRows() const = 0;
-
-      virtual int getColumns() const = 0;
-
-      virtual int getDOFs() const = 0;
-
-      virtual BasisOperator& operator*=(double s) = 0;
-
-      virtual double operator()(int row, int col, int dof) const = 0;
-  };
-
-  class DenseBasisOperator : public BasisOperator
-  {
-    public:
-      DenseBasisOperator() = default;
-
-      DenseBasisOperator(int rows, int cols, int dofs)
-        :  m_rows(rows),
-          m_cols(cols),
-          m_dofs(dofs),
-          m_data(rows, cols, dofs)
-      {
-        assert(rows > 0);
-        assert(dofs > 0);
-        assert(cols > 0);
-      }
-
-      DenseBasisOperator(const DenseBasisOperator& other)
-        :  BasisOperator(other),
-          m_rows(other.m_rows),
-          m_cols(other.m_cols),
-          m_dofs(other.m_dofs),
-          m_data(other.m_data)
-      {}
-
-      DenseBasisOperator(DenseBasisOperator&& other)
-        :  BasisOperator(std::move(other)),
-          m_rows(other.m_rows),
-          m_cols(other.m_cols),
-          m_dofs(other.m_dofs),
-          m_data(std::move(other.m_data))
-      {
-        other.m_rows = 0;
-        other.m_cols = 0;
-        other.m_dofs = 0;
-      }
-
-      DenseBasisOperator& operator=(DenseBasisOperator&& other) = delete;
-
-      void setSize(int i, int j, int k)
-      {
-        m_rows = i;
-        m_cols = j;
-        m_dofs = k;
-        m_data.SetSize(i, j, k);
-      }
-
-      void transpose()
-      {
-        std::swap(m_rows, m_cols);
-        for (int i = 0; i < getDOFs(); i++)
-          operator()(i).Transpose();
-      }
-
-      mfem::DenseMatrix& operator()(int dof)
-      {
-        return m_data(dof);
-      }
-
-      const mfem::DenseMatrix& operator()(int dof) const
-      {
-        return m_data(dof);
-      }
-
-      int getRows() const override
-      {
-        return m_rows;
-      }
-
-      int getColumns() const override
-      {
-        return m_cols;
-      }
-
-      int getDOFs() const override
-      {
-        return m_dofs;
-      }
-
-      DenseBasisOperator& operator=(double s)
-      {
-        m_data = s;
-        return *this;
-      }
-
-      DenseBasisOperator& operator-=(const DenseBasisOperator& rhs)
-      {
-        assert(getRows() == rhs.getRows());
-        assert(getColumns() == rhs.getColumns());
-        assert(getDOFs() == rhs.getDOFs());
-        for (int i = 0; i < getDOFs(); i++)
-          operator()(i) -= rhs(i);
-        return *this;
-      }
-
-      DenseBasisOperator& operator+=(const DenseBasisOperator& rhs)
-      {
-        assert(getRows() == rhs.getRows());
-        assert(getColumns() == rhs.getColumns());
-        assert(getDOFs() == rhs.getDOFs());
-        for (int i = 0; i < getDOFs(); i++)
-          operator()(i) += rhs(i);
-        return *this;
-      }
-
-      DenseBasisOperator& operator*=(double s) override
-      {
-        for (int i = 0; i < getDOFs(); i++)
-          operator()(i) *= s;
-        return *this;
-      }
-
-      double& operator()(int row, int col, int dof)
-      {
-        return m_data(row, col, dof);
-      }
-
-      double operator()(int row, int col, int dof) const override
-      {
-        return m_data(row, col, dof);
-      }
-
-      void addToVector(mfem::Vector& vec) const override;
-
-    private:
-      int m_rows;
-      int m_cols;
-      int m_dofs;
-      mfem::DenseTensor m_data;
-  };
+  using TensorBasis = Math::Tensor<3>;
 }
 
 #endif

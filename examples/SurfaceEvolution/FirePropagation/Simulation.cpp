@@ -299,7 +299,9 @@ int main()
   GridFunction phi(fes);
   phi = [](const Point& p)
   {
-    Math::Vector c = {20400, 19600, 0};
+    Math::FixedSizeVector<3> c;
+    c << 20400, 19600, 0;
+
     return std::sqrt(
         (p.x() - c.x()) * (p.x() - c.x()) +
         (p.y() - c.y()) * (p.y() - c.y())) - 1000;

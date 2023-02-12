@@ -74,7 +74,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      mfem::Vector getVector(const Geometry::Simplex& element) const override;
+      Math::Vector getVector(const Geometry::Simplex& element) const override;
 
       UnaryMinus* copy() const noexcept override
       {
@@ -100,7 +100,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      mfem::DenseMatrix getMatrix(const Geometry::Simplex& element) const override;
+      Math::Matrix getMatrix(const Geometry::Simplex& element) const override;
 
       UnaryMinus* copy() const noexcept override
       {

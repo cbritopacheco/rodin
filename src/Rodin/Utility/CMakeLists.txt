@@ -21,6 +21,8 @@ target_include_directories(RodinUtility
   )
 
 target_link_libraries(RodinUtility
+  PUBLIC
+  Rodin::Math
   PRIVATE
   mfem)
 

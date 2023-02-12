@@ -71,19 +71,18 @@ namespace Rodin::Variational
         return m_u.getDOFs(element);
       }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
       {
         const auto& element = p.getSimplex();
         auto& trans = p.getSimplex().getTransformation();
         const auto& fe = getFiniteElementSpace().getFiniteElement(element);
         const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const int opDofs = getDOFs(element);
-        op.setSize(1, 1, opDofs);
-        for (int i = 0; i < opDofs; i++)
-          op(0, 0, i) = dshape.GetData()[i];
+        const size_t dofs = getDOFs(element);
+        TensorBasis res(static_cast<int>(dofs), 1, 1);
+        for (size_t i = 0; i < dofs; i++)
+          res(static_cast<int>(i), 0, 0) = dshape.GetData()[i];
+        return res;
       }
 
       H1<Trait>& getFiniteElementSpace() override

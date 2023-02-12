@@ -15,10 +15,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include "Rodin/Configure.h"
-
 #include "Rodin/Math.h"
-#include "Rodin/Context.h"
+#include "Rodin/Types.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -308,6 +306,13 @@ namespace Rodin::Geometry
           Builder& operator=(Builder&&) = default;
 
           Builder& setReference(Mesh<Context::Serial>& mesh);
+
+          Builder& vertex(std::initializer_list<Scalar> l)
+          {
+            Math::Vector x(l.size());
+            std::copy(l.begin(), l.end(), x.begin());
+            return vertex(x);
+          }
 
           Builder& vertex(const Math::Vector& x);
 

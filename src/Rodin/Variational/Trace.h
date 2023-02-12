@@ -40,7 +40,7 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        return m_matrix->getValue(p).matrix().Trace();
+        return m_matrix->getValue(p).matrix().trace();
       }
 
       Trace& traceOf(Geometry::Attribute attrs) override

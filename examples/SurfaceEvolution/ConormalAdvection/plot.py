@@ -6,7 +6,7 @@ from scipy.interpolate import make_interp_spline
 plt.style.use('grayscale')
 # plt.style.use('seaborn-paper')
 
-prefix = 'L2ErrorPhysical_'
+prefix = 'L2Error_'
 suffix = '.csv'
 expranges = {
     (1, 32): 0.1,
@@ -41,11 +41,11 @@ for filename in glob.glob('%s*%s' % (prefix, suffix)):
         error[expid - 1] = float(split[1])
 
 for r in expranges:
-    # spline = make_interp_spline(meshsizes, error[r[0] - 1:r[1]])
-    # x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
-    # y = abs(spline(x))
-    # plt.plot(x, y, c=cm.RdYlBu_r(expranges[r]))
-    plt.plot(meshsizes, error[r[0] - 1:r[1]], c=cm.RdYlBu_r(expranges[r]))
+    spline = make_interp_spline(meshsizes, error[r[0] - 1:r[1]])
+    x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
+    y = abs(spline(x))
+    plt.plot(x, y, c=cm.RdYlBu_r(expranges[r]))
+    # plt.plot(meshsizes, error[r[0] - 1:r[1]], c=cm.RdYlBu_r(expranges[r]))
     if (r == (289, 320)):
         break
 
@@ -56,12 +56,12 @@ spline = make_interp_spline(meshsizes, test)
 x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
 y = abs(spline(x))
 cb = plt.colorbar(sm, ticks=np.linspace(0, 1, 10))
-cb.ax.set_ylabel('$c$')
+cb.ax.set_ylabel('$\delta t = c$')
 plt.plot(x, y, 'k--', linewidth=2,
     label='$\mathbb{E}[\mathcal{E}(t)]$')
 plt.ylabel('$\mathcal{E}(T)$', fontsize=14)
 plt.xlabel('$h$', fontsize=14)
-plt.legend()
+plt.legend(loc='upper left')
 plt.grid(alpha=0.4, aa=True)
 plt.savefig('Error.svg')
 plt.show()
