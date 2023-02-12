@@ -34,7 +34,7 @@ namespace Rodin::Variational
 
       virtual ~BooleanFunctionBase() = default;
 
-      FunctionValue::Boolean operator()(const Geometry::Point& p) const
+      Boolean operator()(const Geometry::Point& p) const
       {
         return getValue(p);
       }
@@ -56,10 +56,10 @@ namespace Rodin::Variational
    * @ingroup BooleanFunctionSpecializations
    */
   template <>
-  class BooleanFunction<FunctionValue::Boolean> : public BooleanFunctionBase
+  class BooleanFunction<Boolean> : public BooleanFunctionBase
   {
     public:
-      BooleanFunction(FunctionValue::Boolean v)
+      BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
@@ -84,9 +84,9 @@ namespace Rodin::Variational
       }
 
     private:
-      FunctionValue::Boolean m_v;
+      Boolean m_v;
   };
-  BooleanFunction(FunctionValue::Boolean) -> BooleanFunction<FunctionValue::Boolean>;
+  BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 
 #endif

@@ -60,7 +60,7 @@ namespace Rodin::Variational
       FunctionValue getValue(const Geometry::Point& p) const override
       {
         assert(false);
-        FunctionValue::Vector grad;
+        Math::Vector grad;
         return grad(m_direction);
       }
 

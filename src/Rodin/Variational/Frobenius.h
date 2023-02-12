@@ -59,11 +59,11 @@ namespace Rodin::Variational
           }
           case RangeType::Vector:
           {
-            return m_v->getValue(p).vector().Norml2();
+            return m_v->getValue(p).vector().norm();
           }
           case RangeType::Matrix:
           {
-            return m_v->getValue(p).matrix().FNorm();
+            return m_v->getValue(p).matrix().norm();
           }
           default:
           {

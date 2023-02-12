@@ -57,13 +57,11 @@ namespace Rodin::Variational
     return m_op->getRegion();
   }
 
-  mfem::Vector
-  UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Simplex& element)
+  Math::Vector
+  UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Simplex& simplex)
   const
   {
-    mfem::Vector vec = m_op->getVector(element);
-    vec *= -1.0;
-    return vec;
+    return -1.0 * m_op->getVector(simplex);
   }
 
   UnaryMinus<LinearFormIntegratorBase>
@@ -94,13 +92,11 @@ namespace Rodin::Variational
     return m_op->getRegion();
   }
 
-  mfem::DenseMatrix
+  Math::Matrix
   UnaryMinus<BilinearFormIntegratorBase>
   ::getMatrix(const Geometry::Simplex& element) const
   {
-    mfem::DenseMatrix op = m_op->getMatrix(element);
-    op.Neg();
-    return op;
+    return -1.0 * m_op->getMatrix(element);
   }
 
   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)

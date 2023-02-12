@@ -79,7 +79,7 @@ namespace Rodin::Variational
        */
       virtual Component<FunctionBase> operator()(int i) const;
 
-      FunctionValue::Vector operator()(const Geometry::Point& p) const
+      Math::Vector operator()(const Geometry::Point& p) const
       {
         return getValue(p).vector();
       }
@@ -148,8 +148,7 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Vector value;
-        value.SetSize(static_cast<int>(1 + sizeof...(Values)));
+        Math::FixedSizeVector<1 + sizeof...(Values)> value;
         assert(m_fs.size() == 1 + sizeof...(Values));
         for (size_t i = 0; i < 1 + sizeof...(Values); i++)
           value(i) = m_fs[i]->getValue(p);

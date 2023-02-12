@@ -67,7 +67,7 @@ namespace Rodin::Variational
     }
 
     void getOperator(
-       DenseBasisOperator& op,
+       TensorBasis& op,
        ShapeComputator& compute,
        const Geometry::Point& simplex) override
     {

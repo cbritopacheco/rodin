@@ -143,15 +143,10 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
       {
-        getLHS().getOperator(op, compute, p);
-        DenseBasisOperator tmp;
-        getRHS().getOperator(tmp, compute, p);
-        op += tmp;
+        return getLHS().getOperator(compute, p) + getRHS().getOperator(compute, p);
       }
 
       FiniteElementSpaceBase& getFiniteElementSpace() override

@@ -5,59 +5,43 @@
 
 namespace Rodin::Variational
 {
-  mfem::DenseMatrix
+  Math::Matrix
   Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
   ::getMatrix(const Geometry::Simplex& element) const
   {
-    mfem::DenseMatrix mat;
-
-    auto& trial = m_prod.getLHS();
-    auto& test = m_prod.getRHS();
-
+    const auto& trial = m_prod.getLHS();
+    const auto& test = m_prod.getRHS();
     auto& trans = element.getTransformation();
-
-    mat.SetSize(test.getDOFs(element), trial.getDOFs(element));
-    mat = 0.0;
-
-    const int order = getIntegrationOrder(
+    const size_t order = getIntegrationOrder(
         trial.getFiniteElementSpace(), test.getFiniteElementSpace(), element);
-
-    mfem::DenseMatrix tmp;
     ShapeComputator shapeCompute;
+
+    Math::Matrix res = Math::Matrix::Zero(test.getDOFs(element), trial.getDOFs(element));
     for (const auto& p : element.getIntegrationRule(order))
     {
-      m_prod.getMatrix(tmp, shapeCompute, p);
-      mfem::Add(mat, tmp, trans.Weight() * trans.GetIntPoint().weight, mat);
+      auto tmp = m_prod.getMatrix(shapeCompute, p);
+      res += trans.Weight() * trans.GetIntPoint().weight * tmp;
     }
-
-    return mat;
+    return res;
   }
 
-  mfem::Vector Integral<ShapeFunctionBase<TestSpace>>::getVector(
-      const Geometry::Simplex& element) const
+  Math::Vector
+  Integral<ShapeFunctionBase<TestSpace>>
+  ::getVector(const Geometry::Simplex& simplex) const
   {
-    mfem::Vector vec;
-
-    auto& test = *m_integrand;
-
-    auto& trans = element.getTransformation();
-
+    const auto& test = *m_integrand;
     assert(test.getRangeType() == RangeType::Scalar);
-
-    vec.SetSize(test.getDOFs(element));
-    vec = 0.0;
-
-    const int order = getIntegrationOrder(test.getFiniteElementSpace(), element);
-
+    auto& trans = simplex.getTransformation();
+    const size_t order = getIntegrationOrder(test.getFiniteElementSpace(), simplex);
     ShapeComputator compute;
-    for (const auto& p : element.getIntegrationRule(order))
-    {
-      DenseBasisOperator testOp;
-      test.getOperator(testOp, compute, p);
-      testOp *= trans.Weight() * trans.GetIntPoint().weight;
-      testOp.addToVector(vec);
-    }
 
-    return vec;
+    Math::Vector res = Math::Vector::Zero(test.getDOFs(simplex));
+    for (const auto& p : simplex.getIntegrationRule(order))
+    {
+      const TensorBasis basis =
+        trans.Weight() * trans.GetIntPoint().weight * test.getOperator(compute, p);
+      res += Eigen::Map<const Math::Vector>(basis.data(), basis.size());
+    }
+    return res;
   }
 }

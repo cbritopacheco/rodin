@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_NORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Utility/MFEM.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
@@ -40,74 +41,61 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Vector value;
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();
         auto& trans = simplex.getTransformation();
+        Math::Vector value(m_dimension);
+        Utility::Wrap<Math::Vector&, mfem::Vector> wrapped(value);
+        mfem::CalcOrtho(trans.Jacobian(), wrapped);
+        const Scalar norm = value.norm();
+        value /= norm;
+        assert(norm >= 0.0);
+        assert(std::isfinite(norm));
 
         if ((mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
             simplex.getDimension() == mesh.getDimension())
         {
-          // Or we are on an element of a d-mesh in (d + 1)-space.
-          value.SetSize(m_dimension);
-          mfem::CalcOrtho(trans.Jacobian(), value);
-          const double norm = value.Norml2();
-          assert(norm > 0.0);
-          assert(std::isfinite(norm));
-          value /= norm;
+          // We are on an element of a d-mesh in (d + 1)-space.
+          return value;
         }
         else if ((mesh.getDimension() == mesh.getSpaceDimension()) &&
             simplex.getDimension() == mesh.getDimension() - 1)
         {
-          // We are on a face of a d-mesh in d-space
+          // Or we are on a face of a d-mesh in d-space
           if (mesh.isBoundary(simplex.getIndex()))
           {
-            mfem::FaceElementTransformations* ft =
-              const_cast<Geometry::MeshBase&>(mesh).getHandle()
-              .GetFaceElementTransformations(simplex.getIndex());
-            value.SetSize(m_dimension);
-            ft->SetAllIntPoints(&p.getIntegrationPoint());
-            assert(ft->Elem1);
-            mfem::CalcOrtho(trans.Jacobian(), value);
-            const double norm = value.Norml2();
-            assert(norm > 0.0);
-            assert(std::isfinite(norm));
-            value /= norm;
+            return value;
           }
           else
           {
-            mfem::FaceElementTransformations* ft =
-              const_cast<Geometry::MeshBase&>(mesh).getHandle()
-              .GetFaceElementTransformations(simplex.getIndex());
-            value.SetSize(m_dimension);
-            ft->SetAllIntPoints(&p.getIntegrationPoint());
-            if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+            int* el1 = nullptr;
+            int* el2 = nullptr;
+            const auto& meshHandle = simplex.getMesh().getHandle();
+            meshHandle.GetFaceElements(simplex.getIndex(), el1, el2);
+            if (el1 && *el1 >= 0 && getTraceDomain() == meshHandle.GetAttribute(*el1))
             {
-              mfem::CalcOrtho(trans.Jacobian(), value);
-              const double norm = value.Norml2();
-              assert(norm > 0.0);
-              assert(std::isfinite(norm));
-              value /= norm;
+              return value;
             }
-            else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+            else if (el2 && *el2 >= 0 && getTraceDomain() == meshHandle.GetAttribute(*el2))
             {
-              mfem::CalcOrtho(trans.Jacobian(), value);
-              const double norm = value.Norml2();
-              assert(norm > 0.0);
-              assert(std::isfinite(norm));
-              value /= -norm;
+              value = -1.0 * value;
+              return value;
             }
             else
             {
               assert(false);
+              value = Math::Vector::Zero(m_dimension);
+              return value;
             }
           }
         }
         else
         {
           assert(false);
-          return FunctionValue::Vector{0, 0};
+          value = Math::Vector::Zero(m_dimension);
+          return value;
         }
+
         return value;
       }
 

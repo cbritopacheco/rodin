@@ -40,7 +40,7 @@ namespace Rodin::Variational
 
       virtual ~MatrixFunctionBase() = default;
 
-      FunctionValue::Matrix operator()(const Geometry::Point& p) const
+      Math::Matrix operator()(const Geometry::Point& p) const
       {
         return getValue(p).matrix();
       }

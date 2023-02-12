@@ -50,12 +50,8 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Matrix value;
-        value.SetSize(m_n);
-        value = 0.0;
-        for (int i = 0; i < m_n; i++)
-          value(i, i) = 1.0;
-        return value;
+        Math::Matrix res = Math::Matrix::Identity(m_n, m_n);
+        return res;
       }
 
       IdentityMatrix* copy() const noexcept override

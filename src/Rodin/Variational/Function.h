@@ -13,6 +13,9 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/DenseMatrix.h"
+
 #include "Rodin/Geometry/Simplex.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Utility/Overloaded.h"
@@ -153,12 +156,12 @@ namespace Rodin::Variational
    */
   class FunctionValue
   {
-    public:
-      using Scalar  = double; ///< Scalar value type
-      using Boolean  = bool; ///< Scalar value type
-      using Vector  = mfem::Vector; ///< Vector value type
-      using Matrix  = mfem::DenseMatrix; ///< Matrix value type
+    using Scalar  = double; ///< Scalar value type
+    using Boolean = bool; ///< Scalar value type
+    using Vector  = Math::Vector; ///< Vector value type
+    using Matrix  = Math::Matrix; ///< Matrix value type
 
+    public:
       constexpr
       FunctionValue() = delete;
 
@@ -172,19 +175,17 @@ namespace Rodin::Variational
         : m_v(v)
       {}
 
+      template <int Size>
       constexpr
-      FunctionValue(Vector&& v)
-      {
-        m_v.emplace<Vector>();
-        std::get<Vector>(m_v).Swap(v);
-      }
+      FunctionValue(Eigen::Vector<Scalar, Size>&& v)
+        : m_v(Math::Vector(std::move(v)))
+      {}
 
+      template <int Rows, int Cols>
       constexpr
-      FunctionValue(Matrix&& v)
-      {
-        m_v.emplace<mfem::DenseMatrix>();
-        std::get<mfem::DenseMatrix>(m_v).Swap(v);
-      }
+      FunctionValue(Eigen::Matrix<Scalar, Rows, Cols>&& v)
+        : m_v(Math::Matrix(std::move(v)))
+      {}
 
       FunctionValue(const FunctionValue&) = default;
 

@@ -1,6 +1,9 @@
+#include "Rodin/Utility/MFEM.h"
+
 #include "Rodin/Variational/FiniteElementSpace.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
+
 
 #include "Native.h"
 
@@ -57,7 +60,7 @@ namespace Rodin::Variational::Assembly
           {
             res.AddSubMatrix(
                 input.testFES.getDOFs(element), input.trialFES.getDOFs(element),
-                bfi.getMatrix(element));
+                Utility::Wrap<Math::Matrix&&, mfem::DenseMatrix>(bfi.getMatrix(element)));
           }
         }
       }
@@ -75,7 +78,7 @@ namespace Rodin::Variational::Assembly
           {
             res.AddSubMatrix(
                 input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
-                bfi.getMatrix(face));
+                Utility::Wrap<Math::Matrix&&, mfem::DenseMatrix>(bfi.getMatrix(face)));
           }
         }
 
@@ -88,7 +91,7 @@ namespace Rodin::Variational::Assembly
             {
               res.AddSubMatrix(
                   input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
-                  bfi.getMatrix(face));
+                  Utility::Wrap<Math::Matrix&&, mfem::DenseMatrix>(bfi.getMatrix(face)));
             }
           }
         }
@@ -102,7 +105,7 @@ namespace Rodin::Variational::Assembly
             {
               res.AddSubMatrix(
                   input.testFES.getDOFs(face), input.trialFES.getDOFs(face),
-                  bfi.getMatrix(face));
+                  Utility::Wrap<Math::Matrix&&, mfem::DenseMatrix>(bfi.getMatrix(face)));
             }
           }
         }
@@ -160,8 +163,9 @@ namespace Rodin::Variational::Assembly
         {
           if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
           {
-            res.AddElementVector(
-              input.fes.getDOFs(element), lfi.getVector(element));
+            Math::Vector vec = lfi.getVector(element);
+            mfem::Vector mvec; mvec.SetDataAndSize(vec.data(), vec.size());
+            res.AddElementVector(input.fes.getDOFs(element), mvec);
           }
         }
       }
@@ -173,11 +177,13 @@ namespace Rodin::Variational::Assembly
       {
         const auto& face = *it;
         const Geometry::Attribute attr = face.getAttribute();
-        for (const auto& bfi : facesLFIs)
+        for (const auto& lfi : facesLFIs)
         {
-          if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
+          if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
           {
-            res.AddElementVector(input.fes.getDOFs(face), bfi.getVector(face));
+            res.AddElementVector(
+                input.fes.getDOFs(face),
+                Utility::Wrap<Math::Vector&&, mfem::Vector>(lfi.getVector(face)));
           }
         }
 
@@ -187,7 +193,9 @@ namespace Rodin::Variational::Assembly
           {
             if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
             {
-              res.AddElementVector(input.fes.getDOFs(face), lfi.getVector(face));
+              res.AddElementVector(
+                  input.fes.getDOFs(face),
+                  Utility::Wrap<Math::Vector&&, mfem::Vector>(lfi.getVector(face)));
             }
           }
         }
@@ -199,7 +207,9 @@ namespace Rodin::Variational::Assembly
             const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
             if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
             {
-              res.AddElementVector(input.fes.getDOFs(face), lfi.getVector(face));
+              res.AddElementVector(
+                  input.fes.getDOFs(face),
+                  Utility::Wrap<Math::Vector&&, mfem::Vector>(lfi.getVector(face)));
             }
           }
         }

@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
+#include "Rodin/Utility/MFEM.h"
+
 #include "H1.h"
 #include "GridFunction.h"
 #include "BasisOperator.h"
@@ -61,7 +63,8 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Matrix grad;
+        Math::Matrix grad;
+        Utility::Wrap<Math::Matrix&, mfem::DenseMatrix> wrapped(grad);
         const auto& simplex = p.getSimplex();
         const auto& simplexMesh = simplex.getMesh();
         const auto& fesMesh = m_u.getFiniteElementSpace().getMesh();
@@ -70,7 +73,8 @@ namespace Rodin::Variational
           assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
           const auto& element = p.getSimplex();
           auto& trans = element.getTransformation();
-          m_u.getHandle().GetVectorGradient(trans, grad);
+          m_u.getHandle().GetVectorGradient(trans, wrapped);
+          return grad;
         }
         else if (simplex.getDimension() == fesMesh.getDimension() - 1)
         {
@@ -89,7 +93,8 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
+              return grad;
             }
             else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
             {
@@ -97,7 +102,8 @@ namespace Rodin::Variational
               ft->Elem2->ElementNo = parentIdx;
               ft->Elem2No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem2, wrapped);
+              return grad;
             }
             else if (face.isBoundary())
             {
@@ -106,11 +112,13 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
+              return grad;
             }
             else
             {
               assert(false);
+              return grad;
             }
           }
           else if (fesMesh.isSubMesh())
@@ -124,7 +132,8 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
+              return grad;
             }
             else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) && getTraceDomain() == ft->Elem2->Attribute)
             {
@@ -132,7 +141,8 @@ namespace Rodin::Variational
               ft->Elem2->ElementNo = idx;
               ft->Elem2No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem2, wrapped);
+              return grad;
             }
             else if (face.isBoundary())
             {
@@ -141,11 +151,13 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
+              return grad;
             }
             else
             {
               assert(false);
+              return grad;
             }
           }
           else
@@ -153,30 +165,34 @@ namespace Rodin::Variational
             if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
+              return grad;
             }
             else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem2, wrapped);
+              return grad;
             }
             else if (face.isBoundary())
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
               assert(ft->Elem1);
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
+              return grad;
             }
             else
             {
               assert(false);
+              return grad;
             }
           }
         }
         else
         {
           assert(false);
+          return grad;
         }
-        return grad;
       }
 
       Jacobian* copy() const noexcept override
@@ -242,23 +258,30 @@ namespace Rodin::Variational
         return m_u.getDOFs(element);
       }
 
-      void getOperator(
-          DenseBasisOperator& op, ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
       {
         const auto& element = p.getSimplex();
         auto& trans = element.getTransformation();
         const auto& fe = getFiniteElementSpace().getFiniteElement(element);
         const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const int n = dshape.NumRows();
-        const int sdim = trans.GetSpaceDim();
-        const int vdim = m_u.getFiniteElementSpace().getVectorDimension();
-        op.setSize(sdim, vdim, vdim * n);
-        op = 0.0;
-        for (int i = 0; i < vdim; i++)
-          for (int j = 0; j < n; j++)
-            for (int k = 0; k < sdim; k++)
-              op(k, i, j + i * n) = dshape(j, k);
+        const size_t n = dshape.NumRows();
+        const size_t sdim = trans.GetSpaceDim();
+        const size_t vdim = m_u.getFiniteElementSpace().getVectorDimension();
+        TensorBasis res(
+            static_cast<int>(vdim * n), static_cast<int>(sdim), static_cast<int>(vdim));
+        res.setZero();
+        for (size_t i = 0; i < vdim; i++)
+        {
+          for (size_t j = 0; j < n; j++)
+          {
+            for (size_t k = 0; k < sdim; k++)
+            {
+              res(static_cast<int>(j + i * n), static_cast<int>(k), static_cast<int>(i)) = dshape(j, k);
+            }
+          }
+        }
+        return res;
       }
 
       Jacobian* copy() const noexcept override

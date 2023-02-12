@@ -52,8 +52,8 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-double-promotion
     -Wno-missing-prototypes
     -Wno-missing-declarations
-    -Wno-error=c++11-narrowing
     -Wno-zero-as-null-pointer-constant
+    -Wno-error=c++11-narrowing
     -Wno-error=extra
     -Wno-error=pedantic)
 endif()

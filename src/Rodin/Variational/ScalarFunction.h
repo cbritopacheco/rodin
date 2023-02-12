@@ -46,7 +46,7 @@ namespace Rodin::Variational
 
       virtual ~ScalarFunctionBase() = default;
 
-      FunctionValue::Scalar operator()(const Geometry::Point& p) const
+      Scalar operator()(const Geometry::Point& p) const
       {
         return getValue(p).scalar();
       }
@@ -145,7 +145,7 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        return FunctionValue(static_cast<FunctionValue::Scalar>(m_x));
+        return FunctionValue(static_cast<Scalar>(m_x));
       }
 
       ScalarFunction* copy() const noexcept override

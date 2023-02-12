@@ -73,17 +73,16 @@ namespace Rodin::Variational
 
       virtual FunctionValue getValue(const Geometry::Point& p) const override
       {
-        FunctionValue::Scalar s;
         if (m_lhs->getRangeType() == RangeType::Scalar)
         {
-          s = m_lhs->getValue(p);
+          Scalar s = m_lhs->getValue(p);
           FunctionValue value = m_rhs->getValue(p);
           value *= s;
           return value;
         }
         else if (m_rhs->getRangeType() == RangeType::Scalar)
         {
-          s = m_rhs->getValue(p);
+          Scalar s = m_rhs->getValue(p);
           FunctionValue value = m_lhs->getValue(p);
           value *= s;
           return value;
@@ -209,22 +208,21 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
       {
         const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
         switch (m_lhs->getRangeType())
         {
           case RangeType::Scalar:
           {
-            m_rhs->getOperator(op, compute, p);
-            op *= m_lhs->getValue(p).scalar();
-            break;
+            return m_lhs->getValue(p).scalar() * m_rhs->getOperator(compute, p);
           }
           default:
+          {
             assert(false); // Unimplemented
+            break;
+          }
         }
       }
 
@@ -407,7 +405,8 @@ namespace Rodin::Variational
   }
 
   template <class T, class FES, ShapeFunctionSpaceType Space>
-  std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>>
+  std::enable_if_t<
+    std::is_arithmetic_v<T>, Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>>
   operator*(T v, const Grad<ShapeFunction<FES, Space>>& rhs)
   {
     return Mult(ScalarFunction(v), rhs);

@@ -3,6 +3,9 @@
 
 #include <mfem.hpp>
 
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/DenseMatrix.h"
+
 namespace Rodin::Variational
 {
   mfem::ElementTransformation* refinedToCoarse(

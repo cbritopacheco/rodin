@@ -10,27 +10,15 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+#include "Rodin/Types.h"
+
 namespace Rodin::Math
 {
-  class DenseMatrix : public Eigen::MatrixX<double>
-  {
-   public:
-    using Parent = Eigen::MatrixX<double>;
+  using Matrix = Eigen::MatrixX<Scalar>;
 
-    DenseMatrix() = default;
-
-    template <typename OtherDerived>
-    DenseMatrix(const Eigen::MatrixBase<OtherDerived>& other)
-      : Parent(other)
-    {}
-
-    template <typename OtherDerived>
-    DenseMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-    {
-       this->Parent::operator=(other);
-       return *this;
-    }
-  };
+  template <size_t Rows, size_t Cols>
+  using FixedSizeMatrix = Eigen::Matrix<Scalar, Rows, Cols>;
 }
 
 #endif
+

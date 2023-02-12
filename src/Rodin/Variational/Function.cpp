@@ -125,18 +125,25 @@ namespace Rodin::Variational::Internal
     {
       case mfem::ElementTransformation::ELEMENT:
       {
-        value = m_s.getValue(Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).vector();
+        auto tmp = m_s.getValue(
+            Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).vector();
+        value.SetSize(tmp.size());
+        std::copy(tmp.begin(), tmp.end(), value.begin());
         break;
       }
       case mfem::ElementTransformation::BDR_ELEMENT:
       {
         int faceIdx = m_mesh.getHandle().GetBdrFace(trans.ElementNo);
-        value = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).vector();
+        auto tmp = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).vector();
+        value.SetSize(tmp.size());
+        std::copy(tmp.begin(), tmp.end(), value.begin());
         break;
       }
       case mfem::ElementTransformation::FACE:
       {
-        value = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).vector();
+        auto tmp = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).vector();
+        value.SetSize(tmp.size());
+        std::copy(tmp.begin(), tmp.end(), value.begin());
         break;
       }
     }
@@ -171,18 +178,24 @@ namespace Rodin::Variational::Internal
     {
       case mfem::ElementTransformation::ELEMENT:
       {
-        value = m_s.getValue(Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).matrix();
+        auto tmp = m_s.getValue(Geometry::Point(*m_mesh.getElement(trans.ElementNo), ip)).matrix();
+        value.SetSize(tmp.rows(), tmp.cols());
+        value = tmp.data();
         break;
       }
       case mfem::ElementTransformation::BDR_ELEMENT:
       {
         int faceIdx = m_mesh.getHandle().GetBdrFace(trans.ElementNo);
-        value = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).matrix();
+        auto tmp = m_s.getValue(Geometry::Point(*m_mesh.getFace(faceIdx), ip)).matrix();
+        value.SetSize(tmp.rows(), tmp.cols());
+        value = tmp.data();
         break;
       }
       case mfem::ElementTransformation::FACE:
       {
-        value = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).matrix();
+        auto tmp = m_s.getValue(Geometry::Point(*m_mesh.getFace(trans.ElementNo), ip)).matrix();
+        value.SetSize(tmp.rows(), tmp.cols());
+        value = tmp.data();
         break;
       }
     }

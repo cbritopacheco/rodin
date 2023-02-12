@@ -18,6 +18,22 @@ constexpr char meshFile[] =
 
 int main()
 {
+  Math::Tensor<3> t(2, 4, 7);
+  for (int i = 0; i < t.size(); i++)
+    t(i) = i;
+  for (int i = 0; i < t.size(); i++)
+    std::cout << *(t.data() + i) << " ";
+  std::cout << std::endl;
+
+  std::cout << "cout\n";
+  std::cout << t << std::endl;
+
+  std::cout << "mat" << std::endl;
+
+  Math::Matrix c = Math::slice(t, 1, 1);
+  std::cout << c << std::endl;
+  std::exit(1);
+
   // Load mesh
   MMG::Mesh th;
   th.load(meshFile, IO::FileFormat::MEDIT);

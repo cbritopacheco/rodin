@@ -211,10 +211,8 @@ namespace Rodin::Variational
 
       virtual int getDOFs(const Geometry::Simplex& element) const = 0;
 
-      virtual void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const = 0;
+      virtual TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const = 0;
 
       virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
 
@@ -311,78 +309,80 @@ namespace Rodin::Variational
   template <ShapeFunctionSpaceType Space, class ... Ts>
   class ShapeFunction<H1<Ts...>, Space> : public ShapeFunctionBase<Space>
   {
-   public:
-    using FES = H1<Ts...>;
+    public:
+      using FES = H1<Ts...>;
 
-    constexpr
-    ShapeFunction(FES& fes)
-      : m_fes(fes)
+      constexpr
+        ShapeFunction(FES& fes)
+        : m_fes(fes)
+        {}
+
+      constexpr
+        ShapeFunction(const ShapeFunction& other)
+        :  ShapeFunctionBase<Space>(other),
+        m_fes(other.m_fes)
     {}
 
-    constexpr
-    ShapeFunction(const ShapeFunction& other)
-      :  ShapeFunctionBase<Space>(other),
-       m_fes(other.m_fes)
+      constexpr
+        ShapeFunction(ShapeFunction&& other)
+        :  ShapeFunctionBase<Space>(std::move(other)),
+        m_fes(other.m_fes)
     {}
 
-    constexpr
-    ShapeFunction(ShapeFunction&& other)
-      :  ShapeFunctionBase<Space>(std::move(other)),
-       m_fes(other.m_fes)
-    {}
+      FES& getFiniteElementSpace() override
+      {
+        return m_fes.get();
+      }
 
-    FES& getFiniteElementSpace() override
-    {
-      return m_fes.get();
-    }
+      const FES& getFiniteElementSpace() const override
+      {
+        return m_fes.get();
+      }
 
-    const FES& getFiniteElementSpace() const override
-    {
-      return m_fes.get();
-    }
+      int getRows() const override
+      {
+        return getFiniteElementSpace().getVectorDimension();
+      }
 
-    int getRows() const override
-    {
-      return getFiniteElementSpace().getVectorDimension();
-    }
+      int getColumns() const override
+      {
+        return 1;
+      }
 
-    int getColumns() const override
-    {
-      return 1;
-    }
+      int getDOFs(const Geometry::Simplex& element) const override
+      {
+        const auto& fe = getFiniteElementSpace().getFiniteElement(element);
+        return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
+      }
 
-    int getDOFs(const Geometry::Simplex& element) const override
-    {
-      const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-      return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
-    }
+      TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
+      {
+        const auto& element = p.getSimplex();
+        const auto& shape =
+          compute.getPhysicalShape(
+              getFiniteElementSpace().getFiniteElement(element),
+              element.getTransformation(),
+              element.getTransformation().GetIntPoint());
+        const size_t n = shape.Size();
+        const size_t vdim = getFiniteElementSpace().getVectorDimension();
+        TensorBasis res(static_cast<int>(vdim * n), static_cast<int>(vdim), 1);
+        res.setZero();
+        for (size_t i = 0; i < vdim; i++)
+        {
+          for (size_t j = 0; j < n; j++)
+          {
+            res(static_cast<int>(j + i * n), static_cast<int>(i), 0) = shape(j);
+          }
+        }
+      }
 
-    void getOperator(
-       DenseBasisOperator& op,
-       ShapeComputator& compute,
-       const Geometry::Point& p) const override
-    {
-      const auto& element = p.getSimplex();
-      const auto& shape =
-       compute.getPhysicalShape(
-        getFiniteElementSpace().getFiniteElement(element),
-        element.getTransformation(),
-        element.getTransformation().GetIntPoint());
-      const int n = shape.Size();
-      const int vdim = getFiniteElementSpace().getVectorDimension();
-      op.setSize(vdim, 1, vdim * n);
-      op = 0.0;
-      for (int i = 0; i < vdim; i++)
-       for (int j = 0; j < n; j++)
-        op(i, 0, j + i * n) = shape(j);
-    }
+      virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
 
-    virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
+      virtual ShapeFunction* copy() const noexcept override = 0;
 
-    virtual ShapeFunction* copy() const noexcept override = 0;
-
-   private:
-    std::reference_wrapper<FES> m_fes;
+    private:
+      std::reference_wrapper<FES> m_fes;
   };
 }
 

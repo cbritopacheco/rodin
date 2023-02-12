@@ -16,7 +16,6 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Cast.h"
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/SubMesh.h"

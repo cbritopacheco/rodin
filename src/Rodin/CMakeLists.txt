@@ -16,6 +16,7 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
     OPTIONS
     -w
     -O3
+    -flto
     -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
@@ -50,6 +51,7 @@ target_include_directories(Rodin
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_BINARY_DIR}/src
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+
 
 add_subdirectory(Math)
 add_subdirectory(IO)

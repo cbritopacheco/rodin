@@ -13,6 +13,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Utility/MFEM.h"
 
 #include "Dot.h"
 #include "LinearForm.h"
@@ -24,6 +25,8 @@
 #include "MatrixFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
+
+#include "Utility.h"
 
 namespace Rodin::Variational
 {
@@ -162,8 +165,7 @@ namespace Rodin::Variational
         return Region::Domain;
       }
 
-      virtual mfem::DenseMatrix getMatrix(
-          const Geometry::Simplex& element) const override;
+      virtual Math::Matrix getMatrix(const Geometry::Simplex& element) const override;
 
       virtual Integral* copy() const noexcept override
       {
@@ -312,7 +314,7 @@ namespace Rodin::Variational
         return Region::Domain;
       }
 
-      virtual mfem::Vector getVector(
+      virtual Math::Vector getVector(
           const Geometry::Simplex& element) const override;
 
       virtual Integral* copy() const noexcept override
@@ -507,7 +509,7 @@ namespace Rodin::Variational
         return static_cast<const Integrand&>(Parent::getIntegrand());
       }
 
-      mfem::DenseMatrix getMatrix(const Geometry::Simplex& element) const override
+      Math::Matrix getMatrix(const Geometry::Simplex& element) const override
       {
         const auto& trial = getIntegrand().getLHS()
                                .getFiniteElementSpace()
@@ -531,7 +533,7 @@ namespace Rodin::Variational
           mfem::DiffusionIntegrator bfi(one);
           bfi.SetIntRule(ir);
           bfi.AssembleElementMatrix(trial, element.getTransformation(), mat);
-          return mat;
+          return Utility::Wrap<mfem::DenseMatrix&, Eigen::Map<Math::Matrix>>(mat);
         }
         else
         {
@@ -609,7 +611,7 @@ namespace Rodin::Variational
         return static_cast<const Integrand&>(Parent::getIntegrand());
       }
 
-      virtual mfem::DenseMatrix getMatrix(
+      virtual Math::Matrix getMatrix(
           const Geometry::Simplex& element) const override
       {
         const auto& trial = getIntegrand().getLHS()
@@ -690,7 +692,7 @@ namespace Rodin::Variational
               break;
             }
           }
-          return mat;
+          return Utility::Wrap<mfem::DenseMatrix&, Eigen::Map<Math::Matrix>>(mat);
         }
         else
         {
@@ -792,7 +794,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      virtual mfem::DenseMatrix getMatrix(
+      virtual Math::Matrix getMatrix(
           const Geometry::Simplex& element) const override
       {
         mfem::DenseMatrix mat;
@@ -943,8 +945,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      virtual mfem::DenseMatrix getMatrix(
-          const Geometry::Simplex& element) const override
+      virtual Math::Matrix getMatrix(const Geometry::Simplex& element) const override
       {
         mfem::DenseMatrix mat;
         const auto& trial = getIntegrand().getLHS()
@@ -990,7 +991,7 @@ namespace Rodin::Variational
         {
           assert(false); // Unimplemented
         }
-        return mat;
+        return Utility::Wrap<mfem::DenseMatrix&, Eigen::Map<Math::Matrix>>(mat);
       }
 
       virtual const Integrand& getIntegrand() const override
@@ -1084,7 +1085,7 @@ namespace Rodin::Variational
         return static_cast<const Integrand&>(Parent::getIntegrand());
       }
 
-      virtual mfem::Vector getVector(const Geometry::Simplex& element) const override
+      virtual Math::Vector getVector(const Geometry::Simplex& element) const override
       {
         const FunctionBase& f = getIntegrand().getLHS();
 
@@ -1119,7 +1120,7 @@ namespace Rodin::Variational
             break;
           }
         }
-        return vec;
+        return Utility::Wrap<mfem::Vector&, Eigen::Map<Math::Vector>>(vec);
       }
 
       virtual Integral* copy() const noexcept override

@@ -7,9 +7,14 @@
 #ifndef RODIN_VARIATIONAL_DOT_H
 #define RODIN_VARIATIONAL_DOT_H
 
+#include <Eigen/Core>
+
+#include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Math/DenseMatrix.h"
 
 #include "ForwardDecls.h"
+
 #include "Function.h"
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
@@ -74,11 +79,15 @@ namespace Rodin::Variational
           }
           case RangeType::Vector:
           {
-            return m_a->getValue(p).vector() * m_b->getValue(p).vector();
+            Math::Vector a = m_a->getValue(p).vector();
+            Math::Vector b = m_b->getValue(p).vector();
+            return std::inner_product(a.data(), a.data() + a.size(), b.data(), 0.0);
           }
           case RangeType::Matrix:
           {
-            return m_a->getValue(p).matrix() * m_b->getValue(p).matrix();
+            Math::Matrix a = m_a->getValue(p).matrix();
+            Math::Matrix b = m_b->getValue(p).matrix();
+            return std::inner_product(a.data(), a.data() + a.size(), b.data(), 0.0);
           }
           default:
           {
@@ -183,41 +192,42 @@ namespace Rodin::Variational
         return getRHS().getFiniteElementSpace();
       }
 
-      virtual void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      virtual TensorBasis getOperator(
+          ShapeComputator& compute, const Geometry::Point& p) const override
       {
-        const int opDofs = getRHS().getDOFs(p.getSimplex());
-        op.setSize(1, 1, opDofs);
+        const size_t dofs = getRHS().getDOFs(p.getSimplex());
+        const TensorBasis basis = getRHS().getOperator(compute, p);
         switch (getLHS().getRangeType())
         {
           case RangeType::Scalar:
           {
-            FunctionValue::Scalar v = getLHS().getValue(p);
-            DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, compute, p);
-            for (int i = 0; i < opDofs; i++)
-              op(0, 0, i) = v * tmp(0, 0, i);
-            break;
+            return getLHS().getValue(p) * basis;
           }
           case RangeType::Vector:
           {
-            FunctionValue::Vector v = getLHS().getValue(p);
-            DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, compute, p);
-            for (int i = 0; i < opDofs; i++)
-              op(0, 0, i) = v * tmp(i).Data();
-            break;
+            assert(false);
+            TensorBasis res(static_cast<int>(dofs), 1, 1);
+            const Math::Vector vec = getLHS().getValue(p);
+            for (size_t i = 0; i < dofs; i++)
+            {
+              const auto dof = Math::slice(basis, 0, i);
+              res(static_cast<int>(i), 0, 0) =
+                std::inner_product(dof.data(), dof.data() + dof.size(), vec.data(), 0);
+            }
+            return res;
           }
           case RangeType::Matrix:
           {
-            FunctionValue::Matrix v = getLHS().getValue(p);
-            DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, compute, p);
-            for (int i = 0; i < opDofs; i++)
-              op(0, 0, i) = v * tmp(i);
-            break;
+            assert(false);
+            TensorBasis res(static_cast<int>(dofs), 1, 1);
+            const Math::Matrix mat = getLHS().getValue(p);
+            for (size_t i = 0; i < dofs; i++)
+            {
+              const auto dof = Math::slice(basis, 0, i);
+              res(static_cast<int>(i), 0, 0) =
+                std::inner_product(dof.data(), dof.data() + dof.size(), mat.data(), 0);
+            }
+            return res;
           }
         }
       }
@@ -264,45 +274,52 @@ namespace Rodin::Variational
           m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
       {}
 
-      virtual LHS& getLHS()
+      inline virtual LHS& getLHS()
       {
         assert(m_trial);
         return *m_trial;
       }
 
-      virtual RHS& getRHS()
+      inline virtual RHS& getRHS()
       {
         assert(m_test);
         return *m_test;
       }
 
-      virtual const LHS& getLHS() const
+      inline virtual const LHS& getLHS() const
       {
         assert(m_trial);
         return *m_trial;
       }
 
-      virtual const RHS& getRHS() const
+      inline virtual const RHS& getRHS() const
       {
         assert(m_test);
         return *m_test;
       }
 
-      virtual void getMatrix(
-          mfem::DenseMatrix& result, ShapeComputator& compute,
-          const Geometry::Point& p) const
+      inline virtual Math::Matrix getMatrix(
+          ShapeComputator& compute, const Geometry::Point& p) const
       {
         assert(m_trial->getRangeShape() == m_test->getRangeShape());
-        DenseBasisOperator trialOp, testOp;
-        m_trial->getOperator(trialOp, compute, p);
-        m_test->getOperator(testOp, compute, p);
-        result.SetSize(testOp.getDOFs(), trialOp.getDOFs());
-        for (int i = 0; i < testOp.getDOFs(); i++)
-          for (int j = 0; j < trialOp.getDOFs(); j++)
-            result(i, j) = testOp(i) * trialOp(j);
+        const TensorBasis trial = m_trial->getOperator(compute, p);
+        const TensorBasis test = m_test->getOperator(compute, p);
+        assert(trial.rank() == test.rank());
+        Math::Matrix res(test.dimension(0), trial.dimension(0));
+        for (Math::Matrix::Index i = 0; i < res.rows(); i++)
+        {
+          const auto testdof = Math::slice(test, 0, i);
+          for (Math::Matrix::Index j = 0; j < res.cols(); j++)
+          {
+            const auto trialdof = Math::slice(trial, 0, j);
+            res(i, j) = std::inner_product(
+                testdof.data(), testdof.data() + testdof.size(), trialdof.data(), 0);
+          }
+        }
+        return res;
       }
 
-      virtual Dot* copy() const noexcept override
+      inline virtual Dot* copy() const noexcept override
       {
         return new Dot(*this);
       }
