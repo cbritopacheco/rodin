@@ -533,7 +533,7 @@ namespace Rodin::Variational
           mfem::DiffusionIntegrator bfi(one);
           bfi.SetIntRule(ir);
           bfi.AssembleElementMatrix(trial, element.getTransformation(), mat);
-          return Utility::Wrap<mfem::DenseMatrix&, Eigen::Map<Math::Matrix>>(mat);
+          return Eigen::Map<Math::Matrix>(mat.Data(), mat.NumRows(), mat.NumCols());
         }
         else
         {
@@ -645,14 +645,14 @@ namespace Rodin::Variational
                   mfem::MassIntegrator bfi(q.template get<RangeType::Scalar>());
                   bfi.SetIntRule(ir);
                   bfi.AssembleElementMatrix(trial, element.getTransformation(), mat);
-                  break;
+                  return Eigen::Map<Math::Matrix>(mat.Data(), mat.NumRows(), mat.NumCols());
                 }
                 case RangeType::Vector:
                 {
                   mfem::VectorMassIntegrator bfi(q.template get<RangeType::Scalar>());
                   bfi.SetIntRule(ir);
                   bfi.AssembleElementMatrix(trial, element.getTransformation(), mat);
-                  break;
+                  return Eigen::Map<Math::Matrix>(mat.Data(), mat.NumRows(), mat.NumCols());
                 }
                 case RangeType::Matrix:
                 {
@@ -681,7 +681,7 @@ namespace Rodin::Variational
                   mfem::VectorMassIntegrator bfi(q.template get<RangeType::Matrix>());
                   bfi.SetIntRule(ir);
                   bfi.AssembleElementMatrix(trial, element.getTransformation(), mat);
-                  break;
+                  return Eigen::Map<Math::Matrix>(mat.Data(), mat.NumRows(), mat.NumCols());
                 }
                 case RangeType::Matrix:
                 {
@@ -692,7 +692,6 @@ namespace Rodin::Variational
               break;
             }
           }
-          return Utility::Wrap<mfem::DenseMatrix&, Eigen::Map<Math::Matrix>>(mat);
         }
         else
         {
@@ -843,6 +842,8 @@ namespace Rodin::Variational
         {
           assert(false); // Unimplemented
         }
+        Math::Matrix res = Eigen::Map<Math::Matrix>(mat.GetData(), mat.NumRows(), mat.NumCols());
+        return res;
       }
 
       virtual const Integrand& getIntegrand() const override
@@ -991,7 +992,8 @@ namespace Rodin::Variational
         {
           assert(false); // Unimplemented
         }
-        return Utility::Wrap<mfem::DenseMatrix&, Eigen::Map<Math::Matrix>>(mat);
+        Math::Matrix res = Eigen::Map<Math::Matrix>(mat.GetData(), mat.NumRows(), mat.NumCols());
+        return res;
       }
 
       virtual const Integrand& getIntegrand() const override
@@ -1105,22 +1107,24 @@ namespace Rodin::Variational
             mfem::DomainLFIntegrator lfi(q.get<RangeType::Scalar>());
             lfi.SetIntRule(ir);
             lfi.AssembleRHSElementVect(fe, element.getTransformation(), vec);
-            break;
+            Math::Vector res = Eigen::Map<Math::Vector>(vec.GetData(), vec.Size());
+            return res;
           }
           case RangeType::Vector:
           {
             mfem::VectorDomainLFIntegrator lfi(q.get<RangeType::Vector>());
             lfi.SetIntRule(ir);
             lfi.AssembleRHSElementVect(fe, element.getTransformation(), vec);
-            break;
+            Math::Vector res = Eigen::Map<Math::Vector>(vec.GetData(), vec.Size());
+            return res;
           }
           case RangeType::Matrix:
           {
             assert(false); // Unsupported
-            break;
+            Math::Vector res = Eigen::Map<Math::Vector>(nullptr, 0);
+            return res;
           }
         }
-        return Utility::Wrap<mfem::Vector&, Eigen::Map<Math::Vector>>(vec);
       }
 
       virtual Integral* copy() const noexcept override

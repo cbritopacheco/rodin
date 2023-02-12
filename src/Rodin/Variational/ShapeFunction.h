@@ -375,6 +375,7 @@ namespace Rodin::Variational
             res(static_cast<int>(j + i * n), static_cast<int>(i), 0) = shape(j);
           }
         }
+        return res;
       }
 
       virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;

@@ -63,8 +63,7 @@ namespace Rodin::Variational
 
       FunctionValue getValue(const Geometry::Point& p) const override
       {
-        Math::Matrix grad;
-        Utility::Wrap<Math::Matrix&, mfem::DenseMatrix> wrapped(grad);
+        mfem::DenseMatrix grad;
         const auto& simplex = p.getSimplex();
         const auto& simplexMesh = simplex.getMesh();
         const auto& fesMesh = m_u.getFiniteElementSpace().getMesh();
@@ -73,8 +72,9 @@ namespace Rodin::Variational
           assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
           const auto& element = p.getSimplex();
           auto& trans = element.getTransformation();
-          m_u.getHandle().GetVectorGradient(trans, wrapped);
-          return grad;
+          m_u.getHandle().GetVectorGradient(trans, grad);
+          Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+          return res;
         }
         else if (simplex.getDimension() == fesMesh.getDimension() - 1)
         {
@@ -93,8 +93,9 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
             {
@@ -102,8 +103,9 @@ namespace Rodin::Variational
               ft->Elem2->ElementNo = parentIdx;
               ft->Elem2No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else if (face.isBoundary())
             {
@@ -112,13 +114,14 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else
             {
               assert(false);
-              return grad;
+              return Math::Matrix(0, 0);
             }
           }
           else if (fesMesh.isSubMesh())
@@ -132,8 +135,9 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) && getTraceDomain() == ft->Elem2->Attribute)
             {
@@ -141,8 +145,9 @@ namespace Rodin::Variational
               ft->Elem2->ElementNo = idx;
               ft->Elem2No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else if (face.isBoundary())
             {
@@ -151,13 +156,14 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else
             {
               assert(false);
-              return grad;
+              return Math::Matrix(0, 0);
             }
           }
           else
@@ -165,33 +171,36 @@ namespace Rodin::Variational
             if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else if (face.isBoundary())
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
               assert(ft->Elem1);
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, wrapped);
-              return grad;
+              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              Math::Matrix res = Eigen::Map<Math::Vector>(grad.GetData(), grad.NumRows(), grad.NumCols());
+              return res;
             }
             else
             {
               assert(false);
-              return grad;
+              return Math::Matrix(0, 0);
             }
           }
         }
         else
         {
           assert(false);
-          return grad;
+          return Math::Matrix(0, 0);
         }
       }
 
@@ -268,8 +277,7 @@ namespace Rodin::Variational
         const size_t n = dshape.NumRows();
         const size_t sdim = trans.GetSpaceDim();
         const size_t vdim = m_u.getFiniteElementSpace().getVectorDimension();
-        TensorBasis res(
-            static_cast<int>(vdim * n), static_cast<int>(sdim), static_cast<int>(vdim));
+        TensorBasis res(static_cast<int>(vdim * n), static_cast<int>(sdim), static_cast<int>(vdim));
         res.setZero();
         for (size_t i = 0; i < vdim; i++)
         {

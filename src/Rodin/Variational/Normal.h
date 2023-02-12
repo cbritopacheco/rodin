@@ -44,9 +44,22 @@ namespace Rodin::Variational
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();
         auto& trans = simplex.getTransformation();
+        const auto& jac = trans.Jacobian();
+        const auto* jacdata = jac.Data();
         Math::Vector value(m_dimension);
-        Utility::Wrap<Math::Vector&, mfem::Vector> wrapped(value);
-        mfem::CalcOrtho(trans.Jacobian(), wrapped);
+
+        if (jac.Height() == 2)
+        {
+          value(0) =  jacdata[1];
+          value(1) = -jacdata[0];
+        }
+        else
+        {
+          value(0) = jacdata[1] * jacdata[5] - jacdata[2] * jacdata[4];
+          value(1) = jacdata[2] * jacdata[3] - jacdata[0] * jacdata[5];
+          value(2) = jacdata[0] * jacdata[4] - jacdata[1] * jacdata[3];
+        }
+
         const Scalar norm = value.norm();
         value /= norm;
         assert(norm >= 0.0);
