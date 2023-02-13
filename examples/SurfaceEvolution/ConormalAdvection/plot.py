@@ -6,7 +6,7 @@ from scipy.interpolate import make_interp_spline
 plt.style.use('grayscale')
 # plt.style.use('seaborn-paper')
 
-prefix = 'L2Error_'
+prefix = 'L2ErrorPhysical_'
 suffix = '.csv'
 expranges = {
     (1, 32): 0.1,
@@ -56,9 +56,10 @@ spline = make_interp_spline(meshsizes, test)
 x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
 y = abs(spline(x))
 cb = plt.colorbar(sm, ticks=np.linspace(0, 1, 10))
-cb.ax.set_ylabel('$\delta t = c$')
+cb.ax.set_ylabel('$c$')
 plt.plot(x, y, 'k--', linewidth=2,
     label='$\mathbb{E}[\mathcal{E}(t)]$')
+plt.title('$ \delta t = c h $')
 plt.ylabel('$\mathcal{E}(T)$', fontsize=14)
 plt.xlabel('$h$', fontsize=14)
 plt.legend(loc='upper left')

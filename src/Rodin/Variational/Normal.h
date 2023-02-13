@@ -81,15 +81,15 @@ namespace Rodin::Variational
           }
           else
           {
-            int* el1 = nullptr;
-            int* el2 = nullptr;
+            int el1 = -1;
+            int el2 = -1;
             const auto& meshHandle = simplex.getMesh().getHandle();
-            meshHandle.GetFaceElements(simplex.getIndex(), el1, el2);
-            if (el1 && *el1 >= 0 && getTraceDomain() == meshHandle.GetAttribute(*el1))
+            meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
+            if (el1 >= 0 && getTraceDomain() == meshHandle.GetAttribute(el1))
             {
               return value;
             }
-            else if (el2 && *el2 >= 0 && getTraceDomain() == meshHandle.GetAttribute(*el2))
+            else if (el2 >= 0 && getTraceDomain() == meshHandle.GetAttribute(el2))
             {
               value = -1.0 * value;
               return value;

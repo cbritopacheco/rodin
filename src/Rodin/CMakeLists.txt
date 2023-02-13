@@ -23,7 +23,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     LANG CXX
     OPTIONS
     -g
-    -O0
+    -O1
     -Wall
     -Werror
     -Wextra
