@@ -81,13 +81,13 @@ namespace Rodin::Variational
           {
             Math::Vector a = m_a->getValue(p).vector();
             Math::Vector b = m_b->getValue(p).vector();
-            return std::inner_product(a.data(), a.data() + a.size(), b.data(), 0.0);
+            return a.dot(b);
           }
           case RangeType::Matrix:
           {
             Math::Matrix a = m_a->getValue(p).matrix();
             Math::Matrix b = m_b->getValue(p).matrix();
-            return std::inner_product(a.data(), a.data() + a.size(), b.data(), 0.0);
+            return (a * b.transpose()).trace();
           }
           default:
           {
@@ -205,27 +205,23 @@ namespace Rodin::Variational
           }
           case RangeType::Vector:
           {
-            assert(false);
             TensorBasis res(static_cast<int>(dofs), 1, 1);
             const Math::Vector vec = getLHS().getValue(p);
             for (size_t i = 0; i < dofs; i++)
             {
               const auto dof = Math::slice(basis, 0, i);
-              res(static_cast<int>(i), 0, 0) =
-                std::inner_product(dof.data(), dof.data() + dof.size(), vec.data(), 0);
+              res(static_cast<int>(i), 0, 0) = (dof * vec.transpose()).trace();
             }
             return res;
           }
           case RangeType::Matrix:
           {
-            assert(false);
             TensorBasis res(static_cast<int>(dofs), 1, 1);
             const Math::Matrix mat = getLHS().getValue(p);
             for (size_t i = 0; i < dofs; i++)
             {
               const auto dof = Math::slice(basis, 0, i);
-              res(static_cast<int>(i), 0, 0) =
-                std::inner_product(dof.data(), dof.data() + dof.size(), mat.data(), 0);
+              res(static_cast<int>(i), 0, 0) = (dof * mat.transpose()).trace();
             }
             return res;
           }
@@ -312,8 +308,7 @@ namespace Rodin::Variational
           for (Math::Matrix::Index j = 0; j < res.cols(); j++)
           {
             const auto trialdof = Math::slice(trial, 0, j);
-            res(i, j) = std::inner_product(
-                testdof.data(), testdof.data() + testdof.size(), trialdof.data(), 0);
+            res(i, j) = (testdof * trialdof.transpose()).trace();
           }
         }
         return res;
