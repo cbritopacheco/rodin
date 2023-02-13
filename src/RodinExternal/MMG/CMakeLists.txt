@@ -40,7 +40,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     LANG C CXX
     OPTIONS
     -g
-    -O0
+    -O1
     -Wall
     -Wextra
     -Wpedantic
