@@ -20,24 +20,33 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DivSpecializations
-   * @brief Division of VectorFunctionBase by ScalarFunctionBase.
+   * @brief Division of a FunctionBase by a FunctionBase.
    */
-  template <>
-  class Division<FunctionBase, FunctionBase>
-    : public FunctionBase
+  template <class LHSDerived, class RHSDerived>
+  class Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>
+    : public FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
+    using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+    static_assert(
+        std::is_convertible_v<FormLanguage::Traits<FunctionBase<RHSDerived>>::ResultType, Scalar>);
     public:
-      Division(const FunctionBase& lhs, const FunctionBase& rhs);
+      Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+        : m_lhs(lhs), m_rhs(rhs)
+      {}
 
       Division(const Division& other);
 
       Division(Division&& other);
 
-      RangeShape getRangeShape() const override;
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return m_lhs.getRangeShape();
+      }
 
       Division& traceOf(Geometry::Attribute attr) override;
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      auto getValue(const Geometry::Point& p) const override
       {
         auto v = m_lhs->getValue(p);
         v /= m_rhs->getValue(p).scalar();
@@ -50,8 +59,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<FunctionBase> m_lhs;
-      std::unique_ptr<FunctionBase> m_rhs;
+      FunctionBase<LHSDerived> m_lhs;
+      FunctionBase<RHSDerived> m_rhs;
   };
   Division(const FunctionBase&, const FunctionBase&)
     -> Division<FunctionBase, FunctionBase>;

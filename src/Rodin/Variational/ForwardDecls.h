@@ -213,6 +213,7 @@ namespace Rodin::Variational
    * Instances of FunctionBase will always have the getValue() method defined,
    * which enables the evaluation of any function on some mesh element.
    */
+  template <class Derived>
   class FunctionBase;
 
   class Function;
@@ -220,6 +221,7 @@ namespace Rodin::Variational
   /**
    * @brief Abstract base class for objects representing scalar functions.
    */
+  template <class Derived>
   class ScalarFunctionBase;
 
   /**

@@ -19,6 +19,11 @@ namespace Rodin::Variational
   {
     public:
       constexpr
+      RangeShape(std::initializer_list<int> l)
+        : m_height(l.begin()[0]), m_width(l.begin()[1])
+      {}
+
+      constexpr
       RangeShape(int height, int width)
         : m_height(height), m_width(width)
       {
