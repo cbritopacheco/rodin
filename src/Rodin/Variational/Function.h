@@ -16,20 +16,27 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/DenseMatrix.h"
 
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Simplex.h"
+
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Utility/Overloaded.h"
 
 #include "ForwardDecls.h"
 
+#include "RangeShape.h"
+
 namespace Rodin::Variational::Internal
 {
-  template <RangeType R>
-  class ProxyFunction;
+  template <class Derived>
+  class ScalarProxyFunction;
 
-  using ScalarProxyFunction = ProxyFunction<RangeType::Scalar>;
-  using VectorProxyFunction = ProxyFunction<RangeType::Vector>;
-  using MatrixProxyFunction = ProxyFunction<RangeType::Matrix>;
+  template <class Derived>
+  class VectorProxyFunction;
+
+  template <class Derived>
+  class MatrixProxyFunction;
 
   class MFEMFunction
   {
@@ -362,6 +369,7 @@ namespace Rodin::Variational
       std::variant<Scalar, Boolean, Vector, Matrix> m_v;
   };
 
+  template <class Derived>
   class FunctionBase : public FormLanguage::Base
   {
     public:
@@ -377,24 +385,11 @@ namespace Rodin::Variational
           m_traceDomain(std::move(other.m_traceDomain))
       {}
 
+      virtual ~FunctionBase() = default;
+
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = other.m_traceDomain;
-        return *this;
-      }
-
-      /**
-       * @brief Sets an attribute which will be interpreted as the domain to
-       * trace.
-       *
-       * Convenience function to call traceOf(std::set<int>) with only one
-       * attribute.
-       *
-       * @returns Reference to self (for method chaining)
-       */
-      virtual FunctionBase& traceOf(Geometry::Attribute attr)
-      {
-        m_traceDomain = attr;
         return *this;
       }
 
@@ -412,24 +407,50 @@ namespace Rodin::Variational
         return m_traceDomain;
       }
 
-      virtual Transpose<FunctionBase> T() const;
+      constexpr
+      Transpose<FunctionBase> T() const
+      {
+        return Transpose<FunctionBase>(*this);
+      }
 
-      virtual RangeShape getRangeShape() const = 0;
-
-      virtual RangeType getRangeType() const;
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return static_cast<const Derived&>(*this).getRangeShape();
+      }
 
       /**
        * @note It is not necessary to set the size beforehand.
        */
-      virtual FunctionValue getValue(const Geometry::Point& p) const = 0;
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
+      }
 
       /**
        * @brief Evaluates the function on a vertex of the mesh.
        * @param[in] v Vertex belonging to the mesh
        */
-      FunctionValue operator()(const Geometry::Point& v) const
+      constexpr
+      auto operator()(const Geometry::Point& v) const
       {
         return getValue(v);
+      }
+
+      /**
+       * @brief Sets an attribute which will be interpreted as the domain to
+       * trace.
+       *
+       * Convenience function to call traceOf(std::set<int>) with only one
+       * attribute.
+       *
+       * @returns Reference to self (for method chaining)
+       */
+      virtual FunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        m_traceDomain = attr;
+        return *this;
       }
 
       virtual FunctionBase* copy() const noexcept override = 0;
@@ -441,64 +462,181 @@ namespace Rodin::Variational
   };
 }
 
+namespace Rodin::FormLanguage
+{
+  template <class Derived>
+  struct Traits<Variational::FunctionBase<Derived>>
+  {
+    using ResultType = std::result_of_t<
+      decltype(&Variational::FunctionBase<Derived>::getValue())(const Geometry::Point&)>;
+  };
+}
+
 namespace Rodin::Variational::Internal
 {
-  template <>
-  class ProxyFunction<RangeType::Scalar> : public mfem::Coefficient
+  template <class Derived>
+  class ScalarProxyFunction : public mfem::Coefficient
   {
     public:
-      ProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase& s);
+      ScalarProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
+         : m_mesh(mesh), m_s(s)
+      {}
 
-      ProxyFunction(const ProxyFunction& other);
+      ScalarProxyFunction(const ScalarProxyFunction& other)
+        : mfem::Coefficient(other),
+          m_mesh(other.m_mesh),
+          m_s(other.m_s)
+      {}
 
-      ProxyFunction(ProxyFunction&& other);
+      ScalarProxyFunction(ScalarProxyFunction&& other)
+        : mfem::Coefficient(std::move(other)),
+          m_mesh(other.m_mesh),
+          m_s(other.m_s)
+      {}
 
-      double Eval(
-          mfem::ElementTransformation& trans,
-          const mfem::IntegrationPoint& ip) override;
+      inline
+      double Eval(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+      final override
+      {
+        Scalar res = 0;
+        switch (trans.ElementType)
+        {
+          case mfem::ElementTransformation::ELEMENT:
+          {
+            res = m_s.getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo), ip));
+            break;
+          }
+          case mfem::ElementTransformation::BDR_ELEMENT:
+          {
+            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            res = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(faceIdx), ip));
+            break;
+          }
+          case mfem::ElementTransformation::FACE:
+          {
+            res = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(trans.ElementNo), ip));
+            break;
+          }
+        }
+        return res;
+      }
 
     private:
-      const Geometry::MeshBase& m_mesh;
-      const FunctionBase& m_s;
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      std::reference_wrapper<const FunctionBase<Derived>> m_s;
   };
 
-  template <>
-  class ProxyFunction<RangeType::Vector> : public mfem::VectorCoefficient
+  template <class Derived>
+  class VectorProxyFunction : public mfem::VectorCoefficient
   {
     public:
-      ProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase& s);
+      VectorProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
+        : mfem::VectorCoefficient(
+            s.getRangeShape().height() == 1 ?
+              s.getRangeShape().width() : s.getRangeShape().height()),
+          m_mesh(mesh),
+          m_s(s)
+      {}
 
-      ProxyFunction(const ProxyFunction& other);
+      VectorProxyFunction(const VectorProxyFunction& other)
+        : mfem::VectorCoefficient(other),
+          m_mesh(other.m_mesh),
+          m_s(other.m_s)
+      {}
 
-      ProxyFunction(ProxyFunction&& other);
+      VectorProxyFunction(VectorProxyFunction&& other)
+        : mfem::VectorCoefficient(std::move(other)),
+          m_mesh(other.mesh),
+          m_s(other.m_s)
+      {}
 
+      inline
       void Eval(
-          mfem::Vector& value,
-          mfem::ElementTransformation& trans,
-          const mfem::IntegrationPoint& ip) override;
+          mfem::Vector& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+      final override
+      {
+        Math::Vector vec;
+        switch (trans.ElementType)
+        {
+          case mfem::ElementTransformation::ELEMENT:
+          {
+            vec = m_s.getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo), ip));
+            break;
+          }
+          case mfem::ElementTransformation::BDR_ELEMENT:
+          {
+            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            vec = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(faceIdx), ip));
+            break;
+          }
+          case mfem::ElementTransformation::FACE:
+          {
+            vec = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(trans.ElementNo), ip));
+            break;
+          }
+        }
+        value.SetSize(vec.size());
+        std::copy(vec.begin(), vec.end(), value.begin());
+      }
 
     private:
-      const Geometry::MeshBase& m_mesh;
-      const FunctionBase& m_s;
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      std::reference_wrapper<const FunctionBase<Derived>> m_s;
   };
 
-  template <>
-  class ProxyFunction<RangeType::Matrix> : public mfem::MatrixCoefficient
+  template <class Derived>
+  class MatrixProxyFunction : public mfem::MatrixCoefficient
   {
     public:
-      ProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase& s);
+      MatrixProxyFunction(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
+        : mfem::MatrixCoefficient(s.getRangeShape().height(), s.getRangeShape().width()),
+          m_mesh(mesh),
+          m_s(s)
+      {}
 
-      ProxyFunction(const ProxyFunction& other);
+      MatrixProxyFunction(const MatrixProxyFunction& other)
+        : mfem::MatrixCoefficient(other),
+          m_mesh(other.m_mesh),
+          m_s(other.m_s)
+      {}
 
-      ProxyFunction(ProxyFunction&& other);
+      MatrixProxyFunction(MatrixProxyFunction&& other)
+        : mfem::MatrixCoefficient(std::move(other)),
+          m_mesh(other.m_mesh),
+          m_s(other.m_s)
+      {}
 
+      inline
       void Eval(
-          mfem::DenseMatrix& value,
-          mfem::ElementTransformation& trans,
-          const mfem::IntegrationPoint& ip) override;
+          mfem::DenseMatrix& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
+      final override
+      {
+        Math::Matrix mat;
+        switch (trans.ElementType)
+        {
+          case mfem::ElementTransformation::ELEMENT:
+          {
+            mat = m_s.getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo), ip));
+            break;
+          }
+          case mfem::ElementTransformation::BDR_ELEMENT:
+          {
+            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            mat = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(faceIdx), ip));
+            break;
+          }
+          case mfem::ElementTransformation::FACE:
+          {
+            mat = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(trans.ElementNo), ip));
+            break;
+          }
+        }
+        value.SetSize(mat.rows(), mat.cols());
+        value = mat.data();
+      }
     private:
-      const Geometry::MeshBase& m_mesh;
-      const FunctionBase& m_s;
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      std::reference_wrapper<const FunctionBase<Derived>> m_s;
   };
 }
 

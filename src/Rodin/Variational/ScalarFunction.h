@@ -31,34 +31,37 @@ namespace Rodin::Variational
    * @see ScalarFunction
    */
 
-  class ScalarFunctionBase : public FunctionBase
+  template <class Derived>
+  class ScalarFunctionBase : public FunctionBase<ScalarFunctionBase<Derived>>
   {
+    using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
     public:
+      constexpr
       ScalarFunctionBase() = default;
 
+      constexpr
       ScalarFunctionBase(const ScalarFunctionBase& other)
-        : FunctionBase(other)
+        : Parent(other)
       {}
 
+      constexpr
       ScalarFunctionBase(ScalarFunctionBase&& other)
-        : FunctionBase(std::move(other))
+        : Parent(std::move(other))
       {}
 
       virtual ~ScalarFunctionBase() = default;
 
-      Scalar operator()(const Geometry::Point& p) const
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point& p) const
       {
-        return getValue(p).scalar();
+        return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      RangeShape getRangeShape() const override
+      constexpr
+      RangeShape getRangeShape() const
       {
         return {1, 1};
-      }
-
-      RangeType getRangeType() const override
-      {
-        return RangeType::Scalar;
       }
 
       virtual ScalarFunctionBase* copy() const noexcept override = 0;
@@ -67,37 +70,41 @@ namespace Rodin::Variational
   /**
    * @ingroup ScalarFunctionSpecializations
    */
-  template <>
-  class ScalarFunction<FunctionBase> : public ScalarFunctionBase
+  template <class Derived>
+  class ScalarFunction<FunctionBase<Derived>>
+    : public ScalarFunctionBase<ScalarFunction<FunctionBase<Derived>>>
   {
+    using Parent = ScalarFunctionBase<ScalarFunction<FunctionBase<Derived>>>;
     public:
-      ScalarFunction(const FunctionBase& nested)
-        : m_nested(nested.copy())
-      {
-        if (nested.getRangeType() != RangeType::Scalar)
-          UnexpectedRangeTypeException(RangeType::Scalar, nested.getRangeType()).raise();
-      }
-
-      ScalarFunction(const ScalarFunction& other)
-        :  ScalarFunctionBase(other),
-          m_nested(other.m_nested->copy())
+      constexpr
+      ScalarFunction(const FunctionBase<Derived>& nested)
+        : m_nested(nested)
       {}
 
+      constexpr
+      ScalarFunction(const ScalarFunction& other)
+        : Parent(other),
+          m_nested(other.m_nested)
+      {}
+
+      constexpr
       ScalarFunction(ScalarFunction&& other)
-        : ScalarFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_nested(std::move(other.m_nested))
       {}
 
-      ScalarFunction& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point& v) const
       {
-        ScalarFunctionBase::traceOf(attrs);
-        m_nested->traceOf(attrs);
-        return *this;
+        return static_cast<Scalar>(m_nested->getValue(v));
       }
 
-      FunctionValue getValue(const Geometry::Point& v) const override
+      ScalarFunction& traceOf(Geometry::Attribute attrs) override
       {
-        return m_nested->getValue(v);
+        ScalarFunctionBase<ScalarFunction<FunctionBase<Derived>>>::traceOf(attrs);
+        m_nested->traceOf(attrs);
+        return *this;
       }
 
       ScalarFunction* copy() const noexcept override
@@ -106,9 +113,10 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<FunctionBase> m_nested;
+      FunctionBase<Derived> m_nested;
   };
-  ScalarFunction(const FunctionBase&) -> ScalarFunction<FunctionBase>;
+  template <class Derived>
+  ScalarFunction(const FunctionBase<Derived>&) -> ScalarFunction<FunctionBase<Derived>>;
 
   /**
    * @ingroup ScalarFunctionSpecializations
@@ -119,8 +127,10 @@ namespace Rodin::Variational
    */
   template <class Number>
   class ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>
-    : public ScalarFunctionBase
+    : public ScalarFunctionBase<ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>>
   {
+    using Parent =
+      ScalarFunctionBase<ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>>;
     public:
       /**
        * @brief Constructs a ScalarFunction from an arithmetic value.
@@ -133,19 +143,21 @@ namespace Rodin::Variational
 
       constexpr
       ScalarFunction(const ScalarFunction& other)
-        : ScalarFunctionBase(other),
+        : Parent(other),
           m_x(other.m_x)
       {}
 
       constexpr
       ScalarFunction(ScalarFunction&& other)
-        : ScalarFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_x(other.m_x)
       {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point&) const
       {
-        return FunctionValue(static_cast<Scalar>(m_x));
+        return static_cast<Scalar>(m_x);
       }
 
       ScalarFunction* copy() const noexcept override
@@ -170,20 +182,20 @@ namespace Rodin::Variational
    * @brief Represents a scalar function given by an arbitrary scalar function.
    */
   template <>
-  class ScalarFunction<std::function<double(const Geometry::Point&)>>
-    : public ScalarFunctionBase
+  class ScalarFunction<std::function<Scalar(const Geometry::Point&)>>
+    : public ScalarFunctionBase<ScalarFunction<std::function<double(const Geometry::Point&)>>>
   {
     public:
       template <class T>
+      constexpr
       ScalarFunction(T&& f)
-        : ScalarFunction(
-            std::function<double(const Geometry::Point&)>(std::forward<T>(f)))
+        : ScalarFunction(std::function<Scalar(const Geometry::Point&)>(std::forward<T>(f)))
       {}
 
       /**
        * @brief Constructs a ScalarFunction from an std::function.
        */
-      ScalarFunction(std::function<double(const Geometry::Point&)> f)
+      ScalarFunction(std::function<Scalar(const Geometry::Point&)> f)
         : m_f(f)
       {}
 
@@ -197,7 +209,9 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      FunctionValue getValue(const Geometry::Point& v) const override
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
@@ -208,17 +222,17 @@ namespace Rodin::Variational
       }
 
     private:
-      const std::function<double(const Geometry::Point&)> m_f;
+      const std::function<Scalar(const Geometry::Point&)> m_f;
   };
 
-  ScalarFunction(std::function<double(const Geometry::Point&)>)
-    -> ScalarFunction<std::function<double(const Geometry::Point&)>>;
+  ScalarFunction(std::function<Scalar(const Geometry::Point&)>)
+    -> ScalarFunction<std::function<Scalar(const Geometry::Point&)>>;
 
   template <class T>
   ScalarFunction(T)
     -> ScalarFunction<
-      std::enable_if_t<std::is_invocable_r_v<double, T, const Geometry::Point&>,
-      std::function<double(const Geometry::Point&)>>>;
+      std::enable_if_t<std::is_invocable_r_v<Scalar, T, const Geometry::Point&>,
+      std::function<Scalar(const Geometry::Point&)>>>;
 }
 
 #endif
