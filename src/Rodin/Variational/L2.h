@@ -18,11 +18,13 @@
 
 namespace Rodin::Variational
 {
-  template <class TraitTag>
-  class L2 : public FiniteElementSpaceBase
+  template <class Derived, class ContextType>
+  class L2Base
+    : public FiniteElementSpaceBase
   {
     public:
-      using Context = TraitTag;
+      using Context = ContextType;
+      using Parent = FiniteElementSpaceBase;
 
       /**
        * @brief Possible types of bases for the H1 finite element space.
@@ -96,13 +98,13 @@ namespace Rodin::Variational
         IntegratedGLL      = mfem::BasisType::IntegratedGLL
       };
 
-      static constexpr Basis DefaultBasis = Basis::GaussLegendre;
+      static constexpr const Basis DefaultBasis = Basis::GaussLegendre;
 
       class FEC : public FiniteElementCollectionBase
       {
         public:
           constexpr
-          FEC(const int order, const int elemDim, Basis basis)
+          FEC(const size_t order, const size_t elemDim, Basis basis)
             : m_fec(new mfem::L2_FECollection(order, elemDim, static_cast<int>(basis)))
           {
             assert(order >= 0);
@@ -148,24 +150,23 @@ namespace Rodin::Variational
       };
 
       constexpr
-      L2(Geometry::Mesh<Context>& mesh,
-          int vdim = 1, int order = 0, Basis basis = DefaultBasis)
-        :  m_fec(order, mesh.getDimension(), basis),
+      L2Base(Geometry::Mesh<Context>& mesh,
+          const size_t vdim, const size_t order, Basis basis = DefaultBasis)
+        : m_fec(order, mesh.getDimension(), basis),
           m_mesh(mesh),
-          m_fes(new mfem::FiniteElementSpace(
-                &mesh.getHandle(), &m_fec.getHandle(), vdim))
+          m_fes(new mfem::FiniteElementSpace(&mesh.getHandle(), &m_fec.getHandle(), vdim))
       {}
 
       constexpr
-      L2(const L2& other)
-        :  FiniteElementSpaceBase(other),
+      L2Base(const L2Base& other)
+        : FiniteElementSpaceBase(other),
           m_fec(other.m_fec),
           m_mesh(other.m_mesh),
           m_fes(new mfem::FiniteElementSpace(*other.m_fes))
       {}
 
       constexpr
-      L2(L2&& other)
+      L2Base(L2Base&& other)
         :  FiniteElementSpaceBase(std::move(other)),
           m_fec(std::move(other.m_fec)),
           m_mesh(std::move(other.m_mesh)),
@@ -173,7 +174,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      L2& operator=(L2&& other)
+      L2Base& operator=(L2Base&& other)
       {
         FiniteElementSpaceBase::operator=(std::move(other));
         m_fec = std::move(other.m_fec);
@@ -182,33 +183,32 @@ namespace Rodin::Variational
         return *this;
       }
 
-      int getSize() const override
+      inline
+      size_t getSize() const final override
       {
         return getHandle().GetVSize();
       }
 
-      bool isParallel() const override
-      {
-        return false;
-      }
-
-      Geometry::Mesh<Context>& getMesh() override
+      inline
+      Geometry::Mesh<Context>& getMesh() final override
       {
         return m_mesh;
       }
 
-      const Geometry::Mesh<Context>& getMesh() const override
+      inline
+      const Geometry::Mesh<Context>& getMesh() const final override
       {
         return m_mesh;
       }
 
-      const FEC& getFiniteElementCollection() const override
+      inline
+      const FEC& getFiniteElementCollection() const final override
       {
         return m_fec;
       }
 
-      mfem::Array<int> getDOFs(
-          const Geometry::Simplex& element) const override
+      inline
+      mfem::Array<int> getDOFs(const Geometry::Simplex& element) const final override
       {
         mfem::Array<int> res;
         if (element.getDimension() == getMesh().getDimension())
@@ -226,8 +226,9 @@ namespace Rodin::Variational
         return res;
       }
 
-      const mfem::FiniteElement& getFiniteElement(
-          const Geometry::Simplex& element) const override
+      inline
+      const mfem::FiniteElement&
+      getFiniteElement(const Geometry::Simplex& element) const final override
       {
         if (element.getDimension() == getMesh().getDimension())
         {
@@ -261,10 +262,81 @@ namespace Rodin::Variational
       std::unique_ptr<mfem::FiniteElementSpace> m_fes;
   };
 
+  template <class ContextType>
+  class L2<ContextType, Scalar>
+    : public L2Base<L2<ContextType, Scalar>, ContextType>
+  {
+    public:
+      using Context = ContextType;
+      using Parent = L2Base<L2<ContextType, Scalar>, ContextType>;
+      using Range = Scalar;
+      using Basis = typename Parent::Basis;
+      using Parent::operator=;
+      static constexpr const Basis DefaultBasis = Basis::GaussLobato;
+
+      constexpr
+      L2(Geometry::Mesh<Context>& mesh,
+          FiniteElementOrder order = FiniteElementOrder(0),
+          Basis basis = DefaultBasis)
+        : Parent(mesh, 1, order, basis)
+      {}
+
+      constexpr
+      L2(const L2& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      L2(L2&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
   template <class Context>
   L2(Geometry::Mesh<Context>& mesh,
-    int vdim = 1,
-    int order = 1, typename L2<Context>::Basis basis = L2<Context>::DefaultBasis) -> L2<Context>;
+      FiniteElementOrder order = FiniteElementOrder(0),
+      typename L2Base<L2<Context, Scalar>, Context>::Basis basis =
+        L2Base<L2<Context, Scalar>, Context>::DefaultBasis)
+  -> L2<Context, Scalar>;
+
+  template <class ContextType>
+  class L2<ContextType, Math::Vector>
+    : public L2Base<L2<ContextType, Math::Vector>, ContextType>
+  {
+    public:
+      using Context = ContextType;
+      using Parent = L2Base<L2<ContextType, Math::Vector>, ContextType>;
+      using Range = Math::Vector;
+      using Basis = typename Parent::Basis;
+      using Parent::operator=;
+      static constexpr const Basis DefaultBasis = Basis::GaussLobato;
+
+      constexpr
+      L2(Geometry::Mesh<Context>& mesh,
+          size_t vdim,
+          FiniteElementOrder order = FiniteElementOrder(0),
+          Basis basis = DefaultBasis)
+        : Parent(mesh, vdim, order, basis)
+      {}
+
+      constexpr
+      L2(const L2& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      L2(L2&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class Context>
+  L2(Geometry::Mesh<Context>& mesh,
+      size_t vdim,
+      FiniteElementOrder order = FiniteElementOrder(0),
+      typename L2Base<L2<Context, Math::Vector>, Context>::Basis basis =
+        L2Base<L2<Context, Math::Vector>, Context>::DefaultBasis)
+  -> L2<Context, Math::Vector>;
 }
 
 #endif

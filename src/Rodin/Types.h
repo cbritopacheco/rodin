@@ -2,6 +2,7 @@
 #define RODIN_TYPES_H
 
 #include <cstddef>
+#include <Eigen/Core>
 
 #include "Rodin/Configure.h"
 

@@ -18,49 +18,36 @@ namespace Rodin::Variational
     public:
       using Parent = Integrator;
 
+      template <class TrialFES, class TestFES>
       BilinearFormIntegratorBase(
-          const ShapeFunctionBase<TrialSpace>& u,
-          const ShapeFunctionBase<TestSpace>& v)
+          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         :  m_u(u.copy()), m_v(v.copy())
       {}
 
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
-        :  Parent(other),
+        : Parent(other),
           m_u(other.m_u->copy()), m_v(other.m_v->copy()),
           m_attrs(other.m_attrs)
       {}
 
       BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
-        :  Parent(std::move(other)),
+        : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
           m_attrs(std::move(other.m_attrs))
       {}
 
+      virtual
+      ~BilinearFormIntegratorBase() = default;
+
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
+      inline
       const std::set<Geometry::Attribute>& getAttributes() const
       {
         return m_attrs;
       }
 
-      /**
-       * @brief Gets reference to trial function.
-       */
-      const ShapeFunctionBase<TrialSpace>& getTrialFunction() const
-      {
-        assert(m_u);
-        return *m_u;
-      }
-
-      /**
-       * @brief Gets reference to test function.
-       */
-      const ShapeFunctionBase<TestSpace>& getTestFunction() const
-      {
-        assert(m_v);
-        return *m_v;
-      }
 
       /**
        * @brief Specifies the material reference over which to integrate.
@@ -69,6 +56,7 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
+      inline
       BilinearFormIntegratorBase& over(Geometry::Attribute attr)
       {
         return over(std::set<Geometry::Attribute>{attr});
@@ -81,6 +69,7 @@ namespace Rodin::Variational
        * Specifies the material references over which the integration should
        * take place.
        */
+      inline
       BilinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
       {
         assert(attrs.size() > 0);
@@ -88,24 +77,46 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Integrator::Type getType() const override
+      inline
+      Integrator::Type getType() const
+      final override
       {
         return Integrator::Type::Bilinear;
       }
 
-      virtual ~BilinearFormIntegratorBase() = default;
+      /**
+       * @brief Gets reference to trial function.
+       */
+      inline
+      const FormLanguage::Base& getTrialFunction() const
+      {
+        assert(m_u);
+        return *m_u;
+      }
+
+      /**
+       * @brief Gets reference to test function.
+       */
+      inline
+      const FormLanguage::Base& getTestFunction() const
+      {
+        assert(m_u);
+        return *m_u;
+      }
 
       /**
        * @brief Performs the assembly of the element matrix for the given
        * element.
        */
-      virtual Math::Matrix getMatrix(const Geometry::Simplex& element) const = 0;
+      virtual
+      Math::Matrix getMatrix(const Geometry::Simplex& element) const = 0;
 
-      virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
+      virtual
+      BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_u;
-      std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_v;
+      std::unique_ptr<FormLanguage::Base> m_u;
+      std::unique_ptr<FormLanguage::Base> m_v;
       std::set<Geometry::Attribute> m_attrs;
   };
 }

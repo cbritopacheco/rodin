@@ -8,7 +8,7 @@
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Math/DenseMatrix.h"
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
 #include "ForwardDecls.h"
@@ -36,8 +36,6 @@ namespace Rodin::Geometry
   class Transformation
   {
     public:
-      virtual const Simplex& getSimplex() const = 0;
-
       /**
        * @brief Performs the transformation, taking reference coordinates into
        * physical coordinates.
@@ -66,6 +64,8 @@ namespace Rodin::Geometry
        * @param[in] pc Physical coordinates of the point.
        */
       virtual Math::Vector inverse(const Math::Vector& pc) const = 0;
+
+      virtual const mfem::ElementTransformation& getHandle() const = 0;
   };
 
   /**
@@ -79,27 +79,29 @@ namespace Rodin::Geometry
         : m_fe(fe)
       {}
 
-      const Simplex& getSimplex() const override;
-
-      Math::Vector transform(const Math::Vector& p) const override
-      {
-        return m_pm * p;
-      }
-
-      const Math::DenseMatrix& getMatrix() const
+      inline
+      const Math::Matrix& getMatrix() const
       {
         return m_pm;
       }
 
-      IsoparametricTransformation& setMatrix(const Math::DenseMatrix& pm)
+      inline
+      IsoparametricTransformation& setMatrix(const Math::Matrix& pm)
       {
         m_pm = pm;
         return *this;
       }
 
+      inline
+      Math::Vector transform(const Math::Vector& p) const
+      final override
+      {
+        return m_pm * p;
+      }
+
     private:
       std::reference_wrapper<const Variational::FiniteElement> m_fe;
-      Math::DenseMatrix m_pm;
+      Math::Matrix m_pm;
   };
 }
 

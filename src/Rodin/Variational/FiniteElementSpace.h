@@ -18,6 +18,32 @@
 
 namespace Rodin::Variational
 {
+  class FiniteElementOrder
+  {
+    public:
+      explicit
+      constexpr
+      FiniteElementOrder(size_t v)
+        : m_v(v)
+      {}
+
+      constexpr
+      FiniteElementOrder(const FiniteElementOrder&) = default;
+
+      constexpr
+      FiniteElementOrder(FiniteElementOrder&&) = default;
+
+      inline
+      constexpr
+      operator size_t() const
+      {
+        return m_v;
+      }
+
+    private:
+      const size_t m_v;
+  };
+
   class FiniteElementSpaceBase
   {
     public:
@@ -45,15 +71,13 @@ namespace Rodin::Variational
       /**
        * @brief Gets the vector dimensions
        */
-      int getVectorDimension() const;
+      size_t getVectorDimension() const;
 
       mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr) const;
 
       mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
 
-      virtual int getSize() const = 0;
-
-      virtual bool isParallel() const = 0;
+      virtual size_t getSize() const = 0;
 
       virtual Geometry::MeshBase& getMesh() = 0;
 

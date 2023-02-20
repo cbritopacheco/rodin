@@ -10,7 +10,6 @@
 #include <cmath>
 
 #include "RangeShape.h"
-#include "Exceptions.h"
 #include "Function.h"
 #include "ScalarFunction.h"
 
@@ -33,58 +32,61 @@ namespace Rodin::Variational
    *  f(x) = x^p \ .
    * @f$
    */
-  template <class Number>
-  class Pow<FunctionBase, Number> : public ScalarFunctionBase
+  template <class BaseDerived, class Number>
+  class Pow<FunctionBase<BaseDerived>, Number>
+    : public ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
   {
-    static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
+    static_assert(std::is_arithmetic_v<Number>);
     public:
+      using Base = FunctionBase<BaseDerived>;
+      using Exponent = Number;
+      using Parent = ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
+
       /**
        * @brief Constructs the power object
        * @param[in] s Base value
        * @param[in] p Power
        */
-      Pow(const FunctionBase& s, Number p)
-        : m_s(s.copy()),
-          m_p(p)
-      {
-        if (s.getRangeType() != RangeType::Scalar)
-          UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
-      }
+      constexpr
+      Pow(const Base& s, Exponent p)
+        : m_s(s), m_p(p)
+      {}
 
+      constexpr
       Pow(const Pow& other)
-        : ScalarFunctionBase(other),
-          m_s(other.m_s->copy()),
-          m_p(other.m_p)
+        : Parent(other),
+          m_s(other.m_s), m_p(other.m_p)
       {}
 
+      constexpr
       Pow(Pow&& other)
-        : ScalarFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_s(std::move(other.m_s)),
-          m_p(other.m_p)
+          m_p(std::move(other.m_p))
       {}
 
-      Pow& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      Pow& traceOf(Geometry::Attribute attrs)
       {
-        ScalarFunctionBase::traceOf(attrs);
-        m_s->traceOf(attrs);
+        m_s.traceOf(attrs);
         return *this;
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        return std::pow(m_s->getValue(p).scalar(), m_p);
+        return std::pow(m_s.getValue(p), m_p);
       }
 
-      Pow* copy() const noexcept override
-      {
-        return new Pow(*this);
-      }
     private:
-      std::unique_ptr<FunctionBase> m_s;
-      Number m_p;
+      Base m_s;
+      const Exponent m_p;
   };
-  template <class Number>
-  Pow(const FunctionBase&, Number) -> Pow<FunctionBase, Number>;
+
+  template <class BaseDerived, class Number>
+  Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
 }
 
 #endif

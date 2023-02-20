@@ -9,26 +9,38 @@
 
 namespace Rodin::Variational
 {
-  template <class T>
-  std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
-  operator-(const FunctionBase& lhs, T v)
+  template <class LHSDerived, class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator-(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
-    return Sum(lhs, UnaryMinus(ScalarFunction(v)));
+    return Sum(lhs, UnaryMinus(ScalarFunction(rhs)));
   }
 
-  template <class T>
-  std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
-  operator-(T v, const FunctionBase& rhs)
+  template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator-(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return Sum(ScalarFunction(v), UnaryMinus(rhs));
+    return Sum(UnaryMinus(ScalarFunction(lhs)), rhs);
   }
 
-  Sum<FunctionBase, FunctionBase>
-  operator-(const FunctionBase& lhs, const FunctionBase& rhs);
+  template <class LHSDerived, class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator-(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 
-  template <ShapeFunctionSpaceType Space>
-  Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>
-  operator-(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
+  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
+  inline
+  constexpr
+  auto
+  operator-(const ShapeFunctionBase<LHSDerived, Space>& lhs, const ShapeFunctionBase<RHSDerived, Space>& rhs)
   {
     return Sum(lhs, UnaryMinus(rhs));
   }

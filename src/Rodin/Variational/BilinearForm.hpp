@@ -21,15 +21,6 @@
 namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES>
-   constexpr
-   double BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>
-   ::operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
-   {
-      assert(m_operator);
-      return m_operator->InnerProduct(u.getHandle(), v.getHandle());
-   }
-
-   template <class TrialFES, class TestFES>
    void
    BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>::assemble()
    {

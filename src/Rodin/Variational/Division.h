@@ -26,60 +26,85 @@ namespace Rodin::Variational
   class Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>
     : public FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
-    using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
-    static_assert(
-        std::is_convertible_v<FormLanguage::Traits<FunctionBase<RHSDerived>>::ResultType, Scalar>);
     public:
+      using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = FunctionBase<RHSDerived>;
+
+      constexpr
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs), m_rhs(rhs)
       {}
 
-      Division(const Division& other);
+      constexpr
+      Division(const Division& other)
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+      {}
 
-      Division(Division&& other);
+      constexpr
+      Division(Division&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
 
+      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return m_lhs.getRangeShape();
       }
 
-      Division& traceOf(Geometry::Attribute attr) override;
-
-      auto getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      Division& traceOf(Geometry::Attribute attr)
       {
-        auto v = m_lhs->getValue(p);
-        v /= m_rhs->getValue(p).scalar();
-        return v;
+        m_lhs.traceOf(attr);
+        m_rhs.traceOf(attr);
+        return *this;
       }
 
-      Division* copy() const noexcept override
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        return new Division(*this);
+        using RHSRange = FormLanguage::RangeOf<typename FormLanguage::Traits<RHS>::ResultType>;
+        static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
+        return m_lhs.getValue(p) / m_rhs.getValue(p);
       }
 
     private:
       FunctionBase<LHSDerived> m_lhs;
       FunctionBase<RHSDerived> m_rhs;
   };
-  Division(const FunctionBase&, const FunctionBase&)
-    -> Division<FunctionBase, FunctionBase>;
+  template <class LHSDerived, class RHSDerived>
+  Division(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+    -> Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
-  Division<FunctionBase, FunctionBase>
-  operator/(const FunctionBase& lhs, const FunctionBase& rhs);
+  template <class LHSDerived, class RHSDerived>
+  inline
+  auto
+  operator/(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Division(lhs, rhs);
+  }
 
-  template <class T>
-  std::enable_if_t<std::is_arithmetic_v<T>,
-    Division<FunctionBase, FunctionBase>>
-  operator/(const FunctionBase& lhs, T rhs)
+  template <class LHSDerived, class Number,
+    typename = std::enable_if_t<
+      std::is_arithmetic_v<Number>, Division<LHSDerived, ScalarFunction<Number>>>>
+  inline
+  auto
+  operator/(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return Division(lhs, ScalarFunction(rhs));
   }
 
-  template <class T>
-  std::enable_if_t<std::is_arithmetic_v<T>,
-    Division<FunctionBase, FunctionBase>>
-  operator/(T lhs, const FunctionBase& rhs)
+  template <class Number, class RHSDerived,
+    typename = std::enable_if_t<
+      std::is_arithmetic_v<Number>, Division<RHSDerived, ScalarFunction<Number>>>>
+  inline
+  auto
+  operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Division(ScalarFunction(lhs), rhs);
   }

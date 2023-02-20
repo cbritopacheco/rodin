@@ -22,88 +22,87 @@ namespace Rodin::Variational
   /**
    * @ingroup DivSpecializations
    */
-  template <ShapeFunctionSpaceType Space, class Trait>
-  class Div<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
+  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  class Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>
   {
     public:
+      using Operand = ShapeFunction<NestedDerived, H1<Ts...>, Space>;
+      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>;
+
       /**
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
        */
-      Div(ShapeFunction<H1<Trait>, Space>& u)
+      constexpr
+      Div(Operand& u)
         : m_u(u)
-      {
-        if (u.getRangeType() != RangeType::Scalar &&
-            u.getRangeType() != RangeType::Vector)
-        {
-          UnexpectedRangeTypeException(
-              {RangeType::Scalar, RangeType::Vector}, u.getRangeType());
-        }
-      }
+      {}
 
+      constexpr
       Div(const Div& other)
-        : ShapeFunctionBase<Space>(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
+      constexpr
       Div(Div&& other)
-        : ShapeFunctionBase<Space>(std::move(other)),
+        : Parent(std::move(other)),
           m_u(other.m_u)
       {}
 
-      const ShapeFunction<H1<Trait>, Space>& getLeaf() const override
+      inline
+      constexpr
+      const auto& getLeaf() const
       {
-        return m_u.getLeaf();
+        return m_u.get().getLeaf();
       }
 
-      int getRows() const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return 1;
+        return { 1, 1 };
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
       {
-        return 1;
+        return m_u.get().getDOFs(element);
       }
 
-      int getDOFs(const Geometry::Simplex& element) const override
-      {
-        return m_u.getDOFs(element);
-      }
-
-      TensorBasis getOperator(
-          ShapeComputator& compute, const Geometry::Point& p) const override
+      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
       {
         const auto& element = p.getSimplex();
         auto& trans = p.getSimplex().getTransformation();
         const auto& fe = getFiniteElementSpace().getFiniteElement(element);
         const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
         const size_t dofs = getDOFs(element);
-        TensorBasis res(static_cast<int>(dofs), 1, 1);
-        for (size_t i = 0; i < dofs; i++)
-          res(static_cast<int>(i), 0, 0) = dshape.GetData()[i];
-        return res;
+        return TensorBasis(dofs, [](size_t i) -> Scalar { return dshape.GetData()[i]; });
       }
 
-      H1<Trait>& getFiniteElementSpace() override
+      inline
+      constexpr
+      auto& getFiniteElementSpace()
       {
-        return m_u.getFiniteElementSpace();
+        return m_u.get().getFiniteElementSpace();
       }
 
-      const H1<Trait>& getFiniteElementSpace() const override
+      inline
+      constexpr
+      const auto& getFiniteElementSpace() const
       {
-        return m_u.getFiniteElementSpace();
+        return m_u.get().getFiniteElementSpace();
       }
 
-      Div* copy() const noexcept override
-      {
-        return new Div(*this);
-      }
     private:
-      ShapeFunction<H1<Trait>, Space>& m_u;
+      std::reference_wrapper<Operand> m_u;
   };
-  template <ShapeFunctionSpaceType Space, class Trait>
-  Div(ShapeFunction<H1<Trait>, Space>&) -> Div<ShapeFunction<H1<Trait>, Space>>;
+
+  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  Div(ShapeFunction<NestedDerived, H1<Ts...>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>;
 }
 
 #endif

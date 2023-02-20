@@ -19,72 +19,72 @@ namespace Rodin::Variational
    * @see BooleanFunction
    */
 
-  class BooleanFunctionBase : public FunctionBase
+  template <class Derived>
+  class BooleanFunctionBase
+    : public FunctionBase<BooleanFunctionBase<Derived>>
   {
     public:
+      using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
+
+      constexpr
       BooleanFunctionBase() = default;
 
+      constexpr
       BooleanFunctionBase(const BooleanFunctionBase& other)
-        : FunctionBase(other)
+        : Parent(other)
       {}
 
+      constexpr
       BooleanFunctionBase(BooleanFunctionBase&& other)
-        : FunctionBase(std::move(other))
+        : Parent(std::move(other))
       {}
 
       virtual ~BooleanFunctionBase() = default;
 
-      Boolean operator()(const Geometry::Point& p) const
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return getValue(p);
+        return { 1, 1 };
       }
-
-      RangeShape getRangeShape() const override
-      {
-        return {1, 1};
-      }
-
-      RangeType getRangeType() const override
-      {
-        return RangeType::Scalar;
-      }
-
-      virtual BooleanFunctionBase* copy() const noexcept override = 0;
   };
 
   /**
    * @ingroup BooleanFunctionSpecializations
    */
   template <>
-  class BooleanFunction<Boolean> : public BooleanFunctionBase
+  class BooleanFunction<Boolean> final
+    : public BooleanFunctionBase<BooleanFunction<Boolean>>
   {
     public:
+      using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
+
+      constexpr
       BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
+      constexpr
       BooleanFunction(const BooleanFunction& other)
         : BooleanFunctionBase(other),
           m_v(other.m_v)
       {}
 
+      constexpr
       BooleanFunction(BooleanFunction&& other)
         : BooleanFunctionBase(std::move(other)),
           m_v(other.m_v)
       {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
       }
 
-      BooleanFunction* copy() const noexcept override
-      {
-        return new BooleanFunction(*this);
-      }
-
     private:
-      Boolean m_v;
+      const Boolean m_v;
   };
   BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }

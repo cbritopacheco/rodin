@@ -14,15 +14,7 @@ namespace Rodin::Variational
    */
   class RangeShape;
 
-  /**
-   * @brief Represents the type of the range of a function.
-   */
-  enum class RangeType
-  {
-    Scalar,
-    Vector,
-    Matrix
-  };
+  enum class RangeType;
 
   /**
    * @brief Base class for linear form objects.
@@ -106,7 +98,7 @@ namespace Rodin::Variational
    *   \mathcal{T}_h, \ v |_\tau \in H^1 (\tau)^d \right\}
    * @f]
    */
-  template <class Context>
+  template <class Context, class Range>
   class L2;
 
   /**
@@ -125,12 +117,13 @@ namespace Rodin::Variational
    * C^0(\Omega)^d @f$.
    *
    */
-  template <class Context>
+  template <class Context, class Range>
   class H1;
 
   /**
    * @brief Base class for grid function objects.
    */
+  template <class Derived>
   class GridFunctionBase;
 
   /**
@@ -168,13 +161,14 @@ namespace Rodin::Variational
    */
   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
-  class BasisOperator;
+  template <class Value>
+  class TensorBasis;
 
   /**
    * @brief Base class for shape function objects.
    * @tparam Space Type of shape function space (Trial or Test)
    */
-  template <ShapeFunctionSpaceType Space>
+  template <class Derived, ShapeFunctionSpaceType Space>
   class ShapeFunctionBase;
 
   /**
@@ -189,7 +183,7 @@ namespace Rodin::Variational
    *
    * @see ShapeFunctionSpecializations
    */
-  template <class FES, ShapeFunctionSpaceType Space>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunction;
 
   /**
@@ -239,6 +233,7 @@ namespace Rodin::Variational
    * @note Vectors are zero indexed. This means that the 0-index corresponds
    * to the 1st entry of the vector.
    */
+  template <class Derived>
   class VectorFunctionBase;
 
   /**
@@ -253,6 +248,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for objects representing matrix functions.
    */
+  template <class Derived>
   class MatrixFunctionBase;
 
   /**
@@ -266,6 +262,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for objects representing boolean functions.
    */
+  template <class Derived>
   class BooleanFunctionBase;
 
   /**
@@ -280,7 +277,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Jump;
 
-  template <class Operand>
+  template <class ... Args>
   class Average;
 
   /**
@@ -330,6 +327,9 @@ namespace Rodin::Variational
    */
   template <class Operand>
   class Transpose;
+
+  template <class Operand>
+  class Derivative;
 
   /**
    * @brief Represents the gradient @f$ \nabla u @f$ of a scalar function
@@ -527,7 +527,7 @@ namespace Rodin::Variational
    * where Operand represents a scalar.
    */
   template <class Operand>
-  class Cosine;
+  class Cos;
 
   /**
    * @brief Represents the tangent function.
@@ -540,7 +540,7 @@ namespace Rodin::Variational
    * where Operand represents a scalar.
    */
   template <class Operand>
-  class Tangent;
+  class Tan;
 
   /**
    * @brief Represents the trace of a matrix function
@@ -588,9 +588,14 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class Composition;
 
-
   template <class Operand>
   class TraceOperator;
+
+  template <class ... Args>
+  class Max;
+
+  template <class ... Args>
+  class Min;
 
   /**
    * @tparam LHS Type of left hand side operand
@@ -832,7 +837,7 @@ namespace Rodin::Variational
    *
    * @see DirichletBCSpecializations
    */
-  template <class Operand>
+  template <class Operand, class Value>
   class DirichletBC;
 
   class ProblemBody;
@@ -866,6 +871,8 @@ namespace Rodin::Variational
     template <class Operand>
     class OpenMP;
   }
+
+  class ShapeComputator;
 }
 
 #endif
