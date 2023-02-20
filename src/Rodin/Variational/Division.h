@@ -73,6 +73,12 @@ namespace Rodin::Variational
         return m_lhs.getValue(p) / m_rhs.getValue(p);
       }
 
+      inline
+      Division* copy() const noexcept final override
+      {
+        return new Division(*this);
+      }
+
     private:
       FunctionBase<LHSDerived> m_lhs;
       FunctionBase<RHSDerived> m_rhs;

@@ -47,6 +47,8 @@ namespace Rodin::Variational
       {
         return { 1, 1 };
       }
+
+      virtual BooleanFunctionBase* copy() const noexcept override = 0;
   };
 
   /**
@@ -81,6 +83,11 @@ namespace Rodin::Variational
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
+      }
+
+      inline BooleanFunction* copy() const noexcept final override
+      {
+        return new BooleanFunction(*this);
       }
 
     private:

@@ -58,14 +58,14 @@ namespace Rodin::Variational
 
       constexpr
       DirichletBC(Operand& u, const Value& v)
-        : m_u(u), m_value(v)
+        : m_u(u), m_value(v.copy())
       {}
 
       constexpr
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
-          m_value(other.m_value),
+          m_value(other.m_value->copy()),
           m_essBdr(other.m_essBdr)
       {}
 
@@ -105,12 +105,6 @@ namespace Rodin::Variational
       }
 
       inline
-      const Operand& getOperand() const override
-      {
-        return m_u;
-      }
-
-      inline
       constexpr
       const std::set<Geometry::Attribute>& getAttributes() const
       {
@@ -120,7 +114,13 @@ namespace Rodin::Variational
       inline
       void project() const override
       {
-        m_u.get().getSolution().projectOnBoundary(m_value, m_essBdr);
+        m_u.get().getSolution().projectOnBoundary(*m_value, m_essBdr);
+      }
+
+      inline
+      const Operand& getOperand() const override
+      {
+        return m_u;
       }
 
       inline
@@ -138,7 +138,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<Operand> m_u;
-      Value m_value;
+      std::unique_ptr<Value> m_value;
       std::set<Geometry::Attribute> m_essBdr;
       mutable std::set<size_t> m_dofs;
   };
@@ -204,6 +204,12 @@ namespace Rodin::Variational
       Value& getValue() const
       {
         return m_value;
+      }
+
+      inline
+      void project() const override
+      {
+        assert(false);
       }
 
       inline

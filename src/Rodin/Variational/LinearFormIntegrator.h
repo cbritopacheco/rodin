@@ -27,12 +27,15 @@ namespace Rodin::Variational
 
       template <class FES>
       LinearFormIntegratorBase(const TestFunction<FES>& v)
-        : m_v(v.copy())
+        : m_v(v)
       {}
+
+      template <class FES>
+      LinearFormIntegratorBase(TestFunction<FES>&& v) = delete;
 
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
         : Parent(other),
-          m_v(other.m_v->copy()),
+          m_v(other.m_v),
           m_attrs(other.m_attrs)
       {}
 
@@ -47,8 +50,7 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTestFunction() const
       {
-        assert(m_v);
-        return *m_v;
+        return m_v.get();
       }
 
       /**
@@ -106,7 +108,7 @@ namespace Rodin::Variational
       LinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<FormLanguage::Base> m_v;
+      std::reference_wrapper<const FormLanguage::Base> m_v;
       std::set<Geometry::Attribute> m_attrs;
   };
 }

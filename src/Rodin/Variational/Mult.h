@@ -32,7 +32,7 @@ namespace Rodin::Variational
    * @brief Multiplication of two FunctionBase instances.
    */
   template <class LHSDerived, class RHSDerived>
-  class Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>
+  class Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
     : public FunctionBase<Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:

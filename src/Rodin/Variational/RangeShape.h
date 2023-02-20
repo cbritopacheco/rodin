@@ -19,7 +19,7 @@ namespace Rodin::Variational
   {
     public:
       constexpr
-      RangeShape(std::initializer_list<int> l)
+      RangeShape(std::initializer_list<size_t> l)
         : m_height(l.begin()[0]), m_width(l.begin()[1])
       {
         assert(l.size() == 2);
@@ -31,14 +31,6 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      RangeShape(int height, int width)
-        : m_height(height), m_width(width)
-      {
-        assert(height > 0);
-        assert(width > 0);
-      }
-
-      constexpr
       RangeShape(const RangeShape&) = default;
 
       constexpr
@@ -46,17 +38,15 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      int height() const
+      size_t height() const
       {
-        assert(m_height > 0);
         return m_height;
       }
 
       inline
       constexpr
-      int width() const
+      size_t width() const
       {
-        assert(m_width > 0);
         return m_width;
       }
 
@@ -90,8 +80,8 @@ namespace Rodin::Variational
       }
 
     private:
-      const int m_height;
-      const int m_width;
+      const size_t m_height;
+      const size_t m_width;
   };
 
   std::ostream& operator<<(std::ostream& os, const RangeShape& obj);

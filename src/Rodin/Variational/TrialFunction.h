@@ -38,7 +38,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 1);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
         return Component(*this, 0);
       }
 
@@ -46,7 +46,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 2);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
         return Component(*this, 1);
       }
 
@@ -54,7 +54,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 3);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
         return Component(*this, 2);
       }
 
@@ -63,6 +63,11 @@ namespace Rodin::Variational
       const TrialFunction& getLeaf() const
       {
         return *this;
+      }
+
+      inline TrialFunction* copy() const noexcept final override
+      {
+        return new TrialFunction(*this);
       }
   };
 

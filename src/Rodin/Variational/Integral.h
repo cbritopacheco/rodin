@@ -148,19 +148,20 @@ namespace Rodin::Variational
 
       Math::Matrix getMatrix(const Geometry::Simplex& element) const override
       {
-        const auto& trial = m_prod.getLHS();
-        const auto& test = m_prod.getRHS();
-        auto& trans = element.getTransformation();
         assert(false);
-        const size_t order = 0;
-        // const size_t order = getIntegrationOrder(
-        //     trial.getFiniteElementSpace(), test.getFiniteElementSpace(), element);
-        ShapeComputator shapeCompute;
+        // const auto& trial = m_prod.getLHS();
+        // const auto& test = m_prod.getRHS();
+        // auto& trans = element.getTransformation();
+        // assert(false);
+        // const size_t order = 0;
+        // // const size_t order = getIntegrationOrder(
+        // //     trial.getFiniteElementSpace(), test.getFiniteElementSpace(), element);
+        // ShapeComputator shapeCompute;
 
-        Math::Matrix res = Math::Matrix::Zero(test.getDOFs(element), trial.getDOFs(element));
-        for (const auto& p : element.getIntegrationRule(order))
-          res += trans.Weight() * trans.GetIntPoint().weight * m_prod.getMatrix(shapeCompute, p);
-        return res;
+        // Math::Matrix res = Math::Matrix::Zero(test.getDOFs(element), trial.getDOFs(element));
+        // for (const auto& p : element.getIntegrationRule(order))
+        //   res += trans.Weight() * trans.GetIntPoint().weight * m_prod.getMatrix(shapeCompute, p);
+        // return res;
       }
 
       inline
@@ -274,23 +275,24 @@ namespace Rodin::Variational
 
       Math::Vector getVector(const Geometry::Simplex& simplex) const override
       {
-        const auto& test = m_integrand;
-        assert(test.getRangeType() == RangeType::Scalar);
-        auto& trans = simplex.getTransformation();
         assert(false);
-        const size_t order = 0;
-        // const size_t order = getIntegrationOrder(test.getFiniteElementSpace(), simplex);
-        ShapeComputator compute;
+        // const auto& test = m_integrand;
+        // assert(test.getRangeType() == RangeType::Scalar);
+        // auto& trans = simplex.getTransformation();
+        // assert(false);
+        // const size_t order = 0;
+        // // const size_t order = getIntegrationOrder(test.getFiniteElementSpace(), simplex);
+        // ShapeComputator compute;
 
-        Math::Vector res = Math::Vector::Zero(test.getDOFs(simplex));
-        for (const auto& p : simplex.getIntegrationRule(order))
-        {
-          assert(false);
-          // const auto basis =
-          //   trans.Weight() * trans.GetIntPoint().weight * test.getOperator(compute, p);
-          // res += Eigen::Map<const Math::Vector>(basis.data(), basis.size());
-        }
-        return res;
+        // Math::Vector res = Math::Vector::Zero(test.getDOFs(simplex));
+        // for (const auto& p : simplex.getIntegrationRule(order))
+        // {
+        //   assert(false);
+        //   // const auto basis =
+        //   //   trans.Weight() * trans.GetIntPoint().weight * test.getOperator(compute, p);
+        //   // res += Eigen::Map<const Math::Vector>(basis.data(), basis.size());
+        // }
+        // return res;
       }
 
       inline
