@@ -42,7 +42,7 @@ namespace Rodin::Geometry
 
       virtual ~MeshBase() = default;
 
-      virtual MeshBase& scale(double c) = 0;
+      virtual MeshBase& scale(Scalar c) = 0;
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -60,7 +60,38 @@ namespace Rodin::Geometry
        *
        * @returns Reference to this (for method chaining)
        */
-      MeshBase& displace(const Variational::GridFunctionBase& u);
+      template <class FES>
+      MeshBase& displace(const Variational::GridFunction<FES>& u)
+      {
+        assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
+        getHandle().MoveNodes(u.getHandle());
+        return *this;
+      }
+
+      /**
+       * @brief Gets the maximum number @f$ t @f$ by which the mesh will
+       * remain valid, when displacing by @f$ u @f$.
+       * @param[in] u Displacement at each node
+       *
+       * This function will calculate the maximum number @f$ t @f$ so that
+       * the displacement
+       * @f[
+       *   x \mapsto x + t u(x)
+       * @f]
+       * gives a valid mesh without actually displacing the mesh.
+       *
+       * @note The vector dimension of @f$ u @f$ must be equal to the
+       * space dimension.
+       *
+       * @returns Maximum time so that the mesh remains valid.
+       */
+      template <class FES>
+      Scalar getMaximumDisplacement(const Variational::GridFunction<FES>& u)
+      {
+        Scalar res;
+        getHandle().CheckDisplacements(u.getHandle(), res);
+        return res;
+      }
 
       // /**
       //  * @brief Performs connected-component labelling.
@@ -133,7 +164,7 @@ namespace Rodin::Geometry
        * @brief Gets the total volume of the mesh.
        * @returns Sum of all element volumes.
        */
-      double getVolume();
+      Scalar getVolume();
 
       /**
        * @brief Gets the sum of the volumes of the elements given by the
@@ -143,13 +174,13 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
        */
-      double getVolume(Attribute attr);
+      Scalar getVolume(Attribute attr);
 
       /**
        * @brief Gets the total perimeter of the mesh.
        * @returns Sum of all element perimeters.
        */
-      double getPerimeter();
+      Scalar getPerimeter();
 
       /**
        * @brief Gets the sum of the perimeters of the elements given by the
@@ -159,7 +190,7 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
        */
-      double getPerimeter(Attribute attr);
+      Scalar getPerimeter(Attribute attr);
 
       /**
        * @brief Gets the labels of the domain elements in the mesh.
@@ -174,25 +205,6 @@ namespace Rodin::Geometry
        * @see getAttributes() const
        */
       std::set<Attribute> getBoundaryAttributes() const;
-
-      /**
-       * @brief Gets the maximum number @f$ t @f$ by which the mesh will
-       * remain valid, when displacing by @f$ u @f$.
-       * @param[in] u Displacement at each node
-       *
-       * This function will calculate the maximum number @f$ t @f$ so that
-       * the displacement
-       * @f[
-       *   x \mapsto x + t u(x)
-       * @f]
-       * gives a valid mesh without actually displacing the mesh.
-       *
-       * @note The vector dimension of @f$ u @f$ must be equal to the
-       * space dimension.
-       *
-       * @returns Maximum time so that the mesh remains valid.
-       */
-      double getMaximumDisplacement(const Variational::GridFunctionBase& u);
 
       bool operator==(const MeshBase& other) const
       {
@@ -381,7 +393,7 @@ namespace Rodin::Geometry
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
 
-      virtual Mesh& scale(double c) override;
+      virtual Mesh& scale(Scalar c) override;
 
       virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
 

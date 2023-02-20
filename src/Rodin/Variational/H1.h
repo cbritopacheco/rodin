@@ -19,11 +19,13 @@
 
 namespace Rodin::Variational
 {
-  template <class TraitTag>
-  class H1 : public FiniteElementSpaceBase
+  template <class Derived, class ContextType>
+  class H1Base
+    : public FiniteElementSpaceBase
   {
     public:
-      using Context = TraitTag;
+      using Context = ContextType;
+      using Parent = FiniteElementSpaceBase;
 
       /**
        * @brief Possible types of bases for the H1 finite element space.
@@ -58,13 +60,13 @@ namespace Rodin::Variational
         Serendipity       = mfem::BasisType::Serendipity,
       };
 
-      static constexpr Basis DefaultBasis = Basis::GaussLobato;
+      static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
       class FEC : public FiniteElementCollectionBase
       {
         public:
           constexpr
-          FEC(const int order, const int elemDim, Basis basis)
+          FEC(const size_t order, const size_t elemDim, Basis basis)
             : m_fec(new mfem::H1_FECollection(order, elemDim, static_cast<int>(basis)))
           {
             assert(order >= 1);
@@ -72,7 +74,7 @@ namespace Rodin::Variational
 
           constexpr
           FEC(FEC&& other)
-            :  FiniteElementCollectionBase(std::move(other)),
+            : FiniteElementCollectionBase(std::move(other)),
               m_fec(std::move(other.m_fec)),
               m_basis(std::move(other.m_basis))
           {}
@@ -110,16 +112,18 @@ namespace Rodin::Variational
       };
 
       constexpr
-      H1(Geometry::Mesh<Context>& mesh,
-          const size_t vdim = 1, const size_t order = 1, Basis basis = DefaultBasis)
+      H1Base(Geometry::Mesh<Context>& mesh,
+          const size_t vdim, const size_t order, Basis basis = DefaultBasis)
         : m_fec(order, mesh.getDimension(), basis),
           m_mesh(mesh),
           m_fes(new mfem::FiniteElementSpace(
                 &mesh.getHandle(), &m_fec.getHandle(), vdim))
-      {}
+      {
+        assert(order >= 1);
+      }
 
       constexpr
-      H1(const H1& other)
+      H1Base(const H1Base& other)
         : FiniteElementSpaceBase(other),
           m_fec(other.m_fec),
           m_mesh(other.m_mesh),
@@ -127,7 +131,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      H1(H1&& other)
+      H1Base(H1Base&& other)
         : FiniteElementSpaceBase(std::move(other)),
           m_fec(std::move(other.m_fec)),
           m_mesh(std::move(other.m_mesh)),
@@ -135,7 +139,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      H1& operator=(H1&& other)
+      H1Base& operator=(H1Base&& other)
       {
         FiniteElementSpaceBase::operator=(std::move(other));
         m_fec = std::move(other.m_fec);
@@ -144,32 +148,32 @@ namespace Rodin::Variational
         return *this;
       }
 
-      int getSize() const override
+      inline
+      size_t getSize() const final override
       {
         return getHandle().GetVSize();
       }
 
-      bool isParallel() const override
-      {
-        return false;
-      }
-
-      Geometry::Mesh<Context>& getMesh() override
+      inline
+      Geometry::Mesh<Context>& getMesh() final override
       {
         return m_mesh;
       }
 
-      const Geometry::Mesh<Context>& getMesh() const override
+      inline
+      const Geometry::Mesh<Context>& getMesh() const final override
       {
         return m_mesh;
       }
 
-      const FEC& getFiniteElementCollection() const override
+      inline
+      const FEC& getFiniteElementCollection() const final override
       {
         return m_fec;
       }
 
-      mfem::Array<int> getDOFs(const Geometry::Simplex& element) const override
+      inline
+      mfem::Array<int> getDOFs(const Geometry::Simplex& element) const final override
       {
         mfem::Array<int> res;
         if (element.getDimension() == getMesh().getDimension())
@@ -187,7 +191,9 @@ namespace Rodin::Variational
         return res;
       }
 
-      const mfem::FiniteElement& getFiniteElement(const Geometry::Simplex& element) const override
+      inline
+      const mfem::FiniteElement&
+      getFiniteElement(const Geometry::Simplex& element) const final override
       {
         if (element.getDimension() == getMesh().getDimension())
         {
@@ -203,13 +209,13 @@ namespace Rodin::Variational
         }
       }
 
-      mfem::FiniteElementSpace& getHandle() override
+      mfem::FiniteElementSpace& getHandle() final override
       {
         assert(m_fes);
         return *m_fes;
       }
 
-      const mfem::FiniteElementSpace& getHandle() const override
+      const mfem::FiniteElementSpace& getHandle() const final override
       {
         assert(m_fes);
         return *m_fes;
@@ -221,10 +227,81 @@ namespace Rodin::Variational
       std::unique_ptr<mfem::FiniteElementSpace> m_fes;
   };
 
-  template <class Trait>
-  H1(Geometry::Mesh<Trait>& mesh,
-    size_t vdim = 1,
-    size_t order = 1, typename H1<Trait>::Basis basis = H1<Trait>::DefaultBasis) -> H1<Trait>;
+  template <class ContextType>
+  class H1<ContextType, Scalar>
+    : public H1Base<H1<ContextType, Scalar>, ContextType>
+  {
+    public:
+      using Context = ContextType;
+      using Parent = H1Base<H1<ContextType, Scalar>, ContextType>;
+      using Range = Scalar;
+      using Basis = typename Parent::Basis;
+      using Parent::operator=;
+      static constexpr const Basis DefaultBasis = Basis::GaussLobato;
+
+      constexpr
+      H1(Geometry::Mesh<Context>& mesh,
+          FiniteElementOrder order = FiniteElementOrder(1),
+          Basis basis = DefaultBasis)
+        : Parent(mesh, 1, order, basis)
+      {}
+
+      constexpr
+      H1(const H1& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      H1(H1&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class Context>
+  H1(Geometry::Mesh<Context>& mesh,
+      FiniteElementOrder order = FiniteElementOrder(1),
+      typename H1Base<H1<Context, Scalar>, Context>::Basis basis =
+      H1Base<H1<Context, Scalar>, Context>::DefaultBasis)
+  -> H1<Context, Scalar>;
+
+  template <class ContextType>
+  class H1<ContextType, Math::Vector>
+    : public H1Base<H1<ContextType, Math::Vector>, ContextType>
+  {
+    public:
+      using Context = ContextType;
+      using Parent = H1Base<H1<ContextType, Math::Vector>, ContextType>;
+      using Range = Math::Vector;
+      using Basis = typename Parent::Basis;
+      using Parent::operator=;
+      static constexpr const Basis DefaultBasis = Basis::GaussLobato;
+
+      constexpr
+      H1(Geometry::Mesh<Context>& mesh,
+          size_t vdim,
+          FiniteElementOrder order = FiniteElementOrder(1),
+          Basis basis = DefaultBasis)
+        : Parent(mesh, vdim, order, basis)
+      {}
+
+      constexpr
+      H1(const H1& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      H1(H1&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class Context>
+  H1(Geometry::Mesh<Context>& mesh,
+      size_t vdim,
+      FiniteElementOrder order = FiniteElementOrder(1),
+      typename H1Base<H1<Context, Math::Vector>, Context>::Basis basis =
+        H1Base<H1<Context, Math::Vector>, Context>::DefaultBasis)
+    -> H1<Context, Math::Vector>;
 }
 
 #endif

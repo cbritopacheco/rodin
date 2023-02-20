@@ -11,15 +11,13 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Base.h"
-#include "Rodin/Math/DenseMatrix.h"
+#include "Rodin/Math/Matrix.h"
 
 #include "ForwardDecls.h"
 
 #include "Function.h"
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
-
-#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
@@ -32,79 +30,104 @@ namespace Rodin::Variational
   /**
    * @ingroup DotSpecializations
    */
-  template <>
-  class Dot<FunctionBase, FunctionBase> : public ScalarFunctionBase
+  template <class LHSDerived, class RHSDerived>
+  class Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
+    : public ScalarFunctionBase<Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = FunctionBase;
-      using RHS = FunctionBase;
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = FunctionBase<RHSDerived>;
+      using Parent = ScalarFunctionBase<Dot<LHS, RHS>>;
 
-      Dot(const FunctionBase& a, const FunctionBase& b);
-
-      Dot(const Dot& other);
-
-      Dot(Dot&& other);
-
-      Dot& traceOf(Geometry::Attribute attrs) override;
-
-      virtual LHS& getLHS()
+      constexpr
+      Dot(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs), m_rhs(rhs)
       {
-        return *m_a;
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
       }
 
-      virtual RHS& getRHS()
+      constexpr
+      Dot(const Dot& other)
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+      {}
+
+      constexpr
+      Dot(Dot&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      inline
+      constexpr
+      Dot& traceOf(Geometry::Attribute attrs)
       {
-        return *m_b;
+        m_lhs.traceOf(attrs);
+        m_rhs.traceOf(attrs);
+        return *this;
       }
 
-      virtual const LHS& getLHS() const
+      inline
+      constexpr
+      LHS& getLHS()
       {
-        return *m_a;
+        return m_lhs;
       }
 
-      virtual const RHS& getRHS() const
+      inline
+      constexpr
+      RHS& getRHS()
       {
-        return *m_b;
+        return m_rhs;
       }
 
-      virtual FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      const LHS& getLHS() const
       {
-        assert(m_a->getRangeShape() == m_b->getRangeShape());
-        assert(m_a->getRangeType() == m_b->getRangeType());
-        switch (m_a->getRangeType())
+        return m_lhs;
+      }
+
+      inline
+      constexpr
+      const RHS& getRHS() const
+      {
+        return m_rhs;
+      }
+
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
+        using LHSRange = FormLanguage::RangeOf<typename FormLanguage::Traits<LHS>::ResultType>;
+        using RHSRange = FormLanguage::RangeOf<typename FormLanguage::Traits<RHS>::ResultType>;
+        static_assert(std::is_same_v<LHSRange, RHSRange>);
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
-          case RangeType::Scalar:
-          {
-            return m_a->getValue(p).scalar() * m_b->getValue(p).scalar();
-          }
-          case RangeType::Vector:
-          {
-            Math::Vector a = m_a->getValue(p).vector();
-            Math::Vector b = m_b->getValue(p).vector();
-            return a.dot(b);
-          }
-          case RangeType::Matrix:
-          {
-            Math::Matrix a = m_a->getValue(p).matrix();
-            Math::Matrix b = m_b->getValue(p).matrix();
-            return (a * b.transpose()).trace();
-          }
-          default:
-          {
-            assert(false);
-            return 0.0;
-          }
+          return m_lhs.getValue(p) * m_rhs.getValue(p);
+        } else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        {
+          return m_lhs.getValue(p).dot(m_rhs.getValue(p));
+        }
+        else if constexpr (std::is_same_v<RHSRange, Math::Matrix>)
+        {
+          return (m_lhs.getValue(p) * m_rhs.getValue(p).transpose()).trace();
+        }
+        else
+        {
+          assert(false);
+          return void();
         }
       }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
     private:
-      std::unique_ptr<FunctionBase> m_a, m_b;
+      FunctionBase<LHSDerived> m_lhs;
+      FunctionBase<RHSDerived> m_rhs;
   };
-  Dot(const FunctionBase&, const FunctionBase&) -> Dot<FunctionBase, FunctionBase>;
+  template <class LHSDerived, class RHSDerived>
+  Dot(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+    -> Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
    * @ingroup DotSpecializations
@@ -117,602 +140,655 @@ namespace Rodin::Variational
    * with @f$ A(u) \in \mathbb{R}^{p \times q} @f$, @f$ \Lambda \in
    * \mathbb{R}^{p \times q} @f$.
    */
-  template <ShapeFunctionSpaceType Space>
-  class Dot<FunctionBase, ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
+  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
+  class Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>> final
+    : public ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>>, Space>
   {
     public:
-      using Parent = ShapeFunctionBase<Space>;
-      using LHS = FunctionBase;
-      using RHS = ShapeFunctionBase<Space>;
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = ShapeFunctionBase<RHSDerived, Space>;
+      using Parent =
+        ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>>, Space>;
 
-      Dot(const FunctionBase& lhs, const ShapeFunctionBase<Space>& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      constexpr
+      Dot(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs), m_rhs(rhs)
       {
-        if (lhs.getRangeShape() != rhs.getRangeShape())
-          RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
+        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
       }
 
+      constexpr
       Dot(const Dot& other)
-        :  Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
       {}
 
+      constexpr
       Dot(Dot&& other)
-        :  Parent(std::move(other)),
+        : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      virtual LHS& getLHS()
+      inline
+      constexpr
+      const LHS& getLHS() const
       {
-        return *m_lhs;
+        return m_lhs;
       }
 
-      virtual RHS& getRHS()
+      inline
+      constexpr
+      const RHS& getRHS() const
       {
-        return *m_rhs;
+        return m_rhs;
       }
 
-      virtual const LHS& getLHS() const
-      {
-        return *m_lhs;
-      }
-
-      virtual const RHS& getRHS() const
-      {
-        return *m_rhs;
-      }
-
-      const ShapeFunctionBase<Space>& getLeaf() const override
+      inline
+      constexpr
+      const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      int getRows() const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return 1;
+        return { 1, 1 };
       }
 
-      int getDOFs(const Geometry::Simplex& element) const override
+      inline
+      size_t getDOFs(const Geometry::Simplex& element) const
       {
         return getRHS().getDOFs(element);
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      auto& getFiniteElementSpace()
       {
-        return 1;
+        return m_rhs.getFiniteElementSpace();
       }
 
-      FiniteElementSpaceBase& getFiniteElementSpace() override
-      {
-        return m_rhs->getFiniteElementSpace();
-      }
-
-      const FiniteElementSpaceBase& getFiniteElementSpace() const override
+      inline
+      constexpr
+      const auto& getFiniteElementSpace() const
       {
         return getRHS().getFiniteElementSpace();
       }
 
-      virtual TensorBasis getOperator(
-          ShapeComputator& compute, const Geometry::Point& p) const override
+      inline
+      constexpr
+      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
       {
-        const size_t dofs = getRHS().getDOFs(p.getSimplex());
-        const TensorBasis basis = getRHS().getOperator(compute, p);
-        switch (getLHS().getRangeType())
+        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
+        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+        static_assert(std::is_same_v<LHSRange, RHSRange>);
+        const auto lhs = getLHS().getValue(p);
+        const auto rhs = getRHS().getOperator(compute, p);
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
-          case RangeType::Scalar:
-          {
-            return getLHS().getValue(p) * basis;
-          }
-          case RangeType::Vector:
-          {
-            TensorBasis res(static_cast<int>(dofs), 1, 1);
-            const Math::Vector vec = getLHS().getValue(p);
-            for (size_t i = 0; i < dofs; i++)
-            {
-              const auto dof = Math::slice(basis, 0, i);
-              res(static_cast<int>(i), 0, 0) = (dof * vec.transpose()).trace();
-            }
-            return res;
-          }
-          case RangeType::Matrix:
-          {
-            TensorBasis res(static_cast<int>(dofs), 1, 1);
-            const Math::Matrix mat = getLHS().getValue(p);
-            for (size_t i = 0; i < dofs; i++)
-            {
-              const auto dof = Math::slice(basis, 0, i);
-              res(static_cast<int>(i), 0, 0) = (dof * mat.transpose()).trace();
-            }
-            return res;
-          }
+          return lhs * rhs;
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        {
+          return TensorBasis([&](size_t i) { return lhs.dot(rhs(i)); });
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        {
+          return TensorBasis([&](size_t i) { return (lhs * rhs(i).transpose()).trace(); });
+        }
+        else
+        {
+          assert(false);
+          return void();
         }
       }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-
     private:
-      std::unique_ptr<FunctionBase> m_lhs;
-      std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
+      FunctionBase<LHSDerived> m_lhs;
+      ShapeFunctionBase<RHSDerived, Space> m_rhs;
   };
-  template <ShapeFunctionSpaceType Space>
-  Dot(const FunctionBase&, const ShapeFunctionBase<Space>&)
-    -> Dot<FunctionBase, ShapeFunctionBase<Space>>;
+
+  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
+  Dot(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, Space>&)
+    -> Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>>;
 
   /**
    * @ingroup DotSpecializations
    */
-  template <>
-  class Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+  template <class LHSDerived, class RHSDerived>
+  class Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>> final
     : public FormLanguage::Base
   {
     public:
+      using LHS = ShapeFunctionBase<LHSDerived, TrialSpace>;
+      using RHS = ShapeFunctionBase<RHSDerived, TestSpace>;
       using Parent = FormLanguage::Base;
-      using LHS = ShapeFunctionBase<TrialSpace>;
-      using RHS = ShapeFunctionBase<TestSpace>;
 
-      Dot(const ShapeFunctionBase<TrialSpace>& lhs, const ShapeFunctionBase<TestSpace>& rhs)
-        : m_trial(lhs.copy()), m_test(rhs.copy())
+      constexpr
+      Dot(const LHS& lhs, const RHS& rhs)
+        : m_trial(lhs), m_test(rhs)
       {
-        if (lhs.getRangeShape() != rhs.getRangeShape())
-          RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
       }
 
+      constexpr
       Dot(const Dot& other)
-        :  Base(other),
-          m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
+        : Base(other),
+          m_trial(other.m_trial), m_test(other.m_test)
       {}
 
+      constexpr
       Dot(Dot&& other)
-        :  Base(std::move(other)),
+        : Base(std::move(other)),
           m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
       {}
 
-      inline virtual LHS& getLHS()
+      inline
+      constexpr
+      const LHS& getLHS() const
       {
-        assert(m_trial);
-        return *m_trial;
+        return m_trial;
       }
 
-      inline virtual RHS& getRHS()
+      inline
+      constexpr
+      const RHS& getRHS() const
       {
-        assert(m_test);
-        return *m_test;
+        return m_test;
       }
 
-      inline virtual const LHS& getLHS() const
+      Math::Matrix getMatrix(ShapeComputator& compute, const Geometry::Point& p) const
       {
-        assert(m_trial);
-        return *m_trial;
-      }
-
-      inline virtual const RHS& getRHS() const
-      {
-        assert(m_test);
-        return *m_test;
-      }
-
-      inline virtual Math::Matrix getMatrix(
-          ShapeComputator& compute, const Geometry::Point& p) const
-      {
-        assert(m_trial->getRangeShape() == m_test->getRangeShape());
-        const TensorBasis trial = m_trial->getOperator(compute, p);
-        const TensorBasis test = m_test->getOperator(compute, p);
-        assert(trial.rank() == test.rank());
-        Math::Matrix res(test.dimension(0), trial.dimension(0));
+        assert(m_trial.getRangeShape() == m_test.getRangeShape());
+        const auto trial = m_trial.getOperator(compute, p);
+        const auto test = m_test.getOperator(compute, p);
+        Math::Matrix res(test.getDOFs(), trial.getDOFs());
         for (Math::Matrix::Index i = 0; i < res.rows(); i++)
-        {
-          const auto testdof = Math::slice(test, 0, i);
           for (Math::Matrix::Index j = 0; j < res.cols(); j++)
-          {
-            const auto trialdof = Math::slice(trial, 0, j);
-            res(i, j) = (testdof * trialdof.transpose()).trace();
-          }
-        }
+            res(i, j) = (trial(i) * test(j).transpose()).trace();
         return res;
       }
 
-      inline virtual Dot* copy() const noexcept override
+      inline Dot* copy() const noexcept override
       {
         return new Dot(*this);
       }
 
     private:
-      std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_trial;
-      std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_test;
+      LHS m_trial;
+      RHS m_test;
   };
-  Dot(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
-    -> Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
 
-  /* ||-- OPTIMIZATIONS -----------------------------------------------------
-   * Dot<FunctionBase, ShapeFunctionBase<Space>>
-   * ---------------------------------------------------------------------->>
-   */
+  template <class LHSDerived, class RHSDerived>
+  Dot(const ShapeFunctionBase<LHSDerived, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestSpace>&)
+    -> Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>;
 
-  /**
-   * @ingroup DotSpecializations
-   * @f[
-   *   f \cdot u
-   * @f]
-   * where @f$ f @f$ is a function (scalar or vector valued).
-   */
-  template <class FES, ShapeFunctionSpaceType Space>
-  class Dot<FunctionBase, ShapeFunction<FES, Space>>
-    : public Dot<FunctionBase, ShapeFunctionBase<Space>>
-  {
-    public:
-      using Parent = Dot<FunctionBase, ShapeFunctionBase<Space>>;
-      using LHS = FunctionBase;
-      using RHS = ShapeFunction<FES, Space>;
+  // /* ||-- OPTIMIZATIONS -----------------------------------------------------
+  //  * Dot<FunctionBase, ShapeFunctionBase<Space>>
+  //  * ---------------------------------------------------------------------->>
+  //  */
 
-      constexpr
-      Dot(const FunctionBase& f, const ShapeFunction<FES, Space>& u)
-        : Parent(f, u)
-      {}
+  // /**
+  //  * @ingroup DotSpecializations
+  //  * @f[
+  //  *   f \cdot u
+  //  * @f]
+  //  * where @f$ f @f$ is a function (scalar or vector valued).
+  //  */
+  // template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  // class Dot<FunctionBase<LHSDerived>, ShapeFunction<RHSDerived, FES, Space>> final
+  //   : public Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<ShapeFunction<RHSDerived, FES, Space>, Space>>
+  // {
+  //   public:
+  //     using LHS = FunctionBase<LHSDerived>;
+  //     using RHS = ShapeFunction<RHSDerived, FES, Space>;
+  //     using Parent = Dot<FunctionBase<LHS>, ShapeFunctionBase<RHS, Space>>;
 
-      constexpr
-      Dot(const Dot& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const LHS& f, const RHS& u)
+  //       : Parent(f, u)
+  //     {}
 
-      constexpr
-      Dot(Dot&& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const Dot& other)
+  //       : Parent(other)
+  //     {}
 
-      virtual LHS& getLHS() override
-      {
-        return static_cast<LHS&>(Parent::getLHS());
-      }
+  //     constexpr
+  //     Dot(Dot&& other)
+  //       : Parent(other)
+  //     {}
 
-      virtual RHS& getRHS() override
-      {
-        return static_cast<RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     RHS& getRHS()
+  //     {
+  //       return static_cast<RHS&>(Parent::getRHS());
+  //     }
 
-      virtual const LHS& getLHS() const override
-      {
-        return static_cast<const LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     const LHS& getLHS() const
+  //     {
+  //       return static_cast<const LHS&>(Parent::getLHS());
+  //     }
 
-      virtual const RHS& getRHS() const override
-      {
-        return static_cast<const RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     const RHS& getRHS() const
+  //     {
+  //       return static_cast<const RHS&>(Parent::getRHS());
+  //     }
+  // };
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-  };
-  template <class FES, ShapeFunctionSpaceType Space>
-  Dot(const FunctionBase&, const ShapeFunction<FES, Space>&)
-    -> Dot<FunctionBase, ShapeFunction<FES, Space>>;
+  // template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  // Dot(const FunctionBase<LHSDerived>&, const ShapeFunction<RHSDerived, FES, Space>&)
+  //   -> Dot<FunctionBase<LHSDerived>, ShapeFunction<RHSDerived, FES, Space>>;
 
   /* <<-- OPTIMIZATIONS -----------------------------------------------------
    * Dot<FunctionBase, ShapeFunctionBase<TestSpace>>
    * ----------------------------------------------------------------------||
    */
 
-  /* ||-- OPTIMIZATIONS -----------------------------------------------------
-   * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-   * ---------------------------------------------------------------------->>
-   */
+  // /* ||-- OPTIMIZATIONS -----------------------------------------------------
+  //  * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+  //  * ---------------------------------------------------------------------->>
+  //  */
 
-  /**
-   * @ingroup DotSpecializations
-   *
-   * @f[
-   *   (f u) \cdot v
-   * @f]
-   * where @f$ f @f$ is a function (scalar or vector valued).
-   */
-  template <class FES>
-  class Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>
-    : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  {
-    public:
-      using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-      using LHS = Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>;
-      using RHS = ShapeFunction<FES, TestSpace>;
+  // /**
+  //  * @ingroup DotSpecializations
+  //  *
+  //  * @f[
+  //  *   (f u) \cdot v
+  //  * @f]
+  //  * where @f$ f @f$ is a function (scalar or vector valued).
+  //  */
+  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
+  // class Dot<
+  //         Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>,
+  //         ShapeFunction<RHSDerived, FES, TestSpace>> final
+  //   : public Dot<
+  //         ShapeFunctionBase<Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>, TrialSpace>,
+  //         ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>, TestSpace>>
+  // {
+  //   public:
+  //     using LHS = Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>;
+  //     using RHS = ShapeFunction<RHSDerived, FES, TestSpace>;
+  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
 
-      constexpr
-      Dot(const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>& fu,
-          const ShapeFunction<FES, TestSpace>& v)
-        : Parent(fu, v)
-      {}
+  //     constexpr
+  //     Dot(const LHS& fu, const RHS& v)
+  //       : Parent(fu, v)
+  //     {}
 
-      constexpr
-      Dot(const Dot& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const Dot& other)
+  //       : Parent(other)
+  //     {}
 
-      constexpr
-      Dot(Dot&& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(Dot&& other)
+  //       : Parent(other)
+  //     {}
 
-      virtual LHS& getLHS() override
-      {
-        return static_cast<LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     LHS& getLHS()
+  //     {
+  //       return static_cast<LHS&>(Parent::getLHS());
+  //     }
 
-      virtual RHS& getRHS() override
-      {
-        return static_cast<RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     RHS& getRHS()
+  //     {
+  //       return static_cast<RHS&>(Parent::getRHS());
+  //     }
 
-      virtual const LHS& getLHS() const override
-      {
-        return static_cast<const LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     const LHS& getLHS() const
+  //     {
+  //       return static_cast<const LHS&>(Parent::getLHS());
+  //     }
 
-      virtual const RHS& getRHS() const override
-      {
-        return static_cast<const RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     const RHS& getRHS() const
+  //     {
+  //       return static_cast<const RHS&>(Parent::getRHS());
+  //     }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-  };
-  template <class FES>
-  Dot(const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>&, const ShapeFunction<FES, TestSpace>&)
-    -> Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
+  //     inline
+  //     Dot* copy() const noexcept
+  //     override
+  //     {
+  //       return new Dot(*this);
+  //     }
+  // };
+  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
+  // Dot(const Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>&,
+  //     const ShapeFunctionBase<RHSDerived, TestSpace>&)
+  //   -> Dot<
+  //       Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>,
+  //       ShapeFunction<RHSDerived, FES, TestSpace>>;
 
-  /**
-   * @ingroup DotSpecializations
-   *
-   * @f[
-   *   (f \nabla u) \cdot \nabla v
-   * @f]
-   * where @f$ f @f$ is a function (scalar or matrix valued).
-   */
-  template <class FES>
-  class Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>
-    : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  {
-    public:
-      using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-      using LHS = Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>;
-      using RHS = Grad<ShapeFunction<FES, TestSpace>>;
+  // /**
+  //  * @ingroup DotSpecializations
+  //  *
+  //  * @f[
+  //  *   (f \nabla u) \cdot \nabla v
+  //  * @f]
+  //  * where @f$ f @f$ is a function (scalar or matrix valued).
+  //  */
+  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
+  // class Dot<
+  //       Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
+  //       Grad<ShapeFunction<RHSDerived, FES, TestSpace>>> final
+  //   : public Dot<
+  //       ShapeFunctionBase<Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>, TrialSpace>,
+  //       ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
+  // {
+  //   public:
+  //     using LHS = Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>;
+  //     using RHS = Grad<ShapeFunction<RHSDerived, FES, TestSpace>>;
+  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
 
-      constexpr
-      Dot(const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>& fgu,
-          const Grad<ShapeFunction<FES, TestSpace>>& gv)
-        : Parent(fgu, gv)
-      {}
+  //     constexpr
+  //     Dot(const LHS& fgu, const RHS& gv)
+  //       : Parent(fgu, gv)
+  //     {}
 
-      constexpr
-      Dot(const Dot& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const Dot& other)
+  //       : Parent(other)
+  //     {}
 
-      constexpr
-      Dot(Dot&& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(Dot&& other)
+  //       : Parent(other)
+  //     {}
 
-      virtual LHS& getLHS() override
-      {
-        return static_cast<LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     LHS& getLHS()
+  //     {
+  //       return static_cast<LHS&>(Parent::getLHS());
+  //     }
 
-      virtual RHS& getRHS() override
-      {
-        return static_cast<RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     RHS& getRHS()
+  //     {
+  //       return static_cast<RHS&>(Parent::getRHS());
+  //     }
 
-      virtual const LHS& getLHS() const override
-      {
-        return static_cast<const LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     const LHS& getLHS() const
+  //     {
+  //       return static_cast<const LHS&>(Parent::getLHS());
+  //     }
 
-      virtual const RHS& getRHS() const override
-      {
-        return static_cast<const RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     const RHS& getRHS() const
+  //     {
+  //       return static_cast<const RHS&>(Parent::getRHS());
+  //     }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-  };
-  template <class FES>
-  Dot(const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>&, const Grad<ShapeFunction<FES, TestSpace>>&)
-    -> Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>;
+  //     inline
+  //     Dot* copy() const noexcept
+  //     override
+  //     {
+  //       return new Dot(*this);
+  //     }
+  // };
+  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
+  // Dot(const Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>&,
+  //     const Grad<ShapeFunction<RHSDerived, FES, TestSpace>>&)
+  //   -> Dot<
+  //       Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
+  //       Grad<ShapeFunction<RHSDerived, FES, TestSpace>>>;
 
-  /**
-   * @ingroup DotSpecializations
-   *
-   * Represents the following expression:
-   * @f[
-   *   \nabla u \cdot \nabla v
-   * @f]
-   */
-  template <class FES>
-  class Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>
-    : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  {
-    public:
-      using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-      using LHS = Grad<ShapeFunction<FES, TrialSpace>>;
-      using RHS = Grad<ShapeFunction<FES, TestSpace>>;
+  // /**
+  //  * @ingroup DotSpecializations
+  //  *
+  //  * Represents the following expression:
+  //  * @f[
+  //  *   \nabla u \cdot \nabla v
+  //  * @f]
+  //  */
+  // template <class LHSDerived, class RHSDerived, class FES>
+  // class Dot<
+  //     Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>,
+  //     Grad<ShapeFunction<RHSDerived, FES, TestSpace>>> final
+  //   : public Dot<
+  //       ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>, TrialSpace>,
+  //       ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
+  // {
+  //   public:
+  //     using LHS = Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>;
+  //     using RHS = Grad<ShapeFunction<RHSDerived, FES, TestSpace>>;
+  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
 
-      constexpr
-      Dot(const Grad<ShapeFunction<FES, TrialSpace>>& nu, const Grad<ShapeFunction<FES, TestSpace>>& nv)
-        : Parent(nu, nv)
-      {}
+  //     constexpr
+  //     Dot(const LHS& nu, const RHS& nv)
+  //       : Parent(nu, nv)
+  //     {}
 
-      constexpr
-      Dot(const Dot& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const Dot& other)
+  //       : Parent(other)
+  //     {}
 
-      constexpr
-      Dot(Dot&& other)
-        : Parent(std::move(other))
-      {}
+  //     constexpr
+  //     Dot(Dot&& other)
+  //       : Parent(std::move(other))
+  //     {}
 
-      virtual LHS& getLHS() override
-      {
-        return static_cast<LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     LHS& getLHS()
+  //     {
+  //       return static_cast<LHS&>(Parent::getLHS());
+  //     }
 
-      virtual RHS& getRHS() override
-      {
-        return static_cast<RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     RHS& getRHS()
+  //     {
+  //       return static_cast<RHS&>(Parent::getRHS());
+  //     }
 
-      virtual const LHS& getLHS() const override
-      {
-        return static_cast<const LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     const LHS& getLHS() const
+  //     {
+  //       return static_cast<const LHS&>(Parent::getLHS());
+  //     }
 
-      virtual const RHS& getRHS() const override
-      {
-        return static_cast<const RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     const RHS& getRHS() const
+  //     {
+  //       return static_cast<const RHS&>(Parent::getRHS());
+  //     }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-  };
-  template <class FES>
-  Dot(const Grad<ShapeFunction<FES, TrialSpace>>&, const Grad<ShapeFunction<FES, TestSpace>>&)
-    -> Dot<Grad<ShapeFunction<FES, TrialSpace>>, Grad<ShapeFunction<FES, TestSpace>>>;
+  //     inline
+  //     Dot* copy() const noexcept
+  //     override
+  //     {
+  //       return new Dot(*this);
+  //     }
+  // };
+  // template <class LHSDerived, class RHSDerived, class FES>
+  // Dot(const Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>&, const Grad<ShapeFunction<RHSDerived, FES, TestSpace>>&)
+  //   -> Dot<Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>, Grad<ShapeFunction<RHSDerived, FES, TestSpace>>>;
 
-  /**
-   * @ingroup DotSpecializations
-   *
-   * Represents the following expression:
-   * @f[
-   *   \mathbf{J} u \cdot \mathbf{J} v
-   * @f]
-   */
-  template <class FES>
-  class Dot<Jacobian<ShapeFunction<FES, TrialSpace>>, Jacobian<ShapeFunction<FES, TestSpace>>>
-    : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  {
-    public:
-      using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-      using LHS = Jacobian<ShapeFunction<FES, TrialSpace>>;
-      using RHS = Jacobian<ShapeFunction<FES, TestSpace>>;
+  // /**
+  //  * @ingroup DotSpecializations
+  //  *
+  //  * Represents the following expression:
+  //  * @f[
+  //  *   \mathbf{J} u \cdot \mathbf{J} v
+  //  * @f]
+  //  */
+  // template <class LHSDerived, class RHSDerived, class FES>
+  // class Dot<
+  //     Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>,
+  //     Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>> final
+  //   : public Dot<
+  //       ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>, TrialSpace>,
+  //       ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
+  // {
+  //   public:
+  //     using LHS = Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>;
+  //     using RHS = Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>;
+  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
 
-      constexpr
-      Dot(const Jacobian<ShapeFunction<FES, TrialSpace>>& nu, const Jacobian<ShapeFunction<FES, TestSpace>>& nv)
-        : Parent(nu, nv)
-      {}
+  //     constexpr
+  //     Dot(const LHS& nu, const RHS& nv)
+  //       : Parent(nu, nv)
+  //     {}
 
-      constexpr
-      Dot(const Dot& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const Dot& other)
+  //       : Parent(other)
+  //     {}
 
-      constexpr
-      Dot(Dot&& other)
-        : Parent(std::move(other))
-      {}
+  //     constexpr
+  //     Dot(Dot&& other)
+  //       : Parent(std::move(other))
+  //     {}
 
-      virtual LHS& getLHS() override
-      {
-        return static_cast<LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     LHS& getLHS()
+  //     {
+  //       return static_cast<LHS&>(Parent::getLHS());
+  //     }
 
-      virtual RHS& getRHS() override
-      {
-        return static_cast<RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     RHS& getRHS()
+  //     {
+  //       return static_cast<RHS&>(Parent::getRHS());
+  //     }
 
-      virtual const LHS& getLHS() const override
-      {
-        return static_cast<const LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     const LHS& getLHS() const
+  //     {
+  //       return static_cast<const LHS&>(Parent::getLHS());
+  //     }
 
-      virtual const RHS& getRHS() const override
-      {
-        return static_cast<const RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     const RHS& getRHS() const
+  //     {
+  //       return static_cast<const RHS&>(Parent::getRHS());
+  //     }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-  };
-  template <class FES>
-  Dot(const Jacobian<ShapeFunction<FES, TrialSpace>>&, const Jacobian<ShapeFunction<FES, TestSpace>>&)
-    -> Dot<Jacobian<ShapeFunction<FES, TrialSpace>>, Jacobian<ShapeFunction<FES, TestSpace>>>;
+  //     inline
+  //     Dot* copy() const noexcept
+  //     override
+  //     {
+  //       return new Dot(*this);
+  //     }
+  // };
+  // template <class LHSDerived, class RHSDerived, class FES>
+  // Dot(const Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>&,
+  //     const Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>&)
+  //   -> Dot<
+  //       Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>,
+  //       Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>>;
 
-  /**
-   * @ingroup DotSpecializations
-   *
-   * @f[
-   *   (f \mathbf{J} u) \cdot \mathbf{J} v
-   * @f]
-   * where @f$ f @f$ is a function (scalar or matrix valued).
-   */
-  template <class FES>
-  class Dot<Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>, Jacobian<ShapeFunction<FES, TestSpace>>>
-    : public Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  {
-    public:
-      using Parent = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-      using LHS = Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>;
-      using RHS = Jacobian<ShapeFunction<FES, TestSpace>>;
+  // /**
+  //  * @ingroup DotSpecializations
+  //  *
+  //  * @f[
+  //  *   (f \mathbf{J} u) \cdot \mathbf{J} v
+  //  * @f]
+  //  * where @f$ f @f$ is a function (scalar or matrix valued).
+  //  */
+  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
+  // class Dot<
+  //     Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
+  //     Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>> final
+  //   : public Dot<
+  //       ShapeFunctionBase<Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>, TrialSpace>,
+  //       ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
+  // {
+  //   public:
+  //     using LHS = Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>;
+  //     using RHS = Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>;
+  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
 
-      constexpr
-      Dot(const Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>& fgu,
-          const Jacobian<ShapeFunction<FES, TestSpace>>& gv)
-        : Parent(fgu, gv)
-      {}
+  //     constexpr
+  //     Dot(const LHS& fgu, const RHS& gv)
+  //       : Parent(fgu, gv)
+  //     {}
 
-      constexpr
-      Dot(const Dot& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(const Dot& other)
+  //       : Parent(other)
+  //     {}
 
-      constexpr
-      Dot(Dot&& other)
-        : Parent(other)
-      {}
+  //     constexpr
+  //     Dot(Dot&& other)
+  //       : Parent(other)
+  //     {}
 
-      virtual LHS& getLHS() override
-      {
-        return static_cast<LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     LHS& getLHS()
+  //     {
+  //       return static_cast<LHS&>(Parent::getLHS());
+  //     }
 
-      virtual RHS& getRHS() override
-      {
-        return static_cast<RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     RHS& getRHS()
+  //     {
+  //       return static_cast<RHS&>(Parent::getRHS());
+  //     }
 
-      virtual const LHS& getLHS() const override
-      {
-        return static_cast<const LHS&>(Parent::getLHS());
-      }
+  //     inline
+  //     constexpr
+  //     const LHS& getLHS() const
+  //     {
+  //       return static_cast<const LHS&>(Parent::getLHS());
+  //     }
 
-      virtual const RHS& getRHS() const override
-      {
-        return static_cast<const RHS&>(Parent::getRHS());
-      }
+  //     inline
+  //     constexpr
+  //     const RHS& getRHS() const
+  //     {
+  //       return static_cast<const RHS&>(Parent::getRHS());
+  //     }
 
-      virtual Dot* copy() const noexcept override
-      {
-        return new Dot(*this);
-      }
-  };
-  template <class FES>
-  Dot(const Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>&, const Jacobian<ShapeFunction<FES, TestSpace>>&)
-    -> Dot<Mult<FunctionBase, Jacobian<ShapeFunction<FES, TrialSpace>>>, Jacobian<ShapeFunction<FES, TestSpace>>>;
+  //     inline
+  //     Dot* copy() const noexcept
+  //     override
+  //     {
+  //       return new Dot(*this);
+  //     }
+  // };
+  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
+  // Dot(const Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>&,
+  //     const Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>&)
+  //   -> Dot<
+  //       Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
+  //       Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>>;
 
-  /* <<-- OPTIMIZATIONS -----------------------------------------------------
-   * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-   * ----------------------------------------------------------------------||
-   */
+  // /* <<-- OPTIMIZATIONS -----------------------------------------------------
+  //  * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
+  //  * ----------------------------------------------------------------------||
+  //  */
 }
 
 #endif

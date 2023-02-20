@@ -1,6 +1,6 @@
-#include "Utility.h"
+#include "MFEM.h"
 
-namespace Rodin::Variational
+namespace Rodin::Variational::Internal
 {
   mfem::ElementTransformation* refinedToCoarse(
     mfem::Mesh &coarse_mesh, const mfem::ElementTransformation &T,

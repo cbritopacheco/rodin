@@ -7,8 +7,9 @@
 #ifndef RODIN_VARIATIONAL_FINITEELEMENT_H
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
-#include "Rodin/Math/DenseMatrix.h"
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/SimplexTransformation.h"
 
 #include "ForwardDecls.h"
 
@@ -19,27 +20,34 @@ namespace Rodin::Variational
   class FiniteElement
   {
     public:
-      FiniteElement(
-          const Geometry::Simplex& simplex,
-          const mfem::FiniteElement* handle)
-        : m_simplex(simplex), m_handle(handle)
+      FiniteElement(const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
+                    const mfem::FiniteElement* handle)
+        : m_simplex(simplex), m_trans(trans), m_handle(handle)
       {}
 
-      Math::DenseMatrix getBasis(const Math::Vector& p) const;
+      Math::Matrix getBasis(const Math::Vector& p) const;
 
-      Math::DenseMatrix getJacobian(const Math::Vector& p) const;
+      Math::Matrix getJacobian(const Math::Vector& p) const;
 
-      Math::DenseMatrix getDivergence(const Math::Vector& p) const;
+      Math::Matrix getDivergence(const Math::Vector& p) const;
 
-      Math::DenseMatrix getCurl(const Math::Vector& p) const;
+      Math::Matrix getCurl(const Math::Vector& p) const;
 
-      Math::DenseMatrix getHessian(const Math::Vector& p) const;
+      Math::Matrix getHessian(const Math::Vector& p) const;
 
+      inline
       const Geometry::Simplex& getSimplex() const
       {
         return m_simplex.get();
       }
 
+      inline
+      const Geometry::Transformation& getTransformation() const
+      {
+        return m_trans.get();
+      }
+
+      inline
       const mfem::FiniteElement& getHandle() const
       {
         return *m_handle;
@@ -47,6 +55,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Simplex> m_simplex;
+      std::reference_wrapper<const Geometry::Transformation> m_trans;
       const mfem::FiniteElement* m_handle;
   };
 }

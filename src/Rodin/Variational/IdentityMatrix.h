@@ -15,52 +15,52 @@ namespace Rodin::Variational
    *   F(x) = I_n
    * @f$
    */
-  class IdentityMatrix : public MatrixFunctionBase
+  class IdentityMatrix : public MatrixFunctionBase<IdentityMatrix>
   {
     public:
       /**
        * @brief Constructs the identity matrix function.
        * @param[in] n Dimension of identity matrix
        */
-      IdentityMatrix(int n)
+      constexpr
+      IdentityMatrix(size_t n)
         : m_n(n)
-      {
-        assert(n > 0);
-      }
+      {}
 
+      constexpr
       IdentityMatrix(const IdentityMatrix& other)
-        :  MatrixFunctionBase(other),
+        : MatrixFunctionBase(other),
           m_n(other.m_n)
       {}
 
+      constexpr
       IdentityMatrix(IdentityMatrix&& other)
-        :  MatrixFunctionBase(std::move(other)),
+        : MatrixFunctionBase(std::move(other)),
           m_n(other.m_n)
       {}
 
-      int getRows() const override
+      inline
+      constexpr
+      size_t getRows() const
       {
         return m_n;
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      size_t getColumns() const
       {
         return m_n;
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      auto getValue(const Geometry::Point&) const
       {
-        Math::Matrix res = Math::Matrix::Identity(m_n, m_n);
-        return res;
-      }
-
-      IdentityMatrix* copy() const noexcept override
-      {
-        return new IdentityMatrix(*this);
+        return Math::Matrix::Identity(m_n, m_n);
       }
 
     private:
-      const int m_n;
+      const size_t m_n;
   };
 }
 

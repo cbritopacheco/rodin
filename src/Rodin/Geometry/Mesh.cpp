@@ -48,7 +48,7 @@ namespace Rodin::Geometry
     return m_sdim;
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(double c)
+  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
   {
     mfem::Vector vs;
     getHandle().GetVertices(vs);
@@ -98,32 +98,17 @@ namespace Rodin::Geometry
     }
   }
 
-  MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
+  Scalar MeshBase::getVolume()
   {
-    assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-    getHandle().MoveNodes(u.getHandle());
-    return *this;
-  }
-
-  double
-  MeshBase::getMaximumDisplacement(const Variational::GridFunctionBase& u)
-  {
-    double res;
-    getHandle().CheckDisplacements(u.getHandle(), res);
-    return res;
-  }
-
-  double MeshBase::getVolume()
-  {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getElement(); !it.end(); ++it)
       totalVolume += it->getVolume();
     return totalVolume;
   }
 
-  double MeshBase::getVolume(Attribute attr)
+  Scalar MeshBase::getVolume(Attribute attr)
   {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getElement(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -132,17 +117,17 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  double MeshBase::getPerimeter()
+  Scalar MeshBase::getPerimeter()
   {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
       totalVolume += it->getVolume();
     return totalVolume;
   }
 
-  double MeshBase::getPerimeter(Attribute attr)
+  Scalar MeshBase::getPerimeter(Attribute attr)
   {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)

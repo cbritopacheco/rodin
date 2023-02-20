@@ -2,7 +2,6 @@
 #define RODIN_VARIATIONAL_NORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Utility/MFEM.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
@@ -12,34 +11,41 @@ namespace Rodin::Variational
   /**
    * @brief Outward unit normal.
    */
-  class Normal : public VectorFunctionBase
+  class Normal : public VectorFunctionBase<Normal>
   {
     public:
+      using Parent = VectorFunctionBase<Normal>;
+
       /**
        * @brief Constructs the outward unit normal.
        */
+      constexpr
       Normal(size_t dimension)
         : m_dimension(dimension)
       {
         assert(dimension > 0);
       }
 
+      constexpr
       Normal(const Normal& other)
-        :  VectorFunctionBase(other),
+        : Parent(other),
           m_dimension(other.m_dimension)
       {}
 
+      constexpr
       Normal(Normal&& other)
-        :  VectorFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_dimension(other.m_dimension)
       {}
 
-      int getDimension() const override
+      inline
+      constexpr
+      size_t getDimension() const
       {
         return m_dimension;
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      auto getValue(const Geometry::Point& p) const
       {
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();
@@ -108,14 +114,9 @@ namespace Rodin::Variational
           value = Math::Vector::Zero(m_dimension);
           return value;
         }
-
         return value;
       }
 
-      Normal* copy() const noexcept override
-      {
-        return new Normal(*this);
-      }
     private:
       const size_t m_dimension;
   };

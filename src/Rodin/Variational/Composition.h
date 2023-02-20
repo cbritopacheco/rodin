@@ -30,38 +30,42 @@ namespace Rodin::Variational
    *   (f \circ g)(x) = f(g(x)) \ .
    * @f]
    */
-  template <>
-  class Composition<
-    std::function<Scalar(Scalar)>, FunctionBase>
-    : public ScalarFunctionBase
+  template <class NestedDerived>
+  class Composition<std::function<Scalar(Scalar)>, FunctionBase<NestedDerived>> final
+    : public ScalarFunctionBase<Composition<std::function<Scalar(Scalar)>, FunctionBase<NestedDerived>>>
   {
     public:
-      Composition(std::function<Scalar(Scalar)> f, const FunctionBase& g);
+      using LHS = std::function<Scalar(Scalar)>;
+      using RHS = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Composition<LHS, RHS>>;
 
-      Composition(const Composition& other);
+      Composition(LHS f, const RHS& g)
+        : m_f(f), m_g(g)
+      {}
 
-      Composition(Composition&& other);
+      Composition(const Composition& other)
+        : Parent(other),
+          m_f(other.m_f), m_g(other.m_g)
+      {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      Composition(Composition&& other)
+        : m_f(std::move(other.m_f)), m_g(std::move(other.m_g))
+      {}
+
+      inline
+      Scalar getValue(const Geometry::Point& p) const
       {
         return m_f(m_g->getValue(p));
       }
 
-      Composition* copy() const noexcept override
-      {
-        return new Composition(*this);
-      }
-
     private:
-      std::function<Scalar(Scalar)> m_f;
-      std::unique_ptr<FunctionBase> m_g;
+      LHS m_f;
+      RHS m_g;
   };
-  template <class Lhs>
-  Composition(const Lhs&, const FunctionBase&) ->
-    Composition<
-    std::enable_if_t<
-      std::is_invocable_r_v<Scalar, Lhs, Scalar>,
-      std::function<Scalar(Scalar)>>, FunctionBase>;
+
+  template <class NestedDerived>
+  Composition(const std::function<Scalar(Scalar)>&, const FunctionBase<NestedDerived>&)
+    -> Composition<std::function<Scalar(Scalar)>, FunctionBase<NestedDerived>>;
 
   /**
    * @brief Composes two functions

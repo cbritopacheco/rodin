@@ -21,7 +21,6 @@
 
 #include "Function.h"
 #include "RangeShape.h"
-#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
@@ -34,8 +33,9 @@ namespace Rodin::Variational
   template <class Derived>
   class ScalarFunctionBase : public FunctionBase<ScalarFunctionBase<Derived>>
   {
-    using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
     public:
+      using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
+
       constexpr
       ScalarFunctionBase() = default;
 
@@ -53,7 +53,15 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Scalar getValue(const Geometry::Point& p) const
+      ScalarFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        static_cast<Derived&>(*this).traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -61,23 +69,22 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        return {1, 1};
+        return { 1, 1 };
       }
-
-      virtual ScalarFunctionBase* copy() const noexcept override = 0;
   };
 
   /**
    * @ingroup ScalarFunctionSpecializations
    */
-  template <class Derived>
-  class ScalarFunction<FunctionBase<Derived>>
-    : public ScalarFunctionBase<ScalarFunction<FunctionBase<Derived>>>
+  template <class NestedDerived>
+  class ScalarFunction<FunctionBase<NestedDerived>> final
+    : public ScalarFunctionBase<ScalarFunction<FunctionBase<NestedDerived>>>
   {
-    using Parent = ScalarFunctionBase<ScalarFunction<FunctionBase<Derived>>>;
     public:
+      using Parent = ScalarFunctionBase<ScalarFunction<FunctionBase<NestedDerived>>>;
+
       constexpr
-      ScalarFunction(const FunctionBase<Derived>& nested)
+      ScalarFunction(const FunctionBase<NestedDerived>& nested)
         : m_nested(nested)
       {}
 
@@ -95,25 +102,21 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Scalar getValue(const Geometry::Point& v) const
+      auto getValue(const Geometry::Point& v) const
       {
         return static_cast<Scalar>(m_nested->getValue(v));
       }
 
-      ScalarFunction& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      ScalarFunction& traceOf(Geometry::Attribute attrs)
       {
-        ScalarFunctionBase<ScalarFunction<FunctionBase<Derived>>>::traceOf(attrs);
         m_nested->traceOf(attrs);
         return *this;
       }
 
-      ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
     private:
-      FunctionBase<Derived> m_nested;
+      FunctionBase<NestedDerived> m_nested;
   };
   template <class Derived>
   ScalarFunction(const FunctionBase<Derived>&) -> ScalarFunction<FunctionBase<Derived>>;
@@ -126,12 +129,14 @@ namespace Rodin::Variational
    * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
    */
   template <class Number>
-  class ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>
-    : public ScalarFunctionBase<ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>>
+  class ScalarFunction<Number> final
+    : public ScalarFunctionBase<ScalarFunction<Number>>
   {
-    using Parent =
-      ScalarFunctionBase<ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>>;
+    static_assert(std::is_arithmetic_v<Number>);
+
     public:
+      using Parent = ScalarFunctionBase<ScalarFunction<Number>>;
+
       /**
        * @brief Constructs a ScalarFunction from an arithmetic value.
        * @param[in] x Arithmetic value
@@ -155,34 +160,31 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      ScalarFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
       Scalar getValue(const Geometry::Point&) const
       {
         return static_cast<Scalar>(m_x);
       }
 
-      ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
-      }
-
-      Internal::MFEMFunction build(const Geometry::MeshBase&) const override
-      {
-        return Internal::MFEMFunction(new mfem::ConstantCoefficient(m_x));
-      }
-
     private:
       const Number m_x;
   };
-  template <class Number>
-  ScalarFunction(Number)
-    -> ScalarFunction<Number, std::enable_if_t<std::is_arithmetic_v<Number>>>;
+
+  template <class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  ScalarFunction(Number) -> ScalarFunction<Number>;
 
   /**
    * @ingroup ScalarFunctionSpecializations
    * @brief Represents a scalar function given by an arbitrary scalar function.
    */
   template <>
-  class ScalarFunction<std::function<Scalar(const Geometry::Point&)>>
+  class ScalarFunction<std::function<Scalar(const Geometry::Point&)>> final
     : public ScalarFunctionBase<ScalarFunction<std::function<double(const Geometry::Point&)>>>
   {
     public:
@@ -211,14 +213,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      ScalarFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      constexpr
       Scalar getValue(const Geometry::Point& v) const
       {
         return m_f(v);
-      }
-
-      ScalarFunction* copy() const noexcept override
-      {
-        return new ScalarFunction(*this);
       }
 
     private:

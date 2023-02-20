@@ -1,48 +1,70 @@
 #ifndef RODIN_VARIATIONAL_TESTFUNCTION_H
 #define RODIN_VARIATIONAL_TESTFUNCTION_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-
+#include "Component.h"
+#include "GridFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
-  template <class FES>
-  class TestFunction : public ShapeFunction<FES, TestSpace>
+  template <class FESType>
+  class TestFunction final
+    : public ShapeFunction<TestFunction<FESType>, FESType, TestSpace>
   {
     public:
+      using FES = FESType;
+      using Parent = ShapeFunction<TestFunction<FESType>, FESType, TestSpace>;
+
       constexpr
       TestFunction(FES& fes)
-        : ShapeFunction<FES, TestSpace>(fes)
+        : Parent(fes)
       {}
 
       constexpr
       TestFunction(const TestFunction& other)
-        : ShapeFunction<FES, TestSpace>(other)
+        : Parent(other)
       {}
 
       constexpr
       TestFunction(TestFunction&& other)
-        : ShapeFunction<FES, TestSpace>(std::move(other))
+        : Parent(std::move(other))
       {}
 
       void operator=(const TestFunction&) = delete;
 
       void operator=(TestFunction&&) = delete;
 
-      const TestFunction& getLeaf() const override
+      inline
+      constexpr
+      auto x() const
+      {
+        assert(getFiniteElementSpace().getVectorDimension() >= 1);
+        return Component(*this, 0);
+      }
+
+      inline
+      constexpr
+      auto y() const
+      {
+        assert(getFiniteElementSpace().getVectorDimension() >= 2);
+        return Component(*this, 1);
+      }
+
+      inline
+      constexpr
+      auto z() const
+      {
+        assert(getFiniteElementSpace().getVectorDimension() >= 3);
+        return Component(*this, 2);
+      }
+
+      inline
+      constexpr
+      const TestFunction& getLeaf() const
       {
         return *this;
-
-      }
-
-      TestFunction* copy() const noexcept override
-      {
-        return new TestFunction(*this);
       }
   };
-  template <class FES>
-  TestFunction(FES& fes) -> TestFunction<FES>;
 }
+
 #endif

@@ -9,36 +9,9 @@
 
 namespace Rodin::Variational
 {
-  // ---- FunctionBase ------------------------------------------------------
-
-  UnaryMinus<FunctionBase>::UnaryMinus(const FunctionBase& op)
-    :  FunctionBase(op),
-      m_op(op.copy())
-  {}
-
-  UnaryMinus<FunctionBase>::UnaryMinus(const UnaryMinus& other)
-    :  FunctionBase(other),
-      m_op(other.m_op->copy())
-  {}
-
-  UnaryMinus<FunctionBase>::UnaryMinus(UnaryMinus&& other)
-    : FunctionBase(std::move(other)),
-      m_op(std::move(other.m_op))
-  {}
-
-  RangeShape UnaryMinus<FunctionBase>::getRangeShape() const
-  {
-    return m_op->getRangeShape();
-  }
-
-  UnaryMinus<FunctionBase> operator-(const FunctionBase& op)
-  {
-    return UnaryMinus(op);
-  }
-
   // ---- LinearFormIntegratorBase ------------------------------------------
   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
-    :  LinearFormIntegratorBase(op),
+    : LinearFormIntegratorBase(op),
       m_op(op.copy())
   {}
 

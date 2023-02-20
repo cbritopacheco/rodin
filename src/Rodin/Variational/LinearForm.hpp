@@ -19,22 +19,6 @@
 namespace Rodin::Variational
 {
    template <class FES>
-   constexpr
-   LinearForm<FES, Context::Serial, mfem::Vector>
-   ::LinearForm(TestFunction<FES>& v)
-      :  m_v(v)
-   {}
-
-   template <class FES>
-   constexpr
-   double
-   LinearForm<FES, Context::Serial, mfem::Vector>
-   ::operator()(const GridFunction<FES>& u) const
-   {
-      return *m_vector * u.getHandle();
-   }
-
-   template <class FES>
    void
    LinearForm<FES, Context::Serial, mfem::Vector>::assemble()
    {

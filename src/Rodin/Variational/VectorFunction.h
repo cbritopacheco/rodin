@@ -17,7 +17,6 @@
 
 #include "Rodin/Alert.h"
 
-#include "Utility.h"
 #include "Function.h"
 #include "ScalarFunction.h"
 
@@ -29,47 +28,55 @@ namespace Rodin::Variational
    * @see VectorFunction
    */
 
-  class VectorFunctionBase : public FunctionBase
+  template <class Derived>
+  class VectorFunctionBase : public FunctionBase<VectorFunctionBase<Derived>>
   {
     public:
+      using Parent = FunctionBase<VectorFunctionBase<Derived>>;
+
+      constexpr
       VectorFunctionBase() = default;
 
+      constexpr
       VectorFunctionBase(const VectorFunctionBase& other)
-        : FunctionBase(other)
+        : Parent(other)
       {}
 
+      constexpr
       VectorFunctionBase(VectorFunctionBase&& other)
-        : FunctionBase(std::move(other))
+        : Parent(std::move(other))
       {}
 
       /**
        * @brief Convenience function to access the 1st component of the
        * vector.
        */
-      Component<FunctionBase> x() const;
+      inline
+      constexpr
+      auto x() const
+      {
+        assert(getDimension() >= 1);
+        return operator()(0);
+      }
 
       /**
        * @brief Convenience function to access the 2nd component of the
        * vector.
        */
-      Component<FunctionBase> y() const;
-
-      /**
-       * @brief Convenience function to access the 3rd component of the
-       * vector.
-       */
-      Component<FunctionBase> z() const;
-
-      virtual ~VectorFunctionBase() = default;
-
-      RangeShape getRangeShape() const override
+      inline
+      constexpr
+      auto y() const
       {
-        return {getDimension(), 1};
+        assert(getDimension() >= 2);
+        return operator()(1);
       }
 
-      virtual RangeType getRangeType() const override
+      inline
+      constexpr
+      auto z() const
       {
-        return RangeType::Vector;
+        assert(getDimension() >= 3);
+        return operator()(2);
       }
 
       /**
@@ -77,20 +84,41 @@ namespace Rodin::Variational
        * @returns Object of type Component<VectorFunctionBase> representing
        * the ith component of the VectorFunction.
        */
-      virtual Component<FunctionBase> operator()(int i) const;
-
-      Math::Vector operator()(const Geometry::Point& p) const
+      inline
+      constexpr
+      auto operator()(size_t i) const
       {
-        return getValue(p).vector();
+        assert(0 <= i);
+        assert(i < getDimension());
+        return Component(*this, i);
+      }
+
+      virtual ~VectorFunctionBase() = default;
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getDimension(), 1 };
+      }
+
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
       }
 
       /**
        * @brief Gets the dimension of the vector object.
        * @returns Dimension of vector.
        */
-      virtual int getDimension() const = 0;
-
-      virtual VectorFunctionBase* copy() const noexcept override = 0;
+      inline
+      constexpr
+      size_t getDimension() const
+      {
+        return static_cast<const Derived&>(*this).getDimension();
+      }
   };
 
   /**
@@ -114,9 +142,20 @@ namespace Rodin::Variational
    * @endcode
    */
   template <class V, class ... Values>
-  class VectorFunction<V, Values...> : public VectorFunctionBase
+  class VectorFunction<V, Values...> final
+    : public VectorFunctionBase<VectorFunction<V, Values...>>
   {
+    template <size_t N>
+    struct index { static const constexpr auto value = N; };
+
+    template <class F, size_t ... Is>
+    void for_index(F f, std::index_sequence<Is...>)
+    {
+      (f(index<Is>{}), ...);
+    }
+
     public:
+      using Parent = VectorFunctionBase<VectorFunction<V, Values...>>;
       /**
        * @brief Constructs a vector with the given values.
        * @param[in] values Parameter pack of values
@@ -126,71 +165,50 @@ namespace Rodin::Variational
        */
       constexpr
       VectorFunction(V v, Values... values)
-      {
-        m_fs.reserve(1 + sizeof...(Values));
-        makeFsFromTuple(std::forward_as_tuple(v, values...));
-      }
+        : m_fs(ScalarFunction(v), ScalarFunction(values)...)
+      {}
 
       constexpr
       VectorFunction(const VectorFunction& other)
-        : VectorFunctionBase(other)
-      {
-        m_fs.reserve(1 + sizeof...(Values));
-        for (const auto& v : other.m_fs)
-          m_fs.emplace_back(v->copy());
-      }
+        : Parent(other),
+          m_fs(other.m_fs)
+      {}
 
       constexpr
       VectorFunction(VectorFunction&& other)
-        :  VectorFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_fs(std::move(other.m_fs))
       {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      auto getValue(const Geometry::Point& p) const
       {
         Math::FixedSizeVector<1 + sizeof...(Values)> value;
-        assert(m_fs.size() == 1 + sizeof...(Values));
-        for (size_t i = 0; i < 1 + sizeof...(Values); i++)
-          value(i) = m_fs[i]->getValue(p);
+        for_index<1 + sizeof...(Values)>(
+            [&](auto&& index) { value(index.value) = std::get<index.value>(m_fs).getValue(p); });
         return value;
       }
 
-      int getDimension() const override
+      inline
+      constexpr
+      size_t getDimension() const
       {
         return 1 + sizeof...(Values);
       }
 
-      VectorFunction& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      VectorFunction& traceOf(Geometry::Attribute attrs)
       {
-        VectorFunctionBase::traceOf(attrs);
-        for (auto& f : m_fs)
-          f->traceOf(attrs);
+        std::apply([&](auto& s) { s.traceOf(attrs); }, m_fs);
         return *this;
       }
 
-      VectorFunction* copy() const noexcept override
-      {
-        return new VectorFunction(*this);
-      }
-
     private:
-      template<std::size_t I = 0, class ... Tp>
-      typename std::enable_if_t<I == sizeof...(Tp)>
-      makeFsFromTuple(const std::tuple<Tp...>&)
-      {}
-
-      template<std::size_t I = 0, class ... Tp>
-      typename std::enable_if_t<I < sizeof...(Tp)>
-      makeFsFromTuple(const std::tuple<Tp...>& t)
-      {
-        m_fs.emplace_back(new ScalarFunction(std::get<I>(t)));
-        makeFsFromTuple<I + 1, Tp...>(t);
-      }
-
-      std::vector<std::unique_ptr<ScalarFunctionBase>> m_fs;
+      std::tuple<ScalarFunction<V>, ScalarFunction<Values>...> m_fs;
   };
-  template <class ... Values>
-  VectorFunction(Values&&...) -> VectorFunction<Values...>;
+  template <class V, class ... Values>
+  VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
 }
 
 #endif

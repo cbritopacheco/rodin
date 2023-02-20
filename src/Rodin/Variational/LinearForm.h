@@ -138,7 +138,7 @@ namespace Rodin::Variational
        * @brief Gets the test function argument associated to this linear
        * form.
        */
-      virtual const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const = 0;
+      virtual const FormLanguage::Base& getTestFunction() const = 0;
 
       virtual LinearFormBase* copy() const noexcept override = 0;
 
@@ -163,13 +163,15 @@ namespace Rodin::Variational
    * LinearFormIntegratorBase instances.
    */
   template <class FES>
-  class LinearForm<FES, Context::Serial, mfem::Vector> : public LinearFormBase<mfem::Vector>
+  class LinearForm<FES, Context::Serial, mfem::Vector> final
+    : public LinearFormBase<mfem::Vector>
   {
     static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
 
     public:
       using Context = typename FES::Context;
       using VectorType = mfem::Vector;
+      using Parent = LinearFormBase<VectorType>;
 
       /**
        * @brief Constructs a linear form defined on some finite element
@@ -177,18 +179,20 @@ namespace Rodin::Variational
        * @param[in] fes Reference to the finite element space
        */
       constexpr
-      LinearForm(TestFunction<FES>& v);
+      LinearForm(TestFunction<FES>& v)
+        : m_v(v)
+      {}
 
       constexpr
       LinearForm(const LinearForm& other)
-        :  LinearFormBase(other),
+        : Parent(other),
           m_v(other.m_v)
       {}
 
       constexpr
       LinearForm(LinearForm&& other)
-        :  LinearFormBase(std::move(other)),
-          m_v(other.m_v)
+        : Parent(std::move(other)),
+          m_v(std::move(other.m_v))
       {}
 
       /**
@@ -200,7 +204,10 @@ namespace Rodin::Variational
        * @returns The value which the linear form takes at @f$ u @f$.
        */
       constexpr
-      double operator()(const GridFunction<FES>& u) const;
+      Scalar operator()(const GridFunction<FES>& u) const
+      {
+        return *m_vector * u.getHandle();
+      }
 
       void assemble() override;
 
@@ -226,7 +233,7 @@ namespace Rodin::Variational
 
       const TestFunction<FES>& getTestFunction() const override
       {
-        return m_v;
+        return m_v.get();
       }
 
       LinearForm& operator=(
@@ -249,7 +256,7 @@ namespace Rodin::Variational
       }
 
     private:
-      TestFunction<FES>& m_v;
+      std::reference_wrapper<TestFunction<FES>> m_v;
       std::unique_ptr<VectorType> m_vector;
   };
   template <class FES>

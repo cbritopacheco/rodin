@@ -13,7 +13,7 @@ namespace Rodin::Variational
    return getHandle().GetNDofs();
   }
 
-  int FiniteElementSpaceBase::getVectorDimension() const
+  size_t FiniteElementSpaceBase::getVectorDimension() const
   {
    return getHandle().GetVDim();
   }

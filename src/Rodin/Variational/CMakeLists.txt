@@ -2,7 +2,6 @@ set(RodinVariational_HEADERS
   BilinearForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
-  EssentialBoundary.h
   Derivative.h
   Dot.h
   Jump.h
@@ -18,6 +17,7 @@ set(RodinVariational_HEADERS
   IdentityMatrix.h
   Integral.h
   Sum.h
+  MFEM.h
   UnaryMinus.h
   Mult.h
   Jacobian.h
@@ -32,7 +32,6 @@ set(RodinVariational_HEADERS
   BasisOperator.h
   Restriction.h
   VectorFunction.h
-  Utility.h
   Minus.h
   Min.h
   Max.h
@@ -48,7 +47,6 @@ set(RodinVariational_HEADERS
 
 set(RodinVariational_SRCS
   FiniteElementSpace.cpp
-  EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
   ShapeFunction.cpp
@@ -72,7 +70,7 @@ set(RodinVariational_SRCS
   LinearForm.hpp
   Problem.hpp
   ProblemBody.cpp
-  Utility.cpp
+  MFEM.cpp
   Minus.cpp
   Function.cpp
   RangeShape.cpp

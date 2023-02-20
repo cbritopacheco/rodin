@@ -65,6 +65,8 @@
 #include "Variational/Frobenius.h"
 
 #include "Variational/Integral.h"
+#include "Variational/FaceIntegral.h"
+#include "Variational/BoundaryIntegral.h"
 #include "Variational/Problem.h"
 
 #include "Variational/ScalarFunction.h"

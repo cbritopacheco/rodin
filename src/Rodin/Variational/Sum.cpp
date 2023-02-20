@@ -5,7 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "RangeShape.h"
-#include "Exceptions.h"
 
 #include "BilinearFormIntegrator.h"
 
@@ -13,52 +12,6 @@
 
 namespace Rodin::Variational
 {
-  Sum<FunctionBase, FunctionBase>::Sum(const FunctionBase& lhs, const FunctionBase& rhs)
-    : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-  {
-    if (lhs.getRangeShape() != rhs.getRangeShape())
-      RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
-  }
-
-  Sum<FunctionBase, FunctionBase>::Sum(const Sum& other)
-    :  FunctionBase(other),
-      m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-  {}
-
-  Sum<FunctionBase, FunctionBase>::Sum(Sum&& other)
-    :  FunctionBase(std::move(other)),
-      m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-  {}
-
-  Sum<FunctionBase, FunctionBase>&
-  Sum<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attrs)
-  {
-    FunctionBase::traceOf(attrs);
-    m_lhs->traceOf(attrs);
-    m_rhs->traceOf(attrs);
-    return *this;
-  }
-
-  RangeShape Sum<FunctionBase, FunctionBase>::getRangeShape() const
-  {
-    assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
-    return m_lhs->getRangeShape();
-  }
-
-  Sum<FunctionBase, FunctionBase>&
-  Sum<FunctionBase, FunctionBase>::operator+=(const FunctionBase& lhs)
-  {
-    auto sum = new Sum(lhs, *m_rhs);
-    m_rhs.reset(sum);
-    return *this;
-  }
-
-  Sum<FunctionBase, FunctionBase>
-  operator+(const FunctionBase& lhs, const FunctionBase& rhs)
-  {
-    return Sum(lhs, rhs);
-  }
-
   FormLanguage::List<BilinearFormIntegratorBase>
   operator+(
       const BilinearFormIntegratorBase& lhs,
