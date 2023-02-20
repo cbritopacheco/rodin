@@ -19,14 +19,22 @@ namespace Rodin::Variational
       using Parent = Integrator;
 
       template <class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(
-          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
-        :  m_u(u.copy()), m_v(v.copy())
+      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+        : m_u(u), m_v(v)
       {}
+
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, const TestFunction<TestFES>& v) = delete;
+
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, TestFunction<TestFES>&& v) = delete;
+
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, TestFunction<TestFES>&& v) = delete;
 
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
-          m_u(other.m_u->copy()), m_v(other.m_v->copy()),
+          m_u(other.m_u), m_v(other.m_v),
           m_attrs(other.m_attrs)
       {}
 
@@ -90,8 +98,7 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTrialFunction() const
       {
-        assert(m_u);
-        return *m_u;
+        return m_u.get();
       }
 
       /**
@@ -100,8 +107,7 @@ namespace Rodin::Variational
       inline
       const FormLanguage::Base& getTestFunction() const
       {
-        assert(m_u);
-        return *m_u;
+        return m_v.get();
       }
 
       /**
@@ -115,8 +121,8 @@ namespace Rodin::Variational
       BilinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<FormLanguage::Base> m_u;
-      std::unique_ptr<FormLanguage::Base> m_v;
+      std::reference_wrapper<const FormLanguage::Base> m_u;
+      std::reference_wrapper<const FormLanguage::Base> m_v;
       std::set<Geometry::Attribute> m_attrs;
   };
 }

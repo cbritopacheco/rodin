@@ -125,6 +125,7 @@ namespace Rodin::Variational
       FunctionBase<LHSDerived> m_lhs;
       FunctionBase<RHSDerived> m_rhs;
   };
+
   template <class LHSDerived, class RHSDerived>
   Dot(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
@@ -152,15 +153,15 @@ namespace Rodin::Variational
 
       constexpr
       Dot(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
-        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
       }
 
       constexpr
       Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
@@ -173,14 +174,16 @@ namespace Rodin::Variational
       constexpr
       const LHS& getLHS() const
       {
-        return m_lhs;
+        assert(m_lhs);
+        return *m_lhs;
       }
 
       inline
       constexpr
       const RHS& getRHS() const
       {
-        return m_rhs;
+        assert(m_rhs);
+        return *m_rhs;
       }
 
       inline
@@ -246,9 +249,14 @@ namespace Rodin::Variational
         }
       }
 
+      inline Dot* copy() const noexcept final override
+      {
+        return new Dot(*this);
+      }
+
     private:
-      FunctionBase<LHSDerived> m_lhs;
-      ShapeFunctionBase<RHSDerived, Space> m_rhs;
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
@@ -303,16 +311,40 @@ namespace Rodin::Variational
       Math::Matrix getMatrix(ShapeComputator& compute, const Geometry::Point& p) const
       {
         assert(m_trial.getRangeShape() == m_test.getRangeShape());
+        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+        static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto trial = m_trial.getOperator(compute, p);
         const auto test = m_test.getOperator(compute, p);
         Math::Matrix res(test.getDOFs(), trial.getDOFs());
-        for (Math::Matrix::Index i = 0; i < res.rows(); i++)
-          for (Math::Matrix::Index j = 0; j < res.cols(); j++)
-            res(i, j) = (trial(i) * test(j).transpose()).trace();
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        {
+          for (Math::Matrix::Index i = 0; i < res.rows(); i++)
+            for (Math::Matrix::Index j = 0; j < res.cols(); j++)
+              res(i, j) = trial(i) * test(j);
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        {
+          for (Math::Matrix::Index i = 0; i < res.rows(); i++)
+            for (Math::Matrix::Index j = 0; j < res.cols(); j++)
+              res(i, j) = trial(i).dot(test(j));
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
+        {
+          for (Math::Matrix::Index i = 0; i < res.rows(); i++)
+            for (Math::Matrix::Index j = 0; j < res.cols(); j++)
+              res(i, j) = (trial(i) * test(j).transpose()).trace();
+        }
+        else
+        {
+          assert(false);
+          res.setZero();
+          return res;
+        }
         return res;
       }
 
-      inline Dot* copy() const noexcept override
+      inline Dot* copy() const noexcept final override
       {
         return new Dot(*this);
       }

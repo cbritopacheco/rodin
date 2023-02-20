@@ -418,6 +418,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getFiniteElementSpace();
       }
 
+      virtual GridFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+
       /**
        * @internal
        * @brief Gets the underlying handle to the mfem::GridFunction object.
@@ -541,6 +546,11 @@ namespace Rodin::Variational
         return m_data;
       }
 
+      virtual FESGridFunction* copy() const noexcept override
+      {
+        return new FESGridFunction(*this);
+      }
+
     private:
       std::reference_wrapper<FES> m_fes;
       Math::Vector m_data;
@@ -553,7 +563,7 @@ namespace Rodin::Variational
    * space.
    */
   template <class ... Ts>
-  class GridFunction<L2<Ts ...>> : public FESGridFunction<L2<Ts ...>>
+  class GridFunction<L2<Ts ...>> final : public FESGridFunction<L2<Ts ...>>
   {
     public:
       using FES = L2<Ts ...>;
@@ -594,6 +604,11 @@ namespace Rodin::Variational
       {}
 
       GridFunction& operator=(const GridFunction&)  = delete;
+
+      inline GridFunction* copy() const noexcept final override
+      {
+        return new GridFunction(*this);
+      }
   };
 
   template <class ... Ts>
@@ -605,7 +620,7 @@ namespace Rodin::Variational
    * space.
    */
   template <class ... Ts>
-  class GridFunction<H1<Ts...>> : public FESGridFunction<H1<Ts...>>
+  class GridFunction<H1<Ts...>> final : public FESGridFunction<H1<Ts...>>
   {
     public:
       using FES = H1<Ts...>;
@@ -756,6 +771,11 @@ namespace Rodin::Variational
           assert(false);
           return *this;
         }
+      }
+
+      inline GridFunction* copy() const noexcept final override
+      {
+        return new GridFunction(*this);
       }
   };
 

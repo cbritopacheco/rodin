@@ -242,7 +242,7 @@ namespace Rodin::Variational
       constexpr
       Grad(Grad&& other)
         : Parent(std::move(other)),
-          m_u(other.m_u)
+          m_u(std::move(other.m_u))
       {}
 
       inline
@@ -268,12 +268,12 @@ namespace Rodin::Variational
 
       auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
       {
+        assert(false);
         auto& trans = p.getSimplex().getTransformation();
         const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
         const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
         const size_t n = dshape.NumRows();
         const size_t sdim = trans.GetSpaceDim();
-        assert(false);
         return TensorBasis(n,
             [sdim](size_t) -> Math::Vector { return Math::Vector::Zero(sdim); });
 

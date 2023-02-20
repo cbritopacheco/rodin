@@ -41,13 +41,13 @@ namespace Rodin::Variational
 
       constexpr
       FunctionBase(const FunctionBase& other)
-        : FormLanguage::Base(other),
+        : Parent(other),
           m_traceDomain(other.m_traceDomain)
       {}
 
       constexpr
       FunctionBase(FunctionBase&& other)
-        : FormLanguage::Base(std::move(other)),
+        : Parent(std::move(other)),
           m_traceDomain(std::move(other.m_traceDomain))
       {}
 
@@ -132,9 +132,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline FunctionBase* copy() const noexcept final override
+      virtual FunctionBase* copy() const noexcept override
       {
-        return new Derived(static_cast<const Derived&>(*this));
+        return static_cast<const Derived&>(*this).copy();
       }
 
     private:

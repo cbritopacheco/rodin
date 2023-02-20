@@ -352,7 +352,8 @@ namespace Rodin::Geometry
         return m_element;
       }
 
-      [[deprecated]] const mfem::IntegrationPoint& getIntegrationPoint() const
+      // [[deprecated]]
+      const mfem::IntegrationPoint& getIntegrationPoint() const
       {
         return m_ip;
       }

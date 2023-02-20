@@ -163,18 +163,16 @@ namespace Rodin::Variational
       using Parent = FormLanguage::Base;
 
       constexpr
-      ShapeFunctionBase()
-        : FormLanguage::Base()
-      {}
+      ShapeFunctionBase() = default;
 
       constexpr
       ShapeFunctionBase(const ShapeFunctionBase& other)
-        : FormLanguage::Base(other)
+        : Parent(other)
       {}
 
       constexpr
       ShapeFunctionBase(ShapeFunctionBase&& other)
-        : FormLanguage::Base(std::move(other))
+        : Parent(std::move(other))
       {}
 
       inline
@@ -249,9 +247,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getFiniteElementSpace();
       }
 
-      inline ShapeFunctionBase* copy() const noexcept final override
+      virtual ShapeFunctionBase* copy() const noexcept override
       {
-        return new Derived(static_cast<const Derived&>(*this));
+        return static_cast<const Derived&>(*this).copy();
       }
   };
 
@@ -271,8 +269,7 @@ namespace Rodin::Variational
       constexpr
       FESShapeFunction(const FESShapeFunction& other)
         : Parent(other),
-          m_fes(other.m_fes),
-          m_gf(other.m_gf)
+          m_fes(other.m_fes)
       {}
 
       constexpr
@@ -286,7 +283,7 @@ namespace Rodin::Variational
       constexpr
       auto& emplace()
       {
-        m_gf.emplace(this->getFiniteElementSpace());
+        m_gf.emplace(m_fes.get());
         return *this;
       }
 
@@ -322,11 +319,18 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      RangeShape getRangeShape()
+      const
+      {
+        return { m_fes.get().getVectorDimension(), 1 };
+      }
+
+      inline
+      constexpr
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
-
 
       inline
       constexpr
@@ -334,6 +338,11 @@ namespace Rodin::Variational
           ShapeComputator& compute, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getOperator(compute, p);
+      }
+
+      virtual FESShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
       }
 
     private:
@@ -372,7 +381,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 1);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
         return static_cast<const Derived&>(*this).x();
       }
 
@@ -380,7 +389,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 2);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
         return static_cast<const Derived&>(*this).y();
       }
 
@@ -388,16 +397,8 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 3);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
         return static_cast<const Derived&>(*this).z();
-      }
-
-      inline
-      constexpr
-      RangeShape getRangeShape()
-      const
-      {
-        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
       inline
@@ -421,6 +422,11 @@ namespace Rodin::Variational
           ShapeComputator& compute, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getOperator(compute, p);
+      }
+
+      virtual ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
       }
 
       // void getOperator(
@@ -475,7 +481,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 1);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
         return static_cast<const Derived&>(*this).x();
       }
 
@@ -483,7 +489,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 2);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
         return static_cast<const Derived&>(*this).y();
       }
 
@@ -491,16 +497,8 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        assert(getFiniteElementSpace().getVectorDimension() >= 3);
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
         return static_cast<const Derived&>(*this).z();
-      }
-
-      inline
-      constexpr
-      RangeShape getRangeShape()
-      const
-      {
-        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
       inline
@@ -545,6 +543,11 @@ namespace Rodin::Variational
           assert(false);
           return void();
         }
+      }
+
+      virtual ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
       }
   };
 }

@@ -66,11 +66,14 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      inline
       constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };
       }
+
+      virtual ScalarFunctionBase* copy() const noexcept override = 0;
   };
 
   /**
@@ -113,6 +116,11 @@ namespace Rodin::Variational
       {
         m_nested->traceOf(attrs);
         return *this;
+      }
+
+      inline ScalarFunction* copy() const noexcept final override
+      {
+        return new ScalarFunction(*this);
       }
 
     private:
@@ -172,6 +180,11 @@ namespace Rodin::Variational
         return static_cast<Scalar>(m_x);
       }
 
+      inline ScalarFunction* copy() const noexcept final override
+      {
+        return new ScalarFunction(*this);
+      }
+
     private:
       const Number m_x;
   };
@@ -223,6 +236,11 @@ namespace Rodin::Variational
       Scalar getValue(const Geometry::Point& v) const
       {
         return m_f(v);
+      }
+
+      inline ScalarFunction* copy() const noexcept final override
+      {
+        return new ScalarFunction(*this);
       }
 
     private:

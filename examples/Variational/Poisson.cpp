@@ -8,6 +8,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <boost/uuid/uuid_io.hpp>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -31,16 +32,20 @@ int main(int, char**)
   TestFunction  v(vh);
 
   // Define problem
-  auto f = ScalarFunction(1.0);
-  auto g = ScalarFunction(0.0);
+  ScalarFunction f = 1.0;
+  ScalarFunction g = 0.0;
 
   Solver::CG solver;
   solver.printIterations(true);
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-       - Integral(f, v)
-       + DirichletBC(u, g).on(Gamma);
+          - Integral(f, v)
+          + DirichletBC(u, g).on(Gamma);
+
+  std::exit(1);
+
+
   poisson.solve(solver);
 
   // Save solution

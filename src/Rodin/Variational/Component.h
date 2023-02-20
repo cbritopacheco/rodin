@@ -42,16 +42,16 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Operand& getShapeFunction() const
+      size_t getIndex() const
       {
-        return m_u.get();
+        return m_idx;
       }
 
       inline
       constexpr
-      size_t getIndex() const
+      Operand& getShapeFunction() const
       {
-        return m_idx;
+        return m_u.get();
       }
 
     private:
