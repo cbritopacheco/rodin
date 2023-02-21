@@ -108,7 +108,7 @@ namespace Rodin::FormLanguage
   {
     using Type =
       std::invoke_result_t<Variational::ShapeFunctionBase<Derived, Space>,
-        Variational::ShapeComputator&, const Geometry::Point&>;
+        const Variational::FiniteElement&, const Geometry::Point&>;
   };
 
   template <class T>

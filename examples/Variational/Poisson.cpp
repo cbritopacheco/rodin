@@ -43,8 +43,8 @@ int main(int, char**)
           - Integral(f, v)
           + DirichletBC(u, g).on(Gamma);
 
+  poisson.assemble();
   std::exit(1);
-
 
   poisson.solve(solver);
 

@@ -192,20 +192,21 @@ namespace Rodin::Variational
       }
 
       inline
-      const mfem::FiniteElement&
+      FiniteElement
       getFiniteElement(const Geometry::Simplex& element) const final override
       {
         if (element.getDimension() == getMesh().getDimension())
         {
-          return *m_fes->GetFE(element.getIndex());
+          return FiniteElement(element, m_fes->GetFE(element.getIndex()));
         }
         else if (element.getDimension() == getMesh().getDimension() - 1)
         {
-          return *m_fes->GetFaceElement(element.getIndex());
+          return FiniteElement(element, m_fes->GetFaceElement(element.getIndex()));
         }
         else
         {
           assert(false);
+          return FiniteElement(element, nullptr);
         }
       }
 

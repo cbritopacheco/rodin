@@ -222,14 +222,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const FiniteElement& fe, const Geometry::Point& p) const
       {
-        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
+        assert(m_lhs->getRangeShape() == m_rhs->getRangeShape());
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto lhs = getLHS().getValue(p);
-        const auto rhs = getRHS().getOperator(compute, p);
+        const auto rhs = getRHS().getTensorBasis(fe, p);
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return lhs * rhs;
@@ -249,7 +249,8 @@ namespace Rodin::Variational
         }
       }
 
-      inline Dot* copy() const noexcept final override
+      inline
+      Dot* copy() const noexcept final override
       {
         return new Dot(*this);
       }
@@ -277,7 +278,7 @@ namespace Rodin::Variational
 
       constexpr
       Dot(const LHS& lhs, const RHS& rhs)
-        : m_trial(lhs), m_test(rhs)
+        : m_trial(lhs.copy()), m_test(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
       }
@@ -285,7 +286,7 @@ namespace Rodin::Variational
       constexpr
       Dot(const Dot& other)
         : Base(other),
-          m_trial(other.m_trial), m_test(other.m_test)
+          m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
       {}
 
       constexpr
@@ -298,24 +299,26 @@ namespace Rodin::Variational
       constexpr
       const LHS& getLHS() const
       {
-        return m_trial;
+        assert(m_trial);
+        return *m_trial;
       }
 
       inline
       constexpr
       const RHS& getRHS() const
       {
-        return m_test;
+        assert(m_test);
+        return *m_test;
       }
 
-      Math::Matrix getMatrix(ShapeComputator& compute, const Geometry::Point& p) const
+      Math::Matrix getMatrix(const FiniteElement& compute, const Geometry::Point& p) const
       {
         assert(m_trial.getRangeShape() == m_test.getRangeShape());
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
-        const auto trial = m_trial.getOperator(compute, p);
-        const auto test = m_test.getOperator(compute, p);
+        const auto trial = m_trial.getTensorBasis(compute, p);
+        const auto test = m_test.getTensorBasis(compute, p);
         Math::Matrix res(test.getDOFs(), trial.getDOFs());
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
@@ -350,8 +353,8 @@ namespace Rodin::Variational
       }
 
     private:
-      LHS m_trial;
-      RHS m_test;
+      std::unique_ptr<LHS> m_trial;
+      std::unique_ptr<RHS> m_test;
   };
 
   template <class LHSDerived, class RHSDerived>

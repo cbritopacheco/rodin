@@ -98,8 +98,6 @@ namespace Rodin::Geometry
 
       virtual SimplexIterator getIncident() const;
 
-      mfem::ElementTransformation& getTransformation() const;
-
       virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
     private:
@@ -223,16 +221,14 @@ namespace Rodin::Geometry
         Physical
       };
 
-      // Point(Coordinates type, const Transformation& trans, const Math::Vector& coords);
+      Point(const Simplex& simplex, const Transformation& trans, std::initializer_list<Scalar> rc);
 
       /**
        * @brief Constructs the Point object from reference coordinates.
        * @param[in] simplex Simplex to which point belongs to
        * @param[in] ip Reference coordinates
        */
-      Point(const Simplex& simplex, const mfem::IntegrationPoint& ip);
-
-      Point(const Simplex& simplex, mfem::IntegrationPoint&& ip);
+      Point(const Simplex& simplex, const Transformation& trans, const Math::Vector& rc);
 
       Point(const Point&) = default;
 
@@ -248,20 +244,20 @@ namespace Rodin::Geometry
        * @brief Gets the i-th physical coordinate.
        * @returns Physical i-th coordinate.
        */
-      double operator()(int i, Coordinates coords = Coordinates::Physical) const
+      inline
+      Scalar operator()(size_t i, Coordinates coords = Coordinates::Physical) const
       {
         switch (coords)
         {
           case Coordinates::Physical:
           {
-            assert(m_physical.Size() > i);
-            return m_physical(i);
+            assert(m_pc.size() > static_cast<int>(i));
+            return m_pc(i);
           }
           case Coordinates::Reference:
           {
-            double p[3];
-            m_ip.Get(p, getDimension(coords));
-            return p[i];
+            assert(m_rc.size() > static_cast<int>(i));
+            return m_rc(i);
           }
         }
       }
@@ -270,98 +266,82 @@ namespace Rodin::Geometry
        * @brief Gets the @f$ x @f$ physical coordinate.
        * @returns Physical @f$ x @f$-coordinate.
        */
-      double x(Coordinates coords = Coordinates::Physical) const
+      inline
+      Scalar x(Coordinates coords = Coordinates::Physical) const
       {
-        switch (coords)
-        {
-          case Coordinates::Physical:
-          {
-            assert(m_physical.Size() > 0);
-            return m_physical(0);
-          }
-          case Coordinates::Reference:
-          {
-            return m_ip.x;
-          }
-        }
+        return operator()(0);
       }
 
       /**
        * @brief Gets the @f$ y @f$ physical coordinate.
        * @returns Physical @f$ y @f$-coordinate.
        */
-      double y(Coordinates coords = Coordinates::Physical) const
+      inline
+      Scalar y(Coordinates coords = Coordinates::Physical) const
       {
-        switch (coords)
-        {
-          case Coordinates::Physical:
-          {
-            assert(m_physical.Size() > 1);
-            return m_physical(1);
-          }
-          case Coordinates::Reference:
-          {
-            return m_ip.y;
-          }
-        }
+        return operator()(1);
       }
 
       /**
        * @brief Gets the @f$ z @f$ physical coordinate.
        * @returns Physical @f$ z @f$-coordinate.
        */
-      double z(Coordinates coords = Coordinates::Physical) const
+      inline
+      Scalar z(Coordinates coords = Coordinates::Physical) const
       {
-        switch (coords)
-        {
-          case Coordinates::Physical:
-          {
-            assert(m_physical.Size() > 2);
-            return m_physical(2);
-          }
-          case Coordinates::Reference:
-          {
-            return m_ip.z;
-          }
-        }
-      }
-
-      double w() const
-      {
-        return m_ip.weight;
+        return operator()(2);
       }
 
       /**
        * @brief Lexicographical comparison.
        */
+      inline
       bool operator<(const Point& rhs) const
       {
         assert(getDimension() == rhs.getDimension());
-        for (int i = 0; i < m_physical.Size() - 1; i++)
+        for (int i = 0; i < m_pc.size() - 1; i++)
         {
-          if (m_physical(i) < rhs.m_physical(i))
+          if (m_pc(i) < rhs.m_pc(i))
             return true;
-          if (rhs.m_physical(i) > m_physical(i))
+          if (rhs.m_pc(i) > m_pc(i))
             return false;
         }
-        return (m_physical(m_physical.Size() - 1) < rhs.m_physical(rhs.m_physical.Size() - 1));
+        return (m_pc(m_pc.size() - 1) < rhs.m_pc(rhs.m_pc.size() - 1));
       }
 
+      inline
       const Simplex& getSimplex() const
       {
-        return m_element;
+        return m_simplex.get();
       }
 
-      // [[deprecated]]
-      const mfem::IntegrationPoint& getIntegrationPoint() const
+      inline
+      const Transformation& getTransformation() const
       {
-        return m_ip;
+        return m_trans.get();
+      }
+
+      inline
+      const Math::Vector& getVector(Coordinates coords = Coordinates::Physical) const
+      {
+        switch (coords)
+        {
+          case Coordinates::Physical:
+          {
+            return m_pc;
+          }
+          case Coordinates::Reference:
+          {
+            return m_rc;
+          }
+        }
       }
 
     private:
-      mutable mfem::Vector m_physical;
-      std::reference_wrapper<const Simplex> m_element;
-      mfem::IntegrationPoint m_ip;
+      std::reference_wrapper<const Simplex> m_simplex;
+      std::reference_wrapper<const Transformation> m_trans;
+      Math::Vector m_rc;
+      Math::Vector m_pc;
   };
 }
 
