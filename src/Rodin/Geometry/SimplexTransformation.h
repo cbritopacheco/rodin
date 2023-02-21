@@ -7,12 +7,12 @@
 #ifndef RODIN_GEOMETRY_TRANSFORMATION_H
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
+#include <mfem.hpp>
+
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
-#include "Rodin/Variational/ShapeFunction.h"
 
 #include "ForwardDecls.h"
-#include "Simplex.h"
 
 namespace Rodin::Geometry
 {
@@ -65,6 +65,8 @@ namespace Rodin::Geometry
        */
       virtual Math::Vector inverse(const Math::Vector& pc) const = 0;
 
+      virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
+
       virtual const mfem::ElementTransformation& getHandle() const = 0;
   };
 
@@ -72,36 +74,40 @@ namespace Rodin::Geometry
    * @brief Represents a transformation between the reference space to the
    * physical space of a simplex.
    */
-  class IsoparametricTransformation : public Transformation
+  class IsoparametricTransformation final : public Transformation
   {
     public:
-      IsoparametricTransformation(const Variational::FiniteElement& fe)
-        : m_fe(fe)
-      {}
-
-      inline
-      const Math::Matrix& getMatrix() const
+      IsoparametricTransformation(const Simplex& simplex)
       {
-        return m_pm;
+
       }
 
       inline
-      IsoparametricTransformation& setMatrix(const Math::Matrix& pm)
+      Math::Vector transform(const Math::Vector& rc) const final override
       {
-        m_pm = pm;
-        return *this;
+        assert(false);
       }
 
       inline
-      Math::Vector transform(const Math::Vector& p) const
-      final override
+      Math::Vector inverse(const Math::Vector& pc) const final override
       {
-        return m_pm * p;
+        assert(false);
+      }
+
+      inline
+      Math::Matrix jacobian(const Math::Vector& rc) const final override
+      {
+        assert(false);
+      }
+
+      inline
+      const mfem::IsoparametricTransformation& getHandle() const final override
+      {
+        return *m_handle;
       }
 
     private:
-      std::reference_wrapper<const Variational::FiniteElement> m_fe;
-      Math::Matrix m_pm;
+      const mfem::IsoparametricTransformation* m_handle;
   };
 }
 

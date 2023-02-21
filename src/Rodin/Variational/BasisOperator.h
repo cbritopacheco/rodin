@@ -122,6 +122,84 @@ namespace Rodin::Variational
       std::vector<T> m_basis;
   };
 
+  template <>
+  class TensorBasis<Scalar> : public Math::Vector
+  {
+    public:
+      using ValueType = Scalar;
+      using Parent = Math::Vector;
+
+      explicit
+      TensorBasis(std::initializer_list<Scalar> vs)
+        : Parent(vs.size())
+      {}
+
+      explicit
+      TensorBasis(const Math::Vector& other)
+        : Parent(other)
+      {}
+
+      explicit
+      TensorBasis(Math::Vector&& other)
+        : Parent(std::move(other))
+      {}
+
+      template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
+      explicit
+      constexpr
+      TensorBasis(size_t dofs, F&& f)
+        : Parent(dofs)
+      {
+        static_assert(std::is_same_v<Scalar, std::invoke_result_t<F, size_t>>);
+        for (size_t i = 0; i < dofs; i++)
+          Parent::coeffRef(static_cast<Math::Vector::Index>(i)) = f(i);
+      }
+
+      TensorBasis(const TensorBasis& other)
+        : Parent(other)
+      {}
+
+      TensorBasis(TensorBasis&& other)
+        : Parent(std::move(other))
+      {}
+
+      void operator=(const TensorBasis&) = delete;
+
+      template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Scalar&>>>
+      inline
+      constexpr
+      auto apply(F&& f)
+      {
+        using R = std::invoke_result_t<F, const Scalar&>;
+        return TensorBasis(size(), [&](size_t i) -> R { return f(operator()(i)); });
+      }
+
+      TensorBasis& operator=(TensorBasis&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      inline
+      constexpr
+      size_t getDOFs() const
+      {
+        return size();
+      }
+
+      inline
+      constexpr
+      Scalar operator()(size_t i) const
+      {
+        return Parent::operator()(static_cast<Math::Vector::Index>(i));
+      }
+
+      const Scalar* getData() const
+      {
+        return Parent::data();
+      }
+  };
+
   template <class T>
   TensorBasis(std::initializer_list<T>) -> TensorBasis<T>;
 
@@ -130,6 +208,10 @@ namespace Rodin::Variational
 
   template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
   TensorBasis(size_t, F&&) -> TensorBasis<std::invoke_result_t<F, size_t>>;
+
+  TensorBasis(const Math::Vector&) -> TensorBasis<Scalar>;
+
+  TensorBasis(Math::Vector&&) -> TensorBasis<Scalar>;
 
   template <class LHS, class RHS>
   inline

@@ -12,28 +12,7 @@
 #include "Traits.h"
 
 namespace Rodin::Variational
-{
-  template <class Derived>
-  inline
-  constexpr
-  RangeType FunctionBase<Derived>::getRangeType() const
-  {
-    using R = typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType;
-    if constexpr (std::is_same_v<R, Boolean>)
-    {
-      return RangeType::Boolean;
-    }
-    else if constexpr (std::is_same_v<R, Scalar>)
-    {
-      return RangeType::Scalar;
-    }
-    else
-    {
-      assert(false);
-      return RangeType::Scalar;
-    }
-  }
-}
+{}
 
 #endif
 

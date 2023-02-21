@@ -32,6 +32,7 @@ namespace Rodin::Variational
 
       virtual ~FiniteElementCollectionBase() = default;
 
+      inline
       size_t getOrder() const
       {
         return getHandle().GetOrder();

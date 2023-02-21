@@ -11,39 +11,14 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Utility.h"
+#include "Rodin/Geometry/Mesh.h"
 
 #include "ForwardDecls.h"
+#include "FiniteElement.h"
 
 namespace Rodin::Variational
 {
-  class FiniteElementOrder
-  {
-    public:
-      explicit
-      constexpr
-      FiniteElementOrder(size_t v)
-        : m_v(v)
-      {}
-
-      constexpr
-      FiniteElementOrder(const FiniteElementOrder&) = default;
-
-      constexpr
-      FiniteElementOrder(FiniteElementOrder&&) = default;
-
-      inline
-      constexpr
-      operator size_t() const
-      {
-        return m_v;
-      }
-
-    private:
-      const size_t m_v;
-  };
-
   class FiniteElementSpaceBase
   {
     public:
@@ -79,15 +54,15 @@ namespace Rodin::Variational
 
       virtual size_t getSize() const = 0;
 
-      virtual Geometry::MeshBase& getMesh() = 0;
-
-      virtual const Geometry::MeshBase& getMesh() const = 0;
-
       virtual mfem::Array<int> getDOFs(
           const Geometry::Simplex& element) const = 0;
 
-      virtual const mfem::FiniteElement& getFiniteElement(
+      virtual FiniteElement getFiniteElement(
           const Geometry::Simplex& element) const = 0;
+
+      virtual Geometry::MeshBase& getMesh() = 0;
+
+      virtual const Geometry::MeshBase& getMesh() const = 0;
 
       virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 

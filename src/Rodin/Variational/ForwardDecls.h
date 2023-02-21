@@ -77,9 +77,9 @@ namespace Rodin::Variational
    */
   class BilinearFormIntegratorBase;
 
-  class FiniteElementCollectionBase;
-
   class FiniteElement;
+
+  class FiniteElementCollectionBase;
 
   /**
    * @brief Base class for finite element spaces.

@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_NORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/SimplexTransformation.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
@@ -49,25 +50,32 @@ namespace Rodin::Variational
       {
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();
-        auto& trans = simplex.getTransformation();
-        const auto& jac = trans.Jacobian();
-        const auto* jacdata = jac.Data();
-        Math::Vector value(m_dimension);
+        const auto& trans = p.getTransformation();
+        const auto& jacobian =
+          trans.jacobian(p.getVector(Geometry::Point::Coordinates::Reference));
 
-        if (jac.Height() == 2)
+        Math::Vector value(m_dimension);
+        if (jacobian.rows() == 2)
         {
-          value(0) =  jacdata[1];
-          value(1) = -jacdata[0];
+          value(0) =  jacobian(1, 0);
+          value(1) = -jacobian(0, 0);
+        }
+        else if (jacobian.rows() == 3)
+        {
+          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
         }
         else
         {
-          value(0) = jacdata[1] * jacdata[5] - jacdata[2] * jacdata[4];
-          value(1) = jacdata[2] * jacdata[3] - jacdata[0] * jacdata[5];
-          value(2) = jacdata[0] * jacdata[4] - jacdata[1] * jacdata[3];
+          assert(false);
+          value.setZero();
+          return value;
         }
 
         const Scalar norm = value.norm();
         value /= norm;
+
         assert(norm >= 0.0);
         assert(std::isfinite(norm));
 
@@ -103,7 +111,7 @@ namespace Rodin::Variational
             else
             {
               assert(false);
-              value = Math::Vector::Zero(m_dimension);
+              value.setZero();
               return value;
             }
           }
@@ -111,7 +119,7 @@ namespace Rodin::Variational
         else
         {
           assert(false);
-          value = Math::Vector::Zero(m_dimension);
+          value.setZero();
           return value;
         }
         return value;

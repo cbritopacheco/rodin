@@ -55,12 +55,15 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase
   {
     public:
-      using IntegrationOrder =
-        std::function<size_t(const FiniteElement&, const FiniteElement&)>;
       using LHS = ShapeFunctionBase<LHSDerived, TrialSpace>;
       using RHS = ShapeFunctionBase<RHSDerived, TestSpace>;
       using Integrand = Dot<LHS, RHS>;
       using Parent = BilinearFormIntegratorBase;
+
+      using IntegrationOrder =
+        std::function<size_t(
+            const Geometry::Simplex&, const Geometry::Transformation&,
+            const FiniteElement&, const FiniteElement&)>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
@@ -92,19 +95,19 @@ namespace Rodin::Variational
       constexpr
       Integral(const Integrand& prod)
         : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
-          m_prod(prod),
+          m_prod(prod.copy()),
           m_intOrder(
-            [](const FiniteElement& trial, const FiniteElement& test) -> size_t
+            [](const Geometry::Simplex&, const Geometry::Transformation& trans,
+               const FiniteElement& trial, const FiniteElement& test) -> size_t
             {
-              return (trial.getHandle().GetOrder() + test.getHandle().GetOrder() +
-                      trial.getTransformation().getHandle().OrderW());
+              return trial.getHandle().GetOrder() + test.getHandle().GetOrder() + trans.getHandle().OrderW();
             })
       {}
 
       constexpr
       Integral(const Integral& other)
         : BilinearFormIntegratorBase(other),
-          m_prod(other.m_prod),
+          m_prod(other.m_prod->copy()),
           m_intOrder(other.m_intOrder)
       {}
 
@@ -128,16 +131,19 @@ namespace Rodin::Variational
       }
 
       inline
-      size_t getIntegrationOrder(const FiniteElement& trial, const FiniteElement& test) const
+      size_t getIntegrationOrder(
+          const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
+          const FiniteElement& trial, const FiniteElement& test) const
       {
-        return m_intOrder(trial, test);
+        return m_intOrder(simplex, trans, trial, test);
       }
 
       inline
       constexpr
       const Integrand& getIntegrand() const
       {
-        return m_prod;
+        assert(m_prod);
+        return *m_prod;
       }
 
       inline
@@ -170,7 +176,7 @@ namespace Rodin::Variational
         return new Integral(*this);
       }
     private:
-      Integrand m_prod;
+      std::unique_ptr<Integrand> m_prod;
       IntegrationOrder m_intOrder;
   };
 
@@ -200,9 +206,14 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase
   {
     public:
-      using IntegrationOrder = std::function<size_t(const FiniteElement&)>;
       using Integrand = ShapeFunctionBase<NestedDerived, TestSpace>;
       using Parent = LinearFormIntegratorBase;
+
+      using IntegrationOrder =
+        std::function<size_t(
+            const Geometry::Simplex&,
+            const Geometry::Transformation&,
+            const FiniteElement&)>;
 
       template <class LHSDerived, class RHSDerived>
       constexpr
@@ -225,18 +236,19 @@ namespace Rodin::Variational
       constexpr
       Integral(const Integrand& integrand)
         : Parent(integrand.getLeaf()),
-          m_integrand(integrand),
+          m_integrand(integrand.copy()),
           m_intOrder(
-              [](const FiniteElement& fe) -> size_t
+              [](const Geometry::Simplex&, const Geometry::Transformation& trans,
+                 const FiniteElement& fe) -> size_t
               {
-                return fe.getHandle().GetOrder() + fe.getTransformation().getHandle().OrderW();
+                return fe.getOrder() + trans.getHandle().OrderW();
               })
       {}
 
       constexpr
       Integral(const Integral& other)
         : Parent(other),
-          m_integrand(other.m_integrand),
+          m_integrand(other.m_integrand->copy()),
           m_intOrder(other.m_intOrder)
       {}
 
@@ -254,9 +266,11 @@ namespace Rodin::Variational
       }
 
       inline
-      size_t getIntegrationOrder(const FiniteElement& fe) const
+      size_t getIntegrationOrder(
+          const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
+          const FiniteElement& fe) const
       {
-        return m_intOrder(fe);
+        return m_intOrder(simplex, trans, fe);
       }
 
       inline
@@ -275,9 +289,9 @@ namespace Rodin::Variational
 
       Math::Vector getVector(const Geometry::Simplex& simplex) const override
       {
-        assert(false);
-        // const auto& test = m_integrand;
-        // assert(test.getRangeType() == RangeType::Scalar);
+        const auto& test = *m_integrand;
+        assert(test.getRangeType() == RangeType::Scalar);
+        Geometry::IsoparametricTransformation trans(simplex);
         // auto& trans = simplex.getTransformation();
         // assert(false);
         // const size_t order = 0;
@@ -302,7 +316,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Integrand m_integrand;
+      std::unique_ptr<Integrand> m_integrand;
       IntegrationOrder m_intOrder;
   };
 

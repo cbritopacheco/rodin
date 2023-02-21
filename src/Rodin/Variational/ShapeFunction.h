@@ -5,10 +5,12 @@
 
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
 
 #include "H1.h"
+#include "RangeType.h"
 #include "RangeShape.h"
 #include "BasisOperator.h"
 #include "FiniteElementSpace.h"
@@ -191,9 +193,30 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      RangeShape getRangeType() const
+      RangeType getRangeType() const
       {
-        return static_cast<const Derived&>(*this).getRangeType();
+        using R = typename FormLanguage::Traits<ShapeFunctionBase<Derived, Space>>::RangeType;
+        if constexpr (std::is_same_v<R, Boolean>)
+        {
+          return RangeType::Boolean;
+        }
+        else if constexpr (std::is_same_v<R, Scalar>)
+        {
+          return RangeType::Scalar;
+        }
+        else if constexpr (std::is_same_v<R, Math::Vector>)
+        {
+          return RangeType::Vector;
+        }
+        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        {
+          return RangeType::Matrix;
+        }
+        else
+        {
+          assert(false);
+          return RangeType::Scalar;
+        }
       }
 
       inline
@@ -219,10 +242,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getOperator(
-          ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const FiniteElement& fe, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getOperator(compute, p);
+        return static_cast<const Derived&>(*this).getTensorBasis(fe, p);
       }
 
       template <class ... Args>
@@ -230,7 +252,7 @@ namespace Rodin::Variational
       constexpr
       auto operator()(Args&&... args) const
       {
-        return getOperator(std::forward<Args>(args)...);
+        return getTensorBasis(std::forward<Args>(args)...);
       }
 
       inline
@@ -334,10 +356,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getOperator(
-          ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const FiniteElement& fe, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getOperator(compute, p);
+        return static_cast<const Derived&>(*this).getTensorBasis(fe, p);
       }
 
       virtual FESShapeFunction* copy() const noexcept override
@@ -418,10 +439,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getOperator(
-          ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const FiniteElement& fe, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getOperator(compute, p);
+        return static_cast<const Derived&>(*this).getTensorBasis(fe, p);
       }
 
       virtual ShapeFunction* copy() const noexcept override
@@ -429,7 +449,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).copy();
       }
 
-      // void getOperator(
+      // void getTensorBasis(
       //    DenseBasisOperator& op,
       //    ShapeComputator& compute,
       //    const Geometry::Point& point,
@@ -517,26 +537,20 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const FiniteElement& fe, const Geometry::Point& p) const
       {
-        const auto& element = p.getSimplex();
-        const auto& shape =
-          compute.getPhysicalShape(
-              this->getFiniteElementSpace().getFiniteElement(element),
-              element.getTransformation(),
-              element.getTransformation().GetIntPoint());
-        const size_t n = shape.Size();
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();
         if constexpr (std::is_same_v<typename FES::Range, Scalar>)
         {
           assert(vdim == 1);
-          return TensorBasis(n, [&](size_t i) { return shape(i); });
+          Math::Vector basis = fe.getBasis(p.getVector(Geometry::Point::Coordinates::Reference)).reshaped();
+          return TensorBasis(basis);
         }
         else if constexpr (std::is_same_v<typename FES::Range, Math::Vector>)
         {
           assert(false);
-          return TensorBasis(vdim * n, [&](size_t) { return Math::Vector::Zero(vdim); });
+          Math::Vector basis = fe.getBasis(p.getVector(Geometry::Point::Coordinates::Reference)).reshaped();
+          return TensorBasis(vdim * fe.getDOFs(), [&](size_t) { return basis; });
         }
         else
         {

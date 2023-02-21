@@ -27,6 +27,7 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>
   {
     public:
+      using FES = H1<Ts...>;
       using Operand = ShapeFunction<NestedDerived, H1<Ts...>, Space>;
       using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>;
 
@@ -67,19 +68,15 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Simplex& simplex) const
       {
-        return m_u.get().getDOFs(element);
+        return m_u.get().getDOFs(simplex);
       }
 
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      auto getOperator(const FiniteElement& fe, const Geometry::Point& p) const
       {
-        const auto& element = p.getSimplex();
-        auto& trans = p.getSimplex().getTransformation();
-        const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-        const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const size_t dofs = getDOFs(element);
-        return TensorBasis(dofs, [](size_t i) -> Scalar { return dshape.GetData()[i]; });
+        Math::Vector div = fe.getGradient(p.getVector(Geometry::Point::Coordinates::Reference)).reshaped();
+        return TensorBasis(div);
       }
 
       inline

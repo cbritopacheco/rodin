@@ -93,7 +93,31 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      RangeType getRangeType() const;
+      RangeType getRangeType() const
+      {
+        using R = typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType;
+        if constexpr (std::is_same_v<R, Boolean>)
+        {
+          return RangeType::Boolean;
+        }
+        else if constexpr (std::is_same_v<R, Scalar>)
+        {
+          return RangeType::Scalar;
+        }
+        else if constexpr (std::is_same_v<R, Math::Vector>)
+        {
+          return RangeType::Vector;
+        }
+        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        {
+          return RangeType::Matrix;
+        }
+        else
+        {
+          assert(false);
+          return RangeType::Scalar;
+        }
+      }
 
       inline
       constexpr

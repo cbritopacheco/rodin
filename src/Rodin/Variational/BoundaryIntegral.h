@@ -40,7 +40,7 @@ namespace Rodin::Variational
    * @brief Boundary integration of the dot product of a trial and test operators.
    */
   template <class LHSDerived, class RHSDerived>
-  class BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>>
+  class BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>> final
     : public BilinearFormIntegratorBase
   {
     public:
@@ -50,7 +50,9 @@ namespace Rodin::Variational
       using Parent = BilinearFormIntegratorBase;
 
       using IntegrationOrder =
-        std::function<size_t(const FiniteElement&, const FiniteElement&)>;
+        std::function<size_t(
+            const Geometry::Simplex&, const Geometry::Transformation&,
+            const FiniteElement&, const FiniteElement&)>;
 
       inline
       const Integrand& getIntegrand() const
@@ -58,14 +60,20 @@ namespace Rodin::Variational
         return m_prod;
       }
 
-      inline Region getRegion() const final override
+      inline
+      Region getRegion() const override
       {
         return Region::Boundary;
       }
 
-      virtual Math::Matrix getMatrix(const Geometry::Simplex& element) const override;
+      inline
+      Math::Matrix getMatrix(const Geometry::Simplex& element) const override
+      {
+        assert(false);
+      }
 
-      virtual BoundaryIntegral* copy() const noexcept override
+      inline
+      BoundaryIntegral* copy() const noexcept override
       {
         return new BoundaryIntegral(*this);
       }
@@ -89,13 +97,17 @@ namespace Rodin::Variational
         ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>>;
 
   template <class NestedDerived>
-  class BoundaryIntegral<ShapeFunctionBase<NestedDerived, TestSpace>>
+  class BoundaryIntegral<ShapeFunctionBase<NestedDerived, TestSpace>> final
     : public LinearFormIntegratorBase
   {
     public:
-      using IntegrationOrder = std::function<size_t(const FiniteElement&)>;
       using Integrand = ShapeFunctionBase<NestedDerived, TestSpace>;
       using Parent = LinearFormIntegratorBase;
+
+      using IntegrationOrder =
+        std::function<size_t(
+            const Geometry::Simplex&, const Geometry::Transformation&,
+            const FiniteElement&)>;
 
       template <class LHSDerived, class RHSDerived>
       constexpr
@@ -120,9 +132,10 @@ namespace Rodin::Variational
         : Parent(integrand.getLeaf()),
           m_integrand(integrand),
           m_intOrder(
-              [](const FiniteElement& fe) -> size_t
+              [](const Geometry::Simplex&, const Geometry::Transformation& trans,
+                 const FiniteElement& fe) -> size_t
               {
-                return fe.getHandle().GetOrder() + fe.getTransformation().getHandle().OrderW();
+                return fe.getOrder() + trans.getHandle().OrderW();
               })
       {}
 
@@ -147,9 +160,11 @@ namespace Rodin::Variational
       }
 
       inline
-      size_t getIntegrationOrder(const FiniteElement& fe) const
+      size_t getIntegrationOrder(
+          const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
+          const FiniteElement& fe) const
       {
-        return m_intOrder(fe);
+        return m_intOrder(simplex, trans, fe);
       }
 
       inline
@@ -166,24 +181,26 @@ namespace Rodin::Variational
         return Region::Domain;
       }
 
-      virtual Math::Vector getVector(const Geometry::Simplex& simplex) const override
+      inline
+      Math::Vector getVector(const Geometry::Simplex& simplex) const final override
       {
-        const auto& test = *m_integrand;
-        assert(test.getRangeType() == RangeType::Scalar);
-        auto& trans = simplex.getTransformation();
-        assert(false);
-        const size_t order = 0;
-        // const size_t order = getIntegrationOrder(test.getFiniteElementSpace(), simplex);
-        ShapeComputator compute;
 
-        Math::Vector res = Math::Vector::Zero(test.getDOFs(simplex));
-        for (const auto& p : simplex.getIntegrationRule(order))
-        {
-          const TensorBasis basis =
-            trans.Weight() * trans.GetIntPoint().weight * test.getOperator(compute, p);
-          res += Eigen::Map<const Math::Vector>(basis.data(), basis.size());
-        }
-        return res;
+        // const auto& test = *m_integrand;
+        // assert(test.getRangeType() == RangeType::Scalar);
+        // auto& trans = simplex.getTransformation();
+        // assert(false);
+        // const size_t order = 0;
+        // // const size_t order = getIntegrationOrder(test.getFiniteElementSpace(), simplex);
+        // ShapeComputator compute;
+
+        // Math::Vector res = Math::Vector::Zero(test.getDOFs(simplex));
+        // for (const auto& p : simplex.getIntegrationRule(order))
+        // {
+        //   const TensorBasis basis =
+        //     trans.Weight() * trans.GetIntPoint().weight * test.getOperator(compute, p);
+        //   res += Eigen::Map<const Math::Vector>(basis.data(), basis.size());
+        // }
+        // return res;
       }
 
       virtual BoundaryIntegral* copy() const noexcept override

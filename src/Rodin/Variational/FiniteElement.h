@@ -17,17 +17,43 @@
 
 namespace Rodin::Variational
 {
+  class FiniteElementOrder
+  {
+    public:
+      explicit
+      constexpr
+      FiniteElementOrder(size_t v)
+        : m_v(v)
+      {}
+
+      constexpr
+      FiniteElementOrder(const FiniteElementOrder&) = default;
+
+      constexpr
+      FiniteElementOrder(FiniteElementOrder&&) = default;
+
+      inline
+      constexpr
+      operator size_t() const
+      {
+        return m_v;
+      }
+
+    private:
+      const size_t m_v;
+  };
+
+
   class FiniteElement
   {
     public:
-      FiniteElement(const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
-                    const mfem::FiniteElement* handle)
-        : m_simplex(simplex), m_trans(trans), m_handle(handle)
+      FiniteElement(const Geometry::Simplex& simplex, const mfem::FiniteElement* handle)
+        : m_simplex(simplex), m_handle(handle)
       {}
 
       Math::Matrix getBasis(const Math::Vector& p) const;
 
-      Math::Matrix getJacobian(const Math::Vector& p) const;
+      Math::Matrix getGradient(const Math::Vector& p) const;
 
       Math::Matrix getDivergence(const Math::Vector& p) const;
 
@@ -36,15 +62,21 @@ namespace Rodin::Variational
       Math::Matrix getHessian(const Math::Vector& p) const;
 
       inline
-      const Geometry::Simplex& getSimplex() const
+      size_t getOrder() const
       {
-        return m_simplex.get();
+        return m_handle->GetOrder();
       }
 
       inline
-      const Geometry::Transformation& getTransformation() const
+      size_t getDOFs() const
       {
-        return m_trans.get();
+        return m_handle->GetDof();
+      }
+
+      inline
+      const Geometry::Simplex& getSimplex() const
+      {
+        return m_simplex.get();
       }
 
       inline
@@ -55,7 +87,6 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Simplex> m_simplex;
-      std::reference_wrapper<const Geometry::Transformation> m_trans;
       const mfem::FiniteElement* m_handle;
   };
 }
