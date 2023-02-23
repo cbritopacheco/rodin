@@ -89,13 +89,13 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
-  template <class NestedDerived, ShapeFunctionSpaceType Space>
-  class UnaryMinus<ShapeFunctionBase<NestedDerived, Space>> final
-    : public ShapeFunctionBase<NestedDerived, Space>
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<NestedDerived, FES, Space>
   {
     public:
-      using Operand = ShapeFunctionBase<NestedDerived, Space>;
-      using Parent = ShapeFunctionBase<NestedDerived, Space>;
+      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<NestedDerived, FES, Space>;
 
       constexpr
       UnaryMinus(const Operand& op)
@@ -149,12 +149,12 @@ namespace Rodin::Variational
         return m_op.getOperator(compute, p);
       }
 
-      auto& getFiniteElementSpace()
+      FES& getFiniteElementSpace()
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      const auto& getFiniteElementSpace() const
+      const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }

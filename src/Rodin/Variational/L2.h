@@ -208,6 +208,25 @@ namespace Rodin::Variational
       }
 
       inline
+      FiniteElement<Derived>
+      getFiniteElement(const Geometry::Simplex& simplex) const
+      {
+        if (simplex.getDimension() == getMesh().getDimension())
+        {
+          return FiniteElement<Derived>(simplex, m_fes->GetFE(simplex.getIndex()));
+        }
+        else if (simplex.getDimension() == getMesh().getDimension() - 1)
+        {
+          return FiniteElement<Derived>(simplex, m_fes->GetFaceElement(simplex.getIndex()));
+        }
+        else
+        {
+          assert(false);
+          return FiniteElement<Derived>(simplex, nullptr);
+        }
+      }
+
+      inline
       mfem::Array<int> getDOFs(const Geometry::Simplex& element) const final override
       {
         mfem::Array<int> res;
@@ -226,32 +245,7 @@ namespace Rodin::Variational
         return res;
       }
 
-      inline
-      FiniteElement
-      getFiniteElement(const Geometry::Simplex& simplex) const final override
-      {
-        if (simplex.getDimension() == getMesh().getDimension())
-        {
-          return FiniteElement(simplex, m_fes->GetFE(simplex.getIndex()));
-        }
-        else if (simplex.getDimension() == getMesh().getDimension() - 1)
-        {
-          return FiniteElement(simplex, m_fes->GetFaceElement(simplex.getIndex()));
-        }
-        else
-        {
-          assert(false);
-          return FiniteElement(simplex, nullptr);
-        }
-      }
-
-      mfem::FiniteElementSpace& getHandle() override
-      {
-        assert(m_fes);
-        return *m_fes;
-      }
-
-      const mfem::FiniteElementSpace& getHandle() const override
+      mfem::FiniteElementSpace& getHandle() const final override
       {
         assert(m_fes);
         return *m_fes;

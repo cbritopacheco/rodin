@@ -12,6 +12,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Matrix.h"
 
 #include "ForwardDecls.h"
 
@@ -58,19 +59,19 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the index of the simplex in the mesh.
        */
+      inline
       Index getIndex() const
       {
         return m_index;
       }
 
-
+      inline
       Type getGeometry() const
       {
         return m_type;
       }
 
-      double getVolume() const;
-
+      inline
       size_t getDimension() const
       {
         return m_dimension;
@@ -79,6 +80,7 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the attribute of the simplex.
        */
+      inline
       Attribute getAttribute() const
       {
         return m_attr;
@@ -87,18 +89,21 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the associated mesh to the simplex.
        */
+      inline
       const MeshBase& getMesh() const
       {
         return m_mesh.get();
       }
+
+      Scalar getVolume() const;
+
+      const SimplexTransformation& getTransformation() const;
 
       // virtual VertexIterator getVertices() const;
 
       virtual SimplexIterator getAdjacent() const;
 
       virtual SimplexIterator getIncident() const;
-
-      virtual std::vector<Geometry::Point> getIntegrationRule(int order) const;
 
     private:
       const size_t m_dimension;
@@ -107,7 +112,6 @@ namespace Rodin::Geometry
       std::vector<Index> m_vertices;
       Attribute m_attr;
       Geometry::Type m_type;
-      mutable std::unique_ptr<mfem::ElementTransformation> m_trans;
   };
 
   bool operator<(const Simplex& lhs, const Simplex& rhs);
@@ -170,25 +174,25 @@ namespace Rodin::Geometry
           const Math::Vector& coordinates,
           Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-      double x() const
+      Scalar x() const
       {
         assert(0 < m_coordinates.size());
         return operator()(0);
       }
 
-      double y() const
+      Scalar y() const
       {
         assert(1 < m_coordinates.size());
         return operator()(1);
       }
 
-      double z() const
+      Scalar z() const
       {
         assert(2 < m_coordinates.size());
         return operator()(2);
       }
 
-      double operator()(size_t i) const;
+      Scalar operator()(size_t i) const;
 
       const Math::Vector& coordinates() const
       {
@@ -221,14 +225,12 @@ namespace Rodin::Geometry
         Physical
       };
 
-      Point(const Simplex& simplex, const Transformation& trans, std::initializer_list<Scalar> rc);
-
       /**
        * @brief Constructs the Point object from reference coordinates.
        * @param[in] simplex Simplex to which point belongs to
        * @param[in] ip Reference coordinates
        */
-      Point(const Simplex& simplex, const Transformation& trans, const Math::Vector& rc);
+      Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc);
 
       Point(const Point&) = default;
 
@@ -251,8 +253,7 @@ namespace Rodin::Geometry
         {
           case Coordinates::Physical:
           {
-            assert(m_pc.size() > static_cast<int>(i));
-            return m_pc(i);
+            return getPhysical()(i);
           }
           case Coordinates::Reference:
           {
@@ -299,14 +300,14 @@ namespace Rodin::Geometry
       bool operator<(const Point& rhs) const
       {
         assert(getDimension() == rhs.getDimension());
-        for (int i = 0; i < m_pc.size() - 1; i++)
+        for (int i = 0; i < getPhysical().size() - 1; i++)
         {
-          if (m_pc(i) < rhs.m_pc(i))
+          if (getPhysical()(i) < rhs.getPhysical()(i))
             return true;
-          if (rhs.m_pc(i) > m_pc(i))
+          if (rhs.getPhysical()(i) > getPhysical()(i))
             return false;
         }
-        return (m_pc(m_pc.size() - 1) < rhs.m_pc(rhs.m_pc.size() - 1));
+        return (getPhysical()(getPhysical().size() - 1) < rhs.getPhysical()(rhs.getPhysical().size() - 1));
       }
 
       inline
@@ -316,32 +317,30 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Transformation& getTransformation() const
+      const SimplexTransformation& getTransformation() const
       {
         return m_trans.get();
       }
 
       inline
-      const Math::Vector& getVector(Coordinates coords = Coordinates::Physical) const
+      const Math::Vector& getReference() const
       {
-        switch (coords)
-        {
-          case Coordinates::Physical:
-          {
-            return m_pc;
-          }
-          case Coordinates::Reference:
-          {
-            return m_rc;
-          }
-        }
+        return m_rc;
       }
+
+      const Math::Vector& getPhysical() const;
+
+      const Math::Matrix& getJacobian() const;
+
+      const Math::Matrix& getInverseJacobian() const;
 
     private:
       std::reference_wrapper<const Simplex> m_simplex;
-      std::reference_wrapper<const Transformation> m_trans;
+      std::reference_wrapper<const SimplexTransformation> m_trans;
       Math::Vector m_rc;
-      Math::Vector m_pc;
+      mutable std::optional<const Math::Vector> m_pc;
+      mutable std::optional<const Math::Matrix> m_jacobian;
+      mutable std::optional<const Math::Matrix> m_inverseJacobian;
   };
 }
 

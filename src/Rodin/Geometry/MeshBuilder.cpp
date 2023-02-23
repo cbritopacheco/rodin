@@ -16,10 +16,17 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::setReference(Mesh<Context::Serial>& mesh)
   {
-    size_t dim = mesh.getDimension();
-    size_t sdim = mesh.getSpaceDimension();
+    m_dim = mesh.getDimension();
+    m_sdim = mesh.getSpaceDimension();
+
+    // Track the object
     m_ref.emplace(std::ref(mesh));
-    m_connectivity.resize(dim + 1);
+
+    // Set counts to zero
+    m_count.resize(m_dim + 1, 0);
+
+    // Emplace empty connectivity objects
+    m_connectivity.resize(m_dim + 1);
     for (size_t i = 0; i < m_connectivity.size(); i++)
     {
       m_connectivity[i].reserve(m_connectivity.size());
@@ -28,7 +35,13 @@ namespace Rodin::Geometry
         m_connectivity[i].push_back(Connectivity(i, j));
       }
     }
-    m_impl = mfem::Mesh(dim, 0, 0, 0, sdim);
+
+    // Emplace tranformation vectors
+    m_transformations.resize(m_dim + 1);
+
+    // Emplace the implementation
+    m_impl = mfem::Mesh(m_dim, 0, 0, 0, m_sdim);
+
     return *this;
   }
 
@@ -76,11 +89,21 @@ namespace Rodin::Geometry
     m_impl.FinalizeTopology();
     m_impl.Finalize(false, true);
 
+    // TODO: Compute counts of all simplices
+    m_count[m_dim] = m_impl.GetNE();
+    m_count[m_dim - 1] = m_impl.GetNFaces();
+    m_count[0] = m_impl.GetNV();
+
+    for (size_t d = 0; d < m_count.size(); d++)
+      m_transformations[d].resize(m_count[d]);
+
     assert(m_ref.has_value());
     auto& ref = m_ref->get();
 
     ref.getHandle() = std::move(m_impl);
+    ref.m_count = std::move(m_count);
     ref.m_connectivity = std::move(m_connectivity);
+    ref.m_transformations = std::move(m_transformations);
 
     for (int i = 0; i < ref.getHandle().GetNBE(); i++)
       ref.m_f2b[ref.getHandle().GetBdrElementEdgeIndex(i)] = i;

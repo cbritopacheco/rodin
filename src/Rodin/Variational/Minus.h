@@ -36,11 +36,11 @@ namespace Rodin::Variational
     return Sum(lhs, UnaryMinus(rhs));
   }
 
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   inline
   constexpr
   auto
-  operator-(const ShapeFunctionBase<LHSDerived, Space>& lhs, const ShapeFunctionBase<RHSDerived, Space>& rhs)
+  operator-(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Sum(lhs, UnaryMinus(rhs));
   }

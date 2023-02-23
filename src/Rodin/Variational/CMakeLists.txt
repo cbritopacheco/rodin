@@ -1,4 +1,5 @@
 set(RodinVariational_HEADERS
+  FiniteElement.h
   BilinearForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
@@ -46,6 +47,7 @@ set(RodinVariational_HEADERS
   Assembly/Native.h)
 
 set(RodinVariational_SRCS
+  FiniteElement.cpp
   FiniteElementSpace.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp

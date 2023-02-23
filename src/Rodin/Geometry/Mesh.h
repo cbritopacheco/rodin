@@ -22,7 +22,9 @@
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
+#include "Simplex.h"
 #include "SimplexIterator.h"
+#include "SimplexTransformation.h"
 
 namespace Rodin::Geometry
 {
@@ -273,6 +275,9 @@ namespace Rodin::Geometry
 
       virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
 
+      virtual const SimplexTransformation& getSimplexTransformation(
+          size_t dimension, Index idx) const = 0;
+
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
       virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
@@ -282,16 +287,9 @@ namespace Rodin::Geometry
       /**
        * @internal
        * @brief Gets the underlying handle for the internal mesh.
-       * @returns Reference to the underlying mfem::Mesh.
-       */
-      virtual mfem::Mesh& getHandle() = 0;
-
-      /**
-       * @internal
-       * @brief Gets the underlying handle for the internal mesh.
        * @returns Constant reference to the underlying mfem::Mesh.
        */
-      virtual const mfem::Mesh& getHandle() const = 0;
+      virtual mfem::Mesh& getHandle() const = 0;
   };
 
   using SerialMesh = Mesh<Context::Serial>;
@@ -338,8 +336,10 @@ namespace Rodin::Geometry
 
         private:
           std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
-
+          size_t m_dim, m_sdim;
+          std::vector<size_t> m_count;
           std::vector<std::vector<Connectivity>> m_connectivity;
+          std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
           mfem::Mesh m_impl;
       };
 
@@ -356,9 +356,16 @@ namespace Rodin::Geometry
       Mesh(Mesh&& other) = default;
 
       /**
-      * @brief Performs a deep copy of another mesh.
+      * @brief Performs a copy of another mesh.
       */
-      Mesh(const Mesh& other) = default;
+      Mesh(const Mesh& other)
+        : m_dim(other.m_dim), m_sdim(other.m_sdim),
+          m_count(other.m_count),
+          m_connectivity(other.m_connectivity),
+          m_f2b(other.m_f2b)
+      {
+        m_impl.reset(new mfem::Mesh(*other.m_impl));
+      }
 
       /**
       * @internal
@@ -461,27 +468,34 @@ namespace Rodin::Geometry
 
       virtual size_t getSpaceDimension() const override;
 
+      virtual const SimplexTransformation& getSimplexTransformation(
+          size_t dimension, Index idx) const override;
+
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
       virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
       {
-        assert(d == getDimension());
-        assert(dp == 0);
-        // Other dimensions not implemented yet
+        assert(m_connectivity.size() > d);
+        assert(m_connectivity[d].size() > dp);
+
+        // TODO: Other dimensions not implemented yet
+        assert(d == getDimension()); // TODO: Remove
+        assert(dp == 0); // TODO: Remove
         return m_connectivity[d][dp];
       }
 
-      mfem::Mesh& getHandle() override;
-
-      const mfem::Mesh& getHandle() const override;
+      mfem::Mesh& getHandle() const override;
 
     protected:
 
     private:
       size_t m_dim, m_sdim;
+      std::vector<size_t> m_count;
       std::vector<std::vector<Connectivity>> m_connectivity;
+      mutable std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
+
       std::map<Index, Index> m_f2b;
-      mfem::Mesh m_impl;
+      std::unique_ptr<mfem::Mesh> m_impl;
   };
 }
 

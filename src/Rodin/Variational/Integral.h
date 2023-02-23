@@ -50,20 +50,16 @@ namespace Rodin::Variational
    *   \int_{\mathcal{T}_h} A(u) : B(v) \ dx
    * @f]
    */
-  template <class LHSDerived, class RHSDerived>
-  class Integral<Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>> final
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class Integral<Dot<
+          ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
     : public BilinearFormIntegratorBase
   {
     public:
-      using LHS = ShapeFunctionBase<LHSDerived, TrialSpace>;
-      using RHS = ShapeFunctionBase<RHSDerived, TestSpace>;
+      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
       using Integrand = Dot<LHS, RHS>;
       using Parent = BilinearFormIntegratorBase;
-
-      using IntegrationOrder =
-        std::function<size_t(
-            const Geometry::Simplex&, const Geometry::Transformation&,
-            const FiniteElement&, const FiniteElement&)>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
@@ -95,48 +91,20 @@ namespace Rodin::Variational
       constexpr
       Integral(const Integrand& prod)
         : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
-          m_prod(prod.copy()),
-          m_intOrder(
-            [](const Geometry::Simplex&, const Geometry::Transformation& trans,
-               const FiniteElement& trial, const FiniteElement& test) -> size_t
-            {
-              return trial.getHandle().GetOrder() + test.getHandle().GetOrder() + trans.getHandle().OrderW();
-            })
+          m_prod(prod.copy())
       {}
 
       constexpr
       Integral(const Integral& other)
         : BilinearFormIntegratorBase(other),
-          m_prod(other.m_prod->copy()),
-          m_intOrder(other.m_intOrder)
+          m_prod(other.m_prod->copy())
       {}
 
       constexpr
       Integral(Integral&& other)
         : BilinearFormIntegratorBase(std::move(other)),
-          m_prod(std::move(other.m_prod)),
-          m_intOrder(std::move(other.m_intOrder))
+          m_prod(std::move(other.m_prod))
       {}
-
-      /**
-       * @brief Sets the function which calculates the integration order
-       * @param[in] order Function which computes the order of integration
-       * @returns Reference to self (for method chaining)
-       */
-      inline
-      Integral& setIntegrationOrder(IntegrationOrder order)
-      {
-        m_intOrder = order;
-        return *this;
-      }
-
-      inline
-      size_t getIntegrationOrder(
-          const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
-          const FiniteElement& trial, const FiniteElement& test) const
-      {
-        return m_intOrder(simplex, trans, trial, test);
-      }
 
       inline
       constexpr
@@ -152,22 +120,28 @@ namespace Rodin::Variational
         return Region::Domain;
       }
 
-      Math::Matrix getMatrix(const Geometry::Simplex& element) const override
+      Math::Matrix getMatrix(const Geometry::Simplex& simplex) const override
       {
-        assert(false);
-        // const auto& trial = m_prod.getLHS();
-        // const auto& test = m_prod.getRHS();
-        // auto& trans = element.getTransformation();
-        // assert(false);
-        // const size_t order = 0;
-        // // const size_t order = getIntegrationOrder(
-        // //     trial.getFiniteElementSpace(), test.getFiniteElementSpace(), element);
-        // ShapeComputator shapeCompute;
-
-        // Math::Matrix res = Math::Matrix::Zero(test.getDOFs(element), trial.getDOFs(element));
-        // for (const auto& p : element.getIntegrationRule(order))
-        //   res += trans.Weight() * trans.GetIntPoint().weight * m_prod.getMatrix(shapeCompute, p);
-        // return res;
+        const auto& integrand = getIntegrand();
+        const auto& trial = integrand.getLHS();
+        const auto& test = integrand.getRHS();
+        const auto& trans = simplex.getTransformation();
+        const size_t order =
+          trial.getFiniteElementSpace().getOrder(simplex) +
+          test.getFiniteElementSpace().getOrder(simplex) +
+          simplex.getTransformation().getHandle().OrderW();
+        const mfem::IntegrationRule* ir =
+          &mfem::IntRules.Get(static_cast<mfem::Geometry::Type>(simplex.getGeometry()), order);
+        Math::Matrix res = Math::Matrix::Zero(test.getDOFs(simplex), trial.getDOFs(simplex));
+        for (int i = 0; i < ir->GetNPoints(); i++)
+        {
+          const auto& ip = ir->IntPoint(i);
+          Geometry::Point p(simplex, trans, Internal::ip2vec(ip, simplex.getDimension()));
+          const auto& jacobian = p.getJacobian();
+          const Scalar distortion = std::sqrt(std::abs((jacobian * jacobian.transpose()).determinant()));
+          res += ip.weight * distortion * integrand.getMatrix(p);
+        }
+        return res;
       }
 
       inline
@@ -177,16 +151,15 @@ namespace Rodin::Variational
       }
     private:
       std::unique_ptr<Integrand> m_prod;
-      IntegrationOrder m_intOrder;
   };
 
-  template <class LHSDerived, class RHSDerived>
-  Integral(const Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>&)
-    -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>>;
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  Integral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
+    -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-  template <class LHSDerived, class RHSDerived>
-  Integral(const ShapeFunctionBase<LHSDerived, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestSpace>&)
-    -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialSpace>, ShapeFunctionBase<RHSDerived, TestSpace>>>;
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  Integral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
+    -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
   /**
    * @ingroup IntegralSpecializations
@@ -201,23 +174,17 @@ namespace Rodin::Variational
    *   \int_\Omega A(v) \ dx \ .
    * @f]
    */
-  template <class NestedDerived>
-  class Integral<ShapeFunctionBase<NestedDerived, TestSpace>> final
+  template <class NestedDerived, class FES>
+  class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
     : public LinearFormIntegratorBase
   {
     public:
-      using Integrand = ShapeFunctionBase<NestedDerived, TestSpace>;
+      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
       using Parent = LinearFormIntegratorBase;
-
-      using IntegrationOrder =
-        std::function<size_t(
-            const Geometry::Simplex&,
-            const Geometry::Transformation&,
-            const FiniteElement&)>;
 
       template <class LHSDerived, class RHSDerived>
       constexpr
-      Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, TestSpace>& rhs)
+      Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
@@ -236,20 +203,13 @@ namespace Rodin::Variational
       constexpr
       Integral(const Integrand& integrand)
         : Parent(integrand.getLeaf()),
-          m_integrand(integrand.copy()),
-          m_intOrder(
-              [](const Geometry::Simplex&, const Geometry::Transformation& trans,
-                 const FiniteElement& fe) -> size_t
-              {
-                return fe.getOrder() + trans.getHandle().OrderW();
-              })
+          m_integrand(integrand.copy())
       {}
 
       constexpr
       Integral(const Integral& other)
         : Parent(other),
-          m_integrand(other.m_integrand->copy()),
-          m_intOrder(other.m_intOrder)
+          m_integrand(other.m_integrand->copy())
       {}
 
       constexpr
@@ -257,21 +217,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
-
-      inline
-      Integral& setIntegrationOrder(IntegrationOrder order)
-      {
-        m_intOrder = order;
-        return *this;
-      }
-
-      inline
-      size_t getIntegrationOrder(
-          const Geometry::Simplex& simplex, const Geometry::Transformation& trans,
-          const FiniteElement& fe) const
-      {
-        return m_intOrder(simplex, trans, fe);
-      }
 
       inline
       constexpr
@@ -289,24 +234,23 @@ namespace Rodin::Variational
 
       Math::Vector getVector(const Geometry::Simplex& simplex) const override
       {
-        const auto& test = *m_integrand;
-        assert(test.getRangeType() == RangeType::Scalar);
-        Geometry::IsoparametricTransformation trans(simplex);
-        // auto& trans = simplex.getTransformation();
-        // assert(false);
-        // const size_t order = 0;
-        // // const size_t order = getIntegrationOrder(test.getFiniteElementSpace(), simplex);
-        // ShapeComputator compute;
-
-        // Math::Vector res = Math::Vector::Zero(test.getDOFs(simplex));
-        // for (const auto& p : simplex.getIntegrationRule(order))
-        // {
-        //   assert(false);
-        //   // const auto basis =
-        //   //   trans.Weight() * trans.GetIntPoint().weight * test.getOperator(compute, p);
-        //   // res += Eigen::Map<const Math::Vector>(basis.data(), basis.size());
-        // }
-        // return res;
+        const auto& integrand = getIntegrand();
+        assert(integrand.getRangeType() == RangeType::Scalar);
+        const auto& trans = simplex.getTransformation();
+        const size_t order =
+          integrand.getFiniteElementSpace().getOrder(simplex) + trans.getHandle().OrderW();
+        const mfem::IntegrationRule* ir =
+          &mfem::IntRules.Get(static_cast<mfem::Geometry::Type>(simplex.getGeometry()), order);
+        Math::Vector res = Math::Vector::Zero(integrand.getDOFs(simplex));
+        for (int i = 0; i < ir->GetNPoints(); i++)
+        {
+          const auto& ip = ir->IntPoint(i);
+          Geometry::Point p(simplex, trans, Internal::ip2vec(ip, simplex.getDimension()));
+          const auto& jacobian = p.getJacobian();
+          const Scalar distortion = std::sqrt(std::abs((jacobian * jacobian.transpose()).determinant()));
+          res += ip.weight * distortion * integrand.getTensorBasis(p);
+        }
+        return res;
       }
 
       inline
@@ -317,16 +261,15 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      IntegrationOrder m_intOrder;
   };
 
-  template <class NestedDerived>
-  Integral(const ShapeFunctionBase<NestedDerived, TestSpace>&)
-    -> Integral<ShapeFunctionBase<NestedDerived, TestSpace>>;
+  template <class NestedDerived, class FES>
+  Integral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
+    -> Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
-  template <class LHSDerived, class RHSDerived>
-  Integral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, TestSpace>&)
-    -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, TestSpace>>, TestSpace>>;
+  template <class LHSDerived, class RHSDerived, class FES>
+  Integral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
+    -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
 
   /**
    * @ingroup IntegralSpecializations

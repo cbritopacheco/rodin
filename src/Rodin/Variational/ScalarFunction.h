@@ -73,7 +73,10 @@ namespace Rodin::Variational
         return { 1, 1 };
       }
 
-      virtual ScalarFunctionBase* copy() const noexcept override = 0;
+      virtual ScalarFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
   };
 
   /**
@@ -81,10 +84,13 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class ScalarFunction<FunctionBase<NestedDerived>> final
-    : public ScalarFunctionBase<ScalarFunction<FunctionBase<NestedDerived>>>
+    : public ScalarFunctionBase<ScalarFunction<NestedDerived>>
   {
     public:
-      using Parent = ScalarFunctionBase<ScalarFunction<FunctionBase<NestedDerived>>>;
+      using Parent = ScalarFunctionBase<ScalarFunction<NestedDerived>>;
+      using NestedRangeType = typename FormLanguage::Traits<FunctionBase<NestedDerived>>::RangeType;
+
+      static_assert(std::is_same_v<NestedRangeType, Scalar>);
 
       constexpr
       ScalarFunction(const FunctionBase<NestedDerived>& nested)
@@ -118,7 +124,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline ScalarFunction* copy() const noexcept final override
+      inline ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }
@@ -126,6 +132,7 @@ namespace Rodin::Variational
     private:
       FunctionBase<NestedDerived> m_nested;
   };
+
   template <class Derived>
   ScalarFunction(const FunctionBase<Derived>&) -> ScalarFunction<FunctionBase<Derived>>;
 
@@ -180,7 +187,7 @@ namespace Rodin::Variational
         return static_cast<Scalar>(m_x);
       }
 
-      inline ScalarFunction* copy() const noexcept final override
+      inline ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }
@@ -238,7 +245,7 @@ namespace Rodin::Variational
         return m_f(v);
       }
 
-      inline ScalarFunction* copy() const noexcept final override
+      inline ScalarFunction* copy() const noexcept override
       {
         return new ScalarFunction(*this);
       }

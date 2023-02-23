@@ -77,6 +77,7 @@ namespace Rodin::Variational
    */
   class BilinearFormIntegratorBase;
 
+  template <class FES>
   class FiniteElement;
 
   class FiniteElementCollectionBase;
@@ -98,7 +99,7 @@ namespace Rodin::Variational
    *   \mathcal{T}_h, \ v |_\tau \in H^1 (\tau)^d \right\}
    * @f]
    */
-  template <class Context, class Range>
+  template <class Range, class Context>
   class L2;
 
   /**
@@ -117,7 +118,7 @@ namespace Rodin::Variational
    * C^0(\Omega)^d @f$.
    *
    */
-  template <class Context, class Range>
+  template <class Range, class Context>
   class H1;
 
   /**
@@ -168,11 +169,10 @@ namespace Rodin::Variational
    * @brief Base class for shape function objects.
    * @tparam Space Type of shape function space (Trial or Test)
    */
-  template <class Derived, ShapeFunctionSpaceType Space>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunctionBase;
 
   /**
-   * @brief Base class for shape function objects.
    * @tparam FES Type of finite element space
    * @tparam Space Type of shape function space (@ref
    * ShapeFunctionSpaceType::Trial "Trial" or @ref

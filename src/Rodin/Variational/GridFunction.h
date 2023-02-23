@@ -175,8 +175,10 @@ namespace Rodin::Variational
       }
 
       inline
-      GridFunctionBase& operator=(std::function<double(const Geometry::Point&)> fn)
+      GridFunctionBase& operator=(std::function<Scalar(const Geometry::Point&)> fn)
       {
+        using RangeType = typename FormLanguage::Traits<FunctionBase<GridFunctionBase<Derived>>>::RangeType;
+        static_assert(std::is_same_v<RangeType, Scalar>);
         assert(getFiniteElementSpace().getVectorDimension() == 1);
         return project(ScalarFunction(fn));
       }
@@ -291,6 +293,18 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      inline
+      auto& project(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      {
+        return project(fn, std::set<Geometry::Attribute>{attr});
+      }
+
+      inline
+      auto& project(std::function<Scalar(const Geometry::Point&)> fn, const std::set<Geometry::Attribute>& attrs = {})
+      {
+        return project(ScalarFunction(fn), attrs);
+      }
+
       /**
        * @brief Projects a FunctionBase instance
        *
@@ -318,14 +332,14 @@ namespace Rodin::Variational
       Derived& project(
           const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs = {})
       {
-        using Function = FunctionBase<NestedDerived>;
-        using FunctionRange =
-          FormLanguage::RangeOf<typename FormLanguage::Traits<Function>::ResultType>;
-        if constexpr (std::is_same_v<FunctionRange, Boolean>)
+        using Value = FunctionBase<NestedDerived>;
+        using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
+        if constexpr (std::is_same_v<ValueRangeType, Scalar>)
         {
+          Internal::MFEMScalarCoefficient sc(getFiniteElementSpace().getMesh(), fn);
           if (attrs.size() == 0)
           {
-            getHandle().ProjectCoefficient(Internal::MFEMScalarCoefficient(fn));
+            getHandle().ProjectCoefficient(sc);
           }
           else
           {
@@ -336,38 +350,18 @@ namespace Rodin::Variational
               if (attrs.count(fes.GetAttribute(i)) > 0)
               {
                 fes.GetElementVDofs(i, vdofs);
-                getHandle().ProjectCoefficient(Internal::MFEMScalarCoefficient(fn), vdofs);
-              }
-            }
-          }
-          return *this;
-        }
-        else if constexpr (std::is_same_v<FunctionRange, Scalar>)
-        {
-          if (attrs.size() == 0)
-          {
-            getHandle().ProjectCoefficient(Internal::MFEMScalarCoefficient(fn));
-          }
-          else
-          {
-            mfem::Array<int> vdofs;
-            const auto& fes = getFiniteElementSpace().getHandle();
-            for (int i = 0; i < fes.GetNE(); i++)
-            {
-              if (attrs.count(fes.GetAttribute(i)) > 0)
-              {
-                fes.GetElementVDofs(i, vdofs);
-                getHandle().ProjectCoefficient(Internal::MFEMScalarCoefficient(fn), vdofs);
+                getHandle().ProjectCoefficient(sc, vdofs);
               }
             }
           }
           return static_cast<Derived&>(*this);
         }
-        else if constexpr (std::is_same_v<FunctionRange, Math::Vector>)
+        else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
         {
+          Internal::MFEMVectorCoefficient vc(getFiniteElementSpace().getMesh(), fn);
           if (attrs.size() == 0)
           {
-            getHandle().ProjectCoefficient(Internal::MFEMVectorCoefficient(fn));
+            getHandle().ProjectCoefficient(vc);
           }
           else
           {
@@ -378,7 +372,7 @@ namespace Rodin::Variational
               if (attrs.count(fes.GetAttribute(i)) > 0)
               {
                 fes.GetElementVDofs(i, vdofs);
-                getHandle().ProjectCoefficient(Internal::MFEMVectorCoefficient(fn), vdofs);
+                getHandle().ProjectCoefficient(vc, vdofs);
               }
             }
           }
@@ -458,7 +452,7 @@ namespace Rodin::Variational
       using Parent::operator/=;
 
       constexpr
-      FESGridFunction(FES& fes)
+      FESGridFunction(const FES& fes)
         : m_fes(fes),
           m_data(fes.getHandle().GetVSize()),
           m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
@@ -485,15 +479,16 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        using Range = typename FES::Range;
-        static_assert(std::is_same_v<Range, Scalar> ||
-                      std::is_same_v<Range, Math::Vector>);
-        if constexpr (std::is_same_v<Range, Scalar>)
+        using RangeType = typename FES::RangeType;
+        static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
+        if constexpr (std::is_same_v<RangeType, Scalar>)
         {
+          assert(false);
           return Scalar(0);
         }
-        else if constexpr (std::is_same_v<Range, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
+          assert(false);
           Math::Vector res(getFiniteElementSpace().getVectorDimension());
           return res;
         }
@@ -506,27 +501,13 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      FES& getFiniteElementSpace()
-      {
-        return m_fes.get();
-      }
-
-      inline
-      constexpr
       const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
 
       inline
-      mfem::GridFunction& getHandle()
-      {
-        assert(m_gf);
-        return *m_gf;
-      }
-
-      inline
-      const mfem::GridFunction& getHandle() const
+      mfem::GridFunction& getHandle() const
       {
         assert(m_gf);
         return *m_gf;
@@ -552,7 +533,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<FES> m_fes;
+      std::reference_wrapper<const FES> m_fes;
       Math::Vector m_data;
       std::unique_ptr<mfem::GridFunction> m_gf;
   };
@@ -581,7 +562,7 @@ namespace Rodin::Variational
        * to.
        */
       constexpr
-      GridFunction(FES& fes)
+      GridFunction(const FES& fes)
         : Parent(fes)
       {}
 
@@ -612,7 +593,7 @@ namespace Rodin::Variational
   };
 
   template <class ... Ts>
-  GridFunction(L2<Ts ...>&) -> GridFunction<L2<Ts ...>>;
+  GridFunction(const L2<Ts ...>&) -> GridFunction<L2<Ts ...>>;
 
   /**
    * @ingroup GridFunctionSpecializations
@@ -638,7 +619,7 @@ namespace Rodin::Variational
        * to.
        */
       constexpr
-      GridFunction(FES& fes)
+      GridFunction(const FES& fes)
         : Parent(fes)
       {}
 
@@ -685,10 +666,9 @@ namespace Rodin::Variational
       GridFunction& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
                                       const std::set<Geometry::Attribute>& attrs = {})
       {
-        using Function = FunctionBase<NestedDerived>;
-        using FunctionRange =
-          FormLanguage::RangeOf<typename FormLanguage::Traits<Function>::ResultType>;
-        if constexpr (std::is_same_v<FunctionRange, Boolean>)
+        using Value = FunctionBase<NestedDerived>;
+        using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
+        if constexpr (std::is_same_v<ValueRangeType, Scalar>)
         {
           int maxBdrAttr = this->getFiniteElementSpace()
                                 .getMesh()
@@ -697,8 +677,8 @@ namespace Rodin::Variational
           if (attrs.size() == 0)
           {
             marker = 1;
-            this->getHandle().ProjectBdrCoefficient(
-                Internal::MFEMScalarCoefficient(fn), marker);
+            Internal::MFEMScalarCoefficient sc(this->getFiniteElementSpace().getMesh(), fn);
+            this->getHandle().ProjectBdrCoefficient(sc, marker);
             return *this;
           }
           else
@@ -709,38 +689,12 @@ namespace Rodin::Variational
               assert(attr - 1 < maxBdrAttr);
               marker[attr - 1] = 1;
             }
-            this->getHandle().ProjectBdrCoefficient(
-                Internal::MFEMScalarCoefficient(fn), marker);
+            Internal::MFEMScalarCoefficient sc(this->getFiniteElementSpace().getMesh(), fn);
+            this->getHandle().ProjectBdrCoefficient(sc, marker);
             return *this;
           }
         }
-        else if constexpr (std::is_same_v<FunctionRange, Scalar>)
-        {
-          int maxBdrAttr = this->getFiniteElementSpace()
-                                .getMesh()
-                                .getHandle().bdr_attributes.Max();
-          mfem::Array<int> marker(maxBdrAttr);
-          if (attrs.size() == 0)
-          {
-            marker = 1;
-            this->getHandle().ProjectBdrCoefficient(
-                Internal::MFEMScalarCoefficient(fn), marker);
-            return *this;
-          }
-          else
-          {
-            marker = 0;
-            for (const auto& attr : attrs)
-            {
-              assert(attr - 1 < maxBdrAttr);
-              marker[attr - 1] = 1;
-            }
-            this->getHandle().ProjectBdrCoefficient(
-                Internal::MFEMScalarCoefficient(fn), marker);
-            return *this;
-          }
-        }
-        else if constexpr (std::is_same_v<FunctionRange, Math::Vector>)
+        else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
         {
           int maxBdrAttr = this->getFiniteElementSpace()
                                   .getMesh()
@@ -749,8 +703,8 @@ namespace Rodin::Variational
           if (attrs.size() == 0)
           {
             marker = 1;
-            this->getHandle().ProjectBdrCoefficient(
-                Internal::MFEMVectorCoefficient(fn), marker);
+            Internal::MFEMScalarCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
+            this->getHandle().ProjectBdrCoefficient(vc, marker);
             return *this;
           }
           else
@@ -761,8 +715,8 @@ namespace Rodin::Variational
               assert(attr - 1 < maxBdrAttr);
               marker[attr - 1] = 1;
             }
-            this->getHandle().ProjectBdrCoefficient(
-                Internal::MFEMVectorCoefficient(fn), marker);
+            Internal::MFEMScalarCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
+            this->getHandle().ProjectBdrCoefficient(vc, marker);
             return *this;
           }
         }
@@ -780,7 +734,7 @@ namespace Rodin::Variational
   };
 
   template <class ... Ts>
-  GridFunction(H1<Ts...>&) -> GridFunction<H1<Ts...>>;
+  GridFunction(const H1<Ts...>&) -> GridFunction<H1<Ts...>>;
 
 }
 

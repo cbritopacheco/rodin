@@ -41,12 +41,6 @@ namespace Rodin::Variational
     public:
       using ValueType = T;
 
-      explicit
-      constexpr
-      TensorBasis(std::initializer_list<T> vs)
-        : m_dofs(vs.size()), m_basis(vs)
-      {}
-
       template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
       explicit
       constexpr
@@ -112,15 +106,13 @@ namespace Rodin::Variational
         return m_basis.end();
       }
 
-      const std::vector<T>& getData() const
-      {
-        return m_basis;
-      }
-
     private:
       const size_t m_dofs;
       std::vector<T> m_basis;
   };
+
+  template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
+  TensorBasis(size_t, F&&) -> TensorBasis<std::invoke_result_t<F, size_t>>;
 
   template <>
   class TensorBasis<Scalar> : public Math::Vector
@@ -129,19 +121,10 @@ namespace Rodin::Variational
       using ValueType = Scalar;
       using Parent = Math::Vector;
 
+      template <class ... Args>
       explicit
-      TensorBasis(std::initializer_list<Scalar> vs)
-        : Parent(vs.size())
-      {}
-
-      explicit
-      TensorBasis(const Math::Vector& other)
-        : Parent(other)
-      {}
-
-      explicit
-      TensorBasis(Math::Vector&& other)
-        : Parent(std::move(other))
+      TensorBasis(Args&&... args)
+        : Parent(std::forward<Args>(args)...)
       {}
 
       template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
@@ -193,25 +176,70 @@ namespace Rodin::Variational
       {
         return Parent::operator()(static_cast<Math::Vector::Index>(i));
       }
-
-      const Scalar* getData() const
-      {
-        return Parent::data();
-      }
   };
 
-  template <class T>
-  TensorBasis(std::initializer_list<T>) -> TensorBasis<T>;
+  template <>
+  class TensorBasis<Math::Vector> : public Math::Matrix
+  {
+    public:
+      using ValueType = Math::Vector;
+      using Parent = Math::Matrix;
 
-  template <class T>
-  TensorBasis(size_t, const T&) -> TensorBasis<T>;
+      template <class ... Args>
+      explicit
+      TensorBasis(Args&&... args)
+        : Parent(std::forward<Args>(args)...)
+      {}
 
-  template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
-  TensorBasis(size_t, F&&) -> TensorBasis<std::invoke_result_t<F, size_t>>;
+      template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
+      explicit
+      constexpr
+      TensorBasis(size_t dofs, size_t vdim, F&& f)
+        : Parent(vdim, dofs)
+      {
+        for (size_t i = 0; i < dofs; i++)
+          Parent::col(i) = f(i);
+      }
 
-  TensorBasis(const Math::Vector&) -> TensorBasis<Scalar>;
+      TensorBasis(const TensorBasis& other)
+        : Parent(other)
+      {}
 
-  TensorBasis(Math::Vector&&) -> TensorBasis<Scalar>;
+      TensorBasis(TensorBasis&& other)
+        : Parent(std::move(other))
+      {}
+
+      void operator=(const Math::Matrix&) = delete;
+
+      void operator=(const TensorBasis&) = delete;
+
+      template <class F>
+      inline
+      constexpr
+      auto apply(F&& f)
+      {
+        return TensorBasis(size(), [&](size_t i) { return f(Parent::col(i)); });
+      }
+
+      TensorBasis& operator=(TensorBasis&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      inline
+      constexpr
+      size_t getDOFs() const
+      {
+        return cols();
+      }
+
+      inline
+      auto operator()(size_t i) const
+      {
+        return Parent::col(i);
+      }
+  };
 
   template <class LHS, class RHS>
   inline
@@ -219,7 +247,7 @@ namespace Rodin::Variational
   auto operator+(const TensorBasis<LHS>& lhs, const TensorBasis<RHS>& rhs)
   {
     assert(lhs.getDOFs() == rhs.getDOFs());
-    return TensorBasis(lhs.getDOFs(), [&](size_t i) { return lhs(i) + rhs(i); });
+    return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) + rhs(i); });
   }
 
   template <class LHS, class RHS>
@@ -228,7 +256,7 @@ namespace Rodin::Variational
   auto operator-(const TensorBasis<LHS>& lhs, const TensorBasis<RHS>& rhs)
   {
     assert(lhs.getDOFs() == rhs.getDOFs());
-    return TensorBasis(lhs.getDOFs(), [&](size_t i) { return lhs(i) - rhs(i); });
+    return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) - rhs(i); });
   }
 
   template <class M>
@@ -236,7 +264,7 @@ namespace Rodin::Variational
   constexpr
   auto operator-(const TensorBasis<M>& op)
   {
-    return TensorBasis(op.getDOFs(), [&](size_t i) { return -op(i); });
+    return TensorBasis(op.getDOFs(), [&](size_t i){ return -op(i); });
   }
 
   template <class LHS, class RHS>
@@ -245,7 +273,7 @@ namespace Rodin::Variational
   auto operator*(const TensorBasis<LHS>& lhs, const TensorBasis<RHS>& rhs)
   {
     assert(lhs.getDOFs() == rhs.getDOFs());
-    return TensorBasis(lhs.getDOFs(), [&](size_t i) { return lhs(i) * rhs(i); });
+    return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) * rhs(i); });
   }
 
   template <class RHS>
@@ -253,7 +281,7 @@ namespace Rodin::Variational
   constexpr
   auto operator*(Scalar lhs, const TensorBasis<RHS>& rhs)
   {
-    return TensorBasis(rhs.getDOFs(), [&](size_t i) { return lhs * rhs(i); });
+    return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs * rhs(i); });
   }
 
   template <class LHS>
@@ -261,7 +289,7 @@ namespace Rodin::Variational
   constexpr
   auto operator*(const TensorBasis<LHS>& lhs, Scalar rhs)
   {
-    return TensorBasis(lhs.getDOFs(), [&](size_t i) { return lhs(i) * rhs; });
+    return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) * rhs; });
   }
 
   template <class LHS>
@@ -269,7 +297,45 @@ namespace Rodin::Variational
   constexpr
   auto operator/(const TensorBasis<LHS>& lhs, Scalar rhs)
   {
-    return TensorBasis(lhs.getDOFs(), [&](size_t i) { return lhs(i) / rhs; });
+    return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) / rhs; });
+  }
+
+  inline
+  auto operator+(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
+  {
+    assert(lhs.getDOFs() == rhs.getDOFs());
+    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) + static_cast<const Math::Vector&>(lhs));
+  }
+
+  inline
+  auto operator-(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
+  {
+    assert(lhs.getDOFs() == rhs.getDOFs());
+    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) - static_cast<const Math::Vector&>(lhs));
+  }
+
+  inline
+  auto operator-(const TensorBasis<Scalar>& op)
+  {
+    return TensorBasis<Scalar>(-static_cast<const Math::Vector&>(op));
+  }
+
+  inline
+  auto operator*(Scalar lhs, const TensorBasis<Scalar>& rhs)
+  {
+    return TensorBasis<Scalar>(lhs * static_cast<const Math::Vector&>(rhs));
+  }
+
+  inline
+  auto operator*(const TensorBasis<Scalar>& lhs, Scalar rhs)
+  {
+    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) * rhs);
+  }
+
+  inline
+  auto operator/(const TensorBasis<Scalar>& lhs, Scalar rhs)
+  {
+    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) * rhs);
   }
 }
 

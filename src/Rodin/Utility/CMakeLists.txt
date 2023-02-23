@@ -1,13 +1,11 @@
 set(RodinUtility_HEADERS
+  Cast.h
   IsSpecialization.h
   OptionalReference.h
   Overloaded.h
-  Misc.h
   )
 
-set(RodinUtility_SRCS
-  Misc.cpp
-  )
+set(RodinUtility_SRCS Cast.cpp)
 
 add_library(RodinUtility
   ${RodinUtility_SRCS} ${RodinUtility_HEADERS})

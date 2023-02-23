@@ -112,7 +112,7 @@ namespace Rodin::Variational
       };
 
       constexpr
-      H1Base(Geometry::Mesh<Context>& mesh,
+      H1Base(const Geometry::Mesh<Context>& mesh,
           const size_t vdim, const size_t order, Basis basis = DefaultBasis)
         : m_fec(order, mesh.getDimension(), basis),
           m_mesh(mesh),
@@ -155,21 +155,34 @@ namespace Rodin::Variational
       }
 
       inline
-      Geometry::Mesh<Context>& getMesh() final override
-      {
-        return m_mesh;
-      }
-
-      inline
       const Geometry::Mesh<Context>& getMesh() const final override
       {
-        return m_mesh;
+        return m_mesh.get();
       }
 
       inline
       const FEC& getFiniteElementCollection() const final override
       {
         return m_fec;
+      }
+
+      inline
+      FiniteElement<Derived>
+      getFiniteElement(const Geometry::Simplex& element) const
+      {
+        if (element.getDimension() == getMesh().getDimension())
+        {
+          return FiniteElement<Derived>(element, m_fes->GetFE(element.getIndex()));
+        }
+        else if (element.getDimension() == getMesh().getDimension() - 1)
+        {
+          return FiniteElement<Derived>(element, m_fes->GetFaceElement(element.getIndex()));
+        }
+        else
+        {
+          assert(false);
+          return FiniteElement<Derived>(element, nullptr);
+        }
       }
 
       inline
@@ -191,32 +204,7 @@ namespace Rodin::Variational
         return res;
       }
 
-      inline
-      FiniteElement
-      getFiniteElement(const Geometry::Simplex& element) const final override
-      {
-        if (element.getDimension() == getMesh().getDimension())
-        {
-          return FiniteElement(element, m_fes->GetFE(element.getIndex()));
-        }
-        else if (element.getDimension() == getMesh().getDimension() - 1)
-        {
-          return FiniteElement(element, m_fes->GetFaceElement(element.getIndex()));
-        }
-        else
-        {
-          assert(false);
-          return FiniteElement(element, nullptr);
-        }
-      }
-
-      mfem::FiniteElementSpace& getHandle() final override
-      {
-        assert(m_fes);
-        return *m_fes;
-      }
-
-      const mfem::FiniteElementSpace& getHandle() const final override
+      mfem::FiniteElementSpace& getHandle() const final override
       {
         assert(m_fes);
         return *m_fes;
@@ -224,24 +212,24 @@ namespace Rodin::Variational
 
     private:
       FEC m_fec;
-      std::reference_wrapper<Geometry::Mesh<Context>> m_mesh;
+      std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
       std::unique_ptr<mfem::FiniteElementSpace> m_fes;
   };
 
   template <class ContextType>
-  class H1<ContextType, Scalar>
-    : public H1Base<H1<ContextType, Scalar>, ContextType>
+  class H1<Scalar, ContextType>
+    : public H1Base<H1<Scalar, ContextType>, ContextType>
   {
     public:
       using Context = ContextType;
-      using Parent = H1Base<H1<ContextType, Scalar>, ContextType>;
-      using Range = Scalar;
+      using Parent = H1Base<H1<Scalar, ContextType>, ContextType>;
+      using RangeType = Scalar;
       using Basis = typename Parent::Basis;
       using Parent::operator=;
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
       constexpr
-      H1(Geometry::Mesh<Context>& mesh,
+      H1(const Geometry::Mesh<Context>& mesh,
           FiniteElementOrder order = FiniteElementOrder(1),
           Basis basis = DefaultBasis)
         : Parent(mesh, 1, order, basis)
@@ -261,18 +249,17 @@ namespace Rodin::Variational
   template <class Context>
   H1(Geometry::Mesh<Context>& mesh,
       FiniteElementOrder order = FiniteElementOrder(1),
-      typename H1Base<H1<Context, Scalar>, Context>::Basis basis =
-      H1Base<H1<Context, Scalar>, Context>::DefaultBasis)
-  -> H1<Context, Scalar>;
+      typename H1Base<H1<Scalar, Context>, Context>::Basis basis =
+      H1Base<H1<Scalar, Context>, Context>::DefaultBasis) -> H1<Scalar, Context>;
 
   template <class ContextType>
-  class H1<ContextType, Math::Vector>
-    : public H1Base<H1<ContextType, Math::Vector>, ContextType>
+  class H1<Math::Vector, ContextType>
+    : public H1Base<H1<Math::Vector, ContextType>, ContextType>
   {
     public:
       using Context = ContextType;
-      using Parent = H1Base<H1<ContextType, Math::Vector>, ContextType>;
-      using Range = Math::Vector;
+      using Parent = H1Base<H1<Math::Vector, ContextType>, ContextType>;
+      using RangeType = Math::Vector;
       using Basis = typename Parent::Basis;
       using Parent::operator=;
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
@@ -300,9 +287,8 @@ namespace Rodin::Variational
   H1(Geometry::Mesh<Context>& mesh,
       size_t vdim,
       FiniteElementOrder order = FiniteElementOrder(1),
-      typename H1Base<H1<Context, Math::Vector>, Context>::Basis basis =
-        H1Base<H1<Context, Math::Vector>, Context>::DefaultBasis)
-    -> H1<Context, Math::Vector>;
+      typename H1Base<H1<Math::Vector, Context>, Context>::Basis basis =
+        H1Base<H1<Math::Vector, Context>, Context>::DefaultBasis) -> H1<Math::Vector, Context>;
 }
 
 #endif
