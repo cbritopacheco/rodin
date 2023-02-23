@@ -65,7 +65,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const FormLanguage::List<DirichletBCBase>& getEssentialBoundary() const
+      const FormLanguage::List<DirichletBCBase>& getDBCs() const
       {
         return m_essBdr;
       }

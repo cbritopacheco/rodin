@@ -33,9 +33,11 @@ namespace Rodin::Geometry
    *
    * @see Geometry::Point
    */
-  class Transformation
+  class SimplexTransformation
   {
     public:
+      virtual ~SimplexTransformation() = default;
+
       /**
        * @brief Performs the transformation, taking reference coordinates into
        * physical coordinates.
@@ -51,63 +53,23 @@ namespace Rodin::Geometry
        */
       virtual Math::Vector transform(const Math::Vector& rc) const = 0;
 
-      /**
-       * @brief Performs the inverse transformation, taking physical
-       * coordinates into reference coordinates.
-       *
-       * Given @f$ p \in \tau @f$, computes the point:
-       * @f[
-       *    r = x^{-1}(p)
-       * @f]
-       * in reference coordinates.
-       *
-       * @param[in] pc Physical coordinates of the point.
-       */
-      virtual Math::Vector inverse(const Math::Vector& pc) const = 0;
+      // /**
+      //  * @brief Performs the inverse transformation, taking physical
+      //  * coordinates into reference coordinates.
+      //  *
+      //  * Given @f$ p \in \tau @f$, computes the point:
+      //  * @f[
+      //  *    r = x^{-1}(p)
+      //  * @f]
+      //  * in reference coordinates.
+      //  *
+      //  * @param[in] pc Physical coordinates of the point.
+      //  */
+      // virtual Math::Vector inverse(const Math::Vector& pc) const = 0;
 
       virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
 
-      virtual const mfem::ElementTransformation& getHandle() const = 0;
-  };
-
-  /**
-   * @brief Represents a transformation between the reference space to the
-   * physical space of a simplex.
-   */
-  class IsoparametricTransformation final : public Transformation
-  {
-    public:
-      IsoparametricTransformation(const Simplex& simplex)
-      {
-
-      }
-
-      inline
-      Math::Vector transform(const Math::Vector& rc) const final override
-      {
-        assert(false);
-      }
-
-      inline
-      Math::Vector inverse(const Math::Vector& pc) const final override
-      {
-        assert(false);
-      }
-
-      inline
-      Math::Matrix jacobian(const Math::Vector& rc) const final override
-      {
-        assert(false);
-      }
-
-      inline
-      const mfem::IsoparametricTransformation& getHandle() const final override
-      {
-        return *m_handle;
-      }
-
-    private:
-      const mfem::IsoparametricTransformation* m_handle;
+      virtual mfem::ElementTransformation& getHandle() const = 0;
   };
 }
 

@@ -50,9 +50,7 @@ namespace Rodin::Variational
       {
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();
-        const auto& trans = p.getTransformation();
-        const auto& jacobian =
-          trans.jacobian(p.getVector(Geometry::Point::Coordinates::Reference));
+        const auto& jacobian = p.getJacobian();
 
         Math::Vector value(m_dimension);
         if (jacobian.rows() == 2)

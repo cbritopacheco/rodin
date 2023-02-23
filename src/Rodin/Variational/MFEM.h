@@ -13,8 +13,9 @@
 
 namespace Rodin::Utility
 {
+  template <class T>
   inline
-  mfem::Array<int> set2marker(const std::set<int>& s, int size)
+  mfem::Array<int> set2marker(const std::set<T>& s, size_t size)
   {
     mfem::Array<int> res(size);
     res = 0;
@@ -22,7 +23,7 @@ namespace Rodin::Utility
     {
       assert(v > 0);
       assert(v - 1 < size);
-      res[v - 1] = 1;
+      res[static_cast<int>(v) - 1] = 1;
     }
     return res;
   }
@@ -38,8 +39,76 @@ namespace Rodin::Variational::Internal
     return ip;
   }
 
+  inline
+  Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Eigen::ColMajor, RODIN_MAXIMAL_SPACE_DIMENSION, 1>
+  ip2vec(const mfem::IntegrationPoint& ip, const size_t dim)
+  {
+    if (dim == 1)
+    {
+      Math::FixedSizeVector<1> vec;
+      vec << ip.x;
+      return vec;
+    }
+    else if (dim == 2)
+    {
+      Math::FixedSizeVector<2> vec;
+      vec << ip.x, ip.y;
+      return vec;
+    }
+    else if (dim == 3)
+    {
+      Math::FixedSizeVector<3> vec;
+      vec << ip.x, ip.y, ip.z;
+      return vec;
+    }
+    else
+    {
+      assert(false);
+      return Math::Vector::Zero(0);
+    }
+  }
+
+  class MFEMElementTransformation final : public Geometry::SimplexTransformation
+  {
+    public:
+      MFEMElementTransformation(mfem::ElementTransformation& trans)
+        : m_handle(trans)
+      {}
+
+      Math::Vector transform(const Math::Vector& rc) const override
+      {
+        Math::Vector res(m_handle.get().GetSpaceDim());
+        const mfem::IntegrationPoint ip = Internal::vec2ip(rc);
+        m_handle.get().SetIntPoint(&ip);
+        mfem::Vector tmp;
+        tmp.SetDataAndSize(res.data(), res.size());
+        assert(!tmp.OwnsData());
+        m_handle.get().Transform(ip, tmp);
+        return res;
+      }
+
+      Math::Matrix jacobian(const Math::Vector& rc) const override
+      {
+        Math::Matrix res(m_handle.get().GetSpaceDim(), m_handle.get().GetDimension());
+        const mfem::IntegrationPoint ip = Internal::vec2ip(rc);
+        m_handle.get().SetIntPoint(&ip);
+        mfem::DenseMatrix tmp;
+        tmp.UseExternalData(res.data(), res.rows(), res.cols());
+        tmp = m_handle.get().Jacobian();
+        return res;
+      }
+
+      mfem::ElementTransformation& getHandle() const override
+      {
+        return m_handle.get();
+      }
+
+    private:
+      std::reference_wrapper<mfem::ElementTransformation> m_handle;
+  };
+
   template <class Derived>
-  class MFEMScalarCoefficient : public mfem::Coefficient
+  class MFEMScalarCoefficient final : public mfem::Coefficient
   {
     public:
       MFEMScalarCoefficient(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
@@ -60,26 +129,34 @@ namespace Rodin::Variational::Internal
 
       inline
       double Eval(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-      final override
+      override
       {
         Scalar res = 0;
-        assert(false);
         switch (trans.ElementType)
         {
           case mfem::ElementTransformation::ELEMENT:
           {
-            // res = m_s.getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo), ip));
+            res = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getElement(trans.ElementNo),
+                  MFEMElementTransformation(trans),
+                  Internal::ip2vec(ip, trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
-            // int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            // res = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(faceIdx), ip));
+            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            res = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getFace(faceIdx),
+                  MFEMElementTransformation(trans),
+                  Internal::ip2vec(ip, trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::FACE:
           {
-            // res = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(trans.ElementNo), ip));
+            res = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getFace(trans.ElementNo),
+                  MFEMElementTransformation(trans),
+                  Internal::ip2vec(ip, trans.GetDimension())));
             break;
           }
         }
@@ -92,7 +169,11 @@ namespace Rodin::Variational::Internal
   };
 
   template <class Derived>
-  class MFEMVectorCoefficient : public mfem::VectorCoefficient
+  MFEMScalarCoefficient(const Geometry::MeshBase&, const FunctionBase<Derived>&)
+    -> MFEMScalarCoefficient<Derived>;
+
+  template <class Derived>
+  class MFEMVectorCoefficient final : public mfem::VectorCoefficient
   {
     public:
       MFEMVectorCoefficient(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
@@ -118,7 +199,7 @@ namespace Rodin::Variational::Internal
       inline
       void Eval(
           mfem::Vector& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-      final override
+      override
       {
         Math::Vector vec;
         assert(false);
@@ -151,7 +232,11 @@ namespace Rodin::Variational::Internal
   };
 
   template <class Derived>
-  class MFEMMatrixCoefficient : public mfem::MatrixCoefficient
+  MFEMVectorCoefficient(const Geometry::MeshBase&, const FunctionBase<Derived>&)
+    -> MFEMVectorCoefficient<Derived>;
+
+  template <class Derived>
+  class MFEMMatrixCoefficient final : public mfem::MatrixCoefficient
   {
     public:
       MFEMMatrixCoefficient(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
@@ -175,7 +260,7 @@ namespace Rodin::Variational::Internal
       inline
       void Eval(
           mfem::DenseMatrix& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
-      final override
+      override
       {
         Math::Matrix mat;
         assert(false);
@@ -205,6 +290,10 @@ namespace Rodin::Variational::Internal
       std::reference_wrapper<const Geometry::MeshBase> m_mesh;
       std::reference_wrapper<const FunctionBase<Derived>> m_s;
   };
+
+  template <class Derived>
+  MFEMMatrixCoefficient(const Geometry::MeshBase&, const FunctionBase<Derived>&)
+    -> MFEMMatrixCoefficient<Derived>;
 }
 
 #endif

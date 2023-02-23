@@ -28,12 +28,12 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    */
   template <class ... Ts>
-  class Grad<GridFunction<H1<Ts...>>> final
-    : public VectorFunctionBase<Grad<GridFunction<H1<Ts...>>>>
+  class Grad<GridFunction<H1<Scalar, Ts...>>> final
+    : public VectorFunctionBase<Grad<GridFunction<H1<Scalar, Ts...>>>>
   {
     public:
-      using Operand = GridFunction<H1<Ts...>>;
-      using Parent = VectorFunctionBase<Grad<GridFunction<H1<Ts...>>>>;
+      using Operand = GridFunction<H1<Scalar, Ts...>>;
+      using Parent = VectorFunctionBase<Grad<GridFunction<H1<Scalar, Ts...>>>>;
 
       /**
        * @brief Constructs the gradient of an @f$ H^1 @f$ function
@@ -220,18 +220,19 @@ namespace Rodin::Variational
   /**
    * @ingroup GradSpecializations
    */
-  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  class Grad<ShapeFunction<NestedDerived, H1<Ts...>, Space>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
+  class Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>>, H1<Scalar, Ps...>, Space>
   {
     public:
-      using FES = H1<Ts...>;
-      using Operand = ShapeFunction<NestedDerived, H1<Ts...>, Space>;
-      using Parent = ShapeFunctionBase<Grad<Operand>, Space>;
+      using FES = H1<Scalar, Ps...>;
+      using Operand = ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>;
+      using Parent = ShapeFunctionBase<Grad<Operand>, FES, Space>;
 
       constexpr
-      Grad(Operand& u)
-        : m_u(u)
+      Grad(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
       {}
 
       constexpr
@@ -267,54 +268,30 @@ namespace Rodin::Variational
         return m_u.get().getDOFs(element);
       }
 
-      auto getTensorBasis(const FiniteElement& fe, const Geometry::Point& p) const
+      inline
+      auto getTensorBasis(const Geometry::Point& p) const
       {
-        assert(false);
-        // auto& trans = p.getSimplex().getTransformation();
-        // const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
-        // const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        // const size_t n = dshape.NumRows();
-        // const size_t sdim = trans.GetSpaceDim();
-        // return TensorBasis(n,
-        //     [sdim](size_t) -> Math::Vector { return Math::Vector::Zero(sdim); });
-
-        // TensorBasis res(static_cast<int>(n), static_cast<int>(sdim), 1);
-        // for (size_t j = 0; j < n; j++)
-        // {
-        //   for (size_t k = 0; k < sdim; k++)
-        //   {
-        //     res(static_cast<int>(j), static_cast<int>(k), 0) = dshape(j, k);
-        //   }
-        // }
+        using OperandRange =
+          typename FormLanguage::Traits<ShapeFunctionBase<Operand, H1<Scalar, Ps...>, Space>>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Scalar>);
+        return TensorBasis<Math::Vector>(
+          p.getJacobian().inverse().transpose() * this->getFiniteElementSpace().getFiniteElement(
+            p.getSimplex()).getGradient(p.getReference()));
       }
 
       inline
-      constexpr
-      auto& getFiniteElementSpace()
-      {
-        return m_u.getFiniteElementSpace();
-      }
-
-      inline
-      constexpr
-      const auto& getFiniteElementSpace() const
-      {
-        return m_u.get().getFiniteElementSpace();
-      }
-
-      inline
-      Grad* copy() const noexcept final override
+      Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }
 
     private:
-      std::reference_wrapper<Operand> m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
 
-  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  Grad(ShapeFunction<NestedDerived, H1<Ts...>, Space>&)
-    -> Grad<ShapeFunction<NestedDerived, H1<Ts...>, Space>>;
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
+  Grad(const ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>&)
+    -> Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>>;
 
   // /**
   //  * @ingroup GradSpecializations

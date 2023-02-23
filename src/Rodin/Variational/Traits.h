@@ -67,6 +67,18 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = true;
   };
 
+  template <typename T, typename = void>
+  struct IsVectorAtCompileTime
+  {
+    static constexpr const bool Value = false;
+  };
+
+  template <class T>
+  struct IsVectorAtCompileTime<T, std::void_t<typename T::IsVectorAtCompileTime>>
+  {
+    static constexpr const bool Value = T::IsVectorAtCompileTime;
+  };
+
   template <class T>
   struct IsBooleanRange
   {
@@ -82,13 +94,14 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsVectorRange
   {
-    static constexpr const bool Value = std::is_assignable_v<T, Math::Vector>;
+    static constexpr const bool Value =
+      std::is_assignable_v<T, Math::Vector> || IsVectorAtCompileTime<T>::Value;
   };
 
   template <class T>
   struct IsMatrixRange
   {
-    static constexpr const bool Value = std::is_assignable_v<T, Math::Matrix>;
+    static constexpr const bool Value = std::is_assignable_v<T, Math::Matrix> && !IsVectorRange<T>::Value;
   };
 
   template <class T>
@@ -99,16 +112,14 @@ namespace Rodin::FormLanguage
   struct ResultOf<Variational::FunctionBase<Derived>>
   {
     using Type =
-      std::invoke_result_t<Variational::FunctionBase<Derived>,
-        const Geometry::Point&>;
+      std::invoke_result_t<Variational::FunctionBase<Derived>, const Geometry::Point&>;
   };
 
-  template <class Derived, Variational::ShapeFunctionSpaceType Space>
-  struct ResultOf<Variational::ShapeFunctionBase<Derived, Space>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     using Type =
-      std::invoke_result_t<Variational::ShapeFunctionBase<Derived, Space>,
-        const Variational::FiniteElement&, const Geometry::Point&>;
+      std::invoke_result_t<Variational::ShapeFunctionBase<Derived, FES, Space>, const Geometry::Point&>;
   };
 
   template <class T>
@@ -128,10 +139,10 @@ namespace Rodin::FormLanguage
                                      ::Type;
   };
 
-  template <class Derived, Variational::ShapeFunctionSpaceType Space>
-  struct RangeOf<Variational::ShapeFunctionBase<Derived, Space>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, Space>>::Type;
+    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
     static_assert(Utility::IsSpecialization<ResultType, Variational::TensorBasis>::Value);
     static_assert(HasValueTypeMember<ResultType>::Value);
     using ValueType = typename ResultType::ValueType;
@@ -144,11 +155,11 @@ namespace Rodin::FormLanguage
                                      ::Type;
   };
 
-  template <class Derived, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<Variational::ShapeFunctionBase<Derived, Space>>
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, Space>>::Type;
-    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<Derived, Space>>::Type;
+    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
 
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
   };

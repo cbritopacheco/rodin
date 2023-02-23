@@ -228,12 +228,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
   class Jacobian<ShapeFunction<NestedDerived, H1<Ts...>, Space>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, H1<Ts...>, Space>
   {
     public:
       using FES = H1<Ts...>;
       using Operand = ShapeFunction<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Jacobian<Operand>, Space>;
+      using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
 
       constexpr
       Jacobian(Operand& u)
@@ -288,9 +288,10 @@ namespace Rodin::Variational
         return m_u.get().getDOFs(element);
       }
 
-      auto getOperator(const FiniteElement& fe, const Geometry::Point& p) const
+      auto getOperator(const Geometry::Point& p) const
       {
         assert(false);
+        return void();
         // const auto& element = p.getSimplex();
         // auto& trans = element.getTransformation();
         // const auto& fe = getFiniteElementSpace().getFiniteElement(element);

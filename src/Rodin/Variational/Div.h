@@ -24,12 +24,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
   class Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, H1<Ts...>, Space>
   {
     public:
       using FES = H1<Ts...>;
-      using Operand = ShapeFunction<NestedDerived, H1<Ts...>, Space>;
-      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, Space>;
+      using Operand = ShapeFunction<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, FES, Space>;
 
       /**
        * @brief Constructs Div object
@@ -73,10 +73,11 @@ namespace Rodin::Variational
         return m_u.get().getDOFs(simplex);
       }
 
-      auto getOperator(const FiniteElement& fe, const Geometry::Point& p) const
+      auto getOperator(const Geometry::Point& p) const
       {
-        Math::Vector div = fe.getGradient(p.getVector(Geometry::Point::Coordinates::Reference)).reshaped();
-        return TensorBasis(div);
+        return void();
+        // Math::Vector div = fe.getGradient(p.getVector(Geometry::Point::Coordinates::Reference)).reshaped();
+        // return TensorBasis(div);
       }
 
       inline

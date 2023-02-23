@@ -113,14 +113,14 @@ namespace Rodin::Variational
   /**
    * @ingroup SumSpecializations
    */
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
-  class Sum<ShapeFunctionBase<LHSDerived, Space>, ShapeFunctionBase<RHSDerived, Space>> final
-    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, Space>, ShapeFunctionBase<RHSDerived, Space>>, Space>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>> final
+    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
   {
     public:
-      using LHS = ShapeFunctionBase<LHSDerived, Space>;
-      using RHS = ShapeFunctionBase<RHSDerived, Space>;
-      using Parent = ShapeFunctionBase<Sum<LHS, RHS>, Space>;
+      using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
+      using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Sum<LHS, RHS>, FES, Space>;
 
       constexpr
       Sum(const LHS& lhs, const RHS& rhs)
@@ -181,9 +181,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const Geometry::Point& p) const
       {
-        return getLHS().getOperator(compute, p) + getRHS().getOperator(compute, p);
+        return getLHS().getTensorBasis( p) + getRHS().getTensorBasis(p);
       }
 
       inline
@@ -205,16 +205,16 @@ namespace Rodin::Variational
       RHS m_rhs;
   };
 
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
-  Sum(const ShapeFunctionBase<LHSDerived, Space>&, const ShapeFunctionBase<RHSDerived, Space>&)
-    -> Sum<ShapeFunctionBase<LHSDerived, Space>, ShapeFunctionBase<RHSDerived, Space>>;
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  Sum(const ShapeFunctionBase<LHSDerived, FES, Space>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
+    -> Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   inline
   constexpr
   auto
-  operator+(const ShapeFunctionBase<LHSDerived, Space>& lhs,
-            const ShapeFunctionBase<RHSDerived, Space>& rhs)
+  operator+(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+            const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Sum(lhs, rhs);
   }

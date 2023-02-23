@@ -60,12 +60,20 @@ namespace Rodin::Variational
 
       // Emplace data
       getTrialFunction().emplace();
+      getTestFunction().emplace();
 
       // Project values onto the essential boundary and compute essential dofs
-      assert(false);
+      for (const auto& dbc : getProblemBody().getDBCs())
+      {
+         dbc.project();
+         m_trialEssTrueDofList.Append(dbc.getDOFs());
+      }
 
-      auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      auto& testFes = getTestFunction().getFiniteElementSpace();
+      m_trialEssTrueDofList.Sort();
+      m_trialEssTrueDofList.Unique();
+
+      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
+      const auto& testFes = getTestFunction().getFiniteElementSpace();
 
       if constexpr (std::is_same_v<TrialFES, TestFES>)
       {

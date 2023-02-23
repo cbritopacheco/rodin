@@ -7,13 +7,19 @@
 #ifndef RODIN_FORMLANGUAGE_BASE_H
 #define RODIN_FORMLANGUAGE_BASE_H
 
+#include <deque>
 #include <memory>
 #include <cassert>
+#include <variant>
 #include <typeinfo>
-#include <sstream>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+
+#include "Rodin/Types.h"
+#include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/BasisOperator.h"
 
 namespace Rodin::FormLanguage
 {
@@ -60,6 +66,65 @@ namespace Rodin::FormLanguage
         return "Rodin::FormLanguage::Base";
       }
 
+      inline
+      constexpr
+      const Math::Matrix& object(Math::Matrix&& obj) const
+      {
+        return m_mobjs.emplace_back(std::move(obj));
+      }
+
+      inline
+      constexpr
+      const Math::Vector& object(Math::Vector&& obj) const
+      {
+        return m_vobjs.emplace_back(std::move(obj));
+      }
+
+      inline
+      constexpr
+      const auto& object(Variational::TensorBasis<Math::Vector>&& obj) const
+      {
+        return m_tbvobjs.emplace_back(std::move(obj));
+      }
+
+      template <class EigenDerived>
+      inline
+      constexpr
+      const auto& object(Variational::TensorBasis<Math::Matrix>&& obj) const
+      {
+        return m_tbmobjs.emplace_back(std::move(obj));
+      }
+
+      template <class ObjectType>
+      inline
+      constexpr
+      const ObjectType& object(const ObjectType& obj) const
+      {
+        return obj;
+      }
+
+      inline
+      constexpr
+      Scalar object(Scalar s) const
+      {
+        return s;
+      }
+
+      inline
+      constexpr
+      const auto& object(const Variational::TensorBasis<Scalar>& obj) const
+      {
+        return obj;
+      }
+
+      template <class EigenDerived>
+      inline
+      constexpr
+      const auto& object(const Variational::TensorBasis<Eigen::MatrixBase<EigenDerived>>& obj) const
+      {
+        return obj;
+      }
+
       /**
        * @internal
        * @brief Copies the object and returns a non-owning pointer to the
@@ -70,6 +135,11 @@ namespace Rodin::FormLanguage
 
     private:
       const boost::uuids::uuid m_uuid;
+
+      mutable std::deque<Math::Vector> m_vobjs;
+      mutable std::deque<Math::Matrix> m_mobjs;
+      mutable std::deque<Variational::TensorBasis<Math::Vector>> m_tbvobjs;
+      mutable std::deque<Variational::TensorBasis<Math::Matrix>> m_tbmobjs;
   };
 }
 

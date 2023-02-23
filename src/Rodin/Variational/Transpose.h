@@ -78,13 +78,13 @@ namespace Rodin::Variational
    * @brief Transpose of a ShapeFunctionBase object.
    * @ingroup TransposeSpecializations
    */
-  template <class NestedDerived, ShapeFunctionSpaceType Space>
-  class Transpose<ShapeFunctionBase<NestedDerived, Space>> final
-    : public ShapeFunctionBase<Transpose<ShapeFunctionBase<NestedDerived, Space>>, Space>
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class Transpose<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
-      using Operand = ShapeFunctionBase<NestedDerived, Space>;
-      using Parent = ShapeFunctionBase<Transpose<Operand>, Space>;
+      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Transpose<Operand>, FES, Space>;
 
       constexpr
       Transpose(const Operand& op)
@@ -133,14 +133,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto& getFiniteElementSpace()
+      FES& getFiniteElementSpace()
       {
         return m_shape.getFiniteElementSpace();
       }
 
       inline
       constexpr
-      const auto& getFiniteElementSpace() const
+      const FES& getFiniteElementSpace() const
       {
         return m_shape.getFiniteElementSpace();
       }
@@ -149,9 +149,9 @@ namespace Rodin::Variational
       Operand m_shape;
   };
 
-  template <class NestedDerived, ShapeFunctionSpaceType Space>
-  Transpose(const ShapeFunctionBase<NestedDerived, Space>&)
-    -> Transpose<ShapeFunctionBase<NestedDerived, Space>>;
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  Transpose(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+    -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
 #endif

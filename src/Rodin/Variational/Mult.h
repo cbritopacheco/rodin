@@ -149,14 +149,14 @@ namespace Rodin::Variational
    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
    * $A(u)$ is the shape operator (scalar, vector, or matrix valued).
    */
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
-  class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>> final
-    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>>, Space>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
+    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
   {
     public:
       using LHS = FunctionBase<LHSDerived>;
-      using RHS = ShapeFunctionBase<RHSDerived, Space>;
-      using Parent = ShapeFunctionBase<Mult<LHS, RHS>, Space>;
+      using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
 
       constexpr
       Mult(const LHS& lhs, const RHS& rhs)
@@ -234,12 +234,12 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const Geometry::Point& p) const
       {
         const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
         if constexpr (m_lhs.getRangeType() == RangeType::Scalar)
         {
-          return Scalar(m_lhs.getValue(p)) * m_rhs.getOperator(compute, p);
+          return Scalar(m_lhs.getValue(p)) * m_rhs.getTensorBasis(p);
         }
         else
         {
@@ -254,35 +254,35 @@ namespace Rodin::Variational
       RHS m_rhs;
   };
 
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
-  Mult(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, Space>&)
-    -> Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, Space>>;
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  Mult(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
+    -> Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
-  template <class LHSDerived, class RHSDerived, ShapeFunctionSpaceType Space>
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   inline
   constexpr
   auto
-  operator*(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, Space>& rhs)
+  operator*(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(lhs, rhs);
   }
 
-  template <class Number, class RHSDerived, ShapeFunctionSpaceType Space,
+  template <class Number, class RHSDerived, class FES, ShapeFunctionSpaceType Space,
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   inline
   constexpr
   auto
-  operator*(Number lhs, const ShapeFunctionBase<RHSDerived, Space>& rhs)
+  operator*(Number lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(ScalarFunction(lhs), rhs);
   }
 
-  template <class Number, class LHSDerived, ShapeFunctionSpaceType Space,
+  template <class Number, class LHSDerived, class FES, ShapeFunctionSpaceType Space,
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   inline
   constexpr
   auto
-  operator*(const ShapeFunctionBase<LHSDerived, Space>& lhs, Number rhs)
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, Number rhs)
   {
     return Mult(lhs, ScalarFunction(rhs));
   }

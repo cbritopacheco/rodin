@@ -16,7 +16,7 @@ namespace Rodin::Variational
       using Parent = ShapeFunction<TestFunction<FESType>, FESType, TestSpace>;
 
       constexpr
-      TestFunction(FES& fes)
+      TestFunction(const FES& fes)
         : Parent(fes)
       {}
 
@@ -72,7 +72,7 @@ namespace Rodin::Variational
   };
 
   template <class FES>
-  TestFunction(FES&) -> TestFunction<FES>;
+  TestFunction(const FES&) -> TestFunction<FES>;
 }
 
 #endif

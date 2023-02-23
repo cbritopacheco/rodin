@@ -34,42 +34,48 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
 
-      void update();
-
-      /**
-       * @returns Order of the highest dimensional finite element.
-       */
-      size_t getOrder() const;
-
-      size_t getNumberOfDofs() const;
+      size_t getOrder(const Geometry::Simplex& simplex) const
+      {
+        if (simplex.getDimension() == simplex.getMesh().getDimension())
+        {
+          return getHandle().GetElementOrder(simplex.getIndex());
+        }
+        else if (simplex.getDimension() == simplex.getMesh().getDimension() - 1)
+        {
+          return getHandle().GetFaceOrder(simplex.getIndex());
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
 
       /**
        * @brief Gets the vector dimensions
        */
       size_t getVectorDimension() const;
 
-      mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr) const;
+      mfem::Array<int> getEssentialTrueDOFs(const std::set<Geometry::Attribute>& bdrAttr) const;
 
-      mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
+      mfem::Array<int> getEssentialTrueDOFs(const std::set<Geometry::Attribute>& bdrAttr, size_t component) const;
 
       virtual size_t getSize() const = 0;
 
-      virtual mfem::Array<int> getDOFs(
-          const Geometry::Simplex& element) const = 0;
-
-      virtual FiniteElement getFiniteElement(
-          const Geometry::Simplex& element) const = 0;
-
-      virtual Geometry::MeshBase& getMesh() = 0;
+      virtual mfem::Array<int> getDOFs(const Geometry::Simplex& element) const = 0;
 
       virtual const Geometry::MeshBase& getMesh() const = 0;
 
       virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 
-      virtual mfem::FiniteElementSpace& getHandle() = 0;
-
-      virtual const mfem::FiniteElementSpace& getHandle() const = 0;
+      virtual mfem::FiniteElementSpace& getHandle() const = 0;
   };
+
+  inline
+  bool operator==(const FiniteElementSpaceBase& lhs, const FiniteElementSpaceBase& rhs)
+  {
+    return &lhs == &rhs;
+  }
 }
 
 #endif

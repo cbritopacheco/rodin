@@ -237,7 +237,7 @@ namespace Rodin::Variational
       mfem::Vector    m_massVector;
       mfem::Vector    m_guess;
 
-      mfem::Array<int>    m_trialEssTrueDofList;
+      mfem::Array<int> m_trialEssTrueDofList;
 
       std::unique_ptr<mfem::BilinearForm> m_tmp;
   };
