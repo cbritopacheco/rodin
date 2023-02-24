@@ -74,30 +74,31 @@ namespace Rodin::Variational
 
       /**
        * @brief Computes the gradient of each basis function.
-       * @param[in] p Reference coordinates.
+       * @param[in] r Reference coordinates.
        *
-       * Computes the matrix @f$ \nabla \mathbf{\phi} (r) \in \mathbb{R}^{s
-       * \times n} @f$ defined by
+       * Computes the @f$ n \times d @f$ matrix @f$ \nabla \mathbf{\phi} (r)
+       * @f$ defined by
        * @f[
        *  \nabla \phi (r) = \begin{bmatrix}
-       *    \nabla \phi_1 (r) \ldots \nabla \phi_n (r)
+       *    \nabla^T \phi_1 (r)\\
+       *    \vdots\\
+       *    \nabla^T \phi_n (r)
        *  \end{bmatrix}
-       * @f]
-       * where @f$ s @f$ is the space dimension, @f$ n @f$ is the number of
-       * degrees of freedom, and the column vector @f$ \nabla \phi_i (r) @f$ is
-       * the gradient of the i-th the basis function at the reference point @f$
-       * r @f$.
+       * where @f$ d @f$ is the dimension of the simplex, @f$ n @f$ is the
+       * number of degrees of freedom, and the column vector @f$ \nabla \phi_i
+       * (r) @f$ is the gradient of the i-th the basis function at the
+       * reference point @f$ r \in \mathbb{R}^d @f$.
        *
        * @returns Matrix of dimension @f$ s \times n @f$.
        */
-      Math::Matrix getGradient(const Math::Vector& p) const
+      Math::Matrix getGradient(const Math::Vector& r) const
       {
         Math::Matrix gradient(getDOFs(), getSimplex().getMesh().getSpaceDimension());
         mfem::DenseMatrix tmp;
         tmp.UseExternalData(gradient.data(), gradient.rows(), gradient.cols());
-        const mfem::IntegrationPoint ip = Internal::vec2ip(p);
+        const mfem::IntegrationPoint ip = Internal::vec2ip(r);
         m_handle->CalcDShape(ip, tmp);
-        return gradient.transpose();
+        return gradient;
       }
 
       inline

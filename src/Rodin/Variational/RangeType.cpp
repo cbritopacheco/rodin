@@ -15,18 +15,22 @@ namespace Rodin::Variational
       case RangeType::Boolean:
       {
         os << "Boolean";
+        break;
       }
       case RangeType::Scalar:
       {
         os << "Scalar";
+        break;
       }
       case RangeType::Vector:
       {
         os << "Vector";
+        break;
       }
       case RangeType::Matrix:
       {
         os << "Matrix";
+        break;
       }
     }
     return os;

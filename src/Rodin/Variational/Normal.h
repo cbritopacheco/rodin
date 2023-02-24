@@ -46,7 +46,7 @@ namespace Rodin::Variational
         return m_dimension;
       }
 
-      auto getValue(const Geometry::Point& p) const
+      Math::Vector getValue(const Geometry::Point& p) const
       {
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();

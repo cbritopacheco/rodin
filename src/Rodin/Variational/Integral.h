@@ -136,10 +136,8 @@ namespace Rodin::Variational
         for (int i = 0; i < ir->GetNPoints(); i++)
         {
           const auto& ip = ir->IntPoint(i);
-          Geometry::Point p(simplex, trans, Internal::ip2vec(ip, simplex.getDimension()));
-          const auto& jacobian = p.getJacobian();
-          const Scalar distortion = std::sqrt(std::abs((jacobian * jacobian.transpose()).determinant()));
-          res += ip.weight * distortion * integrand.getMatrix(p);
+          Geometry::Point p(simplex, trans, Internal::ip2vec(ir->IntPoint(i), simplex.getDimension()));
+          res += ip.weight * p.getDistortion() * integrand.getMatrix(p);
         }
         return res;
       }
@@ -246,9 +244,7 @@ namespace Rodin::Variational
         {
           const auto& ip = ir->IntPoint(i);
           Geometry::Point p(simplex, trans, Internal::ip2vec(ip, simplex.getDimension()));
-          const auto& jacobian = p.getJacobian();
-          const Scalar distortion = std::sqrt(std::abs((jacobian * jacobian.transpose()).determinant()));
-          res += ip.weight * distortion * integrand.getTensorBasis(p);
+          res += ip.weight * p.getDistortion() * integrand.getTensorBasis(p);
         }
         return res;
       }

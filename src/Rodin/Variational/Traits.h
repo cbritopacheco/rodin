@@ -67,7 +67,7 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = true;
   };
 
-  template <typename T, typename = void>
+  template <typename T, typename = void, typename = void>
   struct IsVectorAtCompileTime
   {
     static constexpr const bool Value = false;
@@ -94,14 +94,23 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsVectorRange
   {
-    static constexpr const bool Value =
-      std::is_assignable_v<T, Math::Vector> || IsVectorAtCompileTime<T>::Value;
+    static constexpr const bool Value = std::is_assignable_v<Math::Vector, T> || IsVectorAtCompileTime<T>::Value;
   };
 
   template <class T>
   struct IsMatrixRange
   {
-    static constexpr const bool Value = std::is_assignable_v<T, Math::Matrix> && !IsVectorRange<T>::Value;
+    static constexpr const bool Value = std::is_assignable_v<Math::Matrix, T> && !IsVectorRange<T>::Value;
+  };
+
+  template <class T>
+  struct IsPlainObject;
+
+  template <class EigenDerived>
+  struct IsPlainObject<Eigen::MatrixBase<EigenDerived>>
+  {
+    static constexpr const bool Value =
+      std::is_base_of_v<Eigen::PlainObjectBase<std::decay_t<EigenDerived>>, std::decay_t<EigenDerived>>;
   };
 
   template <class T>

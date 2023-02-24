@@ -299,44 +299,6 @@ namespace Rodin::Variational
   {
     return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) / rhs; });
   }
-
-  inline
-  auto operator+(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) + static_cast<const Math::Vector&>(lhs));
-  }
-
-  inline
-  auto operator-(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) - static_cast<const Math::Vector&>(lhs));
-  }
-
-  inline
-  auto operator-(const TensorBasis<Scalar>& op)
-  {
-    return TensorBasis<Scalar>(-static_cast<const Math::Vector&>(op));
-  }
-
-  inline
-  auto operator*(Scalar lhs, const TensorBasis<Scalar>& rhs)
-  {
-    return TensorBasis<Scalar>(lhs * static_cast<const Math::Vector&>(rhs));
-  }
-
-  inline
-  auto operator*(const TensorBasis<Scalar>& lhs, Scalar rhs)
-  {
-    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) * rhs);
-  }
-
-  inline
-  auto operator/(const TensorBasis<Scalar>& lhs, Scalar rhs)
-  {
-    return TensorBasis<Scalar>(static_cast<const Math::Vector&>(lhs) * rhs);
-  }
 }
 
 #endif

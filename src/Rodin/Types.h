@@ -8,8 +8,10 @@
 
 namespace Rodin
 {
+  using Integer = int;
   using Boolean = bool;
-  using Scalar = double;
+  using Float = double;
+  using Scalar = Float;
   using Index = std::size_t;
   using Attribute = std::size_t;
 

@@ -95,20 +95,25 @@ namespace Rodin::Variational
         const auto& rhs = this->object(getRHS().getValue(p));
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
-          return getLHS().getValue(p) * getRHS().getValue(p);
+          return lhs * rhs;
         } else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
-          return getLHS().getValue(p).dot(getRHS().getValue(p));
+          return lhs.dot(rhs);
         }
         else if constexpr (std::is_same_v<RHSRange, Math::Matrix>)
         {
-          return (getLHS().getValue(p) * getRHS().getValue(p).transpose()).trace();
+          return (lhs * rhs.transpose()).trace();
         }
         else
         {
           assert(false);
           return void();
         }
+      }
+
+      inline Dot* copy() const noexcept override
+      {
+        return new Dot(*this);
       }
 
     private:
@@ -242,6 +247,12 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DotSpecializations
+   * @brief Represents the dot product of trial and test operators.
+   *
+   * Constructs an instance representing the following expression:
+   * @f[
+   *    A(u) : B(v)
+   * @f]
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
@@ -287,6 +298,16 @@ namespace Rodin::Variational
         return *m_test;
       }
 
+      /**
+       * @brief Gets the element matrix.
+       *
+       * Computes the @f$ m \times n @f$ element matrix @f$ M @f$ defined by:
+       * @f[
+       *    M = V U^T
+       * @f]
+       * where @f$ n @f$ is the number of trial degrees of freedom, and @f$ m
+       * @f$ is the number of test degrees of freedom.
+       */
       inline
       auto getMatrix(const Geometry::Point& p) const
       {
@@ -298,28 +319,23 @@ namespace Rodin::Variational
         const auto& test = this->object(getRHS().getTensorBasis(p));
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
-          return trial * test.transpose();
+          return test * trial.transpose();
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
-          Math::Matrix res(trial.getDOFs(), test.getDOFs());
-          for (Math::Matrix::Index i = 0; i < res.rows(); i++)
-            for (Math::Matrix::Index j = 0; j < res.cols(); j++)
-              res(i, j) = trial(i).dot(test(j));
-          return res;
+          return test * trial.transpose();
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
-          Math::Matrix res(test.getDOFs(), trial.getDOFs());
-          for (Math::Matrix::Index i = 0; i < res.rows(); i++)
-            for (Math::Matrix::Index j = 0; j < res.cols(); j++)
-              res(i, j) = (trial(i) * test(j).transpose()).trace();
-          return res;
+          assert(false);
+          return void();
+          // return test.contract(trial.shuffle(Eigen::array<int, 3>{2, 1, 0}),
+          //     Eigen::array<Eigen::IndexPair<int>, 2>{ Eigen::IndexPair<int>(2, 0), Eigen::IndexPair<int>(1, 1) });
         }
         else
         {
           assert(false);
-          return Math::Matrix::Zero(test.getDOFs(), trial.getDOFs());
+          return void();
         }
       }
 

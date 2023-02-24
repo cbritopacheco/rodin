@@ -38,20 +38,20 @@ namespace Rodin::Geometry
     public:
       virtual ~SimplexTransformation() = default;
 
-      /**
-       * @brief Performs the transformation, taking reference coordinates into
-       * physical coordinates.
-       *
-       * Given @f$ r \in K @f$, computes the point:
-       * @f[
-       *    p = x(r)
-       * @f]
-       * in physical coordinates.
-       *
-       * @param[in] rc Reference coordinates of the point.
-       * @returns Physical coordinates
-       */
-      virtual Math::Vector transform(const Math::Vector& rc) const = 0;
+      // /**
+      //  * @brief Performs the transformation, taking reference coordinates into
+      //  * physical coordinates.
+      //  *
+      //  * Given @f$ r \in K @f$, computes the point:
+      //  * @f[
+      //  *    p = x(r)
+      //  * @f]
+      //  * in physical coordinates.
+      //  *
+      //  * @param[in] rc Reference coordinates of the point.
+      //  * @returns Physical coordinates
+      //  */
+      // virtual Math::Vector transform(const Math::Vector& rc) const = 0;
 
       // /**
       //  * @brief Performs the inverse transformation, taking physical
@@ -67,7 +67,7 @@ namespace Rodin::Geometry
       //  */
       // virtual Math::Vector inverse(const Math::Vector& pc) const = 0;
 
-      virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
+      // virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
 
       virtual mfem::ElementTransformation& getHandle() const = 0;
   };

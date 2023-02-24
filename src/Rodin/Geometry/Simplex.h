@@ -328,19 +328,29 @@ namespace Rodin::Geometry
         return m_rc;
       }
 
+      inline
+      const mfem::IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_ip;
+      }
+
       const Math::Vector& getPhysical() const;
 
       const Math::Matrix& getJacobian() const;
 
-      const Math::Matrix& getInverseJacobian() const;
+      const Math::Matrix& getJacobianInverse() const;
+
+      Scalar getDistortion() const;
 
     private:
       std::reference_wrapper<const Simplex> m_simplex;
       std::reference_wrapper<const SimplexTransformation> m_trans;
       Math::Vector m_rc;
+      mfem::IntegrationPoint m_ip;
       mutable std::optional<const Math::Vector> m_pc;
       mutable std::optional<const Math::Matrix> m_jacobian;
       mutable std::optional<const Math::Matrix> m_inverseJacobian;
+      mutable std::optional<const Scalar> m_distortion;
   };
 }
 

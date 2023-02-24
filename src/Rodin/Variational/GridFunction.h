@@ -175,7 +175,7 @@ namespace Rodin::Variational
       }
 
       inline
-      GridFunctionBase& operator=(std::function<Scalar(const Geometry::Point&)> fn)
+      Derived& operator=(std::function<Scalar(const Geometry::Point&)> fn)
       {
         using RangeType = typename FormLanguage::Traits<FunctionBase<GridFunctionBase<Derived>>>::RangeType;
         static_assert(std::is_same_v<RangeType, Scalar>);
@@ -227,7 +227,7 @@ namespace Rodin::Variational
        * @brief Division by a scalar value.
        */
       inline
-      GridFunctionBase& operator/=(Scalar rhs)
+      Derived& operator/=(Scalar rhs)
       {
         getData() = getData().array() / rhs;
         return static_cast<Derived&>(*this);
@@ -316,7 +316,7 @@ namespace Rodin::Variational
        * attribute.
        */
       template <class NestedDerived>
-      auto& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
+      Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return project(fn, std::set<Geometry::Attribute>{attr});
       }
@@ -329,13 +329,15 @@ namespace Rodin::Variational
        * empty, this function will project over all elements in the mesh.
        */
       template <class NestedDerived>
-      Derived& project(
-          const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs = {})
+      Derived& project(const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs = {})
       {
         using Value = FunctionBase<NestedDerived>;
         using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
+        using RangeType = typename FormLanguage::Traits<FunctionBase<GridFunctionBase<Derived>>>::RangeType;
+        static_assert(std::is_same_v<RangeType, ValueRangeType>);
         if constexpr (std::is_same_v<ValueRangeType, Scalar>)
         {
+          assert(getFiniteElementSpace().getVectorDimension() == 1);
           Internal::MFEMScalarCoefficient sc(getFiniteElementSpace().getMesh(), fn);
           if (attrs.size() == 0)
           {
@@ -358,6 +360,7 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
         {
+          assert(getFiniteElementSpace().getVectorDimension() == fn.getRangeShape().height());
           Internal::MFEMVectorCoefficient vc(getFiniteElementSpace().getMesh(), fn);
           if (attrs.size() == 0)
           {
@@ -483,13 +486,13 @@ namespace Rodin::Variational
         static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          assert(false);
-          return Scalar(0);
+          return Scalar(m_gf->GetValue(p.getTransformation().getHandle(), p.getIntegrationPoint()));
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
-          assert(false);
           Math::Vector res(getFiniteElementSpace().getVectorDimension());
+          mfem::Vector tmp(res.data(), res.size());
+          m_gf->GetVectorValue(p.getTransformation().getHandle(), p.getIntegrationPoint(), tmp);
           return res;
         }
         else
@@ -504,13 +507,6 @@ namespace Rodin::Variational
       const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
-      }
-
-      inline
-      mfem::GridFunction& getHandle() const
-      {
-        assert(m_gf);
-        return *m_gf;
       }
 
       inline
@@ -530,6 +526,13 @@ namespace Rodin::Variational
       virtual FESGridFunction* copy() const noexcept override
       {
         return new FESGridFunction(*this);
+      }
+
+      inline
+      mfem::GridFunction& getHandle() const
+      {
+        assert(m_gf);
+        return *m_gf;
       }
 
     private:
@@ -586,7 +589,7 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      inline GridFunction* copy() const noexcept final override
+      inline GridFunction* copy() const noexcept override
       {
         return new GridFunction(*this);
       }
@@ -703,7 +706,7 @@ namespace Rodin::Variational
           if (attrs.size() == 0)
           {
             marker = 1;
-            Internal::MFEMScalarCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
+            Internal::MFEMVectorCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
             this->getHandle().ProjectBdrCoefficient(vc, marker);
             return *this;
           }
@@ -715,7 +718,7 @@ namespace Rodin::Variational
               assert(attr - 1 < maxBdrAttr);
               marker[attr - 1] = 1;
             }
-            Internal::MFEMScalarCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
+            Internal::MFEMVectorCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
             this->getHandle().ProjectBdrCoefficient(vc, marker);
             return *this;
           }

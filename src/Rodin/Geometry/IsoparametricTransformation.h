@@ -23,31 +23,29 @@ namespace Rodin::Geometry
   {
     public:
       IsoparametricTransformation(mfem::IsoparametricTransformation* trans)
-        : m_handle(trans),
-          m_pm(trans->GetPointMat().Data(), trans->GetPointMat().NumRows(),
-              trans->GetPointMat().NumCols())
+        : m_handle(trans)
       {}
 
-      inline
-      Math::Vector transform(const Math::Vector& rc) const final override
-      {
-        const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
-        Math::Vector shape(m_handle->GetFE()->GetDof());
-        mfem::Vector tmp(shape.data(), shape.size());
-        m_handle->GetFE()->CalcShape(ip, tmp);
-        return m_pm * shape;
-      }
+      // inline
+      // Math::Vector transform(const Math::Vector& rc) const final override
+      // {
+      //   const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
+      //   Math::Vector shape(m_handle->GetFE()->GetDof());
+      //   mfem::Vector tmp(shape.data(), shape.size());
+      //   m_handle->GetFE()->CalcShape(ip, tmp);
+      //   return m_pm * shape;
+      // }
 
-      inline
-      Math::Matrix jacobian(const Math::Vector& rc) const final override
-      {
-        const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
-        Math::Matrix dshape(m_handle->GetFE()->GetDof(), m_handle->GetFE()->GetDim());
-        mfem::DenseMatrix tmp;
-        tmp.UseExternalData(dshape.data(), dshape.rows(), dshape.cols());
-        m_handle->GetFE()->CalcDShape(ip, tmp);
-        return m_pm * dshape;
-      }
+      // inline
+      // Math::Matrix jacobian(const Math::Vector& rc) const final override
+      // {
+      //   const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
+      //   Math::Matrix dshape(m_handle->GetFE()->GetDof(), m_handle->GetFE()->GetDim());
+      //   mfem::DenseMatrix tmp;
+      //   tmp.UseExternalData(dshape.data(), dshape.rows(), dshape.cols());
+      //   m_handle->GetFE()->CalcDShape(ip, tmp);
+      //   return m_pm * dshape;
+      // }
 
       inline
       mfem::IsoparametricTransformation& getHandle() const final override
@@ -57,7 +55,7 @@ namespace Rodin::Geometry
 
     private:
       std::unique_ptr<mfem::IsoparametricTransformation> m_handle;
-      Eigen::Map<Math::Matrix> m_pm;
+      // Eigen::Map<Math::Matrix> m_pm;
   };
 }
 
