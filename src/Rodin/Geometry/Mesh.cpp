@@ -276,7 +276,7 @@ namespace Rodin::Geometry
 
     m_count.resize(m_dim + 1);
     m_count[m_dim] = getHandle().GetNE();
-    m_count[m_dim - 1] = getHandle().GetNFaces();
+    m_count[m_dim - 1] = getHandle().GetNumFaces();
     m_count[0] = getHandle().GetNV();
 
     m_transformations.resize(m_dim + 1);

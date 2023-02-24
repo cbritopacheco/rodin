@@ -68,48 +68,10 @@ namespace Rodin::Variational::Internal
     }
   }
 
-  class MFEMElementTransformation final : public Geometry::SimplexTransformation
-  {
-    public:
-      MFEMElementTransformation(mfem::ElementTransformation& trans)
-        : m_handle(trans)
-      {}
-
-      Math::Vector transform(const Math::Vector& rc) const override
-      {
-        Math::Vector res(m_handle.get().GetSpaceDim());
-        const mfem::IntegrationPoint ip = Internal::vec2ip(rc);
-        m_handle.get().SetIntPoint(&ip);
-        mfem::Vector tmp;
-        tmp.SetDataAndSize(res.data(), res.size());
-        assert(!tmp.OwnsData());
-        m_handle.get().Transform(ip, tmp);
-        return res;
-      }
-
-      Math::Matrix jacobian(const Math::Vector& rc) const override
-      {
-        Math::Matrix res(m_handle.get().GetSpaceDim(), m_handle.get().GetDimension());
-        const mfem::IntegrationPoint ip = Internal::vec2ip(rc);
-        m_handle.get().SetIntPoint(&ip);
-        mfem::DenseMatrix tmp;
-        tmp.UseExternalData(res.data(), res.rows(), res.cols());
-        tmp = m_handle.get().Jacobian();
-        return res;
-      }
-
-      mfem::ElementTransformation& getHandle() const override
-      {
-        return m_handle.get();
-      }
-
-    private:
-      std::reference_wrapper<mfem::ElementTransformation> m_handle;
-  };
-
   template <class Derived>
   class MFEMScalarCoefficient final : public mfem::Coefficient
   {
+    static_assert(std::is_same_v<Scalar, typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType>);
     public:
       MFEMScalarCoefficient(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
          : m_mesh(mesh), m_s(s)
@@ -138,8 +100,9 @@ namespace Rodin::Variational::Internal
           {
             res = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getElement(trans.ElementNo),
-                  MFEMElementTransformation(trans),
-                  Internal::ip2vec(ip, trans.GetDimension())));
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
+                    trans.ElementNo), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
@@ -147,16 +110,18 @@ namespace Rodin::Variational::Internal
             int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
             res = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getFace(faceIdx),
-                  MFEMElementTransformation(trans),
-                  Internal::ip2vec(ip, trans.GetDimension())));
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                    - 1, faceIdx), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::FACE:
           {
             res = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getFace(trans.ElementNo),
-                  MFEMElementTransformation(trans),
-                  Internal::ip2vec(ip, trans.GetDimension())));
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                    - 1, trans.ElementNo), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
         }
@@ -175,14 +140,15 @@ namespace Rodin::Variational::Internal
   template <class Derived>
   class MFEMVectorCoefficient final : public mfem::VectorCoefficient
   {
+    static_assert(std::is_same_v<Math::Vector, typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType>);
     public:
       MFEMVectorCoefficient(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
-        : mfem::VectorCoefficient(
-            s.getRangeShape().height() == 1 ?
-              s.getRangeShape().width() : s.getRangeShape().height()),
+        : mfem::VectorCoefficient(s.getRangeShape().height()),
           m_mesh(mesh),
           m_s(s)
-      {}
+      {
+        assert(s.getRangeShape().width() == 1);
+      }
 
       MFEMVectorCoefficient(const MFEMVectorCoefficient& other)
         : mfem::VectorCoefficient(other),
@@ -202,23 +168,34 @@ namespace Rodin::Variational::Internal
       override
       {
         Math::Vector vec;
-        assert(false);
         switch (trans.ElementType)
         {
           case mfem::ElementTransformation::ELEMENT:
           {
-            // vec = m_s.getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo), ip));
+            vec =
+              m_s.get().getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo),
+                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
+                      trans.ElementNo), Internal::ip2vec(ip,
+                        trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
-            // int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            // vec = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(faceIdx), ip));
+            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            vec = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getFace(faceIdx),
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                    - 1, faceIdx), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::FACE:
           {
-            // vec = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(trans.ElementNo), ip));
+            vec = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getFace(trans.ElementNo),
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                    - 1, trans.ElementNo), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
         }
@@ -238,6 +215,7 @@ namespace Rodin::Variational::Internal
   template <class Derived>
   class MFEMMatrixCoefficient final : public mfem::MatrixCoefficient
   {
+    static_assert(std::is_same_v<Math::Matrix, typename FormLanguage::Traits<FunctionBase<Derived>>::RangeType>);
     public:
       MFEMMatrixCoefficient(const Geometry::MeshBase& mesh, const FunctionBase<Derived>& s)
         : mfem::MatrixCoefficient(s.getRangeShape().height(), s.getRangeShape().width()),
@@ -268,18 +246,30 @@ namespace Rodin::Variational::Internal
         {
           case mfem::ElementTransformation::ELEMENT:
           {
-            // mat = m_s.getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo), ip));
+            value =
+              m_s.get().getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo),
+                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
+                      trans.ElementNo), Internal::ip2vec(ip,
+                        trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
-            // int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            // mat = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(faceIdx), ip));
+            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            value = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getFace(faceIdx),
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                    - 1, faceIdx), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::FACE:
           {
-            // mat = m_s.getValue(Geometry::Point(*m_mesh.get().getFace(trans.ElementNo), ip));
+            value = m_s.get().getValue(Geometry::Point(
+                  *m_mesh.get().getFace(trans.ElementNo),
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                    - 1, trans.ElementNo), Internal::ip2vec(ip,
+                      trans.GetDimension())));
             break;
           }
         }

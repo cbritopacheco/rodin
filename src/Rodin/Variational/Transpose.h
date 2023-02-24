@@ -35,40 +35,53 @@ namespace Rodin::Variational
        */
       constexpr
       Transpose(const Operand& m)
-        : m_matrix(m)
+        : m_operand(m.copy())
       {}
 
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
-          m_matrix(other.m_matrix)
+          m_operand(other.m_matrix->copy())
       {}
 
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
-          m_matrix(std::move(other.m_matrix))
+          m_operand(std::move(other.m_matrix))
       {}
 
       inline
       constexpr
       RangeShape getRangeShape() const
       {
-        return m_matrix->getRangeShape().transpose();
+        return m_operand->getRangeShape().transpose();
+      }
+
+      inline
+      constexpr
+      const auto& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
       }
 
       inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange =
-          FormLanguage::RangeOf<typename FormLanguage::Traits<Operand>::ResultType>;
-        static_assert(std::is_same_v<OperandRange, Math::Matrix>);
-        return m_matrix.getValue(p).transpose();
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+        return this->object(getOperand().getValue(p)).transpose();
+      }
+
+      inline
+      Transpose* copy() const noexcept override
+      {
+        return new Transpose(*this);
       }
 
     private:
-      Operand m_matrix;
+      std::unique_ptr<Operand> m_operand;
   };
 
   template <class NestedDerived>
@@ -88,65 +101,69 @@ namespace Rodin::Variational
 
       constexpr
       Transpose(const Operand& op)
-        : m_shape(op)
+        : m_operand(op.copy())
       {}
 
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
-          m_shape(other.m_shape)
+          m_operand(other.m_operand->copy())
       {}
 
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
-          m_shape(std::move(other.m_shape))
+          m_operand(std::move(other.m_operand))
       {}
 
       inline
       constexpr
       const auto& getLeaf() const
       {
-        return m_shape.getLeaf();
+        return getOperand().getLeaf();
       }
 
       inline
       constexpr
       RangeShape getRangeShape() const
       {
-        return m_shape.getRangeShape().transpose();
+        return getOperand().getRangeShape().transpose();
       }
 
       inline
       constexpr
       size_t getDOFs(const Geometry::Simplex& simplex) const
       {
-        return m_shape.getDOFs(simplex);
+        return getOperand().getDOFs(simplex);
       }
 
       inline
       constexpr
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      const Operand& getOperand() const
       {
-        return m_shape.getOperator(compute, p).shuffle(std::array<int, 3>{0, 2, 1});
+        assert(m_operand);
+        return *m_operand;
       }
 
       inline
       constexpr
-      FES& getFiniteElementSpace()
+      auto getTensorBasis(const Geometry::Point& p) const
       {
-        return m_shape.getFiniteElementSpace();
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+        const auto& op = this->object(getOperand().getTensorBasis(p));
+        return TensorBasis(getDOFs(p.getSimplex()), [&](size_t i){ return op(i).transpose(); });
       }
 
       inline
       constexpr
       const FES& getFiniteElementSpace() const
       {
-        return m_shape.getFiniteElementSpace();
+        return m_operand.getFiniteElementSpace();
       }
 
     private:
-      Operand m_shape;
+      std::unique_ptr<Operand> m_operand;
   };
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>

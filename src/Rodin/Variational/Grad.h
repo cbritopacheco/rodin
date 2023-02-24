@@ -275,8 +275,8 @@ namespace Rodin::Variational
           typename FormLanguage::Traits<ShapeFunctionBase<Operand, H1<Scalar, Ps...>, Space>>::RangeType;
         static_assert(std::is_same_v<OperandRange, Scalar>);
         return TensorBasis<Math::Vector>(
-          p.getJacobian().inverse().transpose() * this->getFiniteElementSpace().getFiniteElement(
-            p.getSimplex()).getGradient(p.getReference()));
+          this->getFiniteElementSpace().getFiniteElement(
+            p.getSimplex()).getGradient(p.getReference()) * p.getJacobianInverse());
       }
 
       inline

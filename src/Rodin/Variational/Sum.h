@@ -26,7 +26,7 @@ namespace Rodin::Variational
    * @ingroup SumSpecializations
    */
   template <class LHSDerived, class RHSDerived>
-  class Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>
+  class Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
     : public FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
@@ -34,17 +34,20 @@ namespace Rodin::Variational
       using RHS = FunctionBase<RHSDerived>;
       using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
+      constexpr
       Sum(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
       }
 
+      constexpr
       Sum(const Sum& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      constexpr
       Sum(Sum&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
@@ -54,16 +57,32 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
-        return m_lhs.getRangeShape();
+        assert(getLHS().getRangeShape() == getLHS().getRangeShape());
+        return getLHS().getRangeShape();
+      }
+
+      inline
+      constexpr
+      const auto& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      constexpr
+      const auto& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
       }
 
       inline
       constexpr
       Sum& traceOf(Geometry::Attribute attrs)
       {
-        m_lhs.traceOf(attrs);
-        m_rhs.traceOf(attrs);
+        getLHS().traceOf(attrs);
+        getRHS().traceOf(attrs);
         return *this;
       }
 
@@ -71,12 +90,21 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return m_lhs.getValue(p) + m_rhs.getValue(p);
+        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+        static_assert(std::is_same_v<LHSRange, RHSRange>);
+        return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
+      }
+
+      inline
+      Sum* copy() const noexcept override
+      {
+        return new Sum(*this);
       }
 
     private:
-      LHS m_lhs;
-      RHS m_rhs;
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>
@@ -124,7 +152,7 @@ namespace Rodin::Variational
 
       constexpr
       Sum(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
@@ -133,7 +161,7 @@ namespace Rodin::Variational
       constexpr
       Sum(const Sum& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
@@ -183,7 +211,10 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
-        return getLHS().getTensorBasis( p) + getRHS().getTensorBasis(p);
+        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+        static_assert(std::is_same_v<LHSRange, RHSRange>);
+        return this->object(getLHS().getTensorBasis(p)) + this->object(getRHS().getTensorBasis(p));
       }
 
       inline
@@ -200,9 +231,15 @@ namespace Rodin::Variational
         return getLHS().getFiniteElementSpace();
       }
 
+      inline
+      Sum* copy() const noexcept override
+      {
+        return new Sum(*this);
+      }
+
     private:
-      LHS m_lhs;
-      RHS m_rhs;
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>

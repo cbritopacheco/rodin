@@ -16,6 +16,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"
+#include "Rodin/Utility/ForConstexpr.h"
 
 #include "Function.h"
 #include "ScalarFunction.h"
@@ -119,6 +120,11 @@ namespace Rodin::Variational
       {
         return static_cast<const Derived&>(*this).getDimension();
       }
+
+      virtual VectorFunctionBase* copy() const noexcept override
+      {
+        return new VectorFunctionBase(*this);
+      }
   };
 
   /**
@@ -145,15 +151,6 @@ namespace Rodin::Variational
   class VectorFunction<V, Values...> final
     : public VectorFunctionBase<VectorFunction<V, Values...>>
   {
-    template <size_t N>
-    struct index { static const constexpr auto value = N; };
-
-    template <class F, size_t ... Is>
-    void for_index(F f, std::index_sequence<Is...>)
-    {
-      (f(index<Is>{}), ...);
-    }
-
     public:
       using Parent = VectorFunctionBase<VectorFunction<V, Values...>>;
       /**
@@ -181,11 +178,12 @@ namespace Rodin::Variational
       {}
 
       inline
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         Math::FixedSizeVector<1 + sizeof...(Values)> value;
-        for_index<1 + sizeof...(Values)>(
-            [&](auto&& index) { value(index.value) = std::get<index.value>(m_fs).getValue(p); });
+        Utility::ForIndex<1 + sizeof...(Values)>(
+            [&](auto i){ value(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
         return value;
       }
 
@@ -202,6 +200,11 @@ namespace Rodin::Variational
       {
         std::apply([&](auto& s) { s.traceOf(attrs); }, m_fs);
         return *this;
+      }
+
+      inline VectorFunction* copy() const noexcept override
+      {
+        return new VectorFunction(*this);
       }
 
     private:

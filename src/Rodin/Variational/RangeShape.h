@@ -54,8 +54,8 @@ namespace Rodin::Variational
       constexpr
       RangeShape product(const RangeShape& rhs) const
       {
-        assert(m_height == rhs.m_width);
-        return { m_width, rhs.m_height };
+        assert(m_width == rhs.m_height);
+        return { m_height, rhs.m_width };
       }
 
       inline

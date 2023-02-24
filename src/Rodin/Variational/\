@@ -1,0 +1,64 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <mfem.hpp>
+#include <chrono>
+#include <Rodin/Solver.h>
+#include <Rodin/Geometry.h>
+#include <Rodin/Variational.h>
+#include <boost/uuid/uuid_io.hpp>
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+int main(int, char**)
+{
+  const char* meshFile = "../resources/mfem/poisson-example.mesh";
+
+  // Define boundary attributes
+  int Gamma = 1;
+
+  // Load mesh
+  Mesh Omega;
+  Omega.load(meshFile);
+
+  // Functions
+  H1 vh(Omega);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  // 6. Set up the linear form b(.) corresponding to the right-hand side.
+  mfem::ConstantCoefficient one(1.0);
+  mfem::LinearForm b(&vh.getHandle());
+  b.AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
+  b.Assemble();
+
+  // 7. Set up the bilinear form a(.,.) corresponding to the -Delta operator.
+  mfem::BilinearForm a(&vh.getHandle());
+  a.AddDomainIntegrator(new mfem::DiffusionIntegrator);
+  a.Assemble();
+
+  // Define problem
+  ScalarFunction f = 1.0;
+  ScalarFunction g = 0.0;
+
+  Solver::CG solver;
+  solver.printIterations(true);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, g).on(Gamma);
+
+  poisson.solve(solver);
+
+  // Save solution
+  u.getSolution().getHandle().Save("u.gf");
+  Omega.save("Omega.mesh");
+
+  return 0;
+}

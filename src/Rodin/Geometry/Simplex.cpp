@@ -125,15 +125,19 @@ namespace Rodin::Geometry
 
   // ---- Point --------------------------------------------------------------
   Point::Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc)
-    : m_simplex(simplex), m_trans(trans), m_rc(rc)
-  {}
+    : m_simplex(simplex), m_trans(trans), m_rc(rc), m_ip(Variational::Internal::vec2ip(m_rc))
+  {
+    m_trans.get().getHandle().SetIntPoint(&m_ip);
+  }
 
   const Math::Vector& Point::getPhysical() const
   {
     if (!m_pc.has_value())
     {
-      m_pc.emplace(m_trans.get().transform(m_rc));
-      assert(m_pc->size() == static_cast<int>(m_simplex.get().getMesh().getSpaceDimension()));
+      Math::Vector pc(getSimplex().getMesh().getDimension());
+      mfem::Vector tmp(pc.data(), pc.size());
+      m_trans.get().getHandle().Transform(m_ip, tmp);
+      m_pc.emplace(std::move(pc));
     }
     assert(m_pc.has_value());
     return m_pc.value();
@@ -143,23 +147,42 @@ namespace Rodin::Geometry
   {
     if (!m_jacobian.has_value())
     {
-      m_jacobian.emplace(m_trans.get().jacobian(getReference()));
+      const size_t rdim = getSimplex().getDimension();
+      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
+      Math::Matrix jacobian(sdim, rdim);
+      mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
+      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
+      m_trans.get().getHandle().Jacobian();
+      m_jacobian.emplace(std::move(jacobian));
     }
     assert(m_jacobian.has_value());
     return m_jacobian.value();
   }
 
-  const Math::Matrix& Point::getInverseJacobian() const
+  const Math::Matrix& Point::getJacobianInverse() const
   {
     if (!m_inverseJacobian.has_value())
     {
-      mfem::IntegrationPoint ip = Variational::Internal::vec2ip(m_rc);
-      m_trans.get().getHandle().SetIntPoint(&ip);
-      mfem::DenseMatrix tmp(m_trans.get().getHandle().InverseJacobian());
-      m_inverseJacobian.emplace(Eigen::Map<Math::Matrix>(tmp.Data(), tmp.NumRows(), tmp.NumCols()));
+      const size_t rdim = getSimplex().getDimension();
+      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
+      Math::Matrix inv(rdim, sdim);
+      mfem::DenseMatrix tmp(inv.data(), inv.rows(), inv.cols());
+      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
+      tmp = m_trans.get().getHandle().InverseJacobian();
+      m_inverseJacobian.emplace(std::move(inv));
     }
     assert(m_inverseJacobian.has_value());
     return m_inverseJacobian.value();
+  }
+
+  Scalar Point::getDistortion() const
+  {
+    if (!m_distortion.has_value())
+    {
+      m_distortion.emplace(m_trans.get().getHandle().Weight());
+    }
+    assert(m_distortion.has_value());
+    return m_distortion.value();
   }
 
   size_t Point::getDimension(Coordinates coords) const

@@ -17,9 +17,12 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include "Rodin/Types.h"
+#include "Rodin/Utility/DependentFalse.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/BasisOperator.h"
+
+#include "Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -31,20 +34,15 @@ namespace Rodin::FormLanguage
     static boost::uuids::random_generator s_gen;
 
     public:
-      inline
       Base()
         : m_uuid(s_gen())
       {}
 
-      inline
       Base(const Base& other)
         : m_uuid(other.m_uuid)
       {}
 
-      inline
-      Base(Base&& other)
-        : m_uuid(std::move(other.m_uuid))
-      {}
+      Base(Base&&) = default;
 
       Base& operator=(const Base&) = delete;
 
@@ -66,63 +64,27 @@ namespace Rodin::FormLanguage
         return "Rodin::FormLanguage::Base";
       }
 
+      template <class T, typename = std::enable_if_t<FormLanguage::IsPlainObject<T>::Value>>
       inline
       constexpr
-      const Math::Matrix& object(Math::Matrix&& obj) const
+      const T& object(T&& obj) const
       {
-        return m_mobjs.emplace_back(std::move(obj));
+        T* res = new T(std::forward<T>(obj));
+        m_objs.emplace_back(res);
+        return *res;
       }
 
+      template <class T, typename = std::enable_if_t<!FormLanguage::IsPlainObject<T>::Value>>
       inline
       constexpr
-      const Math::Vector& object(Math::Vector&& obj) const
+      T&& object(T&& obj) const
       {
-        return m_vobjs.emplace_back(std::move(obj));
+        return std::forward<T>(obj);
       }
 
-      inline
-      constexpr
-      const auto& object(Variational::TensorBasis<Math::Vector>&& obj) const
+      void clear()
       {
-        return m_tbvobjs.emplace_back(std::move(obj));
-      }
-
-      template <class EigenDerived>
-      inline
-      constexpr
-      const auto& object(Variational::TensorBasis<Math::Matrix>&& obj) const
-      {
-        return m_tbmobjs.emplace_back(std::move(obj));
-      }
-
-      template <class ObjectType>
-      inline
-      constexpr
-      const ObjectType& object(const ObjectType& obj) const
-      {
-        return obj;
-      }
-
-      inline
-      constexpr
-      Scalar object(Scalar s) const
-      {
-        return s;
-      }
-
-      inline
-      constexpr
-      const auto& object(const Variational::TensorBasis<Scalar>& obj) const
-      {
-        return obj;
-      }
-
-      template <class EigenDerived>
-      inline
-      constexpr
-      const auto& object(const Variational::TensorBasis<Eigen::MatrixBase<EigenDerived>>& obj) const
-      {
-        return obj;
+        m_objs.clear();
       }
 
       /**
@@ -135,11 +97,7 @@ namespace Rodin::FormLanguage
 
     private:
       const boost::uuids::uuid m_uuid;
-
-      mutable std::deque<Math::Vector> m_vobjs;
-      mutable std::deque<Math::Matrix> m_mobjs;
-      mutable std::deque<Variational::TensorBasis<Math::Vector>> m_tbvobjs;
-      mutable std::deque<Variational::TensorBasis<Math::Matrix>> m_tbmobjs;
+      mutable std::deque<std::shared_ptr<void>> m_objs;
   };
 }
 

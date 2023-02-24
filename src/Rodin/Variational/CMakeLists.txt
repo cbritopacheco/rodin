@@ -76,6 +76,7 @@ set(RodinVariational_SRCS
   Minus.cpp
   Function.cpp
   RangeShape.cpp
+  RangeType.cpp
   Composition.cpp
   Max.cpp
   Min.cpp
