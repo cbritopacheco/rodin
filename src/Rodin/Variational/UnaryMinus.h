@@ -38,13 +38,13 @@ namespace Rodin::Variational
 
       constexpr
       UnaryMinus(const Operand& op)
-        : m_op()
+        : m_op(op.copy())
       {}
 
       constexpr
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
-          m_op(other.m_op)
+          m_op(other.m_op->copy())
       {}
 
       constexpr
@@ -57,25 +57,30 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        return m_op.getRangeShape();
+        return getOperand().getRangeShape();
       }
 
       inline
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      const Operand& getOperand() const
       {
-        return -m_op.getValue(p);
+        assert(m_op);
+        return *m_op;
       }
 
       inline
-      UnaryMinus* copy() const noexcept
-      override
+      auto getValue(const Geometry::Point& p) const
+      {
+        return -1 * this->object(getOperand().getValue(p));
+      }
+
+      inline UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
       }
 
     private:
-      Operand m_op;
+      std::unique_ptr<Operand> m_op;
   };
 
   template <class NestedDerived>
@@ -99,13 +104,13 @@ namespace Rodin::Variational
 
       constexpr
       UnaryMinus(const Operand& op)
-        : m_op(op)
+        : m_op(op.copy())
       {}
 
       constexpr
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
-          m_op(other.m_op)
+          m_op(other.m_op->copy())
       {}
 
       constexpr
@@ -149,24 +154,17 @@ namespace Rodin::Variational
         return m_op.getOperator(compute, p);
       }
 
-      FES& getFiniteElementSpace()
-      {
-        return getOperand().getFiniteElementSpace();
-      }
-
       const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      inline
-      UnaryMinus* copy() const noexcept
-      override
+      inline UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
       }
     private:
-      Operand m_op;
+      std::unique_ptr<Operand> m_op;
   };
 
   template <>

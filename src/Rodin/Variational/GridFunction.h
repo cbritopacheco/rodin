@@ -403,13 +403,6 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto& getFiniteElementSpace()
-      {
-        return static_cast<Derived&>(*this).getFiniteElementSpace();
-      }
-
-      inline
-      constexpr
       const auto& getFiniteElementSpace() const
       {
         return static_cast<const Derived&>(*this).getFiniteElementSpace();
@@ -588,11 +581,6 @@ namespace Rodin::Variational
       {}
 
       GridFunction& operator=(const GridFunction&)  = delete;
-
-      inline GridFunction* copy() const noexcept override
-      {
-        return new GridFunction(*this);
-      }
   };
 
   template <class ... Ts>
@@ -656,6 +644,77 @@ namespace Rodin::Variational
       }
 
       GridFunction& operator=(const GridFunction&)  = delete;
+
+      GridFunction& load(
+          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        mfem::named_ifgzstream input(filename.c_str());
+        if (!input)
+        {
+          Alert::Exception()
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+        }
+
+        switch (fmt)
+        {
+          case IO::FileFormat::MFEM:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(*this);
+            loader.load(input);
+            break;
+          }
+          case IO::FileFormat::MEDIT:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(*this);
+            loader.load(input);
+            break;
+          }
+          default:
+          {
+            Alert::Exception()
+              << "Loading from \"" << fmt << "\" format unsupported."
+              << Alert::Raise;
+          }
+        }
+        return *this;
+      }
+
+      void save(
+          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
+          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
+      {
+        std::ofstream output(filename.c_str());
+        if (!output)
+        {
+          Alert::Exception()
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+        }
+
+        output.precision(precision);
+        switch (fmt)
+        {
+          case IO::FileFormat::MFEM:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(*this);
+            printer.print(output);
+            break;
+          }
+          case IO::FileFormat::MEDIT:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(*this);
+            printer.print(output);
+            break;
+          }
+          default:
+          {
+            Alert::Exception()
+              << "Saving to \"" << fmt << "\" format unsupported."
+              << Alert::Raise;
+          }
+        }
+      }
 
       template <class NestedDerived>
       inline

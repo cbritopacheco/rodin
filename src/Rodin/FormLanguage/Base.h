@@ -20,7 +20,6 @@
 #include "Rodin/Utility/DependentFalse.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/BasisOperator.h"
 
 #include "Traits.h"
 
@@ -67,9 +66,10 @@ namespace Rodin::FormLanguage
       template <class T, typename = std::enable_if_t<FormLanguage::IsPlainObject<T>::Value>>
       inline
       constexpr
-      const T& object(T&& obj) const
+      const T& object(T&& obj) const noexcept
       {
-        T* res = new T(std::forward<T>(obj));
+        using R = typename std::remove_reference_t<T>;
+        const R* res = new R(std::forward<T>(obj));
         m_objs.emplace_back(res);
         return *res;
       }
@@ -77,7 +77,7 @@ namespace Rodin::FormLanguage
       template <class T, typename = std::enable_if_t<!FormLanguage::IsPlainObject<T>::Value>>
       inline
       constexpr
-      T&& object(T&& obj) const
+      T object(T&& obj) const noexcept
       {
         return std::forward<T>(obj);
       }
@@ -97,7 +97,7 @@ namespace Rodin::FormLanguage
 
     private:
       const boost::uuids::uuid m_uuid;
-      mutable std::deque<std::shared_ptr<void>> m_objs;
+      mutable std::deque<std::shared_ptr<const void>> m_objs;
   };
 }
 

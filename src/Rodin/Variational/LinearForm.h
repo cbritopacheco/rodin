@@ -179,7 +179,7 @@ namespace Rodin::Variational
        * @param[in] fes Reference to the finite element space
        */
       constexpr
-      LinearForm(TestFunction<FES>& v)
+      LinearForm(const TestFunction<FES>& v)
         : m_v(v)
       {}
 
@@ -256,7 +256,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<TestFunction<FES>> m_v;
+      std::reference_wrapper<const TestFunction<FES>> m_v;
       std::unique_ptr<VectorType> m_vector;
   };
   template <class FES>

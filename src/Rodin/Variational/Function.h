@@ -100,6 +100,10 @@ namespace Rodin::Variational
         {
           return RangeType::Boolean;
         }
+        else if constexpr (std::is_same_v<R, Integer>)
+        {
+          return RangeType::Integer;
+        }
         else if constexpr (std::is_same_v<R, Scalar>)
         {
           return RangeType::Scalar;
@@ -115,7 +119,7 @@ namespace Rodin::Variational
         else
         {
           assert(false);
-          return RangeType::Scalar;
+          static_assert(Utility::DependentFalse<R>::Value);
         }
       }
 

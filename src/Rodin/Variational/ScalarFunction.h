@@ -233,9 +233,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Integer getValue(const Geometry::Point&) const
+      Scalar getValue(const Geometry::Point&) const
       {
-        return m_x;
+        return static_cast<Scalar>(m_x);
       }
 
       inline ScalarFunction* copy() const noexcept override

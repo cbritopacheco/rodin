@@ -217,11 +217,11 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
-          return TensorBasis([&](size_t i){ return lhs.dot(rhs(i)); });
+          return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs.dot(rhs(i)); });
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
-          return TensorBasis([&](size_t i){ return (lhs * rhs(i).transpose()).trace(); });
+          return TensorBasis(rhs.getDOFs(), [&](size_t i){ return (lhs * rhs(i).transpose()).trace(); });
         }
         else
         {
@@ -309,7 +309,7 @@ namespace Rodin::Variational
        * @f$ is the number of test degrees of freedom.
        */
       inline
-      auto getMatrix(const Geometry::Point& p) const
+      Math::Matrix getMatrix(const Geometry::Point& p) const
       {
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
@@ -317,25 +317,33 @@ namespace Rodin::Variational
         static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto& trial = this->object(getLHS().getTensorBasis(p));
         const auto& test = this->object(getRHS().getTensorBasis(p));
+        Math::Matrix res(test.getDOFs(), trial.getDOFs());
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
-          return test * trial.transpose();
+          for (size_t i = 0; i < test.getDOFs(); i++)
+            for (size_t j = 0; j < trial.getDOFs(); j++)
+              res(i, j) = test(i) * trial(j);
+          return res;
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
-          return test * trial.transpose();
+          for (size_t i = 0; i < test.getDOFs(); i++)
+            for (size_t j = 0; j < trial.getDOFs(); j++)
+              res(i, j) = test(i).dot(trial(j));
+          return res;
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
-          assert(false);
-          return void();
-          // return test.contract(trial.shuffle(Eigen::array<int, 3>{2, 1, 0}),
-          //     Eigen::array<Eigen::IndexPair<int>, 2>{ Eigen::IndexPair<int>(2, 0), Eigen::IndexPair<int>(1, 1) });
+          for (size_t i = 0; i < test.getDOFs(); i++)
+            for (size_t j = 0; j < trial.getDOFs(); j++)
+              res(i, j) = (test(i) * trial(j).transpose()).trace();
+          return res;
         }
         else
         {
           assert(false);
-          return void();
+          res.setConstant(NAN);
+          return res;
         }
       }
 

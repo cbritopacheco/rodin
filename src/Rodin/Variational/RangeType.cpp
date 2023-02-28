@@ -17,6 +17,11 @@ namespace Rodin::Variational
         os << "Boolean";
         break;
       }
+      case RangeType::Integer:
+      {
+        os << "Boolean";
+        break;
+      }
       case RangeType::Scalar:
       {
         os << "Scalar";

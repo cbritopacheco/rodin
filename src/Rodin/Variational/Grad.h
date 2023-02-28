@@ -249,38 +249,43 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
+
+      inline
+      constexpr
       const auto& getLeaf() const
       {
-        return m_u.get().getLeaf();
+        return getOperand().getLeaf();
       }
 
       inline
       constexpr
       RangeShape getRangeShape() const
       {
-        return { m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
+        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
       }
 
       inline
       constexpr
       size_t getDOFs(const Geometry::Simplex& element) const
       {
-        return m_u.get().getDOFs(element);
+        return getOperand().getDOFs(element);
       }
 
       inline
-      auto getTensorBasis(const Geometry::Point& p) const
+      TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
       {
         using OperandRange =
           typename FormLanguage::Traits<ShapeFunctionBase<Operand, H1<Scalar, Ps...>, Space>>::RangeType;
         static_assert(std::is_same_v<OperandRange, Scalar>);
-        return TensorBasis<Math::Vector>(
-          this->getFiniteElementSpace().getFiniteElement(
-            p.getSimplex()).getGradient(p.getReference()) * p.getJacobianInverse());
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        return (fe.getGradient(p.getReference()) * p.getJacobianInverse()).transpose();
       }
 
-      inline
-      Grad* copy() const noexcept override
+      inline Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }

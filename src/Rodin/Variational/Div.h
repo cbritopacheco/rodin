@@ -23,21 +23,22 @@ namespace Rodin::Variational
    * @ingroup DivSpecializations
    */
   template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  class Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, H1<Ts...>, Space>
+  class Div<ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>>, H1<Math::Vector, Ts...>, Space>
   {
     public:
-      using FES = H1<Ts...>;
+      using FES = H1<Math::Vector, Ts...>;
       using Operand = ShapeFunction<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, FES, Space>;
+      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, FES, Space>>, FES, Space>;
 
       /**
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
        */
       constexpr
-      Div(Operand& u)
-        : m_u(u)
+      Div(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
       {}
 
       constexpr
@@ -49,14 +50,21 @@ namespace Rodin::Variational
       constexpr
       Div(Div&& other)
         : Parent(std::move(other)),
-          m_u(other.m_u)
+          m_u(std::move(other.m_u))
       {}
+
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
 
       inline
       constexpr
       const auto& getLeaf() const
       {
-        return m_u.get().getLeaf();
+        return getOperand().getLeaf();
       }
 
       inline
@@ -70,37 +78,39 @@ namespace Rodin::Variational
       constexpr
       size_t getDOFs(const Geometry::Simplex& simplex) const
       {
-        return m_u.get().getDOFs(simplex);
-      }
-
-      auto getOperator(const Geometry::Point& p) const
-      {
-        return void();
-        // Math::Vector div = fe.getGradient(p.getVector(Geometry::Point::Coordinates::Reference)).reshaped();
-        // return TensorBasis(div);
+        return getOperand().getDOFs(simplex);
       }
 
       inline
-      constexpr
-      auto& getFiniteElementSpace()
+      TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
       {
-        return m_u.get().getFiniteElementSpace();
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const auto& inv = p.getJacobianInverse();
+        const Eigen::TensorMap<const Eigen::Tensor<Scalar, 2>> lift(inv.data(), inv.rows(), inv.cols());
+        static constexpr const Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(2, 0) };
+        Math::Tensor<1> basis = fe.getJacobian(p.getReference()).contract(lift, dims).trace(Eigen::array<int, 2>{1, 2});
+        return Eigen::Map<Math::Vector>(basis.data(), basis.size());
       }
 
       inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
-        return m_u.get().getFiniteElementSpace();
+        return getOperand().getFiniteElementSpace();
+      }
+
+      inline Div* copy() const noexcept override
+      {
+        return new Div(*this);
       }
 
     private:
-      std::reference_wrapper<Operand> m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
 
   template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  Div(ShapeFunction<NestedDerived, H1<Ts...>, Space>&)
-    -> Div<ShapeFunction<NestedDerived, H1<Ts...>, Space>>;
+  Div(const ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>>;
 }
 
 #endif
