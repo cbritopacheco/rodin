@@ -102,7 +102,7 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<RHSRange, Math::Matrix>)
         {
-          return (lhs * rhs.transpose()).trace();
+          return (lhs.array() * rhs.array()).rowwise().sum().colwise().sum();
         }
         else
         {
@@ -217,11 +217,13 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
-          return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs.dot(rhs(i)); });
+          return TensorBasis(rhs.getDOFs(),
+              [&](size_t i){ return lhs.dot(rhs(i)); });
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
-          return TensorBasis(rhs.getDOFs(), [&](size_t i){ return (lhs * rhs(i).transpose()).trace(); });
+          return TensorBasis(rhs.getDOFs(),
+              [&](size_t i){ return (lhs(i).array() * rhs(i).array()).rowwise().sum().colwise().sum(); });
         }
         else
         {
@@ -336,7 +338,7 @@ namespace Rodin::Variational
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = (test(i) * trial(j).transpose()).trace();
+              res(i, j) = (test(i).array() * trial(i).array()).rowwise().sum().colwise().sum().value();
           return res;
         }
         else

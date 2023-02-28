@@ -44,15 +44,15 @@ int main(int argc, char** argv)
   TestFunction  v(vh);
 
   Problem elasticity(u, v);
-  // elasticity = Integral(lambda * Div(u), Div(v))
-  //            + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
-  //            - BoundaryIntegral(f, v).over(GammaN)
-  //            + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-
-
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+  elasticity = Integral(lambda * Div(u), Div(v))
+             + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
+
+  // elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+  //            - BoundaryIntegral(f, v).over(GammaN)
+  //            + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
   for (int i = 0; i < 50; i++)
     elasticity.assemble();
