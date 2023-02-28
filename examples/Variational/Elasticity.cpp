@@ -37,7 +37,7 @@ int main(int argc, char** argv)
   // Solver object
   Solver::CG solver;
   mfem::GSSmoother smooth;
-  solver.printIterations(false).setPreconditioner(smooth);
+  solver.printIterations(true).setPreconditioner(smooth);
 
   // Define problem
   TrialFunction u(vh);
@@ -54,15 +54,12 @@ int main(int argc, char** argv)
   //            - BoundaryIntegral(f, v).over(GammaN)
   //            + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
-  for (int i = 0; i < 50; i++)
-    elasticity.assemble();
-
-  // elasticity.solve(solver);
+  elasticity.solve(solver);
 
 
   // Save solution
-  // u.getSolution().save("u.gf");
-  // Omega.save("Omega.mesh");
+  u.getSolution().save("u.gf");
+  Omega.save("Omega.mesh");
 
   return 0;
 }

@@ -338,7 +338,7 @@ namespace Rodin::Variational
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = (test(i).array() * trial(i).array()).rowwise().sum().colwise().sum().value();
+              res(i, j) = (test(i).array() * trial(j).array()).rowwise().sum().colwise().sum().value();
           return res;
         }
         else
