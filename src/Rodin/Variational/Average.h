@@ -8,7 +8,6 @@
 #define RODIN_VARIATIONAL_AVERAGE_H
 
 #include "ForwardDecls.h"
-#include "BasisOperator.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational

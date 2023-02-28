@@ -96,8 +96,7 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
-      inline
-      Sum* copy() const noexcept override
+      inline Sum* copy() const noexcept override
       {
         return new Sum(*this);
       }
@@ -152,10 +151,12 @@ namespace Rodin::Variational
 
       constexpr
       Sum(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+        : Parent(lhs.getFiniteElementSpace()),
+          m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
+        assert(lhs.getFiniteElementSpace() == rhs.getFiniteElementSpace());
       }
 
       constexpr
@@ -174,14 +175,16 @@ namespace Rodin::Variational
       constexpr
       const LHS& getLHS() const
       {
-        return m_lhs;
+        assert(m_lhs);
+        return *m_lhs;
       }
 
       inline
       constexpr
       const RHS& getRHS() const
       {
-        return m_rhs;
+        assert(m_rhs);
+        return *m_rhs;
       }
 
       inline
@@ -214,14 +217,9 @@ namespace Rodin::Variational
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
-        return this->object(getLHS().getTensorBasis(p)) + this->object(getRHS().getTensorBasis(p));
-      }
-
-      inline
-      constexpr
-      auto& getFiniteElementSpace()
-      {
-        return getLHS().getFiniteElementSpace();
+        const auto& lhs = this->object(getLHS().getTensorBasis(p));
+        const auto& rhs = this->object(getRHS().getTensorBasis(p));
+        return lhs + rhs;
       }
 
       inline
@@ -231,8 +229,7 @@ namespace Rodin::Variational
         return getLHS().getFiniteElementSpace();
       }
 
-      inline
-      Sum* copy() const noexcept override
+      inline Sum* copy() const noexcept override
       {
         return new Sum(*this);
       }

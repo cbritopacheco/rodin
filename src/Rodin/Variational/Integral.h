@@ -23,6 +23,7 @@
 #include "TrialFunction.h"
 #include "FiniteElement.h"
 #include "MatrixFunction.h"
+#include "GaussianQuadrature.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -52,14 +53,17 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Integral<Dot<
-          ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
-    : public BilinearFormIntegratorBase
+          ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
+    : public GaussianQuadrature<Dot<
+          ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
       using Integrand = Dot<LHS, RHS>;
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = GaussianQuadrature<Integrand>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
@@ -90,63 +94,29 @@ namespace Rodin::Variational
        */
       constexpr
       Integral(const Integrand& prod)
-        : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
-          m_prod(prod.copy())
+        : Parent(prod)
       {}
 
       constexpr
       Integral(const Integral& other)
-        : BilinearFormIntegratorBase(other),
-          m_prod(other.m_prod->copy())
+        : Parent(other)
       {}
 
       constexpr
       Integral(Integral&& other)
-        : BilinearFormIntegratorBase(std::move(other)),
-          m_prod(std::move(other.m_prod))
+        : Parent(std::move(other))
       {}
 
-      inline
-      constexpr
-      const Integrand& getIntegrand() const
+      inline Integrator::Region getRegion() const override
       {
-        assert(m_prod);
-        return *m_prod;
+        return Integrator::Region::Domain;
       }
 
-      inline
-      Region getRegion() const override
-      {
-        return Region::Domain;
-      }
-
-      Math::Matrix getMatrix(const Geometry::Simplex& simplex) const override
-      {
-        const auto& integrand = getIntegrand();
-        const auto& trial = integrand.getLHS();
-        const auto& test = integrand.getRHS();
-        const auto& trans = simplex.getTransformation();
-        const size_t order =
-          trial.getFiniteElementSpace().getOrder(simplex) +
-          test.getFiniteElementSpace().getOrder(simplex) +
-          simplex.getTransformation().getHandle().OrderW();
-        const mfem::IntegrationRule* ir =
-          &mfem::IntRules.Get(static_cast<mfem::Geometry::Type>(simplex.getGeometry()), order);
-        Math::Matrix res = Math::Matrix::Zero(test.getDOFs(simplex), trial.getDOFs(simplex));
-        for (int i = 0; i < ir->GetNPoints(); i++)
-        {
-          const auto& ip = ir->IntPoint(i);
-          Geometry::Point p(simplex, trans, Internal::ip2vec(ir->IntPoint(i), simplex.getDimension()));
-          res += ip.weight * p.getDistortion() * integrand.getMatrix(p);
-        }
-        return res;
-      }
-
-      inline
-      Integral* copy() const noexcept override
+      inline Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
+
     private:
       std::unique_ptr<Integrand> m_prod;
   };
@@ -174,11 +144,11 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class FES>
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public LinearFormIntegratorBase
+    : public GaussianQuadrature<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
-      using Parent = LinearFormIntegratorBase;
+      using Parent = GaussianQuadrature<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
       constexpr
@@ -186,71 +156,27 @@ namespace Rodin::Variational
         : Integral(Dot(lhs, rhs))
       {}
 
-      /**
-       * @brief Integral of a scalar valued test operator
-       *
-       * Given
-       * @f[
-       *   A : V_h \rightarrow \mathbb{R}
-       * @f]
-       * constructs an instance representing the following integral
-       * @f[
-       *   \int_\Omega A(v) \ dx \ .
-       * @f]
-       */
       constexpr
       Integral(const Integrand& integrand)
-        : Parent(integrand.getLeaf()),
-          m_integrand(integrand.copy())
+        : Parent(integrand)
       {}
 
       constexpr
       Integral(const Integral& other)
-        : Parent(other),
-          m_integrand(other.m_integrand->copy())
+        : Parent(other)
       {}
 
       constexpr
       Integral(Integral&& other)
-        : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand))
+        : Parent(std::move(other))
       {}
 
-      inline
-      constexpr
-      const Integrand& getIntegrand() const
+      inline Integrator::Region getRegion() const override
       {
-        assert(m_integrand);
-        return *m_integrand;
+        return Integrator::Region::Domain;
       }
 
-      inline
-      Region getRegion() const final override
-      {
-        return Region::Domain;
-      }
-
-      Math::Vector getVector(const Geometry::Simplex& simplex) const override
-      {
-        const auto& integrand = getIntegrand();
-        assert(integrand.getRangeType() == RangeType::Scalar);
-        const auto& trans = simplex.getTransformation();
-        const size_t order =
-          integrand.getFiniteElementSpace().getOrder(simplex) + trans.getHandle().OrderW();
-        const mfem::IntegrationRule* ir =
-          &mfem::IntRules.Get(static_cast<mfem::Geometry::Type>(simplex.getGeometry()), order);
-        Math::Vector res = Math::Vector::Zero(integrand.getDOFs(simplex));
-        for (int i = 0; i < ir->GetNPoints(); i++)
-        {
-          const auto& ip = ir->IntPoint(i);
-          Geometry::Point p(simplex, trans, Internal::ip2vec(ip, simplex.getDimension()));
-          res += ip.weight * p.getDistortion() * integrand.getTensorBasis(p);
-        }
-        return res;
-      }
-
-      inline
-      Integral* copy() const noexcept override
+      inline Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
@@ -334,9 +260,10 @@ namespace Rodin::Variational
       TestFunction<FES>                                 m_v;
       GridFunction<FES>                                 m_one;
 
-      LinearForm<FES, Context::Serial, mfem::Vector> m_lf;
+      LinearForm<FES, Context::Serial, mfem::Vector>    m_lf;
       bool m_assembled;
   };
+
   template <class FES>
   Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
 

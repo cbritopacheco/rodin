@@ -10,7 +10,6 @@
 #include <mfem.hpp>
 
 #include "ForwardDecls.h"
-#include "BasisOperator.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational

@@ -9,7 +9,7 @@
 
 #include "H1.h"
 #include "GridFunction.h"
-#include "BasisOperator.h"
+#include "TensorBasis.h"
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
@@ -226,18 +226,19 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 ShapeFunction object.
    */
-  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  class Jacobian<ShapeFunction<NestedDerived, H1<Ts...>, Space>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived, H1<Ts...>, Space>>, H1<Ts...>, Space>
+  template <class ShapeFunctionDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, H1<Math::Vector, Ts...>, Space>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, H1<Math::Vector, Ts...>, Space>>, H1<Math::Vector, Ts...>, Space>
   {
     public:
-      using FES = H1<Ts...>;
-      using Operand = ShapeFunction<NestedDerived, FES, Space>;
+      using FES = H1<Math::Vector, Ts...>;
+      using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
 
       constexpr
-      Jacobian(Operand& u)
-        : m_u(u)
+      Jacobian(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
       {}
 
       constexpr
@@ -254,74 +255,63 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      FES& getFiniteElementSpace()
+      const Operand& getOperand() const
       {
-        return m_u.getFiniteElementSpace();
+        return m_u.get();
       }
 
       inline
       constexpr
       const FES& getFiniteElementSpace() const
       {
-        return m_u.getFiniteElementSpace();
+        return getOperand().getFiniteElementSpace();
       }
 
       inline
       constexpr
       const auto& getLeaf() const
       {
-        return m_u.get().getLeaf();
+        return getOperand().getLeaf();
       }
 
       inline
       constexpr
       RangeShape getRangeShape() const
       {
-        return { m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension(),
-                 m_u.getFiniteElementSpace().getVectorDimension() };
+        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(),
+                 getOperand().getFiniteElementSpace().getVectorDimension() };
       }
 
       inline
       constexpr
       size_t getDOFs(const Geometry::Simplex& element) const
       {
-        return m_u.get().getDOFs(element);
+        return getOperand().getDOFs(element);
       }
 
-      auto getOperator(const Geometry::Point& p) const
+      inline
+      TensorBasis<Math::Matrix> getTensorBasis(const Geometry::Point& p) const
       {
-        assert(false);
-        return void();
-        // const auto& element = p.getSimplex();
-        // auto& trans = element.getTransformation();
-        // const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-        // const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        // const size_t n = dshape.NumRows();
-        // const size_t sdim = trans.GetSpaceDim();
-        // const size_t vdim = m_u.getFiniteElementSpace().getVectorDimension();
-        // return TensorBasis(vdim * n,
-        //     [sdim, vdim](size_t) -> Math::Matrix { return Math::Matrix::Zero(sdim, vdim); });
-        // TensorBasis res(static_cast<int>(vdim * n), static_cast<int>(sdim), static_cast<int>(vdim));
-        // res.setZero();
-        // for (size_t i = 0; i < vdim; i++)
-        // {
-        //   for (size_t j = 0; j < n; j++)
-        //   {
-        //     for (size_t k = 0; k < sdim; k++)
-        //     {
-        //       res(static_cast<int>(j + i * n), static_cast<int>(k), static_cast<int>(i)) = dshape(j, k);
-        //     }
-        //   }
-        // }
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const auto& inv = p.getJacobianInverse();
+        const Eigen::TensorMap<const Eigen::Tensor<Scalar, 2>> lift(inv.data(), inv.rows(), inv.cols());
+        static constexpr const Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(2, 0) };
+        return fe.getJacobian(p.getReference()).contract(lift, dims)
+                                               .shuffle(Eigen::array<int, 3>{2, 1, 0});
+      }
+
+      inline Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
       }
 
     private:
-      std::reference_wrapper<Operand> m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
 
-  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Jacobian(ShapeFunction<NestedDerived, FES, Space>&)
-    -> Jacobian<ShapeFunction<NestedDerived, FES, Space>>;
+  template <class ShapeFunctionDerived, class FES, ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, FES, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, FES, Space>>;
 }
 
 #endif

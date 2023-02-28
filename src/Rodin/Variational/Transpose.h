@@ -74,8 +74,7 @@ namespace Rodin::Variational
         return this->object(getOperand().getValue(p)).transpose();
       }
 
-      inline
-      Transpose* copy() const noexcept override
+      inline Transpose* copy() const noexcept override
       {
         return new Transpose(*this);
       }
@@ -101,7 +100,8 @@ namespace Rodin::Variational
 
       constexpr
       Transpose(const Operand& op)
-        : m_operand(op.copy())
+        : Parent(op.getFiniteElementSpace()),
+          m_operand(op.copy())
       {}
 
       constexpr
@@ -152,7 +152,7 @@ namespace Rodin::Variational
         using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
         static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
         const auto& op = this->object(getOperand().getTensorBasis(p));
-        return TensorBasis(getDOFs(p.getSimplex()), [&](size_t i){ return op(i).transpose(); });
+        return TensorBasis(op.getDOFs(), [&](size_t i){ return op(i).transpose(); });
       }
 
       inline
@@ -160,6 +160,11 @@ namespace Rodin::Variational
       const FES& getFiniteElementSpace() const
       {
         return m_operand.getFiniteElementSpace();
+      }
+
+      inline Transpose* copy() const noexcept override
+      {
+        return new Transpose(*this);
       }
 
     private:

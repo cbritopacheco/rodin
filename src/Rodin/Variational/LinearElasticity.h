@@ -4,12 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <type_traits>
+#ifndef RODIN_VARIATIONAL_LINEARELASTICITY_H
+#define RODIN_VARIATIONAL_LINEARELASTICITY_H
 
-#include "Base.h"
+#include "LinearElasticity/LinearElasticityIntegral.h"
 
-namespace Rodin::FormLanguage
-{
-  boost::uuids::random_generator Base::s_gen;
-}
-
+#endif

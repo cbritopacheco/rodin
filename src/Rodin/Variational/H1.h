@@ -167,22 +167,9 @@ namespace Rodin::Variational
       }
 
       inline
-      FiniteElement<Derived>
-      getFiniteElement(const Geometry::Simplex& element) const
+      auto getFiniteElement(const Geometry::Simplex& element) const
       {
-        if (element.getDimension() == getMesh().getDimension())
-        {
-          return FiniteElement<Derived>(element, m_fes->GetFE(element.getIndex()));
-        }
-        else if (element.getDimension() == getMesh().getDimension() - 1)
-        {
-          return FiniteElement<Derived>(element, m_fes->GetFaceElement(element.getIndex()));
-        }
-        else
-        {
-          assert(false);
-          return FiniteElement<Derived>(element, nullptr);
-        }
+        return static_cast<const Derived&>(*this).getFiniteElement(element);
       }
 
       inline
@@ -217,7 +204,7 @@ namespace Rodin::Variational
   };
 
   template <class ContextType>
-  class H1<Scalar, ContextType>
+  class H1<Scalar, ContextType> final
     : public H1Base<H1<Scalar, ContextType>, ContextType>
   {
     public:
@@ -244,6 +231,27 @@ namespace Rodin::Variational
       H1(H1&& other)
         : Parent(std::move(other))
       {}
+
+      inline
+      FiniteElement<H1<Scalar, Context>>
+      getFiniteElement(const Geometry::Simplex& element) const
+      {
+        if (element.getDimension() == this->getMesh().getDimension())
+        {
+          return FiniteElement<H1<Scalar, Context>>(
+              element, this->getHandle().GetFE(element.getIndex()));
+        }
+        else if (element.getDimension() == this->getMesh().getDimension() - 1)
+        {
+          return FiniteElement<H1<Scalar, Context>>(
+              element, this->getHandle().GetFaceElement(element.getIndex()));
+        }
+        else
+        {
+          assert(false);
+          return FiniteElement<H1<Scalar, Context>>(element, nullptr);
+        }
+      }
   };
 
   template <class Context>
@@ -253,7 +261,7 @@ namespace Rodin::Variational
       H1Base<H1<Scalar, Context>, Context>::DefaultBasis) -> H1<Scalar, Context>;
 
   template <class ContextType>
-  class H1<Math::Vector, ContextType>
+  class H1<Math::Vector, ContextType> final
     : public H1Base<H1<Math::Vector, ContextType>, ContextType>
   {
     public:
@@ -281,6 +289,27 @@ namespace Rodin::Variational
       H1(H1&& other)
         : Parent(std::move(other))
       {}
+
+      inline
+      FiniteElement<H1<Math::Vector, Context>>
+      getFiniteElement(const Geometry::Simplex& element) const
+      {
+        if (element.getDimension() == this->getMesh().getDimension())
+        {
+          return FiniteElement<H1<Math::Vector, Context>>(
+              this->getVectorDimension(), element, this->getHandle().GetFE(element.getIndex()));
+        }
+        else if (element.getDimension() == this->getMesh().getDimension() - 1)
+        {
+          return FiniteElement<H1<Math::Vector, Context>>(
+              this->getVectorDimension(), element, this->getHandle().GetFaceElement(element.getIndex()));
+        }
+        else
+        {
+          assert(false);
+          return FiniteElement<H1<Math::Vector, Context>>(0, element, nullptr);
+        }
+      }
   };
 
   template <class Context>

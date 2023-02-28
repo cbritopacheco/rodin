@@ -186,7 +186,7 @@ namespace Rodin::Variational
        * @param[in] v Test function argument
        */
       constexpr
-      BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         :  m_u(u), m_v(v)
       {}
 
@@ -277,8 +277,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<TrialFunction<TrialFES>> m_u;
-      std::reference_wrapper<TestFunction<TestFES>>   m_v;
+      std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>>   m_v;
       std::unique_ptr<OperatorType> m_operator;
   };
 

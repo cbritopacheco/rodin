@@ -12,7 +12,7 @@
 #include "H1.h"
 #include "RangeType.h"
 #include "RangeShape.h"
-#include "BasisOperator.h"
+#include "TensorBasis.h"
 #include "FiniteElementSpace.h"
 
 namespace Rodin::Variational
@@ -86,6 +86,10 @@ namespace Rodin::Variational
         {
           return RangeType::Boolean;
         }
+        else if constexpr (std::is_same_v<R, Integer>)
+        {
+          return RangeType::Integer;
+        }
         else if constexpr (std::is_same_v<R, Scalar>)
         {
           return RangeType::Scalar;
@@ -101,7 +105,7 @@ namespace Rodin::Variational
         else
         {
           assert(false);
-          return RangeType::Scalar;
+          static_assert(Utility::DependentFalse<R>::Value);
         }
       }
 
@@ -350,8 +354,93 @@ namespace Rodin::Variational
       inline
       TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
       {
-        return TensorBasis<Scalar>(
-            this->getFiniteElementSpace().getFiniteElement(p.getSimplex()).getBasis(p.getReference()));
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        return fe.getBasis(p.getReference());
+      }
+
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return static_cast<const Derived&>(*this).getLeaf();
+      }
+
+      virtual ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+
+    private:
+      std::optional<GridFunction<FES>> m_gf;
+  };
+
+  /**
+  * @ingroup ShapeFunctionSpecializations
+  * @brief H1 ShapeFunction
+  */
+  template <class Derived, class ... Ps, ShapeFunctionSpaceType Space>
+  class ShapeFunction<Derived, H1<Math::Vector, Ps...>, Space>
+    : public ShapeFunctionBase<ShapeFunction<Derived, H1<Math::Vector, Ps...>, Space>, H1<Math::Vector, Ps...>, Space>
+  {
+    public:
+      using FES = H1<Math::Vector, Ps...>;
+      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
+
+      ShapeFunction() = delete;
+
+      constexpr
+      ShapeFunction(const FES& fes)
+        : Parent(fes)
+      {}
+
+      constexpr
+      ShapeFunction(const ShapeFunction& other)
+        : Parent(other),
+          m_gf(other.m_gf)
+      {}
+
+      constexpr
+      ShapeFunction(ShapeFunction&& other)
+        : Parent(std::move(other)),
+          m_gf(std::move(other.m_gf))
+      {}
+
+      inline
+      constexpr
+      auto& emplace()
+      {
+        m_gf.emplace(this->getFiniteElementSpace());
+        return *this;
+      }
+
+      inline
+      constexpr
+      GridFunction<FES>& getSolution()
+      {
+        assert(m_gf);
+        return *m_gf;
+      }
+
+      inline
+      constexpr
+      const GridFunction<FES>& getSolution() const
+      {
+        assert(m_gf);
+        return *m_gf;
+      }
+
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
+      }
+
+      inline
+      TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
+      {
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        return fe.getBasis(p.getReference()).transpose();
       }
 
       inline

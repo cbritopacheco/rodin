@@ -123,7 +123,7 @@ namespace Rodin::Variational
 
       virtual VectorFunctionBase* copy() const noexcept override
       {
-        return new VectorFunctionBase(*this);
+        return static_cast<const Derived&>(*this).copy();
       }
   };
 
@@ -161,7 +161,7 @@ namespace Rodin::Variational
        * ScalarFunction.
        */
       constexpr
-      VectorFunction(V v, Values... values)
+      VectorFunction(const V v, const Values... values)
         : m_fs(ScalarFunction(v), ScalarFunction(values)...)
       {}
 

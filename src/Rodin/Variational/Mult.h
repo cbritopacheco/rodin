@@ -161,14 +161,14 @@ namespace Rodin::Variational
 
   /**
    * @ingroup MultSpecializations
-   * @brief Left Multiplication by a FunctionBase of a ShapeFunctionBase
+   * @brief Left Multiplication of a ShapeFunctionBase by a FunctionBase
    *
    * Represents the following expression:
    * @f[
    *   f A(u)
    * @f]
    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
-   * $A(u)$ is the shape operator (scalar, vector, or matrix valued).
+   * $A(u)$ is the shape function (scalar, vector, or matrix valued).
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
@@ -181,11 +181,12 @@ namespace Rodin::Variational
 
       constexpr
       Mult(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : Parent(rhs.getFiniteElementSpace()),
+          m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
-        assert(lhs.getRangeType() == RangeType::Scalar
-            || rhs.getRangeType() == RangeType::Scalar
-            || lhs.getRangeShape().width() == rhs.getRangeShape().height());
+        // assert(lhs.getRangeType() == RangeType::Scalar
+        //     || rhs.getRangeType() == RangeType::Scalar
+        //     || lhs.getRangeShape().width() == rhs.getRangeShape().height());
       }
 
       constexpr
@@ -212,9 +213,14 @@ namespace Rodin::Variational
       RangeShape getRangeShape() const
       {
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return getRHS().getRangeShape();
+        }
+        else if constexpr (std::is_same_v<RHSRange, Scalar>)
+        {
+          return getLHS().getRangeShape();
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector> || std::is_same_v<LHSRange, Math::Matrix>)
         {
@@ -263,7 +269,7 @@ namespace Rodin::Variational
       {
         const auto& lhs = this->object(getLHS().getValue(p));
         const auto& rhs = this->object(getRHS().getTensorBasis(p));
-        return TensorBasis(getDOFs(p.getSimplex()), [](size_t i){ return lhs * rhs(i); });
+        return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs * rhs(i); });
       }
 
       inline Mult* copy() const noexcept override
@@ -289,22 +295,156 @@ namespace Rodin::Variational
     return Mult(lhs, rhs);
   }
 
-  template <class Number, class RHSDerived, class FES, ShapeFunctionSpaceType Space,
-           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   inline
   constexpr
   auto
-  operator*(Number lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  operator*(Scalar lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(ScalarFunction(lhs), rhs);
   }
 
-  template <class Number, class LHSDerived, class FES, ShapeFunctionSpaceType Space,
-           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  /**
+   * @ingroup MultSpecializations
+   * @brief Right multiplication of a ShapeFunctionBase by a FunctionBase
+   *
+   * Represents the following expression:
+   * @f[
+   *    A(u) f
+   * @f]
+   * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
+   * $A(u)$ is the shape function (scalar, vector, or matrix valued).
+   */
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
+    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES, Space>
+  {
+    public:
+      using LHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+      using RHS = FunctionBase<LHSDerived>;
+      using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
+
+      constexpr
+      Mult(const LHS& lhs, const RHS& rhs)
+        : Parent(lhs.getFiniteElementSpace()),
+          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      {
+        assert(lhs.getRangeType() == RangeType::Scalar
+            || rhs.getRangeType() == RangeType::Scalar
+            || lhs.getRangeShape().width() == rhs.getRangeShape().height());
+      }
+
+      constexpr
+      Mult(const Mult& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+      {}
+
+      constexpr
+      Mult(Mult&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getRHS().getLeaf();
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        {
+          return getRHS().getRangeShape();
+        }
+        else if constexpr (std::is_same_v<RHSRange, Scalar>)
+        {
+          return getLHS().getRangeShape();
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector> || std::is_same_v<LHSRange, Math::Matrix>)
+        {
+          return getLHS().getRangeShape().product(getRHS().getRangeShape());
+        }
+        else
+        {
+          assert(false);
+          return { 0, 0 };
+        }
+      }
+
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        return getRHS().getDOFs(element);
+      }
+
+      inline
+      constexpr
+      const auto& getFiniteElementSpace() const
+      {
+        return getRHS().getFiniteElementSpace();
+      }
+
+      inline
+      constexpr
+      const LHS& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      constexpr
+      const RHS& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        const auto& lhs = this->object(getLHS().getTensorBasis(p));
+        const auto& rhs = this->object(getRHS().getValue(p));
+        return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) * rhs; });
+      }
+
+      inline Mult* copy() const noexcept override
+      {
+        return new Mult(*this);
+      }
+
+    private:
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
+  };
+
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  Mult(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
+    -> Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
+
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   inline
   constexpr
   auto
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, Number rhs)
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Mult(lhs, rhs);
+  }
+
+  template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
+  inline
+  constexpr
+  auto
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, Scalar rhs)
   {
     return Mult(lhs, ScalarFunction(rhs));
   }

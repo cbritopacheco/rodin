@@ -15,6 +15,7 @@ namespace Rodin::Variational
   enum class RangeType
   {
     Boolean,
+    Integer,
     Scalar,
     Vector,
     Matrix

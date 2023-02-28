@@ -30,7 +30,7 @@ set(RodinVariational_HEADERS
   ScalarFunction.h
   Trace.h
   Transpose.h
-  BasisOperator.h
+  TensorBasis.h
   Restriction.h
   VectorFunction.h
   Minus.h
@@ -44,7 +44,9 @@ set(RodinVariational_HEADERS
   AND.h
   Tangent.h
   Assembly/AssemblyBase.h
-  Assembly/Native.h)
+  Assembly/Native.h
+  LinearElasticity/LinearElasticityIntegral.h
+  )
 
 set(RodinVariational_SRCS
   FiniteElement.cpp
@@ -63,7 +65,6 @@ set(RodinVariational_SRCS
   VectorFunction.cpp
   ScalarFunction.cpp
   Restriction.cpp
-  BasisOperator.cpp
   Sum.cpp
   UnaryMinus.cpp
   Mult.cpp
