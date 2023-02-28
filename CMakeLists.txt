@@ -12,16 +12,17 @@ endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 project(Rodin LANGUAGES CXX C)
 
 # ---- Options ---------------------------------------------------------------
-option(RODIN_BUILD_SRC          "Build the Rodin source code"     ON)
-option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"        ON)
-option(RODIN_BUILD_DOC          "Build the Rodin documentation"   OFF)
-option(RODIN_USE_MCSS           "Use m.css style documentation"   OFF)
-option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"    OFF)
-option(RODIN_USE_MPI            "Build with MPI support"          OFF)
-option(RODIN_USE_OPENMP         "Build with OpenMP support"       OFF)
-option(RODIN_USE_SUITESPARSE    "Build with SuiteSparse support"  ON)
-option(RODIN_SILENCE_WARNINGS   "Silence warning outputted by Rodin"  OFF)
-option(RODIN_WITH_PY            "Build Python bindings."          OFF)
+option(RODIN_BUILD_SRC          "Build the Rodin source code"           ON)
+option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"              ON)
+option(RODIN_BUILD_TESTS        "Build Rodin tests"                     OFF)
+option(RODIN_BUILD_DOC          "Build the Rodin documentation"         OFF)
+option(RODIN_USE_MPI            "Use Rodin with MPI support"            OFF)
+option(RODIN_USE_OPENMP         "Use Rodin with OpenMP support"         OFF)
+option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    ON)
+option(RODIN_USE_MCSS           "Build documentation with m.css"        OFF)
+option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
+option(RODIN_WITH_PY            "Build Python bindings."                OFF)
+option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -144,6 +145,10 @@ if (RODIN_BUILD_SRC)
 
   if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(examples)
+  endif()
+
+  if (RODIN_BUILD_TESTS)
+    add_subdirectory(tests)
   endif()
 
   if (RODIN_WITH_PY)

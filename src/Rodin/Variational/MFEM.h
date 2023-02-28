@@ -10,6 +10,7 @@
 #include <mfem.hpp>
 
 #include "Function.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Utility
 {
@@ -136,6 +137,58 @@ namespace Rodin::Variational::Internal
   template <class Derived>
   MFEMScalarCoefficient(const Geometry::MeshBase&, const FunctionBase<Derived>&)
     -> MFEMScalarCoefficient<Derived>;
+
+  template <>
+  class MFEMScalarCoefficient<FunctionBase<ScalarFunction<Scalar>>> final
+    : public mfem::ConstantCoefficient
+  {
+    public:
+      using Parent = mfem::ConstantCoefficient;
+
+      MFEMScalarCoefficient(const Geometry::MeshBase&,
+          const FunctionBase<ScalarFunctionBase<ScalarFunction<Scalar>>>& s)
+         : Parent(
+             static_cast<const ScalarFunction<Scalar>&>(
+               static_cast<const ScalarFunctionBase<ScalarFunction<Scalar>>&>(s)).getValue())
+      {}
+
+      MFEMScalarCoefficient(const MFEMScalarCoefficient& other)
+        : Parent(other)
+      {}
+
+      MFEMScalarCoefficient(MFEMScalarCoefficient&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  MFEMScalarCoefficient(const Geometry::MeshBase&, const FunctionBase<ScalarFunction<Scalar>>&)
+    -> MFEMScalarCoefficient<FunctionBase<ScalarFunction<Scalar>>>;
+
+  template <>
+  class MFEMScalarCoefficient<FunctionBase<ScalarFunctionBase<ScalarFunction<Integer>>>> final
+    : public mfem::ConstantCoefficient
+  {
+    public:
+      using Parent = mfem::ConstantCoefficient;
+
+      MFEMScalarCoefficient(const Geometry::MeshBase&,
+          const FunctionBase<ScalarFunctionBase<ScalarFunction<Integer>>>& s)
+         : Parent(
+             static_cast<const ScalarFunction<Integer>&>(
+               static_cast<const ScalarFunctionBase<ScalarFunction<Integer>>&>(s)).getValue())
+      {}
+
+      MFEMScalarCoefficient(const MFEMScalarCoefficient& other)
+        : Parent(other)
+      {}
+
+      MFEMScalarCoefficient(MFEMScalarCoefficient&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  MFEMScalarCoefficient(const Geometry::MeshBase&, const FunctionBase<ScalarFunction<Integer>>&)
+    -> MFEMScalarCoefficient<FunctionBase<ScalarFunction<Integer>>>;
 
   template <class Derived>
   class MFEMVectorCoefficient final : public mfem::VectorCoefficient

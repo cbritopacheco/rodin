@@ -180,6 +180,13 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      Scalar getValue() const
+      {
+        return m_x;
+      }
+
+      inline
+      constexpr
       Scalar getValue(const Geometry::Point&) const
       {
         return m_x;
@@ -229,6 +236,13 @@ namespace Rodin::Variational
       ScalarFunction& traceOf(Geometry::Attribute)
       {
         return *this;
+      }
+
+      inline
+      constexpr
+      Scalar getValue() const
+      {
+        return m_x;
       }
 
       inline
