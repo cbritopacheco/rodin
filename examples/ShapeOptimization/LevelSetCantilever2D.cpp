@@ -33,7 +33,7 @@ static constexpr double ell = 0.4;
 static constexpr double alpha = 4 * hmax * hmax;
 
 // Compliance
-double compliance(GridFunction<H1<Context::Serial>>& w);
+double compliance(GridFunction<H1<Math::Vector, Context::Serial>>& w);
 
 int main(int, char**)
 {
@@ -89,18 +89,17 @@ int main(int, char**)
 
     auto e = 0.5 * (jac + jac.T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-    auto n = Normal(d);
+    auto n = FaceNormal(Omega);
     n.traceOf(Interior);
 
     // Hilbert extension-regularization procedure
     TrialFunction g(Vh);
     TestFunction  v(Vh);
     Problem hilbert(g, v);
-    hilbert =
-      Integral(alpha * Jacobian(g), Jacobian(v))
-      + Integral(g, v)
-      - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
-      + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
+    hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+            + Integral(g, v)
+            // - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
+            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     hilbert.solve(solver);
     g.getSolution().save("g.gf");
     Omega.save("g.mesh");
@@ -149,15 +148,15 @@ int main(int, char**)
   return 0;
 }
 
-double compliance(GridFunction<H1<Context::Serial>>& w)
+Scalar compliance(GridFunction<H1<Math::Vector, Context::Serial>>& w)
 {
-  auto& Vh = w.getFiniteElementSpace();
+  const auto& Vh = w.getFiniteElementSpace();
   TrialFunction u(Vh);
   TestFunction  v(Vh);
   BilinearForm  bf(u, v);
   bf = Integral(lambda * Div(u), Div(v))
-    + Integral(
-      mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+     + Integral(
+         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
   return bf(w, w);
 }
 

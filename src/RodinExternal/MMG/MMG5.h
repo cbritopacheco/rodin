@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <mfem.hpp>
 
+#include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -63,47 +64,48 @@ namespace Rodin::External::MMG
     static void copySolution(const Variational::GridFunction<FES>& src, MMG5_pSol dst)
     {
       assert(dst);
-      auto [data, size] = src.getData();
+      const Math::Vector& data = src.getData();
+      const size_t size = data.size();
       if (size)
       {
-       int vdim = src.getFiniteElementSpace().getVectorDimension();
-       assert(size % vdim == 0);
-       assert(dst->size == vdim);
-       size_t n = size / vdim;
-       assert(n > 0);
-       dst->np  = n;
-       dst->npi = n;
-       dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
-       assert(dst->np < dst->npmax);
-       if (!dst->m)
-       {
-        // So (dst->size + 1) * (dst->np + 1) seems to work for most
-        // applications
-        MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
-            Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
-       }
-       if (vdim == 1)
-       {
-         std::copy(data, data + size, dst->m + 1);
-       }
-       else
-       {
-        switch (src.getFiniteElementSpace().getHandle().GetOrdering())
+        int vdim = src.getFiniteElementSpace().getVectorDimension();
+        assert(size % vdim == 0);
+        assert(dst->size == vdim);
+        size_t n = size / vdim;
+        assert(n > 0);
+        dst->np  = n;
+        dst->npi = n;
+        dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+        assert(dst->np < dst->npmax);
+        if (!dst->m)
         {
-          case mfem::Ordering::byNODES:
+          // So (dst->size + 1) * (dst->np + 1) seems to work for most
+          // applications
+          MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
+              Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+        }
+        if (vdim == 1)
+        {
+          std::copy(data.begin(), data.end(), dst->m + 1);
+        }
+        else
+        {
+          switch (src.getFiniteElementSpace().getHandle().GetOrdering())
           {
-            for (size_t i = 0; i < n; i++)
-              for (size_t j = 0; j < vdim; j++)
-                dst->m[(i + 1) * dst->size + j] = data[i + j * n];
-           break;
-          }
-          case mfem::Ordering::byVDIM:
-          {
-           std::copy(data, data + size, dst->m + dst->size);
-           break;
+            case mfem::Ordering::byNODES:
+            {
+              for (size_t i = 0; i < n; i++)
+                for (size_t j = 0; j < vdim; j++)
+                  dst->m[(i + 1) * dst->size + j] = data[i + j * n];
+              break;
+            }
+            case mfem::Ordering::byVDIM:
+            {
+              std::copy(data.begin(), data.end(), dst->m + dst->size);
+              break;
+            }
           }
         }
-       }
       }
     }
 
