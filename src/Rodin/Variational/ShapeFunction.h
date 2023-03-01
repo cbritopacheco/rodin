@@ -74,7 +74,7 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        return { m_fes.get().getVectorDimension(), 1 };
+        return static_cast<const Derived&>(*this).getRangeShape();
       }
 
       inline
@@ -330,6 +330,13 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      RangeShape getRangeShape() const
+      {
+        return { 1, 1 };
+      }
+
+      inline
+      constexpr
       GridFunction<FES>& getSolution()
       {
         assert(m_gf);
@@ -427,6 +434,13 @@ namespace Rodin::Variational
       {
         assert(m_gf);
         return *m_gf;
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
       inline

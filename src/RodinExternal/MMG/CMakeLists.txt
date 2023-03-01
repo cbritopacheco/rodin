@@ -16,7 +16,6 @@ set(RodinExternalMMG_HEADERS
   Distancer.h
   MeshLoader.h
   MeshPrinter.h
-  MeshAdaptor.h
   MeshOptimizer.h
   ImplicitDomainMesher.h
   )
@@ -28,7 +27,6 @@ set(RodinExternalMMG_SRCS
   ISCDProcess.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
-  MeshAdaptor.cpp
   MeshOptimizer.cpp
   ImplicitDomainMesher.cpp
   )

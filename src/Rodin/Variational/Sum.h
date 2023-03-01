@@ -79,7 +79,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Sum& traceOf(Geometry::Attribute attrs)
+      Sum& traceOf(const std::set<Geometry::Attribute>& attrs)
       {
         getLHS().traceOf(attrs);
         getRHS().traceOf(attrs);
@@ -198,8 +198,8 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        assert(m_lhs.getRangeShape() == m_rhs.getRangeShape());
-        return m_lhs.getRangeShape();
+        assert(getLHS().getRangeShape() == getRHS().getRangeShape());
+        return getLHS().getRangeShape();
       }
 
       inline

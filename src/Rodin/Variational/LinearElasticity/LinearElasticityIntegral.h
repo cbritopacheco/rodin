@@ -113,7 +113,8 @@ namespace Rodin::Variational
       auto
       operator()(const L& lambda, const M& mu) const
       {
-        return LinearElasticityIntegrator(m_u.get(), m_v.get(), ScalarFunction<L>(lambda), ScalarFunction<M>(mu));
+        return LinearElasticityIntegrator(m_u.get(), m_v.get(),
+            ScalarFunction<L>(lambda), ScalarFunction<M>(mu));
       }
 
       template <class MuDerived, class LambdaDerived>

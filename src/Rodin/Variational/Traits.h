@@ -35,10 +35,24 @@ namespace Rodin::FormLanguage
     };
 
     template <>
+    struct RangeOfSAT<true, false, true, false, false>
+    {
+      using Type = Scalar;
+      Variational::RangeType Value = Variational::RangeType::Scalar;
+    };
+
+    template <>
     struct RangeOfSAT<false, true, false, false, false>
     {
       using Type = Integer;
       Variational::RangeType Value = Variational::RangeType::Integer;
+    };
+
+    template <>
+    struct RangeOfSAT<false, true, true, false, false>
+    {
+      using Type = Scalar;
+      Variational::RangeType Value = Variational::RangeType::Scalar;
     };
 
     template <>
