@@ -454,6 +454,7 @@ namespace Rodin::Variational
           m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
       {
         assert(!m_gf->OwnsData());
+        m_data.setZero();
       }
 
       constexpr

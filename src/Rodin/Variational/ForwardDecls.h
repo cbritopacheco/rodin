@@ -734,6 +734,9 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class OR;
 
+  template <class Integrand>
+  class GaussianQuadrature;
+
   /**
    * @brief Represents mathematical expressions of the integral operator on a
    * domain.

@@ -16,20 +16,20 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 // Define boundary attributes
-static constexpr int Gamma0 = 1; // Traction free boundary
-static constexpr int GammaD = 2; // Homogenous Dirichlet boundary
-static constexpr int GammaN = 3; // Inhomogenous Neumann boundary
+static constexpr Geometry::Attribute Gamma0 = 1; // Traction free boundary
+static constexpr Geometry::Attribute GammaD = 2; // Homogenous Dirichlet boundary
+static constexpr Geometry::Attribute GammaN = 3; // Inhomogenous Neumann boundary
 
 // Lamé coefficients
-static constexpr double mu    = 0.3846;
-static constexpr double lambda = 0.5769;
+static constexpr Scalar mu    = 0.3846;
+static constexpr Scalar lambda = 0.5769;
 
 // Optimization parameters
 static constexpr size_t maxIt = 40;
-static constexpr double eps  = 1e-6;
-static constexpr double hmax  = 0.05;
-static constexpr double ell  = 5.0;
-static constexpr double alpha = 4 * hmax;
+static constexpr Scalar eps  = 1e-6;
+static constexpr Scalar hmax  = 0.1;
+static constexpr Scalar ell  = 5.0;
+static constexpr Scalar alpha = 4 * hmax;
 
 
 // Compliance
@@ -65,14 +65,14 @@ int main(int, char**)
 
     // Finite element spaces
     int d = 2;
-    H1 Vh(Omega, d);
+    H1 vh(Omega, d);
 
     // Pull-down force
     VectorFunction f{0, -1};
 
     // Elasticity equation
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
     Problem elasticity(u, v);
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
@@ -80,8 +80,8 @@ int main(int, char**)
     elasticity.solve(solver);
 
     // Hilbert extension-regularization procedure
-    TrialFunction g(Vh);
-    TestFunction  w(Vh);
+    TrialFunction g(vh);
+    TestFunction  w(vh);
 
     auto e = 0.5 * (Jacobian(u.getSolution()) + Jacobian(u.getSolution()).T());
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
@@ -99,7 +99,7 @@ int main(int, char**)
     Alert::Info() << "   | Objective: " << obj[i] << Alert::Raise;
 
     // Make the displacement
-    double dt = Omega.getMaximumDisplacement(g.getSolution());
+    Scalar dt = Omega.getMaximumDisplacement(g.getSolution());
     g.getSolution() *= hmax * dt;
     Omega.displace(g.getSolution());
 
