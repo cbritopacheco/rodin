@@ -12,7 +12,7 @@ namespace Rodin::Variational
   /**
    * @brief Outward unit normal.
    */
-  class Normal : public VectorFunctionBase<Normal>
+  class Normal final : public VectorFunctionBase<Normal>
   {
     public:
       using Parent = VectorFunctionBase<Normal>;
@@ -68,6 +68,11 @@ namespace Rodin::Variational
           value.setConstant(NAN);
         }
         return value.normalized();
+      }
+
+      inline Normal* copy() const noexcept override
+      {
+        return new Normal(*this);
       }
 
     private:

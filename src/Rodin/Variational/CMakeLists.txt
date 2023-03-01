@@ -86,6 +86,7 @@ set(RodinVariational_SRCS
   GT.cpp
   LT.cpp
   OR.cpp
+  QuadratureRule.cpp
   AND.cpp
   Tangent.cpp
   Assembly/AssemblyBase.cpp

@@ -94,6 +94,7 @@ namespace Rodin::Variational::Internal
       double Eval(mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
       override
       {
+        const Math::Vector rc = Internal::ip2vec(ip, trans.GetDimension());
         Scalar res = 0;
         switch (trans.ElementType)
         {
@@ -102,27 +103,28 @@ namespace Rodin::Variational::Internal
             res = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getElement(trans.ElementNo),
                   m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
-                    trans.ElementNo), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+                    trans.ElementNo), rc));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
             int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            res = m_s.get().getValue(Geometry::Point(
-                  *m_mesh.get().getFace(faceIdx),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
-                    - 1, faceIdx), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+            res =
+              m_s.get().getValue(
+                  Geometry::Point(
+                    *m_mesh.get().getFace(faceIdx),
+                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, faceIdx),
+                    rc));
             break;
           }
           case mfem::ElementTransformation::FACE:
           {
-            res = m_s.get().getValue(Geometry::Point(
-                  *m_mesh.get().getFace(trans.ElementNo),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
-                    - 1, trans.ElementNo), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+            res =
+              m_s.get().getValue(
+                  Geometry::Point(
+                    *m_mesh.get().getFace(trans.ElementNo),
+                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, trans.ElementNo),
+                    rc));
             break;
           }
         }
@@ -220,33 +222,39 @@ namespace Rodin::Variational::Internal
           mfem::Vector& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
       override
       {
+        const Math::Vector rc = Internal::ip2vec(ip, trans.GetDimension());
         Math::Vector vec;
         switch (trans.ElementType)
         {
           case mfem::ElementTransformation::ELEMENT:
           {
             vec =
-              m_s.get().getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo),
-                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
-                      trans.ElementNo), Internal::ip2vec(ip, trans.GetDimension())));
+              m_s.get().getValue(
+                  Geometry::Point(
+                    *m_mesh.get().getElement(trans.ElementNo),
+                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(), trans.ElementNo),
+                    rc));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
             int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            vec = m_s.get().getValue(
-                Geometry::Point(*m_mesh.get().getFace(faceIdx),
+            vec =
+              m_s.get().getValue(
+                Geometry::Point(
+                  *m_mesh.get().getFace(faceIdx),
                   m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, faceIdx),
-                  Internal::ip2vec(ip, trans.GetDimension())));
+                  rc));
             break;
           }
           case mfem::ElementTransformation::FACE:
           {
-            vec = m_s.get().getValue(Geometry::Point(
-                  *m_mesh.get().getFace(trans.ElementNo),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
-                    - 1, trans.ElementNo), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+            vec =
+              m_s.get().getValue(
+                  Geometry::Point(
+                    *m_mesh.get().getFace(trans.ElementNo),
+                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, trans.ElementNo),
+                    rc));
             break;
           }
         }
@@ -291,17 +299,18 @@ namespace Rodin::Variational::Internal
           mfem::DenseMatrix& value, mfem::ElementTransformation& trans, const mfem::IntegrationPoint& ip)
       override
       {
+        const Math::Vector rc = Internal::ip2vec(ip, trans.GetDimension());
         Math::Matrix mat;
-        assert(false);
         switch (trans.ElementType)
         {
           case mfem::ElementTransformation::ELEMENT:
           {
             value =
-              m_s.get().getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo),
+              m_s.get().getValue(
+                  Geometry::Point(
+                    *m_mesh.get().getElement(trans.ElementNo),
                     m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
-                      trans.ElementNo), Internal::ip2vec(ip,
-                        trans.GetDimension())));
+                      trans.ElementNo), rc));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
@@ -310,8 +319,7 @@ namespace Rodin::Variational::Internal
             value = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getFace(faceIdx),
                   m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
-                    - 1, faceIdx), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+                    - 1, faceIdx), rc));
             break;
           }
           case mfem::ElementTransformation::FACE:
@@ -319,8 +327,7 @@ namespace Rodin::Variational::Internal
             value = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getFace(trans.ElementNo),
                   m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
-                    - 1, trans.ElementNo), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+                    - 1, trans.ElementNo), rc));
             break;
           }
         }

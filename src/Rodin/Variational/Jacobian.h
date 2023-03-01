@@ -217,6 +217,22 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
+      inline
+      constexpr
+      Jacobian& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Jacobian& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
       inline Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);

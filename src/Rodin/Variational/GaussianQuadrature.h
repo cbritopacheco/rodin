@@ -4,12 +4,12 @@
 #include "Dot.h"
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
+#include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
-
   /**
    * @defgroup GaussianQuadratureSpecializations GaussianQuadrature Template Specializations
    * @brief Template specializations of the GaussianQuadrature class.
@@ -69,14 +69,12 @@ namespace Rodin::Variational
           trial.getFiniteElementSpace().getOrder(simplex) +
           test.getFiniteElementSpace().getOrder(simplex) +
           simplex.getTransformation().getHandle().OrderW();
-        const mfem::IntegrationRule* ir =
-          &mfem::IntRules.Get(static_cast<mfem::Geometry::Type>(simplex.getGeometry()), order);
+        const QuadratureRule& qr = QuadratureRule::get(simplex.getGeometry(), order);
         Math::Matrix res = Math::Matrix::Zero(test.getDOFs(simplex), trial.getDOFs(simplex));
-        for (int i = 0; i < ir->GetNPoints(); i++)
+        for (size_t i = 0; i < qr.size(); i++)
         {
-          const auto& ip = ir->IntPoint(i);
-          Geometry::Point p(simplex, trans, Internal::ip2vec(ir->IntPoint(i), simplex.getDimension()));
-          res += ip.weight * p.getDistortion() * integrand.getMatrix(p);
+          Geometry::Point p(simplex, trans, qr.getPoint(i));
+          res += qr.getWeight(i) * p.getDistortion() * integrand.getMatrix(p);
         }
         return res;
       }
@@ -136,14 +134,12 @@ namespace Rodin::Variational
         const auto& trans = simplex.getTransformation();
         const size_t order =
           integrand.getFiniteElementSpace().getOrder(simplex) + trans.getHandle().OrderW();
-        const mfem::IntegrationRule* ir =
-          &mfem::IntRules.Get(static_cast<mfem::Geometry::Type>(simplex.getGeometry()), order);
         Math::Vector res = Math::Vector::Zero(integrand.getDOFs(simplex));
-        for (int i = 0; i < ir->GetNPoints(); i++)
+        const QuadratureRule& qr = QuadratureRule::get(simplex.getGeometry(), order);
+        for (size_t i = 0; i < qr.size(); i++)
         {
-          const auto& ip = ir->IntPoint(i);
-          Geometry::Point p(simplex, trans, Internal::ip2vec(ip, simplex.getDimension()));
-          res += ip.weight * p.getDistortion() * integrand.getTensorBasis(p).getVector();
+          Geometry::Point p(simplex, trans, qr.getPoint(i));
+          res += qr.getWeight(i) * p.getDistortion() * integrand.getTensorBasis(p).getVector();
         }
         return res;
       }

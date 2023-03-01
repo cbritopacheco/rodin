@@ -474,6 +474,20 @@ namespace Rodin::Variational
       {}
 
       inline
+      constexpr
+      Scalar max() const
+      {
+        return m_data.maxCoeff();
+      }
+
+      inline
+      constexpr
+      Scalar min() const
+      {
+        return m_data.minCoeff();
+      }
+
+      inline
       auto getValue(const Geometry::Point& p) const
       {
         using RangeType = typename FES::RangeType;

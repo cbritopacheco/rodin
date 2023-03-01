@@ -82,11 +82,26 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getColumns();
       }
 
+      inline
+      constexpr
+      MatrixFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      MatrixFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
       virtual MatrixFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
       }
-
   };
 }
 
