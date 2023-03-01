@@ -10,11 +10,10 @@
 #include <cassert>
 #include <set>
 #include <utility>
-#include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
 
-
+#include "ForwardDecls.h"
 #include "GaussianQuadrature.h"
 
 namespace Rodin::Variational
@@ -69,9 +68,6 @@ namespace Rodin::Variational
       {
         return new BoundaryIntegral(*this);
       }
-
-    private:
-      std::unique_ptr<Integrand> m_prod;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -120,9 +116,6 @@ namespace Rodin::Variational
       {
         return new BoundaryIntegral(*this);
       }
-
-    private:
-      std::unique_ptr<Integrand> m_integrand;
   };
 
   template <class NestedDerived, class FES>
@@ -132,70 +125,6 @@ namespace Rodin::Variational
   template <class LHSDerived, class RHSDerived, class FES>
   BoundaryIntegral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
     -> BoundaryIntegral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
-
-  // template <class FES>
-  // class BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>
-  //   : public Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>
-  // {
-  //   public:
-  //     using Parent =
-  //       Integral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
-  //     using Integrand =
-  //       Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>;
-  //     using Parent::Parent;
-  //     Integrator::Region getRegion() const override { return Integrator::Region::Boundary; }
-  //     BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
-  // };
-  // template <class FES>
-  // BoundaryIntegral(
-  //     const Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>&,
-  //     const ShapeFunction<FES, TestSpace>&)
-  //   -> BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
-  // template <class FES>
-  // BoundaryIntegral(
-  //     const Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>&)
-  //   -> BoundaryIntegral<Dot<Mult<FunctionBase, ShapeFunction<FES, TrialSpace>>, ShapeFunction<FES, TestSpace>>>;
-
-  // template <class FES>
-  // class BoundaryIntegral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>
-  //   : public Integral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>
-  // {
-  //   public:
-  //     using Parent =
-  //       Integral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
-  //     using Integrand =
-  //       Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>;
-  //     using Parent::Parent;
-  //     Integrator::Region getRegion() const override { return Integrator::Region::Boundary; }
-  //     BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
-  // };
-  // template <class FES>
-  // BoundaryIntegral(
-  //     const Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>&,
-  //     const Grad<ShapeFunction<FES, TestSpace>>&)
-  //   -> BoundaryIntegral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
-  // template <class FES>
-  // BoundaryIntegral(
-  //     const Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>&)
-  //   -> BoundaryIntegral<Dot<Mult<FunctionBase, Grad<ShapeFunction<FES, TrialSpace>>>, Grad<ShapeFunction<FES, TestSpace>>>>;
-
-  // template <class FES>
-  // class BoundaryIntegral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>
-  //   : public Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>
-  // {
-  //   public:
-  //     using Parent    = Integral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
-  //     using Integrand  = Dot<FunctionBase, ShapeFunction<FES, TestSpace>>;
-  //     using Parent::Parent;
-  //     Integrator::Region getRegion() const override { return Integrator::Region::Boundary; }
-  //     BoundaryIntegral* copy() const noexcept override { return new BoundaryIntegral(*this); }
-  // };
-  // template <class FES>
-  // BoundaryIntegral(const FunctionBase&, const ShapeFunction<FES, TestSpace>&)
-  //   -> BoundaryIntegral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
-  // template <class FES>
-  // BoundaryIntegral(const Dot<FunctionBase, ShapeFunction<FES, TestSpace>>&)
-  //   -> BoundaryIntegral<Dot<FunctionBase, ShapeFunction<FES, TestSpace>>>;
 }
 
 #endif

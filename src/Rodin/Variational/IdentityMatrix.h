@@ -59,6 +59,13 @@ namespace Rodin::Variational
         return Math::Matrix::Identity(m_n, m_n);
       }
 
+      inline
+      constexpr
+      IdentityMatrix& traceOf(const std::set<Geometry::Attribute>&)
+      {
+        return *this;
+      }
+
       inline IdentityMatrix* copy() const noexcept override
       {
         return new IdentityMatrix(*this);

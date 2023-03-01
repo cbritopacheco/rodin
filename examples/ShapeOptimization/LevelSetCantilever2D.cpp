@@ -63,23 +63,23 @@ int main(int, char**)
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     int d = 2;
-    H1 Vh(Omega, d);
-    H1 VhInt(trimmed, d);
+    H1 vh(Omega, d);
+    H1 shInt(trimmed);
+    H1 vhInt(trimmed, d);
     Omega.save("miaow.mesh");
 
     Alert::Info() << "   | Solving state equation." << Alert::Raise;
     auto f = VectorFunction{0, -1};
-    TrialFunction uInt(VhInt);
-    TestFunction  vInt(VhInt);
+    TrialFunction uInt(vhInt);
+    TestFunction  vInt(vhInt);
 
     // Elasticity equation
     Problem elasticity(uInt, vInt);
-    elasticity =
-      Integral(lambda * Div(uInt), Div(vInt))
-      + Integral(
-          mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
-      - BoundaryIntegral(f, vInt).over(GammaN)
-      + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
+    elasticity = Integral(lambda * Div(uInt), Div(vInt))
+               + Integral(
+                   mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
+               - BoundaryIntegral(f, vInt).over(GammaN)
+               + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
@@ -93,12 +93,12 @@ int main(int, char**)
     n.traceOf(Interior);
 
     // Hilbert extension-regularization procedure
-    TrialFunction g(Vh);
-    TestFunction  v(Vh);
+    TrialFunction g(vh);
+    TestFunction  v(vh);
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            // - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
+            - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     hilbert.solve(solver);
     g.getSolution().save("g.gf");

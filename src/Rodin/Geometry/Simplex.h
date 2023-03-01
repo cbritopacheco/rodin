@@ -20,7 +20,6 @@ namespace Rodin::Geometry
 {
   enum class Type
   {
-    Invalid = mfem::Geometry::INVALID,
     Point = mfem::Geometry::POINT,
     Segment = mfem::Geometry::SEGMENT,
     Triangle = mfem::Geometry::TRIANGLE,
@@ -257,7 +256,7 @@ namespace Rodin::Geometry
           }
           case Coordinates::Reference:
           {
-            assert(m_rc.size() > static_cast<int>(i));
+            assert(m_rc.get().size() > static_cast<int>(i));
             return m_rc(i);
           }
         }
@@ -325,7 +324,7 @@ namespace Rodin::Geometry
       inline
       const Math::Vector& getReference() const
       {
-        return m_rc;
+        return m_rc.get();
       }
 
       inline
@@ -345,7 +344,7 @@ namespace Rodin::Geometry
     private:
       std::reference_wrapper<const Simplex> m_simplex;
       std::reference_wrapper<const SimplexTransformation> m_trans;
-      Math::Vector m_rc;
+      std::reference_wrapper<const Math::Vector> m_rc;
       mfem::IntegrationPoint m_ip;
       mutable std::optional<const Math::Vector> m_pc;
       mutable std::optional<const Math::Matrix> m_jacobian;

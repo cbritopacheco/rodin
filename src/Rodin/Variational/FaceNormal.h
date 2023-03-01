@@ -48,7 +48,7 @@ namespace Rodin::Variational
 
       Math::Vector getValue(const Geometry::Point& p) const
       {
-        assert(p.getSimplex().getMesh().isSurface());
+        assert(p.getSimplex().getDimension() == p.getSimplex().getMesh().getSpaceDimension() - 1);
         const auto& simplex = p.getSimplex();
         const auto& mesh = simplex.getMesh();
         const auto& jacobian = p.getJacobian();
@@ -69,60 +69,57 @@ namespace Rodin::Variational
         {
           assert(false);
           value.setConstant(NAN);
-        }
-
-        return value.normalized();
-
-        const Scalar norm = value.norm();
-        value /= norm;
-
-        assert(norm >= 0.0);
-        assert(std::isfinite(norm));
-
-        if ((mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
-            simplex.getDimension() == mesh.getDimension())
-        {
-          // We are on an element of a d-mesh in (d + 1)-space.
           return value;
         }
-        else if ((mesh.getDimension() == mesh.getSpaceDimension()) &&
-            simplex.getDimension() == mesh.getDimension() - 1)
+
+        // Or we are on a face of a d-mesh in d-space
+        if (mesh.isBoundary(simplex.getIndex()))
         {
-          // Or we are on a face of a d-mesh in d-space
-          if (mesh.isBoundary(simplex.getIndex()))
-          {
-            return value;
-          }
-          else
-          {
-            int el1 = -1;
-            int el2 = -1;
-            const auto& meshHandle = simplex.getMesh().getHandle();
-            meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
-            if (el1 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el1)))
-            {
-              return value;
-            }
-            else if (el2 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el2)))
-            {
-              value = -1.0 * value;
-              return value;
-            }
-            else
-            {
-              assert(false);
-              value.setZero();
-              return value;
-            }
-          }
+          return value.normalized();
         }
         else
         {
-          assert(false);
-          value.setZero();
-          return value;
+          int el1 = -1;
+          int el2 = -1;
+          const auto& meshHandle = simplex.getMesh().getHandle();
+          meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
+          if (el1 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el1)))
+          {
+            return value.normalized();
+          }
+          else if (el2 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el2)))
+          {
+            value = -1.0 * value;
+            return value.normalized();
+          }
+          else
+          {
+            assert(false);
+            value.setConstant(NAN);
+            return value;
+          }
         }
-        return value;
+      }
+
+      inline
+      constexpr
+      FaceNormal& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      FaceNormal& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      inline FaceNormal* copy() const noexcept override
+      {
+        return new FaceNormal(*this);
       }
 
     private:

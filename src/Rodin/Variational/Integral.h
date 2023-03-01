@@ -116,9 +116,6 @@ namespace Rodin::Variational
       {
         return new Integral(*this);
       }
-
-    private:
-      std::unique_ptr<Integrand> m_prod;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -180,9 +177,6 @@ namespace Rodin::Variational
       {
         return new Integral(*this);
       }
-
-    private:
-      std::unique_ptr<Integrand> m_integrand;
   };
 
   template <class NestedDerived, class FES>

@@ -13,7 +13,6 @@ namespace Rodin
   using Float = double;
   using Scalar = Float;
   using Index = std::size_t;
-  using Attribute = std::size_t;
 
 #if __cpp_size_t_suffix < 202011L
   constexpr

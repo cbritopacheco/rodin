@@ -49,6 +49,7 @@ namespace Rodin::Variational
       Math::Vector getValue(const Geometry::Point& p) const
       {
         assert(p.getSimplex().getDimension() == p.getSimplex().getMesh().getSpaceDimension() - 1);
+        assert(p.getSimplex().getMesh().isBoundary(p.getSimplex().getIndex()));
         const auto& jacobian = p.getJacobian();
         Math::Vector value(m_dimension);
         if (jacobian.rows() == 2)
