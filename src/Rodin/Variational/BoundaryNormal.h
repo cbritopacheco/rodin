@@ -1,5 +1,5 @@
-#ifndef RODIN_VARIATIONAL_NORMAL_H
-#define RODIN_VARIATIONAL_NORMAL_H
+#ifndef RODIN_VARIATIONAL_BOUNDARYNORMAL_H
+#define RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/SimplexTransformation.h"
@@ -12,29 +12,29 @@ namespace Rodin::Variational
   /**
    * @brief Outward unit normal.
    */
-  class Normal : public VectorFunctionBase<Normal>
+  class BoundaryNormal final : public VectorFunctionBase<BoundaryNormal>
   {
     public:
-      using Parent = VectorFunctionBase<Normal>;
+      using Parent = VectorFunctionBase<BoundaryNormal>;
 
       /**
        * @brief Constructs the outward unit normal.
        */
       constexpr
-      Normal(const Geometry::MeshBase& surface)
-        : m_dimension(surface.getSpaceDimension())
+      BoundaryNormal(const Geometry::MeshBase& mesh)
+        : m_dimension(mesh.getSpaceDimension())
       {
         assert(m_dimension > 0);
       }
 
       constexpr
-      Normal(const Normal& other)
+      BoundaryNormal(const BoundaryNormal& other)
         : Parent(other),
           m_dimension(other.m_dimension)
       {}
 
       constexpr
-      Normal(Normal&& other)
+      BoundaryNormal(BoundaryNormal&& other)
         : Parent(std::move(other)),
           m_dimension(std::move(other.m_dimension))
       {}
@@ -48,19 +48,20 @@ namespace Rodin::Variational
 
       Math::Vector getValue(const Geometry::Point& p) const
       {
-        assert(p.getSimplex().getMesh().isSurface());
+        assert(p.getSimplex().getDimension() == p.getSimplex().getMesh().getSpaceDimension() - 1);
         const auto& jacobian = p.getJacobian();
         Math::Vector value(m_dimension);
         if (jacobian.rows() == 2)
         {
-          value(0) =  jacobian(1, 0);
-          value(1) = -jacobian(0, 0);
+          value <<
+            jacobian(1, 0), -jacobian(0, 0);
         }
         else if (jacobian.rows() == 3)
         {
-          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+          value <<
+            jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
+            jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+            jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
         }
         else
         {
@@ -70,9 +71,15 @@ namespace Rodin::Variational
         return value.normalized();
       }
 
+      inline BoundaryNormal* copy() const noexcept override
+      {
+        return new BoundaryNormal(*this);
+      }
+
     private:
       const size_t m_dimension;
   };
 }
 
 #endif
+

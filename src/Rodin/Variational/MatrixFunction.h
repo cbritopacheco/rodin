@@ -81,6 +81,12 @@ namespace Rodin::Variational
       {
         return static_cast<const Derived&>(*this).getColumns();
       }
+
+      virtual MatrixFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+
   };
 }
 

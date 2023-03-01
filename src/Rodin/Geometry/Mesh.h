@@ -340,7 +340,7 @@ namespace Rodin::Geometry
           std::vector<size_t> m_count;
           std::vector<std::vector<Connectivity>> m_connectivity;
           std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
-          mfem::Mesh m_impl;
+          std::unique_ptr<mfem::Mesh> m_impl;
       };
 
       /**

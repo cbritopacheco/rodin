@@ -72,7 +72,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      Geometry::Attribute getTraceDomain() const
+      const std::set<Geometry::Attribute>& getTraceDomain() const
       {
         return m_traceDomain;
       }
@@ -155,6 +155,13 @@ namespace Rodin::Variational
       constexpr
       FunctionBase& traceOf(Geometry::Attribute attr)
       {
+        return traceOf(std::set<Geometry::Attribute>{attr});
+      }
+
+      inline
+      constexpr
+      FunctionBase& traceOf(const std::set<Geometry::Attribute>& attr)
+      {
         static_cast<Derived&>(*this).traceOf(attr);
         m_traceDomain = attr;
         return *this;
@@ -166,7 +173,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Geometry::Attribute m_traceDomain;
+      std::set<Geometry::Attribute> m_traceDomain;
   };
 }
 

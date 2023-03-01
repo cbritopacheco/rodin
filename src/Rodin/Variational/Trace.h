@@ -29,7 +29,7 @@ namespace Rodin::Variational
   {
     public:
       using Operand = FunctionBase<NestedDerived>;
-      using Parent = ScalarFunctionBase<Operand>;
+      using Parent = ScalarFunctionBase<Trace<Operand>>;
 
       /**
        * @brief Constructs the Trace of the given matrix
@@ -37,13 +37,13 @@ namespace Rodin::Variational
        */
       constexpr
       Trace(const Operand& m)
-        : m_operand(m)
+        : m_operand(m.copy())
       {}
 
       constexpr
       Trace(const Trace& other)
         : Parent(other),
-          m_operand(other.m_operand)
+          m_operand(other.m_operand->copy())
       {}
 
       constexpr
@@ -56,10 +56,17 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange =
-          FormLanguage::RangeOf<typename FormLanguage::Traits<Operand>::ResultType>;
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
         static_assert(std::is_same_v<OperandRange, Math::Matrix>);
-        return m_operand.getValue(p).trace();
+        return getOperand().getValue(p).trace();
+      }
+
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
       }
 
       inline
@@ -69,16 +76,15 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline
-      Trace* copy() const noexcept
-      override
+      inline Trace* copy() const noexcept override
       {
         return new Trace(*this);
       }
 
     private:
-      Operand m_operand;
+      std::unique_ptr<Operand> m_operand;
   };
+
   template <class NestedDerived>
   Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
 }

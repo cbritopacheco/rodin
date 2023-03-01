@@ -228,18 +228,16 @@ namespace Rodin::Variational::Internal
             vec =
               m_s.get().getValue(Geometry::Point(*m_mesh.get().getElement(trans.ElementNo),
                     m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
-                      trans.ElementNo), Internal::ip2vec(ip,
-                        trans.GetDimension())));
+                      trans.ElementNo), Internal::ip2vec(ip, trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
             int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            vec = m_s.get().getValue(Geometry::Point(
-                  *m_mesh.get().getFace(faceIdx),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
-                    - 1, faceIdx), Internal::ip2vec(ip,
-                      trans.GetDimension())));
+            vec = m_s.get().getValue(
+                Geometry::Point(*m_mesh.get().getFace(faceIdx),
+                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, faceIdx),
+                  Internal::ip2vec(ip, trans.GetDimension())));
             break;
           }
           case mfem::ElementTransformation::FACE:

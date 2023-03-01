@@ -28,7 +28,7 @@ namespace Rodin::Variational
   {
     public:
       using Operand = FunctionBase<NestedDerived>;
-      using Parent = FunctionBase<Operand>;
+      using Parent = FunctionBase<Transpose<Operand>>;
 
       /**
        * @brief Constructs the Transpose matrix of the given matrix.
@@ -41,13 +41,13 @@ namespace Rodin::Variational
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
-          m_operand(other.m_matrix->copy())
+          m_operand(other.m_operand->copy())
       {}
 
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
-          m_operand(std::move(other.m_matrix))
+          m_operand(std::move(other.m_operand))
       {}
 
       inline
@@ -59,7 +59,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const auto& getOperand() const
+      const Operand& getOperand() const
       {
         assert(m_operand);
         return *m_operand;

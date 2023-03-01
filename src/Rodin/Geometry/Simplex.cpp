@@ -63,19 +63,17 @@ namespace Rodin::Geometry
 
   Scalar Simplex::getVolume() const
   {
-    assert(false);
-    return 0;
-    // mfem::ElementTransformation& trans = getTransformation();
-    // const mfem::IntegrationRule& ir =
-    //   mfem::IntRules.Get(static_cast<int>(getGeometry()), trans.OrderJ());
-    // double volume = 0.0;
-    // for (int j = 0; j < ir.GetNPoints(); j++)
-    // {
-    //   const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-    //   trans.SetIntPoint(&ip);
-    //   volume += ip.weight * trans.Weight();
-    // }
-    // return volume;
+    mfem::ElementTransformation& trans = getTransformation().getHandle();
+    const mfem::IntegrationRule& ir =
+      mfem::IntRules.Get(static_cast<int>(getGeometry()), trans.OrderJ());
+    Scalar volume = 0.0;
+    for (int j = 0; j < ir.GetNPoints(); j++)
+    {
+      const mfem::IntegrationPoint &ip = ir.IntPoint(j);
+      trans.SetIntPoint(&ip);
+      volume += ip.weight * trans.Weight();
+    }
+    return volume;
   }
 
   // VertexIterator Simplex::getVertices() const
@@ -134,7 +132,7 @@ namespace Rodin::Geometry
   {
     if (!m_pc.has_value())
     {
-      Math::Vector pc(getSimplex().getMesh().getDimension());
+      Math::Vector pc(getSimplex().getMesh().getSpaceDimension());
       mfem::Vector tmp(pc.data(), pc.size());
       m_trans.get().getHandle().Transform(m_ip, tmp);
       m_pc.emplace(std::move(pc));
@@ -152,7 +150,7 @@ namespace Rodin::Geometry
       Math::Matrix jacobian(sdim, rdim);
       mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
       assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
-      m_trans.get().getHandle().Jacobian();
+      tmp = m_trans.get().getHandle().Jacobian();
       m_jacobian.emplace(std::move(jacobian));
     }
     assert(m_jacobian.has_value());

@@ -59,6 +59,11 @@ namespace Rodin::Variational
         return Math::Matrix::Identity(m_n, m_n);
       }
 
+      inline IdentityMatrix* copy() const noexcept override
+      {
+        return new IdentityMatrix(*this);
+      }
+
     private:
       const size_t m_n;
   };

@@ -47,6 +47,7 @@
 #include "Variational/Div.h"
 #include "Variational/Grad.h"
 #include "Variational/Normal.h"
+#include "Variational/BoundaryNormal.h"
 #include "Variational/Jacobian.h"
 #include "Variational/Derivative.h"
 #include "Variational/Jump.h"

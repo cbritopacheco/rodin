@@ -382,13 +382,13 @@ namespace Rodin::Variational
    * @f]
    * where Operand is a type representing a function @f$ u : \mathbb{R}^s
    * \rightarrow \mathbb{R}^d @f$ whose Jacobian matrix @f$ \mathbf{J}_u(x)
-   * @f$ at any point @f$ x = (x_1, \ldots, x_s) @f$ is defined by the @f$ s
-   * \times d @f$ matrix:
+   * @f$ at any point @f$ x = (x_1, \ldots, x_s) @f$ is defined by the @f$ d
+   * \times s @f$ matrix:
    * @f[
    * \mathbf{J}_u = \begin{bmatrix}
-   * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_d}{\partial x_1}\\
+   * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_s}{\partial x_1}\\
    * \vdots & \ddots & \vdots\\
-   * \dfrac{\partial u_1}{\partial x_s} & \ldots & \dfrac{\partial u_d}{\partial x_s}
+   * \dfrac{\partial u_1}{\partial x_d} & \ldots & \dfrac{\partial u_s}{\partial x_d}
    * \end{bmatrix} .
    * @f]
    *
