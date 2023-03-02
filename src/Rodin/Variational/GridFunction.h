@@ -37,6 +37,9 @@
 namespace Rodin::Variational
 {
 
+  template <class T>
+  class LazyEvaluator;
+
   /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.
@@ -408,9 +411,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getFiniteElementSpace();
       }
 
-      virtual GridFunctionBase* copy() const noexcept override
+      inline LazyEvaluator<GridFunctionBase>* copy() const noexcept final override
       {
-        return static_cast<const Derived&>(*this).copy();
+        return new LazyEvaluator<GridFunctionBase>(*this);
       }
 
       /**
@@ -418,17 +421,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying handle to the mfem::GridFunction object.
        * @returns Reference to the underlying object.
        */
-      mfem::GridFunction& getHandle()
-      {
-        return static_cast<Derived&>(*this).getHandle();
-      }
-
-      /**
-       * @internal
-       * @brief Gets the underlying handle to the mfem::GridFunction object.
-       * @returns Constant reference to the underlying object.
-       */
-      const mfem::GridFunction& getHandle() const
+      mfem::GridFunction& getHandle() const
       {
         return static_cast<const Derived&>(*this).getHandle();
       }
@@ -472,6 +465,15 @@ namespace Rodin::Variational
           m_data(std::move(other.m_data)),
           m_gf(std::move(other.m_gf))
       {}
+
+      FESGridFunction& operator=(FESGridFunction&& other)
+      {
+        Parent::operator=(std::move(other));
+        m_fes = std::move(other.m_fes);
+        m_data = std::move(other.m_data);
+        m_gf = std::move(other.m_gf);
+        return *this;
+      }
 
       inline
       constexpr
@@ -531,13 +533,7 @@ namespace Rodin::Variational
         return m_data;
       }
 
-      virtual FESGridFunction* copy() const noexcept override
-      {
-        return new FESGridFunction(*this);
-      }
-
-      inline
-      mfem::GridFunction& getHandle() const
+      inline mfem::GridFunction& getHandle() const
       {
         assert(m_gf);
         return *m_gf;
@@ -803,16 +799,50 @@ namespace Rodin::Variational
           return *this;
         }
       }
-
-      inline GridFunction* copy() const noexcept final override
-      {
-        return new GridFunction(*this);
-      }
   };
 
   template <class ... Ts>
   GridFunction(const H1<Ts...>&) -> GridFunction<H1<Ts...>>;
 
+  template <class GridFunctionDerived>
+  class LazyEvaluator<GridFunctionBase<GridFunctionDerived>> final
+    : public FunctionBase<GridFunctionBase<GridFunctionDerived>>
+  {
+    public:
+      using Parent = FunctionBase<GridFunctionBase<GridFunctionDerived>>;
+
+      constexpr
+      LazyEvaluator(const GridFunctionBase<GridFunctionDerived>& gf)
+        : m_gf(gf)
+      {}
+
+      constexpr
+      LazyEvaluator(const LazyEvaluator& other)
+        : Parent(other),
+          m_gf(other.m_gf)
+      {}
+
+      constexpr
+      LazyEvaluator(LazyEvaluator&& other)
+        : Parent(std::move(other)),
+          m_gf(std::move(other.m_gf))
+      {}
+
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return m_gf.getValue(p);
+      }
+
+      inline LazyEvaluator* copy() const noexcept override
+      {
+        return new LazyEvaluator(*this);
+      }
+
+    private:
+      std::reference_wrapper<const GridFunctionBase<GridFunctionDerived>> m_gf;
+  };
 }
 
 #include "GridFunction.hpp"

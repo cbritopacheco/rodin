@@ -55,7 +55,15 @@ namespace Rodin::Variational
       constexpr
       ScalarFunctionBase& traceOf(Geometry::Attribute attr)
       {
-        static_cast<Derived&>(*this).traceOf(attr);
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      ScalarFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
         return *this;
       }
 
@@ -271,6 +279,7 @@ namespace Rodin::Variational
   class ScalarFunction<F> final : public ScalarFunctionBase<ScalarFunction<F>>
   {
     static_assert(std::is_invocable_r_v<Scalar, F, const Geometry::Point&>);
+
     public:
       using Parent = ScalarFunctionBase<ScalarFunction<F>>;
 

@@ -7,6 +7,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Variational/LinearElasticity.h>>
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;
@@ -75,9 +76,7 @@ int main(int, char**)
 
     // Elasticity equation
     Problem elasticity(uInt, vInt);
-    elasticity = Integral(lambda * Div(uInt), Div(vInt))
-               + Integral(
-                   mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
+    elasticity = LinearElasticityIntegral(uInt, vInt)(lambda, mu)
                - BoundaryIntegral(f, vInt).over(GammaN)
                + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);

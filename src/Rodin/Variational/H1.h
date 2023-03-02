@@ -232,6 +232,13 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      constexpr
+      H1& operator=(H1&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
       inline
       FiniteElement<H1<Scalar, Context>>
       getFiniteElement(const Geometry::Simplex& element) const
@@ -273,12 +280,16 @@ namespace Rodin::Variational
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
       constexpr
-      H1(Geometry::Mesh<Context>& mesh,
+      H1(const Geometry::Mesh<Context>& mesh,
           size_t vdim,
           FiniteElementOrder order = FiniteElementOrder(1),
           Basis basis = DefaultBasis)
         : Parent(mesh, vdim, order, basis)
-      {}
+      {
+        m_fe.resize(mesh.getDimension() + 1);
+        for (size_t i = 0; i < mesh.getDimension() + 1; i++)
+          m_fe[i].resize(mesh.getSimplexCount(i));
+      }
 
       constexpr
       H1(const H1& other)
@@ -290,30 +301,50 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline
-      FiniteElement<H1<Math::Vector, Context>>
-      getFiniteElement(const Geometry::Simplex& element) const
+      constexpr
+      H1& operator=(H1&& other)
       {
-        if (element.getDimension() == this->getMesh().getDimension())
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      inline
+      const FiniteElement<H1<Math::Vector, Context>>&
+      getFiniteElement(const Geometry::Simplex& simplex) const
+      {
+        assert(m_fe.size() > simplex.getDimension());
+        assert(m_fe[simplex.getDimension()].size() > simplex.getIndex());
+        auto& fe = m_fe[simplex.getDimension()][simplex.getIndex()];
+        if (fe.has_value())
         {
-          return FiniteElement<H1<Math::Vector, Context>>(
-              this->getVectorDimension(), element, this->getHandle().GetFE(element.getIndex()));
-        }
-        else if (element.getDimension() == this->getMesh().getDimension() - 1)
-        {
-          return FiniteElement<H1<Math::Vector, Context>>(
-              this->getVectorDimension(), element, this->getHandle().GetFaceElement(element.getIndex()));
+          return fe.value();
         }
         else
         {
-          assert(false);
-          return FiniteElement<H1<Math::Vector, Context>>(0, element, nullptr);
+          if (simplex.getDimension() == this->getMesh().getDimension())
+          {
+            fe.emplace(this->getVectorDimension(), simplex, this->getHandle().GetFE(simplex.getIndex()));
+            return fe.value();
+          }
+          else if (simplex.getDimension() == this->getMesh().getDimension() - 1)
+          {
+            fe.emplace(this->getVectorDimension(), simplex, this->getHandle().GetFaceElement(simplex.getIndex()));
+            return fe.value();
+          }
+          else
+          {
+            assert(false);
+            return FiniteElement<H1<Math::Vector, Context>>(0, simplex, nullptr);
+          }
         }
       }
+
+    private:
+      mutable std::vector<std::vector<std::optional<FiniteElement<H1<Math::Vector, Context>>>>> m_fe;
   };
 
   template <class Context>
-  H1(Geometry::Mesh<Context>& mesh,
+  H1(const Geometry::Mesh<Context>& mesh,
       size_t vdim,
       FiniteElementOrder order = FiniteElementOrder(1),
       typename H1Base<H1<Math::Vector, Context>, Context>::Basis basis =

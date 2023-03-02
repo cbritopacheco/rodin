@@ -7,7 +7,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-#include <Rodin/Variational/LinearElasticity.h>>
+#include <Rodin/Variational/LinearElasticity.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -48,7 +48,6 @@ int main(int argc, char** argv)
              + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-
 
   // elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
   //            - BoundaryIntegral(f, v).over(GammaN)

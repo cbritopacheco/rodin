@@ -96,15 +96,16 @@ namespace Rodin::Variational
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   class UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>> final
-    : public ShapeFunctionBase<NestedDerived, FES, Space>
+    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
       using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
-      using Parent = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
       constexpr
       UnaryMinus(const Operand& op)
-        : m_op(op.copy())
+        : Parent(op.getFiniteElementSpace()),
+          m_op(op.copy())
       {}
 
       constexpr
@@ -137,21 +138,21 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        return m_op.getRangeShape();
+        return getOperand().getRangeShape();
       }
 
       inline
       constexpr
       size_t getDOFs(const Geometry::Simplex& element) const
       {
-        return m_op.getDOFs(element);
+        return getOperand().getDOFs(element);
       }
 
       inline
       constexpr
-      auto getOperator(ShapeComputator& compute, const Geometry::Point& p) const
+      auto getTensorBasis(const Geometry::Point& p) const
       {
-        return m_op.getOperator(compute, p);
+        return -1 * this->object(getOperand().getTensorBasis(p));
       }
 
       const FES& getFiniteElementSpace() const
@@ -166,6 +167,19 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<Operand> m_op;
   };
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  UnaryMinus(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+    -> UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>;
+
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  inline
+  constexpr
+  auto operator-(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
+  {
+    return UnaryMinus(op);
+  }
 
   template <>
   class UnaryMinus<LinearFormIntegratorBase> : public LinearFormIntegratorBase

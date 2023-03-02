@@ -457,6 +457,11 @@ namespace Rodin::Geometry
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
+      size_t getSimplexCount(size_t dim) const
+      {
+        return getCount(dim);
+      }
+
       virtual size_t getCount(size_t dim) const override;
 
       virtual FaceIterator getBoundary() const override;

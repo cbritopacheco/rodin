@@ -67,18 +67,16 @@ namespace Rodin::Variational
       constexpr
       size_t getColumns() const
       {
-        return m_u.get().getFiniteElementSpace().getMesh().getDimension();
+        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      auto getValue(const Geometry::Point& p) const
+      Math::Matrix getValue(const Geometry::Point& p) const
       {
         const auto& simplex = p.getSimplex();
         const auto& simplexMesh = simplex.getMesh();
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
-        const size_t sdim = simplex.getMesh().getSpaceDimension();
-        const size_t vdim = fes.getVectorDimension();
-        Math::Matrix jacobian(vdim, sdim);
+        Math::Matrix jacobian(getRows(), getColumns());
         mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
         if (simplex.getDimension() == fesMesh.getDimension())
         {
