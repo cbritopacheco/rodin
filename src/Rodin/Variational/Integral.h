@@ -209,8 +209,11 @@ namespace Rodin::Variational
           m_assembled(false)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-        m_one = ScalarFunction(Scalar(1));
-        m_lf.from(Integral(u * m_v));
+        m_one = 1.0;
+        auto integrand = Dot(m_u.get(), m_v);
+        m_lf.from(
+            Integral<ShapeFunctionBase<decltype(integrand), FES, TestSpace>>(
+              std::move(integrand)));
       }
 
       Integral(const Integral& other)
@@ -243,14 +246,13 @@ namespace Rodin::Variational
         return m_lf(m_one);
       }
 
-      inline
-      Integral* copy() const noexcept override
+      inline Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
 
     private:
-      std::reference_wrapper<GridFunction<FES>>         m_u;
+      std::reference_wrapper<const GridFunction<FES>>   m_u;
       TestFunction<FES>                                 m_v;
       GridFunction<FES>                                 m_one;
 

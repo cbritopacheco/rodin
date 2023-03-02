@@ -86,10 +86,10 @@ namespace Rodin::Variational
       {
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
         const auto& inv = p.getJacobianInverse();
-        const Eigen::TensorMap<const Eigen::Tensor<Scalar, 2>> lift(inv.data(), inv.rows(), inv.cols());
-        static constexpr const Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(2, 0) };
-        Math::Tensor<1> basis = fe.getJacobian(p.getReference()).contract(lift, dims).trace(Eigen::array<int, 2>{1, 2});
-        return Eigen::Map<Math::Vector>(basis.data(), basis.size());
+        const auto& div = fe.getDivergence(p.getReference());
+        const size_t n = fe.getComponentDOFs();
+        const size_t rdim = p.getSimplex().getDimension();
+        return (inv.transpose() * div.reshaped(n, rdim).transpose()).transpose().reshaped();
       }
 
       inline

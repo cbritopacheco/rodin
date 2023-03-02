@@ -33,6 +33,9 @@ namespace Rodin::Variational
       using LHS = FunctionBase<LHSDerived>;
       using RHS = FunctionBase<RHSDerived>;
       using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
 
       constexpr
       Sum(const LHS& lhs, const RHS& rhs)
@@ -79,8 +82,19 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      Sum& traceOf(Geometry::Attribute& attr)
+      {
+        Parent::traceOf(attr);
+        getLHS().traceOf(attr);
+        getRHS().traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
       Sum& traceOf(const std::set<Geometry::Attribute>& attrs)
       {
+        Parent::traceOf(attrs);
         getLHS().traceOf(attrs);
         getRHS().traceOf(attrs);
         return *this;
@@ -90,9 +104,6 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-        static_assert(std::is_same_v<LHSRange, RHSRange>);
         return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
@@ -148,6 +159,9 @@ namespace Rodin::Variational
       using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
       using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Sum<LHS, RHS>, FES, Space>;
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
 
       constexpr
       Sum(const LHS& lhs, const RHS& rhs)
@@ -214,9 +228,6 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
-        static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto& lhs = this->object(getLHS().getTensorBasis(p));
         const auto& rhs = this->object(getRHS().getTensorBasis(p));
         return lhs + rhs;

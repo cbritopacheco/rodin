@@ -30,16 +30,19 @@ namespace Rodin::Variational
       using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
       using LHS = FunctionBase<LHSDerived>;
       using RHS = FunctionBase<RHSDerived>;
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+
+      static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
 
       constexpr
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
       Division(const Division& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
@@ -52,25 +55,39 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        return m_lhs.getRangeShape();
+        return getLHS().getRangeShape();
       }
 
       inline
       constexpr
       Division& traceOf(Geometry::Attribute attr)
       {
-        m_lhs.traceOf(attr);
-        m_rhs.traceOf(attr);
+        getLHS().traceOf(attr);
+        getRHS().traceOf(attr);
         return *this;
+      }
+
+      inline
+      constexpr
+      const LHS& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      constexpr
+      const RHS& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
       }
 
       inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using RHSRange = FormLanguage::RangeOf<typename FormLanguage::Traits<RHS>::ResultType>;
-        static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
-        return m_lhs.getValue(p) / m_rhs.getValue(p);
+        return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
       }
 
       inline
@@ -80,8 +97,8 @@ namespace Rodin::Variational
       }
 
     private:
-      FunctionBase<LHSDerived> m_lhs;
-      FunctionBase<RHSDerived> m_rhs;
+      std::unique_ptr<FunctionBase<LHSDerived>> m_lhs;
+      std::unique_ptr<FunctionBase<RHSDerived>> m_rhs;
   };
   template <class LHSDerived, class RHSDerived>
   Division(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)

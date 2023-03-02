@@ -56,158 +56,180 @@ namespace Rodin::Variational
       constexpr
       Grad(Grad&& other)
         : Parent(std::move(other)),
-          m_u(other.m_u)
+          m_u(std::move(other.m_u))
       {}
 
       inline
       constexpr
       size_t getDimension() const
       {
-        return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
+        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      auto getValue(const Geometry::Point& p) const
+      inline
+      constexpr
+      Grad& traceOf(Geometry::Attribute attr)
       {
-        assert(false);
-        // mfem::Vector grad;
-        // const auto& simplex = p.getSimplex();
-        // const auto& simplexMesh = simplex.getMesh();
-        // const auto& fesMesh = m_u.getFiniteElementSpace().getMesh();
-        // if (simplex.getDimension() == fesMesh.getDimension())
-        // {
-        //   assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
-        //   const auto& element = p.getSimplex();
-        //   auto& trans = element.getTransformation();
-        //   m_u.getHandle().GetGradient(trans, grad);
-        //   Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //   return res;
-        // }
-        // else if (simplex.getDimension() == fesMesh.getDimension() - 1)
-        // {
-        //   assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
-        //   const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
-        //   mfem::FaceElementTransformations* ft =
-        //     const_cast<Geometry::MeshBase&>(simplexMesh).getHandle()
-        //     .GetFaceElementTransformations(face.getIndex());
-        //   if (simplexMesh.isSubMesh())
-        //   {
-        //     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
-        //     assert(submesh.getParent() == fesMesh);
-        //     if (ft->Elem1 && this->getTraceDomain() == ft->Elem1->Attribute)
-        //     {
-        //       Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
-        //       ft->Elem1->ElementNo = parentIdx;
-        //       ft->Elem1No = parentIdx;
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem1, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else if (ft->Elem2 && this->getTraceDomain() == ft->Elem2->Attribute)
-        //     {
-        //       Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
-        //       ft->Elem2->ElementNo = parentIdx;
-        //       ft->Elem2No = parentIdx;
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem2, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else if (face.isBoundary())
-        //     {
-        //       assert(ft->Elem1);
-        //       Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
-        //       ft->Elem1->ElementNo = parentIdx;
-        //       ft->Elem1No = parentIdx;
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem1, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else
-        //     {
-        //       assert(false);
-        //       return Math::Vector(0);
-        //     }
-        //   }
-        //   else if (fesMesh.isSubMesh())
-        //   {
-        //     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
-        //     assert(submesh.getParent() == simplexMesh);
-        //     const auto& s2pe = submesh.getElementMap();
-        //     if (ft->Elem1 && s2pe.right.count(ft->Elem1No) && this->getTraceDomain() == ft->Elem1->Attribute)
-        //     {
-        //       Geometry::Index idx = s2pe.right.at(ft->Elem1No);
-        //       ft->Elem1->ElementNo = idx;
-        //       ft->Elem1No = idx;
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem1, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) && this->getTraceDomain() == ft->Elem2->Attribute)
-        //     {
-        //       Geometry::Index idx = s2pe.right.at(ft->Elem2No);
-        //       ft->Elem2->ElementNo = idx;
-        //       ft->Elem2No = idx;
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem2, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else if (face.isBoundary())
-        //     {
-        //       assert(ft->Elem1);
-        //       Geometry::Index idx = s2pe.right.at(ft->Elem1No);
-        //       ft->Elem1->ElementNo = idx;
-        //       ft->Elem1No = idx;
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem1, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else
-        //     {
-        //       assert(false);
-        //       return Math::Vector(0);
-        //     }
-        //   }
-        //   else
-        //   {
-        //     if (ft->Elem1 && this->getTraceDomain() == ft->Elem1->Attribute)
-        //     {
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem1, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else if (ft->Elem2 && this->getTraceDomain() == ft->Elem2->Attribute)
-        //     {
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       m_u.getHandle().GetGradient(*ft->Elem2, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else if (face.isBoundary())
-        //     {
-        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
-        //       assert(ft->Elem1);
-        //       m_u.getHandle().GetGradient(*ft->Elem1, grad);
-        //       Math::Vector res = Eigen::Map<Math::Vector>(grad.GetData(), grad.Size());
-        //       return res;
-        //     }
-        //     else
-        //     {
-        //       assert(false);
-        //       return Math::Vector(0);
-        //     }
-        //   }
-        // }
-        // else
-        // {
-        //   assert(false);
-        //   return Math::Vector(0);
-        // }
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Grad& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      Math::Vector getValue(const Geometry::Point& p) const
+      {
+        const auto& simplex = p.getSimplex();
+        const auto& simplexMesh = simplex.getMesh();
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+        Math::Vector grad(getDimension());
+        mfem::Vector tmp(grad.data(), grad.size());
+        if (simplex.getDimension() == fesMesh.getDimension())
+        {
+          const auto& trans = p.getTransformation();
+          m_u.get().getHandle().GetGradient(trans.getHandle(), tmp);
+          return grad;
+        }
+        else if (simplex.getDimension() == fesMesh.getDimension() - 1)
+        {
+          assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
+          const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
+          mfem::FaceElementTransformations* ft =
+            simplexMesh.getHandle().GetFaceElementTransformations(face.getIndex());
+          if (simplexMesh.isSubMesh())
+          {
+            const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
+            assert(submesh.getParent() == fesMesh);
+            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
+            {
+              Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
+              ft->Elem1->ElementNo = parentIdx;
+              ft->Elem1No = parentIdx;
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
+            }
+            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
+            {
+              Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
+              ft->Elem2->ElementNo = parentIdx;
+              ft->Elem2No = parentIdx;
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem2, tmp);
+              return grad;
+            }
+            else if (face.isBoundary())
+            {
+              assert(ft->Elem1);
+              Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
+              ft->Elem1->ElementNo = parentIdx;
+              ft->Elem1No = parentIdx;
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
+            }
+            else
+            {
+              assert(false);
+              grad.setConstant(NAN);
+              return grad;
+            }
+          }
+          else if (fesMesh.isSubMesh())
+          {
+            const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
+            assert(submesh.getParent() == simplexMesh);
+            const auto& s2pe = submesh.getElementMap();
+            if (ft->Elem1 && s2pe.right.count(ft->Elem1No) &&
+                this->getTraceDomain().count(ft->Elem1->Attribute))
+            {
+              Geometry::Index idx = s2pe.right.at(ft->Elem1No);
+              ft->Elem1->ElementNo = idx;
+              ft->Elem1No = idx;
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
+            }
+            else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) &&
+                this->getTraceDomain().count(ft->Elem2->Attribute))
+            {
+              Geometry::Index idx = s2pe.right.at(ft->Elem2No);
+              ft->Elem2->ElementNo = idx;
+              ft->Elem2No = idx;
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem2, tmp);
+              return grad;
+            }
+            else if (face.isBoundary())
+            {
+              assert(ft->Elem1);
+              Geometry::Index idx = s2pe.right.at(ft->Elem1No);
+              ft->Elem1->ElementNo = idx;
+              ft->Elem1No = idx;
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
+            }
+            else
+            {
+              assert(false);
+              grad.setConstant(NAN);
+              return grad;
+            }
+          }
+          else
+          {
+            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
+            {
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
+            }
+            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
+            {
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              m_u.get().getHandle().GetGradient(*ft->Elem2, tmp);
+              return grad;
+            }
+            else if (face.isBoundary())
+            {
+              ft->SetAllIntPoints(&p.getIntegrationPoint());
+              assert(ft->Elem1);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
+            }
+            else
+            {
+              assert(false);
+              grad.setConstant(NAN);
+              return grad;
+            }
+          }
+        }
+        else
+        {
+          assert(false);
+          grad.setConstant(NAN);
+          return grad;
+        }
+      }
+
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
+
+      inline Grad* copy() const noexcept override
+      {
+        return new Grad(*this);
       }
 
     private:

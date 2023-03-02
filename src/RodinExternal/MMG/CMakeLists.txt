@@ -32,13 +32,13 @@ set(RodinExternalMMG_SRCS
   )
 
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(LANG C CXX OPTIONS -w -O3)
+  rodin_add_compile_options(LANG CXX OPTIONS -w -O3 -flto -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG C CXX
     OPTIONS
     -g
-    -O1
+    -O0
     -Wall
     -Wextra
     -Wpedantic
@@ -54,6 +54,8 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-error=c++11-narrowing
     -Wno-error=extra
     -Wno-error=pedantic)
+else()
+  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
 endif()
 
 add_library(RodinExternalMMG

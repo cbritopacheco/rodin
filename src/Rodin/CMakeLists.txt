@@ -37,6 +37,8 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-error=cast-function-type
     -Wno-error=deprecated-declarations
     -Wno-error=zero-as-null-pointer-constant)
+else()
+  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
 endif()
 
 add_library(Rodin INTERFACE)

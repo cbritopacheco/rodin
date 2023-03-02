@@ -27,18 +27,18 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<Frobenius<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase<FunctionBase<NestedDerived>>;
-      using Parent = ScalarFunctionBase<Frobenius<FunctionBase<NestedDerived>>>;
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Frobenius<Operand>>;
 
       constexpr
       Frobenius(const Operand& v)
-        : m_v(v)
+        : m_v(v.copy())
       {}
 
       constexpr
       Frobenius(const Frobenius& other)
         : Parent(other),
-          m_v(other.m_v)
+          m_v(other.m_v->copy())
       {}
 
       constexpr
@@ -49,29 +49,32 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Frobenius& traceOf(Geometry::Attribute attrs)
-      {
-        m_v.traceOf(attrs);
-        return *this;
-      }
-
-      inline
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange = FormLanguage::RangeOf<typename FormLanguage::Traits<Operand>::ResultType>;
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
         if constexpr (std::is_same_v<OperandRange, Scalar>)
         {
-          return std::abs(m_v.getValue(p));
+          return std::abs(getOperand().getValue(p));
         }
         else
         {
-          return m_v.getValue(p).norm();
+          return getOperand().getValue(p).norm();
         }
       }
 
+      const Operand& getOperand() const
+      {
+        assert(m_v);
+        return *m_v;
+      }
+
+      inline Frobenius* copy() const noexcept override
+      {
+        return new Frobenius(*this);
+      }
+
     private:
-      Operand m_v;
+      std::unique_ptr<Operand> m_v;
   };
 
   template <class NestedDerived>

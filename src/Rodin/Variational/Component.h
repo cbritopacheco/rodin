@@ -74,16 +74,19 @@ namespace Rodin::Variational
     public:
       using Operand = FunctionBase<OperandDerived>;
       using Parent = ScalarFunctionBase<Component<Operand>>;
+      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+
+      static_assert(std::is_same_v<OperandRange, Math::Vector>);
 
       constexpr
       Component(const Operand& fn, size_t component)
-        : m_fn(fn), m_idx(component)
+        : m_fn(fn.copy()), m_idx(component)
       {}
 
       constexpr
       Component(const Component& other)
         : Parent(other),
-          m_fn(other.m_fn),
+          m_fn(other.m_fn->copy()),
           m_idx(other.m_idx)
       {}
 
@@ -91,7 +94,7 @@ namespace Rodin::Variational
       Component(Component&& other)
         : Parent(std::move(other)),
           m_fn(std::move(other.m_fn)),
-          m_idx(other.m_idx)
+          m_idx(std::move(other.m_idx))
       {}
 
       inline
@@ -103,22 +106,21 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Component& traceOf(Geometry::Attribute attrs)
+      const Operand& getOperand() const
       {
-        m_fn.traceOf(attrs);
-        return *this;
+        assert(m_fn);
+        return *m_fn;
       }
 
       inline
-      Scalar getValue(const Geometry::Point& p) const
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        Math::Vector v = m_fn.getValue(p);
-        assert(m_idx < v.size());
-        return v(m_idx);
+        return getOperand().getValue(p).coeff(m_idx);
       }
 
     private:
-      Operand m_fn;
+      std::unique_ptr<Operand> m_fn;
       const size_t m_idx;
   };
 
@@ -154,7 +156,7 @@ namespace Rodin::Variational
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
-          m_u(other.m_u)
+          m_u(std::move(other.m_u))
       {}
 
       inline
