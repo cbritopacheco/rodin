@@ -1,8 +1,10 @@
+#include "Rodin/Variational/MFEM.h"
+#include "Rodin/Variational/QuadratureRule.h"
+
 #include "Mesh.h"
+#include "SimplexTransformation.h"
 
 #include "Simplex.h"
-#include "SimplexTransformation.h"
-#include "../Variational/MFEM.h"
 
 namespace Rodin::Geometry
 {
@@ -64,15 +66,11 @@ namespace Rodin::Geometry
   Scalar Simplex::getVolume() const
   {
     mfem::ElementTransformation& trans = getTransformation().getHandle();
-    const mfem::IntegrationRule& ir =
-      mfem::IntRules.Get(static_cast<int>(getGeometry()), trans.OrderJ());
+    const Variational::QuadratureRule& qr =
+      Variational::QuadratureRule::get(getGeometry(), trans.OrderJ());
     Scalar volume = 0.0;
-    for (int j = 0; j < ir.GetNPoints(); j++)
-    {
-      const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-      trans.SetIntPoint(&ip);
-      volume += ip.weight * trans.Weight();
-    }
+    for (size_t i = 0; i < qr.size(); i++)
+      volume += qr.getWeight(i) * trans.Weight();
     return volume;
   }
 

@@ -121,6 +121,9 @@ namespace Rodin::Variational
   template <class Range, class Context>
   class H1;
 
+  template <class T>
+  class LazyEvaluator;
+
   /**
    * @brief Base class for grid function objects.
    */

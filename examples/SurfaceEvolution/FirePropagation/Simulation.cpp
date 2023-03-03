@@ -233,7 +233,8 @@ class Environment
 
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(500)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(600)
+                                                .setHMin(100)
                                                 .setHausdorff(20)
                                                 .setAngleDetection(false)
         // .split(Terrain::Burnt,
@@ -243,8 +244,10 @@ class Environment
                                                 .setBoundaryReference(Terrain::Fire)
                                                 .discretize(m_fireDist);
 
-      // MMG::MeshOptimizer().setAngleDetection(false).setHausdorff(10).setHMax(20)
-      //  .optimize(m_topography);
+      MMG::MeshOptimizer().setAngleDetection(false)
+                          .setHausdorff(20)
+                          .setHMax(500)
+                          .optimize(m_topography);
 
       // Rebuild finite element spaces with new topography
       m_sfes = ScalarFES(m_topography);
@@ -303,12 +306,19 @@ int main()
   topography.load(meshfile);
 
   Alert::Info() << "Optimizing mesh..." << Alert::Raise;
-  MMG::MeshOptimizer().setHausdorff(20).setHMax(200).optimize(topography);
+  MMG::MeshOptimizer().setHausdorff(20).setHMax(500).optimize(topography);
 
   // Make a fire somewhere
   Alert::Info() << "Initializing fire..." << Alert::Raise;
   {
     H1 fes(topography);
+
+    // Compute elevation
+    GridFunction elevation(fes);
+    elevation = [](const Point& p) { return p.z(); };
+    topography.save("FirePropagationInitial.mesh");
+    elevation.save("Elevation.gf");
+
     GridFunction phi(fes);
     phi = [](const Point& p)
     {
@@ -321,19 +331,13 @@ int main()
     };
 
     topography = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                            .setHMax(200)
+                                            .setHMax(500)
                                             .setHausdorff(20)
                                             .discretize(phi);
   }
 
   // Define finite element space
   H1 fes(topography);
-
-  // Compute elevation
-  GridFunction elevation(fes);
-  elevation = [](const Point& p) { return p.z(); };
-  topography.save("initial.mesh");
-  elevation.save("elevation.gf");
 
   // Define vegetal stratum
   Environment::VegetalStratum stratum;
@@ -388,8 +392,8 @@ int main()
     Alert::Info() << "t: " << (t / 60) << "m" << Alert::Raise;
 
     environment.step(dt);
-    topography.save("out/evolution.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
-    topography.save("out/evolution.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    topography.save("out/FirePropagation.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
+    topography.save("out/FirePropagation.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
     t += dt;
   }
 
