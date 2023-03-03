@@ -36,10 +36,6 @@
 
 namespace Rodin::Variational
 {
-
-  template <class T>
-  class LazyEvaluator;
-
   /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.

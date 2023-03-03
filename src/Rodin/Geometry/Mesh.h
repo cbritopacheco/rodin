@@ -67,6 +67,7 @@ namespace Rodin::Geometry
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
         getHandle().MoveNodes(u.getHandle());
+        flush();
         return *this;
       }
 
@@ -283,6 +284,8 @@ namespace Rodin::Geometry
       virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
 
       virtual const Connectivity& getConnectivity(size_t d, size_t dp) const = 0;
+
+      virtual void flush() = 0;
 
       /**
        * @internal
@@ -505,9 +508,14 @@ namespace Rodin::Geometry
         return m_connectivity[d][dp];
       }
 
-      mfem::Mesh& getHandle() const override;
+      virtual void flush() override
+      {
+        for (size_t d = 0; d < m_transformations.size(); d++)
+          for (size_t i = 0; i < m_transformations[d].size(); i++)
+            m_transformations[d][i].reset();
+      }
 
-    protected:
+      mfem::Mesh& getHandle() const override;
 
     private:
       size_t m_dim, m_sdim;
