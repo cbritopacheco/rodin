@@ -34,18 +34,15 @@ namespace Rodin::Variational
 
       static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
 
-      constexpr
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       Division(const Division& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       Division(Division&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))

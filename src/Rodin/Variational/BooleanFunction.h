@@ -26,15 +26,12 @@ namespace Rodin::Variational
     public:
       using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
 
-      constexpr
       BooleanFunctionBase() = default;
 
-      constexpr
       BooleanFunctionBase(const BooleanFunctionBase& other)
         : Parent(other)
       {}
 
-      constexpr
       BooleanFunctionBase(BooleanFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -61,18 +58,15 @@ namespace Rodin::Variational
     public:
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
-      constexpr
       BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
-      constexpr
       BooleanFunction(const BooleanFunction& other)
         : BooleanFunctionBase(other),
           m_v(other.m_v)
       {}
 
-      constexpr
       BooleanFunction(BooleanFunction&& other)
         : BooleanFunctionBase(std::move(other)),
           m_v(other.m_v)

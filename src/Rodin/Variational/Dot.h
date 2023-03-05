@@ -39,20 +39,17 @@ namespace Rodin::Variational
       using RHS = FunctionBase<RHSDerived>;
       using Parent = ScalarFunctionBase<Dot<LHS, RHS>>;
 
-      constexpr
       Dot(const LHS& lhs, const RHS& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
         assert(lhs.getRangeShape() == rhs.getRangeShape());
       }
 
-      constexpr
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))

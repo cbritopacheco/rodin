@@ -56,12 +56,10 @@ namespace Rodin::Variational
       using Value = FunctionBase<ValueDerived>;
       using Parent = DirichletBCBase;
 
-      constexpr
       DirichletBC(Operand& u, const Value& v)
         : m_u(u), m_value(v.copy())
       {}
 
-      constexpr
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
@@ -69,7 +67,6 @@ namespace Rodin::Variational
           m_essBdr(other.m_essBdr)
       {}
 
-      constexpr
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),

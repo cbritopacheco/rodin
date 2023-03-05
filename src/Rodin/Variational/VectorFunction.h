@@ -35,15 +35,12 @@ namespace Rodin::Variational
     public:
       using Parent = FunctionBase<VectorFunctionBase<Derived>>;
 
-      constexpr
       VectorFunctionBase() = default;
 
-      constexpr
       VectorFunctionBase(const VectorFunctionBase& other)
         : Parent(other)
       {}
 
-      constexpr
       VectorFunctionBase(VectorFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -167,18 +164,15 @@ namespace Rodin::Variational
        * Each value passed must be convertible to any specialization of
        * ScalarFunction.
        */
-      constexpr
       VectorFunction(const V v, const Values... values)
         : m_fs(ScalarFunction(v), ScalarFunction(values)...)
       {}
 
-      constexpr
       VectorFunction(const VectorFunction& other)
         : Parent(other),
           m_fs(other.m_fs)
       {}
 
-      constexpr
       VectorFunction(VectorFunction&& other)
         : Parent(std::move(other)),
           m_fs(std::move(other.m_fs))

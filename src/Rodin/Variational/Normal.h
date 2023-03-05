@@ -20,20 +20,17 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit normal.
        */
-      constexpr
       Normal(const Geometry::MeshBase& surface)
         : m_dimension(surface.getSpaceDimension())
       {
         assert(m_dimension > 0);
       }
 
-      constexpr
       Normal(const Normal& other)
         : Parent(other),
           m_dimension(other.m_dimension)
       {}
 
-      constexpr
       Normal(Normal&& other)
         : Parent(std::move(other)),
           m_dimension(std::move(other.m_dimension))

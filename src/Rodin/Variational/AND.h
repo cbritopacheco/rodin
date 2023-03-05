@@ -32,19 +32,16 @@ namespace Rodin::Variational
       using RHS = BooleanFunctionBase<RHSDerived>;
       using Parent = BooleanFunctionBase<OR<LHS, RHS>>;
 
-      constexpr
       AND(const LHS& lhs, const RHS& rhs)
         : m_lhs(lhs), m_rhs(rhs)
       {}
 
-      constexpr
       AND(const AND& other)
         : Parent(other),
           m_lhs(other.m_lhs),
           m_rhs(other.m_rhs)
       {}
 
-      constexpr
       AND(AND&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),

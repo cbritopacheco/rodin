@@ -35,19 +35,16 @@ namespace Rodin::Variational
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
        */
-      constexpr
       Div(const Operand& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
 
-      constexpr
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u)
       {}
 
-      constexpr
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))

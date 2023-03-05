@@ -39,22 +39,18 @@ namespace Rodin::Variational
       using Integrand = Dot<LHS, RHS>;
       using Parent = GaussianQuadrature<Integrand>;
 
-      constexpr
       BoundaryIntegral(const LHS& lhs, const RHS& rhs)
         : BoundaryIntegral(Dot(lhs, rhs))
       {}
 
-      constexpr
       BoundaryIntegral(const Integrand& prod)
         : Parent(prod)
       {}
 
-      constexpr
       BoundaryIntegral(const BoundaryIntegral& other)
         : Parent(other)
       {}
 
-      constexpr
       BoundaryIntegral(BoundaryIntegral&& other)
         : Parent(std::move(other))
       {}

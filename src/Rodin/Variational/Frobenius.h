@@ -30,18 +30,15 @@ namespace Rodin::Variational
       using Operand = FunctionBase<NestedDerived>;
       using Parent = ScalarFunctionBase<Frobenius<Operand>>;
 
-      constexpr
       Frobenius(const Operand& v)
         : m_v(v.copy())
       {}
 
-      constexpr
       Frobenius(const Frobenius& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
-      constexpr
       Frobenius(Frobenius&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))

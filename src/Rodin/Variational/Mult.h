@@ -40,7 +40,6 @@ namespace Rodin::Variational
       using RHS = FunctionBase<RHSDerived>;
       using Parent = FunctionBase<Mult<LHS, RHS>>;
 
-      constexpr
       Mult(const LHS& lhs, const RHS& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {
@@ -49,13 +48,11 @@ namespace Rodin::Variational
             || lhs.getRangeShape().width() == rhs.getRangeShape().height());
       }
 
-      constexpr
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))

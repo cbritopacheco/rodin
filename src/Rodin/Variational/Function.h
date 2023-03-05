@@ -36,16 +36,13 @@ namespace Rodin::Variational
     public:
       using Parent = FormLanguage::Base;
 
-      constexpr
       FunctionBase() = default;
 
-      constexpr
       FunctionBase(const FunctionBase& other)
         : Parent(other),
           m_traceDomain(other.m_traceDomain)
       {}
 
-      constexpr
       FunctionBase(FunctionBase&& other)
         : Parent(std::move(other)),
           m_traceDomain(std::move(other.m_traceDomain))
@@ -54,7 +51,6 @@ namespace Rodin::Variational
       virtual ~FunctionBase() = default;
 
       inline
-      constexpr
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = std::move(other.m_traceDomain);

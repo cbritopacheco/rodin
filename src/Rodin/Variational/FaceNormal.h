@@ -20,20 +20,17 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit on a face.
        */
-      constexpr
       FaceNormal(const Geometry::MeshBase& surface)
         : m_dimension(surface.getSpaceDimension())
       {
         assert(m_dimension > 0);
       }
 
-      constexpr
       FaceNormal(const FaceNormal& other)
         : Parent(other),
           m_dimension(other.m_dimension)
       {}
 
-      constexpr
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
           m_dimension(std::move(other.m_dimension))

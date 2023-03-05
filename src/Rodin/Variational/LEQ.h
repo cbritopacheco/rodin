@@ -28,19 +28,16 @@ namespace Rodin::Variational
       using LHS = FunctionBase<LHSDerived>;
       using RHS = FunctionBase<RHSDerived>;
 
-      constexpr
       LEQ(const LHS& lhs, const RHS& rhs)
         : m_lhs(lhs), m_rhs(rhs)
       {}
 
-      constexpr
       LEQ(const LEQ& other)
         : Parent(other),
           m_lhs(other.m_lhs),
           m_rhs(other.m_rhs)
       {}
 
-      constexpr
       LEQ(LEQ&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),

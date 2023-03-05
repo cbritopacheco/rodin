@@ -48,15 +48,12 @@ namespace Rodin::Variational
     public:
       using Parent = FunctionBase<GridFunctionBase<Derived>>;
 
-      constexpr
       GridFunctionBase() = default;
 
-      constexpr
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(other)
       {}
 
-      constexpr
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -436,7 +433,6 @@ namespace Rodin::Variational
       using Parent::operator*=;
       using Parent::operator/=;
 
-      constexpr
       FESGridFunction(const FES& fes)
         : m_fes(fes),
           m_data(fes.getHandle().GetVSize()),
@@ -446,7 +442,6 @@ namespace Rodin::Variational
         m_data.setZero();
       }
 
-      constexpr
       FESGridFunction(const FESGridFunction& other)
         : Parent(other),
           m_fes(other.m_fes),
@@ -454,7 +449,6 @@ namespace Rodin::Variational
           m_gf(new mfem::GridFunction(*other.m_gf))
       {}
 
-      constexpr
       FESGridFunction(FESGridFunction&& other)
         : Parent(std::move(other)),
           m_fes(std::move(other.m_fes)),
@@ -564,7 +558,6 @@ namespace Rodin::Variational
        * @param[in] fes Finite element space to which the function belongs
        * to.
        */
-      constexpr
       GridFunction(const FES& fes)
         : Parent(fes)
       {}
@@ -573,7 +566,6 @@ namespace Rodin::Variational
        * @brief Copies the grid function.
        * @param[in] other Other grid function to copy.
        */
-      constexpr
       GridFunction(const GridFunction& other)
         : Parent(other)
       {}
@@ -582,7 +574,6 @@ namespace Rodin::Variational
        * @brief Move constructs the grid function.
        * @param[in] other Other grid function to move.
        */
-      constexpr
       GridFunction(GridFunction&& other)
         : Parent(std::move(other))
       {}
@@ -616,7 +607,6 @@ namespace Rodin::Variational
        * @param[in] fes Finite element space to which the function belongs
        * to.
        */
-      constexpr
       GridFunction(const FES& fes)
         : Parent(fes)
       {}
@@ -625,7 +615,6 @@ namespace Rodin::Variational
        * @brief Copies the grid function.
        * @param[in] other Other grid function to copy.
        */
-      constexpr
       GridFunction(const GridFunction& other)
         : Parent(other)
       {}
@@ -634,7 +623,6 @@ namespace Rodin::Variational
        * @brief Move constructs the grid function.
        * @param[in] other Other grid function to move.
        */
-      constexpr
       GridFunction(GridFunction&& other)
         : Parent(std::move(other))
       {}
