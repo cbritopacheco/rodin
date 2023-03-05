@@ -36,15 +36,12 @@ namespace Rodin::Variational
     public:
       using Parent = FunctionBase<ScalarFunctionBase<Derived>>;
 
-      constexpr
       ScalarFunctionBase() = default;
 
-      constexpr
       ScalarFunctionBase(const ScalarFunctionBase& other)
         : Parent(other)
       {}
 
-      constexpr
       ScalarFunctionBase(ScalarFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -100,18 +97,15 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<NestedRangeType, Scalar>);
 
-      constexpr
       ScalarFunction(const FunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
       {}
 
-      constexpr
       ScalarFunction(const ScalarFunction& other)
         : Parent(other),
           m_nested(other.m_nested->copy())
       {}
 
-      constexpr
       ScalarFunction(ScalarFunction&& other)
         : Parent(std::move(other)),
           m_nested(std::move(other.m_nested))
@@ -162,18 +156,15 @@ namespace Rodin::Variational
        * @brief Constructs a ScalarFunction from an arithmetic value.
        * @param[in] x Arithmetic value
        */
-      constexpr
       ScalarFunction(Scalar x)
         : m_x(x)
       {}
 
-      constexpr
       ScalarFunction(const ScalarFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
-      constexpr
       ScalarFunction(ScalarFunction&& other)
         : Parent(std::move(other)),
           m_x(other.m_x)
@@ -222,18 +213,15 @@ namespace Rodin::Variational
        * @brief Constructs a ScalarFunction from an arithmetic value.
        * @param[in] x Arithmetic value
        */
-      constexpr
       ScalarFunction(Integer x)
         : m_x(x)
       {}
 
-      constexpr
       ScalarFunction(const ScalarFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
-      constexpr
       ScalarFunction(ScalarFunction&& other)
         : Parent(std::move(other)),
           m_x(other.m_x)
@@ -283,18 +271,15 @@ namespace Rodin::Variational
     public:
       using Parent = ScalarFunctionBase<ScalarFunction<F>>;
 
-      constexpr
       ScalarFunction(F f)
         : m_f(f)
       {}
 
-      constexpr
       ScalarFunction(const ScalarFunction& other)
         : Parent(other),
           m_f(other.m_f)
       {}
 
-      constexpr
       ScalarFunction(ScalarFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f))

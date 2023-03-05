@@ -27,18 +27,15 @@ namespace Rodin::Variational
       using RHS = FunctionBase<RHSDerived>;
       using Parent = ScalarFunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
-      constexpr
       Min(const LHS& a, const RHS& b)
         : m_lhs(a), m_rhs(b)
       {}
 
-      constexpr
       Min(const Min& other)
         : Parent(other),
           m_lhs(other.m_lhs), m_rhs(other.m_rhs)
       {}
 
-      constexpr
       Min(Min&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))

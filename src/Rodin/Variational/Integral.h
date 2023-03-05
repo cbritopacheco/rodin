@@ -76,7 +76,6 @@ namespace Rodin::Variational
        * @param[in] lhs Trial operator @f$ A(u) @f$
        * @param[in] rhs Test operator @f$ B(v) @f$
        */
-      constexpr
       Integral(const LHS& lhs, const RHS& rhs)
         : Integral(Dot(lhs, rhs))
       {}
@@ -92,17 +91,14 @@ namespace Rodin::Variational
        *
        * @param[in] prod Dot product instance
        */
-      constexpr
       Integral(const Integrand& prod)
         : Parent(prod)
       {}
 
-      constexpr
       Integral(const Integral& other)
         : Parent(other)
       {}
 
-      constexpr
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
@@ -148,22 +144,18 @@ namespace Rodin::Variational
       using Parent = GaussianQuadrature<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
-      constexpr
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
-      constexpr
       Integral(const Integrand& integrand)
         : Parent(integrand)
       {}
 
-      constexpr
       Integral(const Integral& other)
         : Parent(other)
       {}
 
-      constexpr
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}

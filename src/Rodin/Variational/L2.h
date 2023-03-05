@@ -149,7 +149,6 @@ namespace Rodin::Variational
           Basis m_basis;
       };
 
-      constexpr
       L2Base(Geometry::Mesh<Context>& mesh,
           const size_t vdim, const size_t order, Basis basis = DefaultBasis)
         : m_fec(order, mesh.getDimension(), basis),
@@ -157,7 +156,6 @@ namespace Rodin::Variational
           m_fes(new mfem::FiniteElementSpace(&mesh.getHandle(), &m_fec.getHandle(), vdim))
       {}
 
-      constexpr
       L2Base(const L2Base& other)
         : FiniteElementSpaceBase(other),
           m_fec(other.m_fec),
@@ -165,7 +163,6 @@ namespace Rodin::Variational
           m_fes(new mfem::FiniteElementSpace(*other.m_fes))
       {}
 
-      constexpr
       L2Base(L2Base&& other)
         :  FiniteElementSpaceBase(std::move(other)),
           m_fec(std::move(other.m_fec)),
@@ -173,7 +170,6 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      constexpr
       L2Base& operator=(L2Base&& other)
       {
         FiniteElementSpaceBase::operator=(std::move(other));
@@ -267,21 +263,19 @@ namespace Rodin::Variational
       using Range = Scalar;
       using Basis = typename Parent::Basis;
       using Parent::operator=;
+
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
-      constexpr
       L2(Geometry::Mesh<Context>& mesh,
           FiniteElementOrder order = FiniteElementOrder(0),
           Basis basis = DefaultBasis)
         : Parent(mesh, 1, order, basis)
       {}
 
-      constexpr
       L2(const L2& other)
         : Parent(other)
       {}
 
-      constexpr
       L2(L2&& other)
         : Parent(std::move(other))
       {}
@@ -304,9 +298,9 @@ namespace Rodin::Variational
       using Range = Math::Vector;
       using Basis = typename Parent::Basis;
       using Parent::operator=;
+
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
-      constexpr
       L2(Geometry::Mesh<Context>& mesh,
           size_t vdim,
           FiniteElementOrder order = FiniteElementOrder(0),
@@ -314,12 +308,10 @@ namespace Rodin::Variational
         : Parent(mesh, vdim, order, basis)
       {}
 
-      constexpr
       L2(const L2& other)
         : Parent(other)
       {}
 
-      constexpr
       L2(L2&& other)
         : Parent(std::move(other))
       {}

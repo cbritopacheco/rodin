@@ -31,18 +31,15 @@ namespace Rodin::Variational
       using Operand = FunctionBase<NestedDerived>;
       using Parent = ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
-      constexpr
       Cos(const Operand& v)
         : m_v(v)
       {}
 
-      constexpr
       Cos(const Cos& other)
         : Parent(other),
           m_v(other.m_v)
       {}
 
-      constexpr
       Cos(Cos&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))

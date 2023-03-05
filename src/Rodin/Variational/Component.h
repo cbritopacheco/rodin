@@ -22,19 +22,16 @@ namespace Rodin::Variational
        * @brief Constructs the component object from a TrialFunction and its
        * component index.
        */
-      constexpr
       Component(Operand& u, size_t component)
         : m_u(u),
           m_idx(component)
       {}
 
-      constexpr
       Component(const Component& other)
         : m_u(other.m_u),
           m_idx(other.m_idx)
       {}
 
-      constexpr
       Component(Component&& other)
         : m_u(other.m_u),
           m_idx(other.m_idx)

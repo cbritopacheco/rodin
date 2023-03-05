@@ -31,15 +31,12 @@ namespace Rodin::Variational
     public:
       using Parent = FunctionBase<MatrixFunctionBase<Derived>>;
 
-      constexpr
       MatrixFunctionBase() = default;
 
-      constexpr
       MatrixFunctionBase(const MatrixFunctionBase& other)
         : Parent(other)
       {}
 
-      constexpr
       MatrixFunctionBase(MatrixFunctionBase&& other)
         : Parent(std::move(other))
       {}

@@ -28,24 +28,20 @@ namespace Rodin::Variational
       using Integrand = Dot<LHS, RHS>;
       using Parent = BilinearFormIntegratorBase;
 
-      constexpr
       GaussianQuadrature(const LHS& lhs, const RHS& rhs)
         : GaussianQuadrature(Dot(lhs, rhs))
       {}
 
-      constexpr
       GaussianQuadrature(const Integrand& prod)
         : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
           m_prod(prod.copy())
       {}
 
-      constexpr
       GaussianQuadrature(const GaussianQuadrature& other)
         : BilinearFormIntegratorBase(other),
           m_prod(other.m_prod->copy())
       {}
 
-      constexpr
       GaussianQuadrature(GaussianQuadrature&& other)
         : BilinearFormIntegratorBase(std::move(other)),
           m_prod(std::move(other.m_prod))

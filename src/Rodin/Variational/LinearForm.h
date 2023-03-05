@@ -23,19 +23,16 @@ namespace Rodin::Variational
     public:
       using NativeAssembly = Assembly::Native<LinearFormBase>;
 
-      constexpr
       LinearFormBase()
       {
         m_assembly.reset(new NativeAssembly);
       }
 
-      constexpr
       LinearFormBase(const LinearFormBase& other)
         :  FormLanguage::Base(other),
           m_lfis(other.m_lfis)
       {}
 
-      constexpr
       LinearFormBase(LinearFormBase&& other)
         :  FormLanguage::Base(std::move(other)),
           m_lfis(std::move(other.m_lfis))

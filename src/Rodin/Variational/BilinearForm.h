@@ -29,20 +29,17 @@ namespace Rodin::Variational
       using NativeAssembly = Assembly::Native<BilinearFormBase>;
       using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
 
-      constexpr
       BilinearFormBase()
       {
         m_assembly.reset(new NativeAssembly);
       }
 
-      constexpr
       BilinearFormBase(const BilinearFormBase& other)
         : FormLanguage::Base(other),
           m_assembly(other.m_assembly->copy()),
           m_bfis(other.m_bfis)
       {}
 
-      constexpr
       BilinearFormBase(BilinearFormBase&& other)
         :  FormLanguage::Base(std::move(other)),
           m_assembly(std::move(other.m_assembly)),

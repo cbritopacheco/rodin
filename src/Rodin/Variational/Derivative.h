@@ -38,14 +38,12 @@ namespace Rodin::Variational
        * @param[in] component Component @f$ u_j @f$ to differentiate
        * @param[in] u GridFunction in H1 space
        */
-      constexpr
       Derivative(size_t direction, size_t component, const Operand& u)
         : m_direction(direction),
           m_component(component),
           m_u(u)
       {}
 
-      constexpr
       Derivative(const Derivative& other)
         : Parent(other),
           m_direction(other.m_direction),
@@ -53,7 +51,6 @@ namespace Rodin::Variational
           m_u(other.m_u)
       {}
 
-      constexpr
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_direction(std::move(other.m_direction)),

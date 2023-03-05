@@ -40,20 +40,17 @@ namespace Rodin::Variational
        * @f$ u @f$.
        * @param[in] u Grid function to be differentiated
        */
-      constexpr
       Grad(const Operand& u)
         : m_u(u)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
       }
 
-      constexpr
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u)
       {}
 
-      constexpr
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))
@@ -251,19 +248,16 @@ namespace Rodin::Variational
       using Operand = ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>;
       using Parent = ShapeFunctionBase<Grad<Operand>, FES, Space>;
 
-      constexpr
       Grad(const Operand& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
 
-      constexpr
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u)
       {}
 
-      constexpr
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))

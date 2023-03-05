@@ -39,18 +39,15 @@ namespace Rodin::Variational
        * @f$ u @f$.
        * @param[in] u Grid function to be differentiated
        */
-      constexpr
       Jacobian(const Operand& u)
         :  m_u(u)
       {}
 
-      constexpr
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u)
       {}
 
-      constexpr
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))
@@ -257,19 +254,16 @@ namespace Rodin::Variational
       using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
 
-      constexpr
       Jacobian(const Operand& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
 
-      constexpr
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u)
       {}
 
-      constexpr
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(other.m_u)

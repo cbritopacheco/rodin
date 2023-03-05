@@ -20,20 +20,17 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit normal.
        */
-      constexpr
       BoundaryNormal(const Geometry::MeshBase& mesh)
         : m_dimension(mesh.getSpaceDimension())
       {
         assert(m_dimension > 0);
       }
 
-      constexpr
       BoundaryNormal(const BoundaryNormal& other)
         : Parent(other),
           m_dimension(other.m_dimension)
       {}
 
-      constexpr
       BoundaryNormal(BoundaryNormal&& other)
         : Parent(std::move(other)),
           m_dimension(std::move(other.m_dimension))

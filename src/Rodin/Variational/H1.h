@@ -65,21 +65,18 @@ namespace Rodin::Variational
       class FEC : public FiniteElementCollectionBase
       {
         public:
-          constexpr
           FEC(const size_t order, const size_t elemDim, Basis basis)
             : m_fec(new mfem::H1_FECollection(order, elemDim, static_cast<int>(basis)))
           {
             assert(order >= 1);
           }
 
-          constexpr
           FEC(FEC&& other)
             : FiniteElementCollectionBase(std::move(other)),
               m_fec(std::move(other.m_fec)),
               m_basis(std::move(other.m_basis))
           {}
 
-          constexpr
           FEC& operator=(FEC&& other)
           {
             FiniteElementCollectionBase::operator=(std::move(other));
@@ -111,7 +108,6 @@ namespace Rodin::Variational
           Basis m_basis;
       };
 
-      constexpr
       H1Base(const Geometry::Mesh<Context>& mesh,
           const size_t vdim, const size_t order, Basis basis = DefaultBasis)
         : m_fec(order, mesh.getDimension(), basis),
@@ -122,7 +118,6 @@ namespace Rodin::Variational
         assert(order >= 1);
       }
 
-      constexpr
       H1Base(const H1Base& other)
         : FiniteElementSpaceBase(other),
           m_fec(other.m_fec),
@@ -130,7 +125,6 @@ namespace Rodin::Variational
           m_fes(new mfem::FiniteElementSpace(*other.m_fes))
       {}
 
-      constexpr
       H1Base(H1Base&& other)
         : FiniteElementSpaceBase(std::move(other)),
           m_fec(std::move(other.m_fec)),
@@ -138,7 +132,6 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      constexpr
       H1Base& operator=(H1Base&& other)
       {
         FiniteElementSpaceBase::operator=(std::move(other));
@@ -213,26 +206,23 @@ namespace Rodin::Variational
       using RangeType = Scalar;
       using Basis = typename Parent::Basis;
       using Parent::operator=;
+
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
-      constexpr
       H1(const Geometry::Mesh<Context>& mesh,
           FiniteElementOrder order = FiniteElementOrder(1),
           Basis basis = DefaultBasis)
         : Parent(mesh, 1, order, basis)
       {}
 
-      constexpr
       H1(const H1& other)
         : Parent(other)
       {}
 
-      constexpr
       H1(H1&& other)
         : Parent(std::move(other))
       {}
 
-      constexpr
       H1& operator=(H1&& other)
       {
         Parent::operator=(std::move(other));
@@ -277,9 +267,9 @@ namespace Rodin::Variational
       using RangeType = Math::Vector;
       using Basis = typename Parent::Basis;
       using Parent::operator=;
+
       static constexpr const Basis DefaultBasis = Basis::GaussLobato;
 
-      constexpr
       H1(const Geometry::Mesh<Context>& mesh,
           size_t vdim,
           FiniteElementOrder order = FiniteElementOrder(1),
@@ -291,17 +281,14 @@ namespace Rodin::Variational
           m_fe[i].resize(mesh.getSimplexCount(i));
       }
 
-      constexpr
       H1(const H1& other)
         : Parent(other)
       {}
 
-      constexpr
       H1(H1&& other)
         : Parent(std::move(other))
       {}
 
-      constexpr
       H1& operator=(H1&& other)
       {
         Parent::operator=(std::move(other));

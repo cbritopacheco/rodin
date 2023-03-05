@@ -39,22 +39,18 @@ namespace Rodin::Variational
       using Integrand = Dot<LHS, RHS>;
       using Parent = GaussianQuadrature<Integrand>;
 
-      constexpr
       FaceIntegral(const LHS& lhs, const RHS& rhs)
         : FaceIntegral(Dot(lhs, rhs))
       {}
 
-      constexpr
       FaceIntegral(const Integrand& prod)
         : Parent(prod)
       {}
 
-      constexpr
       FaceIntegral(const FaceIntegral& other)
         : Parent(other)
       {}
 
-      constexpr
       FaceIntegral(FaceIntegral&& other)
         : Parent(std::move(other))
       {}
@@ -90,22 +86,18 @@ namespace Rodin::Variational
       using Parent = GaussianQuadrature<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
-      constexpr
       FaceIntegral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : FaceIntegral(Dot(lhs, rhs))
       {}
 
-      constexpr
       FaceIntegral(const Integrand& integrand)
         : Parent(integrand)
       {}
 
-      constexpr
       FaceIntegral(const FaceIntegral& other)
         : Parent(other)
       {}
 
-      constexpr
       FaceIntegral(FaceIntegral&& other)
         : Parent(std::move(other))
       {}

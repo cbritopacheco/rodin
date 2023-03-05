@@ -22,32 +22,27 @@ namespace Rodin::Variational
        * @brief Constructs the identity matrix function.
        * @param[in] n Dimension of identity matrix
        */
-      constexpr
       IdentityMatrix(size_t n)
         : m_n(n)
       {}
 
-      constexpr
       IdentityMatrix(const IdentityMatrix& other)
         : MatrixFunctionBase(other),
           m_n(other.m_n)
       {}
 
-      constexpr
       IdentityMatrix(IdentityMatrix&& other)
         : MatrixFunctionBase(std::move(other)),
           m_n(other.m_n)
       {}
 
       inline
-      constexpr
       size_t getRows() const
       {
         return m_n;
       }
 
       inline
-      constexpr
       size_t getColumns() const
       {
         return m_n;
