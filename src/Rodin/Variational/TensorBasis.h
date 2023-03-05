@@ -384,21 +384,18 @@ namespace Rodin::Variational
       TensorBasis& operator=(TensorBasis&&) = default;
 
       inline
-      constexpr
       size_t getRows() const
       {
         return m_data.dimension(0);
       }
 
       inline
-      constexpr
       size_t getColumns() const
       {
         return m_data.dimension(1);
       }
 
       inline
-      constexpr
       size_t getDOFs() const
       {
         return m_data.dimension(2);
