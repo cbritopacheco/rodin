@@ -190,8 +190,12 @@ namespace Rodin::Variational
         return m_data.size();
       }
 
+      const Math::Vector& getVector() const
+      {
+        return m_data;
+      }
+
       inline
-      constexpr
       Scalar operator()(size_t i) const
       {
         return m_data.coeff(static_cast<Math::Vector::Index>(i));
@@ -203,11 +207,6 @@ namespace Rodin::Variational
       friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
       friend inline TensorBasis operator*(const TensorBasis&, Scalar);
       friend inline TensorBasis operator/(const TensorBasis&, Scalar);
-
-      const Math::Vector& getVector() const
-      {
-        return m_data;
-      }
 
     private:
       Math::Vector m_data;

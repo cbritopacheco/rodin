@@ -45,9 +45,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
 rodin_add_compile_options(
   LANG CXX
-  OPTIONS
-  -fvisibility=hidden
-  -fvisibility-inlines-hidden)
+  OPTIONS -fvisibility=hidden)
 
 if (RODIN_BUILD_SRC)
   set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
