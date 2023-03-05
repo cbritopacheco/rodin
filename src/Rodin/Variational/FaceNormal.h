@@ -10,7 +10,7 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Outward unit normal.
+   * @brief Outward unit normal on a face.
    */
   class FaceNormal : public VectorFunctionBase<FaceNormal>
   {
@@ -18,7 +18,7 @@ namespace Rodin::Variational
       using Parent = VectorFunctionBase<FaceNormal>;
 
       /**
-       * @brief Constructs the outward unit FaceNormal.
+       * @brief Constructs the outward unit on a face.
        */
       constexpr
       FaceNormal(const Geometry::MeshBase& surface)

@@ -269,7 +269,7 @@ namespace Rodin::Geometry
       inline
       Scalar x(Coordinates coords = Coordinates::Physical) const
       {
-        return operator()(0);
+        return operator()(0, coords);
       }
 
       /**
@@ -279,7 +279,7 @@ namespace Rodin::Geometry
       inline
       Scalar y(Coordinates coords = Coordinates::Physical) const
       {
-        return operator()(1);
+        return operator()(1, coords);
       }
 
       /**
@@ -289,7 +289,7 @@ namespace Rodin::Geometry
       inline
       Scalar z(Coordinates coords = Coordinates::Physical) const
       {
-        return operator()(2);
+        return operator()(2, coords);
       }
 
       /**

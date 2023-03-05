@@ -369,6 +369,11 @@ namespace Rodin::Geometry
         : m_dim(0), m_sdim(0)
       {}
 
+      Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        load(filename, fmt);
+      }
+
       /**
       * @brief Move constructs the mesh from another mesh.
       */
