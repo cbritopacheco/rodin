@@ -9,6 +9,7 @@
 
 #include <boost/unordered_map.hpp>
 #include <boost/random/uniform_int.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include "Rodin/Variational.h"
 
