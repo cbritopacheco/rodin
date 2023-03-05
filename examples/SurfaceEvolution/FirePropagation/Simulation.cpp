@@ -16,6 +16,9 @@ using namespace Rodin::External;
 // static const char* meshfile =
 //   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
 static const char* meshfile = "Topography.mesh";
+static const Scalar hausdorff = 10;
+static const Scalar hmax = 600;
+static const Scalar hmin = 100;
 
 class Environment
 {
@@ -234,9 +237,9 @@ class Environment
 
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(600)
-                                                .setHMin(100)
-                                                .setHausdorff(20)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(hmax)
+                                                .setHMin(hmin)
+                                                .setHausdorff(hausdorff)
                                                 .setAngleDetection(false)
         // .split(Terrain::Burnt,
         //    {Terrain::Burnt, Terrain::Vegetation})
@@ -246,8 +249,9 @@ class Environment
                                                 .discretize(m_fireDist);
 
       MMG::MeshOptimizer().setAngleDetection(false)
-                          .setHausdorff(20)
-                          .setHMax(500)
+                          .setHausdorff(hausdorff)
+                          .setHMin(hmin)
+                          .setHMax(hmax)
                           .optimize(m_topography);
 
       // Rebuild finite element spaces with new topography
@@ -307,7 +311,7 @@ int main()
   topography.load(meshfile);
 
   Alert::Info() << "Optimizing mesh..." << Alert::Raise;
-  MMG::MeshOptimizer().setHausdorff(20).setHMax(500).optimize(topography);
+  MMG::MeshOptimizer().setHausdorff(hausdorff).setHMax(hmax).setHMin(hmin).optimize(topography);
 
   // Make a fire somewhere
   Alert::Info() << "Initializing fire..." << Alert::Raise;
@@ -317,23 +321,38 @@ int main()
     // Compute elevation
     GridFunction elevation(fes);
     elevation = [](const Point& p) { return p.z(); };
-    topography.save("FirePropagationInitial.mesh");
+    topography.save("Elevation.mesh");
     elevation.save("Elevation.gf");
 
     GridFunction phi(fes);
     phi = [](const Point& p)
     {
-      Math::FixedSizeVector<3> c;
-      c << 20400, 19600, 0;
+      const Scalar r = 1000;
+      Scalar rr = 0;
 
-      return std::sqrt(
-          (p.x() - c.x()) * (p.x() - c.x()) +
-          (p.y() - c.y()) * (p.y() - c.y())) - 1000;
+      Math::FixedSizeVector<3> c0;
+      c0 << 12500, 12500, p.z();
+      rr = (p.getCoordinates() - c0).norm() - r;
+
+      Math::FixedSizeVector<3> c1;
+      c1 << 25000, 25000, p.z();
+      rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
+
+      Math::FixedSizeVector<3> c2;
+      c2 << 12500, 25000, p.z();
+      rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
+
+      Math::FixedSizeVector<3> c3;
+      c3 << 25000, 12500, p.z();
+      rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
+
+      return rr;
     };
 
     topography = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                            .setHMax(500)
-                                            .setHausdorff(20)
+                                            .setHMax(hmax)
+                                            .setHMin(hmin)
+                                            .setHausdorff(hausdorff)
                                             .discretize(phi);
   }
 
@@ -392,9 +411,10 @@ int main()
   {
     Alert::Info() << "t: " << (t / 60) << "m" << Alert::Raise;
 
-    environment.step(dt);
     topography.save("out/FirePropagation.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
     topography.save("out/FirePropagation.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+
+    environment.step(dt);
     t += dt;
   }
 

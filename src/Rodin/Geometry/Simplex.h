@@ -252,7 +252,7 @@ namespace Rodin::Geometry
         {
           case Coordinates::Physical:
           {
-            return getPhysical()(i);
+            return getCoordinates(Coordinates::Physical)(i);
           }
           case Coordinates::Reference:
           {
@@ -296,17 +296,19 @@ namespace Rodin::Geometry
        * @brief Lexicographical comparison.
        */
       inline
-      bool operator<(const Point& rhs) const
+      bool operator<(const Point& p) const
       {
-        assert(getDimension() == rhs.getDimension());
-        for (int i = 0; i < getPhysical().size() - 1; i++)
+        assert(getDimension() == p.getDimension());
+        const Math::Vector& lhs = getCoordinates(Coordinates::Physical);
+        const Math::Vector& rhs = p.getCoordinates(Coordinates::Physical);
+        for (int i = 0; i < lhs.size() - 1; i++)
         {
-          if (getPhysical()(i) < rhs.getPhysical()(i))
+          if (lhs(i) < rhs(i))
             return true;
-          if (rhs.getPhysical()(i) > getPhysical()(i))
+          if (rhs(i) > lhs(i))
             return false;
         }
-        return (getPhysical()(getPhysical().size() - 1) < rhs.getPhysical()(rhs.getPhysical().size() - 1));
+        return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
       }
 
       inline
@@ -322,18 +324,12 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Math::Vector& getReference() const
-      {
-        return m_rc.get();
-      }
-
-      inline
       const mfem::IntegrationPoint& getIntegrationPoint() const
       {
         return m_ip;
       }
 
-      const Math::Vector& getPhysical() const;
+      const Math::Vector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
       const Math::Matrix& getJacobian() const;
 

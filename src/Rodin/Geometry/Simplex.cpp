@@ -126,17 +126,27 @@ namespace Rodin::Geometry
     m_trans.get().getHandle().SetIntPoint(&m_ip);
   }
 
-  const Math::Vector& Point::getPhysical() const
+  const Math::Vector& Point::getCoordinates(Coordinates coords) const
   {
-    if (!m_pc.has_value())
+    switch (coords)
     {
-      Math::Vector pc(getSimplex().getMesh().getSpaceDimension());
-      mfem::Vector tmp(pc.data(), pc.size());
-      m_trans.get().getHandle().Transform(m_ip, tmp);
-      m_pc.emplace(std::move(pc));
+      case Coordinates::Physical:
+      {
+        if (!m_pc.has_value())
+        {
+          Math::Vector pc(getSimplex().getMesh().getSpaceDimension());
+          mfem::Vector tmp(pc.data(), pc.size());
+          m_trans.get().getHandle().Transform(m_ip, tmp);
+          m_pc.emplace(std::move(pc));
+        }
+        assert(m_pc.has_value());
+        return m_pc.value();
+      }
+      case Coordinates::Reference:
+      {
+        return m_rc.get();
+      }
     }
-    assert(m_pc.has_value());
-    return m_pc.value();
   }
 
   const Math::Matrix& Point::getJacobian() const

@@ -304,7 +304,8 @@ namespace Rodin::Variational
           typename FormLanguage::Traits<ShapeFunctionBase<Operand, H1<Scalar, Ps...>, Space>>::RangeType;
         static_assert(std::is_same_v<OperandRange, Scalar>);
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-        return (fe.getGradient(p.getReference()) * p.getJacobianInverse()).transpose();
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return (fe.getGradient(coords) * p.getJacobianInverse()).transpose();
       }
 
       inline Grad* copy() const noexcept override

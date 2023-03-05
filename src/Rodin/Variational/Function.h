@@ -134,12 +134,11 @@ namespace Rodin::Variational
        * @brief Evaluates the function on a vertex of the mesh.
        * @param[in] v Vertex belonging to the mesh
        */
-      template <class ... Args>
       inline
       constexpr
-      auto operator()(Args&&... args) const
+      auto operator()(const Geometry::Point& p) const
       {
-        return getValue(std::forward<Args>(args)...);
+        return getValue(p);
       }
 
       /**
