@@ -86,7 +86,8 @@ namespace Rodin::Variational
       {
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
         const auto& inv = p.getJacobianInverse();
-        const auto& div = fe.getDivergence(p.getReference());
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const auto& div = fe.getDivergence(coords);
         const size_t n = fe.getComponentDOFs();
         const size_t rdim = p.getSimplex().getDimension();
         return (inv.transpose() * div.reshaped(n, rdim).transpose()).transpose().reshaped();

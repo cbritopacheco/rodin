@@ -362,7 +362,7 @@ namespace Rodin::Variational
       TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
       {
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-        return fe.getBasis(p.getReference());
+        return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
       }
 
       inline
@@ -454,7 +454,8 @@ namespace Rodin::Variational
       TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
       {
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-        return fe.getBasis(p.getReference()).transpose();
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return fe.getBasis(coords).transpose();
       }
 
       inline

@@ -318,8 +318,9 @@ namespace Rodin::Variational
         const auto& inv = p.getJacobianInverse();
         const Eigen::TensorMap<const Eigen::Tensor<Scalar, 2>> lift(inv.data(), inv.rows(), inv.cols());
         static constexpr const Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(2, 0) };
-        return fe.getJacobian(p.getReference()).contract(lift, dims)
-                                               .shuffle(Eigen::array<int, 3>{2, 1, 0});
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return fe.getJacobian(coords).contract(lift, dims)
+                                     .shuffle(Eigen::array<int, 3>{2, 1, 0});
       }
 
       inline Jacobian* copy() const noexcept override

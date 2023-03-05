@@ -80,6 +80,13 @@ namespace Rodin::Variational
         return operator()(2);
       }
 
+      inline
+      constexpr
+      auto operator()(const Geometry::Point& p) const
+      {
+        return getValue(p);
+      }
+
       /**
        * @brief Access the ith component of the vector function.
        * @returns Object of type Component<VectorFunctionBase> representing
