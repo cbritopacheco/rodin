@@ -10,6 +10,6 @@
 
 namespace Rodin::FormLanguage
 {
-  boost::uuids::random_generator Base::s_gen;
+  size_t Base::s_id = 0;
 }
 
