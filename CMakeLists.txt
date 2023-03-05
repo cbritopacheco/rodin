@@ -39,6 +39,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
 rodin_add_compile_options(
   LANG CXX
@@ -71,10 +74,6 @@ if (RODIN_BUILD_SRC)
     REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
     NO_DEFAULT_PATH)
 
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
-
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
@@ -100,6 +99,7 @@ if (RODIN_BUILD_SRC)
   add_subdirectory(third-party/corrade EXCLUDE_FROM_ALL)
   find_package(Corrade REQUIRED Utility)
   set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+  set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources")
 
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")

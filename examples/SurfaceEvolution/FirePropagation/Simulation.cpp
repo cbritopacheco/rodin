@@ -13,8 +13,9 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-static const char* meshfile =
-  "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
+// static const char* meshfile =
+//   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
+static const char* meshfile = "Topography.mesh";
 
 class Environment
 {

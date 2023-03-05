@@ -4,13 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <mfem.hpp>
-#include <chrono>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
-#include <Rodin/Math/Tensor.h>
 #include <Rodin/Variational.h>
-#include <boost/uuid/uuid_io.hpp>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;

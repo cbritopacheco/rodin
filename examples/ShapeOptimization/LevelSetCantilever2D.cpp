@@ -100,8 +100,6 @@ int main(int, char**)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     hilbert.solve(solver);
-    g.getSolution().save("g.gf");
-    Omega.save("g.mesh");
 
     // Update objective
     double objective = compliance(uInt.getSolution()) + ell * Omega.getVolume(Interior);
@@ -116,6 +114,7 @@ int main(int, char**)
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
+
     GridFunction gNorm(Dh);
     gNorm = ScalarFunction(
         [&](const Point& v) -> double
@@ -129,6 +128,7 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+
     Omega = MMG::ImplicitDomainMesher()
       .split(Interior, {Interior, Exterior})
       .split(Exterior, {Interior, Exterior})
@@ -137,6 +137,7 @@ int main(int, char**)
       .setBoundaryReference(Gamma)
       .setBaseReferences(GammaD)
       .discretize(dist);
+
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh");
