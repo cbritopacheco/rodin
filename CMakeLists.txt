@@ -173,7 +173,6 @@ if (RODIN_BUILD_SRC)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
-    find_package(GTest REQUIRED)
 
     if (RODIN_BUILD_BENCHMARKS)
       add_subdirectory(third-party/benchmarks)
