@@ -7,21 +7,21 @@
 #ifndef RODIN_MESH_FORWARDDECLS_H
 #define RODIN_MESH_FORWARDDECLS_H
 
-#include <utility>
+#include <cstddef>
 
-#include "Rodin/Configure.h"
-#include "Rodin/Context/ForwardDecls.h"
+#include "Rodin/Context.h"
 
 namespace Rodin::Geometry
 {
   using Index = std::size_t;
+
   using Attribute = std::size_t;
 
   class IndexGenerator;
 
   enum class Type;
 
-  class Transformation;
+  class SimplexTransformation;
 
   class Simplex;
 

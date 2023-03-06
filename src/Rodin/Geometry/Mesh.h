@@ -15,16 +15,16 @@
 
 #include <boost/filesystem.hpp>
 
-#include "Rodin/Configure.h"
-
 #include "Rodin/Math.h"
-#include "Rodin/Context.h"
+#include "Rodin/Types.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
+#include "Simplex.h"
 #include "SimplexIterator.h"
+#include "SimplexTransformation.h"
 
 namespace Rodin::Geometry
 {
@@ -44,7 +44,7 @@ namespace Rodin::Geometry
 
       virtual ~MeshBase() = default;
 
-      virtual MeshBase& scale(double c) = 0;
+      virtual MeshBase& scale(Scalar c) = 0;
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -62,7 +62,39 @@ namespace Rodin::Geometry
        *
        * @returns Reference to this (for method chaining)
        */
-      MeshBase& displace(const Variational::GridFunctionBase& u);
+      template <class FES>
+      MeshBase& displace(const Variational::GridFunction<FES>& u)
+      {
+        assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
+        getHandle().MoveNodes(u.getHandle());
+        flush();
+        return *this;
+      }
+
+      /**
+       * @brief Gets the maximum number @f$ t @f$ by which the mesh will
+       * remain valid, when displacing by @f$ u @f$.
+       * @param[in] u Displacement at each node
+       *
+       * This function will calculate the maximum number @f$ t @f$ so that
+       * the displacement
+       * @f[
+       *   x \mapsto x + t u(x)
+       * @f]
+       * gives a valid mesh without actually displacing the mesh.
+       *
+       * @note The vector dimension of @f$ u @f$ must be equal to the
+       * space dimension.
+       *
+       * @returns Maximum time so that the mesh remains valid.
+       */
+      template <class FES>
+      Scalar getMaximumDisplacement(const Variational::GridFunction<FES>& u)
+      {
+        Scalar res;
+        getHandle().CheckDisplacements(u.getHandle(), res);
+        return res;
+      }
 
       // /**
       //  * @brief Performs connected-component labelling.
@@ -135,7 +167,7 @@ namespace Rodin::Geometry
        * @brief Gets the total volume of the mesh.
        * @returns Sum of all element volumes.
        */
-      double getVolume();
+      Scalar getVolume();
 
       /**
        * @brief Gets the sum of the volumes of the elements given by the
@@ -145,13 +177,13 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
        */
-      double getVolume(Attribute attr);
+      Scalar getVolume(Attribute attr);
 
       /**
        * @brief Gets the total perimeter of the mesh.
        * @returns Sum of all element perimeters.
        */
-      double getPerimeter();
+      Scalar getPerimeter();
 
       /**
        * @brief Gets the sum of the perimeters of the elements given by the
@@ -161,7 +193,7 @@ namespace Rodin::Geometry
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
        */
-      double getPerimeter(Attribute attr);
+      Scalar getPerimeter(Attribute attr);
 
       /**
        * @brief Gets the labels of the domain elements in the mesh.
@@ -176,25 +208,6 @@ namespace Rodin::Geometry
        * @see getAttributes() const
        */
       std::set<Attribute> getBoundaryAttributes() const;
-
-      /**
-       * @brief Gets the maximum number @f$ t @f$ by which the mesh will
-       * remain valid, when displacing by @f$ u @f$.
-       * @param[in] u Displacement at each node
-       *
-       * This function will calculate the maximum number @f$ t @f$ so that
-       * the displacement
-       * @f[
-       *   x \mapsto x + t u(x)
-       * @f]
-       * gives a valid mesh without actually displacing the mesh.
-       *
-       * @note The vector dimension of @f$ u @f$ must be equal to the
-       * space dimension.
-       *
-       * @returns Maximum time so that the mesh remains valid.
-       */
-      double getMaximumDisplacement(const Variational::GridFunctionBase& u);
 
       bool operator==(const MeshBase& other) const
       {
@@ -263,25 +276,23 @@ namespace Rodin::Geometry
 
       virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
 
+      virtual const SimplexTransformation& getSimplexTransformation(
+          size_t dimension, Index idx) const = 0;
+
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
       virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
 
       virtual const Connectivity& getConnectivity(size_t d, size_t dp) const = 0;
 
-      /**
-       * @internal
-       * @brief Gets the underlying handle for the internal mesh.
-       * @returns Reference to the underlying mfem::Mesh.
-       */
-      virtual mfem::Mesh& getHandle() = 0;
+      virtual void flush() = 0;
 
       /**
        * @internal
        * @brief Gets the underlying handle for the internal mesh.
        * @returns Constant reference to the underlying mfem::Mesh.
        */
-      virtual const mfem::Mesh& getHandle() const = 0;
+      virtual mfem::Mesh& getHandle() const = 0;
   };
 
   using SerialMesh = Mesh<Context::Serial>;
@@ -309,6 +320,13 @@ namespace Rodin::Geometry
 
           Builder& setReference(Mesh<Context::Serial>& mesh);
 
+          Builder& vertex(std::initializer_list<Scalar> l)
+          {
+            Math::Vector x(l.size());
+            std::copy(l.begin(), l.end(), x.begin());
+            return vertex(x);
+          }
+
           Builder& vertex(const Math::Vector& x);
 
           Builder& face(Type geom, const Array<Index>& vs,
@@ -317,13 +335,31 @@ namespace Rodin::Geometry
           Builder& element(Type geom, const Array<Index>& vs,
               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
+          Builder& face(Type geom, std::initializer_list<Index> vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          {
+            Array<Index> as(vs.size());
+            std::copy(vs.begin(), vs.end(), as.begin());
+            return face(geom, as, attr);
+          }
+
+          Builder& element(Type geom, std::initializer_list<Index> vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          {
+            Array<Index> as(vs.size());
+            std::copy(vs.begin(), vs.end(), as.begin());
+            return element(geom, as, attr);
+          }
+
           void finalize() override;
 
         private:
           std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
-
+          size_t m_dim, m_sdim;
+          std::vector<size_t> m_count;
           std::vector<std::vector<Connectivity>> m_connectivity;
-          mfem::Mesh m_impl;
+          std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
+          std::unique_ptr<mfem::Mesh> m_impl;
       };
 
       /**
@@ -333,15 +369,27 @@ namespace Rodin::Geometry
         : m_dim(0), m_sdim(0)
       {}
 
+      Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        load(filename, fmt);
+      }
+
       /**
       * @brief Move constructs the mesh from another mesh.
       */
       Mesh(Mesh&& other) = default;
 
       /**
-      * @brief Performs a deep copy of another mesh.
+      * @brief Performs a copy of another mesh.
       */
-      Mesh(const Mesh& other) = default;
+      Mesh(const Mesh& other)
+        : m_dim(other.m_dim), m_sdim(other.m_sdim),
+          m_count(other.m_count),
+          m_connectivity(other.m_connectivity),
+          m_f2b(other.m_f2b)
+      {
+        m_impl.reset(new mfem::Mesh(*other.m_impl));
+      }
 
       /**
       * @internal
@@ -376,7 +424,7 @@ namespace Rodin::Geometry
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const override;
 
-      virtual Mesh& scale(double c) override;
+      virtual Mesh& scale(Scalar c) override;
 
       virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
 
@@ -417,6 +465,11 @@ namespace Rodin::Geometry
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
+      size_t getSimplexCount(size_t dim) const
+      {
+        return getCount(dim);
+      }
+
       virtual size_t getCount(size_t dim) const override;
 
       virtual FaceIterator getBoundary() const override;
@@ -444,27 +497,39 @@ namespace Rodin::Geometry
 
       virtual size_t getSpaceDimension() const override;
 
+      virtual const SimplexTransformation& getSimplexTransformation(
+          size_t dimension, Index idx) const override;
+
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
       virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
       {
-        assert(d == getDimension());
-        assert(dp == 0);
-        // Other dimensions not implemented yet
+        assert(m_connectivity.size() > d);
+        assert(m_connectivity[d].size() > dp);
+
+        // TODO: Other dimensions not implemented yet
+        assert(d == getDimension()); // TODO: Remove
+        assert(dp == 0); // TODO: Remove
         return m_connectivity[d][dp];
       }
 
-      mfem::Mesh& getHandle() override;
+      virtual void flush() override
+      {
+        for (size_t d = 0; d < m_transformations.size(); d++)
+          for (size_t i = 0; i < m_transformations[d].size(); i++)
+            m_transformations[d][i].reset();
+      }
 
-      const mfem::Mesh& getHandle() const override;
-
-    protected:
+      mfem::Mesh& getHandle() const override;
 
     private:
       size_t m_dim, m_sdim;
+      std::vector<size_t> m_count;
       std::vector<std::vector<Connectivity>> m_connectivity;
+      mutable std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
+
       std::map<Index, Index> m_f2b;
-      mfem::Mesh m_impl;
+      std::unique_ptr<mfem::Mesh> m_impl;
   };
 }
 

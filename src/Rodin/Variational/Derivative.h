@@ -23,9 +23,14 @@ namespace Rodin::Variational
    * @f]
    * where @f$ \quad 0 \leq i < s @f$ and @f$ \ 0 \leq j < d @f$.
    */
-  class Derivative : public ScalarFunctionBase
+  template <class ... Ts>
+  class Derivative<GridFunction<H1<Ts...>>> final
+    : public ScalarFunctionBase<Derivative<GridFunction<H1<Ts...>>>>
   {
     public:
+      using Operand = GridFunction<H1<Ts...>>;
+      using Parent = ScalarFunctionBase<Derivative<Operand>>;
+
       /**
        * @brief Constructs the derivative in the i-th direction of the j-th
        * component
@@ -33,45 +38,38 @@ namespace Rodin::Variational
        * @param[in] component Component @f$ u_j @f$ to differentiate
        * @param[in] u GridFunction in H1 space
        */
-      template <class Trait>
-      Derivative(int direction, int component, const GridFunction<H1<Trait>>& u)
-        :  m_direction(direction),
+      Derivative(size_t direction, size_t component, const Operand& u)
+        : m_direction(direction),
           m_component(component),
           m_u(u)
-      {
-        if (u.getRangeType() != RangeType::Scalar)
-          UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType());
-      }
+      {}
 
       Derivative(const Derivative& other)
-        : ScalarFunctionBase(other),
+        : Parent(other),
           m_direction(other.m_direction),
           m_component(other.m_component),
           m_u(other.m_u)
       {}
 
       Derivative(Derivative&& other)
-        : ScalarFunctionBase(std::move(other)),
-          m_direction(other.m_direction),
-          m_component(other.m_component),
-          m_u(other.m_u)
+        : Parent(std::move(other)),
+          m_direction(std::move(other.m_direction)),
+          m_component(std::move(other.m_component)),
+          m_u(std::move(other.m_u))
       {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point&) const
       {
         assert(false);
-        FunctionValue::Vector grad;
-        return grad(m_direction);
+        return Scalar(NAN);
       }
 
-      Derivative* copy() const noexcept override
-      {
-        return new Derivative(*this);
-      }
     private:
-      const int m_direction;
-      const int m_component;
-      const GridFunctionBase& m_u;
+      const size_t m_direction;
+      const size_t m_component;
+      std::reference_wrapper<const Operand> m_u;
   };
 
   /**
@@ -84,8 +82,8 @@ namespace Rodin::Variational
    *   \dfrac{\partial u}{\partial x}
    * @f$
    */
-  template <class Trait>
-  Derivative Dx(GridFunction<H1<Trait>>& u)
+  template <class FES>
+  auto Dx(GridFunction<FES>& u)
   {
     assert(u.getRangeType() == RangeType::Scalar);
     return Derivative(0, 0, u);
@@ -101,8 +99,8 @@ namespace Rodin::Variational
    *   \dfrac{\partial u}{\partial y}
    * @f$
    */
-  template <class Trait>
-  Derivative Dy(GridFunction<H1<Trait>>& u)
+  template <class FES>
+  auto Dy(GridFunction<FES>& u)
   {
     assert(u.getRangeType() == RangeType::Scalar);
     return Derivative(1, 0, u);
@@ -118,8 +116,8 @@ namespace Rodin::Variational
    *   \dfrac{\partial u}{\partial z}
    * @f$
    */
-  template <class Trait>
-  Derivative Dz(GridFunction<H1<Trait>>& u)
+  template <class FES>
+  auto Dz(GridFunction<FES>& u)
   {
     assert(u.getRangeType() == RangeType::Scalar);
     return Derivative(2, 0, u);

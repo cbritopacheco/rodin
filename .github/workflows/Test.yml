@@ -1,0 +1,67 @@
+name: Test
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+concurrency:
+  group: Test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        compiler: [gcc-8]
+        build_type: ['Debug']
+      fail-fast: false
+    env:
+      MAKEFLAGS: "-j2"
+      CTEST_PARALLEL_LEVEL: 2
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libgl1-mesa-dev
+          lcov
+          libsdl2-dev
+          libglfw3-dev
+          libopenal-dev
+          libvulkan-dev
+          libsuitesparse-dev
+          libmetis-dev
+          libboost-all-dev
+      - name: Configure CMake
+        run: >
+          cmake
+          -B ${{github.workspace}}/build
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_BUILD_DOC=OFF
+          -DRODIN_USE_MCSS=OFF
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=ON
+          -DRODIN_CODE_COVERAGE=ON
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build
+      - name: Run tests
+        run: ctest --test-dir ${{github.workspace}}/build/tests
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          gcov: true
+          gcov_include: ${{github.workspace}}
+        
+  

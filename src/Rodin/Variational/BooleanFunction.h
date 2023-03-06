@@ -19,34 +19,30 @@ namespace Rodin::Variational
    * @see BooleanFunction
    */
 
-  class BooleanFunctionBase : public FunctionBase
+  template <class Derived>
+  class BooleanFunctionBase
+    : public FunctionBase<BooleanFunctionBase<Derived>>
   {
     public:
+      using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
+
       BooleanFunctionBase() = default;
 
       BooleanFunctionBase(const BooleanFunctionBase& other)
-        : FunctionBase(other)
+        : Parent(other)
       {}
 
       BooleanFunctionBase(BooleanFunctionBase&& other)
-        : FunctionBase(std::move(other))
+        : Parent(std::move(other))
       {}
 
       virtual ~BooleanFunctionBase() = default;
 
-      FunctionValue::Boolean operator()(const Geometry::Point& p) const
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return getValue(p);
-      }
-
-      RangeShape getRangeShape() const override
-      {
-        return {1, 1};
-      }
-
-      RangeType getRangeType() const override
-      {
-        return RangeType::Scalar;
+        return { 1, 1 };
       }
 
       virtual BooleanFunctionBase* copy() const noexcept override = 0;
@@ -56,10 +52,13 @@ namespace Rodin::Variational
    * @ingroup BooleanFunctionSpecializations
    */
   template <>
-  class BooleanFunction<FunctionValue::Boolean> : public BooleanFunctionBase
+  class BooleanFunction<Boolean> final
+    : public BooleanFunctionBase<BooleanFunction<Boolean>>
   {
     public:
-      BooleanFunction(FunctionValue::Boolean v)
+      using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
+
+      BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
@@ -73,20 +72,22 @@ namespace Rodin::Variational
           m_v(other.m_v)
       {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
       }
 
-      BooleanFunction* copy() const noexcept override
+      inline BooleanFunction* copy() const noexcept final override
       {
         return new BooleanFunction(*this);
       }
 
     private:
-      FunctionValue::Boolean m_v;
+      const Boolean m_v;
   };
-  BooleanFunction(FunctionValue::Boolean) -> BooleanFunction<FunctionValue::Boolean>;
+  BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 
 #endif

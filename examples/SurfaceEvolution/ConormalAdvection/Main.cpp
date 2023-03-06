@@ -10,6 +10,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
+constexpr Scalar T = M_PI / 2 - 0.1;
 constexpr double dt = 0.01;
 constexpr size_t maxIt = 100;
 constexpr Geometry::Attribute sphereCap = 3;
@@ -23,8 +24,17 @@ int main()
   th.load(meshFile, IO::FileFormat::MEDIT);
 
   // Evolution
-  for (size_t i = 0; i < maxIt; i++)
+  size_t i = 0;
+  Scalar t = 0;
+  while (true)
   {
+    if (i == 0)
+      th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+
+    Alert::Info() << "t: " << t
+                  << "i: " << i
+                  << Alert::Raise;
+
     // Build finite element space on the mesh
     H1 vh(th);
     H1 uh(th, th.getSpaceDimension());
@@ -40,7 +50,9 @@ int main()
     conormal = gd / Frobenius(gd);
 
     // Advect
-    MMG::Advect(dist, conormal).step(dt);
+    MMG::Advect(dist, conormal).step(std::min(dt, T - t));
+    t += std::min(dt, T - t);
+    i++;
 
     // Generate mesh to subdomain
     th = MMG::ImplicitDomainMesher().setAngleDetection(false)
@@ -48,8 +60,16 @@ int main()
                                     .setHausdorff(0.01)
                                     .discretize(dist);
 
+    MMG::MeshOptimizer().setAngleDetection(false)
+                        .setHMax(0.05)
+                        .setHausdorff(0.01)
+                        .optimize(th);
+
     // Save results
-    th.save("out/SphereCap." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+
+    if (t + std::numeric_limits<double>::epsilon() > T)
+      break;
   }
   return 0;
 }

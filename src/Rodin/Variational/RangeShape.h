@@ -19,39 +19,60 @@ namespace Rodin::Variational
   {
     public:
       constexpr
-      RangeShape(int height, int width)
-        : m_height(height), m_width(width)
+      RangeShape(std::initializer_list<size_t> l)
+        : m_height(l.begin()[0]), m_width(l.begin()[1])
       {
-        assert(height > 0);
-        assert(width > 0);
+        assert(l.size() == 2);
       }
 
       constexpr
-      int height() const
+      RangeShape(size_t height, size_t width)
+        : m_height(height), m_width(width)
+      {}
+
+      constexpr
+      RangeShape(const RangeShape&) = default;
+
+      constexpr
+      RangeShape(RangeShape&&) = default;
+
+      inline
+      constexpr
+      size_t height() const
       {
-        assert(m_height > 0);
         return m_height;
       }
 
+      inline
       constexpr
-      int width() const
+      size_t width() const
       {
-        assert(m_width > 0);
         return m_width;
       }
 
+      inline
+      constexpr
+      RangeShape product(const RangeShape& rhs) const
+      {
+        assert(m_width == rhs.m_height);
+        return { m_height, rhs.m_width };
+      }
+
+      inline
       constexpr
       RangeShape transpose() const
       {
-        return {width(), height()};
+        return { m_width, m_height };
       }
 
+      inline
       constexpr
       bool operator==(const RangeShape& other)
       {
         return m_height == other.m_height && m_width == other.m_width;
       }
 
+      inline
       constexpr
       bool operator!=(const RangeShape& other)
       {
@@ -59,12 +80,11 @@ namespace Rodin::Variational
       }
 
     private:
-      const int m_height;
-      const int m_width;
+      const size_t m_height;
+      const size_t m_width;
   };
 
   std::ostream& operator<<(std::ostream& os, const RangeShape& obj);
-  std::ostream& operator<<(std::ostream& os, const RangeType& obj);
 }
 
 #endif

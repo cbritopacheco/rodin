@@ -25,49 +25,80 @@ namespace Rodin::Variational
    * @see MatrixFunction
    */
 
-  class MatrixFunctionBase : public FunctionBase
+  template <class Derived>
+  class MatrixFunctionBase : public FunctionBase<MatrixFunctionBase<Derived>>
   {
     public:
+      using Parent = FunctionBase<MatrixFunctionBase<Derived>>;
+
       MatrixFunctionBase() = default;
 
       MatrixFunctionBase(const MatrixFunctionBase& other)
-        : FunctionBase(other)
+        : Parent(other)
       {}
 
       MatrixFunctionBase(MatrixFunctionBase&& other)
-        : FunctionBase(std::move(other))
+        : Parent(std::move(other))
       {}
 
       virtual ~MatrixFunctionBase() = default;
 
-      FunctionValue::Matrix operator()(const Geometry::Point& p) const
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        return getValue(p).matrix();
+        return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      RangeShape getRangeShape() const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return {getRows(), getColumns()};
-      }
-
-      RangeType getRangeType() const override
-      {
-        return RangeType::Matrix;
+        return { getRows(), getColumns() };
       }
 
       /**
        * @brief Gets the number of rows in the matrix
        * @returns Number of rows
        */
-      virtual int getRows() const = 0;
+      inline
+      constexpr
+      size_t getRows() const
+      {
+        return static_cast<const Derived&>(*this).getRows();
+      }
 
       /**
        * @brief Gets the number of columns in the matrix
        * @returns Number of columns
        */
-      virtual int getColumns() const = 0;
+      inline
+      constexpr
+      size_t getColumns() const
+      {
+        return static_cast<const Derived&>(*this).getColumns();
+      }
 
-      virtual MatrixFunctionBase* copy() const noexcept override = 0;
+      inline
+      constexpr
+      MatrixFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      MatrixFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      virtual MatrixFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
   };
 }
 

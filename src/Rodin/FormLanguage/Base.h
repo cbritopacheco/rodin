@@ -7,44 +7,109 @@
 #ifndef RODIN_FORMLANGUAGE_BASE_H
 #define RODIN_FORMLANGUAGE_BASE_H
 
+#include <deque>
 #include <memory>
 #include <cassert>
+#include <variant>
 #include <typeinfo>
-#include <sstream>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
+#include "Rodin/Types.h"
+#include "Rodin/Utility/DependentFalse.h"
+#include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Variational/ForwardDecls.h"
+
+#include "Traits.h"
 
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Base class for all classes which are part of Variational::FormLanguage.
+   * @brief Base class for all classes which are part of Rodin's FormLanguage.
    */
   class Base
   {
-    static boost::uuids::random_generator s_gen;
+    static size_t s_id;
 
     public:
-      Base();
-
-      Base(const Base& other);
-
-      Base(Base&& other);
+      /**
+       * @brief Constructor.
+       */
+      Base()
+        : m_uuid(s_id++)
+      {}
 
       /**
-       * @brief Virtual destructor.
+       * @brief Copy constructor.
+       */
+      Base(const Base& other) = default;
+
+      /**
+       * @brief Move constructor.
+       */
+      Base(Base&&) = default;
+
+      /**
+       * @brief Destructor.
        */
       virtual ~Base() = default;
 
+      /**
+       * @brief Copy assignment is not allowed.
+       */
       Base& operator=(const Base&) = delete;
 
+      /**
+       * @brief Move assignment is not allowed.
+       */
       Base& operator=(Base&&) = delete;
 
-      const boost::uuids::uuid& getUUID() const;
+      /**
+       * @brief Gets the unique identifier associated to the instance.
+       */
+      inline
+      const size_t& getUUID() const
+      {
+        return m_uuid;
+      }
 
+      /**
+       * @brief Gets the name of the object which it represents.
+       */
       virtual const char* getName() const
       {
         return "Rodin::FormLanguage::Base";
+      }
+
+      /**
+       * @brief Keeps the passed object in memory for later use.
+       */
+      template <class T, typename = std::enable_if_t<FormLanguage::IsPlainObject<T>::Value>>
+      inline
+      constexpr
+      const T& object(T&& obj) const noexcept
+      {
+        using R = typename std::remove_reference_t<T>;
+        const R* res = new R(std::forward<T>(obj));
+        m_objs.emplace_back(res);
+        return *res;
+      }
+
+      /**
+       * @brief Returns the same object.
+       */
+      template <class T, typename = std::enable_if_t<!FormLanguage::IsPlainObject<T>::Value>>
+      inline
+      constexpr
+      T object(T&& obj) const noexcept
+      {
+        return std::forward<T>(obj);
+      }
+
+      /**
+       * @brief Destructs the objects stored inside this instance.
+       */
+      void clear()
+      {
+        m_objs.clear();
       }
 
       /**
@@ -56,7 +121,8 @@ namespace Rodin::FormLanguage
       virtual Base* copy() const noexcept = 0;
 
     private:
-      const boost::uuids::uuid m_uuid;
+      const size_t m_uuid;
+      mutable std::deque<std::shared_ptr<const void>> m_objs;
   };
 }
 

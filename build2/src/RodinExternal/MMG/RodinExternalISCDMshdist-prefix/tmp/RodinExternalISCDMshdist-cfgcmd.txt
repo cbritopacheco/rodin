@@ -1,0 +1,1 @@
+cmd='/Users/carlos/.virtualenvs/rodin/lib/python3.8/site-packages/cmake/data/CMake.app/Contents/bin/cmake;-DCMAKE_BUILD_TYPE:STRING=Debug;-GUnix Makefiles;<SOURCE_DIR><SOURCE_SUBDIR>'

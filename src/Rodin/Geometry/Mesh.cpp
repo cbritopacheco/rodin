@@ -15,6 +15,7 @@
 
 #include "Simplex.h"
 #include "SimplexIterator.h"
+#include "IsoparametricTransformation.h"
 
 
 namespace Rodin::Geometry
@@ -48,7 +49,89 @@ namespace Rodin::Geometry
     return m_sdim;
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(double c)
+  const SimplexTransformation&
+  Mesh<Context::Serial>::getSimplexTransformation(size_t dimension, Index idx) const
+  {
+    assert(m_transformations.size() > dimension);
+    assert(m_transformations[dimension].size() > idx);
+    if (m_transformations[dimension][idx])
+    {
+      return *m_transformations[dimension][idx];
+    }
+    else
+    {
+      const auto attribute = getAttribute(dimension, idx);
+      const mfem::Mesh& meshHandle = getHandle();
+      const mfem::GridFunction* nodes = meshHandle.GetNodes();
+      if (dimension == getDimension())
+      {
+        if (!nodes)
+        {
+          mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+          trans->Attribute = attribute;
+          trans->ElementNo = idx;
+          trans->ElementType = mfem::ElementTransformation::ELEMENT;
+          trans->mesh = nullptr;
+          trans->Reset();
+          meshHandle.GetPointMatrix(idx, trans->GetPointMat());
+          trans->SetFE(
+              meshHandle.GetTransformationFEforElementType(
+                meshHandle.GetElementType(idx)));
+          m_transformations[dimension][idx].reset(new IsoparametricTransformation(trans));
+          return *m_transformations[dimension][idx];
+        }
+        else
+        {
+          assert(false);
+          return *m_transformations[dimension][idx];
+        }
+      }
+      else if (dimension == getDimension() - 1)
+      {
+        if (!nodes)
+        {
+          mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+          trans->Attribute = attribute;
+          trans->ElementNo = idx;
+          trans->ElementType = mfem::ElementTransformation::FACE;
+          trans->mesh = nullptr;
+          mfem::DenseMatrix& pm = trans->GetPointMat();
+          trans->Reset();
+          const size_t spaceDim = getSpaceDimension();
+
+          mfem::Array<int> v;
+          meshHandle.GetFaceVertices(idx, v);
+          const int nv = v.Size();
+          pm.SetSize(spaceDim, nv);
+          for (size_t i = 0; i < spaceDim; i++)
+            for (int j = 0; j < nv; j++)
+              pm(i, j) = meshHandle.GetVertex(v[j])[i];
+          trans->SetFE(
+              meshHandle.GetTransformationFEforElementType(
+                meshHandle.GetFaceElementType(idx)));
+          m_transformations[dimension][idx].reset(new IsoparametricTransformation(trans));
+          return *m_transformations[dimension][idx];
+        }
+        else
+        {
+          assert(false);
+          return *m_transformations[dimension][idx];
+        }
+      }
+      else if (dimension == 0)
+      {
+        assert(false);
+        return *m_transformations[dimension][idx];
+      }
+      else
+      {
+        assert(false);
+        return *m_transformations[dimension][idx];
+      }
+    }
+  }
+
+  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
   {
     mfem::Vector vs;
     getHandle().GetVertices(vs);
@@ -98,32 +181,17 @@ namespace Rodin::Geometry
     }
   }
 
-  MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
+  Scalar MeshBase::getVolume()
   {
-    assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-    getHandle().MoveNodes(u.getHandle());
-    return *this;
-  }
-
-  double
-  MeshBase::getMaximumDisplacement(const Variational::GridFunctionBase& u)
-  {
-    double res;
-    getHandle().CheckDisplacements(u.getHandle(), res);
-    return res;
-  }
-
-  double MeshBase::getVolume()
-  {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getElement(); !it.end(); ++it)
       totalVolume += it->getVolume();
     return totalVolume;
   }
 
-  double MeshBase::getVolume(Attribute attr)
+  Scalar MeshBase::getVolume(Attribute attr)
   {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getElement(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -132,17 +200,17 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  double MeshBase::getPerimeter()
+  Scalar MeshBase::getPerimeter()
   {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
       totalVolume += it->getVolume();
     return totalVolume;
   }
 
-  double MeshBase::getPerimeter(Attribute attr)
+  Scalar MeshBase::getPerimeter(Attribute attr)
   {
-    double totalVolume = 0;
+    Scalar totalVolume = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
@@ -199,31 +267,31 @@ namespace Rodin::Geometry
 #endif
 
   Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
-    : m_dim(mesh.Dimension()), m_sdim(mesh.SpaceDimension()), m_impl(std::move(mesh))
+    : m_dim(mesh.Dimension()), m_sdim(mesh.SpaceDimension())
   {
+    m_impl.reset(new mfem::Mesh(std::move(mesh)));
+
+    // TODO: This whole constructors is ugly. In general we should try and
+    // build the mesh with the MeshBuilder object.
+
+    m_count.resize(m_dim + 1);
+    m_count[m_dim] = getHandle().GetNE();
+    m_count[m_dim - 1] = getHandle().GetNumFaces();
+    m_count[0] = getHandle().GetNV();
+
+    m_transformations.resize(m_dim + 1);
+    m_transformations[m_dim].resize(m_count[m_dim]);
+    m_transformations[m_dim - 1].resize(m_count[m_dim - 1]);
+    m_transformations[0].resize(m_count[0]);
+
     for (int i = 0; i < getHandle().GetNBE(); i++)
       m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
   }
 
   size_t Mesh<Context::Serial>::getCount(size_t dimension) const
   {
-    if (dimension == getDimension())
-    {
-      return m_impl.GetNE();
-    }
-    else if (dimension == getDimension() - 1)
-    {
-      return m_impl.GetNumFaces();
-    }
-    else if (dimension == 0)
-    {
-      return m_impl.GetNV();
-    }
-    else
-    {
-      assert(false);
-    }
-    return 0;
+    assert(m_count.size() > dimension);
+    return m_count[dimension];
   }
 
   FaceIterator Mesh<Context::Serial>::getBoundary() const
@@ -433,14 +501,9 @@ namespace Rodin::Geometry
     return keep(complement);
   }
 
-  mfem::Mesh& Mesh<Context::Serial>::getHandle()
+  mfem::Mesh& Mesh<Context::Serial>::getHandle() const
   {
-    return m_impl;
-  }
-
-  const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
-  {
-    return m_impl;
+    return *m_impl;
   }
 }
 

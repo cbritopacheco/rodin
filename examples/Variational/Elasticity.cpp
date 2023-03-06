@@ -7,6 +7,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Variational/LinearElasticity.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -14,7 +15,7 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
-  const char* meshFile = "../resources/mfem/elasticity-example.mesh";
+  const char* meshFile = "/Users/carlos/Projects/rodin/resources/mfem/elasticity-example.mesh";
 
   // Define boundary attributes
   int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
@@ -24,29 +25,34 @@ int main(int argc, char** argv)
   Omega.load(meshFile);
 
   // Functions
-  int d = 2;
-  H1 Vh(Omega, d);
+  size_t d = Omega.getSpaceDimension();
+  H1 vh(Omega, d);
 
   // Lamé coefficients
-  auto mu    = ScalarFunction(0.3846),
-     lambda = ScalarFunction(0.5769);
+  Scalar lambda = 0.5769, mu = 0.3846;
 
   // Pull force
-  auto f = VectorFunction{0, -1};
+  VectorFunction f{0, -1};
 
+  // Solver object
   Solver::CG solver;
   mfem::GSSmoother smooth;
   solver.printIterations(true).setPreconditioner(smooth);
 
   // Define problem
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
   Problem elasticity(u, v);
   elasticity = Integral(lambda * Div(u), Div(v))
-         + Integral(
-            mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
-         - BoundaryIntegral(f, v).over(GammaN)
-         + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+             + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
+             - BoundaryIntegral(f, v).over(GammaN)
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
+  // elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+  //            - BoundaryIntegral(f, v).over(GammaN)
+  //            + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
   elasticity.solve(solver);
 
 

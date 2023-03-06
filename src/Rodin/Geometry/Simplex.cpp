@@ -1,4 +1,8 @@
+#include "Rodin/Variational/MFEM.h"
+#include "Rodin/Variational/QuadratureRule.h"
+
 #include "Mesh.h"
+#include "SimplexTransformation.h"
 
 #include "Simplex.h"
 
@@ -54,104 +58,19 @@ namespace Rodin::Geometry
     return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
   }
 
-  mfem::ElementTransformation& Simplex::getTransformation() const
+  const SimplexTransformation& Simplex::getTransformation() const
   {
-    if (!m_trans)
-    {
-      const auto& mesh = getMesh();
-      const auto index = getIndex();
-      const auto dimension = getDimension();
-      const auto attribute = getAttribute();
-      if (dimension == getMesh().getDimension())
-      {
-        mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
-        trans->Attribute = attribute;
-        trans->ElementNo = index;
-        trans->ElementType = mfem::ElementTransformation::ELEMENT;
-        trans->mesh = nullptr;
-        trans->Reset();
-        const mfem::Mesh& meshHandle = mesh.getHandle();
-        const mfem::GridFunction* nodes = meshHandle.GetNodes();
-        if (!nodes)
-        {
-          meshHandle.GetPointMatrix(getIndex(), trans->GetPointMat());
-          trans->SetFE(
-              meshHandle.GetTransformationFEforElementType(
-                meshHandle.GetElementType(getIndex())));
-        }
-        else
-        {
-          assert(false);
-        }
-        m_trans.reset(trans);
-      }
-      else if (dimension == getMesh().getDimension() - 1)
-      {
-        mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
-        trans->Attribute = attribute;
-        trans->ElementNo = index;
-        trans->ElementType = mfem::ElementTransformation::FACE;
-        trans->mesh = nullptr;
-        mfem::DenseMatrix& pm = trans->GetPointMat();
-        trans->Reset();
-        const mfem::Mesh& meshHandle = mesh.getHandle();
-        const mfem::GridFunction* nodes = meshHandle.GetNodes();
-        const size_t spaceDim = mesh.getSpaceDimension();
-        if (!nodes)
-        {
-
-          mfem::Array<int> v;
-          meshHandle.GetFaceVertices(index, v);
-          const int nv = v.Size();
-          pm.SetSize(spaceDim, nv);
-          for (size_t i = 0; i < spaceDim; i++)
-            for (int j = 0; j < nv; j++)
-              pm(i, j) = meshHandle.GetVertex(v[j])[i];
-          trans->SetFE(
-              meshHandle.GetTransformationFEforElementType(
-                meshHandle.GetFaceElementType(index)));
-        }
-        else
-        {
-          assert(false);
-        }
-        m_trans.reset(trans);
-      }
-      else if (dimension == 0)
-      {
-        assert(false);
-      }
-      else
-      {
-        assert(false);
-      }
-    }
-    return *m_trans;
+    return m_mesh.get().getSimplexTransformation(m_dimension, m_index);
   }
 
-  std::vector<Geometry::Point> Simplex::getIntegrationRule(int order) const
+  Scalar Simplex::getVolume() const
   {
-    const mfem::IntegrationRule* ir =
-      &mfem::IntRules.Get(getTransformation().GetGeometryType(), order);
-    std::vector<Geometry::Point> res;
-    res.reserve(ir->GetNPoints());
-    for (int i = 0; i < ir->GetNPoints(); i++)
-      res.emplace_back(*this, ir->IntPoint(i));
-    return res;
-  }
-
-  double Simplex::getVolume() const
-  {
-    mfem::ElementTransformation& trans = getTransformation();
-    const mfem::IntegrationRule& ir =
-      mfem::IntRules.Get(static_cast<int>(getGeometry()), trans.OrderJ());
-    double volume = 0.0;
-    for (int j = 0; j < ir.GetNPoints(); j++)
-    {
-      const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-      trans.SetIntPoint(&ip);
-      volume += ip.weight * trans.Weight();
-    }
+    mfem::ElementTransformation& trans = getTransformation().getHandle();
+    const Variational::QuadratureRule& qr =
+      Variational::QuadratureRule::get(getGeometry(), trans.OrderJ());
+    Scalar volume = 0.0;
+    for (size_t i = 0; i < qr.size(); i++)
+      volume += qr.getWeight(i) * trans.Weight();
     return volume;
   }
 
@@ -194,24 +113,85 @@ namespace Rodin::Geometry
     : Simplex(0, index, mesh, {index}, attr), m_coordinates(coordinates)
   {}
 
-  double Vertex::operator()(size_t i) const
+  Scalar Vertex::operator()(size_t i) const
   {
-    assert(i < m_coordinates.size());
+    assert(i < static_cast<size_t>(m_coordinates.size()));
     return m_coordinates(i);
   }
 
   // ---- Point --------------------------------------------------------------
-  Point::Point(const Simplex& element, const mfem::IntegrationPoint& ip)
-    : m_element(element), m_ip(ip)
+  Point::Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc)
+    : m_simplex(simplex), m_trans(trans), m_rc(rc), m_ip(Variational::Internal::vec2ip(m_rc))
   {
-    m_element.get().getTransformation().SetIntPoint(&m_ip);
-    m_element.get().getTransformation().Transform(m_ip, m_physical);
-    assert(static_cast<size_t>(m_physical.Size()) == element.getMesh().getSpaceDimension());
+    m_trans.get().getHandle().SetIntPoint(&m_ip);
   }
 
-  Point::Point(const Simplex& element, mfem::IntegrationPoint&& ip)
-    : m_element(element), m_ip(std::move(ip))
-  {}
+  const Math::Vector& Point::getCoordinates(Coordinates coords) const
+  {
+    switch (coords)
+    {
+      case Coordinates::Physical:
+      {
+        if (!m_pc.has_value())
+        {
+          Math::Vector pc(getSimplex().getMesh().getSpaceDimension());
+          mfem::Vector tmp(pc.data(), pc.size());
+          m_trans.get().getHandle().Transform(m_ip, tmp);
+          m_pc.emplace(std::move(pc));
+        }
+        assert(m_pc.has_value());
+        return m_pc.value();
+      }
+      case Coordinates::Reference:
+      {
+        return m_rc.get();
+      }
+    }
+
+    return m_pc.value(); // Some compilers complain, so return any value
+  }
+
+  const Math::Matrix& Point::getJacobian() const
+  {
+    if (!m_jacobian.has_value())
+    {
+      const size_t rdim = getSimplex().getDimension();
+      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
+      Math::Matrix jacobian(sdim, rdim);
+      mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
+      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
+      tmp = m_trans.get().getHandle().Jacobian();
+      m_jacobian.emplace(std::move(jacobian));
+    }
+    assert(m_jacobian.has_value());
+    return m_jacobian.value();
+  }
+
+  const Math::Matrix& Point::getJacobianInverse() const
+  {
+    if (!m_inverseJacobian.has_value())
+    {
+      const size_t rdim = getSimplex().getDimension();
+      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
+      Math::Matrix inv(rdim, sdim);
+      mfem::DenseMatrix tmp(inv.data(), inv.rows(), inv.cols());
+      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
+      tmp = m_trans.get().getHandle().InverseJacobian();
+      m_inverseJacobian.emplace(std::move(inv));
+    }
+    assert(m_inverseJacobian.has_value());
+    return m_inverseJacobian.value();
+  }
+
+  Scalar Point::getDistortion() const
+  {
+    if (!m_distortion.has_value())
+    {
+      m_distortion.emplace(m_trans.get().getHandle().Weight());
+    }
+    assert(m_distortion.has_value());
+    return m_distortion.value();
+  }
 
   size_t Point::getDimension(Coordinates coords) const
   {
@@ -219,11 +199,11 @@ namespace Rodin::Geometry
     {
       case Coordinates::Physical:
       {
-        return m_element.get().getMesh().getSpaceDimension();
+        return m_simplex.get().getMesh().getSpaceDimension();
       }
       case Coordinates::Reference:
       {
-        return m_element.get().getMesh().getDimension();
+        return m_simplex.get().getMesh().getDimension();
       }
       default:
       {
