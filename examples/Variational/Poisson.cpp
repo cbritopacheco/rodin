@@ -21,7 +21,9 @@ int main(int, char**)
 
   // Load mesh
   Mesh Omega;
-  Omega.load(meshFile);
+  std::cout << Omega.getDimension() << std::endl;
+  return 0;
+  // Omega.load(meshFile);
 
   // Functions
   H1 vh(Omega);

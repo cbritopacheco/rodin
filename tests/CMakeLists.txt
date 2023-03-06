@@ -1,13 +1,9 @@
-include(Dart)
-include(CTest)
-include(GoogleTest)
-
 enable_testing()
+
+include(GoogleTest)
 
 add_subdirectory(unit)
 add_subdirectory(benchmarks)
-
-include(CTest)
 
 # rodin_add_test(
 #   NAME Poisson
