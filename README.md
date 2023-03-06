@@ -109,9 +109,10 @@ List of features and modules that are in the works:
 
 ## Requirements
 
-- [CMake 3.12.0+](https://cmake.org/)
+- [CMake 3.16.0+](https://cmake.org/)
 - [Boost 1.65+](https://www.boost.org/)
 - [SuiteSparse](https://people.engr.tamu.edu/davis/suitesparse.html)
+- [METIS](https://github.com/KarypisLab/METIS)
 
 Any of these should be available for quick install from your standard package
 manager.
