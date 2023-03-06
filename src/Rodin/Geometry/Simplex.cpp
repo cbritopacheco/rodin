@@ -147,6 +147,8 @@ namespace Rodin::Geometry
         return m_rc.get();
       }
     }
+
+    return m_pc.value(); // Some compilers complain, so return any value
   }
 
   const Math::Matrix& Point::getJacobian() const
