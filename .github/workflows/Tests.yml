@@ -1,4 +1,4 @@
-name: Test
+name: Tests
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ on:
       - develop
 
 concurrency:
-  group: Test-${{ github.ref }}
+  group: Tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
