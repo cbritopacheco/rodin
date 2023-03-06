@@ -6,8 +6,7 @@ using namespace Rodin::Geometry;
 
 TEST(Cat, Miaow) {
   Mesh mesh;
-  mesh.load("/Users/carlos/Projects/rodin/resources/mfem/StarSquare.mfem.mesh");
-  std::cout << mesh.getSpaceDimension() << std::endl;
+  mesh.initialize(2, 2).finalize();
   EXPECT_EQ(mesh.getDimension(), 2);
 }
 

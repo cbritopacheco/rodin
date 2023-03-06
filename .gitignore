@@ -143,6 +143,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build
+build*/
 _skbuild
 
 # ----> ccls
