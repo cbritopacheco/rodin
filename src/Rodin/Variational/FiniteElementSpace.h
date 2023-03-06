@@ -11,66 +11,67 @@
 
 #include <mfem.hpp>
 
-#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Utility.h"
+#include "Rodin/Geometry/Mesh.h"
 
 #include "ForwardDecls.h"
+#include "FiniteElement.h"
 
 namespace Rodin::Variational
 {
   class FiniteElementSpaceBase
   {
     public:
-      constexpr
       FiniteElementSpaceBase() = default;
 
-      constexpr
       FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
 
-      constexpr
       FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
 
-      constexpr
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
 
-      void update();
-
-      /**
-       * @returns Order of the highest dimensional finite element.
-       */
-      size_t getOrder() const;
-
-      size_t getNumberOfDofs() const;
+      size_t getOrder(const Geometry::Simplex& simplex) const
+      {
+        if (simplex.getDimension() == simplex.getMesh().getDimension())
+        {
+          return getHandle().GetElementOrder(simplex.getIndex());
+        }
+        else if (simplex.getDimension() == simplex.getMesh().getDimension() - 1)
+        {
+          return getHandle().GetFaceOrder(simplex.getIndex());
+        }
+        else
+        {
+          assert(false);
+          return 0;
+        }
+      }
 
       /**
        * @brief Gets the vector dimensions
        */
-      int getVectorDimension() const;
+      size_t getVectorDimension() const;
 
-      mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr) const;
+      mfem::Array<int> getEssentialTrueDOFs(const std::set<Geometry::Attribute>& bdrAttr) const;
 
-      mfem::Array<int> getEssentialTrueDOFs(const std::set<int>& bdrAttr, int component) const;
+      mfem::Array<int> getEssentialTrueDOFs(const std::set<Geometry::Attribute>& bdrAttr, size_t component) const;
 
-      virtual int getSize() const = 0;
+      virtual size_t getSize() const = 0;
 
-      virtual bool isParallel() const = 0;
-
-      virtual Geometry::MeshBase& getMesh() = 0;
+      virtual mfem::Array<int> getDOFs(const Geometry::Simplex& element) const = 0;
 
       virtual const Geometry::MeshBase& getMesh() const = 0;
 
-      virtual mfem::Array<int> getDOFs(
-          const Geometry::Simplex& element) const = 0;
-
-      virtual const mfem::FiniteElement& getFiniteElement(
-          const Geometry::Simplex& element) const = 0;
-
       virtual const FiniteElementCollectionBase& getFiniteElementCollection() const = 0;
 
-      virtual mfem::FiniteElementSpace& getHandle() = 0;
-
-      virtual const mfem::FiniteElementSpace& getHandle() const = 0;
+      virtual mfem::FiniteElementSpace& getHandle() const = 0;
   };
+
+  inline
+  bool operator==(const FiniteElementSpaceBase& lhs, const FiniteElementSpaceBase& rhs)
+  {
+    return &lhs == &rhs;
+  }
 }
 
 #endif

@@ -12,6 +12,7 @@
 #include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
 #include "Integrator.h"
@@ -24,13 +25,17 @@ namespace Rodin::Variational
     public:
       using Parent = Integrator;
 
-      LinearFormIntegratorBase(const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& v)
-        : m_v(v.copy())
+      template <class FES>
+      LinearFormIntegratorBase(const TestFunction<FES>& v)
+        : m_v(v)
       {}
+
+      template <class FES>
+      LinearFormIntegratorBase(TestFunction<FES>&& v) = delete;
 
       LinearFormIntegratorBase(const LinearFormIntegratorBase& other)
         : Parent(other),
-          m_v(other.m_v->copy()),
+          m_v(other.m_v),
           m_attrs(other.m_attrs)
       {}
 
@@ -42,15 +47,16 @@ namespace Rodin::Variational
 
       virtual ~LinearFormIntegratorBase() = default;
 
-      const ShapeFunctionBase<ShapeFunctionSpaceType::Test>& getTestFunction() const
+      inline
+      const FormLanguage::Base& getTestFunction() const
       {
-        assert(m_v);
-        return *m_v;
+        return m_v.get();
       }
 
       /**
        * @brief Gets the attributes of the elements being integrated.
        */
+      inline
       const std::set<Geometry::Attribute>& getAttributes() const
       {
         return m_attrs;
@@ -63,6 +69,7 @@ namespace Rodin::Variational
        * Specifies the material reference over which the integration should
        * take place.
        */
+      inline
       LinearFormIntegratorBase& over(Geometry::Attribute attr)
       {
         return over(std::set<Geometry::Attribute>{attr});
@@ -75,6 +82,7 @@ namespace Rodin::Variational
        * Specifies the material references over which the integration should
        * take place.
        */
+      inline
       LinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
       {
         assert(attrs.size() > 0);
@@ -82,12 +90,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @internal
-       */
-      std::unique_ptr<mfem::LinearFormIntegrator> build() const;
-
-      Integrator::Type getType() const override
+      inline
+      Integrator::Type getType() const
+      final override
       {
         return Integrator::Type::Linear;
       }
@@ -96,13 +101,14 @@ namespace Rodin::Variational
        * @brief Performs the assembly of the element vector for the given
        * element.
        */
-      virtual mfem::Vector getVector(
-          const Geometry::Simplex& element) const = 0;
+      virtual
+      Math::Vector getVector(const Geometry::Simplex& element) const = 0;
 
-      virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
+      virtual
+      LinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<ShapeFunctionBase<ShapeFunctionSpaceType::Test>> m_v;
+      std::reference_wrapper<const FormLanguage::Base> m_v;
       std::set<Geometry::Attribute> m_attrs;
   };
 }

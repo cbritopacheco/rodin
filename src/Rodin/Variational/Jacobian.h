@@ -9,7 +9,7 @@
 
 #include "H1.h"
 #include "GridFunction.h"
-#include "BasisOperator.h"
+#include "TensorBasis.h"
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
@@ -26,78 +26,88 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 GridFunction object.
    */
-  template <class Trait>
-  class Jacobian<GridFunction<H1<Trait>>> : public MatrixFunctionBase
+  template <class ... Ps>
+  class Jacobian<GridFunction<H1<Math::Vector, Ps...>>> final
+    : public MatrixFunctionBase<Jacobian<GridFunction<H1<Math::Vector, Ps...>>>>
   {
     public:
+      using Operand = GridFunction<H1<Math::Vector, Ps...>>;
+      using Parent = MatrixFunctionBase<Jacobian<GridFunction<H1<Math::Vector, Ps...>>>>;
+
       /**
        * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
        * @f$ u @f$.
        * @param[in] u Grid function to be differentiated
        */
-      Jacobian(GridFunction<H1<Trait>>& u)
+      Jacobian(const Operand& u)
         :  m_u(u)
       {}
 
       Jacobian(const Jacobian& other)
-        :  MatrixFunctionBase(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
       Jacobian(Jacobian&& other)
-        : MatrixFunctionBase(std::move(other)),
-          m_u(other.m_u)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
       {}
 
-      int getRows() const override
+      inline
+      constexpr
+      size_t getRows() const
       {
-        return m_u.getFiniteElementSpace().getMesh().getDimension();
+        return m_u.get().getFiniteElementSpace().getVectorDimension();
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      size_t getColumns() const
       {
-        return m_u.getFiniteElementSpace().getVectorDimension();
+        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      Math::Matrix getValue(const Geometry::Point& p) const
       {
-        FunctionValue::Matrix grad;
         const auto& simplex = p.getSimplex();
         const auto& simplexMesh = simplex.getMesh();
-        const auto& fesMesh = m_u.getFiniteElementSpace().getMesh();
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+        Math::Matrix jacobian(getRows(), getColumns());
+        mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
         if (simplex.getDimension() == fesMesh.getDimension())
         {
-          assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
-          const auto& element = p.getSimplex();
-          auto& trans = element.getTransformation();
-          m_u.getHandle().GetVectorGradient(trans, grad);
+          const auto& trans = p.getTransformation();
+          m_u.get().getHandle().GetVectorGradient(trans.getHandle(), tmp);
+          return jacobian;
         }
         else if (simplex.getDimension() == fesMesh.getDimension() - 1)
         {
           assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
           const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
           mfem::FaceElementTransformations* ft =
-            const_cast<Geometry::MeshBase&>(simplexMesh).getHandle()
-            .GetFaceElementTransformations(face.getIndex());
+            simplexMesh.getHandle().GetFaceElementTransformations(face.getIndex());
           if (simplexMesh.isSubMesh())
           {
             const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
             assert(submesh.getParent() == fesMesh);
-            if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
             {
               Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+              return jacobian;
             }
-            else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
             {
               Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
               ft->Elem2->ElementNo = parentIdx;
               ft->Elem2No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
+              return jacobian;
             }
             else if (face.isBoundary())
             {
@@ -106,11 +116,14 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+              return jacobian;
             }
             else
             {
               assert(false);
+              jacobian.setConstant(NAN);
+              return jacobian;
             }
           }
           else if (fesMesh.isSubMesh())
@@ -118,21 +131,25 @@ namespace Rodin::Variational
             const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
             assert(submesh.getParent() == simplexMesh);
             const auto& s2pe = submesh.getElementMap();
-            if (ft->Elem1 && s2pe.right.count(ft->Elem1No) && getTraceDomain() == ft->Elem1->Attribute)
+            if (ft->Elem1 && s2pe.right.count(ft->Elem1No) &&
+                this->getTraceDomain().count(ft->Elem1->Attribute))
             {
               Geometry::Index idx = s2pe.right.at(ft->Elem1No);
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+              return jacobian;
             }
-            else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) && getTraceDomain() == ft->Elem2->Attribute)
+            else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) &&
+                this->getTraceDomain().count(ft->Elem2->Attribute))
             {
               Geometry::Index idx = s2pe.right.at(ft->Elem2No);
               ft->Elem2->ElementNo = idx;
               ft->Elem2No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
+              return jacobian;
             }
             else if (face.isBoundary())
             {
@@ -141,135 +158,177 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+              return jacobian;
             }
             else
             {
               assert(false);
+              jacobian.setConstant(NAN);
+              return jacobian;
             }
           }
           else
           {
-            if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+              return jacobian;
             }
-            else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetVectorGradient(*ft->Elem2, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
+              return jacobian;
             }
             else if (face.isBoundary())
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
               assert(ft->Elem1);
-              m_u.getHandle().GetVectorGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+              return jacobian;
             }
             else
             {
               assert(false);
+              jacobian.setConstant(NAN);
+              return jacobian;
             }
           }
         }
         else
         {
           assert(false);
+          jacobian.setConstant(NAN);
+          return jacobian;
         }
-        return grad;
       }
 
-      Jacobian* copy() const noexcept override
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
+
+      inline
+      constexpr
+      Jacobian& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Jacobian& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      inline Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
       }
 
     private:
-      GridFunction<H1<Trait>>& m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
-  template <class Trait>
-  Jacobian(GridFunction<H1<Trait>>&) -> Jacobian<GridFunction<H1<Trait>>>;
+
+  template <class ... Ps>
+  Jacobian(const GridFunction<H1<Math::Vector, Ps...>>&)
+    -> Jacobian<GridFunction<H1<Math::Vector, Ps...>>>;
 
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 ShapeFunction object.
    */
-  template <ShapeFunctionSpaceType Space, class Trait>
-  class Jacobian<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
+  template <class ShapeFunctionDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, H1<Math::Vector, Ts...>, Space>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, H1<Math::Vector, Ts...>, Space>>, H1<Math::Vector, Ts...>, Space>
   {
     public:
-      Jacobian(ShapeFunction<H1<Trait>, Space>& u)
-        : m_u(u)
+      using FES = H1<Math::Vector, Ts...>;
+      using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
+
+      Jacobian(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
       {}
 
       Jacobian(const Jacobian& other)
-        : ShapeFunctionBase<Space>(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
       Jacobian(Jacobian&& other)
-        : ShapeFunctionBase<Space>(std::move(other)),
+        : Parent(std::move(other)),
           m_u(other.m_u)
       {}
 
-      H1<Trait>& getFiniteElementSpace() override
+      inline
+      constexpr
+      const Operand& getOperand() const
       {
-        return m_u.getFiniteElementSpace();
+        return m_u.get();
       }
 
-      const H1<Trait>& getFiniteElementSpace() const override
+      inline
+      constexpr
+      const FES& getFiniteElementSpace() const
       {
-        return m_u.getFiniteElementSpace();
+        return getOperand().getFiniteElementSpace();
       }
 
-      const ShapeFunction<H1<Trait>, Space>& getLeaf() const override
+      inline
+      constexpr
+      const auto& getLeaf() const
       {
-        return m_u.getLeaf();
+        return getOperand().getLeaf();
       }
 
-      int getRows() const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
+        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(),
+                 getOperand().getFiniteElementSpace().getVectorDimension() };
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
       {
-        return m_u.getFiniteElementSpace().getVectorDimension();
+        return getOperand().getDOFs(element);
       }
 
-      int getDOFs(const Geometry::Simplex& element) const override
+      inline
+      TensorBasis<Math::Matrix> getTensorBasis(const Geometry::Point& p) const
       {
-        return m_u.getDOFs(element);
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const auto& inv = p.getJacobianInverse();
+        const Eigen::TensorMap<const Eigen::Tensor<Scalar, 2>> lift(inv.data(), inv.rows(), inv.cols());
+        static constexpr const Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(2, 0) };
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return fe.getJacobian(coords).contract(lift, dims)
+                                     .shuffle(Eigen::array<int, 3>{2, 1, 0});
       }
 
-      void getOperator(
-          DenseBasisOperator& op, ShapeComputator& compute,
-          const Geometry::Point& p) const override
-      {
-        const auto& element = p.getSimplex();
-        auto& trans = element.getTransformation();
-        const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-        const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const int n = dshape.NumRows();
-        const int sdim = trans.GetSpaceDim();
-        const int vdim = m_u.getFiniteElementSpace().getVectorDimension();
-        op.setSize(sdim, vdim, vdim * n);
-        op = 0.0;
-        for (int i = 0; i < vdim; i++)
-          for (int j = 0; j < n; j++)
-            for (int k = 0; k < sdim; k++)
-              op(k, i, j + i * n) = dshape(j, k);
-      }
-
-      Jacobian* copy() const noexcept override
+      inline Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
       }
+
     private:
-      ShapeFunction<H1<Trait>, Space>& m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
-  template <ShapeFunctionSpaceType Space, class Trait>
-  Jacobian(ShapeFunction<H1<Trait>, Space>&) -> Jacobian<ShapeFunction<H1<Trait>, Space>>;
+
+  template <class ShapeFunctionDerived, class FES, ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, FES, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, FES, Space>>;
 }
 
 #endif

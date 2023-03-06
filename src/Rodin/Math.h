@@ -9,6 +9,8 @@
 
 #include "Math/Common.h"
 #include "Math/Vector.h"
+#include "Math/Tensor.h"
+#include "Math/Matrix.h"
 #include "Math/Constants.h"
 
 #endif

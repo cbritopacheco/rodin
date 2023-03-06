@@ -117,8 +117,8 @@ int main(int, char**)
    gNorm = ScalarFunction(
       [&](const Point& v) -> double
       {
-       mfem::Vector val = g.getSolution()(v);
-       return val.Norml2();
+       Math::Vector val = g.getSolution()(v);
+       return val.norm();
       });
    double gInf = gNorm.max();
    double dt = 4 * hmax / gInf;
