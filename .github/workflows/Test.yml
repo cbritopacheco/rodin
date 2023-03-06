@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   Ubuntu:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
