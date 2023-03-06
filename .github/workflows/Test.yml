@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   Ubuntu:
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
