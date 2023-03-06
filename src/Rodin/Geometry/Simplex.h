@@ -258,9 +258,10 @@ namespace Rodin::Geometry
           case Coordinates::Reference:
           {
             assert(m_rc.get().size() > static_cast<int>(i));
-            return m_rc(i);
+            return m_rc.get()(i);
           }
         }
+        return getCoordinates(Coordinates::Physical)(i);
       }
 
       /**
