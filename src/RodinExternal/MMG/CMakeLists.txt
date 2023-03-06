@@ -31,6 +31,7 @@ set(RodinExternalMMG_SRCS
   ImplicitDomainMesher.cpp
   )
 
+# ---- Set compile options for all the submodules ----------------------------
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   rodin_add_compile_options(LANG CXX OPTIONS -w -O3 -flto -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
@@ -39,6 +40,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     OPTIONS
     -g
     -O0
+    -fPIC
     -Wall
     -Wextra
     -Wpedantic
