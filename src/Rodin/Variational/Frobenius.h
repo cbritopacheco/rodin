@@ -22,66 +22,60 @@ namespace Rodin::Variational
   /**
    * @ingroup FrobeniusSpecializations
    */
-  template <>
-  class Frobenius<FunctionBase> : public ScalarFunctionBase
+  template <class NestedDerived>
+  class Frobenius<FunctionBase<NestedDerived>>
+    : public ScalarFunctionBase<Frobenius<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase;
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Frobenius<Operand>>;
 
-      Frobenius(const FunctionBase& v)
+      Frobenius(const Operand& v)
         : m_v(v.copy())
       {}
 
       Frobenius(const Frobenius& other)
-        :  ScalarFunctionBase(other),
+        : Parent(other),
           m_v(other.m_v->copy())
       {}
 
       Frobenius(Frobenius&& other)
-        :  ScalarFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
-      Frobenius& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        ScalarFunctionBase::traceOf(attrs);
-        m_v->traceOf(attrs);
-        return *this;
-      }
-
-      FunctionValue getValue(const Geometry::Point& p) const override
-      {
-        switch (m_v->getRangeType())
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+        if constexpr (std::is_same_v<OperandRange, Scalar>)
         {
-          case RangeType::Scalar:
-          {
-            return std::abs(m_v->getValue(p).scalar());
-          }
-          case RangeType::Vector:
-          {
-            return m_v->getValue(p).vector().Norml2();
-          }
-          case RangeType::Matrix:
-          {
-            return m_v->getValue(p).matrix().FNorm();
-          }
-          default:
-          {
-            assert(false);
-            return 0.0;
-          }
+          return std::abs(getOperand().getValue(p));
+        }
+        else
+        {
+          return getOperand().getValue(p).norm();
         }
       }
 
-      Frobenius* copy() const noexcept override
+      const Operand& getOperand() const
+      {
+        assert(m_v);
+        return *m_v;
+      }
+
+      inline Frobenius* copy() const noexcept override
       {
         return new Frobenius(*this);
       }
 
     private:
-      std::unique_ptr<FunctionBase> m_v;
+      std::unique_ptr<Operand> m_v;
   };
-  Frobenius(const FunctionBase&) -> Frobenius<FunctionBase>;
+
+  template <class NestedDerived>
+  Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;
 }
 
 #endif

@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_NORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/SimplexTransformation.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
@@ -11,110 +12,66 @@ namespace Rodin::Variational
   /**
    * @brief Outward unit normal.
    */
-  class Normal : public VectorFunctionBase
+  class Normal final : public VectorFunctionBase<Normal>
   {
     public:
+      using Parent = VectorFunctionBase<Normal>;
+
       /**
        * @brief Constructs the outward unit normal.
        */
-      Normal(size_t dimension)
-        : m_dimension(dimension)
+      Normal(const Geometry::MeshBase& surface)
+        : m_dimension(surface.getSpaceDimension())
       {
-        assert(dimension > 0);
+        assert(m_dimension > 0);
       }
 
       Normal(const Normal& other)
-        :  VectorFunctionBase(other),
+        : Parent(other),
           m_dimension(other.m_dimension)
       {}
 
       Normal(Normal&& other)
-        :  VectorFunctionBase(std::move(other)),
-          m_dimension(other.m_dimension)
+        : Parent(std::move(other)),
+          m_dimension(std::move(other.m_dimension))
       {}
 
-      int getDimension() const override
+      inline
+      constexpr
+      size_t getDimension() const
       {
         return m_dimension;
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      Math::Vector getValue(const Geometry::Point& p) const
       {
-        FunctionValue::Vector value;
-        const auto& simplex = p.getSimplex();
-        const auto& mesh = simplex.getMesh();
-        auto& trans = simplex.getTransformation();
-
-        if ((mesh.getDimension() + 1 == mesh.getSpaceDimension()) &&
-            simplex.getDimension() == mesh.getDimension())
+        assert(p.getSimplex().getMesh().isSurface());
+        const auto& jacobian = p.getJacobian();
+        Math::Vector value(m_dimension);
+        if (jacobian.rows() == 2)
         {
-          // Or we are on an element of a d-mesh in (d + 1)-space.
-          value.SetSize(m_dimension);
-          mfem::CalcOrtho(trans.Jacobian(), value);
-          const double norm = value.Norml2();
-          assert(norm > 0.0);
-          assert(std::isfinite(norm));
-          value /= norm;
+          value(0) =  jacobian(1, 0);
+          value(1) = -jacobian(0, 0);
         }
-        else if ((mesh.getDimension() == mesh.getSpaceDimension()) &&
-            simplex.getDimension() == mesh.getDimension() - 1)
+        else if (jacobian.rows() == 3)
         {
-          // We are on a face of a d-mesh in d-space
-          if (mesh.isBoundary(simplex.getIndex()))
-          {
-            mfem::FaceElementTransformations* ft =
-              const_cast<Geometry::MeshBase&>(mesh).getHandle()
-              .GetFaceElementTransformations(simplex.getIndex());
-            value.SetSize(m_dimension);
-            ft->SetAllIntPoints(&p.getIntegrationPoint());
-            assert(ft->Elem1);
-            mfem::CalcOrtho(trans.Jacobian(), value);
-            const double norm = value.Norml2();
-            assert(norm > 0.0);
-            assert(std::isfinite(norm));
-            value /= norm;
-          }
-          else
-          {
-            mfem::FaceElementTransformations* ft =
-              const_cast<Geometry::MeshBase&>(mesh).getHandle()
-              .GetFaceElementTransformations(simplex.getIndex());
-            value.SetSize(m_dimension);
-            ft->SetAllIntPoints(&p.getIntegrationPoint());
-            if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
-            {
-              mfem::CalcOrtho(trans.Jacobian(), value);
-              const double norm = value.Norml2();
-              assert(norm > 0.0);
-              assert(std::isfinite(norm));
-              value /= norm;
-            }
-            else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
-            {
-              mfem::CalcOrtho(trans.Jacobian(), value);
-              const double norm = value.Norml2();
-              assert(norm > 0.0);
-              assert(std::isfinite(norm));
-              value /= -norm;
-            }
-            else
-            {
-              assert(false);
-            }
-          }
+          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
         }
         else
         {
           assert(false);
-          return FunctionValue::Vector{0, 0};
+          value.setConstant(NAN);
         }
-        return value;
+        return value.normalized();
       }
 
-      Normal* copy() const noexcept override
+      inline Normal* copy() const noexcept override
       {
         return new Normal(*this);
       }
+
     private:
       const size_t m_dimension;
   };

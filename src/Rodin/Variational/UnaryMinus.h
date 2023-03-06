@@ -28,36 +28,158 @@ namespace Rodin::Variational
   /**
    * @ingroup UnaryMinusSpecializations
    */
-  template <>
-  class UnaryMinus<FunctionBase> : public FunctionBase
+  template <class NestedDerived>
+  class UnaryMinus<FunctionBase<NestedDerived>> final
+    : public FunctionBase<UnaryMinus<FunctionBase<NestedDerived>>>
   {
     public:
-      using Parent = FunctionBase;
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = FunctionBase<UnaryMinus<Operand>>;
 
-      UnaryMinus(const FunctionBase& op);
+      constexpr
+      UnaryMinus(const Operand& op)
+        : m_op(op.copy())
+      {}
 
-      UnaryMinus(const UnaryMinus& other);
+      constexpr
+      UnaryMinus(const UnaryMinus& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
 
-      UnaryMinus(UnaryMinus&& other);
+      constexpr
+      UnaryMinus(UnaryMinus&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
 
-      RangeShape getRangeShape() const override;
-
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return -m_op->getValue(p);
+        return getOperand().getRangeShape();
       }
 
-      UnaryMinus* copy() const noexcept override
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        assert(m_op);
+        return *m_op;
+      }
+
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        return -1 * this->object(getOperand().getValue(p));
+      }
+
+      inline UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
       }
 
     private:
-      std::unique_ptr<FunctionBase> m_op;
+      std::unique_ptr<Operand> m_op;
   };
-  UnaryMinus(const FunctionBase&) -> UnaryMinus<FunctionBase>;
 
-  UnaryMinus<FunctionBase> operator-(const FunctionBase& op);
+  template <class NestedDerived>
+  UnaryMinus(const FunctionBase<NestedDerived>&) -> UnaryMinus<FunctionBase<NestedDerived>>;
+
+  template <class NestedDerived>
+  inline
+  constexpr
+  auto operator-(const FunctionBase<NestedDerived>& op)
+  {
+    return UnaryMinus(op);
+  }
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
+  {
+    public:
+      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
+
+      constexpr
+      UnaryMinus(const Operand& op)
+        : Parent(op.getFiniteElementSpace()),
+          m_op(op.copy())
+      {}
+
+      constexpr
+      UnaryMinus(const UnaryMinus& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
+
+      constexpr
+      UnaryMinus(UnaryMinus&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
+
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return *m_op;
+      }
+
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return getOperand().getRangeShape();
+      }
+
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        return getOperand().getDOFs(element);
+      }
+
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        return -1 * this->object(getOperand().getTensorBasis(p));
+      }
+
+      const FES& getFiniteElementSpace() const
+      {
+        return getOperand().getFiniteElementSpace();
+      }
+
+      inline UnaryMinus* copy() const noexcept override
+      {
+        return new UnaryMinus(*this);
+      }
+    private:
+      std::unique_ptr<Operand> m_op;
+  };
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  UnaryMinus(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+    -> UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>;
+
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  inline
+  constexpr
+  auto operator-(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
+  {
+    return UnaryMinus(op);
+  }
 
   template <>
   class UnaryMinus<LinearFormIntegratorBase> : public LinearFormIntegratorBase
@@ -74,7 +196,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      mfem::Vector getVector(const Geometry::Simplex& element) const override;
+      Math::Vector getVector(const Geometry::Simplex& element) const override;
 
       UnaryMinus* copy() const noexcept override
       {
@@ -100,7 +222,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      mfem::DenseMatrix getMatrix(const Geometry::Simplex& element) const override;
+      Math::Matrix getMatrix(const Geometry::Simplex& element) const override;
 
       UnaryMinus* copy() const noexcept override
       {
@@ -114,93 +236,35 @@ namespace Rodin::Variational
 
   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op);
 
-  template <ShapeFunctionSpaceType Space>
-  class UnaryMinus<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
+  template <>
+  class UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
+    : public FormLanguage::List<LinearFormIntegratorBase>
   {
     public:
-      using Parent = ShapeFunctionBase<Space>;
-      UnaryMinus(const ShapeFunctionBase<Space>& rhs)
-        :  Parent(rhs),
-          m_op(rhs.copy())
-      {}
+      UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase>& op)
+      {
+        for (const auto& p : op)
+          add(UnaryMinus<LinearFormIntegratorBase>(p));
+      }
 
       UnaryMinus(const UnaryMinus& other)
-        :  Parent(other),
-          m_op(other.m_op->copy())
+        : FormLanguage::List<LinearFormIntegratorBase>(other)
       {}
 
       UnaryMinus(UnaryMinus&& other)
-        :  Parent(std::move(other)),
-          m_op(std::move(other.m_op))
+        : FormLanguage::List<LinearFormIntegratorBase>(std::move(other))
       {}
-
-      ShapeFunctionBase<Space>& getOperand()
-      {
-        return *m_op;
-      }
-
-      const ShapeFunctionBase<Space>& getOperand() const
-      {
-        return *m_op;
-      }
-
-      ShapeFunctionBase<Space>& getLeaf() override
-      {
-        return getOperand().getLeaf();
-      }
-
-      const ShapeFunctionBase<Space>& getLeaf() const override
-      {
-        return getOperand().getLeaf();
-      }
-
-      int getRows(
-          const mfem::FiniteElement& fe,
-          const mfem::ElementTransformation& trans) const override
-      {
-        return getOperand().getRows(fe, trans);
-      }
-
-      int getColumns(
-          const mfem::FiniteElement& fe,
-          const mfem::ElementTransformation& trans) const override
-      {
-        return getOperand().getColumns(fe, trans);
-      }
-
-      int getDOFs(
-          const mfem::FiniteElement& fe,
-          const mfem::ElementTransformation& trans) const override
-      {
-        return getOperand().getDOFs(fe, trans);
-      }
-
-      std::unique_ptr<BasisOperator> getOperator(
-          const mfem::FiniteElement& fe,
-          mfem::ElementTransformation& trans) const override
-      {
-        auto result = getOperand().getOperator(fe, trans);
-        (*result) *= -1.0;
-        return result;
-      }
-
-      FiniteElementSpaceBase& getFiniteElementSpace() override
-      {
-        return getOperand().getFiniteElementSpace();
-      }
-
-      const FiniteElementSpaceBase& getFiniteElementSpace() const override
-      {
-        return getOperand().getFiniteElementSpace();
-      }
 
       UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
       }
-    private:
-      std::unique_ptr<ShapeFunctionBase<Space>> m_op;
   };
+  UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase>&)
+    -> UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>;
+
+  UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
+  operator-(const FormLanguage::List<LinearFormIntegratorBase>& op);
 
   template <>
   class UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
@@ -232,36 +296,6 @@ namespace Rodin::Variational
 
   UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
   operator-(const FormLanguage::List<BilinearFormIntegratorBase>& op);
-
-  template <>
-  class UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
-    : public FormLanguage::List<LinearFormIntegratorBase>
-  {
-    public:
-      UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase>& op)
-      {
-        for (const auto& p : op)
-          add(UnaryMinus<LinearFormIntegratorBase>(p));
-      }
-
-      UnaryMinus(const UnaryMinus& other)
-        : FormLanguage::List<LinearFormIntegratorBase>(other)
-      {}
-
-      UnaryMinus(UnaryMinus&& other)
-        : FormLanguage::List<LinearFormIntegratorBase>(std::move(other))
-      {}
-
-      UnaryMinus* copy() const noexcept override
-      {
-        return new UnaryMinus(*this);
-      }
-  };
-  UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase>&)
-    -> UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>;
-
-  UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
-  operator-(const FormLanguage::List<LinearFormIntegratorBase>& op);
 }
 
 #endif

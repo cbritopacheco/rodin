@@ -107,11 +107,11 @@ int main(int, char**)
    Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
    GridFunction gNorm(Dh);
    gNorm = ScalarFunction(
-      [&](const Point& v) -> double
-      {
-       mfem::Vector val = g.getSolution()(v);
-       return val.Norml2();
-      });
+       [&](const Point& v) -> double
+       {
+         Math::Vector val = g.getSolution()(v);
+         return val.norm();
+       });
    double gInf = gNorm.max();
    double dt = 4 * hmax / gInf;
    MMG::Advect(dist, g.getSolution()).step(dt);

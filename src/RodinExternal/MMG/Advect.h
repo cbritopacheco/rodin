@@ -37,20 +37,21 @@ namespace Rodin::External::MMG
   class Advect
   {
     public:
+      using LevelSetFunction = Variational::GridFunction<Variational::H1<Scalar, Context::Serial>>;
+      using VectorField = Variational::GridFunction<Variational::H1<Math::Vector, Context::Serial>>;
+
       /**
        * @brief Constructs an Advect object
        * @param[in, out] ls Function to advect
        * @param[in] disp Displacement velocity field
        */
-      Advect(
-          Variational::GridFunction<Variational::H1<Context::Serial>>& ls,
-          const Variational::GridFunction<Variational::H1<Context::Serial>>& disp)
+      Advect(LevelSetFunction& ls, const VectorField& disp)
         : m_t(0),
-        m_ex(true),
-        m_advectTheSurface(false),
-        m_ls(ls),
-        m_disp(disp),
-        m_advect(getISCDAdvectExecutable())
+          m_ex(true),
+          m_advectTheSurface(false),
+          m_ls(ls),
+          m_disp(disp),
+          m_advect(getISCDAdvectExecutable())
     {
       assert(ls.getFiniteElementSpace().getVectorDimension() == 1);
       assert(
@@ -81,16 +82,16 @@ namespace Rodin::External::MMG
       {
         assert(!std::isnan(dt) && !std::isinf(dt));
 
-        auto& mesh = m_ls.getFiniteElementSpace().getMesh();
+        auto& mesh = m_ls.get().getFiniteElementSpace().getMesh();
 
         auto meshp = m_advect.tmpnam(".mesh", "RodinMMG");
         mesh.save(meshp, IO::FileFormat::MEDIT);
 
         auto solp = m_advect.tmpnam(".sol", "RodinMMG");
-        m_ls.save(solp, IO::FileFormat::MEDIT);
+        m_ls.get().save(solp, IO::FileFormat::MEDIT);
 
         auto dispp = m_advect.tmpnam(".sol", "RodinMMG");
-        m_disp.save(dispp, IO::FileFormat::MEDIT);
+        m_disp.get().save(dispp, IO::FileFormat::MEDIT);
 
         auto outp = m_advect.tmpnam(".sol", "RodinMMG");
 
@@ -142,7 +143,7 @@ namespace Rodin::External::MMG
           Alert::Exception(
               "MMG::Advect: ISCD::Advection invocation failed.").raise();
 
-        m_ls.load(outp, IO::FileFormat::MEDIT);
+        m_ls.get().load(outp, IO::FileFormat::MEDIT);
 
         m_t += dt;
       }
@@ -157,8 +158,8 @@ namespace Rodin::External::MMG
       double m_t;
       bool m_ex;
       bool m_advectTheSurface;
-      Variational::GridFunction<Variational::H1<Context::Serial>>& m_ls;
-      const Variational::GridFunction<Variational::H1<Context::Serial>>& m_disp;
+      std::reference_wrapper<LevelSetFunction> m_ls;
+      std::reference_wrapper<const VectorField> m_disp;
       ISCDProcess m_advect;
   };
 }
