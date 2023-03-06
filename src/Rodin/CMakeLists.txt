@@ -53,8 +53,7 @@ configure_file(Configure.h.in Configure.h @ONLY)
 target_include_directories(Rodin
   INTERFACE
   ${PROJECT_SOURCE_DIR}/src
-  ${PROJECT_BINARY_DIR}/src
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  ${PROJECT_BINARY_DIR}/src)
 
 
 add_subdirectory(Math)

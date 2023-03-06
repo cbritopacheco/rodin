@@ -7,20 +7,12 @@ set(RodinUtility_HEADERS
 
 set(RodinUtility_SRCS Cast.cpp)
 
-add_library(RodinUtility
-  ${RodinUtility_SRCS} ${RodinUtility_HEADERS})
+add_library(RodinUtility ${RodinUtility_SRCS} ${RodinUtility_HEADERS})
 add_library(Rodin::Utility ALIAS RodinUtility)
 
 target_include_directories(RodinUtility
   INTERFACE
-  # $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
+  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   PUBLIC
-  ${MFEM_INCLUDE_DIRS}
-  )
-
-target_link_libraries(RodinUtility
-  PUBLIC
-  Rodin::Math
-  PRIVATE
-  mfem)
+  ${MFEM_INCLUDE_DIRS})
 

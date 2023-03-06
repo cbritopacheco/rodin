@@ -66,15 +66,9 @@ else()
 endif()
 
 if (RODIN_CODE_COVERAGE)
-  rodin_add_link_options(
-    LANG CXX C
-    OPTIONS
-    -lgcov -fprofile-arcs -ftest-coverage)
-  rodin_add_compile_options(
-    LANG CXX C
-    OPTIONS
-    -Wno-error=missing-profile
-    -fprofile-abs-path -fprofile-arcs -ftest-coverage)
+  include(CodeCoverage)
+  append_coverage_compiler_flags()
+  rodin_add_compile_options(LANG CXX C -fprofile-abs-path)
 endif()
 
 if (RODIN_BUILD_SRC)
