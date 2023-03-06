@@ -1,13 +1,16 @@
-find_package(Corrade REQUIRED TestSuite)
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+include(Dart)
+include(CTest)
+include(GoogleTest)
 
 enable_testing()
 
-corrade_add_resource(
-  RodinTest_RESOURCES "${PROJECT_SOURCE_DIR}/resources/Manifest.conf")
+add_subdirectory(unit)
+add_subdirectory(benchmarks)
 
-rodin_add_test(
-  NAME Poisson
-  MODULES Variational Geometry
-  SOURCES Variational/Poisson.cpp ${RodinTest_RESOURCES}
-  LIBRARIES Rodin::Geometry Rodin::Variational)
+include(CTest)
+
+# rodin_add_test(
+#   NAME Poisson
+#   MODULES Variational Geometry
+#   SOURCES Variational/Poisson.cpp ${RodinTest_RESOURCES}
+#   LIBRARIES Rodin::Geometry Rodin::Variational)

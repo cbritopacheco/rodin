@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.18)
 cmake_policy(SET CMP0054 NEW)
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.13)
   cmake_policy(SET CMP0076 NEW)
@@ -14,15 +14,17 @@ project(Rodin LANGUAGES CXX C)
 # ---- Options ---------------------------------------------------------------
 option(RODIN_BUILD_SRC          "Build the Rodin source code"           ON)
 option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"              ON)
-option(RODIN_BUILD_TESTS        "Build Rodin tests"                     OFF)
+option(RODIN_BUILD_UNIT_TESTS   "Build Rodin unit tests"                OFF)
+option(RODIN_BUILD_BENCHMARKS   "Build Rodin benchmarks"                OFF)
 option(RODIN_BUILD_DOC          "Build the Rodin documentation"         OFF)
 option(RODIN_USE_MPI            "Use Rodin with MPI support"            OFF)
 option(RODIN_USE_OPENMP         "Use Rodin with OpenMP support"         OFF)
 option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    ON)
 option(RODIN_USE_MCSS           "Build documentation with m.css"        OFF)
 option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
-option(RODIN_WITH_PY            "Build Python bindings."                OFF)
+option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
 option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
+option(RODIN_CODE_COVERAGE      "Compile with code coverage flags"      OFF)
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -46,6 +48,20 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 rodin_add_compile_options(
   LANG CXX
   OPTIONS -fvisibility=hidden)
+
+if (RODIN_CODE_COVERAGE)
+  rodin_add_compile_options(
+    LANG CXX
+    OPTIONS
+    --coverage
+    -fprofile-abs-path
+    -fprofile-arcs -ftest-coverage
+    -fprofile-instr-generate -fcoverage-mapping)
+
+  rodin_add_link_options(
+    LANG CXX
+    OPTIONS -lgcov -fprofile-arcs -fprofile-instr-generate -fcoverage-mapping)
+endif()
 
 if (RODIN_BUILD_SRC)
   set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
@@ -145,7 +161,16 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(examples)
   endif()
 
-  if (RODIN_BUILD_TESTS)
+  if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS)
+    # ---- GoogleTest ----
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
+    find_package(GTest REQUIRED)
+
+    if (RODIN_BUILD_BENCHMARKS)
+      add_subdirectory(third-party/benchmarks)
+    endif()
+
     add_subdirectory(tests)
   endif()
 

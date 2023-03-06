@@ -24,6 +24,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     OPTIONS
     -g
     -O0
+    -fPIC
     -Wall
     -Werror
     -Wextra

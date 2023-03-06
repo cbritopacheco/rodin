@@ -9,6 +9,7 @@
 
 #include <set>
 #include <array>
+#include <optional>
 #include <mfem.hpp>
 
 #include "Rodin/Math/Vector.h"
