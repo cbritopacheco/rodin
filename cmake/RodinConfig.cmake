@@ -12,14 +12,6 @@ set(green   "${Esc}[32m")
 set(yellow  "${Esc}[33m")
 set(gray    "${Esc}[0;37m")
 
-# ---- Overwrite message function --------------------------------------------
-function(message)
-  if (NOT MESSAGE_QUIET)
-    _message(${ARGN})
-  endif()
-endfunction()
-set (MESSAGE_QUIET OFF)
-
 #! @brief Add options to the compilation of source files.
 #
 # Adds options to the COMPILE_OPTIONS directory property. These options are
