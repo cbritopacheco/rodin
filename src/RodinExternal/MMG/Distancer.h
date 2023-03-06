@@ -43,14 +43,14 @@ namespace Rodin::External::MMG
   * @f]
   */
   template <>
-  class Distancer<Variational::H1<Context::Serial>>
+  class Distancer<Variational::H1<Scalar, Context::Serial>>
   {
     public:
      /**
       * @brief Creates a Distancer2D object with default values.
       * @param[in] fes Finite element space for the distance function
       */
-     Distancer(Variational::H1<Context::Serial>& fes)
+     Distancer(const Variational::H1<Scalar, Context::Serial>& fes)
        : m_fes(fes),
          m_scale(true),
          m_distTheBoundary(false),
@@ -141,10 +141,10 @@ namespace Rodin::External::MMG
       * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
       * @returns Signed distance function representing @f$ \Omega @f$.
       */
-     Variational::GridFunction<Variational::H1<Context::Serial>> distance(
+     Variational::GridFunction<Variational::H1<Scalar, Context::Serial>> distance(
         const Geometry::Mesh<Context::Serial>& box)
      {
-       if (&box != &m_fes.getMesh())
+       if (&box != &m_fes.get().getMesh())
        {
          Alert::Exception()
            << "Mesh must be the same one as that of the finite element space."
@@ -202,7 +202,7 @@ namespace Rodin::External::MMG
                );
          }
        }
-       Variational::GridFunction res(m_fes);
+       Variational::GridFunction res(m_fes.get());
        if (retcode != 0)
          Alert::Exception("ISCD::Mshdist invocation failed.").raise();
        else
@@ -225,7 +225,7 @@ namespace Rodin::External::MMG
       * @note The contour mesh is allowed to contain a volume part, in which
       * case only the edge (S) or triangle (3D) information will be retained.
       */
-     Variational::GridFunction<Variational::H1<Context::Serial>> distance(
+     Variational::GridFunction<Variational::H1<Scalar, Context::Serial>> distance(
          const Geometry::Mesh<Context::Serial>& box,
          const Geometry::Mesh<Context::Serial>& contour)
      {
@@ -256,7 +256,7 @@ namespace Rodin::External::MMG
            "-v 0");
        }
 
-       Variational::GridFunction res(m_fes);
+       Variational::GridFunction res(m_fes.get());
        if (retcode != 0)
         Alert::Exception("ISCD::Mshdist invocation failed.").raise();
        else
@@ -271,15 +271,16 @@ namespace Rodin::External::MMG
      }
 
     private:
-     Variational::H1<Context::Serial>& m_fes;
+     std::reference_wrapper<const Variational::H1<Scalar, Context::Serial>> m_fes;
      bool m_scale;
      bool m_distTheBoundary;
      unsigned int m_ncpu;
      ISCDProcess m_mshdist;
      std::optional<std::set<MaterialReference>> m_interiorDomains;
   };
-  template <class Trait>
-  Distancer(Variational::H1<Trait>&) -> Distancer<Variational::H1<Trait>>;
+
+  Distancer(const Variational::H1<Scalar, Context::Serial>&)
+    -> Distancer<Variational::H1<Scalar, Context::Serial>>;
 
   // /**
   //  * @brief Distancer specialization for redistancing a level set function.

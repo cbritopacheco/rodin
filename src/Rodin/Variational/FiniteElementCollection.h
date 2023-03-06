@@ -19,19 +19,17 @@ namespace Rodin::Variational
   class FiniteElementCollectionBase
   {
     public:
-      constexpr
       FiniteElementCollectionBase() = default;
 
-      constexpr
       FiniteElementCollectionBase(const FiniteElementCollectionBase&) = default;
 
-      constexpr
       FiniteElementCollectionBase(FiniteElementCollectionBase&&) = default;
 
       FiniteElementCollectionBase& operator=(FiniteElementCollectionBase&&) = default;
 
       virtual ~FiniteElementCollectionBase() = default;
 
+      inline
       size_t getOrder() const
       {
         return getHandle().GetOrder();

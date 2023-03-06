@@ -10,7 +10,6 @@
 #include "ForwardDecls.h"
 
 #include "ScalarFunction.h"
-#include "BasisOperator.h"
 
 namespace Rodin::Variational
 {
@@ -24,40 +23,70 @@ namespace Rodin::Variational
    * @ingroup TraceSpecializations
    * @brief Trace of a FunctionBase instance.
    */
-  template <>
-  class Trace<FunctionBase> : public ScalarFunctionBase
+  template <class NestedDerived>
+  class Trace<FunctionBase<NestedDerived>> final
+    : public ScalarFunctionBase<Trace<FunctionBase<NestedDerived>>>
   {
     public:
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Trace<Operand>>;
+
       /**
        * @brief Constructs the Trace of the given matrix
        * @param[in] m Square matrix
        */
-      Trace(const FunctionBase& m);
+      constexpr
+      Trace(const Operand& m)
+        : m_operand(m.copy())
+      {}
 
-      Trace(const Trace& other);
+      constexpr
+      Trace(const Trace& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy())
+      {}
 
-      Trace(Trace&& other);
+      constexpr
+      Trace(Trace&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand))
+      {}
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        return m_matrix->getValue(p).matrix().Trace();
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Math::Matrix>);
+        return getOperand().getValue(p).trace();
       }
 
-      Trace& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      const Operand& getOperand() const
       {
-        ScalarFunctionBase::traceOf(attrs);
-        m_matrix->traceOf(attrs);
+        assert(m_operand);
+        return *m_operand;
+      }
+
+      inline
+      Trace& traceOf(Geometry::Attribute attrs)
+      {
+        m_operand.traceOf(attrs);
         return *this;
       }
 
-      Trace* copy() const noexcept override
+      inline Trace* copy() const noexcept override
       {
         return new Trace(*this);
       }
+
     private:
-      std::unique_ptr<FunctionBase> m_matrix;
+      std::unique_ptr<Operand> m_operand;
   };
-  Trace(const FunctionBase&) -> Trace<FunctionBase>;
+
+  template <class NestedDerived>
+  Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
 }
 
 #endif

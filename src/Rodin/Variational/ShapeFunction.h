@@ -5,16 +5,19 @@
 
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/FormLanguage/Base.h"
+#include "Rodin/FormLanguage/Traits.h"
+
+#include "ForwardDecls.h"
 
 #include "H1.h"
-#include "ForwardDecls.h"
-#include "BasisOperator.h"
-#include "FiniteElementSpace.h"
-
+#include "RangeType.h"
 #include "RangeShape.h"
+#include "TensorBasis.h"
+#include "FiniteElementSpace.h"
 
 namespace Rodin::Variational
 {
+
   /**
   * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
   * @brief Template specializations of the ShapeFunction class.
@@ -36,353 +39,439 @@ namespace Rodin::Variational
     static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
   };
 
-  class ShapeComputator
-  {
-    public:
-      using Key =
-        std::tuple<
-        const mfem::FiniteElement*,
-              mfem::ElementTransformation*>;
-
-    template <class Data>
-    struct Value
-    {
-      const mfem::IntegrationPoint* pip;
-      Data data;
-    };
-
-    ShapeComputator() = default;
-
-    const mfem::Vector& getShape(
-        const mfem::FiniteElement& el,
-        mfem::ElementTransformation& trans,
-        const mfem::IntegrationPoint& ip)
-    {
-      auto it = m_shapeLookup.find({&el, &trans});
-      if (it != m_shapeLookup.end())
-      {
-        if (it->second.pip != &ip)
-        {
-          it->second.pip = &ip;
-          it->second.data.SetSize(el.GetDof());
-          el.CalcShape(ip, it->second.data);
-        }
-        return it->second.data;
-      }
-      else
-      {
-        auto itt =  m_shapeLookup.insert(
-            it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
-        el.CalcShape(ip, itt->second.data);
-        return itt->second.data;
-      }
-    }
-
-    const mfem::Vector& getPhysicalShape(
-        const mfem::FiniteElement& el,
-        mfem::ElementTransformation& trans,
-        const mfem::IntegrationPoint& ip)
-    {
-      auto it = m_physShapeLookup.find({&el, &trans});
-      if (it != m_physShapeLookup.end())
-      {
-        if (it->second.pip != &ip)
-        {
-          it->second.pip = &ip;
-          it->second.data.SetSize(el.GetDof());
-          el.CalcPhysShape(trans, it->second.data);
-        }
-        return it->second.data;
-      }
-      else
-      {
-        auto itt =  m_physShapeLookup.insert(
-            it, {{&el, &trans}, {&ip, mfem::Vector(el.GetDof())}});
-        el.CalcPhysShape(trans, itt->second.data);
-        return itt->second.data;
-      }
-    }
-
-    const mfem::DenseMatrix& getDShape(
-        const mfem::FiniteElement& el,
-        mfem::ElementTransformation& trans,
-        const mfem::IntegrationPoint& ip)
-    {
-      auto it = m_dShapeLookup.find({&el, &trans});
-      if (it != m_dShapeLookup.end())
-      {
-        it->second.pip = &ip;
-        it->second.data.SetSize(el.GetDof(), el.GetDim());
-        el.CalcDShape(ip, it->second.data);
-        return it->second.data;
-      }
-      else
-      {
-        auto itt =  m_dShapeLookup.insert(
-            it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), el.GetDim())}});
-        el.CalcDShape(ip, itt->second.data);
-        return itt->second.data;
-      }
-    }
-
-    const mfem::DenseMatrix& getPhysicalDShape(
-       const mfem::FiniteElement& el,
-       mfem::ElementTransformation& trans,
-       const mfem::IntegrationPoint& ip)
-    {
-      auto it = m_physDShapeLookup.find({&el, &trans});
-      if (it != m_physDShapeLookup.end())
-      {
-        it->second.pip = &ip;
-        it->second.data.SetSize(el.GetDof(), trans.GetSpaceDim());
-        el.CalcPhysDShape(trans, it->second.data);
-        return it->second.data;
-      }
-      else
-      {
-        auto itt =  m_physDShapeLookup.insert(
-            it, {{&el, &trans}, {&ip, mfem::DenseMatrix(el.GetDof(), trans.GetSpaceDim())}});
-        el.CalcPhysDShape(trans, itt->second.data);
-        return itt->second.data;
-      }
-    }
-
-   private:
-    std::map<Key, Value<mfem::Vector>> m_shapeLookup;
-    std::map<Key, Value<mfem::Vector>> m_physShapeLookup;
-
-    std::map<Key, Value<mfem::DenseMatrix>> m_dShapeLookup;
-    std::map<Key, Value<mfem::DenseMatrix>> m_physDShapeLookup;
-  };
-
-  template <ShapeFunctionSpaceType Space>
+  template <class Derived, class FESType, ShapeFunctionSpaceType Space>
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
+      using Parent = FormLanguage::Base;
+      using FES = FESType;
+
       constexpr
-      ShapeFunctionBase()
-        : FormLanguage::Base()
+      ShapeFunctionBase(const FES& fes)
+        : m_fes(fes)
       {}
 
       constexpr
       ShapeFunctionBase(const ShapeFunctionBase& other)
-        : FormLanguage::Base(other)
+        : Parent(other),
+          m_fes(other.m_fes)
       {}
 
       constexpr
       ShapeFunctionBase(ShapeFunctionBase&& other)
-        : FormLanguage::Base(std::move(other))
+        : Parent(std::move(other)),
+          m_fes(std::move(other.m_fes))
       {}
 
+      inline
       constexpr
       ShapeFunctionSpaceType getSpaceType() const
       {
         return Space;
       }
 
-      constexpr
-      RangeType getRangeType() const
-      {
-        if (getRows() == 1 && getColumns() == 1)
-          return RangeType::Scalar;
-        else if (getRows() > 1 && getColumns() == 1)
-          return RangeType::Vector;
-        else
-          return RangeType::Matrix;
-      }
-
+      inline
       constexpr
       RangeShape getRangeShape() const
       {
-        return {getRows(), getColumns()};
+        return static_cast<const Derived&>(*this).getRangeShape();
       }
 
+      inline
       constexpr
-      Transpose<ShapeFunctionBase<Space>> T() const
+      RangeType getRangeType() const
       {
-        return Transpose<ShapeFunctionBase<Space>>(*this);
+        using R = typename FormLanguage::Traits<ShapeFunctionBase<Derived, FES, Space>>::RangeType;
+        if constexpr (std::is_same_v<R, Boolean>)
+        {
+          return RangeType::Boolean;
+        }
+        else if constexpr (std::is_same_v<R, Integer>)
+        {
+          return RangeType::Integer;
+        }
+        else if constexpr (std::is_same_v<R, Scalar>)
+        {
+          return RangeType::Scalar;
+        }
+        else if constexpr (std::is_same_v<R, Math::Vector>)
+        {
+          return RangeType::Vector;
+        }
+        else if constexpr (std::is_same_v<R, Math::Matrix>)
+        {
+          return RangeType::Matrix;
+        }
+        else
+        {
+          assert(false);
+          static_assert(Utility::DependentFalse<R>::Value);
+        }
       }
 
-      virtual const ShapeFunctionBase<Space>& getLeaf() const = 0;
+      inline
+      constexpr
+      auto T() const
+      {
+        return Transpose(*this);
+      }
 
-      virtual int getRows() const = 0;
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return static_cast<const Derived&>(*this).getLeaf();
+      }
 
-      virtual int getColumns() const = 0;
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        return static_cast<const Derived&>(*this).getDOFs(element);
+      }
 
-      virtual int getDOFs(const Geometry::Simplex& element) const = 0;
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getTensorBasis(p);
+      }
 
-      virtual void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const = 0;
+      template <class ... Args>
+      inline
+      constexpr
+      auto operator()(Args&&... args) const
+      {
+        return getTensorBasis(std::forward<Args>(args)...);
+      }
 
-      virtual FiniteElementSpaceBase& getFiniteElementSpace() = 0;
+      inline
+      constexpr
+      const FES& getFiniteElementSpace() const
+      {
+        return m_fes.get();
+      }
 
-      virtual const FiniteElementSpaceBase& getFiniteElementSpace() const = 0;
+      virtual ShapeFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
 
-      virtual ShapeFunctionBase<Space>* copy() const noexcept override = 0;
+    private:
+      std::reference_wrapper<const FES> m_fes;
   };
+
+  // /**
+  // * @ingroup ShapeFunctionSpecializations
+  // * @brief L2 ShapeFunction
+  // */
+  // template <class Derived, class ... Ts, ShapeFunctionSpaceType Space>
+  // class ShapeFunction<Derived, L2<Ts...>, Space>
+  //   : public ShapeFunctionBase<ShapeFunction<Derived, L2<Ts...>, Space>, L2<Ts...>, Space>
+  // {
+  //   public:
+  //     using FES = L2<Ts...>;
+  //     using Parent = ShapeFunctionBase<ShapeFunction<Derived, L2<Ts...>, Space>, L2<Ts...>, Space>;
+
+  //     constexpr
+  //     ShapeFunction(FES& fes)
+  //       : Parent(fes)
+  //     {}
+
+  //     constexpr
+  //     ShapeFunction(const ShapeFunction& other)
+  //       : Parent(other)
+  //     {}
+
+  //     constexpr
+  //     ShapeFunction(ShapeFunction&& other)
+  //       : Parent(std::move(other))
+  //     {}
+
+  //     inline
+  //     constexpr
+  //     auto& emplace()
+  //     {
+  //       m_gf.emplace(this->getFiniteElementSpace().get());
+  //       return *this;
+  //     }
+
+  //     inline
+  //     constexpr
+  //     GridFunction<FES>& getSolution()
+  //     {
+  //       assert(m_gf);
+  //       return *m_gf;
+  //     }
+
+  //     inline
+  //     constexpr
+  //     const GridFunction<FES>& getSolution() const
+  //     {
+  //       assert(m_gf);
+  //       return *m_gf;
+  //     }
+
+  //     inline
+  //     constexpr
+  //     auto x() const
+  //     {
+  //       assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
+  //       return static_cast<const Derived&>(*this).x();
+  //     }
+
+  //     inline
+  //     constexpr
+  //     auto y() const
+  //     {
+  //       assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
+  //       return static_cast<const Derived&>(*this).y();
+  //     }
+
+  //     inline
+  //     constexpr
+  //     auto z() const
+  //     {
+  //       assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
+  //       return static_cast<const Derived&>(*this).z();
+  //     }
+
+  //     inline
+  //     constexpr
+  //     size_t getDOFs(const Geometry::Simplex& element) const
+  //     {
+  //       const auto& fe = this->getFiniteElementSpace().getFiniteElement(element);
+  //       return fe.GetDof() * this->getFiniteElementSpace().getVectorDimension();
+  //     }
+
+  //     inline
+  //     constexpr
+  //     const auto& getLeaf() const
+  //     {
+  //       return static_cast<const Derived&>(*this).getLeaf();
+  //     }
+
+  //     inline
+  //     constexpr
+  //     auto getTensorBasis(const Geometry::Point& p) const
+  //     {
+  //       return static_cast<const Derived&>(*this).getTensorBasis(p);
+  //     }
+
+  //     virtual ShapeFunction* copy() const noexcept override
+  //     {
+  //       return static_cast<const Derived&>(*this).copy();
+  //     }
+
+  //     // void getTensorBasis(
+  //     //    DenseBasisOperator& op,
+  //     //    ShapeComputator& compute,
+  //     //    const Geometry::Point& point,
+  //     //    const Geometry::Element& element) const override
+  //     // {
+  //     //   const auto& shape =
+  //     //    compute.getPhysicalShape(
+  //     //       getFiniteElementSpace().getFiniteElement(element),
+  //     //       element.getTransformation(),
+  //     //       element.getTransformation().GetIntPoint());
+  //     //   const int n = shape.Size();
+  //     //   const int vdim = getFiniteElementSpace().getVectorDimension();
+  //     //   op.setSize(vdim, 1, vdim * n);
+  //     //   op = 0.0;
+  //     //   for (int i = 0; i < vdim; i++)
+  //     //    for (int j = 0; j < n; j++)
+  //     //     op(i, 0, j + i * n) = shape(j);
+  //     // }
+
+  //   private:
+  //     std::optional<GridFunction<FES>> m_gf;
+  // };
 
   /**
   * @ingroup ShapeFunctionSpecializations
-  * @brief L2 ShapeFunction
+  * @brief H1 ShapeFunction
   */
-  template <ShapeFunctionSpaceType Space, class ... Ts>
-  class ShapeFunction<L2<Ts...>, Space> : public ShapeFunctionBase<Space>
+  template <class Derived, class ... Ps, ShapeFunctionSpaceType Space>
+  class ShapeFunction<Derived, H1<Scalar, Ps...>, Space>
+    : public ShapeFunctionBase<ShapeFunction<Derived, H1<Scalar, Ps...>, Space>, H1<Scalar, Ps...>, Space>
   {
-   public:
-    using FES = L2<Ts...>;
+    public:
+      using FES = H1<Scalar, Ps...>;
+      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
 
-    constexpr
-    ShapeFunction(FES& fes)
-      : m_fes(fes)
-    {}
+      ShapeFunction() = delete;
 
-    constexpr
-    ShapeFunction(const ShapeFunction& other)
-      :  ShapeFunctionBase<Space>(other),
-       m_fes(other.m_fes)
-    {}
+      constexpr
+      ShapeFunction(const FES& fes)
+        : Parent(fes)
+      {
+        assert(fes.getVectorDimension() == 1);
+      }
 
-    constexpr
-    ShapeFunction(ShapeFunction&& other)
-      :  ShapeFunctionBase<Space>(std::move(other)),
-       m_fes(other.m_fes)
-    {}
+      constexpr
+      ShapeFunction(const ShapeFunction& other)
+        : Parent(other),
+          m_gf(other.m_gf)
+      {}
 
-    FES& getFiniteElementSpace() override
-    {
-      return m_fes.get();
-    }
+      constexpr
+      ShapeFunction(ShapeFunction&& other)
+        : Parent(std::move(other)),
+          m_gf(std::move(other.m_gf))
+      {}
 
-    const FES& getFiniteElementSpace() const override
-    {
-      return m_fes.get();
-    }
+      inline
+      constexpr
+      auto& emplace()
+      {
+        m_gf.emplace(this->getFiniteElementSpace());
+        return *this;
+      }
 
-    int getRows() const override
-    {
-      return getFiniteElementSpace().getVectorDimension();
-    }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { 1, 1 };
+      }
 
-    int getColumns() const override
-    {
-      return 1;
-    }
+      inline
+      constexpr
+      GridFunction<FES>& getSolution()
+      {
+        assert(m_gf);
+        return *m_gf;
+      }
 
-    int getDOFs(const Geometry::Simplex& element) const override
-    {
-      const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-      return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
-    }
+      inline
+      constexpr
+      const GridFunction<FES>& getSolution() const
+      {
+        assert(m_gf);
+        return *m_gf;
+      }
 
-    // void getOperator(
-    //    DenseBasisOperator& op,
-    //    ShapeComputator& compute,
-    //    const Geometry::Point& point,
-    //    const Geometry::Element& element) const override
-    // {
-    //   const auto& shape =
-    //    compute.getPhysicalShape(
-    //       getFiniteElementSpace().getFiniteElement(element),
-    //       element.getTransformation(),
-    //       element.getTransformation().GetIntPoint());
-    //   const int n = shape.Size();
-    //   const int vdim = getFiniteElementSpace().getVectorDimension();
-    //   op.setSize(vdim, 1, vdim * n);
-    //   op = 0.0;
-    //   for (int i = 0; i < vdim; i++)
-    //    for (int j = 0; j < n; j++)
-    //     op(i, 0, j + i * n) = shape(j);
-    // }
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
+      }
 
-    virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
+      inline
+      TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
+      {
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
+      }
 
-    virtual ShapeFunction* copy() const noexcept override = 0;
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return static_cast<const Derived&>(*this).getLeaf();
+      }
 
-   private:
-    std::reference_wrapper<FES> m_fes;
+      virtual ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+
+    private:
+      std::optional<GridFunction<FES>> m_gf;
   };
 
   /**
   * @ingroup ShapeFunctionSpecializations
   * @brief H1 ShapeFunction
   */
-  template <ShapeFunctionSpaceType Space, class ... Ts>
-  class ShapeFunction<H1<Ts...>, Space> : public ShapeFunctionBase<Space>
+  template <class Derived, class ... Ps, ShapeFunctionSpaceType Space>
+  class ShapeFunction<Derived, H1<Math::Vector, Ps...>, Space>
+    : public ShapeFunctionBase<ShapeFunction<Derived, H1<Math::Vector, Ps...>, Space>, H1<Math::Vector, Ps...>, Space>
   {
-   public:
-    using FES = H1<Ts...>;
+    public:
+      using FES = H1<Math::Vector, Ps...>;
+      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
 
-    constexpr
-    ShapeFunction(FES& fes)
-      : m_fes(fes)
-    {}
+      ShapeFunction() = delete;
 
-    constexpr
-    ShapeFunction(const ShapeFunction& other)
-      :  ShapeFunctionBase<Space>(other),
-       m_fes(other.m_fes)
-    {}
+      constexpr
+      ShapeFunction(const FES& fes)
+        : Parent(fes)
+      {}
 
-    constexpr
-    ShapeFunction(ShapeFunction&& other)
-      :  ShapeFunctionBase<Space>(std::move(other)),
-       m_fes(other.m_fes)
-    {}
+      constexpr
+      ShapeFunction(const ShapeFunction& other)
+        : Parent(other),
+          m_gf(other.m_gf)
+      {}
 
-    FES& getFiniteElementSpace() override
-    {
-      return m_fes.get();
-    }
+      constexpr
+      ShapeFunction(ShapeFunction&& other)
+        : Parent(std::move(other)),
+          m_gf(std::move(other.m_gf))
+      {}
 
-    const FES& getFiniteElementSpace() const override
-    {
-      return m_fes.get();
-    }
+      inline
+      constexpr
+      auto& emplace()
+      {
+        m_gf.emplace(this->getFiniteElementSpace());
+        return *this;
+      }
 
-    int getRows() const override
-    {
-      return getFiniteElementSpace().getVectorDimension();
-    }
+      inline
+      constexpr
+      GridFunction<FES>& getSolution()
+      {
+        assert(m_gf);
+        return *m_gf;
+      }
 
-    int getColumns() const override
-    {
-      return 1;
-    }
+      inline
+      constexpr
+      const GridFunction<FES>& getSolution() const
+      {
+        assert(m_gf);
+        return *m_gf;
+      }
 
-    int getDOFs(const Geometry::Simplex& element) const override
-    {
-      const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-      return fe.GetDof() * getFiniteElementSpace().getVectorDimension();
-    }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
+      }
 
-    void getOperator(
-       DenseBasisOperator& op,
-       ShapeComputator& compute,
-       const Geometry::Point& p) const override
-    {
-      const auto& element = p.getSimplex();
-      const auto& shape =
-       compute.getPhysicalShape(
-        getFiniteElementSpace().getFiniteElement(element),
-        element.getTransformation(),
-        element.getTransformation().GetIntPoint());
-      const int n = shape.Size();
-      const int vdim = getFiniteElementSpace().getVectorDimension();
-      op.setSize(vdim, 1, vdim * n);
-      op = 0.0;
-      for (int i = 0; i < vdim; i++)
-       for (int j = 0; j < n; j++)
-        op(i, 0, j + i * n) = shape(j);
-    }
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
+      }
 
-    virtual const ShapeFunction<FES, Space>& getLeaf() const override = 0;
+      inline
+      TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
+      {
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return fe.getBasis(coords).transpose();
+      }
 
-    virtual ShapeFunction* copy() const noexcept override = 0;
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return static_cast<const Derived&>(*this).getLeaf();
+      }
 
-   private:
-    std::reference_wrapper<FES> m_fes;
+      virtual ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+
+    private:
+      std::optional<GridFunction<FES>> m_gf;
   };
 }
 

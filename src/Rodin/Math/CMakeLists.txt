@@ -2,10 +2,9 @@ set(RodinMath_HEADERS
   Constants.h
   Common.h
   Vector.h
-  DenseMatrix.h)
+  Matrix.h)
 
-set(RodinMath_SRCS
-  DenseMatrix.cpp)
+set(RodinMath_SRCS Matrix.cpp)
 
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)
@@ -23,7 +22,10 @@ add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
 add_library(Rodin::Math ALIAS RodinMath)
 
 # ---- Link targets ----------------------------------------------------------
-target_link_libraries(RodinMath PUBLIC Eigen3::Eigen)
+target_link_libraries(RodinMath
+  PUBLIC
+  Rodin
+  Eigen3::Eigen)
 
 target_include_directories(RodinMath
   INTERFACE

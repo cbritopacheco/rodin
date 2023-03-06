@@ -29,20 +29,17 @@ namespace Rodin::Variational
       using NativeAssembly = Assembly::Native<BilinearFormBase>;
       using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
 
-      constexpr
       BilinearFormBase()
       {
         m_assembly.reset(new NativeAssembly);
       }
 
-      constexpr
       BilinearFormBase(const BilinearFormBase& other)
-        :  FormLanguage::Base(other),
+        : FormLanguage::Base(other),
           m_assembly(other.m_assembly->copy()),
           m_bfis(other.m_bfis)
       {}
 
-      constexpr
       BilinearFormBase(BilinearFormBase&& other)
         :  FormLanguage::Base(std::move(other)),
           m_assembly(std::move(other.m_assembly)),
@@ -148,13 +145,13 @@ namespace Rodin::Variational
        * @brief Gets the reference to the associated TrialFunction object.
        * @returns Reference to this (for method chaining)
        */
-      virtual const ShapeFunctionBase<TrialSpace>& getTrialFunction() const = 0;
+      virtual const FormLanguage::Base& getTrialFunction() const = 0;
 
       /**
        * @brief Gets the reference to the associated TestFunction object.
        * @returns Reference to this (for method chaining)
        */
-      virtual const ShapeFunctionBase<TestSpace>& getTestFunction() const = 0;
+      virtual const FormLanguage::Base& getTestFunction() const = 0;
 
       virtual BilinearFormBase* copy() const noexcept override = 0;
 
@@ -164,7 +161,7 @@ namespace Rodin::Variational
   };
 
   template <class TrialFES, class TestFES>
-  class BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>
+  class BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix> final
     : public BilinearFormBase<mfem::SparseMatrix>
   {
     static_assert(
@@ -186,20 +183,20 @@ namespace Rodin::Variational
        * @param[in] v Test function argument
        */
       constexpr
-      BilinearForm(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         :  m_u(u), m_v(v)
       {}
 
       constexpr
       BilinearForm(const BilinearForm& other)
-        :  BilinearFormBase(other),
+        : Parent(other),
           m_u(other.m_u), m_v(other.m_v)
       {}
 
       constexpr
       BilinearForm(BilinearForm&& other)
-        :  BilinearFormBase(std::move(other)),
-          m_u(other.m_u), m_v(other.m_v),
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
           m_operator(std::move(other.m_operator))
       {}
 
@@ -214,17 +211,23 @@ namespace Rodin::Variational
        * at @f$ ( u, v ) @f$.
        */
       constexpr
-      double operator()(
-          const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const;
+      Scalar operator()(
+          const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
+      {
+        assert(m_operator);
+        return m_operator->InnerProduct(u.getHandle(), v.getHandle());
+      }
+
+      void assemble() override;
 
       const TrialFunction<TrialFES>& getTrialFunction() const override
       {
-        return m_u;
+        return m_u.get();
       }
 
       const TestFunction<TestFES>& getTestFunction() const override
       {
-        return m_v;
+        return m_v.get();
       }
 
       BilinearForm& operator=(const BilinearFormIntegratorBase& bfi) override
@@ -242,8 +245,6 @@ namespace Rodin::Variational
         from(bfis).assemble();
         return *this;
       }
-
-      virtual void assemble() override;
 
       /**
        * @brief Gets the reference to the (local) associated sparse matrix
@@ -273,8 +274,8 @@ namespace Rodin::Variational
       }
 
     private:
-      TrialFunction<TrialFES>& m_u;
-      TestFunction<TestFES>&  m_v;
+      std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>>   m_v;
       std::unique_ptr<OperatorType> m_operator;
   };
 

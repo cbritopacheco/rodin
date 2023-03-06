@@ -11,66 +11,70 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ScalarFunction.h"
-#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
   /**
-   * @defgroup TangentSpecializations Tangent Template Specializations
-   * @brief Template specializations of the Tangent class.
-   * @see Tangent
+   * @defgroup TanSpecializations Tan Template Specializations
+   * @brief Template specializations of the Tan class.
+   * @see Tan
    */
 
   /**
-   * @ingroup TangentSpecializations
+   * @ingroup TanSpecializations
    */
-  template <>
-  class Tangent<FunctionBase> : public ScalarFunctionBase
+  template <class NestedDerived>
+  class Tan<FunctionBase<NestedDerived>>
+    : public ScalarFunctionBase<Tan<FunctionBase<NestedDerived>>>
   {
     public:
-      using Operand = FunctionBase;
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Tan<FunctionBase<NestedDerived>>>;
 
-      Tangent(const FunctionBase& v)
-        : m_v(v.copy())
-      {
-        if (v.getRangeType() != RangeType::Scalar)
-          throw UnexpectedRangeTypeException(RangeType::Scalar, v.getRangeType());
-      }
-
-      Tangent(const Tangent& other)
-        :  ScalarFunctionBase(other),
-          m_v(other.m_v->copy())
+      constexpr
+      Tan(const Operand& v)
+        : m_v(v)
       {}
 
-      Tangent(Tangent&& other)
-        :  ScalarFunctionBase(std::move(other)),
+      constexpr
+      Tan(const Tan& other)
+        : Parent(other),
+          m_v(other.m_v)
+      {}
+
+      constexpr
+      Tan(Tan&& other)
+        : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
-      Tangent& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      Tan& traceOf(Geometry::Attribute attrs)
       {
-        ScalarFunctionBase::traceOf(attrs);
-        m_v->traceOf(attrs);
+        m_v.traceOf(attrs);
         return *this;
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      Scalar getValue(const Geometry::Point& p) const
       {
-        return Math::tan(m_v->getValue(p).scalar());
+        return std::tan(Scalar(m_v.getValue(p)));
       }
 
-      Tangent* copy() const noexcept override
+      inline
+      Tan* copy() const noexcept
+      override
       {
-        return new Tangent(*this);
+        return new Tan(*this);
       }
 
     private:
-      std::unique_ptr<FunctionBase> m_v;
+      Operand m_v;
   };
-  Tangent(const FunctionBase&) -> Tangent<FunctionBase>;
 
-  Tangent<FunctionBase> tan(const FunctionBase&);
-
+  template <class NestedDerived>
+  Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
 }
 
 #endif

@@ -91,7 +91,8 @@ namespace Rodin::Geometry
         return m_s2ps.at(d);
       }
 
-      [[deprecated]] const boost::bimap<Index, Index>& getElementMap() const
+      // [[deprecated]]
+      const boost::bimap<Index, Index>& getElementMap() const
       {
         return m_s2ps.at(getDimension());
       }
