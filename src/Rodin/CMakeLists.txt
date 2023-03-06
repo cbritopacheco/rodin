@@ -30,6 +30,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wextra
     -Wpedantic
     -Wno-old-style-cast
+    -Wno-cast-function-type
     -Wno-unused-parameter
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra

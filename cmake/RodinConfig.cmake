@@ -96,14 +96,3 @@ function(rodin_add_link_options)
   endforeach()
 endfunction()
 
-function(rodin_add_test)
-  cmake_parse_arguments(RODIN_ADD_TEST_ARG "" "NAME" "MODULES;SOURCES;LIBRARIES" ${ARGN})
-  list(SORT RODIN_ADD_TEST_ARG_MODULES)
-  string(REPLACE ";" "-" RODIN_ADD_TEST_MODULES "${RODIN_ADD_TEST_ARG_MODULES}")
-  string(REPLACE ";" " " RODIN_ADD_TEST_LIBRARIES "${RODIN_ADD_TEST_ARG_LIBRARIES}")
-  string(REPLACE ";" " " RODIN_ADD_TEST_SOURCES "${RODIN_ADD_TEST_ARG_SOURCES}")
-  corrade_add_test(
-    RodinTest_${RODIN_ADD_TEST_MODULES}_${RODIN_ADD_TEST_ARG_NAME}
-    ${RODIN_ADD_TEST_ARG_SOURCES}
-    LIBRARIES ${RODIN_ADD_TEST_ARG_LIBRARIES})
-endfunction()

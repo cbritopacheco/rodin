@@ -1,8 +1,6 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.16)
 cmake_policy(SET CMP0054 NEW)
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.13)
-  cmake_policy(SET CMP0076 NEW)
-endif()
+cmake_policy(SET CMP0076 NEW)
 
 # Prohibit in-source builds
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -45,22 +43,38 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
-rodin_add_compile_options(
-  LANG CXX
-  OPTIONS -fvisibility=hidden)
+rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
+
+# ---- Set compile options for all the submodules ----------------------------
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  rodin_add_compile_options(
+    LANG CXX C
+    OPTIONS
+    -w
+    -O3
+    -flto
+    -march=native)
+elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
+  rodin_add_compile_options(
+    LANG CXX C
+    OPTIONS
+    -g
+    -O0
+    -fPIC)
+else()
+  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
+endif()
 
 if (RODIN_CODE_COVERAGE)
-  rodin_add_compile_options(
-    LANG CXX
-    OPTIONS
-    --coverage
-    -fprofile-abs-path
-    -fprofile-arcs -ftest-coverage
-    -fprofile-instr-generate -fcoverage-mapping)
-
   rodin_add_link_options(
-    LANG CXX
-    OPTIONS -lgcov -fprofile-arcs -fprofile-instr-generate -fcoverage-mapping)
+    LANG CXX C
+    OPTIONS
+    -lgcov -fprofile-arcs -ftest-coverage)
+  rodin_add_compile_options(
+    LANG CXX C
+    OPTIONS
+    -Wno-error=missing-profile
+    -fprofile-abs-path -fprofile-arcs -ftest-coverage)
 endif()
 
 if (RODIN_BUILD_SRC)

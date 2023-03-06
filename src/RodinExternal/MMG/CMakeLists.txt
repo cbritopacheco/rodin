@@ -46,6 +46,7 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wpedantic
     -Wno-sign-compare
     -Wno-old-style-cast
+    -Wno-cast-function-type
     -Wno-unused-variable
     -Wno-unused-function
     -Wno-unused-parameter
