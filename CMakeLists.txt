@@ -71,8 +71,6 @@ if (RODIN_CODE_COVERAGE)
   rodin_add_compile_options(LANG CXX C -fprofile-abs-path)
 endif()
 
-set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
-
 if (RODIN_BUILD_SRC)
   set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
@@ -95,7 +93,7 @@ if (RODIN_BUILD_SRC)
   set(BUILD_DOC OFF CACHE BOOL "" FORCE)
   add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
   find_package(MFEM
-    REQUIRED PATHS "${RODIN_THIRD_PARTY_DIR}/mfem"
+    REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
     NO_DEFAULT_PATH)
 
   # ---- PThreads ----
@@ -134,15 +132,15 @@ if (RODIN_BUILD_SRC)
 
   find_package (Eigen3 3.3 REQUIRED NO_MODULE
     HINTS
-    "${RODIN_THIRD_PARTY_DIR}/eigen"
-    "${RODIN_THIRD_PARTY_DIR}/eigen/cmake")
+    "${PROJECT_BINARY_DIR}/third-party/eigen"
+    "${PROJECT_BINARY_DIR}/third-party/eigen/cmake")
 
   # ---- Spectra ----
   message(STATUS "Configuring Spectra...")
   set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
   set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   set (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT TRUE)
-  list(APPEND CMAKE_MODULE_PATH ${RODIN_THIRD_PARTY_DIR}/eigen/cmake)
+  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
   add_subdirectory(third-party/spectra EXCLUDE_FROM_ALL)
   unset (CMAKE_DISABLE_FIND_PACKAGE_CLANG_FORMAT)
 
@@ -158,8 +156,8 @@ if (RODIN_BUILD_SRC)
 
     # ---- Magnum-Eigen integration ----
     message(STATUS "Configuring Magnum-Eigen integration...")
-    set(EIGEN3_INCLUDE_DIR ${RODIN_THIRD_PARTY_DIR}/eigen)
-    list(APPEND CMAKE_MODULE_PATH ${RODIN_THIRD_PARTY_DIR}/eigen/cmake)
+    set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third-party/eigen)
+    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
     set(WITH_EIGEN ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/magnum-integration EXCLUDE_FROM_ALL)
     find_package(MagnumIntegration REQUIRED Eigen)
