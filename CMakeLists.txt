@@ -56,7 +56,6 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
     OPTIONS
     -w
     -O3
-    -flto
     -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
@@ -178,7 +177,7 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
 
     if (RODIN_BUILD_BENCHMARKS)
-      set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
+      # set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
       set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
       set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
       add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
