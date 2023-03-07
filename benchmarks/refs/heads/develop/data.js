@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678204599208,
+  "lastUpdate": 1678208082086,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -150,6 +150,36 @@ window.BENCHMARK_DATA = {
             "value": 310774.3702882308,
             "unit": "ns/iter",
             "extra": "iterations: 2255\ncpu: 310748.4700665189 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "distinct": true,
+          "id": "ede1bd4c09f17723272483d4cc7e66ffaadce753",
+          "message": "Disable lto",
+          "timestamp": "2023-03-07T17:40:36+01:00",
+          "tree_id": "af3159da5654e1990f24fa9c8c37cee76571a5a4",
+          "url": "https://github.com/cbritopacheco/rodin/commit/ede1bd4c09f17723272483d4cc7e66ffaadce753"
+        },
+        "date": 1678208080109,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Poisson/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 445294.1433182986,
+            "unit": "ns/iter",
+            "extra": "iterations: 1549\ncpu: 445244.1575209812 ns\nthreads: 1"
           }
         ]
       }
