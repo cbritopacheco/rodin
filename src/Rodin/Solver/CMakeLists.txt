@@ -19,5 +19,5 @@ endif()
 target_include_directories(RodinSolver
   PUBLIC $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(RodinSolver PRIVATE mfem)
+target_link_libraries(RodinSolver PUBLIC mfem)
 

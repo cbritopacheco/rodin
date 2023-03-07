@@ -33,7 +33,7 @@ set(RodinExternalMMG_SRCS
 
 # ---- Set compile options for all the submodules ----------------------------
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(LANG CXX OPTIONS -w -O3 -flto -march=native)
+  # No new flags to add
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG C CXX
