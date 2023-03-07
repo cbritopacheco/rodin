@@ -19,7 +19,7 @@ add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
 
 target_link_libraries(RodinGeometry
-  PRIVATE
+  PUBLIC
   mfem
   PUBLIC
   Rodin::IO
