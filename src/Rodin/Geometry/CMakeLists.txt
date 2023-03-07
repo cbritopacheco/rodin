@@ -18,10 +18,6 @@ set(RodinGeometry_SRCS
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
 
-target_include_directories(RodinGeometry
-  PUBLIC
-  ${MFEM_INCLUDE_DIRS})
-
 target_link_libraries(RodinGeometry
   PRIVATE
   mfem

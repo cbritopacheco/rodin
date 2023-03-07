@@ -18,15 +18,11 @@ set(RodinIO_SRCS
 add_library(RodinIO ${RodinIO_SRCS} ${RodinIO_HEADERS})
 add_library(Rodin::IO ALIAS RodinIO)
 
-target_include_directories(RodinIO
-  PUBLIC
-  ${MFEM_INCLUDE_DIRS})
-
 target_link_libraries(RodinIO
   PRIVATE
   mfem
   PUBLIC
-  Rodin::Geometry
+  Boost::filesystem
   Rodin::Alert
-  Rodin::Variational
-  Boost::filesystem)
+  Rodin::Geometry
+  Rodin::Variational)

@@ -9,8 +9,6 @@ add_library(RodinFormLanguage ${RodinFormLanguage_SRCS} ${RodinFormLanguage_HEAD
 add_library(Rodin::FormLanguage ALIAS RodinFormLanguage)
 
 # ---- Link targets ----------------------------------------------------------
-target_include_directories(RodinFormLanguage PUBLIC $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
-target_link_libraries(RodinFormLanguage PUBLIC Rodin)
-
-
+target_include_directories(RodinFormLanguage
+  PUBLIC $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
