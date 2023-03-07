@@ -6,6 +6,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
+#include <Rodin/Variational/LazyEvaluator.h>
 
 using namespace std;
 using namespace Rodin;
@@ -19,6 +20,8 @@ static const char* meshfile = "Topography.mesh";
 static const Scalar hausdorff = 10;
 static const Scalar hmax = 600;
 static const Scalar hmin = 100;
+// static const Scalar hmax = 600;
+// static const Scalar hmin = 100;
 
 class Environment
 {
@@ -143,7 +146,9 @@ class Environment
           auto psi =
             [&](const Point& v) -> Scalar
             {
-              auto fn = Dot(env.m_wind, conormal) / (Frobenius(env.m_wind) * Frobenius(conormal));
+              auto fn =
+                Dot(LazyEvaluator(env.m_wind), conormal) / (
+                    Frobenius(LazyEvaluator(env.m_wind)) * Frobenius(conormal));
               Scalar fv = fn(v);
               if (std::isfinite(fv))
                 return std::acos(fv);
@@ -156,7 +161,8 @@ class Environment
             [&](const Point& v) -> Scalar
             {
               Scalar rhs =
-                std::tan(alpha(v)) * std::cos(phi(v)) + env.m_wind(v).norm() * std::cos(psi(v));
+                std::tan(alpha(v)) * std::cos(phi(v)
+                    ) + env.m_wind(v).norm() * std::cos(psi(v));
               return std::atan(rhs);
             };
 
@@ -217,14 +223,11 @@ class Environment
         MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
                               .distance(m_topography);
 
-      Math::FixedSizeVector<3> center;
-      m_wind = VectorFunction{
-        [](const Geometry::Point& p){ return p.y() - 25000; },
-        [](const Geometry::Point& p){ return p.x() - 25000; },
-        0};
-      m_wind.save("wind.gf");
-      m_wind.getFiniteElementSpace().getMesh().save("wind.mesh");
-      std::exit(1);
+      auto wind = VectorFunction{
+          [](const Geometry::Point& p){ return p.y() - 25000; },
+          [](const Geometry::Point& p){ return -p.x() + 25000; },
+          0};
+      m_wind = wind / Frobenius(wind);
 
       m_flame.step(dt);
 
@@ -334,15 +337,15 @@ int main()
       rr = (p.getCoordinates() - c0).norm() - r;
 
       Math::FixedSizeVector<3> c1;
-      c1 << 25000, 25000, p.z();
+      c1 << 37500, 37500, p.z();
       rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
 
       Math::FixedSizeVector<3> c2;
-      c2 << 12500, 25000, p.z();
+      c2 << 37500, 12500, p.z();
       rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
 
       Math::FixedSizeVector<3> c3;
-      c3 << 25000, 12500, p.z();
+      c3 << 12500, 37500, p.z();
       rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
 
       return rr;
@@ -353,6 +356,7 @@ int main()
                                             .setHMin(hmin)
                                             .setHausdorff(hausdorff)
                                             .discretize(phi);
+
   }
 
   // Define vegetal stratum
