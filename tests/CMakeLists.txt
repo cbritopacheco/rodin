@@ -2,11 +2,11 @@ enable_testing()
 
 include(GoogleTest)
 
-add_subdirectory(unit)
-add_subdirectory(benchmarks)
+if (RODIN_BUILD_UNIT_TESTS)
+  add_subdirectory(unit)
+endif()
 
-# rodin_add_test(
-#   NAME Poisson
-#   MODULES Variational Geometry
-#   SOURCES Variational/Poisson.cpp ${RodinTest_RESOURCES}
-#   LIBRARIES Rodin::Geometry Rodin::Variational)
+if (RODIN_BUILD_BENCHMARKS)
+  add_subdirectory(benchmarks)
+endif()
+

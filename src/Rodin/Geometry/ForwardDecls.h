@@ -46,7 +46,7 @@ namespace Rodin::Geometry
   /**
    * @brief Templated class for Mesh.
    */
-  template <class Trait = Context::Serial>
+  template <class ContextType = Context::Serial>
   class Mesh;
 
   /**
@@ -59,10 +59,10 @@ namespace Rodin::Geometry
    * - SubMesh<Traits::Serial>
    * - SubMesh<Traits::Parallel>
    */
-  template <class Trait>
+  template <class Context>
   class SubMesh;
 
-  template <class Trait>
+  template <class Context>
   class SubMeshBuilder;
 }
 
