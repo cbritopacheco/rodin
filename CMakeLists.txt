@@ -24,6 +24,9 @@ option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
 option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
 option(RODIN_CODE_COVERAGE      "Compile with code coverage flags"      OFF)
 
+set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
+set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
+
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -39,6 +42,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
@@ -121,7 +125,6 @@ if (RODIN_BUILD_SRC)
   add_subdirectory(third-party/corrade EXCLUDE_FROM_ALL)
   find_package(Corrade REQUIRED Utility)
   set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-  set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources")
 
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")
@@ -175,7 +178,9 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
 
     if (RODIN_BUILD_BENCHMARKS)
-      add_subdirectory(third-party/benchmarks)
+      set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+      set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+      add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
     endif()
 
     add_subdirectory(tests)

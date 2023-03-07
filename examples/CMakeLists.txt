@@ -2,7 +2,11 @@ if (RODIN_BUILD_EXAMPLES)
   if (${CMAKE_BUILD_TYPE} MATCHES Release)
     rodin_add_compile_options(LANG CXX OPTIONS -w -O3 -flto -march=native)
   elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-    rodin_add_compile_options(LANG CXX OPTIONS -g -O0 -fPIC)
+    rodin_add_compile_options(
+      LANG CXX
+      OPTIONS
+      -g -O0 -fPIC
+      -Wno-old-style-cast -Wno-unused-parameter)
   else()
     message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
   endif()
