@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678203483359,
+  "lastUpdate": 1678204599208,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -120,6 +120,36 @@ window.BENCHMARK_DATA = {
             "value": 400298.5030986014,
             "unit": "ns/iter",
             "extra": "iterations: 1775\ncpu: 399460.7323943662 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "distinct": true,
+          "id": "9d1aebeecc8c58e4f5168e66d95e52c77d4a5684",
+          "message": "Try to speed up tests",
+          "timestamp": "2023-03-07T16:47:38+01:00",
+          "tree_id": "fcc6dbd0ee4bdc9ae045edb165b00d31268e9653",
+          "url": "https://github.com/cbritopacheco/rodin/commit/9d1aebeecc8c58e4f5168e66d95e52c77d4a5684"
+        },
+        "date": 1678204597183,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Poisson/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 310774.3702882308,
+            "unit": "ns/iter",
+            "extra": "iterations: 2255\ncpu: 310748.4700665189 ns\nthreads: 1"
           }
         ]
       }
