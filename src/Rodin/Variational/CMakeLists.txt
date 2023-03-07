@@ -107,7 +107,7 @@ target_include_directories(RodinVariational
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_link_libraries(RodinVariational
-  PRIVATE
+  PUBLIC
   mfem
   PUBLIC
   Rodin::IO
