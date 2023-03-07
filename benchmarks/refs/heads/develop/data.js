@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678188197284,
+  "lastUpdate": 1678200014441,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -60,6 +60,36 @@ window.BENCHMARK_DATA = {
             "value": 337702.04408458597,
             "unit": "ns/iter",
             "extra": "iterations: 2223\ncpu: 315300.089968511 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "distinct": true,
+          "id": "b1a92a76fb876cee401ae37ad5287c432d5e0da0",
+          "message": "Plot works again",
+          "timestamp": "2023-03-07T15:31:01+01:00",
+          "tree_id": "2a30568559c7127e3d378021d4ecdd99073aa42d",
+          "url": "https://github.com/cbritopacheco/rodin/commit/b1a92a76fb876cee401ae37ad5287c432d5e0da0"
+        },
+        "date": 1678200012797,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Poisson/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 327951.2290651316,
+            "unit": "ns/iter",
+            "extra": "iterations: 2257\ncpu: 313044.04076207354 ns\nthreads: 1"
           }
         ]
       }
