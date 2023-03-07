@@ -7,7 +7,6 @@
 #ifndef RODIN_PLOT_ARTIST_AXES_AXES2D_H
 #define RODIN_PLOT_ARTIST_AXES_AXES2D_H
 
-#include "Rodin/Core/Common.h"
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Bases/BaseAxes.h"
 #include "Rodin/Plot/Backend/Bases/BaseTopLevelArtist2D.h"

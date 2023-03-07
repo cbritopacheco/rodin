@@ -7,7 +7,6 @@
 #ifndef RODIN_PLOT_ARTIST_LINES_LINE2D_H
 #define RODIN_PLOT_ARTIST_LINES_LINE2D_H
 
-#include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Bases/BaseArtist2D.h"
