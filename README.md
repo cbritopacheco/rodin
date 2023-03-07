@@ -6,6 +6,8 @@ It is named after the French sculptor Auguste Rodin, considered the founder of m
 
 The library is still in development. It is primarily maintained by [Carlos Brito-Pacheco](https://edp-ljk.imag.fr/author/carlos-brito-pacheco/) and was developed to generate examples for his ongoing PhD.
 
+Any contributors are warmly encouraged and any help or comments are always appreciated!
+
 ## Status
 
 | Branch      |  Matrix  | Tests | Code Coverage | Benchmarks | Documentation |
