@@ -10,8 +10,8 @@ cmake:
 mmg:
 - any: ['src/RodinExternal/MMG/**/*']
 
-mesh:
-- any: ['src/Rodin/Mesh/**/*']
+geometry:
+- any: ['src/Rodin/Geometry/**/*']
 
 variational:
 - any: ['src/Rodin/Variational/**/*']
@@ -28,5 +28,5 @@ core:
 alerts:
 - any: ['src/Rodin/Alert/**/*']
 
-plotting:
+plot:
 - any: ['src/Rodin/Plot/**/*']
