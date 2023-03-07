@@ -104,12 +104,11 @@ endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariational
-  INTERFACE
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  PUBLIC
-  ${MFEM_INCLUDE_DIRS})
+  INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_link_libraries(RodinVariational
+  PRIVATE
+  mfem
   PUBLIC
   Rodin::IO
   Rodin::Alert

@@ -51,10 +51,7 @@ target_link_libraries(Rodin INTERFACE Eigen3::Eigen)
 configure_file(Configure.h.in Configure.h @ONLY)
 
 target_include_directories(Rodin
-  INTERFACE
-  ${PROJECT_SOURCE_DIR}/src
-  ${PROJECT_BINARY_DIR}/src)
-
+  INTERFACE ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
 add_subdirectory(Math)
 add_subdirectory(IO)
