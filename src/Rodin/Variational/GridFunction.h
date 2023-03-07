@@ -404,9 +404,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getFiniteElementSpace();
       }
 
-      inline LazyEvaluator<GridFunctionBase>* copy() const noexcept final override
+      inline GridFunctionBase* copy() const noexcept final override
       {
-        return new LazyEvaluator<GridFunctionBase>(*this);
+        return nullptr;
       }
 
       /**
@@ -787,46 +787,6 @@ namespace Rodin::Variational
 
   template <class ... Ts>
   GridFunction(const H1<Ts...>&) -> GridFunction<H1<Ts...>>;
-
-  template <class GridFunctionDerived>
-  class LazyEvaluator<GridFunctionBase<GridFunctionDerived>> final
-    : public FunctionBase<GridFunctionBase<GridFunctionDerived>>
-  {
-    public:
-      using Parent = FunctionBase<GridFunctionBase<GridFunctionDerived>>;
-
-      constexpr
-      LazyEvaluator(const GridFunctionBase<GridFunctionDerived>& gf)
-        : m_gf(gf)
-      {}
-
-      constexpr
-      LazyEvaluator(const LazyEvaluator& other)
-        : Parent(other),
-          m_gf(other.m_gf)
-      {}
-
-      constexpr
-      LazyEvaluator(LazyEvaluator&& other)
-        : Parent(std::move(other)),
-          m_gf(std::move(other.m_gf))
-      {}
-
-      inline
-      constexpr
-      auto getValue(const Geometry::Point& p) const
-      {
-        return m_gf.getValue(p);
-      }
-
-      inline LazyEvaluator* copy() const noexcept override
-      {
-        return new LazyEvaluator(*this);
-      }
-
-    private:
-      std::reference_wrapper<const GridFunctionBase<GridFunctionDerived>> m_gf;
-  };
 }
 
 #include "GridFunction.hpp"

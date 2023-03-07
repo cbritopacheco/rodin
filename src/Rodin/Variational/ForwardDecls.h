@@ -121,7 +121,7 @@ namespace Rodin::Variational
   template <class Range, class Context>
   class H1;
 
-  template <class T>
+  template <class StrictType>
   class LazyEvaluator;
 
   /**
