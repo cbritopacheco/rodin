@@ -56,7 +56,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build
       - name: Run benchmarks
-        run: ./${{github.workspace}}/build/tests/benchmarks/RodinBenchmarks --benchmark_format=json --benchmark_out=${{github.workspace}}/RodinBenchmarks.json
+        run: ${{github.workspace}}/build/tests/benchmarks/RodinBenchmarks --benchmark_format=json --benchmark_out=${{github.workspace}}/RodinBenchmarks.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
