@@ -11,8 +11,6 @@
 
 #include <Magnum/Math/Vector2.h>
 
-#include "Rodin/Core/Common.h"
-
 #include "ForwardDecls.h"
 #include "Base.h"
 

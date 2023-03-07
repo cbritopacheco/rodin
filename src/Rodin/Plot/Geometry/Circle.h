@@ -11,8 +11,6 @@
 
 #include <Magnum/Math/Angle.h>
 
-#include "Rodin/Core/Common.h"
-
 #include "ForwardDecls.h"
 #include "Base.h"
 

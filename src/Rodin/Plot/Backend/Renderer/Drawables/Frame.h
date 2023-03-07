@@ -16,7 +16,6 @@
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/SceneGraph/Camera.h>
 
-#include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Backend/Bases/BaseDrawable2D.h"
 
 namespace Rodin::Plot::Backend::Renderer::Drawables

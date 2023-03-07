@@ -15,7 +15,6 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Shaders/FlatGL.h>
 
-#include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Bases/BaseDrawable2D.h"

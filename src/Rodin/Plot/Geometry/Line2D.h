@@ -10,8 +10,6 @@
 #include <variant>
 #include <optional>
 
-#include "Rodin/Core/Common.h"
-
 #include "ForwardDecls.h"
 #include "Base.h"
 
