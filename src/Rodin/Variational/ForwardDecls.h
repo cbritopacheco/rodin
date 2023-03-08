@@ -127,7 +127,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for grid function objects.
    */
-  template <class Derived>
+  template <class Derived, class FES>
   class GridFunctionBase;
 
   /**

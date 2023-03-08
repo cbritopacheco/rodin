@@ -15,29 +15,34 @@
 
 namespace Rodin::Variational
 {
-  template <class FunctionDerived>
-  class LazyEvaluator<FunctionBase<FunctionDerived>> final
-    : public FunctionBase<LazyEvaluator<FunctionBase<FunctionDerived>>>
+  template <class StrictType>
+  class LazyEvaluator : public FunctionBase<LazyEvaluator<StrictType>>
   {
     public:
-      using Parent = FunctionBase<LazyEvaluator<FunctionBase<FunctionDerived>>>;
+      using Parent = FunctionBase<LazyEvaluator<StrictType>>;
 
-      constexpr
-      LazyEvaluator(const FunctionBase<FunctionDerived>& ref)
+      LazyEvaluator(const StrictType& ref)
         : m_ref(ref)
       {}
 
-      constexpr
+      /**
+       * @brief rvalues are not allowed.
+       */
+      LazyEvaluator(StrictType&&) = delete;
+
       LazyEvaluator(const LazyEvaluator& other)
         : Parent(other),
           m_ref(other.m_ref)
       {}
 
-      constexpr
       LazyEvaluator(LazyEvaluator&& other)
         : Parent(std::move(other)),
           m_ref(std::move(other.m_ref))
       {}
+
+      LazyEvaluator& operator=(const LazyEvaluator&) = delete;
+
+      LazyEvaluator& operator=(LazyEvaluator&&) = delete;
 
       inline
       constexpr
@@ -53,18 +58,17 @@ namespace Rodin::Variational
         return m_ref.get().getValue(p);
       }
 
-      inline LazyEvaluator* copy() const noexcept override
+      inline LazyEvaluator* copy() const noexcept final override
       {
         return new LazyEvaluator(*this);
       }
 
     private:
-      std::reference_wrapper<const FunctionBase<FunctionDerived>> m_ref;
+      std::reference_wrapper<const StrictType> m_ref;
   };
 
-  template <class FunctionDerived>
-  LazyEvaluator(const FunctionBase<FunctionDerived>&)
-    -> LazyEvaluator<FunctionBase<FunctionDerived>>;
+  template <class StrictType>
+  LazyEvaluator(const StrictType&) -> LazyEvaluator<StrictType>;
 }
 
 #endif

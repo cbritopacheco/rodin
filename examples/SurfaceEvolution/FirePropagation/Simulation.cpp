@@ -17,9 +17,9 @@ using namespace Rodin::External;
 // static const char* meshfile =
 //   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
 static const char* meshfile = "Topography.mesh";
-static const Scalar hausdorff = 10;
-static const Scalar hmax = 600;
-static const Scalar hmin = 100;
+static Scalar hausdorff = 10;
+static Scalar hmax = 2000;
+static Scalar hmin = 100;
 // static const Scalar hmax = 600;
 // static const Scalar hmin = 100;
 
@@ -147,8 +147,8 @@ class Environment
             [&](const Point& v) -> Scalar
             {
               auto fn =
-                Dot(LazyEvaluator(env.m_wind), conormal) / (
-                    Frobenius(LazyEvaluator(env.m_wind)) * Frobenius(conormal));
+                Dot(env.m_wind, conormal) / (
+                    Frobenius(env.m_wind) * Frobenius(conormal));
               Scalar fv = fn(v);
               if (std::isfinite(fv))
                 return std::acos(fv);
@@ -406,7 +406,7 @@ int main()
   Alert::Info() << "Starting simulation..." << Alert::Raise;
   Environment environment(topography, stratum);
   Scalar t = 0;
-  Scalar dt = 600;
+  Scalar dt = 60;
   for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
     Alert::Info() << "t: " << (t / 60) << "m" << Alert::Raise;
