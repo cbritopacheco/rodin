@@ -29,6 +29,7 @@
 #include "Function.h"
 #include "Component.h"
 #include "Restriction.h"
+#include "LazyEvaluator.h"
 #include "ScalarFunction.h"
 #include "VectorFunction.h"
 #include "MatrixFunction.h"
@@ -42,25 +43,44 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
-  template <class Derived>
-  class GridFunctionBase : public FunctionBase<GridFunctionBase<Derived>>
+  template <class Derived, class FES>
+  class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES>>
   {
     public:
-      using Parent = FunctionBase<GridFunctionBase<Derived>>;
+      using Parent = LazyEvaluator<GridFunctionBase<Derived, FES>>;
+      using RangeType = typename FES::RangeType;
 
-      GridFunctionBase() = default;
+      static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
+
+      GridFunctionBase(const FES& fes)
+        : Parent(*this),
+          m_fes(fes),
+          m_data(fes.getHandle().GetVSize()),
+          m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
+      {
+        assert(!m_gf->OwnsData());
+        m_data.setZero();
+      }
 
       GridFunctionBase(const GridFunctionBase& other)
-        : Parent(other)
+        : Parent(*this),
+          m_fes(other.m_fes),
+          m_data(other.m_data),
+          m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
-        : Parent(std::move(other))
+        : Parent(*this),
+          m_fes(std::move(other.m_fes)),
+          m_data(std::move(other.m_data)),
+          m_gf(std::move(other.m_gf))
       {}
 
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
-        Parent::operator=(std::move(other));
+        m_fes = std::move(other.m_fes);
+        m_data = std::move(other.m_data);
+        m_gf = std::move(other.m_gf);
         return *this;
       }
 
@@ -77,7 +97,7 @@ namespace Rodin::Variational
       constexpr
       Scalar max() const
       {
-        return static_cast<const Derived&>(*this).max();
+        return m_data.maxCoeff();
       }
 
       /**
@@ -91,7 +111,7 @@ namespace Rodin::Variational
       constexpr
       Scalar min() const
       {
-        return static_cast<const Derived&>(*this).max();
+        return m_data.minCoeff();
       }
 
       inline
@@ -127,37 +147,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Math::Vector& getData()
-      {
-        return static_cast<Derived&>(*this).getData();
-      }
-
-      inline
-      constexpr
-      const Math::Vector& getData() const
-      {
-        return static_cast<const Derived&>(*this).getData();
-      }
-
-      inline
-      constexpr
       size_t getSize() const
       {
         return getHandle().Size();
-      }
-
-      inline
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getFiniteElementSpace().getVectorDimension(), 1 };
-      }
-
-      inline
-      constexpr
-      auto getValue(const Geometry::Point& p) const
-      {
-        return static_cast<const Derived&>(*this).getValue(p);
       }
 
       /**
@@ -173,7 +165,6 @@ namespace Rodin::Variational
       inline
       Derived& operator=(std::function<Scalar(const Geometry::Point&)> fn)
       {
-        using RangeType = typename FormLanguage::Traits<FunctionBase<GridFunctionBase<Derived>>>::RangeType;
         static_assert(std::is_same_v<RangeType, Scalar>);
         assert(getFiniteElementSpace().getVectorDimension() == 1);
         return project(ScalarFunction(fn));
@@ -329,7 +320,6 @@ namespace Rodin::Variational
       {
         using Value = FunctionBase<NestedDerived>;
         using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
-        using RangeType = typename FormLanguage::Traits<FunctionBase<GridFunctionBase<Derived>>>::RangeType;
         static_assert(std::is_same_v<RangeType, ValueRangeType>);
         if constexpr (std::is_same_v<ValueRangeType, Scalar>)
         {
@@ -385,124 +375,6 @@ namespace Rodin::Variational
       }
 
       inline
-      void save(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
-          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
-      {
-        return static_cast<const Derived&>(*this).save(filename, fmt, precision);
-      }
-
-      inline
-      Derived& load(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
-      {
-        return static_cast<Derived&>(*this).save(filename, fmt);
-      }
-
-      inline
-      constexpr
-      const auto& getFiniteElementSpace() const
-      {
-        return static_cast<const Derived&>(*this).getFiniteElementSpace();
-      }
-
-      inline GridFunctionBase* copy() const noexcept final override
-      {
-        return nullptr;
-      }
-
-      /**
-       * @internal
-       * @brief Gets the underlying handle to the mfem::GridFunction object.
-       * @returns Reference to the underlying object.
-       */
-      mfem::GridFunction& getHandle() const
-      {
-        return static_cast<const Derived&>(*this).getHandle();
-      }
-  };
-
-  template <class FESType>
-  class FESGridFunction : public GridFunctionBase<FESGridFunction<FESType>>
-  {
-    public:
-      using FES = FESType;
-      using Parent = GridFunctionBase<FESGridFunction<FES>>;
-
-      using Parent::operator=;
-      using Parent::operator+=;
-      using Parent::operator-=;
-      using Parent::operator*=;
-      using Parent::operator/=;
-
-      FESGridFunction(const FES& fes)
-        : m_fes(fes),
-          m_data(fes.getHandle().GetVSize()),
-          m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
-      {
-        assert(!m_gf->OwnsData());
-        m_data.setZero();
-      }
-
-      FESGridFunction(const FESGridFunction& other)
-        : Parent(other),
-          m_fes(other.m_fes),
-          m_data(other.m_data),
-          m_gf(new mfem::GridFunction(*other.m_gf))
-      {}
-
-      FESGridFunction(FESGridFunction&& other)
-        : Parent(std::move(other)),
-          m_fes(std::move(other.m_fes)),
-          m_data(std::move(other.m_data)),
-          m_gf(std::move(other.m_gf))
-      {}
-
-      FESGridFunction& operator=(FESGridFunction&& other)
-      {
-        Parent::operator=(std::move(other));
-        m_fes = std::move(other.m_fes);
-        m_data = std::move(other.m_data);
-        m_gf = std::move(other.m_gf);
-        return *this;
-      }
-
-      inline
-      constexpr
-      Scalar max() const
-      {
-        return m_data.maxCoeff();
-      }
-
-      inline
-      constexpr
-      Scalar min() const
-      {
-        return m_data.minCoeff();
-      }
-
-      inline
-      auto getValue(const Geometry::Point& p) const
-      {
-        using RangeType = typename FES::RangeType;
-        static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
-        if constexpr (std::is_same_v<RangeType, Scalar>)
-        {
-          return Scalar(m_gf->GetValue(p.getTransformation().getHandle(), p.getIntegrationPoint()));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-        {
-          Math::Vector res(getFiniteElementSpace().getVectorDimension());
-          mfem::Vector tmp(res.data(), res.size());
-          m_gf->GetVectorValue(p.getTransformation().getHandle(), p.getIntegrationPoint(), tmp);
-          return res;
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
-      }
-
-      inline
       constexpr
       const FES& getFiniteElementSpace() const
       {
@@ -523,7 +395,53 @@ namespace Rodin::Variational
         return m_data;
       }
 
-      inline mfem::GridFunction& getHandle() const
+      Derived& load(
+          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        return static_cast<Derived&>(*this).load(filename, fmt);
+      }
+
+      void save(
+          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
+          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
+      {
+        return static_cast<const Derived&>(*this).save(filename, fmt, precision);
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getFiniteElementSpace().getVectorDimension(), 1 };
+      }
+
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          return Scalar(getHandle().GetValue(p.getTransformation().getHandle(), p.getIntegrationPoint()));
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          Math::Vector res(getFiniteElementSpace().getVectorDimension());
+          mfem::Vector tmp(res.data(), res.size());
+          getHandle().GetVectorValue(p.getTransformation().getHandle(), p.getIntegrationPoint(), tmp);
+          return res;
+        }
+        else
+        {
+          assert(false);
+          return void();
+        }
+      }
+
+      /**
+       * @internal
+       * @brief Gets the underlying handle to the mfem::GridFunction object.
+       * @returns Reference to the underlying object.
+       */
+      mfem::GridFunction& getHandle() const
       {
         assert(m_gf);
         return *m_gf;
@@ -535,54 +453,6 @@ namespace Rodin::Variational
       std::unique_ptr<mfem::GridFunction> m_gf;
   };
 
-  /**
-   * @ingroup GridFunctionSpecializations
-   * @brief Represents a GridFunction which belongs to an L2 finite element
-   * space.
-   */
-  template <class ... Ts>
-  class GridFunction<L2<Ts ...>> final : public FESGridFunction<L2<Ts ...>>
-  {
-    public:
-      using FES = L2<Ts ...>;
-      using Parent = FESGridFunction<FES>;
-
-      using Parent::operator=;
-      using Parent::operator+=;
-      using Parent::operator-=;
-      using Parent::operator*=;
-      using Parent::operator/=;
-
-      /**
-       * @brief Constructs a grid function on an L2 finite element space.
-       * @param[in] fes Finite element space to which the function belongs
-       * to.
-       */
-      GridFunction(const FES& fes)
-        : Parent(fes)
-      {}
-
-      /**
-       * @brief Copies the grid function.
-       * @param[in] other Other grid function to copy.
-       */
-      GridFunction(const GridFunction& other)
-        : Parent(other)
-      {}
-
-      /**
-       * @brief Move constructs the grid function.
-       * @param[in] other Other grid function to move.
-       */
-      GridFunction(GridFunction&& other)
-        : Parent(std::move(other))
-      {}
-
-      GridFunction& operator=(const GridFunction&)  = delete;
-  };
-
-  template <class ... Ts>
-  GridFunction(const L2<Ts ...>&) -> GridFunction<L2<Ts ...>>;
 
   /**
    * @ingroup GridFunctionSpecializations
@@ -590,11 +460,11 @@ namespace Rodin::Variational
    * space.
    */
   template <class ... Ts>
-  class GridFunction<H1<Ts...>> final : public FESGridFunction<H1<Ts...>>
+  class GridFunction<H1<Ts...>> final : public GridFunctionBase<GridFunction<H1<Ts...>>, H1<Ts...>>
   {
     public:
       using FES = H1<Ts...>;
-      using Parent = FESGridFunction<FES>;
+      using Parent = GridFunctionBase<GridFunction<H1<Ts...>>, H1<Ts...>>;
 
       using Parent::operator=;
       using Parent::operator+=;

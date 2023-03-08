@@ -8,10 +8,7 @@
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
 #include <set>
-#include <memory>
-#include <mfem.hpp>
 
-#include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
