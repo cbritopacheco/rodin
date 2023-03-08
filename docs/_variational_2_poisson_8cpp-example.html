@@ -65,7 +65,6 @@
 <span class="cm"> *       (See accompanying file LICENSE or copy at</span>
 <span class="cm"> *          https://www.boost.org/LICENSE_1_0.txt)</span>
 <span class="cm"> */</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;chrono&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
@@ -76,8 +75,7 @@
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;../resources/mfem/poisson-example.mesh&quot;</span><span class="p">;</span>
-<span class="w">  </span><span class="c1">// const char* meshFile = &quot;miaow.mesh&quot;;</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;../resources/mfem/StarSquare.mfem.mesh&quot;</span><span class="p">;</span>
 
 <span class="w">  </span><span class="c1">// Define boundary attributes</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">Gamma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
@@ -91,22 +89,23 @@
 <span class="w">  </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="w">  </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 
-<span class="w">  </span><span class="c1">// Define problem</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScalarFunction</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w"> </span><span class="c1">// Define problem</span>
+<span class="w"> </span><span class="n">ScalarFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w"> </span><span class="n">ScalarFunction</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
 
-<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
-<span class="w">  </span><span class="n">solver</span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="w"> </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<span class="w"> </span><span class="n">solver</span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
 
-<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="n">Gamma</span><span class="p">);</span>
-<span class="w">  </span><span class="n">poisson</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span>
+<span class="w"> </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w"> </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">         </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">         </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="n">Gamma</span><span class="p">);</span>
 
-<span class="w">  </span><span class="c1">// Save solution</span>
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span>
+<span class="w"> </span><span class="n">poisson</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span>
+
+<span class="w"> </span><span class="c1">// Save solution</span>
+<span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">getHandle</span><span class="p">().</span><span class="n">Save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span>
+<span class="w"> </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre>

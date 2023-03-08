@@ -53,7 +53,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FES, Context::Serial, mfem::Vector&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FES, Context::Serial, mfem::Vector&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Represents a linear form defined over some finite element space.</p>
         <nav class="m-block m-default">
@@ -122,8 +122,8 @@ $ V $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a635f72d0d85e8eba580c7f50515ab3f5">
-              <span class="m-doc-wrap-bumper"><a href="#a635f72d0d85e8eba580c7f50515ab3f5" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="abc6d114df496717418c6e0c8c194a311">
+              <span class="m-doc-wrap-bumper"><a href="#abc6d114df496717418c6e0c8c194a311" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a linear form defined on some finite element space.</dd>
           </dl>
@@ -132,7 +132,7 @@ $ V $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a80c262f82a6e6a7f44f7a12c80ca31d3" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa10a8e0a5f69530c7cf868ed6b9d73b5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const -&gt; Scalar <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -165,12 +165,12 @@ $ u $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a80c262f82a6e6a7f44f7a12c80ca31d3"><div>
+          <section class="m-doc-details" id="aa10a8e0a5f69530c7cf868ed6b9d73b5"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Serial, mfem::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80c262f82a6e6a7f44f7a12c80ca31d3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Serial, mfem::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10a8e0a5f69530c7cf868ed6b9d73b5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>

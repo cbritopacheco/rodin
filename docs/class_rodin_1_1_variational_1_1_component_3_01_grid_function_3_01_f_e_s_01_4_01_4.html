@@ -53,7 +53,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Component&lt;GridFunction&lt;FES&gt;&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Component&lt;GridFunction&lt;FES&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
         <nav class="m-block m-default">
@@ -72,18 +72,18 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_component_3_01_function_base_01_4.html" class="m-doc">Component&lt;FunctionBase&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;Component&lt;GridFunction&lt;FES&gt;&gt;&gt;</a>
             </dt>
-            <dd>Represents the component (or entry) of a vectorial <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance.</dd>
+            <dd>Abstract base class for objects representing scalar functions.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a5a632597a08c85fb2119069131ed2902">
-              <span class="m-doc-wrap-bumper"><a href="#a5a632597a08c85fb2119069131ed2902" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u,
-              int component)</span>
+            <dt id="ae8b7ea08193c8a0b07679174b4cb409b">
+              <span class="m-doc-wrap-bumper"><a href="#ae8b7ea08193c8a0b07679174b4cb409b" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u,
+              size_t component) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the component object from a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> and its component index.</dd>
           </dl>

@@ -52,7 +52,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ShapeFunctionBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for shape function objects.</p>
@@ -62,7 +62,15 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">Space</td>
+              <td style="width: 1%">Derived</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>FESType</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Space</td>
               <td>Type of shape function space (Trial or <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a>)</td>
             </tr>
           </tbody>
@@ -73,47 +81,7 @@
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
             </dt>
-            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of Variational::FormLanguage.</dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_dot_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Dot&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product between a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> and a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space, class ... Ts&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_l2_3_01_ts_8_8_8_01_4_00_01_space_01_4_01_4.html" class="m-doc">Grad&lt;ShapeFunction&lt;L2&lt;Ts...&gt;, Space&gt;&gt;</a>
-            </dt>
-            <dd>Represents the broken gradient.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space, class Trait&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_h1_3_01_trait_01_4_00_01_space_01_4_01_4.html" class="m-doc">Jacobian&lt;ShapeFunction&lt;H1&lt;Trait&gt;, Space&gt;&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_00_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Mult&lt;FunctionBase, ShapeFunctionBase&lt;Space&gt;&gt;</a>
-            </dt>
-            <dd>Left Multiplication by a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space, class ... Ts&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_3_01_h1_3_01_ts_8_8_8_01_4_00_01_space_01_4.html" class="m-doc">ShapeFunction&lt;H1&lt;Ts...&gt;, Space&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space, class ... Ts&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_3_01_l2_3_01_ts_8_8_8_01_4_00_01_space_01_4.html" class="m-doc">ShapeFunction&lt;L2&lt;Ts...&gt;, Space&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_transpose_3_01_shape_function_base_3_01_space_01_4_01_4.html" class="m-doc">Transpose&lt;ShapeFunctionBase&lt;Space&gt;&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> object.</dd>
+            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
         </section>
       </div>

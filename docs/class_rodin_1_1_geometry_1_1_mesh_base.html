@@ -81,7 +81,8 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afef856a04381aa0a8dbfa8f0fdc2d3c7" class="m-doc">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b9126e96482de9c0915e742be8a57ad" class="m-doc">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES&gt;&amp; u) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Displaces the mesh nodes by the displacement <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -95,35 +96,8 @@ $ u $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
-            </dt>
-            <dd>Indicates whether the mesh is a surface or not.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6bed02f060b6becbc52d12095d40a38f" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">) -&gt; double</span>
-            </dt>
-            <dd>Gets the total volume of the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af25b4c1e95166e85c43b63da762ab55b" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">Attribute attr) -&gt; double</span>
-            </dt>
-            <dd>Gets the sum of the volumes of the elements given by the specified attribute.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a629661105b7e3b0c6e1e558c0849e2ee" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">) -&gt; double</span>
-            </dt>
-            <dd>Gets the total perimeter of the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8e817e79b039e55bcab1cdc6e02ff51d" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">Attribute attr) -&gt; double</span>
-            </dt>
-            <dd>Gets the sum of the perimeters of the elements given by the specified attribute.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7fa70599c37c82d3d31407222ae22868" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;Attribute&gt;</span>
-            </dt>
-            <dd>Gets the labels of the domain elements in the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1866c4b3fd280306a3a1abcf24f302f8" class="m-doc">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;Attribute&gt;</span>
-            </dt>
-            <dd>Gets the labels of the boundary elements in the mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0a148a8ef01a3ef2485009d50840320d" class="m-doc">getMaximumDisplacement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u) -&gt; double</span>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aac3e7890eff84c4677b729629c005d4c" class="m-doc">getMaximumDisplacement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES&gt;&amp; u) -&gt; Scalar</span>
             </dt>
             <dd>Gets the maximum number <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
 <title>
@@ -147,6 +121,34 @@ $ u $
 </g>
 </svg>.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc">isSurface</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Indicates whether the mesh is a surface or not.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a510f358baac59f36cb4af6c196aa8c85" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">) -&gt; Scalar</span>
+            </dt>
+            <dd>Gets the total volume of the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afe1e65801cd84e28bcb28b686eba3fdd" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">Attribute attr) -&gt; Scalar</span>
+            </dt>
+            <dd>Gets the sum of the volumes of the elements given by the specified attribute.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1acc4a3d1ff79aa630f9aaee6470f819" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">) -&gt; Scalar</span>
+            </dt>
+            <dd>Gets the total perimeter of the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab41e08ec2a204d2aceb4c7f4c1bc3880" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">Attribute attr) -&gt; Scalar</span>
+            </dt>
+            <dd>Gets the sum of the perimeters of the elements given by the specified attribute.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7fa70599c37c82d3d31407222ae22868" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;Attribute&gt;</span>
+            </dt>
+            <dd>Gets the labels of the domain elements in the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1866c4b3fd280306a3a1abcf24f302f8" class="m-doc">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; std::set&lt;Attribute&gt;</span>
+            </dt>
+            <dd>Gets the labels of the boundary elements in the mesh.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the dimension of the elements.</dd>
@@ -162,9 +164,12 @@ $ u $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="afef856a04381aa0a8dbfa8f0fdc2d3c7"><div>
+          <section class="m-doc-details" id="a9b9126e96482de9c0915e742be8a57ad"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afef856a04381aa0a8dbfa8f0fdc2d3c7" class="m-doc-self">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u)</span></span>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b9126e96482de9c0915e742be8a57ad" class="m-doc-self">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES&gt;&amp; u)</span></span>
             </h3>
             <p>Displaces the mesh nodes by the displacement <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -250,130 +255,12 @@ $ u $
 </g>
 </svg> must be equal to the space dimension.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a5c0ab183385f8806ca268b5c1b31d55d"><div>
+          <section class="m-doc-details" id="aac3e7890eff84c4677b729629c005d4c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-            <p>Indicates whether the mesh is a surface or not.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>True if mesh is a surface, false otherwise.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>A surface mesh is a mesh of codimension 1. That is, the difference between its space dimension and dimension is 1.</p>
-          </div></section>
-          <section class="m-doc-details" id="a6bed02f060b6becbc52d12095d40a38f"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bed02f060b6becbc52d12095d40a38f" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Gets the total volume of the mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Sum of all element volumes.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="af25b4c1e95166e85c43b63da762ab55b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af25b4c1e95166e85c43b63da762ab55b" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">Attribute attr)</span></span>
-            </h3>
-            <p>Gets the sum of the volumes of the elements given by the specified attribute.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute of elements</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Sum of element volumes with given attribute</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the volume.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a629661105b7e3b0c6e1e558c0849e2ee"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a629661105b7e3b0c6e1e558c0849e2ee" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Gets the total perimeter of the mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Sum of all element perimeters.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a8e817e79b039e55bcab1cdc6e02ff51d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e817e79b039e55bcab1cdc6e02ff51d" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">Attribute attr)</span></span>
-            </h3>
-            <p>Gets the sum of the perimeters of the elements given by the specified attribute.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute of elements</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Sum of element perimeters with given attribute</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the perimeter.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a7fa70599c37c82d3d31407222ae22868"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;Attribute&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fa70599c37c82d3d31407222ae22868" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-            <p>Gets the labels of the domain elements in the mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Set of all the attributes in the mesh object.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1866c4b3fd280306a3a1abcf24f302f8" class="m-doc">getBoundaryAttributes() const</a></p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a1866c4b3fd280306a3a1abcf24f302f8"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::set&lt;Attribute&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1866c4b3fd280306a3a1abcf24f302f8" class="m-doc-self">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-            <p>Gets the labels of the boundary elements in the mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Set of all the boundary attributes in the mesh object.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a7fa70599c37c82d3d31407222ae22868" class="m-doc">getAttributes() const</a></p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a0a148a8ef01a3ef2485009d50840320d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">double Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a148a8ef01a3ef2485009d50840320d" class="m-doc-self">getMaximumDisplacement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Variational::<wbr />GridFunctionBase</a>&amp; u)</span></span>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac3e7890eff84c4677b729629c005d4c" class="m-doc-self">getMaximumDisplacement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES&gt;&amp; u)</span></span>
             </h3>
             <p>Gets the maximum number <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
 <title>
@@ -460,6 +347,127 @@ $ u $
 <use x='0' y='0' xlink:href='#eq10-g0-117'/>
 </g>
 </svg> must be equal to the space dimension.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a5c0ab183385f8806ca268b5c1b31d55d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Indicates whether the mesh is a surface or not.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if mesh is a surface, false otherwise.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>A surface mesh is a mesh of codimension 1. That is, the difference between its space dimension and dimension is 1.</p>
+          </div></section>
+          <section class="m-doc-details" id="a510f358baac59f36cb4af6c196aa8c85"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a510f358baac59f36cb4af6c196aa8c85" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the total volume of the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Sum of all element volumes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afe1e65801cd84e28bcb28b686eba3fdd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe1e65801cd84e28bcb28b686eba3fdd" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">Attribute attr)</span></span>
+            </h3>
+            <p>Gets the sum of the volumes of the elements given by the specified attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute of elements</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of element volumes with given attribute</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the volume.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1acc4a3d1ff79aa630f9aaee6470f819"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1acc4a3d1ff79aa630f9aaee6470f819" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the total perimeter of the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Sum of all element perimeters.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab41e08ec2a204d2aceb4c7f4c1bc3880"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab41e08ec2a204d2aceb4c7f4c1bc3880" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">Attribute attr)</span></span>
+            </h3>
+            <p>Gets the sum of the perimeters of the elements given by the specified attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute of elements</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of element perimeters with given attribute</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>If the element attribute does not exist then this function will return 0 as the perimeter.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7fa70599c37c82d3d31407222ae22868"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::set&lt;Attribute&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fa70599c37c82d3d31407222ae22868" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the labels of the domain elements in the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Set of all the attributes in the mesh object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1866c4b3fd280306a3a1abcf24f302f8" class="m-doc">getBoundaryAttributes() const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1866c4b3fd280306a3a1abcf24f302f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::set&lt;Attribute&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1866c4b3fd280306a3a1abcf24f302f8" class="m-doc-self">getBoundaryAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the labels of the boundary elements in the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Set of all the boundary attributes in the mesh object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a7fa70599c37c82d3d31407222ae22868" class="m-doc">getAttributes() const</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aecbab974d66ff87d16610de96cf16878"><div>
             <h3>

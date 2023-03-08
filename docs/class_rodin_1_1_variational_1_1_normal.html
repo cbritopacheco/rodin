@@ -52,7 +52,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Normal <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Normal <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Outward unit normal.</p>
         <nav class="m-block m-default">
@@ -61,56 +61,30 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Normal&gt;</a>
+            </dt>
+            <dd>Abstract base class for objects representing vector functions.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a0a9a50198b179ac41d0378fe4d0f929c">
-              <span class="m-doc-wrap-bumper"><a href="#a0a9a50198b179ac41d0378fe4d0f929c" class="m-doc-self">Normal</a>(</span><span class="m-doc-wrap">size_t dimension)</span>
+            <dt id="a8939e5031c87bd05c5d13475c7272218">
+              <span class="m-doc-wrap-bumper"><a href="#a8939e5031c87bd05c5d13475c7272218" class="m-doc-self">Normal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; surface)</span>
             </dt>
             <dd>Constructs the outward unit normal.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a12754d41b6029ac01247ee48b7b2c394" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; int <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the dimension of the vector object.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a321a2e83e19c56de811af3b4e5a66d34" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a12754d41b6029ac01247ee48b7b2c394"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Variational::<wbr />Normal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a12754d41b6029ac01247ee48b7b2c394" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the dimension of the vector object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Dimension of vector.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a321a2e83e19c56de811af3b4e5a66d34"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_function_value.html" class="m-doc">FunctionValue</a> Rodin::<wbr />Variational::<wbr />Normal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a321a2e83e19c56de811af3b4e5a66d34" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-<aside class="m-note m-info"><h4>Note</h4><p>It is not necessary to set the size beforehand.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>
