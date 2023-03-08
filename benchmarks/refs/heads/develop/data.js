@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678223329413,
+  "lastUpdate": 1678271182301,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -210,6 +210,36 @@ window.BENCHMARK_DATA = {
             "value": 328937.4506912512,
             "unit": "ns/iter",
             "extra": "iterations: 2170\ncpu: 328804.33179723495 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "distinct": true,
+          "id": "504a16b098db621f9d53757cba83cb7821432686",
+          "message": "GridFunction evaluation works again",
+          "timestamp": "2023-03-08T11:11:40+01:00",
+          "tree_id": "482bfb30c3bf63d0592e788a1248c8294cd7ed2d",
+          "url": "https://github.com/cbritopacheco/rodin/commit/504a16b098db621f9d53757cba83cb7821432686"
+        },
+        "date": 1678271180345,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Poisson/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 382392.39213545294,
+            "unit": "ns/iter",
+            "extra": "iterations: 1831\ncpu: 382191.9169852539 ns\nthreads: 1"
           }
         ]
       }
