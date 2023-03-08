@@ -7,19 +7,21 @@
 #ifndef RODIN_MESH_FORWARDDECLS_H
 #define RODIN_MESH_FORWARDDECLS_H
 
-#include <utility>
+#include <cstddef>
 
-#include "Rodin/Configure.h"
-#include "Rodin/Context/ForwardDecls.h"
+#include "Rodin/Context.h"
 
 namespace Rodin::Geometry
 {
   using Index = std::size_t;
+
   using Attribute = std::size_t;
 
   class IndexGenerator;
 
   enum class Type;
+
+  class SimplexTransformation;
 
   class Simplex;
 
@@ -44,7 +46,7 @@ namespace Rodin::Geometry
   /**
    * @brief Templated class for Mesh.
    */
-  template <class Trait = Context::Serial>
+  template <class ContextType = Context::Serial>
   class Mesh;
 
   /**
@@ -57,10 +59,10 @@ namespace Rodin::Geometry
    * - SubMesh<Traits::Serial>
    * - SubMesh<Traits::Parallel>
    */
-  template <class Trait>
+  template <class Context>
   class SubMesh;
 
-  template <class Trait>
+  template <class Context>
   class SubMeshBuilder;
 }
 

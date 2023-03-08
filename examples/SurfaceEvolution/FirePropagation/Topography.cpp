@@ -11,16 +11,18 @@ using namespace Geometry;
 using namespace Variational;
 using namespace External;
 
+const char* meshfile = "../resources/examples/SurfaceEvolution/FirePropagation/GroundPlane.mfem.mesh";
+
 struct Octave
 {
-  double elevation;
-  double period;
+  Scalar elevation;
+  Scalar period;
 };
 
 int main(int, char**)
 {
-  constexpr int width = 5e4, height = 5e4; // meters
-  constexpr double flatness = 4.0;
+  // constexpr int width = 5e4, height = 5e4; // meters
+  constexpr Scalar flatness = 4.0;
 
   std::vector<Octave> octaves = {
    {500.0, 500},
@@ -30,64 +32,54 @@ int main(int, char**)
    {4000.0, 3000},
   };
 
-  MMG::Mesh topography;
-  topography.initialize(2, 3)
-            .vertex({0, 0, 0})
-            .vertex({width, 0, 0})
-            .vertex({0, height, 0})
-            .vertex({width, height, 0})
-            .element(Geometry::Type::Triangle, {0, 1, 2})
-            .element(Geometry::Type::Triangle, {1, 2, 3})
-            .finalize();
-
-  // for (int i = 0; i < 8; i++)
-  //  topography.refine();
+  Mesh topography;
+  topography.load(meshfile);
 
   srand(std::time(0));
   FastNoiseLite gen(rand());
   gen.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 
-  auto noise = [&](double x, double y) { return gen.GetNoise(x, y) / 2.0 + 0.5; };
+  auto noise = [&](Scalar x, Scalar y) { return gen.GetNoise(x, y) / 2.0 + 0.5; };
 
-  double elVol = 0;
-  // for (int i = 0; i < topography.count<Element>(); i++)
-  //  elVol += topography.get<Element>(i).getVolume();
-  // elVol /= topography.count<Element>();
+  Scalar avgElementVolume = 0;
+  for (size_t i = 0; i < topography.getElementCount(); i++)
+    avgElementVolume += topography.getElement(i)->getVolume();
+  avgElementVolume /= topography.getElementCount();
 
-  double maxElevation = std::max_element(
-    octaves.begin(), octaves.end(),
-    [](auto&& lhs, auto& rhs)
-    { return lhs.elevation < rhs.elevation; })->elevation;
+  Scalar maxElevation =
+    std::max_element(octaves.begin(), octaves.end(),
+        [](auto&& lhs, auto& rhs) { return lhs.elevation < rhs.elevation; })->elevation;
 
-  double totalElevation = 0.0;
+  Scalar totalElevation = 0.0;
   for (const auto& octave : octaves)
    totalElevation += octave.elevation;
 
-  H1 vh(topography, topography.getSpaceDimension());
-  GridFunction displacement(vh);
-  displacement =
-   VectorFunction{0, 0,
+  auto elevation =
     [&](const Point& p)
     {
-      double nx = p.x(), ny = p.y();
-      double e = 0.0;
+      Scalar nx = p.x(), ny = p.y();
+      Scalar e = 0.0;
       for (const auto& octave : octaves)
       {
-       double f = elVol / (octave.period * octave.period);
+       Scalar f = avgElementVolume / (octave.period * octave.period);
        e += octave.elevation * noise(f * nx, f * ny);
       }
       e /= totalElevation;
-      assert(e < 1.0 + std::numeric_limits<double>::epsilon());
+      assert(e < 1.0 + std::numeric_limits<Scalar>::epsilon());
       return maxElevation * std::pow(e, flatness);
-    }};
+    };
+
+  H1 vh(topography, topography.getSpaceDimension());
+  GridFunction displacement(vh);
+  displacement = VectorFunction{0, 0, elevation};
   topography.displace(displacement);
 
   H1 sh(topography);
   GridFunction h(sh);
   h = [](const Point& p) { return p.z(); };
 
-  topography.save("topography.mesh");
-  h.save("topography.gf");
+  topography.save("Topography.mesh");
+  h.save("Topography.gf");
 
   return 0;
 }

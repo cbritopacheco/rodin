@@ -14,7 +14,6 @@
 
 #include <Magnum/Math/Vector2.h>
 
-#include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
 #include "Rodin/Plot/Backend/Event.h"
 

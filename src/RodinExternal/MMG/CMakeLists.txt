@@ -16,7 +16,6 @@ set(RodinExternalMMG_HEADERS
   Distancer.h
   MeshLoader.h
   MeshPrinter.h
-  MeshAdaptor.h
   MeshOptimizer.h
   ImplicitDomainMesher.h
   )
@@ -28,34 +27,38 @@ set(RodinExternalMMG_SRCS
   ISCDProcess.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
-  MeshAdaptor.cpp
   MeshOptimizer.cpp
   ImplicitDomainMesher.cpp
   )
 
+# ---- Set compile options for all the submodules ----------------------------
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(LANG C CXX OPTIONS -w -O3)
+  # No new flags to add
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG C CXX
     OPTIONS
     -g
     -O0
+    -fPIC
     -Wall
     -Wextra
     -Wpedantic
     -Wno-sign-compare
     -Wno-old-style-cast
+    -Wno-cast-function-type
     -Wno-unused-variable
     -Wno-unused-function
     -Wno-unused-parameter
     -Wno-double-promotion
     -Wno-missing-prototypes
     -Wno-missing-declarations
-    -Wno-error=c++11-narrowing
     -Wno-zero-as-null-pointer-constant
+    -Wno-error=c++11-narrowing
     -Wno-error=extra
     -Wno-error=pedantic)
+else()
+  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
 endif()
 
 add_library(RodinExternalMMG

@@ -14,15 +14,7 @@ namespace Rodin::Variational
    */
   class RangeShape;
 
-  /**
-   * @brief Represents the type of the range of a function.
-   */
-  enum class RangeType
-  {
-    Scalar,
-    Vector,
-    Matrix
-  };
+  enum class RangeType;
 
   /**
    * @brief Base class for linear form objects.
@@ -85,6 +77,9 @@ namespace Rodin::Variational
    */
   class BilinearFormIntegratorBase;
 
+  template <class FES>
+  class FiniteElement;
+
   class FiniteElementCollectionBase;
 
   /**
@@ -104,7 +99,7 @@ namespace Rodin::Variational
    *   \mathcal{T}_h, \ v |_\tau \in H^1 (\tau)^d \right\}
    * @f]
    */
-  template <class Context>
+  template <class Range, class Context>
   class L2;
 
   /**
@@ -123,12 +118,16 @@ namespace Rodin::Variational
    * C^0(\Omega)^d @f$.
    *
    */
-  template <class Context>
+  template <class Range, class Context>
   class H1;
+
+  template <class StrictType>
+  class LazyEvaluator;
 
   /**
    * @brief Base class for grid function objects.
    */
+  template <class Derived, class FES>
   class GridFunctionBase;
 
   /**
@@ -166,17 +165,17 @@ namespace Rodin::Variational
    */
   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
-  class BasisOperator;
+  template <class Value>
+  class TensorBasis;
 
   /**
    * @brief Base class for shape function objects.
    * @tparam Space Type of shape function space (Trial or Test)
    */
-  template <ShapeFunctionSpaceType Space>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunctionBase;
 
   /**
-   * @brief Base class for shape function objects.
    * @tparam FES Type of finite element space
    * @tparam Space Type of shape function space (@ref
    * ShapeFunctionSpaceType::Trial "Trial" or @ref
@@ -187,7 +186,7 @@ namespace Rodin::Variational
    *
    * @see ShapeFunctionSpecializations
    */
-  template <class FES, ShapeFunctionSpaceType Space>
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunction;
 
   /**
@@ -211,6 +210,7 @@ namespace Rodin::Variational
    * Instances of FunctionBase will always have the getValue() method defined,
    * which enables the evaluation of any function on some mesh element.
    */
+  template <class Derived>
   class FunctionBase;
 
   class Function;
@@ -218,6 +218,7 @@ namespace Rodin::Variational
   /**
    * @brief Abstract base class for objects representing scalar functions.
    */
+  template <class Derived>
   class ScalarFunctionBase;
 
   /**
@@ -235,6 +236,7 @@ namespace Rodin::Variational
    * @note Vectors are zero indexed. This means that the 0-index corresponds
    * to the 1st entry of the vector.
    */
+  template <class Derived>
   class VectorFunctionBase;
 
   /**
@@ -249,6 +251,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for objects representing matrix functions.
    */
+  template <class Derived>
   class MatrixFunctionBase;
 
   /**
@@ -262,6 +265,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for objects representing boolean functions.
    */
+  template <class Derived>
   class BooleanFunctionBase;
 
   /**
@@ -276,7 +280,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Jump;
 
-  template <class Operand>
+  template <class ... Args>
   class Average;
 
   /**
@@ -326,6 +330,9 @@ namespace Rodin::Variational
    */
   template <class Operand>
   class Transpose;
+
+  template <class Operand>
+  class Derivative;
 
   /**
    * @brief Represents the gradient @f$ \nabla u @f$ of a scalar function
@@ -378,13 +385,13 @@ namespace Rodin::Variational
    * @f]
    * where Operand is a type representing a function @f$ u : \mathbb{R}^s
    * \rightarrow \mathbb{R}^d @f$ whose Jacobian matrix @f$ \mathbf{J}_u(x)
-   * @f$ at any point @f$ x = (x_1, \ldots, x_s) @f$ is defined by the @f$ s
-   * \times d @f$ matrix:
+   * @f$ at any point @f$ x = (x_1, \ldots, x_s) @f$ is defined by the @f$ d
+   * \times s @f$ matrix:
    * @f[
    * \mathbf{J}_u = \begin{bmatrix}
-   * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_d}{\partial x_1}\\
+   * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_s}{\partial x_1}\\
    * \vdots & \ddots & \vdots\\
-   * \dfrac{\partial u_1}{\partial x_s} & \ldots & \dfrac{\partial u_d}{\partial x_s}
+   * \dfrac{\partial u_1}{\partial x_d} & \ldots & \dfrac{\partial u_s}{\partial x_d}
    * \end{bmatrix} .
    * @f]
    *
@@ -523,7 +530,7 @@ namespace Rodin::Variational
    * where Operand represents a scalar.
    */
   template <class Operand>
-  class Cosine;
+  class Cos;
 
   /**
    * @brief Represents the tangent function.
@@ -536,7 +543,7 @@ namespace Rodin::Variational
    * where Operand represents a scalar.
    */
   template <class Operand>
-  class Tangent;
+  class Tan;
 
   /**
    * @brief Represents the trace of a matrix function
@@ -584,9 +591,14 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class Composition;
 
-
   template <class Operand>
   class TraceOperator;
+
+  template <class ... Args>
+  class Max;
+
+  template <class ... Args>
+  class Min;
 
   /**
    * @tparam LHS Type of left hand side operand
@@ -725,6 +737,9 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class OR;
 
+  template <class Integrand>
+  class GaussianQuadrature;
+
   /**
    * @brief Represents mathematical expressions of the integral operator on a
    * domain.
@@ -828,7 +843,7 @@ namespace Rodin::Variational
    *
    * @see DirichletBCSpecializations
    */
-  template <class Operand>
+  template <class Operand, class Value>
   class DirichletBC;
 
   class ProblemBody;
@@ -862,6 +877,8 @@ namespace Rodin::Variational
     template <class Operand>
     class OpenMP;
   }
+
+  class ShapeComputator;
 }
 
 #endif

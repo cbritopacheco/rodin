@@ -23,11 +23,13 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     OPTIONS
     -g
     -O0
+    -fPIC
     -Wall
     -Werror
     -Wextra
     -Wpedantic
     -Wno-old-style-cast
+    -Wno-cast-function-type
     -Wno-unused-parameter
     -Wno-zero-as-null-pointer-constant
     -Wno-error=extra
@@ -36,6 +38,8 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -Wno-error=cast-function-type
     -Wno-error=deprecated-declarations
     -Wno-error=zero-as-null-pointer-constant)
+else()
+  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
 endif()
 
 add_library(Rodin INTERFACE)
@@ -46,10 +50,7 @@ target_link_libraries(Rodin INTERFACE Eigen3::Eigen)
 configure_file(Configure.h.in Configure.h @ONLY)
 
 target_include_directories(Rodin
-  INTERFACE
-  ${PROJECT_SOURCE_DIR}/src
-  ${PROJECT_BINARY_DIR}/src
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  INTERFACE ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
 add_subdirectory(Math)
 add_subdirectory(IO)

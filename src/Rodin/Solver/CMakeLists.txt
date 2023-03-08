@@ -12,22 +12,12 @@ add_library(Rodin::Solver ALIAS RodinSolver)
 
 # ---- SuiteSparse -----------------------------------------------------------
 if (RODIN_USE_SUITESPARSE)
-  target_sources(RodinSolver PRIVATE
-    UMFPack.h)
+  target_sources(RodinSolver PRIVATE UMFPack.h)
 endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinSolver
-  PUBLIC
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  PRIVATE
-  ${MFEM_INCLUDE_DIRS}
-  )
+  PUBLIC $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(RodinSolver
-  PUBLIC
-  RodinVariational
-  PRIVATE
-  mfem
-  )
+target_link_libraries(RodinSolver PUBLIC mfem)
 

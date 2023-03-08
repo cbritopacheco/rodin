@@ -22,89 +22,93 @@ namespace Rodin::Variational
   /**
    * @ingroup DivSpecializations
    */
-  template <ShapeFunctionSpaceType Space, class Trait>
-  class Div<ShapeFunction<H1<Trait>, Space>> : public ShapeFunctionBase<Space>
+  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  class Div<ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>>, H1<Math::Vector, Ts...>, Space>
   {
     public:
+      using FES = H1<Math::Vector, Ts...>;
+      using Operand = ShapeFunction<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, FES, Space>>, FES, Space>;
+
       /**
        * @brief Constructs Div object
        * @param[in] u ShapeFunction to be differentiated
        */
-      Div(ShapeFunction<H1<Trait>, Space>& u)
-        : m_u(u)
-      {
-        if (u.getRangeType() != RangeType::Scalar &&
-            u.getRangeType() != RangeType::Vector)
-        {
-          UnexpectedRangeTypeException(
-              {RangeType::Scalar, RangeType::Vector}, u.getRangeType());
-        }
-      }
+      Div(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
+      {}
 
       Div(const Div& other)
-        : ShapeFunctionBase<Space>(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
       Div(Div&& other)
-        : ShapeFunctionBase<Space>(std::move(other)),
-          m_u(other.m_u)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
       {}
 
-      const ShapeFunction<H1<Trait>, Space>& getLeaf() const override
+      inline
+      constexpr
+      const Operand& getOperand() const
       {
-        return m_u.getLeaf();
+        return m_u.get();
       }
 
-      int getRows() const override
+      inline
+      constexpr
+      const auto& getLeaf() const
       {
-        return 1;
+        return getOperand().getLeaf();
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return 1;
+        return { 1, 1 };
       }
 
-      int getDOFs(const Geometry::Simplex& element) const override
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& simplex) const
       {
-        return m_u.getDOFs(element);
+        return getOperand().getDOFs(simplex);
       }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      inline
+      TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
       {
-        const auto& element = p.getSimplex();
-        auto& trans = p.getSimplex().getTransformation();
-        const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-        const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const int opDofs = getDOFs(element);
-        op.setSize(1, 1, opDofs);
-        for (int i = 0; i < opDofs; i++)
-          op(0, 0, i) = dshape.GetData()[i];
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const auto& inv = p.getJacobianInverse();
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const auto& div = fe.getDivergence(coords);
+        const size_t n = fe.getComponentDOFs();
+        const size_t rdim = p.getSimplex().getDimension();
+        return (inv.transpose() * div.reshaped(n, rdim).transpose()).transpose().reshaped();
       }
 
-      H1<Trait>& getFiniteElementSpace() override
+      inline
+      constexpr
+      const auto& getFiniteElementSpace() const
       {
-        return m_u.getFiniteElementSpace();
+        return getOperand().getFiniteElementSpace();
       }
 
-      const H1<Trait>& getFiniteElementSpace() const override
-      {
-        return m_u.getFiniteElementSpace();
-      }
-
-      Div* copy() const noexcept override
+      inline Div* copy() const noexcept override
       {
         return new Div(*this);
       }
+
     private:
-      ShapeFunction<H1<Trait>, Space>& m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
-  template <ShapeFunctionSpaceType Space, class Trait>
-  Div(ShapeFunction<H1<Trait>, Space>&) -> Div<ShapeFunction<H1<Trait>, Space>>;
+
+  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  Div(const ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, H1<Math::Vector, Ts...>, Space>>;
 }
 
 #endif

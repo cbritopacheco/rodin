@@ -7,8 +7,6 @@
 #ifndef RODIN_CORE_GEOMETRY_RECTANGLE_H
 #define RODIN_CORE_GEOMETRY_RECTANGLE_H
 
-#include "Rodin/Core/Common.h"
-
 #include "ForwardDecls.h"
 
 namespace Rodin::Plot::Geometry
