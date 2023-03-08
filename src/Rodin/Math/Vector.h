@@ -11,31 +11,22 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+#include "Rodin/Types.h"
+
 namespace Rodin::Math
 {
-  class Vector : public Eigen::VectorX<double>
-  {
-    public:
-      using Parent = Eigen::VectorX<double>;
+  using Vector = Eigen::VectorX<Scalar>;
 
-      Vector(std::initializer_list<Parent::Scalar> l)
-        : Parent(l.size())
-      {
-        std::copy(l.begin(), l.end(), Parent::begin());
-      }
+  template <size_t Size>
+  using FixedSizeVector = Eigen::Vector<Scalar, Size>;
 
-      template <class ... Args>
-      Vector(Args&&... args)
-        : Parent(std::forward<Args>(args)...)
-      {}
-
-      template <class ... Args>
-      Vector& operator=(Args&&... args)
-      {
-         this->Parent::operator=(std::forward<Args>(args)...);
-         return *this;
-      }
-  };
+  using Vector2 = FixedSizeVector<2>;
+  using Vector3 = FixedSizeVector<3>;
+  using Vector4 = FixedSizeVector<4>;
+  using Vector8 = FixedSizeVector<8>;
+  using Vector16 = FixedSizeVector<16>;
+  using Vector32 = FixedSizeVector<32>;
+  using Vector128 = FixedSizeVector<128>;
 }
 
 #endif

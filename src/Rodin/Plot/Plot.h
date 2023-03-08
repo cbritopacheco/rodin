@@ -12,8 +12,6 @@
 
 #include <Magnum/Platform/GLContext.h>
 
-#include "Rodin/Core/Common.h"
-
 #include "Common.h"
 #include "GUI/Cursor.h"
 #include "Configuration.h"

@@ -34,3 +34,9 @@
 [submodule "third-party/pybind11"]
 	path = third-party/pybind11
 	url = https://github.com/pybind/pybind11
+[submodule "third-party/benchmark"]
+	path = third-party/benchmark
+	url = https://github.com/google/benchmark
+[submodule "third-party/googletest"]
+	path = third-party/googletest
+	url = https://github.com/google/googletest

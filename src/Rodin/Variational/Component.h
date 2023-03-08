@@ -10,17 +10,19 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represents the component (or entry) of a vectorial TrialFunction.
+   * @brief Represents the component (or entry) of a vectorial ShapeFunction.
    */
-  template <class FES>
-  class Component<TrialFunction<FES>>
+  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
+  class Component<ShapeFunction<OperandDerived, FES, Space>> final
   {
     public:
+      using Operand = ShapeFunction<OperandDerived, FES, Space>;
+
       /**
        * @brief Constructs the component object from a TrialFunction and its
        * component index.
        */
-      Component(const TrialFunction<FES>& u, int component)
+      Component(Operand& u, size_t component)
         : m_u(u),
           m_idx(component)
       {}
@@ -35,152 +37,181 @@ namespace Rodin::Variational
           m_idx(other.m_idx)
       {}
 
-      const TrialFunction<FES>& getTrialFunction() const
-      {
-        return m_u;
-      }
-
-      int getIndex() const
+      inline
+      constexpr
+      size_t getIndex() const
       {
         return m_idx;
       }
 
+      inline
+      constexpr
+      Operand& getShapeFunction() const
+      {
+        return m_u.get();
+      }
+
     private:
-      const int m_idx;
-      const TrialFunction<FES>& m_u;
+      std::reference_wrapper<Operand> m_u;
+      const size_t m_idx;
   };
 
-  template <class FES>
-  Component(TrialFunction<FES>&, int) -> Component<TrialFunction<FES>>;
+  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
+  Component(ShapeFunction<OperandDerived, FES, Space>&, size_t)
+    -> Component<ShapeFunction<OperandDerived, FES, Space>>;
 
   /**
    * @brief Represents the component (or entry) of a vectorial FunctionBase
    * instance.
    */
-  template <>
-  class Component<FunctionBase> : public ScalarFunctionBase
+  template <class OperandDerived>
+  class Component<FunctionBase<OperandDerived>> final
+    : public ScalarFunctionBase<Component<FunctionBase<OperandDerived>>>
   {
     public:
-      Component(const FunctionBase& v, int component)
-        :  m_v(v.copy()),
-          m_idx(component)
-      {
-        if (v.getRangeType() != RangeType::Vector)
-          UnexpectedRangeTypeException(RangeType::Vector, v.getRangeType()).raise();
-      }
+      using Operand = FunctionBase<OperandDerived>;
+      using Parent = ScalarFunctionBase<Component<Operand>>;
+      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
 
+      static_assert(std::is_same_v<OperandRange, Math::Vector>);
+
+      constexpr
+      Component(const Operand& fn, size_t component)
+        : m_fn(fn.copy()), m_idx(component)
+      {}
+
+      constexpr
       Component(const Component& other)
-        :  ScalarFunctionBase(other),
-          m_v(other.m_v->copy()),
+        : Parent(other),
+          m_fn(other.m_fn->copy()),
           m_idx(other.m_idx)
       {}
 
+      constexpr
       Component(Component&& other)
-        :  ScalarFunctionBase(std::move(other)),
-          m_v(std::move(other.m_v)),
-          m_idx(other.m_idx)
+        : Parent(std::move(other)),
+          m_fn(std::move(other.m_fn)),
+          m_idx(std::move(other.m_idx))
       {}
 
-      int getIndex() const
+      inline
+      constexpr
+      size_t getIndex() const
       {
         return m_idx;
       }
 
-      Component& traceOf(Geometry::Attribute attrs) override
+      inline
+      constexpr
+      const Operand& getOperand() const
       {
-        ScalarFunctionBase::traceOf(attrs);
-        m_v->traceOf(attrs);
-        return *this;
+        assert(m_fn);
+        return *m_fn;
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
-        FunctionValue::Vector v = m_v->getValue(p);
-        assert(m_idx < v.Size());
-        return v(m_idx);
+        return getOperand().getValue(p).coeff(m_idx);
       }
 
-      Component* copy() const noexcept override
-      {
-        return new Component(*this);
-      }
     private:
-      std::unique_ptr<FunctionBase> m_v;
-      const int m_idx;
+      std::unique_ptr<Operand> m_fn;
+      const size_t m_idx;
   };
-  Component(const FunctionBase&, int) -> Component<FunctionBase>;
+
+  template <class OperandDerived>
+  Component(const FunctionBase<OperandDerived>&, size_t) -> Component<FunctionBase<OperandDerived>>;
 
   /**
    * @brief Represents the component (or entry) of a vectorial GridFunction.
    */
   template <class FES>
-  class Component<GridFunction<FES>> : public Component<FunctionBase>
+  class Component<GridFunction<FES>> final
+    : public ScalarFunctionBase<Component<GridFunction<FES>>>
   {
     public:
+      using Operand = GridFunction<FES>;
+      using Parent = ScalarFunctionBase<Component<Operand>>;
+
       /**
        * @brief Constructs the component object from a GridFunction and its
        * component index.
        */
-      Component(GridFunction<FES>& u, int component)
-        :  Component<FunctionBase>(u, component),
-          m_u(u)
+      constexpr
+      Component(GridFunction<FES>& u, size_t component)
+        : m_u(u), m_idx(component)
       {}
 
+      constexpr
       Component(const Component& other)
-        :  Component<FunctionBase>(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
+      constexpr
       Component(Component&& other)
-        :  Component<FunctionBase>(std::move(other)),
-          m_u(other.m_u)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
       {}
 
+      inline
+      constexpr
       const GridFunction<FES>& getGridFunction() const
       {
-        return m_u;
+        return m_u.get();
       }
 
-      std::enable_if_t<Utility::IsSpecialization<FES, H1>::value, Component&>
-      projectOnBoundary(const FunctionBase& s, int attr)
+      template <class NestedDerived,
+               typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
+      inline
+      constexpr
+      auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
+                              Geometry::Attribute attr)
       {
-        return projectOnBoundary(s, std::set<int>{attr});
+        return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
       }
 
-      std::enable_if_t<Utility::IsSpecialization<FES, H1>::value, Component&>
-      projectOnBoundary(const FunctionBase& s, const std::set<int>& attrs = {})
+      template <class NestedDerived,
+               typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
+      auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
+                              const std::set<Geometry::Attribute>& attrs = {})
       {
-        if (s.getRangeType() != RangeType::Scalar)
-          UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
+        assert(false);
+        // if (s.getRangeType() != RangeType::Scalar)
+        //   UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
 
-        int maxAttr = *m_u.getFiniteElementSpace()
-                    .getMesh()
-                    .getBoundaryAttributes().rbegin();
-        std::vector<mfem::Coefficient*> mfemCoeffs(
-            m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
-        mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(
-            m_u.getFiniteElementSpace().getMesh(), s);
-        if (attrs.size() == 0)
-        {
-          mfem::Array<int> marker(maxAttr);
-          marker = 1;
-          m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-        }
-        else
-        {
-          assert(mfemCoeffs[getIndex()] != nullptr);
-          mfem::Array<int> marker = Utility::set2marker(attrs, maxAttr);
-          m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-        }
-        delete mfemCoeffs[getIndex()];
+        // int maxAttr = *m_u.getFiniteElementSpace()
+        //             .getMesh()
+        //             .getBoundaryAttributes().rbegin();
+        // std::vector<mfem::Coefficient*> mfemCoeffs(
+        //     m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
+        // mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(
+        //     m_u.getFiniteElementSpace().getMesh(), s);
+        // if (attrs.size() == 0)
+        // {
+        //   mfem::Array<int> marker(maxAttr);
+        //   marker = 1;
+        //   m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
+        // }
+        // else
+        // {
+        //   assert(mfemCoeffs[getIndex()] != nullptr);
+        //   mfem::Array<int> marker = Utility::set2marker(attrs, maxAttr);
+        //   m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
+        // }
+        // delete mfemCoeffs[getIndex()];
         return *this;
       }
 
     private:
-      GridFunction<FES>& m_u;
+      std::reference_wrapper<GridFunction<FES>> m_u;
+      const size_t m_idx;
   };
+
   template <class FES>
-  Component(GridFunction<FES>&, int) -> Component<GridFunction<FES>>;
+  Component(GridFunction<FES>&, size_t) -> Component<GridFunction<FES>>;
 }
 
 #endif

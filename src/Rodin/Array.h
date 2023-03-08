@@ -13,29 +13,7 @@
 namespace Rodin
 {
   template <class Scalar>
-  class Array : public Eigen::ArrayX<Scalar>
-  {
-    public:
-      using Parent = Eigen::ArrayX<Scalar>;
-
-      Array(std::initializer_list<typename Parent::Scalar> l)
-        : Parent(l.size())
-      {
-        std::copy(l.begin(), l.end(), Parent::begin());
-      }
-
-      template <class ... Args>
-      Array(Args&&... args)
-        : Parent(std::forward<Args>(args)...)
-      {}
-
-      template <class ... Args>
-      Array& operator=(Args&&... args)
-      {
-         this->Parent::operator=(std::forward<Args>(args)...);
-         return *this;
-      }
-  };
+  using Array = Eigen::ArrayX<Scalar>;
 }
 
 #endif

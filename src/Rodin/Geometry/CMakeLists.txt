@@ -3,25 +3,23 @@ set(RodinGeometry_HEADERS
   SubMesh.h
   Simplex.h
   SimplexIterator.h
+  SimplexTransformation.h
   )
 
 set(RodinGeometry_SRCS
   Mesh.cpp
   Simplex.cpp
+  SimplexIterator.cpp
+  SimplexTransformation.cpp
   SubMesh.cpp
   MeshBuilder.cpp
   SubMeshBuilder.cpp
-  SimplexIterator.cpp
   )
 add_library(RodinGeometry ${RodinGeometry_SRCS} ${RodinGeometry_HEADERS})
 add_library(Rodin::Geometry ALIAS RodinGeometry)
 
-target_include_directories(RodinGeometry
-  PUBLIC
-  ${MFEM_INCLUDE_DIRS})
-
 target_link_libraries(RodinGeometry
-  PRIVATE
+  PUBLIC
   mfem
   PUBLIC
   Rodin::IO

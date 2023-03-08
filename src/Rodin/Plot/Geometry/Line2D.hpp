@@ -156,11 +156,11 @@ namespace Rodin::Plot::Geometry
   T Line2D<T>::distance(const Line2D<T>& other) const
   {
     if (isVertical() && other.isVertical())
-      return Rodin::abs<T>(
+      return Rodin::Math::abs<T>(
           *xIntercept() - *other.xIntercept());
     else if (!isVertical() && !other.isVertical())
-      return Rodin::abs<T>(
-          *yIntercept() - *other.yIntercept()) / Rodin::sqrt(*slope() *
+      return Rodin::Math::abs<T>(
+          *yIntercept() - *other.yIntercept()) / Rodin::Math::sqrt(*slope() *
           *slope() + T{1});
     else
       return T{0};
@@ -184,16 +184,16 @@ namespace Rodin::Plot::Geometry
       return std::make_pair(
           other.center() +
           Point2D<T>(
-            (a() * cp + b() * Rodin::sqrt(discriminant)) / (a() * a() + b() *
+            (a() * cp + b() * Rodin::Math::sqrt(discriminant)) / (a() * a() + b() *
               b()),
-            (b() * cp - a() * Rodin::sqrt(discriminant)) / (a() * a() + b() *
+            (b() * cp - a() * Rodin::Math::sqrt(discriminant)) / (a() * a() + b() *
               b())
             ),
           other.center() +
           Point2D<T>(
-            (a() * cp - b() * Rodin::sqrt(discriminant)) / (a() * a() + b() *
+            (a() * cp - b() * Rodin::Math::sqrt(discriminant)) / (a() * a() + b() *
               b()),
-            (b() * cp + a() * Rodin::sqrt(discriminant)) / (a() * a() + b() *
+            (b() * cp + a() * Rodin::Math::sqrt(discriminant)) / (a() * a() + b() *
               b())
             )
           );

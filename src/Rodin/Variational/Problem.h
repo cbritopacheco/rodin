@@ -24,7 +24,6 @@
 #include "BilinearForm.h"
 #include "TrialFunction.h"
 #include "TestFunction.h"
-#include "EssentialBoundary.h"
 
 
 namespace Rodin::Variational
@@ -63,19 +62,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual bool isParallel() const = 0;
-
       virtual void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
        */
       virtual void assemble() = 0;
-
-      /**
-       * @brief Updates the instance after a refinement in the mesh.
-       */
-      virtual ProblemBase& update() = 0;
 
       /**
        * @returns Reference to the mfem::Operator representing the stiffness
@@ -108,8 +100,6 @@ namespace Rodin::Variational
        * This must be called only after assemble() has been called.
        */
       virtual const VectorType& getMassVector() const = 0;
-
-      virtual const EssentialBoundary& getEssentialBoundary() const = 0;
 
       virtual ProblemBase* copy() const noexcept override = 0;
 
@@ -193,18 +183,6 @@ namespace Rodin::Variational
       }
 
       constexpr
-      mfem::Array<int>& getEssentialTrueDOFs()
-      {
-        return m_trialEssTrueDofList;
-      }
-
-      constexpr
-      const mfem::Array<int>& getEssentialTrueDOFs() const
-      {
-        return m_trialEssTrueDofList;
-      }
-
-      constexpr
       const LinearForm<TestFES, Context, VectorType>& getLinearForm() const
       {
         return m_linearForm;
@@ -216,14 +194,7 @@ namespace Rodin::Variational
         return m_bilinearForm;
       }
 
-      bool isParallel() const override
-      {
-        return false;
-      }
-
       void assemble() override;
-
-      Problem& update() override;
 
       void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
@@ -249,8 +220,6 @@ namespace Rodin::Variational
         return m_stiffnessOp;
       }
 
-      virtual const EssentialBoundary& getEssentialBoundary() const override;
-
       virtual Problem* copy() const noexcept override
       {
         assert(false);
@@ -268,7 +237,7 @@ namespace Rodin::Variational
       mfem::Vector    m_massVector;
       mfem::Vector    m_guess;
 
-      mfem::Array<int>    m_trialEssTrueDofList;
+      mfem::Array<int> m_trialEssTrueDofList;
 
       std::unique_ptr<mfem::BilinearForm> m_tmp;
   };

@@ -4,58 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Exceptions.h"
-
 #include "Mult.h"
 
 namespace Rodin::Variational
-{
-  // ---- FunctionBase, FunctionBase ----------------------------------------
-  Mult<FunctionBase, FunctionBase>::Mult(const FunctionBase& lhs, const FunctionBase& rhs)
-    : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-  {
-    if (lhs.getRangeType() != RangeType::Scalar && rhs.getRangeType() != RangeType::Scalar)
-    {
-      // One of the fields must be scalar valued! (Matrix multiplication not
-      // supported yet)
-      IncompatibleShapeException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
-    }
-  }
-
-  Mult<FunctionBase, FunctionBase>::Mult(const Mult& other)
-    :  FunctionBase(other),
-      m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-  {}
-
-  Mult<FunctionBase, FunctionBase>::Mult(Mult&& other)
-    :  FunctionBase(std::move(other)),
-      m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-  {}
-
-  RangeShape Mult<FunctionBase, FunctionBase>::getRangeShape() const
-  {
-    assert(
-      m_lhs->getRangeType() == RangeType::Scalar ||
-      m_rhs->getRangeType() == RangeType::Scalar);
-
-    if (m_lhs->getRangeType() == RangeType::Scalar)
-      return m_rhs->getRangeShape();
-    else
-      return m_lhs->getRangeShape();
-  }
-
-  Mult<FunctionBase, FunctionBase>&
-  Mult<FunctionBase, FunctionBase>::traceOf(Geometry::Attribute attr)
-  {
-    FunctionBase::traceOf(attr);
-    m_lhs->traceOf(attr);
-    m_rhs->traceOf(attr);
-    return *this;
-  }
-
-  Mult<FunctionBase, FunctionBase>
-  operator*(const FunctionBase& lhs, const FunctionBase& rhs)
-  {
-    return Mult(lhs, rhs);
-  }
-}
+{}

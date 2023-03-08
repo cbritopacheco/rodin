@@ -10,7 +10,6 @@
 #include "ForwardDecls.h"
 
 #include "H1.h"
-#include "Utility.h"
 #include "Jacobian.h"
 #include "GridFunction.h"
 #include "TestFunction.h"
@@ -28,73 +27,99 @@ namespace Rodin::Variational
   /**
    * @ingroup GradSpecializations
    */
-  template <class Trait>
-  class Grad<GridFunction<H1<Trait>>> : public VectorFunctionBase
+  template <class ... Ts>
+  class Grad<GridFunction<H1<Scalar, Ts...>>> final
+    : public VectorFunctionBase<Grad<GridFunction<H1<Scalar, Ts...>>>>
   {
     public:
+      using Operand = GridFunction<H1<Scalar, Ts...>>;
+      using Parent = VectorFunctionBase<Grad<GridFunction<H1<Scalar, Ts...>>>>;
+
       /**
        * @brief Constructs the gradient of an @f$ H^1 @f$ function
        * @f$ u @f$.
        * @param[in] u Grid function to be differentiated
        */
-      Grad(const GridFunction<H1<Trait>>& u)
+      Grad(const Operand& u)
         : m_u(u)
-      {}
+      {
+        assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      }
 
       Grad(const Grad& other)
-        :  VectorFunctionBase(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
       Grad(Grad&& other)
-        :  VectorFunctionBase(std::move(other)),
-          m_u(other.m_u)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
       {}
 
-      int getDimension() const override
+      inline
+      constexpr
+      size_t getDimension() const
       {
-        return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
+        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      FunctionValue getValue(const Geometry::Point& p) const override
+      inline
+      constexpr
+      Grad& traceOf(Geometry::Attribute attr)
       {
-        FunctionValue::Vector grad;
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Grad& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      Math::Vector getValue(const Geometry::Point& p) const
+      {
         const auto& simplex = p.getSimplex();
         const auto& simplexMesh = simplex.getMesh();
-        const auto& fesMesh = m_u.getFiniteElementSpace().getMesh();
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+        Math::Vector grad(getDimension());
+        mfem::Vector tmp(grad.data(), grad.size());
         if (simplex.getDimension() == fesMesh.getDimension())
         {
-          assert(dynamic_cast<const Geometry::Element*>(&p.getSimplex()));
-          const auto& element = p.getSimplex();
-          auto& trans = element.getTransformation();
-          m_u.getHandle().GetGradient(trans, grad);
+          const auto& trans = p.getTransformation();
+          m_u.get().getHandle().GetGradient(trans.getHandle(), tmp);
+          return grad;
         }
         else if (simplex.getDimension() == fesMesh.getDimension() - 1)
         {
           assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
           const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
           mfem::FaceElementTransformations* ft =
-            const_cast<Geometry::MeshBase&>(simplexMesh).getHandle()
-            .GetFaceElementTransformations(face.getIndex());
+            simplexMesh.getHandle().GetFaceElementTransformations(face.getIndex());
           if (simplexMesh.isSubMesh())
           {
             const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
             assert(submesh.getParent() == fesMesh);
-            if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
             {
               Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
             }
-            else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
             {
               Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
               ft->Elem2->ElementNo = parentIdx;
               ft->Elem2No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem2, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem2, tmp);
+              return grad;
             }
             else if (face.isBoundary())
             {
@@ -103,11 +128,14 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = parentIdx;
               ft->Elem1No = parentIdx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
             }
             else
             {
               assert(false);
+              grad.setConstant(NAN);
+              return grad;
             }
           }
           else if (fesMesh.isSubMesh())
@@ -115,21 +143,25 @@ namespace Rodin::Variational
             const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
             assert(submesh.getParent() == simplexMesh);
             const auto& s2pe = submesh.getElementMap();
-            if (ft->Elem1 && s2pe.right.count(ft->Elem1No) && getTraceDomain() == ft->Elem1->Attribute)
+            if (ft->Elem1 && s2pe.right.count(ft->Elem1No) &&
+                this->getTraceDomain().count(ft->Elem1->Attribute))
             {
               Geometry::Index idx = s2pe.right.at(ft->Elem1No);
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
             }
-            else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) && getTraceDomain() == ft->Elem2->Attribute)
+            else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) &&
+                this->getTraceDomain().count(ft->Elem2->Attribute))
             {
               Geometry::Index idx = s2pe.right.at(ft->Elem2No);
               ft->Elem2->ElementNo = idx;
               ft->Elem2No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem2, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem2, tmp);
+              return grad;
             }
             else if (face.isBoundary())
             {
@@ -138,226 +170,240 @@ namespace Rodin::Variational
               ft->Elem1->ElementNo = idx;
               ft->Elem1No = idx;
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
             }
             else
             {
               assert(false);
+              grad.setConstant(NAN);
+              return grad;
             }
           }
           else
           {
-            if (ft->Elem1 && getTraceDomain() == ft->Elem1->Attribute)
+            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
             }
-            else if (ft->Elem2 && getTraceDomain() == ft->Elem2->Attribute)
+            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.getHandle().GetGradient(*ft->Elem2, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem2, tmp);
+              return grad;
             }
             else if (face.isBoundary())
             {
               ft->SetAllIntPoints(&p.getIntegrationPoint());
               assert(ft->Elem1);
-              m_u.getHandle().GetGradient(*ft->Elem1, grad);
+              m_u.get().getHandle().GetGradient(*ft->Elem1, tmp);
+              return grad;
             }
             else
             {
               assert(false);
+              grad.setConstant(NAN);
+              return grad;
             }
           }
         }
         else
         {
           assert(false);
+          grad.setConstant(NAN);
+          return grad;
         }
-        return grad;
       }
 
-      VectorFunctionBase* copy() const noexcept override
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
+
+      inline Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }
 
     private:
-      const GridFunction<H1<Trait>>& m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
-  template <class Trait>
-  Grad(const GridFunction<H1<Trait>>&) -> Grad<GridFunction<H1<Trait>>>;
+
+  template <class ... Ts>
+  Grad(const GridFunction<H1<Ts...>>&) -> Grad<GridFunction<H1<Ts...>>>;
 
   /**
    * @ingroup GradSpecializations
    */
-  template <ShapeFunctionSpaceType Space, class ... Ts>
-  class Grad<ShapeFunction<H1<Ts...>, Space>> : public ShapeFunctionBase<Space>
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
+  class Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>>, H1<Scalar, Ps...>, Space>
   {
     public:
-      using FES = H1<Ts...>;
+      using FES = H1<Scalar, Ps...>;
+      using Operand = ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>;
+      using Parent = ShapeFunctionBase<Grad<Operand>, FES, Space>;
 
-      constexpr
-      Grad(ShapeFunction<H1<Ts...>, Space>& u)
-        : m_u(u)
-      {
-        if (u.getRangeType() != RangeType::Scalar)
-          UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType()).raise();
-      }
+      Grad(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
+      {}
 
-      constexpr
       Grad(const Grad& other)
-        : ShapeFunctionBase<Space>(other),
+        : Parent(other),
           m_u(other.m_u)
       {}
 
-      constexpr
       Grad(Grad&& other)
-        : ShapeFunctionBase<Space>(std::move(other)),
-          m_u(other.m_u)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
       {}
 
-      const ShapeFunction<H1<Ts...>, Space>& getLeaf() const override
+      inline
+      constexpr
+      const Operand& getOperand() const
       {
-        return m_u.getLeaf();
+        return m_u.get();
       }
 
-      int getRows() const override
+      inline
+      constexpr
+      const auto& getLeaf() const
       {
-        return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
+        return getOperand().getLeaf();
       }
 
-      int getColumns() const override
+      inline
+      constexpr
+      RangeShape getRangeShape() const
       {
-        return 1;
+        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
       }
 
-      int getDOFs(const Geometry::Simplex& element) const override
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
       {
-        return m_u.getDOFs(element);
+        return getOperand().getDOFs(element);
       }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Point& p) const override
+      inline
+      TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
       {
-        auto& trans = p.getSimplex().getTransformation();
-        const auto& fe = getFiniteElementSpace().getFiniteElement(p.getSimplex());
-        const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const int n = dshape.NumRows();
-        const int sdim = trans.GetSpaceDim();
-        op.setSize(sdim, 1, n);
-        for (int j = 0; j < n; j++)
-          for (int k = 0; k < sdim; k++)
-            op(k, 0, j) = dshape(j, k);
+        using OperandRange =
+          typename FormLanguage::Traits<ShapeFunctionBase<Operand, H1<Scalar, Ps...>, Space>>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Scalar>);
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return (fe.getGradient(coords) * p.getJacobianInverse()).transpose();
       }
 
-      H1<Ts...>& getFiniteElementSpace() override
-      {
-        return m_u.getFiniteElementSpace();
-      }
-
-      const H1<Ts...>& getFiniteElementSpace() const override
-      {
-        return m_u.getFiniteElementSpace();
-      }
-
-      Grad* copy() const noexcept override
+      inline Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }
+
     private:
-      ShapeFunction<H1<Ts...>, Space>& m_u;
+      std::reference_wrapper<const Operand> m_u;
   };
-  template <ShapeFunctionSpaceType Space, class ... Ts>
-  Grad(ShapeFunction<H1<Ts...>, Space>&) -> Grad<ShapeFunction<H1<Ts...>, Space>>;
 
-  /**
-   * @ingroup GradSpecializations
-   *
-   * @brief Represents the broken gradient.
-   */
-  template <ShapeFunctionSpaceType Space, class ... Ts>
-  class Grad<ShapeFunction<L2<Ts...>, Space>> : public ShapeFunctionBase<Space>
-  {
-    public:
-      using FES = L2<Ts...>;
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
+  Grad(const ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>&)
+    -> Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>>;
 
-      constexpr
-      Grad(ShapeFunction<FES, Space>& u)
-        : m_u(u)
-      {
-        if (u.getRangeType() != RangeType::Scalar)
-          UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType()).raise();
-      }
+  // /**
+  //  * @ingroup GradSpecializations
+  //  *
+  //  * @brief Represents the broken gradient.
+  //  */
+  // template <ShapeFunctionSpaceType Space, class ... Ts>
+  // class Grad<ShapeFunction<L2<Ts...>, Space>> : public ShapeFunctionBase<Space>
+  // {
+  //   public:
+  //     using FES = L2<Ts...>;
 
-      constexpr
-      Grad(const Grad& other)
-        : ShapeFunctionBase<Space>(other),
-          m_u(other.m_u)
-      {}
+  //     constexpr
+  //     Grad(ShapeFunction<FES, Space>& u)
+  //       : m_u(u)
+  //     {
+  //       if (u.getRangeType() != RangeType::Scalar)
+  //         UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType()).raise();
+  //     }
 
-      constexpr
-      Grad(Grad&& other)
-        : ShapeFunctionBase<Space>(std::move(other)),
-          m_u(other.m_u)
-      {}
+  //     constexpr
+  //     Grad(const Grad& other)
+  //       : ShapeFunctionBase<Space>(other),
+  //         m_u(other.m_u)
+  //     {}
 
-      const ShapeFunction<FES, Space>& getLeaf() const override
-      {
-        return m_u.getLeaf();
-      }
+  //     constexpr
+  //     Grad(Grad&& other)
+  //       : ShapeFunctionBase<Space>(std::move(other)),
+  //         m_u(other.m_u)
+  //     {}
 
-      int getRows() const override
-      {
-        return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
-      }
+  //     const ShapeFunction<FES, Space>& getLeaf() const override
+  //     {
+  //       return m_u.getLeaf();
+  //     }
 
-      int getColumns() const override
-      {
-        return 1;
-      }
+  //     int getRows() const override
+  //     {
+  //       return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
+  //     }
 
-      int getDOFs(const Geometry::Simplex& element) const override
-      {
-        return m_u.getDOFs(element);
-      }
+  //     int getColumns() const override
+  //     {
+  //       return 1;
+  //     }
 
-      void getOperator(
-          DenseBasisOperator& op,
-          ShapeComputator& compute,
-          const Geometry::Simplex& element) const override
-      {
-        auto& trans = element.getTransformation();
-        const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-        const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-        const int n = dshape.NumRows();
-        const int sdim = trans.GetSpaceDim();
-        op.setSize(sdim, 1, n);
-        for (int j = 0; j < n; j++)
-          for (int k = 0; k < sdim; k++)
-            op(k, 0, j) = dshape(j, k);
-      }
+  //     int getDOFs(const Geometry::Simplex& element) const override
+  //     {
+  //       return m_u.getDOFs(element);
+  //     }
 
-      FES& getFiniteElementSpace() override
-      {
-        return m_u.getFiniteElementSpace();
-      }
+  //     TensorBasis getOperator(
+  //         ShapeComputator& compute, const Geometry::Simplex& element) const override
+  //     {
+  //       auto& trans = element.getTransformation();
+  //       const auto& fe = getFiniteElementSpace().getFiniteElement(element);
+  //       const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
+  //       const size_t n = dshape.NumRows();
+  //       const size_t sdim = trans.GetSpaceDim();
+  //       TensorBasis res(n, sdim, 1);
+  //       for (size_t j = 0; j < n; j++)
+  //       {
+  //         for (size_t k = 0; k < sdim; k++)
+  //         {
+  //           res(j, k, 0) = dshape(j, k);
+  //         }
+  //       }
+  //       return res;
+  //     }
 
-      const FES& getFiniteElementSpace() const override
-      {
-        return m_u.getFiniteElementSpace();
-      }
+  //     FES& getFiniteElementSpace() override
+  //     {
+  //       return m_u.getFiniteElementSpace();
+  //     }
 
-      Grad* copy() const noexcept override
-      {
-        return new Grad(*this);
-      }
-    private:
-      ShapeFunction<FES, Space>& m_u;
-  };
-  template <ShapeFunctionSpaceType Space, class ... Ts>
-  Grad(ShapeFunction<L2<Ts...>, Space>&) -> Grad<ShapeFunction<L2<Ts...>, Space>>;
+  //     const FES& getFiniteElementSpace() const override
+  //     {
+  //       return m_u.getFiniteElementSpace();
+  //     }
+
+  //     Grad* copy() const noexcept override
+  //     {
+  //       return new Grad(*this);
+  //     }
+  //   private:
+  //     ShapeFunction<FES, Space>& m_u;
+  // };
+  // template <ShapeFunctionSpaceType Space, class ... Ts>
+  // Grad(ShapeFunction<L2<Ts...>, Space>&) -> Grad<ShapeFunction<L2<Ts...>, Space>>;
 }
 
 #endif

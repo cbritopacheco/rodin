@@ -10,7 +10,7 @@
 #include <utility>
 #include <type_traits>
 
-#include "Rodin/Core/Common.h"
+#include "Rodin/Math/Common.h"
 
 #include "Concepts.h"
 
