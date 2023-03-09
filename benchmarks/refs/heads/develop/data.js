@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678271182301,
+  "lastUpdate": 1678357094979,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -240,6 +240,36 @@ window.BENCHMARK_DATA = {
             "value": 382392.39213545294,
             "unit": "ns/iter",
             "extra": "iterations: 1831\ncpu: 382191.9169852539 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito",
+            "username": "cbritopacheco"
+          },
+          "distinct": true,
+          "id": "2f01c309d403e8d66c40e61092b8f3b61e48a6fa",
+          "message": "Try to get surface optimization example working",
+          "timestamp": "2023-03-09T11:03:10+01:00",
+          "tree_id": "cd75e826f171fabe431be3d0f751064961122185",
+          "url": "https://github.com/cbritopacheco/rodin/commit/2f01c309d403e8d66c40e61092b8f3b61e48a6fa"
+        },
+        "date": 1678357092871,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Poisson/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 378724.5342687951,
+            "unit": "ns/iter",
+            "extra": "iterations: 1853\ncpu: 377963.0868861306 ns\nthreads: 1"
           }
         ]
       }
