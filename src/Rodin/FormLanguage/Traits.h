@@ -1,12 +1,14 @@
 #ifndef RODIN_FORMLANGUAGE_TRAITS_H
 #define RODIN_FORMLANGUAGE_TRAITS_H
 
-#include "Rodin/Types.h"
-#include "Rodin/Variational/ForwardDecls.h"
-
 #include <type_traits>
+#include <boost/type_index.hpp>
+
 #include <Eigen/Core>
 #include <unsupported/Eigen/CXX11/Tensor>
+
+#include "Rodin/Types.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::FormLanguage
 {

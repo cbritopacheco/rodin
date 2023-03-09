@@ -351,6 +351,17 @@ namespace Rodin::Geometry
             return element(geom, as, attr);
           }
 
+          Builder& simplex(Type geom, const Array<Index>& vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+
+          Builder& simplex(Type geom, std::initializer_list<Index> vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          {
+            Array<Index> as(vs.size());
+            std::copy(vs.begin(), vs.end(), as.begin());
+            return simplex(geom, as, attr);
+          }
+
           void finalize() override;
 
         private:

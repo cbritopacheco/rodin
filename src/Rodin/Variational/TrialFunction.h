@@ -15,6 +15,9 @@ namespace Rodin::Variational
       using FES = FESType;
       using Parent = ShapeFunction<TrialFunction<FESType>, FESType, TrialSpace>;
 
+      static_assert(std::is_base_of_v<FiniteElementSpaceBase, FES>,
+          "FES is not a finite element space.");
+
       constexpr
       TrialFunction(const FES& fes)
         : Parent(fes)

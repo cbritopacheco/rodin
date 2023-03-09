@@ -31,6 +31,35 @@ namespace Rodin::Geometry
     Pyramid = mfem::Geometry::PYRAMID
   };
 
+  inline
+  static
+  constexpr
+  size_t getGeometryDimension(Geometry::Type t)
+  {
+    switch (t)
+    {
+      case Geometry::Type::Point:
+        return 0;
+      case Geometry::Type::Segment:
+        return 1;
+      case Geometry::Type::Square:
+      case Geometry::Type::Triangle:
+        return 2;
+      case Geometry::Type::Cube:
+      case Geometry::Type::Prism:
+      case Geometry::Type::Pyramid:
+      case Geometry::Type::Tetrahedron:
+        return 3;
+      default:
+      {
+        assert(false);
+        return 0;
+      }
+    }
+    assert(false);
+    return 0;
+  }
+
 
   /**
    * @brief Base class for all geometric elements of the mesh.
@@ -194,7 +223,7 @@ namespace Rodin::Geometry
 
       Scalar operator()(size_t i) const;
 
-      const Math::Vector& coordinates() const
+      const Math::Vector& getCoordinates() const
       {
         return m_coordinates;
       }

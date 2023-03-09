@@ -64,23 +64,47 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::element(Type geom, const Array<Index>& vs, Attribute attr)
   {
-    assert(m_ref.has_value());
-    const auto& ref = m_ref->get();
-    mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
-    std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
-    el->SetAttribute(attr);
-    const Index idx = m_impl->AddElement(el);
-    m_connectivity[ref.getDimension()][0].connect(idx, vs);
-    return *this;
+    assert(getGeometryDimension(geom) == m_ref->get().getDimension());
+    return simplex(geom, vs, attr);
   }
 
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::face(Type geom, const Array<Index>& vs, Attribute attr)
   {
-    mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
-    std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
-    el->SetAttribute(attr);
-    m_impl->AddBdrElement(el);
+    assert(getGeometryDimension(geom) == m_ref->get().getDimension() - 1);
+    return simplex(geom, vs, attr);
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::simplex(Type geom, const Array<Index>& vs, Attribute attr)
+  {
+    assert(m_ref.has_value());
+    const auto& ref = m_ref->get();
+
+    assert(getGeometryDimension(geom) <= ref.getDimension());
+    const size_t dim = getGeometryDimension(geom);
+
+    if (dim == ref.getDimension())
+    {
+      assert(m_ref.has_value());
+      const auto& ref = m_ref->get();
+      mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
+      std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
+      el->SetAttribute(attr);
+      const Index idx = m_impl->AddElement(el);
+      m_connectivity[ref.getDimension()][0].connect(idx, vs);
+    }
+    else if (dim == ref.getDimension() - 1)
+    {
+      mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
+      std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
+      el->SetAttribute(attr);
+      m_impl->AddBdrElement(el);
+    }
+    else
+    {
+      assert(false);
+    }
     return *this;
   }
 

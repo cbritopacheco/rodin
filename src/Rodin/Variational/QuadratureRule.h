@@ -35,34 +35,7 @@ namespace Rodin::Variational
         }
         else
         {
-          size_t dim;
-          switch (geometry)
-          {
-            case Geometry::Type::Point:
-            {
-              dim = 0;
-              break;
-            }
-            case Geometry::Type::Segment:
-            {
-              dim = 1;
-              break;
-            }
-            case Geometry::Type::Square:
-            case Geometry::Type::Triangle:
-            {
-              dim = 2;
-              break;
-            }
-            case Geometry::Type::Cube:
-            case Geometry::Type::Prism:
-            case Geometry::Type::Pyramid:
-            case Geometry::Type::Tetrahedron:
-            {
-              dim = 3;
-              break;
-            }
-          }
+          size_t dim = Geometry::getGeometryDimension(geometry);
           const mfem::IntegrationRule& ir = mfem::IntRules.Get(static_cast<int>(geometry), order);
           auto it = s_rules.insert(search, {key, QuadratureRule(ir, dim)});
           return it->second;
