@@ -47,7 +47,7 @@ namespace Rodin::Geometry
           Builder& setReference(
               Mesh<Context::Serial>::Builder&& build, SubMesh<Context::Serial>& mesh);
 
-          Builder& include(size_t dim, std::set<Index> indices);
+          Builder& include(std::set<Index> indices);
 
           void finalize() override;
 
@@ -86,6 +86,10 @@ namespace Rodin::Geometry
        */
       const MeshBase& getParent() const;
 
+      /**
+       * @brief Gets the map of simplex indices from the submesh to the parent
+       * mesh.
+       */
       const boost::bimap<Index, Index>& getSimplexMap(size_t d) const
       {
         return m_s2ps.at(d);

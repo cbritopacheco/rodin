@@ -78,7 +78,6 @@ set(RodinVariational_SRCS
   Function.cpp
   RangeShape.cpp
   RangeType.cpp
-  Composition.cpp
   Max.cpp
   Min.cpp
   GEQ.cpp

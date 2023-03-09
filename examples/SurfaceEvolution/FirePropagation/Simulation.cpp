@@ -1,5 +1,5 @@
 #include <cmath>
-#include <boost/bimap.hpp>
+#include <chrono>
 
 #include <Rodin/Math.h>
 #include <Rodin/Solver.h>
@@ -17,9 +17,9 @@ using namespace Rodin::External;
 // static const char* meshfile =
 //   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
 static const char* meshfile = "Topography.mesh";
-static Scalar hausdorff = 10;
-static Scalar hmax = 2000;
-static Scalar hmin = 100;
+static const Scalar hmax = 1000;
+static const Scalar hmin = 100;
+static const Scalar hausdorff = 10;
 // static const Scalar hmax = 600;
 // static const Scalar hmin = 100;
 
@@ -134,8 +134,7 @@ class Environment
           auto phi =
             [&](const Point& v) -> Scalar
             {
-              auto fn = Dot(p, conormal) / (Frobenius(p) * Frobenius(conormal));
-              Scalar fv = fn(v);
+              Scalar fv = p(v).dot(conormal(v)) / p(v).norm();
               if (std::isfinite(fv))
                 return std::acos(fv);
               else
@@ -146,10 +145,8 @@ class Environment
           auto psi =
             [&](const Point& v) -> Scalar
             {
-              auto fn =
-                Dot(env.m_wind, conormal) / (
-                    Frobenius(env.m_wind) * Frobenius(conormal));
-              Scalar fv = fn(v);
+              Scalar fv =
+                env.m_wind(v).dot(conormal(v)) / env.m_wind(v).norm();
               if (std::isfinite(fv))
                 return std::acos(fv);
               else
@@ -228,6 +225,8 @@ class Environment
           [](const Geometry::Point& p){ return -p.x() + 25000; },
           0};
       m_wind = wind / Frobenius(wind);
+      m_wind.save("wind.gf");
+      m_wind.getFiniteElementSpace().getMesh().save("wind.mesh");
 
       m_flame.step(dt);
 
@@ -310,54 +309,58 @@ class Environment
 int main()
 {
   MMG::Mesh topography;
-  topography.load(meshfile);
+  topography.load("out/FirePropagation.mfem.33.mesh");
 
   Alert::Info() << "Optimizing mesh..." << Alert::Raise;
-  MMG::MeshOptimizer().setHausdorff(hausdorff).setHMax(hmax).setHMin(hmin).optimize(topography);
+  MMG::MeshOptimizer().setAngleDetection(false)
+                      .setHausdorff(hausdorff)
+                      .setHMax(hmax)
+                      .setHMin(hmin)
+                      .optimize(topography);
 
-  // Make a fire somewhere
-  Alert::Info() << "Initializing fire..." << Alert::Raise;
-  {
-    H1 fes(topography);
+  // // Make a fire somewhere
+  // Alert::Info() << "Initializing fire..." << Alert::Raise;
+  // {
+  //   H1 fes(topography);
 
-    // Compute elevation
-    GridFunction elevation(fes);
-    elevation = [](const Point& p) { return p.z(); };
-    topography.save("Elevation.mesh");
-    elevation.save("Elevation.gf");
+  //   // Compute elevation
+  //   GridFunction elevation(fes);
+  //   elevation = [](const Point& p) { return p.z(); };
+  //   topography.save("Elevation.mesh");
+  //   elevation.save("Elevation.gf");
 
-    GridFunction phi(fes);
-    phi = [](const Point& p)
-    {
-      const Scalar r = 1000;
-      Scalar rr = 0;
+  //   GridFunction phi(fes);
+  //   phi = [](const Point& p)
+  //   {
+  //     const Scalar r = 1000;
+  //     Scalar rr = 0;
 
-      Math::FixedSizeVector<3> c0;
-      c0 << 12500, 12500, p.z();
-      rr = (p.getCoordinates() - c0).norm() - r;
+  //     Math::FixedSizeVector<3> c0;
+  //     c0 << 12500, 12500, p.z();
+  //     rr = (p.getCoordinates() - c0).norm() - r;
 
-      Math::FixedSizeVector<3> c1;
-      c1 << 37500, 37500, p.z();
-      rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
+  //     Math::FixedSizeVector<3> c1;
+  //     c1 << 37500, 37500, p.z();
+  //     rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
 
-      Math::FixedSizeVector<3> c2;
-      c2 << 37500, 12500, p.z();
-      rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
+  //     Math::FixedSizeVector<3> c2;
+  //     c2 << 37500, 12500, p.z();
+  //     rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
 
-      Math::FixedSizeVector<3> c3;
-      c3 << 12500, 37500, p.z();
-      rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
+  //     Math::FixedSizeVector<3> c3;
+  //     c3 << 12500, 37500, p.z();
+  //     rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
 
-      return rr;
-    };
+  //     return rr;
+  //   };
 
-    topography = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                            .setHMax(hmax)
-                                            .setHMin(hmin)
-                                            .setHausdorff(hausdorff)
-                                            .discretize(phi);
+  //   topography = MMG::ImplicitDomainMesher().setAngleDetection(false)
+  //                                           .setHMax(hmax)
+  //                                           .setHMin(hmin)
+  //                                           .setHausdorff(hausdorff)
+  //                                           .discretize(phi);
 
-  }
+  // }
 
   // Define vegetal stratum
   Environment::VegetalStratum stratum;
@@ -406,15 +409,22 @@ int main()
   Alert::Info() << "Starting simulation..." << Alert::Raise;
   Environment environment(topography, stratum);
   Scalar t = 0;
-  Scalar dt = 60;
-  for (int i = 0; i < std::numeric_limits<int>::max(); i++)
+  Scalar dt = 120;
+  for (int i = 33; i < std::numeric_limits<int>::max(); i++)
   {
-    Alert::Info() << "t: " << (t / 60) << "m" << Alert::Raise;
+    Alert::Info info;
+    info << "i: " << i << " | "
+         << "t: " << (t / 60) << "m";
 
     topography.save("out/FirePropagation.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
     topography.save("out/FirePropagation.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
+    auto start = std::chrono::steady_clock::now();
     environment.step(dt);
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> diff = end - start;
+    info << " | cpu: " << std::setw(4) << diff.count() << "s";
+    info.raise();
     t += dt;
   }
 

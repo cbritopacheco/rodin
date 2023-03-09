@@ -460,7 +460,7 @@ namespace Rodin::Geometry
         indices.insert(i);
     }
     res.initialize(getDimension(), getSpaceDimension())
-       .include(getDimension(), indices)
+       .include(indices)
        .finalize();
     return res;
   }
@@ -483,7 +483,7 @@ namespace Rodin::Geometry
     for (auto it = getBoundary(); !it.end(); ++it)
       indices.insert(it->getIndex());
     res.initialize(getDimension() - 1, getSpaceDimension())
-       .include(getDimension() - 1, indices)
+       .include(indices)
        .finalize();
     return res;
   }

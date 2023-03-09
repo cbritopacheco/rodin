@@ -35,7 +35,6 @@
 #include "Variational/Minus.h"
 #include "Variational/Division.h"
 #include "Variational/UnaryMinus.h"
-#include "Variational/Composition.h"
 
 #include "Variational/GT.h"
 #include "Variational/LT.h"
