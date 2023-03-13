@@ -12,6 +12,7 @@
 #include <optional>
 #include <mfem.hpp>
 
+#include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 
@@ -72,12 +73,7 @@ namespace Rodin::Geometry
         Attribute
       };
 
-      Simplex(
-          size_t dimension,
-          Index index,
-          const MeshBase& mesh,
-          const std::vector<Index>& vertices,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      Simplex(size_t dimension, Index index, const MeshBase& mesh);
 
       Simplex(const Simplex&) = delete;
 
@@ -128,17 +124,16 @@ namespace Rodin::Geometry
 
       const SimplexTransformation& getTransformation() const;
 
-      // virtual VertexIterator getVertices() const;
+      const Array<Index>& getVertices() const;
 
-      virtual SimplexIterator getAdjacent() const;
+      SimplexIterator getAdjacent() const;
 
-      virtual SimplexIterator getIncident() const;
+      SimplexIterator getIncident() const;
 
     private:
       const size_t m_dimension;
       const Index m_index;
       std::reference_wrapper<const MeshBase> m_mesh;
-      std::vector<Index> m_vertices;
       Attribute m_attr;
       Geometry::Type m_type;
   };
@@ -156,10 +151,7 @@ namespace Rodin::Geometry
   class Element : public Simplex
   {
     public:
-      Element(
-          Index index,
-          const MeshBase& mesh, const std::vector<Index>& vertices,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      Element(Index index, const MeshBase& mesh);
 
       Element(const Element&) = delete;
 
@@ -178,10 +170,7 @@ namespace Rodin::Geometry
   class Face : public Simplex
   {
     public:
-      Face(
-          Index index,
-          const MeshBase& mesh, const std::vector<Index>& vertices,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      Face(Index index, const MeshBase& mesh);
 
       Face(const Face&) = delete;
 
@@ -197,11 +186,7 @@ namespace Rodin::Geometry
   class Vertex : public Simplex
   {
     public:
-      Vertex(
-          Index index,
-          const MeshBase& mesh,
-          const Math::Vector& coordinates,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      Vertex(Index index, const MeshBase& mesh, const Math::Vector& coordinates);
 
       Scalar x() const
       {

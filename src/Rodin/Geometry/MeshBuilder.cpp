@@ -23,21 +23,14 @@ namespace Rodin::Geometry
     m_ref.emplace(std::ref(mesh));
 
     // Set counts to zero
-    m_count.resize(m_dim + 1, 0);
+    m_count.initialize(m_dim);
+
+    // Set indexes
+    m_attrs.initialize(m_dim);
+    m_transformations.initialize(m_dim);
 
     // Emplace empty connectivity objects
-    m_connectivity.resize(m_dim + 1);
-    for (size_t i = 0; i < m_connectivity.size(); i++)
-    {
-      m_connectivity[i].reserve(m_connectivity.size());
-      for (size_t j = 0; j < m_connectivity.size(); j++)
-      {
-        m_connectivity[i].push_back(Connectivity(i, j));
-      }
-    }
-
-    // Emplace tranformation vectors
-    m_transformations.resize(m_dim + 1);
+    m_connectivity.initialize(m_dim);
 
     // Emplace the implementation
     m_impl.reset(new mfem::Mesh(m_dim, 0, 0, 0, m_sdim));
@@ -57,7 +50,8 @@ namespace Rodin::Geometry
         << " (" << x.size() << " != " << sdim << ")"
         << Alert::Raise;
     }
-    m_impl->AddVertex(x.data());
+    Index idx = m_impl->AddVertex(x.data());
+    m_connectivity.connect({0, 0}, {idx});
     return *this;
   }
 
@@ -91,8 +85,8 @@ namespace Rodin::Geometry
       mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
       std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
       el->SetAttribute(attr);
-      const Index idx = m_impl->AddElement(el);
-      m_connectivity[ref.getDimension()][0].connect(idx, vs);
+      m_impl->AddElement(el);
+      m_connectivity.connect({ref.getDimension(), 0}, vs);
     }
     else if (dim == ref.getDimension() - 1)
     {
@@ -114,22 +108,28 @@ namespace Rodin::Geometry
     m_impl->Finalize(false, true);
 
     // TODO: Compute counts of all simplices
-    m_count[m_dim] = m_impl->GetNE();
-    m_count[m_dim - 1] = m_impl->GetNumFaces();
-    m_count[0] = m_impl->GetNV();
+    m_count.at(m_dim) = m_impl->GetNE();
+    m_count.at(m_dim - 1) = m_impl->GetNumFaces();
+    m_count.at(0) = m_impl->GetNV();
 
-    for (size_t d = 0; d < m_count.size(); d++)
-      m_transformations[d].resize(m_count[d]);
+    // TODO: Verify that tracking these attributes is correct
+    m_attrs.reserve(m_dim, m_count.at(m_dim));
+    for (size_t i = 0; i < m_count.at(m_dim); i++)
+      m_attrs.track(m_dim, i, m_impl->GetAttribute(i));
+
+    m_attrs.reserve(m_dim - 1, m_impl->GetNBE());
+    for (int i = 0; i < m_impl->GetNBE(); i++)
+      m_attrs.track(m_dim - 1, m_impl->GetBdrFace(i), m_impl->GetBdrAttribute(i));
 
     assert(m_ref.has_value());
     auto& ref = m_ref->get();
 
     ref.m_impl = std::move(m_impl);
+
     ref.m_count = std::move(m_count);
     ref.m_connectivity = std::move(m_connectivity);
-    ref.m_transformations = std::move(m_transformations);
 
-    for (int i = 0; i < ref.getHandle().GetNBE(); i++)
-      ref.m_f2b[ref.getHandle().GetBdrElementEdgeIndex(i)] = i;
+    ref.m_attrs = std::move(m_attrs);
+    ref.m_transformations = std::move(m_transformations);
   }
 }

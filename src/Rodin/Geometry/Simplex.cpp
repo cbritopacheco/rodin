@@ -14,14 +14,8 @@ namespace Rodin::Geometry
   }
 
   // ---- Simplex -----------------------------------------------------------
-  Simplex::Simplex(
-      size_t dimension,
-      Index index,
-      const MeshBase& mesh,
-      const std::vector<Index>& vertices,
-      Attribute attr)
-    :  m_dimension(dimension), m_index(index), m_mesh(mesh),
-      m_vertices(vertices), m_attr(attr)
+  Simplex::Simplex(size_t dimension, Index index, const MeshBase& mesh)
+    : m_dimension(dimension), m_index(index), m_mesh(mesh)
   {
     if (m_dimension == mesh.getDimension())
     {
@@ -41,10 +35,10 @@ namespace Rodin::Geometry
     }
   }
 
-  // VertexIterator Simplex::getVertices() const
-  // {
-  //   assert(false);
-  // }
+  const Array<Index>& Simplex::getVertices() const
+  {
+    return m_mesh.get().getConnectivity().getIncidence({getDimension(), 0}, getIndex());
+  }
 
   SimplexIterator Simplex::getAdjacent() const
   {
@@ -83,17 +77,13 @@ namespace Rodin::Geometry
   // }
 
   // ---- Element -----------------------------------------------------------
-  Element::Element(
-      Index index,
-      const MeshBase& mesh, const std::vector<Index>& vertices, Attribute attr)
-    : Simplex(mesh.getDimension(), index, mesh, vertices, attr)
+  Element::Element(Index index, const MeshBase& mesh)
+    : Simplex(mesh.getDimension(), index, mesh)
   {}
 
   // ---- Face --------------------------------------------------------------
-  Face::Face(
-      Index index,
-      const MeshBase& mesh, const std::vector<Index>& vertices, Attribute attr)
-    : Simplex(mesh.getDimension() - 1, index, mesh, vertices, attr)
+  Face::Face(Index index, const MeshBase& mesh)
+    : Simplex(mesh.getDimension() - 1, index, mesh)
   {}
 
   bool Face::isBoundary() const
@@ -107,10 +97,8 @@ namespace Rodin::Geometry
   }
 
   // ---- Vertex -------------------------------------------------------------
-  Vertex::Vertex(
-      Index index,
-      const MeshBase& mesh, const Math::Vector& coordinates, Attribute attr)
-    : Simplex(0, index, mesh, {index}, attr), m_coordinates(coordinates)
+  Vertex::Vertex(Index index, const MeshBase& mesh, const Math::Vector& coordinates)
+    : Simplex(0, index, mesh), m_coordinates(coordinates)
   {}
 
   Scalar Vertex::operator()(size_t i) const

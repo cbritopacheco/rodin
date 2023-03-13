@@ -17,7 +17,8 @@ namespace Rodin::Geometry
 
   using Attribute = std::size_t;
 
-  class IndexGenerator;
+  template <class T>
+  class ContainerIndexGenerator;
 
   enum class Type;
 

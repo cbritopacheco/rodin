@@ -27,52 +27,113 @@ namespace Rodin::Geometry
   class Connectivity
   {
     public:
-      Connectivity(size_t d, size_t dp, size_t n = 0)
-        : m_left(d), m_right(dp), m_connectivity(n)
-      {}
+      using Incidence = std::vector<Array<Index>>;
+
+      Connectivity() = default;
+
+      Connectivity(size_t meshDim)
+        : m_meshDimension(meshDim)
+      {
+        initialize(meshDim);
+      }
 
       Connectivity(const Connectivity&) = default;
 
       Connectivity(Connectivity&&) = default;
 
-      size_t getLeft() const
-      {
-        return m_left;
-      }
+      Connectivity& operator=(const Connectivity&) = default;
 
-      size_t getRight() const
-      {
-        return m_right;
-      }
+      Connectivity& operator=(Connectivity&&) = default;
 
-      size_t getSize() const
+      inline
+      Connectivity& initialize(size_t meshDim)
       {
-        return m_connectivity.size();
-      }
+        m_connectivity.resize(meshDim + 1);
+        for (auto& v : m_connectivity)
+          v.resize(meshDim + 1);
 
-      Connectivity& setSize(size_t size)
-      {
-        m_connectivity.resize(size);
+        m_dirty.resize(meshDim + 1);
+        for (auto& v : m_dirty)
+          v.resize(meshDim + 1, true);
+
         return *this;
       }
 
-      Connectivity& connect(Index idx, const Array<Index>& incidence)
+      inline
+      Connectivity& reserve(size_t d, size_t count)
       {
-        if (idx + 1 > m_connectivity.size())
-          m_connectivity.resize(idx + 1);
-        assert(idx < m_connectivity.size());
-        m_connectivity[idx] = incidence;
+        assert(d < m_connectivity.size());
+        for (auto& v : m_connectivity[d])
+          v.reserve(count);
         return *this;
       }
 
-      /**
-       * @brief Gets the indices of the simplices of dimension @f$ d' @f$,
-       * incident to the simplex @f$ (d, i) @f$.
-       */
-      const Array<Index>& getIncidence(Index idx) const
+      inline
+      Connectivity& reserve(const std::pair<size_t, size_t> p, size_t count)
       {
-        assert(idx < getSize());
-        return m_connectivity[idx];
+        const auto& [d, dp] = p;
+        assert(d < m_connectivity.size());
+        assert(dp < m_connectivity[d].size());
+        m_connectivity[d][dp].reserve(count);
+        return *this;
+      }
+
+      inline
+      Connectivity& connect(const std::pair<size_t, size_t> p, std::initializer_list<Index> in)
+      {
+        Array<Index> a(in.size());
+        std::copy(in.begin(), in.end(), a.begin());
+        return connect(p, std::move(a));
+      }
+
+      inline
+      Connectivity& connect(const std::pair<size_t, size_t> p, const Array<Index>& in)
+      {
+        const auto& [d, dp] = p;
+        assert(d < m_connectivity.size());
+        assert(dp < m_connectivity[d].size());
+        m_dirty[d][dp] = true;
+        m_connectivity[d][dp].push_back(in);
+        return *this;
+      }
+
+      inline
+      Connectivity& connect(const std::pair<size_t, size_t> p, Array<Index>&& in)
+      {
+        const auto& [d, dp] = p;
+        assert(d < m_connectivity.size());
+        assert(dp < m_connectivity[d].size());
+        m_dirty[d][dp] = true;
+        m_connectivity[d][dp].push_back(in);
+        return *this;
+      }
+
+      inline
+      const Incidence& getIncidence(size_t d, size_t dp) const
+      {
+        assert(d < m_connectivity.size());
+        assert(dp < m_connectivity[d].size());
+        return m_connectivity[d][dp];
+      }
+
+      inline
+      const Array<Index>& getIncidence(const std::pair<size_t, size_t> p, Index idx) const
+      {
+        const auto& [d, dp] = p;
+        assert(d < m_connectivity.size());
+        assert(dp < m_connectivity[d].size());
+        assert(idx < m_connectivity[d][dp].size());
+        return m_connectivity[d][dp][idx];
+      }
+
+      inline
+      size_t getMeshDimension() const
+      {
+        return m_meshDimension;
+      }
+
+      void compute(size_t d, size_t dp)
+      {
       }
 
       void build(size_t d)
@@ -91,8 +152,9 @@ namespace Rodin::Geometry
       }
 
     private:
-      size_t m_left, m_right;
-      std::vector<Array<Index>> m_connectivity;
+      size_t m_meshDimension;
+      std::vector<std::vector<Incidence>> m_connectivity;
+      std::vector<std::vector<bool>> m_dirty;
   };
 }
 

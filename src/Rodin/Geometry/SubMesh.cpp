@@ -4,7 +4,7 @@
 
 namespace Rodin::Geometry
 {
-  SubMesh<Context::Serial>::SubMesh(const MeshBase& parent)
+  SubMesh<Context::Serial>::SubMesh(const Mesh<Context::Serial>& parent)
     : m_parent(parent)
   {}
 
@@ -20,7 +20,7 @@ namespace Rodin::Geometry
       m_s2ps(std::move(other.m_s2ps))
   {}
 
-  const MeshBase& SubMesh<Context::Serial>::getParent() const
+  const Mesh<Context::Serial>& SubMesh<Context::Serial>::getParent() const
   {
     return m_parent.get();
   }
@@ -30,7 +30,7 @@ namespace Rodin::Geometry
   {
     assert(sdim == getParent().getSpaceDimension());
     SubMesh<Context::Serial>::Builder build;
-    auto mbuild = Mesh<Context::Serial>::initialize(dim, getParent().getSpaceDimension());
+    auto mbuild = Mesh<Context::Serial>::initialize(dim, sdim);
     build.setReference(std::move(mbuild), *this);
     return build;
   }

@@ -53,19 +53,11 @@ namespace Rodin::Geometry
     const auto& mesh = m_mesh.get();
     if (dimension == mesh.getDimension())
     {
-      const auto& attribute = mesh.getAttribute(dimension, index);
-      mfem::Array<int> vs;
-      mesh.getHandle().GetElementVertices(index, vs);
-      assert(vs.Size() > 0);
-      return new Element(index, mesh, std::vector<Index>(vs.begin(), vs.end()), attribute);
+      return new Element(index, mesh);
     }
     else if (dimension == mesh.getDimension() - 1)
     {
-      const auto& attribute = mesh.getAttribute(dimension, index);
-      mfem::Array<int> vs;
-      mesh.getHandle().GetFaceVertices(index, vs);
-      assert(vs.Size() > 0);
-      return new Face(index, mesh, std::vector<Index>(vs.begin(), vs.end()), attribute);
+      return new Face(index, mesh);
     }
     else if (dimension == 0)
     {
@@ -123,12 +115,7 @@ namespace Rodin::Geometry
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& mesh = getMesh();
-    const auto& dimension = getDimension();
-    const auto& attribute = mesh.getAttribute(dimension, index);
-    mfem::Array<int> vs;
-    mesh.getHandle().GetElementVertices(index, vs);
-    assert(vs.Size() > 0);
-    return new Element(index, mesh, std::vector<Index>(vs.begin(), vs.end()), attribute);
+    return new Element(index, mesh);
   }
 
   // ---- FaceIterator ------------------------------------------------------
@@ -175,12 +162,7 @@ namespace Rodin::Geometry
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& mesh = getMesh();
-    const auto& dimension = getDimension();
-    const auto& attribute = mesh.getAttribute(dimension, index);
-    mfem::Array<int> vs;
-    mesh.getHandle().GetFaceVertices(index, vs);
-    assert(vs.Size() > 0);
-    return new Face(index, mesh, std::vector<Index>(vs.begin(), vs.end()), attribute);
+    return new Face(index, mesh);
   }
 
   // ---- VertexIterator ------------------------------------------------------
@@ -227,11 +209,9 @@ namespace Rodin::Geometry
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& mesh = getMesh();
-    const auto& dimension = getDimension();
-    const auto& attribute = mesh.getAttribute(dimension, index);
     Math::Vector coordinates(mesh.getSpaceDimension());
     assert(coordinates.size() > 0);
     std::copy_n(mesh.getHandle().GetVertex(index), coordinates.size(), coordinates.begin());
-    return new Vertex(index, mesh, coordinates, attribute);
+    return new Vertex(index, mesh, coordinates);
   }
 }
