@@ -52,11 +52,13 @@ namespace Rodin::Geometry
 
       EmptyIndexGenerator& operator++() override
       {
+        assert(false);
         return *this;
       }
 
       Index operator*() const noexcept override
       {
+        assert(false);
         return 0;
       }
 
@@ -124,6 +126,64 @@ namespace Rodin::Geometry
       Index m_curr;
   };
 
+  template <class Iterator>
+  class IteratorIndexGenerator : public IndexGeneratorBase
+  {
+    public:
+      IteratorIndexGenerator(const Iterator& it, const Iterator& end)
+        : m_it(it), m_end(end)
+      {}
+
+      IteratorIndexGenerator(const Iterator& it, size_t count)
+        : m_it(it), m_end(it + count)
+      {}
+
+      IteratorIndexGenerator(Iterator&& it, Iterator&& end)
+        : m_it(std::move(it)), m_end(std::move(end))
+      {}
+
+      IteratorIndexGenerator(IteratorIndexGenerator&& other)
+        : IndexGeneratorBase(std::move(other)),
+          m_it(std::move(other.m_it)), m_end(std::move(other.m_end))
+      {}
+
+      IteratorIndexGenerator(const IteratorIndexGenerator& other)
+        : IndexGeneratorBase(other),
+          m_it(other.m_it), m_end(std::move(other.m_end))
+      {}
+
+      bool end() const override
+      {
+        return m_it == m_end;
+      }
+
+      IteratorIndexGenerator& operator++() override
+      {
+        ++m_it;
+        return *this;
+      }
+
+      Index operator*() const noexcept override
+      {
+        assert(!end());
+        return *m_it;
+      }
+
+      IteratorIndexGenerator* copy() & noexcept override
+      {
+        return new IteratorIndexGenerator(*this);
+      }
+
+      IteratorIndexGenerator* move() && noexcept override
+      {
+        return new IteratorIndexGenerator(std::move(*this));
+      }
+
+    private:
+      Iterator m_it;
+      Iterator m_end;
+  };
+
   class VectorIndexGenerator : public IndexGeneratorBase
   {
     public:
@@ -133,13 +193,13 @@ namespace Rodin::Geometry
       {}
 
       VectorIndexGenerator(VectorIndexGenerator&& other)
-        :  IndexGeneratorBase(std::move(other)),
+        : IndexGeneratorBase(std::move(other)),
           m_indices(std::move(other.m_indices)),
           m_it(std::move(other.m_it))
       {}
 
       VectorIndexGenerator(const VectorIndexGenerator& other)
-        :  IndexGeneratorBase(other),
+        : IndexGeneratorBase(other),
           m_indices(other.m_indices),
           m_it(other.m_it)
       {}
@@ -174,7 +234,6 @@ namespace Rodin::Geometry
     private:
       std::vector<Index> m_indices;
       std::vector<Index>::iterator m_it;
-
   };
 }
 

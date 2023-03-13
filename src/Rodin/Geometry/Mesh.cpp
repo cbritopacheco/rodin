@@ -52,11 +52,10 @@ namespace Rodin::Geometry
   const SimplexTransformation&
   Mesh<Context::Serial>::getSimplexTransformation(size_t dimension, Index idx) const
   {
-    assert(m_transformations.size() > dimension);
-    assert(m_transformations[dimension].size() > idx);
-    if (m_transformations[dimension][idx])
+    if (m_transformations.isTracked(dimension, idx))
     {
-      return *m_transformations[dimension][idx];
+      assert(m_transformations.at(dimension, idx));
+      return *m_transformations.at(dimension, idx);
     }
     else
     {
@@ -77,13 +76,14 @@ namespace Rodin::Geometry
           trans->SetFE(
               meshHandle.GetTransformationFEforElementType(
                 meshHandle.GetElementType(idx)));
-          m_transformations[dimension][idx].reset(new IsoparametricTransformation(trans));
-          return *m_transformations[dimension][idx];
+          m_transformations.track(
+              dimension, idx, std::unique_ptr<SimplexTransformation>(new IsoparametricTransformation(trans)));
+          return *m_transformations.at(dimension, idx);
         }
         else
         {
           assert(false);
-          return *m_transformations[dimension][idx];
+          return *m_transformations.at(dimension, idx);
         }
       }
       else if (dimension == getDimension() - 1)
@@ -109,24 +109,25 @@ namespace Rodin::Geometry
           trans->SetFE(
               meshHandle.GetTransformationFEforElementType(
                 meshHandle.GetFaceElementType(idx)));
-          m_transformations[dimension][idx].reset(new IsoparametricTransformation(trans));
-          return *m_transformations[dimension][idx];
+          m_transformations.track(
+              dimension, idx, std::unique_ptr<SimplexTransformation>(new IsoparametricTransformation(trans)));
+          return *m_transformations.at(dimension, idx);
         }
         else
         {
           assert(false);
-          return *m_transformations[dimension][idx];
+          return *m_transformations.at(dimension, idx);
         }
       }
       else if (dimension == 0)
       {
         assert(false);
-        return *m_transformations[dimension][idx];
+        return *m_transformations.at(dimension, idx);
       }
       else
       {
         assert(false);
-        return *m_transformations[dimension][idx];
+        return *m_transformations.at(dimension, idx);
       }
     }
   }
@@ -274,24 +275,47 @@ namespace Rodin::Geometry
     // TODO: This whole constructors is ugly. In general we should try and
     // build the mesh with the MeshBuilder object.
 
-    m_count.resize(m_dim + 1);
-    m_count[m_dim] = getHandle().GetNE();
-    m_count[m_dim - 1] = getHandle().GetNumFaces();
-    m_count[0] = getHandle().GetNV();
+    m_count.initialize(m_dim);
+    m_count.at(m_dim) = getHandle().GetNE();
+    m_count.at(m_dim - 1) = getHandle().GetNumFaces();
+    m_count.at(0) = getHandle().GetNV();
 
-    m_transformations.resize(m_dim + 1);
-    m_transformations[m_dim].resize(m_count[m_dim]);
-    m_transformations[m_dim - 1].resize(m_count[m_dim - 1]);
-    m_transformations[0].resize(m_count[0]);
+    m_attrs.initialize(m_dim);
+    m_attrs.reserve(m_dim, getHandle().GetNE());
+    m_attrs.reserve(m_dim - 1, getHandle().GetNBE());
+
+    m_connectivity.initialize(m_dim);
+    m_connectivity.reserve(m_dim, getHandle().GetNE());
+    m_connectivity.reserve(0, getHandle().GetNV());
+
+    for (int i = 0; i < getHandle().GetNV(); i++)
+      m_connectivity.connect({ 0, 0 }, { static_cast<Index>(i) });
+
+    for (int i = 0; i < getHandle().GetNE(); i++)
+    {
+      // Attributes
+      m_attrs.track(m_dim, i, getHandle().GetAttribute(i));
+
+      // Connectivity
+      mfem::Array<int> mvs;
+      getHandle().GetElementVertices(i, mvs);
+      Array<Index> vs(mvs.Size());
+      std::copy(mvs.begin(), mvs.end(), mvs.begin());
+      m_connectivity.connect({m_dim, 0}, std::move(vs));
+    }
+
+    for (int i = 0; i < getHandle().GetNBE(); i++)
+      m_attrs.track(m_dim - 1, getHandle().GetBdrFace(i), getHandle().GetBdrAttribute(i));
 
     for (int i = 0; i < getHandle().GetNBE(); i++)
       m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
+
+    m_transformations.initialize(m_dim);
   }
 
-  size_t Mesh<Context::Serial>::getCount(size_t dimension) const
+  size_t Mesh<Context::Serial>::getSimplexCount(size_t dimension) const
   {
-    assert(m_count.size() > dimension);
-    return m_count[dimension];
+    return m_count.at(dimension);
   }
 
   FaceIterator Mesh<Context::Serial>::getBoundary() const
@@ -336,7 +360,7 @@ namespace Rodin::Geometry
 
   SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
   {
-    return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));
+    return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getSimplexCount(dimension)));
   }
 
   bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
@@ -351,36 +375,20 @@ namespace Rodin::Geometry
 
   Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
   {
-    if (dimension == getDimension())
-    {
-      return getHandle().GetAttribute(index);
-    }
-    else if (dimension == getDimension() - 1)
-    {
-      auto it = m_f2b.find(index);
-      if (it != m_f2b.end())
-      {
-        return getHandle().GetBdrAttribute(it->second);
-      }
-      else
-      {
-        return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
-      }
-    }
-    else if (dimension == 0)
-    {
-      return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
-    }
+    if (m_attrs.isTracked(dimension, index))
+      return m_attrs.at(dimension, index);
     else
-    {
-      assert(false);
       return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
-    }
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>
-  ::setAttribute(size_t dimension, Index index, Attribute attr)
+  Mesh<Context::Serial>&
+  Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
   {
+    assert(false);
+    assert(m_attrs.isTracked(dimension, index));
+    m_attrs.at(dimension, index) = attr;
+
+    // Track it also in mfem
     if (dimension == getDimension())
     {
       getHandle().SetAttribute(index, attr);
@@ -399,6 +407,7 @@ namespace Rodin::Geometry
     }
     else
     {
+        assert(false);
     }
     return *this;
   }
@@ -454,7 +463,7 @@ namespace Rodin::Geometry
   {
     SubMesh<Context::Serial> res(*this);
     std::set<Index> indices;
-    for (Index i = 0; i < getCount(getDimension()); i++)
+    for (Index i = 0; i < getSimplexCount(getDimension()); i++)
     {
       if (attrs.count(getAttribute(getDimension(), i)))
         indices.insert(i);

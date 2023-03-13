@@ -56,11 +56,12 @@ namespace Rodin::Geometry
 
           std::optional<Mesh<Context::Serial>::Builder> m_mbuild;
           std::vector<Index> m_sidx;
+          SimplexIndexed<Attribute> m_attrs;
 
           std::vector<boost::bimap<Index, Index>> m_s2ps;
       };
 
-      SubMesh(const MeshBase& parent);
+      SubMesh(const Mesh<Context::Serial>& parent);
 
       SubMesh(const SubMesh& other);
 
@@ -84,7 +85,7 @@ namespace Rodin::Geometry
       /**
        * @returns Reference to the parent Mesh object
        */
-      const MeshBase& getParent() const;
+      const Mesh<Context::Serial>& getParent() const;
 
       /**
        * @brief Gets the map of simplex indices from the submesh to the parent
@@ -104,7 +105,7 @@ namespace Rodin::Geometry
       SubMesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
 
     private:
-      std::reference_wrapper<const MeshBase> m_parent;
+      std::reference_wrapper<const Mesh<Context::Serial>> m_parent;
       std::vector<boost::bimap<Index, Index>> m_s2ps;
   };
 }

@@ -23,6 +23,8 @@
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Simplex.h"
+#include "SimplexCount.h"
+#include "SimplexIndexed.h"
 #include "SimplexIterator.h"
 #include "SimplexTransformation.h"
 
@@ -140,17 +142,17 @@ namespace Rodin::Geometry
 
       size_t getVertexCount() const
       {
-        return getCount(0);
+        return getSimplexCount(0);
       }
 
       size_t getFaceCount() const
       {
-        return getCount(getDimension() - 1);
+        return getSimplexCount(getDimension() - 1);
       }
 
       size_t getElementCount() const
       {
-        return getCount(getDimension());
+        return getSimplexCount(getDimension());
       }
 
       Attribute getFaceAttribute(Index index) const
@@ -266,7 +268,7 @@ namespace Rodin::Geometry
 
       virtual FaceIterator getInterface() const = 0;
 
-      virtual size_t getCount(size_t dim) const = 0;
+      virtual size_t getSimplexCount(size_t dim) const = 0;
 
       virtual ElementIterator getElement(Index idx = 0) const = 0;
 
@@ -283,7 +285,7 @@ namespace Rodin::Geometry
 
       virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
 
-      virtual const Connectivity& getConnectivity(size_t d, size_t dp) const = 0;
+      virtual const Connectivity& getConnectivity() const = 0;
 
       virtual void flush() = 0;
 
@@ -332,9 +334,6 @@ namespace Rodin::Geometry
           Builder& face(Type geom, const Array<Index>& vs,
               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
-          Builder& element(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
-
           Builder& face(Type geom, std::initializer_list<Index> vs,
               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
           {
@@ -342,6 +341,9 @@ namespace Rodin::Geometry
             std::copy(vs.begin(), vs.end(), as.begin());
             return face(geom, as, attr);
           }
+
+          Builder& element(Type geom, const Array<Index>& vs,
+              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
 
           Builder& element(Type geom, std::initializer_list<Index> vs,
               Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
@@ -365,11 +367,16 @@ namespace Rodin::Geometry
           void finalize() override;
 
         private:
-          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
           size_t m_dim, m_sdim;
-          std::vector<size_t> m_count;
-          std::vector<std::vector<Connectivity>> m_connectivity;
-          std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
+          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
+
+
+          SimplexCount m_count;
+          Connectivity m_connectivity;
+
+          SimplexIndexed<Geometry::Attribute> m_attrs;
+          SimplexIndexed<std::unique_ptr<SimplexTransformation>> m_transformations;
+
           std::unique_ptr<mfem::Mesh> m_impl;
       };
 
@@ -476,12 +483,17 @@ namespace Rodin::Geometry
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
-      size_t getSimplexCount(size_t dim) const
+      const SimplexIndexed<Attribute>& getAttributeIndex() const
       {
-        return getCount(dim);
+        return m_attrs;
       }
 
-      virtual size_t getCount(size_t dim) const override;
+      const SimplexIndexed<std::unique_ptr<SimplexTransformation>>& getTransformationIndex() const
+      {
+        return m_transformations;
+      }
+
+      virtual size_t getSimplexCount(size_t dim) const override;
 
       virtual FaceIterator getBoundary() const override;
 
@@ -513,31 +525,26 @@ namespace Rodin::Geometry
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
+      virtual const Connectivity& getConnectivity() const override
       {
-        assert(m_connectivity.size() > d);
-        assert(m_connectivity[d].size() > dp);
-
-        // TODO: Other dimensions not implemented yet
-        assert(d == getDimension()); // TODO: Remove
-        assert(dp == 0); // TODO: Remove
-        return m_connectivity[d][dp];
+        return m_connectivity;
       }
 
       virtual void flush() override
       {
-        for (size_t d = 0; d < m_transformations.size(); d++)
-          for (size_t i = 0; i < m_transformations[d].size(); i++)
-            m_transformations[d][i].reset();
+        m_transformations.clear();
       }
 
       mfem::Mesh& getHandle() const override;
 
     private:
       size_t m_dim, m_sdim;
-      std::vector<size_t> m_count;
-      std::vector<std::vector<Connectivity>> m_connectivity;
-      mutable std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
+
+      SimplexCount m_count;
+      SimplexIndexed<Geometry::Attribute> m_attrs;
+      mutable SimplexIndexed<std::unique_ptr<SimplexTransformation>> m_transformations;
+
+      Connectivity m_connectivity;
 
       std::map<Index, Index> m_f2b;
       std::unique_ptr<mfem::Mesh> m_impl;

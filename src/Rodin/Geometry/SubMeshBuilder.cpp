@@ -57,7 +57,7 @@ namespace Rodin::Geometry
 
       // Add simplex vertices to the resulting mesh
       const Array<Index>& pvs =
-        parent.getConnectivity(dim, 0).getIncidence(idx);
+        parent.getConnectivity().getIncidence({dim, 0}, idx);
 
       Array<Index> vs(pvs.size());
       for (Index i = 0; i < static_cast<Index>(vs.size()); i++)
@@ -76,7 +76,7 @@ namespace Rodin::Geometry
       }
 
       // Add element with the new vertex ordering
-      build.element(simplex->getGeometry(), vs, simplex->getAttribute());
+      build.element(simplex->getGeometry(), vs);
       m_s2ps[dim].insert({ m_sidx[dim]++, idx });
     }
 
@@ -94,14 +94,20 @@ namespace Rodin::Geometry
      */
     // for (const auto& idx : indices)
     // {
-    //   auto simplex = parent.getSimplex(dim, idx);
-
-    //   for (size_t d = 1; d < dim - 1; d++)
+    //   for (size_t d = 1; d <= dim - 1; d++)
     //   {
     //     const Array<Index>& pconnectivity =
-    //       parent.getConnectivity(dim, d).getIncidence(idx);
-
-    //     // build.simplex(simplex->getGeometry(), simplex->getVertices(), simplex->getAttribute());
+    //       parent.getConnectivity().getIncidence({ dim, d }, idx);
+    //     for (const auto& i : pconnectivity)
+    //     {
+    //       if (m_s2ps[d].right.count(i)) // Only add simplex if it is not in the map
+    //         continue;
+    //       else if (parent.getAttributeIndex().isTracked(d, i))
+    //       {
+    //         const SimplexIterator simplex = parent.getSimplex(d, i);
+    //         build.simplex(simplex->getGeometry(), simplex->getVertices());
+    //       }
+    //     }
     //   }
     // }
 
@@ -120,10 +126,10 @@ namespace Rodin::Geometry
           for (int i = 0; i < pvs.Size(); i++)
             vs[i] = m_s2ps[0].right.at(pvs[i]);
           build.face(it->getGeometry(), vs, it->getAttribute());
-          m_sidx[ref.getDimension() - 1]++;
         }
       }
     }
+
     return *this;
   }
 

@@ -23,7 +23,7 @@ int main(int, char**)
       .element(Geometry::Type::Triangle, {0, 1, 2})
       .element(Geometry::Type::Triangle, {1, 2, 3})
       .finalize();
-  for (auto v : mesh.getConnectivity(dim, 0).getIncidence(0))
+  for (auto v : mesh.getConnectivity().getIncidence({dim, 0}, 0))
   {
     std::cout << v << std::endl;
   }

@@ -18,12 +18,12 @@ int main(int, char**)
 
   Alert::Info() << "Extracting mesh..." << Alert::Raise;
 
-  // auto trimmed =
+  auto trimmed = mesh.trim(2);
   //  mesh.extract(
   //    mesh.where([] (const Element& el) { return el.getAttribute() == 1; }));
 
   // Alert::Info() << "Saved mesh to trimmed.mesh" << Alert::Raise;
 
-  // trimmed.save("trimmed.mesh");
+  trimmed.save("trimmed.mesh");
 }
 
