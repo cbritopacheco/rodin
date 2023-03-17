@@ -325,22 +325,14 @@ namespace Rodin::IO
             {
               case 2: // Planar mesh
               {
-                build.face(
-                    Geometry::Type::Segment,
-                    {v1 - 1, v2 - 1},
-                    ref == 0 ? 128 : ref); // Zero-reference is
-                                    // not supported.
+                build.face(Geometry::Type::Segment, {v1 - 1, v2 - 1});
                 break;
               }
               case 3: // Surface mesh
               {
                 if (isSurfaceMesh)
                 {
-                  build.face(
-                      Geometry::Type::Segment,
-                      {v1 - 1, v2 - 1},
-                      ref == 0 ? 128 : ref); // Zero-reference is
-                                      // not supported.
+                  build.face(Geometry::Type::Segment, {v1 - 1, v2 - 1});
                 }
                 break;
               }
@@ -368,24 +360,18 @@ namespace Rodin::IO
             {
               case 2:
               {
-                build.element(
-                  Geometry::Type::Triangle,
-                  {v1 - 1, v2 - 1, v3 - 1}, ref);
+                build.element(Geometry::Type::Triangle, {v1 - 1, v2 - 1, v3 - 1});
                 break;
               }
               case 3:
               {
                 if (isSurfaceMesh)
                 {
-                  build.element(
-                    Geometry::Type::Triangle,
-                    {v1 - 1, v2 - 1, v3 - 1}, ref);
+                  build.element(Geometry::Type::Triangle, {v1 - 1, v2 - 1, v3 - 1});
                 }
                 else
                 {
-                  build.face(
-                    Geometry::Type::Triangle,
-                    {v1 - 1, v2 - 1, v3 - 1}, ref);
+                  build.face(Geometry::Type::Triangle, {v1 - 1, v2 - 1, v3 - 1});
                 }
                 break;
               }
@@ -409,9 +395,7 @@ namespace Rodin::IO
             std::istringstream lss(line);
             size_t v1, v2, v3, v4, ref;
             lss >> v1 >> v2 >> v3 >> v4 >> ref;
-            build.element(
-                Geometry::Type::Tetrahedron,
-                {v1 - 1, v2 - 1, v3 - 1, v4 - 1}, ref);
+            build.element(Geometry::Type::Tetrahedron, {v1 - 1, v2 - 1, v3 - 1, v4 - 1});
           }
           break;
         }

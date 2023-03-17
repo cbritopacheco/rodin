@@ -558,8 +558,7 @@ namespace Rodin::External::MMG
               Geometry::Type::Triangle,
               { static_cast<size_t>(src->tria[i].v[0] - 1),
                 static_cast<size_t>(src->tria[i].v[1] - 1),
-                static_cast<size_t>(src->tria[i].v[2] - 1) },
-              src->tria[i].ref);
+                static_cast<size_t>(src->tria[i].v[2] - 1) });
         }
         // Add boundary
         for (int i = 1; i <= src->na; i++)
@@ -567,8 +566,7 @@ namespace Rodin::External::MMG
           build.face(
               Geometry::Type::Segment,
               { static_cast<size_t>(src->edge[i].a - 1),
-                static_cast<size_t>(src->edge[i].b - 1) },
-              src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
+                static_cast<size_t>(src->edge[i].b - 1) });
         }
         build.finalize();
         break;
@@ -593,8 +591,7 @@ namespace Rodin::External::MMG
                 Geometry::Type::Triangle,
                 { static_cast<size_t>(src->tria[i].v[0] - 1),
                   static_cast<size_t>(src->tria[i].v[1] - 1),
-                  static_cast<size_t>(src->tria[i].v[2] - 1) },
-                src->tria[i].ref);
+                  static_cast<size_t>(src->tria[i].v[2] - 1) });
           }
 
           // Add boundary
@@ -603,8 +600,7 @@ namespace Rodin::External::MMG
             build.face(
                 Geometry::Type::Segment,
                 { static_cast<size_t>(src->edge[i].a - 1),
-                  static_cast<size_t>(src->edge[i].b - 1) },
-                src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
+                  static_cast<size_t>(src->edge[i].b - 1) });
             if (src->edge[i].tag & MG_GEO)
               dst.ridge(i - 1);
           }
@@ -636,8 +632,7 @@ namespace Rodin::External::MMG
               Geometry::Type::Triangle,
               { static_cast<size_t>(src->tria[i].v[0] - 1),
                 static_cast<size_t>(src->tria[i].v[1] - 1),
-                static_cast<size_t>(src->tria[i].v[2] - 1) },
-              src->tria[i].ref);
+                static_cast<size_t>(src->tria[i].v[2] - 1) });
           }
 
           for (int i = 1; i <= src->ne; i++)
@@ -647,8 +642,7 @@ namespace Rodin::External::MMG
               { static_cast<size_t>(src->tetra[i].v[0] - 1),
                 static_cast<size_t>(src->tetra[i].v[1] - 1),
                 static_cast<size_t>(src->tetra[i].v[2] - 1),
-                static_cast<size_t>(src->tetra[i].v[3] - 1) },
-                src->tetra[i].ref);
+                static_cast<size_t>(src->tetra[i].v[3] - 1) });
           }
           build.finalize();
         }

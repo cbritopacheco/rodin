@@ -384,31 +384,7 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>&
   Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
   {
-    assert(false);
-    assert(m_attrs.isTracked(dimension, index));
-    m_attrs.at(dimension, index) = attr;
-
-    // Track it also in mfem
-    if (dimension == getDimension())
-    {
-      getHandle().SetAttribute(index, attr);
-    }
-    else if (dimension == getDimension() - 1)
-    {
-      auto it = m_f2b.find(index);
-      if (it != m_f2b.end())
-      {
-        getHandle().SetBdrAttribute(it->second, attr);
-      }
-      else
-      {
-        assert(false);
-      }
-    }
-    else
-    {
-        assert(false);
-    }
+    m_attrs.track(dimension, index, attr);
     return *this;
   }
 

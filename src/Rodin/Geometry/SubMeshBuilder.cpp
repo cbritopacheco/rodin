@@ -125,7 +125,7 @@ namespace Rodin::Geometry
           Array<Index> vs(pvs.Size());
           for (int i = 0; i < pvs.Size(); i++)
             vs[i] = m_s2ps[0].right.at(pvs[i]);
-          build.face(it->getGeometry(), vs, it->getAttribute());
+          build.face(it->getGeometry(), vs);
         }
       }
     }
