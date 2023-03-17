@@ -22,3 +22,8 @@ add_executable(Connectivity Connectivity.cpp)
 target_link_libraries(Connectivity
   PUBLIC
   Rodin::Geometry)
+
+add_executable(Square Square.cpp)
+target_link_libraries(Square
+  PUBLIC
+  Rodin::Geometry)

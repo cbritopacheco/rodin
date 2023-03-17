@@ -331,45 +331,39 @@ namespace Rodin::Geometry
 
           Builder& vertex(const Math::Vector& x);
 
-          Builder& face(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+          Builder& face(Type geom, const Array<Index>& vs);
 
-          Builder& face(Type geom, std::initializer_list<Index> vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          Builder& face(Type geom, std::initializer_list<Index> vs)
           {
             Array<Index> as(vs.size());
             std::copy(vs.begin(), vs.end(), as.begin());
-            return face(geom, as, attr);
+            return face(geom, as);
           }
 
-          Builder& element(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+          Builder& element(Type geom, const Array<Index>& vs);
 
-          Builder& element(Type geom, std::initializer_list<Index> vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          Builder& element(Type geom, std::initializer_list<Index> vs)
           {
             Array<Index> as(vs.size());
             std::copy(vs.begin(), vs.end(), as.begin());
-            return element(geom, as, attr);
+            return element(geom, as);
           }
 
-          Builder& simplex(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+          Builder& simplex(Type geom, const Array<Index>& vs);
 
-          Builder& simplex(Type geom, std::initializer_list<Index> vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          Builder& simplex(Type geom, std::initializer_list<Index> vs)
           {
             Array<Index> as(vs.size());
             std::copy(vs.begin(), vs.end(), as.begin());
-            return simplex(geom, as, attr);
+            return simplex(geom, as);
           }
 
           void finalize() override;
 
         private:
           size_t m_dim, m_sdim;
+          std::vector<size_t> m_sidx;
           std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
-
 
           SimplexCount m_count;
           Connectivity m_connectivity;
