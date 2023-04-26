@@ -13,13 +13,13 @@ if (RODIN_BUILD_EXAMPLES)
 
   add_subdirectory(IO)
   add_subdirectory(Geometry)
-  add_subdirectory(Variational)
-  add_subdirectory(ShapeOptimization)
+  # add_subdirectory(Variational)
+  # add_subdirectory(ShapeOptimization)
   # add_subdirectory(DensityOptimization)
-  add_subdirectory(SurfaceOptimization)
-  add_subdirectory(SurfaceEvolution)
+  # add_subdirectory(SurfaceOptimization)
+  # add_subdirectory(SurfaceEvolution)
 
-  add_subdirectory(MMG)
+  # add_subdirectory(MMG)
 
   # if (RODIN_USE_MPI)
   #   add_subdirectory(Parallel)
