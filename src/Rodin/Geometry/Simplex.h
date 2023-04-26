@@ -18,68 +18,50 @@
 
 #include "ForwardDecls.h"
 
+#include "Types.h"
+
 namespace Rodin::Geometry
 {
-  enum class Type
-  {
-    Point = mfem::Geometry::POINT,
-    Segment = mfem::Geometry::SEGMENT,
-    Triangle = mfem::Geometry::TRIANGLE,
-    Square = mfem::Geometry::SQUARE,
-    Tetrahedron = mfem::Geometry::TETRAHEDRON,
-    Cube = mfem::Geometry::CUBE,
-    Prism = mfem::Geometry::PRISM,
-    Pyramid = mfem::Geometry::PYRAMID
-  };
-
-  inline
-  static
-  constexpr
-  size_t getGeometryDimension(Geometry::Type t)
-  {
-    switch (t)
-    {
-      case Geometry::Type::Point:
-        return 0;
-      case Geometry::Type::Segment:
-        return 1;
-      case Geometry::Type::Square:
-      case Geometry::Type::Triangle:
-        return 2;
-      case Geometry::Type::Cube:
-      case Geometry::Type::Prism:
-      case Geometry::Type::Pyramid:
-      case Geometry::Type::Tetrahedron:
-        return 3;
-      default:
-      {
-        assert(false);
-        return 0;
-      }
-    }
-    assert(false);
-    return 0;
-  }
-
-
   /**
    * @brief Base class for all geometric elements of the mesh.
    */
-  class Simplex
+  class Polytope
   {
     public:
-      enum class Property
+      enum class Geometry
       {
-        Attribute
+        Point = mfem::Geometry::POINT,
+        Segment = mfem::Geometry::SEGMENT,
+        Triangle = mfem::Geometry::TRIANGLE,
+        Quadrilateral = mfem::Geometry::SQUARE,
+        Tetrahedron = mfem::Geometry::TETRAHEDRON
       };
 
-      Simplex(size_t dimension, Index index, const MeshBase& mesh);
+      inline
+      constexpr
+      static size_t getGeometryDimension(Polytope::Geometry g)
+      {
+        switch (g)
+        {
+          case Geometry::Point:
+            return 0;
+          case Geometry::Segment:
+            return 1;
+          case Geometry::Triangle:
+          case Geometry::Quadrilateral:
+            return 2;
+          case Geometry::Tetrahedron:
+            return 3;
+        }
+      }
 
-      Simplex(const Simplex&) = delete;
+      Polytope(size_t dimension, Index index, const MeshBase& mesh);
 
-      Simplex(Simplex&&) = default;
+      Polytope(const Polytope&) = delete;
 
-      virtual ~Simplex() = default;
+      Polytope(Polytope&&) = default;
+
+      virtual ~Polytope() = default;
 
       /**
        * @brief Gets the index of the simplex in the mesh.
@@ -91,24 +73,9 @@ namespace Rodin::Geometry
       }
 
       inline
-      Type getGeometry() const
-      {
-        return m_type;
-      }
-
-      inline
       size_t getDimension() const
       {
         return m_dimension;
-      }
-
-      /**
-       * @brief Gets the attribute of the simplex.
-       */
-      inline
-      Attribute getAttribute() const
-      {
-        return m_attr;
       }
 
       /**
@@ -120,25 +87,32 @@ namespace Rodin::Geometry
         return m_mesh.get();
       }
 
+      /**
+       * @brief Gets the attribute of the simplex.
+       */
+      Attribute getAttribute() const;
+
       Scalar getVolume() const;
 
-      const SimplexTransformation& getTransformation() const;
+      const PolytopeTransformation& getTransformation() const;
+
+      VertexIterator getVertex() const;
 
       const Array<Index>& getVertices() const;
 
-      SimplexIterator getAdjacent() const;
+      PolytopeIterator getAdjacent() const;
 
-      SimplexIterator getIncident() const;
+      PolytopeIterator getIncident() const;
+
+      Geometry getGeometry() const;
 
     private:
       const size_t m_dimension;
       const Index m_index;
       std::reference_wrapper<const MeshBase> m_mesh;
-      Attribute m_attr;
-      Geometry::Type m_type;
   };
 
-  bool operator<(const Simplex& lhs, const Simplex& rhs);
+  bool operator<(const Polytope& lhs, const Polytope& rhs);
 
   /**
    * @brief Class for representing elements of the highest dimension in the
@@ -148,7 +122,7 @@ namespace Rodin::Geometry
    * element. If one wishes to modify the element then one must use
    * ElementView.
    */
-  class Element : public Simplex
+  class Element : public Polytope
   {
     public:
       Element(Index index, const MeshBase& mesh);
@@ -156,7 +130,7 @@ namespace Rodin::Geometry
       Element(const Element&) = delete;
 
       Element(Element&& other)
-        :  Simplex(std::move(other))
+        :  Polytope(std::move(other))
       {}
   };
 
@@ -167,7 +141,7 @@ namespace Rodin::Geometry
    * This class is designed so that modifications cannot be made to the
    * face.
    */
-  class Face : public Simplex
+  class Face : public Polytope
   {
     public:
       Face(Index index, const MeshBase& mesh);
@@ -175,7 +149,7 @@ namespace Rodin::Geometry
       Face(const Face&) = delete;
 
       Face(Face&& other)
-        : Simplex(std::move(other))
+        : Polytope(std::move(other))
       {}
 
       bool isBoundary() const;
@@ -183,7 +157,7 @@ namespace Rodin::Geometry
       bool isInterface() const;
   };
 
-  class Vertex : public Simplex
+  class Vertex : public Polytope
   {
     public:
       Vertex(Index index, const MeshBase& mesh, const Math::Vector& coordinates);
@@ -208,9 +182,17 @@ namespace Rodin::Geometry
 
       Scalar operator()(size_t i) const;
 
+      inline
       const Math::Vector& getCoordinates() const
       {
         return m_coordinates;
+      }
+
+      inline
+      constexpr
+      Geometry getGeometry() const
+      {
+        return Geometry::Point;
       }
 
     private:
@@ -244,7 +226,7 @@ namespace Rodin::Geometry
        * @param[in] simplex Simplex to which point belongs to
        * @param[in] ip Reference coordinates
        */
-      Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc);
+      Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc);
 
       Point(const Point&) = default;
 
@@ -328,13 +310,13 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Simplex& getSimplex() const
+      const Polytope& getSimplex() const
       {
         return m_simplex.get();
       }
 
       inline
-      const SimplexTransformation& getTransformation() const
+      const PolytopeTransformation& getTransformation() const
       {
         return m_trans.get();
       }
@@ -354,8 +336,8 @@ namespace Rodin::Geometry
       Scalar getDistortion() const;
 
     private:
-      std::reference_wrapper<const Simplex> m_simplex;
-      std::reference_wrapper<const SimplexTransformation> m_trans;
+      std::reference_wrapper<const Polytope> m_simplex;
+      std::reference_wrapper<const PolytopeTransformation> m_trans;
       std::reference_wrapper<const Math::Vector> m_rc;
       mfem::IntegrationPoint m_ip;
       mutable std::optional<const Math::Vector> m_pc;

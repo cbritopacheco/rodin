@@ -24,8 +24,14 @@ namespace Rodin::Variational
 
     public:
 
-      static const QuadratureRule& get(Geometry::Type geometry, size_t order)
+      static const QuadratureRule& get(const Geometry::Polytope& simplex, size_t order)
       {
+        Geometry::Type geometry;
+
+        switch (simplex.getVertices().size())
+        {
+        };
+
         Key key{geometry, order};
         auto search = s_rules.lower_bound(key);
         if (search != s_rules.end() && !(s_rules.key_comp()(key, search->first)))
@@ -35,7 +41,7 @@ namespace Rodin::Variational
         }
         else
         {
-          size_t dim = Geometry::getGeometryDimension(geometry);
+          size_t dim = simplex.getDimension();
           const mfem::IntegrationRule& ir = mfem::IntRules.Get(static_cast<int>(geometry), order);
           auto it = s_rules.insert(search, {key, QuadratureRule(ir, dim)});
           return it->second;

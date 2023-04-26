@@ -1,5 +1,6 @@
 set(RodinBenchmarks_SRCS
-  Poisson.cpp)
+  Poisson.cpp
+  MeshIO.cpp)
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
 target_link_libraries(RodinBenchmarks

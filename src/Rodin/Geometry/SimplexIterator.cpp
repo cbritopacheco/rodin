@@ -10,25 +10,25 @@
 namespace Rodin::Geometry
 {
   // ---- SimplexIterator ---------------------------------------------------
-  SimplexIterator::SimplexIterator(
+  PolytopeIterator::PolytopeIterator(
       size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
     :  m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()),
       m_dirty(false)
   {}
 
-  bool SimplexIterator::end() const
+  bool PolytopeIterator::end() const
   {
     return getIndexGenerator().end();
   }
 
-  SimplexIterator& SimplexIterator::operator++()
+  PolytopeIterator& PolytopeIterator::operator++()
   {
     ++getIndexGenerator();
     m_dirty = true;
     return *this;
   }
 
-  Simplex& SimplexIterator::operator*() const noexcept
+  Polytope& PolytopeIterator::operator*() const noexcept
   {
     if (!m_simplex || m_dirty)
       m_simplex.reset(generate());
@@ -36,7 +36,7 @@ namespace Rodin::Geometry
     return *m_simplex;
   }
 
-  Simplex* SimplexIterator::operator->() const noexcept
+  Polytope* PolytopeIterator::operator->() const noexcept
   {
     if (!m_simplex || m_dirty)
       m_simplex.reset(generate());
@@ -44,7 +44,7 @@ namespace Rodin::Geometry
     return m_simplex.get();
   }
 
-  Simplex* SimplexIterator::generate() const
+  Polytope* PolytopeIterator::generate() const
   {
     if (end()) return nullptr;
     const auto& gen = getIndexGenerator();
@@ -209,9 +209,6 @@ namespace Rodin::Geometry
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& mesh = getMesh();
-    Math::Vector coordinates(mesh.getSpaceDimension());
-    assert(coordinates.size() > 0);
-    std::copy_n(mesh.getHandle().GetVertex(index), coordinates.size(), coordinates.begin());
-    return new Vertex(index, mesh, coordinates);
+    return new Vertex(index, mesh, mesh.getVertexCoordinates(index));
   }
 }

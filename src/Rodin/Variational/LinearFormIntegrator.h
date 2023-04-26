@@ -99,7 +99,7 @@ namespace Rodin::Variational
        * element.
        */
       virtual
-      Math::Vector getVector(const Geometry::Simplex& element) const = 0;
+      Math::Vector getVector(const Geometry::Polytope& element) const = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;

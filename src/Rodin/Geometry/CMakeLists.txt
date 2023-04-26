@@ -2,6 +2,7 @@ set(RodinGeometry_HEADERS
   Mesh.h
   SubMesh.h
   Simplex.h
+  Connectivity.h
   SimplexIterator.h
   SimplexTransformation.h
   )
@@ -11,6 +12,7 @@ set(RodinGeometry_SRCS
   Simplex.cpp
   SimplexIterator.cpp
   SimplexTransformation.cpp
+  Connectivity.cpp
   SubMesh.cpp
   MeshBuilder.cpp
   SubMeshBuilder.cpp

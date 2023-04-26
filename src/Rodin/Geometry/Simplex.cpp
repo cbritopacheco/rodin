@@ -8,82 +8,74 @@
 
 namespace Rodin::Geometry
 {
-  bool operator<(const Simplex& lhs, const Simplex& rhs)
+  bool operator<(const Polytope& lhs, const Polytope& rhs)
   {
     return lhs.getIndex() < rhs.getIndex();
   }
 
   // ---- Simplex -----------------------------------------------------------
-  Simplex::Simplex(size_t dimension, Index index, const MeshBase& mesh)
+  Polytope::Polytope(size_t dimension, Index index, const MeshBase& mesh)
     : m_dimension(dimension), m_index(index), m_mesh(mesh)
+  {}
+
+  Attribute Polytope::getAttribute() const
   {
-    if (m_dimension == mesh.getDimension())
-    {
-      m_type = static_cast<Geometry::Type>(mesh.getHandle().GetElementGeometry(index));
-    }
-    else if (m_dimension == mesh.getDimension() - 1)
-    {
-      m_type = static_cast<Geometry::Type>(mesh.getHandle().GetFaceGeometry(index));
-    }
-    else if (m_dimension == 0)
-    {
-      m_type = Geometry::Type::Point;
-    }
-    else
-    {
-      assert(false);
-    }
+    return getMesh().getAttribute(getDimension(), getIndex());
   }
 
-  const Array<Index>& Simplex::getVertices() const
+  Polytope::Geometry Polytope::getGeometry() const
   {
-    return m_mesh.get().getConnectivity().getIncidence({getDimension(), 0}, getIndex());
+    return getMesh().getGeometry(getDimension(), getIndex());
   }
 
-  SimplexIterator Simplex::getAdjacent() const
+  VertexIterator Polytope::getVertex() const
   {
-    assert(false);
-    return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
+    const auto& vertices = getVertices();
+    return VertexIterator(
+        getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
-  SimplexIterator Simplex::getIncident() const
+  const Array<Index>& Polytope::getVertices() const
+  {
+    return m_mesh.get().getConnectivity().getPolytope(getDimension(), getIndex());
+  }
+
+  PolytopeIterator Polytope::getAdjacent() const
   {
     assert(false);
-    return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
+    return PolytopeIterator(0, getMesh(), EmptyIndexGenerator());
   }
 
-  const SimplexTransformation& Simplex::getTransformation() const
+  PolytopeIterator Polytope::getIncident() const
   {
-    return m_mesh.get().getSimplexTransformation(m_dimension, m_index);
+    assert(false);
+    return PolytopeIterator(0, getMesh(), EmptyIndexGenerator());
   }
 
-  Scalar Simplex::getVolume() const
+  const PolytopeTransformation& Polytope::getTransformation() const
+  {
+    return m_mesh.get().getPolytopeTransformation(m_dimension, m_index);
+  }
+
+  Scalar Polytope::getVolume() const
   {
     mfem::ElementTransformation& trans = getTransformation().getHandle();
     const Variational::QuadratureRule& qr =
-      Variational::QuadratureRule::get(getGeometry(), trans.OrderJ());
+      Variational::QuadratureRule::get(*this, trans.OrderJ());
     Scalar volume = 0.0;
     for (size_t i = 0; i < qr.size(); i++)
       volume += qr.getWeight(i) * trans.Weight();
     return volume;
   }
 
-  // VertexIterator Simplex::getVertices() const
-  // {
-  //   // mfem::Array<int> vs;
-  //   // m_data.element->GetVertices(vs);
-  //   // return std::vector<int>(vs.begin(), vs.end());
-  //   assert(false);
-  // }
-
   // ---- Element -----------------------------------------------------------
   Element::Element(Index index, const MeshBase& mesh)
-    : Simplex(mesh.getDimension(), index, mesh)
+    : Polytope(mesh.getDimension(), index, mesh)
   {}
 
   // ---- Face --------------------------------------------------------------
   Face::Face(Index index, const MeshBase& mesh)
-    : Simplex(mesh.getDimension() - 1, index, mesh)
+    : Polytope(mesh.getDimension() - 1, index, mesh)
   {}
 
   bool Face::isBoundary() const
@@ -98,7 +90,7 @@ namespace Rodin::Geometry
 
   // ---- Vertex -------------------------------------------------------------
   Vertex::Vertex(Index index, const MeshBase& mesh, const Math::Vector& coordinates)
-    : Simplex(0, index, mesh), m_coordinates(coordinates)
+    : Polytope(0, index, mesh), m_coordinates(coordinates)
   {}
 
   Scalar Vertex::operator()(size_t i) const
@@ -108,7 +100,7 @@ namespace Rodin::Geometry
   }
 
   // ---- Point --------------------------------------------------------------
-  Point::Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc)
+  Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc)
     : m_simplex(simplex), m_trans(trans), m_rc(rc), m_ip(Variational::Internal::vec2ip(m_rc))
   {
     m_trans.get().getHandle().SetIntPoint(&m_ip);

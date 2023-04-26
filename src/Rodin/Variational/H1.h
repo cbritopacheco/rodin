@@ -160,13 +160,13 @@ namespace Rodin::Variational
       }
 
       inline
-      auto getFiniteElement(const Geometry::Simplex& element) const
+      auto getFiniteElement(const Geometry::Polytope& element) const
       {
         return static_cast<const Derived&>(*this).getFiniteElement(element);
       }
 
       inline
-      mfem::Array<int> getDOFs(const Geometry::Simplex& element) const final override
+      mfem::Array<int> getDOFs(const Geometry::Polytope& element) const final override
       {
         mfem::Array<int> res;
         if (element.getDimension() == getMesh().getDimension())
@@ -231,7 +231,7 @@ namespace Rodin::Variational
 
       inline
       FiniteElement<H1<Scalar, Context>>
-      getFiniteElement(const Geometry::Simplex& element) const
+      getFiniteElement(const Geometry::Polytope& element) const
       {
         if (element.getDimension() == this->getMesh().getDimension())
         {
@@ -278,7 +278,7 @@ namespace Rodin::Variational
       {
         m_fe.resize(mesh.getDimension() + 1);
         for (size_t i = 0; i < mesh.getDimension() + 1; i++)
-          m_fe[i].resize(mesh.getSimplexCount(i));
+          m_fe[i].resize(mesh.getCount(i));
       }
 
       H1(const H1& other)
@@ -297,7 +297,7 @@ namespace Rodin::Variational
 
       inline
       const FiniteElement<H1<Math::Vector, Context>>&
-      getFiniteElement(const Geometry::Simplex& simplex) const
+      getFiniteElement(const Geometry::Polytope& simplex) const
       {
         assert(m_fe.size() > simplex.getDimension());
         assert(m_fe[simplex.getDimension()].size() > simplex.getIndex());

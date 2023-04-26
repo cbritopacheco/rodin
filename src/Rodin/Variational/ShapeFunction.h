@@ -125,7 +125,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return static_cast<const Derived&>(*this).getDOFs(element);
       }
@@ -353,7 +353,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
       }
@@ -445,7 +445,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
       }

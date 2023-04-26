@@ -53,7 +53,7 @@ namespace Rodin::Variational
       using FES = H1<Scalar, Ps...>;
 
       constexpr
-      FiniteElement(const Geometry::Simplex& simplex, const mfem::FiniteElement* handle)
+      FiniteElement(const Geometry::Polytope& simplex, const mfem::FiniteElement* handle)
         : m_rdim(simplex.getDimension()), m_handle(handle)
       {}
 
@@ -131,7 +131,7 @@ namespace Rodin::Variational
       using FES = H1<Math::Vector, Ps...>;
 
       constexpr
-      FiniteElement(size_t vdim, const Geometry::Simplex& simplex, const mfem::FiniteElement* handle)
+      FiniteElement(size_t vdim, const Geometry::Polytope& simplex, const mfem::FiniteElement* handle)
         : m_rdim(simplex.getDimension()), m_vdim(vdim), m_handle(handle)
       {}
 

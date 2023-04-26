@@ -9,31 +9,29 @@
 
 #include <deque>
 #include <vector>
-#include <unordered_map>
 
+#include "Types.h"
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
   template <class T>
-  class SimplexIndexed
+  class PolytopeIndexed
   {
     public:
-      using Map = std::unordered_map<Index, T>;
+      PolytopeIndexed() = default;
 
-      SimplexIndexed() = default;
-
-      SimplexIndexed(size_t meshDimension)
+      PolytopeIndexed(size_t meshDimension)
         : m_tracked(meshDimension + 1)
       {}
 
-      SimplexIndexed(const SimplexIndexed&) = default;
+      PolytopeIndexed(const PolytopeIndexed&) = default;
 
-      SimplexIndexed(SimplexIndexed&&) = default;
+      PolytopeIndexed(PolytopeIndexed&&) = default;
 
-      SimplexIndexed& operator=(const SimplexIndexed&) = default;
+      PolytopeIndexed& operator=(const PolytopeIndexed&) = default;
 
-      SimplexIndexed& operator=(SimplexIndexed&&) = default;
+      PolytopeIndexed& operator=(PolytopeIndexed&&) = default;
 
       auto begin(size_t d)
       {
@@ -55,6 +53,11 @@ namespace Rodin::Geometry
         return m_tracked[d].end();
       }
 
+      size_t size(size_t d) const
+      {
+        return m_tracked[d].size();
+      }
+
       auto cbegin(size_t d) const
       {
         return m_tracked[d].begin();
@@ -66,14 +69,14 @@ namespace Rodin::Geometry
       }
 
       inline
-      SimplexIndexed& initialize(size_t meshDimension)
+      PolytopeIndexed& initialize(size_t meshDimension)
       {
         m_tracked.resize(meshDimension + 1);
         return *this;
       }
 
       inline
-      SimplexIndexed& track(size_t d, Index i, T&& value)
+      PolytopeIndexed& track(size_t d, Index i, T&& value)
       {
         assert(m_tracked.size() > 0);
         assert(d < m_tracked.size());
@@ -82,7 +85,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      SimplexIndexed& track(size_t d, Index i, const T& value)
+      PolytopeIndexed& track(size_t d, Index i, const T& value)
       {
         assert(m_tracked.size() > 0);
         assert(d < m_tracked.size());
@@ -105,6 +108,12 @@ namespace Rodin::Geometry
         assert(d < m_tracked.size());
         assert(isTracked(d, i));
         return m_tracked[d].at(i);
+      }
+
+      inline
+      auto find(size_t d, Index i) const
+      {
+        return m_tracked[d].find(i);
       }
 
       inline
@@ -136,7 +145,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      std::vector<std::unordered_map<Index, T>> m_tracked;
+      std::vector<UnorderedMap<Index, T>> m_tracked;
   };
 }
 

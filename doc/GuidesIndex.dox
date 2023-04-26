@@ -1,0 +1,12 @@
+/**
+  @page guides-index How-To Guides
+  @brief Utilization of Rodin features.
+
+  @tableofcontents
+
+  @subsection guides-geometry How to use the Rodin::Geometry module
+
+  - @subpage guides-polytopes
+
+  */
+

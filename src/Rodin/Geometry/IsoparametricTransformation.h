@@ -19,7 +19,7 @@ namespace Rodin::Geometry
    * @brief Represents a transformation between the reference space to the
    * physical space of a simplex.
    */
-  class IsoparametricTransformation final : public SimplexTransformation
+  class IsoparametricTransformation final : public PolytopeTransformation
   {
     public:
       IsoparametricTransformation(mfem::IsoparametricTransformation* trans)

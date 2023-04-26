@@ -115,7 +115,7 @@ namespace Rodin::Variational
        * element.
        */
       virtual
-      Math::Matrix getMatrix(const Geometry::Simplex& element) const = 0;
+      Math::Matrix getMatrix(const Geometry::Polytope& element) const = 0;
 
       virtual
       BilinearFormIntegratorBase* copy() const noexcept override = 0;

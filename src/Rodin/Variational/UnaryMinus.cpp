@@ -31,7 +31,7 @@ namespace Rodin::Variational
   }
 
   Math::Vector
-  UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Simplex& simplex)
+  UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Polytope& simplex)
   const
   {
     return -1.0 * m_op->getVector(simplex);
@@ -67,7 +67,7 @@ namespace Rodin::Variational
 
   Math::Matrix
   UnaryMinus<BilinearFormIntegratorBase>
-  ::getMatrix(const Geometry::Simplex& element) const
+  ::getMatrix(const Geometry::Polytope& element) const
   {
     return -1.0 * m_op->getMatrix(element);
   }

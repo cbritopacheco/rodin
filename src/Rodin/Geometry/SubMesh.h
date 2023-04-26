@@ -56,7 +56,7 @@ namespace Rodin::Geometry
 
           std::optional<Mesh<Context::Serial>::Builder> m_mbuild;
           std::vector<Index> m_sidx;
-          SimplexIndexed<Attribute> m_attrs;
+          PolytopeIndexed<Attribute> m_attrs;
 
           std::vector<boost::bimap<Index, Index>> m_s2ps;
       };
@@ -102,7 +102,7 @@ namespace Rodin::Geometry
         return m_s2ps.at(getDimension());
       }
 
-      SubMesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
+      SubMesh<Context::Serial>::Builder initialize(size_t sdim);
 
     private:
       std::reference_wrapper<const Mesh<Context::Serial>> m_parent;

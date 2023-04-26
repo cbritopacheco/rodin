@@ -597,9 +597,11 @@ namespace Rodin::Variational
         using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
         if constexpr (std::is_same_v<ValueRangeType, Scalar>)
         {
-          int maxBdrAttr = this->getFiniteElementSpace()
-                                .getMesh()
-                                .getHandle().bdr_attributes.Max();
+          int maxBdrAttr = 0;
+          assert(false);
+          // int maxBdrAttr = this->getFiniteElementSpace()
+          //                       .getMesh()
+          //                       .getHandle().bdr_attributes.Max();
           mfem::Array<int> marker(maxBdrAttr);
           if (attrs.size() == 0)
           {
@@ -623,9 +625,11 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
         {
-          int maxBdrAttr = this->getFiniteElementSpace()
-                                  .getMesh()
-                                  .getHandle().bdr_attributes.Max();
+          int maxBdrAttr = 0;
+          assert(false);
+          // int maxBdrAttr = this->getFiniteElementSpace()
+          //                         .getMesh()
+          //                         .getHandle().bdr_attributes.Max();
           mfem::Array<int> marker(maxBdrAttr);
           if (attrs.size() == 0)
           {
