@@ -230,7 +230,9 @@ namespace Rodin::External::MMG
               }
           }, split);
         }
-        rodinMesh.getHandle().SetAttributes();
+
+        assert(false);
+        // rodinMesh.getHandle().SetAttributes();
 
         return rodinMesh;
       }

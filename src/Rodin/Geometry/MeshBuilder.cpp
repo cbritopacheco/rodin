@@ -16,107 +16,76 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::setReference(Mesh<Context::Serial>& mesh)
   {
-    m_dim = mesh.getDimension();
     m_sdim = mesh.getSpaceDimension();
 
     // Track the object
     m_ref.emplace(std::ref(mesh));
 
-    // Set counts to zero
-    m_count.initialize(m_dim);
-
     // Set indexes
-    m_attrs.initialize(m_dim);
-    m_transformations.initialize(m_dim);
+    m_attrs.initialize(m_sdim);
+    m_transformations.initialize(m_sdim);
 
     // Emplace empty connectivity objects
-    m_connectivity.initialize(m_dim);
+    m_connectivity.initialize(m_sdim);
 
-    // Emplace the implementation
-    m_impl.reset(new mfem::Mesh(m_dim, 0, 0, 0, m_sdim));
+    return *this;
+  }
 
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::vertex(Math::Vector&& x)
+  {
+    assert(x.size() >= 0);
+    m_vertices.push_back(std::move(x));
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::vertex(const Math::Vector& x)
   {
-    auto sdim = m_impl->SpaceDimension();
     assert(x.size() >= 0);
-    if (static_cast<decltype(sdim)>(x.size()) != sdim)
-    {
-      Alert::Exception()
-        << "Vertex dimension is different from space dimension"
-        << " (" << x.size() << " != " << sdim << ")"
-        << Alert::Raise;
-    }
-    Index idx = m_impl->AddVertex(x.data());
-    m_connectivity.connect({0, 0}, {idx});
+    m_vertices.push_back(x);
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::element(Type geom, const Array<Index>& vs)
+  Mesh<Context::Serial>::Builder::attribute(size_t d, Index idx, Attribute attr)
   {
-    assert(getGeometryDimension(geom) == m_ref->get().getDimension());
-    return simplex(geom, vs);
+    m_attrs.track(d, idx, attr);
+    return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::face(Type geom, const Array<Index>& vs)
+  Mesh<Context::Serial>::Builder::polytope(Polytope::Geometry t, const Array<Index>& vs)
   {
-    assert(getGeometryDimension(geom) == m_ref->get().getDimension() - 1);
-    return simplex(geom, vs);
+    m_connectivity.polytope(t, vs);
+    return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::simplex(Type geom, const Array<Index>& vs)
+  Mesh<Context::Serial>::Builder::polytope(Polytope::Geometry t, Array<Index>&& vs)
   {
-    assert(m_ref.has_value());
-    const auto& ref = m_ref->get();
+    m_connectivity.polytope(t, std::move(vs));
+    return *this;
+  }
 
-    assert(getGeometryDimension(geom) <= ref.getDimension());
-    const size_t dim = getGeometryDimension(geom);
-    m_connectivity.connect({dim, 0}, vs);
-
-    if (dim == ref.getDimension())
-    {
-      assert(m_ref.has_value());
-      mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
-      std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
-      m_impl->AddElement(el);
-    }
-    else if (dim == ref.getDimension() - 1)
-    {
-      mfem::Element* el = m_impl->NewElement(static_cast<int>(geom));
-      std::copy_n(vs.begin(), el->GetNVertices(), el->GetVertices());
-      m_impl->AddBdrElement(el);
-    }
-    else
-    {
-      assert(false);
-    }
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::reserve(size_t d, size_t count)
+  {
+    m_attrs.reserve(d, count);
+    m_connectivity.reserve(d, count);
+    if (d == 0) m_vertices.reserve(count);
     return *this;
   }
 
   void Mesh<Context::Serial>::Builder::finalize()
   {
-    m_impl->FinalizeTopology();
-    m_impl->Finalize(false, true);
-
-    // TODO: Compute counts of all simplices
-    m_count.at(m_dim) = m_impl->GetNE();
-    m_count.at(m_dim - 1) = m_impl->GetNumFaces();
-    m_count.at(0) = m_impl->GetNV();
+    m_connectivity.nodes(m_vertices.size());
 
     assert(m_ref.has_value());
     auto& ref = m_ref->get();
 
-    ref.m_impl = std::move(m_impl);
-
-    ref.m_count = std::move(m_count);
     ref.m_connectivity = std::move(m_connectivity);
-
+    ref.m_vertices = std::move(m_vertices);
     ref.m_attrs = std::move(m_attrs);
     ref.m_transformations = std::move(m_transformations);
   }

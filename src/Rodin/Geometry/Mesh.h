@@ -11,8 +11,6 @@
 #include <string>
 #include <deque>
 
-#include <mfem.hpp>
-
 #include <boost/filesystem.hpp>
 
 #include "Rodin/Math.h"
@@ -68,7 +66,7 @@ namespace Rodin::Geometry
       MeshBase& displace(const Variational::GridFunction<FES>& u)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-        getHandle().MoveNodes(u.getHandle());
+        assert(false);
         flush();
         return *this;
       }
@@ -94,7 +92,8 @@ namespace Rodin::Geometry
       Scalar getMaximumDisplacement(const Variational::GridFunction<FES>& u)
       {
         Scalar res;
-        getHandle().CheckDisplacements(u.getHandle(), res);
+        assert(false);
+        // getHandle().CheckDisplacements(u.getHandle(), res);
         return res;
       }
 
@@ -142,17 +141,17 @@ namespace Rodin::Geometry
 
       size_t getVertexCount() const
       {
-        return getSimplexCount(0);
+        return getCount(0);
       }
 
       size_t getFaceCount() const
       {
-        return getSimplexCount(getDimension() - 1);
+        return getCount(getDimension() - 1);
       }
 
       size_t getElementCount() const
       {
-        return getSimplexCount(getDimension());
+        return getCount(getDimension());
       }
 
       Attribute getFaceAttribute(Index index) const
@@ -202,14 +201,14 @@ namespace Rodin::Geometry
        * @returns Set of all the attributes in the mesh object.
        * @see getBoundaryAttributes() const
        */
-      std::set<Attribute> getAttributes() const;
+      virtual const std::set<Attribute>& getAttributes() const = 0;
 
       /**
        * @brief Gets the labels of the boundary elements in the mesh.
        * @returns Set of all the boundary attributes in the mesh object.
        * @see getAttributes() const
        */
-      std::set<Attribute> getBoundaryAttributes() const;
+      virtual const std::set<Attribute>& getBoundaryAttributes() const = 0;
 
       bool operator==(const MeshBase& other) const
       {
@@ -268,7 +267,7 @@ namespace Rodin::Geometry
 
       virtual FaceIterator getInterface() const = 0;
 
-      virtual size_t getSimplexCount(size_t dim) const = 0;
+      virtual size_t getCount(size_t dim) const = 0;
 
       virtual ElementIterator getElement(Index idx = 0) const = 0;
 
@@ -276,25 +275,24 @@ namespace Rodin::Geometry
 
       virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
-      virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const = 0;
 
-      virtual const SimplexTransformation& getSimplexTransformation(
+      virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const = 0;
+
+      virtual Polytope::Geometry getGeometry(size_t dimension, Index idx) const = 0;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
       virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
 
-      virtual const Connectivity& getConnectivity() const = 0;
+      virtual MeshConnectivity& getConnectivity() = 0;
+
+      virtual const MeshConnectivity& getConnectivity() const = 0;
+
+      virtual const Math::Vector& getVertexCoordinates(Index idx) const = 0;
 
       virtual void flush() = 0;
-
-      /**
-       * @internal
-       * @brief Gets the underlying handle for the internal mesh.
-       * @returns Constant reference to the underlying mfem::Mesh.
-       */
-      virtual mfem::Mesh& getHandle() const = 0;
   };
 
   using SerialMesh = Mesh<Context::Serial>;
@@ -320,65 +318,51 @@ namespace Rodin::Geometry
 
           Builder& operator=(Builder&&) = default;
 
+          Builder& reserve(size_t d, size_t count);
+
           Builder& setReference(Mesh<Context::Serial>& mesh);
 
           Builder& vertex(std::initializer_list<Scalar> l)
           {
             Math::Vector x(l.size());
             std::copy(l.begin(), l.end(), x.begin());
-            return vertex(x);
+            return vertex(std::move(x));
           }
+
+          Builder& vertex(Math::Vector&& x);
 
           Builder& vertex(const Math::Vector& x);
 
-          Builder& face(Type geom, const Array<Index>& vs);
+          Builder& attribute(size_t d, Index idx, Attribute attr);
 
-          Builder& face(Type geom, std::initializer_list<Index> vs)
+          Builder& polytope(Polytope::Geometry t, std::initializer_list<Index> vs)
           {
-            Array<Index> as(vs.size());
-            std::copy(vs.begin(), vs.end(), as.begin());
-            return face(geom, as);
+            return polytope(t, Array<Index>({ vs }));
           }
 
-          Builder& element(Type geom, const Array<Index>& vs);
+          Builder& polytope(Polytope::Geometry t, const Array<Index>& vs);
 
-          Builder& element(Type geom, std::initializer_list<Index> vs)
-          {
-            Array<Index> as(vs.size());
-            std::copy(vs.begin(), vs.end(), as.begin());
-            return element(geom, as);
-          }
-
-          Builder& simplex(Type geom, const Array<Index>& vs);
-
-          Builder& simplex(Type geom, std::initializer_list<Index> vs)
-          {
-            Array<Index> as(vs.size());
-            std::copy(vs.begin(), vs.end(), as.begin());
-            return simplex(geom, as);
-          }
+          Builder& polytope(Polytope::Geometry t, Array<Index>&& vs);
 
           void finalize() override;
 
         private:
-          size_t m_dim, m_sdim;
-          std::vector<size_t> m_sidx;
+          size_t m_sdim;
           std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
 
-          SimplexCount m_count;
-          Connectivity m_connectivity;
+          MeshConnectivity m_connectivity;
 
-          SimplexIndexed<Geometry::Attribute> m_attrs;
-          SimplexIndexed<std::unique_ptr<SimplexTransformation>> m_transformations;
+          std::vector<Math::Vector> m_vertices;
 
-          std::unique_ptr<mfem::Mesh> m_impl;
+          PolytopeIndexed<Geometry::Attribute> m_attrs;
+          PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
       };
 
       /**
       * @brief Constructs an empty mesh with no elements.
       */
       Mesh()
-        : m_dim(0), m_sdim(0)
+        : m_sdim(0)
       {}
 
       Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
@@ -395,26 +379,16 @@ namespace Rodin::Geometry
       * @brief Performs a copy of another mesh.
       */
       Mesh(const Mesh& other)
-        : m_dim(other.m_dim), m_sdim(other.m_sdim),
-          m_count(other.m_count),
-          m_connectivity(other.m_connectivity),
-          m_f2b(other.m_f2b)
-      {
-        m_impl.reset(new mfem::Mesh(*other.m_impl));
-      }
-
-      /**
-      * @internal
-      * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
-      */
-      explicit Mesh(mfem::Mesh&& mesh);
+        : m_sdim(other.m_sdim),
+          m_connectivity(other.m_connectivity)
+      {}
 
       /**
       * @brief Move assigns the mesh from another mesh.
       */
       Mesh& operator=(Mesh&& other) = default;
 
-      Mesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
+      Mesh<Context::Serial>::Builder initialize(size_t sdim);
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -477,17 +451,17 @@ namespace Rodin::Geometry
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
-      const SimplexIndexed<Attribute>& getAttributeIndex() const
+      const PolytopeIndexed<Attribute>& getAttributeIndex() const
       {
         return m_attrs;
       }
 
-      const SimplexIndexed<std::unique_ptr<SimplexTransformation>>& getTransformationIndex() const
+      const PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>& getTransformationIndex() const
       {
         return m_transformations;
       }
 
-      virtual size_t getSimplexCount(size_t dim) const override;
+      virtual size_t getCount(size_t dim) const override;
 
       virtual FaceIterator getBoundary() const override;
 
@@ -499,7 +473,7 @@ namespace Rodin::Geometry
 
       virtual VertexIterator getVertex(Index idx = 0) const override;
 
-      virtual SimplexIterator getSimplex(size_t dimension, Index idx) const override;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const override;
 
       virtual bool isSubMesh() const override
       {
@@ -514,12 +488,19 @@ namespace Rodin::Geometry
 
       virtual size_t getSpaceDimension() const override;
 
-      virtual const SimplexTransformation& getSimplexTransformation(
+      virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
+
+      virtual Polytope::Geometry getGeometry(size_t dimension, Index idx) const override;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      virtual const Connectivity& getConnectivity() const override
+      virtual MeshConnectivity& getConnectivity() override
+      {
+        return m_connectivity;
+      }
+
+      virtual const MeshConnectivity& getConnectivity() const override
       {
         return m_connectivity;
       }
@@ -529,19 +510,28 @@ namespace Rodin::Geometry
         m_transformations.clear();
       }
 
-      mfem::Mesh& getHandle() const override;
+      virtual const Math::Vector& getVertexCoordinates(Index idx) const override
+      {
+        assert(idx < m_vertices.size());
+        return m_vertices[idx];
+      }
+
+      virtual const std::set<Attribute>& getAttributes() const override;
+
+      virtual const std::set<Attribute>& getBoundaryAttributes() const override;
 
     private:
-      size_t m_dim, m_sdim;
+      size_t m_sdim;
 
-      SimplexCount m_count;
-      SimplexIndexed<Geometry::Attribute> m_attrs;
-      mutable SimplexIndexed<std::unique_ptr<SimplexTransformation>> m_transformations;
+      PolytopeIndexed<Geometry::Attribute> m_attrs;
+      std::vector<std::set<Attribute>> m_attributes;
 
-      Connectivity m_connectivity;
+      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
 
-      std::map<Index, Index> m_f2b;
-      std::unique_ptr<mfem::Mesh> m_impl;
+      mutable MeshConnectivity m_connectivity;
+
+      std::vector<Math::Vector> m_vertices;
+
   };
 }
 

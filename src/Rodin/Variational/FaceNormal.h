@@ -76,25 +76,26 @@ namespace Rodin::Variational
         }
         else
         {
-          int el1 = -1;
-          int el2 = -1;
-          const auto& meshHandle = simplex.getMesh().getHandle();
-          meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
-          if (el1 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el1)))
-          {
-            return value.normalized();
-          }
-          else if (el2 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el2)))
-          {
-            value = -1.0 * value;
-            return value.normalized();
-          }
-          else
-          {
-            assert(false);
-            value.setConstant(NAN);
-            return value;
-          }
+          // int el1 = -1;
+          // int el2 = -1;
+          assert(false);
+          // const auto& meshHandle = simplex.getMesh().getHandle();
+          // meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
+          // if (el1 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el1)))
+          // {
+          //   return value.normalized();
+          // }
+          // else if (el2 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el2)))
+          // {
+          //   value = -1.0 * value;
+          //   return value.normalized();
+          // }
+          // else
+          // {
+          //   assert(false);
+          //   value.setConstant(NAN);
+          //   return value;
+          // }
         }
       }
 

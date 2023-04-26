@@ -10,21 +10,18 @@
 #include <cstddef>
 
 #include "Rodin/Context.h"
+#include "Types.h"
 
 namespace Rodin::Geometry
 {
-  using Index = std::size_t;
-
-  using Attribute = std::size_t;
-
   template <class T>
   class ContainerIndexGenerator;
 
   enum class Type;
 
-  class SimplexTransformation;
+  class PolytopeTransformation;
 
-  class Simplex;
+  class Polytope;
 
   class Element;
 
@@ -34,7 +31,7 @@ namespace Rodin::Geometry
 
   class Point;
 
-  class SimplexIterator;
+  class PolytopeIterator;
 
   class ElementIterator;
 

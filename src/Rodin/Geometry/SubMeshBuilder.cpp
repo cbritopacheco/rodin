@@ -53,30 +53,30 @@ namespace Rodin::Geometry
      */
     for (const auto& idx : indices)
     {
-      auto simplex = parent.getSimplex(dim, idx);
+      auto simplex = parent.getPolytope(dim, idx);
 
       // Add simplex vertices to the resulting mesh
-      const Array<Index>& pvs =
-        parent.getConnectivity().getIncidence({dim, 0}, idx);
+      const auto& pvs = simplex->getVertices();
 
       Array<Index> vs(pvs.size());
-      for (Index i = 0; i < static_cast<Index>(vs.size()); i++)
+      for (Array<Index>::Index i = 0; i < pvs.size(); i++)
       {
-        Index pvidx = pvs[i];
+        const Index pvidx = pvs(i);
         if (m_s2ps[0].right.count(pvidx) == 0) // Only add vertex if it is not in the map
         {
           build.vertex(parent.getVertex(pvidx)->getCoordinates());
-          vs[i] = m_sidx[0]++;
-          m_s2ps[0].insert({ vs[i], pvidx });
+          const Index idx = m_sidx[0]++;
+          vs(i) = idx;
+          m_s2ps[0].insert({ idx, pvidx });
         }
         else // Else get the id of the vertex in the submesh
         {
-          vs[i] = m_s2ps[0].right.at(pvidx);
+          vs(i) = m_s2ps[0].right.at(pvidx);
         }
       }
 
       // Add element with the new vertex ordering
-      build.element(simplex->getGeometry(), vs);
+      build.polytope(simplex->getGeometry(), vs);
       m_s2ps[dim].insert({ m_sidx[dim]++, idx });
     }
 
@@ -111,24 +111,24 @@ namespace Rodin::Geometry
     //   }
     // }
 
-    if (dim == parent.getDimension()) // We are not in the surface case
-    {
-      for (auto it = parent.getBoundary(); !it.end(); ++it)
-      {
-        int el1 = -1, el2 = -1;
-        parent.getHandle().GetFaceElements(it->getIndex(), &el1, &el2);
-        if (indices.count(el1) || indices.count(el2))
-        {
-          assert(el1 >= 0 || el2 >= 0);
-          mfem::Array<int> pvs;
-          parent.getHandle().GetFaceVertices(it->getIndex(), pvs);
-          Array<Index> vs(pvs.Size());
-          for (int i = 0; i < pvs.Size(); i++)
-            vs[i] = m_s2ps[0].right.at(pvs[i]);
-          build.face(it->getGeometry(), vs);
-        }
-      }
-    }
+    // if (dim == parent.getDimension()) // We are not in the surface case
+    // {
+    //   for (auto it = parent.getBoundary(); !it.end(); ++it)
+    //   {
+    //     int el1 = -1, el2 = -1;
+    //     parent.getHandle().GetFaceElements(it->getIndex(), &el1, &el2);
+    //     if (indices.count(el1) || indices.count(el2))
+    //     {
+    //       assert(el1 >= 0 || el2 >= 0);
+    //       mfem::Array<int> pvs;
+    //       parent.getHandle().GetFaceVertices(it->getIndex(), pvs);
+    //       Array<Index> vs(pvs.Size());
+    //       for (int i = 0; i < pvs.Size(); i++)
+    //         vs[i] = m_s2ps[0].right.at(pvs[i]);
+    //       build.face(it->getGeometry(), vs);
+    //     }
+    //   }
+    // }
 
     return *this;
   }

@@ -7,11 +7,14 @@
 #ifndef RODIN_GEOMETRY_INDEXGENERATOR_H
 #define RODIN_GEOMETRY_INDEXGENERATOR_H
 
+#include <set>
 #include <memory>
 #include <utility>
 
 #include "ForwardDecls.h"
+
 #include "Simplex.h"
+#include "Types.h"
 
 namespace Rodin
 {
@@ -234,6 +237,63 @@ namespace Rodin::Geometry
     private:
       std::vector<Index> m_indices;
       std::vector<Index>::iterator m_it;
+  };
+
+  class SetIndexGenerator : public IndexGeneratorBase
+  {
+    public:
+      SetIndexGenerator(const IndexSet& indices)
+        : m_indices(indices),
+          m_it(m_indices.begin())
+      {}
+
+      SetIndexGenerator(IndexSet&& indices)
+        : m_indices(std::move(indices)),
+          m_it(m_indices.begin())
+      {}
+
+      SetIndexGenerator(SetIndexGenerator&& other)
+        : IndexGeneratorBase(std::move(other)),
+          m_indices(std::move(other.m_indices)),
+          m_it(std::move(other.m_it))
+      {}
+
+      SetIndexGenerator(const SetIndexGenerator& other)
+        : IndexGeneratorBase(other),
+          m_indices(other.m_indices),
+          m_it(other.m_it)
+      {}
+
+      bool end() const override
+      {
+        return m_it == m_indices.end();
+      }
+
+      SetIndexGenerator& operator++() override
+      {
+        ++m_it;
+        return *this;
+      }
+
+      Index operator*() const noexcept override
+      {
+        assert(!end());
+        return *m_it;
+      }
+
+      SetIndexGenerator* copy() & noexcept override
+      {
+        return new SetIndexGenerator(*this);
+      }
+
+      SetIndexGenerator* move() && noexcept override
+      {
+        return new SetIndexGenerator(std::move(*this));
+      }
+
+    private:
+      IndexSet m_indices;
+      IndexSet::iterator m_it;
   };
 }
 

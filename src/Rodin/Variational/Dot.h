@@ -193,7 +193,7 @@ namespace Rodin::Variational
       }
 
       inline
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }

@@ -5,10 +5,12 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Alert.h"
-#include "Rodin/IO/MeshLoader.h"
-#include "Rodin/IO/MeshPrinter.h"
+
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
+
+#include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/MEDIT.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
@@ -16,7 +18,6 @@
 #include "Simplex.h"
 #include "SimplexIterator.h"
 #include "IsoparametricTransformation.h"
-
 
 namespace Rodin::Geometry
 {
@@ -26,22 +27,20 @@ namespace Rodin::Geometry
     return (getSpaceDimension() - 1 == getDimension());
   }
 
-  std::set<Attribute> MeshBase::getAttributes() const
-  {
-    return std::set<Attribute>(
-        getHandle().attributes.begin(), getHandle().attributes.end());
-  }
-
-  std::set<Attribute> MeshBase::getBoundaryAttributes() const
-  {
-    return std::set<Attribute>(
-        getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
-  }
-
   // ---- Mesh<Context::Serial> ----------------------------------------------
+  const std::set<Attribute>& Mesh<Context::Serial>::getAttributes() const
+  {
+    return m_attributes[getDimension()];
+  }
+
+  const std::set<Attribute>& Mesh<Context::Serial>::getBoundaryAttributes() const
+  {
+    return m_attributes[getDimension()];
+  }
+
   size_t Mesh<Context::Serial>::getDimension() const
   {
-    return m_dim;
+    return m_connectivity.getMeshDimension();
   }
 
   size_t Mesh<Context::Serial>::getSpaceDimension() const
@@ -49,8 +48,8 @@ namespace Rodin::Geometry
     return m_sdim;
   }
 
-  const SimplexTransformation&
-  Mesh<Context::Serial>::getSimplexTransformation(size_t dimension, Index idx) const
+  const PolytopeTransformation&
+  Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
     if (m_transformations.isTracked(dimension, idx))
     {
@@ -59,85 +58,87 @@ namespace Rodin::Geometry
     }
     else
     {
-      const auto attribute = getAttribute(dimension, idx);
-      const mfem::Mesh& meshHandle = getHandle();
-      const mfem::GridFunction* nodes = meshHandle.GetNodes();
-      if (dimension == getDimension())
-      {
-        if (!nodes)
-        {
-          mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
-          trans->Attribute = attribute;
-          trans->ElementNo = idx;
-          trans->ElementType = mfem::ElementTransformation::ELEMENT;
-          trans->mesh = nullptr;
-          trans->Reset();
-          meshHandle.GetPointMatrix(idx, trans->GetPointMat());
-          trans->SetFE(
-              meshHandle.GetTransformationFEforElementType(
-                meshHandle.GetElementType(idx)));
-          m_transformations.track(
-              dimension, idx, std::unique_ptr<SimplexTransformation>(new IsoparametricTransformation(trans)));
-          return *m_transformations.at(dimension, idx);
-        }
-        else
-        {
-          assert(false);
-          return *m_transformations.at(dimension, idx);
-        }
-      }
-      else if (dimension == getDimension() - 1)
-      {
-        if (!nodes)
-        {
-          mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
-          trans->Attribute = attribute;
-          trans->ElementNo = idx;
-          trans->ElementType = mfem::ElementTransformation::FACE;
-          trans->mesh = nullptr;
-          mfem::DenseMatrix& pm = trans->GetPointMat();
-          trans->Reset();
-          const size_t spaceDim = getSpaceDimension();
-
-          mfem::Array<int> v;
-          meshHandle.GetFaceVertices(idx, v);
-          const int nv = v.Size();
-          pm.SetSize(spaceDim, nv);
-          for (size_t i = 0; i < spaceDim; i++)
-            for (int j = 0; j < nv; j++)
-              pm(i, j) = meshHandle.GetVertex(v[j])[i];
-          trans->SetFE(
-              meshHandle.GetTransformationFEforElementType(
-                meshHandle.GetFaceElementType(idx)));
-          m_transformations.track(
-              dimension, idx, std::unique_ptr<SimplexTransformation>(new IsoparametricTransformation(trans)));
-          return *m_transformations.at(dimension, idx);
-        }
-        else
-        {
-          assert(false);
-          return *m_transformations.at(dimension, idx);
-        }
-      }
-      else if (dimension == 0)
-      {
-        assert(false);
-        return *m_transformations.at(dimension, idx);
-      }
-      else
-      {
-        assert(false);
-        return *m_transformations.at(dimension, idx);
-      }
+      assert(false);
     }
+    // else
+    // {
+    //   const auto attribute = getAttribute(dimension, idx);
+    //   const mfem::Mesh& meshHandle = getHandle();
+    //   const mfem::GridFunction* nodes = meshHandle.GetNodes();
+    //   if (dimension == getDimension())
+    //   {
+    //     if (!nodes)
+    //     {
+    //       mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+    //       trans->Attribute = attribute;
+    //       trans->ElementNo = idx;
+    //       trans->ElementType = mfem::ElementTransformation::ELEMENT;
+    //       trans->mesh = nullptr;
+    //       trans->Reset();
+    //       meshHandle.GetPointMatrix(idx, trans->GetPointMat());
+    //       trans->SetFE(
+    //           meshHandle.GetTransformationFEforElementType(
+    //             meshHandle.GetElementType(idx)));
+    //       m_transformations.track(
+    //           dimension, idx, std::unique_ptr<PolytopeTransformation>(new IsoparametricTransformation(trans)));
+    //       return *m_transformations.at(dimension, idx);
+    //     }
+    //     else
+    //     {
+    //       assert(false);
+    //       return *m_transformations.at(dimension, idx);
+    //     }
+    //   }
+    //   else if (dimension == getDimension() - 1)
+    //   {
+    //     if (!nodes)
+    //     {
+    //       mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+    //       trans->Attribute = attribute;
+    //       trans->ElementNo = idx;
+    //       trans->ElementType = mfem::ElementTransformation::FACE;
+    //       trans->mesh = nullptr;
+    //       mfem::DenseMatrix& pm = trans->GetPointMat();
+    //       trans->Reset();
+    //       const size_t spaceDim = getSpaceDimension();
+
+    //       mfem::Array<int> v;
+    //       meshHandle.GetFaceVertices(idx, v);
+    //       const int nv = v.Size();
+    //       pm.SetSize(spaceDim, nv);
+    //       for (size_t i = 0; i < spaceDim; i++)
+    //         for (int j = 0; j < nv; j++)
+    //           pm(i, j) = meshHandle.GetVertex(v[j])[i];
+    //       trans->SetFE(
+    //           meshHandle.GetTransformationFEforElementType(
+    //             meshHandle.GetFaceElementType(idx)));
+    //       m_transformations.track(
+    //           dimension, idx, std::unique_ptr<PolytopeTransformation>(new IsoparametricTransformation(trans)));
+    //       return *m_transformations.at(dimension, idx);
+    //     }
+    //     else
+    //     {
+    //       assert(false);
+    //       return *m_transformations.at(dimension, idx);
+    //     }
+    //   }
+    //   else if (dimension == 0)
+    //   {
+    //     assert(false);
+    //     return *m_transformations.at(dimension, idx);
+    //   }
+    //   else
+    //   {
+    //     assert(false);
+    //     return *m_transformations.at(dimension, idx);
+    //   }
+    // }
   }
 
   Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
   {
-    mfem::Vector vs;
-    getHandle().GetVertices(vs);
-    vs *= c;
-    getHandle().SetVertices(vs);
+    for (auto x : m_vertices)
+      x *= c;
     return *this;
   }
 
@@ -158,12 +159,6 @@ namespace Rodin::Geometry
       case IO::FileFormat::MFEM:
       {
         IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
-        printer.print(ofs);
-        break;
-      }
-      case IO::FileFormat::GMSH:
-      {
-        IO::MeshPrinter<IO::FileFormat::GMSH, Context::Serial> printer(*this);
         printer.print(ofs);
         break;
       }
@@ -267,80 +262,36 @@ namespace Rodin::Geometry
   }
 #endif
 
-  Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
-    : m_dim(mesh.Dimension()), m_sdim(mesh.SpaceDimension())
+  size_t Mesh<Context::Serial>::getCount(size_t dimension) const
   {
-    m_impl.reset(new mfem::Mesh(std::move(mesh)));
-
-    // TODO: This whole constructors is ugly. In general we should try and
-    // build the mesh with the MeshBuilder object.
-
-    m_count.initialize(m_dim);
-    m_count.at(m_dim) = getHandle().GetNE();
-    m_count.at(m_dim - 1) = getHandle().GetNumFaces();
-    m_count.at(0) = getHandle().GetNV();
-
-    m_attrs.initialize(m_dim);
-    m_attrs.reserve(m_dim, getHandle().GetNE());
-    m_attrs.reserve(m_dim - 1, getHandle().GetNBE());
-
-    m_connectivity.initialize(m_dim);
-    m_connectivity.reserve(m_dim, getHandle().GetNE());
-    m_connectivity.reserve(0, getHandle().GetNV());
-
-    for (int i = 0; i < getHandle().GetNV(); i++)
-      m_connectivity.connect({ 0, 0 }, { static_cast<Index>(i) });
-
-    for (int i = 0; i < getHandle().GetNE(); i++)
-    {
-      // Attributes
-      m_attrs.track(m_dim, i, getHandle().GetAttribute(i));
-
-      // Connectivity
-      mfem::Array<int> mvs;
-      getHandle().GetElementVertices(i, mvs);
-      Array<Index> vs(mvs.Size());
-      std::copy(mvs.begin(), mvs.end(), mvs.begin());
-      m_connectivity.connect({m_dim, 0}, std::move(vs));
-    }
-
-    for (int i = 0; i < getHandle().GetNBE(); i++)
-      m_attrs.track(m_dim - 1, getHandle().GetBdrFace(i), getHandle().GetBdrAttribute(i));
-
-    for (int i = 0; i < getHandle().GetNBE(); i++)
-      m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
-
-    m_transformations.initialize(m_dim);
-  }
-
-  size_t Mesh<Context::Serial>::getSimplexCount(size_t dimension) const
-  {
-    return m_count.at(dimension);
+    return m_connectivity.getCount(dimension);
   }
 
   FaceIterator Mesh<Context::Serial>::getBoundary() const
   {
-    std::vector<Index> indices;
-    indices.reserve(getHandle().GetNBE());
-    for (int i = 0; i < getHandle().GetNBE(); i++)
-    {
-      int idx = getHandle().GetBdrFace(i);
-      if (!getHandle().FaceIsInterior(idx))
-        indices.push_back(idx);
-    }
-    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+    assert(false);
+    // std::vector<Index> indices;
+    // indices.reserve(getHandle().GetNBE());
+    // for (int i = 0; i < getHandle().GetNBE(); i++)
+    // {
+    //   int idx = getHandle().GetBdrFace(i);
+    //   if (!getHandle().FaceIsInterior(idx))
+    //     indices.push_back(idx);
+    // }
+    // return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   FaceIterator Mesh<Context::Serial>::getInterface() const
   {
-    std::vector<Index> indices;
-    indices.reserve(getHandle().GetNumFaces());
-    for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
-    {
-      if (getHandle().FaceIsInterior(idx))
-        indices.push_back(idx);
-    }
-    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+    assert(false);
+    // std::vector<Index> indices;
+    // indices.reserve(getHandle().GetNumFaces());
+    // for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
+    // {
+    //   if (getHandle().FaceIsInterior(idx))
+    //     indices.push_back(idx);
+    // }
+    // return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
@@ -358,27 +309,35 @@ namespace Rodin::Geometry
     return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
   }
 
-  SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
+  PolytopeIterator Mesh<Context::Serial>::getPolytope(size_t dimension, Index idx) const
   {
-    return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getSimplexCount(dimension)));
+    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));
   }
 
   bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
   {
-    return getHandle().FaceIsInterior(faceIdx);
+    assert(false);
+    // return getHandle().FaceIsInterior(faceIdx);
   }
 
   bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
   {
-    return !getHandle().FaceIsInterior(faceIdx);
+    assert(false);
+    // return !getHandle().FaceIsInterior(faceIdx);
+  }
+
+  Polytope::Geometry Mesh<Context::Serial>::getGeometry(size_t dimension, Index idx) const
+  {
+    return m_connectivity.getGeometry(dimension, idx);
   }
 
   Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
   {
-    if (m_attrs.isTracked(dimension, index))
-      return m_attrs.at(dimension, index);
+    auto it = m_attrs.find(dimension, index);
+    if (it == m_attrs.end(dimension))
+      return RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
     else
-      return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+      return it->second;
   }
 
   Mesh<Context::Serial>&
@@ -406,12 +365,6 @@ namespace Rodin::Geometry
         loader.load(input);
         break;
       }
-      case IO::FileFormat::GMSH:
-      {
-        IO::MeshLoader<IO::FileFormat::GMSH, Context::Serial> loader(*this);
-        loader.load(input);
-        break;
-      }
       case IO::FileFormat::MEDIT:
       {
         IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
@@ -420,9 +373,8 @@ namespace Rodin::Geometry
       }
       default:
       {
-        Alert::Exception()
-          << "Loading from \"" << fmt << "\" format unsupported."
-          << Alert::Raise;
+        Alert::Exception() << "Loading from \"" << fmt << "\" format unsupported."
+                           << Alert::Raise;
         break;
       }
     }
@@ -439,21 +391,18 @@ namespace Rodin::Geometry
   {
     SubMesh<Context::Serial> res(*this);
     std::set<Index> indices;
-    for (Index i = 0; i < getSimplexCount(getDimension()); i++)
+    for (Index i = 0; i < getCount(getDimension()); i++)
     {
       if (attrs.count(getAttribute(getDimension(), i)))
         indices.insert(i);
     }
-    res.initialize(getDimension(), getSpaceDimension())
-       .include(indices)
-       .finalize();
+    res.initialize(getSpaceDimension()).include(indices).finalize();
     return res;
   }
 
   Mesh<Context::Serial>::Builder
-  Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
+  Mesh<Context::Serial>::initialize(size_t sdim)
   {
-    m_dim = dim;
     m_sdim = sdim;
     Mesh<Context::Serial>::Builder build;
     build.setReference(*this);
@@ -462,14 +411,11 @@ namespace Rodin::Geometry
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
   {
-    assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
     SubMesh<Context::Serial> res(*this);
     std::set<Index> indices;
     for (auto it = getBoundary(); !it.end(); ++it)
       indices.insert(it->getIndex());
-    res.initialize(getDimension() - 1, getSpaceDimension())
-       .include(indices)
-       .finalize();
+    res.initialize(getSpaceDimension()).include(indices).finalize();
     return res;
   }
 
@@ -484,11 +430,6 @@ namespace Rodin::Geometry
     for (const auto& a : attrs)
       complement.erase(a);
     return keep(complement);
-  }
-
-  mfem::Mesh& Mesh<Context::Serial>::getHandle() const
-  {
-    return *m_impl;
   }
 }
 

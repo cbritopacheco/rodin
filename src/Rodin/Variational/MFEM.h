@@ -102,18 +102,20 @@ namespace Rodin::Variational::Internal
           {
             res = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getElement(trans.ElementNo),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
+                  m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension(),
                     trans.ElementNo), rc));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
-            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            // int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            int faceIdx = 0;
+            assert(false);
             res =
               m_s.get().getValue(
                   Geometry::Point(
                     *m_mesh.get().getFace(faceIdx),
-                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, faceIdx),
+                    m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension() - 1, faceIdx),
                     rc));
             break;
           }
@@ -123,7 +125,7 @@ namespace Rodin::Variational::Internal
               m_s.get().getValue(
                   Geometry::Point(
                     *m_mesh.get().getFace(trans.ElementNo),
-                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, trans.ElementNo),
+                    m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension() - 1, trans.ElementNo),
                     rc));
             break;
           }
@@ -232,18 +234,20 @@ namespace Rodin::Variational::Internal
               m_s.get().getValue(
                   Geometry::Point(
                     *m_mesh.get().getElement(trans.ElementNo),
-                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(), trans.ElementNo),
+                    m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension(), trans.ElementNo),
                     rc));
             break;
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
-            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            int faceIdx = 0;
+            assert(false);
+            // int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
             vec =
               m_s.get().getValue(
                 Geometry::Point(
                   *m_mesh.get().getFace(faceIdx),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, faceIdx),
+                  m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension() - 1, faceIdx),
                   rc));
             break;
           }
@@ -253,7 +257,7 @@ namespace Rodin::Variational::Internal
               m_s.get().getValue(
                   Geometry::Point(
                     *m_mesh.get().getFace(trans.ElementNo),
-                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension() - 1, trans.ElementNo),
+                    m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension() - 1, trans.ElementNo),
                     rc));
             break;
           }
@@ -309,7 +313,7 @@ namespace Rodin::Variational::Internal
               m_s.get().getValue(
                   Geometry::Point(
                     *m_mesh.get().getElement(trans.ElementNo),
-                    m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension(),
+                    m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension(),
                       trans.ElementNo), rc));
             break;
           }
@@ -318,7 +322,7 @@ namespace Rodin::Variational::Internal
             int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
             value = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getFace(faceIdx),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                  m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension()
                     - 1, faceIdx), rc));
             break;
           }
@@ -326,7 +330,7 @@ namespace Rodin::Variational::Internal
           {
             value = m_s.get().getValue(Geometry::Point(
                   *m_mesh.get().getFace(trans.ElementNo),
-                  m_mesh.get().getSimplexTransformation(m_mesh.get().getDimension()
+                  m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension()
                     - 1, trans.ElementNo), rc));
             break;
           }

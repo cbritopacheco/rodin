@@ -7,11 +7,17 @@
 #ifndef RODIN_GEOMETRY_CONNECTIVITY_H
 #define RODIN_GEOMETRY_CONNECTIVITY_H
 
+#include <set>
 #include <vector>
+#include <iostream>
+#include <unordered_map>
 
 #include "Rodin/Array.h"
 
 #include "ForwardDecls.h"
+
+#include "Types.h"
+#include "Simplex.h"
 
 namespace Rodin::Geometry
 {
@@ -24,137 +30,87 @@ namespace Rodin::Geometry
    * @f]
    * for a fixed pair of topological dimensions @f$ (d, d') @f$.
    */
-  class Connectivity
+  class MeshConnectivity
   {
     public:
-      using Incidence = std::vector<Array<Index>>;
+      using IndexMap = FlatMap<IndexSet, Index>;
 
-      Connectivity() = default;
-
-      Connectivity(size_t meshDim)
-        : m_meshDimension(meshDim)
+      struct SubPolytope
       {
-        initialize(meshDim);
+        Polytope::Geometry geometry;
+        Array<Index> vertices;
+      };
+
+      MeshConnectivity() = default;
+
+      MeshConnectivity(const MeshConnectivity&) = default;
+
+      MeshConnectivity(MeshConnectivity&&) = default;
+
+      MeshConnectivity& operator=(const MeshConnectivity&) = default;
+
+      MeshConnectivity& operator=(MeshConnectivity&&) = default;
+
+      MeshConnectivity& initialize(size_t meshDim);
+
+      MeshConnectivity& nodes(size_t count);
+
+      MeshConnectivity& reserve(size_t d, size_t count);
+
+      MeshConnectivity& polytope(
+          Geometry::Polytope::Geometry t, std::initializer_list<Index> p)
+      {
+        Array<Index> arr(p.size());
+        std::copy(p.begin(), p.end(), arr.begin());
+        return polytope(t, std::move(arr));
       }
 
-      Connectivity(const Connectivity&) = default;
+      MeshConnectivity& polytope(
+          Geometry::Polytope::Geometry t, const Array<Index>& polytope);
 
-      Connectivity(Connectivity&&) = default;
+      MeshConnectivity& polytope(
+          Geometry::Polytope::Geometry t, Array<Index>&& polytope);
 
-      Connectivity& operator=(const Connectivity&) = default;
+      std::vector<SubPolytope> local(size_t dim, Index i);
 
-      Connectivity& operator=(Connectivity&&) = default;
+      /**
+       * D -> d and D -> 0 from D -> 0 and D -> D
+       */
+      MeshConnectivity& build(size_t d);
 
-      inline
-      Connectivity& initialize(size_t meshDim)
-      {
-        m_connectivity.resize(meshDim + 1);
-        for (auto& v : m_connectivity)
-          v.resize(meshDim + 1);
+      MeshConnectivity& compute(size_t d, size_t dp);
 
-        m_dirty.resize(meshDim + 1);
-        for (auto& v : m_dirty)
-          v.resize(meshDim + 1, true);
+      MeshConnectivity& transpose(size_t d, size_t dp);
 
-        return *this;
-      }
+      MeshConnectivity& intersection(size_t d, size_t dp, size_t dpp);
 
-      inline
-      Connectivity& reserve(size_t d, size_t count)
-      {
-        assert(d < m_connectivity.size());
-        for (auto& v : m_connectivity[d])
-          v.reserve(count);
-        return *this;
-      }
+      size_t getCount(size_t dim) const;
 
-      inline
-      Connectivity& reserve(const std::pair<size_t, size_t> p, size_t count)
-      {
-        const auto& [d, dp] = p;
-        assert(d < m_connectivity.size());
-        assert(dp < m_connectivity[d].size());
-        m_connectivity[d][dp].reserve(count);
-        return *this;
-      }
+      size_t getMeshDimension() const;
 
-      inline
-      Connectivity& connect(const std::pair<size_t, size_t> p, std::initializer_list<Index> in)
-      {
-        Array<Index> a(in.size());
-        std::copy(in.begin(), in.end(), a.begin());
-        return connect(p, std::move(a));
-      }
+      const IndexMap& getIndexMap(size_t dim) const;
 
-      inline
-      Connectivity& connect(const std::pair<size_t, size_t> p, const Array<Index>& in)
-      {
-        const auto& [d, dp] = p;
-        assert(d < m_connectivity.size());
-        assert(dp < m_connectivity[d].size());
-        m_dirty[d][dp] = true;
-        m_connectivity[d][dp].push_back(in);
-        return *this;
-      }
+      const std::optional<Index> getIndex(size_t dim, const IndexSet& key) const;
 
-      inline
-      Connectivity& connect(const std::pair<size_t, size_t> p, Array<Index>&& in)
-      {
-        const auto& [d, dp] = p;
-        assert(d < m_connectivity.size());
-        assert(dp < m_connectivity[d].size());
-        m_dirty[d][dp] = true;
-        m_connectivity[d][dp].push_back(in);
-        return *this;
-      }
+      Polytope::Geometry getGeometry(size_t d, Index idx) const;
 
-      inline
-      const Incidence& getIncidence(size_t d, size_t dp) const
-      {
-        assert(d < m_connectivity.size());
-        assert(dp < m_connectivity[d].size());
-        return m_connectivity[d][dp];
-      }
+      const Array<Index>& getPolytope(size_t d, Index idx) const;
 
-      inline
-      const Array<Index>& getIncidence(const std::pair<size_t, size_t> p, Index idx) const
-      {
-        const auto& [d, dp] = p;
-        assert(d < m_connectivity.size());
-        assert(dp < m_connectivity[d].size());
-        assert(idx < m_connectivity[d][dp].size());
-        return m_connectivity[d][dp][idx];
-      }
+      const Incidence& getIncidence(size_t d, size_t dp) const;
 
-      inline
-      size_t getMeshDimension() const
-      {
-        return m_meshDimension;
-      }
-
-      void compute(size_t d, size_t dp)
-      {
-      }
-
-      void build(size_t d)
-      {
-        assert(false);
-      }
-
-      void transpose(size_t d, size_t dp)
-      {
-        assert(false);
-      }
-
-      void intersection(size_t d, size_t dp)
-      {
-        assert(false);
-      }
+      const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
 
     private:
-      size_t m_meshDimension;
-      std::vector<std::vector<Incidence>> m_connectivity;
+      size_t m_maximalDimension;
+
       std::vector<std::vector<bool>> m_dirty;
+
+      std::vector<std::vector<Array<Index>>> m_polytopes;
+      std::vector<std::vector<Polytope::Geometry>> m_geometry;
+
+      std::vector<size_t> m_count;
+      std::vector<IndexMap> m_index;
+      std::vector<std::vector<Incidence>> m_connectivity;
   };
 }
 

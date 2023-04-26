@@ -69,140 +69,141 @@ namespace Rodin::Variational
 
       Math::Matrix getValue(const Geometry::Point& p) const
       {
-        const auto& simplex = p.getSimplex();
-        const auto& simplexMesh = simplex.getMesh();
-        const auto& fes = getOperand().getFiniteElementSpace();
-        const auto& fesMesh = fes.getMesh();
-        Math::Matrix jacobian(getRows(), getColumns());
-        mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
-        if (simplex.getDimension() == fesMesh.getDimension())
-        {
-          const auto& trans = p.getTransformation();
-          m_u.get().getHandle().GetVectorGradient(trans.getHandle(), tmp);
-          return jacobian;
-        }
-        else if (simplex.getDimension() == fesMesh.getDimension() - 1)
-        {
-          assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
-          const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
-          mfem::FaceElementTransformations* ft =
-            simplexMesh.getHandle().GetFaceElementTransformations(face.getIndex());
-          if (simplexMesh.isSubMesh())
-          {
-            const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
-            assert(submesh.getParent() == fesMesh);
-            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
-            {
-              Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
-              ft->Elem1->ElementNo = parentIdx;
-              ft->Elem1No = parentIdx;
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
-              return jacobian;
-            }
-            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
-            {
-              Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
-              ft->Elem2->ElementNo = parentIdx;
-              ft->Elem2No = parentIdx;
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
-              return jacobian;
-            }
-            else if (face.isBoundary())
-            {
-              assert(ft->Elem1);
-              Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
-              ft->Elem1->ElementNo = parentIdx;
-              ft->Elem1No = parentIdx;
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
-              return jacobian;
-            }
-            else
-            {
-              assert(false);
-              jacobian.setConstant(NAN);
-              return jacobian;
-            }
-          }
-          else if (fesMesh.isSubMesh())
-          {
-            const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
-            assert(submesh.getParent() == simplexMesh);
-            const auto& s2pe = submesh.getElementMap();
-            if (ft->Elem1 && s2pe.right.count(ft->Elem1No) &&
-                this->getTraceDomain().count(ft->Elem1->Attribute))
-            {
-              Geometry::Index idx = s2pe.right.at(ft->Elem1No);
-              ft->Elem1->ElementNo = idx;
-              ft->Elem1No = idx;
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
-              return jacobian;
-            }
-            else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) &&
-                this->getTraceDomain().count(ft->Elem2->Attribute))
-            {
-              Geometry::Index idx = s2pe.right.at(ft->Elem2No);
-              ft->Elem2->ElementNo = idx;
-              ft->Elem2No = idx;
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
-              return jacobian;
-            }
-            else if (face.isBoundary())
-            {
-              assert(ft->Elem1);
-              Geometry::Index idx = s2pe.right.at(ft->Elem1No);
-              ft->Elem1->ElementNo = idx;
-              ft->Elem1No = idx;
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
-              return jacobian;
-            }
-            else
-            {
-              assert(false);
-              jacobian.setConstant(NAN);
-              return jacobian;
-            }
-          }
-          else
-          {
-            if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
-            {
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
-              return jacobian;
-            }
-            else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
-            {
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
-              return jacobian;
-            }
-            else if (face.isBoundary())
-            {
-              ft->SetAllIntPoints(&p.getIntegrationPoint());
-              assert(ft->Elem1);
-              m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
-              return jacobian;
-            }
-            else
-            {
-              assert(false);
-              jacobian.setConstant(NAN);
-              return jacobian;
-            }
-          }
-        }
-        else
-        {
-          assert(false);
-          jacobian.setConstant(NAN);
-          return jacobian;
-        }
+        assert(false);
+        // const auto& simplex = p.getSimplex();
+        // const auto& simplexMesh = simplex.getMesh();
+        // const auto& fes = getOperand().getFiniteElementSpace();
+        // const auto& fesMesh = fes.getMesh();
+        // Math::Matrix jacobian(getRows(), getColumns());
+        // mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
+        // if (simplex.getDimension() == fesMesh.getDimension())
+        // {
+        //   const auto& trans = p.getTransformation();
+        //   m_u.get().getHandle().GetVectorGradient(trans.getHandle(), tmp);
+        //   return jacobian;
+        // }
+        // else if (simplex.getDimension() == fesMesh.getDimension() - 1)
+        // {
+        //   assert(dynamic_cast<const Geometry::Face*>(&p.getSimplex()));
+        //   const auto& face = static_cast<const Geometry::Face&>(p.getSimplex());
+        //   mfem::FaceElementTransformations* ft =
+        //     simplexMesh.getHandle().GetFaceElementTransformations(face.getIndex());
+        //   if (simplexMesh.isSubMesh())
+        //   {
+        //     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(simplexMesh);
+        //     assert(submesh.getParent() == fesMesh);
+        //     if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
+        //     {
+        //       Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
+        //       ft->Elem1->ElementNo = parentIdx;
+        //       ft->Elem1No = parentIdx;
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+        //       return jacobian;
+        //     }
+        //     else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
+        //     {
+        //       Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem2No);
+        //       ft->Elem2->ElementNo = parentIdx;
+        //       ft->Elem2No = parentIdx;
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
+        //       return jacobian;
+        //     }
+        //     else if (face.isBoundary())
+        //     {
+        //       assert(ft->Elem1);
+        //       Geometry::Index parentIdx = submesh.getElementMap().left.at(ft->Elem1No);
+        //       ft->Elem1->ElementNo = parentIdx;
+        //       ft->Elem1No = parentIdx;
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+        //       return jacobian;
+        //     }
+        //     else
+        //     {
+        //       assert(false);
+        //       jacobian.setConstant(NAN);
+        //       return jacobian;
+        //     }
+        //   }
+        //   else if (fesMesh.isSubMesh())
+        //   {
+        //     const auto& submesh = static_cast<const Geometry::SubMesh<Context::Serial>&>(fesMesh);
+        //     assert(submesh.getParent() == simplexMesh);
+        //     const auto& s2pe = submesh.getElementMap();
+        //     if (ft->Elem1 && s2pe.right.count(ft->Elem1No) &&
+        //         this->getTraceDomain().count(ft->Elem1->Attribute))
+        //     {
+        //       Geometry::Index idx = s2pe.right.at(ft->Elem1No);
+        //       ft->Elem1->ElementNo = idx;
+        //       ft->Elem1No = idx;
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+        //       return jacobian;
+        //     }
+        //     else if (ft->Elem2 && s2pe.right.count(ft->Elem2No) &&
+        //         this->getTraceDomain().count(ft->Elem2->Attribute))
+        //     {
+        //       Geometry::Index idx = s2pe.right.at(ft->Elem2No);
+        //       ft->Elem2->ElementNo = idx;
+        //       ft->Elem2No = idx;
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
+        //       return jacobian;
+        //     }
+        //     else if (face.isBoundary())
+        //     {
+        //       assert(ft->Elem1);
+        //       Geometry::Index idx = s2pe.right.at(ft->Elem1No);
+        //       ft->Elem1->ElementNo = idx;
+        //       ft->Elem1No = idx;
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+        //       return jacobian;
+        //     }
+        //     else
+        //     {
+        //       assert(false);
+        //       jacobian.setConstant(NAN);
+        //       return jacobian;
+        //     }
+        //   }
+        //   else
+        //   {
+        //     if (ft->Elem1 && this->getTraceDomain().count(ft->Elem1->Attribute))
+        //     {
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+        //       return jacobian;
+        //     }
+        //     else if (ft->Elem2 && this->getTraceDomain().count(ft->Elem2->Attribute))
+        //     {
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem2, tmp);
+        //       return jacobian;
+        //     }
+        //     else if (face.isBoundary())
+        //     {
+        //       ft->SetAllIntPoints(&p.getIntegrationPoint());
+        //       assert(ft->Elem1);
+        //       m_u.get().getHandle().GetVectorGradient(*ft->Elem1, tmp);
+        //       return jacobian;
+        //     }
+        //     else
+        //     {
+        //       assert(false);
+        //       jacobian.setConstant(NAN);
+        //       return jacobian;
+        //     }
+        //   }
+        // }
+        // else
+        // {
+        //   assert(false);
+        //   jacobian.setConstant(NAN);
+        //   return jacobian;
+        // }
       }
 
       inline
@@ -300,7 +301,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }

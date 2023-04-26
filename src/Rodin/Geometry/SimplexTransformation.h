@@ -33,10 +33,10 @@ namespace Rodin::Geometry
    *
    * @see Geometry::Point
    */
-  class SimplexTransformation
+  class PolytopeTransformation
   {
     public:
-      virtual ~SimplexTransformation() = default;
+      virtual ~PolytopeTransformation() = default;
 
       // /**
       //  * @brief Performs the transformation, taking reference coordinates into

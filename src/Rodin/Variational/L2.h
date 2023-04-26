@@ -205,7 +205,7 @@ namespace Rodin::Variational
 
       inline
       FiniteElement<Derived>
-      getFiniteElement(const Geometry::Simplex& simplex) const
+      getFiniteElement(const Geometry::Polytope& simplex) const
       {
         if (simplex.getDimension() == getMesh().getDimension())
         {
@@ -223,7 +223,7 @@ namespace Rodin::Variational
       }
 
       inline
-      mfem::Array<int> getDOFs(const Geometry::Simplex& element) const final override
+      mfem::Array<int> getDOFs(const Geometry::Polytope& element) const final override
       {
         mfem::Array<int> res;
         if (element.getDimension() == getMesh().getDimension())

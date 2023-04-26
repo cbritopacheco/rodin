@@ -55,7 +55,7 @@ namespace Rodin::Variational
         return *m_prod;
       }
 
-      Math::Matrix getMatrix(const Geometry::Simplex& simplex) const final override
+      Math::Matrix getMatrix(const Geometry::Polytope& simplex) const final override
       {
         const auto& integrand = getIntegrand();
         const auto& trial = integrand.getLHS();
@@ -65,7 +65,7 @@ namespace Rodin::Variational
           trial.getFiniteElementSpace().getOrder(simplex) +
           test.getFiniteElementSpace().getOrder(simplex) +
           simplex.getTransformation().getHandle().OrderW();
-        const QuadratureRule& qr = QuadratureRule::get(simplex.getGeometry(), order);
+        const QuadratureRule& qr = QuadratureRule::get(simplex, order);
         Math::Matrix res = Math::Matrix::Zero(test.getDOFs(simplex), trial.getDOFs(simplex));
         for (size_t i = 0; i < qr.size(); i++)
         {
@@ -123,7 +123,7 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      Math::Vector getVector(const Geometry::Simplex& simplex) const final override
+      Math::Vector getVector(const Geometry::Polytope& simplex) const final override
       {
         const auto& integrand = getIntegrand();
         assert(integrand.getRangeType() == RangeType::Scalar);
@@ -131,7 +131,7 @@ namespace Rodin::Variational
         const size_t order =
           integrand.getFiniteElementSpace().getOrder(simplex) + trans.getHandle().OrderW();
         Math::Vector res = Math::Vector::Zero(integrand.getDOFs(simplex));
-        const QuadratureRule& qr = QuadratureRule::get(simplex.getGeometry(), order);
+        const QuadratureRule& qr = QuadratureRule::get(simplex, order);
         for (size_t i = 0; i < qr.size(); i++)
         {
           Geometry::Point p(simplex, trans, qr.getPoint(i));
@@ -200,7 +200,7 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      Math::Matrix getMatrix(const Geometry::Simplex& simplex) const override
+      Math::Matrix getMatrix(const Geometry::Polytope& simplex) const override
       {
         const auto& fe = getIntegrand().getLHS()
                                        .getFiniteElementSpace()

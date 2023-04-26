@@ -30,7 +30,7 @@ namespace Rodin::Variational
 
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
 
-      size_t getOrder(const Geometry::Simplex& simplex) const
+      size_t getOrder(const Geometry::Polytope& simplex) const
       {
         if (simplex.getDimension() == simplex.getMesh().getDimension())
         {
@@ -58,7 +58,7 @@ namespace Rodin::Variational
 
       virtual size_t getSize() const = 0;
 
-      virtual mfem::Array<int> getDOFs(const Geometry::Simplex& element) const = 0;
+      virtual mfem::Array<int> getDOFs(const Geometry::Polytope& element) const = 0;
 
       virtual const Geometry::MeshBase& getMesh() const = 0;
 

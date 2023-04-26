@@ -41,7 +41,7 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      Math::Matrix getMatrix(const Geometry::Simplex& simplex) const override
+      Math::Matrix getMatrix(const Geometry::Polytope& simplex) const override
       {
         const auto& fe = getFiniteElementSpace().getFiniteElement(simplex);
         const auto& trans = simplex.getTransformation();

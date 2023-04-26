@@ -132,7 +132,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& simplex) const
+      size_t getDOFs(const Geometry::Polytope& simplex) const
       {
         return getOperand().getDOFs(simplex);
       }
