@@ -30,12 +30,42 @@ namespace Rodin::Geometry
     public:
       enum class Geometry
       {
-        Point = mfem::Geometry::POINT,
-        Segment = mfem::Geometry::SEGMENT,
-        Triangle = mfem::Geometry::TRIANGLE,
-        Quadrilateral = mfem::Geometry::SQUARE,
-        Tetrahedron = mfem::Geometry::TETRAHEDRON
+        Point,
+        Segment,
+        Triangle,
+        Quadrilateral,
+        Tetrahedron
       };
+
+      static constexpr std::array Geometries
+      {
+        Geometry::Point,
+        Geometry::Segment,
+        Geometry::Triangle,
+        Geometry::Quadrilateral,
+        Geometry::Tetrahedron
+      };
+
+      inline
+      constexpr
+      static size_t getGeometryVertexCount(Polytope::Geometry g)
+      {
+        switch (g)
+        {
+          case Geometry::Point:
+            return 1;
+          case Geometry::Segment:
+            return 2;
+          case Geometry::Triangle:
+            return 3;
+          case Geometry::Quadrilateral:
+            return 4;
+          case Geometry::Tetrahedron:
+            return 4;
+        }
+        assert(false);
+        return 0;
+      }
 
       inline
       constexpr
@@ -53,6 +83,8 @@ namespace Rodin::Geometry
           case Geometry::Tetrahedron:
             return 3;
         }
+        assert(false);
+        return 0;
       }
 
       Polytope(size_t dimension, Index index, const MeshBase& mesh);
@@ -345,6 +377,40 @@ namespace Rodin::Geometry
       mutable std::optional<const Math::Matrix> m_inverseJacobian;
       mutable std::optional<const Scalar> m_distortion;
   };
+
+  inline
+  std::ostream& operator<<(std::ostream& os, Polytope::Geometry g)
+  {
+    switch (g)
+    {
+      case Polytope::Geometry::Point:
+      {
+        os << "Point";
+        break;
+      }
+      case Polytope::Geometry::Segment:
+      {
+        os << "Segment";
+        break;
+      }
+      case Polytope::Geometry::Triangle:
+      {
+        os << "Triangle";
+        break;
+      }
+      case Polytope::Geometry::Quadrilateral:
+      {
+        os << "Quadrilateral";
+        break;
+      }
+      case Polytope::Geometry::Tetrahedron:
+      {
+        os << "Tetrahedron";
+        break;
+      }
+    }
+    return os;
+  }
 }
 
 #endif

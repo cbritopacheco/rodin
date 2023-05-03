@@ -267,6 +267,11 @@ namespace Rodin::Geometry
     return m_connectivity.getCount(dimension);
   }
 
+  size_t Mesh<Context::Serial>::getCount(Polytope::Geometry g) const
+  {
+    return m_connectivity.getCount(g);
+  }
+
   FaceIterator Mesh<Context::Serial>::getBoundary() const
   {
     assert(false);
@@ -389,34 +394,27 @@ namespace Rodin::Geometry
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
   {
-    SubMesh<Context::Serial> res(*this);
-    std::set<Index> indices;
-    for (Index i = 0; i < getCount(getDimension()); i++)
-    {
-      if (attrs.count(getAttribute(getDimension(), i)))
-        indices.insert(i);
-    }
-    res.initialize(getSpaceDimension()).include(indices).finalize();
-    return res;
-  }
-
-  Mesh<Context::Serial>::Builder
-  Mesh<Context::Serial>::initialize(size_t sdim)
-  {
-    m_sdim = sdim;
-    Mesh<Context::Serial>::Builder build;
-    build.setReference(*this);
-    return build;
+    assert(false);
+    // SubMesh<Context::Serial> res(*this);
+    // std::set<Index> indices;
+    // for (Index i = 0; i < getCount(getDimension()); i++)
+    // {
+    //   if (attrs.count(getAttribute(getDimension(), i)))
+    //     indices.insert(i);
+    // }
+    // res.initialize(getSpaceDimension()).include(indices).finalize();
+    // return res;
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
   {
-    SubMesh<Context::Serial> res(*this);
-    std::set<Index> indices;
-    for (auto it = getBoundary(); !it.end(); ++it)
-      indices.insert(it->getIndex());
-    res.initialize(getSpaceDimension()).include(indices).finalize();
-    return res;
+    assert(false);
+    // SubMesh<Context::Serial> res(*this);
+    // std::set<Index> indices;
+    // for (auto it = getBoundary(); !it.end(); ++it)
+    //   indices.insert(it->getIndex());
+    // res.initialize(getSpaceDimension()).include(indices).finalize();
+    // return res;
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)

@@ -12,6 +12,7 @@ using namespace Geometry;
 
 int main(int, char**)
 {
+  // Mesh<Context::Serial>::Builder build;
   // const size_t dim = 2;
 
   // Mesh mesh;
@@ -58,9 +59,9 @@ int main(int, char**)
 
 
   Mesh miaow;
-  miaow.load("/Users/carlos/Projects/rodin/build/airship.mesh", IO::FileFormat::MEDIT);
+  miaow.load("../resources/mfem/StarSquare.mfem.mesh", IO::FileFormat::MFEM);
   // miaow.load(std::string(RODIN_RESOURCES_DIR) + "/mmg/Box.medit.mesh", IO::FileFormat::MEDIT);
-  miaow.save("test.mesh", IO::FileFormat::MEDIT);
+  miaow.save("test.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

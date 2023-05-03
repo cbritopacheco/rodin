@@ -34,14 +34,6 @@ namespace Rodin::Geometry
   class MeshBase
   {
     public:
-      class BuilderBase
-      {
-        public:
-          virtual ~BuilderBase() = default;
-
-          virtual void finalize() = 0;
-      };
-
       virtual ~MeshBase() = default;
 
       virtual MeshBase& scale(Scalar c) = 0;
@@ -269,6 +261,8 @@ namespace Rodin::Geometry
 
       virtual size_t getCount(size_t dim) const = 0;
 
+      virtual size_t getCount(Polytope::Geometry g) const = 0;
+
       virtual ElementIterator getElement(Index idx = 0) const = 0;
 
       virtual FaceIterator getFace(Index idx = 0) const = 0;
@@ -305,10 +299,14 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
-      class Builder : public BuilderBase
+      using VertexCollection = std::vector<Math::Vector>;
+      using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
+      using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
+
+      class Builder
       {
         public:
-          Builder();
+          Builder() = default;
 
           Builder(const Builder&) = delete;
 
@@ -320,7 +318,7 @@ namespace Rodin::Geometry
 
           Builder& reserve(size_t d, size_t count);
 
-          Builder& setReference(Mesh<Context::Serial>& mesh);
+          Builder& initialize(size_t sdim);
 
           Builder& vertex(std::initializer_list<Scalar> l)
           {
@@ -344,18 +342,19 @@ namespace Rodin::Geometry
 
           Builder& polytope(Polytope::Geometry t, Array<Index>&& vs);
 
-          void finalize() override;
+          Mesh finalize();
+
+          Builder& setConnectivity(MeshConnectivity&& connectivity);
+          Builder& setVertices(VertexCollection&& connectivity);
+          Builder& setAttributeIndex(AttributeIndex&& connectivity);
+          Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
         private:
           size_t m_sdim;
-          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
-
           MeshConnectivity m_connectivity;
-
           std::vector<Math::Vector> m_vertices;
-
-          PolytopeIndexed<Geometry::Attribute> m_attrs;
-          PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
+          AttributeIndex m_attrs;
+          TransformationIndex m_transformations;
       };
 
       /**
@@ -387,8 +386,6 @@ namespace Rodin::Geometry
       * @brief Move assigns the mesh from another mesh.
       */
       Mesh& operator=(Mesh&& other) = default;
-
-      Mesh<Context::Serial>::Builder initialize(size_t sdim);
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -462,6 +459,8 @@ namespace Rodin::Geometry
       }
 
       virtual size_t getCount(size_t dim) const override;
+
+      virtual size_t getCount(Polytope::Geometry g) const override;
 
       virtual FaceIterator getBoundary() const override;
 

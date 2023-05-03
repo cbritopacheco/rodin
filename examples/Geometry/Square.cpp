@@ -15,7 +15,7 @@ int main(int, char**)
   const size_t dim = 2;
 
   Mesh mesh;
-  mesh.load("Square.medit.mesh", IO::FileFormat::MEDIT);
+  mesh.load("../resources/mfem/StarSquare.mfem.mesh", IO::FileFormat::MFEM);
   // mesh.initialize(dim, dim)
   //     .vertex({0, 0})
   //     .vertex({1, 0})

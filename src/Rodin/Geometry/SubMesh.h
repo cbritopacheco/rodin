@@ -39,25 +39,21 @@ namespace Rodin::Geometry
   class SubMesh<Context::Serial> : public Mesh<Context::Serial>
   {
     public:
-      class Builder : public BuilderBase
+      class Builder
       {
         public:
-          Builder();
+          Builder() = default;
 
-          Builder& setReference(
-              Mesh<Context::Serial>::Builder&& build, SubMesh<Context::Serial>& mesh);
+          Builder& initialize(Mesh<Context::Serial>& parent);
 
-          Builder& include(std::set<Index> indices);
+          Builder& include(const IndexSet& indices);
 
-          void finalize() override;
+          SubMesh finalize();
 
         private:
-          std::optional<std::reference_wrapper<SubMesh<Context::Serial>>> m_ref;
-
-          std::optional<Mesh<Context::Serial>::Builder> m_mbuild;
+          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_parent;
+          Mesh<Context::Serial>::Builder m_build;
           std::vector<Index> m_sidx;
-          PolytopeIndexed<Attribute> m_attrs;
-
           std::vector<boost::bimap<Index, Index>> m_s2ps;
       };
 
@@ -101,8 +97,6 @@ namespace Rodin::Geometry
       {
         return m_s2ps.at(getDimension());
       }
-
-      SubMesh<Context::Serial>::Builder initialize(size_t sdim);
 
     private:
       std::reference_wrapper<const Mesh<Context::Serial>> m_parent;

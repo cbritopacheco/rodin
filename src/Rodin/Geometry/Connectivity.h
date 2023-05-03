@@ -51,7 +51,7 @@ namespace Rodin::Geometry
 
       MeshConnectivity& operator=(MeshConnectivity&&) = default;
 
-      MeshConnectivity& initialize(size_t meshDim);
+      MeshConnectivity& initialize(size_t maximalDimension);
 
       MeshConnectivity& nodes(size_t count);
 
@@ -71,20 +71,11 @@ namespace Rodin::Geometry
       MeshConnectivity& polytope(
           Geometry::Polytope::Geometry t, Array<Index>&& polytope);
 
-      std::vector<SubPolytope> local(size_t dim, Index i);
-
-      /**
-       * D -> d and D -> 0 from D -> 0 and D -> D
-       */
-      MeshConnectivity& build(size_t d);
-
       MeshConnectivity& compute(size_t d, size_t dp);
 
-      MeshConnectivity& transpose(size_t d, size_t dp);
-
-      MeshConnectivity& intersection(size_t d, size_t dp, size_t dpp);
-
       size_t getCount(size_t dim) const;
+
+      size_t getCount(Polytope::Geometry g) const;
 
       size_t getMeshDimension() const;
 
@@ -100,6 +91,18 @@ namespace Rodin::Geometry
 
       const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
 
+    protected:
+      std::vector<SubPolytope> local(size_t dim, Index i);
+
+      /**
+       * D -> d and D -> 0 from D -> 0 and D -> D
+       */
+      MeshConnectivity& build(size_t d);
+
+      MeshConnectivity& transpose(size_t d, size_t dp);
+
+      MeshConnectivity& intersection(size_t d, size_t dp, size_t dpp);
+
     private:
       size_t m_maximalDimension;
 
@@ -109,6 +112,7 @@ namespace Rodin::Geometry
       std::vector<std::vector<Polytope::Geometry>> m_geometry;
 
       std::vector<size_t> m_count;
+      FlatMap<Polytope::Geometry, size_t> m_gcount;
       std::vector<IndexMap> m_index;
       std::vector<std::vector<Incidence>> m_connectivity;
   };

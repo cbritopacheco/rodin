@@ -24,14 +24,4 @@ namespace Rodin::Geometry
   {
     return m_parent.get();
   }
-
-  SubMesh<Context::Serial>::Builder
-  SubMesh<Context::Serial>::initialize(size_t sdim)
-  {
-    assert(sdim == getParent().getSpaceDimension());
-    SubMesh<Context::Serial>::Builder build;
-    auto mbuild = Mesh<Context::Serial>::initialize(sdim);
-    build.setReference(std::move(mbuild), *this);
-    return build;
-  }
 }
