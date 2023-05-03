@@ -51,24 +51,7 @@ namespace Rodin::Geometry
     const auto& index = *gen;
     const auto& dimension = m_dimension;
     const auto& mesh = m_mesh.get();
-    if (dimension == mesh.getDimension())
-    {
-      return new Element(index, mesh);
-    }
-    else if (dimension == mesh.getDimension() - 1)
-    {
-      return new Face(index, mesh);
-    }
-    else if (dimension == 0)
-    {
-      assert(false);
-      return nullptr;
-    }
-    else
-    {
-      assert(false);
-      return nullptr;
-    }
+    return new Polytope(dimension, index, mesh);
   }
 
   // ---- ElementIterator ---------------------------------------------------

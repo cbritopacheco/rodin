@@ -25,6 +25,17 @@ namespace RodinBenchmark
       {}
   };
 
+  BENCHMARK_F(MeshIO, Load_MEDIT_2D_Square)(benchmark::State& st)
+  {
+    static constexpr const char* filename = "mmg/Square.medit.mesh";
+    boost::filesystem::path meshfile;
+    meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
+    meshfile.append(filename);
+    Mesh mesh;
+    for (auto _ : st)
+      mesh.load(meshfile, IO::FileFormat::MEDIT);
+  }
+
   BENCHMARK_F(MeshIO, Load_MEDIT_2D_Box)(benchmark::State& st)
   {
     static constexpr const char* filename = "mmg/Box.medit.mesh";

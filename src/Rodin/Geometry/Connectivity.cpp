@@ -34,6 +34,10 @@ namespace Rodin::Geometry
     assert(m_polytopes.size() == 0);
     m_polytopes.resize(maximalDimension + 1);
 
+    m_gcount.reserve(Polytope::Geometries.size());
+    for (const auto& g : Polytope::Geometries)
+      m_gcount.insert({g, 0});
+
     return *this;
   }
 
@@ -51,6 +55,7 @@ namespace Rodin::Geometry
   MeshConnectivity& MeshConnectivity::nodes(size_t count)
   {
     m_count[0] = count;
+    m_gcount[Geometry::Polytope::Geometry::Point] = count;
     return *this;
   }
 
@@ -66,6 +71,7 @@ namespace Rodin::Geometry
     m_geometry[d].push_back(t);
     m_dirty[d][0] = true;
     m_count[d] += 1;
+    m_gcount[t] += 1;
     return *this;
   }
 
@@ -81,6 +87,7 @@ namespace Rodin::Geometry
     m_geometry[d].push_back(t);
     m_dirty[d][0] = true;
     m_count[d] += 1;
+    m_gcount[t] += 1;
     return *this;
   }
 
@@ -118,6 +125,11 @@ namespace Rodin::Geometry
   size_t MeshConnectivity::getCount(size_t dim) const
   {
     return m_count[dim];
+  }
+
+  size_t MeshConnectivity::getCount(Polytope::Geometry g) const
+  {
+    return m_gcount.at(g);
   }
 
   size_t MeshConnectivity::getMeshDimension() const
@@ -200,6 +212,7 @@ namespace Rodin::Geometry
           m_connectivity[d][0].push_back(v);
         }
         m_count[d] += inserted && !(d == D || d == 0);
+        m_gcount[geometry] += inserted && !(d == D || d == 0);
         s.insert(idx);
       }
       m_connectivity[D][d].push_back(std::move(s));

@@ -34,6 +34,7 @@ namespace Rodin::IO::MEDIT
     Dimension,
     Vertices,
     Triangles,
+    Quadrilaterals,
     Tetrahedra,
     Corners,
     Ridges,
@@ -67,6 +68,8 @@ namespace Rodin::IO::MEDIT
         return "Vertices";
       case Keyword::Triangles:
         return "Triangles";
+      case Keyword::Quadrilaterals:
+        return "Quadrilaterals";
       case Keyword::Tetrahedra:
         return "Tetrahedra";
       case Keyword::Corners:
@@ -148,6 +151,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::Vertices;
     else if (str == Keyword::Triangles)
       res = Keyword::Triangles;
+    else if (str == Keyword::Quadrilaterals)
+      res = Keyword::Quadrilaterals;
     else if (str == Keyword::Tetrahedra)
       res = Keyword::Tetrahedra;
     else if (str == Keyword::Corners)
@@ -277,18 +282,6 @@ namespace Rodin::IO::MEDIT
         *this << "Unexpected keyword: " << std::quoted(actual) << ". "
               << "Expected: " << std::quoted(expected) << ".";
       }
-  };
-
-  struct Context
-  {
-    size_t version;
-    size_t spaceDimension;
-    bool isSurfaceMesh;
-    size_t currentLineNumber = 0;
-    std::unordered_map<MEDIT::Keyword, std::istream::pos_type> pos;
-    std::unordered_map<MEDIT::Keyword, size_t> count;
-    Rodin::Geometry::Mesh<Rodin::Context::Serial> mesh;
-    Rodin::Geometry::Mesh<Rodin::Context::Serial>::Builder build;
   };
 
   std::ostream& operator<<(std::ostream& os, Keyword kw);
@@ -510,13 +503,14 @@ namespace Rodin::IO
       void readEntities(std::istream& is);
 
     private:
+      Rodin::Geometry::Mesh<Rodin::Context::Serial>::Builder m_build;
+
       size_t m_version;
       size_t m_spaceDimension;
       size_t m_currentLineNumber;
+
       std::unordered_map<MEDIT::Keyword, std::istream::pos_type> m_pos;
       std::unordered_map<MEDIT::Keyword, size_t> m_count;
-      Rodin::Geometry::Mesh<Rodin::Context::Serial> m_mesh;
-      Rodin::Geometry::Mesh<Rodin::Context::Serial>::Builder m_build;
   };
 
   template <>

@@ -193,10 +193,9 @@ namespace Rodin::IO
   {
     readVersion(is);
     readDimension(is);
-    m_build = m_mesh.initialize(m_spaceDimension);
+    m_build.initialize(m_spaceDimension);
     readEntities(is);
-    m_build.finalize();
-    getObject() = std::move(m_mesh);
+    getObject() = m_build.finalize();
   }
 
   void MeshPrinter<FileFormat::MEDIT, Context::Serial>::printDimension(std::ostream& os)
@@ -214,80 +213,75 @@ namespace Rodin::IO
   {
     const auto& mesh = getObject();
 
-    os << MEDIT::Keyword::Vertices << '\n' << mesh.getVertexCount() << '\n';
-    for (auto it = mesh.getVertex(); !it.end(); ++it)
+    for (auto g : Geometry::Polytope::Geometries)
     {
-      for (const auto& x : it->getCoordinates())
-        os << x << " ";
-      os << it->getAttribute() << '\n';
-    }
-
-    os << '\n';
-
-    const size_t meshDim = mesh.getDimension();
-    switch (meshDim)
-    {
-      case 3:
+      switch (g)
       {
-        os << MEDIT::Keyword::Tetrahedra << '\n';
-        break;
-      }
-      case 2:
-      {
-        os << MEDIT::Keyword::Triangles << '\n';
-        break;
-      }
-      case 1:
-      {
-        os << MEDIT::Keyword::Edges << '\n';
-        break;
-      }
-      default:
-      {
-        assert(false);
-      }
-    }
-
-    os << mesh.getElementCount() << '\n';
-    for (auto it = mesh.getElement(); !it.end(); ++it)
-    {
-      for (const auto& v : it->getVertices())
-        os << v + 1 << " ";
-      os << it->getAttribute() << '\n';
-    }
-
-    os << '\n';
-
-    for (size_t d = 1; d < meshDim; d++)
-    {
-      switch (d)
-      {
-        case 2:
+        case Geometry::Polytope::Geometry::Point:
         {
-          os << MEDIT::Keyword::Triangles << '\n';
-          break;
-        }
-        case 1:
-        {
-          os << MEDIT::Keyword::Edges << '\n';
+          os << MEDIT::Keyword::Vertices << '\n' << mesh.getVertexCount() << '\n';
+          for (auto it = mesh.getVertex(); !it.end(); ++it)
+          {
+            for (const auto& x : it->getCoordinates())
+              os << x << " ";
+            os << it->getAttribute() << '\n';
+          }
+
+          os << '\n';
           break;
         }
         default:
         {
-          assert(false);
+          switch (g)
+          {
+            case Geometry::Polytope::Geometry::Point:
+            {
+              assert(false);
+              break;
+            }
+            case Geometry::Polytope::Geometry::Segment:
+            {
+              os << MEDIT::Keyword::Edges << '\n';
+              break;
+            }
+            case Geometry::Polytope::Geometry::Triangle:
+            {
+              os << MEDIT::Keyword::Triangles << '\n';
+              break;
+            }
+            case Geometry::Polytope::Geometry::Quadrilateral:
+            {
+              os << MEDIT::Keyword::Quadrilaterals << '\n';
+              break;
+            }
+            case Geometry::Polytope::Geometry::Tetrahedron:
+            {
+              os << MEDIT::Keyword::Tetrahedra << '\n';
+              break;
+            }
+          }
+          const size_t d = Geometry::Polytope::getGeometryDimension(g);
+          if (d <= mesh.getDimension())
+          {
+            os << mesh.getCount(g) << '\n';
+            for (auto it = mesh.getPolytope(d); !it.end(); ++it)
+            {
+              if (it->getGeometry() == g)
+              {
+                for (const auto& v : it->getVertices())
+                  os << v + 1 << " ";
+                os << it->getAttribute() << '\n';
+              }
+            }
+          }
+          else
+          {
+            os << 0 << '\n';
+          }
+          os << '\n';
+          break;
         }
       }
-
-      os << mesh.getAttributeIndex().size(d) << '\n';
-
-      for (auto it = mesh.getAttributeIndex().begin(d); it != mesh.getAttributeIndex().end(d); ++it)
-      {
-        auto [i, attr] = *it;
-        for (Index v : mesh.getConnectivity().getIncidence({ d, 0 }, i))
-          os << v + 1 << " ";
-        os << attr << '\n';
-      }
-      os << '\n';
     }
   }
 

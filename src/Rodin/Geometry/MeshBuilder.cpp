@@ -10,16 +10,10 @@
 
 namespace Rodin::Geometry
 {
-  Mesh<Context::Serial>::Builder::Builder()
-  {}
-
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setReference(Mesh<Context::Serial>& mesh)
+  Mesh<Context::Serial>::Builder::initialize(size_t sdim)
   {
-    m_sdim = mesh.getSpaceDimension();
-
-    // Track the object
-    m_ref.emplace(std::ref(mesh));
+    m_sdim = sdim;
 
     // Set indexes
     m_attrs.initialize(m_sdim);
@@ -77,16 +71,46 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  void Mesh<Context::Serial>::Builder::finalize()
+  Mesh<Context::Serial> Mesh<Context::Serial>::Builder::finalize()
   {
+    Mesh res;
+
     m_connectivity.nodes(m_vertices.size());
 
-    assert(m_ref.has_value());
-    auto& ref = m_ref->get();
+    res.m_sdim = m_sdim;
+    res.m_connectivity = std::move(m_connectivity);
+    res.m_vertices = std::move(m_vertices);
+    res.m_attrs = std::move(m_attrs);
+    res.m_transformations = std::move(m_transformations);
 
-    ref.m_connectivity = std::move(m_connectivity);
-    ref.m_vertices = std::move(m_vertices);
-    ref.m_attrs = std::move(m_attrs);
-    ref.m_transformations = std::move(m_transformations);
+    return res;
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::setConnectivity(MeshConnectivity&& connectivity)
+  {
+    m_connectivity = std::move(connectivity);
+    return *this;
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::setVertices(VertexCollection&& vertices)
+  {
+    m_vertices = std::move(vertices);
+    return *this;
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::setAttributeIndex(AttributeIndex&& attrs)
+  {
+    m_attrs = std::move(attrs);
+    return *this;
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::setTransformationIndex(TransformationIndex&& transformations)
+  {
+    m_transformations = std::move(transformations);
+    return *this;
   }
 }
