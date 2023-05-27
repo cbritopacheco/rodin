@@ -59,9 +59,9 @@ int main(int, char**)
 
 
   Mesh miaow;
-  miaow.load("../resources/mfem/StarSquare.mfem.mesh", IO::FileFormat::MFEM);
+  miaow.load("../resources/mfem/surface-meshes-example.mesh", IO::FileFormat::MFEM);
   // miaow.load(std::string(RODIN_RESOURCES_DIR) + "/mmg/Box.medit.mesh", IO::FileFormat::MEDIT);
-  miaow.save("test.mesh", IO::FileFormat::MFEM);
+  miaow.save("test.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }

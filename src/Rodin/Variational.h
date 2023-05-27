@@ -14,7 +14,8 @@
 
 #include "Variational/ForwardDecls.h"
 
-#include "Variational/H1.h"
+#include "Variational/P1.h"
+
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
 #include "Variational/FiniteElementCollection.h"

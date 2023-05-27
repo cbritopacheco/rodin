@@ -59,13 +59,15 @@ namespace Rodin::Geometry
 
   Scalar Polytope::getVolume() const
   {
-    mfem::ElementTransformation& trans = getTransformation().getHandle();
-    const Variational::QuadratureRule& qr =
-      Variational::QuadratureRule::get(*this, trans.OrderJ());
-    Scalar volume = 0.0;
-    for (size_t i = 0; i < qr.size(); i++)
-      volume += qr.getWeight(i) * trans.Weight();
-    return volume;
+    assert(false);
+    return 0;
+    // mfem::ElementTransformation& trans = getTransformation().getHandle();
+    // const Variational::QuadratureRule& qr =
+    //   Variational::QuadratureRule::get(*this, trans.OrderJ());
+    // Scalar volume = 0.0;
+    // for (size_t i = 0; i < qr.size(); i++)
+    //   volume += qr.getWeight(i) * trans.Weight();
+    // return volume;
   }
 
   // ---- Element -----------------------------------------------------------
@@ -89,22 +91,23 @@ namespace Rodin::Geometry
   }
 
   // ---- Vertex -------------------------------------------------------------
-  Vertex::Vertex(Index index, const MeshBase& mesh, const Math::Vector& coordinates)
-    : Polytope(0, index, mesh), m_coordinates(coordinates)
+  Vertex::Vertex(Index index, const MeshBase& mesh)
+    : Polytope(0, index, mesh)
   {}
 
-  Scalar Vertex::operator()(size_t i) const
+  Eigen::Map<const Math::Vector> Vertex::getCoordinates() const
   {
-    assert(i < static_cast<size_t>(m_coordinates.size()));
-    return m_coordinates(i);
+    return getMesh().getVertexCoordinates(getIndex());
   }
 
   // ---- Point --------------------------------------------------------------
   Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc)
-    : m_simplex(simplex), m_trans(trans), m_rc(rc), m_ip(Variational::Internal::vec2ip(m_rc))
-  {
-    m_trans.get().getHandle().SetIntPoint(&m_ip);
-  }
+    : m_simplex(simplex), m_trans(trans), m_rc(rc)
+  {}
+
+  Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc, const Math::Vector& pc)
+    : m_simplex(simplex), m_trans(trans), m_rc(rc), m_pc(pc)
+  {}
 
   const Math::Vector& Point::getCoordinates(Coordinates coords) const
   {
@@ -114,17 +117,21 @@ namespace Rodin::Geometry
       {
         if (!m_pc.has_value())
         {
-          Math::Vector pc(getSimplex().getMesh().getSpaceDimension());
-          mfem::Vector tmp(pc.data(), pc.size());
-          m_trans.get().getHandle().Transform(m_ip, tmp);
-          m_pc.emplace(std::move(pc));
+          assert(m_rc.has_value());
+          m_pc.emplace(m_trans.get().transform(m_rc.value()));
         }
         assert(m_pc.has_value());
         return m_pc.value();
       }
       case Coordinates::Reference:
       {
-        return m_rc.get();
+        if (!m_rc.has_value())
+        {
+          assert(m_pc.has_value());
+          m_rc.emplace(m_trans.get().inverse(m_pc.value()));
+        }
+        assert(m_rc.has_value());
+        return m_rc.value();
       }
     }
 
@@ -133,41 +140,43 @@ namespace Rodin::Geometry
 
   const Math::Matrix& Point::getJacobian() const
   {
-    if (!m_jacobian.has_value())
-    {
-      const size_t rdim = getSimplex().getDimension();
-      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
-      Math::Matrix jacobian(sdim, rdim);
-      mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
-      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
-      tmp = m_trans.get().getHandle().Jacobian();
-      m_jacobian.emplace(std::move(jacobian));
-    }
-    assert(m_jacobian.has_value());
-    return m_jacobian.value();
+    assert(false);
+    // if (!m_jacobian.has_value())
+    // {
+    //   const size_t rdim = getSimplex().getDimension();
+    //   const size_t sdim = getSimplex().getMesh().getSpaceDimension();
+    //   Math::Matrix jacobian(sdim, rdim);
+    //   mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
+    //   tmp = m_trans.get().getHandle().Jacobian();
+    //   m_jacobian.emplace(std::move(jacobian));
+    // }
+    // assert(m_jacobian.has_value());
+    // return m_jacobian.value();
   }
 
   const Math::Matrix& Point::getJacobianInverse() const
   {
-    if (!m_inverseJacobian.has_value())
-    {
-      const size_t rdim = getSimplex().getDimension();
-      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
-      Math::Matrix inv(rdim, sdim);
-      mfem::DenseMatrix tmp(inv.data(), inv.rows(), inv.cols());
-      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
-      tmp = m_trans.get().getHandle().InverseJacobian();
-      m_inverseJacobian.emplace(std::move(inv));
-    }
-    assert(m_inverseJacobian.has_value());
-    return m_inverseJacobian.value();
+    assert(false);
+    // if (!m_inverseJacobian.has_value())
+    // {
+    //   const size_t rdim = getSimplex().getDimension();
+    //   const size_t sdim = getSimplex().getMesh().getSpaceDimension();
+    //   Math::Matrix inv(rdim, sdim);
+    //   mfem::DenseMatrix tmp(inv.data(), inv.rows(), inv.cols());
+    //   assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
+    //   tmp = m_trans.get().getHandle().InverseJacobian();
+    //   m_inverseJacobian.emplace(std::move(inv));
+    // }
+    // assert(m_inverseJacobian.has_value());
+    // return m_inverseJacobian.value();
   }
 
   Scalar Point::getDistortion() const
   {
     if (!m_distortion.has_value())
     {
-      m_distortion.emplace(m_trans.get().getHandle().Weight());
+      m_distortion.emplace(Math::sqrt(Math::abs(
+              (getJacobianInverse().transpose() * getJacobianInverse()).determinant())));
     }
     assert(m_distortion.has_value());
     return m_distortion.value();

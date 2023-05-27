@@ -48,7 +48,7 @@ namespace Rodin::Geometry
 
       inline
       constexpr
-      static size_t getGeometryVertexCount(Polytope::Geometry g)
+      static size_t getVertexCount(Polytope::Geometry g)
       {
         switch (g)
         {
@@ -192,33 +192,33 @@ namespace Rodin::Geometry
   class Vertex : public Polytope
   {
     public:
-      Vertex(Index index, const MeshBase& mesh, const Math::Vector& coordinates);
+      Vertex(Index index, const MeshBase& mesh);
 
+      inline
       Scalar x() const
       {
-        assert(0 < m_coordinates.size());
         return operator()(0);
       }
 
+      inline
       Scalar y() const
       {
-        assert(1 < m_coordinates.size());
         return operator()(1);
       }
 
+      inline
       Scalar z() const
       {
-        assert(2 < m_coordinates.size());
         return operator()(2);
       }
 
-      Scalar operator()(size_t i) const;
-
       inline
-      const Math::Vector& getCoordinates() const
+      Scalar operator()(size_t i) const
       {
-        return m_coordinates;
+        return getCoordinates()(i);
       }
+
+      Eigen::Map<const Math::Vector> getCoordinates() const;
 
       inline
       constexpr
@@ -226,9 +226,6 @@ namespace Rodin::Geometry
       {
         return Geometry::Point;
       }
-
-    private:
-      Math::Vector m_coordinates;
   };
 
   /**
@@ -260,6 +257,8 @@ namespace Rodin::Geometry
        */
       Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc);
 
+      Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc, const Math::Vector& pc);
+
       Point(const Point&) = default;
 
       Point(Point&&) = default;
@@ -285,11 +284,10 @@ namespace Rodin::Geometry
           }
           case Coordinates::Reference:
           {
-            assert(m_rc.get().size() > static_cast<int>(i));
-            return m_rc.get()(i);
+            return getCoordinates(Coordinates::Reference)(i);
           }
         }
-        return getCoordinates(Coordinates::Physical)(i);
+        return NAN;
       }
 
       /**
@@ -353,12 +351,6 @@ namespace Rodin::Geometry
         return m_trans.get();
       }
 
-      inline
-      const mfem::IntegrationPoint& getIntegrationPoint() const
-      {
-        return m_ip;
-      }
-
       const Math::Vector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
       const Math::Matrix& getJacobian() const;
@@ -370,8 +362,8 @@ namespace Rodin::Geometry
     private:
       std::reference_wrapper<const Polytope> m_simplex;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
-      std::reference_wrapper<const Math::Vector> m_rc;
-      mfem::IntegrationPoint m_ip;
+
+      mutable std::optional<const Math::Vector> m_rc;
       mutable std::optional<const Math::Vector> m_pc;
       mutable std::optional<const Math::Matrix> m_jacobian;
       mutable std::optional<const Math::Matrix> m_inverseJacobian;

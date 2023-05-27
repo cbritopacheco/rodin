@@ -25,11 +25,19 @@ namespace Rodin::Geometry
     return *this;
   }
 
+  Mesh<Context::Serial>::Builder& Mesh<Context::Serial>::Builder::nodes(size_t n)
+  {
+    m_nodes = 0;
+    m_vertices.resize(m_sdim, n);
+    m_connectivity.nodes(n);
+    return *this;
+  }
+
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::vertex(Math::Vector&& x)
   {
     assert(x.size() >= 0);
-    m_vertices.push_back(std::move(x));
+    m_vertices.col(m_nodes++) = std::move(x);
     return *this;
   }
 
@@ -37,7 +45,7 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder::vertex(const Math::Vector& x)
   {
     assert(x.size() >= 0);
-    m_vertices.push_back(x);
+    m_vertices.col(m_nodes++) = x;
     return *this;
   }
 
@@ -67,16 +75,12 @@ namespace Rodin::Geometry
   {
     m_attrs.reserve(d, count);
     m_connectivity.reserve(d, count);
-    if (d == 0) m_vertices.reserve(count);
     return *this;
   }
 
   Mesh<Context::Serial> Mesh<Context::Serial>::Builder::finalize()
   {
     Mesh res;
-
-    m_connectivity.nodes(m_vertices.size());
-
     res.m_sdim = m_sdim;
     res.m_connectivity = std::move(m_connectivity);
     res.m_vertices = std::move(m_vertices);
@@ -94,7 +98,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setVertices(VertexCollection&& vertices)
+  Mesh<Context::Serial>::Builder::setVertices(Math::Matrix&& vertices)
   {
     m_vertices = std::move(vertices);
     return *this;

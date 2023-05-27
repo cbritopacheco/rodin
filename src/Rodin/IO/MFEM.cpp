@@ -135,12 +135,13 @@ namespace Rodin::IO
                                << " count on line " << m_currentLineNumber << "."
                                << Alert::Raise;
           }
+          connectivity.nodes(*count);
           getline(is, line);
           auto vdim = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (vdim)
           {
             m_spaceDimension = *vdim;
-            m_build.initialize(m_spaceDimension);
+            m_build.initialize(m_spaceDimension).nodes(*count);
             for (size_t i = 0; i < *count; i++)
             {
               getline(is, line);
@@ -156,7 +157,7 @@ namespace Rodin::IO
           else
           {
             m_spaceDimension = m_dimension;
-            m_build.initialize(m_spaceDimension);
+            m_build.initialize(m_spaceDimension).nodes(m_spaceDimension);
             auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
             if (!x)
             {

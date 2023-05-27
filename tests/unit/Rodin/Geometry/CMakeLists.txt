@@ -14,3 +14,11 @@ target_link_libraries(RodinGeometryMeshTest
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryMeshTest)
 
+add_executable(RodinGeometryIsoparametricTransformationTest IsoparametricTransformationTest.cpp)
+target_link_libraries(RodinGeometryIsoparametricTransformationTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryIsoparametricTransformationTest)
+

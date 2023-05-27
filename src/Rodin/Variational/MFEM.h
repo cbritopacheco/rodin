@@ -12,7 +12,7 @@
 #include "Function.h"
 #include "ScalarFunction.h"
 
-namespace Rodin::Utility
+namespace Rodin::Variational::Internal
 {
   template <class T>
   inline
@@ -28,10 +28,7 @@ namespace Rodin::Utility
     }
     return res;
   }
-}
 
-namespace Rodin::Variational::Internal
-{
   inline
   mfem::IntegrationPoint vec2ip(const Math::Vector& vec)
   {
@@ -319,11 +316,12 @@ namespace Rodin::Variational::Internal
           }
           case mfem::ElementTransformation::BDR_ELEMENT:
           {
-            int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
-            value = m_s.get().getValue(Geometry::Point(
-                  *m_mesh.get().getFace(faceIdx),
-                  m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension()
-                    - 1, faceIdx), rc));
+            assert(false);
+            // int faceIdx = m_mesh.get().getHandle().GetBdrFace(trans.ElementNo);
+            // value = m_s.get().getValue(Geometry::Point(
+            //       *m_mesh.get().getFace(faceIdx),
+            //       m_mesh.get().getPolytopeTransformation(m_mesh.get().getDimension()
+            //         - 1, faceIdx), rc));
             break;
           }
           case mfem::ElementTransformation::FACE:
