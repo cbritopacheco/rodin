@@ -192,6 +192,6 @@ namespace Rodin::Geometry
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& mesh = getMesh();
-    return new Vertex(index, mesh, mesh.getVertexCoordinates(index));
+    return new Vertex(index, mesh);
   }
 }

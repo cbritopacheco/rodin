@@ -347,9 +347,9 @@ namespace Rodin::Geometry
         {
           return {
             { Polytope::Geometry::Segment, { { p(0), p(1) } } },
-            { Polytope::Geometry::Segment, { { p(1), p(2) } } },
-            { Polytope::Geometry::Segment, { { p(2), p(3) } } },
-            { Polytope::Geometry::Segment, { { p(3), p(0) } } }
+            { Polytope::Geometry::Segment, { { p(1), p(3) } } },
+            { Polytope::Geometry::Segment, { { p(3), p(2) } } },
+            { Polytope::Geometry::Segment, { { p(2), p(0) } } }
           };
         }
         else if (dim == 2)

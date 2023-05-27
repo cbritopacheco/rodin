@@ -8,26 +8,26 @@
 
 namespace Rodin::Variational
 {
-  size_t FiniteElementSpaceBase::getVectorDimension() const
-  {
-   return getHandle().GetVDim();
-  }
+  // size_t FiniteElementSpaceBase::getVectorDimension() const
+  // {
+  //   return getHandle().GetVDim();
+  // }
 
-  mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
-    const std::set<Geometry::Attribute>& bdrAttr) const
-  {
-   mfem::Array<int> essTrueDofList;
-   int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-   getHandle().GetEssentialTrueDofs(Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList);
-   return essTrueDofList;
-  }
+  // mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
+  //   const std::set<Geometry::Attribute>& bdrAttr) const
+  // {
+  //  mfem::Array<int> essTrueDofList;
+  //  int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
+  //  getHandle().GetEssentialTrueDofs(Internal::set2marker(bdrAttr, maxBdrAttr), essTrueDofList);
+  //  return essTrueDofList;
+  // }
 
-  mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
-    const std::set<Geometry::Attribute>& bdrAttr, size_t component) const
-  {
-   mfem::Array<int> essTrueDofList;
-   int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-   getHandle().GetEssentialTrueDofs(Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList, component);
-   return essTrueDofList;
-  }
+  // mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
+  //   const std::set<Geometry::Attribute>& bdrAttr, size_t component) const
+  // {
+  //  mfem::Array<int> essTrueDofList;
+  //  int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
+  //  getHandle().GetEssentialTrueDofs(Internal::set2marker(bdrAttr, maxBdrAttr), essTrueDofList, component);
+  //  return essTrueDofList;
+  // }
 }

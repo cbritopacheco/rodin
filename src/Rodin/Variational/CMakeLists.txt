@@ -49,6 +49,7 @@ set(RodinVariational_HEADERS
   )
 
 set(RodinVariational_SRCS
+  P1.cpp
   FiniteElement.cpp
   FiniteElementSpace.cpp
   LinearFormIntegrator.cpp

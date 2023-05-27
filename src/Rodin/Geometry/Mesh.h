@@ -284,7 +284,7 @@ namespace Rodin::Geometry
 
       virtual const MeshConnectivity& getConnectivity() const = 0;
 
-      virtual const Math::Vector& getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const = 0;
 
       virtual void flush() = 0;
   };
@@ -299,7 +299,6 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
-      using VertexCollection = std::vector<Math::Vector>;
       using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
       using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
 
@@ -319,6 +318,8 @@ namespace Rodin::Geometry
           Builder& reserve(size_t d, size_t count);
 
           Builder& initialize(size_t sdim);
+
+          Builder& nodes(size_t n);
 
           Builder& vertex(std::initializer_list<Scalar> l)
           {
@@ -345,14 +346,15 @@ namespace Rodin::Geometry
           Mesh finalize();
 
           Builder& setConnectivity(MeshConnectivity&& connectivity);
-          Builder& setVertices(VertexCollection&& connectivity);
+          Builder& setVertices(Math::Matrix&& connectivity);
           Builder& setAttributeIndex(AttributeIndex&& connectivity);
           Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
         private:
           size_t m_sdim;
+          size_t m_nodes;
           MeshConnectivity m_connectivity;
-          std::vector<Math::Vector> m_vertices;
+          Math::Matrix m_vertices;
           AttributeIndex m_attrs;
           TransformationIndex m_transformations;
       };
@@ -386,6 +388,12 @@ namespace Rodin::Geometry
       * @brief Move assigns the mesh from another mesh.
       */
       Mesh& operator=(Mesh&& other) = default;
+
+      inline
+      const Math::Matrix& getVertices() const
+      {
+        return m_vertices;
+      }
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -509,11 +517,7 @@ namespace Rodin::Geometry
         m_transformations.clear();
       }
 
-      virtual const Math::Vector& getVertexCoordinates(Index idx) const override
-      {
-        assert(idx < m_vertices.size());
-        return m_vertices[idx];
-      }
+      virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const override;
 
       virtual const std::set<Attribute>& getAttributes() const override;
 
@@ -527,10 +531,9 @@ namespace Rodin::Geometry
 
       mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
 
-      mutable MeshConnectivity m_connectivity;
+      MeshConnectivity m_connectivity;
 
-      std::vector<Math::Vector> m_vertices;
-
+      Math::Matrix m_vertices;
   };
 }
 

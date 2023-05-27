@@ -2,6 +2,7 @@
 
 #include <Rodin/Geometry.h>
 
+using namespace Rodin;
 using namespace Rodin::Geometry;
 
 TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
@@ -156,7 +157,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Mixed)
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Geometry::Triangle, {0, 1, 4})
-              .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 3, 4});
+              .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 4, 3});
 
   size_t d;
 
@@ -181,9 +182,9 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_9Nodes_Mixed)
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Geometry::Triangle, {0, 1, 4})
-              .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 3, 4})
-              .polytope(Polytope::Geometry::Quadrilateral, {0, 6, 7, 8})
-              .polytope(Polytope::Geometry::Quadrilateral, {0, 4, 5, 6});
+              .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 4, 3})
+              .polytope(Polytope::Geometry::Quadrilateral, {0, 6, 8, 7})
+              .polytope(Polytope::Geometry::Quadrilateral, {0, 4, 6, 5});
 
   size_t d;
 

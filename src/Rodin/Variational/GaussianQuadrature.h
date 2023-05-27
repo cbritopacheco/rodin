@@ -61,10 +61,11 @@ namespace Rodin::Variational
         const auto& trial = integrand.getLHS();
         const auto& test = integrand.getRHS();
         const auto& trans = simplex.getTransformation();
+        assert(false);
         const size_t order =
           trial.getFiniteElementSpace().getOrder(simplex) +
-          test.getFiniteElementSpace().getOrder(simplex) +
-          simplex.getTransformation().getHandle().OrderW();
+          test.getFiniteElementSpace().getOrder(simplex);
+          //+ simplex.getTransformation().getHandle().OrderW();
         const QuadratureRule& qr = QuadratureRule::get(simplex, order);
         Math::Matrix res = Math::Matrix::Zero(test.getDOFs(simplex), trial.getDOFs(simplex));
         for (size_t i = 0; i < qr.size(); i++)
@@ -128,8 +129,9 @@ namespace Rodin::Variational
         const auto& integrand = getIntegrand();
         assert(integrand.getRangeType() == RangeType::Scalar);
         const auto& trans = simplex.getTransformation();
+        assert(false);
         const size_t order =
-          integrand.getFiniteElementSpace().getOrder(simplex) + trans.getHandle().OrderW();
+          integrand.getFiniteElementSpace().getOrder(simplex);// + trans.getHandle().OrderW();
         Math::Vector res = Math::Vector::Zero(integrand.getDOFs(simplex));
         const QuadratureRule& qr = QuadratureRule::get(simplex, order);
         for (size_t i = 0; i < qr.size(); i++)
@@ -202,14 +204,11 @@ namespace Rodin::Variational
 
       Math::Matrix getMatrix(const Geometry::Polytope& simplex) const override
       {
+        assert(false);
         const auto& fe = getIntegrand().getLHS()
                                        .getFiniteElementSpace()
                                        .getFiniteElement(simplex);
         Math::Matrix res(fe.getDOFs(), fe.getDOFs());
-        mfem::DenseMatrix tmp(res.data(), res.rows(), res.cols());
-        mfem::ConstantCoefficient one(1.0);
-        mfem::DiffusionIntegrator bfi(one);
-        bfi.AssembleElementMatrix(fe.getHandle(), simplex.getTransformation().getHandle(), tmp);
         return res;
       }
 

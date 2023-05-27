@@ -101,7 +101,7 @@ namespace Rodin::IO
       {
         case MEDIT::Keyword::Vertices:
         {
-          m_build.reserve(0, *count);
+          m_build.nodes(*count);
           for (size_t i = 0; i < *count; i++)
           {
             getline(is, line);

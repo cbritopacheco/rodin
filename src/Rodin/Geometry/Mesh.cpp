@@ -28,6 +28,12 @@ namespace Rodin::Geometry
   }
 
   // ---- Mesh<Context::Serial> ----------------------------------------------
+  Eigen::Map<const Math::Vector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
+  {
+    const auto size = static_cast<Eigen::Index>(getSpaceDimension());
+    return { getVertices().data() + getSpaceDimension() * idx, size };
+  }
+
   const std::set<Attribute>& Mesh<Context::Serial>::getAttributes() const
   {
     return m_attributes[getDimension()];
@@ -58,87 +64,29 @@ namespace Rodin::Geometry
     }
     else
     {
-      assert(false);
+      auto g = getGeometry(dimension, idx);
+      const size_t sdim = getSpaceDimension();
+      const size_t n = Polytope::getVertexCount(g);
+      Math::Matrix pm(sdim, n);
+      const auto& polytope = getConnectivity().getPolytope(dimension, idx);
+      assert(n == static_cast<size_t>(polytope.size()));
+      for (const auto& v : polytope | boost::adaptors::indexed())
+      {
+        assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
+        pm.col(v.index()) = getVertexCoordinates(v.value());
+      }
+      Variational::P1Element fe(g);
+      auto trans =
+        std::unique_ptr<PolytopeTransformation>(
+            new IsoparametricTransformation(std::move(pm), std::move(fe)));
+      m_transformations.track(dimension, idx, std::move(trans));
+      return *m_transformations.at(dimension, idx);
     }
-    // else
-    // {
-    //   const auto attribute = getAttribute(dimension, idx);
-    //   const mfem::Mesh& meshHandle = getHandle();
-    //   const mfem::GridFunction* nodes = meshHandle.GetNodes();
-    //   if (dimension == getDimension())
-    //   {
-    //     if (!nodes)
-    //     {
-    //       mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
-    //       trans->Attribute = attribute;
-    //       trans->ElementNo = idx;
-    //       trans->ElementType = mfem::ElementTransformation::ELEMENT;
-    //       trans->mesh = nullptr;
-    //       trans->Reset();
-    //       meshHandle.GetPointMatrix(idx, trans->GetPointMat());
-    //       trans->SetFE(
-    //           meshHandle.GetTransformationFEforElementType(
-    //             meshHandle.GetElementType(idx)));
-    //       m_transformations.track(
-    //           dimension, idx, std::unique_ptr<PolytopeTransformation>(new IsoparametricTransformation(trans)));
-    //       return *m_transformations.at(dimension, idx);
-    //     }
-    //     else
-    //     {
-    //       assert(false);
-    //       return *m_transformations.at(dimension, idx);
-    //     }
-    //   }
-    //   else if (dimension == getDimension() - 1)
-    //   {
-    //     if (!nodes)
-    //     {
-    //       mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
-    //       trans->Attribute = attribute;
-    //       trans->ElementNo = idx;
-    //       trans->ElementType = mfem::ElementTransformation::FACE;
-    //       trans->mesh = nullptr;
-    //       mfem::DenseMatrix& pm = trans->GetPointMat();
-    //       trans->Reset();
-    //       const size_t spaceDim = getSpaceDimension();
-
-    //       mfem::Array<int> v;
-    //       meshHandle.GetFaceVertices(idx, v);
-    //       const int nv = v.Size();
-    //       pm.SetSize(spaceDim, nv);
-    //       for (size_t i = 0; i < spaceDim; i++)
-    //         for (int j = 0; j < nv; j++)
-    //           pm(i, j) = meshHandle.GetVertex(v[j])[i];
-    //       trans->SetFE(
-    //           meshHandle.GetTransformationFEforElementType(
-    //             meshHandle.GetFaceElementType(idx)));
-    //       m_transformations.track(
-    //           dimension, idx, std::unique_ptr<PolytopeTransformation>(new IsoparametricTransformation(trans)));
-    //       return *m_transformations.at(dimension, idx);
-    //     }
-    //     else
-    //     {
-    //       assert(false);
-    //       return *m_transformations.at(dimension, idx);
-    //     }
-    //   }
-    //   else if (dimension == 0)
-    //   {
-    //     assert(false);
-    //     return *m_transformations.at(dimension, idx);
-    //   }
-    //   else
-    //   {
-    //     assert(false);
-    //     return *m_transformations.at(dimension, idx);
-    //   }
-    // }
   }
 
   Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
   {
-    for (auto x : m_vertices)
-      x *= c;
+    m_vertices *= c;
     return *this;
   }
 

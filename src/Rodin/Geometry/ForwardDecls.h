@@ -21,6 +21,9 @@ namespace Rodin::Geometry
 
   class PolytopeTransformation;
 
+  template <class FE>
+  class IsoparametricTransformation;
+
   class Polytope;
 
   class Element;

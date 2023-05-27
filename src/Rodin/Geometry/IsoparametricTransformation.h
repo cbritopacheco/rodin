@@ -7,55 +7,53 @@
 #ifndef RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 #define RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 
-#include "Rodin/Variational/MFEM.h"
-#include "Rodin/Variational/ForwardDecls.h"
+#include <Eigen/QR>
+
+#include "Rodin/Variational/P1.h"
 
 #include "SimplexTransformation.h"
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
-  /**
-   * @brief Represents a transformation between the reference space to the
-   * physical space of a simplex.
-   */
+  template <class FE>
   class IsoparametricTransformation final : public PolytopeTransformation
   {
     public:
-      IsoparametricTransformation(mfem::IsoparametricTransformation* trans)
-        : m_handle(trans)
+      IsoparametricTransformation(Math::Matrix&& pm, FE&& fe)
+        : m_pm(std::move(pm)), m_fe(std::move(fe))
       {}
 
-      // inline
-      // Math::Vector transform(const Math::Vector& rc) const final override
-      // {
-      //   const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
-      //   Math::Vector shape(m_handle->GetFE()->GetDof());
-      //   mfem::Vector tmp(shape.data(), shape.size());
-      //   m_handle->GetFE()->CalcShape(ip, tmp);
-      //   return m_pm * shape;
-      // }
+      /**
+       * pm : sdim x dof
+       */
+      IsoparametricTransformation(const Math::Matrix& pm, const FE& fe)
+        : m_pm(pm), m_fe(fe)
+      {}
 
-      // inline
-      // Math::Matrix jacobian(const Math::Vector& rc) const final override
-      // {
-      //   const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
-      //   Math::Matrix dshape(m_handle->GetFE()->GetDof(), m_handle->GetFE()->GetDim());
-      //   mfem::DenseMatrix tmp;
-      //   tmp.UseExternalData(dshape.data(), dshape.rows(), dshape.cols());
-      //   m_handle->GetFE()->CalcDShape(ip, tmp);
-      //   return m_pm * dshape;
-      // }
+      IsoparametricTransformation(Math::Matrix&& pm, const FE& fe)
+        : m_pm(std::move(pm)), m_fe(fe)
+      {}
+
+      IsoparametricTransformation(Math::Matrix&& pm)
+        : m_pm(std::move(pm))
+      {}
 
       inline
-      mfem::IsoparametricTransformation& getHandle() const final override
+      Math::Vector transform(const Math::Vector& rc) const final override
       {
-        return *m_handle;
+        return m_pm * m_fe.getBasis(rc);
+      }
+
+      inline
+      Math::Matrix jacobian(const Math::Vector& rc) const final override
+      {
+        return m_pm * m_fe.getGradient(rc);
       }
 
     private:
-      std::unique_ptr<mfem::IsoparametricTransformation> m_handle;
-      // Eigen::Map<Math::Matrix> m_pm;
+      Math::Matrix m_pm;
+      FE m_fe;
   };
 }
 

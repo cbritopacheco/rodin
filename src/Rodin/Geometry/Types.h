@@ -11,7 +11,5 @@ namespace Rodin::Geometry
 
   using Attribute = std::size_t;
 
-  using IndexSet = FlatSet<Index>;
-
   using Incidence = std::vector<IndexSet>;
 }
