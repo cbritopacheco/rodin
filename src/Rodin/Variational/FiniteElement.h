@@ -63,6 +63,7 @@ namespace Rodin::Variational
       }
 
       inline
+      constexpr
       auto getDOF(size_t i) const
       {
         return getDOFs().col(i);
@@ -71,24 +72,28 @@ namespace Rodin::Variational
       virtual ~FiniteElementBase() = default;
 
       inline
+      constexpr
       size_t getCount() const
       {
         return static_cast<const Derived&>(*this).getCount();
       }
 
       inline
+      constexpr
       auto getBasis(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
       }
 
       inline
+      constexpr
       auto getBasis(const Math::Vector& rc) const
       {
         return static_cast<const Derived&>(*this).getBasis(rc);
       }
 
       inline
+      constexpr
       const Math::Matrix& getDOFs() const
       {
         return static_cast<const Derived&>(*this).getDOFs();
@@ -96,6 +101,60 @@ namespace Rodin::Variational
 
     private:
       const Geometry::Polytope::Geometry m_g;
+  };
+
+  template <class FE>
+  class FiniteElementProduct : public FiniteElementBase<FiniteElementProduct<FE>>
+  {
+    public:
+      using Parent = FiniteElementBase<FiniteElementProduct<FE>>;
+
+      constexpr
+      FiniteElementProduct(Geometry::Polytope::Geometry g, size_t vdim)
+        : Parent(g), m_vdim(vdim), m_fe(g)
+      {}
+
+      constexpr
+      FiniteElementProduct(const FiniteElementProduct& other)
+        : Parent(other), m_vdim(other.m_vdim), m_fe(other.m_fe)
+      {}
+
+      constexpr
+      FiniteElementProduct(FiniteElementProduct&& other)
+        : Parent(std::move(other)), m_vdim(other.m_vdim), m_fe(other.m_fe)
+      {}
+
+      inline
+      constexpr
+      size_t getCount() const
+      {
+        return m_fe.getCount() * m_vdim;
+      }
+
+      inline
+      auto getBasis(size_t local) const
+      {
+        return 0;
+      }
+
+      inline
+      auto getBasis(const Math::Vector& rc) const
+      {
+        const size_t rdim = Geometry::Polytope::getGeometryDimension(this->getGeometry());
+        Math::Matrix res(rdim, getCount());
+        for (size_t i = 0; i < getCount(); i++)
+          res.col(i) = m_fe.getBasis(rc);
+        return res;
+      }
+
+      inline
+      const Math::Matrix& getDOFs() const
+      {
+      }
+
+    private:
+      const size_t m_vdim;
+      const FE m_fe;
   };
 }
 

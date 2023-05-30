@@ -1,6 +1,16 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_VARIATIONAL_P1ELEMENT_H
+#define RODIN_VARIATIONAL_P1ELEMENT_H
+
 #include "Rodin/Types.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Connectivity.h"
+#include "Rodin/Geometry/GeometryIndexed.h"
 
 #include "ForwardDecls.h"
 #include "FiniteElement.h"
@@ -38,23 +48,21 @@ namespace Rodin::Variational
       inline
       size_t getCount() const
       {
-        return 3;
+        return Geometry::Polytope::getVertexCount(getGeometry());
       }
 
       inline
       const Math::Matrix& getDOFs() const
       {
-        const size_t g = static_cast<size_t>(getGeometry());
-        assert(g > 0);
-        assert(g < s_dofs.size());
-        return s_dofs[g];
+        return s_dofs[getGeometry()];
       }
 
       inline
       auto getBasis(size_t local) const
       {
         const size_t count = getCount();
-        return Math::Matrix::Identity(count, count).row(local);
+        assert(local < count);
+        return Math::Matrix::Identity(count, count).col(local);
       }
 
       inline
@@ -75,6 +83,8 @@ namespace Rodin::Variational
           case G::Tetrahedron:
             return Math::Vector{{-r.x() - r.y() - r.z() + 1, r.x(), r.y(), r.z()}};
         }
+        assert(false);
+        return {};
       }
 
       inline
@@ -96,10 +106,12 @@ namespace Rodin::Variational
           case G::Tetrahedron:
             return Math::Matrix{{-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
         }
+        assert(false);
+        return {};
       }
 
     private:
-      static const std::array<Math::Matrix, 3> s_dofs;
+      static const Geometry::GeometryIndexed<Math::Matrix> s_dofs;
   };
 
   /**
@@ -111,6 +123,7 @@ namespace Rodin::Variational
   class P1Element<Math::Vector> final : public FiniteElementBase<P1Element<Math::Vector>>
   {
     using G = Geometry::Polytope::Geometry;
+
     public:
       using Parent = FiniteElementBase<P1Element>;
 
@@ -129,10 +142,134 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      inline
+      constexpr
+      size_t getCount() const
+      {
+        return Geometry::Polytope::getVertexCount(getGeometry()
+            ) * Geometry::Polytope::getGeometryDimension(getGeometry());
+      }
+
+      inline
+      constexpr
+      const Math::Matrix& getDOFs() const
+      {
+        return s_dofs[getGeometry()];
+      }
+
+      inline
+      auto getBasis(size_t local) const
+      {
+        const size_t vdim = Geometry::Polytope::getGeometryDimension(getGeometry());
+        const size_t count = getCount();
+        Math::Matrix zero = Math::Matrix::Zero(count, vdim);
+        switch (local)
+        {
+          case 0:
+          case 1:
+          {
+            zero.block(0, 0, vdim, vdim) = Math::Matrix::Identity(vdim, vdim);
+            return zero;
+          }
+          case 2:
+          case 3:
+          {
+            zero.block(2, 0, vdim, vdim) = Math::Matrix::Identity(vdim, vdim);
+            return zero;
+          }
+          case 4:
+          case 5:
+          {
+            zero.block(4, 0, vdim, vdim) = Math::Matrix::Identity(vdim, vdim);
+            return zero;
+          }
+        }
+        assert(false);
+        zero.setConstant(NAN);
+        return zero;
+      }
+
+      inline
+      Math::Matrix getBasis(const Math::Vector& r) const
+      {
+        const auto g = getGeometry();
+        switch (g)
+        {
+          case G::Point:
+          {
+            return Math::Matrix{{1}};
+          }
+          case G::Segment:
+          {
+            return Math::Matrix{{1 - r.x(), r.x()}};
+          }
+          case G::Triangle:
+          {
+            return Math::Matrix{
+              {-r.x() - r.y() + 1, 0, r.x(), 0, r.y(), 0},
+              {0, -r.x() - r.y() + 1, 0, r.x(), 0, r.y()}};
+          }
+          case G::Quadrilateral:
+          {
+            return Math::Matrix{
+              {r.x() * r.y() - r.x() - r.y() + 1, 0, r.x() * (1 - r.y()), 0, r.y() * (1 - r.x()), 0, r.x() * r.y(), 0},
+              {0, r.x() * r.y() - r.x() - r.y() + 1, 0, r.x() * (1 - r.y()), 0, r.y() * (1 - r.x()), 0, r.x() * r.y()}};
+          }
+          case G::Tetrahedron:
+          {
+            return Math::Matrix{
+              {-r.x() - r.y() - r.z() + 1, 0, 0, r.x(), 0, 0, r.y(), 0, 0, r.z(), 0, 0},
+              {0, -r.x() - r.y() - r.z() + 1, 0, 0, r.x(), 0, 0, r.y(), 0, 0, r.z(), 0},
+              {0, 0, -r.x() - r.y() - r.z() + 1, 0, 0, r.x(), 0, 0, r.y(), 0, 0, r.z()}
+            };
+          }
+        }
+        assert(false);
+        return {};
+      }
+
+      inline
+      Math::Tensor<3> getJacobian(const Math::Vector& r) const
+      {
+        assert(false);
+        return {};
+        // const auto g = getGeometry();
+        // switch (g)
+        // {
+        //   case G::Point:
+        //   {
+        //     return Math::Tensor<3>{{{0}}};
+        //   }
+        //   case G::Segment:
+        //   {
+        //     Math::Tensor<3> res(1, 1, getCount());
+        //     res.setValues({{{-1}}, {{1}}});
+        //     return res;
+        //   }
+        //   case G::Triangle:
+        //   {
+        //     Math::Tensor<3> res(2, 2, getCount());
+        //     res.setValues({{{-1}}, {{1}}});
+        //     return res;
+        //   }
+        // }
+        // assert(false);
+        // return {};
+      }
+
     private:
+      static const Geometry::GeometryIndexed<Math::Matrix> s_dofs;
   };
 
+  /**
+   * @brief Alias for P1Element<Scalar>
+   */
   using ScalarP1Element = P1Element<Scalar>;
 
+  /**
+   * @brief Alias for P1Element<Math::Vector>
+   */
   using VectorP1Element = P1Element<Math::Vector>;
 }
+
+#endif
