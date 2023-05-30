@@ -37,8 +37,6 @@ namespace Rodin::Variational
 
       virtual const Geometry::MeshBase& getMesh() const = 0;
 
-      virtual const FiniteElementBase& getFiniteElement(size_t d, Index i) const = 0;
-
       virtual Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const = 0;
   };
 

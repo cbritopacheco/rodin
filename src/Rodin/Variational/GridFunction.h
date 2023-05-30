@@ -447,19 +447,6 @@ namespace Rodin::Variational
         return m_data;
       }
 
-      Derived& load(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
-      {
-        return static_cast<Derived&>(*this).load(filename, fmt);
-      }
-
-      void save(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
-          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
-      {
-        return static_cast<const Derived&>(*this).save(filename, fmt, precision);
-      }
-
       inline
       constexpr
       RangeShape getRangeShape() const
@@ -470,13 +457,87 @@ namespace Rodin::Variational
       inline
       auto getValue(size_t dof) const
       {
-        return m_data.col(dof);
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+          return m_data.col(dof).coeff(0);
+        else
+          return m_data.col(dof);
       }
 
       inline
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      Derived& load(
+          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      {
+        std::ifstream input(filename.c_str());
+        if (!input)
+        {
+          Alert::Exception()
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+        }
+
+        switch (fmt)
+        {
+          case IO::FileFormat::MFEM:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(static_cast<Derived&>(*this));
+            loader.load(input);
+            break;
+          }
+          case IO::FileFormat::MEDIT:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(static_cast<Derived&>(*this));
+            loader.load(input);
+            break;
+          }
+          default:
+          {
+            Alert::Exception()
+              << "Loading from \"" << fmt << "\" format unsupported."
+              << Alert::Raise;
+          }
+        }
+        return *this;
+      }
+
+      void save(
+          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
+          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
+      {
+        std::ofstream output(filename.c_str());
+        if (!output)
+        {
+          Alert::Exception()
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+        }
+
+        output.precision(precision);
+        switch (fmt)
+        {
+          case IO::FileFormat::MFEM:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(static_cast<const Derived&>(*this));
+            printer.print(output);
+            break;
+          }
+          case IO::FileFormat::MEDIT:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(static_cast<const Derived&>(*this));
+            printer.print(output);
+            break;
+          }
+          default:
+          {
+            Alert::Exception()
+              << "Saving to \"" << fmt << "\" format unsupported."
+              << Alert::Raise;
+          }
+        }
       }
 
     private:
@@ -534,290 +595,10 @@ namespace Rodin::Variational
       }
 
       GridFunction& operator=(const GridFunction&)  = delete;
-
-      GridFunction& load(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
-      {
-        std::ifstream input(filename.c_str());
-        if (!input)
-        {
-          Alert::Exception()
-            << "Failed to open " << filename << " for reading."
-            << Alert::Raise;
-        }
-
-        switch (fmt)
-        {
-          case IO::FileFormat::MFEM:
-          {
-            IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(*this);
-            loader.load(input);
-            break;
-          }
-          case IO::FileFormat::MEDIT:
-          {
-            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(*this);
-            loader.load(input);
-            break;
-          }
-          default:
-          {
-            Alert::Exception()
-              << "Loading from \"" << fmt << "\" format unsupported."
-              << Alert::Raise;
-          }
-        }
-        return *this;
-      }
-
-      void save(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
-          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
-      {
-        std::ofstream output(filename.c_str());
-        if (!output)
-        {
-          Alert::Exception()
-            << "Failed to open " << filename << " for writing."
-            << Alert::Raise;
-        }
-
-        output.precision(precision);
-        switch (fmt)
-        {
-          case IO::FileFormat::MFEM:
-          {
-            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(*this);
-            printer.print(output);
-            break;
-          }
-          case IO::FileFormat::MEDIT:
-          {
-            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(*this);
-            printer.print(output);
-            break;
-          }
-          default:
-          {
-            Alert::Exception()
-              << "Saving to \"" << fmt << "\" format unsupported."
-              << Alert::Raise;
-          }
-        }
-      }
   };
 
   template <class ... Ts>
   GridFunction(const P1<Ts...>&) -> GridFunction<P1<Ts...>>;
-
-
-  // /**
-  //  * @ingroup GridFunctionSpecializations
-  //  * @brief Represents a GridFunction which belongs to an H1 finite element
-  //  * space.
-  //  */
-  // template <class ... Ts>
-  // class GridFunction<H1<Ts...>> final : public GridFunctionBase<GridFunction<H1<Ts...>>, H1<Ts...>>
-  // {
-  //   public:
-  //     using FES = H1<Ts...>;
-  //     using Parent = GridFunctionBase<GridFunction<H1<Ts...>>, H1<Ts...>>;
-
-  //     using Parent::operator=;
-  //     using Parent::operator+=;
-  //     using Parent::operator-=;
-  //     using Parent::operator*=;
-  //     using Parent::operator/=;
-
-  //     /**
-  //      * @brief Constructs a grid function on a finite element space.
-  //      * @param[in] fes Finite element space to which the function belongs
-  //      * to.
-  //      */
-  //     GridFunction(const FES& fes)
-  //       : Parent(fes)
-  //     {}
-
-  //     /**
-  //      * @brief Copies the grid function.
-  //      * @param[in] other Other grid function to copy.
-  //      */
-  //     GridFunction(const GridFunction& other)
-  //       : Parent(other)
-  //     {}
-
-  //     /**
-  //      * @brief Move constructs the grid function.
-  //      * @param[in] other Other grid function to move.
-  //      */
-  //     GridFunction(GridFunction&& other)
-  //       : Parent(std::move(other))
-  //     {}
-
-  //     /**
-  //      * @brief Move assignment operator.
-  //      */
-  //     inline
-  //     constexpr
-  //     GridFunction& operator=(GridFunction&& other)
-  //     {
-  //       Parent::operator=(std::move(other));
-  //       return *this;
-  //     }
-
-  //     GridFunction& operator=(const GridFunction&)  = delete;
-
-  //     GridFunction& load(
-  //         const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
-  //     {
-  //       mfem::named_ifgzstream input(filename.c_str());
-  //       if (!input)
-  //       {
-  //         Alert::Exception()
-  //           << "Failed to open " << filename << " for reading."
-  //           << Alert::Raise;
-  //       }
-
-  //       switch (fmt)
-  //       {
-  //         case IO::FileFormat::MFEM:
-  //         {
-  //           IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(*this);
-  //           loader.load(input);
-  //           break;
-  //         }
-  //         case IO::FileFormat::MEDIT:
-  //         {
-  //           IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(*this);
-  //           loader.load(input);
-  //           break;
-  //         }
-  //         default:
-  //         {
-  //           Alert::Exception()
-  //             << "Loading from \"" << fmt << "\" format unsupported."
-  //             << Alert::Raise;
-  //         }
-  //       }
-  //       return *this;
-  //     }
-
-  //     void save(
-  //         const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
-  //         size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
-  //     {
-  //       std::ofstream output(filename.c_str());
-  //       if (!output)
-  //       {
-  //         Alert::Exception()
-  //           << "Failed to open " << filename << " for writing."
-  //           << Alert::Raise;
-  //       }
-
-  //       output.precision(precision);
-  //       switch (fmt)
-  //       {
-  //         case IO::FileFormat::MFEM:
-  //         {
-  //           IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(*this);
-  //           printer.print(output);
-  //           break;
-  //         }
-  //         case IO::FileFormat::MEDIT:
-  //         {
-  //           IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(*this);
-  //           printer.print(output);
-  //           break;
-  //         }
-  //         default:
-  //         {
-  //           Alert::Exception()
-  //             << "Saving to \"" << fmt << "\" format unsupported."
-  //             << Alert::Raise;
-  //         }
-  //       }
-  //     }
-
-  //     template <class NestedDerived>
-  //     inline
-  //     GridFunction& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-  //                                     Geometry::Attribute attr)
-  //     {
-  //       return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
-  //     }
-
-  //     template <class NestedDerived>
-  //     GridFunction& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-  //                                     const std::set<Geometry::Attribute>& attrs = {})
-  //     {
-  //       using Value = FunctionBase<NestedDerived>;
-  //       using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
-  //       if constexpr (std::is_same_v<ValueRangeType, Scalar>)
-  //       {
-  //         int maxBdrAttr = 0;
-  //         assert(false);
-  //         // int maxBdrAttr = this->getFiniteElementSpace()
-  //         //                       .getMesh()
-  //         //                       .getHandle().bdr_attributes.Max();
-  //         mfem::Array<int> marker(maxBdrAttr);
-  //         if (attrs.size() == 0)
-  //         {
-  //           marker = 1;
-  //           Internal::MFEMScalarCoefficient sc(this->getFiniteElementSpace().getMesh(), fn);
-  //           this->getHandle().ProjectBdrCoefficient(sc, marker);
-  //           return *this;
-  //         }
-  //         else
-  //         {
-  //           marker = 0;
-  //           for (const auto& attr : attrs)
-  //           {
-  //             assert(attr - 1 < maxBdrAttr);
-  //             marker[attr - 1] = 1;
-  //           }
-  //           Internal::MFEMScalarCoefficient sc(this->getFiniteElementSpace().getMesh(), fn);
-  //           this->getHandle().ProjectBdrCoefficient(sc, marker);
-  //           return *this;
-  //         }
-  //       }
-  //       else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
-  //       {
-  //         int maxBdrAttr = 0;
-  //         assert(false);
-  //         // int maxBdrAttr = this->getFiniteElementSpace()
-  //         //                         .getMesh()
-  //         //                         .getHandle().bdr_attributes.Max();
-  //         mfem::Array<int> marker(maxBdrAttr);
-  //         if (attrs.size() == 0)
-  //         {
-  //           marker = 1;
-  //           Internal::MFEMVectorCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
-  //           this->getHandle().ProjectBdrCoefficient(vc, marker);
-  //           return *this;
-  //         }
-  //         else
-  //         {
-  //           marker = 0;
-  //           for (const auto& attr : attrs)
-  //           {
-  //             assert(attr - 1 < maxBdrAttr);
-  //             marker[attr - 1] = 1;
-  //           }
-  //           Internal::MFEMVectorCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
-  //           this->getHandle().ProjectBdrCoefficient(vc, marker);
-  //           return *this;
-  //         }
-  //       }
-  //       else
-  //       {
-  //         assert(false);
-  //         return *this;
-  //       }
-  //     }
-  // };
-
-  // template <class ... Ts>
-  // GridFunction(const H1<Ts...>&) -> GridFunction<H1<Ts...>>;
 }
 
 #include "GridFunction.hpp"

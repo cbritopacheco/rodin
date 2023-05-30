@@ -77,6 +77,7 @@ namespace Rodin::Variational
    */
   class BilinearFormIntegratorBase;
 
+  template <class Derived>
   class FiniteElementBase;
 
   template <class FES>

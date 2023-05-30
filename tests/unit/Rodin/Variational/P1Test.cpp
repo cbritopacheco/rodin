@@ -160,8 +160,8 @@ TEST(Rodin_Variational_P1Element_FuzzyTest, 2D_Reference_Triangle)
 TEST(Rodin_Variational_P1_SanityTest, 2D_Square_Build)
 {
   constexpr size_t vdim = 1;
-  constexpr size_t mdim = 2;
   constexpr size_t sdim = 2;
+  constexpr size_t mdim = 2;
 
   Mesh mesh =
     Mesh<Rodin::Context::Serial>::Builder()
@@ -182,6 +182,10 @@ TEST(Rodin_Variational_P1_SanityTest, 2D_Square_Build)
 
   EXPECT_EQ(fes.getVectorDimension(), vdim);
   EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
+
+  EXPECT_EQ(fes.getSize(), 4);
+  EXPECT_EQ(fes.getFiniteElement(mdim, 0).getGeometry(), Polytope::Geometry::Triangle);
+  EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Geometry::Triangle);
 }
 
 TEST(Rodin_Variational_P1_GridFunction_SanityTest, 2D_Square_Project_Constant)
@@ -207,4 +211,9 @@ TEST(Rodin_Variational_P1_GridFunction_SanityTest, 2D_Square_Project_Constant)
   gf.project(c);
 
   EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
+
+  EXPECT_NEAR(gf.getValue(0), 0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(gf.getValue(1), 1, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(gf.getValue(2), 1, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(gf.getValue(3), 2, RODIN_FUZZY_CONSTANT);
 }

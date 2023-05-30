@@ -46,6 +46,7 @@ namespace Rodin::Variational
       const size_t m_v;
   };
 
+  template <class Derived>
   class FiniteElementBase
   {
     public:
@@ -76,14 +77,32 @@ namespace Rodin::Variational
 
       virtual ~FiniteElementBase() = default;
 
-      virtual size_t getCount() const = 0;
+      inline
+      size_t getCount() const
+      {
+        return static_cast<const Derived&>(*this).getCount();
+      }
 
-      virtual const Math::Matrix& getDOFs() const = 0;
+      inline
+      auto getBasis(const Math::Vector& rc) const
+      {
+        return static_cast<const Derived&>(*this).getBasis(rc);
+      }
 
-      virtual Math::Vector getBasis(const Math::Vector& rc) const = 0;
+      inline
+      const Math::Matrix& getDOFs() const
+      {
+        return static_cast<const Derived&>(*this).getDOFs();
+      }
 
     private:
       const Geometry::Polytope::Geometry m_g;
+  };
+
+  class FiniteElementProduct
+  {
+    public:
+    private:
   };
 }
 
