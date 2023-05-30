@@ -388,8 +388,7 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
       {
-        assert(false);
-        return static_cast<Derived&>(*this);
+        return static_cast<Derived&>(*this).projectOnBoundary(fn);
       }
 
       template <class NestedDerived>

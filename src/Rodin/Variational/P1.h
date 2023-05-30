@@ -117,7 +117,7 @@ namespace Rodin::Variational
       inline
       size_t getSize() const override
       {
-        return m_mesh.get().getVertexCount();
+        return m_mesh.get().getVertexCount() * m_vdim;
       }
 
       inline
