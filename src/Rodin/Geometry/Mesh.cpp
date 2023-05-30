@@ -75,7 +75,7 @@ namespace Rodin::Geometry
         assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
         pm.col(v.index()) = getVertexCoordinates(v.value());
       }
-      Variational::P1Element fe(g);
+      Variational::ScalarP1Element fe(g);
       auto trans =
         std::unique_ptr<PolytopeTransformation>(
             new IsoparametricTransformation(std::move(pm), std::move(fe)));
