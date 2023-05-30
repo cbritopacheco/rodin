@@ -49,7 +49,7 @@ namespace Rodin::Variational
       P1& operator=(P1&& other) = default;
 
       inline
-      const P1Element<Scalar>& getFiniteElement(size_t d, Index i) const
+      const ScalarP1Element& getFiniteElement(size_t d, Index i) const
       {
         return m_elements[d][i];
       }
@@ -109,7 +109,7 @@ namespace Rodin::Variational
       P1& operator=(P1&& other) = default;
 
       inline
-      const P1Element<Math::Vector>& getFiniteElement(size_t d, Index i) const
+      const VectorP1Element& getFiniteElement(size_t d, Index i) const
       {
         return m_elements[d][i];
       }

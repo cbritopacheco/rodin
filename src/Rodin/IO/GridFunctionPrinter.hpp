@@ -14,8 +14,7 @@
 namespace Rodin::IO
 {
    template <class FES>
-   void GridFunctionPrinter<FileFormat::MEDIT, FES>
-   ::print(std::ostream& os)
+   void GridFunctionPrinter<FileFormat::MEDIT, FES>::print(std::ostream& os)
    {
       assert(false);
       // int vertexCount = this->getObject().getFiniteElementSpace().getMesh().getHandle().GetNV();
