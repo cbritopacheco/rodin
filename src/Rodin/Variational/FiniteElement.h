@@ -56,13 +56,6 @@ namespace Rodin::Variational
       {}
 
       inline
-      auto getBasis(size_t local) const
-      {
-        const size_t count = getCount();
-        return Math::Matrix::Identity(count, count).row(local);
-      }
-
-      inline
       constexpr
       Geometry::Polytope::Geometry getGeometry() const
       {
@@ -84,6 +77,12 @@ namespace Rodin::Variational
       }
 
       inline
+      auto getBasis(size_t local) const
+      {
+        return static_cast<const Derived&>(*this).getBasis(local);
+      }
+
+      inline
       auto getBasis(const Math::Vector& rc) const
       {
         return static_cast<const Derived&>(*this).getBasis(rc);
@@ -97,12 +96,6 @@ namespace Rodin::Variational
 
     private:
       const Geometry::Polytope::Geometry m_g;
-  };
-
-  class FiniteElementProduct
-  {
-    public:
-    private:
   };
 }
 

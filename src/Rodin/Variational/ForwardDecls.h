@@ -124,6 +124,9 @@ namespace Rodin::Variational
   template <class Range, class Context>
   class H1;
 
+  template <class Range>
+  class P1Element;
+
   template <class Range, class Context, class ... Args>
   class P1;
 

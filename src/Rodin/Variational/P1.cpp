@@ -8,14 +8,6 @@
 
 namespace Rodin::Variational
 {
-  const std::array<Math::Matrix, 3> P1Element::s_dofs =
-  {
-    Math::Matrix{{0}},
-    Math::Matrix{{0}, {1}},
-    Math::Matrix{{0, 1, 0},
-                 {0, 0, 1}}
-  };
-
   P1<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>
   ::P1(const Geometry::Mesh<Context::Serial>& mesh)
     : m_mesh(mesh)
