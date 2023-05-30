@@ -14,14 +14,6 @@
 namespace Rodin::IO
 {
    template <class FES>
-   void GridFunctionPrinter<FileFormat::MFEM, FES>
-   ::print(std::ostream& os)
-   {
-      assert(false);
-      // this->getObject().getHandle().Save(os);
-   }
-
-   template <class FES>
    void GridFunctionPrinter<FileFormat::MEDIT, FES>
    ::print(std::ostream& os)
    {

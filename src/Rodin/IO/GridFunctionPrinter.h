@@ -9,9 +9,10 @@
 
 #include <map>
 #include <optional>
-#include <mfem.hpp>
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Types.h"
+#include "Rodin/Context.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -28,7 +29,6 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
-    protected:
       const Variational::GridFunction<FES>& getObject() const override
       {
         return m_gf;
@@ -38,16 +38,30 @@ namespace Rodin::IO
       const Variational::GridFunction<FES>& m_gf;
   };
 
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::MFEM, FES>
-    : public GridFunctionPrinterBase<FES>
+  template <class Range, class ... Args>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Context::Serial, Args...>>
+    : public GridFunctionPrinterBase<Variational::P1<Range, Context::Serial, Args...>>
   {
     public:
+      using FES = Variational::P1<Range, Context::Serial, Args...>;
+
       GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
         : GridFunctionPrinterBase<FES>(gf)
       {}
 
-      void print(std::ostream& os) override;
+      void print(std::ostream& os) override
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        os << "FiniteElementSpace\n"
+           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
+           << "VDim: " << fes.getVectorDimension() << '\n'
+           << "Ordering: 1\n\n";
+        const auto& matrix = gf.getData();
+        const Scalar* data = matrix.data();
+        for (size_t i = 0; i < matrix.size(); i++)
+          os << data[i] << '\n';
+      }
   };
 
   template <class FES>
