@@ -340,7 +340,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Polytope& getSimplex() const
+      const Polytope& getPolytope() const
       {
         return m_simplex.get();
       }

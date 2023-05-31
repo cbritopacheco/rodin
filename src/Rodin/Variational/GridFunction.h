@@ -457,15 +457,53 @@ namespace Rodin::Variational
       auto getValue(size_t dof) const
       {
         if constexpr (std::is_same_v<RangeType, Scalar>)
-          return m_data.col(dof).coeff(0);
-        else
+        {
+          return m_data(dof);
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
           return m_data.col(dof);
+        }
+        else
+        {
+          assert(false);
+          return void();
+        }
       }
 
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValue(p);
+        const auto& fes = getFiniteElementSpace();
+        const size_t d = p.getPolytope().getDimension();
+        const Index i = p.getPolytope().getIndex();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto& x = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const auto& basis = fe.getBasis(x);
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          Scalar res = 0;
+          for (Index local = 0; local < fe.getCount(); local++)
+            res += basis(local) * getValue(fes.getGlobalIndex({d, i}, local));
+          return res;
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          const size_t vdim = fes.getVectorDimension();
+          const size_t dofs = fe.getCount();
+          Math::Matrix loc(dofs, vdim);
+          for (Index local = 0; local < dofs; local++)
+            loc.row(local) = getValue(fes.getGlobalIndex({d, i}, local));
+          Math::Vector res(fes.getVectorDimension());
+          for (size_t k = 0; k < vdim; k++)
+            res(k) = loc.col(k).dot(basis.row(k));
+          return res;
+        }
+        else
+        {
+          assert(false);
+          return void();
+        }
       }
 
       Derived& load(

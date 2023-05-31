@@ -81,12 +81,12 @@ namespace Rodin::Variational
       inline
       TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
       {
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getPolytope());
         const auto& inv = p.getJacobianInverse();
         const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         const auto& div = fe.getDivergence(coords);
         const size_t n = fe.getComponentDOFs();
-        const size_t rdim = p.getSimplex().getDimension();
+        const size_t rdim = p.getPolytope().getDimension();
         return (inv.transpose() * div.reshaped(n, rdim).transpose()).transpose().reshaped();
       }
 

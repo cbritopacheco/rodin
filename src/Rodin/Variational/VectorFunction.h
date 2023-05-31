@@ -211,6 +211,7 @@ namespace Rodin::Variational
     private:
       std::tuple<ScalarFunction<V>, ScalarFunction<Values>...> m_fs;
   };
+
   template <class V, class ... Values>
   VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
 }
