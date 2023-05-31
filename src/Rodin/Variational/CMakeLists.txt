@@ -14,7 +14,6 @@ set(RodinVariational_HEADERS
   ShapeFunction.h
   TrialFunction.h
   TestFunction.h
-  H1.h
   IdentityMatrix.h
   Integral.h
   Sum.h
@@ -51,6 +50,7 @@ set(RodinVariational_HEADERS
 set(RodinVariational_SRCS
   P1.cpp
   P1Element.cpp
+  QFGG.cpp
   FiniteElement.cpp
   FiniteElementSpace.cpp
   LinearFormIntegrator.cpp

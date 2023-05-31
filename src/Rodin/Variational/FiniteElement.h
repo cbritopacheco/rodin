@@ -89,13 +89,6 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getBasis(size_t local) const
-      {
-        return static_cast<const Derived&>(*this).getBasis(local);
-      }
-
-      inline
-      constexpr
       auto getBasis(const Math::Vector& rc) const
       {
         return static_cast<const Derived&>(*this).getBasis(rc);

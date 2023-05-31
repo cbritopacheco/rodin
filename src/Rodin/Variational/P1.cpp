@@ -9,7 +9,7 @@
 namespace Rodin::Variational
 {
   P1<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>
-  ::P1(const Geometry::Mesh<Context::Serial>& mesh)
+  ::P1(const Geometry::Mesh<Context>& mesh)
     : m_mesh(mesh)
   {
     m_elements.resize(mesh.getDimension() + 1);
@@ -22,7 +22,7 @@ namespace Rodin::Variational
   }
 
   P1<Math::Vector, Context::Serial, Geometry::Mesh<Context::Serial>>
-  ::P1(const Geometry::Mesh<Context::Serial>& mesh, size_t vdim)
+  ::P1(const Geometry::Mesh<Context>& mesh, size_t vdim)
     : m_mesh(mesh), m_vdim(vdim)
   {
     m_elements.resize(mesh.getDimension() + 1);

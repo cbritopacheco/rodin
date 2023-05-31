@@ -15,36 +15,36 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/StarSquare.mfem.mesh";
-
-  // Define boundary attributes
+// Define boundary attributes
   int Gamma = 1;
 
   // Load mesh
-  Mesh Omega;
-  Omega.load(meshFile);
+  Mesh mesh;
+  mesh.load(meshFile);
 
   // Functions
-  H1 vh(Omega);
+  P1 vh(mesh);
+
   TrialFunction u(vh);
   TestFunction  v(vh);
 
- // Define problem
- ScalarFunction f = 1.0;
- ScalarFunction g = 0.0;
+  // Define problem
+  ScalarFunction f = 1.0;
+  ScalarFunction g = 0.0;
 
- Solver::CG solver;
- solver.printIterations(true);
+ // Solver::CG solver;
+ // solver.printIterations(true);
 
- Problem poisson(u, v);
- poisson = Integral(Grad(u), Grad(v))
-         - Integral(f, v)
-         + DirichletBC(u, g).on(Gamma);
+ // Problem poisson(u, v);
+ // poisson = Integral(Grad(u), Grad(v))
+ //         - Integral(f, v)
+ //         + DirichletBC(u, g).on(Gamma);
 
- poisson.solve(solver);
+ // poisson.solve(solver);
 
- // Save solution
- u.getSolution().getHandle().Save("u.gf");
- Omega.save("Omega.mesh");
+ // // Save solution
+ // u.getSolution().getHandle().Save("u.gf");
+ // Omega.save("Omega.mesh");
 
   return 0;
 }

@@ -65,14 +65,6 @@ namespace Rodin::Variational
       }
 
       inline
-      auto getBasis(size_t local) const
-      {
-        const size_t count = getCount();
-        assert(local < count);
-        return Math::Matrix::Identity(count, count).col(local);
-      }
-
-      inline
       Math::Vector getBasis(const Math::Vector& r) const
       {
         const auto g = getGeometry();
@@ -169,38 +161,6 @@ namespace Rodin::Variational
       const Math::Matrix& getDOFs() const
       {
         return s_dofs[getGeometry()];
-      }
-
-      inline
-      auto getBasis(size_t local) const
-      {
-        const size_t vdim = Geometry::Polytope::getGeometryDimension(getGeometry());
-        const size_t count = getCount();
-        Math::Matrix zero = Math::Matrix::Zero(count, vdim);
-        switch (local)
-        {
-          case 0:
-          case 1:
-          {
-            zero.block(0, 0, vdim, vdim) = Math::Matrix::Identity(vdim, vdim);
-            return zero;
-          }
-          case 2:
-          case 3:
-          {
-            zero.block(2, 0, vdim, vdim) = Math::Matrix::Identity(vdim, vdim);
-            return zero;
-          }
-          case 4:
-          case 5:
-          {
-            zero.block(4, 0, vdim, vdim) = Math::Matrix::Identity(vdim, vdim);
-            return zero;
-          }
-        }
-        assert(false);
-        zero.setConstant(NAN);
-        return zero;
       }
 
       inline

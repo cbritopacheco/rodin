@@ -7,7 +7,6 @@
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
-#include "H1.h"
 #include "GridFunction.h"
 #include "TensorBasis.h"
 #include "ShapeFunction.h"
