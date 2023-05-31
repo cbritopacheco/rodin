@@ -32,8 +32,6 @@
 #include "MatrixFunction.h"
 #include "FiniteElementSpace.h"
 
-#include "P1.h"
-
 namespace Rodin::Variational
 {
   /**
@@ -581,61 +579,6 @@ namespace Rodin::Variational
       std::reference_wrapper<const FES> m_fes;
       Math::Matrix m_data;
   };
-
-  template <class ... Ts>
-  class GridFunction<P1<Ts...>> final : public GridFunctionBase<GridFunction<P1<Ts...>>, P1<Ts...>>
-  {
-    public:
-      using FES = P1<Ts...>;
-      using Parent = GridFunctionBase<GridFunction<P1<Ts...>>, P1<Ts...>>;
-
-      using Parent::operator=;
-      using Parent::operator+=;
-      using Parent::operator-=;
-      using Parent::operator*=;
-      using Parent::operator/=;
-
-      /**
-       * @brief Constructs a grid function on a finite element space.
-       * @param[in] fes Finite element space to which the function belongs
-       * to.
-       */
-      GridFunction(const FES& fes)
-        : Parent(fes)
-      {}
-
-      /**
-       * @brief Copies the grid function.
-       * @param[in] other Other grid function to copy.
-       */
-      GridFunction(const GridFunction& other)
-        : Parent(other)
-      {}
-
-      /**
-       * @brief Move constructs the grid function.
-       * @param[in] other Other grid function to move.
-       */
-      GridFunction(GridFunction&& other)
-        : Parent(std::move(other))
-      {}
-
-      /**
-       * @brief Move assignment operator.
-       */
-      inline
-      constexpr
-      GridFunction& operator=(GridFunction&& other)
-      {
-        Parent::operator=(std::move(other));
-        return *this;
-      }
-
-      GridFunction& operator=(const GridFunction&)  = delete;
-  };
-
-  template <class ... Ts>
-  GridFunction(const P1<Ts...>&) -> GridFunction<P1<Ts...>>;
 }
 
 #include "GridFunction.hpp"

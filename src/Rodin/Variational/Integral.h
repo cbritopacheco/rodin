@@ -23,7 +23,7 @@
 #include "TrialFunction.h"
 #include "FiniteElement.h"
 #include "MatrixFunction.h"
-#include "GaussianQuadrature.h"
+#include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -55,7 +55,7 @@ namespace Rodin::Variational
   class Integral<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
-    : public GaussianQuadrature<Dot<
+    : public QuadratureRule<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
@@ -63,7 +63,7 @@ namespace Rodin::Variational
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
       using Integrand = Dot<LHS, RHS>;
-      using Parent = GaussianQuadrature<Integrand>;
+      using Parent = QuadratureRule<Integrand>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
@@ -137,11 +137,11 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class FES>
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public GaussianQuadrature<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
+    : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
-      using Parent = GaussianQuadrature<Integrand>;
+      using Parent = QuadratureRule<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)

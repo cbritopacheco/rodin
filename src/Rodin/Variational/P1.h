@@ -15,6 +15,7 @@
 
 #include "ForwardDecls.h"
 #include "P1Element.h"
+#include "GridFunction.h"
 #include "FiniteElementSpace.h"
 
 namespace Rodin::Variational
@@ -28,11 +29,12 @@ namespace Rodin::Variational
     using IndexMap = FlatMap<Index, Index>;
 
     public:
-      using Parent = FiniteElementSpaceBase;
       using RangeType = Scalar;
+      using Context = Context::Serial;
       using Element = P1Element<RangeType>;
+      using Parent = FiniteElementSpaceBase;
 
-      P1(const Geometry::Mesh<Context::Serial>& mesh);
+      P1(const Geometry::Mesh<Context>& mesh);
 
       P1(const P1& other)
         : Parent(other),
@@ -67,7 +69,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const Geometry::Mesh<Context::Serial>& getMesh() const override
+      const Geometry::Mesh<Context>& getMesh() const override
       {
         return m_mesh.get();
       }
@@ -77,12 +79,12 @@ namespace Rodin::Variational
       {
         const auto [d, i] = idx;
         const auto& p = getMesh().getConnectivity().getPolytope(d, i);
-        assert(i < static_cast<size_t>(p.size()));
+        assert(local < static_cast<size_t>(p.size()));
         return p(local);
       }
 
     private:
-      std::reference_wrapper<const Geometry::Mesh<Context::Serial>> m_mesh;
+      std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
       std::vector<std::vector<P1Element<Scalar>>> m_elements;
   };
 
@@ -99,8 +101,11 @@ namespace Rodin::Variational
 
     public:
       using RangeType = Math::Vector;
+      using Context = Context::Serial;
+      using Element = P1Element<RangeType>;
+      using Parent = FiniteElementSpaceBase;
 
-      P1(const Geometry::Mesh<Context::Serial>& mesh, size_t vdim);
+      P1(const Geometry::Mesh<Context>& mesh, size_t vdim);
 
       P1(const P1& other) = default;
 
@@ -127,7 +132,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const Geometry::Mesh<Context::Serial>& getMesh() const override
+      const Geometry::Mesh<Context>& getMesh() const override
       {
         return m_mesh.get();
       }
@@ -144,13 +149,68 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const Geometry::Mesh<Context::Serial>> m_mesh;
+      std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
       size_t m_vdim;
       std::vector<std::vector<P1Element<Math::Vector>>> m_elements;
   };
 
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t) -> P1<Math::Vector, Context, Geometry::Mesh<Context>>;
+
+  template <class ... Ts>
+  class GridFunction<P1<Ts...>> final : public GridFunctionBase<GridFunction<P1<Ts...>>, P1<Ts...>>
+  {
+    public:
+      using FES = P1<Ts...>;
+      using Parent = GridFunctionBase<GridFunction<P1<Ts...>>, P1<Ts...>>;
+
+      using Parent::operator=;
+      using Parent::operator+=;
+      using Parent::operator-=;
+      using Parent::operator*=;
+      using Parent::operator/=;
+
+      /**
+       * @brief Constructs a grid function on a finite element space.
+       * @param[in] fes Finite element space to which the function belongs
+       * to.
+       */
+      GridFunction(const FES& fes)
+        : Parent(fes)
+      {}
+
+      /**
+       * @brief Copies the grid function.
+       * @param[in] other Other grid function to copy.
+       */
+      GridFunction(const GridFunction& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructs the grid function.
+       * @param[in] other Other grid function to move.
+       */
+      GridFunction(GridFunction&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Move assignment operator.
+       */
+      inline
+      constexpr
+      GridFunction& operator=(GridFunction&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      GridFunction& operator=(const GridFunction&)  = delete;
+  };
+
+  template <class ... Ts>
+  GridFunction(const P1<Ts...>&) -> GridFunction<P1<Ts...>>;
 }
 
 

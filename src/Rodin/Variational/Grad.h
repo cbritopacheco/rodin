@@ -9,7 +9,6 @@
 
 #include "ForwardDecls.h"
 
-#include "H1.h"
 #include "Jacobian.h"
 #include "GridFunction.h"
 #include "TestFunction.h"
@@ -237,174 +236,86 @@ namespace Rodin::Variational
   // template <class ... Ts>
   // Grad(const GridFunction<H1<Ts...>>&) -> Grad<GridFunction<H1<Ts...>>>;
 
-  // /**
-  //  * @ingroup GradSpecializations
-  //  */
-  // template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
-  // class Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>> final
-  //   : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>>, H1<Scalar, Ps...>, Space>
-  // {
-  //   public:
-  //     using FES = H1<Scalar, Ps...>;
-  //     using Operand = ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>;
-  //     using Parent = ShapeFunctionBase<Grad<Operand>, FES, Space>;
+  /**
+   * @ingroup GradSpecializations
+   */
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
+  class Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>>, P1<Scalar, Ps...>, Space>
+  {
+    public:
+      using FES = P1<Scalar, Ps...>;
+      using Operand = ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>;
+      using Parent = ShapeFunctionBase<Grad<Operand>, FES, Space>;
 
-  //     Grad(const Operand& u)
-  //       : Parent(u.getFiniteElementSpace()),
-  //         m_u(u)
-  //     {}
+      Grad(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
+      {}
 
-  //     Grad(const Grad& other)
-  //       : Parent(other),
-  //         m_u(other.m_u)
-  //     {}
+      Grad(const Grad& other)
+        : Parent(other),
+          m_u(other.m_u)
+      {}
 
-  //     Grad(Grad&& other)
-  //       : Parent(std::move(other)),
-  //         m_u(std::move(other.m_u))
-  //     {}
+      Grad(Grad&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
+      {}
 
-  //     inline
-  //     constexpr
-  //     const Operand& getOperand() const
-  //     {
-  //       return m_u.get();
-  //     }
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
 
-  //     inline
-  //     constexpr
-  //     const auto& getLeaf() const
-  //     {
-  //       return getOperand().getLeaf();
-  //     }
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
 
-  //     inline
-  //     constexpr
-  //     RangeShape getRangeShape() const
-  //     {
-  //       return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
-  //     }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(), 1 };
+      }
 
-  //     inline
-  //     constexpr
-  //     size_t getDOFs(const Geometry::Polytope& element) const
-  //     {
-  //       return getOperand().getDOFs(element);
-  //     }
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getOperand().getDOFs(element);
+      }
 
-  //     inline
-  //     TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
-  //     {
-  //       using OperandRange =
-  //         typename FormLanguage::Traits<ShapeFunctionBase<Operand, H1<Scalar, Ps...>, Space>>::RangeType;
-  //       static_assert(std::is_same_v<OperandRange, Scalar>);
-  //       const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-  //       const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-  //       return (fe.getGradient(coords) * p.getJacobianInverse()).transpose();
-  //     }
+      inline
+      TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
+      {
+        using OperandRange =
+          typename FormLanguage::Traits<ShapeFunctionBase<Operand, P1<Scalar, Ps...>, Space>>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Scalar>);
+        const size_t d = p.getPolytope().getDimension();
+        const Index i = p.getPolytope().getIndex();
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
+        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return (fe.getGradient(coords) * p.getJacobianInverse()).transpose();
+      }
 
-  //     inline Grad* copy() const noexcept override
-  //     {
-  //       return new Grad(*this);
-  //     }
+      inline Grad* copy() const noexcept override
+      {
+        return new Grad(*this);
+      }
 
-  //   private:
-  //     std::reference_wrapper<const Operand> m_u;
-  // };
+    private:
+      std::reference_wrapper<const Operand> m_u;
+  };
 
-  // template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
-  // Grad(const ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>&)
-  //   -> Grad<ShapeFunction<NestedDerived, H1<Scalar, Ps...>, Space>>;
-
-  // /**
-  //  * @ingroup GradSpecializations
-  //  *
-  //  * @brief Represents the broken gradient.
-  //  */
-  // template <ShapeFunctionSpaceType Space, class ... Ts>
-  // class Grad<ShapeFunction<L2<Ts...>, Space>> : public ShapeFunctionBase<Space>
-  // {
-  //   public:
-  //     using FES = L2<Ts...>;
-
-  //     constexpr
-  //     Grad(ShapeFunction<FES, Space>& u)
-  //       : m_u(u)
-  //     {
-  //       if (u.getRangeType() != RangeType::Scalar)
-  //         UnexpectedRangeTypeException(RangeType::Scalar, u.getRangeType()).raise();
-  //     }
-
-  //     constexpr
-  //     Grad(const Grad& other)
-  //       : ShapeFunctionBase<Space>(other),
-  //         m_u(other.m_u)
-  //     {}
-
-  //     constexpr
-  //     Grad(Grad&& other)
-  //       : ShapeFunctionBase<Space>(std::move(other)),
-  //         m_u(other.m_u)
-  //     {}
-
-  //     const ShapeFunction<FES, Space>& getLeaf() const override
-  //     {
-  //       return m_u.getLeaf();
-  //     }
-
-  //     int getRows() const override
-  //     {
-  //       return m_u.getFiniteElementSpace().getMesh().getSpaceDimension();
-  //     }
-
-  //     int getColumns() const override
-  //     {
-  //       return 1;
-  //     }
-
-  //     int getDOFs(const Geometry::Simplex& element) const override
-  //     {
-  //       return m_u.getDOFs(element);
-  //     }
-
-  //     TensorBasis getOperator(
-  //         ShapeComputator& compute, const Geometry::Simplex& element) const override
-  //     {
-  //       auto& trans = element.getTransformation();
-  //       const auto& fe = getFiniteElementSpace().getFiniteElement(element);
-  //       const auto& dshape = compute.getPhysicalDShape(fe, trans, trans.GetIntPoint());
-  //       const size_t n = dshape.NumRows();
-  //       const size_t sdim = trans.GetSpaceDim();
-  //       TensorBasis res(n, sdim, 1);
-  //       for (size_t j = 0; j < n; j++)
-  //       {
-  //         for (size_t k = 0; k < sdim; k++)
-  //         {
-  //           res(j, k, 0) = dshape(j, k);
-  //         }
-  //       }
-  //       return res;
-  //     }
-
-  //     FES& getFiniteElementSpace() override
-  //     {
-  //       return m_u.getFiniteElementSpace();
-  //     }
-
-  //     const FES& getFiniteElementSpace() const override
-  //     {
-  //       return m_u.getFiniteElementSpace();
-  //     }
-
-  //     Grad* copy() const noexcept override
-  //     {
-  //       return new Grad(*this);
-  //     }
-  //   private:
-  //     ShapeFunction<FES, Space>& m_u;
-  // };
-  // template <ShapeFunctionSpaceType Space, class ... Ts>
-  // Grad(ShapeFunction<L2<Ts...>, Space>&) -> Grad<ShapeFunction<L2<Ts...>, Space>>;
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
+  Grad(const ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>&)
+    -> Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>>;
 }
 
 #endif

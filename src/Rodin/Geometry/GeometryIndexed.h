@@ -27,6 +27,7 @@ namespace Rodin::Geometry
         assert(c == Polytope::Geometries.size());
       }
 
+      inline
       constexpr
       T& operator[](Polytope::Geometry geom)
       {
@@ -36,6 +37,7 @@ namespace Rodin::Geometry
         return m_map[g];
       }
 
+      inline
       constexpr
       const T& operator[](Polytope::Geometry geom) const
       {
@@ -45,6 +47,7 @@ namespace Rodin::Geometry
         return m_map[g];
       }
 
+      inline
       constexpr
       size_t size() const
       {

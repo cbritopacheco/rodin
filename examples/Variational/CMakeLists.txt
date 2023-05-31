@@ -1,10 +1,10 @@
-# add_executable(Poisson Poisson.cpp)
-# target_link_libraries(Poisson
-#   PUBLIC
-#   Rodin::Geometry
-#   Rodin::Solver
-#   Rodin::Variational
-#   )
+add_executable(Poisson Poisson.cpp)
+target_link_libraries(Poisson
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )
 
 # add_executable(Elasticity Elasticity.cpp)
 # target_link_libraries(Elasticity

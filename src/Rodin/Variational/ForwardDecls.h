@@ -747,7 +747,7 @@ namespace Rodin::Variational
   class OR;
 
   template <class Integrand>
-  class GaussianQuadrature;
+  class QuadratureRule;
 
   /**
    * @brief Represents mathematical expressions of the integral operator on a
