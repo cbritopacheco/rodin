@@ -1,6 +1,8 @@
 set(RodinBenchmarks_SRCS
   Poisson.cpp
-  MeshIO.cpp)
+  MeshIO.cpp
+  P1GridFunctionProjection
+  )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
 target_link_libraries(RodinBenchmarks

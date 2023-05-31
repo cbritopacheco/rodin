@@ -46,6 +46,13 @@ namespace Rodin::Variational
       {}
 
       inline
+      constexpr
+      FiniteElementMapping getMapping() const
+      {
+        return FiniteElementMapping::Identity;
+      }
+
+      inline
       size_t getCount() const
       {
         return Geometry::Polytope::getVertexCount(getGeometry());
@@ -141,6 +148,13 @@ namespace Rodin::Variational
       P1Element(P1Element&& other)
         : Parent(std::move(other))
       {}
+
+      inline
+      constexpr
+      FiniteElementMapping getMapping() const
+      {
+        return FiniteElementMapping::Identity;
+      }
 
       inline
       constexpr

@@ -45,8 +45,8 @@ namespace Rodin::Variational
 
       Math::Vector getValue(const Geometry::Point& p) const
       {
-        assert(p.getSimplex().getDimension() == p.getSimplex().getMesh().getSpaceDimension() - 1);
-        const auto& simplex = p.getSimplex();
+        assert(p.getPolytope().getDimension() == p.getPolytope().getMesh().getSpaceDimension() - 1);
+        const auto& simplex = p.getPolytope();
         const auto& mesh = simplex.getMesh();
         const auto& jacobian = p.getJacobian();
 
