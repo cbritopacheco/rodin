@@ -28,52 +28,75 @@ namespace Rodin::Variational
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
+      virtual void dofs() = 0;
       virtual void project() const = 0;
-      virtual const mfem::Array<int>& getDOFs() const = 0;
+      virtual const IndexSet& getDOFs() const = 0;
       virtual const FormLanguage::Base& getOperand() const = 0;
       virtual DirichletBCBase* copy() const noexcept override = 0;
   };
 
   /**
    * @ingroup DirichletBCSpecializations
-   * @brief Represents a Dirichlet boundary condition on an H1 TrialFunction
+   * @brief Represents a Dirichlet boundary condition on a ShapeFunction
    * object.
    *
    * When utilized in a Problem construction, it will impose the Dirichlet
    * condition
    * @f[
-   *   u = g \text{ on } \Gamma_D
+   *   u = g \quad \text{ on } \quad \Gamma_D
    * @f]
-   * on the segment of the boundary @f$ \Gamma_D \subset \partial \Omega @f$
-   * specified by the boundary attribute.
+   * on the subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    */
-  template <class OperandDerived, class ValueDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  class DirichletBC<ShapeFunction<OperandDerived, H1<Ts...>, Space>, FunctionBase<ValueDerived>> final
+  template <class OperandDerived, class ValueDerived, class FES, ShapeFunctionSpaceType Space>
+  class DirichletBC<ShapeFunction<OperandDerived, FES, Space>, FunctionBase<ValueDerived>> final
     : public DirichletBCBase
   {
     public:
-      using Operand = ShapeFunction<OperandDerived, H1<Ts...>, Space>;
+      /// Operand type
+      using Operand = ShapeFunction<OperandDerived, FES, Space>;
+
+      /// Value type
       using Value = FunctionBase<ValueDerived>;
+
+      /// Parent class
       using Parent = DirichletBCBase;
 
+      /**
+       * @brief Constructs the object given the Operand and Value.
+       * @param[in] u ShapeFunction object
+       * @param[in] v Value object
+       */
       DirichletBC(Operand& u, const Value& v)
         : m_u(u), m_value(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor
+       */
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
           m_value(other.m_value->copy()),
-          m_essBdr(other.m_essBdr)
+          m_essBdr(other.m_essBdr),
+          m_dofs(other.m_dofs)
       {}
 
+      /**
+       * @brief Move constructor
+       */
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_value(std::move(other.m_value)),
-          m_essBdr(std::move(other.m_essBdr))
+          m_essBdr(std::move(other.m_essBdr)),
+          m_dofs(std::move(other.m_dofs))
       {}
 
+      /**
+       * @brief Specifies the region of the boundary over which the condition
+       * will be imposed.
+       * @param[in] bdrAttr Attribute associated to the boundary region
+       */
       inline
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)
@@ -81,17 +104,22 @@ namespace Rodin::Variational
         return on(std::set<Geometry::Attribute>{bdrAtr});
       }
 
+      /**
+       * @brief Specifies the regions of the boundary over which the condition
+       * will be imposed.
+       * @param[in] bdrAttrs Attributes associated to the boundary regions
+       */
       inline
       constexpr
-      DirichletBC& on(const std::set<Geometry::Attribute>& bdrAtr)
+      DirichletBC& on(const std::set<Geometry::Attribute>& bdrAttrs)
       {
-        m_essBdr = bdrAtr;
+        assert(bdrAttrs.size() > 0);
+        m_essBdr = bdrAttrs;
         return *this;
       }
 
       /**
-       * @returns Returns reference to the value of the boundary condition
-       * at the boundary
+       * @returns Returns reference to the value of the boundary condition.
        */
       inline
       constexpr
@@ -101,6 +129,9 @@ namespace Rodin::Variational
         return *m_value;
       }
 
+      /**
+       * @returns Attributes over which the boundary condition is imposed.
+       */
       inline
       constexpr
       const std::set<Geometry::Attribute>& getAttributes() const
@@ -108,6 +139,32 @@ namespace Rodin::Variational
         return m_essBdr;
       }
 
+      /**
+       * @brief Computes the indices of the degrees of freedoms associated to
+       * the boundary region.
+       */
+      inline
+      void dofs() override
+      {
+        const auto& fes = m_u.get().getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        for (auto it = mesh.getBoundary(); !it.end(); ++it)
+        {
+          const auto& polytope = *it;
+          if (m_essBdr.size() == 0 || m_essBdr.count(polytope.getAttribute()))
+          {
+            const size_t d = polytope.getDimension();
+            const size_t i = polytope.getIndex();
+            const auto& fe = fes.getFiniteElement(d, i);
+            for (Index local = 0; local < fe.getCount(); local++)
+              m_dofs.insert(fes.getGlobalIndex({ d, i }, local));
+          }
+        }
+      }
+
+      /**
+       * @brief Projects the value over the associated boundary region.
+       */
       inline
       void project() const override
       {
@@ -121,12 +178,9 @@ namespace Rodin::Variational
       }
 
       inline
-      const mfem::Array<int>& getDOFs() const override
+      const IndexSet& getDOFs() const override
       {
-        if (!m_dofs.has_value())
-          m_dofs.emplace(m_u.get().getFiniteElementSpace().getEssentialTrueDOFs(m_essBdr));
-        assert(m_dofs.has_value());
-        return m_dofs.value();
+        return m_dofs;
       }
 
       inline
@@ -139,114 +193,12 @@ namespace Rodin::Variational
       std::reference_wrapper<Operand> m_u;
       std::unique_ptr<Value> m_value;
       std::set<Geometry::Attribute> m_essBdr;
-      mutable std::optional<const mfem::Array<int>> m_dofs;
+      IndexSet m_dofs;
   };
 
-  template <class OperandDerived, class ValueDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  DirichletBC(ShapeFunction<OperandDerived, H1<Ts...>, Space>&, const FunctionBase<ValueDerived>&)
-    -> DirichletBC<ShapeFunction<OperandDerived, H1<Ts...>, Space>, FunctionBase<ValueDerived>>;
-
-  // /**
-  //  * @ingroup DirichletBCSpecializations
-  //  */
-  // template <class OperandDerived, class ValueDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  // class DirichletBC<Component<ShapeFunction<OperandDerived, H1<Ts...>, Space>>, FunctionBase<ValueDerived>>
-  //   : public DirichletBCBase
-  // {
-  //   public:
-  //     using Operand = Component<ShapeFunction<OperandDerived, H1<Ts...>, Space>>;
-  //     using Value = FunctionBase<ValueDerived>;
-  //     using Parent = DirichletBCBase;
-
-  //     constexpr
-  //     DirichletBC(const Operand& ux, const Value& v)
-  //       : m_ux(ux), m_value(v)
-  //     {}
-
-  //     constexpr
-  //     DirichletBC(const DirichletBC& other)
-  //       : Parent(other),
-  //         m_ux(other.m_ux),
-  //         m_value(other.m_value),
-  //         m_essBdr(other.m_essBdr)
-  //     {}
-
-  //     constexpr
-  //     DirichletBC(DirichletBC&& other)
-  //       : Parent(std::move(other)),
-  //         m_ux(std::move(other.m_ux)),
-  //         m_value(std::move(other.m_value)),
-  //         m_essBdr(std::move(other.m_essBdr))
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     DirichletBC& on(int bdrAtr)
-  //     {
-  //       return on(std::set<int>{bdrAtr});
-  //     }
-
-  //     inline
-  //     constexpr
-  //     DirichletBC& on(const std::set<Geometry::Attribute>& bdrAtr)
-  //     {
-  //       m_essBdr = bdrAtr;
-  //       return *this;
-  //     }
-
-  //     /**
-  //      * @returns Returns reference to the value of the boundary condition
-  //      * at the boundary
-  //      */
-  //     inline
-  //     constexpr
-  //     Value& getValue() const
-  //     {
-  //       return m_value;
-  //     }
-
-  //     inline
-  //     void project() const override
-  //     {
-  //       assert(false);
-  //     }
-
-  //     inline
-  //     const Operand& getOperand() const override
-  //     {
-  //       return m_ux;
-  //     }
-
-  //     inline
-  //     const std::set<size_t>& getDOFs() const override
-  //     {
-  //       assert(false);
-  //       return m_dofs;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const std::set<Geometry::Attribute>& getAttributes() const
-  //     {
-  //       return m_essBdr;
-  //     }
-
-  //     inline
-  //     DirichletBC* copy() const noexcept
-  //     override
-  //     {
-  //       return new DirichletBC(*this);
-  //     }
-  //   private:
-  //     Operand m_ux;
-  //     Value m_value;
-  //     std::set<Geometry::Attribute> m_essBdr;
-  //     mutable std::set<size_t> m_dofs;
-  // };
-
-  // template <class OperandDerived, class ValueDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  // DirichletBC(const Component<ShapeFunction<OperandDerived, H1<Ts...>, Space>>&, const FunctionBase<ValueDerived>&)
-  //   -> DirichletBC<Component<ShapeFunction<OperandDerived, H1<Ts...>, Space>>, FunctionBase<ValueDerived>>;
+  template <class OperandDerived, class ValueDerived, class FES, ShapeFunctionSpaceType Space>
+  DirichletBC(ShapeFunction<OperandDerived, FES, Space>&, const FunctionBase<ValueDerived>&)
+    -> DirichletBC<ShapeFunction<OperandDerived, FES, Space>, FunctionBase<ValueDerived>>;
 }
 
 #endif

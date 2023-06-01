@@ -19,7 +19,7 @@ namespace Rodin::Variational
    */
 
   /**
-   * @ingroup DivSpecializations
+   * @ingroup DivisionSpecializations
    * @brief Division of a FunctionBase by a FunctionBase.
    */
   template <class LHSDerived, class RHSDerived>

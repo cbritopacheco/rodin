@@ -15,7 +15,8 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   const char* meshFile = "../resources/mfem/StarSquare.mfem.mesh";
-// Define boundary attributes
+
+  // Define boundary attributes
   int Gamma = 1;
 
   // Load mesh

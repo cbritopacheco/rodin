@@ -55,6 +55,9 @@ namespace Rodin::Variational
     DoubleContravariantPiola
   };
 
+  /**
+   * @brief Base class for finite elements.
+   */
   template <class Derived>
   class FiniteElementBase
   {
@@ -80,6 +83,9 @@ namespace Rodin::Variational
 
       virtual ~FiniteElementBase() = default;
 
+      /**
+       * @brief Gets the number of degrees of freedom in the finite element.
+       */
       inline
       constexpr
       size_t getCount() const

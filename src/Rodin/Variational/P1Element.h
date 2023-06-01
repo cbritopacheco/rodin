@@ -20,7 +20,6 @@ namespace Rodin::Variational
 {
   /**
    * @brief Degree 1 scalar Lagrange element
-   *
    * @see @m_defelement{Lagrange,https://defelement.com/elements/lagrange.html}
    */
   template <>
@@ -52,6 +51,10 @@ namespace Rodin::Variational
         return FiniteElementMapping::Identity;
       }
 
+      /**
+       * @brief Gets the number of degrees of freedom in the finite element.
+       * @returns Number of degrees of freedom
+       */
       inline
       size_t getCount() const
       {
@@ -59,11 +62,17 @@ namespace Rodin::Variational
       }
 
       inline
+      constexpr
       const Math::Matrix& getDOFs() const
       {
         return s_dofs[getGeometry()];
       }
 
+      /**
+       * @brief Gets the basis evaluated at the reference point.
+       * @param[in] r Reference coordinates
+       * @returns A vector of dimension `getCount()`
+       */
       inline
       Math::Vector getBasis(const Math::Vector& r) const
       {
@@ -86,6 +95,11 @@ namespace Rodin::Variational
         return {};
       }
 
+      /**
+       * @brief Gets the gradient evaluated at the reference point.
+       * @param[in] r Reference coordinates
+       * @return A matrix with dimensions `r.size() x getCount()`
+       */
       inline
       Math::Matrix getGradient(const Math::Vector& r) const
       {

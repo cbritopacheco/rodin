@@ -19,9 +19,6 @@
 
 namespace Rodin::Variational
 {
-  /**
-   * @brief Abstract base class for objects of type BilinearForm.
-   */
   template <class OperatorType>
   class BilinearFormBase : public FormLanguage::Base
   {

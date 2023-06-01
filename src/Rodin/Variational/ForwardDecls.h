@@ -14,6 +14,9 @@ namespace Rodin::Variational
    */
   class RangeShape;
 
+  /**
+   * @brief Represents the possible types of ranges for a function.
+   */
   enum class RangeType;
 
   /**
@@ -45,11 +48,14 @@ namespace Rodin::Variational
   class LinearFormIntegratorBase;
 
   /**
-   * @brief Base class for bilinear form objects.
+   * @brief Abstract base class for objects of type BilinearForm.
    * @tparam OperatorType Type of operator which will be assembled
    *
-   * Represents a bilinear form @f$ a : V_h \times U_h \rightarrow \mathbb{R}
-   * @f$ on given finite element spaces @f$ V_h @f$ and @f$ U_h @f$.
+   * Represents a bilinear form:
+   * @f[
+   * a : V_h \times U_h \rightarrow \mathbb{R}
+   * @f]
+   * on given finite element spaces @f$ V_h @f$ and @f$ U_h @f$.
    */
   template <class OperatorType>
   class BilinearFormBase;
@@ -155,22 +161,22 @@ namespace Rodin::Variational
   class GridFunction;
 
   /**
-   * Enumeration class to indicate whether a derived instance of
-   * ShapeFunctionBase is either a Trial or Test space.
+   * @brief Enumeration class to indicate whether a derived instance of
+   * ShapeFunctionBase belongs to either a trial or test space.
    */
   enum class ShapeFunctionSpaceType
   {
-    Trial, ///< Trial function space
-    Test ///< %Test function space
+    Trial, ///< Indicates that the shape function belongs to a trial space.
+    Test ///< Indicates that the shape function belongs to a test space.
   };
 
   /**
-   * Shorthand variable for ShapeFunctionSpaceType::Trial.
+   * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
    */
   static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
 
   /**
-   * Shorthand variable for ShapeFunctionSpaceType::Test.
+   * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
    */
   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
@@ -446,6 +452,7 @@ namespace Rodin::Variational
    * @f[
    * \text{LHS} + \text{RHS}
    * @f]
+   * which represents the usual arithmetic addition of two operands.
    *
    * @see SumSpecializations
    */
@@ -497,6 +504,9 @@ namespace Rodin::Variational
    * @f[
    *   \mathrm{LHS} : \mathrm{RHS}
    * @f]
+   * known as the dot product; the algebraic operation that takes two
+   * equal-length sequences of numbers (usually coordinate vectors), and
+   * returns a single number.
    *
    * @note For an overview of all the possible specializations of the Dot
    * class, please see @ref DotSpecializations.
@@ -846,6 +856,13 @@ namespace Rodin::Variational
 
   /**
    * @tparam Operand Type of operand
+   * @tparam Value Type of value
+   *
+   * Represents a Dirichlet boundary condition:
+   * @f[
+   *   \mathrm{Operand} = \mathrm{Value} \ \text{ on } \ \Gamma_D
+   * @f]
+   * on some subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    *
    * @note For an overview of all the possible specializations of the
    * DirichletBC class, please see @ref DirichletBCSpecializations.

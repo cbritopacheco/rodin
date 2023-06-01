@@ -359,6 +359,8 @@ namespace Rodin::Geometry
           TransformationIndex m_transformations;
       };
 
+      static Mesh UniformGrid(Polytope::Geometry g, size_t h, size_t w);
+
       /**
       * @brief Constructs an empty mesh with no elements.
       */

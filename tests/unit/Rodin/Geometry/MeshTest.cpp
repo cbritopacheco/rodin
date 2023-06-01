@@ -17,7 +17,94 @@ using namespace Rodin;
 using namespace Rodin::IO;
 using namespace Rodin::Geometry;
 
-TEST(Rodin_Geometry_Mesh, 2D_PolytopeTransformation_1)
+TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
+{
+  constexpr const size_t sdim = 2;
+  constexpr const size_t mdim = sdim;
+
+  Mesh mesh =
+    Mesh<Rodin::Context::Serial>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0, 0})
+    .vertex({1, 0})
+    .vertex({0, 1})
+    .vertex({1, 1})
+    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
+    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .finalize();
+
+  EXPECT_EQ(mesh.getVertexCount(), 4);
+  EXPECT_EQ(mesh.getElementCount(), 2);
+}
+
+TEST(Rodin_Geometry_Mesh, 2D_Square_Boundary)
+{
+  constexpr const size_t sdim = 2;
+  constexpr const size_t mdim = sdim;
+
+  Mesh mesh =
+    Mesh<Rodin::Context::Serial>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0, 0})
+    .vertex({1, 0})
+    .vertex({0, 1})
+    .vertex({1, 1})
+    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
+    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .finalize();
+
+  EXPECT_EQ(mesh.getVertexCount(), 4);
+  EXPECT_EQ(mesh.getElementCount(), 2);
+
+  mesh.getConnectivity().compute(mdim - 1, mdim);
+
+  size_t count = 0;
+  for (auto it = mesh.getBoundary(); !it.end(); ++it)
+  {
+    count += 1;
+    ASSERT_TRUE(it->isBoundary());
+    ASSERT_FALSE(it->isInterface());
+  }
+
+  EXPECT_EQ(count, 4);
+}
+
+TEST(Rodin_Geometry_Mesh, 2D_Square_Interface)
+{
+  constexpr const size_t sdim = 2;
+  constexpr const size_t mdim = sdim;
+
+  Mesh mesh =
+    Mesh<Rodin::Context::Serial>::Builder()
+    .initialize(sdim)
+    .nodes(4)
+    .vertex({0, 0})
+    .vertex({1, 0})
+    .vertex({0, 1})
+    .vertex({1, 1})
+    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
+    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .finalize();
+
+  EXPECT_EQ(mesh.getVertexCount(), 4);
+  EXPECT_EQ(mesh.getElementCount(), 2);
+
+  mesh.getConnectivity().compute(mdim - 1, mdim);
+
+  size_t count = 0;
+  for (auto it = mesh.getInterface(); !it.end(); ++it)
+  {
+    count += 1;
+    ASSERT_TRUE(it->isInterface());
+    ASSERT_FALSE(it->isBoundary());
+  }
+
+  EXPECT_EQ(count, 1);
+}
+
+TEST(Rodin_Geometry_Mesh_FuzzyTest, 2D_Square_PolytopeTransformation_1)
 {
   constexpr const size_t rdim = 2;
   constexpr const size_t sdim = 2;

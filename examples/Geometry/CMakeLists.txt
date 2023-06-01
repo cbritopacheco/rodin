@@ -27,3 +27,8 @@ add_executable(Square Square.cpp)
 target_link_libraries(Square
   PUBLIC
   Rodin::Geometry)
+
+add_executable(UniformGrid UniformGrid.cpp)
+target_link_libraries(UniformGrid
+  PUBLIC
+  Rodin::Geometry)

@@ -70,6 +70,40 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction_SanityTest, 2D_Square_Project_Sum)
   EXPECT_NEAR(gf.getValue(3), 2, RODIN_FUZZY_CONSTANT);
 }
 
+TEST(Rodin_Variational_Scalar_P1_GridFunction_FuzzyTest, TriangularUniformGrid16_ProjectOnBoundary_Constant)
+{
+  constexpr size_t mdim = 2;
+
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+
+  mesh.getConnectivity().compute(mdim - 1, mdim);
+
+  P1 fes(mesh);
+  GridFunction gf(fes);
+
+  ScalarFunction c = 1.0;
+  gf.projectOnBoundary(c);
+
+  EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
+}
+
+TEST(Rodin_Variational_Scalar_P1_GridFunction_FuzzyTest, TriangularUniformGrid16_ProjectOnBoundary_Sum)
+{
+  constexpr size_t mdim = 2;
+
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+
+  mesh.getConnectivity().compute(mdim - 1, mdim);
+
+  P1 fes(mesh);
+  GridFunction gf(fes);
+
+  ScalarFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+  gf.projectOnBoundary(c);
+
+  EXPECT_EQ(gf.getRangeShape(), RangeShape(1, 1));
+}
+
 TEST(Rodin_Variational_Scalar_P1_GridFunction_FuzzyTest, 2D_Square_Project_LinearFunction)
 {
   constexpr size_t mdim = 2;
