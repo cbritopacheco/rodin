@@ -28,6 +28,46 @@ namespace Rodin::Geometry
   }
 
   // ---- Mesh<Context::Serial> ----------------------------------------------
+
+  Mesh<Context::Serial> Mesh<Context::Serial>::UniformGrid(Polytope::Geometry g, size_t h, size_t w)
+  {
+    Builder build;
+    const size_t dim = Polytope::getGeometryDimension(g);
+    build.initialize(dim).nodes(h * w);
+    switch (g)
+    {
+      case Polytope::Geometry::Point:
+      {
+        return build.nodes(1).vertex({0}).finalize();
+      }
+      case Polytope::Geometry::Triangle:
+      {
+        assert(h * w >= 4);
+        for (size_t i = 0; i < h; i++)
+        {
+          for (size_t j = 0; j < w; j++)
+            build.vertex({ static_cast<Scalar>(i), static_cast<Scalar>(j) });
+        }
+
+        build.reserve(dim, 2 * (h - 1) * (w - 1));
+        for (size_t i = 0; i < h - 1; i++)
+        {
+          for (size_t j = 0; j < w - 1; j++)
+          {
+            build.polytope(g, { i * w + j, i * w + j + 1, (i + 1) * w + j })
+                 .polytope(g, { i * w + j + 1, (i + 1) * w + j + 1, (i + 1) * w + j });
+          }
+        }
+        return build.finalize();
+      }
+      default:
+      {
+        assert(false);
+        return build.nodes(0).finalize();
+      }
+    };
+  }
+
   Eigen::Map<const Math::Vector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
@@ -222,29 +262,26 @@ namespace Rodin::Geometry
 
   FaceIterator Mesh<Context::Serial>::getBoundary() const
   {
-    assert(false);
-    // std::vector<Index> indices;
-    // indices.reserve(getHandle().GetNBE());
-    // for (int i = 0; i < getHandle().GetNBE(); i++)
-    // {
-    //   int idx = getHandle().GetBdrFace(i);
-    //   if (!getHandle().FaceIsInterior(idx))
-    //     indices.push_back(idx);
-    // }
-    // return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+    std::vector<Index> indices;
+    const size_t count = getFaceCount();
+    for (Index i = 0; i < count; i++)
+    {
+      if (isBoundary(i))
+        indices.push_back(i);
+    }
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   FaceIterator Mesh<Context::Serial>::getInterface() const
   {
-    assert(false);
-    // std::vector<Index> indices;
-    // indices.reserve(getHandle().GetNumFaces());
-    // for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
-    // {
-    //   if (getHandle().FaceIsInterior(idx))
-    //     indices.push_back(idx);
-    // }
-    // return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+    std::vector<Index> indices;
+    const size_t count = getFaceCount();
+    for (Index i = 0; i < count; i++)
+    {
+      if (isInterface(i))
+        indices.push_back(i);
+    }
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
@@ -269,14 +306,18 @@ namespace Rodin::Geometry
 
   bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
   {
-    assert(false);
-    // return getHandle().FaceIsInterior(faceIdx);
+    const size_t D = getDimension();
+    const auto& incidence = getConnectivity().getIncidence({D - 1, D}, faceIdx);
+    assert(incidence.size() > 0);
+    return incidence.size() > 1;
   }
 
   bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
   {
-    assert(false);
-    // return !getHandle().FaceIsInterior(faceIdx);
+    const size_t D = getDimension();
+    const auto& incidence = getConnectivity().getIncidence({D - 1, D}, faceIdx);
+    assert(incidence.size() > 0);
+    return incidence.size() == 1;
   }
 
   Polytope::Geometry Mesh<Context::Serial>::getGeometry(size_t dimension, Index idx) const

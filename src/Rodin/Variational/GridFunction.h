@@ -285,39 +285,10 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
+      inline
       Derived& project(const FunctionBase<NestedDerived>& fn)
       {
-        using Function = FunctionBase<NestedDerived>;
-        using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;
-        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
-        const auto& fes = getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension();
-        for (auto it = mesh.getElement(); !it.end(); ++it)
-        {
-          const auto& simplex = *it;
-          const auto& i = simplex.getIndex();
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto& trans = mesh.getPolytopeTransformation(d, i);
-          for (size_t local = 0; local < fe.getCount(); local++)
-          {
-            const Geometry::Point p(simplex, trans, fe.getDOF(local));
-            if constexpr (std::is_same_v<RangeType, Scalar>)
-            {
-              assert(m_data.rows() == 1);
-              m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-            }
-            else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-            {
-              m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-            }
-            else
-            {
-              assert(false);
-            }
-          }
-        }
-        return static_cast<Derived&>(*this);
+        return project(fn, std::set<Geometry::Attribute>{});
       }
 
       /**
@@ -331,6 +302,7 @@ namespace Rodin::Variational
        * attribute.
        */
       template <class NestedDerived>
+      inline
       Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return project(fn, std::set<Geometry::Attribute>{attr});
@@ -346,29 +318,40 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& project(const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs)
       {
-        if (attrs.size() == 0)
-          return project(fn);
-        else
+        using Function = FunctionBase<NestedDerived>;
+        using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;
+        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        const auto& fes = getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t d = mesh.getDimension();
+        for (auto it = mesh.getElement(); !it.end(); ++it)
         {
-          using Value = FunctionBase<NestedDerived>;
-          using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
-          static_assert(std::is_same_v<RangeType, ValueRangeType>);
-          if constexpr (std::is_same_v<ValueRangeType, Scalar>)
+          const auto& polytope = *it;
+          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
           {
-            assert(getFiniteElementSpace().getVectorDimension() == 1);
-            return static_cast<Derived&>(*this);
-          }
-          else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
-          {
-            assert(getFiniteElementSpace().getVectorDimension() == fn.getRangeShape().height());
-            return static_cast<Derived&>(*this);
-          }
-          else
-          {
-            assert(false);
-            return static_cast<Derived&>(*this);
+            const auto& i = polytope.getIndex();
+            const auto& fe = fes.getFiniteElement(d, i);
+            const auto& trans = mesh.getPolytopeTransformation(d, i);
+            for (size_t local = 0; local < fe.getCount(); local++)
+            {
+              const Geometry::Point p(polytope, trans, fe.getDOF(local));
+              if constexpr (std::is_same_v<RangeType, Scalar>)
+              {
+                assert(m_data.rows() == 1);
+                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              {
+                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else
+              {
+                assert(false);
+              }
+            }
           }
         }
+        return static_cast<Derived&>(*this);
       }
 
       inline
@@ -384,12 +367,14 @@ namespace Rodin::Variational
       }
 
       template <class NestedDerived>
+      inline
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
       {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn);
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, std::set<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
+      inline
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
         return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
@@ -398,29 +383,40 @@ namespace Rodin::Variational
       template <class NestedDerived>
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs)
       {
-        if (attrs.size() == 0)
-          return projectOnBoundary(fn);
-        else
+        using Function = FunctionBase<NestedDerived>;
+        using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;
+        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        const auto& fes = getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t d = mesh.getDimension() - 1;
+        for (auto it = mesh.getBoundary(); !it.end(); ++it)
         {
-          using Value = FunctionBase<NestedDerived>;
-          using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
-          static_assert(std::is_same_v<RangeType, ValueRangeType>);
-          if constexpr (std::is_same_v<ValueRangeType, Scalar>)
+          const auto& polytope = *it;
+          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
           {
-            assert(getFiniteElementSpace().getVectorDimension() == 1);
-            return static_cast<Derived&>(*this);
-          }
-          else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
-          {
-            assert(getFiniteElementSpace().getVectorDimension() == fn.getRangeShape().height());
-            return static_cast<Derived&>(*this);
-          }
-          else
-          {
-            assert(false);
-            return static_cast<Derived&>(*this);
+            const auto& i = polytope.getIndex();
+            const auto& fe = fes.getFiniteElement(d, i);
+            const auto& trans = mesh.getPolytopeTransformation(d, i);
+            for (size_t local = 0; local < fe.getCount(); local++)
+            {
+              const Geometry::Point p(polytope, trans, fe.getDOF(local));
+              if constexpr (std::is_same_v<RangeType, Scalar>)
+              {
+                assert(m_data.rows() == 1);
+                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              {
+                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else
+              {
+                assert(false);
+              }
+            }
           }
         }
+        return static_cast<Derived&>(*this);
       }
 
       inline

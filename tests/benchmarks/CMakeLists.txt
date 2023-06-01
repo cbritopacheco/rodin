@@ -1,7 +1,8 @@
 set(RodinBenchmarks_SRCS
+  P1.cpp
   Poisson.cpp
   MeshIO.cpp
-  P1GridFunctionProjection
+  UniformGrid.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})

@@ -22,3 +22,10 @@ target_link_libraries(RodinGeometryIsoparametricTransformationTest
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryIsoparametricTransformationTest)
 
+add_executable(RodinGeometryUniformGridTest UniformGridTest.cpp)
+target_link_libraries(RodinGeometryUniformGridTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryUniformGridTest)

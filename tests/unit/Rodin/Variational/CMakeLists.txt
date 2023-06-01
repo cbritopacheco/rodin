@@ -14,10 +14,11 @@ target_link_libraries(RodinVariationalP1Test
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalP1Test)
 
-add_executable(RodinVariationalGridFunctionTest GridFunctionTest.cpp)
-target_link_libraries(RodinVariationalGridFunctionTest
+add_executable(RodinVariationalDirichletBCTest DirichletBCTest.cpp)
+target_link_libraries(RodinVariationalDirichletBCTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalGridFunctionTest)
+gtest_discover_tests(RodinVariationalDirichletBCTest)
+

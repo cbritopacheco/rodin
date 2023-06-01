@@ -35,7 +35,7 @@
 
 /**
   @namespace Rodin::Variational
-  @brief Module for writing variational problems in C++.
+  @brief Module for performing the assembly of variational problems.
  */
 
 /**
@@ -45,7 +45,7 @@
 
 /**
   @namespace Rodin::FormLanguage
-  @brief Module for writing formal expressions in C++
+  @brief Module for writing high level abstract expressions.
  */
 
 

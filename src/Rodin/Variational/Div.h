@@ -12,11 +12,12 @@
 
 namespace Rodin::Variational
 {
-//   /**
-//    * @defgroup DivSpecializations Div Template Specializations
-//    * @brief Template specializations of the Div class.
-//    * @see Div
-//    */
+  /**
+    * @defgroup DivSpecializations Div Template Specializations
+    * @brief Template specializations of the Div class.
+    * @see Div
+    */
+
 // 
 //   /**
 //    * @ingroup DivSpecializations

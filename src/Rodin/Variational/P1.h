@@ -142,9 +142,9 @@ namespace Rodin::Variational
       {
         const auto [d, i] = idx;
         const auto& p = getMesh().getConnectivity().getPolytope(d, i);
-        assert(i < static_cast<size_t>(p.size()));
         const size_t q = local / m_vdim;
         const size_t r = local % m_vdim;
+        assert(q < static_cast<size_t>(p.size()));
         return p(q) + r * m_mesh.get().getVertexCount();
       }
 
