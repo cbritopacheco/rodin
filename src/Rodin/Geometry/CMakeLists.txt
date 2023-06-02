@@ -22,8 +22,6 @@ add_library(Rodin::Geometry ALIAS RodinGeometry)
 
 target_link_libraries(RodinGeometry
   PUBLIC
-  mfem
-  PUBLIC
   Rodin::IO
   Rodin::Math
   Rodin::Alert

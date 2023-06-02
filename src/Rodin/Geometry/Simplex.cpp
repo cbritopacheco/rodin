@@ -1,4 +1,3 @@
-#include "Rodin/Variational/MFEM.h"
 #include "Rodin/Variational/QuadratureRule.h"
 
 #include "Mesh.h"
@@ -61,7 +60,6 @@ namespace Rodin::Geometry
   {
     assert(false);
     return 0;
-    // mfem::ElementTransformation& trans = getTransformation().getHandle();
     // const Variational::QuadratureRule& qr =
     //   Variational::QuadratureRule::get(*this, trans.OrderJ());
     // Scalar volume = 0.0;
@@ -141,34 +139,11 @@ namespace Rodin::Geometry
   const Math::Matrix& Point::getJacobian() const
   {
     assert(false);
-    // if (!m_jacobian.has_value())
-    // {
-    //   const size_t rdim = getSimplex().getDimension();
-    //   const size_t sdim = getSimplex().getMesh().getSpaceDimension();
-    //   Math::Matrix jacobian(sdim, rdim);
-    //   mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
-    //   tmp = m_trans.get().getHandle().Jacobian();
-    //   m_jacobian.emplace(std::move(jacobian));
-    // }
-    // assert(m_jacobian.has_value());
-    // return m_jacobian.value();
   }
 
   const Math::Matrix& Point::getJacobianInverse() const
   {
     assert(false);
-    // if (!m_inverseJacobian.has_value())
-    // {
-    //   const size_t rdim = getSimplex().getDimension();
-    //   const size_t sdim = getSimplex().getMesh().getSpaceDimension();
-    //   Math::Matrix inv(rdim, sdim);
-    //   mfem::DenseMatrix tmp(inv.data(), inv.rows(), inv.cols());
-    //   assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
-    //   tmp = m_trans.get().getHandle().InverseJacobian();
-    //   m_inverseJacobian.emplace(std::move(inv));
-    // }
-    // assert(m_inverseJacobian.has_value());
-    // return m_inverseJacobian.value();
   }
 
   Scalar Point::getDistortion() const

@@ -9,8 +9,6 @@
 
 #include <variant>
 
-#include <mfem.hpp>
-
 #include "Rodin/Types.h"
 #include "Rodin/Utility.h"
 #include "Rodin/Geometry/Mesh.h"

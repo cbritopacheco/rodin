@@ -344,7 +344,7 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>&
   Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
-    mfem::named_ifgzstream input(filename.c_str());
+    std::ifstream input(filename.c_str());
     if (!input)
     {
       Alert::Exception()

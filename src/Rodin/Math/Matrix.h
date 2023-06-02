@@ -14,6 +14,9 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Dense matrix type
+   */
   using Matrix = Eigen::MatrixX<Scalar>;
 
   template <size_t Rows, size_t Cols>

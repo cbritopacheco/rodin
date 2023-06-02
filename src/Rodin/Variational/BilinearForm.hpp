@@ -22,7 +22,7 @@ namespace Rodin::Variational
 {
    template <class TrialFES, class TestFES>
    void
-   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>::assemble()
+   BilinearForm<TrialFES, TestFES, Context::Serial, Math::SparseMatrix>::assemble()
    {
       assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
             &getTestFunction().getFiniteElementSpace().getMesh());

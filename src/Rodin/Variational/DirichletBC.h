@@ -47,13 +47,13 @@ namespace Rodin::Variational
    * @f]
    * on the subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    */
-  template <class OperandDerived, class ValueDerived, class FES, ShapeFunctionSpaceType Space>
-  class DirichletBC<ShapeFunction<OperandDerived, FES, Space>, FunctionBase<ValueDerived>> final
+  template <class FES, class ValueDerived>
+  class DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>> final
     : public DirichletBCBase
   {
     public:
       /// Operand type
-      using Operand = ShapeFunction<OperandDerived, FES, Space>;
+      using Operand = TrialFunction<FES>;
 
       /// Value type
       using Value = FunctionBase<ValueDerived>;
@@ -196,9 +196,9 @@ namespace Rodin::Variational
       IndexSet m_dofs;
   };
 
-  template <class OperandDerived, class ValueDerived, class FES, ShapeFunctionSpaceType Space>
-  DirichletBC(ShapeFunction<OperandDerived, FES, Space>&, const FunctionBase<ValueDerived>&)
-    -> DirichletBC<ShapeFunction<OperandDerived, FES, Space>, FunctionBase<ValueDerived>>;
+  template <class FES, class ValueDerived>
+  DirichletBC(TrialFunction<FES>&, const FunctionBase<ValueDerived>&)
+    -> DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>>;
 }
 
 #endif

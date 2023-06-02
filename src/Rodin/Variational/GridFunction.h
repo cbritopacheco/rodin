@@ -14,8 +14,6 @@
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/SubMesh.h"
@@ -40,6 +38,22 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
+  /**
+   * @brief Abstract base class for GridFunction objects.
+   *
+   * @section gridfunction-data-layout Data layout
+   *
+   * The data of the GridFunctionBase object can be accessed via a call to
+   * @ref getData(). In general the following conditions are satisfied:
+   * ```
+   *  const Math::Matrix& data = gf.getData();
+   *  assert(data.rows() == gf.getFiniteElementSpace().getVectorDimension());
+   *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
+   * ```
+   * Hence, the i-th column of the Math::Matrix object corresponds to the value
+   * of the grid function at the global i-th degree of freedom in the finite
+   * element space.
+   */
   template <class Derived, class FES>
   class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES>>
   {
@@ -84,6 +98,10 @@ namespace Rodin::Variational
        *
        * This function will compute the maximum value in the grid function
        * data array.
+       *
+       * @section Complexity
+       * The operation is linear in the size of the number of entries in the
+       * underlying matrix.
        */
       inline
       constexpr
@@ -98,6 +116,10 @@ namespace Rodin::Variational
        *
        * This function will compute the minimum value in the grid function
        * data array.
+       *
+       * @section Complexity
+       * The operation is linear in the size of the number of entries in the
+       * underlying matrix.
        */
       inline
       constexpr
@@ -426,6 +448,9 @@ namespace Rodin::Variational
         return m_fes.get();
       }
 
+      /**
+       * @brief Returns a reference to the GridFunction data.
+       */
       inline
       constexpr
       Math::Matrix& getData()
@@ -433,6 +458,9 @@ namespace Rodin::Variational
         return m_data;
       }
 
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
       inline
       constexpr
       const Math::Matrix& getData() const

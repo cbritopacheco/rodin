@@ -63,8 +63,8 @@ namespace Rodin::Variational
   /**
    * @brief Represents a serial bilinear form supported on two finite element
    * spaces originating from two instances of FiniteElementCollection.
-   * @tparam TrialFES Trial Finite Element Space
-   * @tparam TestFES Test Finite Element Space
+   * @tparam TrialFES Type of trial finite element space
+   * @tparam TestFES Type of test finite element space
    *
    * An object of type BilinearForm represents a bilinear map:
    * @f[
@@ -74,6 +74,8 @@ namespace Rodin::Variational
    * \end{aligned}
    * @f]
    * where @f$ U @f$ and @f$ V @f$ are finite element spaces.
+   *
+   * @see BilinearFormSpecializations
    */
   template <class TrialFES, class TestFES, class Context, class OperatorType>
   class BilinearForm;

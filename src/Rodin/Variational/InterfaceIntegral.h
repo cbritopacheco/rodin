@@ -10,10 +10,8 @@
 #include <cassert>
 #include <set>
 #include <utility>
-#include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
-#include "Rodin/Utility/MFEM.h"
 
 #include "Dot.h"
 #include "LinearForm.h"

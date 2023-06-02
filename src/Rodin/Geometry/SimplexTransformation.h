@@ -7,8 +7,6 @@
 #ifndef RODIN_GEOMETRY_TRANSFORMATION_H
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
-#include <mfem.hpp>
-
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 

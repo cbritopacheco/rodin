@@ -10,19 +10,20 @@
 #include <variant>
 #include <ostream>
 
-#include <mfem.hpp>
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SparseMatrix.h"
 
 #include "AssemblyBase.h"
 
 namespace Rodin::Variational::Assembly
 {
   template <>
-  class Native<BilinearFormBase<mfem::SparseMatrix>>
-    : public AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>
+  class Native<BilinearFormBase<Math::SparseMatrix>>
+    : public AssemblyBase<BilinearFormBase<Math::SparseMatrix>>
   {
     public:
-      using Parent = AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>;
-      using OperatorType = mfem::SparseMatrix;
+      using Parent = AssemblyBase<BilinearFormBase<Math::SparseMatrix>>;
+      using OperatorType = Math::SparseMatrix;
 
       Native() = default;
 
@@ -43,12 +44,12 @@ namespace Rodin::Variational::Assembly
   };
 
   template <>
-  class Native<LinearFormBase<mfem::Vector>>
-    : public AssemblyBase<LinearFormBase<mfem::Vector>>
+  class Native<LinearFormBase<Math::Vector>>
+    : public AssemblyBase<LinearFormBase<Math::Vector>>
   {
     public:
-      using Parent = AssemblyBase<LinearFormBase<mfem::Vector>>;
-      using VectorType = mfem::Vector;
+      using Parent = AssemblyBase<LinearFormBase<Math::Vector>>;
+      using VectorType = Math::Vector;
 
       Native() = default;
 

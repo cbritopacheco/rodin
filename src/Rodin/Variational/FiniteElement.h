@@ -16,7 +16,6 @@
 #include "TensorBasis.h"
 
 #include "ForwardDecls.h"
-#include "MFEM.h"
 
 namespace Rodin::Variational
 {

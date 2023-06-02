@@ -9,7 +9,6 @@
 
 #include <map>
 #include <optional>
-#include <mfem.hpp>
 
 #include "Rodin/Variational/ForwardDecls.h"
 

@@ -10,7 +10,6 @@
 #include <cassert>
 #include <set>
 #include <utility>
-#include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
 
@@ -248,7 +247,7 @@ namespace Rodin::Variational
       TestFunction<FES>                                 m_v;
       GridFunction<FES>                                 m_one;
 
-      LinearForm<FES, Context::Serial, mfem::Vector>    m_lf;
+      LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
       bool m_assembled;
   };
 
