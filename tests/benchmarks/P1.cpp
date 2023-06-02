@@ -18,7 +18,7 @@ using namespace Rodin::Variational;
 
 namespace RodinBenchmark
 {
-  struct P1_GridFunction_Projection : public benchmark::Fixture
+  struct P1Benchmark : public benchmark::Fixture
   {
     public:
       void SetUp(const benchmark::State&)
@@ -39,6 +39,15 @@ namespace RodinBenchmark
 
         uniformTriangularMesh32 =
           SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 32, 32);
+
+        uniformTriangularMesh32 =
+          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 32, 32);
+
+        uniformTriangularMesh64 =
+          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 64, 64);
+
+        uniformTriangularMesh128 =
+          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 128, 128);
       }
 
       void TearDown(const benchmark::State&)
@@ -47,9 +56,39 @@ namespace RodinBenchmark
       SerialMesh square2d;
       SerialMesh uniformTriangularMesh16;
       SerialMesh uniformTriangularMesh32;
+      SerialMesh uniformTriangularMesh64;
+      SerialMesh uniformTriangularMesh128;
   };
 
-  BENCHMARK_F(P1_GridFunction_Projection, Scalar_2D_Square_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, UniformTriangular16_Build)
+  (benchmark::State& st)
+  {
+    for (auto _ : st)
+      P1 fes(uniformTriangularMesh16);
+  }
+
+  BENCHMARK_F(P1Benchmark, UniformTriangular32_Build)
+  (benchmark::State& st)
+  {
+    for (auto _ : st)
+      P1 fes(uniformTriangularMesh32);
+  }
+
+  BENCHMARK_F(P1Benchmark, UniformTriangular64_Build)
+  (benchmark::State& st)
+  {
+    for (auto _ : st)
+      P1 fes(uniformTriangularMesh64);
+  }
+
+  BENCHMARK_F(P1Benchmark, UniformTriangular128_Build)
+  (benchmark::State& st)
+  {
+    for (auto _ : st)
+      P1 fes(uniformTriangularMesh128);
+  }
+
+  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Scalar_2D_Square_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(square2d);
@@ -59,7 +98,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1_GridFunction_Projection, UniformTriangular16_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Scalar_UniformTriangular16_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh16);
@@ -69,7 +108,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1_GridFunction_Projection, UniformTriangular32_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Scalar_UniformTriangular32_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh32);
@@ -79,7 +118,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1_GridFunction_Projection, Vector_2D_Square_Components)
+  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Vector_2D_Square_Components)
   (benchmark::State& st)
   {
     constexpr size_t vdim = 2;
@@ -93,7 +132,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1_GridFunction_Projection, Vector_2D_UniformTriangular16_Components)
+  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Vector_2D_UniformTriangular16_Components)
   (benchmark::State& st)
   {
     constexpr size_t vdim = 2;
@@ -107,7 +146,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1_GridFunction_Projection, Vector_2D_UniformTriangular32_Components)
+  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Vector_2D_UniformTriangular32_Components)
   (benchmark::State& st)
   {
     constexpr size_t vdim = 2;
