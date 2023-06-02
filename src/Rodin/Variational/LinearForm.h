@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
-#include <mfem.hpp>
-
 #include "Rodin/FormLanguage/List.h"
 
 #include "ForwardDecls.h"
@@ -160,14 +158,14 @@ namespace Rodin::Variational
    * LinearFormIntegratorBase instances.
    */
   template <class FES>
-  class LinearForm<FES, Context::Serial, mfem::Vector> final
-    : public LinearFormBase<mfem::Vector>
+  class LinearForm<FES, Context::Serial, Math::Vector> final
+    : public LinearFormBase<Math::Vector>
   {
     static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
 
     public:
       using Context = typename FES::Context;
-      using VectorType = mfem::Vector;
+      using VectorType = Math::Vector;
       using Parent = LinearFormBase<VectorType>;
 
       /**
@@ -257,7 +255,7 @@ namespace Rodin::Variational
       std::unique_ptr<VectorType> m_vector;
   };
   template <class FES>
-  LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, mfem::Vector>;
+  LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, Math::Vector>;
 }
 
 #include "LinearForm.hpp"

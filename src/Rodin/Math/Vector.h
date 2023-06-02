@@ -15,6 +15,9 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Dense vector type.
+   */
   using Vector = Eigen::VectorX<Scalar>;
 
   template <size_t Size>

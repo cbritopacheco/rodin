@@ -1,7 +1,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 #define RODIN_VARIATIONAL_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 
-#include "Rodin/Variational/MFEM.h"
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
@@ -43,15 +43,11 @@ namespace Rodin::Variational
 
       Math::Matrix getMatrix(const Geometry::Polytope& simplex) const override
       {
-        const auto& fe = getFiniteElementSpace().getFiniteElement(simplex);
-        const auto& trans = simplex.getTransformation();
-        Math::Matrix res(fe.getDOFs(), fe.getDOFs());
-        mfem::DenseMatrix tmp(res.data(), res.rows(), res.cols());
-        Internal::MFEMScalarCoefficient mu(simplex.getMesh(), getMu());
-        Internal::MFEMScalarCoefficient lambda(simplex.getMesh(), getLambda());
-        mfem::ElasticityIntegrator bfi(lambda, mu);
-        bfi.AssembleElementMatrix(fe.getHandle(), trans.getHandle(), tmp);
-        return res;
+        assert(false);
+        // const auto& fe = getFiniteElementSpace().getFiniteElement(simplex);
+        // const auto& trans = simplex.getTransformation();
+        // Math::Matrix res(fe.getDOFs(), fe.getDOFs());
+        // return res;
       }
 
       inline

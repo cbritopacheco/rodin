@@ -10,6 +10,7 @@
 #include <chrono>
 
 #include "Rodin/Utility.h"
+
 #include "Assembly/Native.h"
 
 #include "GridFunction.h"
@@ -21,22 +22,23 @@
 namespace Rodin::Variational
 {
    // ------------------------------------------------------------------------
-   // ---- Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   // ---- Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
    // ------------------------------------------------------------------------
 
    template <class TrialFES, class TestFES>
    constexpr
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
    ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
       :  m_trialFunction(u),
          m_testFunction(v),
          m_linearForm(v),
-         m_bilinearForm(u, v)
+         m_bilinearForm(u, v),
+         m_assembled(false)
    {}
 
    template <class TrialFES, class TestFES>
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>&
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
    ::operator=(ProblemBody&& rhs)
    {
       Parent::operator=(std::move(rhs));
@@ -52,67 +54,43 @@ namespace Rodin::Variational
 
    template <class TrialFES, class TestFES>
    void
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>::assemble()
+   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::assemble()
    {
       // Assemble both sides
       getLinearForm().assemble();
+      m_mass = std::move(getLinearForm().getVector());
+
       getBilinearForm().assemble();
+      m_stiffness = std::move(getBilinearForm().getOperator());
 
       // Emplace data
       getTrialFunction().emplace();
-      getTestFunction().emplace();
 
       // Project values onto the essential boundary and compute essential dofs
+      IndexSet trialEssentialDOFs;
       for (const auto& dbc : getProblemBody().getDBCs())
       {
          dbc.project();
-         m_trialEssTrueDofList.Append(dbc.getDOFs());
+         trialEssentialDOFs.insert(dbc.getDOFs());
       }
 
-      m_trialEssTrueDofList.Sort();
-      m_trialEssTrueDofList.Unique();
-
-      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      const auto& testFes = getTestFunction().getFiniteElementSpace();
-
-      if constexpr (std::is_same_v<TrialFES, TestFES>)
-      {
-         assert(&trialFes == &testFes);
-
-         // Form linear system
-         m_stiffnessOp.Swap(getBilinearForm().getOperator());
-         m_tmp.reset(new mfem::BilinearForm(&trialFes.getHandle()));
-         m_tmp->Assemble();
-         m_tmp->SpMat().Swap(m_stiffnessOp);
-         m_tmp->FormLinearSystem(
-                    m_trialEssTrueDofList,
-                    getTrialFunction().getSolution().getHandle(),
-                    getLinearForm().getVector(),
-                    m_stiffnessOp, m_guess, m_massVector);
-         m_tmp->SpMat().Swap(m_stiffnessOp);
-      }
-      else
-      {
-         assert(false); // Not supported yet
-      }
+      m_assembled = true;
    }
 
    template <class TrialFES, class TestFES>
    void
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
+   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
    ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
    {
       // Assemble the system
-      assemble();
+      if (!m_assembled)
+         assemble();
 
-      // Solve the system Ax = b
+      // Solve the system AX = B
       solver.solve(getStiffnessOperator(), m_guess, getMassVector());
 
       // Recover solution
-      m_tmp->RecoverFEMSolution(
-            m_guess,
-            getLinearForm().getVector(),
-            getTrialFunction().getSolution().getHandle());
+      assert(false);
    }
 }
 

@@ -11,8 +11,6 @@
 #include <optional>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"

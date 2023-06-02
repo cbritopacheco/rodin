@@ -3,7 +3,6 @@
 
 #include <set>
 #include <memory>
-#include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
 

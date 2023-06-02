@@ -64,31 +64,43 @@ namespace RodinBenchmark
   (benchmark::State& st)
   {
     for (auto _ : st)
+    {
       P1 fes(uniformTriangularMesh16);
+      benchmark::DoNotOptimize(fes);
+    }
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular32_Build)
   (benchmark::State& st)
   {
     for (auto _ : st)
+    {
       P1 fes(uniformTriangularMesh32);
+      benchmark::DoNotOptimize(fes);
+    }
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular64_Build)
   (benchmark::State& st)
   {
     for (auto _ : st)
+    {
       P1 fes(uniformTriangularMesh64);
+      benchmark::DoNotOptimize(fes);
+    }
   }
 
   BENCHMARK_F(P1Benchmark, UniformTriangular128_Build)
   (benchmark::State& st)
   {
     for (auto _ : st)
+    {
       P1 fes(uniformTriangularMesh128);
+      benchmark::DoNotOptimize(fes);
+    }
   }
 
-  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Scalar_2D_Square_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Scalar_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(square2d);
@@ -98,7 +110,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Scalar_UniformTriangular16_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Scalar_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh16);
@@ -108,7 +120,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Scalar_UniformTriangular32_SumOfComponents)
+  BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Scalar_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh32);
@@ -118,7 +130,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Vector_2D_Square_Components)
+  BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
     constexpr size_t vdim = 2;
@@ -132,7 +144,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Vector_2D_UniformTriangular16_Components)
+  BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
     constexpr size_t vdim = 2;
@@ -146,7 +158,7 @@ namespace RodinBenchmark
       gf.project(c);
   }
 
-  BENCHMARK_F(P1Benchmark, GridFunction_Projection_Vector_2D_UniformTriangular32_Components)
+  BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
     constexpr size_t vdim = 2;

@@ -10,7 +10,6 @@
 #include <set>
 #include <array>
 #include <optional>
-#include <mfem.hpp>
 
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"

@@ -48,6 +48,16 @@
   @brief Module for writing high level abstract expressions.
  */
 
+/**
+  @dir Rodin/Math
+  @brief Namespace @ref Rodin::Math
+ */
+
+/**
+  @namespace Rodin::Math
+  @brief Module for linear algebra operations.
+ */
+
 
 /**
   @dir Rodin/Solver

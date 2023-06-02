@@ -179,29 +179,6 @@ namespace Rodin::Variational
                               const std::set<Geometry::Attribute>& attrs = {})
       {
         assert(false);
-        // if (s.getRangeType() != RangeType::Scalar)
-        //   UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
-
-        // int maxAttr = *m_u.getFiniteElementSpace()
-        //             .getMesh()
-        //             .getBoundaryAttributes().rbegin();
-        // std::vector<mfem::Coefficient*> mfemCoeffs(
-        //     m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
-        // mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(
-        //     m_u.getFiniteElementSpace().getMesh(), s);
-        // if (attrs.size() == 0)
-        // {
-        //   mfem::Array<int> marker(maxAttr);
-        //   marker = 1;
-        //   m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-        // }
-        // else
-        // {
-        //   assert(mfemCoeffs[getIndex()] != nullptr);
-        //   mfem::Array<int> marker = Utility::set2marker(attrs, maxAttr);
-        //   m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-        // }
-        // delete mfemCoeffs[getIndex()];
         return *this;
       }
 

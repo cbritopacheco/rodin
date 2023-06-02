@@ -17,7 +17,6 @@ set(RodinVariational_HEADERS
   IdentityMatrix.h
   Integral.h
   Sum.h
-  MFEM.h
   UnaryMinus.h
   Mult.h
   Jacobian.h
@@ -75,7 +74,6 @@ set(RodinVariational_SRCS
   LinearForm.hpp
   Problem.hpp
   ProblemBody.cpp
-  MFEM.cpp
   Minus.cpp
   Function.cpp
   RangeShape.cpp
@@ -108,8 +106,6 @@ target_include_directories(RodinVariational
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_link_libraries(RodinVariational
-  PUBLIC
-  mfem
   PUBLIC
   Rodin::IO
   Rodin::Alert
