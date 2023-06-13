@@ -47,9 +47,6 @@ set(RodinVariational_HEADERS
   )
 
 set(RodinVariational_SRCS
-  P1.cpp
-  P1Element.cpp
-  QFGG.cpp
   FiniteElement.cpp
   FiniteElementSpace.cpp
   LinearFormIntegrator.cpp
@@ -90,6 +87,8 @@ set(RodinVariational_SRCS
   Tangent.cpp
   Assembly/AssemblyBase.cpp
   Assembly/Native.cpp
+  P1/P1.cpp
+  P1/P1Element.cpp
   )
 
 add_library(RodinVariational
@@ -107,6 +106,7 @@ target_include_directories(RodinVariational
 
 target_link_libraries(RodinVariational
   PUBLIC
+  Rodin::QF
   Rodin::IO
   Rodin::Alert
   Rodin::Utility

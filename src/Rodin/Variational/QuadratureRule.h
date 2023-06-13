@@ -3,8 +3,9 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/QF/QFGG.h"
+
 #include "Dot.h"
-#include "QFGG.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -18,6 +19,21 @@ namespace Rodin::Variational
    * @see QuadratureRule
    */
 
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Approximation of the integral of the the dot product between a
+   * trial shape function and a test shape function.
+   *
+   * Represents the quadrature rule approximation of an integral:
+   * @f[
+   *  \int_{\mathcal{R}_h} \mathrm{Integrand} \ dx \approx \sum_{i = 1}^{n}
+   *  w_i \ \mathrm{Integrand} (x_i)
+   * @f]
+   * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
+   * @f$, the quadrature point @f$ x_i @f$ has an associated weight @f$ w_i @f$
+   * and @f$ \mathrm{Integrand}(x_i) @f$ is the value of the integrand at the
+   * quadrature point.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class QuadratureRule<
     Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
@@ -70,7 +86,7 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(d, idx);
         const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         const size_t order = trialfe.getCount() + testfe.getCount() + vc;
-        QFGG qf(polytope.getGeometry(), order);
+        const QF::QFGG qf(order, polytope.getGeometry());
         Math::Matrix res = Math::Matrix::Zero(test.getDOFs(polytope), trial.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)
         {
@@ -88,6 +104,10 @@ namespace Rodin::Variational
       std::unique_ptr<Integrand> m_prod;
   };
 
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Approximation of the integral of a test shape function.
+   */
   template <class NestedDerived, class FES>
   class QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
     : public LinearFormIntegratorBase
@@ -139,7 +159,7 @@ namespace Rodin::Variational
         const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         assert(integrand.getRangeType() == RangeType::Scalar);
         const size_t order = fe.getCount() + vc;
-        QFGG qf(polytope.getGeometry(), order);
+        const QF::QFGG qf(order, polytope.getGeometry());
         Math::Vector res = Math::Vector::Zero(integrand.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)
         {

@@ -28,15 +28,18 @@ namespace Rodin::Solver
 
   /**
    * @ingroup CGSpecializations
-   * @brief Conjugate Gradient for use with `Math::SparseMatrix` and
-   * `Math::Vector`.
+   * @brief Conjugate Gradient for use with Math::SparseMatrix and
+   * Math::Vector.
    */
   template <>
   class CG<Math::SparseMatrix, Math::Vector>
     : public SolverBase<Math::SparseMatrix, Math::Vector>
   {
     public:
+      /// Type of linear operator
       using OperatorType = Math::SparseMatrix;
+
+      /// Type of vector
       using VectorType = Math::Vector;
 
       /**

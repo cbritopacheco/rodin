@@ -12,31 +12,56 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Abstract base class for bilinear form integrators.
+   *
+   * This class provides the base functionality for bilinear form integrator
+   * objects.
+   */
   class BilinearFormIntegratorBase : public Integrator
   {
     public:
+      /// Parent class
       using Parent = Integrator;
 
+      /**
+       * @brief Constructs the object given a TrialFunction and a TestFunction.
+       */
       template <class TrialFES, class TestFES>
       BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         : m_u(u), m_v(v)
       {}
 
+      /**
+       * @brief Deleted constructor.
+       */
       template <class TrialFES, class TestFES>
       BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, const TestFunction<TestFES>& v) = delete;
 
+      /**
+       * @brief Deleted constructor.
+       */
       template <class TrialFES, class TestFES>
       BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, TestFunction<TestFES>&& v) = delete;
 
+      /**
+       * @brief Deleted constructor.
+       */
       template <class TrialFES, class TestFES>
       BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, TestFunction<TestFES>&& v) = delete;
 
+      /**
+       * @brief Copy constructor.
+       */
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
           m_attrs(other.m_attrs)
       {}
 
+      /**
+       * @brief Move constructor.
+       */
       BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
@@ -92,7 +117,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets reference to trial function.
+       * @brief Gets a constant reference to trial function object.
        */
       inline
       const FormLanguage::Base& getTrialFunction() const
@@ -101,7 +126,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets reference to test function.
+       * @brief Gets a constant reference to test function object.
        */
       inline
       const FormLanguage::Base& getTestFunction() const
@@ -112,9 +137,16 @@ namespace Rodin::Variational
       /**
        * @brief Performs the assembly of the element matrix for the given
        * element.
+       *
+       * Assembles the stiffness matrix of the given element. The 
+       *
+       * @returns A matrix of size of @f$ m \times n @f$ where @f$ n @f$
+       * (resp. @f$ m @f$)
+       * denotes the number of degrees of freedom on the polytope for the test
+       * (trial) space.
        */
       virtual
-      Math::Matrix getMatrix(const Geometry::Polytope& element) const = 0;
+      Math::Matrix getMatrix(const Geometry::Polytope& polytope) const = 0;
 
       virtual
       BilinearFormIntegratorBase* copy() const noexcept override = 0;

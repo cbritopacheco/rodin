@@ -15,6 +15,9 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Represents the lazy evaluation of a function.
+   */
   template <class StrictType>
   class LazyEvaluator : public FunctionBase<LazyEvaluator<StrictType>>
   {
@@ -26,7 +29,7 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief rvalues are not allowed.
+       * @brief R-values are not allowed.
        */
       LazyEvaluator(StrictType&&) = delete;
 

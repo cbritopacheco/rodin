@@ -11,6 +11,7 @@
 #include <variant>
 
 #include "Rodin/Utility.h"
+#include "Rodin/FormLanguage/List.h"
 
 #include "ForwardDecls.h"
 
@@ -25,20 +26,70 @@ namespace Rodin::Variational
    * @see DirichletBC
    */
 
+  /**
+   * @defgroup DirichletBCCTAD DirichletBC Template Deduction Guides
+   * @brief Template Deduction Guides of the DirichletBC class.
+   * @see DirichletBC
+   */
+
+  /**
+   * @brief Abstract base class for a Dirichlet boundary condition.
+   *
+   * Used as a base class to represent the Dirichlet boundary condition:
+   * @f[
+   *   \mathrm{Operand} = \mathrm{Value} \ \text{ on } \ \Gamma_D
+   * @f]
+   * on some subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
+   *
+   * @see DirichletBC
+   */
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
-      virtual void dofs() = 0;
+      /**
+       * @brief Assembles the Dirichlet boundary condition.
+       *
+       * This method computes the global degree of freedom map associated to
+       * the Dirichlet boundary. In other words, it computes the IndexMap which
+       * has a keys the global indices of the DOFs, and as values @f$ \ell_i
+       * @f$ the
+       * @f[
+       *  \ell_i(\mathrm{Value}), \quad i = 1, \ldots, n
+       * @f]
+       * where @f$ \ell_i @f$ is the i-th linear form on the associated finite
+       * element space.
+       */
+      virtual void assemble() = 0;
+
       virtual void project() const = 0;
-      virtual const IndexSet& getDOFs() const = 0;
+
+      /**
+       * @brief Gets the global degree of freedom map.
+       */
+      virtual const IndexMap<Scalar>& getDOFs() const = 0;
+
+      /**
+       * @brief Gets the associated operand.
+       */
       virtual const FormLanguage::Base& getOperand() const = 0;
+
+      /**
+       * @brief Gets the associated value.
+       */
+      virtual const FormLanguage::Base& getValue() const = 0;
+
       virtual DirichletBCBase* copy() const noexcept override = 0;
   };
+
+  /// Alias for a list of Dirichlet boundary conditions
+  using EssentialBoundary = FormLanguage::List<DirichletBCBase>;
 
   /**
    * @ingroup DirichletBCSpecializations
    * @brief Represents a Dirichlet boundary condition on a ShapeFunction
    * object.
+   * @tparam FES Type of finite element space
+   * @tparam ValueDerived Type of value
    *
    * When utilized in a Problem construction, it will impose the Dirichlet
    * condition
@@ -119,17 +170,6 @@ namespace Rodin::Variational
       }
 
       /**
-       * @returns Returns reference to the value of the boundary condition.
-       */
-      inline
-      constexpr
-      const Value& getValue() const
-      {
-        assert(m_value);
-        return *m_value;
-      }
-
-      /**
        * @returns Attributes over which the boundary condition is imposed.
        */
       inline
@@ -144,7 +184,7 @@ namespace Rodin::Variational
        * the boundary region.
        */
       inline
-      void dofs() override
+      void assemble() override
       {
         const auto& fes = m_u.get().getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
@@ -156,8 +196,14 @@ namespace Rodin::Variational
             const size_t d = polytope.getDimension();
             const size_t i = polytope.getIndex();
             const auto& fe = fes.getFiniteElement(d, i);
+            const auto& mapping = fes.getMapping({ d, i }, getValue());
             for (Index local = 0; local < fe.getCount(); local++)
-              m_dofs.insert(fes.getGlobalIndex({ d, i }, local));
+            {
+              const Index global = fes.getGlobalIndex({ d, i }, local);
+              const auto& lf = fe.getLinearForm(local);
+              const Scalar s = lf(mapping);
+              m_dofs.insert({ global, s });
+            }
           }
         }
       }
@@ -178,7 +224,14 @@ namespace Rodin::Variational
       }
 
       inline
-      const IndexSet& getDOFs() const override
+      const Value& getValue() const override
+      {
+        assert(m_value);
+        return *m_value;
+      }
+
+      inline
+      const IndexMap<Scalar>& getDOFs() const override
       {
         return m_dofs;
       }
@@ -193,12 +246,19 @@ namespace Rodin::Variational
       std::reference_wrapper<Operand> m_u;
       std::unique_ptr<Value> m_value;
       std::set<Geometry::Attribute> m_essBdr;
-      IndexSet m_dofs;
+      IndexMap<Scalar> m_dofs;
   };
 
-  template <class FES, class ValueDerived>
-  DirichletBC(TrialFunction<FES>&, const FunctionBase<ValueDerived>&)
-    -> DirichletBC<TrialFunction<FES>, FunctionBase<ValueDerived>>;
+  /**
+   * @ingroup DirichletBCCTAD
+   * @ingroup RodinCTAD
+   * @tparam FES Type of finite element space
+   * @tparam ValueDerived Derived type of FunctionBase
+   * @brief CTAD for DirichletBC
+   */
+  template <class FES, class FunctionDerived>
+  DirichletBC(TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)
+    -> DirichletBC<TrialFunction<FES>, FunctionBase<FunctionDerived>>;
 }
 
 #endif

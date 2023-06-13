@@ -11,6 +11,7 @@
 #include <Eigen/Dense>
 
 #include "Rodin/Types.h"
+#include "Rodin/Array.h"
 
 namespace Rodin::Math
 {

@@ -26,12 +26,10 @@ namespace Rodin::Variational
    {
       assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
             &getTestFunction().getFiniteElementSpace().getMesh());
-      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      const auto& testFes = getTestFunction().getFiniteElementSpace();
+      const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+      const auto& testFES = getTestFunction().getFiniteElementSpace();
       const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
-      m_operator.reset(
-            new OperatorType(
-               getAssembly().execute({mesh, trialFes, testFes, getIntegrators()})));
+      m_operator = getAssembly().execute({mesh, trialFES, testFES, getIntegrators()});
    }
 }
 

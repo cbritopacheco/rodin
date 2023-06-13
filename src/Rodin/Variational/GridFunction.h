@@ -43,22 +43,28 @@ namespace Rodin::Variational
    *
    * @section gridfunction-data-layout Data layout
    *
-   * The data of the GridFunctionBase object can be accessed via a call to
-   * @ref getData(). In general the following conditions are satisfied:
+   * The data of the GridFunctionBase object can be accessed via a call to @ref
+   * getData(). The i-th column of the returned Math::Matrix object corresponds
+   * to the value of the grid function at the global i-th degree of freedom in
+   * the finite element space. Furthermore, the following conditions are
+   * satisfied:
    * ```
    *  const Math::Matrix& data = gf.getData();
    *  assert(data.rows() == gf.getFiniteElementSpace().getVectorDimension());
    *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
    * ```
-   * Hence, the i-th column of the Math::Matrix object corresponds to the value
-   * of the grid function at the global i-th degree of freedom in the finite
-   * element space.
    */
   template <class Derived, class FES>
   class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES>>
   {
     public:
+      /// Type of finite element
+      using Element = typename FES::Element;
+
+      /// Parent class
       using Parent = LazyEvaluator<GridFunctionBase<Derived, FES>>;
+
+      /// Range type of value
       using RangeType = typename FES::RangeType;
 
       static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
@@ -356,7 +362,7 @@ namespace Rodin::Variational
             const auto& trans = mesh.getPolytopeTransformation(d, i);
             for (size_t local = 0; local < fe.getCount(); local++)
             {
-              const Geometry::Point p(polytope, trans, fe.getDOF(local));
+              const Geometry::Point p(polytope, trans, fe.getNode(local));
               if constexpr (std::is_same_v<RangeType, Scalar>)
               {
                 assert(m_data.rows() == 1);
@@ -421,7 +427,7 @@ namespace Rodin::Variational
             const auto& trans = mesh.getPolytopeTransformation(d, i);
             for (size_t local = 0; local < fe.getCount(); local++)
             {
-              const Geometry::Point p(polytope, trans, fe.getDOF(local));
+              const Geometry::Point p(polytope, trans, fe.getNode(local));
               if constexpr (std::is_same_v<RangeType, Scalar>)
               {
                 assert(m_data.rows() == 1);
@@ -439,93 +445,6 @@ namespace Rodin::Variational
           }
         }
         return static_cast<Derived&>(*this);
-      }
-
-      inline
-      constexpr
-      const FES& getFiniteElementSpace() const
-      {
-        return m_fes.get();
-      }
-
-      /**
-       * @brief Returns a reference to the GridFunction data.
-       */
-      inline
-      constexpr
-      Math::Matrix& getData()
-      {
-        return m_data;
-      }
-
-      /**
-       * @brief Returns a constant reference to the GridFunction data.
-       */
-      inline
-      constexpr
-      const Math::Matrix& getData() const
-      {
-        return m_data;
-      }
-
-      inline
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getFiniteElementSpace().getVectorDimension(), 1 };
-      }
-
-      inline
-      auto getValue(size_t dof) const
-      {
-        if constexpr (std::is_same_v<RangeType, Scalar>)
-        {
-          return m_data(dof);
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-        {
-          return m_data.col(dof);
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
-      }
-
-      inline
-      auto getValue(const Geometry::Point& p) const
-      {
-        const auto& fes = getFiniteElementSpace();
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& x = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        const auto& basis = fe.getBasis(x);
-        if constexpr (std::is_same_v<RangeType, Scalar>)
-        {
-          Scalar res = 0;
-          for (Index local = 0; local < fe.getCount(); local++)
-            res += basis(local) * getValue(fes.getGlobalIndex({d, i}, local));
-          return res;
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-        {
-          const size_t vdim = fes.getVectorDimension();
-          const size_t dofs = fe.getCount();
-          Math::Matrix loc(dofs, vdim);
-          for (Index local = 0; local < dofs; local++)
-            loc.row(local) = getValue(fes.getGlobalIndex({d, i}, local));
-          Math::Vector res(fes.getVectorDimension());
-          for (size_t k = 0; k < vdim; k++)
-            res(k) = loc.col(k).dot(basis.row(k));
-          return res;
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
       }
 
       Derived& load(
@@ -597,6 +516,75 @@ namespace Rodin::Variational
               << Alert::Raise;
           }
         }
+      }
+
+      inline
+      constexpr
+      const FES& getFiniteElementSpace() const
+      {
+        return m_fes.get();
+      }
+
+      /**
+       * @brief Returns a reference to the GridFunction data.
+       */
+      inline
+      constexpr
+      Math::Matrix& getData()
+      {
+        return m_data;
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      inline
+      constexpr
+      const Math::Matrix& getData() const
+      {
+        return m_data;
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getFiniteElementSpace().getVectorDimension(), 1 };
+      }
+
+      inline
+      auto getValue(Index global) const
+      {
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          assert(global < m_data.size());
+          return m_data(global);
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          assert(global < m_data.cols());
+          return m_data.col(global);
+        }
+        else
+        {
+          assert(false);
+          return void();
+        }
+      }
+
+      inline
+      auto getValue(const std::pair<size_t, Index>& p, size_t local) const
+      {
+        return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
+      }
+
+      /**
+       * @brief Gets the interpolated value at the point.
+       */
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
       }
 
     private:

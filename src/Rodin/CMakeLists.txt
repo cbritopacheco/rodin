@@ -52,6 +52,7 @@ configure_file(Configure.h.in Configure.h @ONLY)
 target_include_directories(Rodin
   INTERFACE ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
+add_subdirectory(QF)
 add_subdirectory(Math)
 add_subdirectory(IO)
 add_subdirectory(Test)

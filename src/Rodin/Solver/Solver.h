@@ -14,8 +14,7 @@
 namespace Rodin::Solver
 {
   /**
-   * @brief Base class for solving variational problems represented by a
-   * Variational::Problem instance.
+   * @brief Base class for solving linear algebra systems.
    */
   template <class OperatorType, class VectorType>
   class SolverBase

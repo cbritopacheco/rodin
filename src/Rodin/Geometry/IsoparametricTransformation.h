@@ -16,9 +16,15 @@
 
 namespace Rodin::Geometry
 {
+  /**
+   * @brief Polytope isoparametric transformation.
+   */
   template <class FE>
   class IsoparametricTransformation final : public PolytopeTransformation
   {
+    static_assert(std::is_same_v<typename FE::RangeType, Scalar>,
+        "Type of finite element must be scalar valued.");
+
     public:
       IsoparametricTransformation(Math::Matrix&& pm, FE&& fe)
         : m_pm(std::move(pm)), m_fe(std::move(fe))
@@ -35,20 +41,20 @@ namespace Rodin::Geometry
         : m_pm(std::move(pm)), m_fe(fe)
       {}
 
-      IsoparametricTransformation(Math::Matrix&& pm)
-        : m_pm(std::move(pm))
+      IsoparametricTransformation(const Math::Matrix& pm, FE&& fe)
+        : m_pm(pm), m_fe(std::move(fe))
       {}
 
       inline
-      Math::Vector transform(const Math::Vector& rc) const final override
+      Math::Vector transform(const Math::Vector& rc) const override
       {
         return m_pm * m_fe.getBasis(rc);
       }
 
       inline
-      Math::Matrix jacobian(const Math::Vector& rc) const final override
+      Math::Matrix jacobian(const Math::Vector& rc) const override
       {
-        return m_pm * m_fe.getGradient(rc);
+        return m_pm * m_fe.getGradient(rc).transpose();
       }
 
     private:

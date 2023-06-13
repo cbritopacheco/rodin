@@ -1,10 +1,8 @@
 /**
-  @page examples-index Examples and Tutorials
+  @page examples-index Examples and tutorials
   @brief Examples utilizing the Rodin library
 
   @tableofcontents
-
-  @subsection examples-index-getting_started Getting started
 
   @subsection examples-index-variational Variational methods
 
