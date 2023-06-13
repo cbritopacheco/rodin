@@ -27,12 +27,6 @@ namespace Rodin::Variational
    */
 
   /**
-   * @defgroup DirichletBCCTAD DirichletBC Template Deduction Guides
-   * @brief Template Deduction Guides of the DirichletBC class.
-   * @see DirichletBC
-   */
-
-  /**
    * @brief Abstract base class for a Dirichlet boundary condition.
    *
    * Used as a base class to represent the Dirichlet boundary condition:
@@ -250,11 +244,10 @@ namespace Rodin::Variational
   };
 
   /**
-   * @ingroup DirichletBCCTAD
    * @ingroup RodinCTAD
+   * @brief CTAD for DirichletBC
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
-   * @brief CTAD for DirichletBC
    */
   template <class FES, class FunctionDerived>
   DirichletBC(TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)

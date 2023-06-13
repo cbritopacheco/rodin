@@ -347,7 +347,7 @@ namespace Rodin::Variational
 
   /**
   * @ingroup ShapeFunctionSpecializations
-  * @brief P1 ShapeFunction
+  * @brief ShapeFunction
   */
   template <class Derived, class FESType, ShapeFunctionSpaceType Space>
   class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, Space>, FESType, Space>
