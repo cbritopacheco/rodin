@@ -7,11 +7,19 @@
 #include "Rodin/Math.h"
 #include "Rodin/Geometry.h"
 
-namespace Rodin::Variational
+namespace Rodin::QF
 {
+  /**
+   * @brief Abstract base class for quadrature formulas.
+   */
   class QuadratureFormulaBase
   {
     public:
+      constexpr
+      QuadratureFormulaBase(Geometry::Polytope::Geometry g)
+        : m_geometry(g)
+      {}
+
       inline
       size_t getSize() const
       {
@@ -31,11 +39,19 @@ namespace Rodin::Variational
         return getWeights().coeff(i);
       }
 
+      inline
+      constexpr
+      Geometry::Polytope::Geometry getGeometry() const
+      {
+        return m_geometry;
+      }
+
       virtual const Math::Matrix& getPoints() const = 0;
 
       virtual const Math::Vector& getWeights() const = 0;
 
-      virtual Geometry::Polytope::Geometry getGeometry() const = 0;
+    private:
+      Geometry::Polytope::Geometry m_geometry;
   };
 }
 

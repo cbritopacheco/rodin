@@ -7,13 +7,12 @@
 #ifndef RODIN_VARIATIONAL_ASSEMBLY_H
 #define RODIN_VARIATIONAL_ASSEMBLY_H
 
-#include <variant>
-#include <ostream>
-
-#include "Rodin/Geometry/Simplex.h"
 #include "Rodin/FormLanguage/List.h"
 
+#include "Rodin/Math.h"
+
 #include "Rodin/Variational/FiniteElementSpace.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
 namespace Rodin::Variational::Assembly
@@ -42,8 +41,8 @@ namespace Rodin::Variational::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class OperatorType>
-  class AssemblyBase<LinearFormBase<OperatorType>>
+  template <class VectorType>
+  class AssemblyBase<LinearFormBase<VectorType>>
     : public FormLanguage::Base
   {
     public:
@@ -60,7 +59,7 @@ namespace Rodin::Variational::Assembly
 
       AssemblyBase(AssemblyBase&&) = default;
 
-      virtual OperatorType execute(const Input& data) const = 0;
+      virtual VectorType execute(const Input& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };

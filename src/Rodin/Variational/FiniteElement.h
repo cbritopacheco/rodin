@@ -19,31 +19,10 @@
 
 namespace Rodin::Variational
 {
-  class FiniteElementOrder
-  {
-    public:
-      explicit
-      constexpr
-      FiniteElementOrder(size_t v)
-        : m_v(v)
-      {}
-
-      constexpr
-      FiniteElementOrder(const FiniteElementOrder&) = default;
-
-      constexpr
-      FiniteElementOrder(FiniteElementOrder&&) = default;
-
-      inline
-      constexpr
-      operator size_t() const
-      {
-        return m_v;
-      }
-
-    private:
-      const size_t m_v;
-  };
+  /**
+   * @defgroup FiniteElements Supported finite elements
+   * @brief List of finite elements already implemented.
+   */
 
   enum FiniteElementMapping
   {
@@ -66,21 +45,14 @@ namespace Rodin::Variational
         : m_g(g)
       {}
 
+      virtual ~FiniteElementBase() = default;
+
       inline
       constexpr
       Geometry::Polytope::Geometry getGeometry() const
       {
         return m_g;
       }
-
-      inline
-      constexpr
-      auto getDOF(size_t i) const
-      {
-        return getDOFs().col(i);
-      }
-
-      virtual ~FiniteElementBase() = default;
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
@@ -92,18 +64,42 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getCount();
       }
 
+      /**
+       * @brief Gets the i-th degree of freedom on the finite element.
+       */
       inline
       constexpr
-      auto getBasis(const Math::Vector& rc) const
+      auto getNode(size_t i) const
       {
-        return static_cast<const Derived&>(*this).getBasis(rc);
+        return getNodes().col(i);
       }
 
       inline
       constexpr
-      const Math::Matrix& getDOFs() const
+      const Math::Matrix& getNodes() const
       {
-        return static_cast<const Derived&>(*this).getDOFs();
+        return static_cast<const Derived&>(*this).getNodes();
+      }
+
+      inline
+      constexpr
+      const auto& getBasis(size_t i) const
+      {
+        return static_cast<const Derived&>(*this).getBasis(i);
+      }
+
+      inline
+      constexpr
+      auto getBasis(const Math::Vector& r) const
+      {
+        return static_cast<const Derived&>(*this).getBasis(r);
+      }
+
+      inline
+      constexpr
+      const auto& getLinearForm(size_t i) const
+      {
+        return static_cast<const Derived&>(*this).getLinearForm(i);
       }
 
       inline

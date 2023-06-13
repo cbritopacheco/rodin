@@ -201,7 +201,7 @@ namespace Rodin::Variational
       constexpr
       Scalar operator()(const GridFunction<FES>& u) const
       {
-        return *m_vector * u.getHandle();
+        return getVector().dot(u.getData());
       }
 
       void assemble() override;
@@ -210,22 +210,23 @@ namespace Rodin::Variational
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
        */
+      inline
       VectorType& getVector() override
       {
-        assert(m_vector);
-        return *m_vector;
+        return m_vector;
       }
 
       /**
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
        */
+      inline
       const VectorType& getVector() const override
       {
-        assert(m_vector);
-        return *m_vector;
+        return m_vector;
       }
 
+      inline
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
@@ -252,7 +253,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
-      std::unique_ptr<VectorType> m_vector;
+      VectorType m_vector;
   };
   template <class FES>
   LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, Math::Vector>;

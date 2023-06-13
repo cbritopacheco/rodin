@@ -12,4 +12,9 @@
  * @brief Top level include for Rodin library.
  */
 
+/**
+ * @defgroup RodinCTAD Template deduction guides
+ * @brief Class template argument deduction <a href="https://en.cppreference.com/w/cpp/language/class_template_argument_deduction">(CTAD)</a>  guides of the Rodin class.
+ */
+
 #endif

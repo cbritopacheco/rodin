@@ -20,7 +20,7 @@ using namespace Rodin::Geometry;
 TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
 {
   constexpr const size_t sdim = 2;
-  constexpr const size_t mdim = sdim;
+  // constexpr const size_t mdim = sdim;
 
   Mesh mesh =
     Mesh<Rodin::Context::Serial>::Builder()

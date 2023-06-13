@@ -24,9 +24,7 @@ namespace Rodin::Variational
    {
       const auto& fes = getTestFunction().getFiniteElementSpace();
       const auto& mesh = getTestFunction().getFiniteElementSpace().getMesh();
-      m_vector.reset(
-            new VectorType(
-               getAssembly().execute({mesh, fes, getIntegrators()})));
+      m_vector = getAssembly().execute({mesh, fes, getIntegrators()});
    }
 }
 

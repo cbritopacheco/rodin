@@ -59,15 +59,22 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
+      /// Type of the left operand of the dot product
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+
+      /// Type of the right operand of the dot product
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      /// Type of the integrand
       using Integrand = Dot<LHS, RHS>;
+
+      /// Parent class
       using Parent = QuadratureRule<Integrand>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs an instance representing the following integral:
+       * Constructs an object representing the following integral:
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]
@@ -82,8 +89,7 @@ namespace Rodin::Variational
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs the following object representing the following
-       * integral:
+       * Constructs the object representing the following integral:
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]

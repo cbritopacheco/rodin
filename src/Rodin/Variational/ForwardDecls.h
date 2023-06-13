@@ -132,9 +132,37 @@ namespace Rodin::Variational
   template <class Range, class Context>
   class H1;
 
+
+  /**
+   * @brief Degree 1 Lagrange element
+   * @tparam Range Range value type
+   *
+   * @note For an overview of all the possible specializations of the
+   * P1 class, please see @ref P1Specializations.
+   *
+   * @see P1ElementSpecializations
+   */
   template <class Range>
   class P1Element;
 
+  /**
+   * @brief Degree 1 Lagrange finite element space
+   * @tparam Range Range value type
+   * @tparam Context Context type
+   * @tparam Args Additional arguments
+   *
+   * Represents the finite element space composed of continuous, piecewise
+   * linear functions:
+   * @f[
+   *  \mathbb{P}_1 (\mathcal{T}_h)^d = \{ v \in C^0(\mathcal{T}_h)^d \mid v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ ,
+   * @f]
+   * for a given vector dimension @f$ d \in \mathbb{N} @f$.
+   *
+   * @note For an overview of all the possible specializations of the
+   * P1 class, please see @ref P1Specializations.
+   *
+   * @see P1Specializations
+   */
   template <class Range, class Context, class ... Args>
   class P1;
 
@@ -309,9 +337,9 @@ namespace Rodin::Variational
    * @f[
    *   \text{Base}^\text{Exponent}
    * @f]
-   * where Base is a type representing the base @f$ b @f$, the Exponent type
-   * represents the exponent @f$ p @f$, and the exponentiation value is @f$
-   * b^p @f$.
+   * where @f$ \mathrm{Base} @f$ is a type representing the base @f$ b @f$, the
+   * type @f$ \mathrm{Exponent} @f$ represents the exponent @f$ p @f$, and the
+   * exponentiation value is @f$ b^p @f$.
    *
    * @note For an overview of all the possible specializations of the
    * Pow class, please see @ref PowSpecializations.
@@ -758,6 +786,19 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class OR;
 
+  /**
+   * @tparam Integrand Type of the integrand
+   *
+   * Represents the quadrature rule approximation of an integral:
+   * @f[
+   *  \int_{\mathcal{R}_h} \mathrm{Integrand} \ dx \approx \sum_{i = 0}^{n - 1}
+   *  w_i \ \mathrm{Integrand} (x_i)
+   * @f]
+   * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
+   * @f$, the quadrature point @f$ x_i @f$ has an associated weight @f$ w_i @f$
+   * and @f$ \mathrm{Integrand}(x_i) @f$ is the value of the integrand at the
+   * quadrature point.
+   */
   template <class Integrand>
   class QuadratureRule;
 
@@ -768,13 +809,13 @@ namespace Rodin::Variational
    *
    * Represents the integral operator with a templated integrand type:
    * @f[
-   *   \int_{\mathcal{T}_h} \mathrm{Integrand}
+   *   \int_{\mathcal{C}_h} \mathrm{Integrand}
    * @f]
-   * on a triangulation @f$ \mathcal{T}_h @f$ of a domain @f$ \Omega @f$. The
-   * domain integral is defined as the sum of all members of the
+   * on the cells @f$ \mathcal{C}_h @f$ of a triangulation @f$ \mathcal{T}_h
+   * @f$. The domain integral is defined as the sum of all members of the
    * triangulation:
    * @f[
-   *   \int_{\mathcal{T}_h} \mathrm{Integrand} := \sum_{T \in \mathcal{T}_h}
+   *   \int_{\mathcal{C}_h} \mathrm{Integrand} := \sum_{T \in \mathcal{C}_h}
    *   \int_T \mathrm{Integrand} \ .
    * @f]
    *

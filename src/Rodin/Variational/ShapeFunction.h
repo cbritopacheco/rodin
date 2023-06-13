@@ -349,12 +349,11 @@ namespace Rodin::Variational
   * @ingroup ShapeFunctionSpecializations
   * @brief P1 ShapeFunction
   */
-  template <class Derived, class ... Ps, ShapeFunctionSpaceType Space>
-  class ShapeFunction<Derived, P1<Scalar, Ps...>, Space>
-    : public ShapeFunctionBase<ShapeFunction<Derived, P1<Scalar, Ps...>, Space>, P1<Scalar, Ps...>, Space>
+  template <class Derived, class FESType, ShapeFunctionSpaceType Space>
+  class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, Space>, FESType, Space>
   {
     public:
-      using FES = P1<Scalar, Ps...>;
+      using FES = FESType;
       using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
 
       ShapeFunction() = delete;
@@ -419,12 +418,21 @@ namespace Rodin::Variational
       }
 
       inline
-      TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
+      TensorBasis<typename FES::RangeType>
+      getTensorBasis(const Geometry::Point& p) const
       {
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
+        switch (fe.getMapping())
+        {
+          case FiniteElementMapping::Identity:
+            return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
+          default:
+          {
+            assert(false);
+          }
+        }
       }
 
       inline

@@ -22,7 +22,7 @@ TEST(Rodin_Variational_Scalar_P1_SanityTest, TriangularUniformGrid2)
   ScalarFunction c = 1;
 
   DirichletBC dbc(u, c);
-  dbc.dofs();
+  dbc.assemble();
 
   EXPECT_EQ(dbc.getDOFs().size(), 4);
 }
@@ -44,7 +44,7 @@ TEST(Rodin_Variational_Scalar_P1_SanityTest, TriangularUniformGrid16)
 
   DirichletBC dbc(u, c);
   dbc.on(attr);
-  dbc.dofs();
+  dbc.assemble();
 
   EXPECT_EQ(dbc.getDOFs().size(), 60);
 }

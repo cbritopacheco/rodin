@@ -68,7 +68,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline TrialFunction* copy() const noexcept override
+      inline
+      TrialFunction* copy() const noexcept override
       {
         return new TrialFunction(*this);
       }

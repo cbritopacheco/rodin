@@ -11,6 +11,7 @@
 #include <Eigen/Sparse>
 
 #include "Rodin/Types.h"
+#include "Rodin/Math/Matrix.h"
 
 namespace Rodin::Math
 {

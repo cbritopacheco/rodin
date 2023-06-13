@@ -225,8 +225,8 @@ namespace Rodin::Variational
       constexpr
       Scalar operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
       {
-        assert(m_operator);
-        return (u.getData() * getOperator() * v.getData().transpose()).coeff(0);
+        assert(false);
+        return 0;
       }
 
       void assemble() override;
@@ -263,8 +263,7 @@ namespace Rodin::Variational
        */
       virtual OperatorType& getOperator() override
       {
-        assert(m_operator);
-        return *m_operator;
+        return m_operator;
       }
 
       /**
@@ -274,8 +273,7 @@ namespace Rodin::Variational
        */
       virtual const OperatorType& getOperator() const override
       {
-        assert(m_operator);
-        return *m_operator;
+        return m_operator;
       }
 
       virtual BilinearForm* copy() const noexcept override
@@ -286,7 +284,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
       std::reference_wrapper<const TestFunction<TestFES>>   m_v;
-      std::unique_ptr<OperatorType> m_operator;
+      OperatorType m_operator;
   };
 
   template <class TrialFES, class TestFES>

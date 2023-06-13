@@ -14,9 +14,16 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Dense tensor type.
+   * @tparam Rank Rank of tensor.
+   */
   template <size_t Rank>
   using Tensor = Eigen::Tensor<Scalar, Rank>;
 
+  /**
+   * @brief Gets the tank of a tensor.
+   */
   template <auto Rank>
   constexpr
   auto rank(const Tensor<Rank>& tensor)

@@ -1,3 +1,5 @@
+#include <Eigen/Cholesky>
+
 #include "Rodin/Variational/QuadratureRule.h"
 
 #include "Mesh.h"
@@ -100,11 +102,11 @@ namespace Rodin::Geometry
 
   // ---- Point --------------------------------------------------------------
   Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc)
-    : m_simplex(simplex), m_trans(trans), m_rc(rc)
+    : m_polytope(simplex), m_trans(trans), m_rc(rc)
   {}
 
   Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc, const Math::Vector& pc)
-    : m_simplex(simplex), m_trans(trans), m_rc(rc), m_pc(pc)
+    : m_polytope(simplex), m_trans(trans), m_rc(rc), m_pc(pc)
   {}
 
   const Math::Vector& Point::getCoordinates(Coordinates coords) const
@@ -138,20 +140,32 @@ namespace Rodin::Geometry
 
   const Math::Matrix& Point::getJacobian() const
   {
-    assert(false);
+    if (!m_jacobian.has_value())
+    {
+      assert(m_rc.has_value());
+      m_jacobian.emplace(m_trans.get().jacobian(m_rc.value()));
+    }
+    assert(m_jacobian.has_value());
+    return m_jacobian.value();
   }
 
   const Math::Matrix& Point::getJacobianInverse() const
   {
-    assert(false);
+    if (!m_jacobianInverse.has_value())
+    {
+      assert(m_rc.has_value());
+      m_jacobianInverse.emplace(getJacobian().inverse());
+    }
+    assert(m_jacobianInverse.has_value());
+    return m_jacobianInverse.value();
   }
 
   Scalar Point::getDistortion() const
   {
     if (!m_distortion.has_value())
     {
-      m_distortion.emplace(Math::sqrt(Math::abs(
-              (getJacobianInverse().transpose() * getJacobianInverse()).determinant())));
+      assert(m_rc.has_value());
+      m_distortion.emplace(m_trans.get().distortion(m_rc.value()));
     }
     assert(m_distortion.has_value());
     return m_distortion.value();
@@ -162,13 +176,9 @@ namespace Rodin::Geometry
     switch (coords)
     {
       case Coordinates::Physical:
-      {
-        return m_simplex.get().getMesh().getSpaceDimension();
-      }
+        return m_polytope.get().getMesh().getSpaceDimension();
       case Coordinates::Reference:
-      {
-        return m_simplex.get().getMesh().getDimension();
-      }
+        return m_polytope.get().getMesh().getDimension();
       default:
       {
         assert(false);

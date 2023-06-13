@@ -51,16 +51,7 @@ namespace Rodin::Variational
 
       ProblemBase(const ProblemBase& other) = default;
 
-      const ProblemBody& getProblemBody() const
-      {
-        return m_pb;
-      }
-
-      virtual ProblemBase& operator=(ProblemBody&& rhs)
-      {
-        m_pb = std::move(rhs);
-        return *this;
-      }
+      virtual ProblemBase& operator=(const ProblemBody& rhs) = 0;
 
       virtual void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
 
@@ -98,9 +89,6 @@ namespace Rodin::Variational
       virtual const VectorType& getMassVector() const = 0;
 
       virtual ProblemBase* copy() const noexcept override = 0;
-
-    private:
-      ProblemBody m_pb;
   };
 
   /**
@@ -194,26 +182,26 @@ namespace Rodin::Variational
 
       void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
-      Problem& operator=(ProblemBody&& rhs) override;
+      Problem& operator=(const ProblemBody& rhs) override;
 
       virtual VectorType& getMassVector() override
       {
-        return m_mass;
+        return m_linearForm.getVector();
       }
 
       virtual const VectorType& getMassVector() const override
       {
-        return m_mass;
+        return m_linearForm.getVector();
       }
 
       virtual OperatorType& getStiffnessOperator() override
       {
-        return m_stiffness;
+        return m_bilinearForm.getOperator();
       }
 
       virtual const OperatorType& getStiffnessOperator() const override
       {
-        return m_stiffness;
+        return m_bilinearForm.getOperator();
       }
 
       virtual Problem* copy() const noexcept override
@@ -228,10 +216,9 @@ namespace Rodin::Variational
 
       LinearForm<TestFES, Context, VectorType> m_linearForm;
       BilinearForm<TrialFES, TestFES, Context, OperatorType> m_bilinearForm;
+      EssentialBoundary m_dbcs;
 
       bool m_assembled;
-      OperatorType    m_stiffness;
-      VectorType      m_mass;
       VectorType      m_guess;
 
   };

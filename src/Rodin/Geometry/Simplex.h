@@ -86,9 +86,27 @@ namespace Rodin::Geometry
         return 0;
       }
 
+      inline
+      constexpr
+      static bool isSimplex(Polytope::Geometry g)
+      {
+        switch (g)
+        {
+          case Geometry::Point:
+          case Geometry::Segment:
+          case Geometry::Triangle:
+          case Geometry::Tetrahedron:
+            return true;
+          default:
+            return false;
+        }
+        assert(false);
+        return false;
+      }
+
       Polytope(size_t dimension, Index index, const MeshBase& mesh);
 
-      Polytope(const Polytope&) = delete;
+      Polytope(const Polytope&) = default;
 
       Polytope(Polytope&&) = default;
 
@@ -156,9 +174,13 @@ namespace Rodin::Geometry
   class Element : public Polytope
   {
     public:
+      using Parent = Polytope;
+
       Element(Index index, const MeshBase& mesh);
 
-      Element(const Element&) = delete;
+      Element(const Element& other)
+        : Polytope(other)
+      {}
 
       Element(Element&& other)
         :  Polytope(std::move(other))
@@ -175,9 +197,13 @@ namespace Rodin::Geometry
   class Face : public Polytope
   {
     public:
+      using Parent = Polytope;
+
       Face(Index index, const MeshBase& mesh);
 
-      Face(const Face&) = delete;
+      Face(const Face& other)
+        : Polytope(other)
+      {}
 
       Face(Face&& other)
         : Polytope(std::move(other))
@@ -191,7 +217,13 @@ namespace Rodin::Geometry
   class Vertex : public Polytope
   {
     public:
+      using Parent = Polytope;
+
       Vertex(Index index, const MeshBase& mesh);
+
+      Vertex(const Vertex& other)
+        : Polytope(other)
+      {}
 
       inline
       Scalar x() const
@@ -230,36 +262,57 @@ namespace Rodin::Geometry
   /**
    * @brief Represents a spatial point on a simplex.
    *
-   * This class represents the point:
+   * This class represents the tuple @f$ (x, r, p) @f$
+   * such that:
    * @f[
-   *   p = x(r)
+   *  p = x(r)
    * @f]
-   * on some simplex @f$ \tau \in \mathcal{T}_h @f$ belonging to
-   * some discrete mesh @f$ \mathcal{T}_h @f$. Here @f$ p \in \tau @f$ denotes
-   * the physical coordinates of the point, while @f$ x : K \rightarrow \tau
-   * @f$ represents the transformation taking reference coordinates @f$ r \in K
-   * @f$, for a reference geometry @f$ K @f$.
+   * for a polytope @f$ \tau \in \mathcal{T}_h @f$ belonging to the mesh @f$
+   * \mathcal{T}_h @f$. Here, @f$ p \in \tau @f$ denotes the physical
+   * coordinates of the point, while @f$ x : K \rightarrow \tau @f$ represents
+   * the transformation taking reference coordinates @f$ r \in K @f$, for a
+   * reference geometry @f$ K @f$.
+   *
+   * @section rodin-geometry-point-thread_safety Thread safety
+   * This class is not thread safe.
+   *
+   * @see PolytopeTransformation
    */
   class Point
   {
     public:
+      /// Denotes the type of coordinates.
       enum class Coordinates
       {
-        Reference,
-        Physical
+        Reference, ///< Reference coordinates
+        Physical ///< Physical coordinates
       };
 
       /**
        * @brief Constructs the Point object from reference coordinates.
-       * @param[in] simplex Simplex to which point belongs to
-       * @param[in] ip Reference coordinates
+       * @param[in] polytope Polytope to which the point belongs to.
+       * @param[in] rc Coordinates of the point in reference space.
        */
-      Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc);
+      Point(const Polytope& polytope, const PolytopeTransformation& trans, const Math::Vector& rc);
 
-      Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc, const Math::Vector& pc);
+      /**
+       * @brief Constructs the Point object from reference coordinates and
+       * precomputed physical coordinates.
+       * @param[in] polytope Polytope to which the point belongs to.
+       * @param[in] rc Coordinates of the point in reference space.
+       * @param[in] pc Coordinates of the point in physical space.
+       */
+      Point(const Polytope& simplex, const PolytopeTransformation& trans,
+          const Math::Vector& rc, const Math::Vector& pc);
 
+      /**
+       * @brief Copy constructor.
+       */
       Point(const Point&) = default;
 
+      /**
+       * @brief Move constructor.
+       */
       Point(Point&&) = default;
 
       /**
@@ -290,8 +343,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the @f$ x @f$ physical coordinate.
-       * @returns Physical @f$ x @f$-coordinate.
+       * @brief Gets the @f$ x @f$ coordinate.
+       * @returns @f$ x @f$ coordinate of the point.
        */
       inline
       Scalar x(Coordinates coords = Coordinates::Physical) const
@@ -300,8 +353,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the @f$ y @f$ physical coordinate.
-       * @returns Physical @f$ y @f$-coordinate.
+       * @brief Gets the @f$ y @f$ coordinate.
+       * @returns @f$ y @f$ coordinate of the point.
        */
       inline
       Scalar y(Coordinates coords = Coordinates::Physical) const
@@ -310,8 +363,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the @f$ z @f$ physical coordinate.
-       * @returns Physical @f$ z @f$-coordinate.
+       * @brief Gets the @f$ z @f$ coordinate.
+       * @returns @f$ z @f$ coordinate of the point.
        */
       inline
       Scalar z(Coordinates coords = Coordinates::Physical) const
@@ -341,7 +394,7 @@ namespace Rodin::Geometry
       inline
       const Polytope& getPolytope() const
       {
-        return m_simplex.get();
+        return m_polytope.get();
       }
 
       inline
@@ -352,21 +405,33 @@ namespace Rodin::Geometry
 
       const Math::Vector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
+      /**
+       * @brief Computes the Jacobian matrix of the transformation at the
+       * point.
+       */
       const Math::Matrix& getJacobian() const;
 
+      /**
+       * @brief Computes the inverse of the Jacobian matrix of the
+       * transformation at the point.
+       */
       const Math::Matrix& getJacobianInverse() const;
 
+      /**
+       * @brief Computes the distortion of space of the transformation at the
+       * point.
+       */
       Scalar getDistortion() const;
 
     private:
-      std::reference_wrapper<const Polytope> m_simplex;
+      std::reference_wrapper<const Polytope> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
       mutable std::optional<const Math::Vector> m_rc;
       mutable std::optional<const Math::Vector> m_pc;
       mutable std::optional<const Math::Matrix> m_jacobian;
-      mutable std::optional<const Math::Matrix> m_inverseJacobian;
-      mutable std::optional<const Scalar> m_distortion;
+      mutable std::optional<const Math::Matrix> m_jacobianInverse;
+      mutable std::optional<const Scalar>       m_distortion;
   };
 
   inline

@@ -13,10 +13,16 @@ FAVICON = 'favicon-dark.png'
 
 LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
-        ("Examples", 'examples-index'),
+        ('Notation', 'notation-index'),
+        ('Guides', 'guides-index'),
+        ('Examples', 'examples-index'),
         ('Credits', 'credits-index')]),
+    ("Modules", 'modules', [
+        ('Supported finite elements', 'group___finite_elements'),
+        ('CTADs', 'group___rodin_c_t_a_d'),
+        ('Preprocessor directives', 'group___rodin_directives')
+    ]),
     ("Namespaces", 'namespaces', []),
-    ("Modules", 'modules', [])
 ]
 LINKS_NAVBAR2 = [
     ("Classes", 'annotated', []),

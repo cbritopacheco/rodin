@@ -30,7 +30,7 @@ namespace Rodin::Variational
     {
       const size_t count = mesh.getConnectivity().getCount(d);
       for (size_t i = 0; i < count; i++)
-        m_elements[d].emplace_back(mesh.getConnectivity().getGeometry(d, i));
+        m_elements[d].emplace_back(m_vdim, mesh.getConnectivity().getGeometry(d, i));
     }
   }
 }

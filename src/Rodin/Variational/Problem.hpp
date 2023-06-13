@@ -39,15 +39,15 @@ namespace Rodin::Variational
    template <class TrialFES, class TestFES>
    Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
    Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
-   ::operator=(ProblemBody&& rhs)
+   ::operator=(const ProblemBody& rhs)
    {
-      Parent::operator=(std::move(rhs));
-
-      for (auto& bfi : getProblemBody().getBFIs())
+      for (auto& bfi : rhs.getBFIs())
          getBilinearForm().add(bfi);
 
-      for (auto& lfi : getProblemBody().getLFIs())
+      for (auto& lfi : rhs.getLFIs())
          getLinearForm().add(UnaryMinus(lfi)); // Negate every linear form
+
+      m_dbcs = rhs.getDBCs();
 
       return *this;
    }
@@ -56,22 +56,48 @@ namespace Rodin::Variational
    void
    Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::assemble()
    {
-      // Assemble both sides
-      getLinearForm().assemble();
-      m_mass = std::move(getLinearForm().getVector());
+      auto& trial = getTrialFunction();
+      auto& trialFES = trial.getFiniteElementSpace();
 
-      getBilinearForm().assemble();
-      m_stiffness = std::move(getBilinearForm().getOperator());
+      auto& test = getTestFunction();
+      auto& testFES = test.getFiniteElementSpace();
 
       // Emplace data
-      getTrialFunction().emplace();
+      trial.emplace();
 
-      // Project values onto the essential boundary and compute essential dofs
-      IndexSet trialEssentialDOFs;
-      for (const auto& dbc : getProblemBody().getDBCs())
+      // Assemble both sides
+      auto& lhs = getBilinearForm();
+      lhs.assemble();
+      Math::SparseMatrix& stiffness = lhs.getOperator();
+
+      auto& rhs = getLinearForm();
+      rhs.assemble();
+      Math::Vector& mass = rhs.getVector();
+
+      // Impose Dirichlet boundary conditions
+      if (trialFES == testFES)
       {
-         dbc.project();
-         trialEssentialDOFs.insert(dbc.getDOFs());
+         for (auto& dbc : m_dbcs)
+         {
+            dbc.assemble();
+            const auto& dofs = dbc.getDOFs();
+            for (const auto& kv : dofs)
+            {
+               const Index& global = kv.first;
+               const auto& dof = kv.second;
+               mass.coeffRef(global) = dof;
+               stiffness.prune(
+                     [global](const Index& row, const Index& col, const Scalar&) -> bool
+                     {
+                        return !((row == global) || (col == global));
+                     });
+               stiffness.coeffRef(global, global) = 1;
+            }
+         }
+      }
+      else
+      {
+         assert(false); // Not handled yet
       }
 
       m_assembled = true;

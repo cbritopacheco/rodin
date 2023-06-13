@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_GeometryIndexed_H
-#define RODIN_VARIATIONAL_GeometryIndexed_H
+#ifndef RODIN_VARIATIONAL_GEOMETRYINDEXED_H
+#define RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 
 #include "Simplex.h"
 
@@ -16,15 +16,16 @@ namespace Rodin::Geometry
   {
     public:
       constexpr
+      GeometryIndexed() = default;
+
+      constexpr
       GeometryIndexed(std::initializer_list<std::pair<Polytope::Geometry, T>> l)
       {
-        size_t c = 0;
+        // All geometries must be handled exactly once
+        assert(l.size() == Polytope::Geometries.size());
+
         for (const auto& v : l)
-        {
           m_map[static_cast<size_t>(v.first)] = v.second;
-          c += 1;
-        }
-        assert(c == Polytope::Geometries.size());
       }
 
       inline
@@ -32,7 +33,7 @@ namespace Rodin::Geometry
       T& operator[](Polytope::Geometry geom)
       {
         const size_t g = static_cast<size_t>(geom);
-        assert(g > 0);
+        assert(g >= 0);
         assert(g < m_map.size());
         return m_map[g];
       }
@@ -42,7 +43,7 @@ namespace Rodin::Geometry
       const T& operator[](Polytope::Geometry geom) const
       {
         const size_t g = static_cast<size_t>(geom);
-        assert(g > 0);
+        assert(g >= 0);
         assert(g < m_map.size());
         return m_map[g];
       }

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
-#include "Rodin/Variational.h"
+#include "Rodin/Variational/P1.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;

@@ -5,12 +5,11 @@
 #include <type_traits>
 
 
-namespace Rodin::Utility::Internal
-{
-}
-
 namespace Rodin::Utility
 {
+  /**
+   * @brief Performs the application of the function over all the arguments.
+   */
   template <class F, class... Args>
   constexpr void For(F&& f, Args&&... args)
   {
@@ -33,6 +32,19 @@ namespace Rodin::Utility
     }
   }
 
+  /**
+   * @brief Executes the function N times
+   * @tparam N Number of times to execute the function
+   * @tparam F Callable type
+   *
+   * # Utilization
+   *
+   * @code{cpp}
+   * Utility::ForIndex<5>(
+   *   [&](auto i){ std::cout << i.value << std::endl; });
+   * @endcode
+   * 
+   */
   template <size_t N, class F>
   constexpr void ForIndex(F&& f)
   {
