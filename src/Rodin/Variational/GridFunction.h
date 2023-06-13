@@ -557,12 +557,14 @@ namespace Rodin::Variational
       {
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          assert(global < m_data.size());
+          assert(m_data.size() >= 0);
+          assert(global < static_cast<size_t>(m_data.size()));
           return m_data(global);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
-          assert(global < m_data.cols());
+          assert(m_data.cols() >= 0);
+          assert(global < static_cast<size_t>(m_data.cols()));
           return m_data.col(global);
         }
         else

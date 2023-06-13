@@ -59,7 +59,8 @@ namespace Rodin::IO
            << "Ordering: 1\n\n";
         const auto& matrix = gf.getData();
         const Scalar* data = matrix.data();
-        for (size_t i = 0; i < matrix.size(); i++)
+        assert(matrix.size() >= 0);
+        for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
           os << data[i] << '\n';
       }
   };
