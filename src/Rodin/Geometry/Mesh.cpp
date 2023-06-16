@@ -127,6 +127,7 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
   {
     m_vertices *= c;
+    flush();
     return *this;
   }
 
@@ -163,6 +164,7 @@ namespace Rodin::Geometry
           << Alert::Raise;
       }
     }
+    ofs.close();
   }
 
   Scalar MeshBase::getVolume()

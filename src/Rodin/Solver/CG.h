@@ -18,6 +18,10 @@
 
 namespace Rodin::Solver
 {
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for CG
+   */
   CG() -> CG<Math::SparseMatrix, Math::Vector>;
 
   /**
@@ -54,7 +58,8 @@ namespace Rodin::Solver
       void solve(OperatorType& A, VectorType& x, VectorType& b)
       const override
       {
-        assert(false);
+        Eigen::ConjugateGradient<Math::SparseMatrix> solver;
+        x = solver.compute(A).solve(b);
       }
 
     private:

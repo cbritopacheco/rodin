@@ -21,11 +21,12 @@ int main(int, char**)
 
   // Load mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 5, 5);
+  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+  mesh.scale(1. / 15);
   mesh.getConnectivity().compute(1, 2);
 
-  // mesh.load(meshFile);
-  mesh.save("poisson.mesh");
+  for (auto it = mesh.getBoundary(); !it.end(); ++it)
+    mesh.setAttribute(it->getDimension(), it->getIndex(), 1);
 
   // Functions
   P1 vh(mesh);
@@ -40,13 +41,7 @@ int main(int, char**)
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
-          + DirichletBC(u, g).on(Gamma);
-  poisson.assemble();
-
-  std::cout << poisson.getMassVector() << std::endl;
-
-  std::cout << "bf" << std::endl;
-  std::cout << poisson.getStiffnessOperator() << std::endl;
+          + DirichletBC(u, g);
 
   // u.getSolution().projectOnBoundary(g);
   // u.getSolution().save("poisson.gf");
@@ -54,9 +49,15 @@ int main(int, char**)
   Solver::CG solver;
   poisson.solve(solver);
 
- // // Save solution
- // u.getSolution().getHandle().Save("u.gf");
- // Omega.save("Omega.mesh");
+  std::cout << poisson.getStiffnessOperator() << std::endl;
+  std::cout << poisson.getMassVector() << std::endl;
+
+  // std::cout << "weights: \n" << u.getSolution().getWeights().value() << std::endl;
+  // std::cout << "guess: \n" << u.getSolution().getData() << std::endl;
+
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   return 0;
 }

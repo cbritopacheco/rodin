@@ -23,7 +23,7 @@ namespace Rodin::Variational::Assembly
     {
       size_t j = 0;
       for (const auto& c : cols)
-        out.coeffRef(r, c) = in.coeff(i, j++);
+        out.coeffRef(r, c) += in.coeff(i, j++);
       i++;
     }
   }

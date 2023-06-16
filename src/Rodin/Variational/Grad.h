@@ -166,7 +166,6 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
         const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        const auto g = fe.getGradient(coords);
         return p.getJacobianInverse() * fe.getGradient(coords);
       }
 

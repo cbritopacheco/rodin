@@ -7,6 +7,7 @@
 #ifndef RODIN_SOLVER_UMFPACK_H
 #define RODIN_SOLVER_UMFPACK_H
 
+#ifdef RODIN_USE_SUITESPARSE
 
 #include <optional>
 #include <functional>
@@ -17,8 +18,6 @@
 
 #include "ForwardDecls.h"
 #include "Solver.h"
-
-#ifdef RODIN_USE_SUITESPARSE
 
 namespace Rodin::Solver
 {

@@ -24,15 +24,6 @@ namespace Rodin::Variational
    * @brief List of finite elements already implemented.
    */
 
-  enum FiniteElementMapping
-  {
-    Identity,
-    CovariantPiola,
-    ContravariantPiola,
-    DoubleCovariantPiola,
-    DoubleContravariantPiola
-  };
-
   /**
    * @brief Base class for finite elements.
    */
@@ -90,23 +81,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto getBasis(const Math::Vector& r) const
-      {
-        return static_cast<const Derived&>(*this).getBasis(r);
-      }
-
-      inline
-      constexpr
       const auto& getLinearForm(size_t i) const
       {
         return static_cast<const Derived&>(*this).getLinearForm(i);
-      }
-
-      inline
-      constexpr
-      FiniteElementMapping getMapping() const
-      {
-        return static_cast<const Derived&>(*this).getMapping();
       }
 
     private:

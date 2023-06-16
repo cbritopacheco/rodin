@@ -135,7 +135,8 @@ namespace Rodin::Geometry
       inline
       void clear()
       {
-        m_tracked.clear();
+        for (auto& m : m_tracked)
+          m.clear();
       }
 
       inline
