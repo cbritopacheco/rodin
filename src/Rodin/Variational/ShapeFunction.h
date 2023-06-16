@@ -424,15 +424,7 @@ namespace Rodin::Variational
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        switch (fe.getMapping())
-        {
-          case FiniteElementMapping::Identity:
-            return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
-          default:
-          {
-            assert(false);
-          }
-        }
+        return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
       }
 
       inline

@@ -116,7 +116,7 @@ namespace Rodin::Variational
       solver.solve(getStiffnessOperator(), m_guess, getMassVector());
 
       // Recover solution
-      assert(false);
+      getTrialFunction().getSolution().setWeights(std::move(m_guess));
    }
 }
 

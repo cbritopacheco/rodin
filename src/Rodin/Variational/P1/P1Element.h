@@ -321,13 +321,6 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      inline
-      constexpr
-      FiniteElementMapping getMapping() const
-      {
-        return FiniteElementMapping::Identity;
-      }
-
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
@@ -676,13 +669,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_vdim(other.m_vdim)
       {}
-
-      inline
-      constexpr
-      FiniteElementMapping getMapping() const
-      {
-        return FiniteElementMapping::Identity;
-      }
 
       inline
       constexpr
