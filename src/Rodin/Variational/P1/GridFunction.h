@@ -114,6 +114,26 @@ namespace Rodin::Variational
           return void();
         }
       }
+
+      template <class Vector>
+      inline
+      GridFunction& setWeights(Vector&& weights)
+      {
+        assert(weights.size() >= 0);
+        assert(static_cast<size_t>(weights.size()) == this->getFiniteElementSpace().getSize());
+        auto& data = this->getData();
+        const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          data = w;
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          assert(false);
+        }
+        return *this;
+      }
+
   };
 
   template <class ... Ts>

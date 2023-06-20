@@ -12,6 +12,8 @@
 #include <cassert>
 #include <type_traits>
 
+#include "Rodin/Types.h"
+
 namespace Rodin::Test::Random
 {
   template <class T = float>
@@ -50,6 +52,8 @@ namespace Rodin::Test::Random
     std::uniform_real_distribution<T> m_distrib;
     unsigned int m_seed;
   };
+
+  using RandomScalar = RandomFloat<Scalar>;
 }
 
 #endif

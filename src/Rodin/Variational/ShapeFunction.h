@@ -418,13 +418,15 @@ namespace Rodin::Variational
       }
 
       inline
-      TensorBasis<typename FES::RangeType>
-      getTensorBasis(const Geometry::Point& p) const
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
       {
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
+        const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return TensorBasis(fe.getCount(),
+            [&](size_t local){ return this->object(fe.getBasis(local)(rc)); });
       }
 
       inline

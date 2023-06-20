@@ -81,17 +81,28 @@ namespace Rodin::Variational
          {
             dbc.assemble();
             const auto& dofs = dbc.getDOFs();
+
+            // Move essential degrees of freedom in the LHS to the RHS
             for (const auto& kv : dofs)
             {
                const Index& global = kv.first;
                const auto& dof = kv.second;
-               mass.coeffRef(global) = dof;
+               for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
+                  mass.coeffRef(it.row()) -= it.value() * dof;
+            }
+
+            // Impose essential degrees of freedom on both sides
+            for (const auto& kv : dofs)
+            {
+               const Index& global = kv.first;
+               const auto& dof = kv.second;
                stiffness.prune(
                      [global](const Index& row, const Index& col, const Scalar&) -> bool
                      {
                         return !((row == global) || (col == global));
                      });
                stiffness.coeffRef(global, global) = 1;
+               mass.coeffRef(global) = dof;
             }
          }
       }

@@ -163,7 +163,7 @@ namespace Rodin::Variational
    *
    * @see P1Specializations
    */
-  template <class Range, class Context, class ... Args>
+  template <class Range, class Context, class Mesh>
   class P1;
 
   template <class StrictType>

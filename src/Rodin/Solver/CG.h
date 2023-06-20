@@ -9,6 +9,7 @@
 
 #include <optional>
 #include <functional>
+#include<Eigen/SparseCholesky>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -36,7 +37,7 @@ namespace Rodin::Solver
    * Math::Vector.
    */
   template <>
-  class CG<Math::SparseMatrix, Math::Vector>
+  class CG<Math::SparseMatrix, Math::Vector> final
     : public SolverBase<Math::SparseMatrix, Math::Vector>
   {
     public:
@@ -49,20 +50,42 @@ namespace Rodin::Solver
       /**
        * @brief Constructs the CG object with default parameters.
        */
+      constexpr
       CG()
+        : m_tolerance(std::numeric_limits<double>::epsilon())
       {}
 
       ~CG() = default;
 
-      virtual
-      void solve(OperatorType& A, VectorType& x, VectorType& b)
-      const override
+      constexpr
+      CG& setTolerance(double tol)
+      {
+        m_tolerance = tol;
+        return *this;
+      }
+
+      constexpr
+      CG& setMaxIterations(size_t maxIt)
+      {
+        m_maxIterations = maxIt;
+        return *this;
+      }
+
+      void solve(OperatorType& A, VectorType& x, VectorType& b) const override
       {
         Eigen::ConjugateGradient<Math::SparseMatrix> solver;
+
+        solver.setTolerance(m_tolerance);
+
+        if (m_maxIterations.has_value())
+          solver.setMaxIterations(m_maxIterations.value());
+
         x = solver.compute(A).solve(b);
       }
 
     private:
+      double m_tolerance;
+      std::optional<size_t> m_maxIterations;
   };
 
 }

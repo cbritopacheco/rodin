@@ -11,6 +11,8 @@
 
 #include "Rodin/Configure.h"
 
+#include "Array.h"
+
 namespace Rodin
 {
   /// Standard type for representing integer values.
@@ -46,6 +48,9 @@ namespace Rodin
 
   /// Standard set of indices.
   using IndexSet = FlatSet<Index>;
+
+  /// Standard set of indices.
+  using IndexArray = Array<Index>;
 
   /// Standard map of indices.
   template <class T>

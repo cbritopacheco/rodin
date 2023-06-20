@@ -57,13 +57,17 @@ namespace Rodin::Variational
        * the polytope of dimension @f$ d @f$ and index @f$ i @f$.
        * @returns Set of indices associated to the @f$ (d, i) @f$-polytope.
        */
-      virtual const IndexSet& getDOFs(size_t d, Index i) const = 0;
+      virtual const IndexArray& getDOFs(size_t d, Index i) const = 0;
 
       /**
        * @brief Gets the global index for the local degree of freedom on the
        * polytope.
        */
-      virtual Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const = 0;
+      virtual Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const
+      {
+        const auto [d, i] = idx;
+        return getDOFs(d, i).coeff(local);
+      }
   };
 
   /**

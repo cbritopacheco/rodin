@@ -12,6 +12,7 @@
 
 namespace Rodin
 {
+  /// Standard array type
   template <class Scalar>
   using Array = Eigen::ArrayX<Scalar>;
 }
