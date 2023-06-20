@@ -25,7 +25,7 @@ namespace Rodin::Variational::Assembly
     /**
      * @internal
      */
-    static void add(Math::SparseMatrix& out, const Math::Matrix& in, const IndexSet& rows, const IndexSet& cols);
+    static void add(Math::SparseMatrix& out, const Math::Matrix& in, const IndexArray& rows, const IndexArray& cols);
 
     public:
       using Parent = AssemblyBase<BilinearFormBase<Math::SparseMatrix>>;
@@ -62,7 +62,7 @@ namespace Rodin::Variational::Assembly
     : public AssemblyBase<LinearFormBase<Math::Vector>>
   {
 
-    static void add(Math::Vector& out, const Math::Vector& in, const IndexSet& s);
+    static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s);
 
     public:
       using Parent = AssemblyBase<LinearFormBase<Math::Vector>>;

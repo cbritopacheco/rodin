@@ -14,16 +14,22 @@ namespace Rodin::Variational::Assembly
 {
   void Native<BilinearFormBase<Math::SparseMatrix>>
   ::add(Math::SparseMatrix& out, const Math::Matrix& in,
-      const IndexSet& rows, const IndexSet& cols)
+      const IndexArray& rows, const IndexArray& cols)
   {
-    assert(static_cast<size_t>(in.rows()) == rows.size());
-    assert(static_cast<size_t>(in.cols()) == cols.size());
+    assert(in.rows() == rows.size());
+    assert(in.cols() == cols.size());
     size_t i = 0;
     for (const auto& r : rows)
     {
+      assert(out.rows() >= 0);
+      assert(r < static_cast<size_t>(out.rows()));
       size_t j = 0;
       for (const auto& c : cols)
-        out.coeffRef(r, c) += in.coeff(i, j++);
+      {
+        assert(c < static_cast<size_t>(out.cols()));
+        out.coeffRef(r, c) += in.coeff(i, j);
+        j++;
+      }
       i++;
     }
   }
@@ -109,9 +115,9 @@ namespace Rodin::Variational::Assembly
   }
 
   void Native<LinearFormBase<Math::Vector>>
-  ::add(Math::Vector& out, const Math::Vector& in, const IndexSet& s)
+  ::add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
   {
-    assert(static_cast<size_t>(in.size()) == s.size());
+    assert(in.size() == s.size());
     size_t i = 0;
     for (const auto& global : s)
       out.coeffRef(global) += in.coeff(i++);

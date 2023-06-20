@@ -19,43 +19,41 @@ using namespace Rodin::Variational;
 
 namespace RodinBenchmark
 {
-  // struct Poisson : public benchmark::Fixture
-  // {
-  //   public:
-  //     static constexpr const Geometry::Attribute dirichletAttr = 1;
-  //     static constexpr const char* filename = "mfem/StarSquare.mfem.mesh";
+  struct Poisson16 : public benchmark::Fixture
+  {
+    public:
+      static constexpr const Geometry::Attribute dirichletAttr = 1;
 
-  //     void SetUp(const benchmark::State&)
-  //     {
-  //       meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
-  //       meshfile.append(filename);
-  //       mesh.load(meshfile);
-  //       vhPtr.reset(new H1<Scalar, Context::Serial>(mesh));
-  //     }
+      void SetUp(const benchmark::State&)
+      {
+        mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+        mesh.getConnectivity().compute(1, 2);
+        vhPtr.reset(new P1<Scalar, Context::Serial>(mesh));
+      }
 
-  //     void TearDown(const benchmark::State&)
-  //     {}
+      void TearDown(const benchmark::State&)
+      {}
 
-  //     boost::filesystem::path meshfile;
-  //     Mesh<Context::Serial> mesh;
-  //     std::unique_ptr<H1<Scalar, Context::Serial>> vhPtr;
-  // };
+      boost::filesystem::path meshfile;
+      Mesh<Context::Serial> mesh;
+      std::unique_ptr<P1<Scalar, Context::Serial>> vhPtr;
+  };
 
-  // BENCHMARK_F(Poisson, Assembly_ConstantCoefficient_ConstantSource)
-  // (benchmark::State& st)
-  // {
-  //   assert(vhPtr);
-  //   const auto& vh = *vhPtr;
-  //   TrialFunction u(vh);
-  //   TestFunction  v(vh);
-  //   ScalarFunction f(1.0);
-  //   ScalarFunction zero(0.0);
-  //   Problem poisson(u, v);
-  //   poisson = Integral(Grad(u), Grad(v))
-  //           - Integral(f, v)
-  //           + DirichletBC(u, zero).on(dirichletAttr);
+  BENCHMARK_F(Poisson16, Assembly_ConstantCoefficient_ConstantSource)
+  (benchmark::State& st)
+  {
+    assert(vhPtr);
+    const auto& vh = *vhPtr;
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+    ScalarFunction f(1.0);
+    ScalarFunction zero(0.0);
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, zero).on(dirichletAttr);
 
-  //   for (auto _ : st)
-  //     poisson.assemble();
-  // }
+    for (auto _ : st)
+      poisson.assemble();
+  }
 }

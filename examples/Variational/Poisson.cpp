@@ -14,19 +14,10 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/StarSquare.mfem.mesh";
-
-  // Define boundary attributes
-  int Gamma = 1;
-
   // Load mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 16, 16);
-  mesh.scale(1. / 15);
+  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 8, 8);
   mesh.getConnectivity().compute(1, 2);
-
-  for (auto it = mesh.getBoundary(); !it.end(); ++it)
-    mesh.setAttribute(it->getDimension(), it->getIndex(), 1);
 
   // Functions
   P1 vh(mesh);
@@ -43,17 +34,9 @@ int main(int, char**)
           - Integral(f, v)
           + DirichletBC(u, g);
 
-  // u.getSolution().projectOnBoundary(g);
-  // u.getSolution().save("poisson.gf");
-
+  // Solve the problem
   Solver::CG solver;
   poisson.solve(solver);
-
-  std::cout << poisson.getStiffnessOperator() << std::endl;
-  std::cout << poisson.getMassVector() << std::endl;
-
-  // std::cout << "weights: \n" << u.getSolution().getWeights().value() << std::endl;
-  // std::cout << "guess: \n" << u.getSolution().getData() << std::endl;
 
   // Save solution
   u.getSolution().save("Poisson.gf");

@@ -157,7 +157,8 @@ namespace Rodin::Variational
       }
 
       inline
-      TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
       {
         using OperandRange =
           typename FormLanguage::Traits<ShapeFunctionBase<Operand, P1<Scalar, Ps...>, Space>>::RangeType;
@@ -165,8 +166,10 @@ namespace Rodin::Variational
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
-        const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return p.getJacobianInverse() * fe.getGradient(coords);
+        const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return TensorBasis(fe.getCount(),
+            [&](size_t local)
+            { return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc)); });
       }
 
       inline Grad* copy() const noexcept override

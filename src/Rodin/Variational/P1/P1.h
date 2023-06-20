@@ -27,6 +27,9 @@ namespace Rodin::Variational
    * @see P1
    */
 
+  template <class Range, class Context, class Mesh = Geometry::Mesh<Context>>
+  class P1;
+
   /**
    * @ingroup P1Specializations
    * @brief Scalar valued Lagrange finite element space
@@ -138,9 +141,9 @@ namespace Rodin::Variational
       }
 
       inline
-      const IndexSet& getDOFs(size_t d, Index i) const override
+      const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return getMesh().getConnectivity().getIncidence({d, 0}, i);
+        return getMesh().getConnectivity().getPolytope(d, i);
       }
 
       inline
@@ -255,9 +258,9 @@ namespace Rodin::Variational
       }
 
       inline
-      const IndexSet& getDOFs(size_t d, Index i) const override
+      const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return getMesh().getConnectivity().getIncidence({d, 0}, i);
+        return getMesh().getConnectivity().getPolytope(d, i);
       }
 
       inline

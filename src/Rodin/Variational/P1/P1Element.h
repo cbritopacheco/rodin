@@ -354,6 +354,9 @@ namespace Rodin::Variational
         return s_basis[getGeometry()][i];
       }
 
+      /**
+       * @deprecated
+       */
       inline
       Math::Vector getBasis(const Math::Vector& r) const
       {
@@ -372,6 +375,9 @@ namespace Rodin::Variational
         return s_gradient[getGeometry()][i];
       }
 
+      /**
+       * @deprecated
+       */
       inline
       Math::Matrix getGradient(const Math::Vector& r) const
       {
