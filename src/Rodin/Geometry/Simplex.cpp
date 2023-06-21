@@ -165,7 +165,8 @@ namespace Rodin::Geometry
     if (!m_distortion.has_value())
     {
       assert(m_rc.has_value());
-      m_distortion.emplace(m_trans.get().distortion(m_rc.value()));
+      const auto& jac = getJacobian();
+      m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
     }
     assert(m_distortion.has_value());
     return m_distortion.value();
