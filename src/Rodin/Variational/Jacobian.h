@@ -24,15 +24,15 @@ namespace Rodin::Variational
 
   // /**
   //  * @ingroup JacobianSpecializations
-  //  * @brief Jacobian of an H1 GridFunction object.
+  //  * @brief Jacobian of an P1 GridFunction object.
   //  */
   // template <class ... Ps>
-  // class Jacobian<GridFunction<H1<Math::Vector, Ps...>>> final
-  //   : public MatrixFunctionBase<Jacobian<GridFunction<H1<Math::Vector, Ps...>>>>
+  // class Jacobian<GridFunction<P1<Math::Vector, Ps...>>> final
+  //   : public MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>
   // {
   //   public:
-  //     using Operand = GridFunction<H1<Math::Vector, Ps...>>;
-  //     using Parent = MatrixFunctionBase<Jacobian<GridFunction<H1<Math::Vector, Ps...>>>>;
+  //     using Operand = GridFunction<P1<Math::Vector, Ps...>>;
+  //     using Parent = MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>;
 
   //     /**
   //      * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
@@ -105,97 +105,98 @@ namespace Rodin::Variational
   // };
 
   // template <class ... Ps>
-  // Jacobian(const GridFunction<H1<Math::Vector, Ps...>>&)
-  //   -> Jacobian<GridFunction<H1<Math::Vector, Ps...>>>;
+  // Jacobian(const GridFunction<P1<Math::Vector, Ps...>>&)
+  //   -> Jacobian<GridFunction<P1<Math::Vector, Ps...>>>;
 
-  // /**
-  //  * @ingroup JacobianSpecializations
-  //  * @brief Jacobian of an H1 ShapeFunction object.
-  //  */
-  // template <class ShapeFunctionDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  // class Jacobian<ShapeFunction<ShapeFunctionDerived, H1<Math::Vector, Ts...>, Space>> final
-  //   : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, H1<Math::Vector, Ts...>, Space>>, H1<Math::Vector, Ts...>, Space>
-  // {
-  //   public:
-  //     using FES = H1<Math::Vector, Ts...>;
-  //     using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
-  //     using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
+  /**
+   * @ingroup JacobianSpecializations
+   * @brief Jacobian of an P1 ShapeFunction object.
+   */
+  template <class ShapeFunctionDerived, ShapeFunctionSpaceType Space, class ... Ts>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, Space>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, Space>>, P1<Math::Vector, Ts...>, Space>
+  {
+    public:
+      using FES = P1<Math::Vector, Ts...>;
+      using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
 
-  //     Jacobian(const Operand& u)
-  //       : Parent(u.getFiniteElementSpace()),
-  //         m_u(u)
-  //     {}
+      Jacobian(const Operand& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u)
+      {}
 
-  //     Jacobian(const Jacobian& other)
-  //       : Parent(other),
-  //         m_u(other.m_u)
-  //     {}
+      Jacobian(const Jacobian& other)
+        : Parent(other),
+          m_u(other.m_u)
+      {}
 
-  //     Jacobian(Jacobian&& other)
-  //       : Parent(std::move(other)),
-  //         m_u(other.m_u)
-  //     {}
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other)),
+          m_u(other.m_u)
+      {}
 
-  //     inline
-  //     constexpr
-  //     const Operand& getOperand() const
-  //     {
-  //       return m_u.get();
-  //     }
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
 
-  //     inline
-  //     constexpr
-  //     const FES& getFiniteElementSpace() const
-  //     {
-  //       return getOperand().getFiniteElementSpace();
-  //     }
+      inline
+      constexpr
+      const FES& getFiniteElementSpace() const
+      {
+        return getOperand().getFiniteElementSpace();
+      }
 
-  //     inline
-  //     constexpr
-  //     const auto& getLeaf() const
-  //     {
-  //       return getOperand().getLeaf();
-  //     }
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
 
-  //     inline
-  //     constexpr
-  //     RangeShape getRangeShape() const
-  //     {
-  //       return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(),
-  //                getOperand().getFiniteElementSpace().getVectorDimension() };
-  //     }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getOperand().getFiniteElementSpace().getMesh().getSpaceDimension(),
+                 getOperand().getFiniteElementSpace().getVectorDimension() };
+      }
 
-  //     inline
-  //     constexpr
-  //     size_t getDOFs(const Geometry::Polytope& element) const
-  //     {
-  //       return getOperand().getDOFs(element);
-  //     }
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getOperand().getDOFs(element);
+      }
 
-  //     inline
-  //     TensorBasis<Math::Matrix> getTensorBasis(const Geometry::Point& p) const
-  //     {
-  //       const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-  //       const auto& inv = p.getJacobianInverse();
-  //       const Eigen::TensorMap<const Eigen::Tensor<Scalar, 2>> lift(inv.data(), inv.rows(), inv.cols());
-  //       static constexpr const Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(2, 0) };
-  //       const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-  //       return fe.getJacobian(coords).contract(lift, dims)
-  //                                    .shuffle(Eigen::array<int, 3>{2, 1, 0});
-  //     }
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        const size_t d = p.getPolytope().getDimension();
+        const Index i = p.getPolytope().getIndex();
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
+        const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        return TensorBasis(fe.getCount(),
+            [&](size_t local)
+            { return p.getJacobianInverse().transpose() * this->object(fe.getJacobian(local)(rc)); });
+      }
 
-  //     inline Jacobian* copy() const noexcept override
-  //     {
-  //       return new Jacobian(*this);
-  //     }
+      inline Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
+      }
 
-  //   private:
-  //     std::reference_wrapper<const Operand> m_u;
-  // };
+    private:
+      std::reference_wrapper<const Operand> m_u;
+  };
 
-  // template <class ShapeFunctionDerived, class FES, ShapeFunctionSpaceType Space>
-  // Jacobian(const ShapeFunction<ShapeFunctionDerived, FES, Space>&)
-  //   -> Jacobian<ShapeFunction<ShapeFunctionDerived, FES, Space>>;
+  template <class ShapeFunctionDerived, class FES, ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, FES, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, FES, Space>>;
 }
 
 #endif

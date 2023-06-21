@@ -225,7 +225,7 @@ namespace Rodin::Variational
             switch (m_g)
             {
               case Geometry::Polytope::Geometry::Point:
-                return Math::Vector{{0, 0}};
+                return Math::Vector{{0}};
               case Geometry::Polytope::Geometry::Segment:
               {
                 switch (m_i)
@@ -610,6 +610,12 @@ namespace Rodin::Variational
           Geometry::Polytope::Geometry m_g;
       };
 
+      class DivergenceFunction
+      {
+        public:
+        private:
+      };
+
       class JacobianFunction
       {
         public:
@@ -637,13 +643,134 @@ namespace Rodin::Variational
           inline
           Math::Matrix operator()(const Math::Vector& rc) const
           {
-            assert(false);
+            Math::Matrix res =
+              Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
+            const size_t i = m_i % m_vdim;
+            const size_t k = m_i / m_vdim;
+            assert(k < Geometry::Polytope::getVertexCount(m_g));
             switch (m_g)
             {
-              default:
-                return Math::Matrix{{m_i * 1.0}};
+              case Geometry::Polytope::Geometry::Point:
+              {
+                return res;
+              }
+              case Geometry::Polytope::Geometry::Segment:
+              {
+                switch (k)
+                {
+                  case 0:
+                  {
+                    res.row(i) << -1;
+                    return res;
+                  }
+                  case 1:
+                  {
+                    res.row(i) << 1;
+                    return res;
+                  }
+                  default:
+                  {
+                    assert(false);
+                    res.setConstant(NAN);
+                    break;
+                  }
+                }
+              }
+              case Geometry::Polytope::Geometry::Triangle:
+              {
+                switch (k)
+                {
+                  case 0:
+                  {
+                    res.row(i) << -1, -1;
+                    return res;
+                  }
+                  case 1:
+                  {
+                    res.row(i) << 1, 0;
+                    return res;
+                  }
+                  case 2:
+                  {
+                    res.row(i) << 0, 1;
+                    return res;
+                  }
+                  default:
+                  {
+                    assert(false);
+                    res.setConstant(NAN);
+                    break;
+                  }
+                }
+              }
+              case Geometry::Polytope::Geometry::Quadrilateral:
+              {
+                switch (k)
+                {
+                  case 0:
+                  {
+                    res.row(i) << rc.y() - 1, rc.x() - 1;
+                    return res;
+                  }
+                  case 1:
+                  {
+                    res.row(i) << 1 - rc.y(), -rc.x();
+                    return res;
+                  }
+                  case 2:
+                  {
+                    res.row(i) << -rc.y(), 1 - rc.x();
+                    return res;
+                  }
+                  case 3:
+                  {
+                    res.row(i) << rc.y(), rc.x();
+                    return res;
+                  }
+                  default:
+                  {
+                    assert(false);
+                    res.setConstant(NAN);
+                    break;
+                  }
+                }
+              }
+              case Geometry::Polytope::Geometry::Tetrahedron:
+              {
+                switch (k)
+                {
+                  case 0:
+                  {
+                    res.row(i) << -1, -1, -1;
+                    return res;
+                  }
+                  case 1:
+                  {
+                    res.row(i) << 1, 0, 0;
+                    return res;
+                  }
+                  case 2:
+                  {
+                    res.row(i) << 0, 1, 0;
+                    return res;
+                  }
+                  case 3:
+                  {
+                    res.row(i) << 0, 0, 1;
+                    return res;
+                  }
+                  default:
+                  {
+                    assert(false);
+                    res.setConstant(NAN);
+                    break;
+                  }
+                }
+              }
             }
-            return {};
+            assert(false);
+            res.setConstant(NAN);
+            return res;
           }
 
         private:

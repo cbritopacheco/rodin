@@ -22,10 +22,14 @@ namespace Rodin::Variational::Assembly
   class Native<BilinearFormBase<Math::SparseMatrix>>
     : public AssemblyBase<BilinearFormBase<Math::SparseMatrix>>
   {
+    using Triplet = Eigen::Triplet<Scalar>;
+
     /**
      * @internal
      */
-    static void add(Math::SparseMatrix& out, const Math::Matrix& in, const IndexArray& rows, const IndexArray& cols);
+    static void add(
+        std::vector<Triplet>& out, const Math::Matrix& in,
+        const IndexArray& rows, const IndexArray& cols);
 
     public:
       using Parent = AssemblyBase<BilinearFormBase<Math::SparseMatrix>>;

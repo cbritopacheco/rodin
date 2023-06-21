@@ -13,33 +13,28 @@
 namespace Rodin::Variational::Assembly
 {
   void Native<BilinearFormBase<Math::SparseMatrix>>
-  ::add(Math::SparseMatrix& out, const Math::Matrix& in,
+  ::add(std::vector<Triplet>& out, const Math::Matrix& in,
       const IndexArray& rows, const IndexArray& cols)
   {
+    assert(rows.size() >= 0);
+    assert(cols.size() >= 0);
     assert(in.rows() == rows.size());
     assert(in.cols() == cols.size());
-    size_t i = 0;
-    for (const auto& r : rows)
+    for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
     {
-      assert(out.rows() >= 0);
-      assert(r < static_cast<size_t>(out.rows()));
-      size_t j = 0;
-      for (const auto& c : cols)
+      for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
       {
-        assert(c < static_cast<size_t>(out.cols()));
-        out.coeffRef(r, c) += in.coeff(i, j);
-        j++;
+        const Scalar s = in(i, j);
+        if (s != Scalar(0))
+          out.push_back(Triplet(rows(i), cols(j), s));
       }
-      i++;
     }
   }
 
   Math::SparseMatrix Native<BilinearFormBase<Math::SparseMatrix>>
   ::execute(const Input& input) const
   {
-    OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
-    res.setZero();
-
+    std::vector<Triplet> triplets;
     for (const auto& bfi : input.bfis)
     {
       const auto& attrs = bfi.getAttributes();
@@ -56,7 +51,7 @@ namespace Rodin::Variational::Assembly
               const auto& trialDOFs = input.trialFES.getDOFs(d, i);
               const auto& testDOFs = input.testFES.getDOFs(d, i);
               const auto mat = bfi.getMatrix(*it);
-              add(res, mat, testDOFs, trialDOFs);
+              add(triplets, mat, testDOFs, trialDOFs);
             }
           }
           break;
@@ -72,7 +67,7 @@ namespace Rodin::Variational::Assembly
               const auto& trialDOFs = input.trialFES.getDOFs(d, i);
               const auto& testDOFs = input.testFES.getDOFs(d, i);
               const auto mat = bfi.getMatrix(*it);
-              add(res, mat, testDOFs, trialDOFs);
+              add(triplets, mat, testDOFs, trialDOFs);
             }
           }
           break;
@@ -88,7 +83,7 @@ namespace Rodin::Variational::Assembly
               const auto& trialDOFs = input.trialFES.getDOFs(d, i);
               const auto& testDOFs = input.testFES.getDOFs(d, i);
               const auto mat = bfi.getMatrix(*it);
-              add(res, mat, testDOFs, trialDOFs);
+              add(triplets, mat, testDOFs, trialDOFs);
             }
           }
           break;
@@ -104,14 +99,16 @@ namespace Rodin::Variational::Assembly
               const auto& trialDOFs = input.trialFES.getDOFs(d, i);
               const auto& testDOFs = input.testFES.getDOFs(d, i);
               const auto mat = bfi.getMatrix(*it);
-              add(res, mat, testDOFs, trialDOFs);
+              add(triplets, mat, testDOFs, trialDOFs);
             }
           }
           break;
         }
       }
     }
-    return res;
+    OperatorType m(input.testFES.getSize(), input.trialFES.getSize());
+    m.setFromTriplets(triplets.begin(), triplets.end());
+    return m;
   }
 
   void Native<LinearFormBase<Math::Vector>>

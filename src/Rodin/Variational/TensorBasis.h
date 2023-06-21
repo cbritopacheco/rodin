@@ -159,10 +159,14 @@ namespace Rodin::Variational
     public:
       using ValueType = Scalar;
 
-      template <class ... Args>
-      constexpr
-      TensorBasis(Args&&... args)
-        : m_data(std::forward<Args>(args)...)
+      template <class EigenDerived>
+      TensorBasis(const Eigen::MatrixBase<EigenDerived>& v)
+        : m_data(v)
+      {}
+
+      template <class EigenDerived>
+      TensorBasis(Eigen::MatrixBase<EigenDerived>&& v)
+        : m_data(std::move(v))
       {}
 
       template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
@@ -256,10 +260,14 @@ namespace Rodin::Variational
     public:
       using ValueType = Math::Vector;
 
-      template <class ... Args>
-      constexpr
-      TensorBasis(Args&&... args)
-        : m_data(std::forward<Args>(args)...)
+      template <class EigenDerived>
+      TensorBasis(const Eigen::MatrixBase<EigenDerived>& v)
+        : m_data(v)
+      {}
+
+      template <class EigenDerived>
+      TensorBasis(Eigen::MatrixBase<EigenDerived>&& v)
+        : m_data(std::move(v))
       {}
 
       template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
