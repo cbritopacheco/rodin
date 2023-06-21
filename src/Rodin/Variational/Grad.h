@@ -160,9 +160,6 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
-        using OperandRange =
-          typename FormLanguage::Traits<ShapeFunctionBase<Operand, P1<Scalar, Ps...>, Space>>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Scalar>);
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);

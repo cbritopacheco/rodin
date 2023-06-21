@@ -6,14 +6,14 @@ target_link_libraries(Poisson
   Rodin::Variational
   )
 
-# add_executable(Elasticity Elasticity.cpp)
-# target_link_libraries(Elasticity
-#   PUBLIC
-#   Rodin::Geometry
-#   Rodin::Solver
-#   Rodin::Variational
-#   )
-# 
+add_executable(Elasticity Elasticity.cpp)
+target_link_libraries(Elasticity
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )
+
 # add_executable(SurfaceMesh SurfaceMesh.cpp)
 # target_link_libraries(SurfaceMesh
 #   PUBLIC

@@ -225,6 +225,39 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpaceBase;
 
+      template <class FunctionDerived>
+      class Mapping
+      {
+        public:
+          using Function = FunctionBase<FunctionDerived>;
+
+          Mapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v)
+            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+          {}
+
+          Mapping(const Mapping&) = default;
+
+          inline
+          auto operator()(const Math::Vector& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(p);
+          }
+
+          inline
+          constexpr
+          const Function& getFunction() const
+          {
+            assert(m_v);
+            return *m_v;
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
+          std::unique_ptr<Function> m_v;
+      };
+
       P1(const Geometry::Mesh<Context>& mesh, size_t vdim);
 
       P1(const P1& other) = default;
@@ -272,6 +305,15 @@ namespace Rodin::Variational
         const size_t r = local % m_vdim;
         assert(q < static_cast<size_t>(p.size()));
         return p(q) + r * m_mesh.get().getVertexCount();
+      }
+
+      template <class FunctionDerived>
+      inline
+      auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
+      {
+        const auto [d, i] = idx;
+        const auto& mesh = getMesh();
+        return Mapping(*mesh.getPolytope(d, i), v);
       }
 
     private:

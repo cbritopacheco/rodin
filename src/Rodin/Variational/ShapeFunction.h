@@ -361,9 +361,7 @@ namespace Rodin::Variational
       constexpr
       ShapeFunction(const FES& fes)
         : Parent(fes)
-      {
-        assert(fes.getVectorDimension() == 1);
-      }
+      {}
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
@@ -389,7 +387,7 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        return { 1, 1 };
+        return { this->getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
       inline
@@ -421,12 +419,27 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
+        using RangeType = typename FES::RangeType;
         const size_t d = p.getPolytope().getDimension();
         const Index i = p.getPolytope().getIndex();
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
         const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local){ return this->object(fe.getBasis(local)(rc)); });
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          return TensorBasis<Scalar>(fe.getCount(),
+              [&](size_t local) -> Scalar { return fe.getBasis(local)(rc); });
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          return TensorBasis<Math::Vector>(fe.getCount(), fes.getVectorDimension(),
+              [&](size_t local) -> Math::Vector { return fe.getBasis(local)(rc); });
+        }
+        else
+        {
+          assert(false);
+          return void();
+        }
       }
 
       inline

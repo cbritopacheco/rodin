@@ -180,11 +180,7 @@ namespace Rodin::Variational
       Mult(const LHS& lhs, const RHS& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        // assert(lhs.getRangeType() == RangeType::Scalar
-        //     || rhs.getRangeType() == RangeType::Scalar
-        //     || lhs.getRangeShape().width() == rhs.getRangeShape().height());
-      }
+      {}
 
       constexpr
       Mult(const Mult& other)
