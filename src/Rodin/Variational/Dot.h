@@ -314,8 +314,8 @@ namespace Rodin::Variational
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
-        const auto& trial = this->object(getLHS().getTensorBasis(p));
-        const auto& test = this->object(getRHS().getTensorBasis(p));
+        const auto& trial = getLHS().getTensorBasis(p);
+        const auto& test = getRHS().getTensorBasis(p);
         Math::Matrix res(test.getDOFs(), trial.getDOFs());
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {

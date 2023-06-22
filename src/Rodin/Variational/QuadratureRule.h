@@ -182,13 +182,13 @@ namespace Rodin::Variational
    * ---------------------------------------------------------------------->>
    */
 
-  /**
-   * @ingroup QuadratureRuleSpecializations
-   *
-   * @f[
-   * \int \nabla u \cdot \nabla v \ dx
-   * @f]
-   */
+  // /**
+  //  * @ingroup QuadratureRuleSpecializations
+  //  *
+  //  * @f[
+  //  * \int \nabla u \cdot \nabla v \ dx
+  //  * @f]
+  //  */
   // template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   // class QuadratureRule<Dot<
   //       ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>,
@@ -229,10 +229,38 @@ namespace Rodin::Variational
   //       return *m_integrand;
   //     }
 
-  //     Math::Matrix getMatrix(const Geometry::Polytope& simplex) const override
+  //     inline
+  //     Math::Matrix getMatrix(const Geometry::Polytope& polytope) const override
   //     {
-  //       assert(false);
-  //       return {};
+  //       // std::cout << "miaow!!!!!!!!!" << std::endl;
+  //       const size_t d = polytope.getDimension();
+  //       const Index idx = polytope.getIndex();
+  //       const auto& integrand = getIntegrand();
+  //       const auto& trial = integrand.getLHS();
+  //       const auto& test = integrand.getRHS();
+  //       const auto& trans = polytope.getTransformation();
+  //       const auto& trialfes = trial.getFiniteElementSpace();
+  //       const auto& testfes = test.getFiniteElementSpace();
+  //       const auto& trialfe = trialfes.getFiniteElement(d, idx);
+  //       const auto& testfe = testfes.getFiniteElement(d, idx);
+  //       const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
+  //       const size_t order = trialfe.getCount() + testfe.getCount() + vc;
+  //       const QF::QFGG qf(order, polytope.getGeometry());
+  //       Math::Matrix res = Math::Matrix::Zero(test.getDOFs(polytope), trial.getDOFs(polytope));
+  //       for (size_t k = 0; k < qf.getSize(); k++)
+  //       {
+  //         Geometry::Point p(polytope, trans, qf.getPoint(k));
+  //         const Scalar w = qf.getWeight(k);
+  //         const Scalar distortion = p.getDistortion();
+  //         for (size_t i = 0; i < res.rows(); i++)
+  //         {
+  //           for (size_t j = 0; j < res.cols(); j++)
+  //           {
+  //             res(i, j) += w * distortion * test.getTensorBasis(i) * trial.getTensorBasis(j);
+  //           }
+  //         }
+  //       }
+  //       return res;
   //     }
 
   //     virtual Region getRegion() const override = 0;

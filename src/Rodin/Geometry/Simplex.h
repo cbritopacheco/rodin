@@ -411,6 +411,8 @@ namespace Rodin::Geometry
        */
       const Math::Matrix& getJacobian() const;
 
+      Scalar getJacobianDeterminant() const;
+
       /**
        * @brief Computes the inverse of the Jacobian matrix of the
        * transformation at the point.
@@ -431,6 +433,7 @@ namespace Rodin::Geometry
       mutable std::optional<const Math::Vector> m_pc;
       mutable std::optional<const Math::Matrix> m_jacobian;
       mutable std::optional<const Math::Matrix> m_jacobianInverse;
+      mutable std::optional<const Scalar>       m_jacobianDeterminant;
       mutable std::optional<const Scalar>       m_distortion;
   };
 

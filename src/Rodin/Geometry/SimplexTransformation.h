@@ -38,6 +38,7 @@ namespace Rodin::Geometry
   class PolytopeTransformation
   {
     public:
+
       virtual ~PolytopeTransformation() = default;
 
       inline
@@ -92,7 +93,7 @@ namespace Rodin::Geometry
        *
        * @param[in] pc Physical coordinates of the point.
        */
-      virtual Math::Vector inverse(const Math::Vector& pc) const
+      virtual Math::Vector inverse(const Math::Vector&) const
       {
         assert(false); // Not implemented
         return Math::Vector::Zero(0);

@@ -14,7 +14,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  // Load mesh
+  // Build a mesh
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 256, 256);
   mesh.getConnectivity().compute(1, 2);
@@ -29,31 +29,16 @@ int main(int, char**)
   ScalarFunction f = 1.0;
   ScalarFunction g = 0.0;
 
-  // std::cout << "lf\n";
-  // LinearForm lf(v);
-  // lf = Integral(f, v);
-  // lf.assemble();
-
-  // std::cout << "bf\n";
-  // BilinearForm bf(u, v);
-  // bf = Integral(Grad(u), Grad(v));
-  // bf.assemble();
-
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, g);
-
-  // // for (int i = 0; i < 25; i++)
-  // poisson.assemble();
-
+  poisson.assemble();
 
   // Solve the problem
   Solver::CG solver;
-  solver.setMaxIterations(200).setTolerance(1e-12);
+  solver.setMaxIterations(2000).setTolerance(1e-12);
   poisson.solve(solver);
-
-  // std::cout << poisson.getStiffnessOperator() << std::endl;
 
   // Save solution
   u.getSolution().save("Poisson.gf");
