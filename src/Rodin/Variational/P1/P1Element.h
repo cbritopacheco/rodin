@@ -354,39 +354,12 @@ namespace Rodin::Variational
         return s_basis[getGeometry()][i];
       }
 
-      /**
-       * @deprecated
-       */
-      inline
-      Math::Vector getBasis(const Math::Vector& r) const
-      {
-        const size_t n = getCount();
-        Math::Vector res(n);
-        for (size_t i = 0; i < n; i++)
-          res.coeffRef(i) = getBasis(i)(r);
-        return res;
-      }
-
       inline
       constexpr
       const auto& getGradient(size_t i) const
       {
         assert(i < getCount());
         return s_gradient[getGeometry()][i];
-      }
-
-      /**
-       * @deprecated
-       */
-      inline
-      Math::Matrix getGradient(const Math::Vector& r) const
-      {
-        const size_t n = getCount();
-        const size_t d = Geometry::Polytope::getGeometryDimension(getGeometry());
-        Math::Matrix res(d, n);
-        for (size_t i = 0; i < n; i++)
-          res.col(i) = getGradient(i)(r);
-        return res;
       }
 
     private:
