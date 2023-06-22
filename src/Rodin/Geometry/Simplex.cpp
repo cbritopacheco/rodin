@@ -154,10 +154,152 @@ namespace Rodin::Geometry
     if (!m_jacobianInverse.has_value())
     {
       assert(m_rc.has_value());
-      m_jacobianInverse.emplace(getJacobian().inverse());
+      const size_t rdim = Polytope::getGeometryDimension(m_polytope.get().getGeometry());
+      const size_t sdim = m_polytope.get().getMesh().getSpaceDimension();
+      assert(rdim <= sdim);
+      if (rdim == sdim)
+      {
+        switch (rdim)
+        {
+          case 1:
+          {
+            Math::Matrix inv(1, 1);
+            inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
+            m_jacobianDeterminant.emplace(getJacobian().coeff(0, 0));
+            m_jacobianInverse.emplace(std::move(inv));
+            break;
+          }
+          case 2:
+          {
+            const auto& jac = getJacobian();
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(1, 0);
+            const Scalar d = jac.coeff(1, 1);
+            const Scalar det = a * d - b * c;
+            m_jacobianDeterminant.emplace(det);
+            assert(det > 0);
+            Math::Matrix inv(2, 2);
+            inv.coeffRef(0, 0) = d / det;
+            inv.coeffRef(0, 1) = -b / det;
+            inv.coeffRef(1, 0) = -c / det;
+            inv.coeffRef(1, 1) = a / det;
+            m_jacobianInverse.emplace(std::move(inv));
+            break;
+          }
+          case 3:
+          {
+            const auto& jac = getJacobian();
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(0, 2);
+            const Scalar d = jac.coeff(1, 0);
+            const Scalar e = jac.coeff(1, 1);
+            const Scalar f = jac.coeff(1, 2);
+            const Scalar g = jac.coeff(2, 0);
+            const Scalar h = jac.coeff(2, 1);
+            const Scalar i = jac.coeff(2, 2);
+
+            const Scalar A = e * i - f * h;
+            const Scalar B = -(d * i - f * g);
+            const Scalar C = d * h - e * g;
+            const Scalar D = -(b * i - c * h);
+            const Scalar E = a * i - c * g;
+            const Scalar F = -(a * h - b * g);
+            const Scalar G = b * f - c * e;
+            const Scalar H = - (a * f  - c * d);
+            const Scalar I = a * e - b * d;
+
+            const Scalar det = a * A + b * B + c * C;
+            m_jacobianDeterminant.emplace(det);
+
+            assert(det > 0);
+            Math::Matrix inv(3, 3);
+            inv.coeffRef(0, 0) = A / det;
+            inv.coeffRef(0, 1) = D / det;
+            inv.coeffRef(0, 2) = G / det;
+            inv.coeffRef(1, 0) = B / det;
+            inv.coeffRef(1, 1) = E / det;
+            inv.coeffRef(1, 2) = H / det;
+            inv.coeffRef(2, 0) = C / det;
+            inv.coeffRef(2, 1) = F / det;
+            inv.coeffRef(2, 2) = I / det;
+            m_jacobianInverse.emplace(std::move(inv));
+            break;
+          }
+          default:
+          {
+            m_jacobianInverse.emplace(getJacobian().inverse());
+            break;
+          }
+        }
+      }
+      else
+      {
+        assert(false); // Not handled yet
+      }
     }
     assert(m_jacobianInverse.has_value());
     return m_jacobianInverse.value();
+  }
+
+  Scalar Point::getJacobianDeterminant() const
+  {
+    if (!m_jacobianDeterminant.has_value())
+    {
+      assert(m_rc.has_value());
+      const auto& jac = getJacobian();
+      const auto rows = jac.rows();
+      const auto cols = jac.cols();
+      if (rows == cols)
+      {
+        switch (rows)
+        {
+          case 1:
+          {
+            m_jacobianDeterminant.emplace(jac.coeff(0, 0));
+            break;
+          }
+          case 2:
+          {
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(1, 0);
+            const Scalar d = jac.coeff(1, 1);
+            m_jacobianDeterminant.emplace(a * d - b * c);
+            break;
+          }
+          case 3:
+          {
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(0, 2);
+            const Scalar d = jac.coeff(1, 0);
+            const Scalar e = jac.coeff(1, 1);
+            const Scalar f = jac.coeff(1, 2);
+            const Scalar g = jac.coeff(2, 0);
+            const Scalar h = jac.coeff(2, 1);
+            const Scalar i = jac.coeff(2, 2);
+            const Scalar A = e * i - f * h;
+            const Scalar B = -(d * i - f * g);
+            const Scalar C = d * h - e * g;
+            m_jacobianDeterminant.emplace(a * A + b * B + c * C);
+            break;
+          }
+          default:
+          {
+            m_jacobianDeterminant.emplace(jac.determinant());
+            break;
+          }
+        }
+      }
+      else
+      {
+        assert(false); // Not handled yet
+      }
+    }
+    assert(m_jacobianDeterminant.has_value());
+    return m_jacobianDeterminant.value();
   }
 
   Scalar Point::getDistortion() const
@@ -166,7 +308,38 @@ namespace Rodin::Geometry
     {
       assert(m_rc.has_value());
       const auto& jac = getJacobian();
-      m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+      const auto rows = jac.rows();
+      const auto cols = jac.cols();
+      if (rows == cols)
+      {
+        switch (rows)
+        {
+          case 1:
+          {
+            m_distortion.emplace(Math::abs(jac.coeff(0, 0)));
+            break;
+          }
+          case 2:
+          {
+            m_distortion.emplace(Math::abs(getJacobianDeterminant()));
+            break;
+          }
+          case 3:
+          {
+            m_distortion.emplace(Math::abs(getJacobianDeterminant()));
+            break;
+          }
+          default:
+          {
+            m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+            break;
+          }
+        }
+      }
+      else
+      {
+        assert(false); // Not handled yet
+      }
     }
     assert(m_distortion.has_value());
     return m_distortion.value();
