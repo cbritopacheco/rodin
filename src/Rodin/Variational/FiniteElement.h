@@ -32,11 +32,40 @@ namespace Rodin::Variational
   {
     public:
       constexpr
+      FiniteElementBase()
+        : m_g(Geometry::Polytope::Geometry::Point)
+      {}
+
+      constexpr
       FiniteElementBase(Geometry::Polytope::Geometry g)
         : m_g(g)
       {}
 
+      constexpr
+      FiniteElementBase(const FiniteElementBase& other)
+        : m_g(other.m_g)
+      {}
+
+      constexpr
+      FiniteElementBase(FiniteElementBase&& other)
+        : m_g(std::move(other.m_g))
+      {}
+
       virtual ~FiniteElementBase() = default;
+
+      constexpr
+      FiniteElementBase& operator=(const FiniteElementBase& other)
+      {
+        m_g = other.m_g;
+        return *this;
+      }
+
+      constexpr
+      FiniteElementBase& operator=(FiniteElementBase&& other)
+      {
+        m_g = std::move(other.m_g);
+        return *this;
+      }
 
       inline
       constexpr
@@ -87,7 +116,7 @@ namespace Rodin::Variational
       }
 
     private:
-      const Geometry::Polytope::Geometry m_g;
+      Geometry::Polytope::Geometry m_g;
   };
 }
 
