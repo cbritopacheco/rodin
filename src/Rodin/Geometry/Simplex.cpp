@@ -101,59 +101,47 @@ namespace Rodin::Geometry
   }
 
   // ---- Point --------------------------------------------------------------
-  Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc)
-    : m_polytope(simplex), m_trans(trans), m_rc(rc)
+  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans)
+    : m_polytope(simplex), m_trans(trans)
   {}
 
-  Point::Point(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& rc, const Math::Vector& pc)
-    : m_polytope(simplex), m_trans(trans), m_rc(rc), m_pc(pc)
+  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& pc)
+    : m_polytope(simplex), m_trans(trans), m_pc(pc)
   {}
 
-  const Math::Vector& Point::getCoordinates(Coordinates coords) const
+  const Math::Vector& PointBase::getCoordinates(Coordinates coords) const
   {
-    switch (coords)
+    if (coords == Coordinates::Physical)
     {
-      case Coordinates::Physical:
-      {
-        if (!m_pc.has_value())
-        {
-          assert(m_rc.has_value());
-          m_pc.emplace(m_trans.get().transform(m_rc.value()));
-        }
-        assert(m_pc.has_value());
-        return m_pc.value();
-      }
-      case Coordinates::Reference:
-      {
-        if (!m_rc.has_value())
-        {
-          assert(m_pc.has_value());
-          m_rc.emplace(m_trans.get().inverse(m_pc.value()));
-        }
-        assert(m_rc.has_value());
-        return m_rc.value();
-      }
+      return getPhysicalCoordinates();
     }
-
-    return m_pc.value(); // Some compilers complain, so return any value
+    else
+    {
+      assert(coords == Coordinates::Reference);
+      return getReferenceCoordinates();
+    }
   }
 
-  const Math::Matrix& Point::getJacobian() const
+  const Math::Vector& PointBase::getPhysicalCoordinates() const
+  {
+    if (!m_pc.has_value())
+      m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
+    assert(m_pc.has_value());
+    return m_pc.value();
+  }
+
+  const Math::Matrix& PointBase::getJacobian() const
   {
     if (!m_jacobian.has_value())
-    {
-      assert(m_rc.has_value());
-      m_jacobian.emplace(m_trans.get().jacobian(m_rc.value()));
-    }
+      m_jacobian.emplace(m_trans.get().jacobian(getCoordinates(Coordinates::Reference)));
     assert(m_jacobian.has_value());
     return m_jacobian.value();
   }
 
-  const Math::Matrix& Point::getJacobianInverse() const
+  const Math::Matrix& PointBase::getJacobianInverse() const
   {
     if (!m_jacobianInverse.has_value())
     {
-      assert(m_rc.has_value());
       const size_t rdim = Polytope::getGeometryDimension(m_polytope.get().getGeometry());
       const size_t sdim = m_polytope.get().getMesh().getSpaceDimension();
       assert(rdim <= sdim);
@@ -178,7 +166,7 @@ namespace Rodin::Geometry
             const Scalar d = jac.coeff(1, 1);
             const Scalar det = a * d - b * c;
             m_jacobianDeterminant.emplace(det);
-            assert(det > 0);
+            assert(det != 0);
             Math::Matrix inv(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
@@ -213,7 +201,7 @@ namespace Rodin::Geometry
             const Scalar det = a * A + b * B + c * C;
             m_jacobianDeterminant.emplace(det);
 
-            assert(det > 0);
+            assert(det != 0);
             Math::Matrix inv(3, 3);
             inv.coeffRef(0, 0) = A / det;
             inv.coeffRef(0, 1) = D / det;
@@ -243,11 +231,10 @@ namespace Rodin::Geometry
     return m_jacobianInverse.value();
   }
 
-  Scalar Point::getJacobianDeterminant() const
+  Scalar PointBase::getJacobianDeterminant() const
   {
     if (!m_jacobianDeterminant.has_value())
     {
-      assert(m_rc.has_value());
       const auto& jac = getJacobian();
       const auto rows = jac.rows();
       const auto cols = jac.cols();
@@ -302,11 +289,10 @@ namespace Rodin::Geometry
     return m_jacobianDeterminant.value();
   }
 
-  Scalar Point::getDistortion() const
+  Scalar PointBase::getDistortion() const
   {
     if (!m_distortion.has_value())
     {
-      assert(m_rc.has_value());
       const auto& jac = getJacobian();
       const auto rows = jac.rows();
       const auto cols = jac.cols();
@@ -345,7 +331,7 @@ namespace Rodin::Geometry
     return m_distortion.value();
   }
 
-  size_t Point::getDimension(Coordinates coords) const
+  size_t PointBase::getDimension(Coordinates coords) const
   {
     switch (coords)
     {

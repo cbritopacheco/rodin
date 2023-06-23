@@ -116,6 +116,22 @@ namespace Rodin::Geometry
         return m_tracked[d].find(i);
       }
 
+      template <class Iterator>
+      inline
+      auto insert(Iterator&& it, const std::pair<size_t, Index>& p, const T& value)
+      {
+        auto [d, i] = p;
+        return m_tracked[d].insert(std::forward<Iterator>(it), { i, value });
+      }
+
+      template <class Iterator>
+      inline
+      auto insert(Iterator&& it, const std::pair<size_t, Index>& p, T&& value)
+      {
+        auto [d, i] = p;
+        return m_tracked[d].insert(std::forward<Iterator>(it), { i, std::move(value) });
+      }
+
       inline
       bool isTracked(size_t d, Index i) const
       {

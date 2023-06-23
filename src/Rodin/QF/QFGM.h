@@ -19,7 +19,7 @@ namespace Rodin::QF
    * Implements the Grundmann-Möller integration rules as described in
    * @cite grundmann1978invariant.
    */
-  class QFGM final : public QuadratureFormulaBase
+  class QFGM : public QuadratureFormulaBase
   {
     static std::vector<std::array<Math::Vector, RODIN_QFGM_MAX_ORDER>> initializeWeights();
     static std::vector<std::array<Math::Matrix, RODIN_QFGM_MAX_ORDER>> initializePoints();
@@ -49,22 +49,7 @@ namespace Rodin::QF
           m_degree(std::move(other.m_degree))
       {}
 
-      inline
-      const Math::Matrix& getPoints() const override
-      {
-        return s_points[Geometry::Polytope::getGeometryDimension(getGeometry())][m_degree];
-      }
-
-      inline
-      const Math::Vector& getWeights() const override
-      {
-        return s_weights[Geometry::Polytope::getGeometryDimension(getGeometry())][m_degree];
-      }
-
     private:
-      static const std::vector<std::array<Math::Vector, RODIN_QFGM_MAX_ORDER>> s_weights;
-      static const std::vector<std::array<Math::Matrix, RODIN_QFGM_MAX_ORDER>> s_points;
-
       const size_t m_degree;
   };
 }

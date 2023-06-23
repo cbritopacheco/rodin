@@ -307,8 +307,7 @@ namespace Rodin::Variational
        * where @f$ n @f$ is the number of trial degrees of freedom, and @f$ m
        * @f$ is the number of test degrees of freedom.
        */
-      inline
-      Math::Matrix getMatrix(const Geometry::Point& p) const
+      void assemble(const Geometry::Point& p)
       {
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
@@ -316,34 +315,35 @@ namespace Rodin::Variational
         static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto& trial = getLHS().getTensorBasis(p);
         const auto& test = getRHS().getTensorBasis(p);
-        Math::Matrix res(test.getDOFs(), trial.getDOFs());
+        m_matrix.resize(test.getDOFs(), trial.getDOFs());
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = test(i) * trial(j);
-          return res;
+              m_matrix(i, j) = test(i) * trial(j);
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = test(i).dot(trial(j));
-          return res;
+              m_matrix(i, j) = test(i).dot(trial(j));
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = (test(i).array() * trial(j).array()).rowwise().sum().colwise().sum().value();
-          return res;
+              m_matrix(i, j) = (test(i).array() * trial(j).array()).rowwise().sum().colwise().sum().value();
         }
         else
         {
           assert(false);
-          res.setConstant(NAN);
-          return res;
+          m_matrix.setConstant(NAN);
         }
+      }
+
+      const Math::Matrix& getMatrix() const
+      {
+        return m_matrix;
       }
 
       inline Dot* copy() const noexcept final override
@@ -354,6 +354,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHS> m_trial;
       std::unique_ptr<RHS> m_test;
+      Math::Matrix m_matrix;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

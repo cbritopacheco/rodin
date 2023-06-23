@@ -21,34 +21,17 @@ namespace Rodin::QF
       {}
 
       inline
-      size_t getSize() const
-      {
-        assert(getPoints().cols() == getWeights().size());
-        return getWeights().size();
-      }
-
-      inline
-      auto getPoint(size_t i) const
-      {
-        return getPoints().col(i);
-      }
-
-      inline
-      Scalar getWeight(size_t i) const
-      {
-        return getWeights().coeff(i);
-      }
-
-      inline
       constexpr
       Geometry::Polytope::Geometry getGeometry() const
       {
         return m_geometry;
       }
 
-      virtual const Math::Matrix& getPoints() const = 0;
+      virtual size_t getSize() const = 0;
 
-      virtual const Math::Vector& getWeights() const = 0;
+      virtual Scalar getWeight(size_t i) const = 0;
+
+      virtual const Math::Vector& getPoint(size_t i) const = 0;
 
     private:
       Geometry::Polytope::Geometry m_geometry;

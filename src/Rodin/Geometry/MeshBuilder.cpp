@@ -75,6 +75,7 @@ namespace Rodin::Geometry
   {
     m_attrs.reserve(d, count);
     m_connectivity.reserve(d, count);
+    m_transformations.reserve(d, count);
     return *this;
   }
 

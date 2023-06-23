@@ -39,14 +39,22 @@ namespace Rodin::QF
           m_order(std::move(other.m_order))
       {}
 
-      const Math::Matrix& getPoints() const override
+      inline
+      size_t getSize() const override
       {
-        return m_qf1p1.getPoints();
+        return m_qf1p1.getSize();
       }
 
-      const Math::Vector& getWeights() const override
+      inline
+      Scalar getWeight(size_t i) const override
       {
-        return m_qf1p1.getWeights();
+        return m_qf1p1.getWeight(i);
+      }
+
+      inline
+      const Math::Vector& getPoint(size_t i) const override
+      {
+        return m_qf1p1.getPoint(i);
       }
 
     private:

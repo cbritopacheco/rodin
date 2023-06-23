@@ -157,16 +157,18 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
         const size_t d = p.getPolytope().getDimension();
+        const auto& fes = this->getFiniteElementSpace();
         const Index i = p.getPolytope().getIndex();
-        const auto& fe = this->getFiniteElementSpace().getFiniteElement(d, i);
+        const auto& fe = fes.getFiniteElement(d, i);
         const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local)
-            { return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc)); });
+        Math::Matrix res(d, fe.getCount());
+        assert(res.cols() >= 0);
+        for (size_t local = 0; local < static_cast<size_t>(res.cols()); local++)
+          res.col(local) = fe.getGradient(local)(CacheResult, rc);
+        return TensorBasis<Math::Vector>(p.getJacobianInverse().transpose() * res);
       }
 
       inline Grad* copy() const noexcept override

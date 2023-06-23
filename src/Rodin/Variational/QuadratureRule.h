@@ -76,7 +76,7 @@ namespace Rodin::Variational
       {
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        auto& integrand = *m_prod;
         const auto& trial = integrand.getLHS();
         const auto& test = integrand.getRHS();
         const auto& trans = polytope.getTransformation();
@@ -90,8 +90,9 @@ namespace Rodin::Variational
         Math::Matrix res = Math::Matrix::Zero(test.getDOFs(polytope), trial.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)
         {
-          Geometry::Point p(polytope, trans, qf.getPoint(i));
-          res += qf.getWeight(i) * p.getDistortion() * integrand.getMatrix(p);
+          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          integrand.assemble(p);
+          res += qf.getWeight(i) * p.getDistortion() * integrand.getMatrix();
         }
         return res;
       }
@@ -163,7 +164,7 @@ namespace Rodin::Variational
         Math::Vector res = Math::Vector::Zero(integrand.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)
         {
-          Geometry::Point p(polytope, trans, qf.getPoint(i));
+          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
           res += qf.getWeight(i) * p.getDistortion() * integrand.getTensorBasis(p).getVector();
         }
         return res;

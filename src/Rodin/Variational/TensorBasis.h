@@ -272,8 +272,8 @@ namespace Rodin::Variational
 
       template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
       constexpr
-      TensorBasis(size_t dofs, size_t vdim, F&& f)
-        : m_data(vdim, dofs)
+      TensorBasis(size_t dim, size_t dofs, F&& f)
+        : m_data(dim, dofs)
       {
         assert(dofs > 0);
         for (size_t i = 0; i < dofs; i++)

@@ -8,6 +8,7 @@
 #define RODIN_GEOMETRY_SIMPLEX_H
 
 #include <set>
+#include <iostream>
 #include <array>
 #include <optional>
 
@@ -260,7 +261,7 @@ namespace Rodin::Geometry
   };
 
   /**
-   * @brief Represents a spatial point on a simplex.
+   * @brief Abstract class for spatial points on a discrete mesh.
    *
    * This class represents the tuple @f$ (x, r, p) @f$
    * such that:
@@ -278,7 +279,7 @@ namespace Rodin::Geometry
    *
    * @see PolytopeTransformation
    */
-  class Point
+  class PointBase
   {
     public:
       /// Denotes the type of coordinates.
@@ -288,32 +289,19 @@ namespace Rodin::Geometry
         Physical ///< Physical coordinates
       };
 
-      /**
-       * @brief Constructs the Point object from reference coordinates.
-       * @param[in] polytope Polytope to which the point belongs to.
-       * @param[in] rc Coordinates of the point in reference space.
-       */
-      Point(const Polytope& polytope, const PolytopeTransformation& trans, const Math::Vector& rc);
+      PointBase(const Polytope& polytope, const PolytopeTransformation& trans);
 
-      /**
-       * @brief Constructs the Point object from reference coordinates and
-       * precomputed physical coordinates.
-       * @param[in] polytope Polytope to which the point belongs to.
-       * @param[in] rc Coordinates of the point in reference space.
-       * @param[in] pc Coordinates of the point in physical space.
-       */
-      Point(const Polytope& simplex, const PolytopeTransformation& trans,
-          const Math::Vector& rc, const Math::Vector& pc);
+      PointBase(const Polytope& polytope, const PolytopeTransformation& trans, const Math::Vector& pc);
 
       /**
        * @brief Copy constructor.
        */
-      Point(const Point&) = default;
+      PointBase(const PointBase&) = default;
 
       /**
        * @brief Move constructor.
        */
-      Point(Point&&) = default;
+      PointBase(PointBase&&) = default;
 
       /**
        * @brief Gets the space dimension of the physical coordinates.
@@ -376,7 +364,7 @@ namespace Rodin::Geometry
        * @brief Lexicographical comparison.
        */
       inline
-      bool operator<(const Point& p) const
+      bool operator<(const PointBase& p) const
       {
         assert(getDimension() == p.getDimension());
         const Math::Vector& lhs = getCoordinates(Coordinates::Physical);
@@ -403,6 +391,8 @@ namespace Rodin::Geometry
         return m_trans.get();
       }
 
+      const Math::Vector& getPhysicalCoordinates() const;
+
       const Math::Vector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
       /**
@@ -425,16 +415,73 @@ namespace Rodin::Geometry
        */
       Scalar getDistortion() const;
 
+      virtual const Math::Vector& getReferenceCoordinates() const = 0;
+
     private:
       std::reference_wrapper<const Polytope> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
-      mutable std::optional<const Math::Vector> m_rc;
       mutable std::optional<const Math::Vector> m_pc;
       mutable std::optional<const Math::Matrix> m_jacobian;
       mutable std::optional<const Math::Matrix> m_jacobianInverse;
       mutable std::optional<const Scalar>       m_jacobianDeterminant;
       mutable std::optional<const Scalar>       m_distortion;
+  };
+
+  class Point final : public PointBase
+  {
+    public:
+      enum class Type
+      {
+        Data,
+        Reference
+      };
+
+      Point(const Polytope& polytope, const PolytopeTransformation& trans, const Math::Vector& rc)
+        : PointBase(polytope, trans), m_type(Type::Data), m_rc(rc)
+      {}
+
+      explicit
+      Point(const Polytope& polytope, const PolytopeTransformation& trans, std::reference_wrapper<const Math::Vector> rc)
+        : PointBase(polytope, trans), m_type(Type::Reference), m_rc(rc)
+      {}
+
+      Point(const Point& other)
+        : PointBase(other),
+          m_type(other.m_type),
+          m_rc(other.m_rc)
+      {}
+
+      Point(Point&& other)
+        : PointBase(std::move(other)),
+          m_type(other.m_type),
+          m_rc(std::move(other.m_rc))
+      {}
+
+      inline
+      constexpr
+      bool holds(Type t) const
+      {
+        return m_type == t;
+      }
+
+      inline
+      const Math::Vector& getReferenceCoordinates() const override
+      {
+        if (holds(Type::Data))
+        {
+          return std::get<const Math::Vector>(m_rc);
+        }
+        else
+        {
+          assert(holds(Type::Reference));
+          return std::get<std::reference_wrapper<const Math::Vector>>(m_rc);
+        }
+      }
+
+    private:
+      const Type m_type;
+      std::variant<const Math::Vector, std::reference_wrapper<const Math::Vector>> m_rc;
   };
 
   inline
