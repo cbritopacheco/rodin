@@ -104,14 +104,12 @@ namespace Rodin::Variational
 
       P1(const P1& other)
         : Parent(other),
-          m_mesh(other.m_mesh),
-          m_elements(other.m_elements)
+          m_mesh(other.m_mesh)
       {}
 
       P1(P1&& other)
         : Parent(std::move(other)),
-          m_mesh(other.m_mesh),
-          m_elements(other.m_elements)
+          m_mesh(other.m_mesh)
       {}
 
       P1& operator=(P1&& other) = default;
@@ -119,7 +117,7 @@ namespace Rodin::Variational
       inline
       const ScalarP1Element& getFiniteElement(size_t d, Index i) const
       {
-        return m_elements[d][i];
+        return s_elements[getMesh().getGeometry(d, i)];
       }
 
       inline
@@ -181,7 +179,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
-      std::vector<std::vector<P1Element<Scalar>>> m_elements;
+      static const Geometry::GeometryIndexed<P1Element<Scalar>> s_elements;
   };
 
   template <class Context>

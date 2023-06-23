@@ -122,6 +122,7 @@ namespace Rodin::Variational
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
+            m_cache.reserve(64);
           }
 
           GradientFunction(const GradientFunction&) = default;
@@ -142,6 +143,9 @@ namespace Rodin::Variational
       };
 
       constexpr
+      P1Element() = default;
+
+      constexpr
       P1Element(Geometry::Polytope::Geometry geometry)
         : Parent(geometry)
       {}
@@ -155,6 +159,20 @@ namespace Rodin::Variational
       P1Element(P1Element&& other)
         : Parent(std::move(other))
       {}
+
+      constexpr
+      P1Element& operator=(const P1Element& other)
+      {
+        Parent::operator=(other);
+        return *this;
+      }
+
+      constexpr
+      P1Element& operator=(P1Element&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
