@@ -238,3 +238,200 @@ namespace Rodin::Variational
   }
 }
 
+
+namespace Rodin::Variational
+{
+  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::Vector& r) const
+  {
+    switch (m_g)
+    {
+      case Geometry::Polytope::Geometry::Point:
+        return 1;
+      case Geometry::Polytope::Geometry::Segment:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return 1 - r.x();
+          case 1:
+            return r.x();
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Triangle:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return -r.x() - r.y() + 1;
+          case 1:
+            return r.x();
+          case 2:
+            return r.y();
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Quadrilateral:
+      {
+        switch (m_i)
+        {
+          case 0:
+          {
+            auto x = r.x();
+            auto y = r.y();
+            return x * y - x - y + 1;
+          }
+          case 1:
+            return r.x() * (1 - r.y());
+          case 2:
+            return r.y() * (1 - r.x());
+          case 3:
+            return r.x() * r.y();
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Tetrahedron:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return r.x() - r.y() - r.z() + 1;
+          case 1:
+            return r.x();
+          case 2:
+            return r.y();
+          case 3:
+            return r.z();
+          default:
+          {
+            assert(false);
+            return NAN;
+          }
+        }
+      }
+    }
+    assert(false);
+    return NAN;
+  }
+
+  const Scalar& P1Element<Scalar>::BasisFunction::operator()(CacheResultType, const Math::Vector& r) const
+  {
+    auto it = m_cache.find(&r);
+    if (it == m_cache.end())
+    {
+      auto rit = m_cache.insert(it, { &r, operator()(r) });
+      return rit->second;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+
+  Math::Vector P1Element<Scalar>::GradientFunction::operator()(const Math::Vector& r) const
+  {
+    switch (m_g)
+    {
+      case Geometry::Polytope::Geometry::Point:
+        return Math::Vector{{0}};
+      case Geometry::Polytope::Geometry::Segment:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return Math::Vector{{-1}};
+          case 1:
+            return Math::Vector{{1}};
+          default:
+          {
+            assert(false);
+            return Math::Vector{{NAN}};
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Triangle:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return Math::Vector{{-1, -1}};
+          case 1:
+            return Math::Vector{{1, 0}};
+          case 2:
+            return Math::Vector{{0, 1}};
+          default:
+          {
+            assert(false);
+            return Math::Vector{{NAN, NAN}};
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Quadrilateral:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return Math::Vector{{r.y() - 1, r.x() - 1}};
+          case 1:
+            return Math::Vector{{1 - r.y(), -r.y()}};
+          case 2:
+            return Math::Vector{{1 - r.x(), -r.x()}};
+          case 3:
+            return Math::Vector{{r.y(), r.x()}};
+          default:
+          {
+            assert(false);
+            return Math::Vector{{NAN, NAN}};
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Tetrahedron:
+      {
+        switch (m_i)
+        {
+          case 0:
+            return Math::Vector{{-1, -1, -1}};
+          case 1:
+            return Math::Vector{{1, 0, 0}};
+          case 2:
+            return Math::Vector{{0, 1, 0}};
+          case 3:
+            return Math::Vector{{0, 0, 1}};
+          default:
+          {
+            assert(false);
+            return Math::Vector{{NAN, NAN, NAN}};
+          }
+        }
+      }
+    }
+    assert(false);
+    return Math::Vector{{}};
+  }
+
+  const Math::Vector& P1Element<Scalar>::GradientFunction::operator()(CacheResultType, const Math::Vector& r) const
+  {
+    auto it = m_cache.find(&r);
+    if (it == m_cache.end())
+    {
+      auto rit = m_cache.insert(it, { &r, operator()(r) });
+      return rit->second;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+}

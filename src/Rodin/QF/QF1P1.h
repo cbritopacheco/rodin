@@ -15,18 +15,26 @@ namespace Rodin::QF
         : Parent(g)
       {}
 
-      const Math::Matrix& getPoints() const override
+      inline
+      size_t getSize() const override
       {
-        return s_points[getGeometry()];
+        return s_weights[getGeometry()].size();
       }
 
-      const Math::Vector& getWeights() const override
+      inline
+      const Math::Vector& getPoint(size_t i) const override
       {
-        return s_weights[getGeometry()];
+        return s_points[getGeometry()][i];
+      }
+
+      inline
+      Scalar getWeight(size_t i) const override
+      {
+        return s_weights[getGeometry()].coeff(i);
       }
 
     private:
-      static const Geometry::GeometryIndexed<Math::Matrix> s_points;
+      static const Geometry::GeometryIndexed<std::vector<Math::Vector>> s_points;
       static const Geometry::GeometryIndexed<Math::Vector> s_weights;
   };
 }

@@ -79,35 +79,50 @@ namespace Rodin::Variational
     {
       for (auto& dbc : m_dbcs)
       {
-         dbc.assemble();
-         const auto& dofs = dbc.getDOFs();
+        dbc.assemble();
+        const auto& dofs = dbc.getDOFs();
 
-         // Move essential degrees of freedom in the LHS to the RHS
-         for (const auto& kv : dofs)
-         {
-            const Index& global = kv.first;
-            const auto& dof = kv.second;
-            for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
-               mass.coeffRef(it.row()) -= it.value() * dof;
-         }
-
-         // Impose essential degrees of freedom on both sides
-         for (const auto& kv : dofs)
-         {
+        // Move essential degrees of freedom in the LHS to the RHS
+        for (const auto& kv : dofs)
+        {
            const Index& global = kv.first;
            const auto& dof = kv.second;
+           for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
+              mass.coeffRef(it.row()) -= it.value() * dof;
+        }
 
-            // Set essential DOF in the LHS
-            mass.coeffRef(global) = dof;
+        // Impose essential degrees of freedom on RHS
+        for (const auto& kv : dofs)
+        {
+          const Index& global = kv.first;
+          const auto& dof = kv.second;
+          mass.coeffRef(global) = dof;
 
-            // Diagonalize the DOF in the RHS
-            stiffness.row(global) *= 0;
-            for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
+          auto innerIndices = stiffness.innerIndexPtr();
+          auto outerIndices = stiffness.outerIndexPtr();
+          assert(stiffness.rows() >= 0);
+          // Set row to zero
+          for (size_t i = 0; i < static_cast<size_t>(stiffness.rows()); i++)
+          {
+            // Find the position of the column in the current row
+            for (Math::SparseMatrix::StorageIndex j = outerIndices[i]; j < outerIndices[i + 1]; j++)
             {
-              assert(it.row() >= 0);
-              it.valueRef() = Scalar(static_cast<size_t>(it.row()) == global);
+              assert(innerIndices[j] >= 0);
+              if (static_cast<size_t>(innerIndices[j]) == global)
+              {
+                stiffness.valuePtr()[j] = 0.0;
+                break;
+              }
             }
-         }
+          }
+
+          // Set column to zero, diagonal to 1.
+          for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
+          {
+            assert(it.row() >= 0);
+            it.valueRef() = Scalar(static_cast<size_t>(it.row()) == global);
+          }
+        }
       }
     }
     else

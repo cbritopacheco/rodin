@@ -92,218 +92,53 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          constexpr
           BasisFunction(size_t i, Geometry::Polytope::Geometry g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
           }
 
-          constexpr
           BasisFunction(const BasisFunction&) = default;
 
-          constexpr
           BasisFunction& operator=(const BasisFunction&) = default;
 
-          constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          inline
-          constexpr
-          Scalar operator()(const Math::Vector& r) const
-          {
-            switch (m_g)
-            {
-              case Geometry::Polytope::Geometry::Point:
-                return 1;
-              case Geometry::Polytope::Geometry::Segment:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return 1 - r.x();
-                  case 1:
-                    return r.x();
-                  default:
-                  {
-                    assert(false);
-                    return NAN;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Triangle:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return -r.x() - r.y() + 1;
-                  case 1:
-                    return r.x();
-                  case 2:
-                    return r.y();
-                  default:
-                  {
-                    assert(false);
-                    return NAN;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Quadrilateral:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                  {
-                    auto x = r.x();
-                    auto y = r.y();
-                    return x * y - x - y + 1;
-                  }
-                  case 1:
-                    return r.x() * (1 - r.y());
-                  case 2:
-                    return r.y() * (1 - r.x());
-                  case 3:
-                    return r.x() * r.y();
-                  default:
-                  {
-                    assert(false);
-                    return NAN;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Tetrahedron:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return r.x() - r.y() - r.z() + 1;
-                  case 1:
-                    return r.x();
-                  case 2:
-                    return r.y();
-                  case 3:
-                    return r.z();
-                  default:
-                  {
-                    assert(false);
-                    return NAN;
-                  }
-                }
-              }
-            }
-            assert(false);
-            return NAN;
-          }
+          Scalar operator()(const Math::Vector& r) const;
+
+          const Scalar& operator()(CacheResultType, const Math::Vector& r) const;
 
         private:
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
+
+          mutable FlatMap<const Math::Vector*, Scalar> m_cache;
       };
 
       class GradientFunction
       {
         public:
-          constexpr
           GradientFunction(size_t i, Geometry::Polytope::Geometry g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
           }
 
-          constexpr
           GradientFunction(const GradientFunction&) = default;
 
-          constexpr
           GradientFunction& operator=(const GradientFunction&) = default;
 
-          constexpr
           GradientFunction& operator=(GradientFunction&&) = default;
 
-          inline
-          Math::Vector operator()(const Math::Vector& r) const
-          {
-            switch (m_g)
-            {
-              case Geometry::Polytope::Geometry::Point:
-                return Math::Vector{{0}};
-              case Geometry::Polytope::Geometry::Segment:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return Math::Vector{{-1}};
-                  case 1:
-                    return Math::Vector{{1}};
-                  default:
-                  {
-                    assert(false);
-                    return Math::Vector{{NAN}};
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Triangle:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return Math::Vector{{-1, -1}};
-                  case 1:
-                    return Math::Vector{{1, 0}};
-                  case 2:
-                    return Math::Vector{{0, 1}};
-                  default:
-                  {
-                    assert(false);
-                    return Math::Vector{{NAN, NAN}};
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Quadrilateral:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return Math::Vector{{r.y() - 1, r.x() - 1}};
-                  case 1:
-                    return Math::Vector{{1 - r.y(), -r.y()}};
-                  case 2:
-                    return Math::Vector{{1 - r.x(), -r.x()}};
-                  case 3:
-                    return Math::Vector{{r.y(), r.x()}};
-                  default:
-                  {
-                    assert(false);
-                    return Math::Vector{{NAN, NAN}};
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Tetrahedron:
-              {
-                switch (m_i)
-                {
-                  case 0:
-                    return Math::Vector{{-1, -1, -1}};
-                  case 1:
-                    return Math::Vector{{1, 0, 0}};
-                  case 2:
-                    return Math::Vector{{0, 1, 0}};
-                  case 3:
-                    return Math::Vector{{0, 0, 1}};
-                  default:
-                  {
-                    assert(false);
-                    return Math::Vector{{NAN, NAN, NAN}};
-                  }
-                }
-              }
-            }
-            assert(false);
-            return Math::Vector{{}};
-          }
+          Math::Vector operator()(const Math::Vector& r) const;
+
+          const Math::Vector& operator()(CacheResultType, const Math::Vector& r) const;
 
         private:
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
+
+          mutable FlatMap<const Math::Vector*, Math::Vector> m_cache;
       };
 
       constexpr

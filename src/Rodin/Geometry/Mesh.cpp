@@ -97,10 +97,11 @@ namespace Rodin::Geometry
   const PolytopeTransformation&
   Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
-    if (m_transformations.isTracked(dimension, idx))
+    auto it = m_transformations.find(dimension, idx);
+    if (it != m_transformations.end(dimension))
     {
       assert(m_transformations.at(dimension, idx));
-      return *m_transformations.at(dimension, idx);
+      return *it->second;
     }
     else
     {
@@ -119,8 +120,8 @@ namespace Rodin::Geometry
       auto trans =
         std::unique_ptr<PolytopeTransformation>(
             new IsoparametricTransformation(std::move(pm), std::move(fe)));
-      m_transformations.track(dimension, idx, std::move(trans));
-      return *m_transformations.at(dimension, idx);
+      auto p = m_transformations.insert(it, {dimension, idx}, std::move(trans));
+      return *p->second;
     }
   }
 
