@@ -7,8 +7,6 @@
 
 namespace Rodin::Geometry
 {
-  using Index = std::size_t;
-
   using Attribute = std::size_t;
 
   using Incidence = std::vector<IndexSet>;

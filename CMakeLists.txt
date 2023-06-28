@@ -56,6 +56,8 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
     OPTIONS
     -w
     -O3
+    -flto
+    -DNDEBUG
     -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(

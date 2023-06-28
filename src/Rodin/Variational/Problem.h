@@ -154,30 +154,6 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
-      constexpr
-      LinearForm<TestFES, Context, VectorType>& getLinearForm()
-      {
-        return m_linearForm;
-      }
-
-      constexpr
-      BilinearForm<TrialFES, TestFES, Context, OperatorType>& getBilinearForm()
-      {
-        return m_bilinearForm;
-      }
-
-      constexpr
-      const LinearForm<TestFES, Context, VectorType>& getLinearForm() const
-      {
-        return m_linearForm;
-      }
-
-      constexpr
-      const BilinearForm<TrialFES, TestFES, Context, OperatorType>& getBilinearForm() const
-      {
-        return m_bilinearForm;
-      }
-
       void assemble() override;
 
       void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) override;
@@ -186,22 +162,22 @@ namespace Rodin::Variational
 
       virtual VectorType& getMassVector() override
       {
-        return m_linearForm.getVector();
+        return m_mass;
       }
 
       virtual const VectorType& getMassVector() const override
       {
-        return m_linearForm.getVector();
+        return m_mass;
       }
 
       virtual OperatorType& getStiffnessOperator() override
       {
-        return m_bilinearForm.getOperator();
+        return m_stiffness;
       }
 
       virtual const OperatorType& getStiffnessOperator() const override
       {
-        return m_bilinearForm.getOperator();
+        return m_stiffness;
       }
 
       virtual Problem* copy() const noexcept override
@@ -215,11 +191,13 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
       LinearForm<TestFES, Context, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, Context, OperatorType> m_bilinearForm;
+      BilinearForm<TrialFES, TestFES, Context, Math::SparseMatrix> m_bilinearForm;
       EssentialBoundary m_dbcs;
 
       bool m_assembled;
+      VectorType      m_mass;
       VectorType      m_guess;
+      OperatorType    m_stiffness;
 
   };
 }

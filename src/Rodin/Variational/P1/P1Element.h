@@ -18,6 +18,8 @@
  */
 #define RODIN_P1_MAX_VECTOR_DIMENSION 16
 
+#define RODIN_P1_CACHE_SIZE 8
+
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
@@ -96,6 +98,7 @@ namespace Rodin::Variational
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
+            m_cache.reserve(RODIN_P1_CACHE_SIZE);
           }
 
           BasisFunction(const BasisFunction&) = default;
@@ -112,7 +115,7 @@ namespace Rodin::Variational
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
 
-          mutable FlatMap<const Math::Vector*, Scalar> m_cache;
+          mutable UnorderedMap<const Math::Vector*, Scalar> m_cache;
       };
 
       class GradientFunction
@@ -122,7 +125,7 @@ namespace Rodin::Variational
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
-            m_cache.reserve(64);
+            m_cache.reserve(RODIN_P1_CACHE_SIZE);
           }
 
           GradientFunction(const GradientFunction&) = default;
@@ -139,7 +142,7 @@ namespace Rodin::Variational
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
 
-          mutable FlatMap<const Math::Vector*, Math::Vector> m_cache;
+          mutable UnorderedMap<const Math::Vector*, Math::Vector> m_cache;
       };
 
       constexpr

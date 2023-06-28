@@ -100,7 +100,7 @@ namespace Rodin::Geometry
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           assert(res.size() == m_pm.col(local).size());
-          res += m_pm.col(local) * m_fe.getBasis(local)(rc);
+          res.noalias() += m_pm.col(local) * m_fe.getBasis(local)(rc);
         }
         return res;
       }
@@ -115,7 +115,7 @@ namespace Rodin::Geometry
           for (size_t i = 0; i < m_rdim; i++)
           {
             assert(res.col(i).size() == m_pm.col(local).size());
-            res.col(i) += m_pm.col(local) * gradient.coeff(i);
+            res.col(i).noalias() += m_pm.col(local) * gradient.coeff(i);
           }
         }
         return res;

@@ -182,7 +182,7 @@ namespace Rodin::Variational
   }
 
   template <>
-  class UnaryMinus<LinearFormIntegratorBase> : public LinearFormIntegratorBase
+  class UnaryMinus<LinearFormIntegratorBase> final : public LinearFormIntegratorBase
   {
     public:
       using Parent = LinearFormIntegratorBase;
@@ -196,7 +196,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      Math::Vector getVector(const Geometry::Polytope& element) const override;
+      void assemble(const Geometry::Polytope& element) override;
 
       UnaryMinus* copy() const noexcept override
       {
@@ -222,7 +222,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      Math::Matrix getMatrix(const Geometry::Polytope& element) const override;
+      void assemble(const Geometry::Polytope& element) override;
 
       UnaryMinus* copy() const noexcept override
       {

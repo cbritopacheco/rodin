@@ -19,6 +19,9 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 256, 256);
   mesh.getConnectivity().compute(1, 2);
 
+  for (size_t i = 0; i < mesh.getElementCount(); i++)
+    mesh.getPolytopeTransformation(2, i);
+
   // Functions
   P1 vh(mesh);
 

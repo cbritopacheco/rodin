@@ -37,6 +37,12 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      FormLanguage::List<LinearFormIntegratorBase>& getIntegrators()
+      {
+        return m_lfis;
+      }
+
+      constexpr
       const FormLanguage::List<LinearFormIntegratorBase>& getIntegrators() const
       {
         return m_lfis;

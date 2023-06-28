@@ -30,11 +30,13 @@ namespace Rodin::Variational
     return m_op->getRegion();
   }
 
-  Math::Vector
-  UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Polytope& simplex)
-  const
+  void
+  UnaryMinus<LinearFormIntegratorBase>::assemble(const Geometry::Polytope& polytope)
   {
-    return -1.0 * m_op->getVector(simplex);
+    m_op->assemble(polytope);
+    auto& res = getVector();
+    res = std::move(m_op->getVector());
+    res *= -1.0;
   }
 
   UnaryMinus<LinearFormIntegratorBase>
@@ -65,11 +67,12 @@ namespace Rodin::Variational
     return m_op->getRegion();
   }
 
-  Math::Matrix
-  UnaryMinus<BilinearFormIntegratorBase>
-  ::getMatrix(const Geometry::Polytope& element) const
+  void UnaryMinus<BilinearFormIntegratorBase>::assemble(const Geometry::Polytope& element)
   {
-    return -1.0 * m_op->getMatrix(element);
+    m_op->assemble(element);
+    auto& res = getMatrix();
+    res = std::move(m_op->getMatrix());
+    res *= -1.0;
   }
 
   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)

@@ -7,8 +7,10 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include "Rodin/Math/SparseMatrix.h"
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
@@ -46,6 +48,12 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly)),
           m_bfis(std::move(other.m_bfis))
       {}
+
+      constexpr
+      FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators()
+      {
+        return m_bfis;
+      }
 
       constexpr
       const FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators() const
@@ -290,6 +298,109 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
     -> BilinearForm<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix>;
+
+  template <class TrialFES, class TestFES>
+  class BilinearForm<TrialFES, TestFES, Context::Serial, std::vector<Eigen::Triplet<Scalar>>> final
+    : public BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>
+  {
+    static_assert(
+        std::is_same_v<TrialFES, TestFES>,
+        "Different trial and test spaces are currently not supported.");
+
+    static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
+
+    public:
+      /// Context of BilinearForm
+      using Context = typename TrialFES::Context;
+
+      /// Type of operator associated to the bilinear form
+      using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
+
+      /// Parent class
+      using Parent = BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>;
+
+      /**
+       * @brief Constructs a BilinearForm from a TrialFunction and
+       * TestFunction.
+       *
+       * @param[in] u Trial function argument
+       * @param[in] v Test function argument
+       */
+      constexpr
+      BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+        :  m_u(u), m_v(v)
+      {}
+
+      constexpr
+      BilinearForm(const BilinearForm& other)
+        : Parent(other),
+          m_u(other.m_u), m_v(other.m_v)
+      {}
+
+      constexpr
+      BilinearForm(BilinearForm&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_operator(std::move(other.m_operator))
+      {}
+
+      void assemble() override;
+
+      const TrialFunction<TrialFES>& getTrialFunction() const override
+      {
+        return m_u.get();
+      }
+
+      const TestFunction<TestFES>& getTestFunction() const override
+      {
+        return m_v.get();
+      }
+
+      BilinearForm& operator=(const BilinearFormIntegratorBase& bfi) override
+      {
+        from(bfi).assemble();
+        return *this;
+      }
+
+      /**
+       * @todo
+       */
+      BilinearForm& operator=(
+          const FormLanguage::List<BilinearFormIntegratorBase>& bfis) override
+      {
+        from(bfis).assemble();
+        return *this;
+      }
+
+      /**
+       * @brief Gets the reference to sparse matrix.
+       * @returns Reference to the associated sparse matrix.
+       */
+      virtual OperatorType& getOperator() override
+      {
+        return m_operator;
+      }
+
+      /**
+       * @brief Gets the reference to the (local) associated sparse matrix
+       * to the bilinear form.
+       * @returns Constant reference to the associated sparse matrix.
+       */
+      virtual const OperatorType& getOperator() const override
+      {
+        return m_operator;
+      }
+
+      virtual BilinearForm* copy() const noexcept override
+      {
+        return new BilinearForm(*this);
+      }
+
+    private:
+      std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
+      std::reference_wrapper<const TestFunction<TestFES>>   m_v;
+      OperatorType m_operator;
+  };
 }
 
 #include "BilinearForm.hpp"

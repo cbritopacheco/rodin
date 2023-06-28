@@ -320,11 +320,11 @@ namespace Rodin::Geometry
         {
           case Coordinates::Physical:
           {
-            return getCoordinates(Coordinates::Physical)(i);
+            return getPhysicalCoordinates()(i);
           }
           case Coordinates::Reference:
           {
-            return getCoordinates(Coordinates::Reference)(i);
+            return getReferenceCoordinates()(i);
           }
         }
         return NAN;

@@ -56,7 +56,8 @@ namespace Rodin::Variational
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_attrs(other.m_attrs)
+          m_attrs(other.m_attrs),
+          m_matrix(other.m_matrix)
       {}
 
       /**
@@ -65,7 +66,8 @@ namespace Rodin::Variational
       BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs))
+          m_attrs(std::move(other.m_attrs)),
+          m_matrix(std::move(other.m_matrix))
       {}
 
       virtual
@@ -134,19 +136,32 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
+      inline
+      const Math::Matrix& getMatrix() const
+      {
+        return m_matrix;
+      }
+
+      /**
+       * @returns The element matrix of size of @f$ m \times n @f$ where @f$ n
+       * @f$ (resp. @f$ m @f$) denotes the number of degrees of freedom on the
+       * polytope for the test (trial) space.
+       */
+      inline
+      Math::Matrix& getMatrix()
+      {
+        return m_matrix;
+      }
+
       /**
        * @brief Performs the assembly of the element matrix for the given
        * element.
        *
-       * Assembles the stiffness matrix of the given element. The 
+       * Assembles the stiffness matrix of the given element.
        *
-       * @returns A matrix of size of @f$ m \times n @f$ where @f$ n @f$
-       * (resp. @f$ m @f$)
-       * denotes the number of degrees of freedom on the polytope for the test
-       * (trial) space.
        */
       virtual
-      Math::Matrix getMatrix(const Geometry::Polytope& polytope) const = 0;
+      void assemble(const Geometry::Polytope& polytope) = 0;
 
       virtual
       BilinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -155,6 +170,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const FormLanguage::Base> m_u;
       std::reference_wrapper<const FormLanguage::Base> m_v;
       std::set<Geometry::Attribute> m_attrs;
+      Math::Matrix m_matrix;
   };
 }
 

@@ -38,15 +38,19 @@ namespace Rodin::Geometry
   class PolytopeTransformation
   {
     public:
+      PolytopeTransformation() = default;
+
+      PolytopeTransformation(const PolytopeTransformation& other)
+        : m_transform(other.m_transform),
+          m_jacobian(other.m_jacobian)
+      {}
+
+      PolytopeTransformation(PolytopeTransformation&& other)
+        : m_transform(std::move(other.m_transform)),
+          m_jacobian(std::move(other.m_jacobian))
+      {}
 
       virtual ~PolytopeTransformation() = default;
-
-      inline
-      virtual Scalar distortion(const Math::Vector& rc) const
-      {
-        const auto jac = jacobian(rc);
-        return Math::sqrt(Math::abs((jac.transpose() * jac).determinant()));
-      }
 
       /**
        * @brief Computes the physical coordinates of the given reference point.
@@ -62,6 +66,21 @@ namespace Rodin::Geometry
        * physical dimension.
        */
       virtual Math::Vector transform(const Math::Vector& rc) const = 0;
+
+      inline
+      const Math::Vector& transform(CacheResultType, const Math::Vector& rc) const
+      {
+        auto it = m_transform.find(&rc);
+        if (it == m_transform.end())
+        {
+          auto rit = m_transform.insert(it, { &rc, transform(rc) });
+          return rit->second;
+        }
+        else
+        {
+          return it->second;
+        }
+      }
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -82,6 +101,21 @@ namespace Rodin::Geometry
        */
       virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
 
+      inline
+      const Math::Matrix& jacobian(CacheResultType, const Math::Vector& rc) const
+      {
+        auto it = m_jacobian.find(&rc);
+        if (it == m_jacobian.end())
+        {
+          auto rit = m_jacobian.insert(it, { &rc, jacobian(rc) });
+          return rit->second;
+        }
+        else
+        {
+          return it->second;
+        }
+      }
+
       /**
        * @brief Computes the reference coordinates of the given physical point.
        *
@@ -98,6 +132,10 @@ namespace Rodin::Geometry
         assert(false); // Not implemented
         return Math::Vector::Zero(0);
       }
+
+    private:
+      mutable UnorderedMap<const Math::Vector*, Math::Vector> m_transform;
+      mutable UnorderedMap<const Math::Vector*, Math::Matrix> m_jacobian;
   };
 }
 
