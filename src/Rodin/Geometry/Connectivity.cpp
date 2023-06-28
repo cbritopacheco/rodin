@@ -91,7 +91,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  const MeshConnectivity::IndexMap& MeshConnectivity::getIndexMap(size_t dim) const
+  const FlatMap<IndexSet, Index>& MeshConnectivity::getIndexMap(size_t dim) const
   {
     return m_index[dim];
   }
@@ -112,7 +112,7 @@ namespace Rodin::Geometry
     return m_connectivity[d][dp];
   }
 
-  const FlatSet<Index>& MeshConnectivity::getIncidence(
+  const IndexSet& MeshConnectivity::getIncidence(
       const std::pair<size_t, size_t> p, Index idx) const
   {
     const auto& [d, dp] = p;

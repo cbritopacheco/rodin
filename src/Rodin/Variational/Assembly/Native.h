@@ -14,6 +14,43 @@
 
 namespace Rodin::Variational::Assembly
 {
+  template <>
+  class Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+    : public AssemblyBase<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+  {
+    /**
+     * @internal
+     */
+    static void add(
+        std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
+        const IndexArray& rows, const IndexArray& cols);
+
+    public:
+      using Parent = AssemblyBase<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>;
+      using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
+
+      Native() = default;
+
+      Native(const Native& other)
+        : Parent(other)
+      {}
+
+      Native(Native&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Executes the assembly and returns the linear operator
+       * associated to the bilinear form.
+       */
+      OperatorType execute(const BilinearAssemblyInput& input) const override;
+
+      Native* copy() const noexcept override
+      {
+        return new Native(*this);
+      }
+  };
+
   /**
    * @brief Native assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
@@ -22,15 +59,6 @@ namespace Rodin::Variational::Assembly
   class Native<BilinearFormBase<Math::SparseMatrix>>
     : public AssemblyBase<BilinearFormBase<Math::SparseMatrix>>
   {
-    using Triplet = Eigen::Triplet<Scalar>;
-
-    /**
-     * @internal
-     */
-    static void add(
-        std::vector<Triplet>& out, const Math::Matrix& in,
-        const IndexArray& rows, const IndexArray& cols);
-
     public:
       using Parent = AssemblyBase<BilinearFormBase<Math::SparseMatrix>>;
       using OperatorType = Math::SparseMatrix;
@@ -49,7 +77,7 @@ namespace Rodin::Variational::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      OperatorType execute(const Input& input) const override;
+      OperatorType execute(const BilinearAssemblyInput& input) const override;
 
       Native* copy() const noexcept override
       {

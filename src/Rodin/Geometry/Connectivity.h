@@ -33,8 +33,6 @@ namespace Rodin::Geometry
   class MeshConnectivity
   {
     public:
-      using IndexMap = FlatMap<IndexSet, Index>;
-
       struct SubPolytope
       {
         Polytope::Geometry geometry;
@@ -79,7 +77,7 @@ namespace Rodin::Geometry
 
       size_t getMeshDimension() const;
 
-      const IndexMap& getIndexMap(size_t dim) const;
+      const FlatMap<IndexSet, Index>& getIndexMap(size_t dim) const;
 
       const std::optional<Index> getIndex(size_t dim, const IndexSet& key) const;
 
@@ -113,7 +111,7 @@ namespace Rodin::Geometry
 
       std::vector<size_t> m_count;
       FlatMap<Polytope::Geometry, size_t> m_gcount;
-      std::vector<IndexMap> m_index;
+      std::vector<FlatMap<IndexSet, Index>> m_index;
       std::vector<std::vector<Incidence>> m_connectivity;
   };
 }

@@ -289,7 +289,11 @@ namespace Rodin::Geometry
       virtual void flush() = 0;
   };
 
-  using SerialMesh = Mesh<Context::Serial>;
+  using BoundaryIndex = IndexSet;
+
+  using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
+
+  using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
 
   /**
   * @brief Represents the subdivision of some domain into faces of (possibly)
@@ -299,9 +303,6 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
-      using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
-      using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
-
       class Builder
       {
         public:
@@ -353,8 +354,10 @@ namespace Rodin::Geometry
         private:
           size_t m_sdim;
           size_t m_nodes;
-          MeshConnectivity m_connectivity;
+
           Math::Matrix m_vertices;
+          MeshConnectivity m_connectivity;
+
           AttributeIndex m_attrs;
           TransformationIndex m_transformations;
       };
@@ -531,12 +534,13 @@ namespace Rodin::Geometry
       PolytopeIndexed<Geometry::Attribute> m_attrs;
       std::vector<std::set<Attribute>> m_attributes;
 
-      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
-
+      Math::Matrix m_vertices;
       MeshConnectivity m_connectivity;
 
-      Math::Matrix m_vertices;
+      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
   };
+
+  using SerialMesh = Mesh<Context::Serial>;
 }
 
 #include "Mesh.hpp"

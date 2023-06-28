@@ -4,6 +4,8 @@
 #include <cstddef>
 
 #include <boost/unordered_map.hpp>
+#include <boost/container/map.hpp>
+#include <boost/unordered_set.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 
@@ -33,6 +35,10 @@ namespace Rodin
   /// Standard flat set type.
   template <class T>
   using FlatSet = boost::container::flat_set<T>;
+
+  /// Standard unordered set type.
+  template <class T>
+  using UnorderedSet = boost::unordered_set<T>;
 
   /// Standard ordered map type.
   template <class K, class T>

@@ -133,16 +133,8 @@ namespace Rodin::Geometry
   class IteratorIndexGenerator : public IndexGeneratorBase
   {
     public:
-      IteratorIndexGenerator(const Iterator& it, const Iterator& end)
+      IteratorIndexGenerator(Iterator it, Iterator end)
         : m_it(it), m_end(end)
-      {}
-
-      IteratorIndexGenerator(const Iterator& it, size_t count)
-        : m_it(it), m_end(it + count)
-      {}
-
-      IteratorIndexGenerator(Iterator&& it, Iterator&& end)
-        : m_it(std::move(it)), m_end(std::move(end))
       {}
 
       IteratorIndexGenerator(IteratorIndexGenerator&& other)

@@ -1,6 +1,15 @@
 if (RODIN_BUILD_EXAMPLES)
   if (${CMAKE_BUILD_TYPE} MATCHES Release)
-    # No new flags to add
+    rodin_add_compile_options(
+      LANG CXX
+      OPTIONS
+      -flto
+      -msse2
+      -march=native
+      -fvectorize
+      -fslp-vectorize
+      -ffp-contract=fast
+      -fcolor-diagnostics)
   elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     rodin_add_compile_options(
       LANG CXX

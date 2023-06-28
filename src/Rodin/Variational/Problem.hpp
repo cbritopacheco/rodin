@@ -42,14 +42,32 @@ namespace Rodin::Variational
   ::operator=(const ProblemBody& rhs)
   {
     for (auto& bfi : rhs.getBFIs())
-      getBilinearForm().add(bfi);
+      m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())
-      getLinearForm().add(UnaryMinus(lfi)); // Negate every linear form
+      m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
 
     m_dbcs = rhs.getDBCs();
 
      return *this;
+  }
+
+  namespace Internal
+  {
+    class IteratorTripletWrapper
+    {
+      public:
+        IteratorTripletWrapper(UnorderedMap<std::pair<Index, Index>, Scalar>::iterator it) : m_it(it) {}
+        inline bool operator==(const IteratorTripletWrapper& other) const { return m_it == other.m_it; }
+        inline bool operator!=(const IteratorTripletWrapper& other) const { return m_it != other.m_it; }
+        inline IteratorTripletWrapper& operator++() { ++m_it; return *this; }
+        inline const Eigen::Triplet<Scalar>& operator*() const
+        { m_value = Eigen::Triplet<Scalar>(m_it->first.first, m_it->first.second, m_it->second); return m_value; }
+        inline const Eigen::Triplet<Scalar>* operator->() const { m_value = Eigen::Triplet<Scalar>(m_it->first.first, m_it->first.second, m_it->second); return &m_value; }
+      private:
+        UnorderedMap<std::pair<Index, Index>, Scalar>::iterator m_it;
+        mutable Eigen::Triplet<Scalar> m_value;
+    };
   }
 
   template <class TrialFES, class TestFES>
@@ -66,13 +84,11 @@ namespace Rodin::Variational
     trial.emplace();
 
     // Assemble both sides
-    auto& lhs = getBilinearForm();
-    lhs.assemble();
-    Math::SparseMatrix& stiffness = lhs.getOperator();
+    m_linearForm.assemble();
+    m_mass = std::move(m_linearForm.getVector());
 
-    auto& rhs = getLinearForm();
-    rhs.assemble();
-    Math::Vector& mass = rhs.getVector();
+    m_bilinearForm.assemble();
+    m_stiffness = std::move(m_bilinearForm.getOperator());
 
     // Impose Dirichlet boundary conditions
     if (trialFES == testFES)
@@ -82,45 +98,30 @@ namespace Rodin::Variational
         dbc.assemble();
         const auto& dofs = dbc.getDOFs();
 
-        // Move essential degrees of freedom in the LHS to the RHS
-        for (const auto& kv : dofs)
-        {
-           const Index& global = kv.first;
-           const auto& dof = kv.second;
-           for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
-              mass.coeffRef(it.row()) -= it.value() * dof;
-        }
-
         // Impose essential degrees of freedom on RHS
-        for (const auto& kv : dofs)
+        for (const auto& [global, dof] : dofs)
         {
-          const Index& global = kv.first;
-          const auto& dof = kv.second;
-          mass.coeffRef(global) = dof;
+          m_mass.coeffRef(global) = dof;
 
-          auto innerIndices = stiffness.innerIndexPtr();
-          auto outerIndices = stiffness.outerIndexPtr();
-          assert(stiffness.rows() >= 0);
-          // Set row to zero
-          for (size_t i = 0; i < static_cast<size_t>(stiffness.rows()); i++)
+          Math::SparseMatrix::StorageIndex* outerPtr = m_stiffness.outerIndexPtr();
+          Math::SparseMatrix::StorageIndex* innerPtr = m_stiffness.innerIndexPtr();
+          Scalar* valuePtr = m_stiffness.valuePtr();
+          for (auto i = outerPtr[global]; i < outerPtr[global + 1]; ++i)
           {
-            // Find the position of the column in the current row
-            for (Math::SparseMatrix::StorageIndex j = outerIndices[i]; j < outerIndices[i + 1]; j++)
+            assert(innerPtr[i] >= 0);
+            const Index row = innerPtr[i];
+            valuePtr[i] = Scalar(row == global);
+            if (row != global)
             {
-              assert(innerIndices[j] >= 0);
-              if (static_cast<size_t>(innerIndices[j]) == global)
+              for (auto k = outerPtr[row]; 1; k++)
               {
-                stiffness.valuePtr()[j] = 0.0;
-                break;
+                if (static_cast<Index>(innerPtr[k]) == global)
+                {
+                   valuePtr[k] = 0.0;
+                   break;
+                }
               }
             }
-          }
-
-          // Set column to zero, diagonal to 1.
-          for (Math::SparseMatrix::InnerIterator it(stiffness, global); it; ++it)
-          {
-            assert(it.row() >= 0);
-            it.valueRef() = Scalar(static_cast<size_t>(it.row()) == global);
           }
         }
       }
@@ -143,7 +144,7 @@ namespace Rodin::Variational
         assemble();
 
      // Solve the system AX = B
-     solver.solve(getStiffnessOperator(), m_guess, getMassVector());
+     solver.solve(m_stiffness, m_guess, m_mass);
 
      // Recover solution
      getTrialFunction().getSolution().setWeights(std::move(m_guess));
