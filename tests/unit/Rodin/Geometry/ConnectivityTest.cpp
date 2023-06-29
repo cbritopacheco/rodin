@@ -183,7 +183,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_9Nodes_Mixed)
               .nodes(nodes)
               .polytope(Polytope::Geometry::Triangle, {0, 1, 4})
               .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 4, 3})
-              .polytope(Polytope::Geometry::Quadrilateral, {0, 6, 8, 7})
+              .polytope(Polytope::Geometry::Quadrilateral, {8, 0, 7, 6})
               .polytope(Polytope::Geometry::Quadrilateral, {0, 4, 6, 5});
 
   size_t d;
