@@ -44,11 +44,10 @@ namespace Rodin::Geometry
   MeshConnectivity& MeshConnectivity::reserve(size_t d, size_t count)
   {
     assert(d < m_connectivity.size());
-    for (auto& v : m_connectivity[d])
-      v.reserve(count);
     m_index[d].reserve(count);
     m_geometry[d].reserve(count);
     m_polytopes[d].reserve(count);
+    m_connectivity[d][0].reserve(count);
     return *this;
   }
 
@@ -200,7 +199,9 @@ namespace Rodin::Geometry
     for (Index i = 0; i < m_count[D]; i++)
     {
       IndexSet s;
-      for (auto [geometry, vertices] : local(d, i))
+      std::vector<SubPolytope> subpolytopes;
+      local(subpolytopes, d, i);
+      for (auto& [geometry, vertices] : subpolytopes)
       {
         auto [it, inserted] =
           m_index[d].insert({ IndexSet(vertices.begin(), vertices.end()), m_count[d] });
@@ -265,7 +266,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  std::vector<MeshConnectivity::SubPolytope> MeshConnectivity::local(size_t dim, Index i)
+  void MeshConnectivity::local(std::vector<MeshConnectivity::SubPolytope>& out, size_t dim, Index i)
   {
     const size_t D = getMeshDimension();
     const auto& p = m_polytopes[D][i];
@@ -275,7 +276,9 @@ namespace Rodin::Geometry
       {
         assert(dim == 0);
         assert(p.size()  == 0);
-        return { {Polytope::Geometry::Point, { { p(0) } } } };
+        out.resize(1);
+        out[0] = { Polytope::Geometry::Point, { { p(0) } } };
+        return;
       }
       case Polytope::Geometry::Segment:
       {
@@ -283,21 +286,21 @@ namespace Rodin::Geometry
         assert(p.size() == 2);
         if (dim == 0)
         {
-          return {
-            { Polytope::Geometry::Point, { { p(0) } } },
-            { Polytope::Geometry::Point, { { p(1) } } }
-          };
+          out.resize(2);
+          out[0] = { Polytope::Geometry::Point, { { p(0) } } };
+          out[1] = { Polytope::Geometry::Point, { { p(1) } } };
         }
         else if (dim == 1)
         {
-          return { { Polytope::Geometry::Segment, { { p(0), p(1) } } } };
+          out.resize(1);
+          out[0] = { Polytope::Geometry::Segment, { { p(0), p(1) } } };
         }
         else
         {
           assert(false);
-          return {};
+          out = {};
         }
-        break;
+        return;
       }
       case Polytope::Geometry::Triangle:
       {
@@ -305,30 +308,29 @@ namespace Rodin::Geometry
         assert(p.size() == 3);
         if (dim == 0)
         {
-          return {
-            { Polytope::Geometry::Point, { { p(0) } } },
-            { Polytope::Geometry::Point, { { p(1) } } },
-            { Polytope::Geometry::Point, { { p(2) } } }
-          };
+          out.resize(3);
+          out[0] = { Polytope::Geometry::Point, { { p(0) } } };
+          out[1] = { Polytope::Geometry::Point, { { p(1) } } };
+          out[2] = { Polytope::Geometry::Point, { { p(2) } } };
         }
         else if (dim == 1)
         {
-          return {
-            { Polytope::Geometry::Segment, { { p(0), p(1) } } },
-            { Polytope::Geometry::Segment, { { p(1), p(2) } } },
-            { Polytope::Geometry::Segment, { { p(0), p(2) } } }
-          };
+          out.resize(3);
+          out[0] = { Polytope::Geometry::Segment, { { p(0), p(1) } } };
+          out[1] = { Polytope::Geometry::Segment, { { p(1), p(2) } } };
+          out[2] = { Polytope::Geometry::Segment, { { p(0), p(2) } } };
         }
         else if (dim == 2)
         {
-          return { { Polytope::Geometry::Triangle, { { p(0), p(1), p(2) } } } };
+          out.resize(1);
+          out[0] = { Polytope::Geometry::Triangle, { { p(0), p(1), p(2) } } };
         }
         else
         {
           assert(false);
-          return {};
+          out = {};
         }
-        break;
+        return;
       }
       case Polytope::Geometry::Quadrilateral:
       {
@@ -336,32 +338,31 @@ namespace Rodin::Geometry
         assert(p.size() == 4);
         if (dim == 0)
         {
-          return {
-            { Polytope::Geometry::Point, { { p(0) } } },
-            { Polytope::Geometry::Point, { { p(1) } } },
-            { Polytope::Geometry::Point, { { p(2) } } },
-            { Polytope::Geometry::Point, { { p(3) } } }
-          };
+          out.resize(4);
+          out[0] = { Polytope::Geometry::Point, { { p(0) } } };
+          out[1] = { Polytope::Geometry::Point, { { p(1) } } };
+          out[3] = { Polytope::Geometry::Point, { { p(2) } } };
+          out[4] = { Polytope::Geometry::Point, { { p(3) } } };
         }
         else if (dim == 1)
         {
-          return {
-            { Polytope::Geometry::Segment, { { p(0), p(1) } } },
-            { Polytope::Geometry::Segment, { { p(1), p(3) } } },
-            { Polytope::Geometry::Segment, { { p(3), p(2) } } },
-            { Polytope::Geometry::Segment, { { p(2), p(0) } } }
-          };
+          out.resize(4);
+          out[0] = { Polytope::Geometry::Segment, { { p(0), p(1) } } };
+          out[1] = { Polytope::Geometry::Segment, { { p(1), p(3) } } };
+          out[2] = { Polytope::Geometry::Segment, { { p(3), p(2) } } };
+          out[3] = { Polytope::Geometry::Segment, { { p(2), p(0) } } };
         }
         else if (dim == 2)
         {
-          return { { Polytope::Geometry::Quadrilateral, { { p(0), p(1), p(2), p(3) } } } };
+          out.resize(1);
+          out[0] = { Polytope::Geometry::Quadrilateral, { { p(0), p(1), p(2), p(3) } } };
         }
         else
         {
           assert(false);
-          return {};
+          out = {};
         }
-        break;
+        return;
       }
       case Polytope::Geometry::Tetrahedron:
       {
@@ -369,46 +370,44 @@ namespace Rodin::Geometry
         assert(p.size() == 4);
         if (dim == 0)
         {
-          return {
-            { Polytope::Geometry::Point, { { p(0) } } },
-            { Polytope::Geometry::Point, { { p(1) } } },
-            { Polytope::Geometry::Point, { { p(2) } } },
-            { Polytope::Geometry::Point, { { p(3) } } }
-          };
+          out.resize(4);
+          out[0] = { Polytope::Geometry::Point, { { p(0) } } };
+          out[1] = { Polytope::Geometry::Point, { { p(1) } } };
+          out[2] = { Polytope::Geometry::Point, { { p(2) } } };
+          out[3] = { Polytope::Geometry::Point, { { p(3) } } };
         }
         else if (dim == 1)
         {
-          return {
-            { Polytope::Geometry::Segment, { { p(0), p(1) } } },
-            { Polytope::Geometry::Segment, { { p(1), p(2) } } },
-            { Polytope::Geometry::Segment, { { p(0), p(2) } } },
-            { Polytope::Geometry::Segment, { { p(0), p(3) } } },
-            { Polytope::Geometry::Segment, { { p(1), p(3) } } },
-            { Polytope::Geometry::Segment, { { p(2), p(3) } } }
-          };
+          out.resize(6);
+          out[0] = { Polytope::Geometry::Segment, { { p(0), p(1) } } };
+          out[1] = { Polytope::Geometry::Segment, { { p(1), p(2) } } };
+          out[2] = { Polytope::Geometry::Segment, { { p(0), p(2) } } };
+          out[3] = { Polytope::Geometry::Segment, { { p(0), p(3) } } };
+          out[4] = { Polytope::Geometry::Segment, { { p(1), p(3) } } };
+          out[5] = { Polytope::Geometry::Segment, { { p(2), p(3) } } };
         }
         else if (dim == 2)
         {
-          return {
-            { Polytope::Geometry::Triangle, { { p(0), p(1), p(2) } } },
-            { Polytope::Geometry::Triangle, { { p(0), p(1), p(3) } } },
-            { Polytope::Geometry::Triangle, { { p(0), p(2), p(3) } } },
-            { Polytope::Geometry::Triangle, { { p(1), p(2), p(3) } } }
-          };
+          out.resize(3);
+          out[0] = { Polytope::Geometry::Triangle, { { p(0), p(1), p(2) } } };
+          out[1] = { Polytope::Geometry::Triangle, { { p(0), p(1), p(3) } } };
+          out[2] = { Polytope::Geometry::Triangle, { { p(0), p(2), p(3) } } };
+          out[3] = { Polytope::Geometry::Triangle, { { p(1), p(2), p(3) } } };
         }
         else if (dim == 3)
         {
-          return { { Polytope::Geometry::Tetrahedron, { { p(0), p(1), p(2), p(3) } } } };
+          out.resize(1);
+          out[0] = { Polytope::Geometry::Tetrahedron, { { p(0), p(1), p(2), p(3) } } };
         }
         else
         {
           assert(false);
-          return {};
+          out = {};
         }
-        break;
+        return;
       }
     }
     assert(false); // We should not reach here. There is an unhandled case.
-    return {};
+    out = {};
   }
 }

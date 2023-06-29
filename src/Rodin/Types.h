@@ -13,8 +13,6 @@
 
 #include "Rodin/Configure.h"
 
-#include "Array.h"
-
 namespace Rodin
 {
   /// Standard type for representing integer values.
@@ -45,8 +43,8 @@ namespace Rodin
   using Map = boost::container::map<K, T>;
 
   /// Standard unordered map type.
-  template <class K, class T>
-  using UnorderedMap = boost::unordered_map<K, T>;
+  template <class ... Params>
+  using UnorderedMap = boost::unordered_map<Params...>;
 
   /// Standard flat map type.
   template <class K, class T>
@@ -54,9 +52,6 @@ namespace Rodin
 
   /// Standard set of indices.
   using IndexSet = FlatSet<Index>;
-
-  /// Standard set of indices.
-  using IndexArray = Array<Index>;
 
   /// Standard map of indices.
   template <class T>

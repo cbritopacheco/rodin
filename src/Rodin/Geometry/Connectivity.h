@@ -90,7 +90,7 @@ namespace Rodin::Geometry
       const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
 
     protected:
-      std::vector<SubPolytope> local(size_t dim, Index i);
+      void local(std::vector<SubPolytope>& out, size_t dim, Index i);
 
       /**
        * D -> d and D -> 0 from D -> 0 and D -> D

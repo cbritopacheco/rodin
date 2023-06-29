@@ -132,7 +132,11 @@ namespace Rodin::Geometry
 
   const Math::Matrix& PointBase::getJacobian() const
   {
-    return m_trans.get().jacobian(CacheResult, getCoordinates(Coordinates::Reference));
+    return m_trans.get().jacobian(CacheResult, getCoordinates());
+    // if (!m_jacobian.has_value())
+    //   m_jacobian.emplace(m_trans.get().jacobian(getCoordinates(Coordinates::Reference)));
+    // assert(m_jacobian.has_value());
+    // return m_jacobian.value();
   }
 
   const Math::Matrix& PointBase::getJacobianInverse() const
