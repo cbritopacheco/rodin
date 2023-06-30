@@ -399,7 +399,7 @@ namespace Rodin::Geometry
        * @brief Computes the Jacobian matrix of the transformation at the
        * point.
        */
-      const Math::Matrix& getJacobian() const;
+      virtual const Math::Matrix& getJacobian() const;
 
       Scalar getJacobianDeterminant() const;
 
@@ -431,6 +431,8 @@ namespace Rodin::Geometry
   class Point final : public PointBase
   {
     public:
+      using Parent = PointBase;
+
       enum class Type
       {
         Data,
@@ -478,6 +480,8 @@ namespace Rodin::Geometry
           return std::get<std::reference_wrapper<const Math::Vector>>(m_rc);
         }
       }
+
+      const Math::Matrix& getJacobian() const override;
 
     private:
       const Type m_type;

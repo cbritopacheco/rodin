@@ -106,6 +106,28 @@ namespace Rodin::Geometry
       }
 
       inline
+      const Math::Vector& transform(CacheResultType, const Math::Vector& rc) const override
+      {
+        Math::Vector res = Math::Vector::Zero(m_sdim);
+        for (size_t local = 0; local < m_fe.getCount(); local++)
+        {
+          assert(res.size() == m_pm.col(local).size());
+          res.noalias() += m_pm.col(local) * m_fe.getBasis(local)(CacheResult, rc);
+        }
+
+        auto it = m_jacobian.find(&rc);
+        if (it == m_jacobian.end())
+        {
+          auto rit = m_jacobian.insert(it, { &rc, res });
+          return rit->second;
+        }
+        else
+        {
+          return it->second;
+        }
+      }
+
+      inline
       Math::Matrix jacobian(const Math::Vector& rc) const override
       {
         Math::Matrix res = Math::Matrix::Zero(m_sdim, m_rdim);
@@ -119,6 +141,32 @@ namespace Rodin::Geometry
           }
         }
         return res;
+      }
+
+      inline
+      const Math::Matrix& jacobian(CacheResultType, const Math::Vector& rc) const override
+      {
+        Math::Matrix res = Math::Matrix::Zero(m_sdim, m_rdim);
+        for (size_t local = 0; local < m_fe.getCount(); local++)
+        {
+          const auto& gradient = m_fe.getGradient(local)(CacheResult, rc);
+          for (size_t i = 0; i < m_rdim; i++)
+          {
+            assert(res.col(i).size() == m_pm.col(local).size());
+            res.col(i).noalias() += m_pm.col(local) * gradient.coeff(i);
+          }
+        }
+
+        auto it = m_jacobian.find(&rc);
+        if (it == m_jacobian.end())
+        {
+          auto rit = m_jacobian.insert(it, { &rc, res });
+          return rit->second;
+        }
+        else
+        {
+          return it->second;
+        }
       }
 
     private:

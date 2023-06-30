@@ -31,8 +31,8 @@ namespace Rodin::Geometry
     assert(m_geometry.size() == 0);
     m_geometry.resize(maximalDimension + 1);
 
-    assert(m_polytopes.size() == 0);
-    m_polytopes.resize(maximalDimension + 1);
+    // assert(m_polytopes.size() == 0);
+    // m_polytopes.resize(maximalDimension + 1);
 
     m_gcount.reserve(Polytope::Geometries.size());
     for (const auto& g : Polytope::Geometries)
@@ -44,9 +44,10 @@ namespace Rodin::Geometry
   MeshConnectivity& MeshConnectivity::reserve(size_t d, size_t count)
   {
     assert(d < m_connectivity.size());
-    m_index[d].reserve(count);
+    // m_index[d].reserve(count);
+    m_index[d].rehash(count);
     m_geometry[d].reserve(count);
-    m_polytopes[d].reserve(count);
+    // m_polytopes[d].reserve(count);
     m_connectivity[d][0].reserve(count);
     return *this;
   }
@@ -65,8 +66,10 @@ namespace Rodin::Geometry
     const size_t d = Polytope::getGeometryDimension(t);
     assert(d > 0);
     assert(d <= m_maximalDimension);
-    m_connectivity[d][0].emplace_back(in.begin(), in.end());
-    m_polytopes[d].push_back(in);
+    auto [it, inserted] = m_index[d].left.insert({ in, m_count[d] });
+    assert(inserted);
+    m_connectivity[d][0].emplace_back(it->first.begin(), it->first.end());
+    // m_polytopes[d].push_back(in);
     m_geometry[d].push_back(t);
     m_dirty[d][0] = true;
     m_count[d] += 1;
@@ -81,8 +84,10 @@ namespace Rodin::Geometry
     const size_t d = Polytope::getGeometryDimension(t);
     assert(d > 0);
     assert(d <= m_maximalDimension);
-    m_connectivity[d][0].emplace_back(in.begin(), in.end());
-    m_polytopes[d].push_back(std::move(in));
+    auto [it, inserted] = m_index[d].left.insert({ std::move(in), m_count[d] });
+    assert(inserted);
+    m_connectivity[d][0].emplace_back(it->first.begin(), it->first.end());
+    // m_polytopes[d].push_back(std::move(in));
     m_geometry[d].push_back(t);
     m_dirty[d][0] = true;
     m_count[d] += 1;
@@ -90,15 +95,15 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  const FlatMap<IndexSet, Index>& MeshConnectivity::getIndexMap(size_t dim) const
+  const MeshConnectivity::PolytopeIndex& MeshConnectivity::getIndexMap(size_t dim) const
   {
     return m_index[dim];
   }
 
-  const std::optional<Index> MeshConnectivity::getIndex(size_t dim, const IndexSet& key) const
+  const std::optional<Index> MeshConnectivity::getIndex(size_t dim, const IndexArray& key) const
   {
-    auto it = m_index[dim].find(key);
-    if (it == m_index[dim].end())
+    auto it = m_index[dim].left.find(key);
+    if (it == m_index[dim].left.end())
       return {};
     else
       return it->second;
@@ -151,7 +156,8 @@ namespace Rodin::Geometry
 
   const Array<Index>& MeshConnectivity::getPolytope(size_t d, Index idx) const
   {
-    return m_polytopes[d][idx];
+    return m_index[d].right.at(idx);
+    // return m_polytopes[d][idx];
   }
 
   MeshConnectivity& MeshConnectivity::compute(size_t d, size_t dp)
@@ -189,12 +195,6 @@ namespace Rodin::Geometry
 
   MeshConnectivity& MeshConnectivity::build(size_t d)
   {
-    for (size_t i = 0; i < m_polytopes[d].size(); i++)
-    {
-      const auto& vertices = m_polytopes[d][i];
-      m_index[d].insert({ IndexSet(vertices.begin(), vertices.end()), i });
-    }
-
     const size_t D = getMeshDimension();
     for (Index i = 0; i < m_count[D]; i++)
     {
@@ -203,14 +203,26 @@ namespace Rodin::Geometry
       local(subpolytopes, d, i);
       for (auto& [geometry, vertices] : subpolytopes)
       {
-        auto [it, inserted] =
-          m_index[d].insert({ IndexSet(vertices.begin(), vertices.end()), m_count[d] });
+        bool inserted;
+        PolytopeIndex::left_iterator it;
+        if (d == 0)
+        {
+          const Index idx = vertices.coeff(0);
+          auto insert = m_index[d].left.insert({ std::move(vertices), idx });
+          it = insert.first;
+          inserted = insert.second;
+        }
+        else
+        {
+          auto insert = m_index[d].left.insert({ std::move(vertices), m_count[d] });
+          it = insert.first;
+          inserted = insert.second;
+        }
         const auto& [v, idx] = *it;
         if (inserted)
         {
-          m_polytopes[d].push_back(std::move(vertices));
           m_geometry[d].push_back(geometry);
-          m_connectivity[d][0].push_back(v);
+          m_connectivity[d][0].emplace_back(v.begin(), v.end());
         }
         m_count[d] += inserted && !(d == D || d == 0);
         m_gcount[geometry] += inserted && !(d == D || d == 0);
@@ -269,7 +281,8 @@ namespace Rodin::Geometry
   void MeshConnectivity::local(std::vector<MeshConnectivity::SubPolytope>& out, size_t dim, Index i)
   {
     const size_t D = getMeshDimension();
-    const auto& p = m_polytopes[D][i];
+
+    const auto& p = m_index[D].right.at(i);
     switch (m_geometry[D][i])
     {
       case Polytope::Geometry::Point:
@@ -277,7 +290,7 @@ namespace Rodin::Geometry
         assert(dim == 0);
         assert(p.size()  == 0);
         out.resize(1);
-        out[0] = { Polytope::Geometry::Point, { { p(0) } } };
+        out[0] = { Polytope::Geometry::Point, { { i } } };
         return;
       }
       case Polytope::Geometry::Segment:
@@ -293,7 +306,7 @@ namespace Rodin::Geometry
         else if (dim == 1)
         {
           out.resize(1);
-          out[0] = { Polytope::Geometry::Segment, { { p(0), p(1) } } };
+          out[0] = { Polytope::Geometry::Segment, p };
         }
         else
         {
@@ -323,7 +336,7 @@ namespace Rodin::Geometry
         else if (dim == 2)
         {
           out.resize(1);
-          out[0] = { Polytope::Geometry::Triangle, { { p(0), p(1), p(2) } } };
+          out[0] = { Polytope::Geometry::Triangle, p };
         }
         else
         {
@@ -341,8 +354,8 @@ namespace Rodin::Geometry
           out.resize(4);
           out[0] = { Polytope::Geometry::Point, { { p(0) } } };
           out[1] = { Polytope::Geometry::Point, { { p(1) } } };
-          out[3] = { Polytope::Geometry::Point, { { p(2) } } };
-          out[4] = { Polytope::Geometry::Point, { { p(3) } } };
+          out[2] = { Polytope::Geometry::Point, { { p(2) } } };
+          out[3] = { Polytope::Geometry::Point, { { p(3) } } };
         }
         else if (dim == 1)
         {
@@ -355,7 +368,7 @@ namespace Rodin::Geometry
         else if (dim == 2)
         {
           out.resize(1);
-          out[0] = { Polytope::Geometry::Quadrilateral, { { p(0), p(1), p(2), p(3) } } };
+          out[0] = { Polytope::Geometry::Quadrilateral, p };
         }
         else
         {
@@ -397,7 +410,7 @@ namespace Rodin::Geometry
         else if (dim == 3)
         {
           out.resize(1);
-          out[0] = { Polytope::Geometry::Tetrahedron, { { p(0), p(1), p(2), p(3) } } };
+          out[0] = { Polytope::Geometry::Tetrahedron, p };
         }
         else
         {
