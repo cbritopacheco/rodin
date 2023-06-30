@@ -11,6 +11,8 @@
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <boost/bimap.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
 
 #include "Rodin/Array.h"
 
@@ -33,6 +35,12 @@ namespace Rodin::Geometry
   class MeshConnectivity
   {
     public:
+      using PolytopeIndex =
+        boost::bimap<
+          boost::bimaps::unordered_set_of<IndexArray, IndexArraySymmetricHash, IndexArraySymmetricEquality>,
+          boost::bimaps::unordered_set_of<Index>
+        >;
+
       struct SubPolytope
       {
         Polytope::Geometry geometry;
@@ -77,9 +85,9 @@ namespace Rodin::Geometry
 
       size_t getMeshDimension() const;
 
-      const FlatMap<IndexSet, Index>& getIndexMap(size_t dim) const;
+      const PolytopeIndex& getIndexMap(size_t dim) const;
 
-      const std::optional<Index> getIndex(size_t dim, const IndexSet& key) const;
+      const std::optional<Index> getIndex(size_t dim, const IndexArray& key) const;
 
       Polytope::Geometry getGeometry(size_t d, Index idx) const;
 
@@ -106,12 +114,12 @@ namespace Rodin::Geometry
 
       std::vector<std::vector<bool>> m_dirty;
 
-      std::vector<std::vector<Array<Index>>> m_polytopes;
+      // std::vector<std::vector<Array<Index>>> m_polytopes;
       std::vector<std::vector<Polytope::Geometry>> m_geometry;
 
       std::vector<size_t> m_count;
       FlatMap<Polytope::Geometry, size_t> m_gcount;
-      std::vector<FlatMap<IndexSet, Index>> m_index;
+      std::vector<PolytopeIndex> m_index;
       std::vector<std::vector<Incidence>> m_connectivity;
   };
 }

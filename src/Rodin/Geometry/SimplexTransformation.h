@@ -67,8 +67,7 @@ namespace Rodin::Geometry
        */
       virtual Math::Vector transform(const Math::Vector& rc) const = 0;
 
-      inline
-      const Math::Vector& transform(CacheResultType, const Math::Vector& rc) const
+      virtual const Math::Vector& transform(CacheResultType, const Math::Vector& rc) const
       {
         auto it = m_transform.find(&rc);
         if (it == m_transform.end())
@@ -101,8 +100,7 @@ namespace Rodin::Geometry
        */
       virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
 
-      inline
-      const Math::Matrix& jacobian(CacheResultType, const Math::Vector& rc) const
+      virtual const Math::Matrix& jacobian(CacheResultType, const Math::Vector& rc) const
       {
         auto it = m_jacobian.find(&rc);
         if (it == m_jacobian.end())
@@ -133,7 +131,7 @@ namespace Rodin::Geometry
         return Math::Vector::Zero(0);
       }
 
-    private:
+    protected:
       mutable UnorderedMap<const Math::Vector*, Math::Vector> m_transform;
       mutable UnorderedMap<const Math::Vector*, Math::Matrix> m_jacobian;
   };
