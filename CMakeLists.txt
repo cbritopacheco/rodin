@@ -23,6 +23,7 @@ option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
 option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
 option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
 option(RODIN_CODE_COVERAGE      "Compile with code coverage flags"      OFF)
+option(RODIN_FLTO               "Compile with link time optimization"   ON)
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
@@ -56,7 +57,6 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
     OPTIONS
     -w
     -O3
-    -flto
     -DNDEBUG
     -march=native)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
@@ -68,6 +68,10 @@ elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     -fPIC)
 else()
   message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
+endif()
+
+if (RODIN_FLTO)
+  rodin_add_compile_options(LANG CXX C OPTIONS -flto)
 endif()
 
 if (RODIN_CODE_COVERAGE)
