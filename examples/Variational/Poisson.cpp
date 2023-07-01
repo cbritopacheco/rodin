@@ -37,7 +37,6 @@ int main(int, char**)
 
   // Solve the problem
   Solver::CG solver;
-  solver.setMaxIterations(2000).setTolerance(1e-12);
   poisson.solve(solver);
 
   // Save solution

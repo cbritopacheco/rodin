@@ -7,6 +7,7 @@
 #ifndef RODIN_IO_MFEM_H
 #define RODIN_IO_MFEM_H
 
+#include <iomanip>
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 

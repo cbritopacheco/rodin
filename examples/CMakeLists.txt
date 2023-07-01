@@ -3,7 +3,6 @@ if (RODIN_BUILD_EXAMPLES)
     rodin_add_compile_options(
       LANG CXX
       OPTIONS
-      -flto
       -msse2
       -march=native
       -fvectorize

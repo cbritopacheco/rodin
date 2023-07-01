@@ -118,7 +118,7 @@ namespace Rodin::Geometry
         auto it = m_jacobian.find(&rc);
         if (it == m_jacobian.end())
         {
-          auto rit = m_jacobian.insert(it, { &rc, res });
+          auto rit = m_jacobian.insert(it, { &rc, std::move(res) });
           return rit->second;
         }
         else
@@ -160,7 +160,7 @@ namespace Rodin::Geometry
         auto it = m_jacobian.find(&rc);
         if (it == m_jacobian.end())
         {
-          auto rit = m_jacobian.insert(it, { &rc, res });
+          auto rit = m_jacobian.insert(it, { &rc, std::move(res) });
           return rit->second;
         }
         else

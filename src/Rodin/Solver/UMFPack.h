@@ -44,25 +44,14 @@ namespace Rodin::Solver
       /**
        * @brief Constructs the UMFPack object with default parameters.
        */
-      UMFPack()
-        : m_useLongInts(false)
-      {}
+      UMFPack() = default;
 
       ~UMFPack() = default;
 
-      UMFPack& useLongInts(bool v = true)
-      {
-        m_useLongInts = v;
-        return *this;
-      }
-
-      void solve(OperatorType& A, VectorType& x, VectorType& b) const override
+      void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         assert(false);
       }
-
-    private:
-      bool m_useLongInts;
   };
 }
 

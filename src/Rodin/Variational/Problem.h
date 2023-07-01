@@ -53,7 +53,7 @@ namespace Rodin::Variational
 
       virtual ProblemBase& operator=(const ProblemBody& rhs) = 0;
 
-      virtual void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
+      virtual void solve(Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
@@ -156,7 +156,7 @@ namespace Rodin::Variational
 
       void assemble() override;
 
-      void solve(const Solver::SolverBase<OperatorType, VectorType>& solver) override;
+      void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
       Problem& operator=(const ProblemBody& rhs) override;
 

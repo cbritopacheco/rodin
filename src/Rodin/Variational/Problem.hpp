@@ -137,7 +137,7 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   void
   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
-  ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
+  ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
   {
      // Assemble the system
      if (!m_assembled)

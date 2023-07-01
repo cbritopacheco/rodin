@@ -4,12 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_CG_H
-#define RODIN_SOLVER_CG_H
+#ifndef RODIN_SOLVER_SIMPLICIALLDLT_H
+#define RODIN_SOLVER_SIMPLICIALLDLT_H
 
-#include <optional>
-#include <functional>
-#include<Eigen/SparseCholesky>
+#include <Eigen/SparseCholesky>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -21,23 +19,23 @@ namespace Rodin::Solver
 {
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for CG
+   * @brief CTAD for SimplicialLDLT
    */
-  CG() -> CG<Math::SparseMatrix, Math::Vector>;
+  SimplicialLDLT() -> SimplicialLDLT<Math::SparseMatrix, Math::Vector>;
 
   /**
-   * @defgroup CGSpecializations CG Template Specializations
-   * @brief Template specializations of the CG class.
-   * @see CG
+   * @defgroup SimplicialLDLTSpecializations SimplicialLDLT Template Specializations
+   * @brief Template specializations of the SimplicialLDLT class.
+   * @see SimplicialLDLT
    */
 
   /**
-   * @ingroup CGSpecializations
-   * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * Math::SparseMatrix and Math::Vector.
+   * @ingroup SimplicialLDLTSpecializations
+   * @brief A direct sparse LDLT Cholesky factorizations without square root
+   * for use with Math::SparseMatrix and Math::Vector.
    */
   template <>
-  class CG<Math::SparseMatrix, Math::Vector> final
+  class SimplicialLDLT<Math::SparseMatrix, Math::Vector> final
     : public SolverBase<Math::SparseMatrix, Math::Vector>
   {
     public:
@@ -48,25 +46,9 @@ namespace Rodin::Solver
       using VectorType = Math::Vector;
 
       /**
-       * @brief Constructs the CG object with default parameters.
+       * @brief Constructs the SimplicialLDLT object with default parameters.
        */
-      CG() = default;
-
-      ~CG() = default;
-
-      constexpr
-      CG& setTolerance(double tol)
-      {
-        m_solver.setTolerance(tol);
-        return *this;
-      }
-
-      constexpr
-      CG& setMaxIterations(size_t maxIt)
-      {
-        m_solver.setMaxIterations(maxIt);
-        return *this;
-      }
+      SimplicialLDLT() = default;
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
@@ -80,4 +62,5 @@ namespace Rodin::Solver
 }
 
 #endif
+
 
