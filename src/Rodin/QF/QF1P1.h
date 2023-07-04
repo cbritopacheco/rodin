@@ -1,6 +1,7 @@
 #ifndef RODIN_VARIATIONAL_QF_QF1P1_H
 #define RODIN_VARIATIONAL_QF_QF1P1_H
 
+#include "Rodin/Geometry/GeometryIndexed.h"
 #include "QuadratureFormula.h"
 
 namespace Rodin::QF

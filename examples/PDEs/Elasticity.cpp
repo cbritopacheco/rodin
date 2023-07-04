@@ -7,6 +7,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Variational/LinearElasticity.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -14,7 +15,7 @@ using namespace Rodin::Variational;
 
 int main(int argc, char** argv)
 {
-  const char* meshFile = "/Users/carlos/Projects/rodin/resources/mfem/elasticity-example.mesh";
+  const char* meshFile = "../resources/examples/PDEs/Elasticity.mfem.mesh";
 
   // Define boundary attributes
   int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
@@ -22,6 +23,7 @@ int main(int argc, char** argv)
   // Load mesh
   Mesh mesh;
   mesh.load(meshFile);
+  mesh.getConnectivity().compute(1, 2);
 
   // Functions
   size_t d = mesh.getSpaceDimension();
@@ -42,10 +44,6 @@ int main(int argc, char** argv)
              + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-
-  // elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-  //            - BoundaryIntegral(f, v).over(GammaN)
-  //            + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
   // Solver object
   Solver::CG solver;

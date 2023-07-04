@@ -212,6 +212,56 @@ namespace Rodin::Variational
 
   template <class V, class ... Values>
   VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
+
+  template <class F>
+  class VectorFunction<F> final : public VectorFunctionBase<VectorFunction<F>>
+  {
+    static_assert(std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>);
+
+    public:
+      using Parent = VectorFunctionBase<VectorFunction<F>>;
+
+      VectorFunction(size_t vdim, F f)
+        : m_vdim(vdim), m_f(f)
+      {}
+
+      VectorFunction(const VectorFunction& other)
+        : Parent(other),
+          m_vdim(other.m_vdim),
+          m_f(other.m_f)
+      {}
+
+      VectorFunction(VectorFunction&& other)
+        : Parent(std::move(other)),
+          m_vdim(std::move(other.m_vdim)),
+          m_f(std::move(other.m_f))
+      {}
+
+      inline
+      constexpr
+      VectorFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      Math::Vector getValue(const Geometry::Point& v) const
+      {
+        return m_f(v);
+      }
+
+      inline VectorFunction* copy() const noexcept override
+      {
+        return new VectorFunction(*this);
+      }
+
+    private:
+      const size_t m_vdim;
+      const F m_f;
+  };
+
+  template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>>>
+  VectorFunction(size_t, F) -> VectorFunction<F>;
 }
 
 #endif

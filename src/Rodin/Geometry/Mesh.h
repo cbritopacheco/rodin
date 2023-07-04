@@ -131,26 +131,31 @@ namespace Rodin::Geometry
        */
       bool isSurface() const;
 
+      inline
       size_t getVertexCount() const
       {
         return getCount(0);
       }
 
+      inline
       size_t getFaceCount() const
       {
         return getCount(getDimension() - 1);
       }
 
+      inline
       size_t getElementCount() const
       {
         return getCount(getDimension());
       }
 
+      inline
       Attribute getFaceAttribute(Index index) const
       {
         return getAttribute(getDimension() - 1, index);
       }
 
+      inline
       Attribute getElementAttribute(Index index) const
       {
         return getAttribute(getDimension(), index);
@@ -362,6 +367,9 @@ namespace Rodin::Geometry
           TransformationIndex m_transformations;
       };
 
+      /**
+       * @brief Generates a uniform grid for a given geometry.
+       */
       static Mesh UniformGrid(Polytope::Geometry g, size_t h, size_t w);
 
       /**

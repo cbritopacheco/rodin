@@ -31,6 +31,13 @@ namespace Rodin::QF
 
       virtual Scalar getWeight(size_t i) const = 0;
 
+      /**
+       * @brief Returns a reference to a vector containing the coordinates in
+       * reference space.
+       *
+       * @note The reference must be valid throughout the whole lifetime of the
+       * program.
+       */
       virtual const Math::Vector& getPoint(size_t i) const = 0;
 
     private:

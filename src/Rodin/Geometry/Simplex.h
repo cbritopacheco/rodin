@@ -28,6 +28,9 @@ namespace Rodin::Geometry
   class Polytope
   {
     public:
+      /**
+       * @brief Polytope geometry
+       */
       enum class Geometry
       {
         Point,
@@ -37,6 +40,9 @@ namespace Rodin::Geometry
         Tetrahedron
       };
 
+      /**
+       * @brief Iterable of possible polytope geometries.
+       */
       static constexpr std::array Geometries
       {
         Geometry::Point,

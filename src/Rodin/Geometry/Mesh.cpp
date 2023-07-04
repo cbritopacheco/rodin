@@ -6,6 +6,7 @@
  */
 #include "Rodin/Alert.h"
 
+#include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
@@ -46,7 +47,7 @@ namespace Rodin::Geometry
         for (size_t i = 0; i < h; i++)
         {
           for (size_t j = 0; j < w; j++)
-            build.vertex({ static_cast<Scalar>(i), static_cast<Scalar>(j) });
+            build.vertex({ static_cast<Scalar>(j), static_cast<Scalar>(i) });
         }
 
         build.reserve(dim, 2 * (h - 1) * (w - 1));

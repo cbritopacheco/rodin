@@ -56,6 +56,9 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Scalar>>;
 
+      /**
+       * @brief Represents a linear form of a P1 scalar element.
+       */
       class LinearForm
       {
         public:
@@ -91,6 +94,9 @@ namespace Rodin::Variational
           Geometry::Polytope::Geometry m_g;
       };
 
+      /**
+       * @brief Represents a basis function of a P1 scalar element.
+       */
       class BasisFunction
       {
         public:
@@ -118,6 +124,9 @@ namespace Rodin::Variational
           mutable UnorderedMap<const Math::Vector*, Scalar> m_cache;
       };
 
+      /**
+       * @brief Represents a gradient basis function of a P1 scalar element.
+       */
       class GradientFunction
       {
         public:
@@ -267,7 +276,7 @@ namespace Rodin::Variational
           constexpr
           auto operator()(const T& v) const
           {
-            return v(s_nodes[m_vdim][m_g].col(m_i)).coeff(static_cast<size_t>(m_i / m_vdim));
+            return v(s_nodes[m_vdim][m_g].col(m_i)).coeff(static_cast<size_t>(m_i % m_vdim));
           }
 
         private:
@@ -281,168 +290,30 @@ namespace Rodin::Variational
         public:
           BasisFunction() = default;
 
-          constexpr
           BasisFunction(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
           }
 
-          constexpr
           BasisFunction(const BasisFunction&) = default;
 
-          constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          constexpr
           BasisFunction& operator=(const BasisFunction&) = default;
 
-          constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          inline
-          Math::Vector operator()(const Math::Vector& r) const
-          {
-            Math::Vector res = Math::Vector::Zero(m_vdim);
-            const size_t i = m_i % m_vdim;
-            const size_t k = m_i / m_vdim;
-            assert(k < Geometry::Polytope::getVertexCount(m_g));
-            switch (m_g)
-            {
-              case Geometry::Polytope::Geometry::Point:
-              {
-                res.coeffRef(0) = 1;
-                return res;
-              }
-              case Geometry::Polytope::Geometry::Segment:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res.coeffRef(i) = 1 - r.x();
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res.coeffRef(i) = r.x();
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Triangle:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res(i) = -r.x() - r.y() + 1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res(i) = r.x();
-                    return res;
-                  }
-                  case 2:
-                  {
-                    res(i) = r.y();
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Quadrilateral:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res(i) = r.x() * r.y() - r.x() - r.y() + 1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res(i) = r.x() * (1 - r.y());
-                    return res;
-                  }
-                  case 2:
-                  {
-                    res(i) = r.y() * (1 - r.x());
-                    return res;
-                  }
-                  case 3:
-                  {
-                    res(i) = r.x() * r.y();
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Tetrahedron:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res(i) = -r.x() - r.y() - r.z() + 1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res(i) = r.x();
-                    return res;
-                  }
-                  case 2:
-                  {
-                    res(i) = r.y();
-                    return res;
-                  }
-                  case 3:
-                  {
-                    res(i) = r.z();
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-            }
-            assert(false);
-            res.setConstant(NAN);
-            return res;
-          }
+          Math::Vector operator()(const Math::Vector& r) const;
+
+          const Math::Vector& operator()(CacheResultType, const Math::Vector& r) const;
 
         private:
           size_t m_vdim;
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
-      };
 
-      class DivergenceFunction
-      {
-        public:
-        private:
+          mutable UnorderedMap<const Math::Vector*, Math::Vector> m_cache;
       };
 
       class JacobianFunction
@@ -450,162 +321,30 @@ namespace Rodin::Variational
         public:
           JacobianFunction() = default;
 
-          constexpr
           JacobianFunction(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
           }
 
-          constexpr
           JacobianFunction(const JacobianFunction&) = default;
 
-          constexpr
           JacobianFunction(JacobianFunction&&) = default;
 
-          constexpr
           JacobianFunction& operator=(const JacobianFunction&) = default;
 
-          constexpr
           JacobianFunction& operator=(JacobianFunction&&) = default;
 
-          inline
-          Math::Matrix operator()(const Math::Vector& rc) const
-          {
-            Math::Matrix res =
-              Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
-            const size_t i = m_i % m_vdim;
-            const size_t k = m_i / m_vdim;
-            assert(k < Geometry::Polytope::getVertexCount(m_g));
-            switch (m_g)
-            {
-              case Geometry::Polytope::Geometry::Point:
-              {
-                return res;
-              }
-              case Geometry::Polytope::Geometry::Segment:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res.row(i) << -1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res.row(i) << 1;
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Triangle:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res.row(i) << -1, -1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res.row(i) << 1, 0;
-                    return res;
-                  }
-                  case 2:
-                  {
-                    res.row(i) << 0, 1;
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Quadrilateral:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res.row(i) << rc.y() - 1, rc.x() - 1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res.row(i) << 1 - rc.y(), -rc.x();
-                    return res;
-                  }
-                  case 2:
-                  {
-                    res.row(i) << -rc.y(), 1 - rc.x();
-                    return res;
-                  }
-                  case 3:
-                  {
-                    res.row(i) << rc.y(), rc.x();
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-              case Geometry::Polytope::Geometry::Tetrahedron:
-              {
-                switch (k)
-                {
-                  case 0:
-                  {
-                    res.row(i) << -1, -1, -1;
-                    return res;
-                  }
-                  case 1:
-                  {
-                    res.row(i) << 1, 0, 0;
-                    return res;
-                  }
-                  case 2:
-                  {
-                    res.row(i) << 0, 1, 0;
-                    return res;
-                  }
-                  case 3:
-                  {
-                    res.row(i) << 0, 0, 1;
-                    return res;
-                  }
-                  default:
-                  {
-                    assert(false);
-                    res.setConstant(NAN);
-                    break;
-                  }
-                }
-              }
-            }
-            assert(false);
-            res.setConstant(NAN);
-            return res;
-          }
+          Math::Matrix operator()(const Math::Vector& rc) const;
+
+          const Math::Matrix& operator()(CacheResultType, const Math::Vector& rc) const;
 
         private:
           size_t m_vdim;
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
+
+          mutable UnorderedMap<const Math::Vector*, Math::Matrix> m_cache;
       };
 
       /// Type of range
@@ -614,23 +353,42 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element>;
 
-      constexpr
+      P1Element() = default;
+
       P1Element(size_t vdim, Geometry::Polytope::Geometry geometry)
         : Parent(geometry),
           m_vdim(vdim)
       {}
 
-      constexpr
       P1Element(const P1Element& other)
         : Parent(other),
           m_vdim(other.m_vdim)
       {}
 
-      constexpr
       P1Element(P1Element&& other)
         : Parent(std::move(other)),
           m_vdim(other.m_vdim)
       {}
+
+      P1Element& operator=(P1Element&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_vdim = std::move(other.m_vdim);
+        }
+        return *this;
+      }
+
+      P1Element& operator=(const P1Element& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_vdim = other.m_vdim;
+        }
+        return *this;
+      }
 
       inline
       constexpr
@@ -679,7 +437,7 @@ namespace Rodin::Variational
       static const
       std::array<Geometry::GeometryIndexed<std::vector<JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_jacobian;
 
-      const size_t m_vdim;
+      size_t m_vdim;
   };
 
   /**
