@@ -33,7 +33,6 @@ namespace Rodin::Geometry
       T& operator[](Polytope::Geometry geom)
       {
         const size_t g = static_cast<size_t>(geom);
-        assert(g >= 0);
         assert(g < m_map.size());
         return m_map[g];
       }
@@ -43,7 +42,6 @@ namespace Rodin::Geometry
       const T& operator[](Polytope::Geometry geom) const
       {
         const size_t g = static_cast<size_t>(geom);
-        assert(g >= 0);
         assert(g < m_map.size());
         return m_map[g];
       }
