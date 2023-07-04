@@ -54,14 +54,12 @@ namespace Rodin::Solver
 
       ~CG() = default;
 
-      constexpr
       CG& setTolerance(double tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      constexpr
       CG& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
