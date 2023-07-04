@@ -241,7 +241,7 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::Vector& r) const
+  Scalar ScalarP1Element::BasisFunction::operator()(const Math::Vector& r) const
   {
     switch (m_g)
     {
@@ -326,7 +326,7 @@ namespace Rodin::Variational
     return NAN;
   }
 
-  const Scalar& P1Element<Scalar>::BasisFunction::operator()(CacheResultType, const Math::Vector& r) const
+  const Scalar& ScalarP1Element::BasisFunction::operator()(CacheResultType, const Math::Vector& r) const
   {
     auto it = m_cache.find(&r);
     if (it == m_cache.end())
@@ -340,7 +340,7 @@ namespace Rodin::Variational
     }
   }
 
-  Math::Vector P1Element<Scalar>::GradientFunction::operator()(const Math::Vector& r) const
+  Math::Vector ScalarP1Element::GradientFunction::operator()(const Math::Vector& r) const
   {
     switch (m_g)
     {
@@ -421,7 +421,299 @@ namespace Rodin::Variational
     return Math::Vector{{}};
   }
 
-  const Math::Vector& P1Element<Scalar>::GradientFunction::operator()(CacheResultType, const Math::Vector& r) const
+  const Math::Vector& ScalarP1Element::GradientFunction::operator()(CacheResultType, const Math::Vector& r) const
+  {
+    auto it = m_cache.find(&r);
+    if (it == m_cache.end())
+    {
+      auto rit = m_cache.insert(it, { &r, operator()(r) });
+      return rit->second;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+
+  Math::Vector VectorP1Element::BasisFunction::operator()(const Math::Vector& r) const
+  {
+    Math::Vector res = Math::Vector::Zero(m_vdim);
+    const size_t i = m_i % m_vdim;
+    const size_t k = m_i / m_vdim;
+    assert(k < Geometry::Polytope::getVertexCount(m_g));
+    switch (m_g)
+    {
+      case Geometry::Polytope::Geometry::Point:
+      {
+        res.coeffRef(0) = 1;
+        return res;
+      }
+      case Geometry::Polytope::Geometry::Segment:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res.coeffRef(i) = 1 - r.x();
+            return res;
+          }
+          case 1:
+          {
+            res.coeffRef(i) = r.x();
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Triangle:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res(i) = -r.x() - r.y() + 1;
+            return res;
+          }
+          case 1:
+          {
+            res(i) = r.x();
+            return res;
+          }
+          case 2:
+          {
+            res(i) = r.y();
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Quadrilateral:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res(i) = r.x() * r.y() - r.x() - r.y() + 1;
+            return res;
+          }
+          case 1:
+          {
+            res(i) = r.x() * (1 - r.y());
+            return res;
+          }
+          case 2:
+          {
+            res(i) = r.y() * (1 - r.x());
+            return res;
+          }
+          case 3:
+          {
+            res(i) = r.x() * r.y();
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            break;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Tetrahedron:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res(i) = -r.x() - r.y() - r.z() + 1;
+            return res;
+          }
+          case 1:
+          {
+            res(i) = r.x();
+            return res;
+          }
+          case 2:
+          {
+            res(i) = r.y();
+            return res;
+          }
+          case 3:
+          {
+            res(i) = r.z();
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            break;
+          }
+        }
+      }
+    }
+    assert(false);
+    res.setConstant(NAN);
+    return res;
+  }
+
+  const Math::Vector& VectorP1Element::BasisFunction::operator()(CacheResultType, const Math::Vector& r) const
+  {
+    auto it = m_cache.find(&r);
+    if (it == m_cache.end())
+    {
+      auto rit = m_cache.insert(it, { &r, operator()(r) });
+      return rit->second;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+
+  Math::Matrix VectorP1Element::JacobianFunction::operator()(const Math::Vector& rc) const
+  {
+    Math::Matrix res =
+      Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
+    const size_t i = m_i % m_vdim;
+    const size_t k = m_i / m_vdim;
+    assert(k < Geometry::Polytope::getVertexCount(m_g));
+    switch (m_g)
+    {
+      case Geometry::Polytope::Geometry::Point:
+      {
+        return res;
+      }
+      case Geometry::Polytope::Geometry::Segment:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res.row(i) << -1;
+            return res;
+          }
+          case 1:
+          {
+            res.row(i) << 1;
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            return res;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Triangle:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res.row(i) << -1, -1;
+            return res;
+          }
+          case 1:
+          {
+            res.row(i) << 1, 0;
+            return res;
+          }
+          case 2:
+          {
+            res.row(i) << 0, 1;
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            return res;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Quadrilateral:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res.row(i) << rc.y() - 1, rc.x() - 1;
+            return res;
+          }
+          case 1:
+          {
+            res.row(i) << 1 - rc.y(), -rc.x();
+            return res;
+          }
+          case 2:
+          {
+            res.row(i) << -rc.y(), 1 - rc.x();
+            return res;
+          }
+          case 3:
+          {
+            res.row(i) << rc.y(), rc.x();
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            return res;
+          }
+        }
+      }
+      case Geometry::Polytope::Geometry::Tetrahedron:
+      {
+        switch (k)
+        {
+          case 0:
+          {
+            res.row(i) << -1, -1, -1;
+            return res;
+          }
+          case 1:
+          {
+            res.row(i) << 1, 0, 0;
+            return res;
+          }
+          case 2:
+          {
+            res.row(i) << 0, 1, 0;
+            return res;
+          }
+          case 3:
+          {
+            res.row(i) << 0, 0, 1;
+            return res;
+          }
+          default:
+          {
+            assert(false);
+            res.setConstant(NAN);
+            return res;
+          }
+        }
+      }
+    }
+    assert(false);
+    res.setConstant(NAN);
+    return res;
+  }
+
+  const Math::Matrix& VectorP1Element::JacobianFunction::operator()(CacheResultType, const Math::Vector& r) const
   {
     auto it = m_cache.find(&r);
     if (it == m_cache.end())

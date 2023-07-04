@@ -127,6 +127,10 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDOFs(element);
       }
 
+      /**
+       * @brief Gets an expression which yields the shape function basis at the
+       * given point.
+       */
       inline
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
@@ -134,6 +138,12 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getTensorBasis(p);
       }
 
+      /**
+       * @brief Call operator to get an expression which yields the shape
+       * function basis at the given point.
+       *
+       * Synonym to getTensorBasis().
+       */
       template <class ... Args>
       inline
       constexpr
@@ -432,8 +442,8 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
-          return TensorBasis<Math::Vector>(fe.getCount(), fes.getVectorDimension(),
-              [&](size_t local) -> Math::Vector { return fe.getBasis(local)(rc); });
+          return TensorBasis<Math::Vector>(fes.getVectorDimension(), fe.getCount(),
+              [&](size_t local) -> Math::Vector { return fe.getBasis(local)(CacheResult, rc); });
         }
         else
         {

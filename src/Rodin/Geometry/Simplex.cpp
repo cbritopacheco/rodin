@@ -175,8 +175,8 @@ namespace Rodin::Geometry
             const Scalar c = jac.coeff(1, 0);
             const Scalar d = jac.coeff(1, 1);
             const Scalar det = a * d - b * c;
-            m_jacobianDeterminant.emplace(det);
             assert(det != 0);
+            m_jacobianDeterminant.emplace(det);
             Math::Matrix inv(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
@@ -315,16 +315,6 @@ namespace Rodin::Geometry
             m_distortion.emplace(Math::abs(jac.coeff(0, 0)));
             break;
           }
-          case 2:
-          {
-            m_distortion.emplace(Math::abs(getJacobianDeterminant()));
-            break;
-          }
-          case 3:
-          {
-            m_distortion.emplace(Math::abs(getJacobianDeterminant()));
-            break;
-          }
           default:
           {
             m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
@@ -334,7 +324,14 @@ namespace Rodin::Geometry
       }
       else
       {
-        assert(false); // Not handled yet
+        if (jac.rows() == 2 && jac.cols() == 1)
+        {
+          m_distortion.emplace(std::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
+        }
+        else
+        {
+          m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+        }
       }
     }
     assert(m_distortion.has_value());

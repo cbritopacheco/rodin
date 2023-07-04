@@ -5,11 +5,11 @@
 
   @section what-is-rodin What is Rodin?
 
-  Rodin is a lightweight and modular shape optimization framework which
-  provides many of the associated functionalities that are needed when
-  implementing shape and topology optimization algorithms. These
-  functionalities range from refining and remeshing the underlying shape, to
-  providing elegant mechanisms to specify and solve variational problems.
+  Rodin is a lightweight and modular finite element framework which provides
+  many of the associated functionalities that are needed when implementing
+  shape and topology optimization algorithms. These functionalities range from
+  refining and remeshing the underlying shape, to providing elegant mechanisms
+  to specify and solve variational problems.
 
   It is named after the French sculptor [Auguste
   Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
@@ -30,7 +30,6 @@
   To provide many of the functionalities, Rodin utilizes many low-level
   libraries such as:
   - [Eigen3](https://eigen.tuxfamily.org/)
-  - [MFEM](https://mfem.org/)
   - [MMG](https://www.mmgtools.org/)
   - [ISCD Toolbox](https://iscd.sorbonne-universite.fr/)
 

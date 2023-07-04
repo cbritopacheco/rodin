@@ -122,7 +122,7 @@ namespace Rodin::FormLanguage
 
     private:
       const size_t m_uuid;
-      mutable std::deque<std::shared_ptr<const void>> m_objs;
+      mutable std::deque<const std::shared_ptr<const void>> m_objs;
   };
 }
 

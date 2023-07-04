@@ -129,7 +129,20 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
+          const size_t sz = w.size();
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const size_t count = mesh.getVertexCount();
+          const size_t vdim = fes.getVectorDimension();
+          data.setZero();
+          for (size_t i = 0; i < sz; i++)
+            for (size_t d = 0; d < vdim; d++)
+              data.col(i).coeffRef(d) = w(i % count + d * count);
+        }
+        else
+        {
           assert(false);
+          data.setConstant(NAN);
         }
         return *this;
       }

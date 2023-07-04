@@ -178,8 +178,9 @@ namespace Rodin::Variational
 
 
     private:
+      static const Geometry::GeometryIndexed<ScalarP1Element> s_elements;
+
       std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
-      static const Geometry::GeometryIndexed<P1Element<Scalar>> s_elements;
   };
 
   template <class Context>
@@ -267,7 +268,7 @@ namespace Rodin::Variational
       inline
       const VectorP1Element& getFiniteElement(size_t d, Index i) const
       {
-        return m_elements[d][i];
+        return s_elements[m_vdim][getMesh().getGeometry(d, i)];
       }
 
       inline
@@ -291,7 +292,7 @@ namespace Rodin::Variational
       inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return getMesh().getConnectivity().getPolytope(d, i);
+        return m_dofs[d][i];
       }
 
       inline
@@ -315,17 +316,25 @@ namespace Rodin::Variational
       }
 
     private:
+      static const std::array<Geometry::GeometryIndexed<VectorP1Element>, RODIN_P1_MAX_VECTOR_DIMENSION> s_elements;
+
       std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
       size_t m_vdim;
-      std::vector<std::vector<P1Element<Math::Vector>>> m_elements;
+      std::vector<std::vector<IndexArray>> m_dofs;
   };
 
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t) -> P1<Math::Vector, Context, Geometry::Mesh<Context>>;
 
-  /// Alias for a scalar valued P1 finite element space
+  /// Alias for a vector valued P1 finite element space
   template <class Context>
   using VectorP1 = P1<Math::Vector, Context, Geometry::Mesh<Context>>;
+
+  namespace Internal
+  {
+    std::array<Geometry::GeometryIndexed<VectorP1Element>, RODIN_P1_MAX_VECTOR_DIMENSION>
+    initVectorP1Elements();
+  }
 }
 
 

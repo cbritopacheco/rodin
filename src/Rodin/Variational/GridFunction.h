@@ -183,11 +183,22 @@ namespace Rodin::Variational
       }
 
       inline
-      Derived& operator=(std::function<Scalar(const Geometry::Point&)> fn)
+      Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
-        assert(getFiniteElementSpace().getVectorDimension() == 1);
-        return project(ScalarFunction(fn));
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          assert(getFiniteElementSpace().getVectorDimension() == 1);
+          return project(ScalarFunction(fn));
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+        }
+        else
+        {
+          assert(false);
+          return static_cast<Derived&>(*this);
+        }
       }
 
       /**

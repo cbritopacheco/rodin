@@ -19,7 +19,7 @@ using namespace Rodin::Variational;
 
 namespace RodinBenchmark
 {
-  struct Poisson16 : public benchmark::Fixture
+  struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {
     public:
       static constexpr const Geometry::Attribute dirichletAttr = 1;
@@ -39,7 +39,7 @@ namespace RodinBenchmark
       std::unique_ptr<P1<Scalar, Context::Serial>> vhPtr;
   };
 
-  BENCHMARK_F(Poisson16, Assembly_ConstantCoefficient_ConstantSource)
+  BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
   (benchmark::State& st)
   {
     assert(vhPtr);

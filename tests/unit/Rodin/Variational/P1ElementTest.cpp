@@ -9,7 +9,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Test::Random;
 
-TEST(Rodin_Variational_ScalarP1Element_SanityTest, 1D_Reference_Segment)
+TEST(Rodin_Variational_ScalarP1Element, SanityTest_1D_Reference_Segment)
 {
   ScalarP1Element k(Polytope::Geometry::Segment);
 
@@ -29,7 +29,7 @@ TEST(Rodin_Variational_ScalarP1Element_SanityTest, 1D_Reference_Segment)
   }
 }
 
-TEST(Rodin_Variational_ScalarP1Element_FuzzyTest, 1D_Reference_Segment)
+TEST(Rodin_Variational_ScalarP1Element, FuzzyTest_1D_Reference_Segment)
 {
   constexpr size_t n = 25;
 
@@ -47,7 +47,7 @@ TEST(Rodin_Variational_ScalarP1Element_FuzzyTest, 1D_Reference_Segment)
   }
 }
 
-TEST(Rodin_Variational_ScalarP1Element_SanityTest, 2D_Reference_Triangle)
+TEST(Rodin_Variational_ScalarP1Element, SanityTest_2D_Reference_Triangle)
 {
   ScalarP1Element k(Polytope::Geometry::Triangle);
 
@@ -88,7 +88,7 @@ TEST(Rodin_Variational_ScalarP1Element_SanityTest, 2D_Reference_Triangle)
   }
 }
 
-TEST(Rodin_Variational_ScalarP1Element_FuzzyTest, 2D_Reference_Triangle)
+TEST(Rodin_Variational_ScalarP1Element, FuzzyTest_2D_Reference_Triangle)
 {
   constexpr size_t n = 25;
 

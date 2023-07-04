@@ -9,9 +9,10 @@
 
 #include <Eigen/QR>
 
-#include "Rodin/Variational/P1.h"
+#include "Rodin/Geometry/Simplex.h"
 
 #include "SimplexTransformation.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
@@ -115,10 +116,10 @@ namespace Rodin::Geometry
           res.noalias() += m_pm.col(local) * m_fe.getBasis(local)(CacheResult, rc);
         }
 
-        auto it = m_jacobian.find(&rc);
-        if (it == m_jacobian.end())
+        auto it = m_transform.find(&rc);
+        if (it == m_transform.end())
         {
-          auto rit = m_jacobian.insert(it, { &rc, std::move(res) });
+          auto rit = m_transform.insert(it, { &rc, std::move(res) });
           return rit->second;
         }
         else
@@ -167,6 +168,12 @@ namespace Rodin::Geometry
         {
           return it->second;
         }
+      }
+
+      inline
+      const Math::Matrix& getPointMatrix() const
+      {
+        return m_pm;
       }
 
     private:

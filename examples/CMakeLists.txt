@@ -20,20 +20,17 @@ if (RODIN_BUILD_EXAMPLES)
   endif()
 
   add_subdirectory(IO)
+  if (RODIN_WITH_PLOT)
+    add_subdirectory(Plot)
+  endif()
   add_subdirectory(Geometry)
   add_subdirectory(Variational)
+
+  add_subdirectory(PDEs)
   # add_subdirectory(ShapeOptimization)
   # add_subdirectory(DensityOptimization)
   # add_subdirectory(SurfaceOptimization)
   # add_subdirectory(SurfaceEvolution)
 
   # add_subdirectory(MMG)
-
-  # if (RODIN_USE_MPI)
-  #   add_subdirectory(Parallel)
-  # endif()
-
-  if (RODIN_WITH_PLOT)
-    add_subdirectory(Plot)
-  endif()
 endif()

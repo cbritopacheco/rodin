@@ -13,9 +13,14 @@
 
 namespace Rodin::QF
 {
+  /**
+   * @brief Quadrature on a polytope with any of Rodin's supported @ref Geometry::Polytope::Geometry "geometries".
+   * @see @ref Geometry::Polytope::Geometry "Polytope::Geometry"
+   */
   class QFGG : public QuadratureFormulaBase
   {
     public:
+      /// Parent class
       using Parent = QuadratureFormulaBase;
 
       constexpr

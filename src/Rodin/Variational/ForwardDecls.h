@@ -390,7 +390,7 @@ namespace Rodin::Variational
    * @f]
    * where Operand is a type representing a scalar function
    * @f$ u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ and the gradient
-   * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ at the point
+   * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R}^n @f$ at the point
    * @f$ x = (x_1, \ldots, x_n) @f$ is defined by:
    * @f[
    *   \nabla u (x) =
