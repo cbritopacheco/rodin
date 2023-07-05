@@ -46,7 +46,7 @@ namespace Rodin::Geometry
 
           Builder& initialize(Mesh<Context::Serial>& parent);
 
-          Builder& include(const IndexSet& indices);
+          Builder& include(size_t d, const std::vector<Index>& indices);
 
           SubMesh finalize();
 
@@ -87,15 +87,9 @@ namespace Rodin::Geometry
        * @brief Gets the map of simplex indices from the submesh to the parent
        * mesh.
        */
-      const boost::bimap<Index, Index>& getSimplexMap(size_t d) const
+      const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const
       {
         return m_s2ps.at(d);
-      }
-
-      // [[deprecated]]
-      const boost::bimap<Index, Index>& getElementMap() const
-      {
-        return m_s2ps.at(getDimension());
       }
 
     private:

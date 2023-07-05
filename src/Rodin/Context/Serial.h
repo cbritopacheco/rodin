@@ -9,6 +9,9 @@
 
 namespace Rodin::Context
 {
+  /**
+   * @brief Represents the native single-threaded serialized context.
+   */
   struct Serial {};
 }
 

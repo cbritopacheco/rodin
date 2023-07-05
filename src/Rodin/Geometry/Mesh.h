@@ -198,14 +198,14 @@ namespace Rodin::Geometry
        * @returns Set of all the attributes in the mesh object.
        * @see getBoundaryAttributes() const
        */
-      virtual const std::set<Attribute>& getAttributes() const = 0;
+      virtual const FlatSet<Attribute>& getAttributes() const = 0;
 
       /**
        * @brief Gets the labels of the boundary elements in the mesh.
        * @returns Set of all the boundary attributes in the mesh object.
        * @see getAttributes() const
        */
-      virtual const std::set<Attribute>& getBoundaryAttributes() const = 0;
+      virtual const FlatSet<Attribute>& getBoundaryAttributes() const = 0;
 
       bool operator==(const MeshBase& other) const
       {
@@ -308,6 +308,9 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
+      /**
+       * @brief Class used to build Mesh<Context::Serial> instances.
+       */
       class Builder
       {
         public:
@@ -351,9 +354,12 @@ namespace Rodin::Geometry
 
           Mesh finalize();
 
-          Builder& setConnectivity(MeshConnectivity&& connectivity);
           Builder& setVertices(Math::Matrix&& connectivity);
+
+          Builder& setConnectivity(MeshConnectivity&& connectivity);
+
           Builder& setAttributeIndex(AttributeIndex&& connectivity);
+
           Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
         private:
@@ -461,11 +467,11 @@ namespace Rodin::Geometry
       * object containing the elements which were not trimmed from the
       * original mesh.
       */
-      virtual SubMesh<Context::Serial> trim(const std::set<Attribute>& attrs);
+      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs);
 
       virtual SubMesh<Context::Serial> keep(Attribute attr);
 
-      virtual SubMesh<Context::Serial> keep(const std::set<Attribute>& attrs);
+      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs);
 
       // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
 
@@ -532,15 +538,15 @@ namespace Rodin::Geometry
 
       virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const override;
 
-      virtual const std::set<Attribute>& getAttributes() const override;
+      virtual const FlatSet<Attribute>& getAttributes() const override;
 
-      virtual const std::set<Attribute>& getBoundaryAttributes() const override;
+      virtual const FlatSet<Attribute>& getBoundaryAttributes() const override;
 
     private:
       size_t m_sdim;
 
       PolytopeIndexed<Geometry::Attribute> m_attrs;
-      std::vector<std::set<Attribute>> m_attributes;
+      std::vector<FlatSet<Attribute>> m_attributes;
 
       Math::Matrix m_vertices;
       MeshConnectivity m_connectivity;

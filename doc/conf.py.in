@@ -13,9 +13,9 @@ FAVICON = 'favicon-dark.png'
 
 LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
+        ('Examples and tutorials', 'examples-index'),
+        ('General concepts', 'guides-index'),
         ('Notation', 'notation-index'),
-        ('Guides', 'guides-index'),
-        ('Examples', 'examples-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [
         ('Supported finite elements', 'group___finite_elements'),
