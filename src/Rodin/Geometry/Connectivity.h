@@ -24,13 +24,15 @@
 namespace Rodin::Geometry
 {
   /**
-   * @brief Represents the set of incidence relations.
+   * @brief Represents the set of incidence relations of a Mesh.
    *
-   * Stores the set of incidence relations:
+   * This class stores the set of incidence relations:
    * @f[
-   *  d \rightarrow d'
+   *  d \longrightarrow d', \quad 0 \leq d, d' \leq D,
    * @f]
-   * for a fixed pair of topological dimensions @f$ (d, d') @f$.
+   * where @f$ D @f$ represents the topological mesh dimension. This class is
+   * based on @cite logg2009efficient.
+   *
    */
   class MeshConnectivity
   {
@@ -101,7 +103,14 @@ namespace Rodin::Geometry
       void local(std::vector<SubPolytope>& out, size_t dim, Index i);
 
       /**
-       * D -> d and D -> 0 from D -> 0 and D -> D
+       * @brief Computes the entities of dimension @f$ d @f$ of each cell and
+       * for each such entity the vertices of that entity.
+       *
+       * Computes the connectivities:
+       * @f[
+       *  D \longrightarrow d \quad \text{and} \quad D \longrightarrow 0, \quad 0 < d < D,
+       * @f]
+       * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
        */
       MeshConnectivity& build(size_t d);
 

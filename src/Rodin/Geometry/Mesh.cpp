@@ -75,12 +75,12 @@ namespace Rodin::Geometry
     return { getVertices().data() + getSpaceDimension() * idx, size };
   }
 
-  const std::set<Attribute>& Mesh<Context::Serial>::getAttributes() const
+  const FlatSet<Attribute>& Mesh<Context::Serial>::getAttributes() const
   {
     return m_attributes[getDimension()];
   }
 
-  const std::set<Attribute>& Mesh<Context::Serial>::getBoundaryAttributes() const
+  const FlatSet<Attribute>& Mesh<Context::Serial>::getBoundaryAttributes() const
   {
     return m_attributes[getDimension()];
   }
@@ -342,6 +342,7 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
   {
     m_attrs.track(dimension, index, attr);
+    m_attributes[dimension].insert(attr);
     return *this;
   }
 
@@ -382,42 +383,43 @@ namespace Rodin::Geometry
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr)
   {
-    return keep(std::set<Attribute>{attr});
+    return keep(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const FlatSet<Attribute>& attrs)
   {
-    assert(false);
-    // SubMesh<Context::Serial> res(*this);
-    // std::set<Index> indices;
-    // for (Index i = 0; i < getCount(getDimension()); i++)
-    // {
-    //   if (attrs.count(getAttribute(getDimension(), i)))
-    //     indices.insert(i);
-    // }
-    // res.initialize(getSpaceDimension()).include(indices).finalize();
-    // return res;
+    const size_t D = getDimension();
+    SubMesh<Context::Serial>::Builder build;
+    build.initialize(*this);
+    std::vector<Index> indices;
+    for (Index i = 0; i < getElementCount(); i++)
+    {
+      if (attrs.count(getAttribute(D, i)))
+        indices.push_back(i);
+    }
+    build.include(D, indices);
+    return build.finalize();
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
   {
-    assert(false);
-    // SubMesh<Context::Serial> res(*this);
-    // std::set<Index> indices;
-    // for (auto it = getBoundary(); !it.end(); ++it)
-    //   indices.insert(it->getIndex());
-    // res.initialize(getSpaceDimension()).include(indices).finalize();
-    // return res;
+    const size_t D = getDimension();
+    SubMesh<Context::Serial>::Builder build;
+    std::vector<Index> indices;
+    for (auto it = getBoundary(); !it.end(); ++it)
+      indices.push_back(it->getIndex());
+    build.include(D - 1, indices);
+    return build.finalize();
   }
 
   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
   {
-    return trim(std::set<Attribute>{attr});
+    return trim(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<Attribute>& attrs)
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const FlatSet<Attribute>& attrs)
   {
-    std::set<Attribute> complement = getAttributes();
+    auto complement = getAttributes();
     for (const auto& a : attrs)
       complement.erase(a);
     return keep(complement);

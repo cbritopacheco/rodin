@@ -21,8 +21,9 @@ namespace Rodin::Geometry
   }
 
   SubMesh<Context::Serial>::Builder&
-  SubMesh<Context::Serial>::Builder::include(const IndexSet& indices)
+  SubMesh<Context::Serial>::Builder::include(size_t d, const std::vector<Index>& indices)
   {
+    assert(false);
     // auto& build = m_build;
 
     // assert(m_s2ps.size() == ref.getDimension() + 1);
