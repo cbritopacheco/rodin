@@ -66,9 +66,7 @@ namespace Rodin::Variational
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
         assert(dofs == trial.getDOFs(polytope));
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
-        const size_t order = 2 * dofs + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
+        const QF::QF1P1 qf(polytope.getGeometry());
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
         m_gradient.resize(dofs);
@@ -103,6 +101,121 @@ namespace Rodin::Variational
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>, P1<Scalar, Context>, TestSpace>>&)
     -> QuadratureRule<Dot<
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>, P1<Scalar, Context>, TrialSpace>,
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>, P1<Scalar, Context>, TestSpace>>>;
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   *
+   * @f[
+   * \int A \nabla u \cdot \nabla v \ dx
+   * @f]
+   */
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>
+  class QuadratureRule<
+  Dot<
+    ShapeFunctionBase<
+      Mult<
+        FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>, P1<Scalar, Context>, TrialSpace>>,
+      P1<Scalar, Context>, TrialSpace>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>, P1<Scalar, Context>, TestSpace>>>
+    : public BilinearFormIntegratorBase
+  {
+    public:
+      using Parent = BilinearFormIntegratorBase;
+
+      using LHS =
+        ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>,
+        TrialSpace>>, P1<Scalar, Context>, TrialSpace>>, P1<Scalar, Context>,
+        TrialSpace>;
+
+      using RHS = ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>, P1<Scalar, Context>, TestSpace>;
+
+      using Integrand = Dot<LHS, RHS>;
+
+      constexpr
+      QuadratureRule(const Integrand& integrand)
+        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy())
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy())
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand))
+      {}
+
+      inline
+      constexpr
+      const Integrand& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      void assemble(const Geometry::Polytope& polytope) override
+      {
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& integrand = getIntegrand();
+        const auto& trial = integrand.getLHS();
+        const auto& f = static_cast<const Mult<FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>,
+        TrialSpace>>, P1<Scalar, Context>, TrialSpace>>&>(integrand.getLHS()).getLHS();
+        const auto& trans = polytope.getTransformation();
+        const auto& fes = trial.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const size_t dofs = fe.getCount();
+        assert(dofs == trial.getDOFs(polytope));
+        const QF::QF1P1 qf(polytope.getGeometry());
+        auto& res = getMatrix();
+        res = Math::Matrix::Zero(dofs, dofs);
+        m_gradient.resize(dofs);
+        for (size_t k = 0; k < qf.getSize(); k++)
+        {
+          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
+          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+          const auto jacInvT = p.getJacobianInverse().transpose();
+          for (size_t local = 0; local < dofs; local++)
+            m_gradient[local] = jacInvT * fe.getGradient(local)(rc);
+          const auto fv = f.getValue(p);
+          for (size_t i = 0; i < dofs; i++)
+            res(i, i) += qf.getWeight(k) * p.getDistortion() * (fv * m_gradient[i]).dot(m_gradient[i]);
+          for (size_t i = 0; i < dofs; i++)
+            for (size_t j = 0; j < i; j++)
+              res(i, j) += qf.getWeight(k) * p.getDistortion() * (fv * m_gradient[i]).dot(m_gradient[j]);
+        }
+        res.template triangularView<Eigen::Upper>() = res.transpose();
+      }
+
+      virtual Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<Integrand> m_integrand;
+      std::vector<Math::Vector> m_gradient;
+  };
+
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>
+  QuadratureRule(const Dot<
+        ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>,
+        TrialSpace>>, P1<Scalar, Context>, TrialSpace>>, P1<Scalar, Context>,
+        TrialSpace>,
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>, P1<Scalar, Context>, TestSpace>>&)
+    -> QuadratureRule<Dot<
+        ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Scalar, Context>,
+        TrialSpace>>, P1<Scalar, Context>, TrialSpace>>, P1<Scalar, Context>,
+        TrialSpace>,
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>, P1<Scalar, Context>, TestSpace>>>;
 
   /**
@@ -166,10 +279,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         assert(integrand.getRangeType() == RangeType::Scalar);
-        const size_t order = fe.getCount() + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
+        const QF::QF1P1 qf(polytope.getGeometry());
         auto& res = getVector();
         res = Math::Vector::Zero(dofs);
         for (size_t k = 0; k < qf.getSize(); k++)
@@ -274,10 +385,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         assert(integrand.getRangeType() == RangeType::Scalar);
-        const size_t order = fe.getCount() + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
+        const QF::QF1P1 qf(polytope.getGeometry());
         auto& res = getVector();
         res = Math::Vector::Zero(dofs);
         for (size_t k = 0; k < qf.getSize(); k++)

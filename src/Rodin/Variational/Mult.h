@@ -260,9 +260,9 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
-        const auto& lhs = this->object(getLHS().getValue(p));
-        const auto& rhs = this->object(getRHS().getTensorBasis(p));
-        return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs * rhs(i); });
+        m_f = getLHS().getValue(p);
+        const auto rhs = getRHS().getTensorBasis(p);
+        return TensorBasis(rhs.getDOFs(), [&](size_t i){ return m_f * rhs(i); });
       }
 
       inline Mult* copy() const noexcept override
@@ -273,6 +273,8 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHS> m_lhs;
       std::unique_ptr<RHS> m_rhs;
+
+      mutable typename FormLanguage::ResultOf<LHS>::Type m_f;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>

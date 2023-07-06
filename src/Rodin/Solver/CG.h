@@ -72,7 +72,8 @@ namespace Rodin::Solver
       }
 
     private:
-      Eigen::ConjugateGradient<Math::SparseMatrix> m_solver;
+      Eigen::ConjugateGradient<
+        Math::SparseMatrix, Eigen::Lower | Eigen::Upper, Eigen::IdentityPreconditioner> m_solver;
   };
 
 }

@@ -195,10 +195,13 @@ namespace Rodin::Variational
         const auto& fes = this->getFiniteElementSpace();
         const Index i = p.getPolytope().getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
+        const size_t dofs = fe.getCount();
         const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        return TensorBasis(fe.getCount(),
-            [&](size_t local)
-            { return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc)); });
+        m_gradient.resize(dofs);
+        for (size_t local = 0; local < dofs; local++)
+          m_gradient[local] = fe.getGradient(local)(rc);
+        return TensorBasis(dofs,
+            [&](size_t local) { return p.getJacobianInverse().transpose() * m_gradient[local]; });
       }
 
       inline Grad* copy() const noexcept override
@@ -208,6 +211,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Operand> m_u;
+      mutable std::vector<ScalarP1Element::GradientFunction::ReturnType> m_gradient;
   };
 
   template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
