@@ -196,7 +196,7 @@ namespace Rodin::Variational
               const Index global = fes.getGlobalIndex({ d, i }, local);
               const auto& lf = fe.getLinearForm(local);
               const Scalar s = lf(mapping);
-              m_dofs.insert({ global, s });
+              m_dofs.insert(std::pair{ global, s });
             }
           }
         }
