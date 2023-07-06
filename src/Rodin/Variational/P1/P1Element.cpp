@@ -348,6 +348,8 @@ namespace Rodin::Variational
         }
       }
     }
+    assert(false);
+    return NAN;
   }
 
   ScalarP1Element::GradientFunction::ReturnType
