@@ -1,4 +1,5 @@
 if (RODIN_BUILD_EXAMPLES)
+  rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
   if (${CMAKE_BUILD_TYPE} MATCHES Release)
     rodin_add_compile_options(
       LANG CXX
@@ -7,8 +8,7 @@ if (RODIN_BUILD_EXAMPLES)
       -march=native
       -fvectorize
       -fslp-vectorize
-      -ffp-contract=fast
-      -fcolor-diagnostics)
+      -ffp-contract=fast)
   elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     rodin_add_compile_options(
       LANG CXX

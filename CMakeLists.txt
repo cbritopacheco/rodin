@@ -51,6 +51,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 
 # ---- Set compile options for all the submodules ----------------------------
+rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
+
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   rodin_add_compile_options(
     LANG CXX C

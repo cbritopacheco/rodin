@@ -8,6 +8,7 @@
 #define RODIN_MESH_MESHLOADER_H
 
 #include <utility>
+#include <fstream>
 
 #include "Rodin/IO/Loader.h"
 #include "Rodin/Geometry/Mesh.h"
