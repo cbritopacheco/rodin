@@ -207,7 +207,7 @@ namespace Rodin::Variational
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto& lhs = this->object(getLHS().getValue(p));
-        const auto& rhs = this->object(getRHS().getTensorBasis(p));
+        const auto rhs = getRHS().getTensorBasis(p);
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return lhs * rhs;
