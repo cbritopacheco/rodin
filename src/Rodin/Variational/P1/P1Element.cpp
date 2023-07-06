@@ -246,15 +246,21 @@ namespace Rodin::Variational
     switch (m_g)
     {
       case Geometry::Polytope::Geometry::Point:
+      {
         return 1;
+      }
       case Geometry::Polytope::Geometry::Segment:
       {
         switch (m_i)
         {
           case 0:
+          {
             return 1 - r.x();
+          }
           case 1:
+          {
             return r.x();
+          }
           default:
           {
             assert(false);
@@ -267,11 +273,17 @@ namespace Rodin::Variational
         switch (m_i)
         {
           case 0:
+          {
             return -r.x() - r.y() + 1;
+          }
           case 1:
+          {
             return r.x();
+          }
           case 2:
+          {
             return r.y();
+          }
           default:
           {
             assert(false);
@@ -290,11 +302,17 @@ namespace Rodin::Variational
             return x * y - x - y + 1;
           }
           case 1:
+          {
             return r.x() * (1 - r.y());
+          }
           case 2:
+          {
             return r.y() * (1 - r.x());
+          }
           case 3:
+          {
             return r.x() * r.y();
+          }
           default:
           {
             assert(false);
@@ -307,13 +325,21 @@ namespace Rodin::Variational
         switch (m_i)
         {
           case 0:
+          {
             return r.x() - r.y() - r.z() + 1;
+          }
           case 1:
+          {
             return r.x();
+          }
           case 2:
+          {
             return r.y();
+          }
           case 3:
+          {
             return r.z();
+          }
           default:
           {
             assert(false);
@@ -322,122 +348,157 @@ namespace Rodin::Variational
         }
       }
     }
-    assert(false);
-    return NAN;
   }
 
-  const Scalar& ScalarP1Element::BasisFunction::operator()(CacheResultType, const Math::Vector& r) const
+  ScalarP1Element::GradientFunction::ReturnType
+  ScalarP1Element::GradientFunction::operator()(const Math::Vector& r) const
   {
-    auto it = m_cache.find(&r);
-    if (it == m_cache.end())
-    {
-      auto rit = m_cache.insert(it, { &r, operator()(r) });
-      return rit->second;
-    }
-    else
-    {
-      return it->second;
-    }
-  }
-
-  Math::Vector ScalarP1Element::GradientFunction::operator()(const Math::Vector& r) const
-  {
+    ScalarP1Element::GradientFunction::ReturnType out;
     switch (m_g)
     {
       case Geometry::Polytope::Geometry::Point:
-        return Math::Vector{{0}};
+      {
+        out.resize(1);
+        out.coeffRef(0) = 0;
+        return out;
+      }
       case Geometry::Polytope::Geometry::Segment:
       {
+        out.resize(1);
         switch (m_i)
         {
           case 0:
-            return Math::Vector{{-1}};
+          {
+            out.coeffRef(0) = -1;
+            return out;
+          }
           case 1:
-            return Math::Vector{{1}};
+          {
+            out.coeffRef(0) = 1;
+            return out;
+          }
           default:
           {
             assert(false);
-            return Math::Vector{{NAN}};
+            out.setConstant(NAN);
+            return out;
           }
         }
       }
       case Geometry::Polytope::Geometry::Triangle:
       {
+        out.resize(2);
         switch (m_i)
         {
           case 0:
-            return Math::Vector{{-1, -1}};
+          {
+            out.setConstant(-1);
+            return out;
+          }
           case 1:
-            return Math::Vector{{1, 0}};
+          {
+            out.coeffRef(0) = 1;
+            out.coeffRef(1) = 0;
+            return out;
+          }
           case 2:
-            return Math::Vector{{0, 1}};
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 1;
+            return out;
+          }
           default:
           {
             assert(false);
-            return Math::Vector{{NAN, NAN}};
+            out.setConstant(NAN);
+            return out;
           }
         }
       }
       case Geometry::Polytope::Geometry::Quadrilateral:
       {
+        out.resize(2);
         switch (m_i)
         {
           case 0:
-            return Math::Vector{{r.y() - 1, r.x() - 1}};
+          {
+            out.coeffRef(0) = r.y() - 1;
+            out.coeffRef(1) = r.x() - 1;
+            return out;
+          }
           case 1:
-            return Math::Vector{{1 - r.y(), -r.y()}};
+          {
+            out.coeffRef(0) = 1 - r.y();
+            out.coeffRef(1) = -r.y();
+            return out;
+          }
           case 2:
-            return Math::Vector{{1 - r.x(), -r.x()}};
+          {
+            out.coeffRef(0) = 1 - r.x();
+            out.coeffRef(1) = -r.x();
+            return out;
+          }
           case 3:
-            return Math::Vector{{r.y(), r.x()}};
+          {
+            out.coeffRef(0) = r.y();
+            out.coeffRef(1) = r.x();
+            return out;
+          }
           default:
           {
             assert(false);
-            return Math::Vector{{NAN, NAN}};
+            out.setConstant(NAN);
+            return out;
           }
         }
       }
       case Geometry::Polytope::Geometry::Tetrahedron:
       {
+        out.resize(3);
         switch (m_i)
         {
           case 0:
-            return Math::Vector{{-1, -1, -1}};
+          {
+            out.setConstant(-1);
+            return out;
+          }
           case 1:
-            return Math::Vector{{1, 0, 0}};
+          {
+            out.coeffRef(0) = 1;
+            out.coeffRef(1) = 0;
+            out.coeffRef(2) = 0;
+            return out;
+          }
           case 2:
-            return Math::Vector{{0, 1, 0}};
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 1;
+            out.coeffRef(2) = 0;
+            return out;
+          }
           case 3:
-            return Math::Vector{{0, 0, 1}};
+          {
+            out.coeffRef(0) = 0;
+            out.coeffRef(1) = 0;
+            out.coeffRef(2) = 1;
+            return out;
+          }
           default:
           {
             assert(false);
-            return Math::Vector{{NAN, NAN, NAN}};
+            out.setConstant(NAN);
+            return out;
           }
         }
       }
     }
     assert(false);
-    return Math::Vector{{}};
+    out.setConstant(NAN);
   }
 
-  const Math::Vector& ScalarP1Element::GradientFunction::operator()(CacheResultType, const Math::Vector& r) const
+  void VectorP1Element::BasisFunction::operator()(Math::Vector& out, const Math::Vector& r) const
   {
-    auto it = m_cache.find(&r);
-    if (it == m_cache.end())
-    {
-      auto rit = m_cache.insert(it, { &r, operator()(r) });
-      return rit->second;
-    }
-    else
-    {
-      return it->second;
-    }
-  }
-
-  Math::Vector VectorP1Element::BasisFunction::operator()(const Math::Vector& r) const
-  {
-    Math::Vector res = Math::Vector::Zero(m_vdim);
+    out = Math::Vector::Zero(m_vdim);
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));
@@ -445,8 +506,8 @@ namespace Rodin::Variational
     {
       case Geometry::Polytope::Geometry::Point:
       {
-        res.coeffRef(0) = 1;
-        return res;
+        out.coeffRef(0) = 1;
+        return;
       }
       case Geometry::Polytope::Geometry::Segment:
       {
@@ -454,19 +515,19 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res.coeffRef(i) = 1 - r.x();
-            return res;
+            out.coeffRef(i) = 1 - r.x();
+            return;
           }
           case 1:
           {
-            res.coeffRef(i) = r.x();
-            return res;
+            out.coeffRef(i) = r.x();
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            break;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
@@ -476,24 +537,24 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res(i) = -r.x() - r.y() + 1;
-            return res;
+            out.coeffRef(i) = -r.x() - r.y() + 1;
+            return;
           }
           case 1:
           {
-            res(i) = r.x();
-            return res;
+            out.coeffRef(i) = r.x();
+            return;
           }
           case 2:
           {
-            res(i) = r.y();
-            return res;
+            out.coeffRef(i) = r.y();
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            break;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
@@ -503,29 +564,29 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res(i) = r.x() * r.y() - r.x() - r.y() + 1;
-            return res;
+            out.coeffRef(i) = r.x() * r.y() - r.x() - r.y() + 1;
+            return;
           }
           case 1:
           {
-            res(i) = r.x() * (1 - r.y());
-            return res;
+            out.coeffRef(i) = r.x() * (1 - r.y());
+            return;
           }
           case 2:
           {
-            res(i) = r.y() * (1 - r.x());
-            return res;
+            out.coeffRef(i) = r.y() * (1 - r.x());
+            return;
           }
           case 3:
           {
-            res(i) = r.x() * r.y();
-            return res;
+            out.coeffRef(i) = r.x() * r.y();
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            break;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
@@ -535,56 +596,40 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res(i) = -r.x() - r.y() - r.z() + 1;
-            return res;
+            out.coeffRef(i) = -r.x() - r.y() - r.z() + 1;
+            return;
           }
           case 1:
           {
-            res(i) = r.x();
-            return res;
+            out.coeffRef(i) = r.x();
+            return;
           }
           case 2:
           {
-            res(i) = r.y();
-            return res;
+            out.coeffRef(i) = r.y();
+            return;
           }
           case 3:
           {
-            res(i) = r.z();
-            return res;
+            out.coeffRef(i) = r.z();
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            break;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
     }
     assert(false);
-    res.setConstant(NAN);
-    return res;
+    out.setConstant(NAN);
   }
 
-  const Math::Vector& VectorP1Element::BasisFunction::operator()(CacheResultType, const Math::Vector& r) const
+  void VectorP1Element::JacobianFunction::operator()(Math::Matrix& out, const Math::Vector& rc) const
   {
-    auto it = m_cache.find(&r);
-    if (it == m_cache.end())
-    {
-      auto rit = m_cache.insert(it, { &r, operator()(r) });
-      return rit->second;
-    }
-    else
-    {
-      return it->second;
-    }
-  }
-
-  Math::Matrix VectorP1Element::JacobianFunction::operator()(const Math::Vector& rc) const
-  {
-    Math::Matrix res =
-      Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
+    out = Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));
@@ -592,7 +637,7 @@ namespace Rodin::Variational
     {
       case Geometry::Polytope::Geometry::Point:
       {
-        return res;
+        return;
       }
       case Geometry::Polytope::Geometry::Segment:
       {
@@ -600,19 +645,19 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res.row(i) << -1;
-            return res;
+            out.row(i) << -1;
+            return;
           }
           case 1:
           {
-            res.row(i) << 1;
-            return res;
+            out.row(i) << 1;
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            return res;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
@@ -622,24 +667,24 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res.row(i) << -1, -1;
-            return res;
+            out.row(i) << -1, -1;
+            return;
           }
           case 1:
           {
-            res.row(i) << 1, 0;
-            return res;
+            out.row(i) << 1, 0;
+            return;
           }
           case 2:
           {
-            res.row(i) << 0, 1;
-            return res;
+            out.row(i) << 0, 1;
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            return res;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
@@ -649,29 +694,29 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res.row(i) << rc.y() - 1, rc.x() - 1;
-            return res;
+            out.row(i) << rc.y() - 1, rc.x() - 1;
+            return;
           }
           case 1:
           {
-            res.row(i) << 1 - rc.y(), -rc.x();
-            return res;
+            out.row(i) << 1 - rc.y(), -rc.x();
+            return;
           }
           case 2:
           {
-            res.row(i) << -rc.y(), 1 - rc.x();
-            return res;
+            out.row(i) << -rc.y(), 1 - rc.x();
+            return;
           }
           case 3:
           {
-            res.row(i) << rc.y(), rc.x();
-            return res;
+            out.row(i) << rc.y(), rc.x();
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            return res;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
@@ -681,49 +726,34 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            res.row(i) << -1, -1, -1;
-            return res;
+            out.row(i) << -1, -1, -1;
+            return;
           }
           case 1:
           {
-            res.row(i) << 1, 0, 0;
-            return res;
+            out.row(i) << 1, 0, 0;
+            return;
           }
           case 2:
           {
-            res.row(i) << 0, 1, 0;
-            return res;
+            out.row(i) << 0, 1, 0;
+            return;
           }
           case 3:
           {
-            res.row(i) << 0, 0, 1;
-            return res;
+            out.row(i) << 0, 0, 1;
+            return;
           }
           default:
           {
             assert(false);
-            res.setConstant(NAN);
-            return res;
+            out.setConstant(NAN);
+            return;
           }
         }
       }
     }
     assert(false);
-    res.setConstant(NAN);
-    return res;
-  }
-
-  const Math::Matrix& VectorP1Element::JacobianFunction::operator()(CacheResultType, const Math::Vector& r) const
-  {
-    auto it = m_cache.find(&r);
-    if (it == m_cache.end())
-    {
-      auto rit = m_cache.insert(it, { &r, operator()(r) });
-      return rit->second;
-    }
-    else
-    {
-      return it->second;
-    }
+    out.setConstant(NAN);
   }
 }

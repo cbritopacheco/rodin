@@ -122,9 +122,9 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      size_t getDOFs(const Geometry::Polytope& polytope) const
       {
-        return static_cast<const Derived&>(*this).getDOFs(element);
+        return static_cast<const Derived&>(*this).getDOFs(polytope);
       }
 
       /**
@@ -418,10 +418,10 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      size_t getDOFs(const Geometry::Polytope& polytope) const
       {
-        const size_t d = element.getDimension();
-        const size_t i = element.getIndex();
+        const size_t d = polytope.getDimension();
+        const size_t i = polytope.getIndex();
         return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
       }
 
@@ -437,13 +437,13 @@ namespace Rodin::Variational
         const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          return TensorBasis<Scalar>(fe.getCount(),
-              [&](size_t local) -> Scalar { return fe.getBasis(local)(rc); });
+          return TensorBasis(fe.getCount(),
+              [&](size_t local) { return fe.getBasis(local)(rc); });
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
-          return TensorBasis<Math::Vector>(fes.getVectorDimension(), fe.getCount(),
-              [&](size_t local) -> Math::Vector { return fe.getBasis(local)(CacheResult, rc); });
+          return TensorBasis(fe.getCount(),
+              [&](size_t local) { return this->object(fe.getBasis(local)(rc)); });
         }
         else
         {

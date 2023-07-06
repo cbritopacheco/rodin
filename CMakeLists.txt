@@ -58,7 +58,10 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
     -w
     -O3
     -DNDEBUG
-    -march=native)
+    -march=native
+    -fvectorize
+    -fslp-vectorize
+    -ffp-contract=fast)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG CXX C

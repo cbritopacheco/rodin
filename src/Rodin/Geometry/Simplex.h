@@ -487,8 +487,6 @@ namespace Rodin::Geometry
         }
       }
 
-      const Math::Matrix& getJacobian() const override;
-
     private:
       const Type m_type;
       std::variant<const Math::Vector, std::reference_wrapper<const Math::Vector>> m_rc;

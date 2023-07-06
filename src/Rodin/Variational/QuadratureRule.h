@@ -56,12 +56,14 @@ namespace Rodin::Variational
 
       QuadratureRule(const QuadratureRule& other)
         : BilinearFormIntegratorBase(other),
-          m_prod(other.m_prod->copy())
+          m_prod(other.m_prod->copy()),
+          m_mat(other.m_mat)
       {}
 
       QuadratureRule(QuadratureRule&& other)
         : BilinearFormIntegratorBase(std::move(other)),
-          m_prod(std::move(other.m_prod))
+          m_prod(std::move(other.m_prod)),
+          m_mat(std::move(other.m_mat))
       {}
 
       inline
@@ -88,7 +90,8 @@ namespace Rodin::Variational
         const size_t order = trialfe.getCount() + testfe.getCount() + vc;
         const QF::QFGG qf(order, polytope.getGeometry());
         auto& res = getMatrix();
-        res = Math::Matrix::Zero(test.getDOFs(polytope), trial.getDOFs(polytope));
+        res.resize(test.getDOFs(polytope), trial.getDOFs(polytope));
+        res.setZero();
         for (size_t i = 0; i < qf.getSize(); i++)
         {
           Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
@@ -103,6 +106,8 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_prod;
+
+      Math::Matrix m_mat;
   };
 
   /**
@@ -166,7 +171,9 @@ namespace Rodin::Variational
         for (size_t i = 0; i < qf.getSize(); i++)
         {
           Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
-          res.noalias() += qf.getWeight(i) * p.getDistortion() * integrand.getTensorBasis(p).getVector();
+          auto basis = integrand.getTensorBasis(p);
+          for (size_t local = 0; local < basis.getDOFs(); local++)
+            res.coeffRef(local) += qf.getWeight(i) * p.getDistortion() * basis(local);
         }
       }
 
@@ -177,129 +184,6 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<Integrand> m_integrand;
   };
-
-  /* ||-- OPTIMIZATIONS -----------------------------------------------------
-   * QuadratureRule<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   * ---------------------------------------------------------------------->>
-   */
-
-  /**
-   * @ingroup QuadratureRuleSpecializations
-   *
-   * @f[
-   * \int \nabla u \cdot \nabla v \ dx
-   * @f]
-   */
-  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class QuadratureRule<Dot<
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, TestFES, TestSpace>>, TestFES, TestSpace>>>
-    : public BilinearFormIntegratorBase
-  {
-    public:
-      using Parent = BilinearFormIntegratorBase;
-      using LHS = ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>;
-      using RHS = ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, TestFES, TestSpace>>, TestFES, TestSpace>;
-      using Integrand = Dot<
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, TestFES, TestSpace>>, TestFES, TestSpace>>;
-
-      constexpr
-      QuadratureRule(const Integrand& integrand)
-        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy())
-      {}
-
-      constexpr
-      QuadratureRule(const QuadratureRule& other)
-        : Parent(other),
-          m_integrand(other.m_integrand->copy())
-      {}
-
-      constexpr
-      QuadratureRule(QuadratureRule&& other)
-        : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand))
-      {}
-
-      inline
-      constexpr
-      const Integrand& getIntegrand() const
-      {
-        assert(m_integrand);
-        return *m_integrand;
-      }
-
-      void assemble(const Geometry::Polytope& polytope) override
-      {
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
-        const auto& trial = integrand.getLHS();
-        const auto& test = integrand.getRHS();
-        const auto& trans = polytope.getTransformation();
-        const auto& trialfes = trial.getFiniteElementSpace();
-        const auto& testfes = test.getFiniteElementSpace();
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe = testfes.getFiniteElement(d, idx);
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
-        const size_t order = trialfe.getCount() + testfe.getCount() + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
-        auto& res = getMatrix();
-        res = Math::Matrix::Zero(test.getDOFs(polytope), trial.getDOFs(polytope));
-        if (&trialfe == &testfe)
-        {
-          m_trgrad.resize(d, trialfe.getCount());
-          for (size_t i = 0; i < qf.getSize(); i++)
-          {
-            Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
-            const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-            for (size_t local = 0; local < static_cast<size_t>(m_trgrad.cols()); local++)
-              m_trgrad.col(local) = trialfe.getGradient(local)(CacheResult, rc);
-            const auto jact = p.getJacobianInverse().transpose();
-            res.noalias() += qf.getWeight(i) * p.getDistortion() * (jact * m_trgrad).transpose() * (jact * m_trgrad);
-          }
-        }
-        else
-        {
-          m_trgrad.resize(d, trialfe.getCount());
-          m_tegrad.resize(d, testfe.getCount());
-          for (size_t i = 0; i < qf.getSize(); i++)
-          {
-            Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
-            const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-            for (size_t local = 0; local < static_cast<size_t>(m_trgrad.cols()); local++)
-              m_trgrad.col(local) = trialfe.getGradient(local)(CacheResult, rc);
-            for (size_t local = 0; local < static_cast<size_t>(m_tegrad.cols()); local++)
-              m_tegrad.col(local) = testfe.getGradient(local)(CacheResult, rc);
-            const auto jact = p.getJacobianInverse().transpose();
-            res.noalias() += qf.getWeight(i) * p.getDistortion() * (jact * m_tegrad).transpose() * (jact * m_trgrad);
-          }
-        }
-      }
-
-      virtual Region getRegion() const override = 0;
-
-      virtual QuadratureRule* copy() const noexcept override = 0;
-
-    private:
-      Math::Matrix m_trgrad;
-      Math::Matrix m_tegrad;
-      std::unique_ptr<Integrand> m_integrand;
-  };
-
-  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  QuadratureRule(const Dot<
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, TestFES, TestSpace>>, TestFES, TestSpace>>&)
-    -> QuadratureRule<Dot<
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, TestFES, TestSpace>>, TestFES, TestSpace>>>;
-
-  /* <<-- OPTIMIZATIONS -----------------------------------------------------
-   * Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-   * ----------------------------------------------------------------------||
-   */
 }
 
 #endif

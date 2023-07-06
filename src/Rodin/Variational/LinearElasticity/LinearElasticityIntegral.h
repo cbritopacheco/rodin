@@ -61,7 +61,7 @@ namespace Rodin::Variational
           {
             const auto basis = fe.getJacobian(local);
             const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-            const auto jacobian = p.getJacobianInverse().transpose() * basis(CacheResult, rc);
+            const auto jacobian = p.getJacobianInverse().transpose() * basis(rc);
             const auto divergence = jacobian.diagonal();
 
             res.noalias() += p.getDistortion() * getLambda().getValue(p) * divergence * divergence.transpose();

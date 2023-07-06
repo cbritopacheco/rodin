@@ -36,7 +36,7 @@ namespace Rodin::Variational::Assembly
       {
         const Scalar s = in(i, j);
         if (s != Scalar(0))
-          out.push_back(Eigen::Triplet<Scalar>(rows(i), cols(j), s));
+          out.emplace_back(rows(i), cols(j), s);
       }
     }
   }
@@ -45,7 +45,7 @@ namespace Rodin::Variational::Assembly
   ::execute(const BilinearAssemblyInput& input) const
   {
     std::vector<Eigen::Triplet<Scalar>> res;
-    res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
+    // res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
     for (auto& bfi : input.bfis)
     {
       const auto& attrs = bfi.getAttributes();

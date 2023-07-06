@@ -31,10 +31,6 @@ namespace Rodin::Geometry
     assert(m_geometry.size() == 0);
     m_geometry.resize(maximalDimension + 1);
 
-    m_gcount.reserve(Polytope::Geometries.size());
-    for (const auto& g : Polytope::Geometries)
-      m_gcount.insert({g, 0});
-
     return *this;
   }
 
@@ -63,7 +59,7 @@ namespace Rodin::Geometry
     assert(d <= m_maximalDimension);
     auto [it, inserted] = m_index[d].left.insert({ in, m_count[d] });
     assert(inserted);
-    m_connectivity[d][0].emplace_back(it->first.begin(), it->first.end());
+    m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
     m_geometry[d].push_back(t);
     m_dirty[d][0] = true;
     m_count[d] += 1;
@@ -80,7 +76,7 @@ namespace Rodin::Geometry
     assert(d <= m_maximalDimension);
     auto [it, inserted] = m_index[d].left.insert({ std::move(in), m_count[d] });
     assert(inserted);
-    m_connectivity[d][0].emplace_back(it->first.begin(), it->first.end());
+    m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
     m_geometry[d].push_back(t);
     m_dirty[d][0] = true;
     m_count[d] += 1;
@@ -126,7 +122,7 @@ namespace Rodin::Geometry
 
   size_t MeshConnectivity::getCount(Polytope::Geometry g) const
   {
-    return m_gcount.at(g);
+    return m_gcount[g];
   }
 
   size_t MeshConnectivity::getMeshDimension() const
@@ -214,7 +210,7 @@ namespace Rodin::Geometry
         if (inserted)
         {
           m_geometry[d].push_back(geometry);
-          m_connectivity[d][0].emplace_back(v.begin(), v.end());
+          m_connectivity[d][0].emplace_back().insert_unique(v.begin(), v.end());
         }
         m_count[d] += inserted && !(d == D || d == 0);
         m_gcount[geometry] += inserted && !(d == D || d == 0);
@@ -282,7 +278,9 @@ namespace Rodin::Geometry
         assert(dim == 0);
         assert(p.size()  == 0);
         out.resize(1);
-        out[0] = { Polytope::Geometry::Point, { { i } } };
+        out[0].geometry = Polytope::Geometry::Point;
+        out[0].vertices.resize(1);
+        out[0].vertices.coeffRef(0) = i;
         return;
       }
       case Polytope::Geometry::Segment:
@@ -292,13 +290,18 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(2);
-          out[0] = { Polytope::Geometry::Point, { { p(0) } } };
-          out[1] = { Polytope::Geometry::Point, { { p(1) } } };
+          out[0].geometry = Polytope::Geometry::Point;
+          out[0].vertices.resize(1);
+          out[0].vertices.coeffRef(0) = p.coeff(0);
+          out[1].geometry = Polytope::Geometry::Point;
+          out[1].vertices.resize(1);
+          out[1].vertices.coeffRef(0) = p.coeff(1);
         }
         else if (dim == 1)
         {
           out.resize(1);
-          out[0] = { Polytope::Geometry::Segment, p };
+          out[0].geometry = Polytope::Geometry::Segment;
+          out[0].vertices = p;
         }
         else
         {
@@ -314,21 +317,42 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(3);
-          out[0] = { Polytope::Geometry::Point, { { p(0) } } };
-          out[1] = { Polytope::Geometry::Point, { { p(1) } } };
-          out[2] = { Polytope::Geometry::Point, { { p(2) } } };
+          out[0].geometry = Polytope::Geometry::Point;
+          out[0].vertices.resize(1);
+          out[0].vertices.coeffRef(0) = p.coeff(0);
+
+          out[1].geometry = Polytope::Geometry::Point;
+          out[1].vertices.resize(1);
+          out[1].vertices.coeffRef(0) = p.coeff(1);
+
+          out[2].geometry = Polytope::Geometry::Point;
+          out[2].vertices.resize(1);
+          out[2].vertices.coeffRef(0) = p.coeff(2);
         }
         else if (dim == 1)
         {
           out.resize(3);
-          out[0] = { Polytope::Geometry::Segment, { { p(0), p(1) } } };
-          out[1] = { Polytope::Geometry::Segment, { { p(1), p(2) } } };
-          out[2] = { Polytope::Geometry::Segment, { { p(0), p(2) } } };
+
+          out[0].geometry = Polytope::Geometry::Segment;
+          out[0].vertices.resize(2);
+          out[0].vertices.coeffRef(0) = p.coeff(0);
+          out[0].vertices.coeffRef(1) = p.coeff(1);
+
+          out[1].geometry = Polytope::Geometry::Segment;
+          out[1].vertices.resize(2);
+          out[1].vertices.coeffRef(0) = p.coeff(1);
+          out[1].vertices.coeffRef(1) = p.coeff(2);
+
+          out[2].geometry = Polytope::Geometry::Segment;
+          out[2].vertices.resize(2);
+          out[2].vertices.coeffRef(0) = p.coeff(0);
+          out[2].vertices.coeffRef(1) = p.coeff(2);
         }
         else if (dim == 2)
         {
           out.resize(1);
-          out[0] = { Polytope::Geometry::Triangle, p };
+          out[0].geometry = Polytope::Geometry::Triangle;
+          out[0].vertices = p;
         }
         else
         {

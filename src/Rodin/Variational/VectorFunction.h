@@ -177,10 +177,9 @@ namespace Rodin::Variational
       {}
 
       inline
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        Math::FixedSizeVector<1 + sizeof...(Values)> value;
+        Math::Vector value(1 + sizeof...(Values));
         Utility::ForIndex<1 + sizeof...(Values)>(
             [&](auto i){ value(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
         return value;

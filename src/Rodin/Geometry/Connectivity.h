@@ -20,6 +20,7 @@
 
 #include "Types.h"
 #include "Simplex.h"
+#include "GeometryIndexed.h"
 
 namespace Rodin::Geometry
 {
@@ -99,9 +100,6 @@ namespace Rodin::Geometry
 
       const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
 
-    protected:
-      void local(std::vector<SubPolytope>& out, size_t dim, Index i);
-
       /**
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and
        * for each such entity the vertices of that entity.
@@ -118,18 +116,18 @@ namespace Rodin::Geometry
 
       MeshConnectivity& intersection(size_t d, size_t dp, size_t dpp);
 
+      void local(std::vector<SubPolytope>& out, size_t dim, Index i);
+
     private:
       size_t m_maximalDimension;
 
-      std::vector<std::vector<bool>> m_dirty;
-
-      // std::vector<std::vector<Array<Index>>> m_polytopes;
-      std::vector<std::vector<Polytope::Geometry>> m_geometry;
-
       std::vector<size_t> m_count;
-      FlatMap<Polytope::Geometry, size_t> m_gcount;
+      GeometryIndexed<size_t> m_gcount;
       std::vector<PolytopeIndex> m_index;
+      std::vector<std::vector<bool>> m_dirty;
+      std::vector<std::vector<Polytope::Geometry>> m_geometry;
       std::vector<std::vector<Incidence>> m_connectivity;
+
   };
 }
 

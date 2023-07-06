@@ -138,16 +138,6 @@ namespace Rodin::Geometry
     return m_jacobian.value();
   }
 
-  const Math::Matrix& Point::getJacobian() const
-  {
-    if (holds(Type::Reference))
-      return getTransformation().jacobian(CacheResult, getReferenceCoordinates());
-    else
-    {
-      return Parent::getJacobian();
-    }
-  }
-
   const Math::Matrix& PointBase::getJacobianInverse() const
   {
     if (!m_jacobianInverse.has_value())
@@ -164,8 +154,7 @@ namespace Rodin::Geometry
             Math::Matrix inv(1, 1);
             inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
             m_jacobianDeterminant.emplace(getJacobian().coeff(0, 0));
-            m_jacobianInverse.emplace(std::move(inv));
-            break;
+            return m_jacobianInverse.emplace(std::move(inv));
           }
           case 2:
           {
@@ -182,8 +171,7 @@ namespace Rodin::Geometry
             inv.coeffRef(0, 1) = -b / det;
             inv.coeffRef(1, 0) = -c / det;
             inv.coeffRef(1, 1) = a / det;
-            m_jacobianInverse.emplace(std::move(inv));
-            break;
+            return m_jacobianInverse.emplace(std::move(inv));
           }
           case 3:
           {
@@ -222,13 +210,11 @@ namespace Rodin::Geometry
             inv.coeffRef(2, 0) = C / det;
             inv.coeffRef(2, 1) = F / det;
             inv.coeffRef(2, 2) = I / det;
-            m_jacobianInverse.emplace(std::move(inv));
-            break;
+            return m_jacobianInverse.emplace(std::move(inv));
           }
           default:
           {
-            m_jacobianInverse.emplace(getJacobian().inverse());
-            break;
+            return m_jacobianInverse.emplace(getJacobian().inverse());
           }
         }
       }
@@ -254,8 +240,7 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            m_jacobianDeterminant.emplace(jac.coeff(0, 0));
-            break;
+            return m_jacobianDeterminant.emplace(jac.coeff(0, 0));
           }
           case 2:
           {
@@ -263,8 +248,7 @@ namespace Rodin::Geometry
             const Scalar b = jac.coeff(0, 1);
             const Scalar c = jac.coeff(1, 0);
             const Scalar d = jac.coeff(1, 1);
-            m_jacobianDeterminant.emplace(a * d - b * c);
-            break;
+            return m_jacobianDeterminant.emplace(a * d - b * c);
           }
           case 3:
           {
@@ -280,13 +264,11 @@ namespace Rodin::Geometry
             const Scalar A = e * i - f * h;
             const Scalar B = -(d * i - f * g);
             const Scalar C = d * h - e * g;
-            m_jacobianDeterminant.emplace(a * A + b * B + c * C);
-            break;
+            return m_jacobianDeterminant.emplace(a * A + b * B + c * C);
           }
           default:
           {
-            m_jacobianDeterminant.emplace(jac.determinant());
-            break;
+            return m_jacobianDeterminant.emplace(jac.determinant());
           }
         }
       }
@@ -308,29 +290,17 @@ namespace Rodin::Geometry
       const auto cols = jac.cols();
       if (rows == cols)
       {
-        switch (rows)
-        {
-          case 1:
-          {
-            m_distortion.emplace(Math::abs(jac.coeff(0, 0)));
-            break;
-          }
-          default:
-          {
-            m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
-            break;
-          }
-        }
+        return m_distortion.emplace(getJacobianDeterminant());
       }
       else
       {
         if (jac.rows() == 2 && jac.cols() == 1)
         {
-          m_distortion.emplace(std::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
+          return m_distortion.emplace(std::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
         }
         else
         {
-          m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+          return m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
         }
       }
     }
