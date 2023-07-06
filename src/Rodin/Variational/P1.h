@@ -7,5 +7,6 @@
 #include "P1/Jacobian.h"
 #include "P1/P1Element.h"
 #include "P1/GridFunction.h"
+#include "P1/QuadratureRule.h"
 
 #endif

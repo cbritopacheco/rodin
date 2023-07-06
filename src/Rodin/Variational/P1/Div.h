@@ -83,7 +83,7 @@ namespace Rodin::Variational
         const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         return TensorBasis(fe.getCount(),
             [&](size_t local) -> Scalar
-            { return (fe.getJacobian(local)(CacheResult, rc) * p.getJacobianInverse()).trace(); });
+            { return (fe.getJacobian(local)(rc) * p.getJacobianInverse()).trace(); });
       }
 
       inline

@@ -196,11 +196,9 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        Math::Matrix grad(d, fe.getCount());
-        assert(grad.cols() >= 0);
-        for (size_t local = 0; local < static_cast<size_t>(grad.cols()); local++)
-          grad.col(local) = fe.getGradient(local)(CacheResult, rc);
-        return TensorBasis<Math::Vector>(p.getJacobianInverse().transpose() * grad);
+        return TensorBasis(fe.getCount(),
+            [&](size_t local)
+            { return p.getJacobianInverse().transpose() * this->object(fe.getGradient(local)(rc)); });
       }
 
       inline Grad* copy() const noexcept override

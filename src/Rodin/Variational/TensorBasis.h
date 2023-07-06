@@ -53,15 +53,14 @@ namespace Rodin::Variational
           m_data.push_back(f(i));
       }
 
-      TensorBasis(const TensorBasis&) = delete;
+      constexpr
+      TensorBasis(const TensorBasis&) = default;
 
       constexpr
-      TensorBasis(TensorBasis&& other)
-        : m_dofs(std::move(other.m_dofs)),
-          m_data(std::move(other.m_data))
-      {}
+      TensorBasis(TensorBasis&& other) = default;
 
-      void operator=(const TensorBasis&) = delete;
+      constexpr
+      TensorBasis& operator=(const TensorBasis&) = default;
 
       constexpr
       TensorBasis& operator=(TensorBasis&&) = default;
@@ -153,332 +152,338 @@ namespace Rodin::Variational
     return TensorBasis(lhs.getDOFs(), [&](size_t i){ return lhs(i) / rhs; });
   }
 
-  template <>
-  class TensorBasis<Scalar> final
-  {
-    public:
-      using ValueType = Scalar;
+  // template <>
+  // class TensorBasis<Scalar> final
+  // {
+  //   public:
+  //     using ValueType = Scalar;
 
-      template <class EigenDerived>
-      TensorBasis(const Eigen::MatrixBase<EigenDerived>& v)
-        : m_data(v)
-      {}
+  //     TensorBasis() = default;
 
-      template <class EigenDerived>
-      TensorBasis(Eigen::MatrixBase<EigenDerived>&& v)
-        : m_data(std::move(v))
-      {}
+  //     template <class EigenDerived>
+  //     TensorBasis(const Eigen::MatrixBase<EigenDerived>& v)
+  //       : m_data(v)
+  //     {}
 
-      template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
-      constexpr
-      TensorBasis(size_t dofs, F&& f)
-        : m_data(dofs)
-      {
-        assert(dofs > 0);
-        for (size_t i = 0; i < dofs; i++)
-          m_data.coeffRef(static_cast<Math::Vector::Index>(i)) = f(i);
-      }
+  //     template <class EigenDerived>
+  //     TensorBasis(Eigen::MatrixBase<EigenDerived>&& v)
+  //       : m_data(std::move(v))
+  //     {}
 
-      TensorBasis(const TensorBasis& other) = delete;
+  //     template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
+  //     constexpr
+  //     TensorBasis(size_t dofs, F&& f)
+  //       : m_data(dofs)
+  //     {
+  //       assert(dofs > 0);
+  //       for (size_t i = 0; i < dofs; i++)
+  //         m_data.coeffRef(static_cast<Math::Vector::Index>(i)) = f(i);
+  //     }
 
-      TensorBasis(TensorBasis&& other) = default;
+  //     TensorBasis(const TensorBasis&) = default;
 
-      void operator=(const TensorBasis&) = delete;
+  //     TensorBasis(TensorBasis&&) = default;
 
-      TensorBasis& operator=(TensorBasis&&) = default;
+  //     TensorBasis<Scalar>& operator=(const TensorBasis&) = default;
 
-      inline
-      constexpr
-      size_t getDOFs() const
-      {
-        return m_data.size();
-      }
+  //     TensorBasis& operator=(TensorBasis&&) = default;
 
-      const Math::Vector& getVector() const
-      {
-        return m_data;
-      }
+  //     inline
+  //     constexpr
+  //     size_t getDOFs() const
+  //     {
+  //       return m_data.size();
+  //     }
 
-      inline
-      Scalar operator()(size_t i) const
-      {
-        return m_data.coeff(static_cast<Math::Vector::Index>(i));
-      }
+  //     const Math::Vector& getVector() const
+  //     {
+  //       return m_data;
+  //     }
 
-      friend inline TensorBasis operator+(const TensorBasis&, const TensorBasis&);
-      friend inline TensorBasis operator-(const TensorBasis&, const TensorBasis&);
-      friend inline TensorBasis operator-(const TensorBasis&);
-      friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
-      friend inline TensorBasis operator*(const TensorBasis&, Scalar);
-      friend inline TensorBasis operator/(const TensorBasis&, Scalar);
+  //     inline
+  //     Scalar operator()(size_t i) const
+  //     {
+  //       return m_data.coeff(static_cast<Math::Vector::Index>(i));
+  //     }
 
-    private:
-      Math::Vector m_data;
-  };
+  //     friend inline TensorBasis operator+(const TensorBasis&, const TensorBasis&);
+  //     friend inline TensorBasis operator-(const TensorBasis&, const TensorBasis&);
+  //     friend inline TensorBasis operator-(const TensorBasis&);
+  //     friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
+  //     friend inline TensorBasis operator*(const TensorBasis&, Scalar);
+  //     friend inline TensorBasis operator/(const TensorBasis&, Scalar);
 
-  inline
-  TensorBasis<Scalar> operator+(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return lhs.m_data + rhs.m_data;
-  }
+  //   private:
+  //     Math::Vector m_data;
+  // };
 
-  inline
-  TensorBasis<Scalar> operator-(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return lhs.m_data - rhs.m_data;
-  }
+  // inline
+  // TensorBasis<Scalar> operator+(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
+  // {
+  //   assert(lhs.getDOFs() == rhs.getDOFs());
+  //   return lhs.m_data + rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Scalar> operator-(const TensorBasis<Scalar>& op)
-  {
-    return -op.m_data;
-  }
+  // inline
+  // TensorBasis<Scalar> operator-(const TensorBasis<Scalar>& lhs, const TensorBasis<Scalar>& rhs)
+  // {
+  //   assert(lhs.getDOFs() == rhs.getDOFs());
+  //   return lhs.m_data - rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Scalar> operator*(Scalar lhs, const TensorBasis<Scalar>& rhs)
-  {
-    return lhs * rhs.m_data;
-  }
+  // inline
+  // TensorBasis<Scalar> operator-(const TensorBasis<Scalar>& op)
+  // {
+  //   return -op.m_data;
+  // }
 
-  inline
-  TensorBasis<Scalar> operator*(const TensorBasis<Scalar>& lhs, Scalar rhs)
-  {
-    return lhs.m_data * rhs;
-  }
+  // inline
+  // TensorBasis<Scalar> operator*(Scalar lhs, const TensorBasis<Scalar>& rhs)
+  // {
+  //   return lhs * rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Scalar> operator/(const TensorBasis<Scalar>& lhs, Scalar rhs)
-  {
-    return lhs.m_data / rhs;
-  }
+  // inline
+  // TensorBasis<Scalar> operator*(const TensorBasis<Scalar>& lhs, Scalar rhs)
+  // {
+  //   return lhs.m_data * rhs;
+  // }
 
-  template <>
-  class TensorBasis<Math::Vector> final
-  {
-    public:
-      using ValueType = Math::Vector;
+  // inline
+  // TensorBasis<Scalar> operator/(const TensorBasis<Scalar>& lhs, Scalar rhs)
+  // {
+  //   return lhs.m_data / rhs;
+  // }
 
-      template <class EigenDerived>
-      TensorBasis(const Eigen::MatrixBase<EigenDerived>& v)
-        : m_data(v)
-      {}
+  // template <>
+  // class TensorBasis<Math::Vector> final
+  // {
+  //   public:
+  //     using ValueType = Math::Vector;
 
-      template <class EigenDerived>
-      TensorBasis(Eigen::MatrixBase<EigenDerived>&& v)
-        : m_data(std::move(v))
-      {}
+  //     TensorBasis() = default;
 
-      template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
-      constexpr
-      TensorBasis(size_t dim, size_t dofs, F&& f)
-        : m_data(dim, dofs)
-      {
-        assert(dofs > 0);
-        for (size_t i = 0; i < dofs; i++)
-          m_data.col(i) = f(i);
-      }
+  //     template <class EigenDerived>
+  //     TensorBasis(const Eigen::MatrixBase<EigenDerived>& v)
+  //       : m_data(v)
+  //     {}
 
-      TensorBasis(const TensorBasis&) = delete;
+  //     template <class EigenDerived>
+  //     TensorBasis(Eigen::MatrixBase<EigenDerived>&& v)
+  //       : m_data(std::move(v))
+  //     {}
 
-      TensorBasis(TensorBasis&&) = default;
+  //     template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
+  //     constexpr
+  //     TensorBasis(size_t dim, size_t dofs, F&& f)
+  //       : m_data(dim, dofs)
+  //     {
+  //       assert(dofs > 0);
+  //       for (size_t i = 0; i < dofs; i++)
+  //         m_data.col(i) = f(i);
+  //     }
 
-      void operator=(const TensorBasis&) = delete;
+  //     TensorBasis(const TensorBasis&) = default;
 
-      TensorBasis& operator=(TensorBasis&&) = default;
+  //     TensorBasis(TensorBasis&&) = default;
 
-      inline
-      constexpr
-      size_t getDimension() const
-      {
-        return m_data.rows();
-      }
+  //     void operator=(const TensorBasis&) = delete;
 
-      inline
-      constexpr
-      size_t getDOFs() const
-      {
-        return m_data.cols();
-      }
+  //     TensorBasis& operator=(TensorBasis&&) = default;
 
-      inline
-      auto operator()(size_t i) const
-      {
-        return m_data.col(i);
-      }
+  //     inline
+  //     constexpr
+  //     size_t getDimension() const
+  //     {
+  //       return m_data.rows();
+  //     }
 
-      friend inline TensorBasis operator+(const TensorBasis&, const TensorBasis&);
-      friend inline TensorBasis operator-(const TensorBasis&, const TensorBasis&);
-      friend inline TensorBasis operator-(const TensorBasis&);
-      friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
-      friend inline TensorBasis operator*(const TensorBasis&, Scalar);
-      friend inline TensorBasis operator/(const TensorBasis&, Scalar);
+  //     inline
+  //     constexpr
+  //     size_t getDOFs() const
+  //     {
+  //       return m_data.cols();
+  //     }
 
-      const Math::Matrix& getMatrix() const
-      {
-        return m_data;
-      }
+  //     inline
+  //     auto operator()(size_t i) const
+  //     {
+  //       return m_data.col(i);
+  //     }
 
-    private:
-      Math::Matrix m_data;
-  };
+  //     friend inline TensorBasis operator+(const TensorBasis&, const TensorBasis&);
+  //     friend inline TensorBasis operator-(const TensorBasis&, const TensorBasis&);
+  //     friend inline TensorBasis operator-(const TensorBasis&);
+  //     friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
+  //     friend inline TensorBasis operator*(const TensorBasis&, Scalar);
+  //     friend inline TensorBasis operator/(const TensorBasis&, Scalar);
 
-  inline
-  TensorBasis<Math::Vector> operator+(const TensorBasis<Math::Vector>& lhs, const TensorBasis<Math::Vector>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return lhs.m_data + rhs.m_data;
-  }
+  //     const Math::Matrix& getMatrix() const
+  //     {
+  //       return m_data;
+  //     }
 
-  inline
-  TensorBasis<Math::Vector> operator-(const TensorBasis<Math::Vector>& lhs, const TensorBasis<Math::Vector>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return lhs.m_data - rhs.m_data;
-  }
+  //   private:
+  //     Math::Matrix m_data;
+  // };
 
-  inline
-  TensorBasis<Math::Vector> operator-(const TensorBasis<Math::Vector>& op)
-  {
-    return -op.m_data;
-  }
+  // inline
+  // TensorBasis<Math::Vector> operator+(const TensorBasis<Math::Vector>& lhs, const TensorBasis<Math::Vector>& rhs)
+  // {
+  //   assert(lhs.getDOFs() == rhs.getDOFs());
+  //   return lhs.m_data + rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Math::Vector> operator*(Scalar lhs, const TensorBasis<Math::Vector>& rhs)
-  {
-    return lhs * rhs.m_data;
-  }
+  // inline
+  // TensorBasis<Math::Vector> operator-(const TensorBasis<Math::Vector>& lhs, const TensorBasis<Math::Vector>& rhs)
+  // {
+  //   assert(lhs.getDOFs() == rhs.getDOFs());
+  //   return lhs.m_data - rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Math::Vector> operator*(const TensorBasis<Math::Vector>& lhs, Scalar rhs)
-  {
-    return lhs.m_data * rhs;
-  }
+  // inline
+  // TensorBasis<Math::Vector> operator-(const TensorBasis<Math::Vector>& op)
+  // {
+  //   return -op.m_data;
+  // }
 
-  inline
-  TensorBasis<Math::Vector> operator/(const TensorBasis<Math::Vector>& lhs, Scalar rhs)
-  {
-    return lhs.m_data / rhs;
-  }
+  // inline
+  // TensorBasis<Math::Vector> operator*(Scalar lhs, const TensorBasis<Math::Vector>& rhs)
+  // {
+  //   return lhs * rhs.m_data;
+  // }
 
-  template <>
-  class TensorBasis<Math::Matrix> final
-  {
-    public:
-      using ValueType = Math::Matrix;
+  // inline
+  // TensorBasis<Math::Vector> operator*(const TensorBasis<Math::Vector>& lhs, Scalar rhs)
+  // {
+  //   return lhs.m_data * rhs;
+  // }
 
-      template <class ... Args>
-      constexpr
-      TensorBasis(Args&&... args)
-        : m_data(std::forward<Args>(args)...)
-      {}
+  // inline
+  // TensorBasis<Math::Vector> operator/(const TensorBasis<Math::Vector>& lhs, Scalar rhs)
+  // {
+  //   return lhs.m_data / rhs;
+  // }
 
-      template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
-      constexpr
-      TensorBasis(size_t dofs, size_t rows, size_t cols, F&& f)
-        : m_data(rows, cols, dofs)
-      {
-        for (size_t i = 0; i < dofs; i++)
-          operator()(i) = f(i);
-      }
+  // template <>
+  // class TensorBasis<Math::Matrix> final
+  // {
+  //   public:
+  //     using ValueType = Math::Matrix;
 
-      TensorBasis(const TensorBasis& other) = delete;
+  //     TensorBasis() = default;
 
-      TensorBasis(TensorBasis&& other) = default;
+  //     template <class ... Args>
+  //     constexpr
+  //     TensorBasis(Args&&... args)
+  //       : m_data(std::forward<Args>(args)...)
+  //     {}
 
-      TensorBasis& operator=(const TensorBasis&) = delete;
+  //     template <class F, typename = std::enable_if_t<std::is_invocable_v<F, size_t>>>
+  //     constexpr
+  //     TensorBasis(size_t dofs, size_t rows, size_t cols, F&& f)
+  //       : m_data(rows, cols, dofs)
+  //     {
+  //       for (size_t i = 0; i < dofs; i++)
+  //         operator()(i) = f(i);
+  //     }
 
-      TensorBasis& operator=(TensorBasis&&) = default;
+  //     TensorBasis(const TensorBasis& other) = default;
 
-      inline
-      size_t getRows() const
-      {
-        return m_data.dimension(0);
-      }
+  //     TensorBasis(TensorBasis&& other) = default;
 
-      inline
-      size_t getColumns() const
-      {
-        return m_data.dimension(1);
-      }
+  //     TensorBasis& operator=(const TensorBasis&) = delete;
 
-      inline
-      size_t getDOFs() const
-      {
-        return m_data.dimension(2);
-      }
+  //     TensorBasis& operator=(TensorBasis&&) = default;
 
-      inline
-      Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
-      operator()(size_t i) const
-      {
-        return {
-          m_data.data() + i * m_data.dimension(0) * m_data.dimension(1),
-          m_data.dimension(0), m_data.dimension(1),
-          { m_data.dimension(0), 1 }
-        };
-      }
+  //     inline
+  //     size_t getRows() const
+  //     {
+  //       return m_data.dimension(0);
+  //     }
 
-      friend inline TensorBasis operator+(const TensorBasis&, const TensorBasis&);
-      friend inline TensorBasis operator-(const TensorBasis&, const TensorBasis&);
-      friend inline TensorBasis operator-(const TensorBasis&);
-      friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
-      friend inline TensorBasis operator*(const TensorBasis&, Scalar);
-      friend inline TensorBasis operator/(const TensorBasis&, Scalar);
+  //     inline
+  //     size_t getColumns() const
+  //     {
+  //       return m_data.dimension(1);
+  //     }
 
-      const Math::Tensor<3>& getTensor() const
-      {
-        return m_data;
-      }
+  //     inline
+  //     size_t getDOFs() const
+  //     {
+  //       return m_data.dimension(2);
+  //     }
 
-    private:
-      Math::Tensor<3> m_data;
-  };
+  //     inline
+  //     Eigen::Map<const Math::Matrix, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>
+  //     operator()(size_t i) const
+  //     {
+  //       return {
+  //         m_data.data() + i * m_data.dimension(0) * m_data.dimension(1),
+  //         m_data.dimension(0), m_data.dimension(1),
+  //         { m_data.dimension(0), 1 }
+  //       };
+  //     }
 
-  inline
-  TensorBasis<Math::Matrix>
-  operator+(const TensorBasis<Math::Matrix>& lhs, const TensorBasis<Math::Matrix>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return lhs.m_data + rhs.m_data;
-  }
+  //     friend inline TensorBasis operator+(const TensorBasis&, const TensorBasis&);
+  //     friend inline TensorBasis operator-(const TensorBasis&, const TensorBasis&);
+  //     friend inline TensorBasis operator-(const TensorBasis&);
+  //     friend inline TensorBasis operator*(Scalar, const TensorBasis& rhs);
+  //     friend inline TensorBasis operator*(const TensorBasis&, Scalar);
+  //     friend inline TensorBasis operator/(const TensorBasis&, Scalar);
 
-  inline
-  TensorBasis<Math::Matrix>
-  operator-(const TensorBasis<Math::Matrix>& lhs, const TensorBasis<Math::Matrix>& rhs)
-  {
-    assert(lhs.getDOFs() == rhs.getDOFs());
-    return lhs.m_data - rhs.m_data;
-  }
+  //     const Math::Tensor<3>& getTensor() const
+  //     {
+  //       return m_data;
+  //     }
 
-  inline
-  TensorBasis<Math::Matrix>
-  operator-(const TensorBasis<Math::Matrix>& op)
-  {
-    return -op.m_data;
-  }
+  //   private:
+  //     Math::Tensor<3> m_data;
+  // };
 
-  inline
-  TensorBasis<Math::Matrix>
-  operator*(Scalar lhs, const TensorBasis<Math::Matrix>& rhs)
-  {
-    return lhs * rhs.m_data;
-  }
+  // inline
+  // TensorBasis<Math::Matrix>
+  // operator+(const TensorBasis<Math::Matrix>& lhs, const TensorBasis<Math::Matrix>& rhs)
+  // {
+  //   assert(lhs.getDOFs() == rhs.getDOFs());
+  //   return lhs.m_data + rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Math::Matrix>
-  operator*(const TensorBasis<Math::Matrix>& lhs, Scalar rhs)
-  {
-    return lhs.m_data * rhs;
-  }
+  // inline
+  // TensorBasis<Math::Matrix>
+  // operator-(const TensorBasis<Math::Matrix>& lhs, const TensorBasis<Math::Matrix>& rhs)
+  // {
+  //   assert(lhs.getDOFs() == rhs.getDOFs());
+  //   return lhs.m_data - rhs.m_data;
+  // }
 
-  inline
-  TensorBasis<Math::Matrix>
-  operator/(const TensorBasis<Math::Matrix>& lhs, Scalar rhs)
-  {
-    return lhs.m_data / rhs;
-  }
+  // inline
+  // TensorBasis<Math::Matrix>
+  // operator-(const TensorBasis<Math::Matrix>& op)
+  // {
+  //   return -op.m_data;
+  // }
+
+  // inline
+  // TensorBasis<Math::Matrix>
+  // operator*(Scalar lhs, const TensorBasis<Math::Matrix>& rhs)
+  // {
+  //   return lhs * rhs.m_data;
+  // }
+
+  // inline
+  // TensorBasis<Math::Matrix>
+  // operator*(const TensorBasis<Math::Matrix>& lhs, Scalar rhs)
+  // {
+  //   return lhs.m_data * rhs;
+  // }
+
+  // inline
+  // TensorBasis<Math::Matrix>
+  // operator/(const TensorBasis<Math::Matrix>& lhs, Scalar rhs)
+  // {
+  //   return lhs.m_data / rhs;
+  // }
 }
 
 #endif

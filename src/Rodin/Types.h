@@ -57,8 +57,6 @@ namespace Rodin
   template <class T>
   using IndexMap = FlatMap<Index, T>;
 
-  class CacheResultType {} static constexpr const CacheResult;
-
 #if __cpp_size_t_suffix < 202011L
   constexpr
   std::size_t operator "" _UZ (unsigned long long x)

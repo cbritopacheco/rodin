@@ -354,6 +354,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHS> m_trial;
       std::unique_ptr<RHS> m_test;
+
       Math::Matrix m_matrix;
   };
 

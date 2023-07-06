@@ -16,7 +16,7 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 32, 32);
+  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 256, 256);
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
@@ -27,16 +27,16 @@ int main(int, char**)
 
   // Define problem
   ScalarFunction f = 1.0;
-  ScalarFunction g = 0.0;
+  ScalarFunction g = 5.0;
 
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
+  poisson = Integral(f * Grad(u), Grad(v))
+          - Integral(v)
           + DirichletBC(u, g);
   poisson.assemble();
 
   // Solve the problem
-  Solver::CG solver;
+  Solver::SparseLU solver;
   poisson.solve(solver);
 
   // Save solution

@@ -18,8 +18,6 @@
  */
 #define RODIN_P1_MAX_VECTOR_DIMENSION 16
 
-#define RODIN_P1_CACHE_SIZE 8
-
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
@@ -100,11 +98,12 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
+          using ReturnType = Scalar;
+
           BasisFunction(size_t i, Geometry::Polytope::Geometry g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
-            m_cache.reserve(RODIN_P1_CACHE_SIZE);
           }
 
           BasisFunction(const BasisFunction&) = default;
@@ -115,13 +114,9 @@ namespace Rodin::Variational
 
           Scalar operator()(const Math::Vector& r) const;
 
-          const Scalar& operator()(CacheResultType, const Math::Vector& r) const;
-
         private:
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
-
-          mutable UnorderedMap<const Math::Vector*, Scalar> m_cache;
       };
 
       /**
@@ -130,28 +125,29 @@ namespace Rodin::Variational
       class GradientFunction
       {
         public:
+          using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, 0, 3, 1>;
+
+          constexpr
           GradientFunction(size_t i, Geometry::Polytope::Geometry g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
-            m_cache.reserve(RODIN_P1_CACHE_SIZE);
           }
 
+          constexpr
           GradientFunction(const GradientFunction&) = default;
 
+          constexpr
           GradientFunction& operator=(const GradientFunction&) = default;
 
+          constexpr
           GradientFunction& operator=(GradientFunction&&) = default;
 
-          Math::Vector operator()(const Math::Vector& r) const;
-
-          const Math::Vector& operator()(CacheResultType, const Math::Vector& r) const;
+          ReturnType operator()(const Math::Vector& r) const;
 
         private:
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
-
-          mutable UnorderedMap<const Math::Vector*, Math::Vector> m_cache;
       };
 
       constexpr
@@ -290,30 +286,38 @@ namespace Rodin::Variational
         public:
           BasisFunction() = default;
 
+          constexpr
           BasisFunction(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
           }
 
+          constexpr
           BasisFunction(const BasisFunction&) = default;
 
+          constexpr
           BasisFunction(BasisFunction&&) = default;
 
+          constexpr
           BasisFunction& operator=(const BasisFunction&) = default;
 
+          constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          Math::Vector operator()(const Math::Vector& r) const;
+          Math::Vector operator()(const Math::Vector& r) const
+          {
+            Math::Vector res;
+            operator()(res, r);
+            return res;
+          }
 
-          const Math::Vector& operator()(CacheResultType, const Math::Vector& r) const;
+          void operator()(Math::Vector& out, const Math::Vector& r) const;
 
         private:
           size_t m_vdim;
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
-
-          mutable UnorderedMap<const Math::Vector*, Math::Vector> m_cache;
       };
 
       class JacobianFunction
@@ -321,30 +325,38 @@ namespace Rodin::Variational
         public:
           JacobianFunction() = default;
 
+          constexpr
           JacobianFunction(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
           }
 
+          constexpr
           JacobianFunction(const JacobianFunction&) = default;
 
+          constexpr
           JacobianFunction(JacobianFunction&&) = default;
 
+          constexpr
           JacobianFunction& operator=(const JacobianFunction&) = default;
 
+          constexpr
           JacobianFunction& operator=(JacobianFunction&&) = default;
 
-          Math::Matrix operator()(const Math::Vector& rc) const;
+          Math::Matrix operator()(const Math::Vector& rc) const
+          {
+            Math::Matrix res;
+            operator()(res, rc);
+            return res;
+          }
 
-          const Math::Matrix& operator()(CacheResultType, const Math::Vector& rc) const;
+          void operator()(Math::Matrix& out, const Math::Vector& rc) const;
 
         private:
           size_t m_vdim;
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
-
-          mutable UnorderedMap<const Math::Vector*, Math::Matrix> m_cache;
       };
 
       /// Type of range

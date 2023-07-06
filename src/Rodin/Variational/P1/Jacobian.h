@@ -177,7 +177,7 @@ namespace Rodin::Variational
         const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         return TensorBasis(fe.getCount(),
             [&](size_t local)
-            { return fe.getJacobian(local)(CacheResult, rc) * p.getJacobianInverse(); });
+            { return this->object(fe.getJacobian(local)(rc)) * p.getJacobianInverse(); });
       }
 
       inline Jacobian* copy() const noexcept override
