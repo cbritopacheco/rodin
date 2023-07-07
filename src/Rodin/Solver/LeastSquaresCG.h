@@ -54,14 +54,12 @@ namespace Rodin::Solver
 
       ~LeastSquaresCG() = default;
 
-      constexpr
       LeastSquaresCG& setTolerance(double tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      constexpr
       LeastSquaresCG& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
