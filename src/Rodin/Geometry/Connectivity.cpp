@@ -127,7 +127,7 @@ namespace Rodin::Geometry
 
   size_t MeshConnectivity::getMeshDimension() const
   {
-    for (size_t i = m_count.size() - 1; i >= 0; i--)
+    for (int i = m_count.size() - 1; i >= 0; i--)
     {
       if (m_count[i] > 0)
         return i;
