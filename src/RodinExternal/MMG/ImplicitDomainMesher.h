@@ -195,9 +195,9 @@ namespace Rodin::External::MMG
                       MaterialReference originalRef = it->second;
                       const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
                       if (attr == s.interior)
-                      rodinMesh.setAttribute(rodinMesh.getDimension() - 1, idx, originalSplit.interior);
+                      rodinMesh.setAttribute({rodinMesh.getDimension() - 1, idx}, originalSplit.interior);
                       else if (attr == s.exterior)
-                      rodinMesh.setAttribute(rodinMesh.getDimension() - 1, idx, originalSplit.exterior);
+                      rodinMesh.setAttribute({rodinMesh.getDimension() - 1, idx}, originalSplit.exterior);
                   }
                   else
                   {
@@ -217,9 +217,9 @@ namespace Rodin::External::MMG
                     MaterialReference originalRef = it->second;
                     const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
                     if (attr == s.interior)
-                      rodinMesh.setAttribute(rodinMesh.getDimension(), idx, originalSplit.interior);
+                      rodinMesh.setAttribute({rodinMesh.getDimension(), idx}, originalSplit.interior);
                     else if (attr == s.exterior)
-                      rodinMesh.setAttribute(rodinMesh.getDimension(), idx, originalSplit.exterior);
+                      rodinMesh.setAttribute({rodinMesh.getDimension(), idx}, originalSplit.exterior);
                   }
                   else
                   {

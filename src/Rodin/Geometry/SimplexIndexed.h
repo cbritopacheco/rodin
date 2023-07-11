@@ -76,8 +76,9 @@ namespace Rodin::Geometry
       }
 
       inline
-      PolytopeIndexed& track(size_t d, Index i, T&& value)
+      PolytopeIndexed& track(const std::pair<size_t, Index>& p, T&& value)
       {
+        const auto [d, i] = p;
         assert(m_tracked.size() > 0);
         assert(d < m_tracked.size());
         m_tracked[d][i] = std::move(value);
@@ -85,8 +86,9 @@ namespace Rodin::Geometry
       }
 
       inline
-      PolytopeIndexed& track(size_t d, Index i, const T& value)
+      PolytopeIndexed& track(const std::pair<size_t, Index>& p, const T& value)
       {
+        const auto [d, i] = p;
         assert(m_tracked.size() > 0);
         assert(d < m_tracked.size());
         m_tracked[d][i] = value;

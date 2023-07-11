@@ -15,12 +15,14 @@ namespace Rodin::Geometry
   {
     m_sdim = sdim;
 
-    // Set indexes
-    m_attrs.initialize(m_sdim);
-    m_transformations.initialize(m_sdim);
+    m_attributes.resize(m_sdim + 1);
 
     // Emplace empty connectivity objects
-    m_connectivity.initialize(m_sdim);
+    m_connectivity.initialize(m_sdim + 1);
+
+    // Set indexes
+    m_attributeIndex.initialize(m_sdim + 1);
+    m_transformationIndex.initialize(m_sdim + 1);
 
     return *this;
   }
@@ -50,9 +52,9 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::attribute(size_t d, Index idx, Attribute attr)
+  Mesh<Context::Serial>::Builder::attribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
-    m_attrs.track(d, idx, attr);
+    m_attributeIndex.track(p, attr);
     return *this;
   }
 
@@ -73,9 +75,9 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::reserve(size_t d, size_t count)
   {
-    m_attrs.reserve(d, count);
     m_connectivity.reserve(d, count);
-    m_transformations.reserve(d, count);
+    m_attributeIndex.reserve(d, count);
+    m_transformationIndex.reserve(d, count);
     return *this;
   }
 
@@ -83,10 +85,11 @@ namespace Rodin::Geometry
   {
     Mesh res;
     res.m_sdim = m_sdim;
-    res.m_connectivity = std::move(m_connectivity);
     res.m_vertices = std::move(m_vertices);
-    res.m_attrs = std::move(m_attrs);
-    res.m_transformations = std::move(m_transformations);
+    res.m_attributes = std::move(m_attributes);
+    res.m_connectivity = std::move(m_connectivity);
+    res.m_attributeIndex = std::move(m_attributeIndex);
+    res.m_transformationIndex = std::move(m_transformationIndex);
 
     return res;
   }
@@ -108,14 +111,14 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::setAttributeIndex(AttributeIndex&& attrs)
   {
-    m_attrs = std::move(attrs);
+    m_attributeIndex = std::move(attrs);
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::setTransformationIndex(TransformationIndex&& transformations)
   {
-    m_transformations = std::move(transformations);
+    m_transformationIndex = std::move(transformations);
     return *this;
   }
 }

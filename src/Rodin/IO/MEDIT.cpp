@@ -115,7 +115,7 @@ namespace Rodin::IO
             }
             m_build.vertex(std::move(data->vertex));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute(0, i, data->attribute);
+              m_build.attribute({ 0, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -136,7 +136,7 @@ namespace Rodin::IO
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Geometry::Segment, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute(1, i, data->attribute);
+              m_build.attribute({ 1, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -157,7 +157,7 @@ namespace Rodin::IO
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Geometry::Triangle, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute(2, i, data->attribute);
+              m_build.attribute({ 2, i }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -178,7 +178,7 @@ namespace Rodin::IO
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Geometry::Tetrahedron, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
-              m_build.attribute(3, i, data->attribute);
+              m_build.attribute({ 3, i }, data->attribute);
           }
           continue; // Continue the while loop
         }

@@ -39,25 +39,30 @@ namespace Rodin::Geometry
   class SubMesh<Context::Serial> : public Mesh<Context::Serial>
   {
     public:
+      using Parent = Mesh<Context::Serial>;
+
       class Builder
       {
         public:
           Builder() = default;
 
-          Builder& initialize(Mesh<Context::Serial>& parent);
+          Builder& initialize(const Mesh<Context::Serial>& parent);
 
-          Builder& include(size_t d, const std::vector<Index>& indices);
+          Builder& include(size_t d, Index parentIdx);
+
+          Builder& include(size_t d, const IndexSet& indices);
 
           SubMesh finalize();
 
         private:
-          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_parent;
+          std::optional<std::reference_wrapper<const Mesh<Context::Serial>>> m_parent;
           Mesh<Context::Serial>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<boost::bimap<Index, Index>> m_s2ps;
       };
 
-      SubMesh(const Mesh<Context::Serial>& parent);
+      explicit
+      SubMesh(std::reference_wrapper<const Mesh<Context::Serial>> parent);
 
       SubMesh(const SubMesh& other);
 
@@ -67,9 +72,12 @@ namespace Rodin::Geometry
 
       SubMesh& operator=(SubMesh&& other)
       {
-        MeshBase::operator=(std::move(other));
-        m_parent = std::move(other.m_parent);
-        m_s2ps = std::move(other.m_s2ps);
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_parent = std::move(other.m_parent);
+          m_s2ps = std::move(other.m_s2ps);
+        }
         return *this;
       }
 
