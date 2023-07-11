@@ -9,7 +9,7 @@
 namespace Rodin::Geometry
 {
   SubMesh<Context::Serial>::Builder&
-  SubMesh<Context::Serial>::Builder::initialize(Mesh<Context::Serial>& parent)
+  SubMesh<Context::Serial>::Builder::initialize(const Mesh<Context::Serial>& parent)
   {
     const size_t dim = parent.getDimension();
     const size_t sdim = parent.getSpaceDimension();
@@ -21,117 +21,66 @@ namespace Rodin::Geometry
   }
 
   SubMesh<Context::Serial>::Builder&
-  SubMesh<Context::Serial>::Builder::include(size_t d, const std::vector<Index>& indices)
+  SubMesh<Context::Serial>::Builder::include(size_t d, Index parentIdx)
   {
-    assert(false);
-    // auto& build = m_build;
+    auto& build = m_build;
+    assert(m_parent.has_value());
+    const auto& parent = m_parent.value().get();
+    const auto& conn = parent.getConnectivity();
+    const auto& parentPolytope = conn.getPolytope(d, parentIdx);
+    IndexArray childPolytope(parentPolytope.size());
+    assert(childPolytope.size() >= 0);
+    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+    {
+      const Index parentVertex = parentPolytope.coeff(i);
+      const Index childVertex = m_sidx[0];
+      const auto [it, inserted] = m_s2ps[0].left.insert({ childVertex, parentVertex });
+      if (inserted) // Vertex was not already in the map
+      {
+        childPolytope.coeffRef(i) = childVertex;
+        m_sidx[0] += 1;
+      }
+      else // Vertex was already in the map
+      {
+        childPolytope.coeffRef(i) = it->get_left();
+      }
+    }
+    // Add polytope with original geometry and new vertex ordering
+    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
+    const Index childIdx = m_sidx[d];
+    const auto [it, inserted] = m_s2ps[d].left.insert({ childIdx, parentIdx });
+    // Add polytope information
+    if (inserted) // Polytope was already in the map
+    {
+      build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+      m_sidx[d] += 1;
+    }
+    else
+    {
+      build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
+    }
 
-    // assert(m_s2ps.size() == ref.getDimension() + 1);
-    // const auto& parent = m_ref->get().getParent();
+    return *this;
+  }
 
-    // assert(ref.getDimension() <= parent.getDimension());
-    // const size_t dim = ref.getDimension();
-
-    // /* First we add the simplices that coincide with the submesh dimension (the
-    //  * elements in the submesh) along with the vertices that are incident. Note
-    //  * that the element dimension in the submesh is not necessarily equal to
-    //  * the element dimension in the parent mesh. For example:
-    //  * - If the submesh dimension is 2 and the parent dimension is 2, the
-    //  *   elements of the submesh are elements (e.g. triangles) of the parent mesh.
-    //  * - If the submesh dimension is 2 and the parent dimension is 3, the
-    //  *   elements of the submesh are faces (e.g. triangles) of the elements
-    //  *   (e.g. tetrahedra) of the parent mesh.
-    //  * - If the submesh dimension is 1 and the parent dimension is 3, the
-    //  *   elements of the submesh are the facets (e.g. edges) of the faces (e.g.
-    //  *   triangles) of the elements (e.g. tetrahedra) of the parent mesh.
-    //  */
-    // for (const auto& idx : indices)
-    // {
-    //   auto simplex = parent.getPolytope(dim, idx);
-
-    //   // Add simplex vertices to the resulting mesh
-    //   const auto& pvs = simplex->getVertices();
-
-    //   Array<Index> vs(pvs.size());
-    //   for (Array<Index>::Index i = 0; i < pvs.size(); i++)
-    //   {
-    //     const Index pvidx = pvs(i);
-    //     if (m_s2ps[0].right.count(pvidx) == 0) // Only add vertex if it is not in the map
-    //     {
-    //       build.vertex(parent.getVertex(pvidx)->getCoordinates());
-    //       const Index idx = m_sidx[0]++;
-    //       vs(i) = idx;
-    //       m_s2ps[0].insert({ idx, pvidx });
-    //     }
-    //     else // Else get the id of the vertex in the submesh
-    //     {
-    //       vs(i) = m_s2ps[0].right.at(pvidx);
-    //     }
-    //   }
-
-    //   // Add element with the new vertex ordering
-    //   build.polytope(simplex->getGeometry(), vs);
-    //   m_s2ps[dim].insert({ m_sidx[dim]++, idx });
-    // }
-
-    // /* Next we add all the information of the lower dimensional simplices
-    //  * incident to the element. For example:
-    //  *  - If the submesh dimension is 3, we should add the information (e.g.
-    //  *  attribute) of the triangles and edges incident to the tetrahedra (i.e.
-    //  *  the elements) from the parent mesh.
-    //  *  - If the submesh dimension is 2 and the parent dimension is 2, we
-    //  *  should add information about the edges incident to the triangles (i.e.
-    //  *  the elements) from the parent mesh.
-    //  *  - If the submesh dimension is 2 and the parent dimension is 3, we
-    //  *  should add the information about the edges incident to the triangles
-    //  *  (i.e. the faces) from the parent mesh.
-    //  */
-    // // for (const auto& idx : indices)
-    // // {
-    // //   for (size_t d = 1; d <= dim - 1; d++)
-    // //   {
-    // //     const Array<Index>& pconnectivity =
-    // //       parent.getConnectivity().getIncidence({ dim, d }, idx);
-    // //     for (const auto& i : pconnectivity)
-    // //     {
-    // //       if (m_s2ps[d].right.count(i)) // Only add simplex if it is not in the map
-    // //         continue;
-    // //       else if (parent.getAttributeIndex().isTracked(d, i))
-    // //       {
-    // //         const SimplexIterator simplex = parent.getSimplex(d, i);
-    // //         build.simplex(simplex->getGeometry(), simplex->getVertices());
-    // //       }
-    // //     }
-    // //   }
-    // // }
-
-    // // if (dim == parent.getDimension()) // We are not in the surface case
-    // // {
-    // //   for (auto it = parent.getBoundary(); !it.end(); ++it)
-    // //   {
-    // //     int el1 = -1, el2 = -1;
-    // //     parent.getHandle().GetFaceElements(it->getIndex(), &el1, &el2);
-    // //     if (indices.count(el1) || indices.count(el2))
-    // //     {
-    // //       assert(el1 >= 0 || el2 >= 0);
-    // //       mfem::Array<int> pvs;
-    // //       parent.getHandle().GetFaceVertices(it->getIndex(), pvs);
-    // //       Array<Index> vs(pvs.Size());
-    // //       for (int i = 0; i < pvs.Size(); i++)
-    // //         vs[i] = m_s2ps[0].right.at(pvs[i]);
-    // //       build.face(it->getGeometry(), vs);
-    // //     }
-    // //   }
-    // // }
-
+  SubMesh<Context::Serial>::Builder&
+  SubMesh<Context::Serial>::Builder::include(size_t d, const IndexSet& indices)
+  {
+    for (const Index parentIdx : indices)
+      include(d, parentIdx);
     return *this;
   }
 
   SubMesh<Context::Serial> SubMesh<Context::Serial>::Builder::finalize()
   {
     assert(m_parent.has_value());
-    SubMesh res(m_parent.value().get());
-    m_build.finalize();
+    const auto& parent = m_parent.value().get();
+    const size_t nodes = m_sidx[0];
+    m_build.nodes(nodes);
+    for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
+      m_build.vertex(parent.getVertexCoordinates(it->get_right()));
+    SubMesh res(parent);
+    res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
     return res;
   }

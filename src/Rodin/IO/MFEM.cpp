@@ -95,7 +95,7 @@ namespace Rodin::IO
                                  << Alert::Raise;
             }
             connectivity.polytope(g->geometry, std::move(g->vertices));
-            attrs.track(m_dimension - 1, i, g->attribute);
+            attrs.track({ m_dimension - 1, i }, g->attribute);
           }
           continue;
         }
@@ -121,7 +121,7 @@ namespace Rodin::IO
                                  << Alert::Raise;
             }
             connectivity.polytope(g->geometry, std::move(g->vertices));
-            attrs.track(m_dimension, i, g->attribute);
+            attrs.track({ m_dimension, i }, g->attribute);
           }
           continue;
         }

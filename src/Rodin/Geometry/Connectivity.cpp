@@ -58,12 +58,14 @@ namespace Rodin::Geometry
     assert(d > 0);
     assert(d <= m_maximalDimension);
     auto [it, inserted] = m_index[d].left.insert({ in, m_count[d] });
-    assert(inserted);
-    m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
-    m_geometry[d].push_back(t);
-    m_dirty[d][0] = true;
-    m_count[d] += 1;
-    m_gcount[t] += 1;
+    if (inserted)
+    {
+      m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
+      m_geometry[d].push_back(t);
+      m_dirty[d][0] = true;
+      m_count[d] += 1;
+      m_gcount[t] += 1;
+    }
     return *this;
   }
 
@@ -75,12 +77,14 @@ namespace Rodin::Geometry
     assert(d > 0);
     assert(d <= m_maximalDimension);
     auto [it, inserted] = m_index[d].left.insert({ std::move(in), m_count[d] });
-    assert(inserted);
-    m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
-    m_geometry[d].push_back(t);
-    m_dirty[d][0] = true;
-    m_count[d] += 1;
-    m_gcount[t] += 1;
+    if (inserted)
+    {
+      m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
+      m_geometry[d].push_back(t);
+      m_dirty[d][0] = true;
+      m_count[d] += 1;
+      m_gcount[t] += 1;
+    }
     return *this;
   }
 
@@ -417,7 +421,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
-          out.resize(3);
+          out.resize(4);
           out[0] = { Polytope::Geometry::Triangle, { { p(0), p(1), p(2) } } };
           out[1] = { Polytope::Geometry::Triangle, { { p(0), p(1), p(3) } } };
           out[2] = { Polytope::Geometry::Triangle, { { p(0), p(2), p(3) } } };

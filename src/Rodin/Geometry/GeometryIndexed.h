@@ -16,7 +16,11 @@ namespace Rodin::Geometry
   {
     public:
       constexpr
-      GeometryIndexed() = default;
+      GeometryIndexed()
+      {
+        for (auto& v : m_map)
+          v = T();
+      }
 
       constexpr
       GeometryIndexed(std::initializer_list<std::pair<Polytope::Geometry, T>> l)

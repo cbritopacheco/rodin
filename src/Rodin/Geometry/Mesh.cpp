@@ -98,10 +98,10 @@ namespace Rodin::Geometry
   const PolytopeTransformation&
   Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
-    auto it = m_transformations.find(dimension, idx);
-    if (it != m_transformations.end(dimension))
+    auto it = m_transformationIndex.find(dimension, idx);
+    if (it != m_transformationIndex.end(dimension))
     {
-      assert(m_transformations.at(dimension, idx));
+      assert(m_transformationIndex.at(dimension, idx));
       return *it->second;
     }
     else
@@ -121,7 +121,7 @@ namespace Rodin::Geometry
       auto trans =
         std::unique_ptr<PolytopeTransformation>(
             new IsoparametricTransformation(std::move(pm), std::move(fe)));
-      auto p = m_transformations.insert(it, {dimension, idx}, std::move(trans));
+      auto p = m_transformationIndex.insert(it, {dimension, idx}, std::move(trans));
       return *p->second;
     }
   }
@@ -319,7 +319,9 @@ namespace Rodin::Geometry
   bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
   {
     const size_t D = getDimension();
-    const auto& incidence = getConnectivity().getIncidence({D - 1, D}, faceIdx);
+    const auto& conn = getConnectivity();
+    assert(conn.getIncidence(D - 1, D).size());
+    const auto& incidence = conn.getIncidence({D - 1, D}, faceIdx);
     assert(incidence.size() > 0);
     return incidence.size() == 1;
   }
@@ -331,18 +333,19 @@ namespace Rodin::Geometry
 
   Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
   {
-    auto it = m_attrs.find(dimension, index);
-    if (it == m_attrs.end(dimension))
+    auto it = m_attributeIndex.find(dimension, index);
+    if (it == m_attributeIndex.end(dimension))
       return RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
     else
       return it->second;
   }
 
   Mesh<Context::Serial>&
-  Mesh<Context::Serial>::setAttribute(size_t dimension, Index index, Attribute attr)
+  Mesh<Context::Serial>::setAttribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
-    m_attrs.track(dimension, index, attr);
-    m_attributes[dimension].insert(attr);
+    const auto [dimension, index] = p;
+    m_attributeIndex.track(p, attr);
+    m_attributes.at(dimension).insert(attr);
     return *this;
   }
 
@@ -381,23 +384,29 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr)
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr) const
   {
     return keep(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const FlatSet<Attribute>& attrs)
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
     SubMesh<Context::Serial>::Builder build;
     build.initialize(*this);
-    std::vector<Index> indices;
     for (Index i = 0; i < getElementCount(); i++)
     {
       if (attrs.count(getAttribute(D, i)))
-        indices.push_back(i);
+      {
+        build.include(D, i);
+        for (size_t d = 1; d <= D - 1; d++)
+        {
+          const auto& inc = getConnectivity().getIncidence(D, d);
+          if (inc.size() > 0)
+            build.include(d, inc.at(i));
+        }
+      }
     }
-    build.include(D, indices);
     return build.finalize();
   }
 
@@ -405,24 +414,45 @@ namespace Rodin::Geometry
   {
     const size_t D = getDimension();
     SubMesh<Context::Serial>::Builder build;
-    std::vector<Index> indices;
+    build.initialize(*this);
     for (auto it = getBoundary(); !it.end(); ++it)
-      indices.push_back(it->getIndex());
-    build.include(D - 1, indices);
+    {
+      const Index i = it->getIndex();
+      build.include(D - 1, i);
+      for (size_t d = 1; d <= D - 1; d++)
+      {
+        const auto& inc = getConnectivity().getIncidence(D - 1, d);
+        if (inc.size() > 0)
+          build.include(d, inc.at(i));
+      }
+    }
     return build.finalize();
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr) const
   {
     return trim(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const FlatSet<Attribute>& attrs)
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const FlatSet<Attribute>& attrs) const
   {
-    auto complement = getAttributes();
-    for (const auto& a : attrs)
-      complement.erase(a);
-    return keep(complement);
+    const size_t D = getDimension();
+    SubMesh<Context::Serial>::Builder build;
+    build.initialize(*this);
+    for (Index i = 0; i < getElementCount(); i++)
+    {
+      if (!attrs.count(getAttribute(D, i)))
+      {
+        build.include(D, i);
+        for (size_t d = 1; d <= D - 1; d++)
+        {
+          const auto& inc = getConnectivity().getIncidence(D, d);
+          if (inc.size() > 0)
+            build.include(d, inc.at(i));
+        }
+      }
+    }
+    return build.finalize();
   }
 }
 

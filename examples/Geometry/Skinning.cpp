@@ -16,20 +16,18 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh.load(meshFile);
+  mesh.getConnectivity().compute(2, 3);
+  mesh.getConnectivity().compute(2, 1);
+  std::cout << mesh.getCount(1) << std::endl;
+  // mesh.getConnectivity().compute(1, 3);
 
-  Alert::Info() << "Skinning mesh..." << Alert::Raise;
+  for (auto it = mesh.getFace(); !it.end(); ++it)
+    mesh.setAttribute({ it->getDimension(), it->getIndex() }, it->getIndex() + 1);
+
+  for (auto it = mesh.getPolytope(1); !it.end(); ++it)
+    mesh.setAttribute({ it->getDimension(), it->getIndex() }, it->getIndex() + 1);
 
   auto skin = mesh.skin();
 
-  // skin.trace({
-  //    {{3, 6}, 666},
-  //    {{2, 6}, 777}
-  //    });
-  //
-  skin.save("skin.mesh", IO::FileFormat::MEDIT);
-  mesh.save("volume.mesh", IO::FileFormat::MEDIT);
-
-  Alert::Info() << "Saved mesh to skin.mesh" << Alert::Raise;
-
-  // skin.save("skin.mesh", IO::FileFormat::MEDIT);
+  skin.save("Skin.mesh", IO::FileFormat::MEDIT);
 }

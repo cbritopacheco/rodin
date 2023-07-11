@@ -283,7 +283,7 @@ namespace Rodin::Geometry
 
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
-      virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
+      virtual MeshBase& setAttribute(const std::pair<size_t, Index>&, Attribute attr) = 0;
 
       virtual MeshConnectivity& getConnectivity() = 0;
 
@@ -341,7 +341,7 @@ namespace Rodin::Geometry
 
           Builder& vertex(const Math::Vector& x);
 
-          Builder& attribute(size_t d, Index idx, Attribute attr);
+          Builder& attribute(const std::pair<size_t, Index>& p, Attribute attr);
 
           Builder& polytope(Polytope::Geometry t, std::initializer_list<Index> vs)
           {
@@ -369,8 +369,10 @@ namespace Rodin::Geometry
           Math::Matrix m_vertices;
           MeshConnectivity m_connectivity;
 
-          AttributeIndex m_attrs;
-          TransformationIndex m_transformations;
+          AttributeIndex m_attributeIndex;
+          TransformationIndex m_transformationIndex;
+
+          std::vector<FlatSet<Attribute>> m_attributes;
       };
 
       /**
@@ -391,22 +393,27 @@ namespace Rodin::Geometry
       }
 
       /**
-      * @brief Move constructs the mesh from another mesh.
-      */
-      Mesh(Mesh&& other) = default;
-
-      /**
       * @brief Performs a copy of another mesh.
       */
       Mesh(const Mesh& other)
         : m_sdim(other.m_sdim),
-          m_connectivity(other.m_connectivity)
+          m_vertices(other.m_vertices),
+          m_connectivity(other.m_connectivity),
+          m_attributeIndex(other.m_attributeIndex),
+          m_attributes(other.m_attributes)
       {}
+
+      /**
+      * @brief Move constructs the mesh from another mesh.
+      */
+      Mesh(Mesh&& other) = default;
+
+      Mesh& operator=(const Mesh& other) = delete;
 
       /**
       * @brief Move assigns the mesh from another mesh.
       */
-      Mesh& operator=(Mesh&& other) = default;
+      Mesh& operator=(Mesh&&) = default;
 
       inline
       const Math::Matrix& getVertices() const
@@ -436,7 +443,7 @@ namespace Rodin::Geometry
 
       virtual Mesh& scale(Scalar c) override;
 
-      virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
+      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
       /**
       * @brief Skins the mesh to obtain its boundary mesh
@@ -456,7 +463,7 @@ namespace Rodin::Geometry
       * Convenience function to call trim(const std::set<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Serial> trim(Attribute attr);
+      virtual SubMesh<Context::Serial> trim(Attribute attr) const;
 
       /**
       * @brief Trims the elements with the given material references.
@@ -467,22 +474,20 @@ namespace Rodin::Geometry
       * object containing the elements which were not trimmed from the
       * original mesh.
       */
-      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs);
+      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs) const;
 
-      virtual SubMesh<Context::Serial> keep(Attribute attr);
+      virtual SubMesh<Context::Serial> keep(Attribute attr) const;
 
-      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs);
-
-      // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
+      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
 
       const PolytopeIndexed<Attribute>& getAttributeIndex() const
       {
-        return m_attrs;
+        return m_attributeIndex;
       }
 
       const PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>& getTransformationIndex() const
       {
-        return m_transformations;
+        return m_transformationIndex;
       }
 
       virtual size_t getCount(size_t dim) const override;
@@ -533,7 +538,7 @@ namespace Rodin::Geometry
 
       virtual void flush() override
       {
-        m_transformations.clear();
+        m_transformationIndex.clear();
       }
 
       virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const override;
@@ -545,13 +550,13 @@ namespace Rodin::Geometry
     private:
       size_t m_sdim;
 
-      PolytopeIndexed<Geometry::Attribute> m_attrs;
-      std::vector<FlatSet<Attribute>> m_attributes;
-
       Math::Matrix m_vertices;
       MeshConnectivity m_connectivity;
 
-      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformations;
+      PolytopeIndexed<Geometry::Attribute> m_attributeIndex;
+      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformationIndex;
+
+      std::vector<FlatSet<Attribute>> m_attributes;
   };
 
   using SerialMesh = Mesh<Context::Serial>;
