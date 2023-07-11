@@ -37,7 +37,7 @@ namespace Rodin::Geometry
   MeshConnectivity& MeshConnectivity::reserve(size_t d, size_t count)
   {
     assert(d < m_connectivity.size());
-    m_index[d].left.rehash(count);
+    m_index[d].left.rehash(count); m_index[d].right.rehash(count);
     m_geometry[d].reserve(count);
     m_connectivity[d][0].reserve(count);
     return *this;
