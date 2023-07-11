@@ -125,6 +125,10 @@ namespace Rodin
       size_t seed = 0;
       switch (arr.size())
       {
+        case 0:
+        {
+          break;
+        }
         case 1:
         {
           seed = boost::hash_value(arr.coeff(0));
