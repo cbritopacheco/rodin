@@ -17,7 +17,7 @@ option(RODIN_BUILD_BENCHMARKS   "Build Rodin benchmarks"                OFF)
 option(RODIN_BUILD_DOC          "Build the Rodin documentation"         OFF)
 option(RODIN_USE_MPI            "Use Rodin with MPI support"            OFF)
 option(RODIN_USE_OPENMP         "Use Rodin with OpenMP support"         OFF)
-option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    ON)
+option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    OFF)
 option(RODIN_USE_MCSS           "Build documentation with m.css"        OFF)
 option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
 option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
@@ -86,7 +86,7 @@ if (RODIN_CODE_COVERAGE)
 endif()
 
 if (RODIN_BUILD_SRC)
-  set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
+  # set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
   if (RODIN_USE_SUITESPARSE)
     set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
@@ -103,12 +103,12 @@ if (RODIN_BUILD_SRC)
   endif()
 
   # ---- MFEM ----
-  message (STATUS "Configuring mfem...")
-  set(BUILD_DOC OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
-  find_package(MFEM
-    REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
-    NO_DEFAULT_PATH)
+  # message (STATUS "Configuring mfem...")
+  # set(BUILD_DOC OFF CACHE BOOL "" FORCE)
+  # add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
+  # find_package(MFEM
+  #   REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
+  #   NO_DEFAULT_PATH)
 
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)
