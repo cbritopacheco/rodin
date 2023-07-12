@@ -28,6 +28,8 @@
 #include "Rodin/Variational/FiniteElement.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
+#include "ForwardDecls.h"
+
 namespace Rodin::Variational
 {
   /**
@@ -448,16 +450,6 @@ namespace Rodin::Variational
 
       size_t m_vdim;
   };
-
-  /**
-   * @brief Alias for P1Element<Scalar>
-   */
-  using ScalarP1Element = P1Element<Scalar>;
-
-  /**
-   * @brief Alias for P1Element<Math::Vector>
-   */
-  using VectorP1Element = P1Element<Math::Vector>;
 
   namespace Internal
   {

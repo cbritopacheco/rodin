@@ -10,17 +10,40 @@
 using namespace Rodin;
 using namespace Geometry;
 
+static constexpr size_t n = 6;
+static constexpr Attribute trimAttribute = 2;
+
+std::array rainbowAttribute = {1, 3, 4, 5, 6, 7, 8, 9, 10};
+
 int main(int, char**)
 {
-  const char* filename = "../resources/mfem/ccl-2d-example.mesh";
+  // Build the mesh
   Mesh mesh;
-  mesh.load(filename);
+  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
 
-  Alert::Info() << "Trimming mesh..." << Alert::Raise;
+  // We're gonna trim the center of the mesh.
+  for (auto it = mesh.getElement(); !it.end(); ++it)
+  {
+    for (auto vit = it->getVertex(); !vit.end(); ++vit)
+    {
+      const auto v = *vit;
+      if (2 <= v.x() && v.x() <= 3 && 2 <= v.y() && v.y() <= 3)
+      {
+        // Set the attribute to the trim attribute
+        mesh.setAttribute({ it->getDimension(), it->getIndex() }, trimAttribute);
+        break;
+      }
+      else
+      {
+        // Set other attributes to produce colors
+        mesh.setAttribute(
+            { it->getDimension(), it->getIndex() }, rainbowAttribute[it->getIndex() % rainbowAttribute.size()]);
+      }
+    }
+  }
 
-  auto trimmed = mesh.trim(2);
-
-  Alert::Info() << "Saved mesh to trimmed.mesh" << Alert::Raise;
-
-  trimmed.save("trimmed.mesh");
+  // Perform the actual trimming of the attribute
+  auto trimmed = mesh.trim(trimAttribute);
+  trimmed.save("Trimmed.mfem.mesh", IO::FileFormat::MFEM);
+  Alert::Info() << "Saved trimmed mesh to: Trimmed.mfem.mesh" << Alert::Raise;
 }

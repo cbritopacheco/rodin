@@ -16,7 +16,10 @@
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/Utility/IsSpecialization.h"
+#include "Rodin/Variational/Traits.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/P1/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
@@ -37,31 +40,6 @@ namespace Rodin::Geometry
       virtual ~MeshBase() = default;
 
       virtual MeshBase& scale(Scalar c) = 0;
-
-      /**
-       * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
-       * @param[in] u Displacement at each node
-       *
-       * Given a grid function @f$ u @f$, the method will perform the
-       * displacement
-       * @f[
-       *   x \mapsto x + u(x)
-       * @f]
-       * at each node @f$ x @f$ of the mesh.
-       *
-       * @note The vector dimension of @f$ u @f$ must be equal to the
-       * space dimension.
-       *
-       * @returns Reference to this (for method chaining)
-       */
-      template <class FES>
-      MeshBase& displace(const Variational::GridFunction<FES>& u)
-      {
-        assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-        assert(false);
-        flush();
-        return *this;
-      }
 
       /**
        * @brief Gets the maximum number @f$ t @f$ by which the mesh will
@@ -89,60 +67,38 @@ namespace Rodin::Geometry
         return res;
       }
 
-      // /**
-      //  * @brief Performs connected-component labelling.
-      //  * @param[in] p Function which returns true if two adjacent elements
-      //  * belong to the same component, false otherwise.
-      //  * @returns List of sets, each set representing a component containing
-      //  * the indices of its elements.
-      //  *
-      //  * @note Both elements passed to the function will always be adjacent
-      //  * to each other, i.e. it is not necessary to verify this is the case.
-      //  */
-      // std::deque<std::set<int>> ccl(
-      //     std::function<bool(const Element&, const Element&)> p) const;
-
-      // /**
-      //  * @brief Edits the specified elements in the mesh via the given function.
-      //  * @param[in] f Function which takes an ElementView to modify each
-      //  * element.
-      //  * @param[in] elements Set of indices corresponding to the elements
-      //  * which will be modified.
-      //  */
-      // MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
-
-      // /**
-      //  * @brief Obtains a set of elements satisfying the given condition.
-      //  * @param[in] condition Function which returns true if the element
-      //  * satisfies the condition.
-      //  * @returns Set containing the element indices satisfying the
-      //  * condition.
-      //  */
-      // std::set<int> where(std::function<bool(const Element&)> condition) const;
-
-      // std::set<int> where(std::function<bool(const Point&)> condition) const;
-
       /**
        * @brief Indicates whether the mesh is a surface or not.
-       * @returns True if mesh is a surface, false otherwise.
        *
-       * A surface mesh is a mesh of codimension 1. That is, the difference
-       * between its space dimension and dimension is 1.
+       * A mesh is considered a surface mesh if has codimension of 1, meaning
+       * the difference between its space dimension and its topological
+       * dimension is 1.
+       *
+       * @returns True if mesh is a surface, false otherwise.
        */
       bool isSurface() const;
 
+      /**
+       * @brief Gets the number of vertices in the mesh.
+       */
       inline
       size_t getVertexCount() const
       {
         return getCount(0);
       }
 
+      /**
+       * @brief Gets the number of faces in the mesh.
+       */
       inline
       size_t getFaceCount() const
       {
         return getCount(getDimension() - 1);
       }
 
+      /**
+       * @brief Gets the number of elements in the mesh.
+       */
       inline
       size_t getElementCount() const
       {
@@ -415,11 +371,123 @@ namespace Rodin::Geometry
       */
       Mesh& operator=(Mesh&&) = default;
 
+      template <class ... Params>
+      MeshBase& displace(const Variational::GridFunction<Variational::P1<Params...>>& u)
+      {
+        using Range = typename FormLanguage::Traits<Variational::P1<Params...>>::RangeType;
+        static_assert(std::is_same_v<Math::Vector, Range>);
+        assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
+        m_vertices += u.getData();
+        flush();
+      }
+
+      /**
+       * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
+       * @param[in] u Displacement at each node
+       *
+       * Given a vector valued function @f$ \vec{u} @f$, the method will perform the
+       * displacement
+       * @f[
+       *   x \mapsto x + \vec{u}(x)
+       * @f]
+       * at each node @f$ x @f$ of the mesh.
+       *
+       * @note The vector dimension of @f$ \vec{u} @f$ must be equal to the
+       * space dimension.
+       *
+       * @returns Reference to this (for method chaining)
+       */
+      template <class FunctionDerived>
+      MeshBase& displace(const Variational::FunctionBase<FunctionDerived>&)
+      {
+        assert(false);
+        flush();
+        return *this;
+      }
+
+      const PolytopeIndexed<Attribute>& getAttributeIndex() const
+      {
+        return m_attributeIndex;
+      }
+
+      const PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>& getTransformationIndex() const
+      {
+        return m_transformationIndex;
+      }
+
       inline
       const Math::Matrix& getVertices() const
       {
         return m_vertices;
       }
+
+      /**
+      * @brief Skins the mesh to obtain its boundary mesh
+      * @returns SubMesh object to the boundary region of the mesh
+      *
+      * This function "skins" the mesh to return the boundary as a new SubMesh
+      * object. The resulting mesh will be embedded in the original space
+      * dimension.
+      *
+      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 2
+      * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
+      * is already computed in the mesh.
+      */
+      virtual SubMesh<Context::Serial> skin() const;
+
+      /**
+      * @brief Trims the elements with the given attribute.
+      * @param[in] attr Attribute to trim
+      * @returns SubMesh of the remaining region mesh
+      *
+      * Convenience function to call trim(const std::FlatSet<Attribute>&) with
+      * only one attribute.
+      */
+      virtual SubMesh<Context::Serial> trim(Attribute attr) const;
+
+      /**
+      * @brief Trims the elements with the given attribute.
+      * @param[in] attrs Attributes to trim
+      * @returns SubMesh object to the remaining region of the mesh
+      *
+      * This function will trim discard all the elements that have an attribute
+      * in the given set of attributes.
+      *
+      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
+      * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
+      * already computed in the mesh.
+      *
+      * @returns A SubMesh object consisting of elements that have attributes
+      * not in the given set.
+      */
+      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs) const;
+
+      /**
+      * @brief Keeps the elements with the given attribute.
+      * @param[in] attr Attribute to keep
+      * @returns SubMesh of the remaining region mesh
+      *
+      * Convenience function to call keep(const std::FlatSet<Attribute>&) with
+      * only one attribute.
+      */
+      virtual SubMesh<Context::Serial> keep(Attribute attr) const;
+
+      /**
+      * @brief Trims the elements with the given attributes.
+      * @param[in] attrs Attributes to trim
+      * @returns SubMesh object to the remaining region of the mesh
+      *
+      * This function will trim keep only the elements that have an attribute
+      * in the given set of attributes.
+      *
+      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
+      * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
+      * already computed in the mesh.
+      *
+      * @returns A SubMesh object consisting of elements that have attributes
+      * not in the given set.
+      */
+      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -444,51 +512,6 @@ namespace Rodin::Geometry
       virtual Mesh& scale(Scalar c) override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
-
-      /**
-      * @brief Skins the mesh to obtain its boundary mesh
-      * @returns SubMesh object to the boundary region of the mesh
-      *
-      * This function will "skin" the mesh to return the mesh boundary as a
-      * new SubMesh object. The new mesh will be embedded in the original
-      * space dimension.
-      */
-      virtual SubMesh<Context::Serial> skin() const;
-
-      /**
-      * @brief Trims the elements with the given material reference.
-      * @param[in] attr Attribute to trim
-      * @returns SubMesh object to the remaining region of the mesh
-      *
-      * Convenience function to call trim(const std::set<Attribute>&) with
-      * only one attribute.
-      */
-      virtual SubMesh<Context::Serial> trim(Attribute attr) const;
-
-      /**
-      * @brief Trims the elements with the given material references.
-      * @param[in] attrs Attributes to trim
-      * @returns SubMesh object to the remaining region of the mesh
-      *
-      * This function will trim the current mesh and return a Submesh
-      * object containing the elements which were not trimmed from the
-      * original mesh.
-      */
-      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs) const;
-
-      virtual SubMesh<Context::Serial> keep(Attribute attr) const;
-
-      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
-
-      const PolytopeIndexed<Attribute>& getAttributeIndex() const
-      {
-        return m_attributeIndex;
-      }
-
-      const PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>& getTransformationIndex() const
-      {
-        return m_transformationIndex;
-      }
 
       virtual size_t getCount(size_t dim) const override;
 

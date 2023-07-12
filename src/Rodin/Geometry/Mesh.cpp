@@ -6,7 +6,7 @@
  */
 #include "Rodin/Alert.h"
 
-#include "Rodin/Variational/P1/P1Element.h"
+#include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
@@ -419,7 +419,7 @@ namespace Rodin::Geometry
     {
       const Index i = it->getIndex();
       build.include(D - 1, i);
-      for (size_t d = 1; d <= D - 1; d++)
+      for (size_t d = 1; d <= D - 2; d++)
       {
         const auto& inc = getConnectivity().getIncidence(D - 1, d);
         if (inc.size() > 0)

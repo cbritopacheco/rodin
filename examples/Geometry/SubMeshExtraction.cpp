@@ -11,6 +11,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 
 static constexpr Attribute trimAttribute = 2;
+
 int main(int, char**)
 {
   size_t n = 6;
