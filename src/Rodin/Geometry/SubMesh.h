@@ -17,6 +17,17 @@
 
 namespace Rodin::Geometry
 {
+
+  /**
+   * @defgroup DotSpecializations Dot Template Specializations
+   * @brief Template specializations of the Dot class.
+   * @see Dot
+   */
+
+  /**
+   * @ingroup DotSpecializations
+   */
+
   /**
    * @brief A SubMesh object represents a subregion of a Mesh object.
    *

@@ -61,8 +61,7 @@ namespace Rodin::Variational
   class BilinearFormBase;
 
   /**
-   * @brief Represents a serial bilinear form supported on two finite element
-   * spaces originating from two instances of FiniteElementCollection.
+   * @brief Represents a bilinear form on a trial and test space
    * @tparam TrialFES Type of trial finite element space
    * @tparam TestFES Type of test finite element space
    *
@@ -131,40 +130,6 @@ namespace Rodin::Variational
    */
   template <class Range, class Context>
   class H1;
-
-
-  /**
-   * @brief Degree 1 Lagrange element
-   * @tparam Range Range value type
-   *
-   * @note For an overview of all the possible specializations of the
-   * P1 class, please see @ref P1Specializations.
-   *
-   * @see P1ElementSpecializations
-   */
-  template <class Range>
-  class P1Element;
-
-  /**
-   * @brief Degree 1 Lagrange finite element space
-   * @tparam Range Range value type
-   * @tparam Context Context type
-   * @tparam Args Additional arguments
-   *
-   * Represents the finite element space composed of continuous, piecewise
-   * linear functions:
-   * @f[
-   *  \mathbb{P}_1 (\mathcal{T}_h)^d = \{ v \in C^0(\mathcal{T}_h)^d \mid v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ ,
-   * @f]
-   * for a given vector dimension @f$ d \in \mathbb{N} @f$.
-   *
-   * @note For an overview of all the possible specializations of the
-   * P1 class, please see @ref P1Specializations.
-   *
-   * @see P1Specializations
-   */
-  template <class Range, class Context, class Mesh>
-  class P1;
 
   template <class StrictType>
   class LazyEvaluator;
