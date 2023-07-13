@@ -1,3 +1,8 @@
+add_executable(Volume Volume.cpp)
+target_link_libraries(Volume
+  PUBLIC
+  Rodin::Geometry)
+
 add_executable(Displace Displace.cpp)
 target_link_libraries(Displace
   PUBLIC
