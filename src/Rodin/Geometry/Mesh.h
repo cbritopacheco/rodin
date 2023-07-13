@@ -301,12 +301,12 @@ namespace Rodin::Geometry
 
           Builder& polytope(Polytope::Geometry t, std::initializer_list<Index> vs)
           {
-            return polytope(t, Array<Index>({ vs }));
+            return polytope(t, IndexArray({ vs }));
           }
 
-          Builder& polytope(Polytope::Geometry t, const Array<Index>& vs);
+          Builder& polytope(Polytope::Geometry t, const IndexArray& vs);
 
-          Builder& polytope(Polytope::Geometry t, Array<Index>&& vs);
+          Builder& polytope(Polytope::Geometry t, IndexArray&& vs);
 
           Mesh finalize();
 

@@ -153,7 +153,21 @@ namespace Rodin::Geometry
        */
       Attribute getAttribute() const;
 
-      Scalar getVolume() const;
+      /**
+       * @brief Gets the measure of the polytope.
+       *
+       * Gets the @f$ d @f$-dimensional measure of the polytope. This has
+       * different names in different dimensions. See table below.
+       * Dimension of polytope    | Measure
+       * ------------------------ | -------------
+       * 0                        | Always zero
+       * 1                        | Length
+       * 2                        | Area
+       * 3                        | Volume
+       *
+       * @return The measure of the polytope.
+       */
+      Scalar getMeasure() const;
 
       const PolytopeTransformation& getTransformation() const;
 

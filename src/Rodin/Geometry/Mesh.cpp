@@ -188,7 +188,7 @@ namespace Rodin::Geometry
   {
     Scalar totalVolume = 0;
     for (auto it = getElement(); !it.end(); ++it)
-      totalVolume += it->getVolume();
+      totalVolume += it->getMeasure();
     return totalVolume;
   }
 
@@ -198,7 +198,7 @@ namespace Rodin::Geometry
     for (auto it = getElement(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
-        totalVolume += it->getVolume();
+        totalVolume += it->getMeasure();
     }
     return totalVolume;
   }
@@ -207,7 +207,7 @@ namespace Rodin::Geometry
   {
     Scalar totalVolume = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
-      totalVolume += it->getVolume();
+      totalVolume += it->getMeasure();
     return totalVolume;
   }
 
@@ -217,7 +217,7 @@ namespace Rodin::Geometry
     for (auto it = getBoundary(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
-        totalVolume += it->getVolume();
+        totalVolume += it->getMeasure();
     }
     return totalVolume;
   }
