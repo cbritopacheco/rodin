@@ -52,6 +52,8 @@ namespace Rodin::Geometry
         Geometry::Tetrahedron
       };
 
+      static const Math::Matrix& getVertices(Polytope::Geometry g);
+
       inline
       constexpr
       static size_t getVertexCount(Polytope::Geometry g)
@@ -65,7 +67,6 @@ namespace Rodin::Geometry
           case Geometry::Triangle:
             return 3;
           case Geometry::Quadrilateral:
-            return 4;
           case Geometry::Tetrahedron:
             return 4;
         }
@@ -104,13 +105,17 @@ namespace Rodin::Geometry
           case Geometry::Triangle:
           case Geometry::Tetrahedron:
             return true;
-          default:
+          case Geometry::Quadrilateral:
             return false;
         }
         assert(false);
         return false;
       }
 
+      /**
+       * @brief Consructs a polytope of dimension @f$ d @f$ and index @f$ i @f$
+       * belonging to the given mesh.
+       */
       Polytope(size_t dimension, Index index, const MeshBase& mesh);
 
       Polytope(const Polytope&) = default;
@@ -163,6 +168,8 @@ namespace Rodin::Geometry
       Geometry getGeometry() const;
 
     private:
+      static const GeometryIndexed<Math::Matrix> s_vertices;
+
       const size_t m_dimension;
       const Index m_index;
       std::reference_wrapper<const MeshBase> m_mesh;
@@ -445,13 +452,20 @@ namespace Rodin::Geometry
         Reference
       };
 
-      Point(const Polytope& polytope, const PolytopeTransformation& trans, const Math::Vector& rc)
+      Point(const Polytope& polytope, const PolytopeTransformation& trans,
+          const Math::Vector& rc)
         : PointBase(polytope, trans), m_type(Type::Data), m_rc(rc)
       {}
 
+      Point(const Polytope& polytope, const PolytopeTransformation& trans,
+          const Math::Vector& rc, const Math::Vector& pc)
+        : PointBase(polytope, trans, pc), m_type(Type::Data), m_rc(rc)
+      {}
+
       explicit
-      Point(const Polytope& polytope, const PolytopeTransformation& trans, std::reference_wrapper<const Math::Vector> rc)
-        : PointBase(polytope, trans), m_type(Type::Reference), m_rc(rc)
+      Point(const Polytope& polytope, const PolytopeTransformation& trans,
+          std::reference_wrapper<const Math::Vector> rc, std::reference_wrapper<const Math::Vector> pc)
+        : PointBase(polytope, trans, pc), m_type(Type::Reference), m_rc(rc)
       {}
 
       Point(const Point& other)

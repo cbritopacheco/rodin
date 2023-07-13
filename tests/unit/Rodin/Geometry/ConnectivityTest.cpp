@@ -26,6 +26,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
   EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Geometry::Triangle);
 
+  connectivity.compute(d, d);
   EXPECT_EQ(connectivity.getIncidence(d, d).size(), 1);
   EXPECT_EQ(connectivity.getIncidence({d, d}, 0).size(), 0);
 
@@ -75,6 +76,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_4Nodes_Triangles)
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 1), IndexSet({1, 2, 3}));
 
+  connectivity.compute(d, d);
   EXPECT_EQ(connectivity.getIncidence(d, d).size(), 2);
   EXPECT_EQ(connectivity.getIncidence({d, d}, 0).size(), 1);
   EXPECT_EQ(connectivity.getIncidence({d, d}, 1).size(), 1);
@@ -121,6 +123,8 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Triangles)
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 1), IndexSet({1, 2, 3}));
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 2), IndexSet({2, 3, 4}));
+
+  connectivity.compute(d, d);
   EXPECT_EQ(connectivity.getIncidence(d, d).size(), 3);
   EXPECT_EQ(connectivity.getIncidence({d, d}, 0), IndexSet({1, 2}));
   EXPECT_EQ(connectivity.getIncidence({d, d}, 1), IndexSet({0, 2}));

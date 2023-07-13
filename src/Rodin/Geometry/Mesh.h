@@ -371,16 +371,6 @@ namespace Rodin::Geometry
       */
       Mesh& operator=(Mesh&&) = default;
 
-      template <class ... Params>
-      MeshBase& displace(const Variational::GridFunction<Variational::P1<Params...>>& u)
-      {
-        using Range = typename FormLanguage::Traits<Variational::P1<Params...>>::RangeType;
-        static_assert(std::is_same_v<Math::Vector, Range>);
-        assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-        m_vertices += u.getData();
-        flush();
-      }
-
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
        * @param[in] u Displacement at each node
@@ -398,12 +388,23 @@ namespace Rodin::Geometry
        * @returns Reference to this (for method chaining)
        */
       template <class FunctionDerived>
-      MeshBase& displace(const Variational::FunctionBase<FunctionDerived>&)
+      Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
       {
-        assert(false);
-        flush();
+        for (auto it = getVertex(); !it.end(); ++it)
+        {
+          const Geometry::Point p(*it, it->getTransformation(),
+              Polytope::getVertices(Polytope::Geometry::Point).col(0), it->getCoordinates());
+          m_vertices.col(it->getIndex()) += u(p);
+        }
         return *this;
       }
+
+      /**
+       * @internal
+       */
+      Mesh& displace(const
+          Variational::GridFunction<Variational::P1<Math::Vector,
+          Context::Serial, Geometry::Mesh<Context::Serial>>>& u);
 
       const PolytopeIndexed<Attribute>& getAttributeIndex() const
       {
@@ -571,6 +572,8 @@ namespace Rodin::Geometry
       virtual const FlatSet<Attribute>& getBoundaryAttributes() const override;
 
     private:
+      static const GeometryIndexed<Math::Matrix> s_vertices;
+
       size_t m_sdim;
 
       Math::Matrix m_vertices;

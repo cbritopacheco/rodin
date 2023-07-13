@@ -9,12 +9,31 @@
 
 namespace Rodin::Geometry
 {
+
+  const GeometryIndexed<Math::Matrix> Polytope::s_vertices =
+  {
+    { Polytope::Geometry::Point,
+      Math::Matrix{{0}} },
+    { Polytope::Geometry::Segment,
+      Math::Matrix{{0, 1}} },
+    { Polytope::Geometry::Triangle,
+      Math::Matrix{{0, 1, 0},
+                   {0, 0, 1}} },
+    { Polytope::Geometry::Quadrilateral,
+      Math::Matrix{{0, 1, 0, 1},
+                   {0, 0, 1, 1}} },
+    { Polytope::Geometry::Tetrahedron,
+      Math::Matrix{{0, 1, 0, 0},
+                   {0, 0, 1, 0},
+                   {0, 0, 0, 1}} },
+  };
+
   bool operator<(const Polytope& lhs, const Polytope& rhs)
   {
     return lhs.getIndex() < rhs.getIndex();
   }
 
-  // ---- Simplex -----------------------------------------------------------
+  // ---- Polytope -----------------------------------------------------------
   Polytope::Polytope(size_t dimension, Index index, const MeshBase& mesh)
     : m_dimension(dimension), m_index(index), m_mesh(mesh)
   {}
@@ -34,6 +53,11 @@ namespace Rodin::Geometry
     const auto& vertices = getVertices();
     return VertexIterator(
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
+  }
+
+  const Math::Matrix& Polytope::getVertices(Polytope::Geometry g)
+  {
+    return s_vertices[g];
   }
 
   const Array<Index>& Polytope::getVertices() const

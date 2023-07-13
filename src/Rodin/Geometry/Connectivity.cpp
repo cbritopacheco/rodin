@@ -47,6 +47,11 @@ namespace Rodin::Geometry
   {
     m_count[0] = count;
     m_gcount[Geometry::Polytope::Geometry::Point] = count;
+    for (size_t i = 0; i < count; i++)
+    {
+      auto p = m_index[0].left.insert({ IndexArray{{ i }}, i });
+      assert(p.second);
+    }
     return *this;
   }
 
@@ -62,9 +67,9 @@ namespace Rodin::Geometry
     {
       m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
       m_geometry[d].push_back(t);
-      m_dirty[d][0] = true;
       m_count[d] += 1;
       m_gcount[t] += 1;
+      m_dirty[d][0] = false;
     }
     return *this;
   }
@@ -81,9 +86,9 @@ namespace Rodin::Geometry
     {
       m_connectivity[d][0].emplace_back().insert_unique(it->first.begin(), it->first.end());
       m_geometry[d].push_back(t);
-      m_dirty[d][0] = true;
       m_count[d] += 1;
       m_gcount[t] += 1;
+      m_dirty[d][0] = false;
     }
     return *this;
   }
@@ -155,30 +160,33 @@ namespace Rodin::Geometry
   MeshConnectivity& MeshConnectivity::compute(size_t d, size_t dp)
   {
     const size_t D = getMeshDimension();
+    if (d == D && dp == 0)
+      return *this;
     if (m_dirty[D][D])
       transpose(0, D).intersection(D, D, 0);
     assert(!m_dirty[D][D]);
-    if (!(d == D && dp == 0))
+    if (d != D && d != 0 && (m_dirty[D][d] || m_dirty[d][0]))
+      build(d);
+    assert(!m_dirty[D][d]);
+    assert(!m_dirty[d][0] || d == D || d == 0);
+    if (dp != D && dp != 0 && (m_dirty[D][dp] || m_dirty[dp][0]))
+      build(dp);
+    assert(!m_dirty[D][dp]);
+    assert(!m_dirty[dp][0] || dp == D || dp == 0);
+    if (m_dirty[d][dp])
     {
-      if (m_dirty[d][0])
-        build(d);
-      if (m_dirty[dp][0])
-        build(dp);
-      if (m_dirty[d][dp])
+      if (d < dp)
       {
-        if (d < dp)
-        {
-          compute(dp, d).transpose(d, dp);
-        }
+        compute(dp, d).transpose(d, dp);
+      }
+      else
+      {
+        size_t dpp;
+        if (d == 0 && dp == 0)
+          dpp = D;
         else
-        {
-          size_t dpp;
-          if (d == 0 && dp == 0)
-            dpp = D;
-          else
-            dpp = 0;
-          compute(d, dpp).compute(dpp, dp).intersection(d, dp, dpp);
-        }
+          dpp = 0;
+        compute(d, dpp).compute(dpp, dp).intersection(d, dp, dpp);
       }
     }
     m_dirty[d][dp] = false;
@@ -188,6 +196,10 @@ namespace Rodin::Geometry
   MeshConnectivity& MeshConnectivity::build(size_t d)
   {
     const size_t D = getMeshDimension();
+    assert(d > 0);
+    assert(d < D);
+    assert(!m_dirty[D][0]);
+    assert(!m_dirty[D][D]);
     for (Index i = 0; i < m_count[D]; i++)
     {
       IndexSet s;
@@ -195,21 +207,9 @@ namespace Rodin::Geometry
       local(subpolytopes, d, i);
       for (auto& [geometry, vertices] : subpolytopes)
       {
-        bool inserted;
-        PolytopeIndex::left_iterator it;
-        if (d == 0)
-        {
-          const Index idx = vertices.coeff(0);
-          auto insert = m_index[d].left.insert({ std::move(vertices), idx });
-          it = insert.first;
-          inserted = insert.second;
-        }
-        else
-        {
-          auto insert = m_index[d].left.insert({ std::move(vertices), m_count[d] });
-          it = insert.first;
-          inserted = insert.second;
-        }
+        auto insert = m_index[d].left.insert({ std::move(vertices), m_count[d] });
+        const PolytopeIndex::left_iterator it = insert.first;
+        const bool inserted = insert.second;
         const auto& [v, idx] = *it;
         if (inserted)
         {
