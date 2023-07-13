@@ -508,7 +508,7 @@ namespace Rodin::Variational
     {
       case Geometry::Polytope::Geometry::Point:
       {
-        out.coeffRef(0) = 1;
+        out.coeffRef(i) = 1;
         return;
       }
       case Geometry::Polytope::Geometry::Segment:

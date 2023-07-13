@@ -106,23 +106,38 @@ namespace Rodin::Geometry
     }
     else
     {
-      auto g = getGeometry(dimension, idx);
-      const size_t sdim = getSpaceDimension();
-      const size_t n = Polytope::getVertexCount(g);
-      Math::Matrix pm(sdim, n);
-      const auto& polytope = getConnectivity().getPolytope(dimension, idx);
-      assert(n == static_cast<size_t>(polytope.size()));
-      for (const auto& v : polytope | boost::adaptors::indexed())
+      if (dimension == 0)
       {
-        assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
-        pm.col(v.index()) = getVertexCoordinates(v.value());
+        Variational::ScalarP1Element fe(Polytope::Geometry::Point);
+        const size_t sdim = getSpaceDimension();
+        Math::Matrix pm(sdim, 1);
+        pm.col(0) = getVertexCoordinates(idx);
+        auto trans =
+          std::unique_ptr<PolytopeTransformation>(
+              new IsoparametricTransformation(pm, std::move(fe)));
+        auto p = m_transformationIndex.insert(it, { dimension, idx }, std::move(trans));
+        return *p->second;
       }
-      Variational::ScalarP1Element fe(g);
-      auto trans =
-        std::unique_ptr<PolytopeTransformation>(
-            new IsoparametricTransformation(std::move(pm), std::move(fe)));
-      auto p = m_transformationIndex.insert(it, {dimension, idx}, std::move(trans));
-      return *p->second;
+      else
+      {
+        auto g = getGeometry(dimension, idx);
+        const size_t sdim = getSpaceDimension();
+        const size_t n = Polytope::getVertexCount(g);
+        Math::Matrix pm(sdim, n);
+        const auto& polytope = getConnectivity().getPolytope(dimension, idx);
+        assert(n == static_cast<size_t>(polytope.size()));
+        for (const auto& v : polytope | boost::adaptors::indexed())
+        {
+          assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
+          pm.col(v.index()) = getVertexCoordinates(v.value());
+        }
+        Variational::ScalarP1Element fe(g);
+        auto trans =
+          std::unique_ptr<PolytopeTransformation>(
+              new IsoparametricTransformation(std::move(pm), std::move(fe)));
+        auto p = m_transformationIndex.insert(it, { dimension, idx }, std::move(trans));
+        return *p->second;
+      }
     }
   }
 
@@ -453,6 +468,16 @@ namespace Rodin::Geometry
       }
     }
     return build.finalize();
+  }
+
+  Mesh<Context::Serial>& Mesh<Context::Serial>::displace(const
+      Variational::GridFunction<Variational::P1<Math::Vector,
+      Context::Serial, Geometry::Mesh<Context::Serial>>>& u)
+  {
+    assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
+    m_vertices += u.getData();
+    flush();
+    return *this;
   }
 }
 

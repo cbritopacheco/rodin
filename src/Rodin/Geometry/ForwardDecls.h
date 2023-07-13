@@ -15,6 +15,9 @@
 namespace Rodin::Geometry
 {
   template <class T>
+  class GeometryIndexed;
+
+  template <class T>
   class ContainerIndexGenerator;
 
   enum class Type;

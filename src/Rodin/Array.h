@@ -48,7 +48,7 @@ namespace Rodin
         {
           case 1:
           {
-            return lhs.coeff(0) == rhs.coeff(1);
+            return lhs.coeff(0) == rhs.coeff(0);
           }
           case 2:
           {

@@ -1,3 +1,9 @@
+add_executable(Displace Displace.cpp)
+target_link_libraries(Displace
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Variational)
+
 add_executable(SubMeshExtraction SubMeshExtraction.cpp)
 target_link_libraries(SubMeshExtraction
   PUBLIC
