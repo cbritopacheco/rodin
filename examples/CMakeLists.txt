@@ -32,5 +32,5 @@ if (RODIN_BUILD_EXAMPLES)
   # add_subdirectory(SurfaceOptimization)
   # add_subdirectory(SurfaceEvolution)
 
-  # add_subdirectory(MMG)
+  add_subdirectory(MMG)
 endif()

@@ -52,6 +52,9 @@ namespace Rodin::Geometry
     public:
       using Parent = Mesh<Context::Serial>;
 
+      /**
+       * @brief Class used to build SubMesh<Context::Serial> instances.
+       */
       class Builder
       {
         public:

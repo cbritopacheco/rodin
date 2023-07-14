@@ -290,11 +290,11 @@ namespace Rodin::IO
     os << '\n' << IO::MEDIT::Keyword::End;
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::print(std::ostream& os)
+  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::print(std::ostream& os, bool pEnd)
   {
     printVersion(os);
     printDimension(os);
     printEntities(os);
-    printEnd(os);
+    if (pEnd) printEnd(os);
   }
 }

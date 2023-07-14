@@ -7,38 +7,37 @@
 #include <iostream>
 
 #include <Rodin/Geometry.h>
-#include <RodinExternal/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
-using namespace Rodin::External;
+// using namespace Rodin::External;
 using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  Mesh mesh;
-  mesh.load("thks.mesh", IO::FileFormat::MEDIT);
+  // Mesh mesh;
+  // mesh.load("thks.mesh", IO::FileFormat::MEDIT);
 
-  H1 fes(mesh);
+  // H1 fes(mesh);
 
-  auto dist = MMG::Distancer(fes).distance(mesh);
+  // auto dist = MMG::Distancer(fes).distance(mesh);
 
-  mesh = MMG::ImplicitDomainMesher().setHMax(0.05)
-                        .setRMC(1e-3)
-                        .setBoundaryReference(666)
-                        .discretize(dist);
+  // mesh = MMG::ImplicitDomainMesher().setHMax(0.05)
+  //                       .setRMC(1e-3)
+  //                       .setBoundaryReference(666)
+  //                       .discretize(dist);
 
-  mesh.save("mfem.mesh");
-  mesh.save("medit.mesh", IO::FileFormat::MEDIT);
-  // dist.save("dist.gf");
+  // mesh.save("mfem.mesh");
+  // mesh.save("medit.mesh", IO::FileFormat::MEDIT);
+  // // dist.save("dist.gf");
 
 
-  // GridFunction ls(fes);
-  // ls.load("ls.gf");
+  // // GridFunction ls(fes);
+  // // ls.load("ls.gf");
 
-  // auto implicitDomain = MMG::ImplicitDomainMesher().setHMax(0.02).discretize(ls);
+  // // auto implicitDomain = MMG::ImplicitDomainMesher().setHMax(0.02).discretize(ls);
 
-  // implicitDomain.save("implicit.mesh");
+  // // implicitDomain.save("implicit.mesh");
 
   return 0;
 }

@@ -523,7 +523,12 @@ namespace Rodin::IO
         : MeshPrinterBase(mesh)
       {}
 
-      void print(std::ostream& os) override;
+      void print(std::ostream& os) override
+      {
+        print(os, true);
+      }
+
+      void print(std::ostream& os, bool printEnd);
 
       void printVersion(std::ostream& os);
       void printDimension(std::ostream& os);
