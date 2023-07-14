@@ -14,13 +14,13 @@ target_link_libraries(SubMeshExtraction
   PUBLIC
   Rodin::Geometry)
 
-add_executable(Skinning Skinning.cpp)
-target_link_libraries(Skinning
+add_executable(Skin Skin.cpp)
+target_link_libraries(Skin
   PUBLIC
   Rodin::Geometry)
 
-add_executable(Trimming Trimming.cpp)
-target_link_libraries(Trimming
+add_executable(Trim Trim.cpp)
+target_link_libraries(Trim
   PUBLIC
   Rodin::Geometry)
 
