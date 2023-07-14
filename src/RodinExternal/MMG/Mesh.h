@@ -11,78 +11,102 @@
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Mesh class which has support for MMG functionalities.
+   */
   class Mesh : public Geometry::Mesh<Context::Serial>
   {
-   public:
-    struct Edge
-    {
-      std::pair<int, int> endpoints;
-      int ref;
-    };
+    public:
+      /// Parent class
+      using Parent = Geometry::Mesh<Context::Serial>;
 
-    using Parent = Geometry::Mesh<Context::Serial>;
+      /// Index of corners in the mesh
+      using CornerIndex = IndexSet;
 
-    Mesh() : Parent()
-    {}
+      /// Index of ridges in the mesh
+      using RidgeIndex = IndexSet;
 
-    Mesh(const Mesh& other)
-      : Parent(other),
-       m_corners(other.m_corners),
-       m_ridges(other.m_ridges),
-       m_edges(other.m_edges)
-    {}
+      /**
+      * @brief Constructs an empty mesh with no elements.
+      */
+      Mesh() = default;
 
-    Mesh(Mesh&& other)
-      : Parent(std::move(other)),
-       m_corners(std::move(other.m_corners)),
-       m_ridges(std::move(other.m_ridges)),
-       m_edges(std::move(other.m_edges))
-    {}
+      /**
+       * @brief Copy constructor.
+       */
+      Mesh(const Mesh& other)
+        : Parent(other),
+          m_cornerIndex(other.m_cornerIndex),
+          m_ridgeIndex(other.m_ridgeIndex)
+      {}
 
-    Mesh& operator=(Mesh&& other)
-    {
-      Parent::operator=(std::move(other));
-      m_edges = std::move(other.m_edges);
-      m_ridges = std::move(other.m_ridges);
-      m_corners = std::move(other.m_corners);
-      return *this;
-    }
+      /**
+       * @brief Move constructor.
+       */
+      Mesh(Mesh&& other)
+        : Parent(std::move(other)),
+          m_cornerIndex(std::move(other.m_cornerIndex)),
+          m_ridgeIndex(std::move(other.m_ridgeIndex))
+      {}
 
-    void save(
-       const boost::filesystem::path& filename,
-       IO::FileFormat fmt = IO::FileFormat::MFEM,
-       size_t precison = 16) const override;
+      /**
+       * @brief Move assignment.
+       */
+      Mesh& operator=(Mesh&& other)
+      {
+        Parent::operator=(std::move(other));
+        m_ridgeIndex = std::move(other.m_ridgeIndex);
+        m_cornerIndex = std::move(other.m_cornerIndex);
+        return *this;
+      }
 
-    Mesh& load(
-       const boost::filesystem::path& filename,
-       IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+      /**
+       * @brief Move assignment from a Mesh<Context::Serial> object.
+       */
+      Mesh& operator=(Parent&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
 
-    Mesh& corner(int vertexIdx);
+      void save(
+         const boost::filesystem::path& filename,
+         IO::FileFormat fmt = IO::FileFormat::MFEM,
+         size_t precison = 16) const override;
 
-    Mesh& ridge(int edgeIdx);
+      Mesh& load(
+         const boost::filesystem::path& filename,
+         IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
-    Mesh& edge(const std::pair<int, int>& endpoints, int ref);
+      /**
+       * @brief Adds the vertex to the corner index.
+       */
+      Mesh& setCorner(Index vertexIdx);
 
-    const std::set<int>& getCorners() const
-    {
-      return m_corners;
-    }
+      /**
+       * @brief Adds the edge to the corner index.
+       */
+      Mesh& setRidge(Index edgeIdx);
 
-    const std::set<int>& getRidges() const
-    {
-      return m_ridges;
-    }
+      /**
+       * @brief Gets the index of corners.
+       */
+      const CornerIndex& getCorners() const
+      {
+        return m_cornerIndex;
+      }
 
-    const std::vector<Edge>& getEdges() const
-    {
-      return m_edges;
-    }
+      /**
+       * @brief Gets the index of ridges.
+       */
+      const RidgeIndex& getRidges() const
+      {
+        return m_ridgeIndex;
+      }
 
-   private:
-     std::set<int> m_corners;
-
-     std::set<int> m_ridges;
-     std::vector<Edge> m_edges;
+    private:
+      CornerIndex m_cornerIndex;
+      RidgeIndex  m_ridgeIndex;
   };
 }
 

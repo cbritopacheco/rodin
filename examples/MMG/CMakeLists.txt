@@ -1,3 +1,9 @@
+add_executable(MeshIO MeshIO.cpp)
+target_link_libraries(MeshIO
+  PUBLIC
+  Rodin::Geometry
+  Rodin::External::MMG)
+
 add_executable(ImplicitDomain ImplicitDomain.cpp)
 target_link_libraries(ImplicitDomain
   PUBLIC

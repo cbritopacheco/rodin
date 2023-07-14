@@ -16,6 +16,10 @@
 
 namespace Rodin::External::MMG
 {
+  MMG5::MMG5()
+    : m_ridgeDetection(true)
+  {}
+
   MMG5_pMesh MMG5::createMesh(int version, int dim, std::optional<int> spaceDim)
   {
     MMG5_pMesh res;

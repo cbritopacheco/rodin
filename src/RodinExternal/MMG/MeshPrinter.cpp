@@ -14,45 +14,34 @@ namespace Rodin::External::MMG
 {
   void MeshPrinter::print(std::ostream& os)
   {
-    assert(false);
-    // const auto& mesh = getObject();
+    m_printer.print(os, false);
+    printCorners(os);
+    printRidges(os);
+    m_printer.printEnd(os);
+  }
 
-    // IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(mesh);
-    // printer.footer(false).print(os);
+  void MeshPrinter::printCorners(std::ostream& os)
+  {
+    const auto& mesh = getObject();
+    os << IO::MEDIT::Keyword::Corners
+       << '\n'
+       << mesh.getCorners().size()
+       << '\n';
+    for (const auto& c : mesh.getCorners())
+      os << c + 1 << '\n';
+    os << '\n';
+  }
 
-    // // Print edges
-    // if (mesh.getDimension() == 3)
-    // {
-    //   os << '\n'
-    //     << IO::MEDIT::Keyword::Edges
-    //     << '\n'
-    //     << mesh.getEdges().size()
-    //     << '\n';
-
-    //   for (const auto& e : mesh.getEdges())
-    //     os << e.endpoints.first + 1 << " " << e.endpoints.second + 1 << " " << e.ref << '\n';
-    // }
-
-    // // Print corners
-    // os << '\n'
-    //   << IO::MEDIT::Keyword::Corners
-    //   << '\n'
-    //   << mesh.getCorners().size()
-    //   << '\n';
-    // for (const auto& c : mesh.getCorners())
-    //   os << c + 1 << '\n';
-
-    // // Print ridges
-    // os << '\n'
-    //   << IO::MEDIT::Keyword::Ridges
-    //   << '\n'
-    //   << mesh.getRidges().size()
-    //   << '\n';
-    // for (const auto& r : mesh.getRidges())
-    //   os << r + 1 << '\n';
-
-    // // Print footer
-    // os << "\n\n" << IO::MEDIT::Keyword::End;
+  void MeshPrinter::printRidges(std::ostream& os)
+  {
+    const auto& mesh = getObject();
+    os << IO::MEDIT::Keyword::Ridges
+       << '\n'
+       << mesh.getRidges().size()
+       << '\n';
+    for (const auto& r : mesh.getRidges())
+      os << r + 1 << '\n';
+    os << '\n';
   }
 }
 

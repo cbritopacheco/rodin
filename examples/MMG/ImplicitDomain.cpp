@@ -5,25 +5,24 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Geometry.h>
-#include <RodinExternal/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::External;
+// using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  Mesh mesh;
-  mesh.load("ls.mesh");
+  // Mesh mesh;
+  // mesh.load("ls.mesh");
 
-  H1 fes(mesh);
-  GridFunction ls(fes);
-  ls.load("ls.gf");
+  // H1 fes(mesh);
+  // GridFunction ls(fes);
+  // ls.load("ls.gf");
 
-  auto implicitDomain = MMG::ImplicitDomainMesher().setHMax(0.02).discretize(ls);
+  // auto implicitDomain = MMG::ImplicitDomainMesher().setHMax(0.02).discretize(ls);
 
-  implicitDomain.save("implicit.mesh");
+  // implicitDomain.save("implicit.mesh");
 
   return 0;
 }
