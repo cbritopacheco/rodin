@@ -36,9 +36,41 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::vertex(std::initializer_list<Scalar> l)
+  {
+    assert(m_vertices.cols() > 0);
+    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
+    assert(l.size() == m_sdim);
+    std::copy(l.begin(), l.end(), m_vertices.col(m_nodes++).begin());
+    return *this;
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::vertex(const Scalar* data)
+  {
+    assert(m_vertices.cols() > 0);
+    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
+    return vertex(Eigen::Map<const Math::Vector>(data, m_sdim));
+  }
+
+  Mesh<Context::Serial>::Builder&
+  Mesh<Context::Serial>::Builder::vertex(const Eigen::Map<const Math::Vector>& x)
+  {
+    assert(m_vertices.cols() > 0);
+    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
+    assert(x.size() >= 0);
+    assert(static_cast<size_t>(x.size()) == m_sdim);
+    m_vertices.col(m_nodes++) = x;
+    return *this;
+  }
+
+  Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::vertex(Math::Vector&& x)
   {
+    assert(m_vertices.cols() > 0);
+    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(x.size() >= 0);
+    assert(static_cast<size_t>(x.size()) == m_sdim);
     m_vertices.col(m_nodes++) = std::move(x);
     return *this;
   }
@@ -46,7 +78,10 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::vertex(const Math::Vector& x)
   {
+    assert(m_vertices.cols() > 0);
+    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(x.size() >= 0);
+    assert(static_cast<size_t>(x.size()) == m_sdim);
     m_vertices.col(m_nodes++) = x;
     return *this;
   }

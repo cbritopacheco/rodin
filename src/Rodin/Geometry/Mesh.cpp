@@ -75,14 +75,9 @@ namespace Rodin::Geometry
     return { getVertices().data() + getSpaceDimension() * idx, size };
   }
 
-  const FlatSet<Attribute>& Mesh<Context::Serial>::getAttributes() const
+  const FlatSet<Attribute>& Mesh<Context::Serial>::getAttributes(size_t d) const
   {
-    return m_attributes[getDimension()];
-  }
-
-  const FlatSet<Attribute>& Mesh<Context::Serial>::getBoundaryAttributes() const
-  {
-    return m_attributes[getDimension()];
+    return m_attributes[d];
   }
 
   size_t Mesh<Context::Serial>::getDimension() const

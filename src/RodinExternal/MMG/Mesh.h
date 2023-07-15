@@ -27,6 +27,56 @@ namespace Rodin::External::MMG
       using RidgeIndex = IndexSet;
 
       /**
+       * @brief Class used to build MMG::Mesh instances.
+       */
+      class Builder : public Parent::Builder
+      {
+        public:
+          /**
+           * @brief Default constructor.
+           */
+          Builder() = default;
+
+          /**
+           * @brief Deleted copy constructor.
+           */
+          Builder(const Builder&) = delete;
+
+          /**
+           * @brief Move constructor.
+           */
+          Builder(Builder&& other)
+            : Parent::Builder(std::move(other)),
+              m_cornerIndex(std::move(other.m_cornerIndex)),
+              m_ridgeIndex(std::move(other.m_ridgeIndex))
+          {}
+
+          /**
+           * @brief Move assignment.
+           */
+          Builder& operator=(Builder&& other);
+
+          /**
+           * @brief Adds the vertex to the corner index.
+           */
+          Builder& corner(Index vertexIdx);
+
+          /**
+           * @brief Adds the edge to the ridge index.
+           */
+          Builder& ridge(Index edgeIdx);
+
+          /**
+           * @brief Finishes construction of the MMG::Mesh and returns it.
+           */
+          Mesh finalize();
+
+        private:
+          CornerIndex m_cornerIndex;
+          RidgeIndex  m_ridgeIndex;
+      };
+
+      /**
       * @brief Constructs an empty mesh with no elements.
       */
       Mesh() = default;
@@ -60,9 +110,6 @@ namespace Rodin::External::MMG
         return *this;
       }
 
-      /**
-       * @brief Move assignment from a Mesh<Context::Serial> object.
-       */
       Mesh& operator=(Parent&& other)
       {
         Parent::operator=(std::move(other));
@@ -84,7 +131,7 @@ namespace Rodin::External::MMG
       Mesh& setCorner(Index vertexIdx);
 
       /**
-       * @brief Adds the edge to the corner index.
+       * @brief Adds the edge to the ridge index.
        */
       Mesh& setRidge(Index edgeIdx);
 

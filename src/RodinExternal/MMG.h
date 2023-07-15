@@ -10,8 +10,8 @@
 #include "MMG/MMG5.h"
 
 #include "MMG/Mesh.h"
-// #include "MMG/MeshOptimizer.h"
-// #include "MMG/ImplicitDomainMesher.h"
+#include "MMG/MeshOptimizer.h"
+#include "MMG/ImplicitDomainMesher.h"
 // 
 // #include "MMG/Distancer.h"
 // #include "MMG/Advect.h"
