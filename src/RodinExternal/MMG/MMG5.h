@@ -96,7 +96,16 @@ namespace Rodin::External::MMG
         }
         else if constexpr (std::is_same_v<Math::Vector, Range>)
         {
-          assert(false);
+          const size_t vdim = src->size;
+          assert(src->type == MMG5_Vector);
+          assert(vdim == dst.getFiniteElementSpace().getVectorDimension());
+          Math::Matrix& data = dst.getData();
+          assert(data.rows() >= 0);
+          assert(static_cast<size_t>(data.rows()) == vdim);
+          data.resize(vdim, src->np);
+          // MMG5_pSol->m is 1 indexed. We must start at m + vdim and finish at
+          // m + vdim * (src->np + 1).
+          std::copy(src->m + vdim, src->m + vdim * (src->np + 1), data.data());
         }
         else
         {
@@ -137,7 +146,26 @@ namespace Rodin::External::MMG
         }
         else if constexpr (std::is_same_v<Math::Vector, Range>)
         {
-          assert(false);
+          assert(dst->type == MMG5_Vector);
+          const size_t vdim = src.getFiniteElementSpace().getVectorDimension();
+          assert(dst->size >= 0);
+          assert(vdim == static_cast<size_t>(dst->size));
+          const Math::Matrix& data = src.getData();
+          assert(dst->size == data.rows());
+          const size_t n = data.cols();
+          assert(n > 0);
+          dst->np  = n;
+          dst->npi = n;
+          dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+          assert(dst->np < dst->npmax);
+          if (!dst->m)
+          {
+            // So (dst->size + 1) * (dst->np + 1) seems to work for most
+            // applications
+            MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
+                Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+          }
+          std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
         }
         else
         {

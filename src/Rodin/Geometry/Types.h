@@ -7,7 +7,9 @@
 
 namespace Rodin::Geometry
 {
+  /// Standard type for representing material attributes in a mesh.
   using Attribute = std::size_t;
 
+  /// Represents the incidence of a polytope.
   using Incidence = std::vector<IndexSet>;
 }

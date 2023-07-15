@@ -12,29 +12,31 @@ using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+static constexpr Attribute interior = 1;
+static constexpr Attribute exterior = 2;
+static constexpr Scalar hmax = 0.1;
+static constexpr Scalar radius = 0.1;
+
 int main(int, char**)
 {
   const size_t n = 16;
   MMG::Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
-  mesh.getConnectivity().compute(1, 2);
+  mesh.scale(1. / (n - 1));
 
   P1 fes(mesh);
   MMG::ScalarGridFunction gf(fes);
   gf = [](const Geometry::Point& p)
        {
-         if (p.x() < 8)
-           return -1;
-         else return 1;
+         return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
        };
 
   gf.save("LevelSet.gf");
   mesh.save("Domain.mesh");
 
-  MMG::ImplicitDomainMesher().split(1, { 1, 2 })
-                             .setHMax(1)
+  MMG::ImplicitDomainMesher().split(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE, { interior, exterior })
+                             .setHMax(hmax)
                              .discretize(gf)
-                             .save("Discretized.mesh");
-
+                             .save("Discretized.mesh", IO::FileFormat::MEDIT);
   return 0;
 }

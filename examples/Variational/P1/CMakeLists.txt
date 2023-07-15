@@ -1,3 +1,8 @@
+add_executable(P1GridFunctionIO P1GridFunctionIO.cpp)
+target_link_libraries(P1GridFunctionIO PUBLIC
+  Rodin::Variational
+  Rodin::External::MMG)
+
 add_executable(ScalarP1Build ScalarP1Build.cpp)
 target_link_libraries(ScalarP1Build PUBLIC Rodin::Variational)
 
