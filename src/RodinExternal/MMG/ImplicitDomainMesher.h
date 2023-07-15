@@ -7,10 +7,6 @@
 #ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 #define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 
-#include <boost/unordered_map.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
 #include "Rodin/Variational.h"
 
 #include "Mesh.h"
@@ -23,6 +19,19 @@ namespace Rodin::External::MMG
   /**
    * @brief Class to perform the discretization and optimization of a
    * surface implicitly defined by a level set function.
+   *
+   * This class performs the discretization of a level set function @f$\phi : D
+   * \rightarrow \Omega @f$ defined over a computational mesh @f$ D @f$ which
+   * contains a regular domain @f$ \Omega @f$.
+   * @f[
+   *  \left\{
+   *    \begin{aligned}
+   *      \phi(x) < 0 && \text{if } \ x &\in \Omega\\
+   *      \phi(x) = 0 && \text{if } \ x &\in \partial \Omega\\
+   *      \phi(x) > 0 && \text{if } \ x &\in D \backslash \overline{\Omega}\\
+   *    \end{aligned}
+   *  \right.
+   * @f]
    */
   class ImplicitDomainMesher : public MMG5
   {
@@ -52,12 +61,12 @@ namespace Rodin::External::MMG
        */
       ImplicitDomainMesher& setRMC(double rmc = 1e-5);
 
-      ImplicitDomainMesher& setBaseReferences(MaterialAttribute ref)
+      ImplicitDomainMesher& setBaseReferences(Geometry::Attribute ref)
       {
-        return setBaseReferences(FlatSet<MaterialAttribute>{ref});
+        return setBaseReferences(FlatSet<Geometry::Attribute>{ref});
       }
 
-      ImplicitDomainMesher& setBaseReferences(const FlatSet<MaterialAttribute>& refs);
+      ImplicitDomainMesher& setBaseReferences(const FlatSet<Geometry::Attribute>& refs);
 
       /**
        * @brief Sets the material reference for the discretized boundary
@@ -68,7 +77,7 @@ namespace Rodin::External::MMG
        *
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setBoundaryReference(const MaterialAttribute& ref);
+      ImplicitDomainMesher& setBoundaryReference(const Geometry::Attribute& ref);
 
       /**
        * @brief Specifies how to split the materials into an interior and
@@ -89,7 +98,7 @@ namespace Rodin::External::MMG
        * @param[in] s Interior and exterior labels
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& split(const MaterialAttribute& ref, const Split& s);
+      ImplicitDomainMesher& split(const Geometry::Attribute& ref, const Split& s);
 
       /**
        * @brief Indicates that a material reference should not be split.
@@ -97,7 +106,7 @@ namespace Rodin::External::MMG
        * @param[in] s Interior and exterior labels
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& noSplit(const MaterialAttribute& ref);
+      ImplicitDomainMesher& noSplit(const Geometry::Attribute& ref);
 
       /**
        * @brief Discretizes and optimizes an implicitly defined surface defined
@@ -150,23 +159,23 @@ namespace Rodin::External::MMG
 
       void generateUniqueSplit(const FlatSet<Geometry::Attribute>& attr);
 
-      void deleteBoundaryRef(MMG5_pMesh mesh, MaterialAttribute ref);
+      void deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref);
 
       double m_ls;
       SplitMap m_split;
       bool m_meshTheSurface;
       std::optional<double> m_rmc;
-      FlatSet<MaterialAttribute> m_lsBaseReferences;
-      std::optional<MaterialAttribute> m_isoref;
+      FlatSet<Geometry::Attribute> m_lsBaseReferences;
+      std::optional<Geometry::Attribute> m_isoref;
 
       SplitMap m_uniqueSplit;
 
       /**
        * @internal
        *
-       * Generated to original map.
+       * Generated attribute to original attribute map.
        */
-      UnorderedMap<MaterialAttribute, MaterialAttribute> m_g2om;
+      UnorderedMap<Geometry::Attribute, Geometry::Attribute> m_g2om;
   };
 }
 #endif

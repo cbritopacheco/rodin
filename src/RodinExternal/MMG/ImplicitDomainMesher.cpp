@@ -21,28 +21,28 @@ namespace Rodin::External::MMG
   }
 
   ImplicitDomainMesher& ImplicitDomainMesher::setBaseReferences(
-    const FlatSet<MaterialAttribute>& refs)
+    const FlatSet<Geometry::Attribute>& refs)
   {
     m_lsBaseReferences = refs;
     return *this;
   }
 
   ImplicitDomainMesher& ImplicitDomainMesher::setBoundaryReference(
-    const MaterialAttribute& ref)
+    const Geometry::Attribute& ref)
   {
     m_isoref = ref;
     return *this;
   }
 
   ImplicitDomainMesher& ImplicitDomainMesher::split(
-    const MaterialAttribute& ref, const Split& s)
+    const Geometry::Attribute& ref, const Split& s)
   {
     m_split[ref] = s;
     return *this;
   }
 
   ImplicitDomainMesher& ImplicitDomainMesher::noSplit(
-    const MaterialAttribute& ref)
+    const Geometry::Attribute& ref)
   {
     m_split[ref] = NoSplit;
     return *this;
@@ -192,13 +192,13 @@ namespace Rodin::External::MMG
     return MMGS_mmgsls(mesh, sol, nullptr);
   }
 
-  void ImplicitDomainMesher::generateUniqueSplit(const FlatSet<Geometry::Attribute>& attr)
+  void ImplicitDomainMesher::generateUniqueSplit(const FlatSet<Geometry::Attribute>& attrs)
   {
     m_uniqueSplit.clear();
 
     // Compute existing attributes
     FlatSet<Geometry::Attribute> existingAttributes;
-    existingAttributes.insert(attr.begin(), attr.end());
+    existingAttributes.insert(attrs.begin(), attrs.end());
 
     // Add the attributes from the split map to the existing attributes
     for (const auto& [attr, split] : getSplitMap())
@@ -217,7 +217,7 @@ namespace Rodin::External::MMG
     }
 
     // Generate unique splits for each reference
-    MaterialAttribute gen = 1;
+    Geometry::Attribute gen = 1;
     for (const auto it : getSplitMap())
     {
       const auto& attribute = it.first;
@@ -228,13 +228,13 @@ namespace Rodin::External::MMG
           [&](const Split& s)
           {
             // Generate unique interior attribute
-            MaterialAttribute interior;
+            Geometry::Attribute interior;
             do { interior = gen++; } while (existingAttributes.count(interior));
             existingAttributes.insert(interior);
             m_g2om.insert({ interior, s.interior });
 
             // Generate unique exterior attribute
-            MaterialAttribute exterior;
+            Geometry::Attribute exterior;
             do { exterior = gen++; } while (existingAttributes.count(exterior));
             existingAttributes.insert(exterior);
             m_g2om.insert({ exterior, s.exterior });
@@ -250,7 +250,7 @@ namespace Rodin::External::MMG
     }
   }
 
-  void ImplicitDomainMesher::deleteBoundaryRef(MMG5_pMesh mesh, MaterialAttribute ref)
+  void ImplicitDomainMesher::deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref)
   {
     if (m_meshTheSurface || mesh->dim == 2)
     {

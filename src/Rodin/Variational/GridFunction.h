@@ -176,9 +176,20 @@ namespace Rodin::Variational
        * @brief Bulk assigns the value to the whole data array.
        */
       inline
-      Derived& operator=(Scalar v)
+      std::enable_if<std::is_same_v<RangeType, Scalar>, Derived&>
+      operator=(Scalar v)
       {
         getData().setConstant(v);
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
+      std::enable_if<std::is_same_v<RangeType, Math::Vector>, Derived&>
+      operator=(const Math::Vector& v)
+      {
+        Math::Matrix& data = getData();
+        for (size_t i = 0; i < data.cols(); i++)
+          data.col(i) = v;
         return static_cast<Derived&>(*this);
       }
 
@@ -490,7 +501,7 @@ namespace Rodin::Variational
               << Alert::Raise;
           }
         }
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       void save(
