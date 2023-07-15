@@ -12,12 +12,6 @@
 #include "MEDIT.h"
 
 namespace Rodin::IO
-{
-   template <class FES>
-   void GridFunctionPrinter<FileFormat::MEDIT, FES>::print(std::ostream& os)
-   {
-      assert(false);
-   }
-}
+{}
 
 #endif

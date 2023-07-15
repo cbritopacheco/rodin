@@ -16,9 +16,11 @@
 #include "Rodin/Context.h"
 #include "Rodin/Geometry/Types.h"
 
+#include "ForwardDecls.h"
 #include "MeshLoader.h"
 #include "MeshPrinter.h"
-#include "ForwardDecls.h"
+#include "GridFunctionLoader.h"
+#include "GridFunctionPrinter.h"
 
 namespace Rodin::IO::MEDIT
 {
@@ -534,6 +536,36 @@ namespace Rodin::IO
       void printDimension(std::ostream& os);
       void printEntities(std::ostream& os);
       void printEnd(std::ostream& os);
+  };
+
+  template <class FES>
+  class GridFunctionLoader<FileFormat::MEDIT, FES>
+    : public GridFunctionLoaderBase<FES>
+  {
+    public:
+      GridFunctionLoader(Variational::GridFunction<FES>& gf)
+        : GridFunctionLoaderBase<FES>(gf)
+      {}
+
+      void load(std::istream& is) override
+      {
+        assert(false);
+      }
+  };
+
+  template <class FES>
+  class GridFunctionPrinter<FileFormat::MEDIT, FES>
+    : public GridFunctionPrinterBase<FES>
+  {
+    public:
+      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
+        : GridFunctionPrinterBase<FES>(gf)
+      {}
+
+      void print(std::ostream& os) override
+      {
+        assert(false);
+      }
   };
 }
 
