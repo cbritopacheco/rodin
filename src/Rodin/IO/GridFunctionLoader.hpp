@@ -14,18 +14,6 @@
 #include "GridFunctionLoader.h"
 
 namespace Rodin::IO
-{
-  template <class FES>
-  void GridFunctionLoader<FileFormat::MFEM, FES>::load(std::istream& is)
-  {
-    assert(false);
-  }
-
-  template <class FES>
-  void GridFunctionLoader<FileFormat::MEDIT, FES>::load(std::istream& is)
-  {
-    assert(false);
-  }
-}
+{}
 
 #endif
