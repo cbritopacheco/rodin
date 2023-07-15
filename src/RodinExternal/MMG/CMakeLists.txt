@@ -23,6 +23,7 @@ set(RodinExternalMMG_HEADERS
 set(RodinExternalMMG_SRCS
   MMG5.cpp
   Mesh.cpp
+  MeshBuilder.cpp
   Common.cpp
   ISCDProcess.cpp
   MeshLoader.cpp

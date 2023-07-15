@@ -4,11 +4,22 @@ target_link_libraries(MeshIO
   Rodin::Geometry
   Rodin::External::MMG)
 
-add_executable(ImplicitDomain ImplicitDomain.cpp)
-target_link_libraries(ImplicitDomain
+add_executable(GridFunctionIO GridFunctionIO.cpp)
+target_link_libraries(GridFunctionIO
   PUBLIC
   Rodin::Geometry
-  Rodin::Variational
+  Rodin::External::MMG)
+
+add_executable(DomainDiscretization DomainDiscretization.cpp)
+target_link_libraries(DomainDiscretization
+  PUBLIC
+  Rodin::Geometry
+  Rodin::External::MMG)
+
+add_executable(MeshOptimization MeshOptimization.cpp)
+target_link_libraries(MeshOptimization
+  PUBLIC
+  Rodin::Geometry
   Rodin::External::MMG)
 
 add_executable(DomainDistancing DomainDistancing.cpp)

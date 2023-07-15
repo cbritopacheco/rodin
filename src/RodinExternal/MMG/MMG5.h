@@ -12,54 +12,87 @@
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/ForwardDecls.h"
-#include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/P1.h"
 #include "Rodin/Utility/IsSpecialization.h"
 
 #include "Common.h"
 #include "Configure.h"
 #include "ForwardDecls.h"
+#include "GridFunction.h"
 
 namespace Rodin::External::MMG
 {
+  /// Type of return code used by the MMG functions.
+  using ReturnCode = int;
+
+  /**
+   * @brief Class representing MMG5 objects utilized in the MMG framework.
+   *
+   * This class is used for wrappping the functionality of the MMG library.
+   */
   class MMG5
   {
     public:
       static constexpr int s_meshVersionFormatted = 2;
 
       // ---- Mesh methods ---------------------------------------------------
-      static MMG5_pMesh createMesh(int version, int dim, std::optional<int> spaceDim = {});
+      static MMG5_pMesh createMesh(size_t version, size_t dim, std::optional<size_t> spaceDim = {});
 
+      /**
+       * @brief Copies source mesh to a destination mesh.
+       *
+       * This method performs the necessary memory allocations when copying the
+       * data.
+       */
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 
-      static bool isSurfaceMesh(MMG5_pMesh mesh);
+      /**
+       * @brief Determines if a mesh is surface or not.
+       * @param[in] mesh Mesh.
+       */
+      static bool isSurfaceMesh(const MMG5_pMesh mesh);
 
+      /**
+       * @brief Destroys the mesh object and frees the allocated memory.
+       */
       static void destroyMesh(MMG5_pMesh);
 
+      /**
+       * @brief Converts an MMG::Mesh object to a MMG5_pMesh object.
+       */
       static MMG5_pMesh rodinToMesh(const MMG::Mesh& src);
 
+      /**
+       * @brief Converts an MMG5_pMesh object to a MMG::Mesh object.
+       */
       static MMG::Mesh meshToRodin(const MMG5_pMesh src);
 
       // ---- Solution methods -----------------------------------------------
-      static MMG5_pSol createSolution(MMG5_pMesh mesh, int vdim);
+
+      /**
+       * @brief Constructs a solution and allocates space for it.
+       */
+      static MMG5_pSol createSolution(MMG5_pMesh mesh, size_t vdim);
 
       static void copySolution(const MMG5_pSol src, MMG5_pSol dst);
 
-      template <class FES>
-      static void copySolution(const MMG5_pSol src, Variational::GridFunction<FES>& dst)
+      /**
+       * @brief Copies the solution from MMG5_pSol object to an MMG::GridFunction object.
+       * @tparam Range type of value
+       */
+      template <class Range>
+      static void copySolution(const MMG5_pSol src, MMG::GridFunction<Range>& dst)
       {
-        static_assert(Utility::IsSpecialization<FES, Variational::P1>::Value);
-        using Range = typename FormLanguage::Traits<Variational::GridFunction<FES>>::RangeType;
+        assert(src);
         if constexpr (std::is_same_v<Scalar, Range>)
         {
           assert(src->type == MMG5_Scalar);
-          double* data = new double[src->np];
+          assert(dst.getFiniteElementSpace().getVectorDimension() == 1);
+          Math::Matrix& data = dst.getData();
+          assert(data.rows() == 1);
+          data.resize(1, src->np);
           // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
           // + np + 1.
-          std::copy(src->m + 1, src->m + src->np + 1, data);
-          assert(false);
-          // dst.getHandle().SetDataAndSize(data, src->np);
-          // dst.getHandle().MakeDataOwner();
+          std::copy(src->m + 1, src->m + src->np + 1, data.data());
         }
         else if constexpr (std::is_same_v<Math::Vector, Range>)
         {
@@ -71,60 +104,60 @@ namespace Rodin::External::MMG
         }
       }
 
-      template <class FES>
-      static void copySolution(const Variational::GridFunction<FES>& src, MMG5_pSol dst)
+      /**
+       * @brief Copies the solution from MMG::GridFunction object to an MMG5_pSol object.
+       * @tparam Range type of value
+       */
+      template <class Range>
+      static void copySolution(const MMG::GridFunction<Range>& src, MMG5_pSol dst)
       {
-        assert(false);
-        // assert(dst);
-        // const Math::Vector& data = src.getData();
-        // const size_t size = data.size();
-        // if (size)
-        // {
-        //   int vdim = src.getFiniteElementSpace().getVectorDimension();
-        //   assert(size % vdim == 0);
-        //   assert(dst->size == vdim);
-        //   size_t n = size / vdim;
-        //   assert(n > 0);
-        //   dst->np  = n;
-        //   dst->npi = n;
-        //   dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
-        //   assert(dst->np < dst->npmax);
-        //   if (!dst->m)
-        //   {
-        //     // So (dst->size + 1) * (dst->np + 1) seems to work for most
-        //     // applications
-        //     MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
-        //         Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
-        //   }
-        //   if (vdim == 1)
-        //   {
-        //     std::copy(data.begin(), data.end(), dst->m + 1);
-        //   }
-        //   else
-        //   {
-        //     switch (src.getFiniteElementSpace().getHandle().GetOrdering())
-        //     {
-        //       case mfem::Ordering::byNODES:
-        //       {
-        //         for (size_t i = 0; i < n; i++)
-        //           for (size_t j = 0; j < vdim; j++)
-        //             dst->m[(i + 1) * dst->size + j] = data[i + j * n];
-        //         break;
-        //       }
-        //       case mfem::Ordering::byVDIM:
-        //       {
-        //         std::copy(data.begin(), data.end(), dst->m + dst->size);
-        //         break;
-        //       }
-        //     }
-        //   }
-        // }
+        assert(dst);
+        if constexpr (std::is_same_v<Scalar, Range>)
+        {
+          assert(dst->type == MMG5_Scalar);
+          assert(src.getFiniteElementSpace().getVectorDimension() == 1);
+          const Math::Matrix& data = src.getData();
+          assert(data.rows() == 1);
+          assert(dst->size == 1);
+          const size_t n = data.size();
+          if (n)
+          {
+            dst->np  = n;
+            dst->npi = n;
+            dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+            assert(dst->np < dst->npmax);
+            if (!dst->m)
+            {
+              // So 2 * (dst->np + 1) seems to work for most applications
+              MMG5_SAFE_CALLOC(dst->m, 2 * (dst->np + 1), double,
+                  Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+            }
+            std::copy(data.data(), data.data() + n, dst->m + 1);
+          }
+        }
+        else if constexpr (std::is_same_v<Math::Vector, Range>)
+        {
+          assert(false);
+        }
+        else
+        {
+          assert(false);
+        }
       }
 
+      /**
+       * @brief Swaps the data between two instances of type MMG5_pSol.
+       */
       static void swapSolution(MMG5_pSol a, MMG5_pSol b);
 
+      /**
+       * @brief Destroys and frees the allocated memory for a MMG5_pSol object.
+       */
       static void destroySolution(MMG5_pSol sol);
 
+      /**
+       * @brief Default constructor.
+       */
       MMG5();
 
     protected:

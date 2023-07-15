@@ -154,14 +154,7 @@ namespace Rodin::Geometry
        * @returns Set of all the attributes in the mesh object.
        * @see getBoundaryAttributes() const
        */
-      virtual const FlatSet<Attribute>& getAttributes() const = 0;
-
-      /**
-       * @brief Gets the labels of the boundary elements in the mesh.
-       * @returns Set of all the boundary attributes in the mesh object.
-       * @see getAttributes() const
-       */
-      virtual const FlatSet<Attribute>& getBoundaryAttributes() const = 0;
+      virtual const FlatSet<Attribute>& getAttributes(size_t d) const = 0;
 
       bool operator==(const MeshBase& other) const
       {
@@ -270,44 +263,124 @@ namespace Rodin::Geometry
       class Builder
       {
         public:
+          /**
+           * @brief Default constructor.
+           */
           Builder() = default;
 
+          virtual ~Builder() = default;
+
+          /**
+           * @brief Deleted copy constructor.
+           */
           Builder(const Builder&) = delete;
 
+          /**
+           * @brief Move constructor.
+           */
           Builder(Builder&&) = default;
 
+          /**
+           * @brief Deleted copy assignment.
+           */
           Builder& operator=(const Builder&) = delete;
 
+          /**
+           * @brief Move assignment.
+           */
           Builder& operator=(Builder&&) = default;
 
+          /**
+           * @brief Reserves memory accross the data structure for the polytopes of
+           * the given dimension.
+           */
           Builder& reserve(size_t d, size_t count);
 
+          /**
+           * @brief Initializes construction of the mesh object.
+           */
           Builder& initialize(size_t sdim);
 
+          /**
+           * @brief Sets the number of nodes in the mesh.
+           */
           Builder& nodes(size_t n);
 
-          Builder& vertex(std::initializer_list<Scalar> l)
+          /**
+           * @brief Adds vertex with coordinates given by the fixed size array.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          template <size_t Size>
+          inline
+          Builder& vertex(const Scalar (&data)[Size])
           {
-            Math::Vector x(l.size());
-            std::copy(l.begin(), l.end(), x.begin());
-            return vertex(std::move(x));
+            assert(Size == m_sdim);
+            m_vertices.col(m_nodes++) = data;
+            return *this;
           }
 
+          /**
+           * @brief Adds vertex with coordinates given by the initializer list.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(std::initializer_list<Scalar> l);
+
+          /**
+           * @brief Adds vertex with coordinates given by the array pointer.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(const Scalar* data);
+
+          /**
+           * @brief Adds vertex with coordinates given by the mapped memory.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(const Eigen::Map<const Math::Vector>& x);
+
+          /**
+           * @brief Adds vertex with coordinates given by the vector.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
           Builder& vertex(Math::Vector&& x);
 
+          /**
+           * @brief Adds vertex with coordinates given by the vector.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
           Builder& vertex(const Math::Vector& x);
 
+          /**
+           * @brief Sets the attribute of the given polytope.
+           */
           Builder& attribute(const std::pair<size_t, Index>& p, Attribute attr);
 
+          /**
+           * @brief Adds polytope defined by the given vertices.
+           */
           Builder& polytope(Polytope::Geometry t, std::initializer_list<Index> vs)
           {
             return polytope(t, IndexArray({ vs }));
           }
 
+          /**
+           * @brief Adds polytope defined by the given vertices.
+           */
           Builder& polytope(Polytope::Geometry t, const IndexArray& vs);
 
+          /**
+           * @brief Adds polytope defined by the given vertices.
+           */
           Builder& polytope(Polytope::Geometry t, IndexArray&& vs);
 
+          /**
+           * @brief Finalizes construction of the Mesh<Context::Serial> object.
+           */
           Mesh finalize();
 
           Builder& setVertices(Math::Matrix&& connectivity);
@@ -567,9 +640,7 @@ namespace Rodin::Geometry
 
       virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const override;
 
-      virtual const FlatSet<Attribute>& getAttributes() const override;
-
-      virtual const FlatSet<Attribute>& getBoundaryAttributes() const override;
+      virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 
     private:
       static const GeometryIndexed<Math::Matrix> s_vertices;
