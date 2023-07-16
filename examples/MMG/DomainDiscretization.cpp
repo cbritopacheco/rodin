@@ -35,6 +35,7 @@ int main(int, char**)
   mesh.save("Domain.mesh");
 
   MMG::ImplicitDomainMesher().split(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE, { interior, exterior })
+                             .setBoundaryReference(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
                              .setHMax(hmax)
                              .discretize(gf)
                              .save("Discretized.mesh", IO::FileFormat::MEDIT);

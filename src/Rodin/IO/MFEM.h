@@ -56,6 +56,22 @@ namespace Rodin::IO::MFEM
     MeshVersion version;
   };
 
+  enum Ordering
+  {
+    /// XXX..., YYY..., ZZZ...
+    Nodes = 0,
+
+    /// XYZ, XYZ, ...
+    VectorDimension = 1
+  };
+
+  struct GridFunctionHeader
+  {
+    std::string fec;
+    size_t vdim;
+    Ordering ordering;
+  };
+
   enum class Keyword
   {
     dimension,
@@ -374,7 +390,7 @@ namespace Rodin::IO::MFEM
     }
   };
 
-  class ParseHeader
+  class ParseMeshHeader
   {
     public:
       template <class Iterator>
@@ -452,19 +468,28 @@ namespace Rodin::IO
       void printMesh(std::ostream& os);
   };
 
-  template <class FES>
-  class GridFunctionLoader<FileFormat::MFEM, FES>
-    : public GridFunctionLoaderBase<FES>
+  template <class Range>
+  class GridFunctionLoader<FileFormat::MFEM,
+        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
+    : public GridFunctionLoaderBase<
+        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
   {
     public:
+      using FES = Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>;
+
       GridFunctionLoader(Variational::GridFunction<FES>& gf)
         : GridFunctionLoaderBase<FES>(gf)
       {}
 
-      void load(std::istream& is) override
-      {
-        assert(false);
-      }
+      void load(std::istream& is) override;
+
+      std::istream& getline(std::istream& is, std::string& line);
+      std::string skipEmptyLinesAndComments(std::istream& is);
+
+    private:
+      size_t m_dimension;
+      size_t m_spaceDimension;
+      size_t m_currentLineNumber;
   };
 
   template <class Range, class ... Args>
@@ -485,7 +510,8 @@ namespace Rodin::IO
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: 1\n\n";
+           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "\n\n";
         const auto& matrix = gf.getData();
         const Scalar* data = matrix.data();
         assert(matrix.size() >= 0);
@@ -494,4 +520,7 @@ namespace Rodin::IO
       }
   };
 }
+
+#include "MFEM.hpp"
+
 #endif

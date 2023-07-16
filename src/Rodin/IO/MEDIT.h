@@ -118,9 +118,21 @@ namespace Rodin::IO::MEDIT
   }
 
   inline
+  bool operator!=(const std::string& str, Keyword kw)
+  {
+    return str != toCharString(kw);
+  }
+
+  inline
   bool operator==(Keyword kw, const std::string& str)
   {
     return str == toCharString(kw);
+  }
+
+  inline
+  bool operator!=(Keyword kw, const std::string& str)
+  {
+    return str != toCharString(kw);
   }
 
   inline
@@ -130,9 +142,21 @@ namespace Rodin::IO::MEDIT
   }
 
   inline
+  bool operator!=(Keyword kw, const char* str)
+  {
+    return strcmp(toCharString(kw), str) != 0;
+  }
+
+  inline
   bool operator==(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) == 0;
+  }
+
+  inline
+  bool operator!=(const char* str, Keyword kw)
+  {
+    return strcmp(toCharString(kw), str) != 0;
   }
 
   inline
@@ -505,6 +529,26 @@ namespace Rodin::IO
       void readDimension(std::istream& is);
       void readEntities(std::istream& is);
 
+      std::unordered_map<MEDIT::Keyword, size_t>& getCountMap()
+      {
+        return m_count;
+      }
+
+      const std::unordered_map<MEDIT::Keyword, size_t>& getCountMap() const
+      {
+        return m_count;
+      }
+
+      std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap()
+      {
+        return m_pos;
+      }
+
+      const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap() const
+      {
+        return m_pos;
+      }
+
     private:
       Rodin::Geometry::Mesh<Rodin::Context::Serial>::Builder m_build;
 
@@ -538,19 +582,34 @@ namespace Rodin::IO
       void printEnd(std::ostream& os);
   };
 
-  template <class FES>
-  class GridFunctionLoader<FileFormat::MEDIT, FES>
-    : public GridFunctionLoaderBase<FES>
+  template <class Range>
+  class GridFunctionLoader<FileFormat::MEDIT,
+        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
+    : public GridFunctionLoaderBase<
+        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
   {
     public:
+      /// Type of finite element space
+      using FES = Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>;
+
       GridFunctionLoader(Variational::GridFunction<FES>& gf)
-        : GridFunctionLoaderBase<FES>(gf)
+        : GridFunctionLoaderBase<FES>(gf),
+          m_currentLineNumber(0)
       {}
 
-      void load(std::istream& is) override
-      {
-        assert(false);
-      }
+      void load(std::istream& is) override;
+
+      std::istream& getline(std::istream& is, std::string& line);
+      std::string skipEmptyLines(std::istream& is);
+
+      void readVersion(std::istream& is);
+      void readDimension(std::istream& is);
+      void readData(std::istream& is);
+
+    private:
+      size_t m_version;
+      size_t m_spaceDimension;
+      size_t m_currentLineNumber;
   };
 
   template <class FES>
@@ -564,9 +623,60 @@ namespace Rodin::IO
 
       void print(std::ostream& os) override
       {
-        assert(false);
+        printVersion(os);
+        printDimension(os);
+        printData(os);
+        printEnd(os);
+      }
+
+      void printVersion(std::ostream& os)
+      {
+        os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
+      }
+
+      void printDimension(std::ostream& os)
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
+      }
+
+      void printData(std::ostream& os)
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t vdim = fes.getVectorDimension();
+        os << MEDIT::Keyword::SolAtVertices << '\n'
+           << mesh.getVertexCount() << '\n'
+           << 1 // Only one solution
+           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Scalar)
+           << '\n';
+
+        if constexpr (Utility::IsSpecialization<FES, Variational::P1>::Value)
+        {
+          os << gf.getData().reshaped();
+        }
+        else
+        {
+          for (auto it = mesh.getVertex(); !it.end(); ++it)
+          {
+            const Geometry::Point p(*it, it->getTransformation(),
+                Geometry::Polytope::getVertices(Geometry::Polytope::Geometry::Point).col(0),
+                it->getCoordinates());
+            os << gf(p) << '\n';
+          }
+        }
+        os << '\n';
+      }
+
+      void printEnd(std::ostream& os)
+      {
+        os << '\n' << IO::MEDIT::Keyword::End;
       }
   };
 }
 
+#include "MEDIT.hpp"
 #endif
