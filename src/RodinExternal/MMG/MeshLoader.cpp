@@ -16,8 +16,7 @@ namespace Rodin::External::MMG
 {
   void MeshLoader::load(std::istream& is)
   {
-    IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(getObject());
-    loader.load(is);
+    Parent::load(is);
     is.clear();
 
     // At this point, the mesh topology has been built. It only remains to
@@ -27,8 +26,8 @@ namespace Rodin::External::MMG
 
     // We perform another pass on the file, seeking the geometric entities.
     std::string line;
-    const auto& pos = loader.getPositionMap();
-    const auto& count = loader.getCountMap();
+    const auto& pos = getPositionMap();
+    const auto& count = getCountMap();
     is.seekg(pos.at(IO::MEDIT::Keyword::Corners));
     for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Corners); i++)
     {

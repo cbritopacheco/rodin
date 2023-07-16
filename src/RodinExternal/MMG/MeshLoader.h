@@ -7,17 +7,20 @@
 #ifndef RODIN_EXTERNAL_MMG_MESHLOADER_H
 #define RODIN_EXTERNAL_MMG_MESHLOADER_H
 
-#include "Rodin/IO/Loader.h"
+#include "Rodin/IO/MEDIT.h"
 
 #include "Mesh.h"
 
 namespace Rodin::External::MMG
 {
-  class MeshLoader : public IO::Loader<MMG::Mesh>
+  class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial>
   {
    public:
+     using Parent = IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial>;
+
      MeshLoader(MMG::Mesh& mesh)
-       : m_mesh(mesh)
+       : Parent(mesh),
+         m_mesh(mesh)
      {}
 
      void load(std::istream& is) override;

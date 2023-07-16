@@ -21,7 +21,6 @@ namespace Rodin::IO
     using boost::spirit::x3::uint_;
     using boost::spirit::x3::_attr;
     using boost::spirit::x3::char_;
-    using boost::spirit::x3::uint_;
 
     MFEM::GridFunctionHeader header;
     const auto get_fec = [&](auto& ctx) { header.fec = _attr(ctx); };
