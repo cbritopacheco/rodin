@@ -35,16 +35,25 @@ int main(int, char**)
   gf.save("LevelSet.gf");
   mesh.save("Domain.mesh");
 
-  auto implicit = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
-                                             .setHMax(hmax)
-                                             .discretize(gf);
+  MMG::Mesh implicit = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
+                                                  .setHMax(hmax)
+                                                  .discretize(gf);
   P1 miaow(implicit);
 
-  mesh.save("Discretized.mesh");
+  implicit.save("Discretized.mesh", IO::FileFormat::MEDIT);
 
-  auto dist = MMG::Distancer(miaow).distance(implicit);
+  auto dist = MMG::Distancer(miaow).setInteriorDomain(interior).distance(implicit);
 
-  dist.save("dist.gf");
+  dist.save("Discretized.sol", IO::FileFormat::MEDIT);
+
+  MMG::Mesh implicit2 = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
+                                                   .split(exterior, { interior, exterior })
+                                                   .setHMax(hmax)
+                                                   .discretize(dist);
+
+  MMG::MeshOptimizer().setHMin(0.05).setHMax(hmax).optimize(implicit2);
+
+  implicit2.save("Discretized2.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }

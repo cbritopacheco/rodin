@@ -19,11 +19,10 @@ int main(int, char**)
   const size_t n = 16;
   MMG::Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
-  mesh.getConnectivity().compute(1, 2);
 
-  P1 fes(mesh);
-  MMG::ScalarGridFunction gf(fes);
-  gf = [](const Geometry::Point& p) { return p.x() * p.y(); };
+  P1 fes(mesh, 2);
+  GridFunction gf(fes);
+  gf = [](const Geometry::Point& p) { return Math::Vector{{p.x(), p.y()}}; };
 
   gf.save("MMG.medit.sol", IO::FileFormat::MEDIT);
   mesh.save("MMG.medit.mesh", IO::FileFormat::MEDIT);

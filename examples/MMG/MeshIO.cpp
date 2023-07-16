@@ -31,6 +31,10 @@ int main(int, char**)
 
   mesh.save("MMG.medit.mesh", IO::FileFormat::MEDIT);
 
+  MMG::Mesh mesh2;
+  mesh2.load("MMG.medit.mesh", IO::FileFormat::MEDIT);
+  mesh2.save("Woof.medit.mesh", IO::FileFormat::MEDIT);
+
   return 0;
 }
 

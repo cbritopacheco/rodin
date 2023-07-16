@@ -174,23 +174,34 @@ namespace Rodin::Variational
         return getFiniteElementSpace().getSize();
       }
 
+
+      inline
+      Derived& setZero()
+      {
+        getData().setZero();
+        if (m_weights)
+          m_weights->setZero();
+        return static_cast<Derived&>(*this);
+      }
+
       /**
        * @brief Bulk assigns the value to the whole data array.
        */
       inline
-      std::enable_if<std::is_same_v<RangeType, Scalar>, Derived&>
-      operator=(Scalar v)
+      Derived& operator=(Scalar v)
       {
+        static_assert(std::is_same_v<RangeType, Scalar>);
         getData().setConstant(v);
         return static_cast<Derived&>(*this);
       }
 
       inline
-      std::enable_if<std::is_same_v<RangeType, Math::Vector>, Derived&>
-      operator=(const Math::Vector& v)
+      Derived& operator=(const Math::Vector& v)
       {
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
         Math::Matrix& data = getData();
-        for (size_t i = 0; i < data.cols(); i++)
+        assert(data.cols() >= 0);
+        for (size_t i = 0; i < static_cast<size_t>(data.cols()); i++)
           data.col(i) = v;
         return static_cast<Derived&>(*this);
       }

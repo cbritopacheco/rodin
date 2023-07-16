@@ -24,11 +24,11 @@ namespace Rodin::External::MMG
 
      MMG::Mesh& getObject() override
      {
-       return m_mesh;
+       return m_mesh.get();
      }
 
    private:
-     MMG::Mesh& m_mesh;
+     std::reference_wrapper<MMG::Mesh> m_mesh;
   };
 }
 

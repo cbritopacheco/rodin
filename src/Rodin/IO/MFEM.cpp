@@ -14,7 +14,7 @@ namespace Rodin::IO
   void MeshLoader<FileFormat::MFEM, Context::Serial>::readHeader(std::istream& is)
   {
     auto line = skipEmptyLinesAndComments(is);
-    auto header = MFEM::ParseHeader()(line.begin(), line.end());
+    auto header = MFEM::ParseMeshHeader()(line.begin(), line.end());
     if (!header)
       Alert::Exception("Failed to determine MFEM mesh type and version.").raise();
     m_header = *header;
