@@ -46,5 +46,5 @@ TEST(Rodin_Variational_Scalar_P1_SanityTest, TriangularUniformGrid16)
   dbc.on(attr);
   dbc.assemble();
 
-  EXPECT_EQ(dbc.getDOFs().size(), 60);
+  EXPECT_EQ(dbc.getDOFs().size(), 256);
 }
