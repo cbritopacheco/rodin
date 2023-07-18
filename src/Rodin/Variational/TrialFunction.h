@@ -2,7 +2,6 @@
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
 #include "Component.h"
-#include "GridFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational
