@@ -241,7 +241,7 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  Scalar ScalarP1Element::BasisFunction::operator()(const Math::Vector& r) const
+  Scalar ScalarP1Element::BasisFunction::operator()(const Math::SpatialVector& r) const
   {
     switch (m_g)
     {
@@ -352,17 +352,16 @@ namespace Rodin::Variational
     return NAN;
   }
 
-  ScalarP1Element::GradientFunction::ReturnType
-  ScalarP1Element::GradientFunction::operator()(const Math::Vector& r) const
+  void
+  ScalarP1Element::GradientFunction::operator()(Math::SpatialVector& out, const Math::SpatialVector& r) const
   {
-    ScalarP1Element::GradientFunction::ReturnType out;
     switch (m_g)
     {
       case Geometry::Polytope::Geometry::Point:
       {
         out.resize(1);
         out.coeffRef(0) = 0;
-        return out;
+        return;
       }
       case Geometry::Polytope::Geometry::Segment:
       {
@@ -372,18 +371,18 @@ namespace Rodin::Variational
           case 0:
           {
             out.coeffRef(0) = -1;
-            return out;
+            return;
           }
           case 1:
           {
             out.coeffRef(0) = 1;
-            return out;
+            return;
           }
           default:
           {
             assert(false);
             out.setConstant(NAN);
-            return out;
+            return;
           }
         }
       }
@@ -395,25 +394,25 @@ namespace Rodin::Variational
           case 0:
           {
             out.setConstant(-1);
-            return out;
+            return;
           }
           case 1:
           {
             out.coeffRef(0) = 1;
             out.coeffRef(1) = 0;
-            return out;
+            return;
           }
           case 2:
           {
             out.coeffRef(0) = 0;
             out.coeffRef(1) = 1;
-            return out;
+            return;
           }
           default:
           {
             assert(false);
             out.setConstant(NAN);
-            return out;
+            return;
           }
         }
       }
@@ -426,31 +425,31 @@ namespace Rodin::Variational
           {
             out.coeffRef(0) = r.y() - 1;
             out.coeffRef(1) = r.x() - 1;
-            return out;
+            return;
           }
           case 1:
           {
             out.coeffRef(0) = 1 - r.y();
             out.coeffRef(1) = -r.y();
-            return out;
+            return;
           }
           case 2:
           {
             out.coeffRef(0) = 1 - r.x();
             out.coeffRef(1) = -r.x();
-            return out;
+            return;
           }
           case 3:
           {
             out.coeffRef(0) = r.y();
             out.coeffRef(1) = r.x();
-            return out;
+            return;
           }
           default:
           {
             assert(false);
             out.setConstant(NAN);
-            return out;
+            return;
           }
         }
       }
@@ -462,34 +461,34 @@ namespace Rodin::Variational
           case 0:
           {
             out.setConstant(-1);
-            return out;
+            return;
           }
           case 1:
           {
             out.coeffRef(0) = 1;
             out.coeffRef(1) = 0;
             out.coeffRef(2) = 0;
-            return out;
+            return;
           }
           case 2:
           {
             out.coeffRef(0) = 0;
             out.coeffRef(1) = 1;
             out.coeffRef(2) = 0;
-            return out;
+            return;
           }
           case 3:
           {
             out.coeffRef(0) = 0;
             out.coeffRef(1) = 0;
             out.coeffRef(2) = 1;
-            return out;
+            return;
           }
           default:
           {
             assert(false);
             out.setConstant(NAN);
-            return out;
+            return;
           }
         }
       }
@@ -498,7 +497,7 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::BasisFunction::operator()(Math::Vector& out, const Math::Vector& r) const
+  void VectorP1Element::BasisFunction::operator()(Math::Vector& out, const Math::SpatialVector& r) const
   {
     out = Math::Vector::Zero(m_vdim);
     const size_t i = m_i % m_vdim;
@@ -629,7 +628,7 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::JacobianFunction::operator()(Math::Matrix& out, const Math::Vector& rc) const
+  void VectorP1Element::JacobianFunction::operator()(Math::Matrix& out, const Math::SpatialVector& rc) const
   {
     out = Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
     const size_t i = m_i % m_vdim;

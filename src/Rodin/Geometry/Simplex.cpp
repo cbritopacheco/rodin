@@ -178,7 +178,7 @@ namespace Rodin::Geometry
     : Polytope(0, index, mesh)
   {}
 
-  Eigen::Map<const Math::Vector> Vertex::getCoordinates() const
+  Eigen::Map<const Math::SpatialVector> Vertex::getCoordinates() const
   {
     return getMesh().getVertexCoordinates(getIndex());
   }
@@ -188,11 +188,11 @@ namespace Rodin::Geometry
     : m_polytope(simplex), m_trans(trans)
   {}
 
-  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans, const Math::Vector& pc)
+  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans, const Math::SpatialVector& pc)
     : m_polytope(simplex), m_trans(trans), m_pc(pc)
   {}
 
-  const Math::Vector& PointBase::getCoordinates(Coordinates coords) const
+  const Math::SpatialVector& PointBase::getCoordinates(Coordinates coords) const
   {
     if (coords == Coordinates::Physical)
     {
@@ -205,7 +205,7 @@ namespace Rodin::Geometry
     }
   }
 
-  const Math::Vector& PointBase::getPhysicalCoordinates() const
+  const Math::SpatialVector& PointBase::getPhysicalCoordinates() const
   {
     if (!m_pc.has_value())
       m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
@@ -213,7 +213,7 @@ namespace Rodin::Geometry
     return m_pc.value();
   }
 
-  const Math::Matrix& PointBase::getJacobian() const
+  const Math::SpatialMatrix& PointBase::getJacobian() const
   {
     if (!m_jacobian.has_value())
       m_jacobian.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
@@ -221,7 +221,7 @@ namespace Rodin::Geometry
     return m_jacobian.value();
   }
 
-  const Math::Matrix& PointBase::getJacobianInverse() const
+  const Math::SpatialMatrix& PointBase::getJacobianInverse() const
   {
     if (!m_jacobianInverse.has_value())
     {
@@ -303,7 +303,8 @@ namespace Rodin::Geometry
       }
       else
       {
-        assert(false); // Not handled yet
+        const auto& jac = getJacobian();
+        return m_jacobianInverse.emplace(jac.completeOrthogonalDecomposition().pseudoInverse());
       }
     }
     assert(m_jacobianInverse.has_value());

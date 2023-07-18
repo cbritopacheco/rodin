@@ -207,7 +207,9 @@ namespace Rodin::Variational
       constexpr
       Scalar operator()(const GridFunction<FES>& u) const
       {
-        return getVector().dot(u.getData());
+        const auto& weights = u.getWeights();
+        assert(weights.has_value());
+        return getVector().dot(*weights);
       }
 
       void assemble() override;

@@ -65,6 +65,7 @@ namespace Rodin::IO
       if (header.ordering == MFEM::Ordering::Nodes)
         data.transposeInPlace();
     }
+    gf.setWeights();
   }
 
   template <class Range>

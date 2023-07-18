@@ -238,7 +238,7 @@ namespace Rodin::Geometry
 
       virtual const MeshConnectivity& getConnectivity() const = 0;
 
-      virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
 
       virtual void flush() = 0;
   };
@@ -638,7 +638,7 @@ namespace Rodin::Geometry
         m_transformationIndex.clear();
       }
 
-      virtual Eigen::Map<const Math::Vector> getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 

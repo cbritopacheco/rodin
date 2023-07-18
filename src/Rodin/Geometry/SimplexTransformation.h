@@ -59,7 +59,7 @@ namespace Rodin::Geometry
        * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
        * physical dimension.
        */
-      virtual Math::Vector transform(const Math::Vector& rc) const = 0;
+      virtual Math::SpatialVector transform(const Math::Vector& rc) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -78,7 +78,7 @@ namespace Rodin::Geometry
        * represents the reference dimension and @f$ s @f$ represents the
        * physical dimension.
        */
-      virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
+      virtual Math::SpatialMatrix jacobian(const Math::Vector& rc) const = 0;
 
       /**
        * @brief Computes the reference coordinates of the given physical point.

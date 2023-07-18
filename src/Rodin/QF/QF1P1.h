@@ -23,7 +23,7 @@ namespace Rodin::QF
       }
 
       inline
-      const Math::Vector& getPoint(size_t i) const override
+      const Math::SpatialVector& getPoint(size_t i) const override
       {
         return s_points[getGeometry()][i];
       }
@@ -35,7 +35,7 @@ namespace Rodin::QF
       }
 
     private:
-      static const Geometry::GeometryIndexed<std::vector<Math::Vector>> s_points;
+      static const Geometry::GeometryIndexed<std::vector<Math::SpatialVector>> s_points;
       static const Geometry::GeometryIndexed<Math::Vector> s_weights;
   };
 }

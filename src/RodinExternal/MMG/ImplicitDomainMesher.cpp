@@ -311,6 +311,7 @@ namespace Rodin::External::MMG
     {
       Alert::Exception() << "Mesh must be of type MMG::Mesh." << Alert::Raise;
     }
+
     // Erase boundary elements which have the isoref
     // if (m_isoref)
     //  deleteBoundaryRef(mesh, *m_isoref);
@@ -321,8 +322,12 @@ namespace Rodin::External::MMG
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
     if (m_meshTheSurface)
     {
-      assert(false);
-      // generateUniqueSplit(ls.getFiniteElementSpace().getMesh().getBoundaryAttributes());
+      const size_t meshDim = mesh.getDimension();
+      const auto& attributeIndex = mesh.getAttributeIndex();
+      FlatSet<Geometry::Attribute> attrs;
+      for (auto it = attributeIndex.begin(meshDim - 1); it != attributeIndex.end(meshDim - 1); ++it)
+        attrs.insert(it->second);
+      generateUniqueSplit(attrs);
     }
     else
     {
@@ -368,17 +373,20 @@ namespace Rodin::External::MMG
     destroyMesh(mmgMesh);
 
     // Recover original attributes
-    const size_t meshDim = rodinMesh.getDimension();
-    for (auto it = rodinMesh.getElement(); !it.end(); ++it)
+    if (!isSurface)
     {
-      const auto& cell = *it;
-      const Index idx = cell.getIndex();
-      const Geometry::Attribute attr = cell.getAttribute();
-      auto attrIt = m_g2om.find(attr);
-      if (attrIt != m_g2om.end())
-        rodinMesh.setAttribute({ meshDim, idx }, attrIt->second);
-      else
-        assert(std::holds_alternative<NoSplitT>(m_split.at(attr)));
+      const size_t meshDim = rodinMesh.getDimension();
+      for (auto it = rodinMesh.getElement(); !it.end(); ++it)
+      {
+        const auto& cell = *it;
+        const Index idx = cell.getIndex();
+        const Geometry::Attribute attr = cell.getAttribute();
+        auto attrIt = m_g2om.find(attr);
+        if (attrIt != m_g2om.end())
+          rodinMesh.setAttribute({ meshDim, idx }, attrIt->second);
+        else
+          assert(std::holds_alternative<NoSplitT>(m_split.at(attr)));
+      }
     }
     return rodinMesh;
   }

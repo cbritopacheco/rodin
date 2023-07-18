@@ -142,6 +142,7 @@ namespace Rodin::IO
     assert(data.size() >= 0);
     for (size_t i = 0; i < static_cast<size_t>(data.size()); i++)
       is >> data.coeffRef(i);
+    gf.setWeights();
   }
 }
 
