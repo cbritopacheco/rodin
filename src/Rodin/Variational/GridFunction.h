@@ -241,6 +241,7 @@ namespace Rodin::Variational
       inline
       Derived& operator+=(Scalar rhs)
       {
+        static_assert(std::is_same_v<RangeType, Scalar>);
         m_data = m_data.array() + rhs;
         return static_cast<Derived&>(*this);
       }
@@ -251,6 +252,7 @@ namespace Rodin::Variational
       inline
       Derived& operator-=(Scalar rhs)
       {
+        static_assert(std::is_same_v<RangeType, Scalar>);
         m_data = m_data.array() - rhs;
         return static_cast<Derived&>(*this);
       }
