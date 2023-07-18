@@ -444,6 +444,12 @@ namespace Rodin::Geometry
       */
       Mesh& operator=(Mesh&&) = default;
 
+      inline
+      Builder build() const
+      {
+        return Builder();
+      }
+
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
        * @param[in] u Displacement at each node

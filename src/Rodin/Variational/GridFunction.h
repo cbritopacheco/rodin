@@ -338,11 +338,11 @@ namespace Rodin::Variational
       inline
       auto& project(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return project(fn, std::set<Geometry::Attribute>{attr});
+        return project(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       inline
-      auto& project(std::function<Scalar(const Geometry::Point&)> fn, const std::set<Geometry::Attribute>& attrs = {})
+      auto& project(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
         return project(ScalarFunction(fn), attrs);
       }
@@ -351,7 +351,7 @@ namespace Rodin::Variational
       inline
       Derived& project(const FunctionBase<NestedDerived>& fn)
       {
-        return project(fn, std::set<Geometry::Attribute>{});
+        return project(fn, FlatSet<Geometry::Attribute>{});
       }
 
       /**
@@ -361,14 +361,14 @@ namespace Rodin::Variational
        * domain elements with the given attribute.
        *
        * It is a convenience function to call
-       * project(const FunctionBase&, const std::set<int>&) with one
+       * project(const FunctionBase&, const FlatSet<Geometry::Atribute>&) with one
        * attribute.
        */
       template <class NestedDerived>
       inline
       Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return project(fn, std::set<Geometry::Attribute>{attr});
+        return project(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -379,7 +379,7 @@ namespace Rodin::Variational
        * empty, this function will project over all elements in the mesh.
        */
       template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs)
+      Derived& project(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
         using Function = FunctionBase<NestedDerived>;
         using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;
@@ -420,11 +420,11 @@ namespace Rodin::Variational
       inline
       auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
+        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       inline
-      auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, const std::set<Geometry::Attribute>& attrs = {})
+      auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
         return projectOnBoundary(ScalarFunction(fn), attrs);
       }
@@ -433,18 +433,18 @@ namespace Rodin::Variational
       inline
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
       {
-        return static_cast<Derived&>(*this).projectOnBoundary(fn, std::set<Geometry::Attribute>{});
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
       }
 
       template <class NestedDerived>
       inline
       Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
+        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class NestedDerived>
-      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs)
+      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
         using Function = FunctionBase<NestedDerived>;
         using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;

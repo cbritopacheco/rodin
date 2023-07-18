@@ -28,9 +28,9 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  Mesh Mesh::Builder::finalize()
+  MMG::Mesh Mesh::Builder::finalize()
   {
-    Mesh res;
+    MMG::Mesh res;
     res.Parent::operator=(Parent::Builder::finalize());
     res.m_cornerIndex = std::move(m_cornerIndex);
     res.m_ridgeIndex = std::move(m_ridgeIndex);

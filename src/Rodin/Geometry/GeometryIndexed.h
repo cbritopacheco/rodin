@@ -32,6 +32,18 @@ namespace Rodin::Geometry
           m_map[static_cast<size_t>(v.first)] = v.second;
       }
 
+      constexpr
+      GeometryIndexed(const GeometryIndexed&) = default;
+
+      constexpr
+      GeometryIndexed(GeometryIndexed&&) = default;
+
+      constexpr
+      GeometryIndexed& operator=(const GeometryIndexed&) = default;
+
+      constexpr
+      GeometryIndexed& operator=(GeometryIndexed&&) = default;
+
       inline
       constexpr
       T& operator[](Polytope::Geometry geom)

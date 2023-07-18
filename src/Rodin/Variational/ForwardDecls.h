@@ -512,6 +512,24 @@ namespace Rodin::Variational
   class Dot;
 
   /**
+   * @brief Represents the absolute value of a value.
+   * @tparam Operand Type of operand
+   *
+   * Represents the following mathematical expression:
+   * @f[
+   *   | \ \text{Operand} \ |
+   * @f]
+   * where Operand represents a scalar function.
+   *
+   * @note For an overview of all the possible specializations of the
+   * Abs class, please see @ref AbsSpecializations.
+   *
+   * @see AbsSpecializations
+   */
+  template <class Operand>
+  class Abs;
+
+  /**
    * @brief Represents the Frobenius norm.
    * @tparam Operand Type of operand
    *

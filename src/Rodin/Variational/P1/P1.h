@@ -17,6 +17,7 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
+#include "ForwardDecls.h"
 #include "P1Element.h"
 
 namespace Rodin::Variational

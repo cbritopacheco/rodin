@@ -297,7 +297,7 @@ namespace Rodin::External::MMG
     {
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
-      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->np + 1), double,
+      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), double,
           Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
     }
     else
