@@ -115,6 +115,34 @@ namespace Rodin::Variational
         }
       }
 
+      inline
+      GridFunction& setWeights()
+      {
+        auto& data = this->getData();
+        if (!this->getWeights().has_value())
+        {
+          auto& weights = this->getWeights().emplace(this->getFiniteElementSpace().getSize());
+          if constexpr (std::is_same_v<RangeType, Scalar>)
+          {
+            assert(data.rows() == 1);
+            std::copy(data.data(), data.data() + data.size(), weights.data());
+          }
+          else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+          {
+            const auto& fes = this->getFiniteElementSpace();
+            const size_t vdim = fes.getVectorDimension();
+            for (size_t i = 0; i < fes.getSize(); i++)
+              weights.coeffRef(i) = data.col(i).coeff(i % vdim);
+          }
+          else
+          {
+            assert(false);
+            weights.setConstant(NAN);
+          }
+        }
+        return *this;
+      }
+
       template <class Vector>
       inline
       GridFunction& setWeights(Vector&& weights)
@@ -125,7 +153,8 @@ namespace Rodin::Variational
         const auto& w = this->getWeights().emplace(std::forward<Vector>(weights));
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          data = w;
+          assert(data.rows() == 1);
+          std::copy(w.data(), w.data() + w.size(), data.data());
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {

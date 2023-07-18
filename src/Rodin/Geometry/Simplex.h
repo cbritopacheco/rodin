@@ -277,7 +277,7 @@ namespace Rodin::Geometry
         return getCoordinates()(i);
       }
 
-      Eigen::Map<const Math::Vector> getCoordinates() const;
+      Eigen::Map<const Math::SpatialVector> getCoordinates() const;
 
       inline
       constexpr
@@ -318,7 +318,7 @@ namespace Rodin::Geometry
 
       PointBase(const Polytope& polytope, const PolytopeTransformation& trans);
 
-      PointBase(const Polytope& polytope, const PolytopeTransformation& trans, const Math::Vector& pc);
+      PointBase(const Polytope& polytope, const PolytopeTransformation& trans, const Math::SpatialVector& pc);
 
       /**
        * @brief Copy constructor.
@@ -394,8 +394,8 @@ namespace Rodin::Geometry
       bool operator<(const PointBase& p) const
       {
         assert(getDimension() == p.getDimension());
-        const Math::Vector& lhs = getCoordinates(Coordinates::Physical);
-        const Math::Vector& rhs = p.getCoordinates(Coordinates::Physical);
+        const auto& lhs = getCoordinates(Coordinates::Physical);
+        const auto& rhs = p.getCoordinates(Coordinates::Physical);
         for (int i = 0; i < lhs.size() - 1; i++)
         {
           if (lhs(i) < rhs(i))
@@ -418,15 +418,15 @@ namespace Rodin::Geometry
         return m_trans.get();
       }
 
-      const Math::Vector& getPhysicalCoordinates() const;
+      const Math::SpatialVector& getPhysicalCoordinates() const;
 
-      const Math::Vector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
+      const Math::SpatialVector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation at the
        * point.
        */
-      virtual const Math::Matrix& getJacobian() const;
+      virtual const Math::SpatialMatrix& getJacobian() const;
 
       Scalar getJacobianDeterminant() const;
 
@@ -434,7 +434,7 @@ namespace Rodin::Geometry
        * @brief Computes the inverse of the Jacobian matrix of the
        * transformation at the point.
        */
-      const Math::Matrix& getJacobianInverse() const;
+      const Math::SpatialMatrix& getJacobianInverse() const;
 
       /**
        * @brief Computes the distortion of space of the transformation at the
@@ -442,17 +442,17 @@ namespace Rodin::Geometry
        */
       Scalar getDistortion() const;
 
-      virtual const Math::Vector& getReferenceCoordinates() const = 0;
+      virtual const Math::SpatialVector& getReferenceCoordinates() const = 0;
 
     private:
       std::reference_wrapper<const Polytope> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
-      mutable std::optional<const Math::Vector> m_pc;
-      mutable std::optional<const Math::Matrix> m_jacobian;
-      mutable std::optional<const Math::Matrix> m_jacobianInverse;
-      mutable std::optional<const Scalar>       m_jacobianDeterminant;
-      mutable std::optional<const Scalar>       m_distortion;
+      mutable std::optional<const Math::SpatialVector> m_pc;
+      mutable std::optional<const Math::SpatialMatrix> m_jacobian;
+      mutable std::optional<const Math::SpatialMatrix> m_jacobianInverse;
+      mutable std::optional<const Scalar>              m_jacobianDeterminant;
+      mutable std::optional<const Scalar>              m_distortion;
   };
 
   class Point final : public PointBase
@@ -467,18 +467,18 @@ namespace Rodin::Geometry
       };
 
       Point(const Polytope& polytope, const PolytopeTransformation& trans,
-          const Math::Vector& rc)
+          const Math::SpatialVector& rc)
         : PointBase(polytope, trans), m_type(Type::Data), m_rc(rc)
       {}
 
       Point(const Polytope& polytope, const PolytopeTransformation& trans,
-          const Math::Vector& rc, const Math::Vector& pc)
+          const Math::SpatialVector& rc, const Math::SpatialVector& pc)
         : PointBase(polytope, trans, pc), m_type(Type::Data), m_rc(rc)
       {}
 
       explicit
       Point(const Polytope& polytope, const PolytopeTransformation& trans,
-          std::reference_wrapper<const Math::Vector> rc, std::reference_wrapper<const Math::Vector> pc)
+          std::reference_wrapper<const Math::SpatialVector> rc, std::reference_wrapper<const Math::SpatialVector> pc)
         : PointBase(polytope, trans, pc), m_type(Type::Reference), m_rc(rc)
       {}
 
@@ -502,22 +502,22 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Math::Vector& getReferenceCoordinates() const override
+      const Math::SpatialVector& getReferenceCoordinates() const override
       {
         if (holds(Type::Data))
         {
-          return std::get<const Math::Vector>(m_rc);
+          return std::get<const Math::SpatialVector>(m_rc);
         }
         else
         {
           assert(holds(Type::Reference));
-          return std::get<std::reference_wrapper<const Math::Vector>>(m_rc);
+          return std::get<std::reference_wrapper<const Math::SpatialVector>>(m_rc);
         }
       }
 
     private:
       const Type m_type;
-      std::variant<const Math::Vector, std::reference_wrapper<const Math::Vector>> m_rc;
+      std::variant<const Math::SpatialVector, std::reference_wrapper<const Math::SpatialVector>> m_rc;
   };
 
   inline

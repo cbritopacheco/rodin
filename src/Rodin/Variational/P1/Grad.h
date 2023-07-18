@@ -29,6 +29,8 @@ namespace Rodin::Variational
     : public VectorFunctionBase<Grad<GridFunction<P1<Scalar, Ts...>>>>
   {
     public:
+      using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, 0, 3, 1>;
+
       /// Operand type
       using Operand = GridFunction<P1<Scalar, Ts...>>;
 
@@ -85,7 +87,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Math::Vector getValue(const Geometry::Point& p) const
+      ReturnType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -95,7 +97,9 @@ namespace Rodin::Variational
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& rc = p.getReferenceCoordinates();
-        Math::Vector res = Math::Vector::Zero(getDimension());
+        ReturnType res(d);
+        res.setZero();
+        assert(data.rows() == 1);
         for (size_t local = 0; local < fe.getCount(); local++)
         {
           const auto& grad = fe.getGradient(local);
@@ -196,7 +200,7 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t dofs = fe.getCount();
-        const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         m_gradient.resize(dofs);
         for (size_t local = 0; local < dofs; local++)
           m_gradient[local] = fe.getGradient(local)(rc);
@@ -211,7 +215,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Operand> m_u;
-      mutable std::vector<ScalarP1Element::GradientFunction::ReturnType> m_gradient;
+      mutable std::vector<Math::SpatialVector> m_gradient;
   };
 
   template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>

@@ -178,7 +178,7 @@ namespace Rodin::Variational
       inline
       Derived& setZero()
       {
-        getData().setZero();
+        m_data.setZero();
         if (m_weights)
           m_weights->setZero();
         return static_cast<Derived&>(*this);
@@ -191,7 +191,7 @@ namespace Rodin::Variational
       Derived& operator=(Scalar v)
       {
         static_assert(std::is_same_v<RangeType, Scalar>);
-        getData().setConstant(v);
+        m_data.setConstant(v);
         return static_cast<Derived&>(*this);
       }
 
@@ -199,7 +199,7 @@ namespace Rodin::Variational
       Derived& operator=(const Math::Vector& v)
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
-        Math::Matrix& data = getData();
+        Math::Matrix& data = m_data;
         assert(data.cols() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(data.cols()); i++)
           data.col(i) = v;
@@ -241,7 +241,7 @@ namespace Rodin::Variational
       inline
       Derived& operator+=(Scalar rhs)
       {
-        getData() = getData().array() + rhs;
+        m_data = m_data.array() + rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -251,7 +251,7 @@ namespace Rodin::Variational
       inline
       Derived& operator-=(Scalar rhs)
       {
-        getData() = getData().array() - rhs;
+        m_data = m_data.array() - rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -261,7 +261,7 @@ namespace Rodin::Variational
       inline
       Derived& operator*=(Scalar rhs)
       {
-        getData() = getData().array() * rhs;
+        m_data = m_data.array() * rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -271,7 +271,7 @@ namespace Rodin::Variational
       inline
       Derived& operator/=(Scalar rhs)
       {
-        getData() = getData().array() / rhs;
+        m_data = m_data.array() / rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -285,7 +285,7 @@ namespace Rodin::Variational
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() + rhs.getData().array();
+          m_data = m_data.array() + rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -300,7 +300,7 @@ namespace Rodin::Variational
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() - rhs.getData().array();
+          m_data = m_data.array() - rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -310,12 +310,12 @@ namespace Rodin::Variational
       {
         if (this == &rhs)
         {
-          getData() = getData().array() * getData().array();
+          m_data = m_data.array() * m_data.array();
         }
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() * rhs.getData().array();
+          m_data = m_data.array() * rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -330,7 +330,7 @@ namespace Rodin::Variational
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() / rhs.getData().array();
+          m_data = m_data.array() / rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -562,7 +562,19 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a reference to the GridFunction data.
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      template <class Matrix>
+      inline
+      constexpr
+      Derived& setData(Matrix&& data) const
+      {
+        m_data = std::forward<Matrix>(data);
+        return static_cast<Derived&>(*this).setData();
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
        */
       inline
       constexpr
@@ -593,6 +605,12 @@ namespace Rodin::Variational
       const std::optional<Math::Vector>& getWeights() const
       {
         return m_weights;
+      }
+
+      inline
+      Derived& setWeights()
+      {
+        return static_cast<Derived&>(*this).setWeights();
       }
 
       template <class Vector>

@@ -28,17 +28,26 @@ namespace Rodin::External::MMG
     std::string line;
     const auto& pos = getPositionMap();
     const auto& count = getCountMap();
-    is.seekg(pos.at(IO::MEDIT::Keyword::Corners));
-    for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Corners); i++)
+    auto find = pos.find(IO::MEDIT::Keyword::Corners);
+    if (find != pos.end())
     {
-      std::getline(is, line);
-      mesh.setCorner(std::stoul(line) - 1);
+      is.seekg(find->second);
+      for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Corners); i++)
+      {
+        std::getline(is, line);
+        mesh.setCorner(std::stoul(line) - 1);
+      }
     }
-    is.seekg(pos.at(IO::MEDIT::Keyword::Ridges));
-    for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Ridges); i++)
+
+    find = pos.find(IO::MEDIT::Keyword::Ridges);
+    if (find != pos.end())
     {
-      std::getline(is, line);
-      mesh.setRidge(std::stoul(line) - 1);
+      is.seekg(find->second);
+      for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Ridges); i++)
+      {
+        std::getline(is, line);
+        mesh.setRidge(std::stoul(line) - 1);
+      }
     }
   }
 }

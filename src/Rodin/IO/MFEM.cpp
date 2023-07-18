@@ -257,22 +257,19 @@ namespace Rodin::IO
     }
     os << '\n';
 
-    const size_t fdim = mesh.getDimension() - 1;
-    os << MFEM::Keyword::boundary << '\n' << mesh.getAttributeIndex().size(fdim) << '\n';
-    const auto& attrs = mesh.getAttributeIndex();
-    for (auto it = attrs.begin(mesh.getDimension() - 1); it != attrs.end(mesh.getDimension() - 1); ++it)
+    os << MFEM::Keyword::boundary << '\n' << mesh.getFaceCount() << '\n';
+    for (auto it = mesh.getFace(); !it.end(); ++it)
     {
-      const auto& [i, attr] = *it;
-      auto g = MFEM::getGeometry(mesh.getConnectivity().getGeometry(fdim, i));
+      auto g = MFEM::getGeometry(it->getGeometry());
       if (!g)
       {
         Alert::Exception() << "MFEM format does not support geometry: "
-                           << mesh.getConnectivity().getGeometry(fdim, i) << "."
+                           << it->getGeometry() << "."
                            << Alert::Raise;
       }
-      os << attr << ' ' << *g << ' ';
+      os << it->getAttribute() << ' ' << *g << ' ';
 
-      const auto& vertices = mesh.getConnectivity().getPolytope(fdim, i);
+      const auto& vertices = it->getVertices();
       for (int i = 0; i < vertices.size() - 1; i++)
         os << vertices(i) << ' ';
       os << vertices(vertices.size() - 1) << '\n';

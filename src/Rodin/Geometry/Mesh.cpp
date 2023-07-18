@@ -69,7 +69,7 @@ namespace Rodin::Geometry
     };
   }
 
-  Eigen::Map<const Math::Vector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
+  Eigen::Map<const Math::SpatialVector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
     return { getVertices().data() + getSpaceDimension() * idx, size };

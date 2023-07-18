@@ -114,7 +114,7 @@ namespace Rodin::Variational
 
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          Scalar operator()(const Math::Vector& r) const;
+          Scalar operator()(const Math::SpatialVector& r) const;
 
         private:
           size_t m_i;
@@ -127,8 +127,6 @@ namespace Rodin::Variational
       class GradientFunction
       {
         public:
-          using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, 0, 3, 1>;
-
           constexpr
           GradientFunction(size_t i, Geometry::Polytope::Geometry g)
             : m_i(i), m_g(g)
@@ -145,7 +143,14 @@ namespace Rodin::Variational
           constexpr
           GradientFunction& operator=(GradientFunction&&) = default;
 
-          ReturnType operator()(const Math::Vector& r) const;
+          Math::SpatialVector operator()(const Math::SpatialVector& r) const
+          {
+            Math::SpatialVector out;
+            operator()(out, r);
+            return out;
+          }
+
+          void operator()(Math::SpatialVector& out, const Math::SpatialVector& r) const;
 
         private:
           size_t m_i;
@@ -304,14 +309,14 @@ namespace Rodin::Variational
           constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
-          Math::Vector operator()(const Math::Vector& r) const
+          Math::Vector operator()(const Math::SpatialVector& r) const
           {
             Math::Vector res;
             operator()(res, r);
             return res;
           }
 
-          void operator()(Math::Vector& out, const Math::Vector& r) const;
+          void operator()(Math::Vector& out, const Math::SpatialVector& r) const;
 
         private:
           size_t m_vdim;
@@ -343,14 +348,14 @@ namespace Rodin::Variational
           constexpr
           JacobianFunction& operator=(JacobianFunction&&) = default;
 
-          Math::Matrix operator()(const Math::Vector& rc) const
+          Math::Matrix operator()(const Math::SpatialVector& rc) const
           {
             Math::Matrix res;
             operator()(res, rc);
             return res;
           }
 
-          void operator()(Math::Matrix& out, const Math::Vector& rc) const;
+          void operator()(Math::Matrix& out, const Math::SpatialVector& rc) const;
 
         private:
           size_t m_vdim;

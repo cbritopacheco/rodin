@@ -24,9 +24,10 @@ namespace Rodin::External::MMG
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
         Alert::Exception("Failed to allocate memory for the mesh").raise());
-
+    assert(dim > 0);
     if (!spaceDim)
       spaceDim = dim;
+    assert(spaceDim > 0);
     const bool isSurface = (*spaceDim - 1) == dim;
     assert(isSurface || (dim == *spaceDim));
     if (isSurface)

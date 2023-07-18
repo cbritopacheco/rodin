@@ -95,7 +95,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      Math::Vector transform(const Math::Vector& rc) const override
+      Math::SpatialVector transform(const Math::Vector& rc) const override
       {
         Math::Vector res = Math::Vector::Zero(m_sdim);
         for (size_t local = 0; local < m_fe.getCount(); local++)
@@ -107,12 +107,13 @@ namespace Rodin::Geometry
       }
 
       inline
-      Math::Matrix jacobian(const Math::Vector& rc) const override
+      Math::SpatialMatrix jacobian(const Math::Vector& rc) const override
       {
-        Math::Matrix res = Math::Matrix::Zero(m_sdim, m_rdim);
+        Math::SpatialMatrix res = Math::Matrix::Zero(m_sdim, m_rdim);
+        Math::SpatialVector gradient;
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
-          const auto gradient = m_fe.getGradient(local)(rc);
+          m_fe.getGradient(local)(gradient, rc);
           for (size_t i = 0; i < m_rdim; i++)
           {
             assert(res.col(i).size() == m_pm.col(local).size());
