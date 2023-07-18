@@ -87,6 +87,8 @@ set(RodinVariational_SRCS
   Tangent.cpp
   Assembly/AssemblyBase.cpp
   Assembly/Native.cpp
+  P0/P0.cpp
+  P0/P0Element.cpp
   P1/P1.cpp
   P1/P1Element.cpp
   )

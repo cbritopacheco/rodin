@@ -170,13 +170,13 @@ namespace Rodin::Variational
       auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
                               Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
+        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class NestedDerived,
                typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
       auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-                              const std::set<Geometry::Attribute>& attrs = {})
+                              const FlatSet<Geometry::Attribute>& attrs = {})
       {
         assert(false);
         return *this;

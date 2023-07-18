@@ -21,5 +21,3 @@ target_link_libraries(Elasticity
 #   Rodin::Solver
 #   Rodin::Variational
 #   )
-
-# add_subdirectory(DG)

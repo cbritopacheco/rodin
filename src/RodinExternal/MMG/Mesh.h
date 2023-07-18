@@ -116,14 +116,11 @@ namespace Rodin::External::MMG
         return *this;
       }
 
-      void save(
-         const boost::filesystem::path& filename,
-         IO::FileFormat fmt = IO::FileFormat::MFEM,
-         size_t precison = 16) const override;
-
-      Mesh& load(
-         const boost::filesystem::path& filename,
-         IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+      inline
+      MMG::Mesh::Builder build() const
+      {
+        return MMG::Mesh::Builder();
+      }
 
       /**
        * @brief Adds the vertex to the corner index.
@@ -150,6 +147,15 @@ namespace Rodin::External::MMG
       {
         return m_ridgeIndex;
       }
+
+      void save(
+         const boost::filesystem::path& filename,
+         IO::FileFormat fmt = IO::FileFormat::MFEM,
+         size_t precison = 16) const override;
+
+      Mesh& load(
+         const boost::filesystem::path& filename,
+         IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
     private:
       CornerIndex m_cornerIndex;

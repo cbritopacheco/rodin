@@ -146,7 +146,7 @@ namespace Rodin::Variational
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)
       {
-        return on(std::set<Geometry::Attribute>{bdrAtr});
+        return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
 
       /**
@@ -156,7 +156,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      DirichletBC& on(const std::set<Geometry::Attribute>& bdrAttrs)
+      DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
         assert(bdrAttrs.size() > 0);
         m_essBdr = bdrAttrs;
@@ -168,7 +168,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const std::set<Geometry::Attribute>& getAttributes() const
+      const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_essBdr;
       }
@@ -182,7 +182,7 @@ namespace Rodin::Variational
       {
         const auto& fes = m_u.get().getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getBoundary(); !it.end(); ++it)
+        for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (m_essBdr.size() == 0 || m_essBdr.count(polytope.getAttribute()))
@@ -239,7 +239,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<Operand> m_u;
       std::unique_ptr<Value> m_value;
-      std::set<Geometry::Attribute> m_essBdr;
+      FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<Scalar> m_dofs;
   };
 

@@ -10,6 +10,8 @@
 #include <cmath>
 #include <type_traits>
 
+#include "Types.h"
+
 namespace Rodin::Math::Constants
 {
    /**
@@ -22,6 +24,14 @@ namespace Rodin::Math::Constants
    pi()
    {
     return static_cast<T>(std::acos(-1));
+   }
+
+   static
+   constexpr
+   inline
+   Scalar epsilon()
+   {
+      return std::numeric_limits<Scalar>::epsilon();
    }
 }
 
