@@ -17,8 +17,6 @@ namespace Rodin::FormLanguage
   template <class T>
   class List : public Base
   {
-    static_assert(std::is_base_of_v<Base, T>);
-
     public:
       using reference = T&;
       using const_reference = const T&;

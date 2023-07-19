@@ -9,9 +9,10 @@
 
 #include <map>
 #include <optional>
-#include <mfem.hpp>
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Types.h"
+#include "Rodin/Context.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -28,7 +29,6 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
-    protected:
       const Variational::GridFunction<FES>& getObject() const override
       {
         return m_gf;
@@ -36,30 +36,6 @@ namespace Rodin::IO
 
     private:
       const Variational::GridFunction<FES>& m_gf;
-  };
-
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::MFEM, FES>
-    : public GridFunctionPrinterBase<FES>
-  {
-    public:
-      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
-        : GridFunctionPrinterBase<FES>(gf)
-      {}
-
-      void print(std::ostream& os) override;
-  };
-
-  template <class FES>
-  class GridFunctionPrinter<FileFormat::MEDIT, FES>
-    : public GridFunctionPrinterBase<FES>
-  {
-    public:
-      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
-        : GridFunctionPrinterBase<FES>(gf)
-      {}
-
-      void print(std::ostream& os) override;
   };
 }
 

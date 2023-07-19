@@ -14,10 +14,8 @@
 
 #include "Variational/ForwardDecls.h"
 
-#include "Variational/H1.h"
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
-#include "Variational/FiniteElementCollection.h"
 
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
@@ -76,5 +74,7 @@
 #include "Variational/BooleanFunction.h"
 
 #include "Variational/DirichletBC.h"
+
+#include "Variational/P1.h"
 
 #endif

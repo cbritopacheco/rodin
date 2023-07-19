@@ -218,7 +218,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
         return getLHS().getDOFs(element);

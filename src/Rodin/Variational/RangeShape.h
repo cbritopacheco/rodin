@@ -67,14 +67,14 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      bool operator==(const RangeShape& other)
+      bool operator==(const RangeShape& other) const
       {
         return m_height == other.m_height && m_width == other.m_width;
       }
 
       inline
       constexpr
-      bool operator!=(const RangeShape& other)
+      bool operator!=(const RangeShape& other) const
       {
         return !operator==(other);
       }

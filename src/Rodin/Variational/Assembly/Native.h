@@ -7,22 +7,27 @@
 #ifndef RODIN_ASSEMBLY_NATIVE_H
 #define RODIN_ASSEMBLY_NATIVE_H
 
-#include <variant>
-#include <ostream>
-
-#include <mfem.hpp>
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SparseMatrix.h"
 
 #include "AssemblyBase.h"
 
 namespace Rodin::Variational::Assembly
 {
   template <>
-  class Native<BilinearFormBase<mfem::SparseMatrix>>
-    : public AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>
+  class Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+    : public AssemblyBase<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   {
+    /**
+     * @internal
+     */
+    static void add(
+        std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
+        const IndexArray& rows, const IndexArray& cols);
+
     public:
-      using Parent = AssemblyBase<BilinearFormBase<mfem::SparseMatrix>>;
-      using OperatorType = mfem::SparseMatrix;
+      using Parent = AssemblyBase<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>;
+      using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
       Native() = default;
 
@@ -34,7 +39,11 @@ namespace Rodin::Variational::Assembly
         : Parent(std::move(other))
       {}
 
-      OperatorType execute(const Input& input) const override;
+      /**
+       * @brief Executes the assembly and returns the linear operator
+       * associated to the bilinear form.
+       */
+      OperatorType execute(const BilinearAssemblyInput& input) const override;
 
       Native* copy() const noexcept override
       {
@@ -42,13 +51,17 @@ namespace Rodin::Variational::Assembly
       }
   };
 
+  /**
+   * @brief Native assembly of the Math::SparseMatrix associated to a
+   * BilinearFormBase object.
+   */
   template <>
-  class Native<LinearFormBase<mfem::Vector>>
-    : public AssemblyBase<LinearFormBase<mfem::Vector>>
+  class Native<BilinearFormBase<Math::SparseMatrix>>
+    : public AssemblyBase<BilinearFormBase<Math::SparseMatrix>>
   {
     public:
-      using Parent = AssemblyBase<LinearFormBase<mfem::Vector>>;
-      using VectorType = mfem::Vector;
+      using Parent = AssemblyBase<BilinearFormBase<Math::SparseMatrix>>;
+      using OperatorType = Math::SparseMatrix;
 
       Native() = default;
 
@@ -60,6 +73,47 @@ namespace Rodin::Variational::Assembly
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Executes the assembly and returns the linear operator
+       * associated to the bilinear form.
+       */
+      OperatorType execute(const BilinearAssemblyInput& input) const override;
+
+      Native* copy() const noexcept override
+      {
+        return new Native(*this);
+      }
+  };
+
+  /**
+   * @brief %Native assembly of the Math::Vector associated to a LinearFormBase
+   * object.
+   */
+  template <>
+  class Native<LinearFormBase<Math::Vector>>
+    : public AssemblyBase<LinearFormBase<Math::Vector>>
+  {
+
+    static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s);
+
+    public:
+      using Parent = AssemblyBase<LinearFormBase<Math::Vector>>;
+      using VectorType = Math::Vector;
+
+      Native() = default;
+
+      Native(const Native& other)
+        : Parent(other)
+      {}
+
+      Native(Native&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Executes the assembly and returns the vector associated to the
+       * linear form.
+       */
       VectorType execute(const Input& input) const override;
 
       Native* copy() const noexcept override

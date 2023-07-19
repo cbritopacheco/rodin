@@ -16,10 +16,9 @@
 
 #include "ForwardDecls.h"
 
-#include "BilinearFormIntegrator.h"
-#include "LinearFormIntegrator.h"
 #include "DirichletBC.h"
-#include "UnaryMinus.h"
+#include "LinearFormIntegrator.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {

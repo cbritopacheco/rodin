@@ -7,28 +7,36 @@
 #ifndef RODIN_EXTERNAL_MMG_MESHPRINTER_H
 #define RODIN_EXTERNAL_MMG_MESHPRINTER_H
 
-#include "Rodin/IO/Printer.h"
+#include "Rodin/IO/MEDIT.h"
 
 #include "Mesh.h"
 
 namespace Rodin::External::MMG
 {
+  /**
+   * @brief Class used to print objects of type MMG::Mesh.
+   */
   class MeshPrinter : public IO::Printer<MMG::Mesh>
   {
-   public:
-     MeshPrinter(const MMG::Mesh& mesh)
-       : m_mesh(mesh)
-     {}
+    public:
+      MeshPrinter(const MMG::Mesh& mesh)
+        : m_mesh(mesh),
+          m_printer(mesh)
+      {}
 
-     void print(std::ostream& os) override;
+      void print(std::ostream& os) override;
 
-     const MMG::Mesh& getObject() const override
-     {
-       return m_mesh;
-     }
+      void printCorners(std::ostream& os);
+      void printRidges(std::ostream& os);
 
-   private:
-     const MMG::Mesh& m_mesh;
+      const MMG::Mesh& getObject() const override
+      {
+        return m_mesh.get();
+      }
+
+    private:
+      std::reference_wrapper<const MMG::Mesh> m_mesh;
+      IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> m_printer;
   };
 }
 

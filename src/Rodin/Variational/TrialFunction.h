@@ -2,7 +2,6 @@
 #define RODIN_VARIATIONAL_TRIALFUNCTION_H
 
 #include "Component.h"
-#include "GridFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational
@@ -68,7 +67,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      inline TrialFunction* copy() const noexcept override
+      inline
+      TrialFunction* copy() const noexcept override
       {
         return new TrialFunction(*this);
       }

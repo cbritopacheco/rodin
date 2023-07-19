@@ -334,7 +334,7 @@ OPTIMIZE_OUTPUT_SLICE  = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      =
+EXTENSION_MAPPING      = in=C
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -853,7 +853,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  =  @CMAKE_SOURCE_DIR@/src/Rodin \
+INPUT                  =  @CMAKE_SOURCE_DIR@/src/ \
+                          @CMAKE_SOURCE_DIR@/src/Rodin \
                           @CMAKE_SOURCE_DIR@/src/RodinExternal \
                           @CMAKE_SOURCE_DIR@/doc/
 

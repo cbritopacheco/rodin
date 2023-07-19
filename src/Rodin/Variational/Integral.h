@@ -10,7 +10,6 @@
 #include <cassert>
 #include <set>
 #include <utility>
-#include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
 
@@ -23,7 +22,7 @@
 #include "TrialFunction.h"
 #include "FiniteElement.h"
 #include "MatrixFunction.h"
-#include "GaussianQuadrature.h"
+#include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -55,20 +54,27 @@ namespace Rodin::Variational
   class Integral<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
-    : public GaussianQuadrature<Dot<
+    : public QuadratureRule<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
+      /// Type of the left operand of the dot product
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+
+      /// Type of the right operand of the dot product
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      /// Type of the integrand
       using Integrand = Dot<LHS, RHS>;
-      using Parent = GaussianQuadrature<Integrand>;
+
+      /// Parent class
+      using Parent = QuadratureRule<Integrand>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs an instance representing the following integral:
+       * Constructs an object representing the following integral:
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]
@@ -83,8 +89,7 @@ namespace Rodin::Variational
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs the following object representing the following
-       * integral:
+       * Constructs the object representing the following integral:
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]
@@ -137,11 +142,11 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class FES>
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public GaussianQuadrature<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
+    : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
-      using Parent = GaussianQuadrature<Integrand>;
+      using Parent = QuadratureRule<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
@@ -248,7 +253,7 @@ namespace Rodin::Variational
       TestFunction<FES>                                 m_v;
       GridFunction<FES>                                 m_one;
 
-      LinearForm<FES, Context::Serial, mfem::Vector>    m_lf;
+      LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
       bool m_assembled;
   };
 

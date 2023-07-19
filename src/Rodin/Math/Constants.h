@@ -10,19 +10,26 @@
 #include <cmath>
 #include <type_traits>
 
+#include "Types.h"
+
 namespace Rodin::Math::Constants
 {
-   /**
-    * @brief Computes the number @f$ \pi @f$ to machine precision.
-    */
-   template <class T>
-   constexpr
-   inline
-   std::enable_if_t<std::is_arithmetic_v<T>, T>
-   pi()
-   {
-    return static_cast<T>(std::acos(-1));
-   }
+  /**
+   * @brief Computes the number @f$ \pi @f$ to machine precision.
+   */
+  inline
+  constexpr
+  Scalar pi()
+  {
+    return M_PI;
+  }
+
+  inline
+  constexpr
+  Scalar epsilon()
+  {
+    return std::numeric_limits<Scalar>::epsilon();
+  }
 }
 
 #endif

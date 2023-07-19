@@ -1,12 +1,10 @@
 /**
-  @page examples-index Examples and Tutorials
+  @page examples-index Examples and tutorials
   @brief Examples utilizing the Rodin library
 
   @tableofcontents
 
-  @subsection examples-index-getting_started Getting started
-
-  @subsection examples-index-variational Utilizing the variational methods module
+  @subsection examples-index-variational Variational methods
 
   The Rodin::Variational module is mostly used when dealing with to variational
   problems of the form:
@@ -20,13 +18,13 @@
 
   - @subpage examples-variational-index
 
-  @subsection examples-index-solver Utilizing the linear algebra solver module
+  @subsection examples-index-solver Solving linear systems
 
   Rodin::Solver
 
   In progress.
 
-  @subsection examples-index-geometry Utilizing the geometry module
+  @subsection examples-index-geometry Mesh geometry
 
   Rodin::Geometry
 

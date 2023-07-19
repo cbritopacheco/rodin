@@ -180,11 +180,7 @@ namespace Rodin::Variational
       Mult(const LHS& lhs, const RHS& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
-      {
-        // assert(lhs.getRangeType() == RangeType::Scalar
-        //     || rhs.getRangeType() == RangeType::Scalar
-        //     || lhs.getRangeShape().width() == rhs.getRangeShape().height());
-      }
+      {}
 
       constexpr
       Mult(const Mult& other)
@@ -232,7 +228,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }
@@ -264,9 +260,9 @@ namespace Rodin::Variational
       constexpr
       auto getTensorBasis(const Geometry::Point& p) const
       {
-        const auto& lhs = this->object(getLHS().getValue(p));
-        const auto& rhs = this->object(getRHS().getTensorBasis(p));
-        return TensorBasis(rhs.getDOFs(), [&](size_t i){ return lhs * rhs(i); });
+        m_f = getLHS().getValue(p);
+        const auto rhs = getRHS().getTensorBasis(p);
+        return TensorBasis(rhs.getDOFs(), [&](size_t i){ return m_f * rhs(i); });
       }
 
       inline Mult* copy() const noexcept override
@@ -277,6 +273,8 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHS> m_lhs;
       std::unique_ptr<RHS> m_rhs;
+
+      mutable typename FormLanguage::ResultOf<LHS>::Type m_f;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
@@ -377,7 +375,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }

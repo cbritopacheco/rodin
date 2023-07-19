@@ -61,6 +61,8 @@ int main(int, char**)
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = Omega.trim(Exterior);
+    trimmed.save("trimmed.mesh");
+    std::exit(1);
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     int d = 2;
@@ -110,7 +112,7 @@ int main(int, char**)
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
     H1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
-      .distance(Omega);
+                                  .distance(Omega);
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
@@ -129,14 +131,13 @@ int main(int, char**)
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
 
-    Omega = MMG::ImplicitDomainMesher()
-      .split(Interior, {Interior, Exterior})
-      .split(Exterior, {Interior, Exterior})
-      .setRMC(1e-3)
-      .setAngleDetection(false)
-      .setBoundaryReference(Gamma)
-      .setBaseReferences(GammaD)
-      .discretize(dist);
+    Omega = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+                                       .split(Exterior, {Interior, Exterior})
+                                       .setRMC(1e-3)
+                                       .setAngleDetection(false)
+                                       .setBoundaryReference(Gamma)
+                                       .setBaseReferences(GammaD)
+                                       .discretize(dist);
 
     MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 

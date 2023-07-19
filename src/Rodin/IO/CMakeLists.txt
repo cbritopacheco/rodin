@@ -1,20 +1,19 @@
 set(RodinIO_HEADERS
-  Helpers.h
+  MFEM.h
+  MEDIT.h
   Loader.h
   Printer.h
   MeshLoader.h
   MeshPrinter.h
   GridFunctionLoader.h
-  # GridFunctionPrinter.h
-  )
+  GridFunctionPrinter.h)
 
 set(RodinIO_SRCS
-  Helpers.cpp
+  MFEM.cpp
+  MEDIT.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
-  GridFunctionLoader.cpp
-  # GridFunctionPrinter.cpp
-  )
+  GridFunctionLoader.cpp)
 add_library(RodinIO ${RodinIO_SRCS} ${RodinIO_HEADERS})
 add_library(Rodin::IO ALIAS RodinIO)
 
