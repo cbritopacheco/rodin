@@ -121,7 +121,7 @@ class Environment
               Scalar angle = std::acos(p.z()(v) / Frobenius(p)(v));
               assert(angle >= 0);
               // assert(angle <= Math::Constants::pi<Scalar>() / 2.0);
-              return Math::Constants::pi<Scalar>() / 2.0 - angle;
+              return Math::Constants::pi() / 2.0 - angle;
             };
 
           Grad gdist(env.m_fireDist);
