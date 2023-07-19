@@ -12,22 +12,15 @@
 
 namespace Rodin::External::MMG
 {
-  Mesh& Mesh::corner(int vertexIdx)
+  Mesh& Mesh::setCorner(Index vertexIdx)
   {
-    m_corners.insert(vertexIdx);
+    m_cornerIndex.insert(vertexIdx);
     return *this;
   }
 
-  Mesh& Mesh::ridge(int edgeIdx)
+  Mesh& Mesh::setRidge(Index edgeIdx)
   {
-    assert(edgeIdx >= 0);
-    m_ridges.insert(edgeIdx);
-    return *this;
-  }
-
-  Mesh& Mesh::edge(const std::pair<int, int>& endpoints, int ref)
-  {
-    m_edges.push_back(Edge{endpoints, ref});
+    m_ridgeIndex.insert(edgeIdx);
     return *this;
   }
 

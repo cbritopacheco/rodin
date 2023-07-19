@@ -17,12 +17,13 @@ option(RODIN_BUILD_BENCHMARKS   "Build Rodin benchmarks"                OFF)
 option(RODIN_BUILD_DOC          "Build the Rodin documentation"         OFF)
 option(RODIN_USE_MPI            "Use Rodin with MPI support"            OFF)
 option(RODIN_USE_OPENMP         "Use Rodin with OpenMP support"         OFF)
-option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    ON)
+option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    OFF)
 option(RODIN_USE_MCSS           "Build documentation with m.css"        OFF)
 option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
 option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
 option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
 option(RODIN_CODE_COVERAGE      "Compile with code coverage flags"      OFF)
+option(RODIN_LTO                "Compile with link time optimization"   OFF)
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
@@ -50,13 +51,19 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 
 # ---- Set compile options for all the submodules ----------------------------
+rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
+
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   rodin_add_compile_options(
     LANG CXX C
     OPTIONS
     -w
     -O3
-    -march=native)
+    -DNDEBUG
+    -march=native
+    -fvectorize
+    -fslp-vectorize
+    -ffp-contract=fast)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG CXX C
@@ -68,6 +75,10 @@ else()
   message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
 endif()
 
+if (RODIN_LTO)
+  rodin_add_compile_options(LANG CXX C OPTIONS -flto)
+endif()
+
 if (RODIN_CODE_COVERAGE)
   include(CodeCoverage)
   append_coverage_compiler_flags()
@@ -75,7 +86,7 @@ if (RODIN_CODE_COVERAGE)
 endif()
 
 if (RODIN_BUILD_SRC)
-  set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
+  # set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
   if (RODIN_USE_SUITESPARSE)
     set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
@@ -92,12 +103,12 @@ if (RODIN_BUILD_SRC)
   endif()
 
   # ---- MFEM ----
-  message (STATUS "Configuring mfem...")
-  set(BUILD_DOC OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
-  find_package(MFEM
-    REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
-    NO_DEFAULT_PATH)
+  # message (STATUS "Configuring mfem...")
+  # set(BUILD_DOC OFF CACHE BOOL "" FORCE)
+  # add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
+  # find_package(MFEM
+  #   REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
+  #   NO_DEFAULT_PATH)
 
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)

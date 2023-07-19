@@ -5,7 +5,6 @@
 #include <cstdlib>
 
 #include "ForwardDecls.h"
-#include "H1.h"
 #include "FiniteElementSpace.h"
 #include "GridFunction.h"
 #include "ScalarFunction.h"
@@ -23,54 +22,54 @@ namespace Rodin::Variational
    * @f]
    * where @f$ \quad 0 \leq i < s @f$ and @f$ \ 0 \leq j < d @f$.
    */
-  template <class ... Ts>
-  class Derivative<GridFunction<H1<Ts...>>> final
-    : public ScalarFunctionBase<Derivative<GridFunction<H1<Ts...>>>>
-  {
-    public:
-      using Operand = GridFunction<H1<Ts...>>;
-      using Parent = ScalarFunctionBase<Derivative<Operand>>;
+  // template <class ... Ts>
+  // class Derivative<GridFunction<H1<Ts...>>> final
+  //   : public ScalarFunctionBase<Derivative<GridFunction<H1<Ts...>>>>
+  // {
+  //   public:
+  //     using Operand = GridFunction<H1<Ts...>>;
+  //     using Parent = ScalarFunctionBase<Derivative<Operand>>;
 
-      /**
-       * @brief Constructs the derivative in the i-th direction of the j-th
-       * component
-       * @param[in] direction Spatial direction @f$ x_i @f$
-       * @param[in] component Component @f$ u_j @f$ to differentiate
-       * @param[in] u GridFunction in H1 space
-       */
-      Derivative(size_t direction, size_t component, const Operand& u)
-        : m_direction(direction),
-          m_component(component),
-          m_u(u)
-      {}
+  //     /**
+  //      * @brief Constructs the derivative in the i-th direction of the j-th
+  //      * component
+  //      * @param[in] direction Spatial direction @f$ x_i @f$
+  //      * @param[in] component Component @f$ u_j @f$ to differentiate
+  //      * @param[in] u GridFunction in H1 space
+  //      */
+  //     Derivative(size_t direction, size_t component, const Operand& u)
+  //       : m_direction(direction),
+  //         m_component(component),
+  //         m_u(u)
+  //     {}
 
-      Derivative(const Derivative& other)
-        : Parent(other),
-          m_direction(other.m_direction),
-          m_component(other.m_component),
-          m_u(other.m_u)
-      {}
+  //     Derivative(const Derivative& other)
+  //       : Parent(other),
+  //         m_direction(other.m_direction),
+  //         m_component(other.m_component),
+  //         m_u(other.m_u)
+  //     {}
 
-      Derivative(Derivative&& other)
-        : Parent(std::move(other)),
-          m_direction(std::move(other.m_direction)),
-          m_component(std::move(other.m_component)),
-          m_u(std::move(other.m_u))
-      {}
+  //     Derivative(Derivative&& other)
+  //       : Parent(std::move(other)),
+  //         m_direction(std::move(other.m_direction)),
+  //         m_component(std::move(other.m_component)),
+  //         m_u(std::move(other.m_u))
+  //     {}
 
-      inline
-      constexpr
-      Scalar getValue(const Geometry::Point&) const
-      {
-        assert(false);
-        return Scalar(NAN);
-      }
+  //     inline
+  //     constexpr
+  //     Scalar getValue(const Geometry::Point&) const
+  //     {
+  //       assert(false);
+  //       return Scalar(NAN);
+  //     }
 
-    private:
-      const size_t m_direction;
-      const size_t m_component;
-      std::reference_wrapper<const Operand> m_u;
-  };
+  //   private:
+  //     const size_t m_direction;
+  //     const size_t m_component;
+  //     std::reference_wrapper<const Operand> m_u;
+  // };
 
   /**
    * @brief %Utility function for computing @f$ \partial_x u @f$

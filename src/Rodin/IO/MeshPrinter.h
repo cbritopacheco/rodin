@@ -7,9 +7,7 @@
 #ifndef RODIN_MESH_MESHPRINTER_H
 #define RODIN_MESH_MESHPRINTER_H
 
-#include <string>
-#include <optional>
-#include <mfem.hpp>
+#include <utility>
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/IO/Printer.h"
@@ -22,7 +20,7 @@ namespace Rodin::IO
   class MeshPrinterBase : public IO::Printer<Rodin::Geometry::Mesh<Trait>>
   {
     public:
-      MeshPrinterBase(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
+      MeshPrinterBase(const Geometry::Mesh<Context::Serial>& mesh)
         : m_mesh(mesh)
       {}
 
@@ -33,55 +31,6 @@ namespace Rodin::IO
 
     private:
       const Rodin::Geometry::Mesh<Context::Serial>& m_mesh;
-  };
-
-  template <>
-  class MeshPrinter<FileFormat::MFEM, Context::Serial>
-    : public MeshPrinterBase<Context::Serial>
-  {
-    public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
-        : MeshPrinterBase(mesh)
-      {}
-
-      void print(std::ostream& os) override
-      {
-        getObject().getHandle().Print(os);
-      }
-  };
-
-  template <>
-  class MeshPrinter<FileFormat::GMSH, Context::Serial>
-    : public MeshPrinterBase<Context::Serial>
-  {
-    public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
-        : MeshPrinterBase(mesh)
-      {}
-
-      void print(std::ostream& os) override;
-  };
-
-  template <>
-  class MeshPrinter<FileFormat::MEDIT, Context::Serial>
-    : public MeshPrinterBase<Context::Serial>
-  {
-    public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
-        :  MeshPrinterBase(mesh),
-          m_footer(true)
-      {}
-
-      MeshPrinter& footer(bool b = true)
-      {
-        m_footer = b;
-        return *this;
-      }
-
-      void print(std::ostream& os) override;
-
-    private:
-      bool m_footer;
   };
 }
 

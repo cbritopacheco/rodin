@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_JUMP_H
 #define RODIN_VARIATIONAL_JUMP_H
 
-#include <mfem.hpp>
-
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 

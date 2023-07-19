@@ -10,20 +10,24 @@
 #include <cstddef>
 
 #include "Rodin/Context.h"
+#include "Types.h"
 
 namespace Rodin::Geometry
 {
-  using Index = std::size_t;
+  template <class T>
+  class GeometryIndexed;
 
-  using Attribute = std::size_t;
-
-  class IndexGenerator;
+  template <class T>
+  class ContainerIndexGenerator;
 
   enum class Type;
 
-  class SimplexTransformation;
+  class PolytopeTransformation;
 
-  class Simplex;
+  template <class FE>
+  class IsoparametricTransformation;
+
+  class Polytope;
 
   class Element;
 
@@ -33,7 +37,7 @@ namespace Rodin::Geometry
 
   class Point;
 
-  class SimplexIterator;
+  class PolytopeIterator;
 
   class ElementIterator;
 
@@ -44,20 +48,34 @@ namespace Rodin::Geometry
   class MeshBase;
 
   /**
-   * @brief Templated class for Mesh.
+   * @brief Represents a polyhedral complex.
+   *
+   * A Mesh object represents a polyhedral complex @f$ \mathcal{T}_h @f$ is a
+   * set containing finitely many convex polyhedra.
    */
   template <class ContextType = Context::Serial>
   class Mesh;
 
   /**
-   * @brief Templated class for SubMesh.
+   * @brief Represents a subset of a Mesh.
    *
-   * @tparam Trait Indicates whether the Mesh is in a parallel context. It is
-   * one of Traits::Serial or Traits::Parallel.
+   * # Mapping between the SubMesh and the parent Mesh
    *
-   * There are two possible specializations:
-   * - SubMesh<Traits::Serial>
-   * - SubMesh<Traits::Parallel>
+   * A SubMesh object holds a reference to its parent Mesh object and includes
+   * details about how polytopes and vertices are mapped between the child and
+   * parent Mesh.
+   *
+   * # Downcasting
+   *
+   * A Mesh that is also a SubMesh can be downcasted to access the SubMesh
+   * functionality. For instance:
+   * @code{.cpp}
+   * if (mesh.isSubMesh())
+   * {
+   *   // The cast is well defined
+   *   auto& submesh = static_cast<SubMesh&>(mesh);
+   * }
+   * @endcode
    */
   template <class Context>
   class SubMesh;

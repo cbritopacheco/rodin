@@ -16,6 +16,7 @@
 #include "Common.h"
 #include "ForwardDecls.h"
 #include "ISCDProcess.h"
+#include "GridFunction.h"
 
 namespace Rodin::External::MMG
 {
@@ -37,8 +38,8 @@ namespace Rodin::External::MMG
   class Advect
   {
     public:
-      using LevelSetFunction = Variational::GridFunction<Variational::H1<Scalar, Context::Serial>>;
-      using VectorField = Variational::GridFunction<Variational::H1<Math::Vector, Context::Serial>>;
+      using LevelSetFunction = ScalarGridFunction;
+      using VectorField = VectorGridFunction;
 
       /**
        * @brief Constructs an Advect object
@@ -53,7 +54,6 @@ namespace Rodin::External::MMG
           m_disp(disp),
           m_advect(getISCDAdvectExecutable())
     {
-      assert(ls.getFiniteElementSpace().getVectorDimension() == 1);
       assert(
           disp.getFiniteElementSpace().getVectorDimension()
           == ls.getFiniteElementSpace().getMesh().getSpaceDimension());

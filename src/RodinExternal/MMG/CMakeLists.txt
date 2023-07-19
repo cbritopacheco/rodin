@@ -13,6 +13,7 @@ set(RodinExternalMMG_HEADERS
   Mesh.h
   Common.h
   ISCDProcess.h
+  Adapt.h
   Distancer.h
   MeshLoader.h
   MeshPrinter.h
@@ -23,8 +24,10 @@ set(RodinExternalMMG_HEADERS
 set(RodinExternalMMG_SRCS
   MMG5.cpp
   Mesh.cpp
+  MeshBuilder.cpp
   Common.cpp
   ISCDProcess.cpp
+  Adapt.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
   MeshOptimizer.cpp

@@ -10,11 +10,23 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/Types.h"
+#include "Rodin/Array.h"
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Dense matrix type
+   */
   using Matrix = Eigen::MatrixX<Scalar>;
+
+  using SpatialMatrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+        RODIN_MAXIMAL_SPACE_DIMENSION, RODIN_MAXIMAL_SPACE_DIMENSION>;
+
+  using PointMatrix =
+    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
 
   template <size_t Rows, size_t Cols>
   using FixedSizeMatrix = Eigen::Matrix<Scalar, Rows, Cols>;

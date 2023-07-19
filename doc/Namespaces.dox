@@ -1,4 +1,9 @@
 /**
+  @dir rodin/src/
+  @brief Source directory for Rodin.
+ */
+
+/**
   @dir rodin/src/Rodin
   @brief Namespace @ref Rodin
  */
@@ -6,6 +11,17 @@
 /**
   @namespace Rodin
   @brief The Rodin library for Shape and Topology Optimization
+ */
+
+/**
+  @dir Rodin/Context
+  @brief Namespace @ref Rodin::Context
+ */
+
+/**
+  @namespace Rodin::Context
+  @brief Module for serial, multi-threaded, distributed, and/or parallel
+  computation.
  */
 
 /**
@@ -29,13 +45,49 @@
  */
 
 /**
+  @dir Rodin/Plot
+  @brief Namespace @ref Rodin::Plot
+ */
+
+/**
+  @namespace Rodin::Plot
+  @brief Module for visualization tools.
+ */
+
+/**
   @dir Rodin/Variational
   @brief Namespace @ref Rodin::Variational
  */
 
 /**
   @namespace Rodin::Variational
-  @brief Module for writing variational problems in C++.
+  @brief Module which provides the necessary tools for constructing variational problems.
+
+  The Rodin::Variational module aids in the general construction of variational
+  problems:
+
+  @f[
+    \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
+    a(u, v) = b(v) \ ,
+  @f]
+
+  which then can be translated into linear algebra problems of the type:
+
+  @f[
+    \mathbf{A} \mathbf{x} = \mathbf{b}
+  @f]
+
+  where @f$ \mathbf{A} @f$ represents the stiffness operator.
+ */
+
+/**
+  @dir Rodin/QF
+  @brief Namespace @ref Rodin::QF
+ */
+
+/**
+  @namespace Rodin::QF
+  @brief Module for defining quadrature formulae.
  */
 
 /**
@@ -45,7 +97,17 @@
 
 /**
   @namespace Rodin::FormLanguage
-  @brief Module for writing formal expressions in C++
+  @brief Module for writing high level abstract expressions.
+ */
+
+/**
+  @dir Rodin/Math
+  @brief Namespace @ref Rodin::Math
+ */
+
+/**
+  @namespace Rodin::Math
+  @brief Module for linear algebra operations.
  */
 
 
@@ -56,8 +118,7 @@
 
 /**
   @namespace Rodin::Solver
-  @brief Module for solving variational problems constructed with the
-  Variational module.
+  @brief Module for linear algebra systems.
  */
 
 /**

@@ -104,8 +104,8 @@ int main(int argc, char** argv)
   while (true)
   {
     // Build finite element space on the mesh
-    H1 vh(th);
-    H1 uh(th, th.getSpaceDimension());
+    P1 vh(th);
+    P1 uh(th, th.getSpaceDimension());
 
     // Distance the subdomain
     GridFunction dist(vh);

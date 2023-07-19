@@ -6,6 +6,8 @@
 #include "ForwardDecls.h"
 #include "Sum.h"
 #include "UnaryMinus.h"
+#include "LinearFormIntegrator.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {

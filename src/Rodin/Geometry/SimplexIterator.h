@@ -17,22 +17,22 @@
 
 namespace Rodin::Geometry
 {
-  class SimplexIterator
+  class PolytopeIterator
   {
     public:
-      SimplexIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
+      PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      SimplexIterator(const SimplexIterator&) = delete;
+      PolytopeIterator(const PolytopeIterator&) = delete;
 
-      SimplexIterator(SimplexIterator&&) = default;
+      PolytopeIterator(PolytopeIterator&&) = default;
 
       bool end() const;
 
-      SimplexIterator& operator++();
+      PolytopeIterator& operator++();
 
-      Simplex& operator*() const noexcept;
+      Polytope& operator*() const noexcept;
 
-      Simplex* operator->() const noexcept;
+      Polytope* operator->() const noexcept;
 
       size_t getDimension() const
       {
@@ -51,7 +51,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      Simplex* generate() const;
+      Polytope* generate() const;
 
       IndexGeneratorBase& getIndexGenerator()
       {
@@ -63,7 +63,7 @@ namespace Rodin::Geometry
       std::reference_wrapper<const MeshBase> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<Simplex> m_simplex;
+      mutable std::unique_ptr<Polytope> m_simplex;
   };
 
   class ElementIterator
