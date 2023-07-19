@@ -33,6 +33,7 @@ namespace Rodin::Variational
       using RangeType = typename FES::RangeType;
 
       using Parent::getValue;
+      using Parent::getValueByReference;
       using Parent::operator=;
       using Parent::operator+=;
       using Parent::operator-=;
@@ -98,20 +99,35 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
-          const size_t vdim = fes.getVectorDimension();
-          const size_t dofs = fe.getCount();
-          Math::Vector res = Math::Vector::Zero(vdim);
-          for (Index local = 0; local < dofs; local++)
-          {
-            const auto& basis = fe.getBasis(local);
-            res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
-          }
+          Math::Vector res;
+          getValueByReference(res, p);
           return res;
         }
         else
         {
           assert(false);
           return void();
+        }
+      }
+
+      inline
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+        const size_t vdim = fes.getVectorDimension();
+        const size_t dofs = fe.getCount();
+        res.resize(vdim);
+        res.setZero();
+        for (Index local = 0; local < dofs; local++)
+        {
+          const auto& basis = fe.getBasis(local);
+          res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
         }
       }
 

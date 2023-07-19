@@ -39,6 +39,8 @@ namespace Rodin::Variational
       using LHS = FunctionBase<LHSDerived>;
       using RHS = FunctionBase<RHSDerived>;
       using Parent = FunctionBase<Mult<LHS, RHS>>;
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
       Mult(const LHS& lhs, const RHS& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -62,8 +64,6 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return getRHS().getRangeShape();

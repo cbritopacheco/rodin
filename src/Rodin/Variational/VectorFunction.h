@@ -112,6 +112,28 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
+
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        res = getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const = delete;
+
       /**
        * @brief Gets the dimension of the vector object.
        * @returns Dimension of vector.
@@ -179,10 +201,18 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        Math::Vector value(1 + sizeof...(Values));
+        Math::FixedSizeVector<1 + sizeof...(Values)> res;
         Utility::ForIndex<1 + sizeof...(Values)>(
-            [&](auto i){ value(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
-        return value;
+            [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
+        return res;
+      }
+
+      inline
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        res.resize(1 + sizeof...(Values));
+        Utility::ForIndex<1 + sizeof...(Values)>(
+            [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
       }
 
       inline
