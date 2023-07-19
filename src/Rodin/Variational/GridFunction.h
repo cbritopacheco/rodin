@@ -389,32 +389,49 @@ namespace Rodin::Variational
         const auto& fes = getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t d = mesh.getDimension();
-        for (auto it = mesh.getElement(); !it.end(); ++it)
+
+        if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          const auto& polytope = *it;
-          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
+          for (auto it = mesh.getElement(); !it.end(); ++it)
           {
-            const auto& i = polytope.getIndex();
-            const auto& fe = fes.getFiniteElement(d, i);
-            const auto& trans = mesh.getPolytopeTransformation(d, i);
-            for (size_t local = 0; local < fe.getCount(); local++)
+            const auto& polytope = *it;
+            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
             {
-              const Geometry::Point p(polytope, trans, fe.getNode(local));
-              if constexpr (std::is_same_v<RangeType, Scalar>)
+              const auto& i = polytope.getIndex();
+              const auto& fe = fes.getFiniteElement(d, i);
+              const auto& trans = mesh.getPolytopeTransformation(d, i);
+              for (size_t local = 0; local < fe.getCount(); local++)
               {
+                const Geometry::Point p(polytope, trans, fe.getNode(local));
                 assert(m_data.rows() == 1);
                 m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
               }
-              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+            }
+          }
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          Math::Vector value;
+          for (auto it = mesh.getElement(); !it.end(); ++it)
+          {
+            const auto& polytope = *it;
+            if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
+            {
+              const auto& i = polytope.getIndex();
+              const auto& fe = fes.getFiniteElement(d, i);
+              const auto& trans = mesh.getPolytopeTransformation(d, i);
+              for (size_t local = 0; local < fe.getCount(); local++)
               {
-                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
-              }
-              else
-              {
-                assert(false);
+                const Geometry::Point p(polytope, trans, fe.getNode(local));
+                fn.getValue(value, p);
+                m_data.col(fes.getGlobalIndex({ d, i }, local)) = value;
               }
             }
           }
+        }
+        else
+        {
+          assert(false);
         }
         return static_cast<Derived&>(*this);
       }
@@ -674,6 +691,28 @@ namespace Rodin::Variational
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
+
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
+
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        res = getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const = delete;
 
     private:
       std::reference_wrapper<const FES> m_fes;

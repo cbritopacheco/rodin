@@ -127,6 +127,34 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        res = getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        res = getValue(p);
+      }
+
       /**
        * @brief Evaluates the function on a vertex of the mesh.
        * @param[in] v Vertex belonging to the mesh
