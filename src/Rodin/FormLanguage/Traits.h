@@ -37,19 +37,6 @@ namespace Rodin::FormLanguage
       std::is_base_of_v<Eigen::PlainObjectBase<std::decay_t<EigenDerived>>, std::decay_t<EigenDerived>>;
   };
 
-  // template <class TensorDerived>
-  // struct IsPlainObject<Eigen::TensorBase<TensorDerived>>
-  // {
-  //   static constexpr const bool Value =
-  //     std::is_base_of_v<Eigen::TensorBase<std::decay_t<TensorDerived>>, std::decay_t<TensorDerived>>;
-  // };
-
-  template <>
-  struct IsPlainObject<Variational::TensorBasis<Scalar>>
-  {
-    static constexpr const bool Value = true;
-  };
-
   template <class EigenDerived>
   struct IsPlainObject<Variational::TensorBasis<EigenDerived>>
   {

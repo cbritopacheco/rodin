@@ -4,42 +4,56 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <iostream>
-
 #include <Rodin/Geometry.h>
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::Geometry;
 using namespace Rodin::External;
+using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+static constexpr Attribute material = RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
+static constexpr Attribute interior = 1;
+static constexpr Attribute exterior = 2;
+static constexpr Scalar hmax = 0.1;
+static constexpr Scalar radius = 0.1;
 
 int main(int, char**)
 {
-  Mesh mesh;
-  mesh.load("thks.mesh", IO::FileFormat::MEDIT);
+  const size_t n = 16;
+  MMG::Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
+  mesh.scale(1. / (n - 1));
 
-  H1 fes(mesh);
+  P1 fes(mesh);
+  MMG::ScalarGridFunction gf(fes);
+  gf = [](const Geometry::Point& p)
+       {
+         return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
+       };
 
-  auto dist = MMG::Distancer(fes).distance(mesh);
+  gf.save("LevelSet.gf");
+  mesh.save("Domain.mesh");
 
-  mesh = MMG::ImplicitDomainMesher().setHMax(0.05)
-                        .setRMC(1e-3)
-                        .setBoundaryReference(666)
-                        .discretize(dist);
+  MMG::Mesh implicit = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
+                                                  .setHMax(hmax)
+                                                  .discretize(gf);
+  P1 miaow(implicit);
 
-  mesh.save("mfem.mesh");
-  mesh.save("medit.mesh", IO::FileFormat::MEDIT);
-  // dist.save("dist.gf");
+  implicit.save("Discretized.mesh", IO::FileFormat::MEDIT);
 
+  auto dist = MMG::Distancer(miaow).setInteriorDomain(interior).distance(implicit);
 
-  // GridFunction ls(fes);
-  // ls.load("ls.gf");
+  dist.save("Discretized.sol", IO::FileFormat::MEDIT);
 
-  // auto implicitDomain = MMG::ImplicitDomainMesher().setHMax(0.02).discretize(ls);
+  MMG::Mesh implicit2 = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
+                                                   .split(exterior, { interior, exterior })
+                                                   .setHMax(hmax)
+                                                   .discretize(dist);
 
-  // implicitDomain.save("implicit.mesh");
+  MMG::MeshOptimizer().setHMin(0.05).setHMax(hmax).optimize(implicit2);
+
+  implicit2.save("Discretized2.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }
-

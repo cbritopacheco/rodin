@@ -14,6 +14,9 @@ namespace Rodin::Variational
    */
   class RangeShape;
 
+  /**
+   * @brief Represents the possible types of ranges for a function.
+   */
   enum class RangeType;
 
   /**
@@ -45,20 +48,22 @@ namespace Rodin::Variational
   class LinearFormIntegratorBase;
 
   /**
-   * @brief Base class for bilinear form objects.
+   * @brief Abstract base class for objects of type BilinearForm.
    * @tparam OperatorType Type of operator which will be assembled
    *
-   * Represents a bilinear form @f$ a : V_h \times U_h \rightarrow \mathbb{R}
-   * @f$ on given finite element spaces @f$ V_h @f$ and @f$ U_h @f$.
+   * Represents a bilinear form:
+   * @f[
+   * a : V_h \times U_h \rightarrow \mathbb{R}
+   * @f]
+   * on given finite element spaces @f$ V_h @f$ and @f$ U_h @f$.
    */
   template <class OperatorType>
   class BilinearFormBase;
 
   /**
-   * @brief Represents a serial bilinear form supported on two finite element
-   * spaces originating from two instances of FiniteElementCollection.
-   * @tparam TrialFES Trial FiniteElementCollection
-   * @tparam TestFES Test FiniteElementCollection
+   * @brief Represents a bilinear form on a trial and test space
+   * @tparam TrialFES Type of trial finite element space
+   * @tparam TestFES Type of test finite element space
    *
    * An object of type BilinearForm represents a bilinear map:
    * @f[
@@ -68,6 +73,8 @@ namespace Rodin::Variational
    * \end{aligned}
    * @f]
    * where @f$ U @f$ and @f$ V @f$ are finite element spaces.
+   *
+   * @see BilinearFormSpecializations
    */
   template <class TrialFES, class TestFES, class Context, class OperatorType>
   class BilinearForm;
@@ -76,6 +83,9 @@ namespace Rodin::Variational
    * @brief Base class for bilinear form integrators.
    */
   class BilinearFormIntegratorBase;
+
+  template <class Derived>
+  class FiniteElementBase;
 
   template <class FES>
   class FiniteElement;
@@ -146,22 +156,22 @@ namespace Rodin::Variational
   class GridFunction;
 
   /**
-   * Enumeration class to indicate whether a derived instance of
-   * ShapeFunctionBase is either a Trial or Test space.
+   * @brief Enumeration class to indicate whether a derived instance of
+   * ShapeFunctionBase belongs to either a trial or test space.
    */
   enum class ShapeFunctionSpaceType
   {
-    Trial, ///< Trial function space
-    Test ///< %Test function space
+    Trial, ///< Indicates that the shape function belongs to a trial space.
+    Test ///< Indicates that the shape function belongs to a test space.
   };
 
   /**
-   * Shorthand variable for ShapeFunctionSpaceType::Trial.
+   * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
    */
   static constexpr auto TrialSpace = ShapeFunctionSpaceType::Trial;
 
   /**
-   * Shorthand variable for ShapeFunctionSpaceType::Test.
+   * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
    */
   static constexpr auto TestSpace  = ShapeFunctionSpaceType::Test;
 
@@ -292,9 +302,9 @@ namespace Rodin::Variational
    * @f[
    *   \text{Base}^\text{Exponent}
    * @f]
-   * where Base is a type representing the base @f$ b @f$, the Exponent type
-   * represents the exponent @f$ p @f$, and the exponentiation value is @f$
-   * b^p @f$.
+   * where @f$ \mathrm{Base} @f$ is a type representing the base @f$ b @f$, the
+   * type @f$ \mathrm{Exponent} @f$ represents the exponent @f$ p @f$, and the
+   * exponentiation value is @f$ b^p @f$.
    *
    * @note For an overview of all the possible specializations of the
    * Pow class, please see @ref PowSpecializations.
@@ -345,7 +355,7 @@ namespace Rodin::Variational
    * @f]
    * where Operand is a type representing a scalar function
    * @f$ u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ and the gradient
-   * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ at the point
+   * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R}^n @f$ at the point
    * @f$ x = (x_1, \ldots, x_n) @f$ is defined by:
    * @f[
    *   \nabla u (x) =
@@ -437,6 +447,7 @@ namespace Rodin::Variational
    * @f[
    * \text{LHS} + \text{RHS}
    * @f]
+   * which represents the usual arithmetic addition of two operands.
    *
    * @see SumSpecializations
    */
@@ -488,6 +499,9 @@ namespace Rodin::Variational
    * @f[
    *   \mathrm{LHS} : \mathrm{RHS}
    * @f]
+   * known as the dot product; the algebraic operation that takes two
+   * equal-length sequences of numbers (usually coordinate vectors), and
+   * returns a single number.
    *
    * @note For an overview of all the possible specializations of the Dot
    * class, please see @ref DotSpecializations.
@@ -496,6 +510,24 @@ namespace Rodin::Variational
    */
   template <class LHS, class RHS>
   class Dot;
+
+  /**
+   * @brief Represents the absolute value of a value.
+   * @tparam Operand Type of operand
+   *
+   * Represents the following mathematical expression:
+   * @f[
+   *   | \ \text{Operand} \ |
+   * @f]
+   * where Operand represents a scalar function.
+   *
+   * @note For an overview of all the possible specializations of the
+   * Abs class, please see @ref AbsSpecializations.
+   *
+   * @see AbsSpecializations
+   */
+  template <class Operand>
+  class Abs;
 
   /**
    * @brief Represents the Frobenius norm.
@@ -737,8 +769,21 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class OR;
 
+  /**
+   * @tparam Integrand Type of the integrand
+   *
+   * Represents the quadrature rule approximation of an integral:
+   * @f[
+   *  \int_{\mathcal{R}_h} \mathrm{Integrand} \ dx \approx \sum_{i = 0}^{n - 1}
+   *  w_i \ \mathrm{Integrand} (x_i)
+   * @f]
+   * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
+   * @f$, the quadrature point @f$ x_i @f$ has an associated weight @f$ w_i @f$
+   * and @f$ \mathrm{Integrand}(x_i) @f$ is the value of the integrand at the
+   * quadrature point.
+   */
   template <class Integrand>
-  class GaussianQuadrature;
+  class QuadratureRule;
 
   /**
    * @brief Represents mathematical expressions of the integral operator on a
@@ -747,13 +792,13 @@ namespace Rodin::Variational
    *
    * Represents the integral operator with a templated integrand type:
    * @f[
-   *   \int_{\mathcal{T}_h} \mathrm{Integrand}
+   *   \int_{\mathcal{C}_h} \mathrm{Integrand}
    * @f]
-   * on a triangulation @f$ \mathcal{T}_h @f$ of a domain @f$ \Omega @f$. The
-   * domain integral is defined as the sum of all members of the
+   * on the cells @f$ \mathcal{C}_h @f$ of a triangulation @f$ \mathcal{T}_h
+   * @f$. The domain integral is defined as the sum of all members of the
    * triangulation:
    * @f[
-   *   \int_{\mathcal{T}_h} \mathrm{Integrand} := \sum_{T \in \mathcal{T}_h}
+   *   \int_{\mathcal{C}_h} \mathrm{Integrand} := \sum_{T \in \mathcal{C}_h}
    *   \int_T \mathrm{Integrand} \ .
    * @f]
    *
@@ -837,6 +882,13 @@ namespace Rodin::Variational
 
   /**
    * @tparam Operand Type of operand
+   * @tparam Value Type of value
+   *
+   * Represents a Dirichlet boundary condition:
+   * @f[
+   *   \mathrm{Operand} = \mathrm{Value} \ \text{ on } \ \Gamma_D
+   * @f]
+   * on some subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
    *
    * @note For an overview of all the possible specializations of the
    * DirichletBC class, please see @ref DirichletBCSpecializations.

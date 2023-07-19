@@ -9,7 +9,6 @@
 
 #include <set>
 #include <optional>
-#include <mfem.hpp>
 
 #include "Rodin/Alert.h"
 

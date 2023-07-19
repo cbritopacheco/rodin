@@ -11,18 +11,21 @@
 #include <string>
 #include <deque>
 
-#include <mfem.hpp>
-
 #include <boost/filesystem.hpp>
 
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/Utility/IsSpecialization.h"
+#include "Rodin/Variational/Traits.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/P1/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Simplex.h"
+#include "SimplexCount.h"
+#include "SimplexIndexed.h"
 #include "SimplexIterator.h"
 #include "SimplexTransformation.h"
 
@@ -34,42 +37,9 @@ namespace Rodin::Geometry
   class MeshBase
   {
     public:
-      class BuilderBase
-      {
-        public:
-          virtual ~BuilderBase() = default;
-
-          virtual void finalize() = 0;
-      };
-
       virtual ~MeshBase() = default;
 
       virtual MeshBase& scale(Scalar c) = 0;
-
-      /**
-       * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
-       * @param[in] u Displacement at each node
-       *
-       * Given a grid function @f$ u @f$, the method will perform the
-       * displacement
-       * @f[
-       *   x \mapsto x + u(x)
-       * @f]
-       * at each node @f$ x @f$ of the mesh.
-       *
-       * @note The vector dimension of @f$ u @f$ must be equal to the
-       * space dimension.
-       *
-       * @returns Reference to this (for method chaining)
-       */
-      template <class FES>
-      MeshBase& displace(const Variational::GridFunction<FES>& u)
-      {
-        assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-        getHandle().MoveNodes(u.getHandle());
-        flush();
-        return *this;
-      }
 
       /**
        * @brief Gets the maximum number @f$ t @f$ by which the mesh will
@@ -92,72 +62,56 @@ namespace Rodin::Geometry
       Scalar getMaximumDisplacement(const Variational::GridFunction<FES>& u)
       {
         Scalar res;
-        getHandle().CheckDisplacements(u.getHandle(), res);
+        assert(false);
+        // getHandle().CheckDisplacements(u.getHandle(), res);
         return res;
       }
 
-      // /**
-      //  * @brief Performs connected-component labelling.
-      //  * @param[in] p Function which returns true if two adjacent elements
-      //  * belong to the same component, false otherwise.
-      //  * @returns List of sets, each set representing a component containing
-      //  * the indices of its elements.
-      //  *
-      //  * @note Both elements passed to the function will always be adjacent
-      //  * to each other, i.e. it is not necessary to verify this is the case.
-      //  */
-      // std::deque<std::set<int>> ccl(
-      //     std::function<bool(const Element&, const Element&)> p) const;
-
-      // /**
-      //  * @brief Edits the specified elements in the mesh via the given function.
-      //  * @param[in] f Function which takes an ElementView to modify each
-      //  * element.
-      //  * @param[in] elements Set of indices corresponding to the elements
-      //  * which will be modified.
-      //  */
-      // MeshBase& edit(std::function<void(ElementView)> f, const std::set<int>& elements);
-
-      // /**
-      //  * @brief Obtains a set of elements satisfying the given condition.
-      //  * @param[in] condition Function which returns true if the element
-      //  * satisfies the condition.
-      //  * @returns Set containing the element indices satisfying the
-      //  * condition.
-      //  */
-      // std::set<int> where(std::function<bool(const Element&)> condition) const;
-
-      // std::set<int> where(std::function<bool(const Point&)> condition) const;
-
       /**
        * @brief Indicates whether the mesh is a surface or not.
-       * @returns True if mesh is a surface, false otherwise.
        *
-       * A surface mesh is a mesh of codimension 1. That is, the difference
-       * between its space dimension and dimension is 1.
+       * A mesh is considered a surface mesh if has codimension of 1, meaning
+       * the difference between its space dimension and its topological
+       * dimension is 1.
+       *
+       * @returns True if mesh is a surface, false otherwise.
        */
       bool isSurface() const;
 
+      /**
+       * @brief Gets the number of vertices in the mesh.
+       */
+      inline
       size_t getVertexCount() const
       {
         return getCount(0);
       }
 
+      /**
+       * @brief Gets the number of faces in the mesh.
+       */
+      inline
       size_t getFaceCount() const
       {
         return getCount(getDimension() - 1);
       }
 
+      /**
+       * @brief Gets the number of elements in the mesh.
+       */
+      inline
       size_t getElementCount() const
       {
         return getCount(getDimension());
       }
 
+      inline
       Attribute getFaceAttribute(Index index) const
       {
         return getAttribute(getDimension() - 1, index);
       }
 
+      inline
       Attribute getElementAttribute(Index index) const
       {
         return getAttribute(getDimension(), index);
@@ -200,14 +154,7 @@ namespace Rodin::Geometry
        * @returns Set of all the attributes in the mesh object.
        * @see getBoundaryAttributes() const
        */
-      std::set<Attribute> getAttributes() const;
-
-      /**
-       * @brief Gets the labels of the boundary elements in the mesh.
-       * @returns Set of all the boundary attributes in the mesh object.
-       * @see getAttributes() const
-       */
-      std::set<Attribute> getBoundaryAttributes() const;
+      virtual const FlatSet<Attribute>& getAttributes(size_t d) const = 0;
 
       bool operator==(const MeshBase& other) const
       {
@@ -268,34 +215,39 @@ namespace Rodin::Geometry
 
       virtual size_t getCount(size_t dim) const = 0;
 
+      virtual size_t getCount(Polytope::Geometry g) const = 0;
+
       virtual ElementIterator getElement(Index idx = 0) const = 0;
 
       virtual FaceIterator getFace(Index idx = 0) const = 0;
 
       virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
-      virtual SimplexIterator getSimplex(size_t dimension, Index idx) const = 0;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const = 0;
 
-      virtual const SimplexTransformation& getSimplexTransformation(
+      virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const = 0;
+
+      virtual Polytope::Geometry getGeometry(size_t dimension, Index idx) const = 0;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
-      virtual MeshBase& setAttribute(size_t dimension, Index index, Attribute attr) = 0;
+      virtual MeshBase& setAttribute(const std::pair<size_t, Index>&, Attribute attr) = 0;
 
-      virtual const Connectivity& getConnectivity(size_t d, size_t dp) const = 0;
+      virtual MeshConnectivity& getConnectivity() = 0;
+
+      virtual const MeshConnectivity& getConnectivity() const = 0;
+
+      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
 
       virtual void flush() = 0;
-
-      /**
-       * @internal
-       * @brief Gets the underlying handle for the internal mesh.
-       * @returns Constant reference to the underlying mfem::Mesh.
-       */
-      virtual mfem::Mesh& getHandle() const = 0;
   };
 
-  using SerialMesh = Mesh<Context::Serial>;
+  using BoundaryIndex = IndexSet;
+
+  using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
+
+  using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
 
   /**
   * @brief Represents the subdivision of some domain into faces of (possibly)
@@ -305,79 +257,163 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
-      class Builder : public BuilderBase
+      /**
+       * @brief Class used to build Mesh<Context::Serial> instances.
+       */
+      class Builder
       {
         public:
-          Builder();
+          /**
+           * @brief Default constructor.
+           */
+          Builder() = default;
 
+          virtual ~Builder() = default;
+
+          /**
+           * @brief Deleted copy constructor.
+           */
           Builder(const Builder&) = delete;
 
+          /**
+           * @brief Move constructor.
+           */
           Builder(Builder&&) = default;
 
+          /**
+           * @brief Deleted copy assignment.
+           */
           Builder& operator=(const Builder&) = delete;
 
+          /**
+           * @brief Move assignment.
+           */
           Builder& operator=(Builder&&) = default;
 
-          Builder& setReference(Mesh<Context::Serial>& mesh);
+          /**
+           * @brief Reserves memory accross the data structure for the polytopes of
+           * the given dimension.
+           */
+          Builder& reserve(size_t d, size_t count);
 
-          Builder& vertex(std::initializer_list<Scalar> l)
+          /**
+           * @brief Initializes construction of the mesh object.
+           */
+          Builder& initialize(size_t sdim);
+
+          /**
+           * @brief Sets the number of nodes in the mesh.
+           */
+          Builder& nodes(size_t n);
+
+          /**
+           * @brief Adds vertex with coordinates given by the fixed size array.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          template <size_t Size>
+          inline
+          Builder& vertex(const Scalar (&data)[Size])
           {
-            Math::Vector x(l.size());
-            std::copy(l.begin(), l.end(), x.begin());
-            return vertex(x);
+            assert(Size == m_sdim);
+            m_vertices.col(m_nodes++) = data;
+            return *this;
           }
 
+          /**
+           * @brief Adds vertex with coordinates given by the initializer list.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(std::initializer_list<Scalar> l);
+
+          /**
+           * @brief Adds vertex with coordinates given by the array pointer.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(const Scalar* data);
+
+          /**
+           * @brief Adds vertex with coordinates given by the mapped memory.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(const Eigen::Map<const Math::Vector>& x);
+
+          /**
+           * @brief Adds vertex with coordinates given by the vector.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
+          Builder& vertex(Math::Vector&& x);
+
+          /**
+           * @brief Adds vertex with coordinates given by the vector.
+           *
+           * This method requires nodes(size_t) to be called beforehand.
+           */
           Builder& vertex(const Math::Vector& x);
 
-          Builder& face(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+          /**
+           * @brief Sets the attribute of the given polytope.
+           */
+          Builder& attribute(const std::pair<size_t, Index>& p, Attribute attr);
 
-          Builder& element(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
-
-          Builder& face(Type geom, std::initializer_list<Index> vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
+          /**
+           * @brief Adds polytope defined by the given vertices.
+           */
+          Builder& polytope(Polytope::Geometry t, std::initializer_list<Index> vs)
           {
-            Array<Index> as(vs.size());
-            std::copy(vs.begin(), vs.end(), as.begin());
-            return face(geom, as, attr);
+            return polytope(t, IndexArray({ vs }));
           }
 
-          Builder& element(Type geom, std::initializer_list<Index> vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
-          {
-            Array<Index> as(vs.size());
-            std::copy(vs.begin(), vs.end(), as.begin());
-            return element(geom, as, attr);
-          }
+          /**
+           * @brief Adds polytope defined by the given vertices.
+           */
+          Builder& polytope(Polytope::Geometry t, const IndexArray& vs);
 
-          Builder& simplex(Type geom, const Array<Index>& vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+          /**
+           * @brief Adds polytope defined by the given vertices.
+           */
+          Builder& polytope(Polytope::Geometry t, IndexArray&& vs);
 
-          Builder& simplex(Type geom, std::initializer_list<Index> vs,
-              Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE)
-          {
-            Array<Index> as(vs.size());
-            std::copy(vs.begin(), vs.end(), as.begin());
-            return simplex(geom, as, attr);
-          }
+          /**
+           * @brief Finalizes construction of the Mesh<Context::Serial> object.
+           */
+          Mesh finalize();
 
-          void finalize() override;
+          Builder& setVertices(Math::Matrix&& connectivity);
+
+          Builder& setConnectivity(MeshConnectivity&& connectivity);
+
+          Builder& setAttributeIndex(AttributeIndex&& connectivity);
+
+          Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
         private:
-          std::optional<std::reference_wrapper<Mesh<Context::Serial>>> m_ref;
-          size_t m_dim, m_sdim;
-          std::vector<size_t> m_count;
-          std::vector<std::vector<Connectivity>> m_connectivity;
-          std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
-          std::unique_ptr<mfem::Mesh> m_impl;
+          size_t m_sdim;
+          size_t m_nodes;
+
+          Math::Matrix m_vertices;
+          MeshConnectivity m_connectivity;
+
+          AttributeIndex m_attributeIndex;
+          TransformationIndex m_transformationIndex;
+
+          std::vector<FlatSet<Attribute>> m_attributes;
       };
+
+      /**
+       * @brief Generates a uniform grid for a given geometry.
+       */
+      static Mesh UniformGrid(Polytope::Geometry g, size_t h, size_t w);
 
       /**
       * @brief Constructs an empty mesh with no elements.
       */
       Mesh()
-        : m_dim(0), m_sdim(0)
+        : m_sdim(0)
       {}
 
       Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
@@ -386,34 +422,152 @@ namespace Rodin::Geometry
       }
 
       /**
+      * @brief Performs a copy of another mesh.
+      */
+      Mesh(const Mesh& other)
+        : m_sdim(other.m_sdim),
+          m_vertices(other.m_vertices),
+          m_connectivity(other.m_connectivity),
+          m_attributeIndex(other.m_attributeIndex),
+          m_attributes(other.m_attributes)
+      {}
+
+      /**
       * @brief Move constructs the mesh from another mesh.
       */
       Mesh(Mesh&& other) = default;
 
-      /**
-      * @brief Performs a copy of another mesh.
-      */
-      Mesh(const Mesh& other)
-        : m_dim(other.m_dim), m_sdim(other.m_sdim),
-          m_count(other.m_count),
-          m_connectivity(other.m_connectivity),
-          m_f2b(other.m_f2b)
-      {
-        m_impl.reset(new mfem::Mesh(*other.m_impl));
-      }
-
-      /**
-      * @internal
-      * @brief Move constructs a Rodin::Mesh from an mfem::Mesh.
-      */
-      explicit Mesh(mfem::Mesh&& mesh);
+      Mesh& operator=(const Mesh& other) = delete;
 
       /**
       * @brief Move assigns the mesh from another mesh.
       */
-      Mesh& operator=(Mesh&& other) = default;
+      Mesh& operator=(Mesh&&) = default;
 
-      Mesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
+      inline
+      Builder build() const
+      {
+        return Builder();
+      }
+
+      /**
+       * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
+       * @param[in] u Displacement at each node
+       *
+       * Given a vector valued function @f$ \vec{u} @f$, the method will perform the
+       * displacement
+       * @f[
+       *   x \mapsto x + \vec{u}(x)
+       * @f]
+       * at each node @f$ x @f$ of the mesh.
+       *
+       * @note The vector dimension of @f$ \vec{u} @f$ must be equal to the
+       * space dimension.
+       *
+       * @returns Reference to this (for method chaining)
+       */
+      template <class FunctionDerived>
+      Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
+      {
+        for (auto it = getVertex(); !it.end(); ++it)
+        {
+          const Geometry::Point p(*it, it->getTransformation(),
+              Polytope::getVertices(Polytope::Geometry::Point).col(0), it->getCoordinates());
+          m_vertices.col(it->getIndex()) += u(p);
+        }
+        return *this;
+      }
+
+      /**
+       * @internal
+       */
+      Mesh& displace(const
+          Variational::GridFunction<Variational::P1<Math::Vector,
+          Context::Serial, Geometry::Mesh<Context::Serial>>>& u);
+
+      const PolytopeIndexed<Attribute>& getAttributeIndex() const
+      {
+        return m_attributeIndex;
+      }
+
+      const PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>& getTransformationIndex() const
+      {
+        return m_transformationIndex;
+      }
+
+      inline
+      const Math::Matrix& getVertices() const
+      {
+        return m_vertices;
+      }
+
+      /**
+      * @brief Skins the mesh to obtain its boundary mesh
+      * @returns SubMesh object to the boundary region of the mesh
+      *
+      * This function "skins" the mesh to return the boundary as a new SubMesh
+      * object. The resulting mesh will be embedded in the original space
+      * dimension.
+      *
+      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 2
+      * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
+      * is already computed in the mesh.
+      */
+      virtual SubMesh<Context::Serial> skin() const;
+
+      /**
+      * @brief Trims the elements with the given attribute.
+      * @param[in] attr Attribute to trim
+      * @returns SubMesh of the remaining region mesh
+      *
+      * Convenience function to call trim(const std::FlatSet<Attribute>&) with
+      * only one attribute.
+      */
+      virtual SubMesh<Context::Serial> trim(Attribute attr) const;
+
+      /**
+      * @brief Trims the elements with the given attribute.
+      * @param[in] attrs Attributes to trim
+      * @returns SubMesh object to the remaining region of the mesh
+      *
+      * This function will trim discard all the elements that have an attribute
+      * in the given set of attributes.
+      *
+      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
+      * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
+      * already computed in the mesh.
+      *
+      * @returns A SubMesh object consisting of elements that have attributes
+      * not in the given set.
+      */
+      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs) const;
+
+      /**
+      * @brief Keeps the elements with the given attribute.
+      * @param[in] attr Attribute to keep
+      * @returns SubMesh of the remaining region mesh
+      *
+      * Convenience function to call keep(const std::FlatSet<Attribute>&) with
+      * only one attribute.
+      */
+      virtual SubMesh<Context::Serial> keep(Attribute attr) const;
+
+      /**
+      * @brief Trims the elements with the given attributes.
+      * @param[in] attrs Attributes to trim
+      * @returns SubMesh object to the remaining region of the mesh
+      *
+      * This function will trim keep only the elements that have an attribute
+      * in the given set of attributes.
+      *
+      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
+      * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
+      * already computed in the mesh.
+      *
+      * @returns A SubMesh object consisting of elements that have attributes
+      * not in the given set.
+      */
+      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
 
       /**
       * @brief Loads a mesh from file in the given format.
@@ -437,51 +591,11 @@ namespace Rodin::Geometry
 
       virtual Mesh& scale(Scalar c) override;
 
-      virtual Mesh& setAttribute(size_t dimension, Index index, Attribute attr) override;
-
-      /**
-      * @brief Skins the mesh to obtain its boundary mesh
-      * @returns SubMesh object to the boundary region of the mesh
-      *
-      * This function will "skin" the mesh to return the mesh boundary as a
-      * new SubMesh object. The new mesh will be embedded in the original
-      * space dimension.
-      */
-      virtual SubMesh<Context::Serial> skin() const;
-
-      /**
-      * @brief Trims the elements with the given material reference.
-      * @param[in] attr Attribute to trim
-      * @returns SubMesh object to the remaining region of the mesh
-      *
-      * Convenience function to call trim(const std::set<Attribute>&) with
-      * only one attribute.
-      */
-      virtual SubMesh<Context::Serial> trim(Attribute attr);
-
-      /**
-      * @brief Trims the elements with the given material references.
-      * @param[in] attrs Attributes to trim
-      * @returns SubMesh object to the remaining region of the mesh
-      *
-      * This function will trim the current mesh and return a Submesh
-      * object containing the elements which were not trimmed from the
-      * original mesh.
-      */
-      virtual SubMesh<Context::Serial> trim(const std::set<Attribute>& attrs);
-
-      virtual SubMesh<Context::Serial> keep(Attribute attr);
-
-      virtual SubMesh<Context::Serial> keep(const std::set<Attribute>& attrs);
-
-      // virtual SubMesh<Context::Serial> keep(std::function<bool(const Element&)> pred);
-
-      size_t getSimplexCount(size_t dim) const
-      {
-        return getCount(dim);
-      }
+      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
       virtual size_t getCount(size_t dim) const override;
+
+      virtual size_t getCount(Polytope::Geometry g) const override;
 
       virtual FaceIterator getBoundary() const override;
 
@@ -493,7 +607,7 @@ namespace Rodin::Geometry
 
       virtual VertexIterator getVertex(Index idx = 0) const override;
 
-      virtual SimplexIterator getSimplex(size_t dimension, Index idx) const override;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const override;
 
       virtual bool isSubMesh() const override
       {
@@ -508,40 +622,47 @@ namespace Rodin::Geometry
 
       virtual size_t getSpaceDimension() const override;
 
-      virtual const SimplexTransformation& getSimplexTransformation(
+      virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
+
+      virtual Polytope::Geometry getGeometry(size_t dimension, Index idx) const override;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      virtual const Connectivity& getConnectivity(size_t d, size_t dp) const override
+      virtual MeshConnectivity& getConnectivity() override
       {
-        assert(m_connectivity.size() > d);
-        assert(m_connectivity[d].size() > dp);
+        return m_connectivity;
+      }
 
-        // TODO: Other dimensions not implemented yet
-        assert(d == getDimension()); // TODO: Remove
-        assert(dp == 0); // TODO: Remove
-        return m_connectivity[d][dp];
+      virtual const MeshConnectivity& getConnectivity() const override
+      {
+        return m_connectivity;
       }
 
       virtual void flush() override
       {
-        for (size_t d = 0; d < m_transformations.size(); d++)
-          for (size_t i = 0; i < m_transformations[d].size(); i++)
-            m_transformations[d][i].reset();
+        m_transformationIndex.clear();
       }
 
-      mfem::Mesh& getHandle() const override;
+      virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
+
+      virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 
     private:
-      size_t m_dim, m_sdim;
-      std::vector<size_t> m_count;
-      std::vector<std::vector<Connectivity>> m_connectivity;
-      mutable std::vector<std::vector<std::unique_ptr<SimplexTransformation>>> m_transformations;
+      static const GeometryIndexed<Math::Matrix> s_vertices;
 
-      std::map<Index, Index> m_f2b;
-      std::unique_ptr<mfem::Mesh> m_impl;
+      size_t m_sdim;
+
+      Math::Matrix m_vertices;
+      MeshConnectivity m_connectivity;
+
+      PolytopeIndexed<Geometry::Attribute> m_attributeIndex;
+      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformationIndex;
+
+      std::vector<FlatSet<Attribute>> m_attributes;
   };
+
+  using SerialMesh = Mesh<Context::Serial>;
 }
 
 #include "Mesh.hpp"

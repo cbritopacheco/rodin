@@ -170,38 +170,15 @@ namespace Rodin::Variational
       auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
                               Geometry::Attribute attr)
       {
-        return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
+        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       template <class NestedDerived,
                typename = std::enable_if_t<Utility::IsSpecialization<FES, H1>::Value>>
       auto& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-                              const std::set<Geometry::Attribute>& attrs = {})
+                              const FlatSet<Geometry::Attribute>& attrs = {})
       {
         assert(false);
-        // if (s.getRangeType() != RangeType::Scalar)
-        //   UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
-
-        // int maxAttr = *m_u.getFiniteElementSpace()
-        //             .getMesh()
-        //             .getBoundaryAttributes().rbegin();
-        // std::vector<mfem::Coefficient*> mfemCoeffs(
-        //     m_u.getFiniteElementSpace().getVectorDimension(), nullptr);
-        // mfemCoeffs[getIndex()] = new Internal::ScalarProxyFunction(
-        //     m_u.getFiniteElementSpace().getMesh(), s);
-        // if (attrs.size() == 0)
-        // {
-        //   mfem::Array<int> marker(maxAttr);
-        //   marker = 1;
-        //   m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-        // }
-        // else
-        // {
-        //   assert(mfemCoeffs[getIndex()] != nullptr);
-        //   mfem::Array<int> marker = Utility::set2marker(attrs, maxAttr);
-        //   m_u.getHandle().ProjectBdrCoefficient(mfemCoeffs.data(), marker);
-        // }
-        // delete mfemCoeffs[getIndex()];
         return *this;
       }
 

@@ -8,82 +8,121 @@
 #define RODIN_GEOMETRY_SIMPLEX_H
 
 #include <set>
+#include <iostream>
 #include <array>
 #include <optional>
-#include <mfem.hpp>
 
+#include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 
 #include "ForwardDecls.h"
 
+#include "Types.h"
+
 namespace Rodin::Geometry
 {
-  enum class Type
-  {
-    Point = mfem::Geometry::POINT,
-    Segment = mfem::Geometry::SEGMENT,
-    Triangle = mfem::Geometry::TRIANGLE,
-    Square = mfem::Geometry::SQUARE,
-    Tetrahedron = mfem::Geometry::TETRAHEDRON,
-    Cube = mfem::Geometry::CUBE,
-    Prism = mfem::Geometry::PRISM,
-    Pyramid = mfem::Geometry::PYRAMID
-  };
-
-  inline
-  static
-  constexpr
-  size_t getGeometryDimension(Geometry::Type t)
-  {
-    switch (t)
-    {
-      case Geometry::Type::Point:
-        return 0;
-      case Geometry::Type::Segment:
-        return 1;
-      case Geometry::Type::Square:
-      case Geometry::Type::Triangle:
-        return 2;
-      case Geometry::Type::Cube:
-      case Geometry::Type::Prism:
-      case Geometry::Type::Pyramid:
-      case Geometry::Type::Tetrahedron:
-        return 3;
-      default:
-      {
-        assert(false);
-        return 0;
-      }
-    }
-    assert(false);
-    return 0;
-  }
-
-
   /**
    * @brief Base class for all geometric elements of the mesh.
    */
-  class Simplex
+  class Polytope
   {
     public:
-      enum class Property
+      /**
+       * @brief Polytope geometry
+       */
+      enum class Geometry
       {
-        Attribute
+        Point,
+        Segment,
+        Triangle,
+        Quadrilateral,
+        Tetrahedron
       };
 
-      Simplex(
-          size_t dimension,
-          Index index,
-          const MeshBase& mesh,
-          const std::vector<Index>& vertices,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      /**
+       * @brief Iterable of possible polytope geometries.
+       */
+      static constexpr std::array Geometries
+      {
+        Geometry::Point,
+        Geometry::Segment,
+        Geometry::Triangle,
+        Geometry::Quadrilateral,
+        Geometry::Tetrahedron
+      };
 
-      Simplex(const Simplex&) = delete;
+      static const Math::Matrix& getVertices(Polytope::Geometry g);
 
-      Simplex(Simplex&&) = default;
+      inline
+      constexpr
+      static size_t getVertexCount(Polytope::Geometry g)
+      {
+        switch (g)
+        {
+          case Geometry::Point:
+            return 1;
+          case Geometry::Segment:
+            return 2;
+          case Geometry::Triangle:
+            return 3;
+          case Geometry::Quadrilateral:
+          case Geometry::Tetrahedron:
+            return 4;
+        }
+        assert(false);
+        return 0;
+      }
 
-      virtual ~Simplex() = default;
+      inline
+      constexpr
+      static size_t getGeometryDimension(Polytope::Geometry g)
+      {
+        switch (g)
+        {
+          case Geometry::Point:
+            return 0;
+          case Geometry::Segment:
+            return 1;
+          case Geometry::Triangle:
+          case Geometry::Quadrilateral:
+            return 2;
+          case Geometry::Tetrahedron:
+            return 3;
+        }
+        assert(false);
+        return 0;
+      }
+
+      inline
+      constexpr
+      static bool isSimplex(Polytope::Geometry g)
+      {
+        switch (g)
+        {
+          case Geometry::Point:
+          case Geometry::Segment:
+          case Geometry::Triangle:
+          case Geometry::Tetrahedron:
+            return true;
+          case Geometry::Quadrilateral:
+            return false;
+        }
+        assert(false);
+        return false;
+      }
+
+      /**
+       * @brief Consructs a polytope of dimension @f$ d @f$ and index @f$ i @f$
+       * belonging to the given mesh.
+       */
+      Polytope(size_t dimension, Index index, const MeshBase& mesh);
+
+      Polytope(const Polytope&) = default;
+
+      Polytope(Polytope&&) = default;
+
+      virtual ~Polytope() = default;
 
       /**
        * @brief Gets the index of the simplex in the mesh.
@@ -95,24 +134,9 @@ namespace Rodin::Geometry
       }
 
       inline
-      Type getGeometry() const
-      {
-        return m_type;
-      }
-
-      inline
       size_t getDimension() const
       {
         return m_dimension;
-      }
-
-      /**
-       * @brief Gets the attribute of the simplex.
-       */
-      inline
-      Attribute getAttribute() const
-      {
-        return m_attr;
       }
 
       /**
@@ -124,26 +148,48 @@ namespace Rodin::Geometry
         return m_mesh.get();
       }
 
-      Scalar getVolume() const;
+      /**
+       * @brief Gets the attribute of the simplex.
+       */
+      Attribute getAttribute() const;
 
-      const SimplexTransformation& getTransformation() const;
+      /**
+       * @brief Gets the measure of the polytope.
+       *
+       * Gets the @f$ d @f$-dimensional measure of the polytope. This has
+       * different names in different dimensions. See table below.
+       * Dimension of polytope    | Measure
+       * ------------------------ | -------------
+       * 0                        | Always zero
+       * 1                        | Length
+       * 2                        | Area
+       * 3                        | Volume
+       *
+       * @return The measure of the polytope.
+       */
+      Scalar getMeasure() const;
 
-      // virtual VertexIterator getVertices() const;
+      const PolytopeTransformation& getTransformation() const;
 
-      virtual SimplexIterator getAdjacent() const;
+      VertexIterator getVertex() const;
 
-      virtual SimplexIterator getIncident() const;
+      const Array<Index>& getVertices() const;
+
+      PolytopeIterator getAdjacent() const;
+
+      PolytopeIterator getIncident() const;
+
+      Geometry getGeometry() const;
 
     private:
+      static const GeometryIndexed<Math::Matrix> s_vertices;
+
       const size_t m_dimension;
       const Index m_index;
       std::reference_wrapper<const MeshBase> m_mesh;
-      std::vector<Index> m_vertices;
-      Attribute m_attr;
-      Geometry::Type m_type;
   };
 
-  bool operator<(const Simplex& lhs, const Simplex& rhs);
+  bool operator<(const Polytope& lhs, const Polytope& rhs);
 
   /**
    * @brief Class for representing elements of the highest dimension in the
@@ -153,18 +199,19 @@ namespace Rodin::Geometry
    * element. If one wishes to modify the element then one must use
    * ElementView.
    */
-  class Element : public Simplex
+  class Element : public Polytope
   {
     public:
-      Element(
-          Index index,
-          const MeshBase& mesh, const std::vector<Index>& vertices,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      using Parent = Polytope;
 
-      Element(const Element&) = delete;
+      Element(Index index, const MeshBase& mesh);
+
+      Element(const Element& other)
+        : Polytope(other)
+      {}
 
       Element(Element&& other)
-        :  Simplex(std::move(other))
+        :  Polytope(std::move(other))
       {}
   };
 
@@ -175,18 +222,19 @@ namespace Rodin::Geometry
    * This class is designed so that modifications cannot be made to the
    * face.
    */
-  class Face : public Simplex
+  class Face : public Polytope
   {
     public:
-      Face(
-          Index index,
-          const MeshBase& mesh, const std::vector<Index>& vertices,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      using Parent = Polytope;
 
-      Face(const Face&) = delete;
+      Face(Index index, const MeshBase& mesh);
+
+      Face(const Face& other)
+        : Polytope(other)
+      {}
 
       Face(Face&& other)
-        : Simplex(std::move(other))
+        : Polytope(std::move(other))
       {}
 
       bool isBoundary() const;
@@ -194,76 +242,93 @@ namespace Rodin::Geometry
       bool isInterface() const;
   };
 
-  class Vertex : public Simplex
+  class Vertex : public Polytope
   {
     public:
-      Vertex(
-          Index index,
-          const MeshBase& mesh,
-          const Math::Vector& coordinates,
-          Attribute attr = RODIN_DEFAULT_SIMPLEX_ATTRIBUTE);
+      using Parent = Polytope;
 
+      Vertex(Index index, const MeshBase& mesh);
+
+      Vertex(const Vertex& other)
+        : Polytope(other)
+      {}
+
+      inline
       Scalar x() const
       {
-        assert(0 < m_coordinates.size());
         return operator()(0);
       }
 
+      inline
       Scalar y() const
       {
-        assert(1 < m_coordinates.size());
         return operator()(1);
       }
 
+      inline
       Scalar z() const
       {
-        assert(2 < m_coordinates.size());
         return operator()(2);
       }
 
-      Scalar operator()(size_t i) const;
-
-      const Math::Vector& getCoordinates() const
+      inline
+      Scalar operator()(size_t i) const
       {
-        return m_coordinates;
+        return getCoordinates()(i);
       }
 
-    private:
-      Math::Vector m_coordinates;
+      Eigen::Map<const Math::SpatialVector> getCoordinates() const;
+
+      inline
+      constexpr
+      Geometry getGeometry() const
+      {
+        return Geometry::Point;
+      }
   };
 
   /**
-   * @brief Represents a spatial point on a simplex.
+   * @brief Abstract class for spatial points on a discrete mesh.
    *
-   * This class represents the point:
+   * This class represents the tuple @f$ (x, r, p) @f$
+   * such that:
    * @f[
-   *   p = x(r)
+   *  p = x(r)
    * @f]
-   * on some simplex @f$ \tau \in \mathcal{T}_h @f$ belonging to
-   * some discrete mesh @f$ \mathcal{T}_h @f$. Here @f$ p \in \tau @f$ denotes
-   * the physical coordinates of the point, while @f$ x : K \rightarrow \tau
-   * @f$ represents the transformation taking reference coordinates @f$ r \in K
-   * @f$, for a reference geometry @f$ K @f$.
+   * for a polytope @f$ \tau \in \mathcal{T}_h @f$ belonging to the mesh @f$
+   * \mathcal{T}_h @f$. Here, @f$ p \in \tau @f$ denotes the physical
+   * coordinates of the point, while @f$ x : K \rightarrow \tau @f$ represents
+   * the transformation taking reference coordinates @f$ r \in K @f$, for a
+   * reference geometry @f$ K @f$.
+   *
+   * @section rodin-geometry-point-thread_safety Thread safety
+   * This class is not thread safe.
+   *
+   * @see PolytopeTransformation
    */
-  class Point
+  class PointBase
   {
     public:
+      /// Denotes the type of coordinates.
       enum class Coordinates
       {
-        Reference,
-        Physical
+        Reference, ///< Reference coordinates
+        Physical ///< Physical coordinates
       };
 
+      PointBase(const Polytope& polytope, const PolytopeTransformation& trans);
+
+      PointBase(const Polytope& polytope, const PolytopeTransformation& trans, const Math::SpatialVector& pc);
+
       /**
-       * @brief Constructs the Point object from reference coordinates.
-       * @param[in] simplex Simplex to which point belongs to
-       * @param[in] ip Reference coordinates
+       * @brief Copy constructor.
        */
-      Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc);
+      PointBase(const PointBase&) = default;
 
-      Point(const Point&) = default;
-
-      Point(Point&&) = default;
+      /**
+       * @brief Move constructor.
+       */
+      PointBase(PointBase&&) = default;
 
       /**
        * @brief Gets the space dimension of the physical coordinates.
@@ -282,20 +347,19 @@ namespace Rodin::Geometry
         {
           case Coordinates::Physical:
           {
-            return getCoordinates(Coordinates::Physical)(i);
+            return getPhysicalCoordinates()(i);
           }
           case Coordinates::Reference:
           {
-            assert(m_rc.get().size() > static_cast<int>(i));
-            return m_rc.get()(i);
+            return getReferenceCoordinates()(i);
           }
         }
-        return getCoordinates(Coordinates::Physical)(i);
+        return NAN;
       }
 
       /**
-       * @brief Gets the @f$ x @f$ physical coordinate.
-       * @returns Physical @f$ x @f$-coordinate.
+       * @brief Gets the @f$ x @f$ coordinate.
+       * @returns @f$ x @f$ coordinate of the point.
        */
       inline
       Scalar x(Coordinates coords = Coordinates::Physical) const
@@ -304,8 +368,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the @f$ y @f$ physical coordinate.
-       * @returns Physical @f$ y @f$-coordinate.
+       * @brief Gets the @f$ y @f$ coordinate.
+       * @returns @f$ y @f$ coordinate of the point.
        */
       inline
       Scalar y(Coordinates coords = Coordinates::Physical) const
@@ -314,8 +378,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the @f$ z @f$ physical coordinate.
-       * @returns Physical @f$ z @f$-coordinate.
+       * @brief Gets the @f$ z @f$ coordinate.
+       * @returns @f$ z @f$ coordinate of the point.
        */
       inline
       Scalar z(Coordinates coords = Coordinates::Physical) const
@@ -327,11 +391,11 @@ namespace Rodin::Geometry
        * @brief Lexicographical comparison.
        */
       inline
-      bool operator<(const Point& p) const
+      bool operator<(const PointBase& p) const
       {
         assert(getDimension() == p.getDimension());
-        const Math::Vector& lhs = getCoordinates(Coordinates::Physical);
-        const Math::Vector& rhs = p.getCoordinates(Coordinates::Physical);
+        const auto& lhs = getCoordinates(Coordinates::Physical);
+        const auto& rhs = p.getCoordinates(Coordinates::Physical);
         for (int i = 0; i < lhs.size() - 1; i++)
         {
           if (lhs(i) < rhs(i))
@@ -343,41 +407,152 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Simplex& getSimplex() const
+      const Polytope& getPolytope() const
       {
-        return m_simplex.get();
+        return m_polytope.get();
       }
 
       inline
-      const SimplexTransformation& getTransformation() const
+      const PolytopeTransformation& getTransformation() const
       {
         return m_trans.get();
       }
 
-      inline
-      const mfem::IntegrationPoint& getIntegrationPoint() const
-      {
-        return m_ip;
-      }
+      const Math::SpatialVector& getPhysicalCoordinates() const;
 
-      const Math::Vector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
+      const Math::SpatialVector& getCoordinates(Coordinates coords = Coordinates::Physical) const;
 
-      const Math::Matrix& getJacobian() const;
+      /**
+       * @brief Computes the Jacobian matrix of the transformation at the
+       * point.
+       */
+      virtual const Math::SpatialMatrix& getJacobian() const;
 
-      const Math::Matrix& getJacobianInverse() const;
+      Scalar getJacobianDeterminant() const;
 
+      /**
+       * @brief Computes the inverse of the Jacobian matrix of the
+       * transformation at the point.
+       */
+      const Math::SpatialMatrix& getJacobianInverse() const;
+
+      /**
+       * @brief Computes the distortion of space of the transformation at the
+       * point.
+       */
       Scalar getDistortion() const;
 
+      virtual const Math::SpatialVector& getReferenceCoordinates() const = 0;
+
     private:
-      std::reference_wrapper<const Simplex> m_simplex;
-      std::reference_wrapper<const SimplexTransformation> m_trans;
-      std::reference_wrapper<const Math::Vector> m_rc;
-      mfem::IntegrationPoint m_ip;
-      mutable std::optional<const Math::Vector> m_pc;
-      mutable std::optional<const Math::Matrix> m_jacobian;
-      mutable std::optional<const Math::Matrix> m_inverseJacobian;
-      mutable std::optional<const Scalar> m_distortion;
+      std::reference_wrapper<const Polytope> m_polytope;
+      std::reference_wrapper<const PolytopeTransformation> m_trans;
+
+      mutable std::optional<const Math::SpatialVector> m_pc;
+      mutable std::optional<const Math::SpatialMatrix> m_jacobian;
+      mutable std::optional<const Math::SpatialMatrix> m_jacobianInverse;
+      mutable std::optional<const Scalar>              m_jacobianDeterminant;
+      mutable std::optional<const Scalar>              m_distortion;
   };
+
+  class Point final : public PointBase
+  {
+    public:
+      using Parent = PointBase;
+
+      enum class Type
+      {
+        Data,
+        Reference
+      };
+
+      Point(const Polytope& polytope, const PolytopeTransformation& trans,
+          const Math::SpatialVector& rc)
+        : PointBase(polytope, trans), m_type(Type::Data), m_rc(rc)
+      {}
+
+      Point(const Polytope& polytope, const PolytopeTransformation& trans,
+          const Math::SpatialVector& rc, const Math::SpatialVector& pc)
+        : PointBase(polytope, trans, pc), m_type(Type::Data), m_rc(rc)
+      {}
+
+      explicit
+      Point(const Polytope& polytope, const PolytopeTransformation& trans,
+          std::reference_wrapper<const Math::SpatialVector> rc, std::reference_wrapper<const Math::SpatialVector> pc)
+        : PointBase(polytope, trans, pc), m_type(Type::Reference), m_rc(rc)
+      {}
+
+      Point(const Point& other)
+        : PointBase(other),
+          m_type(other.m_type),
+          m_rc(other.m_rc)
+      {}
+
+      Point(Point&& other)
+        : PointBase(std::move(other)),
+          m_type(other.m_type),
+          m_rc(std::move(other.m_rc))
+      {}
+
+      inline
+      constexpr
+      bool holds(Type t) const
+      {
+        return m_type == t;
+      }
+
+      inline
+      const Math::SpatialVector& getReferenceCoordinates() const override
+      {
+        if (holds(Type::Data))
+        {
+          return std::get<const Math::SpatialVector>(m_rc);
+        }
+        else
+        {
+          assert(holds(Type::Reference));
+          return std::get<std::reference_wrapper<const Math::SpatialVector>>(m_rc);
+        }
+      }
+
+    private:
+      const Type m_type;
+      std::variant<const Math::SpatialVector, std::reference_wrapper<const Math::SpatialVector>> m_rc;
+  };
+
+  inline
+  std::ostream& operator<<(std::ostream& os, Polytope::Geometry g)
+  {
+    switch (g)
+    {
+      case Polytope::Geometry::Point:
+      {
+        os << "Point";
+        break;
+      }
+      case Polytope::Geometry::Segment:
+      {
+        os << "Segment";
+        break;
+      }
+      case Polytope::Geometry::Triangle:
+      {
+        os << "Triangle";
+        break;
+      }
+      case Polytope::Geometry::Quadrilateral:
+      {
+        os << "Quadrilateral";
+        break;
+      }
+      case Polytope::Geometry::Tetrahedron:
+      {
+        os << "Tetrahedron";
+        break;
+      }
+    }
+    return os;
+  }
 }
 
 #endif

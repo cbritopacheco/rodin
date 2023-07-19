@@ -45,7 +45,7 @@ namespace Rodin::Variational
 
       Math::Vector getValue(const Geometry::Point& p) const
       {
-        assert(p.getSimplex().getMesh().isSurface());
+        assert(p.getPolytope().getMesh().isSurface());
         const auto& jacobian = p.getJacobian();
         Math::Vector value(m_dimension);
         if (jacobian.rows() == 2)

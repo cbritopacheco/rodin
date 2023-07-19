@@ -15,7 +15,13 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Dense vector type.
+   */
   using Vector = Eigen::VectorX<Scalar>;
+
+  using SpatialVector =
+    Eigen::Matrix<Scalar, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
 
   template <size_t Size>
   using FixedSizeVector = Eigen::Vector<Scalar, Size>;

@@ -1,6 +1,6 @@
 # Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
 
-Rodin is a lightweight and modular shape optimization framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems. 
+Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
@@ -111,8 +111,6 @@ List of features and modules that are in the works:
 
 - [CMake 3.16.0+](https://cmake.org/)
 - [Boost 1.65+](https://www.boost.org/)
-- [SuiteSparse](https://people.engr.tamu.edu/davis/suitesparse.html)
-- [METIS](https://github.com/KarypisLab/METIS)
 
 Any of these should be available for quick install from your standard package
 manager.

@@ -12,5 +12,6 @@
 #include "Math/Tensor.h"
 #include "Math/Matrix.h"
 #include "Math/Constants.h"
+#include "Math/SparseMatrix.h"
 
 #endif

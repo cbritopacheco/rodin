@@ -12,224 +12,197 @@
 
 namespace Rodin::Variational::Assembly
 {
-  mfem::SparseMatrix
-  Native<BilinearFormBase<mfem::SparseMatrix>>
-  ::execute(const Input& input) const
+  Math::SparseMatrix Native<BilinearFormBase<Math::SparseMatrix>>
+  ::execute(const BilinearAssemblyInput& input) const
   {
+    Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>> assembly;
+    const auto triplets = assembly.execute(input);
     OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
-    res = 0.0;
+    res.setFromTriplets(triplets.begin(), triplets.end());
+    return res;
+  }
 
-    FormLanguage::List<BilinearFormIntegratorBase> domainBFIs;
-    FormLanguage::List<BilinearFormIntegratorBase> facesBFIs;
-    FormLanguage::List<BilinearFormIntegratorBase> boundaryBFIs;
-    FormLanguage::List<BilinearFormIntegratorBase> interfaceBFIs;
-
-    for (const auto& bfi : input.bfis)
+  void Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+  ::add(std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
+      const IndexArray& rows, const IndexArray& cols)
+  {
+    assert(rows.size() >= 0);
+    assert(cols.size() >= 0);
+    assert(in.rows() == rows.size());
+    assert(in.cols() == cols.size());
+    for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
     {
+      for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
+      {
+        const Scalar s = in(i, j);
+        if (s != Scalar(0))
+          out.emplace_back(rows(i), cols(j), s);
+      }
+    }
+  }
+
+  std::vector<Eigen::Triplet<Scalar>> Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+  ::execute(const BilinearAssemblyInput& input) const
+  {
+    std::vector<Eigen::Triplet<Scalar>> res;
+    // res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
+    for (auto& bfi : input.bfis)
+    {
+      const auto& attrs = bfi.getAttributes();
       switch (bfi.getRegion())
       {
         case Integrator::Region::Domain:
         {
-          domainBFIs.add(bfi);
+          for (auto it = input.mesh.getElement(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
           break;
         }
         case Integrator::Region::Faces:
         {
-          facesBFIs.add(bfi);
+          for (auto it = input.mesh.getFace(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
           break;
         }
         case Integrator::Region::Boundary:
         {
-          boundaryBFIs.add(bfi);
+          for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
           break;
         }
         case Integrator::Region::Interface:
         {
-          interfaceBFIs.add(bfi);
+          for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
           break;
-        }
-      }
-    }
-
-    if (domainBFIs.size() > 0)
-    {
-      for (auto it = input.mesh.getElement(); !it.end(); ++it)
-      {
-        const auto& element = *it;
-        const Geometry::Attribute attr = element.getAttribute();
-        for (const auto& bfi : domainBFIs)
-        {
-          if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
-          {
-            Math::Matrix mat = bfi.getMatrix(element);
-            mfem::DenseMatrix mfem;
-            mfem.UseExternalData(mat.data(), mat.rows(), mat.cols());
-            res.AddSubMatrix(
-                input.testFES.getDOFs(element), input.trialFES.getDOFs(element), mfem);
-          }
-        }
-      }
-    }
-
-    if (facesBFIs.size() > 0 || boundaryBFIs.size() > 0 || interfaceBFIs.size() > 0)
-    {
-      for (auto it = input.mesh.getFace(); !it.end(); ++it)
-      {
-        const auto& face = *it;
-        const Geometry::Attribute attr = face.getAttribute();
-        for (const auto& bfi : facesBFIs)
-        {
-          if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
-          {
-            Math::Matrix mat = bfi.getMatrix(face);
-            mfem::DenseMatrix mfem;
-            mfem.UseExternalData(mat.data(), mat.rows(), mat.cols());
-            res.AddSubMatrix(
-                input.testFES.getDOFs(face), input.trialFES.getDOFs(face), mfem);
-          }
-        }
-
-        if (face.isBoundary())
-        {
-          for (const auto& bfi : boundaryBFIs)
-          {
-            const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
-            if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
-            {
-              Math::Matrix mat = bfi.getMatrix(face);
-              mfem::DenseMatrix mfem;
-              mfem.UseExternalData(mat.data(), mat.rows(), mat.cols());
-              res.AddSubMatrix(
-                  input.testFES.getDOFs(face), input.trialFES.getDOFs(face), mfem);
-            }
-          }
-        }
-
-        if (face.isInterface())
-        {
-          for (const auto& bfi : interfaceBFIs)
-          {
-            const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
-            if (bfi.getAttributes().size() == 0 || bfi.getAttributes().count(attr))
-            {
-              Math::Matrix mat = bfi.getMatrix(face);
-              mfem::DenseMatrix mfem;
-              mfem.UseExternalData(mat.data(), mat.rows(), mat.cols());
-              res.AddSubMatrix(
-                  input.testFES.getDOFs(face), input.trialFES.getDOFs(face), mfem);
-            }
-          }
         }
       }
     }
     return res;
   }
 
-  mfem::Vector
-  Native<LinearFormBase<mfem::Vector>>
+  void Native<LinearFormBase<Math::Vector>>
+  ::add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
+  {
+    assert(in.size() == s.size());
+    size_t i = 0;
+    for (const auto& global : s)
+      out.coeffRef(global) += in.coeff(i++);
+  }
+
+  Math::Vector Native<LinearFormBase<Math::Vector>>
   ::execute(const Input& input) const
   {
     VectorType res(input.fes.getSize());
-    res = 0.0;
+    res.setZero();
 
-    FormLanguage::List<LinearFormIntegratorBase> domainLFIs;
-    FormLanguage::List<LinearFormIntegratorBase> facesLFIs;
-    FormLanguage::List<LinearFormIntegratorBase> boundaryLFIs;
-    FormLanguage::List<LinearFormIntegratorBase> interfaceLFIs;
-
-    for (const auto& lfi : input.lfis)
+    for (auto& lfi : input.lfis)
     {
+      const auto& attrs = lfi.getAttributes();
       switch (lfi.getRegion())
       {
         case Integrator::Region::Domain:
         {
-          domainLFIs.add(lfi);
+          for (auto it = input.mesh.getElement(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& dofs = input.fes.getDOFs(d, i);
+              lfi.assemble(*it);
+              add(res, lfi.getVector(), dofs);
+            }
+          }
           break;
         }
         case Integrator::Region::Faces:
         {
-          facesLFIs.add(lfi);
+          for (auto it = input.mesh.getFace(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& dofs = input.fes.getDOFs(d, i);
+              lfi.assemble(*it);
+              add(res, lfi.getVector(), dofs);
+            }
+          }
           break;
         }
         case Integrator::Region::Boundary:
         {
-          boundaryLFIs.add(lfi);
+          for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& dofs = input.fes.getDOFs(d, i);
+              lfi.assemble(*it);
+              add(res, lfi.getVector(), dofs);
+            }
+          }
           break;
         }
         case Integrator::Region::Interface:
         {
-          interfaceLFIs.add(lfi);
+          for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& dofs = input.fes.getDOFs(d, i);
+              lfi.assemble(*it);
+              add(res, lfi.getVector(), dofs);
+            }
+          }
           break;
         }
       }
     }
 
-    if (domainLFIs.size() > 0)
-    {
-      for (auto it = input.mesh.getElement(); !it.end(); ++it)
-      {
-        const auto& element = *it;
-        const Geometry::Attribute attr = element.getAttribute();
-        for (const auto& lfi : domainLFIs)
-        {
-          if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
-          {
-            Math::Vector vec = lfi.getVector(element);
-            mfem::Vector mvec;
-            mvec.SetDataAndSize(vec.data(), vec.size());
-            res.AddElementVector(input.fes.getDOFs(element), mvec);
-          }
-        }
-      }
-    }
-
-    if (facesLFIs.size() > 0 || boundaryLFIs.size() > 0 || interfaceLFIs.size() > 0)
-    {
-      for (auto it = input.mesh.getFace(); !it.end(); ++it)
-      {
-        const auto& face = *it;
-        const Geometry::Attribute attr = face.getAttribute();
-        for (const auto& lfi : facesLFIs)
-        {
-          if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
-          {
-            Math::Vector vec = lfi.getVector(face);
-            mfem::Vector mvec;
-            mvec.SetDataAndSize(vec.data(), vec.size());
-            res.AddElementVector(input.fes.getDOFs(face), mvec);
-          }
-        }
-
-        if (face.isBoundary())
-        {
-          for (const auto& lfi : boundaryLFIs)
-          {
-            if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
-            {
-              Math::Vector vec = lfi.getVector(face);
-              mfem::Vector mvec;
-              mvec.SetDataAndSize(vec.data(), vec.size());
-              res.AddElementVector(input.fes.getDOFs(face), mvec);
-            }
-          }
-        }
-
-        if (face.isInterface())
-        {
-          for (const auto& lfi : interfaceLFIs)
-          {
-            const Geometry::Attribute attr = input.mesh.getFaceAttribute(it->getIndex());
-            if (lfi.getAttributes().size() == 0 || lfi.getAttributes().count(attr))
-            {
-              Math::Vector vec = lfi.getVector(face);
-              mfem::Vector mvec;
-              mvec.SetDataAndSize(vec.data(), vec.size());
-              res.AddElementVector(input.fes.getDOFs(face), mvec);
-            }
-          }
-        }
-      }
-    }
     return res;
   }
 }

@@ -4,7 +4,7 @@ set(RodinMath_HEADERS
   Vector.h
   Matrix.h)
 
-set(RodinMath_SRCS Matrix.cpp)
+set(RodinMath_SRCS Matrix.cpp SparseMatrix.cpp)
 
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)

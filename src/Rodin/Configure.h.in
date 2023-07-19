@@ -1,18 +1,140 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2023.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_CONFIGURE_H
 #define RODIN_CONFIGURE_H
 
+/**
+ * @file
+ * @brief Header containing preprocessor directives for Rodin.
+ */
+
+/**
+ * @defgroup RodinDirectives Preprocessor directives
+ * @brief Preprocessor directives defined by Rodin.
+ */
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with Python support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ *  #ifndef RODIN_WITH_PY
+ *  // Code depending on Python support
+ *  #endif
+ * @endcode
+ */
 #cmakedefine RODIN_WITH_PY
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin::Plot is built.
+ * @code{cpp}
+ *  #ifndef RODIN_WITH_PLOT
+ *  // Code depending on Rodin::Plot support
+ *  #endif
+ * @endcode
+ */
 #cmakedefine RODIN_WITH_PLOT
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with MPI support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ *  #ifndef RODIN_USE_MPI
+ *  // Code depending on MPI support
+ *  #endif
+ * @endcode
+ */
 #cmakedefine RODIN_USE_MPI
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with OpenMP support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifndef RODIN_USE_OPENMP
+ * // Code depending on OpenMP support
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_USE_OPENMP
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with SuiteSparse support.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * #ifndef RODIN_USE_SUITESPARSE
+ * // Code depending on SuiteSparse
+ * #endif
+ * @endcode
+ */
 #cmakedefine RODIN_USE_SUITESPARSE
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates if Rodin warnings are silenced.
+ */
 #cmakedefine RODIN_SILENCE_WARNINGS
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates the Rodin resources directory.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * std::cout << RODIN_RESOURCES_DIR << std::endl;
+ * @endcode
+ */
 #cmakedefine RODIN_RESOURCES_DIR "@RODIN_RESOURCES_DIR@"
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates the Rodin third-party source directory.
+ *
+ * # Utilization
+ *
+ * @code{cpp}
+ * std::cout << RODIN_THIRD_PARTY_DIR << std::endl;
+ * @endcode
+ */
 #cmakedefine RODIN_THIRD_PARTY_DIR "@RODIN_THIRD_PARTY_DIR@"
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates the maximal space dimension.
+ */
 #define RODIN_MAXIMAL_SPACE_DIMENSION 3
-#define RODIN_DEFAULT_SIMPLEX_ATTRIBUTE 1
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates the default polytope attribute.
+ */
+#define RODIN_DEFAULT_POLYTOPE_ATTRIBUTE 1
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Indicates the default gridfunction save precision.
+ */
 #define RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION 8
-#define RODIN_MAGIC_FUZZY_CONSTANT 0
+
+/**
+ * @brief Represents the constant used for fuzzy comparison.
+ */
+#define RODIN_FUZZY_CONSTANT 1e-8
 
 #endif

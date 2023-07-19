@@ -143,7 +143,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -182,7 +182,7 @@ namespace Rodin::Variational
   }
 
   template <>
-  class UnaryMinus<LinearFormIntegratorBase> : public LinearFormIntegratorBase
+  class UnaryMinus<LinearFormIntegratorBase> final : public LinearFormIntegratorBase
   {
     public:
       using Parent = LinearFormIntegratorBase;
@@ -196,7 +196,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      Math::Vector getVector(const Geometry::Simplex& element) const override;
+      void assemble(const Geometry::Polytope& element) override;
 
       UnaryMinus* copy() const noexcept override
       {
@@ -222,7 +222,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      Math::Matrix getMatrix(const Geometry::Simplex& element) const override;
+      void assemble(const Geometry::Polytope& element) override;
 
       UnaryMinus* copy() const noexcept override
       {

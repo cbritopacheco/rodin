@@ -14,9 +14,11 @@ if (${CMAKE_BUILD_TYPE} MATCHES Release)
   rodin_add_compile_options(
     LANG CXX
     OPTIONS
-    -w
-    -O3
-    -march=native)
+    -msse2
+    -fvectorize
+    -fslp-vectorize
+    -ffp-contract=fast
+    -fcolor-diagnostics)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG CXX
@@ -52,6 +54,7 @@ configure_file(Configure.h.in Configure.h @ONLY)
 target_include_directories(Rodin
   INTERFACE ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
+add_subdirectory(QF)
 add_subdirectory(Math)
 add_subdirectory(IO)
 add_subdirectory(Test)
