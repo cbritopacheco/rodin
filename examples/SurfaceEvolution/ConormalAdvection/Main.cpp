@@ -11,11 +11,13 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 constexpr Scalar T = M_PI / 2 - 0.1;
-constexpr double dt = 0.01;
+constexpr Scalar dt = 0.01;
+constexpr Scalar hmax = 0.05;
+constexpr Scalar hmin = 0.1 * hmax;
 constexpr size_t maxIt = 100;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
-  "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
+  "/Users/carlos/Projects/rodin/resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
 
 int main()
 {
@@ -29,15 +31,15 @@ int main()
   while (true)
   {
     if (i == 0)
-      th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+      th.save("out/SphereCap.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
-    Alert::Info() << "t: " << t
+    Alert::Info() << "t: " << t << '\n'
                   << "i: " << i
                   << Alert::Raise;
 
     // Build finite element space on the mesh
-    H1 vh(th);
-    H1 uh(th, th.getSpaceDimension());
+    P1 vh(th);
+    P1 uh(th, th.getSpaceDimension());
 
     // Distance the subdomain
     GridFunction dist(vh);
@@ -56,17 +58,19 @@ int main()
 
     // Generate mesh to subdomain
     th = MMG::ImplicitDomainMesher().setAngleDetection(false)
-                                    .setHMax(0.05)
+                                    .setHMin(hmin)
+                                    .setHMax(hmax)
                                     .setHausdorff(0.01)
                                     .discretize(dist);
 
     MMG::MeshOptimizer().setAngleDetection(false)
-                        .setHMax(0.05)
+                        .setHMin(hmin)
+                        .setHMax(hmax)
                         .setHausdorff(0.01)
                         .optimize(th);
 
     // Save results
-    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+    th.save("out/SphereCap.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
     if (t + std::numeric_limits<double>::epsilon() > T)
       break;

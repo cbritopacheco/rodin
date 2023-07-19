@@ -14,7 +14,7 @@
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
-#include "GaussianQuadrature.h"
+#include "QuadratureRule.h"
 
 namespace Rodin::Variational
 {
@@ -29,7 +29,7 @@ namespace Rodin::Variational
   class FaceIntegral<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
-    : public GaussianQuadrature<Dot<
+    : public QuadratureRule<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
@@ -37,7 +37,7 @@ namespace Rodin::Variational
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
       using Integrand = Dot<LHS, RHS>;
-      using Parent = GaussianQuadrature<Integrand>;
+      using Parent = QuadratureRule<Integrand>;
 
       FaceIntegral(const LHS& lhs, const RHS& rhs)
         : FaceIntegral(Dot(lhs, rhs))
@@ -79,11 +79,11 @@ namespace Rodin::Variational
 
   template <class NestedDerived, class FES>
   class FaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public GaussianQuadrature<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
+    : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
-      using Parent = GaussianQuadrature<Integrand>;
+      using Parent = QuadratureRule<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
       FaceIntegral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)

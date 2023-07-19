@@ -7,8 +7,7 @@
 #ifndef RODIN_GEOMETRY_TRANSFORMATION_H
 #define RODIN_GEOMETRY_TRANSFORMATION_H
 
-#include <mfem.hpp>
-
+#include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 
@@ -20,56 +19,83 @@ namespace Rodin::Geometry
    * @brief Represents the transformation function of a simplex, taking
    * reference coordinates to physical coordinates.
    *
-   * This class represents the transformation @f$ x : K \rightarrow \tau @f$ of
-   * a point:
+   * Let @f$ \tau @f$ denote a polytope in a triangulation @f$ \mathcal{T}_h
+   * @f$ which has an associated reference element @f$ K @f$, This class
+   * represents the transformation @f$ x : K \subset \mathbb{R}^k \rightarrow
+   * \tau \subset \mathbb{R}^s @f$ of a reference point @f$ r @f$ into a
+   * physical point @f$ p @f$:
    * @f[
    *    p = x(r)
    * @f]
-   * on some simplex @f$ \tau \in \mathcal{T}_h @f$ belonging to
-   * some discrete mesh @f$ \mathcal{T}_h @f$. Here @f$ p \in \tau @f$ denotes
-   * the physical coordinates of the point, while @f$ x : K \rightarrow \tau
-   * @f$ represents the transformation taking reference coordinates @f$ r \in K
-   * @f$, for a reference geometry @f$ K @f$.
+   * Here, @f$ k @f$ and @f$ s @f$ represent the reference and physical
+   * dimensions, @f$ p \in \tau @f$ denotes the physical coordinates of the
+   * point, while @f$ x : K \rightarrow \tau @f$ represents the transformation
+   * taking reference coordinates @f$ r \in K @f$, for a reference geometry @f$
+   * K @f$.
    *
-   * @see Geometry::Point
+   * @see @ref Geometry::Point "Point"
    */
-  class SimplexTransformation
+  class PolytopeTransformation
   {
     public:
-      virtual ~SimplexTransformation() = default;
+      PolytopeTransformation() = default;
 
-      // /**
-      //  * @brief Performs the transformation, taking reference coordinates into
-      //  * physical coordinates.
-      //  *
-      //  * Given @f$ r \in K @f$, computes the point:
-      //  * @f[
-      //  *    p = x(r)
-      //  * @f]
-      //  * in physical coordinates.
-      //  *
-      //  * @param[in] rc Reference coordinates of the point.
-      //  * @returns Physical coordinates
-      //  */
-      // virtual Math::Vector transform(const Math::Vector& rc) const = 0;
+      PolytopeTransformation(const PolytopeTransformation&) = default;
 
-      // /**
-      //  * @brief Performs the inverse transformation, taking physical
-      //  * coordinates into reference coordinates.
-      //  *
-      //  * Given @f$ p \in \tau @f$, computes the point:
-      //  * @f[
-      //  *    r = x^{-1}(p)
-      //  * @f]
-      //  * in reference coordinates.
-      //  *
-      //  * @param[in] pc Physical coordinates of the point.
-      //  */
-      // virtual Math::Vector inverse(const Math::Vector& pc) const = 0;
+      PolytopeTransformation(PolytopeTransformation&&) = default;
 
-      // virtual Math::Matrix jacobian(const Math::Vector& rc) const = 0;
+      virtual ~PolytopeTransformation() = default;
 
-      virtual mfem::ElementTransformation& getHandle() const = 0;
+      /**
+       * @brief Computes the physical coordinates of the given reference point.
+       *
+       * Given @f$ r \in K @f$, computes the point:
+       * @f[
+       *    p = x(r)
+       * @f]
+       * in physical coordinates.
+       *
+       * @param[in] rc Reference coordinates of the point.
+       * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
+       * physical dimension.
+       */
+      virtual Math::SpatialVector transform(const Math::Vector& rc) const = 0;
+
+      /**
+       * @brief Computes the Jacobian matrix of the transformation.
+       *
+       * Given @f$ r \in K @f$, computes the Jacobian matrix:
+       * @f[
+       *  \mathbf{J}_x (r) = \begin{bmatrix}
+       * \dfrac{\partial x_1}{\partial r_1} & \ldots & \dfrac{\partial x_s}{\partial r_k}\\
+       * \vdots & \ddots & \vdots\\
+       * \dfrac{\partial x_s}{\partial r_1} & \ldots & \dfrac{\partial x_s}{\partial r_k}
+       * \end{bmatrix} ,
+       * @f]
+       * for the given transformation @f$ x : K \rightarrow \tau @f$.
+       *
+       * @returns A matrix of dimensions @f$ s \times k @f$ where @f$ k @f$
+       * represents the reference dimension and @f$ s @f$ represents the
+       * physical dimension.
+       */
+      virtual Math::SpatialMatrix jacobian(const Math::Vector& rc) const = 0;
+
+      /**
+       * @brief Computes the reference coordinates of the given physical point.
+       *
+       * Given @f$ p \in \tau @f$, computes the point:
+       * @f[
+       *    r = x^{-1}(p)
+       * @f]
+       * in reference coordinates.
+       *
+       * @param[in] pc Physical coordinates of the point.
+       */
+      virtual Math::Vector inverse(const Math::Vector&) const
+      {
+        assert(false); // Not implemented
+        return Math::Vector::Zero(0);
+      }
   };
 }
 

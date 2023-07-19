@@ -8,7 +8,18 @@
 #define RODIN_SOLVER_H
 
 #include "Solver/Solver.h"
+
+// Built-in direct solvers
+#include "Solver/SparseLU.h"
+#include "Solver/SparseQR.h"
+#include "Solver/SimplicialLLT.h"
+#include "Solver/SimplicialLDLT.h"
+
+// Built-in iteratives solvers
 #include "Solver/CG.h"
+#include "Solver/LeastSquaresCG.h"
+
+// SuiteSparse solvers
 #include "Solver/UMFPack.h"
 
 #endif

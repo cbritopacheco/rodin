@@ -13,8 +13,6 @@
 #include <optional>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "Rodin/Geometry/Simplex.h"
 
 #include "ForwardDecls.h"

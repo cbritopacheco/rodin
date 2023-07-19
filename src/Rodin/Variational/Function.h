@@ -11,8 +11,6 @@
 #include <variant>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 
@@ -30,6 +28,9 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Base class for functions defined on a mesh.
+   */
   template <class Derived>
   class FunctionBase : public FormLanguage::Base
   {

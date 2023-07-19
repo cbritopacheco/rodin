@@ -10,6 +10,7 @@
 #include <chrono>
 
 #include "Rodin/Utility.h"
+
 #include "Assembly/Native.h"
 
 #include "GridFunction.h"
@@ -20,100 +21,143 @@
 
 namespace Rodin::Variational
 {
-   // ------------------------------------------------------------------------
-   // ---- Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // ---- Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  // ------------------------------------------------------------------------
 
-   template <class TrialFES, class TestFES>
-   constexpr
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-      :  m_trialFunction(u),
-         m_testFunction(v),
-         m_linearForm(v),
-         m_bilinearForm(u, v)
-   {}
+  template <class TrialFES, class TestFES>
+  constexpr
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+     :  m_trialFunction(u),
+        m_testFunction(v),
+        m_linearForm(v),
+        m_bilinearForm(u, v),
+        m_assembled(false)
+  {}
 
-   template <class TrialFES, class TestFES>
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>&
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   ::operator=(ProblemBody&& rhs)
-   {
-      Parent::operator=(std::move(rhs));
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator=(const ProblemBody& rhs)
+  {
+    for (auto& bfi : rhs.getBFIs())
+      m_bilinearForm.add(bfi);
 
-      for (auto& bfi : getProblemBody().getBFIs())
-         getBilinearForm().add(bfi);
+    for (auto& lfi : rhs.getLFIs())
+      m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
 
-      for (auto& lfi : getProblemBody().getLFIs())
-         getLinearForm().add(UnaryMinus(lfi)); // Negate every linear form
+    m_dbcs = rhs.getDBCs();
 
-      return *this;
-   }
+     return *this;
+  }
 
-   template <class TrialFES, class TestFES>
-   void
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>::assemble()
-   {
-      // Assemble both sides
-      getLinearForm().assemble();
-      getBilinearForm().assemble();
+  namespace Internal
+  {
+    class IteratorTripletWrapper
+    {
+      public:
+        IteratorTripletWrapper(UnorderedMap<std::pair<Index, Index>, Scalar>::iterator it) : m_it(it) {}
+        inline bool operator==(const IteratorTripletWrapper& other) const { return m_it == other.m_it; }
+        inline bool operator!=(const IteratorTripletWrapper& other) const { return m_it != other.m_it; }
+        inline IteratorTripletWrapper& operator++() { ++m_it; return *this; }
+        inline const Eigen::Triplet<Scalar>& operator*() const
+        { m_value = Eigen::Triplet<Scalar>(m_it->first.first, m_it->first.second, m_it->second); return m_value; }
+        inline const Eigen::Triplet<Scalar>* operator->() const { m_value = Eigen::Triplet<Scalar>(m_it->first.first, m_it->first.second, m_it->second); return &m_value; }
+      private:
+        UnorderedMap<std::pair<Index, Index>, Scalar>::iterator m_it;
+        mutable Eigen::Triplet<Scalar> m_value;
+    };
+  }
 
-      // Emplace data
-      getTrialFunction().emplace();
-      getTestFunction().emplace();
+  template <class TrialFES, class TestFES>
+  void
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::assemble()
+  {
+    auto& trial = getTrialFunction();
+    auto& trialFES = trial.getFiniteElementSpace();
 
-      // Project values onto the essential boundary and compute essential dofs
-      for (const auto& dbc : getProblemBody().getDBCs())
+    auto& test = getTestFunction();
+    auto& testFES = test.getFiniteElementSpace();
+
+    // Emplace data
+    trial.emplace();
+
+    // Assemble both sides
+    m_linearForm.assemble();
+    m_mass = std::move(m_linearForm.getVector());
+
+    m_bilinearForm.assemble();
+    m_stiffness = std::move(m_bilinearForm.getOperator());
+
+    // Impose Dirichlet boundary conditions
+    if (trialFES == testFES)
+    {
+      for (auto& dbc : m_dbcs)
       {
-         dbc.project();
-         m_trialEssTrueDofList.Append(dbc.getDOFs());
+        dbc.assemble();
+        const auto& dofs = dbc.getDOFs();
+
+        // Move essential degrees of freedom in the LHS to the RHS
+        for (const auto& kv : dofs)
+        {
+           const Index& global = kv.first;
+           const auto& dof = kv.second;
+           for (Math::SparseMatrix::InnerIterator it(m_stiffness, global); it; ++it)
+              m_mass.coeffRef(it.row()) -= it.value() * dof;
+        }
+
+        // Impose essential degrees of freedom on RHS
+        for (const auto& [global, dof] : dofs)
+        {
+          m_mass.coeffRef(global) = dof;
+
+          Math::SparseMatrix::StorageIndex* outerPtr = m_stiffness.outerIndexPtr();
+          Math::SparseMatrix::StorageIndex* innerPtr = m_stiffness.innerIndexPtr();
+          Scalar* valuePtr = m_stiffness.valuePtr();
+          for (auto i = outerPtr[global]; i < outerPtr[global + 1]; ++i)
+          {
+            assert(innerPtr[i] >= 0);
+            const Index row = innerPtr[i];
+            valuePtr[i] = Scalar(row == global);
+            if (row != global)
+            {
+              for (auto k = outerPtr[row]; 1; k++)
+              {
+                if (static_cast<Index>(innerPtr[k]) == global)
+                {
+                   valuePtr[k] = 0.0;
+                   break;
+                }
+              }
+            }
+          }
+        }
       }
+    }
+    else
+    {
+      assert(false); // Not handled yet
+    }
 
-      m_trialEssTrueDofList.Sort();
-      m_trialEssTrueDofList.Unique();
+    m_assembled = true;
+  }
 
-      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      const auto& testFes = getTestFunction().getFiniteElementSpace();
+  template <class TrialFES, class TestFES>
+  void
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
+  {
+     // Assemble the system
+     if (!m_assembled)
+        assemble();
 
-      if constexpr (std::is_same_v<TrialFES, TestFES>)
-      {
-         assert(&trialFes == &testFes);
+     // Solve the system AX = B
+     solver.solve(m_stiffness, m_guess, m_mass);
 
-         // Form linear system
-         m_stiffnessOp.Swap(getBilinearForm().getOperator());
-         m_tmp.reset(new mfem::BilinearForm(&trialFes.getHandle()));
-         m_tmp->Assemble();
-         m_tmp->SpMat().Swap(m_stiffnessOp);
-         m_tmp->FormLinearSystem(
-                    m_trialEssTrueDofList,
-                    getTrialFunction().getSolution().getHandle(),
-                    getLinearForm().getVector(),
-                    m_stiffnessOp, m_guess, m_massVector);
-         m_tmp->SpMat().Swap(m_stiffnessOp);
-      }
-      else
-      {
-         assert(false); // Not supported yet
-      }
-   }
-
-   template <class TrialFES, class TestFES>
-   void
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
-   {
-      // Assemble the system
-      assemble();
-
-      // Solve the system Ax = b
-      solver.solve(getStiffnessOperator(), m_guess, getMassVector());
-
-      // Recover solution
-      m_tmp->RecoverFEMSolution(
-            m_guess,
-            getLinearForm().getVector(),
-            getTrialFunction().getSolution().getHandle());
-   }
+     // Recover solution
+     getTrialFunction().getSolution().setWeights(std::move(m_guess));
+  }
 }
 
 #endif

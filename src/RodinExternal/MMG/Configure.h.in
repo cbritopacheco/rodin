@@ -7,10 +7,14 @@
 #ifndef RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
 #define RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
 
+/**
+ * @file MMG/Configure.h.in
+ * @brief Header containing preprocessor directives for Rodin::External::MMG.
+ */
+
 namespace Rodin::External::MMG
 {
   /**
-   * @internal
    * @brief Path to the ISCD Mshdist executable.
    */
   inline constexpr const char* ISCD_MSHDIST_EXECUTABLE =
@@ -20,7 +24,6 @@ namespace Rodin::External::MMG
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
   /**
-   * @internal
    * @brief Path to the ISCD Mshdist executable.
    */
   inline constexpr const char* ISCD_ADVECTION_EXECUTABLE =

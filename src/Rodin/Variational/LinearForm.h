@@ -7,8 +7,6 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
-#include <mfem.hpp>
-
 #include "Rodin/FormLanguage/List.h"
 
 #include "ForwardDecls.h"
@@ -37,6 +35,12 @@ namespace Rodin::Variational
         :  FormLanguage::Base(std::move(other)),
           m_lfis(std::move(other.m_lfis))
       {}
+
+      constexpr
+      FormLanguage::List<LinearFormIntegratorBase>& getIntegrators()
+      {
+        return m_lfis;
+      }
 
       constexpr
       const FormLanguage::List<LinearFormIntegratorBase>& getIntegrators() const
@@ -160,14 +164,14 @@ namespace Rodin::Variational
    * LinearFormIntegratorBase instances.
    */
   template <class FES>
-  class LinearForm<FES, Context::Serial, mfem::Vector> final
-    : public LinearFormBase<mfem::Vector>
+  class LinearForm<FES, Context::Serial, Math::Vector> final
+    : public LinearFormBase<Math::Vector>
   {
     static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
 
     public:
       using Context = typename FES::Context;
-      using VectorType = mfem::Vector;
+      using VectorType = Math::Vector;
       using Parent = LinearFormBase<VectorType>;
 
       /**
@@ -203,7 +207,9 @@ namespace Rodin::Variational
       constexpr
       Scalar operator()(const GridFunction<FES>& u) const
       {
-        return *m_vector * u.getHandle();
+        const auto& weights = u.getWeights();
+        assert(weights.has_value());
+        return getVector().dot(*weights);
       }
 
       void assemble() override;
@@ -212,22 +218,23 @@ namespace Rodin::Variational
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
        */
+      inline
       VectorType& getVector() override
       {
-        assert(m_vector);
-        return *m_vector;
+        return m_vector;
       }
 
       /**
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
        */
+      inline
       const VectorType& getVector() const override
       {
-        assert(m_vector);
-        return *m_vector;
+        return m_vector;
       }
 
+      inline
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
@@ -254,10 +261,10 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
-      std::unique_ptr<VectorType> m_vector;
+      VectorType m_vector;
   };
   template <class FES>
-  LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, mfem::Vector>;
+  LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, Math::Vector>;
 }
 
 #include "LinearForm.hpp"

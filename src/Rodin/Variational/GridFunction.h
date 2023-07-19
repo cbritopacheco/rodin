@@ -14,18 +14,15 @@
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/MEDIT.h"
 
 #include "ForwardDecls.h"
 
-#include "H1.h"
-#include "L2.h"
-#include "MFEM.h"
 #include "Function.h"
 #include "Component.h"
 #include "Restriction.h"
@@ -43,11 +40,33 @@ namespace Rodin::Variational
    * @see GridFunction
    */
 
+  /**
+   * @brief Abstract base class for GridFunction objects.
+   *
+   * @section gridfunction-data-layout Data layout
+   *
+   * The data of the GridFunctionBase object can be accessed via a call to @ref
+   * getData(). The i-th column of the returned Math::Matrix object corresponds
+   * to the value of the grid function at the global i-th degree of freedom in
+   * the finite element space. Furthermore, the following conditions are
+   * satisfied:
+   * ```
+   *  const Math::Matrix& data = gf.getData();
+   *  assert(data.rows() == gf.getFiniteElementSpace().getVectorDimension());
+   *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
+   * ```
+   */
   template <class Derived, class FES>
   class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES>>
   {
     public:
+      /// Type of finite element
+      using Element = typename FES::Element;
+
+      /// Parent class
       using Parent = LazyEvaluator<GridFunctionBase<Derived, FES>>;
+
+      /// Range type of value
       using RangeType = typename FES::RangeType;
 
       static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
@@ -55,32 +74,27 @@ namespace Rodin::Variational
       GridFunctionBase(const FES& fes)
         : Parent(*this),
           m_fes(fes),
-          m_data(fes.getHandle().GetVSize()),
-          m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
+          m_data(fes.getVectorDimension(), fes.getSize())
       {
-        assert(!m_gf->OwnsData());
         m_data.setZero();
       }
 
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(*this),
           m_fes(other.m_fes),
-          m_data(other.m_data),
-          m_gf(new mfem::GridFunction(&m_fes.get().getHandle(), m_data.data()))
+          m_data(other.m_data)
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(*this),
           m_fes(std::move(other.m_fes)),
-          m_data(std::move(other.m_data)),
-          m_gf(std::move(other.m_gf))
+          m_data(std::move(other.m_data))
       {}
 
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
         m_fes = std::move(other.m_fes);
         m_data = std::move(other.m_data);
-        m_gf = std::move(other.m_gf);
         return *this;
       }
 
@@ -92,6 +106,10 @@ namespace Rodin::Variational
        *
        * This function will compute the maximum value in the grid function
        * data array.
+       *
+       * @section Complexity
+       * The operation is linear in the size of the number of entries in the
+       * underlying matrix.
        */
       inline
       constexpr
@@ -106,6 +124,10 @@ namespace Rodin::Variational
        *
        * This function will compute the minimum value in the grid function
        * data array.
+       *
+       * @section Complexity
+       * The operation is linear in the size of the number of entries in the
+       * underlying matrix.
        */
       inline
       constexpr
@@ -149,7 +171,17 @@ namespace Rodin::Variational
       constexpr
       size_t getSize() const
       {
-        return getHandle().Size();
+        return getFiniteElementSpace().getSize();
+      }
+
+
+      inline
+      Derived& setZero()
+      {
+        m_data.setZero();
+        if (m_weights)
+          m_weights->setZero();
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -158,16 +190,39 @@ namespace Rodin::Variational
       inline
       Derived& operator=(Scalar v)
       {
-        getData().setConstant(v);
+        static_assert(std::is_same_v<RangeType, Scalar>);
+        m_data.setConstant(v);
         return static_cast<Derived&>(*this);
       }
 
       inline
-      Derived& operator=(std::function<Scalar(const Geometry::Point&)> fn)
+      Derived& operator=(const Math::Vector& v)
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
-        assert(getFiniteElementSpace().getVectorDimension() == 1);
-        return project(ScalarFunction(fn));
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        Math::Matrix& data = m_data;
+        assert(data.cols() >= 0);
+        for (size_t i = 0; i < static_cast<size_t>(data.cols()); i++)
+          data.col(i) = v;
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
+      Derived& operator=(std::function<RangeType(const Geometry::Point&)> fn)
+      {
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          assert(getFiniteElementSpace().getVectorDimension() == 1);
+          return project(ScalarFunction(fn));
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          return project(VectorFunction(getFiniteElementSpace().getVectorDimension(), fn));
+        }
+        else
+        {
+          assert(false);
+          return static_cast<Derived&>(*this);
+        }
       }
 
       /**
@@ -186,7 +241,8 @@ namespace Rodin::Variational
       inline
       Derived& operator+=(Scalar rhs)
       {
-        getData() = getData().array() + rhs;
+        static_assert(std::is_same_v<RangeType, Scalar>);
+        m_data = m_data.array() + rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -196,7 +252,8 @@ namespace Rodin::Variational
       inline
       Derived& operator-=(Scalar rhs)
       {
-        getData() = getData().array() - rhs;
+        static_assert(std::is_same_v<RangeType, Scalar>);
+        m_data = m_data.array() - rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -206,7 +263,7 @@ namespace Rodin::Variational
       inline
       Derived& operator*=(Scalar rhs)
       {
-        getData() = getData().array() * rhs;
+        m_data = m_data.array() * rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -216,7 +273,7 @@ namespace Rodin::Variational
       inline
       Derived& operator/=(Scalar rhs)
       {
-        getData() = getData().array() / rhs;
+        m_data = m_data.array() / rhs;
         return static_cast<Derived&>(*this);
       }
 
@@ -230,7 +287,7 @@ namespace Rodin::Variational
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() + rhs.getData().array();
+          m_data = m_data.array() + rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -245,7 +302,7 @@ namespace Rodin::Variational
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() - rhs.getData().array();
+          m_data = m_data.array() - rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -255,12 +312,12 @@ namespace Rodin::Variational
       {
         if (this == &rhs)
         {
-          getData() = getData().array() * getData().array();
+          m_data = m_data.array() * m_data.array();
         }
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() * rhs.getData().array();
+          m_data = m_data.array() * rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -275,7 +332,7 @@ namespace Rodin::Variational
         else
         {
           assert(&getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-          getData() = getData().array() / rhs.getData().array();
+          m_data = m_data.array() / rhs.m_data.array();
         }
         return static_cast<Derived&>(*this);
       }
@@ -283,13 +340,20 @@ namespace Rodin::Variational
       inline
       auto& project(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
-        return project(fn, std::set<Geometry::Attribute>{attr});
+        return project(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       inline
-      auto& project(std::function<Scalar(const Geometry::Point&)> fn, const std::set<Geometry::Attribute>& attrs = {})
+      auto& project(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
         return project(ScalarFunction(fn), attrs);
+      }
+
+      template <class NestedDerived>
+      inline
+      Derived& project(const FunctionBase<NestedDerived>& fn)
+      {
+        return project(fn, FlatSet<Geometry::Attribute>{});
       }
 
       /**
@@ -299,13 +363,14 @@ namespace Rodin::Variational
        * domain elements with the given attribute.
        *
        * It is a convenience function to call
-       * project(const FunctionBase&, const std::set<int>&) with one
+       * project(const FunctionBase&, const FlatSet<Geometry::Atribute>&) with one
        * attribute.
        */
       template <class NestedDerived>
+      inline
       Derived& project(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
       {
-        return project(fn, std::set<Geometry::Attribute>{attr});
+        return project(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -316,204 +381,113 @@ namespace Rodin::Variational
        * empty, this function will project over all elements in the mesh.
        */
       template <class NestedDerived>
-      Derived& project(const FunctionBase<NestedDerived>& fn, const std::set<Geometry::Attribute>& attrs = {})
+      Derived& project(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
       {
-        using Value = FunctionBase<NestedDerived>;
-        using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
-        static_assert(std::is_same_v<RangeType, ValueRangeType>);
-        if constexpr (std::is_same_v<ValueRangeType, Scalar>)
+        using Function = FunctionBase<NestedDerived>;
+        using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;
+        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        const auto& fes = getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t d = mesh.getDimension();
+        for (auto it = mesh.getElement(); !it.end(); ++it)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == 1);
-          Internal::MFEMScalarCoefficient sc(getFiniteElementSpace().getMesh(), fn);
-          if (attrs.size() == 0)
+          const auto& polytope = *it;
+          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
           {
-            getHandle().ProjectCoefficient(sc);
-          }
-          else
-          {
-            mfem::Array<int> vdofs;
-            const auto& fes = getFiniteElementSpace().getHandle();
-            for (int i = 0; i < fes.GetNE(); i++)
+            const auto& i = polytope.getIndex();
+            const auto& fe = fes.getFiniteElement(d, i);
+            const auto& trans = mesh.getPolytopeTransformation(d, i);
+            for (size_t local = 0; local < fe.getCount(); local++)
             {
-              if (attrs.count(fes.GetAttribute(i)) > 0)
+              const Geometry::Point p(polytope, trans, fe.getNode(local));
+              if constexpr (std::is_same_v<RangeType, Scalar>)
               {
-                fes.GetElementVDofs(i, vdofs);
-                getHandle().ProjectCoefficient(sc, vdofs);
+                assert(m_data.rows() == 1);
+                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              {
+                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else
+              {
+                assert(false);
               }
             }
           }
-          return static_cast<Derived&>(*this);
         }
-        else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
+      auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
+      {
+        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
+      }
+
+      inline
+      auto& projectOnBoundary(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
+      {
+        return projectOnBoundary(ScalarFunction(fn), attrs);
+      }
+
+      template <class NestedDerived>
+      inline
+      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn)
+      {
+        return static_cast<Derived&>(*this).projectOnBoundary(fn, FlatSet<Geometry::Attribute>{});
+      }
+
+      template <class NestedDerived>
+      inline
+      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, Geometry::Attribute attr)
+      {
+        return projectOnBoundary(fn, FlatSet<Geometry::Attribute>{attr});
+      }
+
+      template <class NestedDerived>
+      Derived& projectOnBoundary(const FunctionBase<NestedDerived>& fn, const FlatSet<Geometry::Attribute>& attrs)
+      {
+        using Function = FunctionBase<NestedDerived>;
+        using FunctionRangeType = typename FormLanguage::Traits<Function>::RangeType;
+        static_assert(std::is_same_v<RangeType, FunctionRangeType>);
+        const auto& fes = getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t d = mesh.getDimension() - 1;
+        for (auto it = mesh.getBoundary(); !it.end(); ++it)
         {
-          assert(getFiniteElementSpace().getVectorDimension() == fn.getRangeShape().height());
-          Internal::MFEMVectorCoefficient vc(getFiniteElementSpace().getMesh(), fn);
-          if (attrs.size() == 0)
+          const auto& polytope = *it;
+          if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
           {
-            getHandle().ProjectCoefficient(vc);
-          }
-          else
-          {
-            mfem::Array<int> vdofs;
-            const auto& fes = getFiniteElementSpace().getHandle();
-            for (int i = 0; i < fes.GetNE(); i++)
+            const auto& i = polytope.getIndex();
+            const auto& fe = fes.getFiniteElement(d, i);
+            const auto& trans = mesh.getPolytopeTransformation(d, i);
+            for (size_t local = 0; local < fe.getCount(); local++)
             {
-              if (attrs.count(fes.GetAttribute(i)) > 0)
+              const Geometry::Point p(polytope, trans, fe.getNode(local));
+              if constexpr (std::is_same_v<RangeType, Scalar>)
               {
-                fes.GetElementVDofs(i, vdofs);
-                getHandle().ProjectCoefficient(vc, vdofs);
+                assert(m_data.rows() == 1);
+                m_data(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+              {
+                m_data.col(fes.getGlobalIndex({ d, i }, local)) = fn.getValue(p);
+              }
+              else
+              {
+                assert(false);
               }
             }
           }
-          return static_cast<Derived&>(*this);
         }
-        else
-        {
-          assert(false);
-          return static_cast<Derived&>(*this);
-        }
-      }
-
-      inline
-      constexpr
-      const FES& getFiniteElementSpace() const
-      {
-        return m_fes.get();
-      }
-
-      inline
-      constexpr
-      Math::Vector& getData()
-      {
-        return m_data;
-      }
-
-      inline
-      constexpr
-      const Math::Vector& getData() const
-      {
-        return m_data;
+        return static_cast<Derived&>(*this);
       }
 
       Derived& load(
           const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
       {
-        return static_cast<Derived&>(*this).load(filename, fmt);
-      }
-
-      void save(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM,
-          size_t precision = RODIN_DEFAULT_GRIDFUNCTION_SAVE_PRECISION) const
-      {
-        return static_cast<const Derived&>(*this).save(filename, fmt, precision);
-      }
-
-      inline
-      constexpr
-      RangeShape getRangeShape() const
-      {
-        return { getFiniteElementSpace().getVectorDimension(), 1 };
-      }
-
-      inline
-      auto getValue(const Geometry::Point& p) const
-      {
-        if constexpr (std::is_same_v<RangeType, Scalar>)
-        {
-          return Scalar(getHandle().GetValue(p.getTransformation().getHandle(), p.getIntegrationPoint()));
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-        {
-          Math::Vector res(getFiniteElementSpace().getVectorDimension());
-          mfem::Vector tmp(res.data(), res.size());
-          getHandle().GetVectorValue(p.getTransformation().getHandle(), p.getIntegrationPoint(), tmp);
-          return res;
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
-      }
-
-      /**
-       * @internal
-       * @brief Gets the underlying handle to the mfem::GridFunction object.
-       * @returns Reference to the underlying object.
-       */
-      mfem::GridFunction& getHandle() const
-      {
-        assert(m_gf);
-        return *m_gf;
-      }
-
-    private:
-      std::reference_wrapper<const FES> m_fes;
-      Math::Vector m_data;
-      std::unique_ptr<mfem::GridFunction> m_gf;
-  };
-
-
-  /**
-   * @ingroup GridFunctionSpecializations
-   * @brief Represents a GridFunction which belongs to an H1 finite element
-   * space.
-   */
-  template <class ... Ts>
-  class GridFunction<H1<Ts...>> final : public GridFunctionBase<GridFunction<H1<Ts...>>, H1<Ts...>>
-  {
-    public:
-      using FES = H1<Ts...>;
-      using Parent = GridFunctionBase<GridFunction<H1<Ts...>>, H1<Ts...>>;
-
-      using Parent::operator=;
-      using Parent::operator+=;
-      using Parent::operator-=;
-      using Parent::operator*=;
-      using Parent::operator/=;
-
-      /**
-       * @brief Constructs a grid function on a finite element space.
-       * @param[in] fes Finite element space to which the function belongs
-       * to.
-       */
-      GridFunction(const FES& fes)
-        : Parent(fes)
-      {}
-
-      /**
-       * @brief Copies the grid function.
-       * @param[in] other Other grid function to copy.
-       */
-      GridFunction(const GridFunction& other)
-        : Parent(other)
-      {}
-
-      /**
-       * @brief Move constructs the grid function.
-       * @param[in] other Other grid function to move.
-       */
-      GridFunction(GridFunction&& other)
-        : Parent(std::move(other))
-      {}
-
-      /**
-       * @brief Move assignment operator.
-       */
-      inline
-      constexpr
-      GridFunction& operator=(GridFunction&& other)
-      {
-        Parent::operator=(std::move(other));
-        return *this;
-      }
-
-      GridFunction& operator=(const GridFunction&)  = delete;
-
-      GridFunction& load(
-          const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
-      {
-        mfem::named_ifgzstream input(filename.c_str());
+        std::ifstream input(filename.c_str());
         if (!input)
         {
           Alert::Exception()
@@ -525,13 +499,13 @@ namespace Rodin::Variational
         {
           case IO::FileFormat::MFEM:
           {
-            IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(*this);
+            IO::GridFunctionLoader<IO::FileFormat::MFEM, FES> loader(static_cast<Derived&>(*this));
             loader.load(input);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
-            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(*this);
+            IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES> loader(static_cast<Derived&>(*this));
             loader.load(input);
             break;
           }
@@ -542,7 +516,7 @@ namespace Rodin::Variational
               << Alert::Raise;
           }
         }
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       void save(
@@ -562,13 +536,13 @@ namespace Rodin::Variational
         {
           case IO::FileFormat::MFEM:
           {
-            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(*this);
+            IO::GridFunctionPrinter<IO::FileFormat::MFEM, FES> printer(static_cast<const Derived&>(*this));
             printer.print(output);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
-            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(*this);
+            IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FES> printer(static_cast<const Derived&>(*this));
             printer.print(output);
             break;
           }
@@ -579,84 +553,133 @@ namespace Rodin::Variational
               << Alert::Raise;
           }
         }
+        output.close();
       }
 
-      template <class NestedDerived>
       inline
-      GridFunction& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-                                      Geometry::Attribute attr)
+      constexpr
+      const FES& getFiniteElementSpace() const
       {
-        return projectOnBoundary(fn, std::set<Geometry::Attribute>{attr});
+        return m_fes.get();
       }
 
-      template <class NestedDerived>
-      GridFunction& projectOnBoundary(const FunctionBase<NestedDerived>& fn,
-                                      const std::set<Geometry::Attribute>& attrs = {})
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      template <class Matrix>
+      inline
+      constexpr
+      Derived& setData(Matrix&& data) const
       {
-        using Value = FunctionBase<NestedDerived>;
-        using ValueRangeType = typename FormLanguage::Traits<Value>::RangeType;
-        if constexpr (std::is_same_v<ValueRangeType, Scalar>)
+        m_data = std::forward<Matrix>(data);
+        return static_cast<Derived&>(*this).setData();
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      inline
+      constexpr
+      Math::Matrix& getData()
+      {
+        return m_data;
+      }
+
+      /**
+       * @brief Returns a constant reference to the GridFunction data.
+       */
+      inline
+      constexpr
+      const Math::Matrix& getData() const
+      {
+        return m_data;
+      }
+
+      inline
+      constexpr
+      std::optional<Math::Vector>& getWeights()
+      {
+        return m_weights;
+      }
+
+      inline
+      constexpr
+      const std::optional<Math::Vector>& getWeights() const
+      {
+        return m_weights;
+      }
+
+      inline
+      Derived& setWeights()
+      {
+        return static_cast<Derived&>(*this).setWeights();
+      }
+
+      template <class Vector>
+      inline
+      Derived& setWeights(Vector&& weights)
+      {
+        return static_cast<Derived&>(*this).setWeights(std::forward<Vector>(weights));
+      }
+
+      template <class Vector, class Matrix>
+      inline
+      Derived& setWeightsAndData(Vector&& weights, Matrix&& data)
+      {
+        m_weights = std::forward<Vector>(weights);
+        m_data = std::forward<Matrix>(data);
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getFiniteElementSpace().getVectorDimension(), 1 };
+      }
+
+      inline
+      auto getValue(Index global) const
+      {
+        if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          int maxBdrAttr = this->getFiniteElementSpace()
-                                .getMesh()
-                                .getHandle().bdr_attributes.Max();
-          mfem::Array<int> marker(maxBdrAttr);
-          if (attrs.size() == 0)
-          {
-            marker = 1;
-            Internal::MFEMScalarCoefficient sc(this->getFiniteElementSpace().getMesh(), fn);
-            this->getHandle().ProjectBdrCoefficient(sc, marker);
-            return *this;
-          }
-          else
-          {
-            marker = 0;
-            for (const auto& attr : attrs)
-            {
-              assert(attr - 1 < maxBdrAttr);
-              marker[attr - 1] = 1;
-            }
-            Internal::MFEMScalarCoefficient sc(this->getFiniteElementSpace().getMesh(), fn);
-            this->getHandle().ProjectBdrCoefficient(sc, marker);
-            return *this;
-          }
+          assert(m_data.size() >= 0);
+          assert(global < static_cast<size_t>(m_data.size()));
+          return m_data(global);
         }
-        else if constexpr (std::is_same_v<ValueRangeType, Math::Vector>)
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
-          int maxBdrAttr = this->getFiniteElementSpace()
-                                  .getMesh()
-                                  .getHandle().bdr_attributes.Max();
-          mfem::Array<int> marker(maxBdrAttr);
-          if (attrs.size() == 0)
-          {
-            marker = 1;
-            Internal::MFEMVectorCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
-            this->getHandle().ProjectBdrCoefficient(vc, marker);
-            return *this;
-          }
-          else
-          {
-            marker = 0;
-            for (const auto& attr : attrs)
-            {
-              assert(attr - 1 < maxBdrAttr);
-              marker[attr - 1] = 1;
-            }
-            Internal::MFEMVectorCoefficient vc(this->getFiniteElementSpace().getMesh(), fn);
-            this->getHandle().ProjectBdrCoefficient(vc, marker);
-            return *this;
-          }
+          assert(m_data.cols() >= 0);
+          assert(global < static_cast<size_t>(m_data.cols()));
+          return m_data.col(global);
         }
         else
         {
           assert(false);
-          return *this;
+          return void();
         }
       }
-  };
 
-  template <class ... Ts>
-  GridFunction(const H1<Ts...>&) -> GridFunction<H1<Ts...>>;
+      inline
+      auto getValue(const std::pair<size_t, Index>& p, size_t local) const
+      {
+        return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
+      }
+
+      /**
+       * @brief Gets the interpolated value at the point.
+       */
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+    private:
+      std::reference_wrapper<const FES> m_fes;
+      Math::Matrix m_data;
+      std::optional<Math::Vector> m_weights;
+  };
 }
 
 #include "GridFunction.hpp"

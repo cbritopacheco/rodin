@@ -1,0 +1,25 @@
+.defelement-button:link
+{
+  text-decoration: none;
+}
+
+.defelement-button:hover
+{
+  text-decoration: underline;
+}
+
+.defelement-name
+{
+  font-family: 'Varela Round', sans-serif;
+  color: #44AAFF;
+}
+
+.defelement-logo
+{
+  background: linear-gradient(to left,
+                    #FF8800,
+                    #DD2299);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-family: 'Varela Round', sans-serif;
+}

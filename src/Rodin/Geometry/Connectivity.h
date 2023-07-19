@@ -7,92 +7,127 @@
 #ifndef RODIN_GEOMETRY_CONNECTIVITY_H
 #define RODIN_GEOMETRY_CONNECTIVITY_H
 
+#include <set>
 #include <vector>
+#include <iostream>
+#include <unordered_map>
+#include <boost/bimap.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
 
 #include "Rodin/Array.h"
 
 #include "ForwardDecls.h"
 
+#include "Types.h"
+#include "Simplex.h"
+#include "GeometryIndexed.h"
+
 namespace Rodin::Geometry
 {
   /**
-   * @brief Represents the set of incidence relations.
+   * @brief Represents the set of incidence relations of a Mesh.
    *
-   * Stores the set of incidence relations:
+   * This class stores the set of incidence relations:
    * @f[
-   *  d \rightarrow d'
+   *  d \longrightarrow d', \quad 0 \leq d, d' \leq D,
    * @f]
-   * for a fixed pair of topological dimensions @f$ (d, d') @f$.
+   * where @f$ D @f$ represents the topological mesh dimension. This class is
+   * based on @cite logg2009efficient.
+   *
    */
-  class Connectivity
+  class MeshConnectivity
   {
     public:
-      Connectivity(size_t d, size_t dp, size_t n = 0)
-        : m_left(d), m_right(dp), m_connectivity(n)
-      {}
+      using PolytopeIndex =
+        boost::bimap<
+          boost::bimaps::unordered_set_of<IndexArray, IndexArraySymmetricHash, IndexArraySymmetricEquality>,
+          boost::bimaps::unordered_set_of<Index>
+        >;
 
-      Connectivity(const Connectivity&) = default;
-
-      Connectivity(Connectivity&&) = default;
-
-      size_t getLeft() const
+      struct SubPolytope
       {
-        return m_left;
+        Polytope::Geometry geometry;
+        Array<Index> vertices;
+      };
+
+      MeshConnectivity() = default;
+
+      MeshConnectivity(const MeshConnectivity&) = default;
+
+      MeshConnectivity(MeshConnectivity&&) = default;
+
+      MeshConnectivity& operator=(const MeshConnectivity&) = default;
+
+      MeshConnectivity& operator=(MeshConnectivity&&) = default;
+
+      MeshConnectivity& initialize(size_t maximalDimension);
+
+      MeshConnectivity& nodes(size_t count);
+
+      MeshConnectivity& reserve(size_t d, size_t count);
+
+      MeshConnectivity& polytope(
+          Geometry::Polytope::Geometry t, std::initializer_list<Index> p)
+      {
+        Array<Index> arr(p.size());
+        std::copy(p.begin(), p.end(), arr.begin());
+        return polytope(t, std::move(arr));
       }
 
-      size_t getRight() const
-      {
-        return m_right;
-      }
+      MeshConnectivity& polytope(
+          Geometry::Polytope::Geometry t, const Array<Index>& polytope);
 
-      size_t getSize() const
-      {
-        return m_connectivity.size();
-      }
+      MeshConnectivity& polytope(
+          Geometry::Polytope::Geometry t, Array<Index>&& polytope);
 
-      Connectivity& setSize(size_t size)
-      {
-        m_connectivity.resize(size);
-        return *this;
-      }
+      MeshConnectivity& compute(size_t d, size_t dp);
 
-      Connectivity& connect(Index idx, const Array<Index>& incidence)
-      {
-        if (idx + 1 > m_connectivity.size())
-          m_connectivity.resize(idx + 1);
-        assert(idx < m_connectivity.size());
-        m_connectivity[idx] = incidence;
-        return *this;
-      }
+      size_t getCount(size_t dim) const;
+
+      size_t getCount(Polytope::Geometry g) const;
+
+      size_t getMeshDimension() const;
+
+      const PolytopeIndex& getIndexMap(size_t dim) const;
+
+      const std::optional<Index> getIndex(size_t dim, const IndexArray& key) const;
+
+      Polytope::Geometry getGeometry(size_t d, Index idx) const;
+
+      const Array<Index>& getPolytope(size_t d, Index idx) const;
+
+      const Incidence& getIncidence(size_t d, size_t dp) const;
+
+      const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
 
       /**
-       * @brief Gets the indices of the simplices of dimension @f$ d' @f$,
-       * incident to the simplex @f$ (d, i) @f$.
+       * @brief Computes the entities of dimension @f$ d @f$ of each cell and
+       * for each such entity the vertices of that entity.
+       *
+       * Computes the connectivities:
+       * @f[
+       *  D \longrightarrow d \quad \text{and} \quad D \longrightarrow 0, \quad 0 < d < D,
+       * @f]
+       * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
        */
-      const Array<Index>& getIncidence(Index idx) const
-      {
-        assert(idx < getSize());
-        return m_connectivity[idx];
-      }
+      MeshConnectivity& build(size_t d);
 
-      void build(size_t d)
-      {
-        assert(false);
-      }
+      MeshConnectivity& transpose(size_t d, size_t dp);
 
-      void transpose(size_t d, size_t dp)
-      {
-        assert(false);
-      }
+      MeshConnectivity& intersection(size_t d, size_t dp, size_t dpp);
 
-      void intersection(size_t d, size_t dp)
-      {
-        assert(false);
-      }
+      void local(std::vector<SubPolytope>& out, size_t dim, Index i);
 
     private:
-      size_t m_left, m_right;
-      std::vector<Array<Index>> m_connectivity;
+      size_t m_maximalDimension;
+
+      std::vector<size_t> m_count;
+      GeometryIndexed<size_t> m_gcount;
+      std::vector<PolytopeIndex> m_index;
+      std::vector<std::vector<bool>> m_dirty;
+      std::vector<std::vector<Polytope::Geometry>> m_geometry;
+      std::vector<std::vector<Incidence>> m_connectivity;
+
   };
 }
 

@@ -1,4 +1,5 @@
-#include "Rodin/Variational/MFEM.h"
+#include <Eigen/Cholesky>
+
 #include "Rodin/Variational/QuadratureRule.h"
 
 #include "Mesh.h"
@@ -8,92 +9,158 @@
 
 namespace Rodin::Geometry
 {
-  bool operator<(const Simplex& lhs, const Simplex& rhs)
+
+  const GeometryIndexed<Math::Matrix> Polytope::s_vertices =
+  {
+    { Polytope::Geometry::Point,
+      Math::Matrix{{0}} },
+    { Polytope::Geometry::Segment,
+      Math::Matrix{{0, 1}} },
+    { Polytope::Geometry::Triangle,
+      Math::Matrix{{0, 1, 0},
+                   {0, 0, 1}} },
+    { Polytope::Geometry::Quadrilateral,
+      Math::Matrix{{0, 1, 0, 1},
+                   {0, 0, 1, 1}} },
+    { Polytope::Geometry::Tetrahedron,
+      Math::Matrix{{0, 1, 0, 0},
+                   {0, 0, 1, 0},
+                   {0, 0, 0, 1}} },
+  };
+
+  bool operator<(const Polytope& lhs, const Polytope& rhs)
   {
     return lhs.getIndex() < rhs.getIndex();
   }
 
-  // ---- Simplex -----------------------------------------------------------
-  Simplex::Simplex(
-      size_t dimension,
-      Index index,
-      const MeshBase& mesh,
-      const std::vector<Index>& vertices,
-      Attribute attr)
-    :  m_dimension(dimension), m_index(index), m_mesh(mesh),
-      m_vertices(vertices), m_attr(attr)
+  // ---- Polytope -----------------------------------------------------------
+  Polytope::Polytope(size_t dimension, Index index, const MeshBase& mesh)
+    : m_dimension(dimension), m_index(index), m_mesh(mesh)
+  {}
+
+  Attribute Polytope::getAttribute() const
   {
-    if (m_dimension == mesh.getDimension())
-    {
-      m_type = static_cast<Geometry::Type>(mesh.getHandle().GetElementGeometry(index));
-    }
-    else if (m_dimension == mesh.getDimension() - 1)
-    {
-      m_type = static_cast<Geometry::Type>(mesh.getHandle().GetFaceGeometry(index));
-    }
-    else if (m_dimension == 0)
-    {
-      m_type = Geometry::Type::Point;
-    }
-    else
-    {
-      assert(false);
-    }
+    return getMesh().getAttribute(getDimension(), getIndex());
   }
 
-  // VertexIterator Simplex::getVertices() const
-  // {
-  //   assert(false);
-  // }
-
-  SimplexIterator Simplex::getAdjacent() const
+  Polytope::Geometry Polytope::getGeometry() const
   {
-    assert(false);
-    return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
+    return getMesh().getGeometry(getDimension(), getIndex());
   }
 
-  SimplexIterator Simplex::getIncident() const
+  VertexIterator Polytope::getVertex() const
+  {
+    const auto& vertices = getVertices();
+    return VertexIterator(
+        getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
+  }
+
+  const Math::Matrix& Polytope::getVertices(Polytope::Geometry g)
+  {
+    return s_vertices[g];
+  }
+
+  const Array<Index>& Polytope::getVertices() const
+  {
+    return m_mesh.get().getConnectivity().getPolytope(getDimension(), getIndex());
+  }
+
+  PolytopeIterator Polytope::getAdjacent() const
   {
     assert(false);
-    return SimplexIterator(0, getMesh(), EmptyIndexGenerator());
+    return PolytopeIterator(0, getMesh(), EmptyIndexGenerator());
   }
 
-  const SimplexTransformation& Simplex::getTransformation() const
+  PolytopeIterator Polytope::getIncident() const
   {
-    return m_mesh.get().getSimplexTransformation(m_dimension, m_index);
+    assert(false);
+    return PolytopeIterator(0, getMesh(), EmptyIndexGenerator());
   }
 
-  Scalar Simplex::getVolume() const
+  const PolytopeTransformation& Polytope::getTransformation() const
   {
-    mfem::ElementTransformation& trans = getTransformation().getHandle();
-    const Variational::QuadratureRule& qr =
-      Variational::QuadratureRule::get(getGeometry(), trans.OrderJ());
-    Scalar volume = 0.0;
-    for (size_t i = 0; i < qr.size(); i++)
-      volume += qr.getWeight(i) * trans.Weight();
-    return volume;
+    return m_mesh.get().getPolytopeTransformation(m_dimension, m_index);
   }
 
-  // VertexIterator Simplex::getVertices() const
-  // {
-  //   // mfem::Array<int> vs;
-  //   // m_data.element->GetVertices(vs);
-  //   // return std::vector<int>(vs.begin(), vs.end());
-  //   assert(false);
-  // }
+  Scalar Polytope::getMeasure() const
+  {
+    const auto& mesh = getMesh();
+    switch (getGeometry())
+    {
+      case Geometry::Point:
+      {
+        return 0;
+      }
+      case Geometry::Segment:
+      {
+        const auto& vertices = getVertices();
+        const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
+        const auto& b = mesh.getVertexCoordinates(vertices.coeff(1));
+        const Scalar x0 = a.x();
+        const Scalar y0 = a.y();
+        const Scalar x1 = b.x();
+        const Scalar y1 = b.y();
+        return Math::sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
+      }
+      case Geometry::Triangle:
+      {
+        const auto& vertices = getVertices();
+        const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
+        const auto& b = mesh.getVertexCoordinates(vertices.coeff(1));
+        const auto& c = mesh.getVertexCoordinates(vertices.coeff(2));
+        const Scalar x0 = a.x();
+        const Scalar y0 = a.y();
+        const Scalar x1 = b.x();
+        const Scalar y1 = b.y();
+        const Scalar x2 = c.x();
+        const Scalar y2 = c.y();
+        return (1.0 / 2.0) * Math::abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0));
+      }
+      case Geometry::Quadrilateral:
+      {
+        const auto& vertices = getVertices();
+        const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
+        const auto& b = mesh.getVertexCoordinates(vertices.coeff(1));
+        const auto& c = mesh.getVertexCoordinates(vertices.coeff(3));
+        const auto& d = mesh.getVertexCoordinates(vertices.coeff(2));
+        const Scalar x0 = a.x();
+        const Scalar y0 = a.y();
+        const Scalar x1 = b.x();
+        const Scalar y1 = b.y();
+        const Scalar x2 = c.x();
+        const Scalar y2 = c.y();
+        const Scalar x3 = d.x();
+        const Scalar y3 = d.y();
+        return (1.0 / 2.0) * Math::abs((x0 * y1 - x1 * y0) + (x1 * y2 - x2 * y1) + (x2 * y3 - x3 * y2) + (x3 * y0 - x0 * y3));
+      }
+      case Geometry::Tetrahedron:
+      {
+        Eigen::Matrix<Scalar, 4, 4> pm;
+        const auto& vertices = getVertices();
+        const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
+        const auto& b = mesh.getVertexCoordinates(vertices.coeff(1));
+        const auto& c = mesh.getVertexCoordinates(vertices.coeff(3));
+        const auto& d = mesh.getVertexCoordinates(vertices.coeff(2));
+        pm << a.x(), a.y(), a.z(), 1,
+              b.x(), b.y(), b.z(), 1,
+              c.x(), c.y(), c.z(), 1,
+              d.x(), d.y(), d.z(), 1;
+        return (1.0 / 6.0) * pm.determinant();
+      }
+    }
+
+    assert(false);
+    return NAN;
+  }
 
   // ---- Element -----------------------------------------------------------
-  Element::Element(
-      Index index,
-      const MeshBase& mesh, const std::vector<Index>& vertices, Attribute attr)
-    : Simplex(mesh.getDimension(), index, mesh, vertices, attr)
+  Element::Element(Index index, const MeshBase& mesh)
+    : Polytope(mesh.getDimension(), index, mesh)
   {}
 
   // ---- Face --------------------------------------------------------------
-  Face::Face(
-      Index index,
-      const MeshBase& mesh, const std::vector<Index>& vertices, Attribute attr)
-    : Simplex(mesh.getDimension() - 1, index, mesh, vertices, attr)
+  Face::Face(Index index, const MeshBase& mesh)
+    : Polytope(mesh.getDimension() - 1, index, mesh)
   {}
 
   bool Face::isBoundary() const
@@ -107,104 +174,232 @@ namespace Rodin::Geometry
   }
 
   // ---- Vertex -------------------------------------------------------------
-  Vertex::Vertex(
-      Index index,
-      const MeshBase& mesh, const Math::Vector& coordinates, Attribute attr)
-    : Simplex(0, index, mesh, {index}, attr), m_coordinates(coordinates)
+  Vertex::Vertex(Index index, const MeshBase& mesh)
+    : Polytope(0, index, mesh)
   {}
 
-  Scalar Vertex::operator()(size_t i) const
+  Eigen::Map<const Math::SpatialVector> Vertex::getCoordinates() const
   {
-    assert(i < static_cast<size_t>(m_coordinates.size()));
-    return m_coordinates(i);
+    return getMesh().getVertexCoordinates(getIndex());
   }
 
   // ---- Point --------------------------------------------------------------
-  Point::Point(const Simplex& simplex, const SimplexTransformation& trans, const Math::Vector& rc)
-    : m_simplex(simplex), m_trans(trans), m_rc(rc), m_ip(Variational::Internal::vec2ip(m_rc))
-  {
-    m_trans.get().getHandle().SetIntPoint(&m_ip);
-  }
+  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans)
+    : m_polytope(simplex), m_trans(trans)
+  {}
 
-  const Math::Vector& Point::getCoordinates(Coordinates coords) const
+  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans, const Math::SpatialVector& pc)
+    : m_polytope(simplex), m_trans(trans), m_pc(pc)
+  {}
+
+  const Math::SpatialVector& PointBase::getCoordinates(Coordinates coords) const
   {
-    switch (coords)
+    if (coords == Coordinates::Physical)
     {
-      case Coordinates::Physical:
-      {
-        if (!m_pc.has_value())
-        {
-          Math::Vector pc(getSimplex().getMesh().getSpaceDimension());
-          mfem::Vector tmp(pc.data(), pc.size());
-          m_trans.get().getHandle().Transform(m_ip, tmp);
-          m_pc.emplace(std::move(pc));
-        }
-        assert(m_pc.has_value());
-        return m_pc.value();
-      }
-      case Coordinates::Reference:
-      {
-        return m_rc.get();
-      }
+      return getPhysicalCoordinates();
     }
-
-    return m_pc.value(); // Some compilers complain, so return any value
+    else
+    {
+      assert(coords == Coordinates::Reference);
+      return getReferenceCoordinates();
+    }
   }
 
-  const Math::Matrix& Point::getJacobian() const
+  const Math::SpatialVector& PointBase::getPhysicalCoordinates() const
+  {
+    if (!m_pc.has_value())
+      m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
+    assert(m_pc.has_value());
+    return m_pc.value();
+  }
+
+  const Math::SpatialMatrix& PointBase::getJacobian() const
   {
     if (!m_jacobian.has_value())
-    {
-      const size_t rdim = getSimplex().getDimension();
-      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
-      Math::Matrix jacobian(sdim, rdim);
-      mfem::DenseMatrix tmp(jacobian.data(), jacobian.rows(), jacobian.cols());
-      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
-      tmp = m_trans.get().getHandle().Jacobian();
-      m_jacobian.emplace(std::move(jacobian));
-    }
+      m_jacobian.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
     assert(m_jacobian.has_value());
     return m_jacobian.value();
   }
 
-  const Math::Matrix& Point::getJacobianInverse() const
+  const Math::SpatialMatrix& PointBase::getJacobianInverse() const
   {
-    if (!m_inverseJacobian.has_value())
+    if (!m_jacobianInverse.has_value())
     {
-      const size_t rdim = getSimplex().getDimension();
-      const size_t sdim = getSimplex().getMesh().getSpaceDimension();
-      Math::Matrix inv(rdim, sdim);
-      mfem::DenseMatrix tmp(inv.data(), inv.rows(), inv.cols());
-      assert(&m_trans.get().getHandle().GetIntPoint() == &m_ip);
-      tmp = m_trans.get().getHandle().InverseJacobian();
-      m_inverseJacobian.emplace(std::move(inv));
+      const size_t rdim = Polytope::getGeometryDimension(m_polytope.get().getGeometry());
+      const size_t sdim = m_polytope.get().getMesh().getSpaceDimension();
+      assert(rdim <= sdim);
+      if (rdim == sdim)
+      {
+        switch (rdim)
+        {
+          case 1:
+          {
+            Math::Matrix inv(1, 1);
+            inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
+            m_jacobianDeterminant.emplace(getJacobian().coeff(0, 0));
+            return m_jacobianInverse.emplace(std::move(inv));
+          }
+          case 2:
+          {
+            const auto& jac = getJacobian();
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(1, 0);
+            const Scalar d = jac.coeff(1, 1);
+            const Scalar det = a * d - b * c;
+            assert(det != 0);
+            m_jacobianDeterminant.emplace(det);
+            Math::Matrix inv(2, 2);
+            inv.coeffRef(0, 0) = d / det;
+            inv.coeffRef(0, 1) = -b / det;
+            inv.coeffRef(1, 0) = -c / det;
+            inv.coeffRef(1, 1) = a / det;
+            return m_jacobianInverse.emplace(std::move(inv));
+          }
+          case 3:
+          {
+            const auto& jac = getJacobian();
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(0, 2);
+            const Scalar d = jac.coeff(1, 0);
+            const Scalar e = jac.coeff(1, 1);
+            const Scalar f = jac.coeff(1, 2);
+            const Scalar g = jac.coeff(2, 0);
+            const Scalar h = jac.coeff(2, 1);
+            const Scalar i = jac.coeff(2, 2);
+
+            const Scalar A = e * i - f * h;
+            const Scalar B = -(d * i - f * g);
+            const Scalar C = d * h - e * g;
+            const Scalar D = -(b * i - c * h);
+            const Scalar E = a * i - c * g;
+            const Scalar F = -(a * h - b * g);
+            const Scalar G = b * f - c * e;
+            const Scalar H = - (a * f  - c * d);
+            const Scalar I = a * e - b * d;
+
+            const Scalar det = a * A + b * B + c * C;
+            m_jacobianDeterminant.emplace(det);
+
+            assert(det != 0);
+            Math::Matrix inv(3, 3);
+            inv.coeffRef(0, 0) = A / det;
+            inv.coeffRef(0, 1) = D / det;
+            inv.coeffRef(0, 2) = G / det;
+            inv.coeffRef(1, 0) = B / det;
+            inv.coeffRef(1, 1) = E / det;
+            inv.coeffRef(1, 2) = H / det;
+            inv.coeffRef(2, 0) = C / det;
+            inv.coeffRef(2, 1) = F / det;
+            inv.coeffRef(2, 2) = I / det;
+            return m_jacobianInverse.emplace(std::move(inv));
+          }
+          default:
+          {
+            return m_jacobianInverse.emplace(getJacobian().inverse());
+          }
+        }
+      }
+      else
+      {
+        const auto& jac = getJacobian();
+        return m_jacobianInverse.emplace(jac.completeOrthogonalDecomposition().pseudoInverse());
+      }
     }
-    assert(m_inverseJacobian.has_value());
-    return m_inverseJacobian.value();
+    assert(m_jacobianInverse.has_value());
+    return m_jacobianInverse.value();
   }
 
-  Scalar Point::getDistortion() const
+  Scalar PointBase::getJacobianDeterminant() const
+  {
+    if (!m_jacobianDeterminant.has_value())
+    {
+      const auto& jac = getJacobian();
+      const auto rows = jac.rows();
+      const auto cols = jac.cols();
+      if (rows == cols)
+      {
+        switch (rows)
+        {
+          case 1:
+          {
+            return m_jacobianDeterminant.emplace(jac.coeff(0, 0));
+          }
+          case 2:
+          {
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(1, 0);
+            const Scalar d = jac.coeff(1, 1);
+            return m_jacobianDeterminant.emplace(a * d - b * c);
+          }
+          case 3:
+          {
+            const Scalar a = jac.coeff(0, 0);
+            const Scalar b = jac.coeff(0, 1);
+            const Scalar c = jac.coeff(0, 2);
+            const Scalar d = jac.coeff(1, 0);
+            const Scalar e = jac.coeff(1, 1);
+            const Scalar f = jac.coeff(1, 2);
+            const Scalar g = jac.coeff(2, 0);
+            const Scalar h = jac.coeff(2, 1);
+            const Scalar i = jac.coeff(2, 2);
+            const Scalar A = e * i - f * h;
+            const Scalar B = -(d * i - f * g);
+            const Scalar C = d * h - e * g;
+            return m_jacobianDeterminant.emplace(a * A + b * B + c * C);
+          }
+          default:
+          {
+            return m_jacobianDeterminant.emplace(jac.determinant());
+          }
+        }
+      }
+      else
+      {
+        assert(false); // Not handled yet
+      }
+    }
+    assert(m_jacobianDeterminant.has_value());
+    return m_jacobianDeterminant.value();
+  }
+
+  Scalar PointBase::getDistortion() const
   {
     if (!m_distortion.has_value())
     {
-      m_distortion.emplace(m_trans.get().getHandle().Weight());
+      const auto& jac = getJacobian();
+      const auto rows = jac.rows();
+      const auto cols = jac.cols();
+      if (rows == cols)
+      {
+        return m_distortion.emplace(getJacobianDeterminant());
+      }
+      else
+      {
+        if (jac.rows() == 2 && jac.cols() == 1)
+        {
+          return m_distortion.emplace(std::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
+        }
+        else
+        {
+          return m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+        }
+      }
     }
     assert(m_distortion.has_value());
     return m_distortion.value();
   }
 
-  size_t Point::getDimension(Coordinates coords) const
+  size_t PointBase::getDimension(Coordinates coords) const
   {
     switch (coords)
     {
       case Coordinates::Physical:
-      {
-        return m_simplex.get().getMesh().getSpaceDimension();
-      }
+        return m_polytope.get().getMesh().getSpaceDimension();
       case Coordinates::Reference:
-      {
-        return m_simplex.get().getMesh().getDimension();
-      }
+        return m_polytope.get().getMesh().getDimension();
       default:
       {
         assert(false);

@@ -94,12 +94,24 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
+      inline
+      const Math::Vector getVector() const
+      {
+        return m_vector;
+      }
+
+      inline
+      Math::Vector& getVector()
+      {
+        return m_vector;
+      }
+
       /**
        * @brief Performs the assembly of the element vector for the given
        * element.
        */
       virtual
-      Math::Vector getVector(const Geometry::Simplex& element) const = 0;
+      void assemble(const Geometry::Polytope& element) = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
@@ -107,6 +119,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const FormLanguage::Base> m_v;
       std::set<Geometry::Attribute> m_attrs;
+      Math::Vector m_vector;
   };
 }
 

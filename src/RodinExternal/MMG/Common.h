@@ -7,7 +7,6 @@
 #ifndef RODIN_EXTERNAL_MMG_COMMON_H
 #define RODIN_EXTERNAL_MMG_COMMON_H
 
-#include <map>
 #include <variant>
 
 #include <mmg/libmmg.h>
@@ -19,6 +18,9 @@
 #include <mmgs/libmmgs_private.h>
 #include <mmg/mmgs/libmmgs.h>
 #include <common/mmgcommon_private.h>
+
+#include "Rodin/Types.h"
+#include "Rodin/Geometry/Types.h"
 
 #include "Configure.h"
 
@@ -32,11 +34,6 @@
 
 namespace Rodin::External::MMG
 {
-  /**
-  * @brief Material reference for each element.
-  */
-  using MaterialReference = int;
-
   /**
   * @brief Empty class tag to specify that a material reference should not be
   * splitted.
@@ -53,16 +50,15 @@ namespace Rodin::External::MMG
   */
   struct Split
   {
-   MaterialReference   interior; /// Reference for the interior domain
-   MaterialReference   exterior; /// Reference for exterior domain
+    Geometry::Attribute   interior; /// Reference for the interior domain
+    Geometry::Attribute   exterior; /// Reference for exterior domain
   };
 
   /**
   * @brief Map indicating how a material reference should be split into
   * exterior and interior material references.
   */
-  using SplitMap = std::map<
-   MaterialReference, std::variant<Split, NoSplitT>>;
+  using SplitMap = UnorderedMap<Geometry::Attribute, std::variant<Split, NoSplitT>>;
 
   const char* getISCDMshdistExecutable();
 

@@ -9,7 +9,6 @@
 
 #include <map>
 #include <optional>
-#include <mfem.hpp>
 
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -35,32 +34,6 @@ namespace Rodin::IO
 
     private:
       Variational::GridFunction<FES>& m_gf;
-  };
-
-  // ---- MFEM Format -------------------------------------------------------
-  template <class FES>
-  class GridFunctionLoader<FileFormat::MFEM, FES>
-    : public GridFunctionLoaderBase<FES>
-  {
-    public:
-      GridFunctionLoader(Variational::GridFunction<FES>& gf)
-        : GridFunctionLoaderBase<FES>(gf)
-      {}
-
-      void load(std::istream& is) override;
-  };
-
-  // ---- MEDIT Format ------------------------------------------------------
-  template <class FES>
-  class GridFunctionLoader<FileFormat::MEDIT, FES>
-    : public GridFunctionLoaderBase<FES>
-  {
-    public:
-      GridFunctionLoader(Variational::GridFunction<FES>& gf)
-        : GridFunctionLoaderBase<FES>(gf)
-      {}
-
-      void load(std::istream& is) override;
   };
 }
 
