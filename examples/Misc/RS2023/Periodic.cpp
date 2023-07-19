@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <Rodin/Math.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -12,8 +13,9 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+static constexpr Scalar m = 10;
+static constexpr Scalar pi = Math::Constants::pi();
 static constexpr Attribute dQ = 2;
-static constexpr Attribute dR = 3;
 
 int main(int, char**)
 {
@@ -30,21 +32,23 @@ int main(int, char**)
 
   // Define problem
   ScalarFunction f = 1.0;
-  ScalarFunction zero = 0.0;
+  ScalarFunction phi = [](const Point& p) { return p.x(); };
 
   ScalarFunction gamma =
-    [](const Geometry::Point& p)
+    [](const Point& p)
     {
-      if (p.getPolytope().getAttribute() == 1)
-        return 100.0;
-      else
-        return 1.0;
+      return 2 + sin(pi * m * p.x()) * cos(pi * m * p.y());
     };
+
+  GridFunction gf(vh);
+  gf = gamma;
+  mesh.save("Q.mesh", IO::FileFormat::MFEM);
+  gf.save("gamma.gf");
 
   Problem poisson(u, v);
   poisson = Integral(gamma * Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, zero).on(dQ);
+          - Integral(v)
+          + DirichletBC(u, phi).on(dQ);
 
   // Solve the problem
   Solver::SparseLU solver;
@@ -56,4 +60,5 @@ int main(int, char**)
 
   return 0;
 }
+
 

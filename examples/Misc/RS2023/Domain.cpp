@@ -18,7 +18,7 @@ static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
 static constexpr Attribute ball = 3;
 
-static constexpr Scalar hmax = 0.05;
+static constexpr Scalar hmax = 0.01;
 static constexpr Scalar hmin = 0.001 * hmax;
 
 int main(int, char**)
