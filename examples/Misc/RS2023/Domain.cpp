@@ -19,7 +19,7 @@ static constexpr Attribute exterior = 2;
 static constexpr Attribute ball = 3;
 
 static constexpr Scalar hmax = 0.01;
-static constexpr Scalar hmin = 0.001 * hmax;
+static constexpr Scalar hmin = 0.01 * hmax;
 
 int main(int, char**)
 {
@@ -56,20 +56,20 @@ int main(int, char**)
 
   MMG::MeshOptimizer().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
 
-  {
-    P1 fes(mesh);
-    MMG::ScalarGridFunction sizeMap(fes);
-    sizeMap = [](const Geometry::Point& p)
-    {
-      const Scalar s = std::abs(std::sqrt((p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5)));
-      if (s == 0)
-        return hmin;
-      else
-        return s;
-    };
-    MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
-    MMG::MeshOptimizer().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
-  }
+  // {
+  //   P1 fes(mesh);
+  //   MMG::ScalarGridFunction sizeMap(fes);
+  //   sizeMap = [](const Geometry::Point& p)
+  //   {
+  //     const Scalar s = std::abs(std::sqrt((p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5)));
+  //     if (s == 0)
+  //       return hmin;
+  //     else
+  //       return s;
+  //   };
+  //   MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
+  //   MMG::MeshOptimizer().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
+  // }
 
   mesh.save("Q.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("Q.mfem.mesh", IO::FileFormat::MFEM);

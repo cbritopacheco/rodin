@@ -22,7 +22,8 @@ int main(int, char**)
   // Build a mesh
   Mesh mesh;
   mesh.load("Q.medit.mesh", IO::FileFormat::MEDIT);
-  mesh.getConnectivity().compute(1, 2);
+
+  mesh.getConnectivity().compute(1, 0);
 
   // Functions
   P1 vh(mesh);
@@ -32,7 +33,7 @@ int main(int, char**)
 
   // Define problem
   ScalarFunction f = 1.0;
-  ScalarFunction phi = [](const Point& p) { return p.x(); };
+  ScalarFunction phi = 0;
 
   ScalarFunction gamma =
     [](const Point& p)
@@ -53,6 +54,11 @@ int main(int, char**)
   // Solve the problem
   Solver::SparseLU solver;
   poisson.solve(solver);
+
+  P1 th(mesh, 2);
+  GridFunction grad(th);
+  grad = Grad(u.getSolution());
+  grad.save("Gradient.gf");
 
   // Save solution
   u.getSolution().save("RS2023.gf");

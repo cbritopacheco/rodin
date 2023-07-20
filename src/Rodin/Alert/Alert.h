@@ -9,6 +9,7 @@
 
 #include <string>
 #include <sstream>
+#include <iomanip>
 #include <type_traits>
 
 namespace Rodin::Alert
@@ -31,6 +32,8 @@ namespace Rodin::Alert
    */
   static constexpr RaiseT Raise;
 
+  static constexpr char NewLine = '\n';
+
   /**
    * @brief Base class for objects which represents alerts.
    *
@@ -52,7 +55,7 @@ namespace Rodin::Alert
       /**
        * @brief Initializes an Alert with an empty message.
        */
-      Alert() = default;
+      Alert() noexcept;
 
       /**
        * @brief Initializes an Alert with the given message.
@@ -92,6 +95,8 @@ namespace Rodin::Alert
       operator<<(T&& v) noexcept
       {
         std::stringstream ss;
+        if (m_what.back() == NewLine)
+          ss << std::string(m_indent, ' ');
         ss << std::forward<T>(v);
         m_what += ss.str();
         return *this;
@@ -115,8 +120,12 @@ namespace Rodin::Alert
        */
       virtual void raise() const = 0;
 
+    protected:
+      Alert(int setw) noexcept;
+
     private:
       std::string m_what;
+      size_t m_indent;
   };
 }
 

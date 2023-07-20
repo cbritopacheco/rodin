@@ -26,6 +26,12 @@ namespace Rodin::Geometry
 
       PolytopeIterator(PolytopeIterator&&) = default;
 
+      inline
+      operator bool() const
+      {
+        return !end();
+      }
+
       bool end() const;
 
       PolytopeIterator& operator++();

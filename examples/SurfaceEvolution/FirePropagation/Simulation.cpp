@@ -17,8 +17,8 @@ using namespace Rodin::External;
 static const char* meshfile =
   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
 static const Scalar hmax = 1000;
-static const Scalar hmin = 0.1 * hmax;
-static const Scalar hausdorff = 0.1 * hmax;
+static Scalar hmin = 200;
+static const Scalar hausdorff = 100;
 // static const Scalar hmax = 600;
 // static const Scalar hmin = 100;
 
@@ -110,13 +110,6 @@ class Environment
           assert(dt > 0);
           const auto& env = m_env.get();
 
-          auto dwind = VectorFunction{
-              [](const Geometry::Point& p){ return p.y() - 25000; },
-              [](const Geometry::Point& p){ return -p.x() + 25000; },
-              0};
-
-          auto wind = dwind / Frobenius(dwind);
-
           // Slope vector
           auto p = Grad(env.m_terrainHeight);
           p.traceOf(Terrain::Burnt);
@@ -152,7 +145,7 @@ class Environment
             [&](const Point& v) -> Scalar
             {
               Scalar fv =
-                wind(v).dot(conormal(v)) / wind(v).norm();
+                env.m_wind(v).dot(conormal(v)) / env.m_wind(v).norm();
               if (std::isfinite(fv))
                 return std::acos(fv);
               else
@@ -165,7 +158,7 @@ class Environment
             {
               Scalar rhs =
                 std::tan(alpha(v)) * std::cos(phi(v)
-                    ) + wind(v).norm() * std::cos(psi(v));
+                    ) + env.m_wind(v).norm() * std::cos(psi(v));
               return std::atan(rhs);
             };
 
@@ -191,8 +184,6 @@ class Environment
 
           m_direction = GridFunction(env.m_vfes);
           m_direction = dt * ScalarFunction(R) * conormal;
-          // m_direction.getFiniteElementSpace().getMesh().save("direction.mesh");
-          // m_direction.save("direction.gf");
 
           return *this;
         }
@@ -211,7 +202,7 @@ class Environment
       : m_topography(topography),
         m_sfes(m_topography),
         m_vfes(m_topography, m_topography.getSpaceDimension()),
-        // m_wind(m_vfes),
+        m_wind(m_vfes),
         m_terrainHeight(m_sfes),
         m_vegetalStratum(vegetalStratum),
         m_flame(*this),
@@ -224,17 +215,18 @@ class Environment
 
     Environment& step(Scalar dt)
     {
-      std::cout << "dist\n";
-      m_fireDist =
-        MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
-                              .distance(m_topography);
-
-      auto dwind = VectorFunction{
+      std::cout << "wind\n";
+      auto wind = VectorFunction{
           [](const Geometry::Point& p){ return p.y() - 25000; },
           [](const Geometry::Point& p){ return -p.x() + 25000; },
           0};
 
-      auto wind = dwind / Frobenius(dwind);
+      m_wind = wind / Frobenius(wind);
+
+      std::cout << "dist\n";
+      m_fireDist =
+        MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
+                              .distance(m_topography);
 
       std::cout << "flame\n";
       m_flame.step(1);
@@ -243,6 +235,7 @@ class Environment
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
       std::cout << "mmgls\n";
+      m_topography.getCorners().clear();
       m_topography = MMG::ImplicitDomainMesher().setHMax(hmax)
                                                 .setHMin(hmin)
                                                 .setHausdorff(hausdorff)
@@ -255,11 +248,13 @@ class Environment
                                                 .discretize(m_fireDist);
 
       std::cout << "mmgoptim\n";
+      m_topography.getCorners().clear();
       MMG::MeshOptimizer().setAngleDetection(false)
                           .setHausdorff(hausdorff)
                           .setHMin(hmin)
                           .setHMax(hmax)
                           .optimize(m_topography);
+
 
       // Rebuild finite element spaces with new topography
       m_sfes = ScalarFES(m_topography);
@@ -268,7 +263,7 @@ class Environment
       std::cout << "terrain\n";
       m_terrainHeight = GridFunction(m_sfes);
       m_terrainHeight = [](const Point& v) { return v.z(); };
-      // m_wind = GridFunction(m_vfes);
+      m_wind = GridFunction(m_vfes);
       m_elapsedTime += dt;
       std::cout << "end\n";
       return *this;
@@ -279,12 +274,12 @@ class Environment
       return m_flame;
     }
 
-    // template <class FunctionDerived>
-    // Environment& setWind(const FunctionBase<FunctionDerived>& fn)
-    // {
-    //   m_wind.projectOnBoundary(fn);
-    //   return *this;
-    // }
+    template <class FunctionDerived>
+    Environment& setWind(const FunctionBase<FunctionDerived>& fn)
+    {
+      m_wind.project(fn);
+      return *this;
+    }
 
     const Mesh<Context>& getTopography() const
     {
@@ -302,7 +297,7 @@ class Environment
     ScalarFES m_sfes;
     VectorFES m_vfes;
 
-    // GridFunction<VectorFES> m_wind;
+    GridFunction<VectorFES> m_wind;
 
     GridFunction<ScalarFES> m_terrainHeight;
 
@@ -326,13 +321,20 @@ int main()
   topography.getConnectivity().compute(1, 0);
 
   for (auto it = topography.getFace(); !it.end(); ++it)
-    topography.setRidge(it->getIndex());
+  {
+    Scalar avgHeight = 0;
+    for (auto vit = it->getVertex(); !vit.end(); ++vit)
+      avgHeight += vit->z();
+    avgHeight /= 2;
 
-  Alert::Info() << "Optimizing mesh..." << Alert::Raise;
+    if (avgHeight > 200)
+      topography.setRidge(it->getIndex());
+  }
+
   MMG::MeshOptimizer().setAngleDetection(false)
                       .setHausdorff(hausdorff)
-                      .setHMax(hmax)
                       .setHMin(hmin)
+                      .setHMax(hmax)
                       .optimize(topography);
 
   // Make a fire somewhere
@@ -425,8 +427,8 @@ int main()
   // Define environment and step through it
   Alert::Info() << "Starting simulation..." << Alert::Raise;
   Environment environment(topography, stratum);
+  const Scalar dt = 300;
   Scalar t = 0;
-  Scalar dt = 120;
   for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
     topography.save("FirePropagation.mfem.mesh");
@@ -434,7 +436,7 @@ int main()
     info << "i: " << i << " | "
          << "t: " << (t / 60) << "m";
 
-    // topography.save("out/FirePropagation.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
+    topography.save("out/FirePropagation.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
     topography.save("out/FirePropagation.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
     auto start = std::chrono::steady_clock::now();

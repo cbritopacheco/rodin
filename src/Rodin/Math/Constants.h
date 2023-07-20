@@ -26,9 +26,44 @@ namespace Rodin::Math::Constants
 
   inline
   constexpr
+  Scalar nan()
+  {
+    return NAN;
+  }
+
+  inline
+  constexpr
   Scalar epsilon()
   {
     return std::numeric_limits<Scalar>::epsilon();
+  }
+
+  inline
+  constexpr
+  Scalar zero()
+  {
+    return Scalar(0);
+  }
+
+  inline
+  constexpr
+  Boolean isZero(Scalar x)
+  {
+    return x == Scalar(0);
+  }
+
+  inline
+  constexpr
+  Scalar one()
+  {
+    return Scalar(1);
+  }
+
+  inline
+  constexpr
+  Boolean isOne(Scalar x)
+  {
+    return x == Scalar(1);
   }
 }
 

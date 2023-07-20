@@ -141,9 +141,25 @@ namespace Rodin::External::MMG
       }
 
       /**
+       * @brief Gets the index of corners.
+       */
+      CornerIndex& getCorners()
+      {
+        return m_cornerIndex;
+      }
+
+      /**
        * @brief Gets the index of ridges.
        */
       const RidgeIndex& getRidges() const
+      {
+        return m_ridgeIndex;
+      }
+
+      /**
+       * @brief Gets the index of ridges.
+       */
+      RidgeIndex& getRidges()
       {
         return m_ridgeIndex;
       }

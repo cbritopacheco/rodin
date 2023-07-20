@@ -29,8 +29,6 @@ namespace Rodin::Variational
     : public VectorFunctionBase<Grad<GridFunction<P1<Scalar, Ts...>>>>
   {
     public:
-      using ReturnType = Eigen::Matrix<Scalar, Eigen::Dynamic, 1, 0, 3, 1>;
-
       /// Operand type
       using Operand = GridFunction<P1<Scalar, Ts...>>;
 
@@ -87,7 +85,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      ReturnType getValue(const Geometry::Point& p) const
+      Math::SpatialVector getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -97,13 +95,14 @@ namespace Rodin::Variational
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& rc = p.getReferenceCoordinates();
-        ReturnType res(d);
+        Math::SpatialVector grad(d);
+        Math::SpatialVector res(d);
         res.setZero();
         assert(data.rows() == 1);
         for (size_t local = 0; local < fe.getCount(); local++)
         {
-          const auto& grad = fe.getGradient(local);
-          res += data.coeff(fes.getGlobalIndex({d, i}, local)) * grad(rc);
+          fe.getGradient(local)(grad, rc);
+          res += data.coeff(fes.getGlobalIndex({d, i}, local)) * grad;
         }
         return p.getJacobianInverse().transpose() * res;
       }
