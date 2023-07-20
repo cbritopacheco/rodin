@@ -143,6 +143,12 @@ namespace Rodin::External::MMG
             }
             std::copy(data.data(), data.data() + n, dst->m + 1);
           }
+          else
+          {
+            dst->np  = 0;
+            dst->npi = 0;
+            dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+          }
         }
         else if constexpr (std::is_same_v<Math::Vector, Range>)
         {
@@ -158,14 +164,23 @@ namespace Rodin::External::MMG
           dst->npi = n;
           dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           assert(dst->np < dst->npmax);
-          if (!dst->m)
+          if (n)
           {
-            // So (dst->size + 1) * (dst->np + 1) seems to work for most
-            // applications
-            MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
-                Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+            if (!dst->m)
+            {
+              // So (dst->size + 1) * (dst->np + 1) seems to work for most
+              // applications
+              MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
+                  Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+            }
+            std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
           }
-          std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
+          else
+          {
+            dst->np  = 0;
+            dst->npi = 0;
+            dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+          }
         }
         else
         {

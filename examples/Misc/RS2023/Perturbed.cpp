@@ -63,7 +63,7 @@ int main(int, char**)
   MMG::Mesh mesh;
   mesh.load("Q.medit.mesh", IO::FileFormat::MEDIT);
 
-  MMG::Optimize().setAngleDetection(false).setGradation(hmax).optimize(mesh);
+  MMG::Optimize().setAngleDetection(false).setHMax(hmax).optimize(mesh);
   mesh.save("Q.mesh");
 
   // Define finite element spaces
