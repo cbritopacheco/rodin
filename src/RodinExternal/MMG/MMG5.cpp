@@ -51,9 +51,9 @@ namespace Rodin::External::MMG
       return nullptr;
     }
     res->np = 0;
+    res->npmax = 0; // Zero this so that MMG defines an appropiate value
     res->ver = version;
     res->dim = *spaceDim;
-    res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
     res->info.imprim = getMMGVerbosityLevel();
     return res;
   }
@@ -297,7 +297,7 @@ namespace Rodin::External::MMG
     {
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
-      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), double,
+      MMG5_SAFE_CALLOC(res->m, res->size * (mesh->npmax + 1), double,
           Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
     }
     else
@@ -624,9 +624,7 @@ namespace Rodin::External::MMG
 
     if (dst->np)
     {
-      // So (dst->size + 1) * (dst->np + 1) seems to work for most
-      // applications
-      MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
+      MMG5_SAFE_CALLOC(dst->m, dst->size * (src->npmax + 1), double,
           Alert::Exception("Failed to allocate memory for the MMG5_pSol->m").raise());
       std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
     }

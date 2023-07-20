@@ -13,6 +13,10 @@ namespace Rodin::External::MMG
 
   class Mesh;
 
+  class Adapt;
+
+  class Optimize;
+
   template <class T>
   class Distancer;
 
