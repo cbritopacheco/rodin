@@ -54,8 +54,9 @@ int main(int, char**)
   mesh.setAttribute({1, 0}, 3);
   mesh.setAttribute({1, 1}, 3);
 
-  MMG::MeshOptimizer().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
+  // MMG::MeshOptimizer().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
 
+  // Refine around the interior corner
   // {
   //   P1 fes(mesh);
   //   MMG::ScalarGridFunction sizeMap(fes);

@@ -51,7 +51,7 @@ int main(int, char**)
                                                    .setHMax(hmax)
                                                    .discretize(dist);
 
-  MMG::MeshOptimizer().setHMin(0.05).setHMax(hmax).optimize(implicit2);
+  MMG::Optimize().setHMin(0.05).setHMax(hmax).optimize(implicit2);
 
   implicit2.save("Discretized2.mesh", IO::FileFormat::MEDIT);
 

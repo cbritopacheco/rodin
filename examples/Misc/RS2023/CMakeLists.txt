@@ -4,6 +4,7 @@ target_link_libraries(RS2023_Perturbed
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
+  Rodin::External::MMG
   )
 
 add_executable(RS2023_Transition Transition.cpp)
