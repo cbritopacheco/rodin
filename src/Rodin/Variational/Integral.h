@@ -192,7 +192,10 @@ namespace Rodin::Variational
   class Integral<GridFunction<FES>> final : public FormLanguage::Base
   {
     public:
+      /// Type of integrand
       using Integrand = GridFunction<FES>;
+
+      /// Parent class
       using Parent = FormLanguage::Base;
 
       /**
@@ -201,23 +204,17 @@ namespace Rodin::Variational
       Integral(const Integrand& u)
         : m_u(u),
           m_v(u.getFiniteElementSpace()),
-          m_one(u.getFiniteElementSpace()),
           m_lf(m_v),
           m_assembled(false)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-        m_one = 1.0;
-        auto integrand = Dot(m_u.get(), m_v);
-        m_lf.from(
-            Integral<ShapeFunctionBase<decltype(integrand), FES, TestSpace>>(
-              std::move(integrand)));
+        m_lf = Variational::Integral(m_v); // Prefix with namespace so CTAD kicks in.
       }
 
       Integral(const Integral& other)
         : Parent(other),
           m_u(other.m_u),
           m_v(other.m_u.get().getFiniteElementSpace()),
-          m_one(other.m_u.get().getFiniteElementSpace()),
           m_lf(m_v),
           m_assembled(false)
       {}
@@ -226,21 +223,48 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_v(std::move(other.m_v)),
-          m_one(std::move(other.m_one)),
           m_lf(std::move(other.m_lf)),
           m_assembled(std::move(other.m_assembled))
       {}
 
       /**
-       * @brief Integrates the expression and returns the value
+       * @brief Integrates the expression and returns the value.
+       *
+       * Compute the value of the integral, caches it and returns it.
+       *
        * @returns Value of integral
        */
       inline
       Scalar compute()
       {
-        m_lf.assemble();
+        if (!m_assembled)
+          m_lf.assemble();
         m_assembled = true;
-        return m_lf(m_one);
+        return m_value.emplace(m_lf(m_u));
+      }
+
+      /**
+       * @brief Returns the value of the integral, computing it if necessary.
+       *
+       * If compute() has been called before, returns the value of the cached
+       * value. Otherwise, it will call compute() and return the newly computed
+       * value.
+       *
+       * @returns Value of integral
+       */
+      inline
+      operator Scalar()
+      {
+        if (!m_value.has_value())
+          return compute();
+        else
+          return m_value.value();
+      }
+
+      inline
+      const std::optional<Scalar>& getValue() const
+      {
+        return m_value;
       }
 
       inline Integral* copy() const noexcept override
@@ -251,10 +275,11 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const GridFunction<FES>>   m_u;
       TestFunction<FES>                                 m_v;
-      GridFunction<FES>                                 m_one;
 
       LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
       bool m_assembled;
+
+      std::optional<Scalar> m_value;
   };
 
   template <class FES>

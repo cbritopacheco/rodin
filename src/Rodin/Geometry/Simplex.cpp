@@ -230,6 +230,7 @@ namespace Rodin::Geometry
       assert(rdim <= sdim);
       if (rdim == sdim)
       {
+        return m_jacobianInverse.emplace(getJacobian().inverse());
         switch (rdim)
         {
           case 1:

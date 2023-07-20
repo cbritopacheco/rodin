@@ -11,6 +11,10 @@
 
 namespace Rodin::Alert
 {
+  Info::Info()
+    : Alert(6)
+  {}
+
   void Info::raise() const noexcept
   {
     std::cout << rang::fg::blue

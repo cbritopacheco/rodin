@@ -17,7 +17,7 @@ namespace Rodin::Alert
       /**
        * @brief Constructs a Info with an empty message.
        */
-      Info() = default;
+      Info();
 
       /**
        * @brief Constructs a Info with the given message.

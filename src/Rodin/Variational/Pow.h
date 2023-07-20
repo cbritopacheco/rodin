@@ -9,6 +9,10 @@
 
 #include <cmath>
 
+#include <Rodin/Math/Common.h>
+
+#include "ForwardDecls.h"
+
 #include "RangeShape.h"
 #include "Function.h"
 #include "ScalarFunction.h"
@@ -38,8 +42,13 @@ namespace Rodin::Variational
   {
     static_assert(std::is_arithmetic_v<Number>);
     public:
+      /// Type of base
       using Base = FunctionBase<BaseDerived>;
+
+      /// Type of exponent
       using Exponent = Number;
+
+      /// Parent class
       using Parent = ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
 
       /**
@@ -49,13 +58,13 @@ namespace Rodin::Variational
        */
       constexpr
       Pow(const Base& s, Exponent p)
-        : m_s(s), m_p(p)
+        : m_s(s.copy()), m_p(p)
       {}
 
       constexpr
       Pow(const Pow& other)
         : Parent(other),
-          m_s(other.m_s), m_p(other.m_p)
+          m_s(other.m_s->copy()), m_p(other.m_p)
       {}
 
       constexpr
@@ -69,7 +78,8 @@ namespace Rodin::Variational
       constexpr
       Pow& traceOf(Geometry::Attribute attrs)
       {
-        m_s.traceOf(attrs);
+        assert(m_s);
+        m_s->traceOf(attrs);
         return *this;
       }
 
@@ -77,11 +87,12 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return std::pow(m_s.getValue(p), m_p);
+        assert(m_s);
+        return Math::pow(m_s->getValue(p), m_p);
       }
 
     private:
-      Base m_s;
+      std::unique_ptr<Base> m_s;
       const Exponent m_p;
   };
 
