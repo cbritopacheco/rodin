@@ -8,10 +8,16 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
+#include <RodinExternal/MMG.h>
+
 using namespace Rodin;
 using namespace Rodin::Math;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+using namespace Rodin::External;
+
+static constexpr Scalar hmax = 0.01; // Maximal size of a triangle's edge
 
 static constexpr Attribute A1 = 1; // Attribute of triangle
 static constexpr Attribute A2 = 2; // Attribute of complement
@@ -54,8 +60,10 @@ int main(int, char**)
                 << Alert::Raise;
 
   // Define mesh
-  Mesh mesh;
+  MMG::Mesh mesh;
   mesh.load("Q.medit.mesh", IO::FileFormat::MEDIT);
+
+  MMG::Optimize().setAngleDetection(false).setGradation(hmax).optimize(mesh);
   mesh.save("Q.mesh");
 
   // Define finite element spaces
@@ -82,7 +90,7 @@ int main(int, char**)
     [&](const Geometry::Point& p)
     {
       const Scalar r = (p.getCoordinates() - x0).norm();
-      return g((r - epsilon) / (R1 - R0));
+      return g((r - R0) / (R1 - R0));
     };
 
   GridFunction source(vh);

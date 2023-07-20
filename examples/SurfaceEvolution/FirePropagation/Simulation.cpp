@@ -249,7 +249,7 @@ class Environment
 
       std::cout << "mmgoptim\n";
       m_topography.getCorners().clear();
-      MMG::MeshOptimizer().setAngleDetection(false)
+      MMG::Optimize().setAngleDetection(false)
                           .setHausdorff(hausdorff)
                           .setHMin(hmin)
                           .setHMax(hmax)
@@ -331,7 +331,7 @@ int main()
       topography.setRidge(it->getIndex());
   }
 
-  MMG::MeshOptimizer().setAngleDetection(false)
+  MMG::Optimize().setAngleDetection(false)
                       .setHausdorff(hausdorff)
                       .setHMin(hmin)
                       .setHMax(hmax)
