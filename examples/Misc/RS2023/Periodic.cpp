@@ -22,8 +22,7 @@ int main(int, char**)
   // Build a mesh
   Mesh mesh;
   mesh.load("Q.medit.mesh", IO::FileFormat::MEDIT);
-
-  mesh.getConnectivity().compute(1, 0);
+  mesh.save("Q.mesh", IO::FileFormat::MFEM);
 
   // Functions
   P1 vh(mesh);
@@ -32,8 +31,7 @@ int main(int, char**)
   TestFunction  v(vh);
 
   // Define problem
-  ScalarFunction f = 1.0;
-  ScalarFunction phi = 0;
+  ScalarFunction phi = 5;
 
   ScalarFunction gamma =
     [](const Point& p)
@@ -41,28 +39,25 @@ int main(int, char**)
       return 2 + sin(pi * m * p.x()) * cos(pi * m * p.y());
     };
 
-  GridFunction gf(vh);
-  gf = gamma;
-  mesh.save("Q.mesh", IO::FileFormat::MFEM);
-  gf.save("gamma.gf");
+  GridFunction conductivity(vh);
+  conductivity = gamma;
+  conductivity.save("Conductivity.gf");
 
   Problem poisson(u, v);
   poisson = Integral(gamma * Grad(u), Grad(v))
-          - Integral(v)
           + DirichletBC(u, phi).on(dQ);
 
   // Solve the problem
   Solver::SparseLU solver;
   poisson.solve(solver);
 
+  u.getSolution().save("Periodic.gf");
+
   P1 th(mesh, 2);
   GridFunction grad(th);
   grad = Grad(u.getSolution());
   grad.save("Gradient.gf");
 
-  // Save solution
-  u.getSolution().save("RS2023.gf");
-  mesh.save("RS2023.mesh");
 
   return 0;
 }

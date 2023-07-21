@@ -18,7 +18,7 @@ static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
 static constexpr Attribute ball = 3;
 
-static constexpr Scalar hmax = 0.1;
+static constexpr Scalar hmax = 0.01;
 static constexpr Scalar hmin = 0.01 * hmax;
 
 int main(int, char**)
@@ -38,11 +38,13 @@ int main(int, char**)
                      .polytope(Polytope::Geometry::Triangle, { 3, 0, 4 })
                      .polytope(Polytope::Geometry::Segment, { 0, 4 })
                      .polytope(Polytope::Geometry::Segment, { 1, 4 })
+                     .polytope(Polytope::Geometry::Segment, { 0, 3 })
+                     .polytope(Polytope::Geometry::Segment, { 1, 2 })
                      .finalize();
   mesh.getConnectivity().compute(1, 0);
 
   mesh.setCorner(0).setCorner(1).setCorner(2).setCorner(3).setCorner(4)
-      .setRidge(0).setRidge(1);
+      .setRidge(2).setRidge(3);
   mesh.setAttribute({2, 0}, 1);
   mesh.setAttribute({2, 1}, 2);
   mesh.setAttribute({2, 2}, 2);
@@ -53,24 +55,26 @@ int main(int, char**)
 
   mesh.setAttribute({1, 0}, 3);
   mesh.setAttribute({1, 1}, 3);
+  mesh.setAttribute({1, 2}, 4);
+  mesh.setAttribute({1, 3}, 5);
 
-  MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
+  // MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
 
-  // Refine around the interior corner
-  {
-    P1 fes(mesh);
-    MMG::ScalarGridFunction sizeMap(fes);
-    sizeMap = [](const Geometry::Point& p)
-    {
-      const Scalar s = std::abs(std::sqrt((p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5)));
-      if (s == 0)
-        return hmin;
-      else
-        return s;
-    };
-    MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
-    MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
-  }
+  // // Refine around the interior corner
+  // {
+  //   P1 fes(mesh);
+  //   MMG::ScalarGridFunction sizeMap(fes);
+  //   sizeMap = [](const Geometry::Point& p)
+  //   {
+  //     const Scalar s = std::abs(std::sqrt((p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5)));
+  //     if (s == 0)
+  //       return hmin;
+  //     else
+  //       return s;
+  //   };
+  //   MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
+  //   MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
+  // }
 
   mesh.save("Q.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("Q.mfem.mesh", IO::FileFormat::MFEM);

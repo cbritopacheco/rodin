@@ -204,27 +204,23 @@ namespace Rodin::Variational
       Integral(const Integrand& u)
         : m_u(u),
           m_v(u.getFiniteElementSpace()),
-          m_lf(m_v),
-          m_assembled(false)
+          m_lf(m_v)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-        m_lf = Variational::Integral(m_v); // Prefix with namespace so CTAD kicks in.
       }
 
       Integral(const Integral& other)
         : Parent(other),
           m_u(other.m_u),
           m_v(other.m_u.get().getFiniteElementSpace()),
-          m_lf(m_v),
-          m_assembled(false)
+          m_lf(m_v)
       {}
 
       Integral(Integral&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_v(std::move(other.m_v)),
-          m_lf(std::move(other.m_lf)),
-          m_assembled(std::move(other.m_assembled))
+          m_lf(std::move(other.m_lf))
       {}
 
       /**
@@ -237,9 +233,9 @@ namespace Rodin::Variational
       inline
       Scalar compute()
       {
-        if (!m_assembled)
-          m_lf.assemble();
-        m_assembled = true;
+        auto lfi = Variational::Integral(m_v);
+        lfi.over(m_attrs);
+        m_lf.from(lfi).assemble();
         return m_value.emplace(m_lf(m_u));
       }
 
@@ -262,6 +258,19 @@ namespace Rodin::Variational
       }
 
       inline
+      Integral& over(Geometry::Attribute attr)
+      {
+        return over(FlatSet<Geometry::Attribute>{attr});
+      }
+
+      inline
+      Integral& over(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        m_attrs = attrs;
+        return *this;
+      }
+
+      inline
       const std::optional<Scalar>& getValue() const
       {
         return m_value;
@@ -276,8 +285,8 @@ namespace Rodin::Variational
       std::reference_wrapper<const GridFunction<FES>>   m_u;
       TestFunction<FES>                                 m_v;
 
+      FlatSet<Geometry::Attribute> m_attrs;
       LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
-      bool m_assembled;
 
       std::optional<Scalar> m_value;
   };
