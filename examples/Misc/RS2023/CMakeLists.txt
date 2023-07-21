@@ -1,3 +1,12 @@
+add_executable(RS2023_PerturbedPeriodic PerturbedPeriodic.cpp)
+target_link_libraries(RS2023_PerturbedPeriodic
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::External::MMG
+  )
+
 add_executable(RS2023_Perturbed Perturbed.cpp)
 target_link_libraries(RS2023_Perturbed
   PUBLIC
