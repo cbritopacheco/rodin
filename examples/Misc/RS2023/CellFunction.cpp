@@ -18,7 +18,7 @@ static constexpr Scalar m = 1;
 
 int main(int, char**)
 {
-  const size_t n = 64;
+  const size_t n = 32;
 
   // Build a mesh
   Mesh mesh;
@@ -27,7 +27,10 @@ int main(int, char**)
   mesh.scale(1.0 / (n - 1));
   mesh.save("Cell.mesh");
 
-  Alert::Info() << "Number of mesh elements: " << n << Alert::Raise;
+  Alert::Info() << "Number of mesh elements: " << n << "."
+                << Alert::NewLine
+                << "Saved mesh to Cell.mesh "
+                << Alert::Raise;
 
   // Functions
   P1 vh(mesh);
@@ -40,7 +43,7 @@ int main(int, char**)
   ScalarFunction gamma =
     [](const Point& p)
     {
-      return 2 + sin(2 * M_PI * m * p.x()) * cos(2 * M_PI * m * p.y());
+      return 2 + sin(2 * M_PI * m * p.x()) * sin(2 * M_PI * m * p.y());
     };
 
   ScalarFunction dxgamma =
@@ -110,11 +113,12 @@ int main(int, char**)
   Ah11 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(1, 1); };
   Ah11.setWeights();
 
-  Alert::Info() << "Homogenized coefficient: "
-                << Alert::NewLine
-                << "[ " << Integral(Ah00).compute() << " 0"
-                << Alert::NewLine
-                << "0 " << Integral(Ah11).compute() << " ]";
+  Alert::Success() << "Homogenized coefficient: "
+                   << Alert::NewLine
+                   << "[ " << std::setprecision(16) << Integral(Ah00).compute() << " 0 ]"
+                   << Alert::NewLine
+                   << "[ 0 " << Integral(Ah11).compute() << " ]"
+                   << Alert::Raise;
 
   return 0;
 }

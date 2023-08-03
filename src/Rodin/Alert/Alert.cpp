@@ -11,29 +11,37 @@
 namespace Rodin::Alert
 {
   Alert::Alert() noexcept
-    : m_indent(0)
+    : m_indent(0),
+      m_newline(false)
   {}
 
-  Alert::Alert(int setw) noexcept
-    : m_indent(setw)
+  Alert::Alert(int indent) noexcept
+    : m_indent(indent),
+      m_newline(false)
   {}
 
-  Alert::Alert(const std::string& what)
-    : m_what(what)
+  Alert::Alert(const std::string& what, int indent)
+    : m_ss(what),
+      m_indent(indent),
+      m_newline(false)
   {}
 
   Alert::Alert(const Alert& other)
-    : m_what(other.m_what),
-      m_indent(other.m_indent)
-  {}
+    : m_indent(other.m_indent),
+      m_newline(other.m_newline)
+  {
+    m_ss << other.m_ss.rdbuf();
+  }
 
   Alert::Alert(Alert&& other)
-    : m_what(std::move(other.m_what)),
-      m_indent(std::move(other.m_indent))
+    : m_ss(std::move(other.m_ss)),
+      m_indent(std::move(other.m_indent)),
+      m_newline(std::move(other.m_newline))
   {}
 
   const char* Alert::what() const noexcept
   {
+    m_what = m_ss.str();
     return m_what.c_str();
   }
 }
