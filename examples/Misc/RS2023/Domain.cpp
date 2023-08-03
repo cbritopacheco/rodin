@@ -18,8 +18,10 @@ static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
 static constexpr Attribute ball = 3;
 
-static constexpr Scalar hmax = 0.01;
+static constexpr Scalar hmax = 0.005;
 static constexpr Scalar hmin = 0.01 * hmax;
+
+static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
 
 int main(int, char**)
 {
@@ -36,27 +38,23 @@ int main(int, char**)
                      .polytope(Polytope::Geometry::Triangle, { 1, 2, 4 })
                      .polytope(Polytope::Geometry::Triangle, { 2, 3, 4 })
                      .polytope(Polytope::Geometry::Triangle, { 3, 0, 4 })
-                     .polytope(Polytope::Geometry::Segment, { 0, 4 })
-                     .polytope(Polytope::Geometry::Segment, { 1, 4 })
+                     // .polytope(Polytope::Geometry::Segment, { 0, 4 })
+                     // .polytope(Polytope::Geometry::Segment, { 1, 4 })
                      .polytope(Polytope::Geometry::Segment, { 0, 3 })
                      .polytope(Polytope::Geometry::Segment, { 1, 2 })
                      .finalize();
-  mesh.getConnectivity().compute(1, 0);
 
   mesh.setCorner(0).setCorner(1).setCorner(2).setCorner(3).setCorner(4)
-      .setRidge(2).setRidge(3);
-  mesh.setAttribute({2, 0}, 1);
-  mesh.setAttribute({2, 1}, 2);
-  mesh.setAttribute({2, 2}, 2);
-  mesh.setAttribute({2, 3}, 2);
+      .setRidge(0).setRidge(1);
 
+  mesh.getConnectivity().compute(1, 0);
   for (auto it = mesh.getFace(); !it.end(); ++it)
-    mesh.setAttribute({ it->getDimension(), it->getIndex() }, 2);
+  {
+    mesh.setAttribute({it->getDimension(), it->getIndex()}, 2);
+  }
 
-  mesh.setAttribute({1, 0}, 3);
-  mesh.setAttribute({1, 1}, 3);
-  mesh.setAttribute({1, 2}, 4);
-  mesh.setAttribute({1, 3}, 5);
+  mesh.setAttribute({1, 0}, 4);
+  mesh.setAttribute({1, 1}, 5);
 
   // MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
 
@@ -78,6 +76,25 @@ int main(int, char**)
 
   mesh.save("Q.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("Q.mfem.mesh", IO::FileFormat::MFEM);
+
+  MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
+
+  // // Refine mesh
+  // {
+  //   P1 fes(mesh);
+  //   MMG::ScalarGridFunction sizeMap(fes);
+  //   sizeMap =
+  //     [&](const Geometry::Point& p)
+  //     {
+  //       const Scalar r = (p.getCoordinates() - x0).norm();
+  //       return r;
+  //     };
+  //   sizeMap *= (hmax - hmin);
+  //   sizeMap += hmin;
+  //   MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
+  // }
+
+  mesh.save("Q1.medit.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }

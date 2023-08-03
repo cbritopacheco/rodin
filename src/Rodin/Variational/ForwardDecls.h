@@ -898,6 +898,9 @@ namespace Rodin::Variational
   template <class Operand, class Value>
   class DirichletBC;
 
+  template <class Operand, class ... Parameters>
+  class PeriodicBC;
+
   class ProblemBody;
 
   /**

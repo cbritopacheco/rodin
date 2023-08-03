@@ -17,91 +17,111 @@
 
 namespace Rodin::Variational
 {
-  // /**
-  //  * @ingroup JacobianSpecializations
-  //  * @brief Jacobian of an P1 GridFunction object.
-  //  */
-  // template <class ... Ps>
-  // class Jacobian<GridFunction<P1<Math::Vector, Ps...>>> final
-  //   : public MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>
-  // {
-  //   public:
-  //     using Operand = GridFunction<P1<Math::Vector, Ps...>>;
-  //     using Parent = MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>;
+  /**
+   * @ingroup JacobianSpecializations
+   * @brief Jacobian of an P1 GridFunction object.
+   */
+  template <class ... Ps>
+  class Jacobian<GridFunction<P1<Math::Vector, Ps...>>> final
+    : public MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>
+  {
+    public:
+      using Operand = GridFunction<P1<Math::Vector, Ps...>>;
+      using Parent = MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>;
 
-  //     /**
-  //      * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
-  //      * @f$ u @f$.
-  //      * @param[in] u Grid function to be differentiated
-  //      */
-  //     Jacobian(const Operand& u)
-  //       :  m_u(u)
-  //     {}
+      /**
+       * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
+       * @f$ u @f$.
+       * @param[in] u Grid function to be differentiated
+       */
+      Jacobian(const Operand& u)
+        :  m_u(u)
+      {}
 
-  //     Jacobian(const Jacobian& other)
-  //       : Parent(other),
-  //         m_u(other.m_u)
-  //     {}
+      Jacobian(const Jacobian& other)
+        : Parent(other),
+          m_u(other.m_u)
+      {}
 
-  //     Jacobian(Jacobian&& other)
-  //       : Parent(std::move(other)),
-  //         m_u(std::move(other.m_u))
-  //     {}
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u))
+      {}
 
-  //     inline
-  //     constexpr
-  //     size_t getRows() const
-  //     {
-  //       return m_u.get().getFiniteElementSpace().getVectorDimension();
-  //     }
+      inline
+      constexpr
+      size_t getRows() const
+      {
+        return m_u.get().getFiniteElementSpace().getVectorDimension();
+      }
 
-  //     inline
-  //     constexpr
-  //     size_t getColumns() const
-  //     {
-  //       return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
-  //     }
+      inline
+      constexpr
+      size_t getColumns() const
+      {
+        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
+      }
 
-  //     Math::Matrix getValue(const Geometry::Point& p) const
-  //     {
-  //       assert(false);
-  //     }
+      Math::Matrix getValue(const Geometry::Point& p) const
+      {
+        const auto& polytope = p.getPolytope();
+        const auto& d = polytope.getDimension();
+        const auto& i = polytope.getIndex();
+        const auto& gf = m_u.get();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& vdim = fes.getVectorDimension();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto& rc = p.getReferenceCoordinates();
+        Math::Matrix jacobian(vdim, d);
+        Math::Matrix res(vdim, d);
+        res.setZero();
+        for (size_t local = 0; local < fe.getCount(); local++)
+        {
+          fe.getJacobian(local)(jacobian, rc);
+          res += gf.getValue(fes.getGlobalIndex({d, i}, local)).coeff(local % vdim) * jacobian;
+        }
+        return this->object(std::move(res)) * p.getJacobianInverse();
+      }
 
-  //     inline
-  //     constexpr
-  //     const Operand& getOperand() const
-  //     {
-  //       return m_u.get();
-  //     }
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        return m_u.get();
+      }
 
-  //     inline
-  //     constexpr
-  //     Jacobian& traceOf(Geometry::Attribute attr)
-  //     {
-  //       Parent::traceOf(attr);
-  //       return *this;
-  //     }
+      inline
+      constexpr
+      Jacobian& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
 
-  //     inline
-  //     constexpr
-  //     Jacobian& traceOf(const std::set<Geometry::Attribute>& attrs)
-  //     {
-  //       Parent::traceOf(attrs);
-  //       return *this;
-  //     }
+      inline
+      constexpr
+      Jacobian& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
 
-  //     inline Jacobian* copy() const noexcept override
-  //     {
-  //       return new Jacobian(*this);
-  //     }
+      inline Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
+      }
 
-  //   private:
-  //     std::reference_wrapper<const Operand> m_u;
-  // };
+    private:
+      std::reference_wrapper<const Operand> m_u;
+  };
 
-  // template <class ... Ps>
-  // Jacobian(const GridFunction<P1<Math::Vector, Ps...>>&)
-  //   -> Jacobian<GridFunction<P1<Math::Vector, Ps...>>>;
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for Jacobian of a P1 GridFunction
+   */
+  template <class ... Ps>
+  Jacobian(const GridFunction<P1<Math::Vector, Ps...>>&)
+    -> Jacobian<GridFunction<P1<Math::Vector, Ps...>>>;
 
   /**
    * @ingroup JacobianSpecializations

@@ -101,6 +101,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getNodes();
       }
 
+      /**
+       * @brief Gets the i-th basis function of the finite element.
+       */
       inline
       constexpr
       const auto& getBasis(size_t i) const
@@ -108,6 +111,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getBasis(i);
       }
 
+      /**
+       * @brief Gets the i-th linear function on the finite element.
+       */
       inline
       constexpr
       const auto& getLinearForm(size_t i) const

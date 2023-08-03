@@ -190,7 +190,6 @@ namespace Rodin::Variational
       {
         for (auto g : Geometry::Polytope::Geometries)
         {
-          auto sfe = ScalarP1Element(g);
           const size_t n = Geometry::Polytope::getVertexCount(g);
           res[vdim][g].resize(n * vdim);
           for (size_t i = 0; i < n * vdim; i++)
@@ -208,7 +207,6 @@ namespace Rodin::Variational
       {
         for (auto g : Geometry::Polytope::Geometries)
         {
-          auto sfe = ScalarP1Element(g);
           const size_t n = Geometry::Polytope::getVertexCount(g);
           res[vdim][g].resize(n * vdim);
           for (size_t i = 0; i < n * vdim; i++)
@@ -226,7 +224,6 @@ namespace Rodin::Variational
       {
         for (auto g : Geometry::Polytope::Geometries)
         {
-          auto sfe = ScalarP1Element(g);
           const size_t n = Geometry::Polytope::getVertexCount(g);
           res[vdim][g].resize(n * vdim);
           for (size_t i = 0; i < n * vdim; i++)

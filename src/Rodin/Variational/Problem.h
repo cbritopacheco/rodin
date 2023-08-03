@@ -58,7 +58,7 @@ namespace Rodin::Variational
       /**
        * @brief Assembles the underlying linear system to solve.
        */
-      virtual void assemble() = 0;
+      virtual ProblemBase& assemble() = 0;
 
       /**
        * @returns Reference to the stiffness operator.
@@ -154,7 +154,11 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
-      void assemble() override;
+      Problem& imposePeriodicBCs();
+
+      Problem& imposeDirichletBCs();
+
+      Problem& assemble() override;
 
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
@@ -193,6 +197,7 @@ namespace Rodin::Variational
       LinearForm<TestFES, Context, VectorType> m_linearForm;
       BilinearForm<TrialFES, TestFES, Context, Math::SparseMatrix> m_bilinearForm;
       EssentialBoundary m_dbcs;
+      PeriodicBoundary  m_pbcs;
 
       bool m_assembled;
       VectorType      m_mass;

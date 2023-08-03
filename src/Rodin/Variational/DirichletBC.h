@@ -40,6 +40,8 @@ namespace Rodin::Variational
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
+      using DOFs = IndexMap<Scalar>;
+
       /**
        * @brief Assembles the Dirichlet boundary condition.
        *
@@ -55,12 +57,10 @@ namespace Rodin::Variational
        */
       virtual void assemble() = 0;
 
-      virtual void project() const = 0;
-
       /**
        * @brief Gets the global degree of freedom map.
        */
-      virtual const IndexMap<Scalar>& getDOFs() const = 0;
+      virtual const DOFs& getDOFs() const = 0;
 
       /**
        * @brief Gets the associated operand.
@@ -111,7 +111,7 @@ namespace Rodin::Variational
        * @param[in] u ShapeFunction object
        * @param[in] v Value object
        */
-      DirichletBC(Operand& u, const Value& v)
+      DirichletBC(const Operand& u, const Value& v)
         : m_u(u), m_value(v.copy())
       {}
 
@@ -194,21 +194,16 @@ namespace Rodin::Variational
             for (Index local = 0; local < fe.getCount(); local++)
             {
               const Index global = fes.getGlobalIndex({ d, i }, local);
-              const auto& lf = fe.getLinearForm(local);
-              const Scalar s = lf(mapping);
-              m_dofs.insert(std::pair{ global, s });
+              auto find = m_dofs.find(global);
+              if (find == m_dofs.end())
+              {
+                const auto& lf = fe.getLinearForm(local);
+                const Scalar s = lf(mapping);
+                m_dofs.insert(find, std::pair{ global, s });
+              }
             }
           }
         }
-      }
-
-      /**
-       * @brief Projects the value over the associated boundary region.
-       */
-      inline
-      void project() const override
-      {
-        m_u.get().getSolution().projectOnBoundary(getValue(), m_essBdr);
       }
 
       inline
@@ -225,7 +220,7 @@ namespace Rodin::Variational
       }
 
       inline
-      const IndexMap<Scalar>& getDOFs() const override
+      const DOFs& getDOFs() const override
       {
         return m_dofs;
       }
@@ -237,7 +232,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<Operand> m_u;
+      std::reference_wrapper<const Operand> m_u;
       std::unique_ptr<Value> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
       IndexMap<Scalar> m_dofs;
@@ -250,7 +245,7 @@ namespace Rodin::Variational
    * @tparam ValueDerived Derived type of FunctionBase
    */
   template <class FES, class FunctionDerived>
-  DirichletBC(TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)
+  DirichletBC(const TrialFunction<FES>&, const FunctionBase<FunctionDerived>&)
     -> DirichletBC<TrialFunction<FES>, FunctionBase<FunctionDerived>>;
 }
 

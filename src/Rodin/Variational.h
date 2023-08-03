@@ -75,6 +75,7 @@
 #include "Variational/BooleanFunction.h"
 
 #include "Variational/DirichletBC.h"
+#include "Variational/PeriodicBC.h"
 
 #include "Variational/P1.h"
 

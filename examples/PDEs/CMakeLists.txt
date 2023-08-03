@@ -14,10 +14,10 @@ target_link_libraries(Elasticity
   Rodin::Variational
   )
 
-# add_executable(SurfaceMesh SurfaceMesh.cpp)
-# target_link_libraries(SurfaceMesh
-#   PUBLIC
-#   Rodin::Geometry
-#   Rodin::Solver
-#   Rodin::Variational
-#   )
+add_executable(Periodic Periodic.cpp)
+target_link_libraries(Periodic
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )
