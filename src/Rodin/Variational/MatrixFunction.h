@@ -94,7 +94,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual MatrixFunctionBase* copy() const noexcept override
+      virtual inline MatrixFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
       }

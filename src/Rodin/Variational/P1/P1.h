@@ -165,8 +165,8 @@ namespace Rodin::Variational
        * @f[
        *  \psi_\tau : \mathbb{P}_1(\tau) \rightarrow \mathbb{P}_1(R)
        * @f]
-       * taking a function @f$ v \in V(\tau) @f$ from the element in the mesh to the reference
-       * element @f$ R @f$.
+       * taking a function @f$ v \in V(\tau) @f$ from the global element @f$
+       * \tau @f$ element @f$ R @f$.
        */
       template <class FunctionDerived>
       inline

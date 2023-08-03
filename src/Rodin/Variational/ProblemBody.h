@@ -16,6 +16,7 @@
 
 #include "ForwardDecls.h"
 
+#include "PeriodicBC.h"
 #include "DirichletBC.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -64,7 +65,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const FormLanguage::List<DirichletBCBase>& getDBCs() const
+      const PeriodicBoundary& getPBCs() const
+      {
+        return m_periodicBdr;
+      }
+
+      const EssentialBoundary& getDBCs() const
       {
         return m_essBdr;
       }
@@ -108,10 +114,19 @@ namespace Rodin::Variational
       ProblemBody operator+(
           const ProblemBody& pb, const FormLanguage::List<DirichletBCBase>& dbcs);
 
+      friend
+      ProblemBody operator+(
+          const ProblemBody& pb, const PeriodicBCBase& dbc);
+
+      friend
+      ProblemBody operator+(
+          const ProblemBody& pb, const FormLanguage::List<PeriodicBCBase>& dbcs);
+
     private:
       FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
       FormLanguage::List<LinearFormIntegratorBase> m_lfis;
-      FormLanguage::List<DirichletBCBase> m_essBdr;
+      EssentialBoundary m_essBdr;
+      PeriodicBoundary  m_periodicBdr;
   };
 
   ProblemBody operator+(
@@ -131,6 +146,12 @@ namespace Rodin::Variational
 
   ProblemBody operator+(
       const ProblemBody& pb, const FormLanguage::List<DirichletBCBase>& dbcs);
+
+  ProblemBody operator+(
+      const ProblemBody& pb, const PeriodicBCBase& dbc);
+
+  ProblemBody operator+(
+      const ProblemBody& pb, const FormLanguage::List<PeriodicBCBase>& dbcs);
 }
 
 #endif

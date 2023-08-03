@@ -107,6 +107,24 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
+        getLHS().getValue(res, p);
+        res += getRHS().getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
+        getLHS().getValue(res, p);
+        res += getRHS().getValue(p);
+      }
+
       inline Sum* copy() const noexcept override
       {
         return new Sum(*this);

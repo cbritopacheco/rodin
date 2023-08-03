@@ -61,7 +61,7 @@ namespace Rodin::IO
       {
         Alert::Exception() << "Expected keyword on line "
                            << m_currentLineNumber
-                           << "." << Alert::Raise;
+                           << "." << line << Alert::Raise;
       }
       auto keyword = MFEM::toKeyword(kw->c_str());
       if (!keyword)

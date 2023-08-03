@@ -16,9 +16,9 @@ using namespace Rodin::External;
 
 static const char* meshfile =
   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
-static const Scalar hmax = 1000;
-static Scalar hmin = 200;
-static const Scalar hausdorff = 100;
+static const Scalar hmax = 400;
+static Scalar hmin = 0.01 * hmax;
+static const Scalar hausdorff = 20;
 // static const Scalar hmax = 600;
 // static const Scalar hmin = 100;
 
@@ -216,12 +216,13 @@ class Environment
     Environment& step(Scalar dt)
     {
       std::cout << "wind\n";
-      auto wind = VectorFunction{
-          [](const Geometry::Point& p){ return p.y() - 25000; },
-          [](const Geometry::Point& p){ return -p.x() + 25000; },
-          0};
+      // auto wind = VectorFunction{0, 0, 0};
+      // auto wind = VectorFunction{
+      //     [](const Geometry::Point& p){ return p.y() - 25000; },
+      //     [](const Geometry::Point& p){ return -p.x() + 25000; },
+      //     0};
 
-      m_wind = wind / Frobenius(wind);
+      // m_wind = wind / Frobenius(wind);
 
       std::cout << "dist\n";
       m_fireDist =
@@ -235,7 +236,6 @@ class Environment
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
       std::cout << "mmgls\n";
-      m_topography.getCorners().clear();
       m_topography = MMG::ImplicitDomainMesher().setHMax(hmax)
                                                 .setHMin(hmin)
                                                 .setHausdorff(hausdorff)
@@ -248,7 +248,6 @@ class Environment
                                                 .discretize(m_fireDist);
 
       std::cout << "mmgoptim\n";
-      m_topography.getCorners().clear();
       MMG::Optimize().setAngleDetection(false)
                           .setHausdorff(hausdorff)
                           .setHMin(hmin)
@@ -316,19 +315,20 @@ class Environment
 int main()
 {
   MMG::Mesh topography;
-  topography.load("/Users/carlos/Projects/rodin/build/Topography.mesh");
+  // topography.load("/Users/carlos/Projects/rodin/build/Topography.mesh");
+  topography.load(meshfile);
 
   topography.getConnectivity().compute(1, 0);
 
-  for (auto it = topography.getFace(); !it.end(); ++it)
+  for (auto it = topography.getVertex(); !it.end(); ++it)
   {
-    Scalar avgHeight = 0;
-    for (auto vit = it->getVertex(); !vit.end(); ++vit)
-      avgHeight += vit->z();
-    avgHeight /= 2;
+    // Scalar avgHeight = 0;
+    // for (auto vit = it->getVertex(); !vit.end(); ++vit)
+    //   avgHeight += vit->z();
+    // avgHeight /= 2;
 
-    if (avgHeight > 200)
-      topography.setRidge(it->getIndex());
+    if (it->z() > 200)
+      topography.setCorner(it->getIndex());
   }
 
   MMG::Optimize().setAngleDetection(false)
@@ -355,20 +355,20 @@ int main()
       Scalar rr = 0;
 
       Math::FixedSizeVector<3> c0;
-      c0 << 12500, 12500, p.z();
+      c0 << 19500, 19500, p.z();
       rr = (p.getCoordinates() - c0).norm() - r;
 
-      Math::FixedSizeVector<3> c1;
-      c1 << 37500, 37500, p.z();
-      rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
+      // Math::FixedSizeVector<3> c1;
+      // c1 << 37500, 37500, p.z();
+      // rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
 
-      Math::FixedSizeVector<3> c2;
-      c2 << 37500, 12500, p.z();
-      rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
+      // Math::FixedSizeVector<3> c2;
+      // c2 << 37500, 12500, p.z();
+      // rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
 
-      Math::FixedSizeVector<3> c3;
-      c3 << 12500, 37500, p.z();
-      rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
+      // Math::FixedSizeVector<3> c3;
+      // c3 << 12500, 37500, p.z();
+      // rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
 
       return rr;
     };
@@ -427,7 +427,7 @@ int main()
   // Define environment and step through it
   Alert::Info() << "Starting simulation..." << Alert::Raise;
   Environment environment(topography, stratum);
-  const Scalar dt = 300;
+  const Scalar dt = 1200;
   Scalar t = 0;
   for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {

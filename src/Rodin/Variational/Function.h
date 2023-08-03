@@ -69,7 +69,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const std::set<Geometry::Attribute>& getTraceDomain() const
+      const FlatSet<Geometry::Attribute>& getTraceDomain() const
       {
         return m_traceDomain;
       }
@@ -120,6 +120,9 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Evaluates the function on a Point belonging to the mesh.
+       */
       inline
       constexpr
       auto getValue(const Geometry::Point& p) const
@@ -156,8 +159,9 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Evaluates the function on a vertex of the mesh.
-       * @param[in] v Vertex belonging to the mesh
+       * @brief Evaluates the function on a Point belonging to the mesh.
+       *
+       * This calls the function get getValue(const Geometry::Point&).
        */
       inline
       constexpr
@@ -170,7 +174,7 @@ namespace Rodin::Variational
        * @brief Sets an attribute which will be interpreted as the domain to
        * trace.
        *
-       * Convenience function to call traceOf(std::set<int>) with only one
+       * Convenience function to call traceOf(FlatSet<int>) with only one
        * attribute.
        *
        * @returns Reference to self (for method chaining)
@@ -179,13 +183,13 @@ namespace Rodin::Variational
       constexpr
       FunctionBase& traceOf(Geometry::Attribute attr)
       {
-        m_traceDomain = std::set<Geometry::Attribute>{attr};
+        m_traceDomain = FlatSet<Geometry::Attribute>{attr};
         return *this;
       }
 
       inline
       constexpr
-      FunctionBase& traceOf(const std::set<Geometry::Attribute>& attr)
+      FunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         m_traceDomain = attr;
         return *this;
@@ -197,7 +201,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::set<Geometry::Attribute> m_traceDomain;
+      FlatSet<Geometry::Attribute> m_traceDomain;
   };
 }
 

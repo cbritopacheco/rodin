@@ -35,6 +35,7 @@ namespace Rodin::Variational
     public:
       using Operand = FunctionBase<NestedDerived>;
       using Parent = FunctionBase<UnaryMinus<Operand>>;
+      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
 
       constexpr
       UnaryMinus(const Operand& op)
@@ -72,6 +73,24 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return -1 * this->object(getOperand().getValue(p));
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsVectorRange<OperandRange>::Value);
+        getOperand().getValue(res, p);
+        res *= -1;
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsMatrixRange<OperandRange>::Value);
+        getOperand().getValue(res, p);
+        res *= -1;
       }
 
       inline UnaryMinus* copy() const noexcept override

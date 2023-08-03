@@ -92,9 +92,9 @@ namespace Rodin::Variational
        * @f[
        *  \psi_\tau : V(\tau) \rightarrow V(R)
        * @f]
-       * taking a function @f$ v \in V(\tau) @f$ from the element in the mesh
-       * to the reference element @f$ R @f$. Here the notation @f$ V(S) @f$
-       * represents a Banach space of functions on the set @f$ S @f$.
+       * taking a function @f$ v \in V(\tau) @f$ from the global element @f$
+       * \tau @f$ to the reference element @f$ R @f$. Here the notation @f$
+       * V(S) @f$ represents a Banach space of functions on the set @f$ S @f$.
        *
        * The callable type T must be a function on the mesh, i.e. the call
        * operator must have the following signature:

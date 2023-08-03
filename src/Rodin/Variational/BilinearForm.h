@@ -170,7 +170,7 @@ namespace Rodin::Variational
    * @ingroup BilinearFormSpecializations
    * @brief Speciallization of BilinearForm for Math::SparseMatrix.
    *
-   * This specialization aids in the construction of a @f$ n \times m @f$
+   * This specialization aids in the construction of a @f$ m \times n @f$
    * matrix @f$ A @f$, which is associated to the bilinear form. Here, @f$ n
    * @f$ represents the size (total number of degrees-of-freedom) of the trial
    * space, and @f$ m @f$ represents the size of the test space.

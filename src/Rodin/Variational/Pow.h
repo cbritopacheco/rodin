@@ -37,7 +37,7 @@ namespace Rodin::Variational
    * @f$
    */
   template <class BaseDerived, class Number>
-  class Pow<FunctionBase<BaseDerived>, Number>
+  class Pow<FunctionBase<BaseDerived>, Number> final
     : public ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
   {
     static_assert(std::is_arithmetic_v<Number>);
@@ -89,6 +89,11 @@ namespace Rodin::Variational
       {
         assert(m_s);
         return Math::pow(m_s->getValue(p), m_p);
+      }
+
+      inline Pow* copy() const noexcept override
+      {
+        return new Pow(*this);
       }
 
     private:

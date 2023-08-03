@@ -145,7 +145,7 @@ namespace Rodin::Variational
       /**
        * @returns The element matrix of size of @f$ m \times n @f$ where @f$ n
        * @f$ (resp. @f$ m @f$) denotes the number of degrees of freedom on the
-       * polytope for the test (trial) space.
+       * polytope for the test (resp. trial) space.
        */
       inline
       Math::Matrix& getMatrix()

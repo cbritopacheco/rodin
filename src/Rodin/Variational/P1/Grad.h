@@ -79,32 +79,30 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Grad& traceOf(const std::set<Geometry::Attribute>& attrs)
+      Grad& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         return *this;
       }
 
-      Math::SpatialVector getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
         const auto& i = polytope.getIndex();
         const auto& gf = m_u.get();
-        const auto& data = gf.getData();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
         const auto& rc = p.getReferenceCoordinates();
         Math::SpatialVector grad(d);
         Math::SpatialVector res(d);
         res.setZero();
-        assert(data.rows() == 1);
         for (size_t local = 0; local < fe.getCount(); local++)
         {
           fe.getGradient(local)(grad, rc);
-          res += data.coeff(fes.getGlobalIndex({d, i}, local)) * grad;
+          res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
         }
-        return p.getJacobianInverse().transpose() * res;
+        return p.getJacobianInverse().transpose() * this->object(std::move(res));
       }
 
       inline

@@ -71,6 +71,7 @@ int main()
 
     // Save results
     th.save("out/SphereCap.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
 
     if (t + std::numeric_limits<double>::epsilon() > T)
       break;

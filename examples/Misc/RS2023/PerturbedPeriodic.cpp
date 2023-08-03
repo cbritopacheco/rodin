@@ -33,8 +33,8 @@ static constexpr Scalar pi = Math::Constants::pi();
 // static constexpr Scalar gamma_ek =
 //   (sectorArea * gammaA1 + (inhomogeinityArea - sectorArea) * gammaA2) / inhomogeinityArea;
 
-const constexpr Scalar m = 100;
-static constexpr Scalar gamma_ek = 1;
+const constexpr Scalar m = 50;
+static constexpr Scalar gamma_ek = 1e-12;
 
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
@@ -80,7 +80,7 @@ int main(int, char**)
   ScalarFunction gamma =
     [&](const Point& p)
     {
-      return 1 + sin(pi * m * p.x()) * cos(pi * m * p.y());
+      return 2 + sin(pi * m * p.x()) * cos(pi * m * p.y());
     };
 
   ScalarFunction gamma_e =
@@ -138,39 +138,37 @@ int main(int, char**)
             + DirichletBC(u, phi).on(dCurrent)
             + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
-  // Define gradient grid function
-  GridFunction gradient(gh);
-
   // Solve the background problem
   Alert::Info() << "Solving background equation." << Alert::Raise;
-  poisson.solve(solver);
+  poisson.assemble().solve(solver);
   const auto u0 = u.getSolution();
-  u0.save("Background.gf");
+
+  // u0.save("Background.gf");
 
   Alert::Info() << "Computing its gradient." << Alert::Raise;
-  gradient = Grad(u.getSolution());
-  gradient.save("BackgroundGradient.gf");
+  GridFunction g0(gh);
+  g0 = Grad(u0);
+  g0.save("BackgroundGradient.gf");
 
   // Solve the perturbed problem
   Alert::Info() << "Solving perturbed equation." << Alert::Raise;
 
-  Solver::SparseLU solver;
-  perturbed.solve(solver);
+  perturbed.assemble().solve(solver);
   const auto u_e = u.getSolution();
+  GridFunction g_e(gh);
   u_e.save("Perturbed.gf");
 
   Alert::Info() << "Computing its gradient." << Alert::Raise;
-  gradient.getData().setZero();
-  gradient = Grad(u.getSolution());
-  gradient.setWeights();
-  gradient.save("PerturbedGradient.gf");
+  g_e = Grad(u_e);
+  g_e.save("PerturbedGradient.gf");
 
   GridFunction diff(vh);
-  diff = Pow(u_e - u0, 2);
+  GridFunction gdiff(gh);
+  //diff = u0 - u_e;
+  diff = Frobenius(Grad(u0) - Grad(u_e));
+  gdiff.save("GDiff.gf");
   diff.setWeights();
-  const Scalar err = sqrt(Integral(diff).compute());
-
-  Alert::Info() << "Error: " << err << Alert::Raise;
+  diff.save("Diff.gf");
 
   return 0;
 }

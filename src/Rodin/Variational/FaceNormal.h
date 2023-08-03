@@ -109,7 +109,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      FaceNormal& traceOf(const std::set<Geometry::Attribute>& attrs)
+      FaceNormal& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         return *this;

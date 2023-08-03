@@ -234,7 +234,8 @@ namespace Rodin::Variational
       Scalar compute()
       {
         auto lfi = Variational::Integral(m_v);
-        lfi.over(m_attrs);
+        if (m_attrs.size() > 0)
+          lfi.over(m_attrs);
         m_lf.from(lfi).assemble();
         return m_value.emplace(m_lf(m_u));
       }
