@@ -18,7 +18,7 @@ static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
 static constexpr Attribute ball = 3;
 
-static constexpr Scalar hmax = 0.005;
+static constexpr Scalar hmax = 0.01;
 static constexpr Scalar hmin = 0.01 * hmax;
 
 static const Math::Vector x0{{0.5, 0.5}}; // Center of domain

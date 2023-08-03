@@ -12,6 +12,8 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+static constexpr Attribute boundary = 2;
+
 int main(int, char**)
 {
   // Build a mesh

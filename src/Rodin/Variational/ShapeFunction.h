@@ -36,12 +36,14 @@ namespace Rodin::Variational
     static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
   };
 
-  template <class Derived, class FESType, ShapeFunctionSpaceType Space>
+  template <class Derived, class FESType = typename Derived::FES, ShapeFunctionSpaceType SpaceType = Derived::Space>
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
-      using Parent = FormLanguage::Base;
       using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
+      using Parent = FormLanguage::Base;
 
       constexpr
       ShapeFunctionBase(const FES& fes)
@@ -168,202 +170,17 @@ namespace Rodin::Variational
       std::reference_wrapper<const FES> m_fes;
   };
 
-  // /**
-  // * @ingroup ShapeFunctionSpecializations
-  // * @brief H1 ShapeFunction
-  // */
-  // template <class Derived, class ... Ps, ShapeFunctionSpaceType Space>
-  // class ShapeFunction<Derived, H1<Scalar, Ps...>, Space>
-  //   : public ShapeFunctionBase<ShapeFunction<Derived, H1<Scalar, Ps...>, Space>, H1<Scalar, Ps...>, Space>
-  // {
-  //   public:
-  //     using FES = H1<Scalar, Ps...>;
-  //     using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
-
-  //     ShapeFunction() = delete;
-
-  //     constexpr
-  //     ShapeFunction(const FES& fes)
-  //       : Parent(fes)
-  //     {
-  //       assert(fes.getVectorDimension() == 1);
-  //     }
-
-  //     constexpr
-  //     ShapeFunction(const ShapeFunction& other)
-  //       : Parent(other),
-  //         m_gf(other.m_gf)
-  //     {}
-
-  //     constexpr
-  //     ShapeFunction(ShapeFunction&& other)
-  //       : Parent(std::move(other)),
-  //         m_gf(std::move(other.m_gf))
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     auto& emplace()
-  //     {
-  //       m_gf.emplace(this->getFiniteElementSpace());
-  //       return *this;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RangeShape getRangeShape() const
-  //     {
-  //       return { 1, 1 };
-  //     }
-
-  //     inline
-  //     constexpr
-  //     GridFunction<FES>& getSolution()
-  //     {
-  //       assert(m_gf);
-  //       return *m_gf;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const GridFunction<FES>& getSolution() const
-  //     {
-  //       assert(m_gf);
-  //       return *m_gf;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     size_t getDOFs(const Geometry::Polytope& element) const
-  //     {
-  //       return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
-  //     }
-
-  //     inline
-  //     TensorBasis<Scalar> getTensorBasis(const Geometry::Point& p) const
-  //     {
-  //       const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-  //       return fe.getBasis(p.getCoordinates(Geometry::Point::Coordinates::Reference));
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const auto& getLeaf() const
-  //     {
-  //       return static_cast<const Derived&>(*this).getLeaf();
-  //     }
-
-  //     virtual ShapeFunction* copy() const noexcept override
-  //     {
-  //       return static_cast<const Derived&>(*this).copy();
-  //     }
-
-  //   private:
-  //     std::optional<GridFunction<FES>> m_gf;
-  // };
-
-  // /**
-  // * @ingroup ShapeFunctionSpecializations
-  // * @brief H1 ShapeFunction
-  // */
-  // template <class Derived, class ... Ps, ShapeFunctionSpaceType Space>
-  // class ShapeFunction<Derived, H1<Math::Vector, Ps...>, Space>
-  //   : public ShapeFunctionBase<ShapeFunction<Derived, H1<Math::Vector, Ps...>, Space>, H1<Math::Vector, Ps...>, Space>
-  // {
-  //   public:
-  //     using FES = H1<Math::Vector, Ps...>;
-  //     using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
-
-  //     ShapeFunction() = delete;
-
-  //     constexpr
-  //     ShapeFunction(const FES& fes)
-  //       : Parent(fes)
-  //     {}
-
-  //     constexpr
-  //     ShapeFunction(const ShapeFunction& other)
-  //       : Parent(other),
-  //         m_gf(other.m_gf)
-  //     {}
-
-  //     constexpr
-  //     ShapeFunction(ShapeFunction&& other)
-  //       : Parent(std::move(other)),
-  //         m_gf(std::move(other.m_gf))
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     auto& emplace()
-  //     {
-  //       m_gf.emplace(this->getFiniteElementSpace());
-  //       return *this;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     GridFunction<FES>& getSolution()
-  //     {
-  //       assert(m_gf);
-  //       return *m_gf;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const GridFunction<FES>& getSolution() const
-  //     {
-  //       assert(m_gf);
-  //       return *m_gf;
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RangeShape getRangeShape() const
-  //     {
-  //       return { this->getFiniteElementSpace().getVectorDimension(), 1 };
-  //     }
-
-  //     inline
-  //     constexpr
-  //     size_t getDOFs(const Geometry::Polytope& element) const
-  //     {
-  //       return this->getFiniteElementSpace().getFiniteElement(element).getDOFs();
-  //     }
-
-  //     inline
-  //     TensorBasis<Math::Vector> getTensorBasis(const Geometry::Point& p) const
-  //     {
-  //       const auto& fe = this->getFiniteElementSpace().getFiniteElement(p.getSimplex());
-  //       const Math::Vector& coords = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-  //       return fe.getBasis(coords).transpose();
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const auto& getLeaf() const
-  //     {
-  //       return static_cast<const Derived&>(*this).getLeaf();
-  //     }
-
-  //     virtual ShapeFunction* copy() const noexcept override
-  //     {
-  //       return static_cast<const Derived&>(*this).copy();
-  //     }
-
-  //   private:
-  //     std::optional<GridFunction<FES>> m_gf;
-  // };
-
   /**
   * @ingroup ShapeFunctionSpecializations
   * @brief ShapeFunction
   */
-  template <class Derived, class FESType, ShapeFunctionSpaceType Space>
-  class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, Space>, FESType, Space>
+  template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>
   {
     public:
       using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
 
       ShapeFunction() = delete;

@@ -8,14 +8,10 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
-#include <RodinExternal/MMG.h>
-
 using namespace Rodin;
 using namespace Rodin::Math;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-
-using namespace Rodin::External;
 
 static constexpr Scalar hmax = 0.01; // Maximal size of a triangle's edge
 static constexpr Scalar hmin = 0.1 * hmax;
@@ -33,8 +29,8 @@ static constexpr Scalar pi = Math::Constants::pi();
 // static constexpr Scalar gamma_ek =
 //   (sectorArea * gammaA1 + (inhomogeinityArea - sectorArea) * gammaA2) / inhomogeinityArea;
 
-const constexpr Scalar m = 50;
-static constexpr Scalar gamma_ek = 1e+12;
+const constexpr Scalar waveNumber = 40;
+static constexpr Scalar gamma_ek = 2;
 
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
@@ -45,43 +41,22 @@ int main(int, char**)
 {
   Alert::Info() << "Epsilon: " << epsilon
                 << Alert::NewLine
-                << "m: " << m
+                << "waveNumber: " << waveNumber
                 << Alert::NewLine
                 << "Inhomogeinity constant: " << gamma_ek
                 << Alert::Raise;
 
   // Define mesh
-  MMG::Mesh mesh;
+  Mesh mesh;
   mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("Q.mesh");
-
-  // // Refine mesh
-  // {
-  //   P1 fes(mesh);
-  //   MMG::ScalarGridFunction sizeMap(fes);
-  //   sizeMap =
-  //     [&](const Geometry::Point& p)
-  //     {
-  //       const Scalar r = (p.getCoordinates() - x0).norm();
-  //       return r;
-  //     };
-  //   sizeMap *= (hmax - hmin);
-  //   sizeMap += hmin;
-  //   MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
-  // }
-  // mesh.save("Q1.medit.mesh", IO::FileFormat::MEDIT);
-  // std::exit(1);
 
   // Define finite element spaces
   P1 vh(mesh);
   P1 gh(mesh, mesh.getSpaceDimension());
 
   // Define conductivity
-  ScalarFunction gamma =
-    [&](const Point& p)
-    {
-      return 2 + sin(pi * m * p.x()) * cos(pi * m * p.y());
-    };
+  ScalarFunction gamma = 1.0;
 
   ScalarFunction gamma_e =
     [&](const Point& p)
@@ -105,42 +80,21 @@ int main(int, char**)
   TestFunction  v(vh);
   ScalarFunction phi = 1;
 
-  const auto f =
-    [&](const Scalar& x)
-    {
-      if (x > 0)
-        return std::exp(-1.0 / x);
-      else
-        return 0.0;
-    };
-
-  // Define source
-  const auto g =
-    [&](const Scalar& x)
-    {
-      return f(x) / (f(x) + f(1 - x));
-    };
-
-  ScalarFunction h = 1;
-  //   [&](const Geometry::Point& p)
-  //   {
-  //     const Scalar r = (p.getCoordinates() - x0).norm();
-  //     return g((r - R0) / (R1 - R0));
-  //   };
-
-  Problem poisson(u, v);
-  poisson = Integral(gamma * Grad(u), Grad(v))
-          + DirichletBC(u, phi).on(dCurrent)
-          + DirichletBC(u, ScalarFunction(0)).on(dGround);
+  Problem helmholtz(u, v);
+  helmholtz = Integral(gamma * Grad(u), Grad(v))
+            + Integral(waveNumber * u, v)
+            + DirichletBC(u, phi).on(dCurrent)
+            + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
   Problem perturbed(u, v);
   perturbed = Integral(gamma_e * Grad(u), Grad(v))
+            + Integral(waveNumber * u, v)
             + DirichletBC(u, phi).on(dCurrent)
             + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
   // Solve the background problem
   Alert::Info() << "Solving background equation." << Alert::Raise;
-  poisson.solve(solver);
+  helmholtz.solve(solver);
   const auto u0 = u.getSolution();
 
   u0.save("Background.gf");
@@ -162,16 +116,17 @@ int main(int, char**)
   g_e = Grad(u_e);
   g_e.save("PerturbedGradient.gf");
 
-  GridFunction diff(vh);
-  GridFunction gdiff(gh);
-  //diff = u0 - u_e;
-  diff = Frobenius(Grad(u0) - Grad(u_e));
-  gdiff.save("GDiff.gf");
-  diff.setWeights();
-  diff.save("Diff.gf");
+  // GridFunction diff(vh);
+  // GridFunction gdiff(gh);
+  // //diff = u0 - u_e;
+  // diff = Frobenius(Grad(u0) - Grad(u_e));
+  // gdiff.save("GDiff.gf");
+  // diff.setWeights();
+  // diff.save("Diff.gf");
 
   return 0;
 }
+
 
 
 

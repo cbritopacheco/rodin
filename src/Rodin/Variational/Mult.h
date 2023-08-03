@@ -167,11 +167,14 @@ namespace Rodin::Variational
    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
    * $A(u)$ is the shape function (scalar, vector, or matrix valued).
    */
-  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
-    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
+  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
+    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>, FESType, SpaceType>
   {
     public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using LHS = FunctionBase<LHSDerived>;
       using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
@@ -310,11 +313,14 @@ namespace Rodin::Variational
    * where @f$ f @f$ is the function (scalar, vector or matrix valued), and
    * $A(u)$ is the shape function (scalar, vector, or matrix valued).
    */
-  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  class Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
-    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES, Space>
+  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>> final
+    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>>, FESType, SpaceType>
   {
     public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using LHS = ShapeFunctionBase<RHSDerived, FES, Space>;
       using RHS = FunctionBase<LHSDerived>;
       using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;

@@ -20,11 +20,15 @@ namespace Rodin::Geometry
   class PolytopeIterator
   {
     public:
+      PolytopeIterator() = default;
+
       PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
 
       PolytopeIterator(const PolytopeIterator&) = delete;
 
       PolytopeIterator(PolytopeIterator&&) = default;
+
+      PolytopeIterator& operator=(PolytopeIterator&&) = default;
 
       inline
       operator bool() const
@@ -40,16 +44,21 @@ namespace Rodin::Geometry
 
       Polytope* operator->() const noexcept;
 
+      inline
+      constexpr
       size_t getDimension() const
       {
         return m_dimension;
       }
 
+      inline
       const MeshBase& getMesh() const
       {
-        return m_mesh.get();
+        assert(m_mesh);
+        return m_mesh->get();
       }
 
+      inline
       const IndexGeneratorBase& getIndexGenerator() const
       {
         assert(m_gen);
@@ -65,8 +74,8 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
-      const size_t m_dimension;
-      std::reference_wrapper<const MeshBase> m_mesh;
+      size_t m_dimension;
+      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
       mutable std::unique_ptr<Polytope> m_simplex;
@@ -75,11 +84,21 @@ namespace Rodin::Geometry
   class ElementIterator
   {
     public:
+      ElementIterator() = default;
+
       ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
       ElementIterator(const ElementIterator&) = delete;
 
       ElementIterator(ElementIterator&& other) = default;
+
+      ElementIterator& operator=(ElementIterator&&) = default;
+
+      inline
+      operator bool() const
+      {
+        return !end();
+      }
 
       bool end() const;
 
@@ -91,11 +110,14 @@ namespace Rodin::Geometry
 
       size_t getDimension() const;
 
+      inline
       const MeshBase& getMesh() const
       {
-        return m_mesh.get();
+        assert(m_mesh);
+        return m_mesh->get();
       }
 
+      inline
       const IndexGeneratorBase& getIndexGenerator() const
       {
         assert(m_gen);
@@ -111,7 +133,7 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
-      std::reference_wrapper<const MeshBase> m_mesh;
+      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
       mutable std::unique_ptr<Element> m_simplex;
@@ -120,11 +142,21 @@ namespace Rodin::Geometry
   class FaceIterator
   {
     public:
+      FaceIterator() = default;
+
       FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
       FaceIterator(const FaceIterator&) = delete;
 
       FaceIterator(FaceIterator&&) = default;
+
+      FaceIterator& operator=(FaceIterator&&) = default;
+
+      inline
+      operator bool() const
+      {
+        return !end();
+      }
 
       bool end() const;
 
@@ -136,11 +168,14 @@ namespace Rodin::Geometry
 
       size_t getDimension() const;
 
+      inline
       const MeshBase& getMesh() const
       {
-        return m_mesh.get();
+        assert(m_mesh);
+        return m_mesh->get();
       }
 
+      inline
       const IndexGeneratorBase& getIndexGenerator() const
       {
         assert(m_gen);
@@ -156,7 +191,7 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
-      std::reference_wrapper<const MeshBase> m_mesh;
+      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
       mutable std::unique_ptr<Face> m_simplex;
@@ -165,11 +200,21 @@ namespace Rodin::Geometry
   class VertexIterator
   {
     public:
+      VertexIterator() = default;
+
       VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
       VertexIterator(const VertexIterator&) = delete;
 
       VertexIterator(VertexIterator&&) = default;
+
+      VertexIterator& operator=(VertexIterator&&) = default;
+
+      inline
+      operator bool() const
+      {
+        return !end();
+      }
 
       bool end() const;
 
@@ -181,11 +226,14 @@ namespace Rodin::Geometry
 
       constexpr size_t getDimension() const;
 
+      inline
       const MeshBase& getMesh() const
       {
-        return m_mesh.get();
+        assert(m_mesh);
+        return m_mesh->get();
       }
 
+      inline
       const IndexGeneratorBase& getIndexGenerator() const
       {
         assert(m_gen);
@@ -201,7 +249,7 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
-      std::reference_wrapper<const MeshBase> m_mesh;
+      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
       mutable std::unique_ptr<Vertex> m_simplex;
