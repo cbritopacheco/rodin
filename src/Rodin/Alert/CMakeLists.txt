@@ -9,6 +9,7 @@ set(RodinAlert_HEADERS
   Exception.h
   Warning.h
   Info.h
+  Success.h
   )
 
 set(RodinAlert_SRCS
@@ -16,6 +17,7 @@ set(RodinAlert_SRCS
   Exception.cpp
   Warning.cpp
   Info.cpp
+  Success.cpp
   )
 
 add_library(RodinAlert ${RodinAlert_SRCS} ${RodinAlert_HEADERS})

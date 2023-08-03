@@ -7,20 +7,21 @@
 #include <iostream>
 #include <rang.hpp>
 
-#include "Info.h"
+#include "Success.h"
 
 namespace Rodin::Alert
 {
-  Info::Info()
-    : Alert(RODIN_ALERT_INFO_PREFIX_LENGTH)
+  Success::Success()
+    : Alert(RODIN_ALERT_SUCCESS_PREFIX_LENGTH)
   {}
 
-  void Info::raise() const noexcept
+  void Success::raise() const noexcept
   {
-    std::cout << rang::fg::blue
-           << RODIN_ALERT_INFO_PREFIX
+    std::cout << rang::fg::green
+           << RODIN_ALERT_SUCCESS_PREFIX
            << rang::fg::reset
            << what()
            << std::endl;
   }
 }
+

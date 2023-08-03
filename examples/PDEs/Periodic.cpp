@@ -18,7 +18,8 @@ static constexpr Scalar m = 1;
 
 int main(int, char**)
 {
-  const size_t n = 100;
+  const size_t n = 200;
+
   // Build a mesh
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
@@ -57,8 +58,6 @@ int main(int, char**)
   // Solve the problem
   Solver::SparseLU solver;
   poisson.solve(solver);
-
-  mesh.save("Poisson.mesh");
 
   // Save solution
   u.getSolution().save("Periodic.gf");

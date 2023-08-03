@@ -1,53 +1,3 @@
-add_executable(RS2023_Simulation Simulation.cpp)
-target_link_libraries(RS2023_Simulation
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  )
-
-add_executable(RS2023_PerturbedPeriodic PerturbedPeriodic.cpp)
-target_link_libraries(RS2023_PerturbedPeriodic
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::External::MMG
-  )
-
-add_executable(RS2023_Perturbed Perturbed.cpp)
-target_link_libraries(RS2023_Perturbed
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::External::MMG
-  )
-
-add_executable(RS2023_Transition Transition.cpp)
-target_link_libraries(RS2023_Transition
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  )
-
-add_executable(RS2023_Periodic Periodic.cpp)
-target_link_libraries(RS2023_Periodic
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  )
-
-add_executable(RS2023_Main Main.cpp)
-target_link_libraries(RS2023_Main
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  )
-
 add_executable(RS2023_Domain Domain.cpp)
 target_link_libraries(RS2023_Domain
   PUBLIC
@@ -57,11 +7,15 @@ target_link_libraries(RS2023_Domain
   Rodin::External::MMG
   )
 
-add_executable(RS2023_Homogenized Homogenized.cpp)
-target_link_libraries(RS2023_Homogenized
+add_executable(RS2023_CellFunction CellFunction.cpp)
+target_link_libraries(RS2023_CellFunction
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
   Rodin::External::MMG
   )
+
+add_subdirectory(Conductivity)
+add_subdirectory(Helmholtz)
+
