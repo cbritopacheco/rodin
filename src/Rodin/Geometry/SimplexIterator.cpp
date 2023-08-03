@@ -12,8 +12,7 @@ namespace Rodin::Geometry
   // ---- SimplexIterator ---------------------------------------------------
   PolytopeIterator::PolytopeIterator(
       size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
-    :  m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()),
-      m_dirty(false)
+    : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
   {}
 
   bool PolytopeIterator::end() const
@@ -50,7 +49,7 @@ namespace Rodin::Geometry
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& dimension = m_dimension;
-    const auto& mesh = m_mesh.get();
+    const auto& mesh = getMesh();
     return new Polytope(dimension, index, mesh);
   }
 

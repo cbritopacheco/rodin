@@ -64,7 +64,6 @@ int main(int, char**)
   // Define mesh
   MMG::Mesh mesh;
   mesh.load("Q.medit.mesh", IO::FileFormat::MEDIT);
-  mesh.save("Q.mesh");
 
   // Refine mesh
   {
@@ -81,7 +80,7 @@ int main(int, char**)
     MMG::Adapt().setAngleDetection(false).setHMax(hmax).setHMin(hmin).adapt(mesh, sizeMap);
   }
   mesh.save("Q1.medit.mesh", IO::FileFormat::MEDIT);
-  std::exit(1);
+  mesh.save("Q.mesh");
   // mesh.save("Q.mesh");
 
   const auto f =

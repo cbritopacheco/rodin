@@ -132,13 +132,14 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 ShapeFunction
    */
-  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType Space>
-  class Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>>, P1<Scalar, Ps...>, Space>
+  template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType SpaceType>
+  class Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, SpaceType>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, SpaceType>>, P1<Scalar, Ps...>, SpaceType>
   {
     public:
       /// Finite element space type
       using FES = P1<Scalar, Ps...>;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// Operand type
       using Operand = ShapeFunction<NestedDerived, P1<Scalar, Ps...>, Space>;

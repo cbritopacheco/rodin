@@ -127,12 +127,14 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 ShapeFunction object.
    */
-  template <class ShapeFunctionDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, Space>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, Space>>, P1<Math::Vector, Ts...>, Space>
+  template <class ShapeFunctionDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, SpaceType>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector, Ts...>, SpaceType>>, P1<Math::Vector, Ts...>, SpaceType>
   {
     public:
       using FES = P1<Math::Vector, Ts...>;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using Operand = ShapeFunction<ShapeFunctionDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Jacobian<Operand>, FES, Space>;
 

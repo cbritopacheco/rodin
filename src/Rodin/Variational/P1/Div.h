@@ -17,12 +17,14 @@ namespace Rodin::Variational
   /**
    * @ingroup DivSpecializations
    */
-  template <class NestedDerived, ShapeFunctionSpaceType Space, class ... Ts>
-  class Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, Space>>, P1<Math::Vector, Ts...>, Space>
+  template <class NestedDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
+  class Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>>, P1<Math::Vector, Ts...>, SpaceType>
   {
     public:
       using FES = P1<Math::Vector, Ts...>;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using Operand = ShapeFunction<NestedDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Div<ShapeFunction<NestedDerived, FES, Space>>, FES, Space>;
 

@@ -15,7 +15,7 @@ using namespace Rodin::Math;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static constexpr Scalar hmax = 0.005; // Maximal size of a triangle's edge
+static constexpr Scalar hmax = 0.01; // Maximal size of a triangle's edge
 static constexpr Scalar hmin = 0.01 * hmax;
 
 static constexpr Attribute dQ = 2; // Attribute of box boundary
@@ -59,11 +59,12 @@ int main(int, char**)
   P1 gh(mesh, mesh.getSpaceDimension());
 
   std::stringstream filename;
-  filename << "hmax" << std::setw(4) << hmax << "_"
-           << "gammaek" << gamma_ek;
-  mesh.save("Q_" + filename.str() + ".mesh");
-  std::ofstream out("L2_Grid_" + filename.str() + ".live.csv");
+  filename << "Helmholtz_L2_Grid_"
+           << "hmax" << std::setw(4) << hmax << "_"
+           << "gammaek" << gamma_ek
+           << ".live.csv";
 
+  std::ofstream out(filename.str());
   for (auto m : ms)
   {
     for (auto epsilon : es)
@@ -95,13 +96,6 @@ int main(int, char**)
             return gamma_ek;
         };
 
-      // GridFunction conductivity(vh);
-      // conductivity = gamma;
-      // conductivity.save("Conductivity.gf");
-
-      // conductivity = gamma_e;
-      // conductivity.save("Conductivity_E.gf");
-
       // Define variational problems
       TrialFunction u(vh);
       TestFunction  v(vh);
@@ -123,13 +117,6 @@ int main(int, char**)
           return f(x) / (f(x) + f(1 - x));
         };
 
-      ScalarFunction h = 1;
-      //   [&](const Geometry::Point& p)
-      //   {
-      //     const Scalar r = (p.getCoordinates() - x0).norm();
-      //     return g((r - R0) / (R1 - R0));
-      //   };
-
       Problem poisson(u, v);
       poisson = Integral(gamma * Grad(u), Grad(v))
               + DirichletBC(u, phi).on(dCurrent)
@@ -144,28 +131,14 @@ int main(int, char**)
 
       // Solve the background problem
       Alert::Info() << "Solving background equation." << Alert::Raise;
-      poisson.assemble().solve(solver);
+      poisson.solve(solver);
       const auto u0 = u.getSolution();
-
-      // u0.save("Background.gf");
-
-      // Alert::Info() << "Computing its gradient." << Alert::Raise;
-      // GridFunction g0(gh);
-      // g0 = Grad(u0);
-      // // g0.save("BackgroundGradient.gf");
 
       // Solve the perturbed problem
       Alert::Info() << "Solving perturbed equation." << Alert::Raise;
 
-      perturbed.assemble().solve(solver);
+      perturbed.solve(solver);
       const auto u_e = u.getSolution();
-      // GridFunction g_e(gh);
-      // // u_e.save("Perturbed.gf");
-
-      // Alert::Info() << "Computing its gradient." << Alert::Raise;
-      // g_e = Grad(u_e);
-      // gradient.setWeights();
-      // gradient.save("PerturbedGradient.gf");
 
       GridFunction diff(vh);
       diff = Pow(u0 - u_e, 2);// - Pow(Frobenius(g0 - g_e), 2);

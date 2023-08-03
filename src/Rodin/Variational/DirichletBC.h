@@ -182,7 +182,12 @@ namespace Rodin::Variational
       {
         const auto& fes = m_u.get().getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        for (auto it = mesh.getFace(); !it.end(); ++it)
+        Geometry::FaceIterator it;
+        if (m_essBdr.size() > 0)
+          it = mesh.getFace();
+        else
+          it = mesh.getBoundary();
+        for (; !it.end(); ++it)
         {
           const auto& polytope = *it;
           if (m_essBdr.size() == 0 || m_essBdr.count(polytope.getAttribute()))

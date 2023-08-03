@@ -169,11 +169,14 @@ namespace Rodin::Variational
   /**
    * @ingroup SumSpecializations
    */
-  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>> final
-    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
+  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
+    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>, FESType, SpaceType>
   {
     public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
       using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Sum<LHS, RHS>, FES, Space>;
