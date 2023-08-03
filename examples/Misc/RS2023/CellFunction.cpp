@@ -18,7 +18,7 @@ static constexpr Scalar m = 1;
 
 int main(int, char**)
 {
-  const size_t n = 200;
+  const size_t n = 64;
 
   // Build a mesh
   Mesh mesh;
@@ -26,6 +26,8 @@ int main(int, char**)
   mesh.getConnectivity().compute(1, 2);
   mesh.scale(1.0 / (n - 1));
   mesh.save("Cell.mesh");
+
+  Alert::Info() << "Number of mesh elements: " << n << Alert::Raise;
 
   // Functions
   P1 vh(mesh);
@@ -57,6 +59,8 @@ int main(int, char**)
   conductivity = gamma;
   conductivity.save("Conductivity.gf");
 
+  Alert::Info() << "Saved conductivity coefficient to Conductivity.gf" << Alert::Raise;
+
   ScalarFunction g = 0.0;
 
   IndexMap<IndexSet> dofs;
@@ -70,56 +74,47 @@ int main(int, char**)
   poisson1 = Integral(gamma * Grad(psi1), Grad(v))
            + Integral(dxgamma, v)
            + PeriodicBC(psi1, dofs);
-  poisson1.assemble();
 
   Problem poisson2(psi2, v);
   poisson2 = Integral(gamma * Grad(psi2), Grad(v))
            + Integral(dygamma, v)
            + PeriodicBC(psi2, dofs);
-  poisson2.assemble();
 
   // Solve the problem
   Solver::SparseLU solver;
 
+  Alert::Info() << "Solving for first component..." << Alert::Raise;
   poisson1.solve(solver);
-  psi1.getSolution().save("Psi1.gf");
+  psi1.getSolution().save("CellFunction1.gf");
+  Alert::Success() << "Done! Saved to CellFunction1.gf" << Alert::Raise;
 
+  Alert::Info() << "Solving for second component..." << Alert::Raise;
   poisson2.solve(solver);
-  psi2.getSolution().save("Psi2.gf");
+  psi2.getSolution().save("CellFunction2.gf");
+  Alert::Success() << "Done! Saved to CellFunction2.gf" << Alert::Raise;
 
   P1 gh(mesh, 2);
 
   GridFunction psi(gh);
   psi = VectorFunction{ psi1.getSolution(), psi2.getSolution() };
-  psi.save("Psi.gf");
+  psi.save("CellFunction.gf");
+  Alert::Success() << "Saved cell function to CellFunction.gf" << Alert::Raise;
 
-  GridFunction gpsi_1(vh);
-  gpsi_1 = gamma * Pow(Frobenius(Grad(psi1.getSolution())), 2);
-  gpsi_1.setWeights();
-
-  GridFunction gpsi_2(vh);
-  gpsi_2 = gamma * Pow(Frobenius(Grad(psi2.getSolution())), 2);
-  gpsi_2.setWeights();
+  Alert::Info() << "Computing homogenized coefficient..." << Alert::Raise;
 
   GridFunction Ah00(vh);
   Ah00 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(0, 0); };
   Ah00.setWeights();
-  Ah00.save("dx00.gf");
 
   GridFunction Ah11(vh);
   Ah11 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(1, 1); };
   Ah11.setWeights();
-  Ah11.save("dx11.gf");
 
-  const Scalar value_1 = Integral(gpsi_1);
-  const Scalar value_2 = Integral(gpsi_2);
-  const Scalar value_00 = Integral(Ah00);
-  const Scalar value_11 = Integral(Ah11);
-  std::cout << value_1 << std::endl;
-  std::cout << value_2 << std::endl;
-  std::cout << value_00 << std::endl;
-  std::cout << value_11 << std::endl;
-
+  Alert::Info() << "Homogenized coefficient: "
+                << Alert::NewLine
+                << "[ " << Integral(Ah00).compute() << " 0"
+                << Alert::NewLine
+                << "0 " << Integral(Ah11).compute() << " ]";
 
   return 0;
 }

@@ -7,6 +7,9 @@
 #ifndef RODIN_ALERT_INFO_H
 #define RODIN_ALERT_INFO_H
 
+#define RODIN_ALERT_INFO_PREFIX "Info: "
+#define RODIN_ALERT_INFO_PREFIX_LENGTH (sizeof(RODIN_ALERT_INFO_PREFIX) - 1)
+
 #include "Alert.h"
 
 namespace Rodin::Alert
