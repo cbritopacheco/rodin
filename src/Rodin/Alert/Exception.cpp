@@ -13,7 +13,7 @@
 namespace Rodin::Alert
 {
   Exception::Exception(const std::string& what)
-    : Alert(what)
+    : Alert(what, 0)
   {}
 
   void Exception::raise() const

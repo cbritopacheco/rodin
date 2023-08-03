@@ -26,11 +26,9 @@ static_assert(epsilon > 0);
 
 static constexpr Scalar pi = Math::Constants::pi();
 
-// static constexpr Scalar gamma_ek =
-//   (sectorArea * gammaA1 + (inhomogeinityArea - sectorArea) * gammaA2) / inhomogeinityArea;
-
-const constexpr Scalar waveNumber = 40;
-static constexpr Scalar gamma_ek = 2;
+const constexpr Scalar m = 50;
+const constexpr Scalar waveNumber = 25;
+static constexpr Scalar gamma_ek = 1.1;
 
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
@@ -40,6 +38,8 @@ static Solver::SparseLU solver;
 int main(int, char**)
 {
   Alert::Info() << "Epsilon: " << epsilon
+                << Alert::NewLine
+                << "m: " << m
                 << Alert::NewLine
                 << "waveNumber: " << waveNumber
                 << Alert::NewLine
@@ -55,8 +55,15 @@ int main(int, char**)
   P1 vh(mesh);
   P1 gh(mesh, mesh.getSpaceDimension());
 
+  // Define oscillatory screen
+  ScalarFunction h =
+    [&](const Point& p)
+    {
+      return 2 + sin(2 * pi * m * p.x()) * sin(2 * pi * m * p.y());
+    };
+
   // Define conductivity
-  ScalarFunction gamma = 1.0;
+  ScalarFunction gamma = 1;
 
   ScalarFunction gamma_e =
     [&](const Point& p)
@@ -68,6 +75,10 @@ int main(int, char**)
         return gamma_ek;
     };
 
+  GridFunction screen(vh);
+  screen = h;
+  screen.save("Screen.gf");
+
   GridFunction conductivity(vh);
   conductivity = gamma;
   conductivity.save("Conductivity.gf");
@@ -75,20 +86,21 @@ int main(int, char**)
   conductivity = gamma_e;
   conductivity.save("Conductivity_E.gf");
 
+  ScalarFunction phi = 1;
+
   // Define variational problems
   TrialFunction u(vh);
   TestFunction  v(vh);
-  ScalarFunction phi = 1;
 
   Problem helmholtz(u, v);
   helmholtz = Integral(gamma * Grad(u), Grad(v))
-            + Integral(waveNumber * u, v)
+            - Integral(waveNumber * waveNumber * h * u, v)
             + DirichletBC(u, phi).on(dCurrent)
             + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
   Problem perturbed(u, v);
   perturbed = Integral(gamma_e * Grad(u), Grad(v))
-            + Integral(waveNumber * u, v)
+            - Integral(waveNumber * waveNumber * h * u, v)
             + DirichletBC(u, phi).on(dCurrent)
             + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
@@ -116,13 +128,11 @@ int main(int, char**)
   g_e = Grad(u_e);
   g_e.save("PerturbedGradient.gf");
 
-  // GridFunction diff(vh);
-  // GridFunction gdiff(gh);
-  // //diff = u0 - u_e;
-  // diff = Frobenius(Grad(u0) - Grad(u_e));
-  // gdiff.save("GDiff.gf");
-  // diff.setWeights();
-  // diff.save("Diff.gf");
+  GridFunction diff(vh);
+  diff = Pow(u0 - u_e, 2);
+  diff.setWeights();
+
+  Alert::Info() << "L2 Error: " << Integral(diff).compute() << Alert::Raise;
 
   return 0;
 }

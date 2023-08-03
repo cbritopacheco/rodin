@@ -22,7 +22,7 @@ namespace Rodin::Alert
    */
   struct RaiseT
   {
-    explicit RaiseT() = default;
+    explicit constexpr RaiseT() = default;
   };
 
   /**
@@ -32,7 +32,12 @@ namespace Rodin::Alert
    */
   static constexpr RaiseT Raise;
 
-  static constexpr char NewLine = '\n';
+  struct NewLineT
+  {
+    explicit constexpr NewLineT() = default;
+  };
+
+  static constexpr NewLineT NewLine;
 
   /**
    * @brief Base class for objects which represents alerts.
@@ -61,7 +66,7 @@ namespace Rodin::Alert
        * @brief Initializes an Alert with the given message.
        * @param[in] what Description or reason for the Alert being raised.
        */
-      Alert(const std::string& what);
+      Alert(const std::string& what, int indent);
 
       /**
        * @brief Performs a copy of the Alert's message.
@@ -91,14 +96,22 @@ namespace Rodin::Alert
        * messages.
        */
       template <class T>
+      inline
       std::enable_if_t<!std::is_same_v<RaiseT, T>, Alert&>
       operator<<(T&& v) noexcept
       {
-        std::stringstream ss;
-        if (m_what.back() == NewLine)
-          ss << std::string(m_indent, ' ');
-        ss << std::forward<T>(v);
-        m_what += ss.str();
+        if (m_newline)
+          m_ss << std::string(m_indent, ' ');
+        m_ss << std::forward<T>(v);
+        m_newline = false;
+        return *this;
+      }
+
+      inline
+      Alert& operator<<(const NewLineT&)
+      {
+        operator<<('\n');
+        m_newline = true;
         return *this;
       }
 
@@ -107,6 +120,7 @@ namespace Rodin::Alert
        *
        * This method will call @ref raise().
        */
+      inline
       void operator<<(const RaiseT&)
       {
         this->raise();
@@ -121,11 +135,13 @@ namespace Rodin::Alert
       virtual void raise() const = 0;
 
     protected:
-      Alert(int setw) noexcept;
+      Alert(int indent) noexcept;
 
     private:
-      std::string m_what;
+      std::stringstream m_ss;
       size_t m_indent;
+      bool m_newline;
+      mutable std::string m_what;
   };
 }
 

@@ -27,7 +27,7 @@ namespace Rodin::Alert
        * @param[in] what Description or reason for the Success being raised.
        */
       Success(const std::string& what)
-        : Alert(what)
+        : Alert(what, RODIN_ALERT_SUCCESS_PREFIX_LENGTH)
       {}
 
       /**

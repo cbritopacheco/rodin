@@ -14,7 +14,7 @@
 namespace Rodin::Alert
 {
   Warning::Warning(const std::string& what)
-    : Alert(what)
+    : Alert(what, RODIN_ALERT_WARNING_PREFIX_LENGTH)
   {}
 
   void Warning::raise() const noexcept
@@ -22,7 +22,7 @@ namespace Rodin::Alert
 #ifdef RODIN_SILENCE_WARNINGS
 #else
     std::cerr << rang::fg::yellow
-           << "Warning: "
+           << RODIN_ALERT_WARNING_PREFIX
            << rang::fg::reset
            << what()
            << std::endl;

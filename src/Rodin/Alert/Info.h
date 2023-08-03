@@ -27,7 +27,7 @@ namespace Rodin::Alert
        * @param[in] what Description or reason for the Info being raised.
        */
       Info(const std::string& what)
-        : Alert(what)
+        : Alert(what, RODIN_ALERT_INFO_PREFIX_LENGTH)
       {}
 
       /**
