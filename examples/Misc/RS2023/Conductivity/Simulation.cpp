@@ -27,10 +27,6 @@ static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
 static constexpr Scalar pi = Math::Constants::pi();
 static constexpr Scalar gamma_ek = 1.93559;
 
-// static constexpr Scalar gamma_ek =
-//   (sectorArea * gammaA1 + (inhomogeinityArea - sectorArea) * gammaA2) / inhomogeinityArea;
-
-
 static Solver::SparseLU solver;
 
 struct Data

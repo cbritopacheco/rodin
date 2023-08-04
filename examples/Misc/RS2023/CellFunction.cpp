@@ -18,7 +18,7 @@ static constexpr Scalar m = 1;
 
 int main(int, char**)
 {
-  const size_t n = 32;
+  const size_t n = 128;
 
   // Build a mesh
   Mesh mesh;
@@ -43,7 +43,7 @@ int main(int, char**)
   ScalarFunction gamma =
     [](const Point& p)
     {
-      return 2 + sin(2 * M_PI * m * p.x()) * sin(2 * M_PI * m * p.y());
+      return 2 + sin(2 * M_PI * m * p.x()) * cos(2 * M_PI * m * p.y());
     };
 
   ScalarFunction dxgamma =
