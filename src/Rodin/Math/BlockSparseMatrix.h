@@ -9,7 +9,7 @@
 
 #include <Eigen/Core>
 #include <unsupported/Eigen/SparseExtra>
-#include <unsupported/Eigen/src/SparseExtra/BlockSparseMatrix.h>
+// #include <unsupported/Eigen/src/SparseExtra/BlockSparseMatrix.h>
 
 #include "Rodin/Types.h"
 
@@ -20,7 +20,7 @@ namespace Rodin::Math
   /**
    * @brief Sparse matrix type
    */
-  using BlockSparseMatrix = Eigen::BlockSparseMatrix<Scalar>;
+  // using BlockSparseMatrix = Eigen::BlockSparseMatrix<Scalar>;
 }
 
 #endif
