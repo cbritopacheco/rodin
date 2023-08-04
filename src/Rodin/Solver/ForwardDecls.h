@@ -54,8 +54,40 @@ namespace Rodin::Solver
   template <class OperatorType, class VectorType>
   class BiCGSTAB;
 
+#ifdef RODIN_USE_UMFPACK
+
   template <class OperatorType, class VectorType>
   class UMFPack;
+
+#endif
+
+#ifdef RODIN_USE_CHOLMOD
+
+  template <class OperatorType, class VectorType>
+  class Cholmod;
+
+#endif
+
+#ifdef RODIN_USE_PASTIX
+#endif
+
+#ifdef RODIN_USE_KLU
+#endif
+
+#ifdef RODIN_USE_KLU
+#endif
+
+#ifdef RODIN_USE_SUPERLU
+#endif
+
+#ifdef RODIN_USE_SPQR
+#endif
+
+#ifdef RODIN_USE_PARDISO
+#endif
+
+#ifdef RODIN_USE_APPLE_ACCELERATE
+#endif
 }
 
 #endif

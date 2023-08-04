@@ -43,7 +43,7 @@ int main()
 
     // Distance the subdomain
     GridFunction dist(vh);
-    dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
+    dist = MMG::Distance(vh).setInteriorDomain(sphereCap)
                              .distance(th);
 
     // Compute gradient of signed distance function

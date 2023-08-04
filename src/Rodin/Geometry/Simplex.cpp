@@ -208,7 +208,7 @@ namespace Rodin::Geometry
   const Math::SpatialVector& PointBase::getPhysicalCoordinates() const
   {
     if (!m_pc.has_value())
-      m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
+      return m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
     assert(m_pc.has_value());
     return m_pc.value();
   }
@@ -216,7 +216,7 @@ namespace Rodin::Geometry
   const Math::SpatialMatrix& PointBase::getJacobian() const
   {
     if (!m_jacobian.has_value())
-      m_jacobian.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
+      return m_jacobian.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
     assert(m_jacobian.has_value());
     return m_jacobian.value();
   }
@@ -359,7 +359,7 @@ namespace Rodin::Geometry
       }
       else
       {
-        assert(false); // Not handled yet
+        return m_jacobianDeterminant.emplace(Math::sqrt((jac.transpose() * jac).determinant()));
       }
     }
     assert(m_jacobianDeterminant.has_value());

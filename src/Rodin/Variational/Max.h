@@ -28,12 +28,12 @@ namespace Rodin::Variational
       using Parent = ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       Max(const LHS& a, const RHS& b)
-        : m_lhs(a), m_rhs(b)
+        : m_lhs(a.copy()), m_rhs(b.copy())
       {}
 
       Max(const Max& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       Max(Max&& other)
@@ -57,9 +57,23 @@ namespace Rodin::Variational
         return std::max(Scalar(m_lhs.getValue(p)), Scalar(m_rhs.getValue(p).scalar()));
       }
 
+      inline
+      const auto& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      const auto& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
     private:
-      LHS m_lhs;
-      RHS m_rhs;
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>
@@ -77,13 +91,13 @@ namespace Rodin::Variational
 
       constexpr
       Max(const LHS& a, const RHS& b)
-        : m_lhs(a), m_rhs(b)
+        : m_lhs(a.copy()), m_rhs(b)
       {}
 
       constexpr
       Max(const Max& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs)
       {}
 
       constexpr
@@ -104,11 +118,24 @@ namespace Rodin::Variational
       constexpr
       Scalar getValue(const Geometry::Point& p) const
       {
-        return std::max(Scalar(m_lhs.getValue(p)), m_rhs);
+        return std::max(Scalar(getLHS().getValue(p)), getRHS());
+      }
+
+      inline
+      const auto& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      const auto& getRHS() const
+      {
+        return m_rhs;
       }
 
     private:
-      LHS m_lhs;
+      std::unique_ptr<LHS> m_lhs;
       RHS m_rhs;
   };
 

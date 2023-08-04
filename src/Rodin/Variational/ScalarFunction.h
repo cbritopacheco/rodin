@@ -324,6 +324,13 @@ namespace Rodin::Variational
 
   template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Scalar, F, const Geometry::Point&>>>
   ScalarFunction(F) -> ScalarFunction<F>;
+
+  namespace P
+  {
+    static ScalarFunction x([](const Geometry::Point& p) { return p.x(); });
+    static ScalarFunction y([](const Geometry::Point& p) { return p.y(); });
+    static ScalarFunction z([](const Geometry::Point& p) { return p.z(); });
+  }
 }
 
 #endif

@@ -42,32 +42,6 @@ namespace Rodin::Geometry
       virtual MeshBase& scale(Scalar c) = 0;
 
       /**
-       * @brief Gets the maximum number @f$ t @f$ by which the mesh will
-       * remain valid, when displacing by @f$ u @f$.
-       * @param[in] u Displacement at each node
-       *
-       * This function will calculate the maximum number @f$ t @f$ so that
-       * the displacement
-       * @f[
-       *   x \mapsto x + t u(x)
-       * @f]
-       * gives a valid mesh without actually displacing the mesh.
-       *
-       * @note The vector dimension of @f$ u @f$ must be equal to the
-       * space dimension.
-       *
-       * @returns Maximum time so that the mesh remains valid.
-       */
-      template <class FES>
-      Scalar getMaximumDisplacement(const Variational::GridFunction<FES>& u)
-      {
-        Scalar res;
-        assert(false);
-        // getHandle().CheckDisplacements(u.getHandle(), res);
-        return res;
-      }
-
-      /**
        * @brief Indicates whether the mesh is a surface or not.
        *
        * A mesh is considered a surface mesh if has codimension of 1, meaning

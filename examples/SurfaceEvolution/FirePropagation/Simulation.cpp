@@ -226,7 +226,7 @@ class Environment
 
       std::cout << "dist\n";
       m_fireDist =
-        MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
+        MMG::Distance(m_sfes).setInteriorDomain(Terrain::Burnt)
                               .distance(m_topography);
 
       std::cout << "flame\n";

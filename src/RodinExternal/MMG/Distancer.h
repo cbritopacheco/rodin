@@ -42,14 +42,14 @@ namespace Rodin::External::MMG
   * @f]
   */
   template <>
-  class Distancer<ScalarGridFunction::FES>
+  class Distance<ScalarGridFunction::FES>
   {
     public:
      /**
       * @brief Creates a Distancer2D object with default values.
       * @param[in] fes Finite element space for the distance function
       */
-     Distancer(const ScalarGridFunction::FES& fes)
+     Distance(const ScalarGridFunction::FES& fes)
        : m_fes(fes),
          m_scale(true),
          m_distTheBoundary(false),
@@ -68,7 +68,7 @@ namespace Rodin::External::MMG
       *
       * @see distance(Mesh&) const
       */
-     Distancer& setInteriorDomain(const Geometry::Attribute& ref)
+     Distance& setInteriorDomain(const Geometry::Attribute& ref)
      {
        return setInteriorDomain(FlatSet<Geometry::Attribute>{ref});
      }
@@ -84,7 +84,7 @@ namespace Rodin::External::MMG
       *
       * @see distance(Mesh&) const
       */
-     Distancer& setInteriorDomain(const FlatSet<Geometry::Attribute>& refs)
+     Distance& setInteriorDomain(const FlatSet<Geometry::Attribute>& refs)
      {
        m_interiorDomains = refs;
        return *this;
@@ -100,7 +100,7 @@ namespace Rodin::External::MMG
       *
       * @see distance(Mesh&, Mesh&)
       */
-     Distancer& enableScaling(bool b = true)
+     Distance& enableScaling(bool b = true)
      {
        m_scale = b;
        return *this;
@@ -112,7 +112,7 @@ namespace Rodin::External::MMG
       *
       * By default, it will utilize `std::thread::hardware_concurrency()`.
       */
-     Distancer& setCPUs(unsigned int ncpu)
+     Distance& setCPUs(unsigned int ncpu)
      {
        m_ncpu = ncpu;
        return *this;
@@ -262,7 +262,7 @@ namespace Rodin::External::MMG
        return res;
      }
 
-     Distancer& surface(bool distTheBoundary = true)
+     Distance& surface(bool distTheBoundary = true)
      {
        m_distTheBoundary = distTheBoundary;
        return *this;
@@ -277,7 +277,7 @@ namespace Rodin::External::MMG
      std::optional<FlatSet<Geometry::Attribute>> m_interiorDomains;
   };
 
-  Distancer(const ScalarGridFunction::FES&) -> Distancer<ScalarGridFunction::FES>;
+  Distance(const ScalarGridFunction::FES&) -> Distance<ScalarGridFunction::FES>;
 
   // /**
   //  * @brief Distancer specialization for redistancing a level set function.

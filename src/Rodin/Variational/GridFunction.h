@@ -115,6 +115,7 @@ namespace Rodin::Variational
       constexpr
       Scalar max() const
       {
+        static_assert(std::is_same_v<RangeType, Scalar>);
         return m_data.maxCoeff();
       }
 
@@ -133,6 +134,7 @@ namespace Rodin::Variational
       constexpr
       Scalar min() const
       {
+        static_assert(std::is_same_v<RangeType, Scalar>);
         return m_data.minCoeff();
       }
 
@@ -147,6 +149,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 1);
         return static_cast<const Derived&>(*this);
       }
@@ -155,6 +158,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 2);
         return static_cast<const Derived&>(*this);
       }
@@ -163,6 +167,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 3);
         return static_cast<const Derived&>(*this);
       }

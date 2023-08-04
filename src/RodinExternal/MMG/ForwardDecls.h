@@ -18,11 +18,11 @@ namespace Rodin::External::MMG
   class Optimize;
 
   template <class T>
-  class Distancer;
-
-  class Advect;
+  class Distance;
 
   class ISCDProcess;
+
+  class Advect;
 
   class ImplicitDomainMesher;
 }

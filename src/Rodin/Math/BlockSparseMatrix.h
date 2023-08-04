@@ -4,10 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MATH_SPARSEMATRIX_H
-#define RODIN_MATH_SPARSEMATRIX_H
+#ifndef RODIN_MATH_BLOCKSPARSEMATRIX_H
+#define RODIN_MATH_BLOCKSPARSEMATRIX_H
 
-#include <Eigen/Sparse>
+#include <Eigen/Core>
+#include <unsupported/Eigen/SparseExtra>
+#include <unsupported/Eigen/src/SparseExtra/BlockSparseMatrix.h>
 
 #include "Rodin/Types.h"
 
@@ -18,8 +20,9 @@ namespace Rodin::Math
   /**
    * @brief Sparse matrix type
    */
-  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  using BlockSparseMatrix = Eigen::BlockSparseMatrix<Scalar>;
 }
 
 #endif
+
 

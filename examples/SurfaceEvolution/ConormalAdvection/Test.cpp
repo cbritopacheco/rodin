@@ -116,7 +116,7 @@ int main(int argc, char** argv)
     }
     else
     {
-      dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
+      dist = MMG::Distance(vh).setInteriorDomain(sphereCap)
                                .distance(th);
 
       // Compute gradient of signed distance function
