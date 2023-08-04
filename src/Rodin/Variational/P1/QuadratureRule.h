@@ -8,30 +8,30 @@
 
 namespace Rodin::Variational
 {
-  /**
-   * @ingroup QuadratureRuleSpecializations
-   *
-   * @f[
-   * \int A u \cdot v \ dx
-   * @f]
-   */
-  template <class FunctionDerived, class LHSDerived, class RHSDerived, class Context>
-  class QuadratureRule<
-    Dot<
-      Mult<
-        FunctionBase<FunctionDerived>,
-        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>,
-      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>
-    : public BilinearFormIntegratorBase
-  {
-    public:
-      using Parent = BilinearFormIntegratorBase;
-      using LHS = Mult<
-        FunctionBase<FunctionDerived>,
-        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>;
-      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>;
-      using Integrand = Dot<LHS, RHS>;
-  };
+  // /**
+  //  * @ingroup QuadratureRuleSpecializations
+  //  *
+  //  * @f[
+  //  * \int A u \cdot v \ dx
+  //  * @f]
+  //  */
+  // template <class FunctionDerived, class LHSDerived, class RHSDerived, class Context>
+  // class QuadratureRule<
+  //   Dot<
+  //     Mult<
+  //       FunctionBase<FunctionDerived>,
+  //       ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>,
+  //     ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>>>
+  //   : public BilinearFormIntegratorBase
+  // {
+  //   public:
+  //     using Parent = BilinearFormIntegratorBase;
+  //     using LHS = Mult<
+  //       FunctionBase<FunctionDerived>,
+  //       ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Scalar, Context>, TrialSpace>>>;
+  //     using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>;
+  //     using Integrand = Dot<LHS, RHS>;
+  // };
 
   /**
    * @ingroup QuadratureRuleSpecializations
