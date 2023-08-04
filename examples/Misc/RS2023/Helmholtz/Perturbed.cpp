@@ -26,9 +26,9 @@ static_assert(epsilon > 0);
 
 static constexpr Scalar pi = Math::Constants::pi();
 
-const constexpr Scalar m = 50;
-const constexpr Scalar waveNumber = 25;
-static constexpr Scalar gamma_ek = 1.1;
+const constexpr Scalar waveNumber = 20;
+const constexpr Scalar m = 10;
+static constexpr Scalar gamma_ek = 2;
 
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)

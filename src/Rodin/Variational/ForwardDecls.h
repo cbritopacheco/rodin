@@ -564,6 +564,9 @@ namespace Rodin::Variational
   template <class Operand>
   class Cos;
 
+  template <class Operand>
+  class Sin;
+
   /**
    * @brief Represents the tangent function.
    * @tparam Operand Type of operand

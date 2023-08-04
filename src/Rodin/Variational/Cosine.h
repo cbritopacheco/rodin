@@ -24,7 +24,7 @@ namespace Rodin::Variational
    * @ingroup CosSpecializations
    */
   template <class NestedDerived>
-  class Cos<FunctionBase<NestedDerived>>
+  class Cos<FunctionBase<NestedDerived>> final
     : public ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>
   {
     public:
@@ -32,12 +32,12 @@ namespace Rodin::Variational
       using Parent = ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
       Cos(const Operand& v)
-        : m_v(v)
+        : m_v(v.copy())
       {}
 
       Cos(const Cos& other)
         : Parent(other),
-          m_v(other.m_v)
+          m_v(other.m_v->copy())
       {}
 
       Cos(Cos&& other)
@@ -56,15 +56,33 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return std::cos(Scalar(m_v.getValue(p)));
+        return std::cos(Scalar(getOperand().getValue(p)));
+      }
+
+      inline
+      const Operand& getOperand() const
+      {
+        assert(m_v);
+        return *m_v;
+      }
+
+      inline Cos* copy() const noexcept override
+      {
+        return new Cos(*this);
       }
 
     private:
-      Operand m_v;
+      std::unique_ptr<Operand> m_v;
   };
 
   template <class NestedDerived>
   Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
+
+  template <class NestedDerived>
+  auto cos(const FunctionBase<NestedDerived>& f)
+  {
+    return Cos(f);
+  }
 }
 
 #endif

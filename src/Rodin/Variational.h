@@ -59,6 +59,7 @@
 #include "Variational/Max.h"
 #include "Variational/Min.h"
 
+#include "Variational/Sine.h"
 #include "Variational/Cosine.h"
 #include "Variational/Tangent.h"
 

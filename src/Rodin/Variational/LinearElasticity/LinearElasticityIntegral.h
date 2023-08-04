@@ -9,7 +9,8 @@
 namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES, class MuDerived, class LambdaDerived>
-  class LinearElasticityIntegrator final : public BilinearFormIntegratorBase
+  class LinearElasticityIntegrator final
+    : public BilinearFormIntegratorBase
   {
     public:
       using Parent = BilinearFormIntegratorBase;
@@ -17,7 +18,8 @@ namespace Rodin::Variational
       using Lambda = FunctionBase<LambdaDerived>;
 
       LinearElasticityIntegrator(
-          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, const Lambda& lambda, const Mu& mu)
+          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v,
+          const Lambda& lambda, const Mu& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
           m_fes(u.getFiniteElementSpace())

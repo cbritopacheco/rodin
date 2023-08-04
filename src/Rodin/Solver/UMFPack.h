@@ -7,7 +7,7 @@
 #ifndef RODIN_SOLVER_UMFPACK_H
 #define RODIN_SOLVER_UMFPACK_H
 
-#ifdef RODIN_USE_SUITESPARSE
+#ifdef RODIN_USE_UMFPACK
 
 #include <optional>
 #include <functional>
@@ -55,7 +55,7 @@ namespace Rodin::Solver
   };
 }
 
-#endif // #ifdef RODIN_USE_SUITESPARSE
+#endif // #ifdef RODIN_USE_UMFPACK
 #endif
 
 

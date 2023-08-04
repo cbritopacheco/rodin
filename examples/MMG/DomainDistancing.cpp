@@ -42,7 +42,7 @@ int main(int, char**)
 
   implicit.save("Discretized.mesh", IO::FileFormat::MEDIT);
 
-  auto dist = MMG::Distancer(miaow).setInteriorDomain(interior).distance(implicit);
+  auto dist = MMG::Distance(miaow).setInteriorDomain(interior).distance(implicit);
 
   dist.save("Discretized.sol", IO::FileFormat::MEDIT);
 

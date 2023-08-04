@@ -64,7 +64,7 @@ namespace Rodin::Variational
           assert(false);
           value.setConstant(NAN);
         }
-        return value.normalized();
+        return Math::sgn(p.getJacobianDeterminant()) * value.normalized();
       }
 
       inline Normal* copy() const noexcept override

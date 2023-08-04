@@ -103,6 +103,12 @@ namespace Rodin::Variational
 
   template <class BaseDerived, class Number>
   Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
+
+  template <class NestedDerived, class Number>
+  auto pow(const FunctionBase<NestedDerived>& f, Number exponent)
+  {
+    return Pow(f, exponent);
+  }
 }
 
 #endif

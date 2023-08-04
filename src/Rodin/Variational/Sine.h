@@ -4,10 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_ABS_H
-#define RODIN_VARIATIONAL_ABS_H
+#ifndef RODIN_VARIATIONAL_SIN_H
+#define RODIN_VARIATIONAL_SIN_H
 
-#include <cmath>
+#include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ScalarFunction.h"
@@ -15,55 +15,60 @@
 namespace Rodin::Variational
 {
   /**
-   * @defgroup AbsSpecializations Abs Template Specializations
-   * @brief Template specializations of the Abs class.
-   * @see Abs
+   * @defgroup SinSpecializations Sin Template Specializations
+   * @brief Template specializations of the Sin class.
+   * @see Sin
    */
 
   /**
-   * @ingroup AbsSpecializations
+   * @ingroup SinSpecializations
    */
   template <class NestedDerived>
-  class Abs<FunctionBase<NestedDerived>>
-    : public ScalarFunctionBase<Abs<FunctionBase<NestedDerived>>>
+  class Sin<FunctionBase<NestedDerived>> final
+    : public ScalarFunctionBase<Sin<FunctionBase<NestedDerived>>>
   {
     public:
       using Operand = FunctionBase<NestedDerived>;
-      using Parent = ScalarFunctionBase<Abs<Operand>>;
+      using Parent = ScalarFunctionBase<Sin<FunctionBase<NestedDerived>>>;
 
-      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-      static_assert(std::is_same_v<OperandRange, Scalar>);
-
-      Abs(const Operand& v)
+      Sin(const Operand& v)
         : m_v(v.copy())
       {}
 
-      Abs(const Abs& other)
+      Sin(const Sin& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
-      Abs(Abs&& other)
+      Sin(Sin&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
       inline
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      Sin& traceOf(Geometry::Attribute attrs)
       {
-        return std::abs(getOperand().getValue(p));
+        m_v.traceOf(attrs);
+        return *this;
       }
 
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        return std::sin(Scalar(getOperand().getValue(p)));
+      }
+
+      inline
       const Operand& getOperand() const
       {
         assert(m_v);
         return *m_v;
       }
 
-      inline Abs* copy() const noexcept override
+      inline Sin* copy() const noexcept override
       {
-        return new Abs(*this);
+        return new Sin(*this);
       }
 
     private:
@@ -71,17 +76,14 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived>
-  Abs(const FunctionBase<NestedDerived>&) -> Abs<FunctionBase<NestedDerived>>;
+  Sin(const FunctionBase<NestedDerived>&) -> Sin<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
-  inline
-  constexpr auto
-  abs(const FunctionBase<NestedDerived>& op)
+  auto sin(const FunctionBase<NestedDerived>& f)
   {
-    return Abs(op);
+    return Sin(f);
   }
 }
 
 #endif
-
 

@@ -11,7 +11,7 @@ add_library(RodinSolver ${RodinSolver_SRCS} ${RodinSolver_HEADERS})
 add_library(Rodin::Solver ALIAS RodinSolver)
 
 # ---- SuiteSparse -----------------------------------------------------------
-if (RODIN_USE_SUITESPARSE)
+if (RODIN_USE_UMFPACK)
   target_sources(RodinSolver PRIVATE UMFPack.h)
 endif()
 

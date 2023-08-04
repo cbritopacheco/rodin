@@ -16,6 +16,7 @@
 #include "Rodin/Solver/Solver.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
+#include "Rodin/Math/BlockSparseMatrix.h"
 
 #include "ForwardDecls.h"
 
@@ -203,7 +204,6 @@ namespace Rodin::Variational
       VectorType      m_mass;
       VectorType      m_guess;
       OperatorType    m_stiffness;
-
   };
 }
 

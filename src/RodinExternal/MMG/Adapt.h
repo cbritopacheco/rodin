@@ -7,6 +7,8 @@
 #ifndef RODIN_EXTERNAL_MMG_ADAPT_H
 #define RODIN_EXTERNAL_MMG_ADAPT_H
 
+#include "ForwardDecls.h"
+
 #include "Mesh.h"
 
 #include "MMG5.h"

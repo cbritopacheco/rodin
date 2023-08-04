@@ -45,11 +45,10 @@ namespace Rodin::Variational
 
       Math::Vector getValue(const Geometry::Point& p) const
       {
-        assert(p.getPolytope().getDimension() == p.getPolytope().getMesh().getSpaceDimension() - 1);
-        const auto& simplex = p.getPolytope();
-        const auto& mesh = simplex.getMesh();
+        const auto& polytope = p.getPolytope();
+        const auto& mesh = polytope.getMesh();
         const auto& jacobian = p.getJacobian();
-
+        assert(polytope.getDimension() == mesh.getDimension() - 1);
         Math::Vector value(m_dimension);
         if (jacobian.rows() == 2)
         {
@@ -68,35 +67,7 @@ namespace Rodin::Variational
           value.setConstant(NAN);
           return value;
         }
-
-        // Or we are on a face of a d-mesh in d-space
-        if (mesh.isBoundary(simplex.getIndex()))
-        {
-          return value.normalized();
-        }
-        else
-        {
-          // int el1 = -1;
-          // int el2 = -1;
-          assert(false);
-          // const auto& meshHandle = simplex.getMesh().getHandle();
-          // meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
-          // if (el1 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el1)))
-          // {
-          //   return value.normalized();
-          // }
-          // else if (el2 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el2)))
-          // {
-          //   value = -1.0 * value;
-          //   return value.normalized();
-          // }
-          // else
-          // {
-          //   assert(false);
-          //   value.setConstant(NAN);
-          //   return value;
-          // }
-        }
+        return value.normalized();
       }
 
       inline
