@@ -26,7 +26,7 @@ static_assert(epsilon > 0);
 
 static constexpr Scalar pi = Math::Constants::pi();
 
-const constexpr Scalar waveNumber = 20;
+const constexpr Scalar waveNumber = 100;
 const constexpr Scalar m = 10;
 static constexpr Scalar gamma_ek = 2;
 
@@ -128,11 +128,21 @@ int main(int, char**)
   g_e = Grad(u_e);
   g_e.save("PerturbedGradient.gf");
 
+  ScalarFunction chi_e =
+    [&](const Point& p)
+    { return Scalar((p.getCoordinates() - x0).norm() > 2 * epsilon); };
+
   GridFunction diff(vh);
-  diff = Pow(u0 - u_e, 2);
+  diff = chi_e * Pow(u0 - u_e, 2);
   diff.setWeights();
 
-  Alert::Info() << "L2 Error: " << Integral(diff).compute() << Alert::Raise;
+  GridFunction indicator(vh);
+  indicator = chi_e;
+  indicator.save("Indicator.gf");
+
+  const Scalar error = Integral(diff);
+
+  Alert::Info() << "L2 Error: " << error << Alert::Raise;
 
   return 0;
 }
