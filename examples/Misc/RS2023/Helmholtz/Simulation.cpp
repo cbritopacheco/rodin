@@ -4,6 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <thread>
+#include <chrono>
+#include <fstream>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -27,7 +30,7 @@ static constexpr Scalar pi = Math::Constants::pi();
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
 static constexpr Scalar R1 = R0 + 10 * hmax; // Radius of B_R(x_0)
 
-static Solver::SparseLU solver;
+static std::mutex mutex_io;
 
 struct Data
 {
@@ -37,40 +40,119 @@ struct Data
   const Scalar conductivity;
 };
 
+template <class T>
+std::vector<std::vector<T>> splitVector(const std::vector<T>& vec, int n) {
+    std::vector<std::vector<T>> result;
+    int size = vec.size();
+    int partSize = size / n;
+    int remainder = size % n;
+    int startIndex = 0;
+
+    for (int i = 0; i < n; i++) {
+        int currentPartSize = partSize + (i < remainder ? 1 : 0);
+        std::vector<T> currentPart(vec.begin() + startIndex, vec.begin() + startIndex + currentPartSize);
+        result.push_back(currentPart);
+        startIndex += currentPartSize;
+    }
+
+    return result;
+}
+
+void run(int i, const std::vector<Data>& grid);
+
 int main(int, char**)
 {
-  // Load mesh
-  Mesh mesh;
-  mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
-
   // Define evaluation grid
-  constexpr size_t N = 20;
-  Math::Vector m_r = Math::Vector::LinSpaced(N, 0, 0.5 * 1. / hmax);
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(N, hmax, 0.2);
-  Math::Vector waveNumber_r = Math::Vector::LinSpaced(25, 0.1, 25);
-  Math::Vector conductivity_r{{ 1e-12, 1.0, 1e12 }};
+  Math::Vector m_r = Math::Vector::LinSpaced(50, 0, 0.5 * 1. / hmax);
+  Math::Vector epsilon_r = Math::Vector::LinSpaced(1. / hmax, hmax, 0.2);
+  Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
+  Math::Vector conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
 
   std::vector<Data> grid;
+  grid.reserve(m_r.size() * epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
   for (const Scalar m : m_r)
     for (const Scalar epsilon : epsilon_r)
       for (const Scalar waveNumber : waveNumber_r)
         for (const Scalar g : conductivity_r)
           grid.push_back({ m, epsilon, waveNumber, g });
 
+  const size_t hwc = std::thread::hardware_concurrency();
+  const size_t n = hwc - 2;
+  Alert::Info() << "Hardware concurrency: " << hwc
+                << Alert::NewLine
+                << "Launching " << n << " threads"
+                << Alert::Raise;
+  std::vector<std::thread> ts(n);
+  auto split = splitVector(grid, ts.size());
+
+  for (size_t i = 0; i < ts.size(); i++)
+    ts[i] = std::thread(run, i, split[i]);
+
+  for (auto& t : ts)
+    t.join();
+}
+
+void run(int id, const std::vector<Data>& grid)
+{
+  mutex_io.lock();
+  Alert::Info() << "Running thread: " << id
+                << Alert::NewLine
+                << "Grid size: " << grid.size()
+                << Alert::Raise;
+  mutex_io.unlock();
+
+  // Load mesh
+  Mesh mesh;
+  mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
+  // mesh.save("out/Q.mesh");
+
+  Solver::SparseLU solver;
+
+  // Math::Vector m_r{{  }};
+  // Math::Vector epsilon_r{{ 0.1 }};
+  // Math::Vector waveNumber_r{{ 5 }};
+  // Math::Vector conductivity_r{{ 2 }};
+
+  Alert::Info() << "Grid size: " << grid.size() << Alert::Raise;
+
   std::stringstream filename;
-  filename << "L2_Grid_HMax" << std::setw(4) << hmax << ".live.csv";
+  filename << "grid/T" << id << "_L2_Grid_HMax" << std::setw(4) << hmax << ".live.csv";
   std::ofstream out(filename.str());
-  out << "m,epsilon,waveNumber,conductivity,error";
+  out << "m,epsilon,waveNumber,conductivity,error\n";
+
+  size_t i = 0;
+  auto t0 = std::chrono::high_resolution_clock::now();
   for (const auto& data : grid)
   {
-    Alert::Info() << "Epsilon: " << data.epsilon
-                  << Alert::NewLine
-                  << "m: " << data.m
-                  << Alert::NewLine
-                  << "waveNumber: " << data.waveNumber
-                  << Alert::NewLine
-                  << "Inhomogeinity constant: " << data.conductivity
-                  << Alert::Raise;
+    if (i % 100 == 0)
+    {
+      auto t1 = std::chrono::high_resolution_clock::now();
+      const auto delta = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0);
+      mutex_io.lock();
+      Alert::Info() << "Thread " << id << " progress."
+                    << Alert::NewLine
+                    << "----------------------------------"
+                    << Alert::NewLine
+                    << i << " / " << grid.size() << " ---- "
+                    << (100 * Scalar(i) / Scalar(grid.size())) << "%"
+                    << Alert::NewLine
+                    << "Total elapsed time: " << delta.count() << "s"
+                    << Alert::Raise;
+      mutex_io.unlock();
+    }
+
+    // Alert::Info() << ">>>>>>>>>>>>>>>>>>>>"
+    //               << Alert::NewLine
+    //               << i << " / " << grid.size()
+    //               << Alert::NewLine
+    //               << "Epsilon: " << data.epsilon
+    //               << Alert::NewLine
+    //               << "m: " << data.m
+    //               << Alert::NewLine
+    //               << "waveNumber: " << data.waveNumber
+    //               << Alert::NewLine
+    //               << "Inhomogeinity constant: " << data.conductivity
+    //               << Alert::Raise;
 
     // Define finite element spaces
     P1 vh(mesh);
@@ -115,34 +197,53 @@ int main(int, char**)
               + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
     // Solve the background problem
-    Alert::Info() << "Solving background equation." << Alert::Raise;
+    // Alert::Info() << "Solving background equation." << Alert::Raise;
     helmholtz.solve(solver);
     const auto u0 = std::move(u.getSolution());
-    Alert::Success() << "Done." << Alert::Raise;
+    // Alert::Success() << "Done." << Alert::Raise;
 
-    Alert::Info() << "Solving perturbed equation." << Alert::Raise;
+    // Alert::Info() << "Solving perturbed equation." << Alert::Raise;
     perturbed.solve(solver);
     const auto ue = std::move(u.getSolution());
-    Alert::Success() << "Done." << Alert::Raise;
+    // Alert::Success() << "Done." << Alert::Raise;
 
-    mesh.save("Q.mesh");
-    u0.save("u0.gf");
-    ue.save("ue.gf");
+    ScalarFunction chi_e =
+      [&](const Point& p)
+      { return Scalar((p.getCoordinates() - x0).norm() > 2 * data.epsilon); };
 
     GridFunction diff(vh);
-    diff = Pow(u0 - ue, 2);
+    diff = chi_e * Pow(u0 - ue, 2);
     diff.setWeights();
     const Scalar error = Integral(diff);
 
-    Alert::Success() << "L2 Error: " << error << Alert::Raise;
-
+    // Alert::Success() << "L2 Error: " << error
+    //                  << Alert::NewLine
+    //                  << "<<<<<<<<<<<<<<<<<<<<"
+    //                  << Alert::Raise;
+    out << data.m << ','
+        << data.epsilon << ','
+        << data.waveNumber << ','
+        << data.conductivity << ','
+        << error << '\n';
     out.flush();
-    std::exit(1);
+
+    // auto t1 = std::chrono::high_resolution_clock::now();
+    // auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0);
+    // Alert::Info() << "Time taken: " << delta.count() << "ms" << Alert::Raise;
+
+    // std::stringstream ss;
+    // ss << std::setfill('0') << std::setw(4) << i;
+    // u0.save("out/Background_" + ss.str() + ".gf");
+    // ue.save("out/Perturbed_" + ss.str() + ".gf");
+
+    i++;
   }
 
-  return 0;
+  auto t1 = std::chrono::high_resolution_clock::now();
+  const auto delta = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0);
+
+  mutex_io.lock();
+  Alert::Success() << "Finished thread " << id << " in " << delta.count() << "s" << Alert::Raise;
+  mutex_io.unlock();
 }
-
-
-
 

@@ -36,10 +36,10 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
   size_t d = 0;
   EXPECT_EQ(mesh.getCount(d), 4);
   EXPECT_EQ(mesh.getCount(d), mesh.getVertexCount());
-  EXPECT_EQ(mesh.getAttribute(d, 0), 1);
-  EXPECT_EQ(mesh.getAttribute(d, 1), 2);
-  EXPECT_EQ(mesh.getAttribute(d, 2), 3);
-  EXPECT_EQ(mesh.getAttribute(d, 3), 4);
+  EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+  EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+  EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+  EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
 
   d = 1;
   EXPECT_EQ(mesh.getCount(d), 5);
