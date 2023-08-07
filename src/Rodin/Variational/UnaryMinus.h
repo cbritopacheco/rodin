@@ -17,6 +17,16 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class NestedDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -115,7 +125,7 @@ namespace Rodin::Variational
 
   template <class NestedDerived, class FESType, ShapeFunctionSpaceType SpaceType>
   class UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>>, FESType, SpaceType>
+    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
   {
     public:
       using FES = FESType;

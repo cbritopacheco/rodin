@@ -12,6 +12,18 @@
 
 #include "GridFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<
+    Variational::Grad<
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Scalar, Ps...>, SpaceType>>>
+  {
+    using FES = Variational::P1<Scalar, Ps...>;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -134,7 +146,7 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class ... Ps, ShapeFunctionSpaceType SpaceType>
   class Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, SpaceType>>, P1<Scalar, Ps...>, SpaceType>
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Ps...>, SpaceType>>>
   {
     public:
       /// Finite element space type

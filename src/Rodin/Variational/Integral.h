@@ -146,6 +146,7 @@ namespace Rodin::Variational
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+
       using Parent = QuadratureRule<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
@@ -182,7 +183,7 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class RHSDerived, class FES>
   Integral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
-    -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
+    -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>>>;
 
   /**
    * @ingroup IntegralSpecializations

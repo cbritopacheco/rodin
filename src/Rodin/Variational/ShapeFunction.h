@@ -12,9 +12,32 @@
 #include "TensorBasis.h"
 #include "FiniteElementSpace.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Derived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::ShapeFunctionBase<Derived, FESType, SpaceType>>
+  {
+    using FES = FESType;
+
+    static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
+
+    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+
+    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+
+  };
+
+  template <class Derived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::ShapeFunction<Derived, FESType, SpaceType>>
+  {
+    using FES = FESType;
+
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
-
   /**
   * @defgroup ShapeFunctionSpecializations ShapeFunction Template Specializations
   * @brief Template specializations of the ShapeFunction class.
@@ -36,7 +59,10 @@ namespace Rodin::Variational
     static constexpr ShapeFunctionSpaceType Value = ShapeFunctionSpaceType::Trial;
   };
 
-  template <class Derived, class FESType = typename Derived::FES, ShapeFunctionSpaceType SpaceType = Derived::Space>
+  template <
+    class Derived,
+    class FESType = typename FormLanguage::Traits<Derived>::FES,
+    ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::Space>
   class ShapeFunctionBase : public FormLanguage::Base
   {
     public:
@@ -175,13 +201,14 @@ namespace Rodin::Variational
   * @brief ShapeFunction
   */
   template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>
+  class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>>
   {
     public:
       using FES = FESType;
+
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
+      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>>;
 
       ShapeFunction() = delete;
 

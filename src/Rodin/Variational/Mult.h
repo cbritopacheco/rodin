@@ -19,6 +19,26 @@
 #include "ShapeFunction.h"
 #include "Grad.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<
+    Variational::Mult<
+      Variational::FunctionBase<LHSDerived>,
+      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+
+  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::Mult<Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>, Variational::FunctionBase<RHSDerived>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -169,7 +189,7 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
   class Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>, FESType, SpaceType>
+    : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
   {
     public:
       using FES = FESType;
@@ -315,7 +335,7 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
   class Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>> final
-    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>>, FESType, SpaceType>
+    : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, FunctionBase<RHSDerived>>>
   {
     public:
       using FES = FESType;
@@ -449,250 +469,6 @@ namespace Rodin::Variational
   {
     return Mult(lhs, ScalarFunction(rhs));
   }
-
-  // /* ||--- OPTIMIZATIONS ----------------------------------------------------
-  //  * Mult<FunctionBase, ShapeFunctionBase<Space>>
-  //  * ---------------------------------------------------------------------->>
-  //  */
-
-  // /**
-  //  * @ingroup MultSpecializations
-  //  * @brief Left Multiplication of a ShapeFunction by a FunctionBase
-  //  *
-  //  * Represents the following expression:
-  //  * @f[
-  //  *   f u
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or or matrix valued).
-  //  */
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // class Mult<FunctionBase, ShapeFunction<FES, Space>>
-  //   : public Mult<FunctionBase, ShapeFunctionBase<Space>>
-  // {
-  //   public:
-  //     using Parent = Mult<FunctionBase, ShapeFunctionBase<Space>>;
-  //     using LHS = FunctionBase;
-  //     using RHS = ShapeFunction<FES, Space>;
-
-  //     constexpr
-  //     Mult(const FunctionBase& lhs, const ShapeFunction<FES, Space>& rhs)
-  //       : Parent(lhs, rhs)
-  //     {}
-
-  //     constexpr
-  //     Mult(const Mult& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Mult(Mult&& other)
-  //       : Parent(std::move(other))
-  //     {}
-
-  //     virtual FunctionBase& getLHS() override
-  //     {
-  //       return static_cast<FunctionBase&>(Parent::getLHS());
-  //     }
-
-  //     virtual const FunctionBase& getLHS() const override
-  //     {
-  //       return static_cast<const FunctionBase&>(Parent::getLHS());
-  //     }
-
-  //     virtual ShapeFunction<FES, Space>& getRHS() override
-  //     {
-  //       return static_cast<ShapeFunction<FES, Space>&>(Parent::getRHS());
-  //     }
-
-  //     virtual const ShapeFunction<FES, Space>& getRHS() const override
-  //     {
-  //       return static_cast<const ShapeFunction<FES, Space>&>(Parent::getRHS());
-  //     }
-
-  //     virtual Mult* copy() const noexcept override
-  //     {
-  //       return new Mult(*this);
-  //     }
-  // };
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // Mult(const FunctionBase&, const ShapeFunction<FES, Space>& rhs)
-  //   -> Mult<FunctionBase, ShapeFunction<FES, Space>>;
-
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // Mult<FunctionBase, ShapeFunction<FES, Space>>
-  // operator*(const FunctionBase& lhs, const ShapeFunction<FES, Space>& rhs)
-  // {
-  //   return Mult(lhs, rhs);
-  // }
-
-  // template <class T, class FES, ShapeFunctionSpaceType Space>
-  // std::enable_if_t<std::is_arithmetic_v<T>, Mult<FunctionBase, ShapeFunction<FES, Space>>>
-  // operator*(T v, const ShapeFunction<FES, Space>& rhs)
-  // {
-  //   return Mult(ScalarFunction(v), rhs);
-  // }
-
-  // /**
-  //  * @ingroup MultSpecializations
-  //  * @brief Left Multiplication of the gradient of a ShapeFunction by a FunctionBase
-  //  *
-  //  * Represents the following expression:
-  //  * @f[
-  //  *   f \nabla u
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or matrix valued).
-  //  */
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // class Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>
-  //   : public Mult<FunctionBase, ShapeFunctionBase<Space>>
-  // {
-  //   public:
-  //     using Parent = Mult<FunctionBase, ShapeFunctionBase<Space>>;
-  //     using LHS = FunctionBase;
-  //     using RHS = Grad<ShapeFunction<FES, Space>>;
-
-  //     constexpr
-  //     Mult(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
-  //       : Parent(lhs, rhs)
-  //     {}
-
-  //     constexpr
-  //     Mult(const Mult& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Mult(Mult&& other)
-  //       : Parent(std::move(other))
-  //     {}
-
-  //     virtual FunctionBase& getLHS() override
-  //     {
-  //       return static_cast<FunctionBase&>(Parent::getLHS());
-  //     }
-
-  //     virtual const FunctionBase& getLHS() const override
-  //     {
-  //       return static_cast<const FunctionBase&>(Parent::getLHS());
-  //     }
-
-  //     virtual Grad<ShapeFunction<FES, Space>>& getRHS() override
-  //     {
-  //       return static_cast<Grad<ShapeFunction<FES, Space>>&>(Parent::getRHS());
-  //     }
-
-  //     virtual const Grad<ShapeFunction<FES, Space>>& getRHS() const override
-  //     {
-  //       return static_cast<const Grad<ShapeFunction<FES, Space>>&>(Parent::getRHS());
-  //     }
-
-  //     virtual Mult* copy() const noexcept override
-  //     {
-  //       return new Mult(*this);
-  //     }
-  // };
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // Mult(const FunctionBase&, const Grad<ShapeFunction<FES, Space>>&)
-  //   -> Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>;
-
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>
-  // operator*(const FunctionBase& lhs, const Grad<ShapeFunction<FES, Space>>& rhs)
-  // {
-  //   return Mult(lhs, rhs);
-  // }
-
-  // template <class T, class FES, ShapeFunctionSpaceType Space>
-  // std::enable_if_t<
-  //   std::is_arithmetic_v<T>, Mult<FunctionBase, Grad<ShapeFunction<FES, Space>>>>
-  // operator*(T v, const Grad<ShapeFunction<FES, Space>>& rhs)
-  // {
-  //   return Mult(ScalarFunction(v), rhs);
-  // }
-
-  // /**
-  //  * @ingroup MultSpecializations
-  //  * @brief Left Multiplication of the gradient of a ShapeFunction by the
-  //  * Jacobian of a FunctionBase
-  //  *
-  //  * Represents the following expression:
-  //  * @f[
-  //  *   f \mathbf{J} u
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or matrix valued).
-  //  */
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // class Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>
-  //   : public Mult<FunctionBase, ShapeFunctionBase<Space>>
-  // {
-  //   public:
-  //     using Parent = Mult<FunctionBase, ShapeFunctionBase<Space>>;
-  //     using LHS = FunctionBase;
-  //     using RHS = Jacobian<ShapeFunction<FES, Space>>;
-
-  //     constexpr
-  //     Mult(const FunctionBase& lhs, const Jacobian<ShapeFunction<FES, Space>>& rhs)
-  //       : Parent(lhs, rhs)
-  //     {}
-
-  //     constexpr
-  //     Mult(const Mult& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Mult(Mult&& other)
-  //       : Parent(std::move(other))
-  //     {}
-
-  //     virtual FunctionBase& getLHS() override
-  //     {
-  //       return static_cast<FunctionBase&>(Parent::getLHS());
-  //     }
-
-  //     virtual const FunctionBase& getLHS() const override
-  //     {
-  //       return static_cast<const FunctionBase&>(Parent::getLHS());
-  //     }
-
-  //     virtual Jacobian<ShapeFunction<FES, Space>>& getRHS() override
-  //     {
-  //       return static_cast<Jacobian<ShapeFunction<FES, Space>>&>(Parent::getRHS());
-  //     }
-
-  //     virtual const Jacobian<ShapeFunction<FES, Space>>& getRHS() const override
-  //     {
-  //       return static_cast<const Jacobian<ShapeFunction<FES, Space>>&>(Parent::getRHS());
-  //     }
-
-  //     virtual Mult* copy() const noexcept override
-  //     {
-  //       return new Mult(*this);
-  //     }
-  // };
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // Mult(const FunctionBase&, const Jacobian<ShapeFunction<FES, Space>>&)
-  //   -> Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>;
-
-  // template <class FES, ShapeFunctionSpaceType Space>
-  // Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>
-  // operator*(const FunctionBase& lhs, const Jacobian<ShapeFunction<FES, Space>>& rhs)
-  // {
-  //   return Mult(lhs, rhs);
-  // }
-
-  // template <class T, class FES, ShapeFunctionSpaceType Space>
-  // std::enable_if_t<
-  //   std::is_arithmetic_v<T>, Mult<FunctionBase, Jacobian<ShapeFunction<FES, Space>>>>
-  // operator*(T v, const Jacobian<ShapeFunction<FES, Space>>& rhs)
-  // {
-  //   return Mult(ScalarFunction(v), rhs);
-  // }
-
-  // /* <<-- OPTIMIZATIONS -----------------------------------------------------
-  //  * Mult<FunctionBase, ShapeFunctionBase<Space>>
-  //  * ----------------------------------------------------------------------||
-  //  */
 }
 
 #endif

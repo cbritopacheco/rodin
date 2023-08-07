@@ -26,6 +26,16 @@
 #include "RangeType.h"
 #include "RangeShape.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Derived>
+  struct Traits<Variational::FunctionBase<Derived>>
+  {
+    using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+    using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
