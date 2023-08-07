@@ -36,13 +36,18 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class QuadratureRule<
-    Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+    Dot<
+      ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
     : public BilinearFormIntegratorBase
   {
     public:
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
       using Integrand = Dot<LHS, RHS>;
+
       using Parent = BilinearFormIntegratorBase;
 
       QuadratureRule(const LHS& lhs, const RHS& rhs)

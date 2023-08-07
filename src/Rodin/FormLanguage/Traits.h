@@ -12,6 +12,13 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @defgroup TraitsSpecializations Traits Template Specializations
+   * @brief Template specializations of the Traits class.
+   *
+   * @see Traits
+   */
+
   template <class ... Args>
   struct Traits;
 

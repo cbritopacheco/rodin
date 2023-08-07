@@ -14,6 +14,19 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<
+    Variational::Sum<
+      Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>,
+      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -171,7 +184,7 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
   class Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
-    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>, FESType, SpaceType>
+    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
   {
     public:
       using FES = FESType;

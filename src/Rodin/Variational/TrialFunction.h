@@ -4,6 +4,16 @@
 #include "Component.h"
 #include "ShapeFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class FESType>
+  struct Traits<Variational::TrialFunction<FESType>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = Variational::TrialSpace;
+  };
+}
+
 namespace Rodin::Variational
 {
   template <class FESType>
@@ -12,6 +22,8 @@ namespace Rodin::Variational
   {
     public:
       using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = TrialSpace;
+
       using Parent = ShapeFunction<TrialFunction<FESType>, FESType, TrialSpace>;
 
       static_assert(std::is_base_of_v<FiniteElementSpaceBase, FES>,
