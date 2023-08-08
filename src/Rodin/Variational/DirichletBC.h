@@ -176,6 +176,19 @@ namespace Rodin::Variational
       /**
        * @brief Computes the indices of the degrees of freedoms associated to
        * the boundary region.
+       *
+       * This will compute the degrees of freedom over the incidence set
+       * @f[
+       *  D - 1 \longrightarrow 0 ~.
+       * @f]
+       *
+       * If the set of specified attributes is empty, this will
+       * compute the degrees of freedom over the boundary, in which case the
+       * incidence set
+       * @f[
+       *  D - 1 \longrightarrow D
+       * @f]
+       * is also required.
        */
       inline
       void assemble() override

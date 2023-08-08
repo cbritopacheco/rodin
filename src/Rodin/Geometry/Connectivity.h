@@ -62,8 +62,14 @@ namespace Rodin::Geometry
 
       MeshConnectivity& initialize(size_t maximalDimension);
 
+      /**
+       * @brief Sets the number of nodes (vertices) in the mesh.
+       */
       MeshConnectivity& nodes(size_t count);
 
+      /**
+       * @brief Reserves space for the polytopes of the given dimension.
+       */
       MeshConnectivity& reserve(size_t d, size_t count);
 
       MeshConnectivity& polytope(

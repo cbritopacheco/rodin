@@ -33,7 +33,7 @@ int main(int, char**)
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(v)
+          - Integral(f, v)
           + DirichletBC(u, g);
   poisson.assemble();
 

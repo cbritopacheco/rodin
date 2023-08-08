@@ -181,6 +181,9 @@ namespace Rodin::Geometry
 
       virtual bool isInterface(Index faceIdx) const = 0;
 
+      /**
+       * @brief Determines whether a face of the mesh is on the boundary.
+       */
       virtual bool isBoundary(Index faceIdx) const = 0;
 
       virtual FaceIterator getBoundary() const = 0;
@@ -208,6 +211,9 @@ namespace Rodin::Geometry
 
       virtual MeshBase& setAttribute(const std::pair<size_t, Index>&, Attribute attr) = 0;
 
+      /**
+       * @brief Gets a reference to the connectivity.
+       */
       virtual MeshConnectivity& getConnectivity() = 0;
 
       virtual const MeshConnectivity& getConnectivity() const = 0;
@@ -217,10 +223,13 @@ namespace Rodin::Geometry
       virtual void flush() = 0;
   };
 
+  /// Index containing the indices of boundary elements.
   using BoundaryIndex = IndexSet;
 
+  /// Index containing the attribute numbers of the polytopes.
   using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
 
+  /// Index containing the transformations of the polytopes.
   using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
 
   /**
@@ -636,6 +645,7 @@ namespace Rodin::Geometry
       std::vector<FlatSet<Attribute>> m_attributes;
   };
 
+  /// Type alias for Mesh<Context::Serial>
   using SerialMesh = Mesh<Context::Serial>;
 }
 

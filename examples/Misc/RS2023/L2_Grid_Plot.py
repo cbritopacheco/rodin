@@ -47,6 +47,7 @@ if __name__ == '__main__':
             sdf.loc[:, x_column],
             sdf.loc[:, y_column],
             gridsize=75,
+            reduce_C_function=np.mean,
             cmap='inferno',
             C=sdf.loc[:, 'error'], edgecolors='face', linewidths=0.5)
 

@@ -34,7 +34,7 @@ static std::mutex mutex_io;
 
 struct Data
 {
-  const Scalar m;
+  const Scalar screen;
   const Scalar epsilon;
   const Scalar waveNumber;
   const Scalar conductivity;
@@ -63,20 +63,18 @@ void run(int i, const std::vector<Data>& grid);
 int main(int, char**)
 {
   // Define evaluation grid
-  Math::Vector m_r = Math::Vector::LinSpaced(0.5 * 1. / hmax, 0, 0.5 * 1. / hmax);
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(1. / hmax, hmax, 0.2);
-  // Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
-  // Math::Vector conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
-  Math::Vector waveNumber_r{{ 20, 40 }};
-  Math::Vector conductivity_r{{ 0.5, 2.0 }};
+  Math::Vector epsilon_r = Math::Vector::LinSpaced(1.0 / hmax, hmax, 0.2);
+  Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
+  Math::Vector screen_r{{ 2.0 }};
+  Math::Vector conductivity_r{{ 2.0 }};
 
   std::vector<Data> grid;
-  grid.reserve(m_r.size() * epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
-  for (const Scalar m : m_r)
+  grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
+  for (const Scalar screen : screen_r)
     for (const Scalar epsilon : epsilon_r)
       for (const Scalar waveNumber : waveNumber_r)
         for (const Scalar g : conductivity_r)
-          grid.push_back({ m, epsilon, waveNumber, g });
+          grid.push_back({ screen, epsilon, waveNumber, g });
 
   const size_t hwc = std::thread::hardware_concurrency();
   const size_t n = hwc - 2;
@@ -159,13 +157,6 @@ void run(int id, const std::vector<Data>& grid)
     // Define finite element spaces
     P1 vh(mesh);
 
-    // Define oscillatory screen
-    ScalarFunction h =
-      [&](const Point& p)
-      {
-        return 2 + sin(2 * pi * data.m * p.x()) * sin(2 * pi * data.m * p.y());
-      };
-
     // Define conductivity
     ScalarFunction gamma = 1;
 
@@ -179,6 +170,8 @@ void run(int id, const std::vector<Data>& grid)
           return data.conductivity;
       };
 
+    ScalarFunction h = data.screen;
+
     // Define boundary data
     ScalarFunction phi = 1;
 
@@ -187,14 +180,16 @@ void run(int id, const std::vector<Data>& grid)
     TestFunction  v(vh);
 
     Problem helmholtz(u, v);
-    helmholtz = Integral(gamma * Grad(u), Grad(v))
+    helmholtz = Integral(Grad(u), Grad(v))
               - Integral(data.waveNumber * data.waveNumber * h * u, v)
-              + DirichletBC(u, phi);
+              + DirichletBC(u, phi).on(dCurrent)
+              + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
     Problem perturbed(u, v);
     perturbed = Integral(gamma_e * Grad(u), Grad(v))
               - Integral(data.waveNumber * data.waveNumber * h * u, v)
-              + DirichletBC(u, phi);
+              + DirichletBC(u, phi).on(dCurrent)
+              + DirichletBC(u, ScalarFunction(0)).on(dGround);
 
     // Solve the background problem
     // Alert::Info() << "Solving background equation." << Alert::Raise;
@@ -207,20 +202,22 @@ void run(int id, const std::vector<Data>& grid)
     const auto ue = std::move(u.getSolution());
     // Alert::Success() << "Done." << Alert::Raise;
 
-    ScalarFunction chi =
-      [&](const Point& p)
-      { return Scalar((p.getCoordinates() - x0).norm() > 0.25); };
+    ScalarFunction chi_e =
+      [](const Point& p)
+      {
+        return (p.getCoordinates() - Math::Vector{{0.5, 0.5}}).norm() > 0.25;
+      };
 
     GridFunction diff(vh);
-    diff = chi * Pow(u0 - ue, 2);
+    diff = chi_e * Pow(u0 - ue, 2);
     diff.setWeights();
-    const Scalar error = sqrt(Integral(diff).compute());
+    const Scalar error = Integral(diff);
 
     // Alert::Success() << "L2 Error: " << error
     //                  << Alert::NewLine
     //                  << "<<<<<<<<<<<<<<<<<<<<"
     //                  << Alert::Raise;
-    out << data.m << ','
+    out << data.screen << ','
         << data.epsilon << ','
         << data.waveNumber << ','
         << data.conductivity << ','
@@ -246,4 +243,5 @@ void run(int id, const std::vector<Data>& grid)
   Alert::Success() << "Finished thread " << id << " in " << delta.count() << "s" << Alert::Raise;
   mutex_io.unlock();
 }
+
 

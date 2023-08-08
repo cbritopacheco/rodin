@@ -29,10 +29,70 @@ namespace Rodin::FormLanguage
   {
     using FES = FESType;
     static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+
+    using LHS =
+      Variational::FunctionBase<LHSDerived>;
+
+    using RHS =
+      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>;
+
+    using LHSRange =
+      typename FormLanguage::Traits<LHS>::RangeType;
+
+    using RHSRange =
+      typename FormLanguage::Traits<RHS>::RangeType;
+
+    using RangeType =
+      std::conditional_t<
+        // If
+        std::is_same_v<LHSRange, Scalar>,
+        // Then
+        RHSRange,
+        // Else
+        std::conditional_t<
+          // If
+          std::is_same_v<LHSRange, Math::Vector>,
+          // Then
+          std::conditional_t<
+            // If
+            std::is_same_v<RHSRange, Scalar>,
+            // Then
+            Math::Vector,
+            // Else
+            std::conditional_t<
+              // If
+              std::is_same_v<RHSRange, Math::Vector>,
+              // Then
+              Math::Matrix,
+              // Else
+              std::conditional_t<
+                // If
+                std::is_same_v<RHSRange, Math::Matrix>,
+                // Then
+                Math::Matrix,
+                // Else
+                void
+              >
+            >
+          >,
+          // Else
+          std::conditional_t<
+            // If
+            std::is_same_v<LHSRange, Math::Matrix>,
+            // Then
+            Math::Matrix,
+            // Else
+            void
+          >
+        >
+      >;
   };
 
   template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
-  struct Traits<Variational::Mult<Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>, Variational::FunctionBase<RHSDerived>>>
+  struct Traits<
+    Variational::Mult<
+      Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>,
+      Variational::FunctionBase<RHSDerived>>>
   {
     using FES = FESType;
     static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
@@ -57,9 +117,13 @@ namespace Rodin::Variational
   {
     public:
       using LHS = FunctionBase<LHSDerived>;
+
       using RHS = FunctionBase<RHSDerived>;
+
       using Parent = FunctionBase<Mult<LHS, RHS>>;
+
       using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+
       using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
       Mult(const LHS& lhs, const RHS& rhs)
@@ -196,8 +260,14 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using LHS = FunctionBase<LHSDerived>;
+
       using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+
       using Parent = ShapeFunctionBase<Mult<LHS, RHS>, FES, Space>;
+
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
       constexpr
       Mult(const LHS& lhs, const RHS& rhs)
@@ -228,8 +298,6 @@ namespace Rodin::Variational
       constexpr
       RangeShape getRangeShape() const
       {
-        using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
-        using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return getRHS().getRangeShape();

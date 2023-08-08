@@ -21,13 +21,13 @@ static constexpr Attribute dCurrent = 4; // Attribute of box boundary
 static constexpr Attribute dGround = 5; // Attribute of box boundary
 
 static const Math::Vector x0{{0.5, 0.5}}; // Center of domain
-static constexpr Scalar epsilon = 0.05; // Radius of B_e(x_0)
+static constexpr Scalar epsilon = 0.1; // Radius of B_e(x_0)
 static_assert(epsilon > 0);
 
 static constexpr Scalar pi = Math::Constants::pi();
 
-const constexpr Scalar waveNumber = 100;
-const constexpr Scalar m = 10;
+const constexpr Scalar waveNumber = 20;
+const constexpr Scalar m = 5;
 static constexpr Scalar gamma_ek = 2;
 
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
@@ -50,6 +50,7 @@ int main(int, char**)
   Mesh mesh;
   mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("Q.mesh");
+  mesh.getConnectivity().compute(1, 2);
 
   // Define finite element spaces
   P1 vh(mesh);
@@ -86,7 +87,8 @@ int main(int, char**)
   conductivity = gamma_e;
   conductivity.save("Conductivity_E.gf");
 
-  ScalarFunction phi = 1;
+  VectorFunction xi = { std::sqrt(2) / 2.0, std::sqrt(2) / 2.0 };
+  ScalarFunction phi = [&](const Point& p) { return cos(waveNumber * p.getCoordinates().dot(xi(p))); };
 
   // Define variational problems
   TrialFunction u(vh);
@@ -95,14 +97,12 @@ int main(int, char**)
   Problem helmholtz(u, v);
   helmholtz = Integral(gamma * Grad(u), Grad(v))
             - Integral(waveNumber * waveNumber * h * u, v)
-            + DirichletBC(u, phi).on(dCurrent)
-            + DirichletBC(u, ScalarFunction(0)).on(dGround);
+            + DirichletBC(u, phi);
 
   Problem perturbed(u, v);
   perturbed = Integral(gamma_e * Grad(u), Grad(v))
             - Integral(waveNumber * waveNumber * h * u, v)
-            + DirichletBC(u, phi).on(dCurrent)
-            + DirichletBC(u, ScalarFunction(0)).on(dGround);
+            + DirichletBC(u, phi);
 
   // Solve the background problem
   Alert::Info() << "Solving background equation." << Alert::Raise;
@@ -140,7 +140,7 @@ int main(int, char**)
   indicator = chi_e;
   indicator.save("Indicator.gf");
 
-  const Scalar error = Integral(diff);
+  const Scalar error = sqrt(Integral(diff).compute());
 
   Alert::Info() << "L2 Error: " << error << Alert::Raise;
 

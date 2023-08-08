@@ -430,6 +430,16 @@ namespace Rodin::Variational
    *   - \text{Operand}
    * @f]
    *
+   * Range Deduction Rules
+   * ---------------------
+   *  The rule for deducing the range of a UnaryMinus object, denoted @f$
+   *  \texttt{Range}[-\text{Operand}] @f$, is the following:
+   *  @f[
+   *      \dfrac
+   *      {\vdash \texttt{Range}[\text{Operand}] : \texttt{R}}
+   *      {\vdash \texttt{Range}[- \text{Operand}] : \texttt{R}}
+   *  @f]
+   *
    * @see UnaryMinusSpecializations
    */
   template <class Operand>
@@ -449,6 +459,16 @@ namespace Rodin::Variational
    * @f]
    * which represents the usual arithmetic addition of two operands.
    *
+   * Range Deduction Rules
+   * ---------------------
+   *  The rule for deducing the range of a Sum object, denoted @f$
+   *  \texttt{Range}[\text{LHS} + \text{RHS}]@f$, is the following:
+   *  @f[
+   *      \dfrac
+   *      {\vdash \texttt{Range}[\text{LHS}] = \texttt{Range}[\text{RHS}] =: \texttt{R}}
+   *      {\vdash \texttt{Range}[\text{LHS} + \text{RHS}] : \texttt{R}}
+   *  @f]
+   *
    * @see SumSpecializations
    */
   template <class LHS, class RHS>
@@ -466,6 +486,59 @@ namespace Rodin::Variational
    * @f[
    * \text{LHS} * \text{RHS}
    * @f]
+   *
+   * Range Deduction Rules
+   * ---------------------
+   *  The rules for deducing the range of a Mult object, denoted @f$
+   *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are the following:
+   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Scalar} @f$
+   *    1.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Scalar}}
+   *        @f]
+   *    2.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Vector}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Vector}}
+   *        @f]
+   *    3.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Matrix}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}
+   *        @f]
+   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Vector} @f$
+   *    1.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Vector}}\\
+   *        @f]
+   *    2.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Vector}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}
+   *        @f]
+   *    3.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Matrix}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}
+   *        @f]
+   *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Matrix} @f$
+   *    1.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Scalar}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}\\
+   *        @f]
+   *    2.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Vector}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}\\
+   *        @f]
+   *    3.  @f[
+   *          \dfrac
+   *          {\vdash \texttt{Range}[\text{RHS}] : \texttt{Matrix}}
+   *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}
+   *        @f]
    *
    * @see MultSpecializations
    */

@@ -12,8 +12,28 @@
 #include <iomanip>
 #include <type_traits>
 
+#include "ForwardDecls.h"
+
 namespace Rodin::Alert
 {
+  namespace Internal
+  {
+    template <typename T>
+    class CanBeOutput
+    {
+      template <
+        class U,
+        class = decltype(std::declval<std::stringstream&>() << std::declval<const U&>())>
+      static std::true_type test(U*);
+
+      template <typename>
+      static std::false_type test(...);
+
+    public:
+        static constexpr bool Value = decltype(test<T>(nullptr))::value;
+    };
+  }
+
   /**
    * @brief Empty class tag type to raise an Alert.
    *
@@ -97,23 +117,19 @@ namespace Rodin::Alert
        */
       template <class T>
       inline
-      std::enable_if_t<!std::is_same_v<RaiseT, T>, Alert&>
-      operator<<(T&& v) noexcept
+      std::enable_if_t<Internal::CanBeOutput<T>::Value, Alert&>
+      operator<<(const T& v) noexcept
       {
         if (m_newline)
           m_ss << std::string(m_indent, ' ');
-        m_ss << std::forward<T>(v);
+        m_ss << v;
         m_newline = false;
         return *this;
       }
 
-      inline
-      Alert& operator<<(const NewLineT&)
-      {
-        operator<<('\n');
-        m_newline = true;
-        return *this;
-      }
+      Alert& operator<<(const NewLineT&);
+
+      Alert& operator<<(const Notation::Base& symbol);
 
       /**
        * @brief Operator overload to raise the Alert from a stream.
