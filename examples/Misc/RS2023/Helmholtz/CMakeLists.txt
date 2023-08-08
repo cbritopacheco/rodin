@@ -12,5 +12,15 @@ target_link_libraries(RS2023_Helmholtz_Simulation
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
+  PRIVATE
+  Threads::Threads
+  )
+
+add_executable(RS2023_Helmholtz_Animation Animation.cpp)
+target_link_libraries(RS2023_Helmholtz_Animation
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
   )
 
