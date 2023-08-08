@@ -10,6 +10,7 @@ set(RodinAlert_HEADERS
   Warning.h
   Info.h
   Success.h
+  Notation/Base.h
   )
 
 set(RodinAlert_SRCS
@@ -18,6 +19,7 @@ set(RodinAlert_SRCS
   Warning.cpp
   Info.cpp
   Success.cpp
+  Notation/Base.cpp
   )
 
 add_library(RodinAlert ${RodinAlert_SRCS} ${RodinAlert_HEADERS})

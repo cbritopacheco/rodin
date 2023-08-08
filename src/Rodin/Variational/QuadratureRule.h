@@ -39,7 +39,7 @@ namespace Rodin::Variational
     Dot<
       ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    : public BilinearFormIntegratorBase
+        : public BilinearFormIntegratorBase
   {
     public:
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;

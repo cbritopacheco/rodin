@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <boost/current_function.hpp>
 #include "Rodin/Alert.h"
 
 #include "Rodin/Variational/P1.h"
@@ -331,6 +332,13 @@ namespace Rodin::Geometry
     const size_t D = getDimension();
     const auto& conn = getConnectivity();
     assert(conn.getIncidence(D - 1, D).size());
+    if (conn.getIncidence(D - 1, D).size() == 0)
+    {
+      Alert::Exception()
+        << "Incidence " << D - 1 << " " << Alert::Notation::Arrow << " " << D
+        << " is required to use " << BOOST_CURRENT_FUNCTION
+        << Alert::Raise;
+    }
     const auto& incidence = conn.getIncidence({D - 1, D}, faceIdx);
     assert(incidence.size() > 0);
     return incidence.size() == 1;

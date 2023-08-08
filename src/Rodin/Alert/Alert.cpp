@@ -8,6 +8,8 @@
 
 #include "Alert.h"
 
+#include "Notation/Base.h"
+
 namespace Rodin::Alert
 {
   Alert::Alert() noexcept
@@ -38,6 +40,19 @@ namespace Rodin::Alert
       m_indent(std::move(other.m_indent)),
       m_newline(std::move(other.m_newline))
   {}
+
+  Alert& Alert::operator<<(const NewLineT&)
+  {
+    operator<<('\n');
+    m_newline = true;
+    return *this;
+  }
+
+  Alert& Alert::operator<<(const Notation::Base& symbol)
+  {
+    operator<<(symbol.toCharString());
+    return *this;
+  }
 
   const char* Alert::what() const noexcept
   {

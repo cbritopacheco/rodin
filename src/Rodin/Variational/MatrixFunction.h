@@ -43,6 +43,12 @@ namespace Rodin::Variational
       virtual ~MatrixFunctionBase() = default;
 
       inline
+      const Derived& getDerived() const
+      {
+        return static_cast<const Derived&>(*this);
+      }
+
+      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {

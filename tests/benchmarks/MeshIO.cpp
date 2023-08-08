@@ -36,9 +36,9 @@ namespace RodinBenchmark
       mesh.load(meshfile, IO::FileFormat::MEDIT);
   }
 
-  BENCHMARK_F(MeshIO, Load_MEDIT_2D_Box)(benchmark::State& st)
+  BENCHMARK_F(MeshIO, Load_MEDIT_2D_UniformTriangular64)(benchmark::State& st)
   {
-    static constexpr const char* filename = "mmg/Box.medit.mesh";
+    static constexpr const char* filename = "mmg/UniformTriangular64.medit.mesh";
     boost::filesystem::path meshfile;
     meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
     meshfile.append(filename);
