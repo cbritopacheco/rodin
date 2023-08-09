@@ -10,6 +10,6 @@
 
 namespace Rodin::FormLanguage
 {
-  size_t Base::s_id = 0;
+  thread_local Base::UUID Base::s_id = 0;
 }
 

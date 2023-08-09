@@ -26,8 +26,9 @@ static_assert(epsilon > 0);
 
 static constexpr Scalar pi = Math::Constants::pi();
 
-const constexpr Scalar waveNumber = 20;
-const constexpr Scalar m = 5;
+const constexpr Scalar angle = M_PI / 4;
+const constexpr Scalar waveNumber = 40;
+const constexpr Scalar m = 40;
 static constexpr Scalar gamma_ek = 2;
 
 static constexpr Scalar R0 = 0.2; // Radius of B_R(x_0)
@@ -87,8 +88,14 @@ int main(int, char**)
   conductivity = gamma_e;
   conductivity.save("Conductivity_E.gf");
 
-  VectorFunction xi = { std::sqrt(2) / 2.0, std::sqrt(2) / 2.0 };
-  ScalarFunction phi = [&](const Point& p) { return cos(waveNumber * p.getCoordinates().dot(xi(p))); };
+  VectorFunction xi = { std::cos(angle), std::sqrt(angle) };
+  ScalarFunction phi =
+    [&](const Point& p)
+    { return cos(waveNumber * p.getCoordinates().dot(xi(p))); };
+
+  GridFunction miaow(vh);
+  miaow = phi;
+  miaow.save("PlaneWave.gf");
 
   // Define variational problems
   TrialFunction u(vh);
@@ -128,16 +135,16 @@ int main(int, char**)
   g_e = Grad(u_e);
   g_e.save("PerturbedGradient.gf");
 
-  ScalarFunction chi_e =
+  ScalarFunction chi =
     [&](const Point& p)
-    { return Scalar((p.getCoordinates() - x0).norm() > 2 * epsilon); };
+    { return Scalar((p.getCoordinates() - x0).norm() > 0.25); };
 
   GridFunction diff(vh);
-  diff = chi_e * Pow(u0 - u_e, 2);
+  diff = chi * Pow(u0 - u_e, 2);
   diff.setWeights();
 
   GridFunction indicator(vh);
-  indicator = chi_e;
+  indicator = chi;
   indicator.save("Indicator.gf");
 
   const Scalar error = sqrt(Integral(diff).compute());

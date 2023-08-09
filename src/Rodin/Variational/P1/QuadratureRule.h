@@ -282,8 +282,8 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      std::vector<Math::SpatialVector> m_pgradient;
       std::vector<Math::SpatialVector> m_rgradient;
+      std::vector<Math::SpatialVector> m_pgradient;
   };
 
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context>

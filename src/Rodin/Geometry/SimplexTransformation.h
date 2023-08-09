@@ -10,6 +10,7 @@
 #include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Geometry/Simplex.h"
 
 #include "ForwardDecls.h"
 
@@ -38,13 +39,32 @@ namespace Rodin::Geometry
   class PolytopeTransformation
   {
     public:
-      PolytopeTransformation() = default;
+      constexpr
+      PolytopeTransformation(size_t rdim, size_t pdim)
+        : m_rdim(rdim), m_pdim(pdim)
+      {}
 
+      constexpr
       PolytopeTransformation(const PolytopeTransformation&) = default;
 
+      constexpr
       PolytopeTransformation(PolytopeTransformation&&) = default;
 
       virtual ~PolytopeTransformation() = default;
+
+      inline
+      constexpr
+      size_t getReferenceDimension() const
+      {
+        return m_rdim;
+      }
+
+      inline
+      constexpr
+      size_t getPhysicalDimension() const
+      {
+        return m_pdim;
+      }
 
       /**
        * @brief Computes the physical coordinates of the given reference point.
@@ -59,7 +79,14 @@ namespace Rodin::Geometry
        * @returns A vector of size @f$ s @f$ where @f$ s @f$ represents the
        * physical dimension.
        */
-      virtual Math::SpatialVector transform(const Math::Vector& rc) const = 0;
+      Math::SpatialVector transform(const Math::SpatialVector& rc) const
+      {
+        Math::SpatialVector res;
+        transform(rc, res);
+        return res;
+      }
+
+      virtual void transform(const Math::SpatialVector& rc, Math::SpatialVector&) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -78,7 +105,14 @@ namespace Rodin::Geometry
        * represents the reference dimension and @f$ s @f$ represents the
        * physical dimension.
        */
-      virtual Math::SpatialMatrix jacobian(const Math::Vector& rc) const = 0;
+      Math::SpatialMatrix jacobian(const Math::SpatialVector& rc) const
+      {
+        Math::SpatialMatrix res;
+        jacobian(rc, res);
+        return res;
+      }
+
+      virtual void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& jacobian) const = 0;
 
       /**
        * @brief Computes the reference coordinates of the given physical point.
@@ -91,11 +125,18 @@ namespace Rodin::Geometry
        *
        * @param[in] pc Physical coordinates of the point.
        */
-      virtual Math::Vector inverse(const Math::Vector&) const
+      Math::SpatialVector inverse(const Math::SpatialVector& pc) const
       {
-        assert(false); // Not implemented
-        return Math::Vector::Zero(0);
+        Math::SpatialVector res;
+        inverse(pc, res);
+        return res;
       }
+
+      virtual void inverse(const Math::SpatialVector& pc, Math::SpatialVector& rc) const;
+
+    private:
+      const size_t m_rdim;
+      const size_t m_pdim;
   };
 }
 

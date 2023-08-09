@@ -38,6 +38,7 @@ struct Data
   const Scalar epsilon;
   const Scalar waveNumber;
   const Scalar conductivity;
+  const Scalar angle;
 };
 
 template <class T>
@@ -64,23 +65,27 @@ int main(int, char**)
 {
   // Define evaluation grid
   Math::Vector m_r = Math::Vector::LinSpaced(0.5 * 1. / hmax, 0, 0.5 * 1. / hmax);
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(1. / hmax, hmax, 0.2);
+  Math::Vector epsilon_r = Math::Vector::LinSpaced(0.5 * 1. / hmax, hmax, 0.2);
   // Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
   // Math::Vector conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
-  Math::Vector waveNumber_r{{ 20, 40 }};
-  Math::Vector conductivity_r{{ 0.5, 2.0 }};
+  Math::Vector waveNumber_r{{ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 90 }};
+  Math::Vector conductivity_r{{ 2.0 }};
+  Math::Vector angle_r{{ 0, M_PI / 4 }};
 
   std::vector<Data> grid;
   grid.reserve(m_r.size() * epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
   for (const Scalar m : m_r)
     for (const Scalar epsilon : epsilon_r)
       for (const Scalar waveNumber : waveNumber_r)
-        for (const Scalar g : conductivity_r)
-          grid.push_back({ m, epsilon, waveNumber, g });
+        for (const Scalar conductivity : conductivity_r)
+          for (const Scalar angle : angle_r)
+            grid.push_back({ m, epsilon, waveNumber, conductivity, angle });
 
   const size_t hwc = std::thread::hardware_concurrency();
   const size_t n = hwc - 2;
-  Alert::Info() << "Hardware concurrency: " << hwc
+  Alert::Info() << "Total grid size: " << grid.size()
+                << Alert::NewLine
+                << "Hardware concurrency: " << hwc
                 << Alert::NewLine
                 << "Launching " << n << " threads"
                 << Alert::Raise;
@@ -106,6 +111,7 @@ void run(int id, const std::vector<Data>& grid)
   // Load mesh
   Mesh mesh;
   mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
+  mesh.getConnectivity().compute(1, 2);
   // mesh.save("out/Q.mesh");
 
   Solver::SparseLU solver;
@@ -120,7 +126,7 @@ void run(int id, const std::vector<Data>& grid)
   std::stringstream filename;
   filename << "grid/T" << id << "_L2_Grid_HMax" << std::setw(4) << hmax << ".live.csv";
   std::ofstream out(filename.str());
-  out << "m,epsilon,waveNumber,conductivity,error\n";
+  out << "m,epsilon,waveNumber,conductivity,angle,error\n";
 
   size_t i = 0;
   auto t0 = std::chrono::high_resolution_clock::now();
@@ -160,11 +166,7 @@ void run(int id, const std::vector<Data>& grid)
     P1 vh(mesh);
 
     // Define oscillatory screen
-    ScalarFunction h =
-      [&](const Point& p)
-      {
-        return 2 + sin(2 * pi * data.m * p.x()) * sin(2 * pi * data.m * p.y());
-      };
+    ScalarFunction h = 2;
 
     // Define conductivity
     ScalarFunction gamma = 1;
@@ -180,7 +182,10 @@ void run(int id, const std::vector<Data>& grid)
       };
 
     // Define boundary data
-    ScalarFunction phi = 1;
+    VectorFunction xi = { std::cos(data.angle), std::sin(data.angle) };
+    ScalarFunction phi =
+      [&](const Point& p)
+      { return cos(std::sqrt(2) * data.waveNumber * p.getCoordinates().dot(xi(p))); };
 
     // Define variational problems
     TrialFunction u(vh);
@@ -207,9 +212,9 @@ void run(int id, const std::vector<Data>& grid)
     const auto ue = std::move(u.getSolution());
     // Alert::Success() << "Done." << Alert::Raise;
 
-    ScalarFunction chi =
-      [&](const Point& p)
-      { return Scalar((p.getCoordinates() - x0).norm() > 0.25); };
+  ScalarFunction chi =
+    [&](const Point& p)
+    { return Scalar((p.getCoordinates() - x0).norm() > 0.25); };
 
     GridFunction diff(vh);
     diff = chi * Pow(u0 - ue, 2);
@@ -224,6 +229,7 @@ void run(int id, const std::vector<Data>& grid)
         << data.epsilon << ','
         << data.waveNumber << ','
         << data.conductivity << ','
+        << data.angle << ','
         << error << '\n';
     out.flush();
 

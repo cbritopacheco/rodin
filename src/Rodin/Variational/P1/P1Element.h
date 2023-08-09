@@ -50,11 +50,11 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Geometry;
 
     public:
-      /// Type of range
-      using RangeType = Scalar;
-
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Scalar>>;
+
+      /// Type of range
+      using RangeType = Scalar;
 
       /**
        * @brief Represents a linear form of a P1 scalar element.
@@ -247,6 +247,12 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Geometry;
 
     public:
+      /// Parent class
+      using Parent = FiniteElementBase<P1Element>;
+
+      /// Type of range
+      using RangeType = Math::Vector;
+
       class LinearForm
       {
         public:
@@ -362,12 +368,6 @@ namespace Rodin::Variational
           size_t m_i;
           Geometry::Polytope::Geometry m_g;
       };
-
-      /// Type of range
-      using RangeType = Math::Vector;
-
-      /// Parent class
-      using Parent = FiniteElementBase<P1Element>;
 
       P1Element() = default;
 

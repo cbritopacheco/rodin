@@ -23,16 +23,19 @@ TEST(Rodin_Geometry_IsoparametricTransformation, SanityTest_ReferenceTriangle)
   {
     const auto res = trans.transform(pm.col(0));
     EXPECT_NEAR((res - pm.col(0)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - pm.col(0)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
     const auto res = trans.transform(pm.col(1));
     EXPECT_NEAR((res - pm.col(1)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - pm.col(1)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
     const auto res = trans.transform(pm.col(2));
     EXPECT_NEAR((res - pm.col(2)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - pm.col(2)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 }
 
@@ -50,67 +53,74 @@ TEST(Rodin_Geometry_IsoparametricTransformation, SanityTest_Triangle_1)
   IsoparametricTransformation trans(pm, fe);
 
   {
-    Math::Vector r(rdim);
-    r << 0, 0;
-    const auto res = trans.transform(r);
+    Math::Vector rc(rdim);
+    rc << 0, 0;
+    const auto res = trans.transform(rc);
     EXPECT_NEAR((res - pm.col(0)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
-    Math::Vector r(rdim);
-    r << 1, 0;
-    const auto res = trans.transform(r);
+    Math::Vector rc(rdim);
+    rc << 1, 0;
+    const auto res = trans.transform(rc);
     EXPECT_NEAR((res - pm.col(1)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
-    Math::Vector r(rdim);
-    r << 0, 1;
-    const auto res = trans.transform(r);
+    Math::Vector rc(rdim);
+    rc << 0, 1;
+    const auto res = trans.transform(rc);
     EXPECT_NEAR((res - pm.col(2)).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
-    Math::Vector r(rdim);
-    r << (1.0 / 3.0), (1.0 / 3.0);
+    Math::Vector rc(rdim);
+    rc << (1.0 / 3.0), (1.0 / 3.0);
 
-    Math::Vector p(sdim);
-    p << 0, (1.0 / 3.0);
+    Math::Vector pc(sdim);
+    pc << 0, (1.0 / 3.0);
 
-    const auto res = trans.transform(r);
-    EXPECT_NEAR((res - p).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    const auto res = trans.transform(rc);
+    EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
-    Math::Vector r(rdim);
-    r << 0.5, 0;
+    Math::Vector rc(rdim);
+    rc << 0.5, 0;
 
-    Math::Vector p(sdim);
-    p << 0, 0;
-    const auto res = trans.transform(r);
-    EXPECT_NEAR((res - p).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    Math::Vector pc(sdim);
+    pc << 0, 0;
+    const auto res = trans.transform(rc);
+    EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
-    Math::Vector r(rdim);
-    r << 0.5, 0.5;
+    Math::Vector rc(rdim);
+    rc << 0.5, 0.5;
 
-    Math::Vector p(sdim);
-    p << 0.5, 1;
+    Math::Vector pc(sdim);
+    pc << 0.5, 1;
 
-    const auto res = trans.transform(r);
-    EXPECT_NEAR((res - p).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    const auto res = trans.transform(rc);
+    EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   {
-    Math::Vector r(rdim);
-    r << 0.5, 0.5;
+    Math::Vector rc(rdim);
+    rc << 0.5, 0.5;
 
-    Math::Vector p(sdim);
-    p << 0.5, 1;
+    Math::Vector pc(sdim);
+    pc << 0.5, 1;
 
-    const auto res = trans.transform(r);
-    EXPECT_NEAR((res - p).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    const auto res = trans.transform(rc);
+    EXPECT_NEAR((res - pc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR((trans.inverse(res) - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 }
 
