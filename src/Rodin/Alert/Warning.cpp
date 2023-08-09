@@ -22,10 +22,10 @@ namespace Rodin::Alert
 #ifdef RODIN_SILENCE_WARNINGS
 #else
     std::cerr << rang::fg::yellow
-           << RODIN_ALERT_WARNING_PREFIX
-           << rang::fg::reset
-           << what()
-           << std::endl;
+              << RODIN_ALERT_WARNING_PREFIX
+              << rang::fg::reset
+              << what()
+              << std::endl;
 #endif
   }
 }

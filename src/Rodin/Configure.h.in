@@ -92,6 +92,15 @@
 
 /**
  * @ingroup RodinDirectives
+ * @brief Indicates if Rodin exceptions are silenced.
+ *
+ * If defined, this directive will prevent Rodin from outputting the error
+ * messages. It does not prevent the exception from being thrown.
+ */
+#cmakedefine RODIN_SILENCE_EXCEPTIONS
+
+/**
+ * @ingroup RodinDirectives
  * @brief Indicates the Rodin resources directory.
  *
  * # Utilization

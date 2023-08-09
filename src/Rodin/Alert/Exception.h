@@ -7,6 +7,9 @@
 #ifndef RODIN_ALERT_EXCEPTION_H
 #define RODIN_ALERT_EXCEPTION_H
 
+#define RODIN_ALERT_EXCEPTION_PREFIX "Error: "
+#define RODIN_ALERT_EXCEPTION_PREFIX_LENGTH (sizeof(RODIN_ALERT_WARNING_PREFIX) - 1)
+
 #include <exception>
 
 #include "Alert.h"
