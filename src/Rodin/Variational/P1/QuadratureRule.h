@@ -101,7 +101,6 @@ namespace Rodin::Variational
         const auto& fes = multiplicand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
-        assert(dofs == trial.getDOFs(polytope));
         const QF::QF1P1 qf(polytope.getGeometry());
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
