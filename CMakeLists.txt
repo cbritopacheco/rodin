@@ -28,6 +28,7 @@ option(RODIN_USE_SPQR               "Use Rodin with SPQR support"               
 option(RODIN_USE_PARDISO            "Use Rodin with Pardiso support"            OFF)
 option(RODIN_USE_APPLE_ACCELERATE   "Use Rodin with Apple Accelerate support"   OFF)
 option(RODIN_SILENCE_WARNINGS       "Silence warnings outputted by Rodin"       OFF)
+option(RODIN_SILENCE_EXCEPTIONS     "Silence exceptions thrown by Rodin"        ON)
 option(RODIN_CODE_COVERAGE          "Compile with code coverage flags"          OFF)
 option(RODIN_LTO                    "Compile with link time optimization"       OFF)
 option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)

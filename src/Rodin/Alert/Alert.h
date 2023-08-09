@@ -23,7 +23,7 @@ namespace Rodin::Alert
     {
       template <
         class U,
-        class = decltype(std::declval<std::stringstream&>() << std::declval<const U&>())>
+        class = decltype(std::declval<std::ostream&>() << std::declval<const U&>())>
       static std::true_type test(U*);
 
       template <typename>
