@@ -381,7 +381,7 @@ namespace Rodin::Geometry
       {
         if (jac.rows() == 2 && jac.cols() == 1)
         {
-          return m_distortion.emplace(std::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
+          return m_distortion.emplace(Math::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
         }
         else
         {

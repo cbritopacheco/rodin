@@ -28,12 +28,14 @@ namespace Rodin::Geometry
 
     public:
       using Parent = PolytopeTransformation;
+      using Parent::transform;
+      using Parent::jacobian;
+      using Parent::inverse;
 
-      IsoparametricTransformation(Math::Matrix&& pm, FE&& fe)
-        : m_pm(std::move(pm)),
-          m_sdim(m_pm.rows()),
-          m_fe(std::move(fe)),
-          m_rdim(Polytope::getGeometryDimension(m_fe.getGeometry()))
+      IsoparametricTransformation(Math::SpatialMatrix&& pm, FE&& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(std::move(pm)),
+          m_fe(std::move(fe))
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
@@ -42,31 +44,28 @@ namespace Rodin::Geometry
       /**
        * pm : sdim x dof
        */
-      IsoparametricTransformation(const Math::Matrix& pm, const FE& fe)
-        : m_pm(pm),
-          m_sdim(m_pm.rows()),
-          m_fe(fe),
-          m_rdim(Polytope::getGeometryDimension(m_fe.getGeometry()))
+      IsoparametricTransformation(const Math::SpatialMatrix& pm, const FE& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(pm),
+          m_fe(fe)
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      IsoparametricTransformation(Math::Matrix&& pm, const FE& fe)
-        : m_pm(std::move(pm)),
-          m_sdim(m_pm.rows()),
-          m_fe(fe),
-          m_rdim(Polytope::getGeometryDimension(m_fe.getGeometry()))
+      IsoparametricTransformation(Math::SpatialMatrix&& pm, const FE& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(std::move(pm)),
+          m_fe(fe)
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      IsoparametricTransformation(const Math::Matrix& pm, FE&& fe)
-        : m_pm(pm),
-          m_sdim(m_pm.rows()),
-          m_fe(std::move(fe)),
-          m_rdim(Polytope::getGeometryDimension(m_fe.getGeometry()))
+      IsoparametricTransformation(const Math::SpatialMatrix& pm, FE&& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(pm),
+          m_fe(std::move(fe))
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
@@ -75,9 +74,7 @@ namespace Rodin::Geometry
       IsoparametricTransformation(const IsoparametricTransformation& other)
         : Parent(other),
           m_fe(other.m_fe),
-          m_sdim(m_pm.rows()),
-          m_pm(other.m_pm),
-          m_rdim(Polytope::getGeometryDimension(m_fe.getGeometry()))
+          m_pm(other.m_pm)
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
@@ -86,55 +83,58 @@ namespace Rodin::Geometry
       IsoparametricTransformation(IsoparametricTransformation&& other)
         : Parent(std::move(other)),
           m_fe(std::move(other.m_fe)),
-          m_sdim(m_pm.rows()),
-          m_pm(std::move(other.m_pm)),
-          m_rdim(Polytope::getGeometryDimension(m_fe.getGeometry()))
+          m_pm(std::move(other.m_pm))
       {
         assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
       inline
-      Math::SpatialVector transform(const Math::Vector& rc) const override
+      void transform(const Math::SpatialVector& rc, Math::SpatialVector& pc) const override
       {
-        Math::Vector res = Math::Vector::Zero(m_sdim);
+        const size_t pdim = getPhysicalDimension();
+        assert(rc.size() >= 0);
+        assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
+        pc.resize(pdim);
+        pc.setZero();
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
-          assert(res.size() == m_pm.col(local).size());
-          res.noalias() += m_pm.col(local) * m_fe.getBasis(local)(rc);
+          assert(pc.size() == m_pm.col(local).size());
+          pc.noalias() += m_pm.col(local) * m_fe.getBasis(local)(rc);
         }
-        return res;
       }
 
       inline
-      Math::SpatialMatrix jacobian(const Math::Vector& rc) const override
+      void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& res) const override
       {
-        Math::SpatialMatrix res = Math::Matrix::Zero(m_sdim, m_rdim);
+        const size_t rdim = getReferenceDimension();
+        assert(rc.size() >= 0);
+        assert(static_cast<size_t>(rc.size()) == rdim);
+        const size_t pdim = getPhysicalDimension();
+        res.resize(pdim, rdim);
+        res.setZero();
         Math::SpatialVector gradient;
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           m_fe.getGradient(local)(gradient, rc);
-          for (size_t i = 0; i < m_rdim; i++)
+          for (size_t i = 0; i < rdim; i++)
           {
             assert(res.col(i).size() == m_pm.col(local).size());
             res.col(i).noalias() += m_pm.col(local) * gradient.coeff(i);
           }
         }
-        return res;
       }
 
 
       inline
-      const Math::Matrix& getPointMatrix() const
+      const Math::SpatialMatrix& getPointMatrix() const
       {
         return m_pm;
       }
 
     private:
-      Math::Matrix m_pm;
-      const size_t m_sdim;
+      Math::SpatialMatrix m_pm;
       FE m_fe;
-      const size_t m_rdim;
   };
 }
 
