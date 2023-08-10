@@ -5,23 +5,25 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <iostream>
-#include <rang.hpp>
 
 #include "Success.h"
 
 namespace Rodin::Alert
 {
   Success::Success()
-    : Alert(RODIN_ALERT_SUCCESS_PREFIX_LENGTH)
+    : Success(std::cout)
   {}
 
-  void Success::raise() const noexcept
-  {
-    std::cout << rang::fg::green
-           << RODIN_ALERT_SUCCESS_PREFIX
-           << rang::fg::reset
-           << what()
-           << std::endl;
-  }
+  Success::Success(std::ostream& os)
+    : Parent(os, SuccessPrefix())
+  {}
+
+  Success::Success(const Success& other)
+    : Parent(other)
+  {}
+
+  Success::Success(Success&& other)
+    : Parent(std::move(other))
+  {}
 }
 

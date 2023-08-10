@@ -140,8 +140,7 @@ namespace Rodin::External::MMG
         }
 
         if (retcode != 0)
-          Alert::Exception(
-              "MMG::Advect: ISCD::Advection invocation failed.").raise();
+          Alert::Exception() << "MMG::Advect: ISCD::Advection invocation failed." << Alert::Raise;
 
         m_ls.get().load(outp, IO::FileFormat::MEDIT);
 

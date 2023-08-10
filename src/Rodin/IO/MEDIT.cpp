@@ -42,7 +42,7 @@ namespace Rodin::IO
       if (version)
         m_version = *version;
       else
-        throw Alert::Exception("Failed to parse version number of mesh.");
+        Alert::Exception() << "Failed to parse version number of mesh." << Alert::Raise;
     }
   }
 
@@ -59,7 +59,7 @@ namespace Rodin::IO
       if (dimension)
         m_spaceDimension = *dimension;
       else
-        throw Alert::Exception("Failed to parse dimension of mesh.");
+        Alert::Exception() << "Failed to parse dimension of mesh." << Alert::Raise;
     }
   }
 

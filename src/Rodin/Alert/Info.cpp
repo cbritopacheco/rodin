@@ -5,22 +5,24 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <iostream>
-#include <rang.hpp>
 
 #include "Info.h"
 
 namespace Rodin::Alert
 {
   Info::Info()
-    : Alert(RODIN_ALERT_INFO_PREFIX_LENGTH)
+    : Info(std::cout)
   {}
 
-  void Info::raise() const noexcept
-  {
-    std::cout << rang::fg::blue
-           << RODIN_ALERT_INFO_PREFIX
-           << rang::fg::reset
-           << what()
-           << std::endl;
-  }
+  Info::Info(std::ostream& os)
+    : Parent(os, InfoPrefix())
+  {}
+
+  Info::Info(const Info& other)
+    : Parent(other)
+  {}
+
+  Info::Info(Info&& other)
+    : Parent(std::move(other))
+  {}
 }
