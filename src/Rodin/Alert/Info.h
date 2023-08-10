@@ -7,41 +7,43 @@
 #ifndef RODIN_ALERT_INFO_H
 #define RODIN_ALERT_INFO_H
 
-#define RODIN_ALERT_INFO_PREFIX "Info: "
-#define RODIN_ALERT_INFO_PREFIX_LENGTH (sizeof(RODIN_ALERT_INFO_PREFIX) - 1)
+#define RODIN_ALERT_INFO_PREFIX "Info"
 
-#include "Alert.h"
+#include "Message.h"
 
 namespace Rodin::Alert
 {
-  class Info : public Alert
+  class InfoPrefix : public MessagePrefix<BlueT>
   {
     public:
+      using Parent = MessagePrefix<BlueT>;
+
+      InfoPrefix()
+        : Parent(RODIN_ALERT_INFO_PREFIX)
+      {}
+  };
+
+  class Info : public Message<InfoPrefix>
+  {
+    public:
+      using Parent = Message<InfoPrefix>;
+
       /**
-       * @brief Constructs a Info with an empty message.
+       * @brief Constructs an Info alert with an empty message.
        */
       Info();
 
-      /**
-       * @brief Constructs a Info with the given message.
-       * @param[in] what Description or reason for the Info being raised.
-       */
-      Info(const std::string& what)
-        : Alert(what, RODIN_ALERT_INFO_PREFIX_LENGTH)
-      {}
+      Info(std::ostream& os);
 
       /**
-       * @brief Copies the Info message.
+       * @brief Copy constructor.
        */
-      Info(const Info&) = default;
+      Info(const Info& other);
 
       /**
-       * @brief Raises the Info to the user.
-       *
-       * Default behaviour is to output a formatted Info message to
-       * stderr.
+       * @brief Move constructor.
        */
-      virtual void raise() const noexcept override;
+      Info(Info&& other);
   };
 }
 

@@ -16,7 +16,7 @@ namespace Rodin::IO
     auto line = skipEmptyLinesAndComments(is);
     auto header = MFEM::ParseMeshHeader()(line.begin(), line.end());
     if (!header)
-      Alert::Exception("Failed to determine MFEM mesh type and version.").raise();
+      Alert::Exception() << "Failed to determine MFEM mesh type and version." << Alert::Raise;
     m_header = *header;
   }
 

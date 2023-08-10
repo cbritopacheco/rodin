@@ -202,7 +202,7 @@ namespace Rodin::External::MMG
        }
        ScalarGridFunction res(m_fes.get());
        if (retcode != 0)
-         Alert::Exception("ISCD::Mshdist invocation failed.").raise();
+         Alert::Exception() << "ISCD::Mshdist invocation failed." << Alert::Raise;
        else
          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
        return res;
@@ -256,7 +256,7 @@ namespace Rodin::External::MMG
 
        Variational::GridFunction res(m_fes.get());
        if (retcode != 0)
-         Alert::Exception("ISCD::Mshdist invocation failed.").raise();
+         Alert::Exception() << "ISCD::Mshdist invocation failed." << Alert::Raise;
        else
          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
        return res;

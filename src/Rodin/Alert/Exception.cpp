@@ -5,7 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <iostream>
-#include <rang.hpp>
 
 #include "Rodin/Configure.h"
 
@@ -13,20 +12,32 @@
 
 namespace Rodin::Alert
 {
-  Exception::Exception(const std::string& what)
-    : Alert(what, 0)
+  Exception::Exception()
+    : Exception(std::cerr)
   {}
+
+  Exception::Exception(std::ostream& os)
+    : Parent(os, ExceptionPrefix())
+  {}
+
+  Exception::Exception(const Exception& other)
+    : std::exception(other),
+      Parent(other)
+  {}
+
+  Exception::Exception(Exception&& other)
+    : std::exception(std::move(other)),
+      Parent(std::move(other))
+  {}
+
+  const char* Exception::what() const noexcept
+  {
+    return Parent::what();
+  }
 
   void Exception::raise() const
   {
-#ifdef RODIN_SILENCE_EXCEPTIONS
-#else
-    std::cerr << rang::fg::red
-              << RODIN_ALERT_WARNING_PREFIX
-              << rang::fg::reset
-              << what()
-              << std::endl;
-#endif
+    Parent::raise();
     throw *this;
   }
 }

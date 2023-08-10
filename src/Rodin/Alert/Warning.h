@@ -7,13 +7,22 @@
 #ifndef RODIN_ALERT_WARNING_H
 #define RODIN_ALERT_WARNING_H
 
-#define RODIN_ALERT_WARNING_PREFIX "Warning: "
-#define RODIN_ALERT_WARNING_PREFIX_LENGTH (sizeof(RODIN_ALERT_WARNING_PREFIX) - 1)
+#define RODIN_ALERT_WARNING_PREFIX "Warning"
 
-#include "Alert.h"
+#include "Message.h"
 
 namespace Rodin::Alert
 {
+  class WarningPrefix : public MessagePrefix<YellowT>
+  {
+    public:
+      using Parent = MessagePrefix<YellowT>;
+
+      WarningPrefix()
+        : Parent(RODIN_ALERT_WARNING_PREFIX)
+      {}
+  };
+
   /**
    * @brief Derived Alert class representing a warning.
    *
@@ -21,32 +30,27 @@ namespace Rodin::Alert
    * still has visible effects when raised. For example, showing a formatted
    * message on the screen.
    */
-  class Warning : public Alert
+  class Warning : public Message<WarningPrefix>
   {
     public:
-      /**
-       * @brief Constructs a Warning with an empty message.
-       */
-      Warning() = default;
+      using Parent = Message<WarningPrefix>;
 
       /**
-       * @brief Constructs a Warning with the given message.
-       * @param[in] what Description or reason for the Warning being raised.
+       * @brief Constructs a Warning alert with an empty message.
        */
-      Warning(const std::string& what);
+      Warning();
+
+      Warning(std::ostream& os);
 
       /**
-       * @brief Copies the Warning message.
+       * @brief Copy constructor.
        */
-      Warning(const Warning&) = default;
+      Warning(const Warning& other);
 
       /**
-       * @brief Raises the warning to the user.
-       *
-       * Default behaviour is to output a formatted warning message to
-       * stderr.
+       * @brief Move constructor.
        */
-      virtual void raise() const noexcept override;
+      Warning(Warning&& other);
   };
 }
 

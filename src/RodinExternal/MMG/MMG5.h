@@ -140,7 +140,7 @@ namespace Rodin::External::MMG
             {
               // So 2 * (dst->np + 1) seems to work for most applications
               MMG5_SAFE_CALLOC(dst->m, 2 * (dst->npmax + 1), double,
-                  Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+                Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m." << Alert::Raise);
             }
             std::copy(data.data(), data.data() + n, dst->m + 1);
           }
@@ -172,7 +172,7 @@ namespace Rodin::External::MMG
               // So (dst->size + 1) * (dst->np + 1) seems to work for most
               // applications
               MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->npmax + 1), double,
-                  Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+                Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
             }
             std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
           }

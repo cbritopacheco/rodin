@@ -64,16 +64,17 @@ void run(int i, const std::vector<Data>& grid);
 int main(int, char**)
 {
   // Define evaluation grid
-  Math::Vector m_r = Math::Vector::LinSpaced(0.5 * 1. / hmax, 0, 0.5 * 1. / hmax);
+  Math::Vector m_r = Math::Vector::LinSpaced(0.25 * 1. / hmax, 0, 0.5 * 1. / hmax);
   Math::Vector epsilon_r = Math::Vector::LinSpaced(0.5 * 1. / hmax, hmax, 0.2);
   // Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
   // Math::Vector conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
-  Math::Vector waveNumber_r{{ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 90 }};
+  Math::Vector waveNumber_r = Math::Vector::LinSpaced(0.5 * 1.0 / hmax, 1, 1.0 / hmax);
+  // Math::Vector waveNumber_r{{ 0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 90 }};
   Math::Vector conductivity_r{{ 2.0 }};
-  Math::Vector angle_r{{ 0, M_PI / 4 }};
+  Math::Vector angle_r{{ M_PI / 4 }};
 
   std::vector<Data> grid;
-  grid.reserve(m_r.size() * epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
+  grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
   for (const Scalar m : m_r)
     for (const Scalar epsilon : epsilon_r)
       for (const Scalar waveNumber : waveNumber_r)

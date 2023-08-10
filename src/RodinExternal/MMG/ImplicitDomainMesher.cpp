@@ -173,11 +173,11 @@ namespace Rodin::External::MMG
   int ImplicitDomainMesher::discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
-      Alert::Warning("Warning RMC option is not supported for surfaces").raise();
+      Alert::Warning() << "Warning RMC option is not supported for surfaces." << Alert::Raise;
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
-      Alert::Exception("Material splitting is not supported for surfaces.").raise();
+      Alert::Exception() << "Material splitting is not supported for surfaces." << Alert::Raise;
 
     if (m_meshTheSurface)
     {
@@ -265,7 +265,7 @@ namespace Rodin::External::MMG
       size_t newna = ids.size();
       MMG5_pEdge edges = nullptr;
       MMG5_SAFE_MALLOC(edges, newna + 1, MMG5_Edge,
-          Alert::Exception("Failed to reallocate edges.").raise());
+          Alert::Exception() << "Failed to reallocate edge memory." << Alert::Raise);
       for (int i = 1; i <= newna; i++)
         edges[i] = mesh->edge[ids[i - 1]];
       MMG5_SAFE_FREE(mesh->edge);
@@ -285,7 +285,7 @@ namespace Rodin::External::MMG
       size_t newnt = ids.size();
       MMG5_pTria triangles = nullptr;
       MMG5_SAFE_MALLOC(triangles, newnt + 1, MMG5_Tria,
-          Alert::Exception("Failed to reallocate triangles.").raise());
+          Alert::Exception() << "Failed to reallocate triangles." << Alert::Raise);
       for (int i = 1; i <= newnt; i++)
         triangles[i] = mesh->tria[ids[i - 1]];
       MMG5_SAFE_FREE(mesh->tria);

@@ -23,6 +23,7 @@ if (RODIN_BUILD_EXAMPLES)
   if (RODIN_WITH_PLOT)
     add_subdirectory(Plot)
   endif()
+  add_subdirectory(Alert)
   add_subdirectory(Geometry)
   add_subdirectory(Variational)
 
