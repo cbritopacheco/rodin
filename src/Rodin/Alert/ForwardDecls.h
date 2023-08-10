@@ -14,9 +14,9 @@ namespace Rodin::Alert
   template <class Prefix>
   class Message;
 
-  class ResetT;
+  struct ResetT;
 
-  class StylizeT;
+  struct StylizeT;
 
   template <size_t RED, size_t GREEN, size_t BLUE>
   struct RGB;
