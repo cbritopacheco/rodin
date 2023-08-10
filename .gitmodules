@@ -4,9 +4,6 @@
 [submodule "third-party/mfem"]
 	path = third-party/mfem
 	url = https://github.com/mfem/mfem/
-[submodule "third-party/rang"]
-	path = third-party/rang
-	url = https://github.com/agauniyal/rang
 [submodule "third-party/corrade"]
 	path = third-party/corrade
 	url = https://github.com/mosra/corrade
