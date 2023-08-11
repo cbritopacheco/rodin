@@ -3,9 +3,9 @@
 #include "Rodin/Variational/QuadratureRule.h"
 
 #include "Mesh.h"
-#include "SimplexTransformation.h"
+#include "PolytopeTransformation.h"
 
-#include "Simplex.h"
+#include "Polytope.h"
 
 namespace Rodin::Geometry
 {

@@ -19,7 +19,7 @@
 #include "ForwardDecls.h"
 
 #include "Types.h"
-#include "Simplex.h"
+#include "Polytope.h"
 #include "GeometryIndexed.h"
 
 namespace Rodin::Geometry

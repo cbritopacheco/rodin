@@ -2,7 +2,7 @@
 #define RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/SimplexTransformation.h"
+#include "Rodin/Geometry/PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"

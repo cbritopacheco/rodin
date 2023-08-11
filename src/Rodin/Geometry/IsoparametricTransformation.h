@@ -9,9 +9,9 @@
 
 #include <Eigen/QR>
 
-#include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/Polytope.h"
 
-#include "SimplexTransformation.h"
+#include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
 

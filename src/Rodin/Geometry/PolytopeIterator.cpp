@@ -5,11 +5,11 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Mesh.h"
-#include "SimplexIterator.h"
+#include "PolytopeIterator.h"
 
 namespace Rodin::Geometry
 {
-  // ---- SimplexIterator ---------------------------------------------------
+  // ---- PolytopeIterator ---------------------------------------------------
   PolytopeIterator::PolytopeIterator(
       size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
     : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)

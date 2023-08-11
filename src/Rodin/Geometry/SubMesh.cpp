@@ -2,7 +2,7 @@
 
 #include "SubMesh.h"
 
-#include "Simplex.h"
+#include "Polytope.h"
 
 namespace Rodin::Geometry
 {

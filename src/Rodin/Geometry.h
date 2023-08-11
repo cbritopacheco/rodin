@@ -15,8 +15,8 @@
 #include "Geometry/Types.h"
 #include "Geometry/Mesh.h"
 #include "Geometry/SubMesh.h"
-#include "Geometry/Simplex.h"
-#include "Geometry/SimplexTransformation.h"
+#include "Geometry/Polytope.h"
+#include "Geometry/PolytopeTransformation.h"
 #include "Geometry/IsoparametricTransformation.h"
 
 #endif

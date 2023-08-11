@@ -15,7 +15,7 @@
 #include "Rodin/Math/Matrix.h"
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/Polytope.h"
 
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/Traits.h"

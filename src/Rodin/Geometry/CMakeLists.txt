@@ -1,17 +1,17 @@
 set(RodinGeometry_HEADERS
   Mesh.h
   SubMesh.h
-  Simplex.h
+  Polytope.h
   Connectivity.h
-  SimplexIterator.h
-  SimplexTransformation.h
+  PolytopeIterator.h
+  PolytopeTransformation.h
   )
 
 set(RodinGeometry_SRCS
   Mesh.cpp
-  Simplex.cpp
-  SimplexIterator.cpp
-  SimplexTransformation.cpp
+  Polytope.cpp
+  PolytopeIterator.cpp
+  PolytopeTransformation.cpp
   Connectivity.cpp
   SubMesh.cpp
   MeshBuilder.cpp
