@@ -4,7 +4,7 @@
 
   @tableofcontents
 
-  @subsection examples-index-variational Variational methods
+  @subsection examples-index-variational Variational methods and weak formulations
 
   The Rodin::Variational module is mostly used when dealing with to variational
   problems of the form:
@@ -14,9 +14,9 @@
     a(u, v) = b(v) \ .
   @f]
 
-  For the complete list of examples go to the link below:
+  @subsection examples-index-pdes Solving PDEs
 
-  - @subpage examples-variational-index
+  - @subpage examples-pdes-index
 
   @subsection examples-index-solver Solving linear systems
 

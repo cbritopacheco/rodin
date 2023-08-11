@@ -1,5 +1,5 @@
 /**
-  @page examples-variational-poisson Solving the Poisson equation
+  @page examples-pdes-poisson Solving the Poisson equation
   @brief Resolution of the Poisson equation using Rodin
 
   @image html Poisson.png width=410px
@@ -10,7 +10,7 @@
 
   @m_footernavigation
 
-  @section examples-variational-poisson-intro Introduction
+  @section examples-pdes-poisson-intro Introduction
 
   To introduce the Rodin::Variational module it is important to start from a
   type of "Hello World!" example. In this context, the Poisson equation fits
@@ -41,7 +41,7 @@
   literature. Hence we won't go into specifics. Rather, we deem it best to show
   how to implement said weak formulation and solve it.
 
-  @section examples-variational-poisson-preamble Includes and Namespaces
+  @section examples-pdes-poisson-preamble Includes and Namespaces
 
   In order to start using Rodin we first need to include the relevant parts
   which will aid us in the resolution of our equation. If you are familiar with
@@ -72,7 +72,7 @@ components:
   Rodin and Rodin::Variational namespaces to the global scope, so we don't have
   to write their namespace again.
 
-  @section examples-variational-poisson-impl Implementing the solution
+  @section examples-pdes-poisson-impl Implementing the solution
 
   Next we would like to write the code which actually solves the equation. For
   our purposes we will write it inside the `main` function like so:
@@ -183,7 +183,7 @@ components:
   @endcode
 
   The full source code may be found below:
-  -   @ref Variational/Poisson.cpp "Poisson.cpp"
+  -   @ref PDEs/Poisson.cpp "Poisson.cpp"
 
-  @example Variational/Poisson.cpp @m_examplenavigation{examples-variational-poisson,Variational/} @m_footernavigation
+  @example PDEs/Poisson.cpp @m_examplenavigation{examples-pdes-poisson,PDEs/} @m_footernavigation
   */

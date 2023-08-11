@@ -1,5 +1,5 @@
 /**
-  @page examples-variational-surface_meshes Solving on surfaces with flat elements
+  @page examples-pdes-surface_meshes Solving on surfaces with flat elements
   @brief Showcases the resolution of Poisson equation with a mass term on the sphere
 
   @image html SurfaceMeshes.png width=410px
@@ -21,7 +21,7 @@
   elements.
 
   The full source code may be found below:
-  -   @ref Variational/SurfaceMeshes.cpp "SurfaceMeshes.cpp"
+  -   @ref PDEs/SurfaceMeshes.cpp "SurfaceMeshes.cpp"
 
-  @example Variational/SurfaceMeshes.cpp @m_examplenavigation{examples-variational-surface_meshes,Variational/} @m_footernavigation
+  @example PDEs/SurfaceMeshes.cpp @m_examplenavigation{examples-pdes-surface_meshes,PDEs/} @m_footernavigation
   */
