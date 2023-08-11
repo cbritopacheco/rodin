@@ -13,7 +13,7 @@
 #include <optional>
 #include <type_traits>
 
-#include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
 

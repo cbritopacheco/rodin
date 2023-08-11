@@ -13,7 +13,7 @@
 
 #include "ForwardDecls.h"
 
-#include "Simplex.h"
+#include "Polytope.h"
 #include "Types.h"
 
 namespace Rodin

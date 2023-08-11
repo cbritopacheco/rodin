@@ -7,7 +7,7 @@
 #ifndef RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 #define RODIN_VARIATIONAL_GEOMETRYINDEXED_H
 
-#include "Simplex.h"
+#include "Polytope.h"
 
 namespace Rodin::Geometry
 {

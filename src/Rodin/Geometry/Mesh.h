@@ -23,11 +23,11 @@
 
 #include "ForwardDecls.h"
 #include "Connectivity.h"
-#include "Simplex.h"
-#include "SimplexCount.h"
-#include "SimplexIndexed.h"
-#include "SimplexIterator.h"
-#include "SimplexTransformation.h"
+#include "Polytope.h"
+#include "PolytopeCount.h"
+#include "PolytopeIndexed.h"
+#include "PolytopeIterator.h"
+#include "PolytopeTransformation.h"
 
 namespace Rodin::Geometry
 {

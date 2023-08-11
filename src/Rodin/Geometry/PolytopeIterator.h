@@ -12,7 +12,7 @@
 
 #include "ForwardDecls.h"
 
-#include "Simplex.h"
+#include "Polytope.h"
 #include "IndexGenerator.h"
 
 namespace Rodin::Geometry

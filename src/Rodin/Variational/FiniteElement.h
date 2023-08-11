@@ -10,8 +10,8 @@
 #include <unordered_map>
 
 #include "Rodin/Math/Matrix.h"
-#include "Rodin/Geometry/Simplex.h"
-#include "Rodin/Geometry/SimplexTransformation.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PolytopeTransformation.h"
 
 #include "TensorBasis.h"
 

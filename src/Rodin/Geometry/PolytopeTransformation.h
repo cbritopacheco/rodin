@@ -10,7 +10,7 @@
 #include "Rodin/Math.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
-#include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
 

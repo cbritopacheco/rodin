@@ -17,8 +17,8 @@
 #include "Mesh.h"
 #include "SubMesh.h"
 
-#include "Simplex.h"
-#include "SimplexIterator.h"
+#include "Polytope.h"
+#include "PolytopeIterator.h"
 #include "IsoparametricTransformation.h"
 
 namespace Rodin::Geometry

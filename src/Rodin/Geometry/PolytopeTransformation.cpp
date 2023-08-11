@@ -3,9 +3,9 @@
 #include "Rodin/Variational/FiniteElement.h"
 
 #include "Mesh.h"
-#include "Simplex.h"
+#include "Polytope.h"
 
-#include "SimplexTransformation.h"
+#include "PolytopeTransformation.h"
 
 namespace Rodin::Geometry
 {
