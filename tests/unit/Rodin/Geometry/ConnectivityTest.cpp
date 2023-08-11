@@ -13,7 +13,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
   MeshConnectivity connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
-              .polytope(Polytope::Geometry::Triangle, {0, 1, 2});
+              .polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   EXPECT_EQ(connectivity.getMeshDimension(), 2);
 
@@ -24,7 +24,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
   EXPECT_EQ(connectivity.getCount(d), 1);
   EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
   EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexSet({0, 1, 2}));
-  EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Geometry::Triangle);
+  EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Triangle);
 
   connectivity.compute(d, d);
   EXPECT_EQ(connectivity.getIncidence(d, d).size(), 1);
@@ -43,17 +43,17 @@ TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
   EXPECT_EQ(connectivity.getCount(d), 3);
   EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
 
-  EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Geometry::Segment);
-  EXPECT_EQ(connectivity.getGeometry(d, 1), Polytope::Geometry::Segment);
-  EXPECT_EQ(connectivity.getGeometry(d, 2), Polytope::Geometry::Segment);
+  EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Segment);
+  EXPECT_EQ(connectivity.getGeometry(d, 1), Polytope::Type::Segment);
+  EXPECT_EQ(connectivity.getGeometry(d, 2), Polytope::Type::Segment);
 
   d = 0;
   connectivity.compute(d, 0);
   EXPECT_EQ(connectivity.getCount(d), 3);
   EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
-  EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Geometry::Point);
-  EXPECT_EQ(connectivity.getGeometry(d, 1), Polytope::Geometry::Point);
-  EXPECT_EQ(connectivity.getGeometry(d, 2), Polytope::Geometry::Point);
+  EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Point);
+  EXPECT_EQ(connectivity.getGeometry(d, 1), Polytope::Type::Point);
+  EXPECT_EQ(connectivity.getGeometry(d, 2), Polytope::Type::Point);
 }
 
 TEST(Rodin_Geometry_Connectivity, SanityTest2D_4Nodes_Triangles)
@@ -64,8 +64,8 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_4Nodes_Triangles)
   MeshConnectivity connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
-              .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-              .polytope(Polytope::Geometry::Triangle, {1, 2, 3});
+              .polytope(Polytope::Type::Triangle, {0, 1, 2})
+              .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
   size_t d;
 
@@ -110,9 +110,9 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Triangles)
   MeshConnectivity connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
-              .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-              .polytope(Polytope::Geometry::Triangle, {1, 2, 3})
-              .polytope(Polytope::Geometry::Triangle, {2, 3, 4});
+              .polytope(Polytope::Type::Triangle, {0, 1, 2})
+              .polytope(Polytope::Type::Triangle, {1, 2, 3})
+              .polytope(Polytope::Type::Triangle, {2, 3, 4});
 
   size_t d;
 
@@ -160,8 +160,8 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Mixed)
   MeshConnectivity connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
-              .polytope(Polytope::Geometry::Triangle, {0, 1, 4})
-              .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 4, 3});
+              .polytope(Polytope::Type::Triangle, {0, 1, 4})
+              .polytope(Polytope::Type::Quadrilateral, {1, 2, 4, 3});
 
   size_t d;
 
@@ -185,10 +185,10 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_9Nodes_Mixed)
   MeshConnectivity connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
-              .polytope(Polytope::Geometry::Triangle, {0, 1, 4})
-              .polytope(Polytope::Geometry::Quadrilateral, {1, 2, 4, 3})
-              .polytope(Polytope::Geometry::Quadrilateral, {8, 0, 7, 6})
-              .polytope(Polytope::Geometry::Quadrilateral, {0, 4, 6, 5});
+              .polytope(Polytope::Type::Triangle, {0, 1, 4})
+              .polytope(Polytope::Type::Quadrilateral, {1, 2, 4, 3})
+              .polytope(Polytope::Type::Quadrilateral, {8, 0, 7, 6})
+              .polytope(Polytope::Type::Quadrilateral, {0, 4, 6, 5});
 
   size_t d;
 

@@ -82,29 +82,29 @@ namespace Rodin::IO::MFEM
 
   inline
   constexpr
-  std::optional<Rodin::Geometry::Polytope::Geometry> getGeometry(GeometryType t)
+  std::optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
   {
     switch (t)
     {
       case GeometryType::POINT:
       {
-        return Rodin::Geometry::Polytope::Geometry::Point;
+        return Rodin::Geometry::Polytope::Type::Point;
       }
       case GeometryType::SEGMENT:
       {
-        return Rodin::Geometry::Polytope::Geometry::Segment;
+        return Rodin::Geometry::Polytope::Type::Segment;
       }
       case GeometryType::TRIANGLE:
       {
-        return Rodin::Geometry::Polytope::Geometry::Triangle;
+        return Rodin::Geometry::Polytope::Type::Triangle;
       }
       case GeometryType::TETRAHEDRON:
       {
-        return Rodin::Geometry::Polytope::Geometry::Tetrahedron;
+        return Rodin::Geometry::Polytope::Type::Tetrahedron;
       }
       case GeometryType::SQUARE:
       {
-        return Rodin::Geometry::Polytope::Geometry::Quadrilateral;
+        return Rodin::Geometry::Polytope::Type::Quadrilateral;
       }
       default:
         return {};
@@ -114,19 +114,19 @@ namespace Rodin::IO::MFEM
 
   inline
   constexpr
-  std::optional<GeometryType> getGeometry(Geometry::Polytope::Geometry t)
+  std::optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
   {
     switch (t)
     {
-      case Geometry::Polytope::Geometry::Point:
+      case Geometry::Polytope::Type::Point:
         return GeometryType::POINT;
-      case Geometry::Polytope::Geometry::Segment:
+      case Geometry::Polytope::Type::Segment:
         return GeometryType::SEGMENT;
-      case Geometry::Polytope::Geometry::Triangle:
+      case Geometry::Polytope::Type::Triangle:
         return GeometryType::TRIANGLE;
-      case Geometry::Polytope::Geometry::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
         return GeometryType::SQUARE;
-      case Geometry::Polytope::Geometry::Tetrahedron:
+      case Geometry::Polytope::Type::Tetrahedron:
         return GeometryType::TETRAHEDRON;
       default:
         return {};
@@ -283,7 +283,7 @@ namespace Rodin::IO::MFEM
     struct Data
     {
       Geometry::Attribute attribute;
-      Geometry::Polytope::Geometry geometry;
+      Geometry::Polytope::Type geometry;
       Array<Index> vertices;
     };
 

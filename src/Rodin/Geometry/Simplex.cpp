@@ -9,20 +9,19 @@
 
 namespace Rodin::Geometry
 {
-
   const GeometryIndexed<Math::Matrix> Polytope::s_vertices =
   {
-    { Polytope::Geometry::Point,
+    { Polytope::Type::Point,
       Math::Matrix{{0}} },
-    { Polytope::Geometry::Segment,
+    { Polytope::Type::Segment,
       Math::Matrix{{0, 1}} },
-    { Polytope::Geometry::Triangle,
+    { Polytope::Type::Triangle,
       Math::Matrix{{0, 1, 0},
                    {0, 0, 1}} },
-    { Polytope::Geometry::Quadrilateral,
+    { Polytope::Type::Quadrilateral,
       Math::Matrix{{0, 1, 0, 1},
                    {0, 0, 1, 1}} },
-    { Polytope::Geometry::Tetrahedron,
+    { Polytope::Type::Tetrahedron,
       Math::Matrix{{0, 1, 0, 0},
                    {0, 0, 1, 0},
                    {0, 0, 0, 1}} },
@@ -43,7 +42,7 @@ namespace Rodin::Geometry
     return getMesh().getAttribute(getDimension(), getIndex());
   }
 
-  Polytope::Geometry Polytope::getGeometry() const
+  Polytope::Type Polytope::getGeometry() const
   {
     return getMesh().getGeometry(getDimension(), getIndex());
   }
@@ -55,7 +54,7 @@ namespace Rodin::Geometry
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
-  const Math::Matrix& Polytope::getVertices(Polytope::Geometry g)
+  const Math::Matrix& Polytope::getVertices(Polytope::Type g)
   {
     return s_vertices[g];
   }
@@ -87,11 +86,11 @@ namespace Rodin::Geometry
     const auto& mesh = getMesh();
     switch (getGeometry())
     {
-      case Geometry::Point:
+      case Type::Point:
       {
         return 0;
       }
-      case Geometry::Segment:
+      case Type::Segment:
       {
         const auto& vertices = getVertices();
         const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
@@ -102,7 +101,7 @@ namespace Rodin::Geometry
         const Scalar y1 = b.y();
         return Math::sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
       }
-      case Geometry::Triangle:
+      case Type::Triangle:
       {
         const auto& vertices = getVertices();
         const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
@@ -116,7 +115,7 @@ namespace Rodin::Geometry
         const Scalar y2 = c.y();
         return (1.0 / 2.0) * Math::abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0));
       }
-      case Geometry::Quadrilateral:
+      case Type::Quadrilateral:
       {
         const auto& vertices = getVertices();
         const auto& a = mesh.getVertexCoordinates(vertices.coeff(0));
@@ -133,7 +132,7 @@ namespace Rodin::Geometry
         const Scalar y3 = d.y();
         return (1.0 / 2.0) * Math::abs((x0 * y1 - x1 * y0) + (x1 * y2 - x2 * y1) + (x2 * y3 - x3 * y2) + (x3 * y0 - x0 * y3));
       }
-      case Geometry::Tetrahedron:
+      case Type::Tetrahedron:
       {
         Eigen::Matrix<Scalar, 4, 4> pm;
         const auto& vertices = getVertices();
@@ -184,13 +183,55 @@ namespace Rodin::Geometry
   }
 
   // ---- Point --------------------------------------------------------------
-  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans)
-    : m_polytope(simplex), m_trans(trans)
+  PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      const Math::SpatialVector& pc)
+    : m_polytopeStorage(PolytopeStorage::Reference),
+      m_polytope(polytope), m_trans(trans), m_pc(pc)
   {}
 
-  PointBase::PointBase(const Polytope& simplex, const PolytopeTransformation& trans, const Math::SpatialVector& pc)
-    : m_polytope(simplex), m_trans(trans), m_pc(pc)
+  PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans)
+    : m_polytopeStorage(PolytopeStorage::Reference),
+      m_polytope(polytope), m_trans(trans)
   {}
+
+  PointBase::PointBase(Polytope&& polytope, const PolytopeTransformation& trans,
+      const Math::SpatialVector& pc)
+    : m_polytopeStorage(PolytopeStorage::Value),
+      m_polytope(std::move(polytope)), m_trans(trans), m_pc(pc)
+  {}
+
+  PointBase::PointBase(Polytope&& polytope, const PolytopeTransformation& trans)
+    : m_polytopeStorage(PolytopeStorage::Value),
+      m_polytope(std::move(polytope)), m_trans(trans)
+  {}
+
+  bool PointBase::operator<(const PointBase& p) const
+  {
+    assert(getDimension() == p.getDimension());
+    const auto& lhs = getCoordinates(Coordinates::Physical);
+    const auto& rhs = p.getCoordinates(Coordinates::Physical);
+    for (int i = 0; i < lhs.size() - 1; i++)
+    {
+      if (lhs(i) < rhs(i))
+        return true;
+      if (rhs(i) > lhs(i))
+        return false;
+    }
+    return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
+  }
+
+  const Polytope& PointBase::getPolytope() const
+  {
+    if (m_polytopeStorage == PolytopeStorage::Value)
+    {
+      return std::get<const Polytope>(m_polytope);
+    }
+    else
+    {
+      assert(m_polytopeStorage == PolytopeStorage::Reference);
+      return std::get<std::reference_wrapper<const Polytope>>(m_polytope);
+    }
+  }
 
   const Math::SpatialVector& PointBase::getCoordinates(Coordinates coords) const
   {
@@ -225,8 +266,9 @@ namespace Rodin::Geometry
   {
     if (!m_jacobianInverse.has_value())
     {
-      const size_t rdim = Polytope::getGeometryDimension(m_polytope.get().getGeometry());
-      const size_t sdim = m_polytope.get().getMesh().getSpaceDimension();
+      const auto& polytope = getPolytope();
+      const size_t rdim = Polytope::getGeometryDimension(polytope.getGeometry());
+      const size_t sdim = polytope.getMesh().getSpaceDimension();
       assert(rdim <= sdim);
       if (rdim == sdim)
       {
@@ -395,17 +437,83 @@ namespace Rodin::Geometry
 
   size_t PointBase::getDimension(Coordinates coords) const
   {
+    const auto& polytope = getPolytope();
     switch (coords)
     {
       case Coordinates::Physical:
-        return m_polytope.get().getMesh().getSpaceDimension();
+        return polytope.getMesh().getSpaceDimension();
       case Coordinates::Reference:
-        return m_polytope.get().getMesh().getDimension();
+        return polytope.getMesh().getDimension();
       default:
       {
         assert(false);
         return 0;
       }
+    }
+  }
+
+  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc)
+    : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
+  {}
+
+  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      Math::SpatialVector&& rc, const Math::SpatialVector& pc)
+    : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
+  {}
+
+  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      std::reference_wrapper<const Math::SpatialVector> rc)
+    : PointBase(polytope, trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
+  {}
+
+  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      Math::SpatialVector&& rc)
+    : PointBase(polytope, trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
+  {}
+
+  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
+      std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc)
+    : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
+  {}
+
+  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
+      Math::SpatialVector&& rc, const Math::SpatialVector& pc)
+    : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
+  {}
+
+  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
+      std::reference_wrapper<const Math::SpatialVector> rc)
+    : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
+  {}
+
+  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
+      Math::SpatialVector&& rc)
+    : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
+  {}
+
+  Point::Point(const Point& other)
+    : PointBase(other),
+      m_rcStorage(other.m_rcStorage),
+      m_rc(other.m_rc)
+  {}
+
+  Point::Point(Point&& other)
+    : PointBase(std::move(other)),
+      m_rcStorage(other.m_rcStorage),
+      m_rc(std::move(other.m_rc))
+  {}
+
+  const Math::SpatialVector& Point::getReferenceCoordinates() const
+  {
+    if (m_rcStorage == RCStorage::Value)
+    {
+      return std::get<const Math::SpatialVector>(m_rc);
+    }
+    else
+    {
+      assert(m_rcStorage == RCStorage::Reference);
+      return std::get<std::reference_wrapper<const Math::SpatialVector>>(m_rc);
     }
   }
 }

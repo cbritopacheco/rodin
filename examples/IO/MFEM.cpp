@@ -16,8 +16,8 @@ int main(int, char** argv)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   P1 fes(mesh);

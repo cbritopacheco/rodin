@@ -26,7 +26,7 @@ namespace RodinBenchmark
 
       void SetUp(const benchmark::State&)
       {
-        mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+        mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
         mesh.getConnectivity().compute(1, 2);
         vhPtr.reset(new P1<Scalar, Context::Serial>(mesh));
       }

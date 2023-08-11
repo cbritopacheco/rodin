@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ALERT_FUNCTIONEXCEPTION_H
-#define RODIN_ALERT_FUNCTIONEXCEPTION_H
+#ifndef RODIN_ALERT_MEMBERFUNCTIONEXCEPTION_H
+#define RODIN_ALERT_MEMBERFUNCTIONEXCEPTION_H
 
 #include <boost/type_index.hpp>
 

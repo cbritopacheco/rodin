@@ -94,14 +94,14 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::polytope(Polytope::Geometry t, const Array<Index>& vs)
+  Mesh<Context::Serial>::Builder::polytope(Polytope::Type t, const Array<Index>& vs)
   {
     m_connectivity.polytope(t, vs);
     return *this;
   }
 
   Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::polytope(Polytope::Geometry t, Array<Index>&& vs)
+  Mesh<Context::Serial>::Builder::polytope(Polytope::Type t, Array<Index>&& vs)
   {
     m_connectivity.polytope(t, std::move(vs));
     return *this;

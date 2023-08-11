@@ -663,7 +663,7 @@ namespace Rodin::IO
           for (auto it = mesh.getVertex(); !it.end(); ++it)
           {
             const Geometry::Point p(*it, it->getTransformation(),
-                Geometry::Polytope::getVertices(Geometry::Polytope::Geometry::Point).col(0),
+                Geometry::Polytope::getVertices(Geometry::Polytope::Type::Point).col(0),
                 it->getCoordinates());
             os << gf(p) << '\n';
           }

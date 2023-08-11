@@ -11,7 +11,7 @@ using namespace Rodin::Test::Random;
 
 TEST(Rodin_Variational_ScalarP1Element, SanityTest_1D_Reference_Segment)
 {
-  ScalarP1Element k(Polytope::Geometry::Segment);
+  ScalarP1Element k(Polytope::Type::Segment);
 
   {
     EXPECT_NEAR(k.getBasis(0)(Math::Vector{{0}}), 1, RODIN_FUZZY_CONSTANT);
@@ -34,7 +34,7 @@ TEST(Rodin_Variational_ScalarP1Element, FuzzyTest_1D_Reference_Segment)
   constexpr size_t n = 25;
 
   RandomFloat gen(0.0, 1.0);
-  ScalarP1Element k(Polytope::Geometry::Segment);
+  ScalarP1Element k(Polytope::Type::Segment);
 
   {
     for (size_t i = 0; i < n; i++)
@@ -49,7 +49,7 @@ TEST(Rodin_Variational_ScalarP1Element, FuzzyTest_1D_Reference_Segment)
 
 TEST(Rodin_Variational_ScalarP1Element, SanityTest_2D_Reference_Triangle)
 {
-  ScalarP1Element k(Polytope::Geometry::Triangle);
+  ScalarP1Element k(Polytope::Type::Triangle);
 
   {
     EXPECT_NEAR(k.getBasis(0)(Math::Vector{{0, 0}}), 1, RODIN_FUZZY_CONSTANT);
@@ -93,7 +93,7 @@ TEST(Rodin_Variational_ScalarP1Element, FuzzyTest_2D_Reference_Triangle)
   constexpr size_t n = 25;
 
   RandomFloat gen(0.0, 1.0);
-  ScalarP1Element k(Polytope::Geometry::Triangle);
+  ScalarP1Element k(Polytope::Type::Triangle);
 
   {
     for (size_t i = 0; i < n; i++)

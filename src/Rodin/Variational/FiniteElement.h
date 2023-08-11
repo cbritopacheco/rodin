@@ -33,11 +33,11 @@ namespace Rodin::Variational
     public:
       constexpr
       FiniteElementBase()
-        : m_g(Geometry::Polytope::Geometry::Point)
+        : m_g(Geometry::Polytope::Type::Point)
       {}
 
       constexpr
-      FiniteElementBase(Geometry::Polytope::Geometry g)
+      FiniteElementBase(Geometry::Polytope::Type g)
         : m_g(g)
       {}
 
@@ -69,7 +69,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      Geometry::Polytope::Geometry getGeometry() const
+      Geometry::Polytope::Type getGeometry() const
       {
         return m_g;
       }
@@ -122,7 +122,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Geometry::Polytope::Geometry m_g;
+      Geometry::Polytope::Type m_g;
   };
 }
 

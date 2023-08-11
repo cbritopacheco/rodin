@@ -29,7 +29,7 @@ namespace Rodin::QF
       using Parent = QuadratureFormulaBase;
 
       constexpr
-      QFGM(size_t order, Geometry::Polytope::Geometry geom)
+      QFGM(size_t order, Geometry::Polytope::Type geom)
         : Parent(geom),
           m_degree((order + 1) / 2)
       {

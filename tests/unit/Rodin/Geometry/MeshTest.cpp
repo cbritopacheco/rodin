@@ -30,8 +30,8 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   EXPECT_EQ(mesh.getVertexCount(), 4);
@@ -51,8 +51,8 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Boundary)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   EXPECT_EQ(mesh.getVertexCount(), 4);
@@ -84,8 +84,8 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Interface)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   EXPECT_EQ(mesh.getVertexCount(), 4);
@@ -118,8 +118,8 @@ TEST(Rodin_Geometry_Mesh_FuzzyTest, 2D_Square_PolytopeTransformation_1)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   {

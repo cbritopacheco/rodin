@@ -46,7 +46,7 @@ namespace Rodin::Geometry
 
       struct SubPolytope
       {
-        Polytope::Geometry geometry;
+        Polytope::Type geometry;
         Array<Index> vertices;
       };
 
@@ -73,7 +73,7 @@ namespace Rodin::Geometry
       MeshConnectivity& reserve(size_t d, size_t count);
 
       MeshConnectivity& polytope(
-          Geometry::Polytope::Geometry t, std::initializer_list<Index> p)
+          Geometry::Polytope::Type t, std::initializer_list<Index> p)
       {
         Array<Index> arr(p.size());
         std::copy(p.begin(), p.end(), arr.begin());
@@ -81,16 +81,16 @@ namespace Rodin::Geometry
       }
 
       MeshConnectivity& polytope(
-          Geometry::Polytope::Geometry t, const Array<Index>& polytope);
+          Geometry::Polytope::Type t, const Array<Index>& polytope);
 
       MeshConnectivity& polytope(
-          Geometry::Polytope::Geometry t, Array<Index>&& polytope);
+          Geometry::Polytope::Type t, Array<Index>&& polytope);
 
       MeshConnectivity& compute(size_t d, size_t dp);
 
       size_t getCount(size_t dim) const;
 
-      size_t getCount(Polytope::Geometry g) const;
+      size_t getCount(Polytope::Type g) const;
 
       size_t getMeshDimension() const;
 
@@ -98,7 +98,7 @@ namespace Rodin::Geometry
 
       const std::optional<Index> getIndex(size_t dim, const IndexArray& key) const;
 
-      Polytope::Geometry getGeometry(size_t d, Index idx) const;
+      Polytope::Type getGeometry(size_t d, Index idx) const;
 
       const Array<Index>& getPolytope(size_t d, Index idx) const;
 
@@ -131,7 +131,7 @@ namespace Rodin::Geometry
       GeometryIndexed<size_t> m_gcount;
       std::vector<PolytopeIndex> m_index;
       std::vector<std::vector<bool>> m_dirty;
-      std::vector<std::vector<Polytope::Geometry>> m_geometry;
+      std::vector<std::vector<Polytope::Type>> m_geometry;
       std::vector<std::vector<Incidence>> m_connectivity;
 
   };

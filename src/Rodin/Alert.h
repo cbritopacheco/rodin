@@ -19,7 +19,7 @@
 #include "Alert/Notation.h"
 #include "Alert/Identifier.h"
 #include "Alert/ClassException.h"
-#include "Alert/FunctionException.h"
 #include "Alert/NamespacedException.h"
+#include "Alert/MemberFunctionException.h"
 
 #endif

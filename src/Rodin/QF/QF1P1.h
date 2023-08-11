@@ -12,7 +12,7 @@ namespace Rodin::QF
       using Parent = QuadratureFormulaBase;
 
       constexpr
-      QF1P1(Geometry::Polytope::Geometry g)
+      QF1P1(Geometry::Polytope::Type g)
         : Parent(g)
       {}
 

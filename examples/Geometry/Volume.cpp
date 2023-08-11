@@ -15,7 +15,7 @@ int main(int, char**)
 {
   size_t n = 32;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.getConnectivity().compute(1, 2);
 
   std::cout << "Volume: " << mesh.getVolume() << std::endl;

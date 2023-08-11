@@ -24,7 +24,7 @@ namespace Rodin::QF
       using Parent = QuadratureFormulaBase;
 
       constexpr
-      QFGG(size_t order, Geometry::Polytope::Geometry g)
+      QFGG(size_t order, Geometry::Polytope::Type g)
         : Parent(g),
           m_qf1p1(g),
           m_order(order)

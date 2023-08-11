@@ -29,9 +29,9 @@ namespace Rodin::Geometry
   {
     public:
       /**
-       * @brief Polytope geometry
+       * @brief The type of the Polytope geometry.
        */
-      enum class Geometry
+      enum class Type
       {
         Point,
         Segment,
@@ -41,33 +41,33 @@ namespace Rodin::Geometry
       };
 
       /**
-       * @brief Iterable of possible polytope geometries.
+       * @brief Iterable of possible polytope geometry types.
        */
-      static constexpr std::array Geometries
+      static constexpr std::array Types
       {
-        Geometry::Point,
-        Geometry::Segment,
-        Geometry::Triangle,
-        Geometry::Quadrilateral,
-        Geometry::Tetrahedron
+        Type::Point,
+        Type::Segment,
+        Type::Triangle,
+        Type::Quadrilateral,
+        Type::Tetrahedron
       };
 
-      static const Math::Matrix& getVertices(Polytope::Geometry g);
+      static const Math::Matrix& getVertices(Polytope::Type g);
 
       inline
       constexpr
-      static size_t getVertexCount(Polytope::Geometry g)
+      static size_t getVertexCount(Polytope::Type g)
       {
         switch (g)
         {
-          case Geometry::Point:
+          case Type::Point:
             return 1;
-          case Geometry::Segment:
+          case Type::Segment:
             return 2;
-          case Geometry::Triangle:
+          case Type::Triangle:
             return 3;
-          case Geometry::Quadrilateral:
-          case Geometry::Tetrahedron:
+          case Type::Quadrilateral:
+          case Type::Tetrahedron:
             return 4;
         }
         assert(false);
@@ -76,18 +76,18 @@ namespace Rodin::Geometry
 
       inline
       constexpr
-      static size_t getGeometryDimension(Polytope::Geometry g)
+      static size_t getGeometryDimension(Polytope::Type g)
       {
         switch (g)
         {
-          case Geometry::Point:
+          case Type::Point:
             return 0;
-          case Geometry::Segment:
+          case Type::Segment:
             return 1;
-          case Geometry::Triangle:
-          case Geometry::Quadrilateral:
+          case Type::Triangle:
+          case Type::Quadrilateral:
             return 2;
-          case Geometry::Tetrahedron:
+          case Type::Tetrahedron:
             return 3;
         }
         assert(false);
@@ -96,16 +96,16 @@ namespace Rodin::Geometry
 
       inline
       constexpr
-      static bool isSimplex(Polytope::Geometry g)
+      static bool isSimplex(Polytope::Type g)
       {
         switch (g)
         {
-          case Geometry::Point:
-          case Geometry::Segment:
-          case Geometry::Triangle:
-          case Geometry::Tetrahedron:
+          case Type::Point:
+          case Type::Segment:
+          case Type::Triangle:
+          case Type::Tetrahedron:
             return true;
-          case Geometry::Quadrilateral:
+          case Type::Quadrilateral:
             return false;
         }
         assert(false);
@@ -179,7 +179,7 @@ namespace Rodin::Geometry
 
       PolytopeIterator getIncident() const;
 
-      Geometry getGeometry() const;
+      Type getGeometry() const;
 
     private:
       static const GeometryIndexed<Math::Matrix> s_vertices;
@@ -281,9 +281,9 @@ namespace Rodin::Geometry
 
       inline
       constexpr
-      Geometry getGeometry() const
+      Type getGeometry() const
       {
-        return Geometry::Point;
+        return Type::Point;
       }
   };
 
@@ -308,6 +308,12 @@ namespace Rodin::Geometry
    */
   class PointBase
   {
+    enum class PolytopeStorage
+    {
+      Value,
+      Reference
+    };
+
     public:
       /// Denotes the type of coordinates.
       enum class Coordinates
@@ -316,9 +322,19 @@ namespace Rodin::Geometry
         Physical ///< Physical coordinates
       };
 
-      PointBase(const Polytope& polytope, const PolytopeTransformation& trans);
+      explicit
+      PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+          const Math::SpatialVector& pc);
 
-      PointBase(const Polytope& polytope, const PolytopeTransformation& trans, const Math::SpatialVector& pc);
+      explicit
+      PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans);
+
+      explicit
+      PointBase(Polytope&& polytope, const PolytopeTransformation& trans,
+          const Math::SpatialVector& pc);
+
+      explicit
+      PointBase(Polytope&& polytope, const PolytopeTransformation& trans);
 
       /**
        * @brief Copy constructor.
@@ -390,27 +406,9 @@ namespace Rodin::Geometry
       /**
        * @brief Lexicographical comparison.
        */
-      inline
-      bool operator<(const PointBase& p) const
-      {
-        assert(getDimension() == p.getDimension());
-        const auto& lhs = getCoordinates(Coordinates::Physical);
-        const auto& rhs = p.getCoordinates(Coordinates::Physical);
-        for (int i = 0; i < lhs.size() - 1; i++)
-        {
-          if (lhs(i) < rhs(i))
-            return true;
-          if (rhs(i) > lhs(i))
-            return false;
-        }
-        return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
-      }
+      bool operator<(const PointBase& p) const;
 
-      inline
-      const Polytope& getPolytope() const
-      {
-        return m_polytope.get();
-      }
+      const Polytope& getPolytope() const;
 
       inline
       const PolytopeTransformation& getTransformation() const
@@ -445,7 +443,8 @@ namespace Rodin::Geometry
       virtual const Math::SpatialVector& getReferenceCoordinates() const = 0;
 
     private:
-      std::reference_wrapper<const Polytope> m_polytope;
+      PolytopeStorage m_polytopeStorage;
+      std::variant<const Polytope, std::reference_wrapper<const Polytope>> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
       mutable std::optional<const Math::SpatialVector> m_pc;
@@ -457,95 +456,84 @@ namespace Rodin::Geometry
 
   class Point final : public PointBase
   {
+    enum class RCStorage
+    {
+      Value,
+      Reference
+    };
+
     public:
       using Parent = PointBase;
 
-      enum class Type
-      {
-        Data,
-        Reference
-      };
-
-      Point(const Polytope& polytope, const PolytopeTransformation& trans,
-          const Math::SpatialVector& rc)
-        : PointBase(polytope, trans), m_type(Type::Data), m_rc(rc)
-      {}
-
-      Point(const Polytope& polytope, const PolytopeTransformation& trans,
-          const Math::SpatialVector& rc, const Math::SpatialVector& pc)
-        : PointBase(polytope, trans, pc), m_type(Type::Data), m_rc(rc)
-      {}
+      explicit
+      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+          std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc);
 
       explicit
-      Point(const Polytope& polytope, const PolytopeTransformation& trans,
-          std::reference_wrapper<const Math::SpatialVector> rc, std::reference_wrapper<const Math::SpatialVector> pc)
-        : PointBase(polytope, trans, pc), m_type(Type::Reference), m_rc(rc)
-      {}
+      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+          Math::SpatialVector&& rc, const Math::SpatialVector& pc);
 
-      Point(const Point& other)
-        : PointBase(other),
-          m_type(other.m_type),
-          m_rc(other.m_rc)
-      {}
+      explicit
+      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+          std::reference_wrapper<const Math::SpatialVector> rc);
 
-      Point(Point&& other)
-        : PointBase(std::move(other)),
-          m_type(other.m_type),
-          m_rc(std::move(other.m_rc))
-      {}
+      explicit
+      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+          Math::SpatialVector&& rc);
 
-      inline
-      constexpr
-      bool holds(Type t) const
-      {
-        return m_type == t;
-      }
+      explicit
+      Point(Polytope&& polytope, const PolytopeTransformation& trans,
+          std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc);
 
-      inline
-      const Math::SpatialVector& getReferenceCoordinates() const override
-      {
-        if (holds(Type::Data))
-        {
-          return std::get<const Math::SpatialVector>(m_rc);
-        }
-        else
-        {
-          assert(holds(Type::Reference));
-          return std::get<std::reference_wrapper<const Math::SpatialVector>>(m_rc);
-        }
-      }
+      explicit
+      Point(Polytope&& polytope, const PolytopeTransformation& trans,
+          Math::SpatialVector&& rc, const Math::SpatialVector& pc);
+
+      explicit
+      Point(Polytope&& polytope, const PolytopeTransformation& trans,
+          std::reference_wrapper<const Math::SpatialVector> rc);
+
+      explicit
+      Point(Polytope&& polytope, const PolytopeTransformation& trans,
+          Math::SpatialVector&& rc);
+
+      Point(const Point& other);
+
+      Point(Point&& other);
+
+      const Math::SpatialVector& getReferenceCoordinates() const override;
 
     private:
-      const Type m_type;
+      const RCStorage m_rcStorage;
       std::variant<const Math::SpatialVector, std::reference_wrapper<const Math::SpatialVector>> m_rc;
   };
 
   inline
-  std::ostream& operator<<(std::ostream& os, Polytope::Geometry g)
+  std::ostream& operator<<(std::ostream& os, Polytope::Type g)
   {
     switch (g)
     {
-      case Polytope::Geometry::Point:
+      case Polytope::Type::Point:
       {
         os << "Point";
         break;
       }
-      case Polytope::Geometry::Segment:
+      case Polytope::Type::Segment:
       {
         os << "Segment";
         break;
       }
-      case Polytope::Geometry::Triangle:
+      case Polytope::Type::Triangle:
       {
         os << "Triangle";
         break;
       }
-      case Polytope::Geometry::Quadrilateral:
+      case Polytope::Type::Quadrilateral:
       {
         os << "Quadrilateral";
         break;
       }
-      case Polytope::Geometry::Tetrahedron:
+      case Polytope::Type::Tetrahedron:
       {
         os << "Tetrahedron";
         break;

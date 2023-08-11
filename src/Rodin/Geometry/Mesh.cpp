@@ -31,18 +31,18 @@ namespace Rodin::Geometry
 
   // ---- Mesh<Context::Serial> ----------------------------------------------
 
-  Mesh<Context::Serial> Mesh<Context::Serial>::UniformGrid(Polytope::Geometry g, size_t h, size_t w)
+  Mesh<Context::Serial> Mesh<Context::Serial>::UniformGrid(Polytope::Type g, size_t h, size_t w)
   {
     Builder build;
     const size_t dim = Polytope::getGeometryDimension(g);
     build.initialize(dim).nodes(h * w);
     switch (g)
     {
-      case Polytope::Geometry::Point:
+      case Polytope::Type::Point:
       {
         return build.nodes(1).vertex({0}).finalize();
       }
-      case Polytope::Geometry::Triangle:
+      case Polytope::Type::Triangle:
       {
         assert(h * w >= 4);
         for (size_t i = 0; i < h; i++)
@@ -104,7 +104,7 @@ namespace Rodin::Geometry
     {
       if (dimension == 0)
       {
-        Variational::ScalarP1Element fe(Polytope::Geometry::Point);
+        Variational::ScalarP1Element fe(Polytope::Type::Point);
         const size_t sdim = getSpaceDimension();
         Math::SpatialMatrix pm(sdim, 1);
         pm.col(0) = getVertexCoordinates(idx);
@@ -270,7 +270,7 @@ namespace Rodin::Geometry
     return m_connectivity.getCount(dimension);
   }
 
-  size_t Mesh<Context::Serial>::getCount(Polytope::Geometry g) const
+  size_t Mesh<Context::Serial>::getCount(Polytope::Type g) const
   {
     return m_connectivity.getCount(g);
   }
@@ -354,7 +354,7 @@ namespace Rodin::Geometry
     return incidence.size() == 1;
   }
 
-  Polytope::Geometry Mesh<Context::Serial>::getGeometry(size_t dimension, Index idx) const
+  Polytope::Type Mesh<Context::Serial>::getGeometry(size_t dimension, Index idx) const
   {
     return m_connectivity.getGeometry(dimension, idx);
   }

@@ -30,24 +30,24 @@ namespace RodinBenchmark
         .vertex({1, 0})
         .vertex({0, 1})
         .vertex({1, 1})
-        .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-        .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .polytope(Polytope::Type::Triangle, {1, 3, 2})
         .finalize();
 
         uniformTriangularMesh16 =
-          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+          SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
 
         uniformTriangularMesh32 =
-          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 32, 32);
+          SerialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
 
         uniformTriangularMesh32 =
-          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 32, 32);
+          SerialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
 
         uniformTriangularMesh64 =
-          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 64, 64);
+          SerialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
 
         uniformTriangularMesh128 =
-          SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 128, 128);
+          SerialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
       }
 
       void TearDown(const benchmark::State&)

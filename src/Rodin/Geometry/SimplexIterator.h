@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_GEOMETRY_SIMPLEXITERATOR_H
-#define RODIN_GEOMETRY_SIMPLEXITERATOR_H
+#ifndef RODIN_GEOMETRY_POLYTOPEITERATOR_H
+#define RODIN_GEOMETRY_POLYTOPEITERATOR_H
 
 #include <memory>
 #include <utility>
@@ -78,7 +78,7 @@ namespace Rodin::Geometry
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<Polytope> m_simplex;
+      mutable std::unique_ptr<Polytope> m_polytope;
   };
 
   class ElementIterator
@@ -136,7 +136,7 @@ namespace Rodin::Geometry
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<Element> m_simplex;
+      mutable std::unique_ptr<Element> m_polytope;
   };
 
   class FaceIterator
@@ -194,7 +194,7 @@ namespace Rodin::Geometry
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<Face> m_simplex;
+      mutable std::unique_ptr<Face> m_polytope;
   };
 
   class VertexIterator
@@ -252,7 +252,7 @@ namespace Rodin::Geometry
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<Vertex> m_simplex;
+      mutable std::unique_ptr<Vertex> m_vertex;
   };
 }
 

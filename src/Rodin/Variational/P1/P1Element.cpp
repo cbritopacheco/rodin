@@ -5,38 +5,38 @@ namespace Rodin::Variational
   const Geometry::GeometryIndexed<std::vector<ScalarP1Element::LinearForm>>
   ScalarP1Element::s_ls =
   {
-    { Geometry::Polytope::Geometry::Point,
+    { Geometry::Polytope::Type::Point,
       {
-        { 0, Geometry::Polytope::Geometry::Point }
+        { 0, Geometry::Polytope::Type::Point }
       }
     },
-    { Geometry::Polytope::Geometry::Segment,
+    { Geometry::Polytope::Type::Segment,
       {
-        { 0, Geometry::Polytope::Geometry::Segment },
-        { 1, Geometry::Polytope::Geometry::Segment }
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment }
       }
     },
-    { Geometry::Polytope::Geometry::Triangle,
+    { Geometry::Polytope::Type::Triangle,
       {
-        { 0, Geometry::Polytope::Geometry::Triangle },
-        { 1, Geometry::Polytope::Geometry::Triangle },
-        { 2, Geometry::Polytope::Geometry::Triangle }
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle }
       }
     },
-    { Geometry::Polytope::Geometry::Quadrilateral,
+    { Geometry::Polytope::Type::Quadrilateral,
       {
-        { 0, Geometry::Polytope::Geometry::Quadrilateral },
-        { 1, Geometry::Polytope::Geometry::Quadrilateral },
-        { 2, Geometry::Polytope::Geometry::Quadrilateral },
-        { 3, Geometry::Polytope::Geometry::Quadrilateral }
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral }
       }
     },
-    { Geometry::Polytope::Geometry::Tetrahedron,
+    { Geometry::Polytope::Type::Tetrahedron,
       {
-        { 0, Geometry::Polytope::Geometry::Tetrahedron },
-        { 1, Geometry::Polytope::Geometry::Tetrahedron },
-        { 2, Geometry::Polytope::Geometry::Tetrahedron },
-        { 3, Geometry::Polytope::Geometry::Tetrahedron }
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     }
   };
@@ -44,38 +44,38 @@ namespace Rodin::Variational
   const Geometry::GeometryIndexed<std::vector<ScalarP1Element::BasisFunction>>
   ScalarP1Element::s_basis =
   {
-    { Geometry::Polytope::Geometry::Point,
+    { Geometry::Polytope::Type::Point,
       {
-        { 0, Geometry::Polytope::Geometry::Point }
+        { 0, Geometry::Polytope::Type::Point }
       }
     },
-    { Geometry::Polytope::Geometry::Segment,
+    { Geometry::Polytope::Type::Segment,
       {
-        { 0, Geometry::Polytope::Geometry::Segment },
-        { 1, Geometry::Polytope::Geometry::Segment }
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment }
       }
     },
-    { Geometry::Polytope::Geometry::Triangle,
+    { Geometry::Polytope::Type::Triangle,
       {
-        { 0, Geometry::Polytope::Geometry::Triangle },
-        { 1, Geometry::Polytope::Geometry::Triangle },
-        { 2, Geometry::Polytope::Geometry::Triangle }
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle }
       }
     },
-    { Geometry::Polytope::Geometry::Quadrilateral,
+    { Geometry::Polytope::Type::Quadrilateral,
       {
-        { 0, Geometry::Polytope::Geometry::Quadrilateral },
-        { 1, Geometry::Polytope::Geometry::Quadrilateral },
-        { 2, Geometry::Polytope::Geometry::Quadrilateral },
-        { 3, Geometry::Polytope::Geometry::Quadrilateral }
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral }
       }
     },
-    { Geometry::Polytope::Geometry::Tetrahedron,
+    { Geometry::Polytope::Type::Tetrahedron,
       {
-        { 0, Geometry::Polytope::Geometry::Tetrahedron },
-        { 1, Geometry::Polytope::Geometry::Tetrahedron },
-        { 2, Geometry::Polytope::Geometry::Tetrahedron },
-        { 3, Geometry::Polytope::Geometry::Tetrahedron }
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     }
   };
@@ -83,55 +83,55 @@ namespace Rodin::Variational
   const Geometry::GeometryIndexed<std::vector<ScalarP1Element::GradientFunction>>
   ScalarP1Element::s_gradient =
   {
-    { Geometry::Polytope::Geometry::Point,
+    { Geometry::Polytope::Type::Point,
       {
-        { 0, Geometry::Polytope::Geometry::Point }
+        { 0, Geometry::Polytope::Type::Point }
       }
     },
-    { Geometry::Polytope::Geometry::Segment,
+    { Geometry::Polytope::Type::Segment,
       {
-        { 0, Geometry::Polytope::Geometry::Segment },
-        { 1, Geometry::Polytope::Geometry::Segment }
+        { 0, Geometry::Polytope::Type::Segment },
+        { 1, Geometry::Polytope::Type::Segment }
       }
     },
-    { Geometry::Polytope::Geometry::Triangle,
+    { Geometry::Polytope::Type::Triangle,
       {
-        { 0, Geometry::Polytope::Geometry::Triangle },
-        { 1, Geometry::Polytope::Geometry::Triangle },
-        { 2, Geometry::Polytope::Geometry::Triangle }
+        { 0, Geometry::Polytope::Type::Triangle },
+        { 1, Geometry::Polytope::Type::Triangle },
+        { 2, Geometry::Polytope::Type::Triangle }
       }
     },
-    { Geometry::Polytope::Geometry::Quadrilateral,
+    { Geometry::Polytope::Type::Quadrilateral,
       {
-        { 0, Geometry::Polytope::Geometry::Quadrilateral },
-        { 1, Geometry::Polytope::Geometry::Quadrilateral },
-        { 2, Geometry::Polytope::Geometry::Quadrilateral },
-        { 3, Geometry::Polytope::Geometry::Quadrilateral }
+        { 0, Geometry::Polytope::Type::Quadrilateral },
+        { 1, Geometry::Polytope::Type::Quadrilateral },
+        { 2, Geometry::Polytope::Type::Quadrilateral },
+        { 3, Geometry::Polytope::Type::Quadrilateral }
       }
     },
-    { Geometry::Polytope::Geometry::Tetrahedron,
+    { Geometry::Polytope::Type::Tetrahedron,
       {
-        { 0, Geometry::Polytope::Geometry::Tetrahedron },
-        { 1, Geometry::Polytope::Geometry::Tetrahedron },
-        { 2, Geometry::Polytope::Geometry::Tetrahedron },
-        { 3, Geometry::Polytope::Geometry::Tetrahedron }
+        { 0, Geometry::Polytope::Type::Tetrahedron },
+        { 1, Geometry::Polytope::Type::Tetrahedron },
+        { 2, Geometry::Polytope::Type::Tetrahedron },
+        { 3, Geometry::Polytope::Type::Tetrahedron }
       }
     }
   };
 
   const Geometry::GeometryIndexed<Math::Matrix> ScalarP1Element::s_nodes =
   {
-    { Geometry::Polytope::Geometry::Point,
+    { Geometry::Polytope::Type::Point,
       Math::Matrix{{0}} },
-    { Geometry::Polytope::Geometry::Segment,
+    { Geometry::Polytope::Type::Segment,
       Math::Matrix{{0, 1}} },
-    { Geometry::Polytope::Geometry::Triangle,
+    { Geometry::Polytope::Type::Triangle,
       Math::Matrix{{0, 1, 0},
                    {0, 0, 1}} },
-    { Geometry::Polytope::Geometry::Quadrilateral,
+    { Geometry::Polytope::Type::Quadrilateral,
       Math::Matrix{{0, 1, 0, 1},
                    {0, 0, 1, 1}} },
-    { Geometry::Polytope::Geometry::Tetrahedron,
+    { Geometry::Polytope::Type::Tetrahedron,
       Math::Matrix{{0, 1, 0, 0},
                    {0, 0, 1, 0},
                    {0, 0, 0, 1}} },
@@ -157,11 +157,11 @@ namespace Rodin::Variational
       std::array<Geometry::GeometryIndexed<Math::Matrix>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
       for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
       {
-        for (auto g : Geometry::Polytope::Geometries)
+        for (auto g : Geometry::Polytope::Types)
         {
           switch (g)
           {
-            case Geometry::Polytope::Geometry::Point:
+            case Geometry::Polytope::Type::Point:
             {
               res[vdim][g] = Math::Matrix::Zero(1, vdim);
               break;
@@ -188,7 +188,7 @@ namespace Rodin::Variational
       std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
       for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
       {
-        for (auto g : Geometry::Polytope::Geometries)
+        for (auto g : Geometry::Polytope::Types)
         {
           const size_t n = Geometry::Polytope::getVertexCount(g);
           res[vdim][g].resize(n * vdim);
@@ -205,7 +205,7 @@ namespace Rodin::Variational
       std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::BasisFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
       for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
       {
-        for (auto g : Geometry::Polytope::Geometries)
+        for (auto g : Geometry::Polytope::Types)
         {
           const size_t n = Geometry::Polytope::getVertexCount(g);
           res[vdim][g].resize(n * vdim);
@@ -222,7 +222,7 @@ namespace Rodin::Variational
       std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::JacobianFunction>>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
       for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
       {
-        for (auto g : Geometry::Polytope::Geometries)
+        for (auto g : Geometry::Polytope::Types)
         {
           const size_t n = Geometry::Polytope::getVertexCount(g);
           res[vdim][g].resize(n * vdim);
@@ -242,11 +242,11 @@ namespace Rodin::Variational
   {
     switch (m_g)
     {
-      case Geometry::Polytope::Geometry::Point:
+      case Geometry::Polytope::Type::Point:
       {
         return 1;
       }
-      case Geometry::Polytope::Geometry::Segment:
+      case Geometry::Polytope::Type::Segment:
       {
         switch (m_i)
         {
@@ -265,7 +265,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Triangle:
+      case Geometry::Polytope::Type::Triangle:
       {
         switch (m_i)
         {
@@ -288,7 +288,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
       {
         switch (m_i)
         {
@@ -317,7 +317,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Tetrahedron:
+      case Geometry::Polytope::Type::Tetrahedron:
       {
         switch (m_i)
         {
@@ -354,13 +354,13 @@ namespace Rodin::Variational
   {
     switch (m_g)
     {
-      case Geometry::Polytope::Geometry::Point:
+      case Geometry::Polytope::Type::Point:
       {
         out.resize(1);
         out.coeffRef(0) = 0;
         return;
       }
-      case Geometry::Polytope::Geometry::Segment:
+      case Geometry::Polytope::Type::Segment:
       {
         out.resize(1);
         switch (m_i)
@@ -383,7 +383,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Triangle:
+      case Geometry::Polytope::Type::Triangle:
       {
         out.resize(2);
         switch (m_i)
@@ -413,7 +413,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
       {
         out.resize(2);
         switch (m_i)
@@ -450,7 +450,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Tetrahedron:
+      case Geometry::Polytope::Type::Tetrahedron:
       {
         out.resize(3);
         switch (m_i)
@@ -502,12 +502,12 @@ namespace Rodin::Variational
     assert(k < Geometry::Polytope::getVertexCount(m_g));
     switch (m_g)
     {
-      case Geometry::Polytope::Geometry::Point:
+      case Geometry::Polytope::Type::Point:
       {
         out.coeffRef(i) = 1;
         return;
       }
-      case Geometry::Polytope::Geometry::Segment:
+      case Geometry::Polytope::Type::Segment:
       {
         switch (k)
         {
@@ -529,7 +529,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Triangle:
+      case Geometry::Polytope::Type::Triangle:
       {
         switch (k)
         {
@@ -556,7 +556,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
       {
         switch (k)
         {
@@ -588,7 +588,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Tetrahedron:
+      case Geometry::Polytope::Type::Tetrahedron:
       {
         switch (k)
         {
@@ -633,11 +633,11 @@ namespace Rodin::Variational
     assert(k < Geometry::Polytope::getVertexCount(m_g));
     switch (m_g)
     {
-      case Geometry::Polytope::Geometry::Point:
+      case Geometry::Polytope::Type::Point:
       {
         return;
       }
-      case Geometry::Polytope::Geometry::Segment:
+      case Geometry::Polytope::Type::Segment:
       {
         switch (k)
         {
@@ -659,7 +659,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Triangle:
+      case Geometry::Polytope::Type::Triangle:
       {
         switch (k)
         {
@@ -686,7 +686,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
       {
         switch (k)
         {
@@ -718,7 +718,7 @@ namespace Rodin::Variational
           }
         }
       }
-      case Geometry::Polytope::Geometry::Tetrahedron:
+      case Geometry::Polytope::Type::Tetrahedron:
       {
         switch (k)
         {

@@ -34,6 +34,14 @@ namespace Rodin::Alert
       ss << "Incidence(" << d << " " << Arrow << " " << dp << ")";
       return ss.str();
     }
+
+    inline
+    NotationT Polytope(size_t d, Index index)
+    {
+      std::stringstream ss;
+      ss << "Polytope(" << d << ", " << index << ")";
+      return ss.str();
+    }
   }
 
 }
