@@ -1,5 +1,5 @@
 /**
-  @page examples-variational-elasticity Solving the elasticity equation
+  @page examples-pdes-elasticity Solving the elasticity equation
   @brief Showcases the resolution of the elasticity system
 
   @image html Elasticity.png width=410px
@@ -14,7 +14,7 @@
   of the reference material in the introduction is taken from
   @cite allaire2021shape.
 
-  @section examples-variational-elasticity-intro Introduction
+  @section examples-pdes-elasticity-intro Introduction
 
   In the elasticity setting, we are most typically interested in characterizing
   the <em> elastic displacement </em> @f$ u_\Omega : \Omega \rightarrow
@@ -66,7 +66,7 @@
   @f$, @f$ \mu @f$ are the <em> Lamé parameters </em> of the constituent
   material, satisfying @f$ \mu > 0 @f$ and @f$ \lambda + 2\mu / d > 0 @f$.
   In general, as we have said in the
-  @ref examples-variational-poisson "Poisson example", we are mainly interested
+  @ref examples-pdes-poisson "Poisson example", we are mainly interested
   in the variational formulation of this equation. That is we seek to solve the
   problem:
   @f[
@@ -86,7 +86,7 @@
   theory. In this example we will be implementing the variational formulation
   using Rodin's @ref Rodin::Variational "Variational" module.
 
-  @section examples-variational-elasticity-impl Implementation
+  @section examples-pdes-elasticity-impl Implementation
 
   For simplicity, we will disregard any body forces by taking @f$ f = 0 @f$.
   In this vein, we also note that the integral in the variational formulation
@@ -153,7 +153,7 @@
   @endcode
 
   The full source code may be found below:
-  -   @ref Variational/Elasticity.cpp "Elasticity.cpp"
+  -   @ref PDEs/Elasticity.cpp "Elasticity.cpp"
 
-  @example Variational/Elasticity.cpp @m_examplenavigation{examples-variational-elasticity,Variational/} @m_footernavigation
+  @example PDEs/Elasticity.cpp @m_examplenavigation{examples-pdes-elasticity,PDEs/} @m_footernavigation
   */
