@@ -11,11 +11,11 @@ namespace Rodin::Variational
   const Geometry::GeometryIndexed<ScalarP1Element>
   P1<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>::s_elements =
   {
-    { Geometry::Polytope::Geometry::Point, ScalarP1Element(Geometry::Polytope::Geometry::Point) },
-    { Geometry::Polytope::Geometry::Segment, ScalarP1Element(Geometry::Polytope::Geometry::Segment) },
-    { Geometry::Polytope::Geometry::Triangle, ScalarP1Element(Geometry::Polytope::Geometry::Triangle) },
-    { Geometry::Polytope::Geometry::Quadrilateral, ScalarP1Element(Geometry::Polytope::Geometry::Quadrilateral) },
-    { Geometry::Polytope::Geometry::Tetrahedron, ScalarP1Element(Geometry::Polytope::Geometry::Tetrahedron) }
+    { Geometry::Polytope::Type::Point, ScalarP1Element(Geometry::Polytope::Type::Point) },
+    { Geometry::Polytope::Type::Segment, ScalarP1Element(Geometry::Polytope::Type::Segment) },
+    { Geometry::Polytope::Type::Triangle, ScalarP1Element(Geometry::Polytope::Type::Triangle) },
+    { Geometry::Polytope::Type::Quadrilateral, ScalarP1Element(Geometry::Polytope::Type::Quadrilateral) },
+    { Geometry::Polytope::Type::Tetrahedron, ScalarP1Element(Geometry::Polytope::Type::Tetrahedron) }
   };
 
   P1<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>
@@ -60,11 +60,11 @@ namespace Rodin::Variational
       {
         res[i] =
         {
-          { Geometry::Polytope::Geometry::Point, VectorP1Element(i, Geometry::Polytope::Geometry::Point) },
-          { Geometry::Polytope::Geometry::Segment, VectorP1Element(i, Geometry::Polytope::Geometry::Segment) },
-          { Geometry::Polytope::Geometry::Triangle, VectorP1Element(i, Geometry::Polytope::Geometry::Triangle) },
-          { Geometry::Polytope::Geometry::Quadrilateral, VectorP1Element(i, Geometry::Polytope::Geometry::Quadrilateral) },
-          { Geometry::Polytope::Geometry::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Geometry::Tetrahedron) }
+          { Geometry::Polytope::Type::Point, VectorP1Element(i, Geometry::Polytope::Type::Point) },
+          { Geometry::Polytope::Type::Segment, VectorP1Element(i, Geometry::Polytope::Type::Segment) },
+          { Geometry::Polytope::Type::Triangle, VectorP1Element(i, Geometry::Polytope::Type::Triangle) },
+          { Geometry::Polytope::Type::Quadrilateral, VectorP1Element(i, Geometry::Polytope::Type::Quadrilateral) },
+          { Geometry::Polytope::Type::Tetrahedron, VectorP1Element(i, Geometry::Polytope::Type::Tetrahedron) }
         };
       }
       return res;

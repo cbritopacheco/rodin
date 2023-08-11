@@ -192,7 +192,7 @@ namespace Rodin::Geometry
 
       virtual size_t getCount(size_t dim) const = 0;
 
-      virtual size_t getCount(Polytope::Geometry g) const = 0;
+      virtual size_t getCount(Polytope::Type g) const = 0;
 
       virtual ElementIterator getElement(Index idx = 0) const = 0;
 
@@ -205,7 +205,7 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const = 0;
 
-      virtual Polytope::Geometry getGeometry(size_t dimension, Index idx) const = 0;
+      virtual Polytope::Type getGeometry(size_t dimension, Index idx) const = 0;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
@@ -346,7 +346,7 @@ namespace Rodin::Geometry
           /**
            * @brief Adds polytope defined by the given vertices.
            */
-          Builder& polytope(Polytope::Geometry t, std::initializer_list<Index> vs)
+          Builder& polytope(Polytope::Type t, std::initializer_list<Index> vs)
           {
             return polytope(t, IndexArray({ vs }));
           }
@@ -354,12 +354,12 @@ namespace Rodin::Geometry
           /**
            * @brief Adds polytope defined by the given vertices.
            */
-          Builder& polytope(Polytope::Geometry t, const IndexArray& vs);
+          Builder& polytope(Polytope::Type t, const IndexArray& vs);
 
           /**
            * @brief Adds polytope defined by the given vertices.
            */
-          Builder& polytope(Polytope::Geometry t, IndexArray&& vs);
+          Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
           /**
            * @brief Finalizes construction of the Mesh<Context::Serial> object.
@@ -390,7 +390,7 @@ namespace Rodin::Geometry
       /**
        * @brief Generates a uniform grid for a given geometry.
        */
-      static Mesh UniformGrid(Polytope::Geometry g, size_t h, size_t w);
+      static Mesh UniformGrid(Polytope::Type g, size_t h, size_t w);
 
       /**
       * @brief Constructs an empty mesh with no elements.
@@ -455,7 +455,7 @@ namespace Rodin::Geometry
         for (auto it = getVertex(); !it.end(); ++it)
         {
           const Geometry::Point p(*it, it->getTransformation(),
-              Polytope::getVertices(Polytope::Geometry::Point).col(0), it->getCoordinates());
+              Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
           m_vertices.col(it->getIndex()) += u(p);
         }
         return *this;
@@ -578,7 +578,7 @@ namespace Rodin::Geometry
 
       virtual size_t getCount(size_t dim) const override;
 
-      virtual size_t getCount(Polytope::Geometry g) const override;
+      virtual size_t getCount(Polytope::Type g) const override;
 
       virtual FaceIterator getBoundary() const override;
 
@@ -608,7 +608,7 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
 
-      virtual Polytope::Geometry getGeometry(size_t dimension, Index idx) const override;
+      virtual Polytope::Type getGeometry(size_t dimension, Index idx) const override;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 

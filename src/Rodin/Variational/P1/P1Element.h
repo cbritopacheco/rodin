@@ -47,7 +47,7 @@ namespace Rodin::Variational
   template <>
   class P1Element<Scalar> final : public FiniteElementBase<P1Element<Scalar>>
   {
-    using G = Geometry::Polytope::Geometry;
+    using G = Geometry::Polytope::Type;
 
     public:
       /// Parent class
@@ -63,7 +63,7 @@ namespace Rodin::Variational
       {
         public:
           constexpr
-          LinearForm(size_t i, Geometry::Polytope::Geometry g)
+          LinearForm(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
@@ -91,7 +91,7 @@ namespace Rodin::Variational
 
         private:
           size_t m_i;
-          Geometry::Polytope::Geometry m_g;
+          Geometry::Polytope::Type m_g;
       };
 
       /**
@@ -102,7 +102,7 @@ namespace Rodin::Variational
         public:
           using ReturnType = Scalar;
 
-          BasisFunction(size_t i, Geometry::Polytope::Geometry g)
+          BasisFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
@@ -118,7 +118,7 @@ namespace Rodin::Variational
 
         private:
           size_t m_i;
-          Geometry::Polytope::Geometry m_g;
+          Geometry::Polytope::Type m_g;
       };
 
       /**
@@ -128,7 +128,7 @@ namespace Rodin::Variational
       {
         public:
           constexpr
-          GradientFunction(size_t i, Geometry::Polytope::Geometry g)
+          GradientFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
@@ -154,14 +154,14 @@ namespace Rodin::Variational
 
         private:
           size_t m_i;
-          Geometry::Polytope::Geometry m_g;
+          Geometry::Polytope::Type m_g;
       };
 
       constexpr
       P1Element() = default;
 
       constexpr
-      P1Element(Geometry::Polytope::Geometry geometry)
+      P1Element(Geometry::Polytope::Type geometry)
         : Parent(geometry)
       {}
 
@@ -244,7 +244,7 @@ namespace Rodin::Variational
   template <>
   class P1Element<Math::Vector> final : public FiniteElementBase<P1Element<Math::Vector>>
   {
-    using G = Geometry::Polytope::Geometry;
+    using G = Geometry::Polytope::Type;
 
     public:
       /// Parent class
@@ -259,7 +259,7 @@ namespace Rodin::Variational
           LinearForm() = default;
 
           constexpr
-          LinearForm(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
+          LinearForm(size_t vdim, size_t i, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
@@ -288,7 +288,7 @@ namespace Rodin::Variational
         private:
           size_t m_vdim;
           size_t m_i;
-          Geometry::Polytope::Geometry m_g;
+          Geometry::Polytope::Type m_g;
       };
 
       class BasisFunction
@@ -297,7 +297,7 @@ namespace Rodin::Variational
           BasisFunction() = default;
 
           constexpr
-          BasisFunction(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
+          BasisFunction(size_t vdim, size_t i, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
@@ -327,7 +327,7 @@ namespace Rodin::Variational
         private:
           size_t m_vdim;
           size_t m_i;
-          Geometry::Polytope::Geometry m_g;
+          Geometry::Polytope::Type m_g;
       };
 
       class JacobianFunction
@@ -336,7 +336,7 @@ namespace Rodin::Variational
           JacobianFunction() = default;
 
           constexpr
-          JacobianFunction(size_t vdim, size_t i, Geometry::Polytope::Geometry g)
+          JacobianFunction(size_t vdim, size_t i, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_i(i), m_g(g)
           {
             assert(m_vdim > 0);
@@ -366,12 +366,12 @@ namespace Rodin::Variational
         private:
           size_t m_vdim;
           size_t m_i;
-          Geometry::Polytope::Geometry m_g;
+          Geometry::Polytope::Type m_g;
       };
 
       P1Element() = default;
 
-      P1Element(size_t vdim, Geometry::Polytope::Geometry geometry)
+      P1Element(size_t vdim, Geometry::Polytope::Type geometry)
         : Parent(geometry),
           m_vdim(vdim)
       {}

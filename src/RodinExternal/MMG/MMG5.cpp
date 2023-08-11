@@ -334,7 +334,7 @@ namespace Rodin::External::MMG
       for (auto it = src.getVertex(); !it.end(); ++it)
       {
         const auto& vertex = *it;
-        assert(vertex.getGeometry() == Geometry::Polytope::Geometry::Point);
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
         const Index i = vertex.getIndex() + 1;
         const auto& coords = vertex.getCoordinates();
         std::copy(coords.begin(), coords.end(), res->point[i].c);
@@ -345,7 +345,7 @@ namespace Rodin::External::MMG
       for (auto it = src.getFace(); !it.end(); ++it)
       {
         const auto& face = *it;
-        assert(face.getGeometry() == Geometry::Polytope::Geometry::Segment);
+        assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
         const Index i = face.getIndex() + 1;
         const auto& vertices = face.getVertices();
         res->edge[i].a = vertices[0] + 1;
@@ -358,7 +358,7 @@ namespace Rodin::External::MMG
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;
-        assert(cell.getGeometry() == Geometry::Polytope::Geometry::Triangle);
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
         MMG5_pTria pt = &res->tria[i];
         const auto& vertices = cell.getVertices();
         pt->v[0] = vertices[0] + 1;
@@ -380,7 +380,7 @@ namespace Rodin::External::MMG
       for (auto it = src.getVertex(); !it.end(); ++it)
       {
         const auto& vertex = *it;
-        assert(vertex.getGeometry() == Geometry::Polytope::Geometry::Point);
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
         const Index i = vertex.getIndex() + 1;
         const auto& coords = vertex.getCoordinates();
         std::copy(coords.begin(), coords.end(), res->point[i].c);
@@ -392,7 +392,7 @@ namespace Rodin::External::MMG
       for (auto it = src.getFace(); !it.end(); ++it)
       {
         const auto& face = *it;
-        assert(face.getGeometry() == Geometry::Polytope::Geometry::Segment);
+        assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
         const Index i = face.getIndex() + 1;
         const auto& vertices = face.getVertices();
         res->edge[i].a = vertices[0] + 1;
@@ -406,7 +406,7 @@ namespace Rodin::External::MMG
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;
-        assert(cell.getGeometry() == Geometry::Polytope::Geometry::Triangle);
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
         MMG5_pTria pt = &res->tria[i];
         const auto& vertices = cell.getVertices();
         pt->v[0] = vertices[0] + 1;
@@ -443,7 +443,7 @@ namespace Rodin::External::MMG
       for (auto it = src.getVertex(); !it.end(); ++it)
       {
         const auto& vertex = *it;
-        assert(vertex.getGeometry() == Geometry::Polytope::Geometry::Point);
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
         const Index i = vertex.getIndex() + 1;
         const auto& coords = vertex.getCoordinates();
         std::copy(coords.begin(), coords.end(), res->point[i].c);
@@ -454,7 +454,7 @@ namespace Rodin::External::MMG
       for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
       {
         const auto& segment = *it;
-        assert(segment.getGeometry() == Geometry::Polytope::Geometry::Segment);
+        assert(segment.getGeometry() == Geometry::Polytope::Type::Segment);
         const Index i = segment.getIndex() + 1;
         const auto& vertices = segment.getVertices();
         res->edge[i].a = vertices[0] + 1;
@@ -467,7 +467,7 @@ namespace Rodin::External::MMG
       {
         const auto& face = *it;
         const Index i = face.getIndex() + 1;
-        assert(face.getGeometry() == Geometry::Polytope::Geometry::Triangle);
+        assert(face.getGeometry() == Geometry::Polytope::Type::Triangle);
         MMG5_pTria pt = &res->tria[i];
         const auto& vertices = face.getVertices();
         pt->v[0] = vertices[0] + 1;
@@ -481,7 +481,7 @@ namespace Rodin::External::MMG
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;
-        assert(cell.getGeometry() == Geometry::Polytope::Geometry::Tetrahedron);
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Tetrahedron);
         MMG5_pTetra pt = &res->tetra[i];
         const auto& vertices = cell.getVertices();
         pt->v[0] = vertices[0] + 1;
@@ -576,7 +576,7 @@ namespace Rodin::External::MMG
     {
       assert(src->edge[i].a >= 1);
       assert(src->edge[i].b >= 1);
-      build.polytope(Geometry::Polytope::Geometry::Segment,
+      build.polytope(Geometry::Polytope::Type::Segment,
           { static_cast<size_t>(src->edge[i].a - 1),
             static_cast<size_t>(src->edge[i].b - 1) });
       build.attribute({ 1, i - 1 }, src->edge[i].ref );
@@ -590,7 +590,7 @@ namespace Rodin::External::MMG
       assert(src->tria[i].v[0] >= 1);
       assert(src->tria[i].v[1] >= 1);
       assert(src->tria[i].v[2] >= 1);
-      build.polytope(Geometry::Polytope::Geometry::Triangle,
+      build.polytope(Geometry::Polytope::Type::Triangle,
           { static_cast<size_t>(src->tria[i].v[0] - 1),
             static_cast<size_t>(src->tria[i].v[1] - 1),
             static_cast<size_t>(src->tria[i].v[2] - 1) });
@@ -604,7 +604,7 @@ namespace Rodin::External::MMG
       assert(src->tetra[i].v[1] >= 1);
       assert(src->tetra[i].v[2] >= 1);
       assert(src->tetra[i].v[3] >= 1);
-      build.polytope(Geometry::Polytope::Geometry::Tetrahedron,
+      build.polytope(Geometry::Polytope::Type::Tetrahedron,
           { static_cast<size_t>(src->tetra[i].v[0] - 1),
             static_cast<size_t>(src->tetra[i].v[1] - 1),
             static_cast<size_t>(src->tetra[i].v[2] - 1),

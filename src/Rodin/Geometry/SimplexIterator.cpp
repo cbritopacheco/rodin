@@ -29,18 +29,18 @@ namespace Rodin::Geometry
 
   Polytope& PolytopeIterator::operator*() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_polytope || m_dirty)
+      m_polytope.reset(generate());
     m_dirty = false;
-    return *m_simplex;
+    return *m_polytope;
   }
 
   Polytope* PolytopeIterator::operator->() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_polytope || m_dirty)
+      m_polytope.reset(generate());
     m_dirty = false;
-    return m_simplex.get();
+    return m_polytope.get();
   }
 
   Polytope* PolytopeIterator::generate() const
@@ -72,18 +72,18 @@ namespace Rodin::Geometry
 
   Element& ElementIterator::operator*() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_polytope || m_dirty)
+      m_polytope.reset(generate());
     m_dirty = false;
-    return *m_simplex;
+    return *m_polytope;
   }
 
   Element* ElementIterator::operator->() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_polytope || m_dirty)
+      m_polytope.reset(generate());
     m_dirty = false;
-    return m_simplex.get();
+    return m_polytope.get();
   }
 
   size_t ElementIterator::getDimension() const
@@ -119,18 +119,18 @@ namespace Rodin::Geometry
 
   Face& FaceIterator::operator*() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_polytope || m_dirty)
+      m_polytope.reset(generate());
     m_dirty = false;
-    return *m_simplex;
+    return *m_polytope;
   }
 
   Face* FaceIterator::operator->() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_polytope || m_dirty)
+      m_polytope.reset(generate());
     m_dirty = false;
-    return m_simplex.get();
+    return m_polytope.get();
   }
 
   size_t FaceIterator::getDimension() const
@@ -166,18 +166,18 @@ namespace Rodin::Geometry
 
   Vertex& VertexIterator::operator*() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_vertex || m_dirty)
+      m_vertex.reset(generate());
     m_dirty = false;
-    return *m_simplex;
+    return *m_vertex;
   }
 
   Vertex* VertexIterator::operator->() const noexcept
   {
-    if (!m_simplex || m_dirty)
-      m_simplex.reset(generate());
+    if (!m_vertex || m_dirty)
+      m_vertex.reset(generate());
     m_dirty = false;
-    return m_simplex.get();
+    return m_vertex.get();
   }
 
   constexpr size_t VertexIterator::getDimension() const

@@ -119,5 +119,5 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_StarSquare)
     EXPECT_EQ(mesh.getAttribute(d, i), 1);
 
   for (size_t i = 0; i < ecount; i++)
-    EXPECT_EQ(mesh.getGeometry(d, i), Polytope::Geometry::Quadrilateral);
+    EXPECT_EQ(mesh.getGeometry(d, i), Polytope::Type::Quadrilateral);
 }

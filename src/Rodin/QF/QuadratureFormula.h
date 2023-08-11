@@ -16,13 +16,13 @@ namespace Rodin::QF
   {
     public:
       constexpr
-      QuadratureFormulaBase(Geometry::Polytope::Geometry g)
+      QuadratureFormulaBase(Geometry::Polytope::Type g)
         : m_geometry(g)
       {}
 
       inline
       constexpr
-      Geometry::Polytope::Geometry getGeometry() const
+      Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
       }
@@ -41,7 +41,7 @@ namespace Rodin::QF
       virtual const Math::SpatialVector& getPoint(size_t i) const = 0;
 
     private:
-      Geometry::Polytope::Geometry m_geometry;
+      Geometry::Polytope::Type m_geometry;
   };
 }
 

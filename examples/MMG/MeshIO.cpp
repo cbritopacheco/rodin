@@ -18,7 +18,7 @@ int main(int, char**)
 {
   const size_t n = 16;
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.getConnectivity().compute(1, 2);
 
   mesh.setCorner(0);

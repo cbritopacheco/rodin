@@ -134,7 +134,7 @@ namespace Rodin::IO
                                  << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Geometry::Segment, std::move(data->vertices));
+            m_build.polytope(Geometry::Polytope::Type::Segment, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
               m_build.attribute({ 1, i }, data->attribute);
           }
@@ -155,7 +155,7 @@ namespace Rodin::IO
                                  << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Geometry::Triangle, std::move(data->vertices));
+            m_build.polytope(Geometry::Polytope::Type::Triangle, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
               m_build.attribute({ 2, i }, data->attribute);
           }
@@ -176,7 +176,7 @@ namespace Rodin::IO
                                  << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Geometry::Tetrahedron, std::move(data->vertices));
+            m_build.polytope(Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
               m_build.attribute({ 3, i }, data->attribute);
           }
@@ -213,11 +213,11 @@ namespace Rodin::IO
   {
     const auto& mesh = getObject();
 
-    for (auto g : Geometry::Polytope::Geometries)
+    for (auto g : Geometry::Polytope::Types)
     {
       switch (g)
       {
-        case Geometry::Polytope::Geometry::Point:
+        case Geometry::Polytope::Type::Point:
         {
           os << MEDIT::Keyword::Vertices << '\n' << mesh.getVertexCount() << '\n';
           for (auto it = mesh.getVertex(); !it.end(); ++it)
@@ -234,27 +234,27 @@ namespace Rodin::IO
         {
           switch (g)
           {
-            case Geometry::Polytope::Geometry::Point:
+            case Geometry::Polytope::Type::Point:
             {
               assert(false);
               break;
             }
-            case Geometry::Polytope::Geometry::Segment:
+            case Geometry::Polytope::Type::Segment:
             {
               os << MEDIT::Keyword::Edges << '\n';
               break;
             }
-            case Geometry::Polytope::Geometry::Triangle:
+            case Geometry::Polytope::Type::Triangle:
             {
               os << MEDIT::Keyword::Triangles << '\n';
               break;
             }
-            case Geometry::Polytope::Geometry::Quadrilateral:
+            case Geometry::Polytope::Type::Quadrilateral:
             {
               os << MEDIT::Keyword::Quadrilaterals << '\n';
               break;
             }
-            case Geometry::Polytope::Geometry::Tetrahedron:
+            case Geometry::Polytope::Type::Tetrahedron:
             {
               os << MEDIT::Keyword::Tetrahedra << '\n';
               break;

@@ -95,6 +95,10 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      Point inclusion(const Point& p);
+
+      Point restriction(const Point& p);
+
       bool isSubMesh() const override
       {
         return true;
@@ -106,8 +110,8 @@ namespace Rodin::Geometry
       const Mesh<Context::Serial>& getParent() const;
 
       /**
-       * @brief Gets the map of simplex indices from the submesh to the parent
-       * mesh.
+       * @brief Gets the map of polytope indices from the SubMesh to the parent
+       * Mesh.
        */
       const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const
       {

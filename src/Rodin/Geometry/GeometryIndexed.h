@@ -23,10 +23,10 @@ namespace Rodin::Geometry
       }
 
       constexpr
-      GeometryIndexed(std::initializer_list<std::pair<Polytope::Geometry, T>> l)
+      GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> l)
       {
         // All geometries must be handled exactly once
-        assert(l.size() == Polytope::Geometries.size());
+        assert(l.size() == Polytope::Types.size());
 
         for (const auto& v : l)
           m_map[static_cast<size_t>(v.first)] = v.second;
@@ -46,7 +46,7 @@ namespace Rodin::Geometry
 
       inline
       constexpr
-      T& operator[](Polytope::Geometry geom)
+      T& operator[](Polytope::Type geom)
       {
         const size_t g = static_cast<size_t>(geom);
         assert(g < m_map.size());
@@ -55,7 +55,7 @@ namespace Rodin::Geometry
 
       inline
       constexpr
-      const T& operator[](Polytope::Geometry geom) const
+      const T& operator[](Polytope::Type geom) const
       {
         const size_t g = static_cast<size_t>(geom);
         assert(g < m_map.size());
@@ -66,11 +66,11 @@ namespace Rodin::Geometry
       constexpr
       size_t size() const
       {
-        return Polytope::Geometries.size();
+        return Polytope::Types.size();
       }
 
     private:
-      std::array<T, Polytope::Geometries.size()> m_map;
+      std::array<T, Polytope::Types.size()> m_map;
   };
 }
 

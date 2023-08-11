@@ -22,7 +22,7 @@ int main(int, char**)
 
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Geometry::Triangle, n, n);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.getConnectivity().compute(1, 2);
   mesh.scale(1.0 / (n - 1));
   mesh.scale(2 * M_PI);

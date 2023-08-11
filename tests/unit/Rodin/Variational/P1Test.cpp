@@ -23,8 +23,8 @@ TEST(Rodin_Variational_Scalar_P1, SanityTest_2D_Square_Build)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   EXPECT_EQ(mesh.getDimension(), mdim);
@@ -36,8 +36,8 @@ TEST(Rodin_Variational_Scalar_P1, SanityTest_2D_Square_Build)
   EXPECT_EQ(fes.getSize(), mesh.getVertexCount());
 
   EXPECT_EQ(fes.getSize(), 4);
-  EXPECT_EQ(fes.getFiniteElement(mdim, 0).getGeometry(), Polytope::Geometry::Triangle);
-  EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Geometry::Triangle);
+  EXPECT_EQ(fes.getFiniteElement(mdim, 0).getGeometry(), Polytope::Type::Triangle);
+  EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Type::Triangle);
 }
 
 TEST(Rodin_Variational_Scalar_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
@@ -52,8 +52,8 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   P1 fes(mesh);
@@ -74,7 +74,7 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction_FuzzyTest, TriangularUniformGrid16
 {
   constexpr size_t mdim = 2;
 
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
@@ -91,7 +91,7 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_TriangularUniformGrid16
 {
   constexpr size_t mdim = 2;
 
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 16, 16);
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
@@ -116,8 +116,8 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   P1 fes(mesh);
@@ -241,8 +241,8 @@ TEST(Rodin_Variational_Vector_P1, SanityTest_2D_Square_Build)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   EXPECT_EQ(mesh.getDimension(), mdim);
@@ -252,8 +252,8 @@ TEST(Rodin_Variational_Vector_P1, SanityTest_2D_Square_Build)
 
   EXPECT_EQ(fes.getVectorDimension(), vdim);
   EXPECT_EQ(fes.getSize(), vdim * mesh.getVertexCount());
-  EXPECT_EQ(fes.getFiniteElement(mdim, 0).getGeometry(), Polytope::Geometry::Triangle);
-  EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Geometry::Triangle);
+  EXPECT_EQ(fes.getFiniteElement(mdim, 0).getGeometry(), Polytope::Type::Triangle);
+  EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Type::Triangle);
 }
 
 TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
@@ -268,8 +268,8 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
     .vertex({1, 0})
     .vertex({0, 1})
     .vertex({1, 1})
-    .polytope(Polytope::Geometry::Triangle, {0, 1, 2})
-    .polytope(Polytope::Geometry::Triangle, {1, 3, 2})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
     .finalize();
 
   P1 fes(mesh, mdim);
@@ -385,7 +385,7 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
 
 TEST(Rodin_Variational_Scalar_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 4, 4);
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
   P1 fes(mesh);
   TrialFunction u(fes);
 
@@ -394,7 +394,7 @@ TEST(Rodin_Variational_Scalar_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
 
 TEST(Rodin_Variational_Scalar_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 4, 4);
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
   P1 fes(mesh);
   TrialFunction v(fes);
 
@@ -404,7 +404,7 @@ TEST(Rodin_Variational_Scalar_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
 
 TEST(Rodin_Variational_Scalar_P1_LinearForm, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Geometry::Triangle, 4, 4);
+  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
   P1 fes(mesh);
   TestFunction v(fes);
   LinearForm lf(v);

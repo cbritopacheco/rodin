@@ -17,7 +17,7 @@ TEST(Rodin_Geometry_IsoparametricTransformation, SanityTest_ReferenceTriangle)
   pm << 0, 1, 0,
         0, 0, 1;
 
-  Variational::ScalarP1Element fe(Polytope::Geometry::Triangle);
+  Variational::ScalarP1Element fe(Polytope::Type::Triangle);
   IsoparametricTransformation trans(pm, fe);
 
   {
@@ -49,7 +49,7 @@ TEST(Rodin_Geometry_IsoparametricTransformation, SanityTest_Triangle_1)
   pm << -1, 1, 0,
         -1, 1, 1;
 
-  Variational::ScalarP1Element fe(Polytope::Geometry::Triangle);
+  Variational::ScalarP1Element fe(Polytope::Type::Triangle);
   IsoparametricTransformation trans(pm, fe);
 
   {
