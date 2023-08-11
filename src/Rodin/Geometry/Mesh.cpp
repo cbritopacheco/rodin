@@ -311,7 +311,7 @@ namespace Rodin::Geometry
     {
       Alert::MemberFunctionException(*this, __func__)
         << Alert::Notation::Incidence(D - 1, 0)
-        << " is required to use this function."
+        << " has not been computed and is required to use this function."
         << Alert::Raise;
     }
 
@@ -346,7 +346,7 @@ namespace Rodin::Geometry
     {
       Alert::MemberFunctionException(*this, __func__)
         << Alert::Notation::Incidence(D - 1, D)
-        << " is required to use this function."
+        << " has not been computed and is required to use this function."
         << Alert::Raise;
     }
     const auto& incidence = conn.getIncidence({D - 1, D}, faceIdx);
