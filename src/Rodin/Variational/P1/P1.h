@@ -20,6 +20,27 @@
 #include "ForwardDecls.h"
 #include "P1Element.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class ContextType, class MeshType>
+  struct Traits<Variational::P1<Scalar, ContextType, MeshType>>
+  {
+    using RangeType = Scalar;
+    using Context = ContextType;
+    using Mesh = MeshType;
+    using Element = Variational::ScalarP1Element;
+  };
+
+  template <class ContextType, class MeshType>
+  struct Traits<Variational::P1<Math::Vector, ContextType, MeshType>>
+  {
+    using RangeType = Math::Vector;
+    using Context = ContextType;
+    using Mesh = MeshType;
+    using Element = Variational::VectorP1Element;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**

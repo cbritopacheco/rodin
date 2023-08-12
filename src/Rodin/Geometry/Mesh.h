@@ -39,7 +39,31 @@ namespace Rodin::Geometry
     public:
       virtual ~MeshBase() = default;
 
+      inline
+      constexpr
+      bool operator==(const MeshBase& other) const
+      {
+        return this == &other;
+      }
+
+      inline
+      constexpr
+      bool operator!=(const MeshBase& other) const
+      {
+        return this != &other;
+      }
+
       virtual MeshBase& scale(Scalar c) = 0;
+
+      virtual MeshBase& load(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
+
+      virtual void save(
+        const boost::filesystem::path& filename,
+        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
+
+      virtual void flush() = 0;
 
       /**
        * @brief Indicates whether the mesh is a surface or not.
@@ -51,6 +75,44 @@ namespace Rodin::Geometry
        * @returns True if mesh is a surface, false otherwise.
        */
       bool isSurface() const;
+
+      /**
+       * @brief Indicates whether the mesh is a submesh or not.
+       * @returns True if mesh is a submesh, false otherwise.
+       *
+       * A Mesh which is also a SubMesh may be casted into down to access
+       * the SubMesh functionality. For example:
+       * @code{.cpp}
+       * if (mesh.isSubMesh())
+       * {
+       *   // Cast is well defined
+       *   auto& submesh = static_cast<SubMesh&>(mesh);
+       * }
+       * @endcode
+       *
+       */
+      virtual bool isSubMesh() const = 0;
+
+      virtual bool isInterface(Index faceIdx) const = 0;
+
+      /**
+       * @brief Determines whether a face of the mesh is on the boundary.
+       */
+      virtual bool isBoundary(Index faceIdx) const = 0;
+
+      /**
+       * @brief Gets the dimension of the elements.
+       * @returns Dimension of the elements.
+       * @see getSpaceDimension() const
+       */
+      virtual size_t getDimension() const = 0;
+
+      /**
+       * @brief Gets the dimension of the ambient space
+       * @returns Dimension of the space which the mesh is embedded in
+       * @see getDimension() const
+       */
+      virtual size_t getSpaceDimension() const = 0;
 
       /**
        * @brief Gets the number of vertices in the mesh.
@@ -130,62 +192,6 @@ namespace Rodin::Geometry
        */
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const = 0;
 
-      bool operator==(const MeshBase& other) const
-      {
-        return this == &other;
-      }
-
-      bool operator!=(const MeshBase& other) const
-      {
-        return this != &other;
-      }
-
-      /**
-       * @brief Gets the dimension of the elements.
-       * @returns Dimension of the elements.
-       * @see getSpaceDimension() const
-       */
-      virtual size_t getDimension() const = 0;
-
-      /**
-       * @brief Gets the dimension of the ambient space
-       * @returns Dimension of the space which the mesh is embedded in
-       * @see getDimension() const
-       */
-      virtual size_t getSpaceDimension() const = 0;
-
-      virtual MeshBase& load(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
-
-      virtual void save(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
-
-      /**
-       * @brief Indicates whether the mesh is a submesh or not.
-       * @returns True if mesh is a submesh, false otherwise.
-       *
-       * A Mesh which is also a SubMesh may be casted into down to access
-       * the SubMesh functionality. For example:
-       * @code{.cpp}
-       * if (mesh.isSubMesh())
-       * {
-       *   // Cast is well defined
-       *   auto& submesh = static_cast<SubMesh&>(mesh);
-       * }
-       * @endcode
-       *
-       */
-      virtual bool isSubMesh() const = 0;
-
-      virtual bool isInterface(Index faceIdx) const = 0;
-
-      /**
-       * @brief Determines whether a face of the mesh is on the boundary.
-       */
-      virtual bool isBoundary(Index faceIdx) const = 0;
-
       virtual FaceIterator getBoundary() const = 0;
 
       virtual FaceIterator getInterface() const = 0;
@@ -220,7 +226,9 @@ namespace Rodin::Geometry
 
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
 
-      virtual void flush() = 0;
+      virtual SubMeshBase& asSubMesh() = 0;
+
+      virtual const SubMeshBase& asSubMesh() const = 0;
   };
 
   /// Index containing the indices of boundary elements.
@@ -551,6 +559,10 @@ namespace Rodin::Geometry
       * not in the given set.
       */
       virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
+
+      SubMeshBase& asSubMesh() override;
+
+      const SubMeshBase& asSubMesh() const override;
 
       /**
       * @brief Loads a mesh from file in the given format.

@@ -16,7 +16,7 @@ using namespace Rodin::Math;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static constexpr Scalar hmax = 0.005; // Maximal size of a triangle's edge
+static constexpr Scalar hmax = 0.01; // Maximal size of a triangle's edge
 static constexpr Scalar hmin = 0.1 * hmax;
 
 static constexpr Attribute dQ = 2; // Attribute of box boundary
@@ -64,20 +64,20 @@ void run(int i, const std::vector<Data>& grid);
 int main(int, char**)
 {
   // Define evaluation grid
-  Math::Vector m_r = Math::Vector::LinSpaced(51, 0, 50);
-  Math::Vector epsilon_r = Math::Vector::LinSpaced(100, hmax, 0.2);
+  Math::Vector m_r = Math::Vector::LinSpaced(300, 0, 100);
+  Math::Vector epsilon_r = Math::Vector::LinSpaced(50, hmax, 0.2);
   // Math::Vector waveNumber_r = Math::Vector::LinSpaced(1.0 / hmax, 1, 1.0 / hmax);
   // Math::Vector conductivity_r{{ 1e-12, 0.5, 1.0, 2.0, 1e12 }};
-  Math::Vector waveNumber_r = Math::Vector::LinSpaced(81, 0, 80);
-  // Math::Vector waveNumber_r{{ 0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 90 }};
+  // Math::Vector waveNumber_r = Math::Vector::LinSpaced(150, 0, 74);
+  Math::Vector waveNumber_r{{ 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 20 }};
   Math::Vector conductivity_r{{ 2.0 }};
   Math::Vector angle_r{{ M_PI / 4 }};
 
   std::vector<Data> grid;
   grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
-  for (const Scalar m : m_r)
-    for (const Scalar epsilon : epsilon_r)
-      for (const Scalar waveNumber : waveNumber_r)
+  for (const Scalar waveNumber : waveNumber_r)
+    for (const Scalar m : m_r)
+      for (const Scalar epsilon : epsilon_r)
         for (const Scalar conductivity : conductivity_r)
           for (const Scalar angle : angle_r)
             grid.push_back({ m, epsilon, waveNumber, conductivity, angle });
@@ -167,7 +167,11 @@ void run(int id, const std::vector<Data>& grid)
     P1 vh(mesh);
 
     // Define oscillatory screen
-    ScalarFunction h = 2;
+    ScalarFunction h =
+      [&](const Point& p)
+      {
+        return 2 + sin(2 * pi * data.m * p.x()) * sin(2 * pi * data.m * p.y());
+      };
 
     // Define conductivity
     ScalarFunction gamma = 1;

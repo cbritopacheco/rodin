@@ -4,8 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <boost/current_function.hpp>
-#include "Rodin/Alert.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -30,45 +29,172 @@ namespace Rodin::Geometry
   }
 
   // ---- Mesh<Context::Serial> ----------------------------------------------
-
-  Mesh<Context::Serial> Mesh<Context::Serial>::UniformGrid(Polytope::Type g, size_t h, size_t w)
+  Mesh<Context::Serial>&
+  Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
-    Builder build;
-    const size_t dim = Polytope::getGeometryDimension(g);
-    build.initialize(dim).nodes(h * w);
-    switch (g)
+    std::ifstream input(filename.c_str());
+    if (!input)
     {
-      case Polytope::Type::Point:
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to open " << filename << " for reading."
+        << Alert::Raise;
+    }
+    switch (fmt)
+    {
+      case IO::FileFormat::MFEM:
       {
-        return build.nodes(1).vertex({0}).finalize();
+        IO::MeshLoader<IO::FileFormat::MFEM, Context::Serial> loader(*this);
+        loader.load(input);
+        break;
       }
-      case Polytope::Type::Triangle:
+      case IO::FileFormat::MEDIT:
       {
-        assert(h * w >= 4);
-        for (size_t i = 0; i < h; i++)
-        {
-          for (size_t j = 0; j < w; j++)
-            build.vertex({ static_cast<Scalar>(j), static_cast<Scalar>(i) });
-        }
-
-        build.reserve(dim, 2 * (h - 1) * (w - 1));
-        for (size_t i = 0; i < h - 1; i++)
-        {
-          for (size_t j = 0; j < w - 1; j++)
-          {
-            build.polytope(g, { i * w + j, i * w + j + 1, (i + 1) * w + j })
-                 .polytope(g, { i * w + j + 1, (i + 1) * w + j + 1, (i + 1) * w + j });
-          }
-        }
-        return build.finalize();
+        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
+        loader.load(input);
+        break;
       }
       default:
       {
-        assert(false);
-        return build.nodes(0).finalize();
+        Alert::MemberFunctionException(*this, __func__)
+          << "Loading from \"" << fmt << "\" format unsupported."
+          << Alert::Raise;
+        break;
       }
-    };
+    }
+    return *this;
   }
+
+  void Mesh<Context::Serial>::save(
+      const boost::filesystem::path& filename,
+      IO::FileFormat fmt, size_t precision) const
+  {
+    std::ofstream ofs(filename.c_str());
+    if (!ofs)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to open " << filename << " for writing."
+        << Alert::Raise;
+    }
+    ofs.precision(precision);
+    switch (fmt)
+    {
+      case IO::FileFormat::MFEM:
+      {
+        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
+        printer.print(ofs);
+        break;
+      }
+      case IO::FileFormat::MEDIT:
+      {
+        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(*this);
+        printer.print(ofs);
+        break;
+      }
+      default:
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Saving to \"" << fmt << "\" format unsupported."
+          << Alert::Raise;
+      }
+    }
+    ofs.close();
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr) const
+  {
+    return keep(FlatSet<Attribute>{attr});
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const FlatSet<Attribute>& attrs) const
+  {
+    const size_t D = getDimension();
+    SubMesh<Context::Serial>::Builder build;
+    build.initialize(*this);
+    for (Index i = 0; i < getElementCount(); i++)
+    {
+      if (attrs.count(getAttribute(D, i)))
+      {
+        build.include(D, i);
+        for (size_t d = 1; d <= D - 1; d++)
+        {
+          const auto& inc = getConnectivity().getIncidence(D, d);
+          if (inc.size() > 0)
+            build.include(d, inc.at(i));
+        }
+      }
+    }
+    return build.finalize();
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
+  {
+    const size_t D = getDimension();
+    SubMesh<Context::Serial>::Builder build;
+    build.initialize(*this);
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      const Index i = it->getIndex();
+      build.include(D - 1, i);
+      for (size_t d = 1; d <= D - 2; d++)
+      {
+        const auto& inc = getConnectivity().getIncidence(D - 1, d);
+        if (inc.size() > 0)
+          build.include(d, inc.at(i));
+      }
+    }
+    return build.finalize();
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr) const
+  {
+    return trim(FlatSet<Attribute>{attr});
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const FlatSet<Attribute>& attrs) const
+  {
+    const size_t D = getDimension();
+    SubMesh<Context::Serial>::Builder build;
+    build.initialize(*this);
+    for (Index i = 0; i < getElementCount(); i++)
+    {
+      if (!attrs.count(getAttribute(D, i)))
+      {
+        build.include(D, i);
+        for (size_t d = 1; d <= D - 1; d++)
+        {
+          const auto& inc = getConnectivity().getIncidence(D, d);
+          if (inc.size() > 0)
+            build.include(d, inc.at(i));
+        }
+      }
+    }
+    return build.finalize();
+  }
+
+  Mesh<Context::Serial>& Mesh<Context::Serial>::displace(const
+      Variational::GridFunction<Variational::P1<Math::Vector,
+      Context::Serial, Geometry::Mesh<Context::Serial>>>& u)
+  {
+    assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
+    m_vertices += u.getData();
+    flush();
+    return *this;
+  }
+
+  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
+  {
+    m_vertices *= c;
+    flush();
+    return *this;
+  }
+
+#ifdef RODIN_USE_MPI
+  Mesh<Context::MPI>
+  Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
+  {
+    return Mesh<Context::MPI>(comm, *this);
+  }
+#endif
 
   Eigen::Map<const Math::SpatialVector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
   {
@@ -135,49 +261,6 @@ namespace Rodin::Geometry
         return *p->second;
       }
     }
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
-  {
-    m_vertices *= c;
-    flush();
-    return *this;
-  }
-
-  void Mesh<Context::Serial>::save(
-      const boost::filesystem::path& filename,
-      IO::FileFormat fmt, size_t precision) const
-  {
-    std::ofstream ofs(filename.c_str());
-    if (!ofs)
-    {
-      Alert::Exception()
-        << "Failed to open " << filename << " for writing."
-        << Alert::Raise;
-    }
-    ofs.precision(precision);
-    switch (fmt)
-    {
-      case IO::FileFormat::MFEM:
-      {
-        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
-        printer.print(ofs);
-        break;
-      }
-      case IO::FileFormat::MEDIT:
-      {
-        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(*this);
-        printer.print(ofs);
-        break;
-      }
-      default:
-      {
-        Alert::Exception()
-          << "Saving to \"" << fmt << "\" format unsupported."
-          << Alert::Raise;
-      }
-    }
-    ofs.close();
   }
 
   Scalar MeshBase::getVolume()
@@ -255,15 +338,6 @@ namespace Rodin::Geometry
   //   // }
   //   return res;
   // }
-
-  // ---- Mesh<Serial> ------------------------------------------------------
-#ifdef RODIN_USE_MPI
-  Mesh<Context::MPI>
-  Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
-  {
-    return Mesh<Context::MPI>(comm, *this);
-  }
-#endif
 
   size_t Mesh<Context::Serial>::getCount(size_t dimension) const
   {
@@ -377,120 +451,69 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
+  SubMeshBase& Mesh<Context::Serial>::asSubMesh()
   {
-    std::ifstream input(filename.c_str());
-    if (!input)
+    assert(isSubMesh());
+    if (!isSubMesh())
     {
-      Alert::Exception()
-        << "Failed to open " << filename << " for reading."
+      Alert::MemberFunctionException(*this, __func__)
+        << "This instance of Mesh is not a SubMesh (isSubMesh() == false). "
+        << "Downcasting to SubMesh is ill-defined."
         << Alert::Raise;
     }
-    switch (fmt)
+    return static_cast<SubMesh<Context::Serial>&>(*this);
+  }
+
+  const SubMeshBase& Mesh<Context::Serial>::asSubMesh() const
+  {
+    assert(isSubMesh());
+    if (!isSubMesh())
     {
-      case IO::FileFormat::MFEM:
+      Alert::MemberFunctionException(*this, __func__)
+        << "This instance of Mesh is not a SubMesh (isSubMesh() == false). "
+        << "Downcasting to SubMesh is ill-defined."
+        << Alert::Raise;
+    }
+    return static_cast<const SubMesh<Context::Serial>&>(*this);
+  }
+
+  Mesh<Context::Serial> Mesh<Context::Serial>::UniformGrid(Polytope::Type g, size_t h, size_t w)
+  {
+    Builder build;
+    const size_t dim = Polytope::getGeometryDimension(g);
+    build.initialize(dim).nodes(h * w);
+    switch (g)
+    {
+      case Polytope::Type::Point:
       {
-        IO::MeshLoader<IO::FileFormat::MFEM, Context::Serial> loader(*this);
-        loader.load(input);
-        break;
+        return build.nodes(1).vertex({0}).finalize();
       }
-      case IO::FileFormat::MEDIT:
+      case Polytope::Type::Triangle:
       {
-        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
-        loader.load(input);
-        break;
+        assert(h * w >= 4);
+        for (size_t i = 0; i < h; i++)
+        {
+          for (size_t j = 0; j < w; j++)
+            build.vertex({ static_cast<Scalar>(j), static_cast<Scalar>(i) });
+        }
+
+        build.reserve(dim, 2 * (h - 1) * (w - 1));
+        for (size_t i = 0; i < h - 1; i++)
+        {
+          for (size_t j = 0; j < w - 1; j++)
+          {
+            build.polytope(g, { i * w + j, i * w + j + 1, (i + 1) * w + j })
+                 .polytope(g, { i * w + j + 1, (i + 1) * w + j + 1, (i + 1) * w + j });
+          }
+        }
+        return build.finalize();
       }
       default:
       {
-        Alert::Exception() << "Loading from \"" << fmt << "\" format unsupported."
-                           << Alert::Raise;
-        break;
+        assert(false);
+        return build.nodes(0).finalize();
       }
-    }
-
-    return *this;
-  }
-
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr) const
-  {
-    return keep(FlatSet<Attribute>{attr});
-  }
-
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const FlatSet<Attribute>& attrs) const
-  {
-    const size_t D = getDimension();
-    SubMesh<Context::Serial>::Builder build;
-    build.initialize(*this);
-    for (Index i = 0; i < getElementCount(); i++)
-    {
-      if (attrs.count(getAttribute(D, i)))
-      {
-        build.include(D, i);
-        for (size_t d = 1; d <= D - 1; d++)
-        {
-          const auto& inc = getConnectivity().getIncidence(D, d);
-          if (inc.size() > 0)
-            build.include(d, inc.at(i));
-        }
-      }
-    }
-    return build.finalize();
-  }
-
-  SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
-  {
-    const size_t D = getDimension();
-    SubMesh<Context::Serial>::Builder build;
-    build.initialize(*this);
-    for (auto it = getBoundary(); !it.end(); ++it)
-    {
-      const Index i = it->getIndex();
-      build.include(D - 1, i);
-      for (size_t d = 1; d <= D - 2; d++)
-      {
-        const auto& inc = getConnectivity().getIncidence(D - 1, d);
-        if (inc.size() > 0)
-          build.include(d, inc.at(i));
-      }
-    }
-    return build.finalize();
-  }
-
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr) const
-  {
-    return trim(FlatSet<Attribute>{attr});
-  }
-
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const FlatSet<Attribute>& attrs) const
-  {
-    const size_t D = getDimension();
-    SubMesh<Context::Serial>::Builder build;
-    build.initialize(*this);
-    for (Index i = 0; i < getElementCount(); i++)
-    {
-      if (!attrs.count(getAttribute(D, i)))
-      {
-        build.include(D, i);
-        for (size_t d = 1; d <= D - 1; d++)
-        {
-          const auto& inc = getConnectivity().getIncidence(D, d);
-          if (inc.size() > 0)
-            build.include(d, inc.at(i));
-        }
-      }
-    }
-    return build.finalize();
-  }
-
-  Mesh<Context::Serial>& Mesh<Context::Serial>::displace(const
-      Variational::GridFunction<Variational::P1<Math::Vector,
-      Context::Serial, Geometry::Mesh<Context::Serial>>>& u)
-  {
-    assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-    m_vertices += u.getData();
-    flush();
-    return *this;
+    };
   }
 }
 

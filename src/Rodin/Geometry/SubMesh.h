@@ -17,18 +17,33 @@
 
 namespace Rodin::Geometry
 {
-
   /**
-   * @defgroup DotSpecializations Dot Template Specializations
-   * @brief Template specializations of the Dot class.
-   * @see Dot
+   * @defgroup SubMeshSpecializations SubMesh Template Specializations
+   * @brief Template specializations of the SubMesh class.
+   * @see SubMesh
    */
 
-  /**
-   * @ingroup DotSpecializations
-   */
+  class SubMeshBase
+  {
+    public:
+      virtual Point inclusion(const Point& p) const = 0;
+
+      virtual Point restriction(const Point& p) const = 0;
+
+      /**
+       * @returns Reference to the parent Mesh object
+       */
+      virtual const MeshBase& getParent() const = 0;
+
+      /**
+       * @brief Gets the map of polytope indices from the SubMesh to the parent
+       * Mesh.
+       */
+      virtual const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const = 0;
+  };
 
   /**
+   * @ingroup SubMeshSpecializations
    * @brief A SubMesh object represents a subregion of a Mesh object.
    *
    * A SubMesh object contains a reference to the parent Mesh object. It also
@@ -41,13 +56,23 @@ namespace Rodin::Geometry
    * if (mesh.isSubMesh())
    * {
    *   // Cast is well defined
-   *   auto& submesh = static_cast<SubMesh&>(mesh);
+   *   auto& submesh = static_cast<SubMesh<Context::Serial>&>(mesh);
+   * }
+   * @endcode
+   *
+   * Alternatively, you can use the asSubMesh() to access the SubMeshBase
+   * interface:
+   * @code{.cpp}
+   * if (mesh.isSubMesh())
+   * {
+   *   // Cast is well defined
+   *   auto& submesh = mesh.asSubMesh();
    * }
    * @endcode
    *
    */
   template <>
-  class SubMesh<Context::Serial> : public Mesh<Context::Serial>
+  class SubMesh<Context::Serial> final : public SubMeshBase, public Mesh<Context::Serial>
   {
     public:
       using Parent = Mesh<Context::Serial>;
@@ -95,9 +120,9 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      Point inclusion(const Point& p);
+      Point inclusion(const Point& p) const override;
 
-      Point restriction(const Point& p);
+      Point restriction(const Point& p) const override;
 
       bool isSubMesh() const override
       {
@@ -107,13 +132,14 @@ namespace Rodin::Geometry
       /**
        * @returns Reference to the parent Mesh object
        */
-      const Mesh<Context::Serial>& getParent() const;
+      const Mesh<Context::Serial>& getParent() const override;
 
       /**
        * @brief Gets the map of polytope indices from the SubMesh to the parent
        * Mesh.
        */
-      const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const
+      inline
+      const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const override
       {
         return m_s2ps.at(d);
       }

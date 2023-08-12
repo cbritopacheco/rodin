@@ -27,7 +27,7 @@ namespace Rodin::Geometry
     return m_parent.get();
   }
 
-  Point SubMesh<Context::Serial>::inclusion(const Point& p)
+  Point SubMesh<Context::Serial>::inclusion(const Point& p) const
   {
     const auto& parent = getParent();
     const auto& polytope = p.getPolytope();
@@ -39,7 +39,7 @@ namespace Rodin::Geometry
         std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
   }
 
-  Point SubMesh<Context::Serial>::restriction(const Point& p)
+  Point SubMesh<Context::Serial>::restriction(const Point& p) const
   {
     const auto& child = *this;
     const auto& polytope = p.getPolytope();

@@ -30,6 +30,18 @@
 
 #include "ForwardDecls.h"
 
+namespace Rodin::FormLanguage
+{
+  /**
+   * @ingroup TraitsSpecializations
+   */
+  template <class Range>
+  struct Traits<Variational::P1Element<Range>>
+  {
+    using RangeType = Range;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
