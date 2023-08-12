@@ -8,6 +8,7 @@
 #define RODIN_ALERT_MEMBERFUNCTIONEXCEPTION_H
 
 #include <boost/type_index.hpp>
+#include <boost/current_function.hpp>
 
 #include "Exception.h"
 #include "Identifier.h"

@@ -56,6 +56,8 @@ namespace Rodin::Geometry
   template <class ContextType = Context::Serial>
   class Mesh;
 
+  class SubMeshBase;
+
   /**
    * @brief Represents a subset of a Mesh.
    *
@@ -79,6 +81,9 @@ namespace Rodin::Geometry
    */
   template <class Context>
   class SubMesh;
+
+  template <>
+  class SubMesh<Context::Serial>;
 
   template <class Context>
   class SubMeshBuilder;

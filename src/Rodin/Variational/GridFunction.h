@@ -32,6 +32,17 @@
 #include "MatrixFunction.h"
 #include "FiniteElementSpace.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Derived, class FESType>
+  struct Traits<Variational::GridFunctionBase<Derived, FESType>>
+  {
+    using FES = FESType;
+    using Element = typename Traits<FES>::Element;
+    using RangeType = typename Traits<FES>::RangeType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -56,18 +67,20 @@ namespace Rodin::Variational
    *  assert(data.cols() == gf.getFiniteElementSpace().getSize());
    * ```
    */
-  template <class Derived, class FES>
-  class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FES>>
+  template <class Derived, class FESType = typename FormLanguage::Traits<Derived>::FES>
+  class GridFunctionBase : public LazyEvaluator<GridFunctionBase<Derived, FESType>>
   {
     public:
+      using FES = FESType;
+
       /// Type of finite element
-      using Element = typename FES::Element;
+      using Element = typename FormLanguage::Traits<FES>::Element;
 
       /// Parent class
       using Parent = LazyEvaluator<GridFunctionBase<Derived, FES>>;
 
       /// Range type of value
-      using RangeType = typename FES::RangeType;
+      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
 
       static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
 

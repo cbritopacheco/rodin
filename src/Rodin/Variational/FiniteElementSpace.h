@@ -32,6 +32,20 @@ namespace Rodin::Variational
 
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
 
+      inline
+      constexpr
+      bool operator==(const FiniteElementSpaceBase& other) const
+      {
+        return this == &other;
+      }
+
+      inline
+      constexpr
+      bool operator!=(const FiniteElementSpaceBase& other) const
+      {
+        return this != &other;
+      }
+
       /**
        * @brief Gets the total number of degrees of freedom.
        * @returns Size of the finite element space
@@ -110,13 +124,6 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getMapping(p, v);
       }
   };
-
-  inline
-  constexpr
-  bool operator==(const FiniteElementSpaceBase& lhs, const FiniteElementSpaceBase& rhs)
-  {
-    return &lhs == &rhs;
-  }
 }
 
 #endif

@@ -8,7 +8,25 @@
 #define RODIN_VARIATIONAL_P1_GRIDFUNCTION_H
 
 #include "Rodin/Variational/GridFunction.h"
+#include "Rodin/Geometry/SubMesh.h"
+
 #include "P1.h"
+
+namespace Rodin::FormLanguage
+{
+  /**
+   * @ingroup TraitsSpecializations
+   */
+  template <class Range, class ContextType, class MeshType>
+  struct Traits<Variational::GridFunction<Variational::P1<Range, ContextType, MeshType>>>
+  {
+    using RangeType = Range;
+    using FES = Variational::P1<RangeType, ContextType, MeshType>;
+    using Context = typename FormLanguage::Traits<FES>::Context;
+    using Mesh = typename FormLanguage::Traits<FES>::Mesh;
+    using Element = typename FormLanguage::Traits<FES>::Element;
+  };
+}
 
 namespace Rodin::Variational
 {
@@ -16,21 +34,22 @@ namespace Rodin::Variational
    * @ingroup GridFunctionSpecializations
    * @brief P1 GridFunction
    */
-  template <class ... Ts>
-  class GridFunction<P1<Ts...>> final : public GridFunctionBase<GridFunction<P1<Ts...>>, P1<Ts...>>
+  template <class Range, class Context, class Mesh>
+  class GridFunction<P1<Range, Context, Mesh>> final
+    : public GridFunctionBase<GridFunction<P1<Range, Context, Mesh>>>
   {
     public:
       /// Type of finite element space to which the GridFunction belongs to
-      using FES = P1<Ts...>;
+      using FES = P1<Range, Context, Mesh>;
 
       /// Type of finite element
       using Element = typename FES::Element;
 
-      /// Parent class
-      using Parent = GridFunctionBase<GridFunction<P1<Ts...>>, P1<Ts...>>;
-
       /// Range type of value
       using RangeType = typename FES::RangeType;
+
+      /// Parent class
+      using Parent = GridFunctionBase<GridFunction<FES>>;
 
       using Parent::getValue;
       using Parent::getValueByReference;
@@ -78,58 +97,9 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const GridFunction&)  = delete;
 
-      inline
-      auto getValue(const Geometry::Point& p) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        if constexpr (std::is_same_v<RangeType, Scalar>)
-        {
-          Scalar res = 0;
-          for (Index local = 0; local < fe.getCount(); local++)
-          {
-            const auto& basis = fe.getBasis(local);
-            res += getValue({d, i}, local) * basis(r);
-          }
-          return res;
-        }
-        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-        {
-          Math::Vector res;
-          getValueByReference(res, p);
-          return res;
-        }
-        else
-        {
-          assert(false);
-          return void();
-        }
-      }
+      auto getValue(const Geometry::Point& p) const;
 
-      inline
-      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
-      {
-        static_assert(std::is_same_v<RangeType, Math::Vector>);
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& r = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-        const size_t vdim = fes.getVectorDimension();
-        const size_t dofs = fe.getCount();
-        res.resize(vdim);
-        res.setZero();
-        for (Index local = 0; local < dofs; local++)
-        {
-          const auto& basis = fe.getBasis(local);
-          res += getValue({d, i}, local).coeff(local % vdim) * basis(r);
-        }
-      }
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const;
 
       inline
       GridFunction& setWeights()
@@ -196,6 +166,8 @@ namespace Rodin::Variational
 
   template <class ... Ts>
   GridFunction(const P1<Ts...>&) -> GridFunction<P1<Ts...>>;
-
 }
+
+#include "GridFunction.hpp"
+
 #endif

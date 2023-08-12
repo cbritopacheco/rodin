@@ -9,11 +9,11 @@ from sklearn import preprocessing
 plt.style.use("bmh")
 
 conductivities = [2.0]
-waveNumbers = [ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 90 ]
+waveNumbers = [1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 20]
 angles = [ math.pi / 4 ]
 
 
-x_column = 'waveNumber'
+x_column = 'm'
 y_column = 'epsilon'
 
 latex_label = {
@@ -38,46 +38,53 @@ if __name__ == '__main__':
     df = pd.read_csv(args.filename)
     print('Read dataset !')
 
-    for angle in angles:
-        for conductivity in conductivities:
-            plt.figure()
-            sdf = df[
-                (df['conductivity'] > conductivity - 0.001) &
-                (df['conductivity'] < conductivity + 0.001) &
-                (df['angle'] > angle - 0.001) &
-                (df['angle'] < angle + 0.001) &
-                (df['waveNumber'] < 10)
-            ]
+    thresh = math.exp(df['error'].median())
 
-            thresh = sdf['error'].median()
-            sdf.loc[sdf['error'] > thresh, 'error'] = thresh
+    df.loc[df['error'] > thresh, 'error'] = thresh
 
-            plt.hexbin(
-                sdf.loc[:, x_column],
-                sdf.loc[:, y_column],
-                gridsize=25,
-                reduce_C_function=np.mean,
-                cmap='inferno',
-                C=sdf.loc[:, 'error'], edgecolors='face', linewidths=0.5)
+    i = 0
+    for waveNumber in waveNumbers:
+        print(waveNumber)
+        for angle in angles:
+            for conductivity in conductivities:
+                plt.figure()
+                sdf = df[
+                    (df['conductivity'] > conductivity - 0.001) &
+                    (df['conductivity'] < conductivity + 0.001) &
+                    (df['angle'] > angle - 0.001) &
+                    (df['angle'] < angle + 0.001) &
+                    (df['waveNumber'] > waveNumber - 0.01) &
+                    (df['waveNumber'] < waveNumber + 0.01)
+                ]
 
-            # plt.contourf(
-            #     sdf.loc[:, 'm'],
-            #     sdf.loc[:, 'epsilon'],
-            #     sdf.loc[:, 'error'])
-            plt.colorbar()
+                plt.hexbin(
+                    sdf.loc[:, x_column],
+                    sdf.loc[:, y_column],
+                    gridsize=50,
+                    reduce_C_function=np.mean,
+                    cmap='inferno',
+                    C=sdf.loc[:, 'error'], edgecolors='face', linewidths=0.5)
 
-            plt.xlabel(latex_label[x_column])
-            plt.ylabel(latex_label[y_column])
-            plt.title(
-                '$|| u_\epsilon - u_0 ||_{L^2 (Q)} \
-                \ \mathrm{with} \ \gamma |_{B(x, e)} = %.2E, \
-                \ \\theta = %d^\circ $' % (conductivity, (180.0 / math.pi) * angle),
-                pad=20)
-            out=("%s_VS_%s_Gamma=%.2E_Angle=%.2E") % (
-                file_label[x_column], file_label[y_column], conductivity, (180.0 / math.pi) * angle)
-            plt.savefig(out + '.svg')
-            plt.savefig(out + '.png')
-            # plt.show()
+                # plt.contourf(
+                #     sdf.loc[:, 'm'],
+                #     sdf.loc[:, 'epsilon'],
+                #     sdf.loc[:, 'error'])
+                plt.colorbar()
+
+                plt.xlabel(latex_label[x_column])
+                plt.ylabel(latex_label[y_column])
+                plt.title(
+                    '$|| u_\epsilon - u_0 ||_{L^2 (Q / B(x, 0.25))} \
+                    \ \mathrm{with} \ \gamma |_{B(x, e)} = %.2E, \
+                    \ \\theta = %d^\circ, \ k=%.2E$' % (
+                        conductivity, (180.0 / math.pi) * angle, waveNumber), pad=20)
+                out=("%s_VS_%s_Gamma=%.2E_Angle=%.2E_Wavenumber=%.2E") % (
+                    file_label[x_column], file_label[y_column], conductivity,
+                    (180.0 / math.pi) * angle, waveNumber)
+                plt.savefig(str(i) + '_' + out + '.svg')
+                plt.savefig(str(i) + '_' + out + '.png')
+                # plt.show()
+                i += 1
 
 
 
