@@ -37,12 +37,14 @@ jobs:
       - name: Execute script
         run: |
           mkdir -p static/dev/${{ github.ref }}
-          python ${{github.workspace}}/dev/include_dependency_graph.py ${{github.workspace}}/src --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
+          python ${{github.workspace}}/dev/include_dependency_graph.py ${{github.workspace}}/src --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg --dot=static/dev/${{ github.ref }}/IncludeDependencyGraph.dot
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: script-artifact
-          path: static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
+          name: IncludeDependencyGraph
+          path: |
+            static/dev/${{ github.ref }}/IncludeDependencyGraph.dot
+            static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
   Deploy:
     runs-on: ubuntu-latest
     if: ${{ true }}
