@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::External::MMG namespace | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span>MMG <span class="m-thin">namespace</span>
+        </h1>
+        <p><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#var-members">Variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />External::<wbr />MMG</a> module has a wide variety of uses which ranges from optimization of the mesh, to implicit domain meshing. It provides many C++ wrappers to execute the functionality of the <a href="https://www.mmgtools.org/">Mmg Platform</a>.</p>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_advect.html" class="m-doc">Advect</a>
+            </dt>
+            <dd>Advection of a level set function by a velocity field.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>
+            </dt>
+            <dd>Empty class tag to specify that a material reference should not be splitted.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>
+            </dt>
+            <dd>Class to specify the interior and exterior material references.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distance_3_01_scalar_grid_function_1_1_f_e_s_01_4.html" class="m-doc">Distance&lt;ScalarGridFunction::FES&gt;</a>
+            </dt>
+            <dd>Class which generates the signed distance function of a domain.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>
+            </dt>
+            <dd>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> class which has support for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> functionalities.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_optimize.html" class="m-doc">Optimize</a>
+            </dt>
+            <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>
+            </dt>
+            <dd>Class used to print objects of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
+            </dt>
+            <dd>Class representing <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> framework.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt id="a14f11f18e0531a8e76581e4adfabdc83">
+              using <a href="#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc-self">SplitMap</a> = <a href="namespace_rodin.html#a5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>, std::variant&lt;<a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>, <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>&gt;&gt;
+            </dt>
+            <dd>Map indicating how a material reference should be split into exterior and interior material references.</dd>
+            <dt id="a9fd827bfb4fd8dddc7e80b190f7cb82c">
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              using <a href="#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt;&gt;&gt;
+            </dt>
+            <dd>GridFunction class for use with the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />External::<wbr />MMG</a> module.</dd>
+            <dt id="a5332c61d0f3f1c9696dcb640b2255f1d">
+              using <a href="#a5332c61d0f3f1c9696dcb640b2255f1d" class="m-doc-self">ScalarGridFunction</a> = <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin.html#a618f5f98eaa9b4906269b4fe9461ea95" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Type alias for a GridFunction with scalar range.</dd>
+            <dt id="a22d535305aaf40c50d869d00386dcb73">
+              using <a href="#a22d535305aaf40c50d869d00386dcb73" class="m-doc-self">VectorGridFunction</a> = <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>&gt;
+            </dt>
+            <dd>Type alias for a GridFunction with vector range.</dd>
+            <dt id="a2e664251a56ddb6630af9e4586dd47cd">
+              using <a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc-self">ReturnCode</a> = int
+            </dt>
+            <dd>Type of return code used by the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> functions.</dd>
+          </dl>
+        </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt id="aedca4332ab915213f5f99c61b951ab12">
+              static <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc-self">NoSplit</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Instance of the empty struct tag <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>.</dd>
+            <dt>
+              const char* <a href="#a63de188461907d4e396294ae8c6a9c3a" class="m-doc">ISCD_MSHDIST_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Path to the ISCD Mshdist executable.</dd>
+            <dt>
+              const char* <a href="#a4404167df2ec94385623e756594ccb5c" class="m-doc">ISCD_ADVECTION_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Path to the ISCD Mshdist executable.</dd>
+            <dt>
+              const int <a href="#a269af232c229adaba3e889ad4c895218" class="m-doc">VERBOSITY_LEVEL</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Verbosity level for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> console output.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a63de188461907d4e396294ae8c6a9c3a"><div>
+            <h3>
+              const char* Rodin::<wbr />External::<wbr />MMG::<wbr /><a href="#a63de188461907d4e396294ae8c6a9c3a" class="m-doc-self">ISCD_MSHDIST_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_external_2_m_m_g_2_configure_8h_8in.html">&lt;RodinExternal/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Path to the ISCD Mshdist executable.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4404167df2ec94385623e756594ccb5c"><div>
+            <h3>
+              const char* Rodin::<wbr />External::<wbr />MMG::<wbr /><a href="#a4404167df2ec94385623e756594ccb5c" class="m-doc-self">ISCD_ADVECTION_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_external_2_m_m_g_2_configure_8h_8in.html">&lt;RodinExternal/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Path to the ISCD Mshdist executable.</p>
+          </div></section>
+          <section class="m-doc-details" id="a269af232c229adaba3e889ad4c895218"><div>
+            <h3>
+              const int Rodin::<wbr />External::<wbr />MMG::<wbr /><a href="#a269af232c229adaba3e889ad4c895218" class="m-doc-self">VERBOSITY_LEVEL</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_external_2_m_m_g_2_configure_8h_8in.html">&lt;RodinExternal/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Verbosity level for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> console output.</p>
+<p>Ranges from -1 to INT_MAX. A higher number means more verbose output.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
