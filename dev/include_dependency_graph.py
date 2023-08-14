@@ -219,11 +219,11 @@ if __name__ == '__main__':
         command_line += ['-Goverlap=prism', '-Gbeautify=true', '-Gsmoothing=true ']
         if args.png:
             png_filename = args.png
-            command_line += ["-Tpng", "-o %s " % png_filename]
+            command_line += ["-Tpng", "-o", png_filename]
 
         if args.svg:
             svg_filename = args.svg
-            command_line += ["-Tsvg", "-o %s " % svg_filename]
+            command_line += ["-Tsvg", "-o", svg_filename]
 
         result = subprocess.run(command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
