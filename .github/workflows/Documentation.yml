@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - develop
 
 concurrency:
   group: Documentation-${{ github.ref }}
@@ -21,7 +22,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: 3.x
           cache: 'pip'
       - run: pip install -r doc/requirements.txt
       - name: Install dependencies
