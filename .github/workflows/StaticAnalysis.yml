@@ -35,7 +35,9 @@ jobs:
           cache: 'pip'
       - run: pip install -r dev/Requirements.txt
       - name: Execute script
-        run: python ${{github.workspace}}/dev/include_dependency_graph.py ${{github.workspace}}/src --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
+        run: |
+          mkdir -p static/dev/${{ github.ref }}
+          python ${{github.workspace}}/dev/include_dependency_graph.py ${{github.workspace}}/src --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
@@ -51,5 +53,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: static/dev/
-          destination_dir: static/dev/
+          publish_dir: static/dev/${{ github.ref }}
+          destination_dir: static/dev/${{ github.ref }}
