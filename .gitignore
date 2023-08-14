@@ -7,6 +7,8 @@
 # Icon must end with two \r
 Icon
 
+# CSV Files
+*.csv
 
 # Thumbnails
 ._*
