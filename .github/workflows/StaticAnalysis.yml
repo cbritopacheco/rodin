@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v1
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -24,8 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: Setup
     steps:
-      - name: Setup Graphviz
-        uses: ts-graphviz/setup-graphviz@v1
       - name: Execute script
         run: python dev/include_dependency_graph.py --svg=static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
       - name: Upload Artifact
@@ -35,6 +35,7 @@ jobs:
           path: static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
   Deploy:
     runs-on: ubuntu-latest
+    if: ${{ true }}
     needs: [IncludeDependencyGraph]
     steps:
       - name: Upload 
