@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - develop
 
 concurrency:
   group: Documentation-${{ github.ref }}
