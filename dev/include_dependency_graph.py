@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 import numpy as np
 import argparse
 import networkx as nx
@@ -163,12 +164,6 @@ def get_fontsize_map(m):
     return fontsize_map
 
 
-def check_graphviz_command(command):
-    dot_command = which(command)
-    if not dot_command:
-        raise GraphvizNotFoundError(
-            "Graphviz %s command not found. Please install Graphviz to generate graphical output." % command)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Generates #include dependency graph.')
@@ -192,12 +187,6 @@ if __name__ == '__main__':
 
     dot_filename = args.dot if args.dot else f'{folder_name}_include_dependency_graph.dot'
 
-    try:
-        check_graphviz_command(args.layout_engine)
-    except GraphvizNotFoundError as e:
-        print(colored(e, 'red'))
-        exit(1)
-
     root_path = args.root_path
     dependency_graph = generate_dependency_graph(root_path, args.extensions)
     weight_map = get_accumulated_map(dependency_graph)
@@ -220,21 +209,29 @@ if __name__ == '__main__':
 
     layout_engine = args.layout_engine
     print(colored(f'Using layout engine {layout_engine}', 'blue'))
-    command_line = f'{layout_engine} '
-    command_line += '-Goverlap=prism -Gbeautify=true -Gsmoothing=true'
+    dot_command = which(layout_engine)
+    if not dot_command:
+        raise GraphvizNotFoundError(
+            "Graphviz %s command not found. Please install Graphviz to generate graphical output." % command)
+
+    command_line = [f'{dot_command}', dot_filename]
+    command_line += ['-Goverlap=prism', '-Gbeautify=true', '-Gsmoothing=true ']
     if args.png:
         png_filename = args.png
-        command_line += " -Tpng -o %s " % png_filename
+        command_line += ["-Tpng -o %s " % png_filename]
 
     if args.svg:
         svg_filename = args.svg
-        command_line += " -Tsvg -o %s " % svg_filename
+        command_line += ["-Tsvg -o %s " % svg_filename]
 
-    command_line += dot_filename
-    os.system(command_line)
 
-    if args.png:
-        print(colored(f'PNG output generated: {png_filename}', 'green'))
-    if args.svg:
-        print(colored(f'SVG output generated: {svg_filename}', 'green'))
+    result = subprocess.run(command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    if result.returncode == 0:
+        if args.png:
+            print(colored(f'PNG output generated: {png_filename}', 'green'))
+        if args.svg:
+            print(colored(f'SVG output generated: {svg_filename}', 'green'))
+    else:
+        raise result.stderr
 
