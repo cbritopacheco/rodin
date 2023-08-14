@@ -1,11 +1,3 @@
-add_executable(ConormalAdvection ConormalAdvection.cpp)
-target_link_libraries(ConormalAdvection
-  PUBLIC
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::External::MMG)
-
 # add_executable(NeumannRegion NeumannRegion.cpp)
 # target_link_libraries(NeumannRegion
 #   PUBLIC

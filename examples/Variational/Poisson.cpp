@@ -4,7 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <chrono>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -15,7 +14,7 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/poisson-example.mesh";
+  const char* meshFile = "../resources/mfem/StarSquare.mfem.mesh";
 
   // Define boundary attributes
   int Gamma = 1;
@@ -25,28 +24,27 @@ int main(int, char**)
   Omega.load(meshFile);
 
   // Functions
-  H1 Vh(Omega);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
+  H1 vh(Omega);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
-  // Define problem
-  auto f = ScalarFunction(1.0);
-  auto g = ScalarFunction(0.0);
+ // Define problem
+ ScalarFunction f = 1.0;
+ ScalarFunction g = 0.0;
 
-  // Use CG for solving
-  Solver::CG cg;
-  mfem::GSSmoother smoother;
-  cg.setPreconditioner(smoother).setMaxIterations(200).setRelativeTolerance(1e-12).printIterations(true);
+ Solver::CG solver;
+ solver.printIterations(true);
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g).on(Gamma);
-  poisson.solve(cg);
+ Problem poisson(u, v);
+ poisson = Integral(Grad(u), Grad(v))
+         - Integral(f, v)
+         + DirichletBC(u, g).on(Gamma);
 
-  // Save solution
-  u.getGridFunction().save("u.gf");
-  Omega.save("miaow.mesh");
+ poisson.solve(solver);
+
+ // Save solution
+ u.getSolution().getHandle().Save("u.gf");
+ Omega.save("Omega.mesh");
 
   return 0;
 }

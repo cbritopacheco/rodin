@@ -15,56 +15,76 @@
 
 namespace Rodin::Variational
 {
-   class RangeShape
-   {
-      public:
-         constexpr
-         RangeShape(int height, int width)
-            : m_height(height), m_width(width)
-         {
-            assert(height > 0);
-            assert(width > 0);
-         }
+  class RangeShape
+  {
+    public:
+      constexpr
+      RangeShape(std::initializer_list<size_t> l)
+        : m_height(l.begin()[0]), m_width(l.begin()[1])
+      {
+        assert(l.size() == 2);
+      }
 
-         constexpr
-         int height() const
-         {
-            assert(m_height > 0);
-            return m_height;
-         }
+      constexpr
+      RangeShape(size_t height, size_t width)
+        : m_height(height), m_width(width)
+      {}
 
-         constexpr
-         int width() const
-         {
-            assert(m_width > 0);
-            return m_width;
-         }
+      constexpr
+      RangeShape(const RangeShape&) = default;
 
-         constexpr
-         RangeShape transpose() const
-         {
-            return {width(), height()};
-         }
+      constexpr
+      RangeShape(RangeShape&&) = default;
 
-         constexpr
-         bool operator==(const RangeShape& other)
-         {
-            return m_height == other.m_height && m_width == other.m_width;
-         }
+      inline
+      constexpr
+      size_t height() const
+      {
+        return m_height;
+      }
 
-         constexpr
-         bool operator!=(const RangeShape& other)
-         {
-            return !operator==(other);
-         }
+      inline
+      constexpr
+      size_t width() const
+      {
+        return m_width;
+      }
 
-      private:
-         const int m_height;
-         const int m_width;
-   };
+      inline
+      constexpr
+      RangeShape product(const RangeShape& rhs) const
+      {
+        assert(m_width == rhs.m_height);
+        return { m_height, rhs.m_width };
+      }
 
-   std::ostream& operator<<(std::ostream& os, const RangeShape& obj);
-   std::ostream& operator<<(std::ostream& os, const RangeType& obj);
+      inline
+      constexpr
+      RangeShape transpose() const
+      {
+        return { m_width, m_height };
+      }
+
+      inline
+      constexpr
+      bool operator==(const RangeShape& other)
+      {
+        return m_height == other.m_height && m_width == other.m_width;
+      }
+
+      inline
+      constexpr
+      bool operator!=(const RangeShape& other)
+      {
+        return !operator==(other);
+      }
+
+    private:
+      const size_t m_height;
+      const size_t m_width;
+  };
+
+  std::ostream& operator<<(std::ostream& os, const RangeShape& obj);
 }
 
 #endif

@@ -13,14 +13,14 @@ namespace Rodin::Plot::Backend::Bases
 {
   class BaseTopLevelArtist2D : public BaseArtist2D
   {
-    public:
-    explicit BaseTopLevelArtist2D() = default;
-    virtual ~BaseTopLevelArtist2D() = default;
+   public:
+   explicit BaseTopLevelArtist2D() = default;
+   virtual ~BaseTopLevelArtist2D() = default;
 
-    bool isTopLevel() const override;
+   bool isTopLevel() const override;
 
-    virtual Renderer::DrawableGroup2D& getDrawableGroup() = 0;
-    virtual const Renderer::DrawableGroup2D& getDrawableGroup() const = 0;
+   virtual Renderer::DrawableGroup2D& getDrawableGroup() = 0;
+   virtual const Renderer::DrawableGroup2D& getDrawableGroup() const = 0;
   };
 }
 

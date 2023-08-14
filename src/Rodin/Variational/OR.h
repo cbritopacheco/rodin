@@ -8,70 +8,94 @@
 #define RODIN_VARIATIONAL_OR_H
 
 #include "ForwardDecls.h"
-#include "Exceptions.h"
 #include "GridFunction.h"
 #include "BooleanFunction.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup ORSpecializations OR Template Specializations
-    * @brief Template specializations of the OR class.
-    * @see OR
-    */
+  /**
+   * @defgroup ORSpecializations OR Template Specializations
+   * @brief Template specializations of the OR class.
+   * @see OR
+   */
 
-   template <>
-   class OR<BooleanFunctionBase, BooleanFunctionBase> : public BooleanFunctionBase
-   {
-      public:
-         OR(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            if (lhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
-            if (rhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, rhs.getRangeType()).raise();
-         }
+  template <class LHSDerived, class RHSDerived>
+  class OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>> final
+    : public BooleanFunctionBase<OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>>
+  {
+    public:
+      using LHS = BooleanFunctionBase<LHSDerived>;
+      using RHS = BooleanFunctionBase<RHSDerived>;
+      using Parent = BooleanFunctionBase<OR<LHS, RHS>>;
 
-         OR(const OR& other)
-            : BooleanFunctionBase(other),
-              m_lhs(other.m_lhs->copy()),
-              m_rhs(other.m_rhs->copy())
-         {}
+      constexpr
+      OR(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs), m_rhs(rhs)
+      {}
 
-         OR(OR&& other)
-            : BooleanFunctionBase(std::move(other)),
-              m_lhs(std::move(other.m_lhs)),
-              m_rhs(std::move(other.m_rhs))
-         {}
+      constexpr
+      OR(const OR& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
+      {}
 
-         bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            return m_lhs->getValue(trans, ip) || m_rhs->getValue(trans, ip);
-         }
+      constexpr
+      OR(OR&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
+      {}
 
-         OR* copy() const noexcept override
-         {
-            return new OR(*this);
-         }
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return Boolean(m_lhs.getValue(p)) || Boolean(m_rhs.getValue(p));
+      }
 
-      private:
-         std::unique_ptr<BooleanFunctionBase> m_lhs;
-         std::unique_ptr<BooleanFunctionBase> m_rhs;
-   };
-   OR(const BooleanFunctionBase&, const BooleanFunctionBase&)
-      -> OR<BooleanFunctionBase, BooleanFunctionBase>;
+      inline
+      OR* copy() const noexcept
+      override
+      {
+        return new OR(*this);
+      }
 
-   OR<BooleanFunctionBase, BooleanFunctionBase>
-   operator||(const BooleanFunctionBase&, const BooleanFunctionBase&);
+    private:
+      LHS m_lhs;
+      RHS m_rhs;
+  };
 
-   OR<BooleanFunctionBase, BooleanFunctionBase>
-   operator||(bool lhs, const BooleanFunctionBase& rhs);
+  template <class LHSDerived, class RHSDerived>
+  OR(const BooleanFunctionBase<LHSDerived>&, const BooleanFunctionBase<RHSDerived>&)
+    -> OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;
 
-   OR<BooleanFunctionBase, BooleanFunctionBase>
-   operator||(const BooleanFunctionBase& lhs, bool rhs);
+  template <class LHSDerived, class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator&&(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  {
+    return OR(lhs, rhs);
+  }
+
+  template <class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator&&(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  {
+    return OR(BooleanFunction(lhs), rhs);
+  }
+
+  template <class LHSDerived>
+  inline
+  constexpr
+  auto
+  operator&&(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
+  {
+    return OR(lhs, BooleanFunction(rhs));
+  }
 }
 
 #endif

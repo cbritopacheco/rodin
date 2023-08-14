@@ -14,216 +14,295 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
-#include "Exceptions.h"
-
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup SumSpecializations Sum Template Specializations
-    * @brief Template specializations of the Sum class.
-    * @see Sum
-    */
+  /**
+   * @defgroup SumSpecializations Sum Template Specializations
+   * @brief Template specializations of the Sum class.
+   * @see Sum
+   */
 
-   /**
-    * @ingroup SumSpecializations
-    */
-   template <>
-   class Sum<FunctionBase, FunctionBase> : public FunctionBase
-   {
-      public:
-         Sum(const FunctionBase& lhs, const FunctionBase& rhs);
+  /**
+   * @ingroup SumSpecializations
+   */
+  template <class LHSDerived, class RHSDerived>
+  class Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
+    : public FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+  {
+    public:
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = FunctionBase<RHSDerived>;
+      using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
 
-         Sum(const Sum& other);
+      constexpr
+      Sum(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      {
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
+      }
 
-         Sum(Sum&& other);
+      constexpr
+      Sum(const Sum& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+      {}
 
-         Sum& operator+=(const FunctionBase& lhs);
+      constexpr
+      Sum(Sum&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
 
-         RangeShape getRangeShape() const override;
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        assert(getLHS().getRangeShape() == getLHS().getRangeShape());
+        return getLHS().getRangeShape();
+      }
 
-         Sum& traceOf(const std::set<int>& attrs) override;
+      inline
+      constexpr
+      const auto& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+      inline
+      constexpr
+      const auto& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
 
-         Sum* copy() const noexcept override
-         {
-            return new Sum(*this);
-         }
+      inline
+      constexpr
+      Sum& traceOf(Geometry::Attribute& attr)
+      {
+        Parent::traceOf(attr);
+        getLHS().traceOf(attr);
+        getRHS().traceOf(attr);
+        return *this;
+      }
 
-      private:
-         std::unique_ptr<FunctionBase> m_lhs;
-         std::unique_ptr<FunctionBase> m_rhs;
-   };
-   Sum(const FunctionBase&, const FunctionBase&) -> Sum<FunctionBase, FunctionBase>;
+      inline
+      constexpr
+      Sum& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        getLHS().traceOf(attrs);
+        getRHS().traceOf(attrs);
+        return *this;
+      }
 
-   Sum<FunctionBase, FunctionBase>
-   operator+(const FunctionBase& lhs, const FunctionBase& rhs);
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
+      }
 
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
-   operator+(const FunctionBase& lhs, T v)
-   {
-      return Sum(lhs, ScalarFunction(v));
-   }
+      inline Sum* copy() const noexcept override
+      {
+        return new Sum(*this);
+      }
 
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
-   operator+(T v, const FunctionBase& rhs)
-   {
-      return Sum(ScalarFunction(v), rhs);
-   }
+    private:
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
+  };
 
-   /**
-    * @ingroup SumSpecializations
-    */
-   template <ShapeFunctionSpaceType Space>
-   class Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>
-      : public ShapeFunctionBase<Space>
-   {
-      public:
-         Sum(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
-            if (lhs.getRangeShape() != rhs.getRangeShape())
-               RangeShapeMismatchException(lhs.getRangeShape(), rhs.getRangeShape()).raise();
-         }
+  template <class LHSDerived, class RHSDerived>
+  Sum(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+    -> Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
-         Sum(const Sum& other)
-            : m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
-         {}
+  template <class LHSDerived, class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator+(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Sum(lhs, rhs);
+  }
 
-         Sum(Sum&& other)
-            : m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
-         {}
+  template <class LHSDerived, class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator+(const FunctionBase<LHSDerived>& lhs, Number rhs)
+  {
+    return Sum(lhs, ScalarFunction(rhs));
+  }
 
-         ShapeFunctionBase<Space>& getLHS()
-         {
-            return *m_lhs;
-         }
+  template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator+(Number lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Sum(ScalarFunction(lhs), rhs);
+  }
 
-         ShapeFunctionBase<Space>& getRHS()
-         {
-            return *m_rhs;
-         }
+  /**
+   * @ingroup SumSpecializations
+   */
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>> final
+    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
+  {
+    public:
+      using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
+      using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Sum<LHS, RHS>, FES, Space>;
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
 
-         const ShapeFunctionBase<Space>& getLHS() const
-         {
-            return *m_lhs;
-         }
+      constexpr
+      Sum(const LHS& lhs, const RHS& rhs)
+        : Parent(lhs.getFiniteElementSpace()),
+          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      {
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
+        assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
+        assert(lhs.getFiniteElementSpace() == rhs.getFiniteElementSpace());
+      }
 
-         const ShapeFunctionBase<Space>& getRHS() const
-         {
-            return *m_rhs;
-         }
+      constexpr
+      Sum(const Sum& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+      {}
 
-         const ShapeFunctionBase<Space>& getLeaf() const override
-         {
-            return getRHS().getLeaf();
-         }
+      constexpr
+      Sum(Sum&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
 
-         int getRows() const override
-         {
-            return getLHS().getRows();
-         }
+      inline
+      constexpr
+      const LHS& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
 
-         int getColumns() const override
-         {
-            return getLHS().getColumns();
-         }
+      inline
+      constexpr
+      const RHS& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
-         {
-            assert(getLHS().getDOFs(fe, trans) == getRHS().getDOFs(fe, trans));
-            return getLHS().getDOFs(fe, trans);
-         }
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getRHS().getLeaf();
+      }
 
-         void getOperator(
-               DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& compute) const override
-         {
-            getLHS().getOperator(op, fe, trans, ip, compute);
-            DenseBasisOperator tmp;
-            getRHS().getOperator(tmp, fe, trans, ip, compute);
-            op += tmp;
-         }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        assert(getLHS().getRangeShape() == getRHS().getRangeShape());
+        return getLHS().getRangeShape();
+      }
 
-         FiniteElementSpaceBase& getFiniteElementSpace() override
-         {
-            return getLHS().getFiniteElementSpace();
-         }
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& element) const
+      {
+        assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
+        return getLHS().getDOFs(element);
+      }
 
-         const FiniteElementSpaceBase& getFiniteElementSpace() const override
-         {
-            return getLHS().getFiniteElementSpace();
-         }
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        const auto& lhs = this->object(getLHS().getTensorBasis(p));
+        const auto& rhs = this->object(getRHS().getTensorBasis(p));
+        return lhs + rhs;
+      }
 
-         Sum* copy() const noexcept override
-         {
-            return new Sum(*this);
-         }
-      private:
-         std::unique_ptr<ShapeFunctionBase<Space>> m_lhs;
-         std::unique_ptr<ShapeFunctionBase<Space>> m_rhs;
-   };
-   template <ShapeFunctionSpaceType Space>
-   Sum(const ShapeFunctionBase<Space>&, const ShapeFunctionBase<Space>&)
-      -> Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>;
+      inline
+      constexpr
+      const auto& getFiniteElementSpace() const
+      {
+        return getLHS().getFiniteElementSpace();
+      }
 
-   template <ShapeFunctionSpaceType Space>
-   Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>
-   operator+(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
-   {
-      return Sum(lhs, rhs);
-   }
+      inline Sum* copy() const noexcept override
+      {
+        return new Sum(*this);
+      }
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator+(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs);
+    private:
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
+  };
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator+(
-         const BilinearFormIntegratorBase& lhs,
-         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  Sum(const ShapeFunctionBase<LHSDerived, FES, Space>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
+    -> Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator+(
-         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
-         const BilinearFormIntegratorBase& rhs);
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  inline
+  constexpr
+  auto
+  operator+(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+            const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  {
+    return Sum(lhs, rhs);
+  }
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator+(
-         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
-         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator+(
+      const BilinearFormIntegratorBase& lhs,
+      const BilinearFormIntegratorBase& rhs);
 
-   FormLanguage::List<LinearFormIntegratorBase>
-   operator+(
-         const LinearFormIntegratorBase& lhs,
-         const LinearFormIntegratorBase& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator+(
+      const BilinearFormIntegratorBase& lhs,
+      const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
 
-   FormLanguage::List<LinearFormIntegratorBase>
-   operator+(
-         const LinearFormIntegratorBase& lhs,
-         const FormLanguage::List<LinearFormIntegratorBase>& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+      const BilinearFormIntegratorBase& rhs);
 
-   FormLanguage::List<LinearFormIntegratorBase>
-   operator+(
-         const FormLanguage::List<LinearFormIntegratorBase>& lhs,
-         const LinearFormIntegratorBase& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+      const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
 
-   FormLanguage::List<LinearFormIntegratorBase>
-   operator+(
-         const FormLanguage::List<LinearFormIntegratorBase>& lhs,
-         const FormLanguage::List<LinearFormIntegratorBase>& rhs);
+  FormLanguage::List<LinearFormIntegratorBase>
+  operator+(
+      const LinearFormIntegratorBase& lhs,
+      const LinearFormIntegratorBase& rhs);
+
+  FormLanguage::List<LinearFormIntegratorBase>
+  operator+(
+      const LinearFormIntegratorBase& lhs,
+      const FormLanguage::List<LinearFormIntegratorBase>& rhs);
+
+  FormLanguage::List<LinearFormIntegratorBase>
+  operator+(
+      const FormLanguage::List<LinearFormIntegratorBase>& lhs,
+      const LinearFormIntegratorBase& rhs);
+
+  FormLanguage::List<LinearFormIntegratorBase>
+  operator+(
+      const FormLanguage::List<LinearFormIntegratorBase>& lhs,
+      const FormLanguage::List<LinearFormIntegratorBase>& rhs);
 
 }
 

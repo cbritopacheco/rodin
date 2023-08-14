@@ -1,7 +1,10 @@
 set(RodinMath_HEADERS
-  Common.h)
+  Constants.h
+  Common.h
+  Vector.h
+  Matrix.h)
 
-set(RodinMath_SRCS )
+set(RodinMath_SRCS Matrix.cpp)
 
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)
@@ -15,13 +18,16 @@ if (${CMAKE_VERSION} VERSION_LESS 3.13)
     )
 endif()
 
-add_library(RodinMath INTERFACE)
+add_library(RodinMath ${RodinMath_SRCS} ${RodinMath_HEADERS})
 add_library(Rodin::Math ALIAS RodinMath)
-target_sources(RodinMath INTERFACE ${RodinMath_SRCS} ${RodinMath_HEADERS})
 
 # ---- Link targets ----------------------------------------------------------
+target_link_libraries(RodinMath
+  PUBLIC
+  Rodin
+  Eigen3::Eigen)
+
 target_include_directories(RodinMath
   INTERFACE
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  )
+  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 

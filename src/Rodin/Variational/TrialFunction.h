@@ -7,86 +7,72 @@
 
 namespace Rodin::Variational
 {
-   template <class FES>
-   class TrialFunction : public ShapeFunction<FES, TrialSpace>
-   {
-      public:
-         constexpr
-         TrialFunction(FES& fes)
-            : ShapeFunction<FES, TrialSpace>(fes)
-         {}
+  template <class FESType>
+  class TrialFunction final
+    : public ShapeFunction<TrialFunction<FESType>, FESType, TrialSpace>
+  {
+    public:
+      using FES = FESType;
+      using Parent = ShapeFunction<TrialFunction<FESType>, FESType, TrialSpace>;
 
-         constexpr
-         TrialFunction(const TrialFunction& other)
-            : ShapeFunction<FES, TrialSpace>(other)
-         {}
+      constexpr
+      TrialFunction(const FES& fes)
+        : Parent(fes)
+      {}
 
-         constexpr
-         TrialFunction(TrialFunction&& other)
-            : ShapeFunction<FES, TrialSpace>(std::move(other))
-         {}
+      constexpr
+      TrialFunction(const TrialFunction& other)
+        : Parent(other)
+      {}
 
-         void operator=(const TrialFunction&) = delete;
+      constexpr
+      TrialFunction(TrialFunction&& other)
+        : Parent(std::move(other))
+      {}
 
-         void operator=(TrialFunction&&) = delete;
+      void operator=(const TrialFunction&) = delete;
 
-         constexpr
-         TrialFunction& emplaceGridFunction()
-         {
-            m_gf.emplace(this->getFiniteElementSpace());
-            return *this;
-         }
+      void operator=(TrialFunction&&) = delete;
 
-         constexpr
-         GridFunction<FES>& getGridFunction()
-         {
-            assert(m_gf);
-            return *m_gf;
-         }
+      inline
+      constexpr
+      auto x() const
+      {
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
+        return Component(*this, 0);
+      }
 
-         constexpr
-         const GridFunction<FES>& getGridFunction() const
-         {
-            assert(m_gf);
-            return *m_gf;
-         }
+      inline
+      constexpr
+      auto y() const
+      {
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
+        return Component(*this, 1);
+      }
 
-         constexpr
-         Component<TrialFunction<FES>> x() const
-         {
-            assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
-            return Component<TrialFunction<FES>>(*this, 0);
-         }
+      inline
+      constexpr
+      auto z() const
+      {
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
+        return Component(*this, 2);
+      }
 
-         constexpr
-         Component<TrialFunction<FES>> y() const
-         {
-            assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
-            return Component<TrialFunction<FES>>(*this, 1);
-         }
+      inline
+      constexpr
+      const TrialFunction& getLeaf() const
+      {
+        return *this;
+      }
 
-         constexpr
-         Component<TrialFunction<FES>> z() const
-         {
-            assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
-            return Component<TrialFunction<FES>>(*this, 2);
-         }
+      inline TrialFunction* copy() const noexcept override
+      {
+        return new TrialFunction(*this);
+      }
+  };
 
-         const TrialFunction& getLeaf() const override
-         {
-            return *this;
-         }
-
-         TrialFunction* copy() const noexcept override
-         {
-            return new TrialFunction(*this);
-         }
-      private:
-         std::optional<GridFunction<FES>> m_gf;
-   };
-
-   template <class FES>
-   TrialFunction(FES&) -> TrialFunction<FES>;
+  template <class FES>
+  TrialFunction(const FES&) -> TrialFunction<FES>;
 }
 #endif
 

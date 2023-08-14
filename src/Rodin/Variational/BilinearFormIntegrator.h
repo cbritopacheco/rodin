@@ -9,150 +9,122 @@
 
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
-#include "Assembly.h"
+#include "Integrator.h"
 
 namespace Rodin::Variational
 {
-   class BilinearFormIntegratorBase : public FormLanguage::Base
-   {
-      public:
-         BilinearFormIntegratorBase(
-               const ShapeFunctionBase<TrialSpace>& u,
-               const ShapeFunctionBase<TestSpace>& v)
-            :  m_u(u.copy()), m_v(v.copy())
-         {}
-
-         BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
-            :  FormLanguage::Base(other),
-               m_u(other.m_u->copy()), m_v(other.m_v->copy()),
-               m_attrs(other.m_attrs)
-         {}
-
-         BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
-            :  FormLanguage::Base(std::move(other)),
-               m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-               m_attrs(std::move(other.m_attrs))
-         {}
-
-         /**
-          * @brief Gets the attributes of the elements being integrated.
-          */
-         const std::set<int>& getAttributes() const
-         {
-            return m_attrs;
-         }
-
-         /**
-          * @brief Gets reference to trial function.
-          */
-         const ShapeFunctionBase<TrialSpace>& getTrialFunction() const
-         {
-            assert(m_u);
-            return *m_u;
-         }
-
-         /**
-          * @brief Gets reference to test function.
-          */
-         const ShapeFunctionBase<TestSpace>& getTestFunction() const
-         {
-            assert(m_v);
-            return *m_v;
-         }
-
-         /**
-          * @brief Specifies the material reference over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material reference over which the integration should
-          * take place.
-          */
-         BilinearFormIntegratorBase& over(int attr)
-         {
-            return over(std::set<int>{attr});
-         }
-
-         /**
-          * @brief Specifies the material references over which to integrate.
-          * @returns Reference to self (for method chaining)
-          *
-          * Specifies the material references over which the integration should
-          * take place.
-          */
-         BilinearFormIntegratorBase& over(const std::set<int>& attrs)
-         {
-            assert(attrs.size() > 0);
-            m_attrs = attrs;
-            return *this;
-         }
-
-         std::unique_ptr<mfem::BilinearFormIntegrator> build() const;
-
-         virtual ~BilinearFormIntegratorBase() = default;
-
-         /**
-          * @brief Gets the integration region.
-          */
-         virtual IntegratorRegion getIntegratorRegion() const = 0;
-
-         virtual bool isSupported(Bilinear::Assembly::Type t) const
-         {
-            switch (t)
-            {
-               case Bilinear::Assembly::Type::Common:
-                  return true;
-               default:
-                  return false;
-            }
-            return false;
-         }
-
-         virtual void getElementMatrix(const Bilinear::Assembly::Common& as) const = 0;
-
-         virtual BilinearFormIntegratorBase* copy() const noexcept override = 0;
-
-      private:
-         std::unique_ptr<ShapeFunctionBase<TrialSpace>> m_u;
-         std::unique_ptr<ShapeFunctionBase<TestSpace>>  m_v;
-         std::set<int> m_attrs;
-   };
-}
-
-namespace Rodin::Variational::Internal
-{
-   class ProxyBilinearFormIntegrator : public mfem::BilinearFormIntegrator
+  class BilinearFormIntegratorBase : public Integrator
   {
-      public:
-         ProxyBilinearFormIntegrator(const BilinearFormIntegratorBase& bfi)
-            : m_bfi(bfi)
-         {}
+    public:
+      using Parent = Integrator;
 
-         ProxyBilinearFormIntegrator(const ProxyBilinearFormIntegrator& other)
-            : mfem::BilinearFormIntegrator(other),
-              m_bfi(other.m_bfi)
-         {}
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+        : m_u(u), m_v(v)
+      {}
 
-         ProxyBilinearFormIntegrator(ProxyBilinearFormIntegrator&& other)
-            : mfem::BilinearFormIntegrator(std::move(other)),
-              m_bfi(other.m_bfi)
-         {}
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, const TestFunction<TestFES>& v) = delete;
 
-         void AssembleElementMatrix(
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
-         {
-            m_bfi.getElementMatrix(Bilinear::Assembly::Common{fe, fe, trans, mat});
-         }
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(const TrialFunction<TrialFES>& u, TestFunction<TestFES>&& v) = delete;
 
-         void AssembleElementMatrix2(
-               const mfem::FiniteElement& trial, const mfem::FiniteElement& test,
-                  mfem::ElementTransformation& trans, mfem::DenseMatrix& mat) override
-         {
-            m_bfi.getElementMatrix(Bilinear::Assembly::Common{trial, test, trans, mat});
-         }
-      private:
-         const BilinearFormIntegratorBase& m_bfi;
-   };
+      template <class TrialFES, class TestFES>
+      BilinearFormIntegratorBase(TrialFunction<TrialFES>&& u, TestFunction<TestFES>&& v) = delete;
+
+      BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
+        : Parent(other),
+          m_u(other.m_u), m_v(other.m_v),
+          m_attrs(other.m_attrs)
+      {}
+
+      BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_attrs(std::move(other.m_attrs))
+      {}
+
+      virtual
+      ~BilinearFormIntegratorBase() = default;
+
+      /**
+       * @brief Gets the attributes of the elements being integrated.
+       */
+      inline
+      const std::set<Geometry::Attribute>& getAttributes() const
+      {
+        return m_attrs;
+      }
+
+
+      /**
+       * @brief Specifies the material reference over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material reference over which the integration should
+       * take place.
+       */
+      inline
+      BilinearFormIntegratorBase& over(Geometry::Attribute attr)
+      {
+        return over(std::set<Geometry::Attribute>{attr});
+      }
+
+      /**
+       * @brief Specifies the material references over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material references over which the integration should
+       * take place.
+       */
+      inline
+      BilinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
+      {
+        assert(attrs.size() > 0);
+        m_attrs = attrs;
+        return *this;
+      }
+
+      inline
+      Integrator::Type getType() const
+      final override
+      {
+        return Integrator::Type::Bilinear;
+      }
+
+      /**
+       * @brief Gets reference to trial function.
+       */
+      inline
+      const FormLanguage::Base& getTrialFunction() const
+      {
+        return m_u.get();
+      }
+
+      /**
+       * @brief Gets reference to test function.
+       */
+      inline
+      const FormLanguage::Base& getTestFunction() const
+      {
+        return m_v.get();
+      }
+
+      /**
+       * @brief Performs the assembly of the element matrix for the given
+       * element.
+       */
+      virtual
+      Math::Matrix getMatrix(const Geometry::Simplex& element) const = 0;
+
+      virtual
+      BilinearFormIntegratorBase* copy() const noexcept override = 0;
+
+    private:
+      std::reference_wrapper<const FormLanguage::Base> m_u;
+      std::reference_wrapper<const FormLanguage::Base> m_v;
+      std::set<Geometry::Attribute> m_attrs;
+  };
 }
 
 #endif

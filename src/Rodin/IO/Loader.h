@@ -15,21 +15,21 @@
 
 namespace Rodin::IO
 {
-   template <class T>
-   class Loader
-   {
-      public:
-         virtual void load(std::istream& is) = 0;
+  template <class T>
+  class Loader
+  {
+    public:
+      virtual void load(std::istream& is) = 0;
 
-         virtual void load(const boost::filesystem::path& is)
-         {
-            std::ifstream in(is.c_str());
-            load(in);
-         }
+      virtual void load(const boost::filesystem::path& is)
+      {
+        std::ifstream in(is.c_str());
+        load(in);
+      }
 
-      protected:
-         virtual T& getObject() = 0;
-   };
+    protected:
+      virtual T& getObject() = 0;
+  };
 }
 
 #endif

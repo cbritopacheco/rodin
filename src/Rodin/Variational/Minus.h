@@ -9,49 +9,61 @@
 
 namespace Rodin::Variational
 {
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
-   operator-(const FunctionBase& lhs, T v)
-   {
-      return Sum(lhs, UnaryMinus(ScalarFunction(v)));
-   }
+  template <class LHSDerived, class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator-(const FunctionBase<LHSDerived>& lhs, Number rhs)
+  {
+    return Sum(lhs, UnaryMinus(ScalarFunction(rhs)));
+  }
 
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, Sum<FunctionBase, FunctionBase>>
-   operator-(T v, const FunctionBase& rhs)
-   {
-      return Sum(ScalarFunction(v), UnaryMinus(rhs));
-   }
+  template <class Number, class RHSDerived, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator-(Number lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Sum(UnaryMinus(ScalarFunction(lhs)), rhs);
+  }
 
-   Sum<FunctionBase, FunctionBase>
-   operator-(const FunctionBase& lhs, const FunctionBase& rhs);
+  template <class LHSDerived, class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator-(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 
-   template <ShapeFunctionSpaceType Space>
-   Sum<ShapeFunctionBase<Space>, ShapeFunctionBase<Space>>
-   operator-(const ShapeFunctionBase<Space>& lhs, const ShapeFunctionBase<Space>& rhs)
-   {
-      return Sum(lhs, UnaryMinus(rhs));
-   }
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  inline
+  constexpr
+  auto
+  operator-(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  {
+    return Sum(lhs, UnaryMinus(rhs));
+  }
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator-(
-         const BilinearFormIntegratorBase& lhs,
-         const BilinearFormIntegratorBase& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator-(
+      const BilinearFormIntegratorBase& lhs,
+      const BilinearFormIntegratorBase& rhs);
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator-(
-         const BilinearFormIntegratorBase& lhs,
-         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator-(
+      const BilinearFormIntegratorBase& lhs,
+      const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator-(
-         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
-         const BilinearFormIntegratorBase& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator-(
+      const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+      const BilinearFormIntegratorBase& rhs);
 
-   FormLanguage::List<BilinearFormIntegratorBase>
-   operator-(
-         const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
-         const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
+  FormLanguage::List<BilinearFormIntegratorBase>
+  operator-(
+      const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
+      const FormLanguage::List<BilinearFormIntegratorBase>& rhs);
 }
 
 #endif

@@ -4,81 +4,67 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_COSINE_H
-#define RODIN_VARIATIONAL_COSINE_H
+#ifndef RODIN_VARIATIONAL_Cos_H
+#define RODIN_VARIATIONAL_Cos_H
 
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "ScalarFunction.h"
-#include "Exceptions.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup CosineSpecializations Cosine Template Specializations
-    * @brief Template specializations of the Cosine class.
-    * @see Cosine
-    */
+  /**
+   * @defgroup CosSpecializations Cos Template Specializations
+   * @brief Template specializations of the Cos class.
+   * @see Cos
+   */
 
-   /**
-    * @ingroup CosSpecializations
-    */
-   template <>
-   class Cosine<FunctionBase> : public ScalarFunctionBase
-   {
-      public:
-         using Operand = FunctionBase;
+  /**
+   * @ingroup CosSpecializations
+   */
+  template <class NestedDerived>
+  class Cos<FunctionBase<NestedDerived>>
+    : public ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>
+  {
+    public:
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
-         Cosine(const FunctionBase& v)
-            : m_v(v.copy())
-         {
-            if (v.getRangeType() != RangeType::Scalar)
-               throw UnexpectedRangeTypeException(RangeType::Scalar, v.getRangeType());
-         }
+      Cos(const Operand& v)
+        : m_v(v)
+      {}
 
-         Cosine(const Cosine& other)
-            :  ScalarFunctionBase(other),
-               m_v(other.m_v->copy())
-         {}
+      Cos(const Cos& other)
+        : Parent(other),
+          m_v(other.m_v)
+      {}
 
-         Cosine(Cosine&& other)
-            :  ScalarFunctionBase(std::move(other)),
-               m_v(std::move(other.m_v))
-         {}
+      Cos(Cos&& other)
+        : Parent(std::move(other)),
+          m_v(std::move(other.m_v))
+      {}
 
-         Cosine& traceOf(const std::set<int>& attrs) override
-         {
-            ScalarFunctionBase::traceOf(attrs);
-            m_v->traceOf(attrs);
-            return *this;
-         }
+      inline
+      constexpr
+      Cos& traceOf(Geometry::Attribute attrs)
+      {
+        m_v.traceOf(attrs);
+        return *this;
+      }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            mfem::DenseMatrix s;
-            m_v->getValue(s, trans, ip);
-            return Math::cos(s(0, 0));
-         }
+      inline
+      auto getValue(const Geometry::Point& p) const
+      {
+        return std::cos(Scalar(m_v.getValue(p)));
+      }
 
-         Cosine* copy() const noexcept override
-         {
-            return new Cosine(*this);
-         }
+    private:
+      Operand m_v;
+  };
 
-      private:
-         std::unique_ptr<FunctionBase> m_v;
-   };
-   Cosine(const FunctionBase&) -> Cosine<FunctionBase>;
-
-   /**
-    * @brief Convenience function to create objects of type
-    * Cosine<FunctionBase>.
-    * @param[in] op Scalar function type
-    */
-   Cosine<FunctionBase> cos(const FunctionBase& op);
+  template <class NestedDerived>
+  Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
 }
 
 #endif

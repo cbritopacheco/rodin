@@ -13,477 +13,497 @@
 #include "Mesh.h"
 #include "SubMesh.h"
 
-#include "Element.h"
+#include "Simplex.h"
+#include "SimplexIterator.h"
+#include "IsoparametricTransformation.h"
+
 
 namespace Rodin::Geometry
 {
-   // ---- MeshBase ----------------------------------------------------------
-   int MeshBase::getSpaceDimension() const
-   {
-      return getHandle().SpaceDimension();
-   }
+  // ---- MeshBase ----------------------------------------------------------
+  bool MeshBase::isSurface() const
+  {
+    return (getSpaceDimension() - 1 == getDimension());
+  }
 
-   int MeshBase::getDimension() const
-   {
-      return getHandle().Dimension();
-   }
+  std::set<Attribute> MeshBase::getAttributes() const
+  {
+    return std::set<Attribute>(
+        getHandle().attributes.begin(), getHandle().attributes.end());
+  }
 
-   bool MeshBase::isSurface() const
-   {
-      return (getSpaceDimension() - 1 == getDimension());
-   }
+  std::set<Attribute> MeshBase::getBoundaryAttributes() const
+  {
+    return std::set<Attribute>(
+        getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
+  }
 
-   MeshBase& MeshBase::refine()
-   {
-      getHandle().UniformRefinement();
-      return *this;
-   }
+  // ---- Mesh<Context::Serial> ----------------------------------------------
+  size_t Mesh<Context::Serial>::getDimension() const
+  {
+    return m_dim;
+  }
 
-   MeshBase& MeshBase::refine(
-         std::function<bool(const Element&)> p,
-         Refinement::Type t,
-         int maxHangingNodesLevel)
-   {
-      assert(maxHangingNodesLevel >= 1);
-      if (maxHangingNodesLevel == std::numeric_limits<int>::infinity())
-         maxHangingNodesLevel = 0; // interpreted as unlimited in
-                                   // GeneralRefinement()
-      mfem::Array<int> refinementList;
-      for (int i = 0; i < count<Element>(); i++)
-         if (p(get<Element>(i)))
-            refinementList.Append(i);
-      switch (t)
+  size_t Mesh<Context::Serial>::getSpaceDimension() const
+  {
+    return m_sdim;
+  }
+
+  const SimplexTransformation&
+  Mesh<Context::Serial>::getSimplexTransformation(size_t dimension, Index idx) const
+  {
+    assert(m_transformations.size() > dimension);
+    assert(m_transformations[dimension].size() > idx);
+    if (m_transformations[dimension][idx])
+    {
+      return *m_transformations[dimension][idx];
+    }
+    else
+    {
+      const auto attribute = getAttribute(dimension, idx);
+      const mfem::Mesh& meshHandle = getHandle();
+      const mfem::GridFunction* nodes = meshHandle.GetNodes();
+      if (dimension == getDimension())
       {
-         case Refinement::Type::Automatic:
-         {
-            getHandle().GeneralRefinement(refinementList, -1, maxHangingNodesLevel);
-            break;
-         }
-         case Refinement::Type::Conforming:
-         {
-            getHandle().GeneralRefinement(refinementList, 0, maxHangingNodesLevel);
-            break;
-         }
-         case Refinement::Type::NonConforming:
-         {
-            getHandle().GeneralRefinement(refinementList, 1, maxHangingNodesLevel);
-            break;
-         }
-      };
-      return *this;
-   }
-
-   std::set<int> MeshBase::getAttributes() const
-   {
-      return std::set<int>(
-            getHandle().attributes.begin(), getHandle().attributes.end());
-   }
-
-   std::set<int> MeshBase::getBoundaryAttributes() const
-   {
-      return std::set<int>(
-            getHandle().bdr_attributes.begin(), getHandle().bdr_attributes.end());
-   }
-
-   void Mesh<Context::Serial>::save(
-         const boost::filesystem::path& filename, IO::FileFormat fmt, int precision) const
-   {
-      std::ofstream ofs(filename.c_str());
-      if (!ofs)
-      {
-         Alert::Exception()
-            << "Failed to open " << filename << " for writing."
-            << Alert::Raise;
+        if (!nodes)
+        {
+          mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+          trans->Attribute = attribute;
+          trans->ElementNo = idx;
+          trans->ElementType = mfem::ElementTransformation::ELEMENT;
+          trans->mesh = nullptr;
+          trans->Reset();
+          meshHandle.GetPointMatrix(idx, trans->GetPointMat());
+          trans->SetFE(
+              meshHandle.GetTransformationFEforElementType(
+                meshHandle.GetElementType(idx)));
+          m_transformations[dimension][idx].reset(new IsoparametricTransformation(trans));
+          return *m_transformations[dimension][idx];
+        }
+        else
+        {
+          assert(false);
+          return *m_transformations[dimension][idx];
+        }
       }
-      ofs.precision(precision);
-      switch (fmt)
+      else if (dimension == getDimension() - 1)
       {
-         case IO::FileFormat::MFEM:
-         {
-            IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
-            printer.print(ofs);
-            break;
-         }
-         case IO::FileFormat::GMSH:
-         {
-            IO::MeshPrinter<IO::FileFormat::GMSH, Context::Serial> printer(*this);
-            printer.print(ofs);
-            break;
-         }
-         case IO::FileFormat::MEDIT:
-         {
-            IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(*this);
-            printer.print(ofs);
-            break;
-         }
-         default:
-         {
-            Alert::Exception()
-               << "Saving to \"" << fmt << "\" format unsupported."
-               << Alert::Raise;
-         }
+        if (!nodes)
+        {
+          mfem::IsoparametricTransformation* trans = new mfem::IsoparametricTransformation;
+          trans->Attribute = attribute;
+          trans->ElementNo = idx;
+          trans->ElementType = mfem::ElementTransformation::FACE;
+          trans->mesh = nullptr;
+          mfem::DenseMatrix& pm = trans->GetPointMat();
+          trans->Reset();
+          const size_t spaceDim = getSpaceDimension();
+
+          mfem::Array<int> v;
+          meshHandle.GetFaceVertices(idx, v);
+          const int nv = v.Size();
+          pm.SetSize(spaceDim, nv);
+          for (size_t i = 0; i < spaceDim; i++)
+            for (int j = 0; j < nv; j++)
+              pm(i, j) = meshHandle.GetVertex(v[j])[i];
+          trans->SetFE(
+              meshHandle.GetTransformationFEforElementType(
+                meshHandle.GetFaceElementType(idx)));
+          m_transformations[dimension][idx].reset(new IsoparametricTransformation(trans));
+          return *m_transformations[dimension][idx];
+        }
+        else
+        {
+          assert(false);
+          return *m_transformations[dimension][idx];
+        }
       }
-   }
-
-   MeshBase& MeshBase::displace(const Variational::GridFunctionBase& u)
-   {
-      assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-      getHandle().MoveNodes(u.getHandle());
-      return *this;
-   }
-
-   double
-   MeshBase::getMaximumDisplacement(const Variational::GridFunctionBase& u)
-   {
-      double res;
-      getHandle().CheckDisplacements(u.getHandle(), res);
-      return res;
-   }
-
-   double MeshBase::getVolume()
-   {
-      double totalVolume = 0;
-      for (int i = 0; i < count<Element>(); i++)
-         totalVolume += getHandle().GetElementVolume(i);
-      return totalVolume;
-   }
-
-   double MeshBase::getVolume(int attr)
-   {
-      double totalVolume = 0;
-      for (int i = 0; i < count<Element>(); i++)
-         totalVolume += getHandle().GetElementVolume(i) * (getHandle().GetAttribute(i) == attr);
-      return totalVolume;
-   }
-
-   double MeshBase::getBoundaryElementArea(int i)
-   {
-      mfem::ElementTransformation *et = getHandle().GetBdrElementTransformation(i);
-      const mfem::IntegrationRule &ir = mfem::IntRules.Get(
-            getHandle().GetBdrElementBaseGeometry(i), et->OrderJ());
-      double area = 0.0;
-      for (int j = 0; j < ir.GetNPoints(); j++)
+      else if (dimension == 0)
       {
-         const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-         et->SetIntPoint(&ip);
-         area += ip.weight * et->Weight();
+        assert(false);
+        return *m_transformations[dimension][idx];
       }
-      return area;
-   }
-
-   double MeshBase::getPerimeter()
-   {
-      double totalArea = 0;
-      for (int i = 0; i < count<Element>(); i++)
-         totalArea += getBoundaryElementArea(i);
-      return totalArea;
-   }
-
-   double MeshBase::getPerimeter(int attr)
-   {
-      double totalVolume = 0;
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         totalVolume += getBoundaryElementArea(i) * (getHandle().GetBdrAttribute(i) == attr);
-      return totalVolume;
-   }
-
-   std::set<int> MeshBase::where(std::function<bool(const Element&)> p) const
-   {
-      std::set<int> res;
-      for (int i = 0; i < count<Element>(); i++)
-         if (p(get<Element>(i)))
-            res.insert(i);
-      return res;
-   }
-
-   MeshBase& MeshBase::edit(std::function<void(ElementView)> f)
-   {
-      for (int i = 0; i < count<Element>(); i++)
-         f(get<Element>(i));
-      return *this;
-   }
-
-   MeshBase& MeshBase::edit(std::function<void(BoundaryElementView)> f)
-   {
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         f(get<BoundaryElement>(i));
-      return *this;
-   }
-
-   MeshBase& MeshBase::edit(std::function<void(ElementView)> f, const std::set<int>& elements)
-   {
-      for (auto el : elements)
+      else
       {
-         assert(el >= 0);
-         assert(el < count<Element>());
-
-         f(get<Element>(el));
+        assert(false);
+        return *m_transformations[dimension][idx];
       }
-      return *this;
-   }
+    }
+  }
 
-   MeshBase& MeshBase::update()
-   {
-      getHandle().SetAttributes();
-      return *this;
-   }
+  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
+  {
+    mfem::Vector vs;
+    getHandle().GetVertices(vs);
+    vs *= c;
+    getHandle().SetVertices(vs);
+    return *this;
+  }
 
-   std::deque<std::set<int>> MeshBase::ccl(
-         std::function<bool(const Element&, const Element&)> p) const
-   {
-      std::set<int> visited;
-      std::deque<int> searchQueue;
-      std::deque<std::set<int>> res;
-
-      // Perform the labelling
-      for (int i = 0; i < count<Element>(); i++)
+  void Mesh<Context::Serial>::save(
+      const boost::filesystem::path& filename,
+      IO::FileFormat fmt, size_t precision) const
+  {
+    std::ofstream ofs(filename.c_str());
+    if (!ofs)
+    {
+      Alert::Exception()
+        << "Failed to open " << filename << " for writing."
+        << Alert::Raise;
+    }
+    ofs.precision(precision);
+    switch (fmt)
+    {
+      case IO::FileFormat::MFEM:
       {
-         if (!visited.count(i))
-         {
-            res.push_back({});
-            searchQueue.push_back(i);
-            while (searchQueue.size() > 0)
-            {
-               int el = searchQueue.back();
-               searchQueue.pop_back();
-               auto result = visited.insert(el);
-               bool inserted = result.second;
-               if (inserted)
-               {
-                  res.back().insert(el);
-                  for (int n : get<Element>(el).adjacent())
-                  {
-                     if (p(get<Element>(el), get<Element>(n)))
-                     {
-                        searchQueue.push_back(n);
-                     }
-                  }
-               }
-            }
-         }
+        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
+        printer.print(ofs);
+        break;
       }
-      return res;
-   }
+      case IO::FileFormat::GMSH:
+      {
+        IO::MeshPrinter<IO::FileFormat::GMSH, Context::Serial> printer(*this);
+        printer.print(ofs);
+        break;
+      }
+      case IO::FileFormat::MEDIT:
+      {
+        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(*this);
+        printer.print(ofs);
+        break;
+      }
+      default:
+      {
+        Alert::Exception()
+          << "Saving to \"" << fmt << "\" format unsupported."
+          << Alert::Raise;
+      }
+    }
+  }
 
+  Scalar MeshBase::getVolume()
+  {
+    Scalar totalVolume = 0;
+    for (auto it = getElement(); !it.end(); ++it)
+      totalVolume += it->getVolume();
+    return totalVolume;
+  }
+
+  Scalar MeshBase::getVolume(Attribute attr)
+  {
+    Scalar totalVolume = 0;
+    for (auto it = getElement(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+        totalVolume += it->getVolume();
+    }
+    return totalVolume;
+  }
+
+  Scalar MeshBase::getPerimeter()
+  {
+    Scalar totalVolume = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+      totalVolume += it->getVolume();
+    return totalVolume;
+  }
+
+  Scalar MeshBase::getPerimeter(Attribute attr)
+  {
+    Scalar totalVolume = 0;
+    for (auto it = getBoundary(); !it.end(); ++it)
+    {
+      if (it->getAttribute() == attr)
+        totalVolume += it->getVolume();
+    }
+    return totalVolume;
+  }
+
+  // std::deque<std::set<int>> MeshBase::ccl(
+  //     std::function<bool(const Element&, const Element&)> p) const
+  // {
+  //   std::set<int> visited;
+  //   std::deque<int> searchQueue;
+  //   std::deque<std::set<int>> res;
+
+  //   // Perform the labelling
+  //   assert(false);
+  //   // for (int i = 0; i < count<Element>(); i++)
+  //   // {
+  //   //   if (!visited.count(i))
+  //   //   {
+  //   //     res.push_back({});
+  //   //     searchQueue.push_back(i);
+  //   //     while (searchQueue.size() > 0)
+  //   //     {
+  //   //       int el = searchQueue.back();
+  //   //       searchQueue.pop_back();
+  //   //       auto result = visited.insert(el);
+  //   //       bool inserted = result.second;
+  //   //       if (inserted)
+  //   //       {
+  //   //         res.back().insert(el);
+  //   //         for (int n : get<Element>(el).adjacent())
+  //   //         {
+  //   //           if (p(get<Element>(el), get<Element>(n)))
+  //   //           {
+  //   //             searchQueue.push_back(n);
+  //   //           }
+  //   //         }
+  //   //       }
+  //   //     }
+  //   //   }
+  //   // }
+  //   return res;
+  // }
+
+  // ---- Mesh<Serial> ------------------------------------------------------
 #ifdef RODIN_USE_MPI
-   Mesh<Context::Parallel>
-   Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
-   {
-      return Mesh<Context::Parallel>(comm, *this);
-   }
+  Mesh<Context::MPI>
+  Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
+  {
+    return Mesh<Context::MPI>(comm, *this);
+  }
 #endif
 
-   // ---- Mesh<Serial> ------------------------------------------------------
-   Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
-      : m_mesh(std::move(mesh))
-   {}
+  Mesh<Context::Serial>::Mesh(mfem::Mesh&& mesh)
+    : m_dim(mesh.Dimension()), m_sdim(mesh.SpaceDimension())
+  {
+    m_impl.reset(new mfem::Mesh(std::move(mesh)));
 
-   Mesh<Context::Serial>::Mesh(const Mesh& other)
-      : m_mesh(other.m_mesh)
-   {}
+    // TODO: This whole constructors is ugly. In general we should try and
+    // build the mesh with the MeshBuilder object.
 
-   Mesh<Context::Serial>&
-   Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
-   {
-      mfem::named_ifgzstream input(filename.c_str());
-      if (!input)
+    m_count.resize(m_dim + 1);
+    m_count[m_dim] = getHandle().GetNE();
+    m_count[m_dim - 1] = getHandle().GetNumFaces();
+    m_count[0] = getHandle().GetNV();
+
+    m_transformations.resize(m_dim + 1);
+    m_transformations[m_dim].resize(m_count[m_dim]);
+    m_transformations[m_dim - 1].resize(m_count[m_dim - 1]);
+    m_transformations[0].resize(m_count[0]);
+
+    for (int i = 0; i < getHandle().GetNBE(); i++)
+      m_f2b[getHandle().GetBdrElementEdgeIndex(i)] = i;
+  }
+
+  size_t Mesh<Context::Serial>::getCount(size_t dimension) const
+  {
+    assert(m_count.size() > dimension);
+    return m_count[dimension];
+  }
+
+  FaceIterator Mesh<Context::Serial>::getBoundary() const
+  {
+    std::vector<Index> indices;
+    indices.reserve(getHandle().GetNBE());
+    for (int i = 0; i < getHandle().GetNBE(); i++)
+    {
+      int idx = getHandle().GetBdrFace(i);
+      if (!getHandle().FaceIsInterior(idx))
+        indices.push_back(idx);
+    }
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+  }
+
+  FaceIterator Mesh<Context::Serial>::getInterface() const
+  {
+    std::vector<Index> indices;
+    indices.reserve(getHandle().GetNumFaces());
+    for (int idx = 0; idx < getHandle().GetNumFaces(); idx++)
+    {
+      if (getHandle().FaceIsInterior(idx))
+        indices.push_back(idx);
+    }
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+  }
+
+  ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
+  {
+    return ElementIterator(*this, BoundedIndexGenerator(idx, getElementCount()));
+  }
+
+  FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
+  {
+    return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
+  }
+
+  VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
+  {
+    return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
+  }
+
+  SimplexIterator Mesh<Context::Serial>::getSimplex(size_t dimension, Index idx) const
+  {
+    return SimplexIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));
+  }
+
+  bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
+  {
+    return getHandle().FaceIsInterior(faceIdx);
+  }
+
+  bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
+  {
+    return !getHandle().FaceIsInterior(faceIdx);
+  }
+
+  Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
+  {
+    if (dimension == getDimension())
+    {
+      return getHandle().GetAttribute(index);
+    }
+    else if (dimension == getDimension() - 1)
+    {
+      auto it = m_f2b.find(index);
+      if (it != m_f2b.end())
       {
-         Alert::Exception()
-            << "Failed to open " << filename << " for reading."
-            << Alert::Raise;
+        return getHandle().GetBdrAttribute(it->second);
       }
-      switch (fmt)
+      else
       {
-         case IO::FileFormat::MFEM:
-         {
-            IO::MeshLoader<IO::FileFormat::MFEM, Context::Serial> loader(*this);
-            loader.load(input);
-            break;
-         }
-         case IO::FileFormat::GMSH:
-         {
-            IO::MeshLoader<IO::FileFormat::GMSH, Context::Serial> loader(*this);
-            loader.load(input);
-            break;
-         }
-         case IO::FileFormat::MEDIT:
-         {
-            IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
-            loader.load(input);
-            break;
-         }
-         default:
-         {
-            Alert::Exception()
-               << "Loading from \"" << fmt << "\" format unsupported."
-               << Alert::Raise;
-            break;
-         }
+        return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
       }
+    }
+    else if (dimension == 0)
+    {
+      return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+    }
+    else
+    {
+      assert(false);
+      return RODIN_DEFAULT_SIMPLEX_ATTRIBUTE;
+    }
+  }
 
-      return *this;
-   }
-
-   SubMesh<Context::Serial> Mesh<Context::Serial>::extract(const std::set<int>& elements)
-   {
-      SubMesh<Context::Serial> res(*this);
-      res.initialize(getDimension(), getSpaceDimension(), elements.size());
-      for (int el : elements)
-         res.add(get<Element>(el));
-      res.finalize();
-      return res;
-   }
-
-   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(int attr)
-   {
-      return keep(std::set<int>{attr});
-   }
-
-   SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<int>& attrs)
-   {
-      assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-
-      SubMesh<Context::Serial> res(*this);
-      res.initialize(getDimension(), getSpaceDimension());
-
-      // Add elements with matching attribute
-      for (int i = 0; i < count<Element>(); i++)
+  Mesh<Context::Serial>& Mesh<Context::Serial>
+  ::setAttribute(size_t dimension, Index index, Attribute attr)
+  {
+    if (dimension == getDimension())
+    {
+      getHandle().SetAttribute(index, attr);
+    }
+    else if (dimension == getDimension() - 1)
+    {
+      auto it = m_f2b.find(index);
+      if (it != m_f2b.end())
       {
-         const auto& el = get<Element>(i);
-         if (attrs.count(el.getAttribute()))
-            res.add(el);
+        getHandle().SetBdrAttribute(it->second, attr);
       }
-
-      // Add the boundary elements
-      for (int i = 0; i < count<BoundaryElement>(); i++)
+      else
       {
-         const auto& be = get<BoundaryElement>(i);
-         const auto& elems = be.elements();
-         for (const auto& el : elems)
-         {
-            if (attrs.count(get<Element>(el).getAttribute()))
-            {
-               res.add(be);
-               break;
-            }
-         }
+        assert(false);
       }
-      res.finalize();
-      return res;
-   }
+    }
+    else
+    {
+    }
+    return *this;
+  }
 
-   SubMesh<Context::Serial> Mesh<Context::Serial>::skin()
-   {
-      assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
-
-      SubMesh<Context::Serial> res(*this);
-      res.initialize(getSpaceDimension() - 1, getSpaceDimension());
-      for (int i = 0; i < count<BoundaryElement>(); i++)
-         res.add(get<BoundaryElement>(i));
-      res.finalize();
-      return res;
-   }
-
-   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(int attr)
-   {
-      return trim(std::set<int>{attr});
-   }
-
-   SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<int>& attrs)
-   {
-      std::set<int> complement = getAttributes();
-      for (const auto& a : attrs)
-         complement.erase(a);
-      return keep(complement);
-   }
-
-   Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
-         const std::map<std::set<int>, int>& boundaries)
-   {
-      for (int i = 0; i < count<Face>(); i++)
+  Mesh<Context::Serial>&
+  Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
+  {
+    mfem::named_ifgzstream input(filename.c_str());
+    if (!input)
+    {
+      Alert::Exception()
+        << "Failed to open " << filename << " for reading."
+        << Alert::Raise;
+    }
+    switch (fmt)
+    {
+      case IO::FileFormat::MFEM:
       {
-         const auto& fc = get<Face>(i);
-         const auto& elems = fc.elements();
-         if (elems.size() == 2)
-         {
-            std::set<int> k{
-               get<Element>(*elems.begin()).getAttribute(),
-               get<Element>(*std::next(elems.begin())).getAttribute()
-            };
-            auto it = boundaries.find(k);
-            if (it != boundaries.end())
-            {
-               mfem::Element* be =
-                  getHandle().NewElement(fc.getHandle().GetGeometryType());
-               be->SetVertices(fc.getHandle().GetVertices());
-               be->SetAttribute(it->second);
-               getHandle().AddBdrElement(be);
-            }
-         }
+        IO::MeshLoader<IO::FileFormat::MFEM, Context::Serial> loader(*this);
+        loader.load(input);
+        break;
       }
-      getHandle().FinalizeTopology();
-      return *this;
-   }
-
-   mfem::Mesh& Mesh<Context::Serial>::getHandle()
-   {
-      return m_mesh;
-   }
-
-   const mfem::Mesh& Mesh<Context::Serial>::getHandle() const
-   {
-      return m_mesh;
-   }
-
-   Mesh<Context::Serial>&
-   Mesh<Context::Serial>::initialize(int dim, int sdim)
-   {
-      m_mesh = mfem::Mesh(dim, 0, 0, 0, sdim);
-      return *this;
-   }
-
-   Mesh<Context::Serial>& Mesh<Context::Serial>::vertex(const std::vector<double>& x)
-   {
-      if (static_cast<int>(x.size()) != getSpaceDimension())
+      case IO::FileFormat::GMSH:
       {
-         Alert::Exception()
-            << "Vertex dimension is different from space dimension"
-            << " (" << x.size() << " != " << getSpaceDimension() << ")"
-            << Alert::Raise;
+        IO::MeshLoader<IO::FileFormat::GMSH, Context::Serial> loader(*this);
+        loader.load(input);
+        break;
       }
-      getHandle().AddVertex(x.data());
-      return *this;
-   }
+      case IO::FileFormat::MEDIT:
+      {
+        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
+        loader.load(input);
+        break;
+      }
+      default:
+      {
+        Alert::Exception()
+          << "Loading from \"" << fmt << "\" format unsupported."
+          << Alert::Raise;
+        break;
+      }
+    }
 
-   Mesh<Context::Serial>& Mesh<Context::Serial>::element(
-         Type geom,
-         const std::vector<int>& vs, int attr)
-   {
-      mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
-      el->SetVertices(vs.data());
-      el->SetAttribute(attr);
-      getHandle().AddElement(el);
-      return *this;
-   }
+    return *this;
+  }
 
-   Mesh<Context::Serial>& Mesh<Context::Serial>::boundary(
-         Type geom,
-         const std::vector<int>& vs, int attr)
-   {
-      mfem::Element* el = getHandle().NewElement(static_cast<int>(geom));
-      el->SetVertices(vs.data());
-      el->SetAttribute(attr);
-      getHandle().AddBdrElement(el);
-      return *this;
-   }
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr)
+  {
+    return keep(std::set<Attribute>{attr});
+  }
 
-   Mesh<Context::Serial>& Mesh<Context::Serial>::finalize()
-   {
-      getHandle().FinalizeTopology();
-      getHandle().Finalize(false, true);
-      return *this;
-   }
+  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const std::set<Attribute>& attrs)
+  {
+    SubMesh<Context::Serial> res(*this);
+    std::set<Index> indices;
+    for (Index i = 0; i < getCount(getDimension()); i++)
+    {
+      if (attrs.count(getAttribute(getDimension(), i)))
+        indices.insert(i);
+    }
+    res.initialize(getDimension(), getSpaceDimension())
+       .include(getDimension(), indices)
+       .finalize();
+    return res;
+  }
 
-   // ---- Mesh<Parallel> ----------------------------------------------------
+  Mesh<Context::Serial>::Builder
+  Mesh<Context::Serial>::initialize(size_t dim, size_t sdim)
+  {
+    m_dim = dim;
+    m_sdim = sdim;
+    Mesh<Context::Serial>::Builder build;
+    build.setReference(*this);
+    return build;
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
+  {
+    assert(!getHandle().GetNodes()); // Curved mesh or discontinuous mesh not handled yet!
+    SubMesh<Context::Serial> res(*this);
+    std::set<Index> indices;
+    for (auto it = getBoundary(); !it.end(); ++it)
+      indices.insert(it->getIndex());
+    res.initialize(getDimension() - 1, getSpaceDimension())
+       .include(getDimension() - 1, indices)
+       .finalize();
+    return res;
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr)
+  {
+    return trim(std::set<Attribute>{attr});
+  }
+
+  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const std::set<Attribute>& attrs)
+  {
+    std::set<Attribute> complement = getAttributes();
+    for (const auto& a : attrs)
+      complement.erase(a);
+    return keep(complement);
+  }
+
+  mfem::Mesh& Mesh<Context::Serial>::getHandle() const
+  {
+    return *m_impl;
+  }
 }
 

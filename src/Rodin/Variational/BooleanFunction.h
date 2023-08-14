@@ -13,95 +13,81 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup BooleanFunctionSpecializations BooleanFunction Template Specializations
-    * @brief Template specializations of the BooleanFunction class.
-    * @see BooleanFunction
-    */
+  /**
+   * @defgroup BooleanFunctionSpecializations BooleanFunction Template Specializations
+   * @brief Template specializations of the BooleanFunction class.
+   * @see BooleanFunction
+   */
 
-   class BooleanFunctionBase : public FunctionBase
-   {
-      public:
-         BooleanFunctionBase() = default;
+  template <class Derived>
+  class BooleanFunctionBase
+    : public FunctionBase<BooleanFunctionBase<Derived>>
+  {
+    public:
+      using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
 
-         BooleanFunctionBase(const BooleanFunctionBase& other)
-            : FunctionBase(other)
-         {}
+      BooleanFunctionBase() = default;
 
-         BooleanFunctionBase(BooleanFunctionBase&& other)
-            : FunctionBase(std::move(other))
-         {}
+      BooleanFunctionBase(const BooleanFunctionBase& other)
+        : Parent(other)
+      {}
 
-         virtual ~BooleanFunctionBase() = default;
+      BooleanFunctionBase(BooleanFunctionBase&& other)
+        : Parent(std::move(other))
+      {}
 
-         bool operator()(const Geometry::Point& v) const
-         {
-            return getValue(v.getElementTransformation(), v.getIntegrationPoint());
-         }
+      virtual ~BooleanFunctionBase() = default;
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            value.SetSize(1, 1);
-            value(0, 0) = getValue(trans, ip);
-         }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { 1, 1 };
+      }
 
-         RangeShape getRangeShape() const override
-         {
-            return {1, 1};
-         }
+      virtual BooleanFunctionBase* copy() const noexcept override = 0;
+  };
 
-         RangeType getRangeType() const override
-         {
-            return RangeType::Scalar;
-         }
+  /**
+   * @ingroup BooleanFunctionSpecializations
+   */
+  template <>
+  class BooleanFunction<Boolean> final
+    : public BooleanFunctionBase<BooleanFunction<Boolean>>
+  {
+    public:
+      using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
-         virtual bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const = 0;
+      BooleanFunction(Boolean v)
+        : m_v(v)
+      {}
 
-         virtual BooleanFunctionBase* copy() const noexcept override = 0;
-   };
+      BooleanFunction(const BooleanFunction& other)
+        : BooleanFunctionBase(other),
+          m_v(other.m_v)
+      {}
 
-   /**
-    * @ingroup BooleanFunctionSpecializations
-    */
-   template <>
-   class BooleanFunction<bool> : public BooleanFunctionBase
-   {
-      public:
-         BooleanFunction(bool v)
-            : m_v(v)
-         {}
+      BooleanFunction(BooleanFunction&& other)
+        : BooleanFunctionBase(std::move(other)),
+          m_v(other.m_v)
+      {}
 
-         BooleanFunction(const BooleanFunction& other)
-            : BooleanFunctionBase(other),
-              m_v(other.m_v)
-         {}
+      inline
+      constexpr
+      Boolean getValue(const Geometry::Point&) const
+      {
+        return m_v;
+      }
 
-         BooleanFunction(BooleanFunction&& other)
-            : BooleanFunctionBase(std::move(other)),
-              m_v(other.m_v)
-         {}
+      inline BooleanFunction* copy() const noexcept final override
+      {
+        return new BooleanFunction(*this);
+      }
 
-         bool getValue(
-               mfem::ElementTransformation&,
-               const mfem::IntegrationPoint&) const override
-         {
-            return m_v;
-         }
-
-         BooleanFunction* copy() const noexcept override
-         {
-            return new BooleanFunction(*this);
-         }
-
-      private:
-         bool m_v;
-   };
-   BooleanFunction(bool) -> BooleanFunction<bool>;
+    private:
+      const Boolean m_v;
+  };
+  BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 
 #endif

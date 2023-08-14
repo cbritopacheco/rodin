@@ -10,21 +10,26 @@
 using namespace Rodin;
 using namespace Geometry;
 
+const char* meshFile = "../resources/examples/Geometry/Skinning.mesh";
+
 int main(int, char**)
 {
-  const char* filename = "../resources/examples/Mesh/skinning.mesh";
   Mesh mesh;
-  mesh.load(filename);
+  mesh.load(meshFile);
 
   Alert::Info() << "Skinning mesh..." << Alert::Raise;
 
   auto skin = mesh.skin();
-  skin.trace({
-      {{3, 6}, 666},
-      {{2, 6}, 777}
-      });
+
+  // skin.trace({
+  //    {{3, 6}, 666},
+  //    {{2, 6}, 777}
+  //    });
+  //
+  skin.save("skin.mesh", IO::FileFormat::MEDIT);
+  mesh.save("volume.mesh", IO::FileFormat::MEDIT);
 
   Alert::Info() << "Saved mesh to skin.mesh" << Alert::Raise;
 
-  skin.save("skin.mesh", IO::FileFormat::MEDIT);
+  // skin.save("skin.mesh", IO::FileFormat::MEDIT);
 }

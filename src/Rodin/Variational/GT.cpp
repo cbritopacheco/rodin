@@ -7,10 +7,4 @@
 #include "GT.h"
 
 namespace Rodin::Variational
-{
-   GT<FunctionBase, FunctionBase>
-   operator>(const FunctionBase& lhs, const FunctionBase& rhs)
-   {
-      return GT(lhs, rhs);
-   }
-}
+{}

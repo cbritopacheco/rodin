@@ -9,6 +9,7 @@
 
 #include <boost/unordered_map.hpp>
 #include <boost/random/uniform_int.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include "Rodin/Variational.h"
 
@@ -31,9 +32,9 @@ namespace Rodin::External::MMG
        */
       ImplicitDomainMesher()
         : m_ls(0.0),
-          m_meshTheSurface(false),
-          m_idGen(0, std::numeric_limits<int16_t>::max())
-      {}
+        m_meshTheSurface(false),
+        m_idGen(0, std::numeric_limits<int16_t>::max())
+    {}
 
       ImplicitDomainMesher& surface(bool meshTheSurface = true);
 
@@ -107,7 +108,7 @@ namespace Rodin::External::MMG
        * The material reference of the level set (edge) boundary will be 10.
        */
       template <class FES>
-      MMG::Mesh discretize(Variational::GridFunction<FES>& ls)
+      MMG::Mesh discretize(const Variational::GridFunction<FES>& ls)
       {
         MMG5_pMesh mesh = nullptr;
         try
@@ -121,7 +122,7 @@ namespace Rodin::External::MMG
 
         // Erase boundary elements which have the isoref
         // if (m_isoref)
-        //   deleteBoundaryRef(mesh, *m_isoref);
+        //  deleteBoundaryRef(mesh, *m_isoref);
 
         MMG5_pSol sol = createSolution(mesh, ls.getFiniteElementSpace().getVectorDimension());
         copySolution(ls, sol);
@@ -178,56 +179,58 @@ namespace Rodin::External::MMG
         {
           const auto& ref = it.first;
           const auto& split = it.second;
-
           std::visit(Utility::Overloaded{
-            [&](const NoSplitT&) {},
-            [&](const Split& s)
-            {
-              if (m_meshTheSurface)
+              [&](const NoSplitT&) {},
+              [&](const Split& s)
               {
-                rodinMesh.edit(
-                  [&](Geometry::BoundaryElementView el)
+                if (m_meshTheSurface)
+                {
+                  for (auto bit = rodinMesh.getBoundary(); !bit.end(); ++bit)
                   {
-                    auto it = m_originalRefMap.find(el.getAttribute());
+                    const Geometry::Index idx = bit->getIndex();
+                    const Geometry::Attribute attr = rodinMesh.getFaceAttribute(idx);
+                    auto it = m_originalRefMap.find(attr);
                     if (it != m_originalRefMap.end())
                     {
                       MaterialReference originalRef = it->second;
                       const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
-                      if (el.getAttribute() == s.interior)
-                        el.setAttribute(originalSplit.interior);
-                      else if (el.getAttribute() == s.exterior)
-                        el.setAttribute(originalSplit.exterior);
-                    }
-                    else
-                    {
-                      // The key must have come from a no split
-                    }
-                  }).update();
+                      if (attr == s.interior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension() - 1, idx, originalSplit.interior);
+                      else if (attr == s.exterior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension() - 1, idx, originalSplit.exterior);
+                  }
+                  else
+                  {
+                    // The key must have come from a no split
+                  }
+                }
               }
               else
               {
-                rodinMesh.edit(
-                  [&](Geometry::ElementView el)
+                for (auto eit = rodinMesh.getElement(); !eit.end(); ++eit)
+                {
+                  const Geometry::Index idx = eit->getIndex();
+                  const Geometry::Attribute attr = rodinMesh.getElementAttribute(idx);
+                  auto it = m_originalRefMap.find(attr);
+                  if (it != m_originalRefMap.end())
                   {
-                    auto it = m_originalRefMap.find(el.getAttribute());
-                    if (it != m_originalRefMap.end())
-                    {
-                      MaterialReference originalRef = it->second;
-                      const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
-                      if (el.getAttribute() == s.interior)
-                        el.setAttribute(originalSplit.interior);
-                      else if (el.getAttribute() == s.exterior)
-                        el.setAttribute(originalSplit.exterior);
-                    }
-                    else
-                    {
-                      // The key must have come from a no split
-                    }
-                  }).update();
+                    MaterialReference originalRef = it->second;
+                    const auto& originalSplit = std::get<Split>(getSplitMap().at(originalRef));
+                    if (attr == s.interior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension(), idx, originalSplit.interior);
+                    else if (attr == s.exterior)
+                      rodinMesh.setAttribute(rodinMesh.getDimension(), idx, originalSplit.exterior);
+                  }
+                  else
+                  {
+                    // The key must have come from a no split
+                  }
+                }
               }
-            }
+              }
           }, split);
         }
+        rodinMesh.getHandle().SetAttributes();
 
         return rodinMesh;
       }
@@ -272,7 +275,7 @@ namespace Rodin::External::MMG
       int discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
       int discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
 
-      void generateUniqueSplit(const std::set<int>& attr);
+      void generateUniqueSplit(const std::set<Geometry::Attribute>& attr);
 
       void deleteBoundaryRef(MMG5_pMesh mesh, MaterialReference ref);
 

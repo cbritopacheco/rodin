@@ -1,48 +1,78 @@
 #ifndef RODIN_VARIATIONAL_TESTFUNCTION_H
 #define RODIN_VARIATIONAL_TESTFUNCTION_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-
+#include "Component.h"
+#include "GridFunction.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
-   template <class FES>
-   class TestFunction : public ShapeFunction<FES, TestSpace>
-   {
-      public:
-         constexpr
-         TestFunction(FES& fes)
-            : ShapeFunction<FES, TestSpace>(fes)
-         {}
+  template <class FESType>
+  class TestFunction final
+    : public ShapeFunction<TestFunction<FESType>, FESType, TestSpace>
+  {
+    public:
+      using FES = FESType;
+      using Parent = ShapeFunction<TestFunction<FESType>, FESType, TestSpace>;
 
-         constexpr
-         TestFunction(const TestFunction& other)
-            : ShapeFunction<FES, TestSpace>(other)
-         {}
+      constexpr
+      TestFunction(const FES& fes)
+        : Parent(fes)
+      {}
 
-         constexpr
-         TestFunction(TestFunction&& other)
-            : ShapeFunction<FES, TestSpace>(std::move(other))
-         {}
+      constexpr
+      TestFunction(const TestFunction& other)
+        : Parent(other)
+      {}
 
-         void operator=(const TestFunction&) = delete;
+      constexpr
+      TestFunction(TestFunction&& other)
+        : Parent(std::move(other))
+      {}
 
-         void operator=(TestFunction&&) = delete;
+      void operator=(const TestFunction&) = delete;
 
-         const TestFunction& getLeaf() const override
-         {
-            return *this;
+      void operator=(TestFunction&&) = delete;
 
-         }
+      inline
+      constexpr
+      auto x() const
+      {
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 1);
+        return Component(*this, 0);
+      }
 
-         TestFunction* copy() const noexcept override
-         {
-            return new TestFunction(*this);
-         }
-   };
-   template <class FES>
-   TestFunction(FES& fes) -> TestFunction<FES>;
+      inline
+      constexpr
+      auto y() const
+      {
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 2);
+        return Component(*this, 1);
+      }
+
+      inline
+      constexpr
+      auto z() const
+      {
+        assert(this->getFiniteElementSpace().getVectorDimension() >= 3);
+        return Component(*this, 2);
+      }
+
+      inline
+      constexpr
+      const TestFunction& getLeaf() const
+      {
+        return *this;
+      }
+
+      inline TestFunction* copy() const noexcept override
+      {
+        return new TestFunction(*this);
+      }
+  };
+
+  template <class FES>
+  TestFunction(const FES&) -> TestFunction<FES>;
 }
+
 #endif

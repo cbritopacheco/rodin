@@ -7,66 +7,63 @@
 #ifndef RODIN_MESH_FORWARDDECLS_H
 #define RODIN_MESH_FORWARDDECLS_H
 
-#include "Rodin/Traits.h"
-#include "Rodin/Configure.h"
+#include <cstddef>
 
-namespace Rodin
-{
-   namespace Context
-   {
-      struct Serial;
-      struct Parallel;
-   }
-}
+#include "Rodin/Context.h"
 
 namespace Rodin::Geometry
 {
-   enum class Type;
+  using Index = std::size_t;
 
-   class MeshBase;
+  using Attribute = std::size_t;
 
-   class MeshBuilder;
+  class IndexGenerator;
 
-   /**
-    * @brief Templated class for Mesh.
-    * @tparam Trait Indicates whether if Mesh is in a parallel context. It is
-    * one of Traits::Serial or Traits::Parallel.
-    *
-    * The Mesh class represents an n-dimensional support for instances of type
-    * GridFunctionBase or ShapeFunctionBase.
-    *
-    * There are two possible specializations:
-    * - Mesh<Traits::Serial>
-    * - Mesh<Traits::Parallel>
-    */
-   template <class Trait = Context::Serial>
-   class Mesh;
+  enum class Type;
 
-   /**
-    * @brief Templated class for SubMesh.
-    *
-    * @tparam Trait Indicates whether the Mesh is in a parallel context. It is
-    * one of Traits::Serial or Traits::Parallel.
-    *
-    * There are two possible specializations:
-    * - SubMesh<Traits::Serial>
-    * - SubMesh<Traits::Parallel>
-    */
-   template <class Trait>
-   class SubMesh;
+  class SimplexTransformation;
 
-   class ElementBase;
+  class Simplex;
 
-   class Element;
-   class ElementView;
+  class Element;
 
-   class Face;
-   class FaceView;
+  class Face;
 
-   class BoundaryElement;
-   class BoundaryElementView;
+  class Vertex;
 
-   class Point;
+  class Point;
+
+  class SimplexIterator;
+
+  class ElementIterator;
+
+  class FaceIterator;
+
+  class VertexIterator;
+
+  class MeshBase;
+
+  /**
+   * @brief Templated class for Mesh.
+   */
+  template <class ContextType = Context::Serial>
+  class Mesh;
+
+  /**
+   * @brief Templated class for SubMesh.
+   *
+   * @tparam Trait Indicates whether the Mesh is in a parallel context. It is
+   * one of Traits::Serial or Traits::Parallel.
+   *
+   * There are two possible specializations:
+   * - SubMesh<Traits::Serial>
+   * - SubMesh<Traits::Parallel>
+   */
+  template <class Context>
+  class SubMesh;
+
+  template <class Context>
+  class SubMeshBuilder;
 }
 
 #endif

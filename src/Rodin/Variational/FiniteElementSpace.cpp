@@ -8,40 +8,26 @@
 
 namespace Rodin::Variational
 {
-   int FiniteElementSpaceBase::getNumberOfDofs() const
-   {
-      return getHandle().GetNDofs();
-   }
+  size_t FiniteElementSpaceBase::getVectorDimension() const
+  {
+   return getHandle().GetVDim();
+  }
 
-   int FiniteElementSpaceBase::getVectorDimension() const
-   {
-      return getHandle().GetVDim();
-   }
+  mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
+    const std::set<Geometry::Attribute>& bdrAttr) const
+  {
+   mfem::Array<int> essTrueDofList;
+   int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
+   getHandle().GetEssentialTrueDofs(Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList);
+   return essTrueDofList;
+  }
 
-   void FiniteElementSpaceBase::update()
-   {
-      getHandle().Update();
-   }
-
-   mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
-         const std::set<int>& bdrAttr) const
-   {
-      mfem::Array<int> essTrueDofList;
-      int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-      const_cast<mfem::FiniteElementSpace&>(getHandle()
-            ).GetEssentialTrueDofs(
-               Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList);
-      return essTrueDofList;
-   }
-
-   mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
-         const std::set<int>& bdrAttr, int component) const
-   {
-      mfem::Array<int> essTrueDofList;
-      int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
-      const_cast<mfem::FiniteElementSpace&>(getHandle()
-            ).GetEssentialTrueDofs(
-               Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList, component);
-      return essTrueDofList;
-   }
+  mfem::Array<int> FiniteElementSpaceBase::getEssentialTrueDOFs(
+    const std::set<Geometry::Attribute>& bdrAttr, size_t component) const
+  {
+   mfem::Array<int> essTrueDofList;
+   int maxBdrAttr = *getMesh().getBoundaryAttributes().rbegin();
+   getHandle().GetEssentialTrueDofs(Utility::set2marker(bdrAttr, maxBdrAttr), essTrueDofList, component);
+   return essTrueDofList;
+  }
 }

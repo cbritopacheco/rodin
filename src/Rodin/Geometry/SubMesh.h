@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2023.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_MESH_SUBMESH_H
 #define RODIN_MESH_SUBMESH_H
 
@@ -11,80 +17,92 @@
 
 namespace Rodin::Geometry
 {
-   /**
-    * @brief A SubMesh object represents a subregion of a Mesh object.
-    *
-    * A SubMesh object contains a reference to the parent Mesh object. It also
-    * contains information regarding the mapping of elements and vertices
-    * between the child and parent Mesh.
-    *
-    * A Mesh which is also a SubMesh may be casted into down to access
-    * the SubMesh functionality. For example:
-    * @code{.cpp}
-    * if (mesh.isSubMesh())
-    * {
-    *    // Cast is well defined
-    *    auto& submesh = static_cast<SubMesh&>(mesh);
-    * }
-    * @endcode
-    *
-    */
-   template <>
-   class SubMesh<Context::Serial> : public Mesh<Context::Serial>
-   {
-      public:
-         SubMesh(const MeshBase& parent);
+  /**
+   * @brief A SubMesh object represents a subregion of a Mesh object.
+   *
+   * A SubMesh object contains a reference to the parent Mesh object. It also
+   * contains information regarding the mapping of elements and vertices
+   * between the child and parent Mesh.
+   *
+   * A Mesh which is also a SubMesh may be casted into down to access
+   * the SubMesh functionality. For example:
+   * @code{.cpp}
+   * if (mesh.isSubMesh())
+   * {
+   *   // Cast is well defined
+   *   auto& submesh = static_cast<SubMesh&>(mesh);
+   * }
+   * @endcode
+   *
+   */
+  template <>
+  class SubMesh<Context::Serial> : public Mesh<Context::Serial>
+  {
+    public:
+      class Builder : public BuilderBase
+      {
+        public:
+          Builder();
 
-         SubMesh(const SubMesh& other);
+          Builder& setReference(
+              Mesh<Context::Serial>::Builder&& build, SubMesh<Context::Serial>& mesh);
 
-         SubMesh& initialize(int dim, int sdim, int numVert = 0, int numElem = 0, int numBdrElem = 0)
-         {
-            getHandle() = mfem::Mesh(dim, numVert, numElem, numBdrElem, sdim);
-            return *this;
-         }
+          Builder& include(size_t dim, std::set<Index> indices);
 
-         /**
-          * @brief Adds an element from the parent mesh to the submesh.
-          *
-          * @param[in] el Element from the parent mesh
-          */
-         SubMesh& add(const Element& el);
+          void finalize() override;
 
-         /**
-          * Adds a bounday element from the parent mesh to the submesh.
-          *
-          * If `this->isSurface() && !getParent().isSurface()` then this will add the
-          * boundary element as an element of the submesh. Otherwise, it gets
-          * added normally as a boundary element.
-          */
-         SubMesh& add(const BoundaryElement& el);
+        private:
+          std::optional<std::reference_wrapper<SubMesh<Context::Serial>>> m_ref;
 
-         /**
-          * @returns Reference to the parent Mesh object
-          */
-         const MeshBase& getParent() const;
+          std::optional<Mesh<Context::Serial>::Builder> m_mbuild;
+          std::vector<Index> m_sidx;
 
-         /**
-          * @returns The SubMesh to Mesh vertex map
-          */
-         const boost::bimap<int, int>& getVertexMap() const;
+          std::vector<boost::bimap<Index, Index>> m_s2ps;
+      };
 
-         const boost::bimap<int, int>& getElementMap() const;
+      SubMesh(const MeshBase& parent);
 
-         const boost::bimap<int, int>& getBoundaryElementMap() const;
+      SubMesh(const SubMesh& other);
 
-         bool isSubMesh() const override
-         {
-            return true;
-         }
+      SubMesh(SubMesh&& other);
 
-      private:
-         const MeshBase& m_parent;
-         boost::bimap<int, int> m_s2pv;
-         boost::bimap<int, int> m_s2pf;
-         boost::bimap<int, int> m_s2pe;
-         boost::bimap<int, int> m_s2pb;
-   };
+      SubMesh& operator=(const SubMesh&) = delete;
+
+      SubMesh& operator=(SubMesh&& other)
+      {
+        MeshBase::operator=(std::move(other));
+        m_parent = std::move(other.m_parent);
+        m_s2ps = std::move(other.m_s2ps);
+        return *this;
+      }
+
+      bool isSubMesh() const override
+      {
+        return true;
+      }
+
+      /**
+       * @returns Reference to the parent Mesh object
+       */
+      const MeshBase& getParent() const;
+
+      const boost::bimap<Index, Index>& getSimplexMap(size_t d) const
+      {
+        return m_s2ps.at(d);
+      }
+
+      // [[deprecated]]
+      const boost::bimap<Index, Index>& getElementMap() const
+      {
+        return m_s2ps.at(getDimension());
+      }
+
+      SubMesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
+
+    private:
+      std::reference_wrapper<const MeshBase> m_parent;
+      std::vector<boost::bimap<Index, Index>> m_s2ps;
+  };
 }
 
 #endif

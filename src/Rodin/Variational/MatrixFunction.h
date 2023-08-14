@@ -19,56 +19,87 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
-    * @brief Template specializations of the MatrixFunction class.
-    * @see MatrixFunction
-    */
+  /**
+   * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
+   * @brief Template specializations of the MatrixFunction class.
+   * @see MatrixFunction
+   */
 
-   class MatrixFunctionBase : public FunctionBase
-   {
-      public:
-         MatrixFunctionBase() = default;
+  template <class Derived>
+  class MatrixFunctionBase : public FunctionBase<MatrixFunctionBase<Derived>>
+  {
+    public:
+      using Parent = FunctionBase<MatrixFunctionBase<Derived>>;
 
-         MatrixFunctionBase(const MatrixFunctionBase& other)
-            : FunctionBase(other)
-         {}
+      MatrixFunctionBase() = default;
 
-         MatrixFunctionBase(MatrixFunctionBase&& other)
-            : FunctionBase(std::move(other))
-         {}
+      MatrixFunctionBase(const MatrixFunctionBase& other)
+        : Parent(other)
+      {}
 
-         virtual ~MatrixFunctionBase() = default;
+      MatrixFunctionBase(MatrixFunctionBase&& other)
+        : Parent(std::move(other))
+      {}
 
-         RangeShape getRangeShape() const override
-         {
-            return {getRows(), getColumns()};
-         }
+      virtual ~MatrixFunctionBase() = default;
 
-         RangeType getRangeType() const override
-         {
-            return RangeType::Matrix;
-         }
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
+      }
 
-         /**
-          * @brief Gets the number of rows in the matrix
-          * @returns Number of rows
-          */
-         virtual int getRows() const = 0;
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getRows(), getColumns() };
+      }
 
-         /**
-          * @brief Gets the number of columns in the matrix
-          * @returns Number of columns
-          */
-         virtual int getColumns() const = 0;
+      /**
+       * @brief Gets the number of rows in the matrix
+       * @returns Number of rows
+       */
+      inline
+      constexpr
+      size_t getRows() const
+      {
+        return static_cast<const Derived&>(*this).getRows();
+      }
 
-         virtual void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override = 0;
+      /**
+       * @brief Gets the number of columns in the matrix
+       * @returns Number of columns
+       */
+      inline
+      constexpr
+      size_t getColumns() const
+      {
+        return static_cast<const Derived&>(*this).getColumns();
+      }
 
-         virtual MatrixFunctionBase* copy() const noexcept override = 0;
-   };
+      inline
+      constexpr
+      MatrixFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      MatrixFunctionBase& traceOf(const std::set<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      virtual MatrixFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+  };
 }
 
 #endif

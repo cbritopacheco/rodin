@@ -1,8 +1,6 @@
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.16)
 cmake_policy(SET CMP0054 NEW)
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.13)
-  cmake_policy(SET CMP0076 NEW)
-endif()
+cmake_policy(SET CMP0076 NEW)
 
 # Prohibit in-source builds
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -12,16 +10,22 @@ endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 project(Rodin LANGUAGES CXX C)
 
 # ---- Options ---------------------------------------------------------------
-option(RODIN_BUILD_SRC          "Build the Rodin source code"     ON)
-option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"        ON)
-option(RODIN_BUILD_DOC          "Build the Rodin documentation"   OFF)
-option(RODIN_USE_MCSS           "Use m.css style documentation"   OFF)
-option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"    OFF)
-option(RODIN_USE_MPI            "Build with MPI support"          OFF)
-option(RODIN_USE_OPENMP         "Build with OpenMP support"       OFF)
-option(RODIN_USE_SUITESPARSE    "Build with SuiteSparse support"  ON)
-option(RODIN_SILENCE_WARNINGS   "Silence warning outputted by Rodin"  OFF)
-option(RODIN_BUILD_PY           "Build Python bindings."          OFF)
+option(RODIN_BUILD_SRC          "Build the Rodin source code"           ON)
+option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"              ON)
+option(RODIN_BUILD_UNIT_TESTS   "Build Rodin unit tests"                OFF)
+option(RODIN_BUILD_BENCHMARKS   "Build Rodin benchmarks"                OFF)
+option(RODIN_BUILD_DOC          "Build the Rodin documentation"         OFF)
+option(RODIN_USE_MPI            "Use Rodin with MPI support"            OFF)
+option(RODIN_USE_OPENMP         "Use Rodin with OpenMP support"         OFF)
+option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    ON)
+option(RODIN_USE_MCSS           "Build documentation with m.css"        OFF)
+option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
+option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
+option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
+option(RODIN_CODE_COVERAGE      "Compile with code coverage flags"      OFF)
+
+set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
+set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
 
 # ---- Set the module path ---------------------
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -39,13 +43,39 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-rodin_add_compile_options(
-  LANG CXX
-  OPTIONS
-  -fvisibility=hidden
-  -fvisibility-inlines-hidden)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
+
+rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
+
+# ---- Set compile options for all the submodules ----------------------------
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  rodin_add_compile_options(
+    LANG CXX C
+    OPTIONS
+    -w
+    -O3
+    -march=native)
+elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
+  rodin_add_compile_options(
+    LANG CXX C
+    OPTIONS
+    -g
+    -O0
+    -fPIC)
+else()
+  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
+endif()
+
+if (RODIN_CODE_COVERAGE)
+  include(CodeCoverage)
+  append_coverage_compiler_flags()
+  rodin_add_compile_options(LANG CXX C -fprofile-abs-path)
+endif()
 
 if (RODIN_BUILD_SRC)
+  set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
   if (RODIN_USE_SUITESPARSE)
     set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
@@ -68,10 +98,6 @@ if (RODIN_BUILD_SRC)
   find_package(MFEM
     REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
     NO_DEFAULT_PATH)
-
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -145,7 +171,22 @@ if (RODIN_BUILD_SRC)
     add_subdirectory(examples)
   endif()
 
-  if (RODIN_BUILD_PY)
+  if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS)
+    # ---- GoogleTest ----
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
+
+    if (RODIN_BUILD_BENCHMARKS)
+      # set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
+      set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+      set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+      add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
+    endif()
+
+    add_subdirectory(tests)
+  endif()
+
+  if (RODIN_WITH_PY)
     set(Python3_FIND_REGISTRY LAST)
     set(Python3_FIND_VIRTUALENV FIRST)
     find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
