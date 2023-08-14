@@ -9,7 +9,6 @@ from sklearn import preprocessing
 plt.style.use("bmh")
 
 conductivities = [2.0]
-waveNumbers = [1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 20]
 angles = [ math.pi / 4 ]
 
 
@@ -43,18 +42,19 @@ if __name__ == '__main__':
     df.loc[df['error'] > thresh, 'error'] = thresh
 
     i = 0
+    waveNumbers = df['waveNumber'].unique()
     for waveNumber in waveNumbers:
         print(waveNumber)
         for angle in angles:
             for conductivity in conductivities:
-                plt.figure()
+                fig = plt.figure()
                 sdf = df[
                     (df['conductivity'] > conductivity - 0.001) &
                     (df['conductivity'] < conductivity + 0.001) &
                     (df['angle'] > angle - 0.001) &
                     (df['angle'] < angle + 0.001) &
-                    (df['waveNumber'] > waveNumber - 0.01) &
-                    (df['waveNumber'] < waveNumber + 0.01)
+                    (df['waveNumber'] < waveNumber + 0.001) &
+                    (df['waveNumber'] < waveNumber - 0.001)
                 ]
 
                 plt.hexbin(
@@ -75,9 +75,10 @@ if __name__ == '__main__':
                 plt.ylabel(latex_label[y_column])
                 plt.title(
                     '$|| u_\epsilon - u_0 ||_{L^2 (Q / B(x, 0.25))} \
-                    \ \mathrm{with} \ \gamma |_{B(x, e)} = %.2E, \
+                    \ \mathrm{with} \ \gamma |_{B(x, \epsilon)} = %.2E, \
                     \ \\theta = %d^\circ, \ k=%.2E$' % (
-                        conductivity, (180.0 / math.pi) * angle, waveNumber), pad=20)
+                        conductivity, (180.0 / math.pi) * angle, waveNumber),
+                    pad=20, fontsize=12)
                 out=("%s_VS_%s_Gamma=%.2E_Angle=%.2E_Wavenumber=%.2E") % (
                     file_label[x_column], file_label[y_column], conductivity,
                     (180.0 / math.pi) * angle, waveNumber)
@@ -85,6 +86,7 @@ if __name__ == '__main__':
                 plt.savefig(str(i) + '_' + out + '.png')
                 # plt.show()
                 i += 1
+                plt.close(fig)
 
 
 

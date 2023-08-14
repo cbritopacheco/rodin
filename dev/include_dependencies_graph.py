@@ -1,7 +1,6 @@
 import os
 import re
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
 import networkx as nx
 from pathlib import Path
