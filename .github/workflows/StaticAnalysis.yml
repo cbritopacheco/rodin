@@ -37,7 +37,7 @@ jobs:
           cache: 'pip'
       - run: pip install -r dev/Requirements.txt
       - name: Execute script
-        run: python ${{github.workspace}}/dev/include_dependency_graph.py --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
+        run: python ${{github.workspace}}/dev/include_dependency_graph.py ${{github.workspace}}/src --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
