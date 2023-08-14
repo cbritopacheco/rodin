@@ -6,41 +6,52 @@ on:
       - main
       - develop
 
+concurrency:
+  group: StaticAnalysis-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  deployments: write
+  contents: write
+
 jobs:
   Setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      - run: pip install -r dev/Requirements.txt
       - name: Setup destination path
-        run: mkdir -p static/dev/{{ github.ref }}
+        run: mkdir -p static/dev/${{ github.ref }}
   IncludeDependencyGraph:
     runs-on: ubuntu-latest
     needs: Setup
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Setup Graphviz
         uses: ts-graphviz/setup-graphviz@v1
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+          cache: 'pip'
+      - run: pip install -r dev/Requirements.txt
       - name: Execute script
-        run: python dev/include_dependency_graph.py --svg=static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
+        run: |
+          mkdir -p static/dev/${{ github.ref }}
+          python ${{github.workspace}}/dev/include_dependency_graph.py ${{github.workspace}}/src --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: script-artifact
-          path: static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
+          path: static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
   Deploy:
     runs-on: ubuntu-latest
+    if: ${{ true }}
     needs: [IncludeDependencyGraph]
     steps:
       - name: Upload 
-      - uses: peaceiris/actions-gh-pages@v3
-      - with:
+        uses: peaceiris/actions-gh-pages@v3
+        with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: static/dev/
-          destination_dir: static/dev/
+          publish_dir: static/dev/${{ github.ref }}
+          destination_dir: static/dev/${{ github.ref }}
