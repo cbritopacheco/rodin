@@ -34,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: Setup
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Execute script
         run: python ${{github.workspace}}/dev/include_dependency_graph.py --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
       - name: Upload Artifact
@@ -46,6 +48,8 @@ jobs:
     if: ${{ true }}
     needs: [IncludeDependencyGraph]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Upload 
         uses: peaceiris/actions-gh-pages@v3
         with:
