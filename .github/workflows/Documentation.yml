@@ -48,5 +48,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{github.workspace}}/build/doc/html
-          destination_dir: docs
+          destination_dir: docs/${{ github.ref }}
 
