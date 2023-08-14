@@ -15,17 +15,13 @@ permissions:
   contents: write
 
 jobs:
-  Setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup destination path
-        run: mkdir -p static/dev/${{ github.ref }}
   IncludeDependencyGraph:
     runs-on: ubuntu-latest
-    needs: Setup
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Setup destination path
+        run: mkdir -p static/dev/${{ github.ref }}
       - name: Setup Graphviz
         uses: ts-graphviz/setup-graphviz@v1
       - name: Setup Python
@@ -45,15 +41,10 @@ jobs:
           path: |
             static/dev/${{ github.ref }}/IncludeDependencyGraph.dot
             static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
-  Deploy:
-    runs-on: ubuntu-latest
-    if: ${{ true }}
-    needs: [IncludeDependencyGraph]
-    steps:
-      - name: Upload 
+      - name: Upload
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: static/dev/${{ github.ref }}
-          destination_dir: static/dev/${{ github.ref }}
+          destination_dir: static/dev/${{ github.ref }}/IncludeDependencyGraph
