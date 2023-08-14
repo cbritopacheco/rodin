@@ -18,10 +18,6 @@ jobs:
   Setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup Graphviz
-        uses: ts-graphviz/setup-graphviz@v1
       - name: Setup destination path
         run: mkdir -p static/dev/${{ github.ref }}
   IncludeDependencyGraph:
@@ -30,6 +26,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v1
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
