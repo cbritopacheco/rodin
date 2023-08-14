@@ -10,29 +10,29 @@ jobs:
   Setup:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-        cache: 'pip'
-    - run: pip install -r dev/Requirements.txt
-    - name: Setup destination path
-      run: mkdir -p static/dev/{{ github.ref }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - run: pip install -r dev/Requirements.txt
+      - name: Setup destination path
+        run: mkdir -p static/dev/{{ github.ref }}
   IncludeDependencyGraph:
     runs-on: ubuntu-latest
     needs: Setup
     steps:
-    - name: Setup Graphviz
-      uses: ts-graphviz/setup-graphviz@v1
-    - name: Execute script
-      run: python dev/include_dependencies_graph.py --svg=static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: script-artifact
-        path: static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v1
+      - name: Execute script
+        run: python dev/include_dependencies_graph.py --svg=static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: script-artifact
+          path: static/dev/{{ github.ref }}/IncludeDependencyGraph.svg
   Deploy:
     runs-on: ubuntu-latest
     needs: [IncludeDependencyGraph]
