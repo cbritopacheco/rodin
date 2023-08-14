@@ -25,7 +25,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: 3.x
           cache: 'pip'
       - run: pip install -r dev/Requirements.txt
       - name: Setup destination path
@@ -36,6 +36,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+          cache: 'pip'
       - name: Execute script
         run: python ${{github.workspace}}/dev/include_dependency_graph.py --svg=static/dev/${{ github.ref }}/IncludeDependencyGraph.svg
       - name: Upload Artifact
@@ -48,8 +53,6 @@ jobs:
     if: ${{ true }}
     needs: [IncludeDependencyGraph]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
       - name: Upload 
         uses: peaceiris/actions-gh-pages@v3
         with:
