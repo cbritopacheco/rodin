@@ -13,25 +13,25 @@
 
 namespace Rodin::Solver
 {
-   /**
-    * @brief Base class for solving variational problems represented by a
-    * Variational::Problem instance.
-    */
-   template <class OperatorType, class VectorType>
-   class SolverBase
-   {
-      public:
-         /**
-          * @brief Default virtual destructor.
-          */
-         virtual ~SolverBase() = default;
+  /**
+   * @brief Base class for solving variational problems represented by a
+   * Variational::Problem instance.
+   */
+  template <class OperatorType, class VectorType>
+  class SolverBase
+  {
+    public:
+      /**
+       * @brief Default virtual destructor.
+       */
+      virtual ~SolverBase() = default;
 
-         /**
-          * @brief Solves the specified Variational::Problem.
-          * @param[in,out] problem Variational problem to solve.
-          */
-         virtual void solve(OperatorType& stiffness, VectorType& mass, VectorType& solution) const = 0;
-   };
+      /**
+       * @brief Solves the specified Variational::Problem.
+       * @param[in,out] problem Variational problem to solve.
+       */
+      virtual void solve(OperatorType& A, VectorType& X, VectorType& B) const = 0;
+  };
 }
 
 #endif

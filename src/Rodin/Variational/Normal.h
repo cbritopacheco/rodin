@@ -1,86 +1,80 @@
 #ifndef RODIN_VARIATIONAL_NORMAL_H
 #define RODIN_VARIATIONAL_NORMAL_H
 
-#include "ForwardDecls.h"
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/SimplexTransformation.h"
 
+#include "ForwardDecls.h"
 #include "VectorFunction.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Outward unit normal.
-    */
-   class Normal : public VectorFunctionBase
-   {
-      public:
-         /**
-          * @brief Constructs the outward unit normal.
-          */
-         Normal(int dimension)
-            : m_dimension(dimension)
-         {
-            assert(dimension > 0);
-         }
+  /**
+   * @brief Outward unit normal.
+   */
+  class Normal final : public VectorFunctionBase<Normal>
+  {
+    public:
+      using Parent = VectorFunctionBase<Normal>;
 
-         Normal(const Normal& other)
-            :  VectorFunctionBase(other),
-               m_dimension(other.m_dimension)
-         {}
+      /**
+       * @brief Constructs the outward unit normal.
+       */
+      Normal(const Geometry::MeshBase& surface)
+        : m_dimension(surface.getSpaceDimension())
+      {
+        assert(m_dimension > 0);
+      }
 
-         Normal(Normal&& other)
-            :  VectorFunctionBase(std::move(other)),
-               m_dimension(other.m_dimension)
-         {}
+      Normal(const Normal& other)
+        : Parent(other),
+          m_dimension(other.m_dimension)
+      {}
 
-         int getDimension() const override
-         {
-            return m_dimension;
-         }
+      Normal(Normal&& other)
+        : Parent(std::move(other)),
+          m_dimension(std::move(other.m_dimension))
+      {}
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint&) const override
-         {
-            assert(
-               // We are on a boundary element of a d-mesh in d-space
-               (
-                  trans.mesh->Dimension() == trans.mesh->SpaceDimension() &&
-                  trans.ElementType == mfem::ElementTransformation::BDR_ELEMENT
-               ) ||
-               // Or we are on an element of a d-mesh in (d + 1)-space.
-               (
-                  trans.mesh->Dimension() == (trans.mesh->SpaceDimension() - 1) &&
-                  trans.ElementType == mfem::ElementTransformation::ELEMENT
-               )
-            );
-            value.SetSize(m_dimension);
-            mfem::CalcOrtho(trans.Jacobian(), value);
-            const double norm = value.Norml2();
-            assert(norm > 0.0);
-            switch (trans.ElementType)
-            {
-               case mfem::ElementTransformation::BDR_ELEMENT:
-               {
-                  value /= norm * (
-                        1.0 - 2.0 * trans.mesh->FaceIsInterior(
-                           trans.mesh->GetBdrFace(trans.ElementNo)));
-                  break;
-               }
-               default:
-               {
-                  value /= norm;
-               }
-            }
-         }
+      inline
+      constexpr
+      size_t getDimension() const
+      {
+        return m_dimension;
+      }
 
-         Normal* copy() const noexcept override
-         {
-            return new Normal(*this);
-         }
-      private:
-         const int m_dimension;
-   };
+      Math::Vector getValue(const Geometry::Point& p) const
+      {
+        assert(p.getSimplex().getMesh().isSurface());
+        const auto& jacobian = p.getJacobian();
+        Math::Vector value(m_dimension);
+        if (jacobian.rows() == 2)
+        {
+          value(0) =  jacobian(1, 0);
+          value(1) = -jacobian(0, 0);
+        }
+        else if (jacobian.rows() == 3)
+        {
+          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+        }
+        else
+        {
+          assert(false);
+          value.setConstant(NAN);
+        }
+        return value.normalized();
+      }
+
+      inline Normal* copy() const noexcept override
+      {
+        return new Normal(*this);
+      }
+
+    private:
+      const size_t m_dimension;
+  };
 }
 
 #endif

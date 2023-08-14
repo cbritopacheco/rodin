@@ -12,132 +12,168 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup TransposeSpecializations Transpose Template Specializations
-    * @brief Template specializations of the Transpose class.
-    * @see Transpose
-    */
+  /**
+   * @defgroup TransposeSpecializations Transpose Template Specializations
+   * @brief Template specializations of the Transpose class.
+   * @see Transpose
+   */
 
-   /**
-    * @brief Transpose of a FunctionBase object.
-    * @ingroup TransposeSpecializations
-    */
-   template <>
-   class Transpose<FunctionBase> : public FunctionBase
-   {
-      public:
-         /**
-          * @brief Constructs the Transpose matrix of the given matrix.
-          */
-         Transpose(const FunctionBase& m)
-            : m_matrix(m.copy())
-         {}
+  /**
+   * @brief Transpose of a FunctionBase object.
+   * @ingroup TransposeSpecializations
+   */
+  template <class NestedDerived>
+  class Transpose<FunctionBase<NestedDerived>> final
+    : public FunctionBase<Transpose<FunctionBase<NestedDerived>>>
+  {
+    public:
+      using Operand = FunctionBase<NestedDerived>;
+      using Parent = FunctionBase<Transpose<Operand>>;
 
-         Transpose(const Transpose& other)
-            :  FunctionBase(other),
-               m_matrix(other.m_matrix->copy())
-         {}
+      /**
+       * @brief Constructs the Transpose matrix of the given matrix.
+       */
+      constexpr
+      Transpose(const Operand& m)
+        : m_operand(m.copy())
+      {}
 
-         Transpose(Transpose&& other)
-            : FunctionBase(std::move(other)),
-              m_matrix(std::move(other.m_matrix))
-         {}
+      constexpr
+      Transpose(const Transpose& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy())
+      {}
 
-         RangeShape getRangeShape() const override
-         {
-            return m_matrix->getRangeShape().transpose();
-         }
+      constexpr
+      Transpose(Transpose&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand))
+      {}
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            m_matrix->getValue(value, trans, ip);
-            value.Transpose();
-         }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return m_operand->getRangeShape().transpose();
+      }
 
-         Transpose* copy() const noexcept override
-         {
-            return new Transpose(*this);
-         }
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
+      }
 
-      private:
-         std::unique_ptr<FunctionBase> m_matrix;
-   };
-   Transpose(const FunctionBase&) -> Transpose<MatrixFunctionBase>;
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+        return this->object(getOperand().getValue(p)).transpose();
+      }
 
-   /**
-    * @brief Transpose of a ShapeFunctionBase object.
-    * @ingroup TransposeSpecializations
-    */
-   template <ShapeFunctionSpaceType Space>
-   class Transpose<ShapeFunctionBase<Space>> : public ShapeFunctionBase<Space>
-   {
-      public:
-         Transpose(const ShapeFunctionBase<Space>& op)
-            : m_shape(op.copy())
-         {}
+      inline Transpose* copy() const noexcept override
+      {
+        return new Transpose(*this);
+      }
 
-         Transpose(const Transpose& other)
-            : m_shape(other.m_shape->copy())
-         {}
+    private:
+      std::unique_ptr<Operand> m_operand;
+  };
 
-         Transpose(Transpose&& other)
-            : m_shape(std::move(other.m_shape))
-         {}
+  template <class NestedDerived>
+  Transpose(const FunctionBase<NestedDerived>&) -> Transpose<FunctionBase<NestedDerived>>;
 
-         const ShapeFunctionBase<Space>& getLeaf() const override
-         {
-            return m_shape->getLeaf();
-         }
+  /**
+   * @brief Transpose of a ShapeFunctionBase object.
+   * @ingroup TransposeSpecializations
+   */
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class Transpose<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
+  {
+    public:
+      using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
+      using Parent = ShapeFunctionBase<Transpose<Operand>, FES, Space>;
 
-         int getRows() const override
-         {
-            return m_shape->getColumns();
-         }
+      constexpr
+      Transpose(const Operand& op)
+        : Parent(op.getFiniteElementSpace()),
+          m_operand(op.copy())
+      {}
 
-         int getColumns() const override
-         {
-            return m_shape->getRows();
-         }
+      constexpr
+      Transpose(const Transpose& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy())
+      {}
 
-         int getDOFs(
-               const mfem::FiniteElement& fe,
-               const mfem::ElementTransformation& trans) const override
-         {
-            return m_shape->getDOFs(fe, trans);
-         }
+      constexpr
+      Transpose(Transpose&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand))
+      {}
 
-         void getOperator(
-               DenseBasisOperator& op,
-               const mfem::FiniteElement& fe,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip,
-               ShapeComputator& comp) const override
-         {
-            m_shape->getOperator(op, fe, trans, ip, comp);
-            op.transpose();
-         }
+      inline
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
 
-         FiniteElementSpaceBase& getFiniteElementSpace() override
-         {
-            return m_shape->getFiniteElementSpace();
-         }
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return getOperand().getRangeShape().transpose();
+      }
 
-         const FiniteElementSpaceBase& getFiniteElementSpace() const override
-         {
-            return m_shape->getFiniteElementSpace();
-         }
+      inline
+      constexpr
+      size_t getDOFs(const Geometry::Simplex& simplex) const
+      {
+        return getOperand().getDOFs(simplex);
+      }
 
-         Transpose* copy() const noexcept override
-         {
-            return new Transpose(*this);
-         }
+      inline
+      constexpr
+      const Operand& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
+      }
 
-      private:
-         std::unique_ptr<ShapeFunctionBase<Space>> m_shape;
-   };
+      inline
+      constexpr
+      auto getTensorBasis(const Geometry::Point& p) const
+      {
+        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+        const auto& op = this->object(getOperand().getTensorBasis(p));
+        return TensorBasis(op.getDOFs(), [&](size_t i){ return op(i).transpose(); });
+      }
+
+      inline
+      constexpr
+      const FES& getFiniteElementSpace() const
+      {
+        return m_operand.getFiniteElementSpace();
+      }
+
+      inline Transpose* copy() const noexcept override
+      {
+        return new Transpose(*this);
+      }
+
+    private:
+      std::unique_ptr<Operand> m_operand;
+  };
+
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  Transpose(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+    -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
 #endif

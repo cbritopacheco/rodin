@@ -13,76 +13,76 @@ namespace Rodin::External::MMG
 {
   class Mesh : public Geometry::Mesh<Context::Serial>
   {
-    public:
-      struct Edge
-      {
-        std::pair<int, int> endpoints;
-        int ref;
-      };
+   public:
+    struct Edge
+    {
+      std::pair<int, int> endpoints;
+      int ref;
+    };
 
-      using Parent = Geometry::Mesh<Context::Serial>;
+    using Parent = Geometry::Mesh<Context::Serial>;
 
-      Mesh() : Parent()
-      {}
+    Mesh() : Parent()
+    {}
 
-      Mesh(const Mesh& other)
-        : Parent(other),
-          m_corners(other.m_corners),
-          m_ridges(other.m_ridges),
-          m_edges(other.m_edges)
-      {}
+    Mesh(const Mesh& other)
+      : Parent(other),
+       m_corners(other.m_corners),
+       m_ridges(other.m_ridges),
+       m_edges(other.m_edges)
+    {}
 
-      Mesh(Mesh&& other)
-        : Parent(std::move(other)),
-          m_corners(std::move(other.m_corners)),
-          m_ridges(std::move(other.m_ridges)),
-          m_edges(std::move(other.m_edges))
-      {}
+    Mesh(Mesh&& other)
+      : Parent(std::move(other)),
+       m_corners(std::move(other.m_corners)),
+       m_ridges(std::move(other.m_ridges)),
+       m_edges(std::move(other.m_edges))
+    {}
 
-      Mesh& operator=(Mesh&& other)
-      {
-        Parent::operator=(std::move(other));
-        m_edges = std::move(other.m_edges);
-        m_ridges = std::move(other.m_ridges);
-        m_corners = std::move(other.m_corners);
-        return *this;
-      }
+    Mesh& operator=(Mesh&& other)
+    {
+      Parent::operator=(std::move(other));
+      m_edges = std::move(other.m_edges);
+      m_ridges = std::move(other.m_ridges);
+      m_corners = std::move(other.m_corners);
+      return *this;
+    }
 
-      void save(
-          const boost::filesystem::path& filename,
-          IO::FileFormat fmt = IO::FileFormat::MFEM,
-          int precison = 16) const override;
+    void save(
+       const boost::filesystem::path& filename,
+       IO::FileFormat fmt = IO::FileFormat::MFEM,
+       size_t precison = 16) const override;
 
-      Mesh& load(
-          const boost::filesystem::path& filename,
-          IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+    Mesh& load(
+       const boost::filesystem::path& filename,
+       IO::FileFormat fmt = IO::FileFormat::MFEM) override;
 
-      Mesh& corner(int vertexIdx);
+    Mesh& corner(int vertexIdx);
 
-      Mesh& ridge(int edgeIdx);
+    Mesh& ridge(int edgeIdx);
 
-      Mesh& edge(const std::pair<int, int>& endpoints, int ref);
+    Mesh& edge(const std::pair<int, int>& endpoints, int ref);
 
-      const std::set<int>& getCorners() const
-      {
-        return m_corners;
-      }
+    const std::set<int>& getCorners() const
+    {
+      return m_corners;
+    }
 
-      const std::set<int>& getRidges() const
-      {
-        return m_ridges;
-      }
+    const std::set<int>& getRidges() const
+    {
+      return m_ridges;
+    }
 
-      const std::vector<Edge>& getEdges() const
-      {
-        return m_edges;
-      }
+    const std::vector<Edge>& getEdges() const
+    {
+      return m_edges;
+    }
 
-    private:
-       std::set<int> m_corners;
+   private:
+     std::set<int> m_corners;
 
-       std::set<int> m_ridges;
-       std::vector<Edge> m_edges;
+     std::set<int> m_ridges;
+     std::vector<Edge> m_edges;
   };
 }
 

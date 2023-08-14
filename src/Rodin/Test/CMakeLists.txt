@@ -26,8 +26,6 @@ add_library(Rodin::Test ALIAS RodinTest)
 target_sources(RodinTest INTERFACE ${RodinTest_SRCS} ${RodinTest_HEADERS})
 
 target_include_directories(RodinTest
-  INTERFACE
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  )
+  INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 

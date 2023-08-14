@@ -10,6 +10,6 @@ namespace Rodin::Plot::Backend::Bases
 {
   bool BaseTopLevelArtist2D::isTopLevel() const
   {
-    return true;
+   return true;
   }
 }

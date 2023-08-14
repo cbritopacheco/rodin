@@ -14,67 +14,75 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup CompositionSpecializations Composition Template Specializations
-    * @brief Template specializations of the Composition class.
-    * @see Composition
-    */
+  /**
+   * @defgroup CompositionSpecializations Composition Template Specializations
+   * @brief Template specializations of the Composition class.
+   * @see Composition
+   */
 
-   /**
-    * @brief Composition of a scalar valued function on the real line and a
-    * scalar function on the mesh.
-    *
-    * Represents the composition of two functions @f$ f : \mathbb{R}
-    * \rightarrow \mathbb{R} @f$ and @f$ g : \Omega \rightarrow \mathbb{R} @f$:
-    * @f[
-    *    (f \circ g)(x) = f(g(x)) \ .
-    * @f]
-    */
-   template <>
-   class Composition<std::function<double(double)>, FunctionBase>
-      : public ScalarFunctionBase
-   {
-      public:
-         Composition(std::function<double(double)> f, const FunctionBase& g);
+  /**
+   * @brief Composition of a scalar valued function on the real line and a
+   * scalar function on the mesh.
+   *
+   * Represents the composition of two functions @f$ f : \mathbb{R}
+   * \rightarrow \mathbb{R} @f$ and @f$ g : \Omega \rightarrow \mathbb{R} @f$:
+   * @f[
+   *   (f \circ g)(x) = f(g(x)) \ .
+   * @f]
+   */
+  template <class NestedDerived>
+  class Composition<std::function<Scalar(Scalar)>, FunctionBase<NestedDerived>> final
+    : public ScalarFunctionBase<Composition<std::function<Scalar(Scalar)>, FunctionBase<NestedDerived>>>
+  {
+    public:
+      using LHS = std::function<Scalar(Scalar)>;
+      using RHS = FunctionBase<NestedDerived>;
+      using Parent = ScalarFunctionBase<Composition<LHS, RHS>>;
 
-         Composition(const Composition& other);
+      Composition(LHS f, const RHS& g)
+        : m_f(f), m_g(g)
+      {}
 
-         Composition(Composition&& other);
+      Composition(const Composition& other)
+        : Parent(other),
+          m_f(other.m_f), m_g(other.m_g)
+      {}
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+      Composition(Composition&& other)
+        : m_f(std::move(other.m_f)), m_g(std::move(other.m_g))
+      {}
 
-         Composition* copy() const noexcept override
-         {
-            return new Composition(*this);
-         }
+      inline
+      Scalar getValue(const Geometry::Point& p) const
+      {
+        return m_f(m_g->getValue(p));
+      }
 
-      private:
-         std::function<double(double)> m_f;
-         std::unique_ptr<FunctionBase> m_g;
-   };
-   template <class Lhs>
-   Composition(const Lhs&, const FunctionBase&)
-      -> Composition<std::enable_if_t<
-         std::is_invocable_r_v<double, Lhs, double>, std::function<double(double)>>, FunctionBase>;
+    private:
+      LHS m_f;
+      RHS m_g;
+  };
 
-   /**
-    * @brief Composes two functions
-    * @param f
-    * @param g
-    *
-    * Represents the composition of two functions @f$ f @f$ and @f$ g @f$:
-    * @f[
-    *    (f \circ g)(x) = f(g(x))
-    * @f]
-    *
-    */
-   template <class Lhs, class Rhs>
-   auto compose(Lhs&& f, Rhs&& g)
-   {
-      return Composition(std::forward<Lhs>(f), std::forward<Rhs>(g));
-   }
+  template <class NestedDerived>
+  Composition(const std::function<Scalar(Scalar)>&, const FunctionBase<NestedDerived>&)
+    -> Composition<std::function<Scalar(Scalar)>, FunctionBase<NestedDerived>>;
+
+  /**
+   * @brief Composes two functions
+   * @param f
+   * @param g
+   *
+   * Represents the composition of two functions @f$ f @f$ and @f$ g @f$:
+   * @f[
+   *   (f \circ g)(x) = f(g(x))
+   * @f]
+   *
+   */
+  template <class Lhs, class Rhs>
+  auto compose(Lhs&& f, Rhs&& g)
+  {
+    return Composition(std::forward<Lhs>(f), std::forward<Rhs>(g));
+  }
 }
 
 #endif

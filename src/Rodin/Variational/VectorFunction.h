@@ -16,205 +16,203 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"
+#include "Rodin/Utility/ForConstexpr.h"
 
-#include "Utility.h"
 #include "Function.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup VectorFunctionSpecializations VectorFunction Template Specializations
-    * @brief Template specializations of the VectorFunction class.
-    * @see VectorFunction
-    */
+  /**
+   * @defgroup VectorFunctionSpecializations VectorFunction Template Specializations
+   * @brief Template specializations of the VectorFunction class.
+   * @see VectorFunction
+   */
 
-   class VectorFunctionBase : public FunctionBase
-   {
-      public:
-         VectorFunctionBase() = default;
+  template <class Derived>
+  class VectorFunctionBase : public FunctionBase<VectorFunctionBase<Derived>>
+  {
+    public:
+      using Parent = FunctionBase<VectorFunctionBase<Derived>>;
 
-         VectorFunctionBase(const VectorFunctionBase& other)
-            : FunctionBase(other)
-         {}
+      VectorFunctionBase() = default;
 
-         VectorFunctionBase(VectorFunctionBase&& other)
-            : FunctionBase(std::move(other))
-         {}
+      VectorFunctionBase(const VectorFunctionBase& other)
+        : Parent(other)
+      {}
 
-         /**
-          * @brief Convenience function to access the 1st component of the
-          * vector.
-          */
-         Component<FunctionBase> x() const;
+      VectorFunctionBase(VectorFunctionBase&& other)
+        : Parent(std::move(other))
+      {}
 
-         /**
-          * @brief Convenience function to access the 2nd component of the
-          * vector.
-          */
-         Component<FunctionBase> y() const;
+      /**
+       * @brief Convenience function to access the 1st component of the
+       * vector.
+       */
+      inline
+      constexpr
+      auto x() const
+      {
+        assert(getDimension() >= 1);
+        return operator()(0);
+      }
 
-         /**
-          * @brief Convenience function to access the 3rd component of the
-          * vector.
-          */
-         Component<FunctionBase> z() const;
+      /**
+       * @brief Convenience function to access the 2nd component of the
+       * vector.
+       */
+      inline
+      constexpr
+      auto y() const
+      {
+        assert(getDimension() >= 2);
+        return operator()(1);
+      }
 
-         virtual ~VectorFunctionBase() = default;
+      inline
+      constexpr
+      auto z() const
+      {
+        assert(getDimension() >= 3);
+        return operator()(2);
+      }
 
-         void getValue(
-               mfem::DenseMatrix& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            mfem::Vector v;
-            getValue(v, trans, ip);
-            value.GetMemory() = std::move(v.GetMemory());
-            value.SetSize(v.Size(), 1);
-         }
+      inline
+      constexpr
+      auto operator()(const Geometry::Point& p) const
+      {
+        return getValue(p);
+      }
 
-         RangeShape getRangeShape() const override
-         {
-            return {getDimension(), 1};
-         }
+      /**
+       * @brief Access the ith component of the vector function.
+       * @returns Object of type Component<VectorFunctionBase> representing
+       * the ith component of the VectorFunction.
+       */
+      inline
+      constexpr
+      auto operator()(size_t i) const
+      {
+        assert(0 <= i);
+        assert(i < getDimension());
+        return Component(*this, i);
+      }
 
-         virtual RangeType getRangeType() const override
-         {
-            return RangeType::Vector;
-         }
+      virtual ~VectorFunctionBase() = default;
 
-         /**
-          * @brief Access the ith component of the vector function.
-          * @returns Object of type Component<VectorFunctionBase> representing
-          * the ith component of the VectorFunction.
-          */
-         virtual Component<FunctionBase> operator()(int i) const;
+      inline
+      constexpr
+      RangeShape getRangeShape() const
+      {
+        return { getDimension(), 1 };
+      }
 
-         /**
-          * @brief Computes the value at the given transformation and
-          * integration point.
-          * @returns Value at given transformation and integration point.
-          */
-         virtual void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const = 0;
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
+      }
 
-         FunctionValue::Vector operator()(const Geometry::Point& v) const
-         {
-            mfem::Vector value;
-            getValue(value, v.getElementTransformation(), v.getIntegrationPoint());
-            return value;
-         }
+      /**
+       * @brief Gets the dimension of the vector object.
+       * @returns Dimension of vector.
+       */
+      inline
+      constexpr
+      size_t getDimension() const
+      {
+        return static_cast<const Derived&>(*this).getDimension();
+      }
 
-         /**
-          * @brief Gets the dimension of the vector object.
-          * @returns Dimension of vector.
-          */
-         virtual int getDimension() const = 0;
+      virtual VectorFunctionBase* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+  };
 
-         virtual VectorFunctionBase* copy() const noexcept override = 0;
-   };
+  /**
+   * @ingroup VectorFunctionSpecializations
+   * @tparam V Type of first value
+   * @tparam Values Parameter pack of remaining values
+   * @brief Represents a vector function which may be constructed from values
+   * which can be converted to objects of type ScalarFunction.
+   *
+   * In general one may construct any VectorFunction by specifying its values
+   * in a uniform initialization manner. For example, to construct a
+   * VectorFunction with constant entries (1, 2, 3) :
+   * @code{.cpp}
+   * auto v = VectorFunction{1, 2, 3};
+   * @endcode
+   * Alternatively, we may construct instances of VectorFunction from any type
+   * which is convertible to specializations of ScalarFunction:
+   * @code{.cpp}
+   * auto s = ScalarFunction(3.1416);
+   * auto v = VectorFunction{Dx(s), 42, s};
+   * @endcode
+   */
+  template <class V, class ... Values>
+  class VectorFunction<V, Values...> final
+    : public VectorFunctionBase<VectorFunction<V, Values...>>
+  {
+    public:
+      using Parent = VectorFunctionBase<VectorFunction<V, Values...>>;
+      /**
+       * @brief Constructs a vector with the given values.
+       * @param[in] values Parameter pack of values
+       *
+       * Each value passed must be convertible to any specialization of
+       * ScalarFunction.
+       */
+      VectorFunction(const V v, const Values... values)
+        : m_fs(ScalarFunction(v), ScalarFunction(values)...)
+      {}
 
-   /**
-    * @ingroup VectorFunctionSpecializations
-    * @tparam V Type of first value
-    * @tparam Values Parameter pack of remaining values
-    * @brief Represents a vector function which may be constructed from values
-    * which can be converted to objects of type ScalarFunction.
-    *
-    * In general one may construct any VectorFunction by specifying its values
-    * in a uniform initialization manner. For example, to construct a
-    * VectorFunction with constant entries (1, 2, 3) :
-    * @code{.cpp}
-    * auto v = VectorFunction{1, 2, 3};
-    * @endcode
-    * Alternatively, we may construct instances of VectorFunction from any type
-    * which is convertible to specializations of ScalarFunction:
-    * @code{.cpp}
-    * auto s = ScalarFunction(3.1416);
-    * auto v = VectorFunction{Dx(s), 42, s};
-    * @endcode
-    */
-   template <class V, class ... Values>
-   class VectorFunction<V, Values...> : public VectorFunctionBase
-   {
-      public:
-         /**
-          * @brief Constructs a vector with the given values.
-          * @param[in] values Parameter pack of values
-          *
-          * Each value passed must be convertible to any specialization of
-          * ScalarFunction.
-          */
-         constexpr
-         VectorFunction(V v, Values... values)
-         {
-            m_fs.reserve(1 + sizeof...(Values));
-            makeFsFromTuple(std::forward_as_tuple(v, values...));
-         }
+      VectorFunction(const VectorFunction& other)
+        : Parent(other),
+          m_fs(other.m_fs)
+      {}
 
-         constexpr
-         VectorFunction(const VectorFunction& other)
-            : VectorFunctionBase(other)
-         {
-            m_fs.reserve(1 + sizeof...(Values));
-            for (const auto& v : other.m_fs)
-               m_fs.emplace_back(v->copy());
-         }
+      VectorFunction(VectorFunction&& other)
+        : Parent(std::move(other)),
+          m_fs(std::move(other.m_fs))
+      {}
 
-         constexpr
-         VectorFunction(VectorFunction&& other)
-            :  VectorFunctionBase(std::move(other)),
-               m_fs(std::move(other.m_fs))
-         {}
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        Math::FixedSizeVector<1 + sizeof...(Values)> value;
+        Utility::ForIndex<1 + sizeof...(Values)>(
+            [&](auto i){ value(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
+        return value;
+      }
 
-         void getValue(
-               mfem::Vector& value,
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            value.SetSize(static_cast<int>(1 + sizeof...(Values)));
-            for (size_t i = 0; i < 1 + sizeof...(Values); i++)
-               value(i) = m_fs[i]->getValue(trans, ip);
-         }
+      inline
+      constexpr
+      size_t getDimension() const
+      {
+        return 1 + sizeof...(Values);
+      }
 
-         int getDimension() const override
-         {
-            return 1 + sizeof...(Values);
-         }
+      inline
+      constexpr
+      VectorFunction& traceOf(Geometry::Attribute attrs)
+      {
+        std::apply([&](auto& s) { s.traceOf(attrs); }, m_fs);
+        return *this;
+      }
 
-         VectorFunction& traceOf(const std::set<int>& attrs) override
-         {
-            VectorFunctionBase::traceOf(attrs);
-            for (auto& f : m_fs)
-               f->traceOf(attrs);
-            return *this;
-         }
+      inline VectorFunction* copy() const noexcept override
+      {
+        return new VectorFunction(*this);
+      }
 
-         VectorFunction* copy() const noexcept override
-         {
-            return new VectorFunction(*this);
-         }
-
-      private:
-         template<std::size_t I = 0, class ... Tp>
-         typename std::enable_if_t<I == sizeof...(Tp)>
-         makeFsFromTuple(const std::tuple<Tp...>&)
-         {}
-
-         template<std::size_t I = 0, class ... Tp>
-         typename std::enable_if_t<I < sizeof...(Tp)>
-         makeFsFromTuple(const std::tuple<Tp...>& t)
-         {
-            m_fs.emplace_back(new ScalarFunction(std::get<I>(t)));
-            makeFsFromTuple<I + 1, Tp...>(t);
-         }
-
-         std::vector<std::unique_ptr<ScalarFunctionBase>> m_fs;
-   };
-   template <class ... Values>
-   VectorFunction(Values&&...) -> VectorFunction<Values...>;
+    private:
+      std::tuple<ScalarFunction<V>, ScalarFunction<Values>...> m_fs;
+  };
+  template <class V, class ... Values>
+  VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
 }
 
 #endif

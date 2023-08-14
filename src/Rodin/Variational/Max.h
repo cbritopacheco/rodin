@@ -15,34 +15,133 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Represent the max function.
-    */
-   class Max : public ScalarFunctionBase
-   {
-      public:
-         Max(const FunctionBase& a, double b);
+  /**
+   * @brief Represents the maximum between two arguments.
+   */
+  template <class LHSDerived, class RHSDerived>
+  class Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
+    : public ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+  {
+    public:
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = FunctionBase<RHSDerived>;
+      using Parent = ScalarFunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
-         Max(double a, const FunctionBase& b);
+      Max(const LHS& a, const RHS& b)
+        : m_lhs(a), m_rhs(b)
+      {}
 
-         Max(const FunctionBase& a, const FunctionBase& b);
+      Max(const Max& other)
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+      {}
 
-         Max(const Max& other);
+      Max(Max&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
 
-         Max(Max&& other);
+      inline
+      constexpr
+      Max& traceOf(Geometry::Attribute attrs)
+      {
+        m_lhs.traceOf(attrs);
+        m_rhs.traceOf(attrs);
+        return *this;
+      }
 
-         Max& traceOf(const std::set<int>& attrs) override;
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point& p) const
+      {
+        return std::max(Scalar(m_lhs.getValue(p)), Scalar(m_rhs.getValue(p).scalar()));
+      }
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override;
+    private:
+      LHS m_lhs;
+      RHS m_rhs;
+  };
 
-         Max* copy() const noexcept override;
+  template <class LHSDerived, class RHSDerived>
+  Max(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+    -> Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
-      private:
-         std::unique_ptr<FunctionBase> m_a;
-         std::unique_ptr<FunctionBase> m_b;
-   };
+  template <class NestedDerived>
+  class Max<FunctionBase<NestedDerived>, Scalar>
+    : public ScalarFunctionBase<Max<FunctionBase<NestedDerived>, Scalar>>
+  {
+    public:
+      using LHS = FunctionBase<NestedDerived>;
+      using RHS = Scalar;
+      using Parent = ScalarFunctionBase<Max<FunctionBase<NestedDerived>, RHS>>;
+
+      constexpr
+      Max(const LHS& a, const RHS& b)
+        : m_lhs(a), m_rhs(b)
+      {}
+
+      constexpr
+      Max(const Max& other)
+        : Parent(other),
+          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+      {}
+
+      constexpr
+      Max(Max&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      inline
+      constexpr
+      Max& traceOf(Geometry::Attribute attrs)
+      {
+        m_lhs.traceOf(attrs);
+        return *this;
+      }
+
+      inline
+      constexpr
+      Scalar getValue(const Geometry::Point& p) const
+      {
+        return std::max(Scalar(m_lhs.getValue(p)), m_rhs);
+      }
+
+    private:
+      LHS m_lhs;
+      RHS m_rhs;
+  };
+
+  template <class NestedDerived>
+  Max(const FunctionBase<NestedDerived>&, Scalar) -> Max<FunctionBase<NestedDerived>, Scalar>;
+
+  template <class NestedDerived>
+  class Max<Scalar, FunctionBase<NestedDerived>>
+    : public Max<FunctionBase<NestedDerived>, Scalar>
+  {
+    public:
+      using LHS = Scalar;
+      using RHS = FunctionBase<NestedDerived>;
+      using Parent = Max<FunctionBase<NestedDerived>, Scalar>;
+
+      constexpr
+      Max(const LHS& a, const RHS& b)
+        : Parent(b, a)
+      {}
+
+      constexpr
+      Max(const Max& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      Max(Max&& other)
+        : Parent(std::move(other))
+      {}
+  };
+
+  template <class NestedDerived>
+  Max(Scalar, const FunctionBase<NestedDerived>&) -> Max<Scalar, FunctionBase<NestedDerived>>;
 }
 
 #endif

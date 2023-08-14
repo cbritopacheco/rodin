@@ -8,74 +8,88 @@
 #define RODIN_VARIATIONAL_AND_H
 
 #include "ForwardDecls.h"
-#include "Exceptions.h"
 #include "GridFunction.h"
 #include "BooleanFunction.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup ANDSpecializations AND Template Specializations
-    * @brief Template specializations of the AND class.
-    * @see AND
-    */
+  /**
+   * @defgroup ANDSpecializations AND Template Specializations
+   * @brief Template specializations of the AND class.
+   * @see AND
+   */
 
-   /**
-    * @ingroup ANDSpecializations
-    * @brief Logical AND operator between two instances of BooleanFunctionBase
-    */
-   template <>
-   class AND<BooleanFunctionBase, BooleanFunctionBase> : public BooleanFunctionBase
-   {
-      public:
-         AND(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            if (lhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
-            if (rhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, rhs.getRangeType()).raise();
-         }
+  /**
+   * @ingroup ANDSpecializations
+   * @brief Logical AND operator between two instances of BooleanFunctionBase
+   */
+  template <class LHSDerived, class RHSDerived>
+  class AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>> final
+    : public BooleanFunctionBase<AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>>
+  {
+    public:
+      using LHS = BooleanFunctionBase<LHSDerived>;
+      using RHS = BooleanFunctionBase<RHSDerived>;
+      using Parent = BooleanFunctionBase<OR<LHS, RHS>>;
 
-         AND(const AND& other)
-            : BooleanFunctionBase(other),
-              m_lhs(other.m_lhs->copy()),
-              m_rhs(other.m_rhs->copy())
-         {}
+      AND(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs), m_rhs(rhs)
+      {}
 
-         AND(AND&& other)
-            : BooleanFunctionBase(std::move(other)),
-              m_lhs(std::move(other.m_lhs)),
-              m_rhs(std::move(other.m_rhs))
-         {}
+      AND(const AND& other)
+        : Parent(other),
+          m_lhs(other.m_lhs),
+          m_rhs(other.m_rhs)
+      {}
 
-         bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            return m_lhs->getValue(trans, ip) && m_rhs->getValue(trans, ip);
-         }
+      AND(AND&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
+      {}
 
-         AND* copy() const noexcept override
-         {
-            return new AND(*this);
-         }
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return Boolean(m_lhs.getValue(p)) && Boolean(m_rhs.getValue(p));
+      }
 
-      private:
-         std::unique_ptr<BooleanFunctionBase> m_lhs;
-         std::unique_ptr<BooleanFunctionBase> m_rhs;
-   };
-   AND(const BooleanFunctionBase&, const BooleanFunctionBase&)
-      -> AND<BooleanFunctionBase, BooleanFunctionBase>;
+    private:
+      LHS m_lhs;
+      RHS m_rhs;
+  };
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(const BooleanFunctionBase&, const BooleanFunctionBase&);
+  template <class LHSDerived, class RHSDerived>
+  AND(const BooleanFunctionBase<LHSDerived>&, const BooleanFunctionBase<RHSDerived>&)
+    -> AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(bool lhs, const BooleanFunctionBase& rhs);
+  template <class LHSDerived, class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator||(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  {
+    return AND(lhs, rhs);
+  }
 
-   AND<BooleanFunctionBase, BooleanFunctionBase>
-   operator&&(const BooleanFunctionBase& lhs, bool rhs);
+  template <class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator||(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  {
+    return AND(BooleanFunction(lhs), rhs);
+  }
+
+  template <class LHSDerived>
+  inline
+  constexpr
+  auto
+  operator||(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
+  {
+    return AND(lhs, BooleanFunction(rhs));
+  }
 }
 
 #endif

@@ -7,7 +7,6 @@
 #ifndef RODIN_PLOT_ARTIST_LINES_LINE2D_H
 #define RODIN_PLOT_ARTIST_LINES_LINE2D_H
 
-#include "Rodin/Core/Common.h"
 #include "Rodin/Plot/Common.h"
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Bases/BaseArtist2D.h"
@@ -17,22 +16,22 @@ namespace Rodin::Plot::Artist::Lines
 {
   class Line2D : public Backend::Bases::BaseArtist2D
   {
-    public:
-    template <class ... Args>
-    Line2D(Backend::Bases::BaseArtist2D& parent, Args&&... args)
-      : Backend::Bases::BaseArtist2D(parent),
-        m_object(parent.getObject2D().addChild<Backend::Renderer::Object2D>())
-    {
-      draw<Backend::Renderer::Drawables::Line2D>(std::forward<Args>(args)...);
-    }
+   public:
+   template <class ... Args>
+   Line2D(Backend::Bases::BaseArtist2D& parent, Args&&... args)
+    : Backend::Bases::BaseArtist2D(parent),
+      m_object(parent.getObject2D().addChild<Backend::Renderer::Object2D>())
+   {
+    draw<Backend::Renderer::Drawables::Line2D>(std::forward<Args>(args)...);
+   }
 
-    virtual Backend::Renderer::Object2D& getObject2D() override
-    {
-      return m_object;
-    }
+   virtual Backend::Renderer::Object2D& getObject2D() override
+   {
+    return m_object;
+   }
 
-    private:
-    Backend::Renderer::Object2D&            m_object;
+   private:
+   Backend::Renderer::Object2D&        m_object;
   };
 }
 

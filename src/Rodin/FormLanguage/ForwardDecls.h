@@ -9,10 +9,10 @@
 
 namespace Rodin::Variational::FormLanguage
 {
-   class Base;
+  class Base;
 
-   template <class T>
-   class List;
+  template <class T>
+  class List;
 }
 
 #endif

@@ -10,85 +10,83 @@
 #include <cmath>
 
 #include "RangeShape.h"
-#include "Exceptions.h"
 #include "Function.h"
 #include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup PowSpecializations Pow Template Specializations
-    * @brief Template specializations of the Pow class.
-    * @see Pow
-    */
+  /**
+   * @defgroup PowSpecializations Pow Template Specializations
+   * @brief Template specializations of the Pow class.
+   * @see Pow
+   */
 
-   /**
-    * @ingroup PowSpecializations
-    * @brief Represent the power function.
-    *
-    * This class represents the function @f$ f : \mathbb{R} \rightarrow
-    * \mathbb{R} @f$ defined by the exponentiation of a base value @f$ x \in
-    * \mathbb{R} @f$ to the power @f$ p @f$:
-    * @f$
-    *   f(x) = x^p \ .
-    * @f$
-    */
-   template <class Number>
-   class Pow<FunctionBase, Number> : public ScalarFunctionBase
-   {
-      static_assert(std::is_arithmetic_v<Number>, "T must be an arithmetic type");
-      public:
-         /**
-          * @brief Constructs the power object
-          * @param[in] s Base value
-          * @param[in] p Power
-          */
-         Pow(const FunctionBase& s, Number p)
-            : m_s(s.copy()),
-              m_p(p)
-         {
-            if (s.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, s.getRangeType());
-         }
+  /**
+   * @ingroup PowSpecializations
+   * @brief Represent the power function.
+   *
+   * This class represents the function @f$ f : \mathbb{R} \rightarrow
+   * \mathbb{R} @f$ defined by the exponentiation of a base value @f$ x \in
+   * \mathbb{R} @f$ to the power @f$ p @f$:
+   * @f$
+   *  f(x) = x^p \ .
+   * @f$
+   */
+  template <class BaseDerived, class Number>
+  class Pow<FunctionBase<BaseDerived>, Number>
+    : public ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>
+  {
+    static_assert(std::is_arithmetic_v<Number>);
+    public:
+      using Base = FunctionBase<BaseDerived>;
+      using Exponent = Number;
+      using Parent = ScalarFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
 
-         Pow(const Pow& other)
-            : ScalarFunctionBase(other),
-              m_s(other.m_s->copy()),
-              m_p(other.m_p)
-         {}
+      /**
+       * @brief Constructs the power object
+       * @param[in] s Base value
+       * @param[in] p Power
+       */
+      constexpr
+      Pow(const Base& s, Exponent p)
+        : m_s(s), m_p(p)
+      {}
 
-         Pow(Pow&& other)
-            : ScalarFunctionBase(std::move(other)),
-              m_s(std::move(other.m_s)),
-              m_p(other.m_p)
-         {}
+      constexpr
+      Pow(const Pow& other)
+        : Parent(other),
+          m_s(other.m_s), m_p(other.m_p)
+      {}
 
-         Pow& traceOf(const std::set<int>& attrs) override
-         {
-            ScalarFunctionBase::traceOf(attrs);
-            m_s->traceOf(attrs);
-            return *this;
-         }
+      constexpr
+      Pow(Pow&& other)
+        : Parent(std::move(other)),
+          m_s(std::move(other.m_s)),
+          m_p(std::move(other.m_p))
+      {}
 
-         double getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            mfem::DenseMatrix s;
-            m_s->getValue(s, trans, ip);
-            return std::pow(s(0, 0), m_p);
-         }
+      inline
+      constexpr
+      Pow& traceOf(Geometry::Attribute attrs)
+      {
+        m_s.traceOf(attrs);
+        return *this;
+      }
 
-         Pow* copy() const noexcept override
-         {
-            return new Pow(*this);
-         }
-      private:
-         std::unique_ptr<FunctionBase> m_s;
-         Number m_p;
-   };
-   template <class Number>
-   Pow(const FunctionBase&, Number) -> Pow<FunctionBase, Number>;
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return std::pow(m_s.getValue(p), m_p);
+      }
+
+    private:
+      Base m_s;
+      const Exponent m_p;
+  };
+
+  template <class BaseDerived, class Number>
+  Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
 }
 
 #endif

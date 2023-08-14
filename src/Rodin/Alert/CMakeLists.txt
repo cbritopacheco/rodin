@@ -26,6 +26,5 @@ target_include_directories(RodinAlert
   PUBLIC
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   PRIVATE
-  ${PROJECT_SOURCE_DIR}/third-party/rang/include
-  )
+  ${PROJECT_SOURCE_DIR}/third-party/rang/include)
 

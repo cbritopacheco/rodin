@@ -7,24 +7,6 @@
 #include "OR.h"
 
 namespace Rodin::Variational
-{
-   OR<BooleanFunctionBase, BooleanFunctionBase>
-   operator||(const BooleanFunctionBase& lhs, const BooleanFunctionBase& rhs)
-   {
-      return OR(lhs, rhs);
-   }
-
-   OR<BooleanFunctionBase, BooleanFunctionBase>
-   operator||(bool lhs, const BooleanFunctionBase& rhs)
-   {
-      return OR(BooleanFunction(lhs), rhs);
-   }
-
-   OR<BooleanFunctionBase, BooleanFunctionBase>
-   operator||(const BooleanFunctionBase& lhs, bool rhs)
-   {
-      return OR(lhs, BooleanFunction(rhs));
-   }
-}
+{}
 
 

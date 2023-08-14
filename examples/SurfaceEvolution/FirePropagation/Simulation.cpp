@@ -6,6 +6,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
+#include <Rodin/Variational/LazyEvaluator.h>
 
 using namespace std;
 using namespace Rodin;
@@ -13,17 +14,25 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::External;
 
-static constexpr double tgv = std::numeric_limits<double>::max();
+// static const char* meshfile =
+//   "../resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh";
+static const char* meshfile = "Topography.mesh";
+static Scalar hausdorff = 10;
+static Scalar hmax = 2000;
+static Scalar hmin = 100;
+// static const Scalar hmax = 600;
+// static const Scalar hmin = 100;
 
 class Environment
 {
   public:
     using Context = Context::Serial;
-    using FES = H1<Context>;
+    using ScalarFES = H1<Scalar, Context>;
+    using VectorFES = H1<Math::Vector, Context>;
 
     struct Plane
     {
-      double a, b, c, d;
+      Scalar a, b, c, d;
     };
 
     enum Terrain
@@ -38,107 +47,95 @@ class Environment
     {
       // Energy ratio between incident radiant energy and ignition energy of
       // dry fuel
-      double A0;
+      Scalar A0;
 
       // Vertical velocity
-      double u00;
+      Scalar u00;
 
       // Energy ratio between incident radiant energy emitted from the flame
       // base and ignition energy of dry fuel
-      double R00;
+      Scalar R00;
 
       // Moisture factor
-      double a;
+      Scalar a;
 
       // Rate of spread for no slope and no wind (m/s)
-      std::function<double(const Point&)> R0;
+      std::function<Scalar(const Point&)> R0;
 
       // Buoyancy velocity component for a zero slope (m/s)
-      std::function<double(const Point&)> u0;
+      std::function<Scalar(const Point&)> u0;
 
       // Energy ratio between incident radiant energy and ignition energy of wet fuel
-      std::function<double(const Point&)> A;
+      std::function<Scalar(const Point&)> A;
 
       // ROS coefficient (m/s)
-      std::function<double(const Point&)> v0;
+      std::function<Scalar(const Point&)> v0;
 
       // Moisture content (%)
-      std::function<double(const Point&)> m;
+      std::function<Scalar(const Point&)> m;
 
       // Thickness of the vegetal stratum (m)
-      std::function<double(const Point&)> e;
+      std::function<Scalar(const Point&)> e;
 
       // Surface density of vegetal fuel, (kg/m^2)
-      std::function<double(const Point&)> sigma;
+      std::function<Scalar(const Point&)> sigma;
 
       // Residence time (s)
-      std::function<double(const Point&)> tau;
+      std::function<Scalar(const Point&)> tau;
 
       // Vegetal fuel surface to volume ratio (1/m)
-      std::function<double(const Point&)> sv;
+      std::function<Scalar(const Point&)> sv;
 
       // Gas flame density (kg/m^3)
-      std::function<double(const Point&)> pv;
+      std::function<Scalar(const Point&)> pv;
 
       // Absorption coefficient
-      std::function<double(const Point&)> v;
+      std::function<Scalar(const Point&)> v;
 
       // Flame gas temperature (K)
-      std::function<double(const Point&)> T;
+      std::function<Scalar(const Point&)> T;
 
       // Air temperature (K)
-      std::function<double(const Point&)> Ta;
+      std::function<Scalar(const Point&)> Ta;
     };
 
     class Flame
     {
       public:
         Flame(Environment& env)
-          : m_env(env),
-            m_direction(env.m_vfes)
+          : m_env(env), m_direction(env.m_vfes)
         {}
 
-        Flame& step(double dt)
+        Flame& step(Scalar dt)
         {
           assert(dt > 0);
+          const auto& env = m_env.get();
 
           // Slope vector
-          auto p = Grad(m_env.m_terrainHeight);
+          auto p = Grad(env.m_terrainHeight);
           p.traceOf(Terrain::Burnt);
 
           // Angle between slope and ground
           auto alpha =
             [&](const Point& v)
             {
-              double angle = std::acos(p.z()(v) / Frobenius(p)(v));
+              Scalar angle = std::acos(p.z()(v) / Frobenius(p)(v));
               assert(angle >= 0);
-              // assert(angle <= Math::Constants::pi<double>() / 2.0);
-              return Math::Constants::pi<double>() / 2.0 - angle;
+              // assert(angle <= Math::Constants::pi<Scalar>() / 2.0);
+              return Math::Constants::pi<Scalar>() / 2.0 - angle;
             };
 
-          Solver::UMFPack solver;
-
-          TrialFunction d(m_env.m_vfes);
-          TestFunction  v(m_env.m_vfes);
-
-          Grad gdist(m_env.m_fireDist);
+          Grad gdist(env.m_fireDist);
           gdist.traceOf(Terrain::Vegetation);
 
-          double lambda = 100;
-          Problem cnd(d, v);
-          cnd = Integral(lambda * Jacobian(d), Jacobian(v))
-              + Integral(d, v)
-              - Integral(gdist, v);
-          cnd.solve(solver);
-
-          const auto conormal = d.getGridFunction() / Frobenius(d.getGridFunction());
+          const auto conormal = gdist / Frobenius(gdist);
 
           // Angle between slope and conormal
           auto phi =
-            [&](const Point& v) -> double
+            [&](const Point& v) -> Scalar
             {
               auto fn = Dot(p, conormal) / (Frobenius(p) * Frobenius(conormal));
-              double fv = fn(v);
+              Scalar fv = fn(v);
               if (std::isfinite(fv))
                 return std::acos(fv);
               else
@@ -146,12 +143,13 @@ class Environment
             };
 
           // Angle between wind and conormal
-          const auto& wind = m_env.getWind();
           auto psi =
-            [&](const Point& v) -> double
+            [&](const Point& v) -> Scalar
             {
-              auto fn = Dot(wind, conormal) / (Frobenius(wind) * Frobenius(conormal));
-              double fv = fn(v);
+              auto fn =
+                Dot(env.m_wind, conormal) / (
+                    Frobenius(env.m_wind) * Frobenius(conormal));
+              Scalar fv = fn(v);
               if (std::isfinite(fv))
                 return std::acos(fv);
               else
@@ -160,69 +158,76 @@ class Environment
 
           // Compute the tilt angle
           auto gamma =
-            [&](const Point& v) -> double
+            [&](const Point& v) -> Scalar
             {
-              auto w = Frobenius(wind)(v);
-              double rhs =
-                std::tan(alpha(v)) * std::cos(phi(v)) + w * std::cos(psi(v));
+              Scalar rhs =
+                std::tan(alpha(v)) * std::cos(phi(v)
+                    ) + env.m_wind(v).norm() * std::cos(psi(v));
               return std::atan(rhs);
             };
 
           // Compute rate of spread
           auto R =
-            [&](const Point& v) -> double
+            [&](const Point& v) -> Scalar
             {
-              const double g = gamma(v);
+              const Scalar g = gamma(v);
               if (g > 0)
               {
-                const double R0 = m_env.m_vegetalStratum.R0(v);
-                const double v0 = m_env.m_vegetalStratum.v0(v);
-                const double A = m_env.m_vegetalStratum.A(v);
-                const double Ra = R0 + A * v0 * (
+                const Scalar R0 = env.m_vegetalStratum.R0(v);
+                const Scalar v0 = env.m_vegetalStratum.v0(v);
+                const Scalar A = env.m_vegetalStratum.A(v);
+                const Scalar Ra = R0 + A * v0 * (
                     1 + std::sin(g) - std::cos(g)) / std::cos(g) - v0 / std::cos(g);
                 return 0.5 * (Ra + std::sqrt(Ra * Ra + (4 * v0 * R0) / std::cos(g)));
               }
               else
               {
-                return m_env.m_vegetalStratum.R0(v);
+                return env.m_vegetalStratum.R0(v);
               }
             };
 
-          GridFunction disp(m_env.m_vfes);
-          disp = ScalarFunction(R) * conormal;
-          m_direction = std::move(disp);
+          m_direction = GridFunction(env.m_vfes);
+          m_direction = ScalarFunction(R) * conormal;
+
           return *this;
         }
 
-        const GridFunction<FES>& getDirection() const
+        const GridFunction<VectorFES>& getDirection() const
         {
           return m_direction;
         }
 
       private:
-        Environment& m_env;
-        GridFunction<FES> m_direction;
+        std::reference_wrapper<Environment> m_env;
+        GridFunction<VectorFES> m_direction;
     };
 
     Environment(MMG::Mesh& topography, const VegetalStratum& vegetalStratum)
       : m_topography(topography),
         m_sfes(m_topography),
         m_vfes(m_topography, m_topography.getSpaceDimension()),
-        m_wind(new VectorFunction{0.0, 0.0, 0.0}),
+        m_wind(m_vfes),
         m_terrainHeight(m_sfes),
         m_vegetalStratum(vegetalStratum),
         m_flame(*this),
         m_gravity(-9.8),
         m_fireDist(m_sfes),
         m_elapsedTime(0.0)
-    {
-      m_terrainHeight = [](const Point& v) { return v.z(); };
-    }
+      {
+        m_terrainHeight = [](const Point& v) { return v.z(); };
+      }
 
-    Environment& step(double dt)
+    Environment& step(Scalar dt)
     {
-      m_fireDist = MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
-                                         .distance(m_topography);
+      m_fireDist =
+        MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
+                              .distance(m_topography);
+
+      auto wind = VectorFunction{
+          [](const Geometry::Point& p){ return p.y() - 25000; },
+          [](const Geometry::Point& p){ return -p.x() + 25000; },
+          0};
+      m_wind = wind / Frobenius(wind);
 
       m_flame.step(dt);
 
@@ -231,8 +236,9 @@ class Environment
 
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_topography = MMG::ImplicitDomainMesher().setHMax(200)
-                                                .setHausdorff(30)
+      m_topography = MMG::ImplicitDomainMesher().setHMax(hmax)
+                                                .setHMin(hmin)
+                                                .setHausdorff(hausdorff)
                                                 .setAngleDetection(false)
                                                 // .split(Terrain::Burnt,
                                                 //     {Terrain::Burnt, Terrain::Vegetation})
@@ -241,11 +247,18 @@ class Environment
                                                 .setBoundaryReference(Terrain::Fire)
                                                 .discretize(m_fireDist);
 
+      MMG::MeshOptimizer().setAngleDetection(false)
+                          .setHausdorff(hausdorff)
+                          .setHMin(hmin)
+                          .setHMax(hmax)
+                          .optimize(m_topography);
+
       // Rebuild finite element spaces with new topography
-      m_sfes = FES(m_topography);
-      m_vfes = FES(m_topography, m_topography.getSpaceDimension());
+      m_sfes = ScalarFES(m_topography);
+      m_vfes = VectorFES(m_topography, m_topography.getSpaceDimension());
       m_terrainHeight = GridFunction(m_sfes);
       m_terrainHeight = [](const Point& v) { return v.z(); };
+      m_wind = GridFunction(m_vfes);
       m_elapsedTime += dt;
       return *this;
     }
@@ -255,9 +268,11 @@ class Environment
       return m_flame;
     }
 
-    const VectorFunctionBase& getWind() const
+    template <class FunctionDerived>
+    Environment& setWind(const FunctionBase<FunctionDerived>& fn)
     {
-      return *m_wind;
+      m_wind.projectOnBoundary(fn);
+      return *this;
     }
 
     const Mesh<Context>& getTopography() const
@@ -265,7 +280,7 @@ class Environment
       return m_topography;
     }
 
-    double getGravity() const
+    Scalar getGravity() const
     {
       return m_gravity;
     }
@@ -273,58 +288,78 @@ class Environment
   private:
     MMG::Mesh& m_topography;
 
-    FES m_sfes;
-    FES m_vfes;
+    ScalarFES m_sfes;
+    VectorFES m_vfes;
 
-    std::unique_ptr<VectorFunctionBase> m_wind;
+    GridFunction<VectorFES> m_wind;
 
-    GridFunction<FES> m_terrainHeight;
+    GridFunction<ScalarFES> m_terrainHeight;
 
     VegetalStratum m_vegetalStratum;
 
     Flame m_flame;
 
-    const double m_gravity;
+    const Scalar m_gravity;
 
-    GridFunction<FES> m_fireDist;
+    GridFunction<ScalarFES> m_fireDist;
 
-    double m_elapsedTime;
+    Scalar m_elapsedTime;
 };
 
 
 int main()
 {
-  // const char* meshfile = "topo.mesh";
-  // MMG::Mesh topography;
-  // topography.load(meshfile);
-
-  // std::cout << "optimizing" << std::endl;
-  // MMG::MeshOptimizer().setHausdorff(50).setHMax(200).optimize(topography);
-  // topography.save("optimize.mesh");
-
-  // // Make a fire somewhere
-  // std::cout << "meshing" << std::endl;
-  // H1 sh(topography);
-  // GridFunction fire(sh);
-  // fire =
-  //   [](const Point& p)
-  //   {
-  //     return std::sqrt((p.x() - 2.5e4) * (p.x() - 2.5e4) + (p.y() - 2.5e4) * (p.y() - 2.5e4)) - 300;
-  //   };
-  // fire.save("fire.mesh");
-  // auto implicit = MMG::ImplicitDomainMesher().setHausdorff(50).setHMax(200).setBoundaryReference(5).discretize(fire);
-  // implicit.save("implicit.mesh", IO::FileFormat::MEDIT);
-
-  // std::cout << "exiting" << std::endl;
-  // std::exit(1);
-
-  const char* meshfile = "implicit.mesh";
   MMG::Mesh topography;
-  topography.load(meshfile, IO::FileFormat::MEDIT);
+  topography.load(meshfile);
 
-  // MMG::MeshOptimizer().setHausdorff(50).setHMax(500).optimize(topography);
-  // topography.save("optimize.mesh");
+  Alert::Info() << "Optimizing mesh..." << Alert::Raise;
+  MMG::MeshOptimizer().setHausdorff(hausdorff).setHMax(hmax).setHMin(hmin).optimize(topography);
 
+  // Make a fire somewhere
+  Alert::Info() << "Initializing fire..." << Alert::Raise;
+  {
+    H1 fes(topography);
+
+    // Compute elevation
+    GridFunction elevation(fes);
+    elevation = [](const Point& p) { return p.z(); };
+    topography.save("Elevation.mesh");
+    elevation.save("Elevation.gf");
+
+    GridFunction phi(fes);
+    phi = [](const Point& p)
+    {
+      const Scalar r = 1000;
+      Scalar rr = 0;
+
+      Math::FixedSizeVector<3> c0;
+      c0 << 12500, 12500, p.z();
+      rr = (p.getCoordinates() - c0).norm() - r;
+
+      Math::FixedSizeVector<3> c1;
+      c1 << 37500, 37500, p.z();
+      rr = std::min(rr, (p.getCoordinates() - c1).norm() - r);
+
+      Math::FixedSizeVector<3> c2;
+      c2 << 37500, 12500, p.z();
+      rr = std::min(rr, (p.getCoordinates() - c2).norm() - r);
+
+      Math::FixedSizeVector<3> c3;
+      c3 << 12500, 37500, p.z();
+      rr = std::min(rr, (p.getCoordinates() - c3).norm() - r);
+
+      return rr;
+    };
+
+    topography = MMG::ImplicitDomainMesher().setAngleDetection(false)
+                                            .setHMax(hmax)
+                                            .setHMin(hmin)
+                                            .setHausdorff(hausdorff)
+                                            .discretize(phi);
+
+  }
+
+  // Define vegetal stratum
   Environment::VegetalStratum stratum;
 
   stratum.a = 0.05;
@@ -339,43 +374,48 @@ int main()
   stratum.tau = [](const Point&) { return 20; };
   stratum.e = [](const Point&) { return 4.0; };
   stratum.v =
-    [&](const Point& v) -> double
+    [&](const Point& v) -> Scalar
     {
-      double pv = stratum.pv(v);
+      Scalar pv = stratum.pv(v);
       assert(pv > 0);
       return std::min(1.0, stratum.sv(v) * stratum.sigma(v) / (4.0 * pv));
     };
   stratum.A =
-    [&](const Point& v) -> double
+    [&](const Point& v) -> Scalar
     {
-      double absorption = stratum.v(v);
+      Scalar absorption = stratum.v(v);
       return absorption * (stratum.A0 / (1 + stratum.a * stratum.m(v)));
     };
   stratum.R0 =
-    [&](const Point& v) -> double
+    [&](const Point& v) -> Scalar
     {
       return stratum.e(v) / stratum.sigma(v) * stratum.R00 / (1 + stratum.a * stratum.m(v));
     };
   stratum.u0 =
-    [&](const Point& v) -> double
+    [&](const Point& v) -> Scalar
     {
       return stratum.u00 * stratum.sigma(v) / stratum.tau(v);
     };
   stratum.v0 =
-    [&](const Point& v) -> double
+    [&](const Point& v) -> Scalar
     {
       return 12 * stratum.R0(v);
     };
 
+  // Define environment and step through it
+  Alert::Info() << "Starting simulation..." << Alert::Raise;
   Environment environment(topography, stratum);
+  Scalar t = 0;
+  Scalar dt = 60;
   for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
-    std::cout << "i: " << i << std::endl;
+    Alert::Info() << "t: " << (t / 60) << "m" << Alert::Raise;
 
-    environment.step(60.0);
-    topography.save("out/evolution." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
-    topography.save("woof.mesh", IO::FileFormat::MEDIT);
-    // environment.getFlame().getDirection().save("direction.gf");
+    topography.save("out/FirePropagation.mfem."  + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
+    topography.save("out/FirePropagation.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+
+    environment.step(dt);
+    t += dt;
   }
 
   return 0;

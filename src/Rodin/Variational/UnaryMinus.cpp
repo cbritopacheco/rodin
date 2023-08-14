@@ -9,137 +9,83 @@
 
 namespace Rodin::Variational
 {
-   // ---- FunctionBase ------------------------------------------------------
-  
-   UnaryMinus<FunctionBase>::UnaryMinus(const FunctionBase& op)
-      :  FunctionBase(op),
-         m_op(op.copy())
-   {}
+  // ---- LinearFormIntegratorBase ------------------------------------------
+  UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
+    : LinearFormIntegratorBase(op),
+      m_op(op.copy())
+  {}
 
-   UnaryMinus<FunctionBase>::UnaryMinus(const UnaryMinus& other)
-      :  FunctionBase(other),
-         m_op(other.m_op->copy())
-   {}
+  UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
+    :  LinearFormIntegratorBase(other),
+      m_op(other.m_op->copy())
+  {}
 
-   UnaryMinus<FunctionBase>::UnaryMinus(UnaryMinus&& other)
-      : FunctionBase(std::move(other)),
-        m_op(std::move(other.m_op))
-   {}
+  UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
+    : LinearFormIntegratorBase(std::move(other)),
+      m_op(std::move(other.m_op))
+  {}
 
-   void UnaryMinus<FunctionBase>::getValue(
-         mfem::DenseMatrix& value,
-         mfem::ElementTransformation& trans,
-         const mfem::IntegrationPoint& ip) const
-   {
-      m_op->getValue(value, trans, ip);
-      value.Neg();
-   }
+  Integrator::Region UnaryMinus<LinearFormIntegratorBase>::getRegion() const
+  {
+    return m_op->getRegion();
+  }
 
-   RangeShape UnaryMinus<FunctionBase>::getRangeShape() const
-   {
-      return m_op->getRangeShape();
-   }
+  Math::Vector
+  UnaryMinus<LinearFormIntegratorBase>::getVector(const Geometry::Simplex& simplex)
+  const
+  {
+    return -1.0 * m_op->getVector(simplex);
+  }
 
-   UnaryMinus<FunctionBase> operator-(const FunctionBase& op)
-   {
-      return UnaryMinus(op);
-   }
+  UnaryMinus<LinearFormIntegratorBase>
+  operator-(const LinearFormIntegratorBase& op)
+  {
+    return UnaryMinus(op);
+  }
 
-   // ---- LinearFormIntegratorBase ------------------------------------------
-   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const LinearFormIntegratorBase& op)
-      :  LinearFormIntegratorBase(op),
-         m_op(op.copy())
-   {}
+  // ---- BilinearFormIntegratorBase ----------------------------------------
+  UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
+    :  BilinearFormIntegratorBase(op),
+      m_op(op.copy())
+  {}
 
-   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
-      :  LinearFormIntegratorBase(other),
-         m_op(other.m_op->copy())
-   {}
+  UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
+    :  BilinearFormIntegratorBase(other),
+      m_op(other.m_op->copy())
+  {}
 
-   UnaryMinus<LinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
-      : LinearFormIntegratorBase(std::move(other)),
-        m_op(std::move(other.m_op))
-   {}
+  UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
+    : BilinearFormIntegratorBase(std::move(other)),
+      m_op(std::move(other.m_op))
+  {}
 
-   IntegratorRegion
-   UnaryMinus<LinearFormIntegratorBase>::getIntegratorRegion() const
-   {
-      return m_op->getIntegratorRegion();
-   }
+  Integrator::Region
+  UnaryMinus<BilinearFormIntegratorBase>::getRegion() const
+  {
+    return m_op->getRegion();
+  }
 
-   bool
-   UnaryMinus<LinearFormIntegratorBase>::isSupported(Linear::Assembly::Type t)
-   const
-   {
-      return m_op->isSupported(t);
-   }
+  Math::Matrix
+  UnaryMinus<BilinearFormIntegratorBase>
+  ::getMatrix(const Geometry::Simplex& element) const
+  {
+    return -1.0 * m_op->getMatrix(element);
+  }
 
-   void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Device& as)
-   const
-   {
-      m_op->getElementVector(as);
-      as.vec *= -1.0;
-   }
+  UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
+  {
+    return UnaryMinus(op);
+  }
 
-   void
-   UnaryMinus<LinearFormIntegratorBase>::getElementVector(const Linear::Assembly::Common& as)
-   const
-   {
-      m_op->getElementVector(as);
-      as.vec *= -1.0;
-   }
+  UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
+  operator-(const FormLanguage::List<BilinearFormIntegratorBase>& op)
+  {
+    return UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>(op);
+  }
 
-   UnaryMinus<LinearFormIntegratorBase>
-   operator-(const LinearFormIntegratorBase& op)
-   {
-      return UnaryMinus(op);
-   }
-
-   // ---- BilinearFormIntegratorBase ----------------------------------------
-   UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
-      :  BilinearFormIntegratorBase(op),
-         m_op(op.copy())
-   {}
-
-   UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
-      :  BilinearFormIntegratorBase(other),
-         m_op(other.m_op->copy())
-   {}
-
-   UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
-      : BilinearFormIntegratorBase(std::move(other)),
-        m_op(std::move(other.m_op))
-   {}
-
-   IntegratorRegion
-   UnaryMinus<BilinearFormIntegratorBase>::getIntegratorRegion() const
-   {
-      return m_op->getIntegratorRegion();
-   }
-
-   void
-   UnaryMinus<BilinearFormIntegratorBase>
-   ::getElementMatrix(const Bilinear::Assembly::Common& as) const
-   {
-      m_op->getElementMatrix(as);
-      as.mat.Neg();
-   }
-
-   UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
-   {
-      return UnaryMinus(op);
-   }
-
-   UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
-   operator-(const FormLanguage::List<BilinearFormIntegratorBase>& op)
-   {
-      return UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>(op);
-   }
-
-   UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
-   operator-(const FormLanguage::List<LinearFormIntegratorBase>& op)
-   {
-      return UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>(op);
-   }
+  UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
+  operator-(const FormLanguage::List<LinearFormIntegratorBase>& op)
+  {
+    return UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>(op);
+  }
 }

@@ -1,10 +1,11 @@
 set(RodinVariational_HEADERS
+  FiniteElement.h
   BilinearForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
-  EssentialBoundary.h
   Derivative.h
   Dot.h
+  Jump.h
   FiniteElementSpace.h
   ForwardDecls.h
   Grad.h
@@ -17,6 +18,7 @@ set(RodinVariational_HEADERS
   IdentityMatrix.h
   Integral.h
   Sum.h
+  MFEM.h
   UnaryMinus.h
   Mult.h
   Jacobian.h
@@ -28,10 +30,9 @@ set(RodinVariational_HEADERS
   ScalarFunction.h
   Trace.h
   Transpose.h
-  BasisOperator.h
+  TensorBasis.h
   Restriction.h
   VectorFunction.h
-  Utility.h
   Minus.h
   Min.h
   Max.h
@@ -42,11 +43,14 @@ set(RodinVariational_HEADERS
   OR.h
   AND.h
   Tangent.h
+  Assembly/AssemblyBase.h
+  Assembly/Native.h
+  LinearElasticity/LinearElasticityIntegral.h
   )
 
 set(RodinVariational_SRCS
+  FiniteElement.cpp
   FiniteElementSpace.cpp
-  EssentialBoundary.cpp
   LinearFormIntegrator.cpp
   BilinearFormIntegrator.cpp
   ShapeFunction.cpp
@@ -61,7 +65,6 @@ set(RodinVariational_SRCS
   VectorFunction.cpp
   ScalarFunction.cpp
   Restriction.cpp
-  BasisOperator.cpp
   Sum.cpp
   UnaryMinus.cpp
   Mult.cpp
@@ -70,10 +73,11 @@ set(RodinVariational_SRCS
   LinearForm.hpp
   Problem.hpp
   ProblemBody.cpp
-  Utility.cpp
+  MFEM.cpp
   Minus.cpp
   Function.cpp
   RangeShape.cpp
+  RangeType.cpp
   Composition.cpp
   Max.cpp
   Min.cpp
@@ -82,22 +86,29 @@ set(RodinVariational_SRCS
   GT.cpp
   LT.cpp
   OR.cpp
+  QuadratureRule.cpp
   AND.cpp
   Tangent.cpp
+  Assembly/AssemblyBase.cpp
+  Assembly/Native.cpp
   )
 
 add_library(RodinVariational
   ${RodinVariational_SRCS} ${RodinVariational_HEADERS})
 add_library(Rodin::Variational ALIAS RodinVariational)
 
+if (RODIN_USE_OPENMP)
+  target_sources(RodinVariational PUBLIC Assembly/OpenMP.h Assembly/OpenMP.cpp)
+  target_link_libraries(RodinVariational PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariational
-  INTERFACE
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  PUBLIC
-  ${MFEM_INCLUDE_DIRS})
+  INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_link_libraries(RodinVariational
+  PUBLIC
+  mfem
   PUBLIC
   Rodin::IO
   Rodin::Alert

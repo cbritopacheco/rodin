@@ -7,10 +7,4 @@
 #include "LEQ.h"
 
 namespace Rodin::Variational
-{
-   LEQ<FunctionBase, FunctionBase>
-   operator<=(const FunctionBase& lhs, const FunctionBase& rhs)
-   {
-      return LEQ(lhs, rhs);
-   }
-}
+{}

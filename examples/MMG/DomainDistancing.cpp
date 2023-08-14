@@ -24,9 +24,9 @@ int main(int, char**)
   auto dist = MMG::Distancer(fes).distance(mesh);
 
   mesh = MMG::ImplicitDomainMesher().setHMax(0.05)
-                                    .setRMC(1e-3)
-                                    .setBoundaryReference(666)
-                                    .discretize(dist);
+                        .setRMC(1e-3)
+                        .setBoundaryReference(666)
+                        .discretize(dist);
 
   mesh.save("mfem.mesh");
   mesh.save("medit.mesh", IO::FileFormat::MEDIT);

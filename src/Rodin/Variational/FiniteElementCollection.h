@@ -11,36 +11,34 @@
 
 namespace Rodin::Variational
 {
-   /**
-    * @brief Abstract base class for finite element collections.
-    * @see L2
-    * @see H1
-    */
-   class FiniteElementCollectionBase
-   {
-      public:
-         constexpr
-         FiniteElementCollectionBase() = default;
+  /**
+   * @brief Abstract base class for finite element collections.
+   * @see L2
+   * @see H1
+   */
+  class FiniteElementCollectionBase
+  {
+    public:
+      FiniteElementCollectionBase() = default;
 
-         constexpr
-         FiniteElementCollectionBase(const FiniteElementCollectionBase&) = default;
+      FiniteElementCollectionBase(const FiniteElementCollectionBase&) = default;
 
-         constexpr
-         FiniteElementCollectionBase(FiniteElementCollectionBase&&) = default;
+      FiniteElementCollectionBase(FiniteElementCollectionBase&&) = default;
 
-         FiniteElementCollectionBase& operator=(FiniteElementCollectionBase&&) = default;
+      FiniteElementCollectionBase& operator=(FiniteElementCollectionBase&&) = default;
 
-         virtual ~FiniteElementCollectionBase() = default;
+      virtual ~FiniteElementCollectionBase() = default;
 
-         int getOrder() const
-         {
-            return getHandle().GetOrder();
-         }
+      inline
+      size_t getOrder() const
+      {
+        return getHandle().GetOrder();
+      }
 
-         virtual mfem::FiniteElementCollection& getHandle() = 0;
+      virtual mfem::FiniteElementCollection& getHandle() = 0;
 
-         virtual const mfem::FiniteElementCollection& getHandle() const = 0;
-   };
+      virtual const mfem::FiniteElementCollection& getHandle() const = 0;
+  };
 }
 
 #endif

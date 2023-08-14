@@ -16,43 +16,43 @@ namespace Rodin::Test::Utility
   template <class Result, class ... Parameters>
   class ExpectedResultTable
   {
-    public:
-      class ExpectedResult
-      {
-        public:
-          constexpr ExpectedResult(const Result& res, const Parameters&... params)
-            : m_res(res), m_params{params...}
-          {}
+   public:
+    class ExpectedResult
+    {
+      public:
+       constexpr ExpectedResult(const Result& res, const Parameters&... params)
+        : m_res(res), m_params{params...}
+       {}
 
-          constexpr Result getResult() const
-          {
-            return m_res;
-          }
+       constexpr Result getResult() const
+       {
+        return m_res;
+       }
 
-          constexpr std::tuple<Parameters...> getParameters() const
-          {
-            return m_params;
-          }
+       constexpr std::tuple<Parameters...> getParameters() const
+       {
+        return m_params;
+       }
 
-        private:
-          Result m_res;
-          std::tuple<Parameters...> m_params;
-      };
-      constexpr ExpectedResultTable(
-          std::function<Result(Parameters&&...)> model,
-          std::function<bool(const Result&, const Result&)> compare =
-          [](const Result& modelResult, const Result& knownResult){
-            return modelResult == knownResult;
-          });
+      private:
+       Result m_res;
+       std::tuple<Parameters...> m_params;
+    };
+    constexpr ExpectedResultTable(
+       std::function<Result(Parameters&&...)> model,
+       std::function<bool(const Result&, const Result&)> compare =
+       [](const Result& modelResult, const Result& knownResult){
+        return modelResult == knownResult;
+       });
 
-      constexpr void push_back(const ExpectedResult& entry);
-      constexpr void emplace_back(Result&& res, Parameters&&... params);
-      constexpr bool evaluate() const;
+    constexpr void push_back(const ExpectedResult& entry);
+    constexpr void emplace_back(Result&& res, Parameters&&... params);
+    constexpr bool evaluate() const;
 
-    private:
-      std::vector<ExpectedResult> m_table;
-      std::function<Result(Parameters&&...)> m_model;
-      std::function<bool(const Result&, const Result&)> m_compare;
+   private:
+    std::vector<ExpectedResult> m_table;
+    std::function<Result(Parameters&&...)> m_model;
+    std::function<bool(const Result&, const Result&)> m_compare;
   };
 }
 

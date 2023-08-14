@@ -47,8 +47,12 @@
 #include "Variational/Div.h"
 #include "Variational/Grad.h"
 #include "Variational/Normal.h"
+#include "Variational/FaceNormal.h"
+#include "Variational/BoundaryNormal.h"
 #include "Variational/Jacobian.h"
 #include "Variational/Derivative.h"
+#include "Variational/Jump.h"
+#include "Variational/Average.h"
 
 #include "Variational/Trace.h"
 #include "Variational/Transpose.h"
@@ -63,6 +67,8 @@
 #include "Variational/Frobenius.h"
 
 #include "Variational/Integral.h"
+#include "Variational/FaceIntegral.h"
+#include "Variational/BoundaryIntegral.h"
 #include "Variational/Problem.h"
 
 #include "Variational/ScalarFunction.h"

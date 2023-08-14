@@ -20,59 +20,59 @@ namespace Rodin::Plot::Backend::Bases
 {
   class BaseAxes
   {
-    public:
-      struct XLimits
-      {
-        float left, right;
-      };
+   public:
+    struct XLimits
+    {
+      float left, right;
+    };
 
-      struct YLimits
-      {
-        float bottom, top;
-      };
+    struct YLimits
+    {
+      float bottom, top;
+    };
 
-      BaseAxes(
-          Artist::Figure& fig,
-          Magnum::Math::Vector2<int> bottomLeft,
-          Magnum::Math::Vector2<int> size,
-          bool frameEnabled);
+    BaseAxes(
+       Artist::Figure& fig,
+       Magnum::Math::Vector2<int> bottomLeft,
+       Magnum::Math::Vector2<int> size,
+       bool frameEnabled);
 
-      virtual ~BaseAxes() = default;
+    virtual ~BaseAxes() = default;
 
-      virtual void drawContent() = 0;
+    virtual void drawContent() = 0;
 
-      Magnum::Math::Vector2<int> getSize() const;
+    Magnum::Math::Vector2<int> getSize() const;
 
-      Magnum::Math::Vector2<int> getBottomLeft() const;
+    Magnum::Math::Vector2<int> getBottomLeft() const;
 
-      Artist::Figure& getFigure();
-      const Artist::Figure& getFigure() const;
+    Artist::Figure& getFigure();
+    const Artist::Figure& getFigure() const;
 
-      bool isFrameEnabled() const;
+    bool isFrameEnabled() const;
 
-      BaseAxes& enableFrame(bool v);
+    BaseAxes& enableFrame(bool v);
 
-      XLimits getXLimits() const;
+    XLimits getXLimits() const;
 
-      YLimits getYLimits() const;
+    YLimits getYLimits() const;
 
-      BaseAxes& setXLimits(const XLimits& xlim);
-      BaseAxes& setYLimits(const YLimits& ylim);
+    BaseAxes& setXLimits(const XLimits& xlim);
+    BaseAxes& setYLimits(const YLimits& ylim);
 
-      Geometry::Rectangle<int> getBoundingBox() const;
+    Geometry::Rectangle<int> getBoundingBox() const;
 
-      virtual void handle(const Backend::Event::MouseMotionEvent& e) = 0;
-      virtual void handle(const Backend::Event::MouseButtonEvent& e) = 0;
-      virtual void handle(const Backend::Event::MouseWheelEvent& e) = 0;
-    private:
-      Artist::Figure&       m_figure;
+    virtual void handle(const Backend::Event::MouseMotionEvent& e) = 0;
+    virtual void handle(const Backend::Event::MouseButtonEvent& e) = 0;
+    virtual void handle(const Backend::Event::MouseWheelEvent& e) = 0;
+   private:
+    Artist::Figure&     m_figure;
 
-      Magnum::Math::Vector2<int> m_bottomLeft;
-      Magnum::Math::Vector2<int> m_size;
+    Magnum::Math::Vector2<int> m_bottomLeft;
+    Magnum::Math::Vector2<int> m_size;
 
-      bool          m_frameEnabled;
-      XLimits       m_xlim;
-      YLimits       m_ylim;
+    bool       m_frameEnabled;
+    XLimits     m_xlim;
+    YLimits     m_ylim;
   };
 }
 

@@ -11,12 +11,12 @@
 
 namespace Rodin::Alert
 {
-   void Info::raise() const noexcept
-   {
-      std::cout << rang::fg::blue
-                << "Info: "
-                << rang::fg::reset
-                << what()
-                << std::endl;
-   }
+  void Info::raise() const noexcept
+  {
+    std::cout << rang::fg::blue
+           << "Info: "
+           << rang::fg::reset
+           << what()
+           << std::endl;
+  }
 }

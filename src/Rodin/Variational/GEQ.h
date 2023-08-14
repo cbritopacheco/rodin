@@ -8,83 +8,86 @@
 #define RODIN_VARIATIONAL_GEQ_H
 
 #include "ForwardDecls.h"
-#include "Exceptions.h"
 #include "GridFunction.h"
 #include "BooleanFunction.h"
 
 namespace Rodin::Variational
 {
-   /**
-    * @defgroup GEQSpecializations GEQ Template Specializations
-    * @brief Template specializations of the GEQ class.
-    * @see GEQ
-    */
+  /**
+   * @defgroup GEQSpecializations GEQ Template Specializations
+   * @brief Template specializations of the GEQ class.
+   * @see GEQ
+   */
 
-   template <>
-   class GEQ<FunctionBase, FunctionBase> : public BooleanFunctionBase
-   {
-      public:
-         GEQ(const FunctionBase& lhs, const FunctionBase& rhs)
-            : m_lhs(lhs.copy()), m_rhs(rhs.copy())
-         {
-            if (lhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, lhs.getRangeType()).raise();
-            if (rhs.getRangeType() != RangeType::Scalar)
-               UnexpectedRangeTypeException(RangeType::Scalar, rhs.getRangeType()).raise();
-         }
+  template <class LHSDerived, class RHSDerived>
+  class GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
+    : public BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+  {
+    public:
+      using Parent = BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = FunctionBase<RHSDerived>;
 
-         GEQ(const GEQ& other)
-            : BooleanFunctionBase(other),
-              m_lhs(other.m_lhs->copy()),
-              m_rhs(other.m_rhs->copy())
-         {}
+      GEQ(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs), m_rhs(rhs)
+      {}
 
-         GEQ(GEQ&& other)
-            : BooleanFunctionBase(std::move(other)),
-              m_lhs(std::move(other.m_lhs)),
-              m_rhs(std::move(other.m_rhs))
-         {}
+      GEQ(const GEQ& other)
+        : Parent(other),
+          m_lhs(other.m_lhs),
+          m_rhs(other.m_rhs)
+      {}
 
-         bool getValue(
-               mfem::ElementTransformation& trans,
-               const mfem::IntegrationPoint& ip) const override
-         {
-            mfem::DenseMatrix lhs;
-            m_lhs->getValue(lhs, trans, ip);
+      GEQ(GEQ&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
+      {}
 
-            mfem::DenseMatrix rhs;
-            m_rhs->getValue(rhs, trans, ip);
+      inline
+      constexpr
+      Boolean getValue(const Geometry::Point& p) const
+      {
+        return Scalar(m_lhs.getValue(p)) >= Scalar(m_rhs.getValue(p));
+      }
 
-            return lhs(0, 0) >= rhs(0, 0);
-         }
+    private:
+      LHS m_lhs;
+      RHS m_rhs;
+  };
 
-         GEQ* copy() const noexcept override
-         {
-            return new GEQ(*this);
-         }
+  template <class LHSDerived, class RHSDerived>
+  GEQ(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+    -> GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
-      private:
-         std::unique_ptr<FunctionBase> m_lhs;
-         std::unique_ptr<FunctionBase> m_rhs;
-   };
-   GEQ(const FunctionBase&, const FunctionBase&) -> GEQ<FunctionBase, FunctionBase>;
+  template <class LHSDerived, class RHSDerived>
+  inline
+  constexpr
+  auto
+  operator>=(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return GEQ(lhs, rhs);
+  }
 
-   GEQ<FunctionBase, FunctionBase>
-   operator>=(const FunctionBase&, const FunctionBase&);
+  template <class Number, class RHSDerived,
+           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator>=(Number lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return GEQ(ScalarFunction(lhs), rhs);
+  }
 
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, GEQ<FunctionBase, FunctionBase>>
-   operator>=(T lhs, const FunctionBase& rhs)
-   {
-      return GEQ(ScalarFunction(lhs), rhs);
-   }
-
-   template <class T>
-   std::enable_if_t<std::is_arithmetic_v<T>, GEQ<FunctionBase, FunctionBase>>
-   operator>=(const FunctionBase& lhs, T rhs)
-   {
-      return GEQ(lhs, ScalarFunction(rhs));
-   }
+  template <class LHSDerived, class Number,
+           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  inline
+  constexpr
+  auto
+  operator>=(const FunctionBase<LHSDerived>& lhs, Number rhs)
+  {
+    return GEQ(lhs, ScalarFunction(rhs));
+  }
 }
 
 #endif
