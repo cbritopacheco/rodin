@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678289575284,
+  "lastUpdate": 1692044020853,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -30,6 +30,36 @@ window.BENCHMARK_DATA = {
             "value": 317253.6320797561,
             "unit": "ns/iter",
             "extra": "iterations: 2207\ncpu: 317235.5233348437 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e4dc54d40c8fcdeeb1a9ef10d1725b928b52ce7d",
+          "message": "Update Documentation.yml",
+          "timestamp": "2023-08-14T16:00:11-04:00",
+          "tree_id": "73e67a0fb3f8dd17a74ccd95376d8b5604cb04d7",
+          "url": "https://github.com/cbritopacheco/rodin/commit/e4dc54d40c8fcdeeb1a9ef10d1725b928b52ce7d"
+        },
+        "date": 1692044018889,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Poisson/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 413369.39885490655,
+            "unit": "ns/iter",
+            "extra": "iterations: 1572\ncpu: 409439.18575063616 ns\nthreads: 1"
           }
         ]
       }
