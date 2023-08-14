@@ -207,31 +207,31 @@ if __name__ == '__main__':
     write_dot(dependency_graph, dot_filename)
     print(colored(f'DOT output generated: {dot_filename}', 'green'))
 
-    layout_engine = args.layout_engine
-    print(colored(f'Using layout engine {layout_engine}', 'blue'))
-    dot_command = which(layout_engine)
-    if not dot_command:
-        raise GraphvizNotFoundError(
-            "Graphviz %s command not found. Please install Graphviz to generate graphical output." % command)
+    if args.png or args.svg:
+        layout_engine = args.layout_engine
+        print(colored(f'Using layout engine {layout_engine}...', 'blue'))
+        dot_command = which(layout_engine)
+        if not dot_command:
+            raise GraphvizNotFoundError(
+                "Graphviz %s command not found. Please install Graphviz to generate graphical output." % command)
 
-    command_line = [f'{dot_command}', dot_filename]
-    command_line += ['-Goverlap=prism', '-Gbeautify=true', '-Gsmoothing=true ']
-    if args.png:
-        png_filename = args.png
-        command_line += ["-Tpng -o %s " % png_filename]
-
-    if args.svg:
-        svg_filename = args.svg
-        command_line += ["-Tsvg -o %s " % svg_filename]
-
-
-    result = subprocess.run(command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    if result.returncode == 0:
+        command_line = [f'{dot_command}', dot_filename]
+        command_line += ['-Goverlap=prism', '-Gbeautify=true', '-Gsmoothing=true ']
         if args.png:
-            print(colored(f'PNG output generated: {png_filename}', 'green'))
+            png_filename = args.png
+            command_line += ["-Tpng", "-o %s " % png_filename]
+
         if args.svg:
-            print(colored(f'SVG output generated: {svg_filename}', 'green'))
-    else:
-        raise result.stderr
+            svg_filename = args.svg
+            command_line += ["-Tsvg", "-o %s " % svg_filename]
+
+        result = subprocess.run(command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        if result.returncode == 0:
+            if args.png:
+                print(colored(f'PNG output generated: {png_filename}', 'green'))
+            if args.svg:
+                print(colored(f'SVG output generated: {svg_filename}', 'green'))
+        else:
+            raise RuntimeError(result.stderr)
 
