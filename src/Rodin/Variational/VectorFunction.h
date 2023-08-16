@@ -122,23 +122,19 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector& res, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
       }
 
       inline
       constexpr
       void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
-
-      inline
-      constexpr
-      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
-      {
-        res = getValue(p);
-      }
-
-      inline
-      constexpr
-      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const = delete;
 
       /**
        * @brief Gets the dimension of the vector object.

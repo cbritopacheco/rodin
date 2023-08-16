@@ -13,7 +13,7 @@ angles = [ math.pi / 4 ]
 
 
 x_column = 'm'
-y_column = 'epsilon'
+y_column = 'waveNumber'
 
 latex_label = {
     'm' : '$m$',
@@ -37,12 +37,11 @@ if __name__ == '__main__':
     df = pd.read_csv(args.filename)
     print('Read dataset !')
 
-    thresh = math.exp(df['error'].median())
-
+    thresh = df['error'].median()
     df.loc[df['error'] > thresh, 'error'] = thresh
 
     i = 0
-    waveNumbers = df['waveNumber'].unique()
+    waveNumbers = df['epsilon'].unique()
     for waveNumber in waveNumbers:
         print(waveNumber)
         for angle in angles:
@@ -53,15 +52,15 @@ if __name__ == '__main__':
                     (df['conductivity'] < conductivity + 0.001) &
                     (df['angle'] > angle - 0.001) &
                     (df['angle'] < angle + 0.001) &
-                    (df['waveNumber'] < waveNumber + 0.001) &
-                    (df['waveNumber'] < waveNumber - 0.001)
+                    (df['epsilon'] > waveNumber - 0.001) &
+                    (df['epsilon'] < waveNumber + 0.001)
                 ]
 
                 plt.hexbin(
                     sdf.loc[:, x_column],
                     sdf.loc[:, y_column],
-                    gridsize=50,
-                    reduce_C_function=np.mean,
+                    gridsize=125,
+                    reduce_C_function=lambda x : np.mean(x, dtype=np.float64),
                     cmap='inferno',
                     C=sdf.loc[:, 'error'], edgecolors='face', linewidths=0.5)
 
@@ -76,10 +75,10 @@ if __name__ == '__main__':
                 plt.title(
                     '$|| u_\epsilon - u_0 ||_{L^2 (Q / B(x, 0.25))} \
                     \ \mathrm{with} \ \gamma |_{B(x, \epsilon)} = %.2E, \
-                    \ \\theta = %d^\circ, \ k=%.2E$' % (
+                    \ \\theta = %d^\circ, \ \epsilon = %.2E$' % (
                         conductivity, (180.0 / math.pi) * angle, waveNumber),
                     pad=20, fontsize=12)
-                out=("%s_VS_%s_Gamma=%.2E_Angle=%.2E_Wavenumber=%.2E") % (
+                out=("%s_VS_%s_Gamma=%.2E_Angle=%.2E_Epsilon=%.2E") % (
                     file_label[x_column], file_label[y_column], conductivity,
                     (180.0 / math.pi) * angle, waveNumber)
                 plt.savefig(str(i) + '_' + out + '.svg')

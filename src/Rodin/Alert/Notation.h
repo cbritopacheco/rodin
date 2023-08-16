@@ -42,6 +42,26 @@ namespace Rodin::Alert
       ss << "Polytope(" << d << ", " << index << ")";
       return ss.str();
     }
+
+    inline
+    NotationT True()
+    {
+      return NotationT("true");
+    }
+
+    inline
+    NotationT False()
+    {
+      return NotationT("false");
+    }
+
+    inline
+    NotationT Predicate(bool v, const std::string& pred)
+    {
+      std::stringstream ss;
+      ss << "[" << pred <<  "] = " << (v ? "true" : "false");
+      return ss.str();
+    }
   }
 
 }

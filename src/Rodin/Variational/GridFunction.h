@@ -707,38 +707,77 @@ namespace Rodin::Variational
       inline
       auto getValue(const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValue(p);
+        RangeType out;
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& fes = m_fes.get();
+        const auto& fesMesh = fes.getMesh();
+        if (polytopeMesh.isSubMesh())
+        {
+          const auto& submesh = polytopeMesh.asSubMesh();
+          assert(submesh.getParent() == fes.getMesh());
+          interpolate(out, submesh.inclusion(p));
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          assert(submesh.getParent() == polytopeMesh);
+          interpolate(out, submesh.restriction(p));
+        }
+        else
+        {
+          interpolate(out, p);
+        }
+        return out;
       }
 
       inline
       constexpr
       void getValue(Math::Vector& res, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        interpolate(res, p);
       }
 
+      /**
+       * @brief Interpolates the GridFunction at the given point.
+       */
+      inline
+      constexpr
+      Scalar interpolate(const Geometry::Point& p) const
+      {
+        static_assert(std::is_same_v<RangeType, Scalar>);
+        return static_cast<const Derived&>(*this).interpolate(p);
+      }
+
+      /**
+       * @brief Interpolates the GridFunction at the given point.
+       */
+      inline
+      constexpr
+      void interpolate(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(std::is_same_v<RangeType, Math::Vector>);
+        static_cast<const Derived&>(*this).interpolate(res, p);
+      }
+
+      /**
+       * @brief Deleted function.
+       */
       inline
       constexpr
       void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
 
-      inline
-      constexpr
-      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+    private:
+      void interpolate(Scalar& res, const Geometry::Point& p) const
       {
-        res = getValue(p);
+        res = interpolate(p);
       }
 
-      inline
-      constexpr
-      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const = delete;
-
-    private:
       std::reference_wrapper<const FES> m_fes;
       Math::Matrix m_data;
       std::optional<Math::Vector> m_weights;
   };
 }
-
-#include "GridFunction.hpp"
 
 #endif

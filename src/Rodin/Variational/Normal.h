@@ -43,28 +43,11 @@ namespace Rodin::Variational
         return m_dimension;
       }
 
-      Math::Vector getValue(const Geometry::Point& p) const
+      Math::SpatialVector getValue(const Geometry::Point& p) const
       {
-        assert(p.getPolytope().getMesh().isSurface());
-        const auto& jacobian = p.getJacobian();
-        Math::Vector value(m_dimension);
-        if (jacobian.rows() == 2)
-        {
-          value(0) =  jacobian(1, 0);
-          value(1) = -jacobian(0, 0);
-        }
-        else if (jacobian.rows() == 3)
-        {
-          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
-        }
-        else
-        {
-          assert(false);
-          value.setConstant(NAN);
-        }
-        return Math::sgn(p.getJacobianDeterminant()) * value.normalized();
+        Math::SpatialVector res;
+        // this->getValue(res, p);
+        return res;
       }
 
       inline Normal* copy() const noexcept override

@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_P1_GRADIENT_H
 #define RODIN_VARIATIONAL_P1_GRADIENT_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Grad.h"
 
@@ -14,6 +15,14 @@
 
 namespace Rodin::FormLanguage
 {
+  template <class ... Ps>
+  struct Traits<
+    Variational::Grad<Variational::GridFunction<Variational::P1<Scalar, Ps...>>>>
+  {
+    using FES = Variational::P1<Scalar, Ps...>;
+    using Operand = Variational::GridFunction<FES>;
+  };
+
   template <class NestedDerived, class ... Ps, Variational::ShapeFunctionSpaceType SpaceType>
   struct Traits<
     Variational::Grad<
@@ -36,16 +45,18 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P1 GridFunction
    */
-  template <class ... Ts>
-  class Grad<GridFunction<P1<Scalar, Ts...>>> final
-    : public VectorFunctionBase<Grad<GridFunction<P1<Scalar, Ts...>>>>
+  template <class Context, class Mesh>
+  class Grad<GridFunction<P1<Scalar, Context, Mesh>>> final
+    : public GradBase<Grad<GridFunction<P1<Scalar, Context, Mesh>>>, GridFunction<P1<Scalar, Context, Mesh>>>
   {
     public:
+      using FES = P1<Scalar, Context, Mesh>;
+
       /// Operand type
-      using Operand = GridFunction<P1<Scalar, Ts...>>;
+      using Operand = GridFunction<FES>;
 
       /// Parent class
-      using Parent = VectorFunctionBase<Grad<GridFunction<P1<Scalar, Ts...>>>>;
+      using Parent = GradBase<Grad<Operand>, Operand>;
 
       /**
        * @brief Constructs the gradient of an @f$ \mathbb{P}^1 @f$ function
@@ -53,84 +64,83 @@ namespace Rodin::Variational
        * @param[in] u P1 GridFunction
        */
       Grad(const Operand& u)
-        : m_u(u)
-      {
-        assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-      }
+        : Parent(u)
+      {}
 
       /**
        * @brief Copy constructor
        */
       Grad(const Grad& other)
-        : Parent(other),
-          m_u(other.m_u)
+        : Parent(other)
       {}
 
       /**
        * @brief Move constructor
        */
       Grad(Grad&& other)
-        : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+        : Parent(std::move(other))
       {}
 
-      inline
-      constexpr
-      size_t getDimension() const
-      {
-        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
-      }
-
-      inline
-      constexpr
-      Grad& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      inline
-      constexpr
-      Grad& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
-      }
-
-      auto getValue(const Geometry::Point& p) const
+      void interpolate(Math::Vector& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
         const auto& i = polytope.getIndex();
-        const auto& gf = m_u.get();
-        const auto& fes = gf.getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
-        Math::SpatialVector grad(d);
-        Math::SpatialVector res(d);
-        res.setZero();
-        for (size_t local = 0; local < fe.getCount(); local++)
+        const auto& mesh = polytope.getMesh();
+        const size_t meshDim = mesh.getDimension();
+        if (d == meshDim - 1)
         {
-          fe.getGradient(local)(grad, rc);
-          res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+          const auto& conn = mesh.getConnectivity();
+          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& rc = p.getPhysicalCoordinates();
+          const auto& pc = p.getPhysicalCoordinates();
+          assert(inc.size() == 1 || inc.size() == 2);
+          if (inc.size() == 1)
+          {
+            const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
+            const Geometry::Point np(*tracePolytope, rc, pc);
+            interpolate(out, np);
+            return;
+          }
+          else
+          {
+            assert(inc.size() == 2);
+            const auto& traceDomain = this->getTraceDomain();
+            assert(traceDomain.size() > 0);
+            if (traceDomain.size() == 0)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No trace domain provided: "
+                << Alert::Notation::Predicate(false, "getTraceDomain().size() == 0")
+                << ". Grad at an interface with no trace domain is undefined."
+                << Alert::Raise;
+            }
+            return;
+          }
         }
-        return p.getJacobianInverse().transpose() * this->object(std::move(res));
-      }
-
-      inline
-      constexpr
-      const Operand& getOperand() const
-      {
-        return m_u.get();
+        else
+        {
+          assert(d == mesh.getDimension());
+          const auto& gf = this->getOperand();
+          const auto& fes = gf.getFiniteElementSpace();
+          const auto& fe = fes.getFiniteElement(d, i);
+          const auto& rc = p.getReferenceCoordinates();
+          Math::SpatialVector grad(d);
+          Math::SpatialVector res(d);
+          res.setZero();
+          for (size_t local = 0; local < fe.getCount(); local++)
+          {
+            fe.getGradient(local)(grad, rc);
+            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+          }
+          out = p.getJacobianInverse().transpose() * res;
+        }
       }
 
       inline Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }
-
-    private:
-      std::reference_wrapper<const Operand> m_u;
   };
 
   /**

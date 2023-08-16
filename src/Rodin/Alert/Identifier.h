@@ -33,7 +33,7 @@ namespace Rodin::Alert
     }
 
     inline
-    IdentifierT<WhiteT> Function(const std::string& id)
+    IdentifierT<ResetT> Function(const std::string& id)
     {
       return id;
     }

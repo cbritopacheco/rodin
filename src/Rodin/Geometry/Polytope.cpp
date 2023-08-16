@@ -183,24 +183,24 @@ namespace Rodin::Geometry
   }
 
   // ---- Point --------------------------------------------------------------
-  PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+  PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, std::reference_wrapper<const PolytopeTransformation> trans,
       const Math::SpatialVector& pc)
     : m_polytopeStorage(PolytopeStorage::Reference),
       m_polytope(polytope), m_trans(trans), m_pc(pc)
   {}
 
-  PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans)
+  PointBase::PointBase(std::reference_wrapper<const Polytope> polytope, std::reference_wrapper<const PolytopeTransformation> trans)
     : m_polytopeStorage(PolytopeStorage::Reference),
       m_polytope(polytope), m_trans(trans)
   {}
 
-  PointBase::PointBase(Polytope&& polytope, const PolytopeTransformation& trans,
+  PointBase::PointBase(Polytope&& polytope, std::reference_wrapper<const PolytopeTransformation> trans,
       const Math::SpatialVector& pc)
     : m_polytopeStorage(PolytopeStorage::Value),
       m_polytope(std::move(polytope)), m_trans(trans), m_pc(pc)
   {}
 
-  PointBase::PointBase(Polytope&& polytope, const PolytopeTransformation& trans)
+  PointBase::PointBase(Polytope&& polytope, std::reference_wrapper<const PolytopeTransformation> trans)
     : m_polytopeStorage(PolytopeStorage::Value),
       m_polytope(std::move(polytope)), m_trans(trans)
   {}
@@ -452,42 +452,62 @@ namespace Rodin::Geometry
     }
   }
 
-  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
-      std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc)
+  Point::Point(
+      std::reference_wrapper<const Polytope> polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
+      std::reference_wrapper<const Math::SpatialVector> rc,
+      const Math::SpatialVector& pc)
     : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
-  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
-      Math::SpatialVector&& rc, const Math::SpatialVector& pc)
+  Point::Point(
+      std::reference_wrapper<const Polytope> polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
+      Math::SpatialVector&& rc,
+      const Math::SpatialVector& pc)
     : PointBase(polytope, trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
-  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+  Point::Point(
+      std::reference_wrapper<const Polytope> polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
       std::reference_wrapper<const Math::SpatialVector> rc)
     : PointBase(polytope, trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
-  Point::Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+  Point::Point(
+      std::reference_wrapper<const Polytope> polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
       Math::SpatialVector&& rc)
     : PointBase(polytope, trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
-  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
-      std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc)
+  Point::Point(
+      Polytope&& polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
+      std::reference_wrapper<const Math::SpatialVector> rc,
+      const Math::SpatialVector& pc)
     : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
-  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
-      Math::SpatialVector&& rc, const Math::SpatialVector& pc)
+  Point::Point(
+      Polytope&& polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
+      Math::SpatialVector&& rc,
+      const Math::SpatialVector& pc)
     : PointBase(std::move(polytope), trans, pc), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
 
-  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
+  Point::Point(
+      Polytope&& polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
       std::reference_wrapper<const Math::SpatialVector> rc)
     : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Reference), m_rc(rc)
   {}
 
-  Point::Point(Polytope&& polytope, const PolytopeTransformation& trans,
+  Point::Point(
+      Polytope&& polytope,
+      std::reference_wrapper<const PolytopeTransformation> trans,
       Math::SpatialVector&& rc)
     : PointBase(std::move(polytope), trans), m_rcStorage(RCStorage::Value), m_rc(std::move(rc))
   {}
