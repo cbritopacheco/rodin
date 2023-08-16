@@ -38,6 +38,35 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  namespace Internal
+  {
+    template <typename T, class ... Args>
+    struct HasGetValueMethod
+    {
+      template<typename U, typename = decltype(std::declval<U>().getValue(std::declval<Args>()...))>
+      static std::true_type Test(int);
+
+      template<typename U>
+      static std::false_type Test(...);
+
+      using Type = decltype(Test<T>(0));
+      static constexpr bool Value = Type::value;
+    };
+
+    template <typename T, typename... Args>
+    struct HasGetValueMethod<T, Args&...>
+    {
+      template <typename U, typename = decltype(std::declval<U>().myMethodRef(std::declval<Args&>()...))>
+      static std::true_type Test(int);
+
+      template <typename U>
+      static std::false_type Test(...);
+
+      using Type = decltype(Test<T>(0));
+      static constexpr bool Value = Type::value;
+    };
+  }
+
   /**
    * @brief Base class for functions defined on a mesh.
    */
@@ -46,6 +75,8 @@ namespace Rodin::Variational
   {
     public:
       using Parent = FormLanguage::Base;
+
+      using TraceDomain = FlatSet<Geometry::Attribute>;
 
       FunctionBase() = default;
 
@@ -79,7 +110,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const FlatSet<Geometry::Attribute>& getTraceDomain() const
+      const TraceDomain& getTraceDomain() const
       {
         return m_traceDomain;
       }
@@ -144,28 +175,28 @@ namespace Rodin::Variational
       constexpr
       void getValue(Math::Vector& res, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValueByReference(res, p);
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
       }
 
       inline
       constexpr
       void getValue(Math::Matrix& res, const Geometry::Point& p) const
       {
-        return static_cast<const Derived&>(*this).getValueByReference(res, p);
-      }
-
-      inline
-      constexpr
-      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
-      {
-        res = getValue(p);
-      }
-
-      inline
-      constexpr
-      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
-      {
-        res = getValue(p);
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
       }
 
       /**

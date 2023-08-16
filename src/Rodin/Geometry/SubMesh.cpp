@@ -51,7 +51,7 @@ namespace Rodin::Geometry
     if (find == pmap.right.end())
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Could not find " << Alert::Notation::Polytope(d, i)
+        << "Invalid restrictuon. Could not find " << Alert::Notation::Polytope(d, i)
         << " in the SubMesh to parent Mesh map."
         << Alert::Raise;
     }

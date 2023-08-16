@@ -7,8 +7,6 @@
 #ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 #define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 
-#include "Rodin/Variational.h"
-
 #include "Mesh.h"
 
 #include "MMG5.h"

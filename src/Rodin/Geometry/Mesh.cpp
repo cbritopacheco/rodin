@@ -380,16 +380,6 @@ namespace Rodin::Geometry
 
   FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
   {
-    const size_t D = getDimension();
-    if (getConnectivity().getIncidence(D - 1, 0).size() == 0)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << Alert::Notation::Incidence(D - 1, 0)
-        << " has not been computed and is required to use this function."
-        << Alert::Raise;
-    }
-
-
     return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
   }
 

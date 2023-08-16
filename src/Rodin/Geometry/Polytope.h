@@ -323,18 +323,26 @@ namespace Rodin::Geometry
       };
 
       explicit
-      PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      PointBase(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
           const Math::SpatialVector& pc);
 
       explicit
-      PointBase(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans);
+      PointBase(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans);
 
       explicit
-      PointBase(Polytope&& polytope, const PolytopeTransformation& trans,
+      PointBase(
+          Polytope&& polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
           const Math::SpatialVector& pc);
 
       explicit
-      PointBase(Polytope&& polytope, const PolytopeTransformation& trans);
+      PointBase(
+          Polytope&& polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans);
 
       /**
        * @brief Copy constructor.
@@ -466,35 +474,63 @@ namespace Rodin::Geometry
       using Parent = PointBase;
 
       explicit
-      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
-          std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc);
+      Point(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const Math::SpatialVector> rc,
+          const Math::SpatialVector& pc)
+        : Point(polytope, polytope.get().getTransformation(), rc, pc)
+      {}
 
       explicit
-      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
-          Math::SpatialVector&& rc, const Math::SpatialVector& pc);
+      Point(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
+          std::reference_wrapper<const Math::SpatialVector> rc,
+          const Math::SpatialVector& pc);
 
       explicit
-      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      Point(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
+          Math::SpatialVector&& rc,
+          const Math::SpatialVector& pc);
+
+      explicit
+      Point(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
           std::reference_wrapper<const Math::SpatialVector> rc);
 
       explicit
-      Point(std::reference_wrapper<const Polytope> polytope, const PolytopeTransformation& trans,
+      Point(
+          std::reference_wrapper<const Polytope> polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
           Math::SpatialVector&& rc);
 
       explicit
-      Point(Polytope&& polytope, const PolytopeTransformation& trans,
-          std::reference_wrapper<const Math::SpatialVector> rc, const Math::SpatialVector& pc);
+      Point(
+          Polytope&& polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
+          std::reference_wrapper<const Math::SpatialVector> rc,
+          const Math::SpatialVector& pc);
 
       explicit
-      Point(Polytope&& polytope, const PolytopeTransformation& trans,
-          Math::SpatialVector&& rc, const Math::SpatialVector& pc);
+      Point(
+          Polytope&& polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
+          Math::SpatialVector&& rc,
+          const Math::SpatialVector& pc);
 
       explicit
-      Point(Polytope&& polytope, const PolytopeTransformation& trans,
+      Point(
+          Polytope&& polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
           std::reference_wrapper<const Math::SpatialVector> rc);
 
       explicit
-      Point(Polytope&& polytope, const PolytopeTransformation& trans,
+      Point(
+          Polytope&& polytope,
+          std::reference_wrapper<const PolytopeTransformation> trans,
           Math::SpatialVector&& rc);
 
       Point(const Point& other);
