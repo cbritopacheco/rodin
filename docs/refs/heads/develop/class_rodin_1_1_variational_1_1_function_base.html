@@ -284,7 +284,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a975fd7035cf8f07bf78199803d012880" class="m-doc">getTraceDomain</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c12ae701519a9531c37053cb041cbb0" class="m-doc">getTraceDomain</a>(</span><span class="m-doc-wrap">) const -&gt; const TraceDomain&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</dd>
             <dt id="af5f065ebe0b3b1c58b0c2402a50fc9e3">
@@ -303,12 +303,12 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a975fd7035cf8f07bf78199803d012880"><div>
+          <section class="m-doc-details" id="a7c12ae701519a9531c37053cb041cbb0"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />FunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a975fd7035cf8f07bf78199803d012880" class="m-doc-self">getTraceDomain</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const TraceDomain&amp; Rodin::<wbr />Variational::<wbr />FunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c12ae701519a9531c37053cb041cbb0" class="m-doc-self">getTraceDomain</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</p>
 <p>The domains to trace are interpreted as the domains where there shall be a continuous extension from values to the interior boundaries. If the trace domain is empty, then this has the semantic value that it has not been specified yet.</p>
