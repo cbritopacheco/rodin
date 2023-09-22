@@ -98,11 +98,11 @@ int main(int, char**)
 
 - Optimizing the mesh:
   ```c++
-  MMG::MeshOptimizer().setHMax(hmax) // maximal edge size
-                      .setHMin(hmin) // minimal edge size
-                      .setGradation(hgrad) // ratio between two edges
-                      .setHausdorff(hausd) // curvature refinement
-                      .optimize(Omega);
+  MMG::Optimizer().setHMax(hmax) // maximal edge size
+                  .setHMin(hmin) // minimal edge size
+                  .setGradation(hgrad) // ratio between two edges
+                  .setHausdorff(hausd) // curvature refinement
+                  .optimize(Omega);
   ```
 
 ## Roadmap
