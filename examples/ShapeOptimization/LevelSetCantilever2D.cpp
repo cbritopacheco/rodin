@@ -15,6 +15,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
+using FES = VectorP1<Context::Serial>;
 
 // Define interior and exterior for level set discretization
 static constexpr Attribute Interior = 1, Exterior = 2;
@@ -34,7 +35,16 @@ static constexpr double ell = 0.4;
 static constexpr double alpha = 4 * hmax * hmax;
 
 // Compliance
-double compliance(GridFunction<H1<Math::Vector, Context::Serial>>& w);
+inline Scalar compliance(const GridFunction<FES>& w)
+{
+  auto& vh = w.getFiniteElementSpace();
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+  BilinearForm  bf(u, v);
+  bf = Integral(lambda * Div(u), Div(v))
+     + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+  return bf(w, w);
+};
 
 int main(int, char**)
 {
@@ -44,13 +54,13 @@ int main(int, char**)
   MMG::Mesh Omega;
   Omega.load(meshFile);
 
-  MMG::MeshOptimizer().setHMax(hmax / 2.0).optimize(Omega);
+  MMG::Optimizer().setHMax(hmax / 2.0).optimize(Omega);
 
   Omega.save("Omega0.mesh");
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-  // UMFPACK
-  Solver::UMFPack solver;
+  // Solver
+  Solver::SparseLU solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -66,9 +76,9 @@ int main(int, char**)
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     int d = 2;
-    H1 vh(Omega, d);
-    H1 shInt(trimmed);
-    H1 vhInt(trimmed, d);
+    P1 vh(Omega, d);
+    P1 shInt(trimmed);
+    P1 vhInt(trimmed, d);
     Omega.save("miaow.mesh");
 
     Alert::Info() << "   | Solving state equation." << Alert::Raise;
@@ -110,7 +120,7 @@ int main(int, char**)
     fObj.flush();
     Alert::Info() << "   | Objective: " << obj.back() << Alert::Raise;
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
-    H1 Dh(Omega);
+    P1 Dh(Omega);
     auto dist = MMG::Distancer(Dh).setInteriorDomain(Interior)
                                   .distance(Omega);
 
@@ -139,7 +149,7 @@ int main(int, char**)
                                        .setBaseReferences(GammaD)
                                        .discretize(dist);
 
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+    MMG::Optimizer().setHMax(hmax).optimize(Omega);
 
     Omega.save("Omega.mesh");
   }
@@ -147,17 +157,5 @@ int main(int, char**)
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
-}
-
-Scalar compliance(GridFunction<H1<Math::Vector, Context::Serial>>& w)
-{
-  const auto& Vh = w.getFiniteElementSpace();
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-  BilinearForm  bf(u, v);
-  bf = Integral(lambda * Div(u), Div(v))
-     + Integral(
-         mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
-  return bf(w, w);
 }
 

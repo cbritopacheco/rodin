@@ -63,7 +63,7 @@ int main()
                                     .setHausdorff(0.01)
                                     .discretize(dist);
 
-    MMG::Optimize().setAngleDetection(false)
+    MMG::Optimizer().setAngleDetection(false)
                         .setHMin(hmin)
                         .setHMax(hmax)
                         .setHausdorff(0.01)

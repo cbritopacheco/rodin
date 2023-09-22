@@ -28,7 +28,7 @@ int main(int, char**)
   for (auto it = mesh.getBoundary(); !it.end(); ++it)
     mesh.setRidge(it->getIndex());
 
-  MMG::Optimize().setHMax(0.5).optimize(mesh);
+  MMG::Optimizer().setHMax(0.5).optimize(mesh);
 
   mesh.save("Optimized.mesh");
 

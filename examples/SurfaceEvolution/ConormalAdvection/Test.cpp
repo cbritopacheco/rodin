@@ -220,7 +220,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
                                     .setHausdorff(experiment.hausd)
                                     .discretize(dist);
 
-    MMG::Optimize().setAngleDetection(false)
+    MMG::Optimizer().setAngleDetection(false)
                    .setHMax(experiment.hmax)
                    .setHausdorff(experiment.hausd)
                    .optimize(th);
