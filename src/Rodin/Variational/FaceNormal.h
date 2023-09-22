@@ -24,7 +24,7 @@ namespace Rodin::Variational
       FaceNormal(const Geometry::MeshBase& mesh)
         : m_sdim(mesh.getSpaceDimension())
       {
-        assert(m_dimension > 0);
+        assert(m_sdim > 0);
       }
 
       FaceNormal(const FaceNormal& other)
