@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ShapeFunctionBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -52,29 +63,23 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ShapeFunctionBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for shape function objects.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">Derived</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>FESType</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Space</td>
-              <td>Type of shape function space (Trial or <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a>)</td>
-            </tr>
-          </tbody>
-        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -83,6 +88,49 @@
             </dt>
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
+        </section>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a35f1f20b2826ace7527909b619cbc9fa">
+              <span class="m-doc-wrap-bumper">auto <a href="#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc-self">getTensorBasis</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets an expression which yields the shape function basis at the given point.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a86b3f2feaa6730900f76484cf10397f8" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Call operator to get an expression which yields the shape function basis at the given point.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a86b3f2feaa6730900f76484cf10397f8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+                template&lt;class ... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a86b3f2feaa6730900f76484cf10397f8" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Call operator to get an expression which yields the shape function basis at the given point.</p>
+<p>Synonym to <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc">getTensorBasis()</a>.</p>
+          </div></section>
         </section>
       </div>
     </div>

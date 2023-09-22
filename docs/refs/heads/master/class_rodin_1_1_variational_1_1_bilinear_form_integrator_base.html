@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::BilinearFormIntegratorBase class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearFormIntegratorBase <span class="m-thin">class</span>
+        </h1>
+        <p>Abstract base class for bilinear form integrators.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class provides the base functionality for bilinear form integrator objects.</p>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class Context&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_grad_3_01d05bda2c02c4bb8ee1fdb39b908deab8.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Approximation of the integral of the the dot product between a trial shape function and a test shape function.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class Context&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_0137dd1250166c80f03fc5839c6584c737.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_0157e08f2daef43190f918f4ec5313a602.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;LHSFunctionDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a7c03f13cf0d83f880c52331108498d99">
+              using <a href="#a7c03f13cf0d83f880c52331108498d99" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>
+            </dt>
+            <dd>Parent class.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a8ea60372c788563cc17cff02a133937a">
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a8ea60372c788563cc17cff02a133937a" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v)</span>
+            </dt>
+            <dd>Constructs the object given a <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> and a <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>.</dd>
+            <dt id="a34f1e7a99db2ab6d2e55f7d5dce063d3">
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a34f1e7a99db2ab6d2e55f7d5dce063d3" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Deleted constructor.</dd>
+            <dt id="a95d4f90a0df33e92b1d60ce5203229f8">
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a95d4f90a0df33e92b1d60ce5203229f8" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp;&amp; v) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Deleted constructor.</dd>
+            <dt id="a1b1a9297437341d283bda100291c887f">
+              <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a1b1a9297437341d283bda100291c887f" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;TrialFES&gt;&amp;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp;&amp; v) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Deleted constructor.</dd>
+            <dt id="ae4cabbb053a38c08a2ce821f5878b747">
+              <span class="m-doc-wrap-bumper"><a href="#ae4cabbb053a38c08a2ce821f5878b747" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="af5bfa95c392a3b8b192f043e62f8edd8">
+              <span class="m-doc-wrap-bumper"><a href="#af5bfa95c392a3b8b192f043e62f8edd8" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="acb1587e26b46b0995b8b02e380f27930">
+              <span class="m-doc-wrap-bumper">auto <a href="#acb1587e26b46b0995b8b02e380f27930" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the attributes of the elements being integrated.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a04dbd0220c197cc9b970eb176e02e609" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;</span>
+            </dt>
+            <dd>Specifies the material reference over which to integrate.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa3c87e0e350dad63f2f5d128fad139e5" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;</span>
+            </dt>
+            <dd>Specifies the material references over which to integrate.</dd>
+            <dt id="a9aa0b9db49913ce5d4e2537b8396b931">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9aa0b9db49913ce5d4e2537b8396b931" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp;</span>
+            </dt>
+            <dd>Gets a constant reference to trial function object.</dd>
+            <dt id="a5ec0b20db13d020cb99d937328d6a183">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5ec0b20db13d020cb99d937328d6a183" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp;</span>
+            </dt>
+            <dd>Gets a constant reference to test function object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8f85c7700294f44b378350ac4b996f1c" class="m-doc">getMatrix</a>(</span><span class="m-doc-wrap">) -&gt; <a href="namespace_rodin_1_1_math.html#ae0ef49e0b0fe8eb8fb5fa62cf553d27e" class="m-doc">Math::<wbr />Matrix</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a99e26a9d28b76c8f6438a086b63c1017" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Performs the assembly of the element matrix for the given element.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a04dbd0220c197cc9b970eb176e02e609"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04dbd0220c197cc9b970eb176e02e609" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
+            </h3>
+            <p>Specifies the material reference over which to integrate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Specifies the material reference over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa3c87e0e350dad63f2f5d128fad139e5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa3c87e0e350dad63f2f5d128fad139e5" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
+            </h3>
+            <p>Specifies the material references over which to integrate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Specifies the material references over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8f85c7700294f44b378350ac4b996f1c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#ae0ef49e0b0fe8eb8fb5fa62cf553d27e" class="m-doc">Math::<wbr />Matrix</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f85c7700294f44b378350ac4b996f1c" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The element matrix of size of <svg class="m-math" style="width: 3.317em; height: 0.830em; vertical-align: -0.104em;" viewBox="0 -6.973856 31.838697 7.970127">
+<title>
+$ m \times n $
+</title>
+<defs>
+<path id='eq1-g0-2' d='M4.65056-3.323537L2.259527-5.702615C2.116065-5.846077 2.092154-5.869988 1.996513-5.869988C1.876961-5.869988 1.75741-5.762391 1.75741-5.630884C1.75741-5.547198 1.78132-5.523288 1.912827-5.391781L4.303861-2.988792L1.912827-.585803C1.78132-.454296 1.75741-.430386 1.75741-.3467C1.75741-.215193 1.876961-.107597 1.996513-.107597C2.092154-.107597 2.116065-.131507 2.259527-.274969L4.638605-2.654047L7.113325-.179328C7.137235-.167372 7.220922-.107597 7.292653-.107597C7.436115-.107597 7.531756-.215193 7.531756-.3467C7.531756-.37061 7.531756-.418431 7.49589-.478207C7.483935-.502117 5.583064-2.379078 4.985305-2.988792L7.173101-5.176588C7.232877-5.248319 7.412204-5.403736 7.47198-5.475467C7.483935-5.499377 7.531756-5.547198 7.531756-5.630884C7.531756-5.762391 7.436115-5.869988 7.292653-5.869988C7.197011-5.869988 7.149191-5.822167 7.017684-5.69066L4.65056-3.323537Z'/>
+<path id='eq1-g1-109' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-4.124533 5.057036-3.88543 4.913574-3.323537L4.614695-2.092154C4.519054-1.733499 4.291905-.848817 4.267995-.71731C4.220174-.537983 4.148443-.227148 4.148443-.179328C4.148443-.011955 4.27995 .119552 4.459278 .119552C4.817933 .119552 4.877709-.155417 4.985305-.585803L5.702615-3.443088C5.726526-3.53873 6.348194-5.033126 7.663263-5.033126C8.141469-5.033126 8.308842-4.674471 8.308842-4.196264C8.308842-3.526775 7.84259-2.223661 7.579577-1.506351C7.47198-1.219427 7.412204-1.06401 7.412204-.848817C7.412204-.310834 7.782814 .119552 8.356663 .119552C9.468493 .119552 9.886924-1.637858 9.886924-1.709589C9.886924-1.769365 9.839103-1.817186 9.767372-1.817186C9.659776-1.817186 9.647821-1.78132 9.588045-1.578082C9.313076-.621669 8.870735-.119552 8.392528-.119552C8.272976-.119552 8.081694-.131507 8.081694-.514072C8.081694-.824907 8.225156-1.207472 8.272976-1.338979C8.488169-1.912827 9.026152-3.323537 9.026152-4.016936C9.026152-4.734247 8.607721-5.272229 7.699128-5.272229C6.898132-5.272229 6.252553-4.817933 5.774346-4.112578C5.738481-4.758157 5.34396-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.207472-5.272229 .932503-5.104857 .705355-4.65056C.490162-4.220174 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.327771 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+<path id='eq1-g1-110' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-3.514819 4.566874-2.15193 4.327771-1.506351C4.220174-1.219427 4.160399-1.06401 4.160399-.848817C4.160399-.310834 4.531009 .119552 5.104857 .119552C6.216687 .119552 6.635118-1.637858 6.635118-1.709589C6.635118-1.769365 6.587298-1.817186 6.515567-1.817186C6.40797-1.817186 6.396015-1.78132 6.336239-1.578082C6.06127-.597758 5.606974-.119552 5.140722-.119552C5.021171-.119552 4.829888-.131507 4.829888-.514072C4.829888-.812951 4.961395-1.171606 5.033126-1.338979C5.272229-1.996513 5.774346-3.335492 5.774346-4.016936C5.774346-4.734247 5.355915-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.171606-5.272229 .908593-5.045081 .705355-4.638605C.490162-4.208219 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.824907-4.351681 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-109'/>
+<use x='12.89593' y='0' xlink:href='#eq1-g0-2'/>
+<use x='24.851091' y='0' xlink:href='#eq1-g1-110'/>
+</g>
+</svg> where <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+<title>
+$ n $
+</title>
+<defs>
+<path id='eq2-g0-110' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-3.514819 4.566874-2.15193 4.327771-1.506351C4.220174-1.219427 4.160399-1.06401 4.160399-.848817C4.160399-.310834 4.531009 .119552 5.104857 .119552C6.216687 .119552 6.635118-1.637858 6.635118-1.709589C6.635118-1.769365 6.587298-1.817186 6.515567-1.817186C6.40797-1.817186 6.396015-1.78132 6.336239-1.578082C6.06127-.597758 5.606974-.119552 5.140722-.119552C5.021171-.119552 4.829888-.131507 4.829888-.514072C4.829888-.812951 4.961395-1.171606 5.033126-1.338979C5.272229-1.996513 5.774346-3.335492 5.774346-4.016936C5.774346-4.734247 5.355915-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.171606-5.272229 .908593-5.045081 .705355-4.638605C.490162-4.208219 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.824907-4.351681 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-110'/>
+</g>
+</svg> (resp. <svg class="m-math" style="width: 1.067em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 10.239267 5.147373">
+<title>
+$ m $
+</title>
+<defs>
+<path id='eq3-g0-109' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-4.124533 5.057036-3.88543 4.913574-3.323537L4.614695-2.092154C4.519054-1.733499 4.291905-.848817 4.267995-.71731C4.220174-.537983 4.148443-.227148 4.148443-.179328C4.148443-.011955 4.27995 .119552 4.459278 .119552C4.817933 .119552 4.877709-.155417 4.985305-.585803L5.702615-3.443088C5.726526-3.53873 6.348194-5.033126 7.663263-5.033126C8.141469-5.033126 8.308842-4.674471 8.308842-4.196264C8.308842-3.526775 7.84259-2.223661 7.579577-1.506351C7.47198-1.219427 7.412204-1.06401 7.412204-.848817C7.412204-.310834 7.782814 .119552 8.356663 .119552C9.468493 .119552 9.886924-1.637858 9.886924-1.709589C9.886924-1.769365 9.839103-1.817186 9.767372-1.817186C9.659776-1.817186 9.647821-1.78132 9.588045-1.578082C9.313076-.621669 8.870735-.119552 8.392528-.119552C8.272976-.119552 8.081694-.131507 8.081694-.514072C8.081694-.824907 8.225156-1.207472 8.272976-1.338979C8.488169-1.912827 9.026152-3.323537 9.026152-4.016936C9.026152-4.734247 8.607721-5.272229 7.699128-5.272229C6.898132-5.272229 6.252553-4.817933 5.774346-4.112578C5.738481-4.758157 5.34396-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.207472-5.272229 .932503-5.104857 .705355-4.65056C.490162-4.220174 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.327771 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-109'/>
+</g>
+</svg>) denotes the number of degrees of freedom on the polytope for the test (resp. trial) space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a99e26a9d28b76c8f6438a086b63c1017"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99e26a9d28b76c8f6438a086b63c1017" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Performs the assembly of the element matrix for the given element.</p>
+<p>Assembles the stiffness matrix of the given element.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

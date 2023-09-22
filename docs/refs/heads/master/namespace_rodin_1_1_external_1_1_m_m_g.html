@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin::External::MMG namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -86,7 +97,7 @@
             <dd>Class to specify the interior and exterior material references.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer_3_01_variational_1_1_h1_3_01_scalar_00_01_context_1_1_serial_01_4_01_4.html" class="m-doc">Distancer&lt;Variational::H1&lt;Scalar, Context::Serial&gt;&gt;</a>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_distancer_3_01_scalar_grid_function_1_1_f_e_s_01_4.html" class="m-doc">Distancer&lt;ScalarGridFunction::FES&gt;</a>
             </dt>
             <dd>Class which generates the signed distance function of a domain.</dd>
             <dt>
@@ -94,22 +105,47 @@
             </dt>
             <dd>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</dd>
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_optimizer.html" class="m-doc">MeshOptimizer</a>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> class which has support for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> functionalities.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>
             </dt>
             <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>
+            </dt>
+            <dd>Class used to print objects of type <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
+            </dt>
+            <dd>Class representing <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> framework.</dd>
           </dl>
         </section>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a077152ee876d6e213437cf61fba97e90">
-              using <a href="#a077152ee876d6e213437cf61fba97e90" class="m-doc-self">MaterialReference</a> = int
-            </dt>
-            <dd>Material reference for each element.</dd>
-            <dt id="ac72151e3771f28bd1282a1aa79bb23f7">
-              using <a href="#ac72151e3771f28bd1282a1aa79bb23f7" class="m-doc-self">SplitMap</a> = std::map&lt;<a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a077152ee876d6e213437cf61fba97e90" class="m-doc">MaterialReference</a>, std::variant&lt;<a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>, <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>&gt;&gt;
+            <dt id="a14f11f18e0531a8e76581e4adfabdc83">
+              using <a href="#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc-self">SplitMap</a> = <a href="namespace_rodin.html#a5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>, std::variant&lt;<a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>, <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>&gt;&gt;
             </dt>
             <dd>Map indicating how a material reference should be split into exterior and interior material references.</dd>
+            <dt id="a9fd827bfb4fd8dddc7e80b190f7cb82c">
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              using <a href="#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt;&gt;&gt;
+            </dt>
+            <dd>GridFunction class for use with the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />External::<wbr />MMG</a> module.</dd>
+            <dt id="a5332c61d0f3f1c9696dcb640b2255f1d">
+              using <a href="#a5332c61d0f3f1c9696dcb640b2255f1d" class="m-doc-self">ScalarGridFunction</a> = <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin.html#a618f5f98eaa9b4906269b4fe9461ea95" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Type alias for a GridFunction with scalar range.</dd>
+            <dt id="a22d535305aaf40c50d869d00386dcb73">
+              using <a href="#a22d535305aaf40c50d869d00386dcb73" class="m-doc-self">VectorGridFunction</a> = <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>&gt;
+            </dt>
+            <dd>Type alias for a GridFunction with vector range.</dd>
+            <dt id="a2e664251a56ddb6630af9e4586dd47cd">
+              using <a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc-self">ReturnCode</a> = int
+            </dt>
+            <dd>Type of return code used by the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> functions.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -119,7 +155,44 @@
               static <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc-self">NoSplit</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Instance of the empty struct tag <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>.</dd>
+            <dt>
+              const char* <a href="#a63de188461907d4e396294ae8c6a9c3a" class="m-doc">ISCD_MSHDIST_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Path to the ISCD Mshdist executable.</dd>
+            <dt>
+              const char* <a href="#a4404167df2ec94385623e756594ccb5c" class="m-doc">ISCD_ADVECTION_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Path to the ISCD Mshdist executable.</dd>
+            <dt>
+              const int <a href="#a269af232c229adaba3e889ad4c895218" class="m-doc">VERBOSITY_LEVEL</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Verbosity level for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> console output.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a63de188461907d4e396294ae8c6a9c3a"><div>
+            <h3>
+              const char* Rodin::<wbr />External::<wbr />MMG::<wbr /><a href="#a63de188461907d4e396294ae8c6a9c3a" class="m-doc-self">ISCD_MSHDIST_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_external_2_m_m_g_2_configure_8h_8in.html">&lt;RodinExternal/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Path to the ISCD Mshdist executable.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4404167df2ec94385623e756594ccb5c"><div>
+            <h3>
+              const char* Rodin::<wbr />External::<wbr />MMG::<wbr /><a href="#a4404167df2ec94385623e756594ccb5c" class="m-doc-self">ISCD_ADVECTION_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_external_2_m_m_g_2_configure_8h_8in.html">&lt;RodinExternal/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Path to the ISCD Mshdist executable.</p>
+          </div></section>
+          <section class="m-doc-details" id="a269af232c229adaba3e889ad4c895218"><div>
+            <h3>
+              const int Rodin::<wbr />External::<wbr />MMG::<wbr /><a href="#a269af232c229adaba3e889ad4c895218" class="m-doc-self">VERBOSITY_LEVEL</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_external_2_m_m_g_2_configure_8h_8in.html">&lt;RodinExternal/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Verbosity level for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> console output.</p>
+<p>Ranges from -1 to INT_MAX. A higher number means more verbose output.</p>
+          </div></section>
         </section>
       </div>
     </div>

@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin::FormLanguage::Base class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -77,10 +88,10 @@
             </dt>
             <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Rodin::Variational::FunctionBase</a>
+              <div class="m-doc-template">template&lt;class OperatorType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">Rodin::Variational::BilinearFormBase</a>
             </dt>
-            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
+            <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Rodin::Variational::FunctionBase</a>
@@ -157,57 +168,52 @@
             </dt>
             <dd>Base class for variational problem objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
-            </dt>
-            <dd>Base class for shape function objects.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
@@ -216,6 +222,10 @@
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">Rodin::Variational::BilinearFormBase</a>
             </dt>
             <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Rodin::Variational::DirichletBCBase</a>
+            </dt>
+            <dd>Abstract base class for a Dirichlet boundary condition.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dot_3_01_shape_function_base_3_01_l_h_s_derived_00_01_trial_f_e_c05da362fa61f70432d39f64e867babe.html" class="m-doc">Rodin::Variational::Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
@@ -237,6 +247,10 @@
             </dt>
             <dd>Base class for linear form objects.</dd>
             <dt>
+              class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Rodin::Variational::PeriodicBCBase</a>
+            </dt>
+            <dd>Abstract base class for a periodic boundary condition.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Rodin::Variational::ProblemBase</a>
             </dt>
@@ -246,7 +260,7 @@
             </dt>
             <dd>Represents the body of a variational problem.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Rodin::Variational::ShapeFunctionBase</a>
             </dt>
             <dd>Base class for shape function objects.</dd>
@@ -284,8 +298,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a16304dcb0a7f0b43c3819cbb8851f30e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Move assignment is not allowed.</dd>
-            <dt id="a90b8bc7323256e69c4078c917904532d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a90b8bc7323256e69c4078c917904532d" class="m-doc-self">getUUID</a>(</span><span class="m-doc-wrap">) const -&gt; const size_t&amp;</span>
+            <dt id="a9ab4468c8c8a9f26eed96f028f68d625">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ab4468c8c8a9f26eed96f028f68d625" class="m-doc-self">getUUID</a>(</span><span class="m-doc-wrap">) const -&gt; const UUID&amp;</span>
             </dt>
             <dd>Gets the unique identifier associated to the instance.</dd>
             <dt id="a2ab4ce45db41bdd5911d4dc95286c592">

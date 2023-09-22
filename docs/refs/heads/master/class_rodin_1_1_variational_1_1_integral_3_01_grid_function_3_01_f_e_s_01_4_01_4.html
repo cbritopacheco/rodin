@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Integral&lt;GridFunction&lt;FES&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -63,6 +74,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -78,32 +90,67 @@
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all classes which are part of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aafab5f57c9a6c3a1e07d5dfa81f55190">
+              using <a href="#aafab5f57c9a6c3a1e07d5dfa81f55190" class="m-doc-self">Integrand</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;
+            </dt>
+            <dd>Type of integrand.</dd>
+            <dt id="a02f58f805c9cd09c1326a38fcb96f441">
+              using <a href="#a02f58f805c9cd09c1326a38fcb96f441" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>
+            </dt>
+            <dd>Parent class.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a36173ed77949828101383d8921092cd6">
-              <span class="m-doc-wrap-bumper"><a href="#a36173ed77949828101383d8921092cd6" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Integrand</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a36173ed77949828101383d8921092cd6" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#aafab5f57c9a6c3a1e07d5dfa81f55190" class="m-doc">Integrand</a>&amp; u)</span>
             </dt>
             <dd>Constructs the integral object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a272bd7c5451358a16dc432a233dc229d" class="m-doc">operator Scalar</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Returns the value of the integral, computing it if necessary.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute</a>(</span><span class="m-doc-wrap">) -&gt; Scalar</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute</a>(</span><span class="m-doc-wrap">) -&gt; <a href="namespace_rodin.html#a618f5f98eaa9b4906269b4fe9461ea95" class="m-doc">Scalar</a></span>
             </dt>
             <dd>Integrates the expression and returns the value.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a272bd7c5451358a16dc432a233dc229d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a272bd7c5451358a16dc432a233dc229d" class="m-doc-self">operator Scalar</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns the value of the integral, computing it if necessary.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value of integral</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>If <a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute()</a> has been called before, returns the value of the cached value. Otherwise, it will call <a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute()</a> and return the newly computed value.</p>
+          </div></section>
           <section class="m-doc-details" id="ade9205e5f61b0d6df0e31bab6ae6b362"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Variational::<wbr />Integral&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a618f5f98eaa9b4906269b4fe9461ea95" class="m-doc">Scalar</a> Rodin::<wbr />Variational::<wbr />Integral&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Integrates the expression and returns the value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -114,6 +161,7 @@
                 </tr>
               </tfoot>
             </table>
+<p>Compute the value of the integral, caches it and returns it.</p>
           </div></section>
         </section>
       </div>

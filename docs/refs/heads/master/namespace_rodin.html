@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -62,6 +73,7 @@
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
               </ul>
             </li>
           </ul>
@@ -69,16 +81,24 @@
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></dt>
+            <dd>Module for serial, multi-threaded, distributed, and/or parallel computation.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_external.html" class="m-doc">External</a></dt>
             <dd>Third-party library integrations with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a></dt>
-            <dd>Module for writing formal expressions in C++.</dd>
+            <dd>Module for writing high level abstract expressions.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a></dt>
             <dd>Module for dealing with geometries.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a></dt>
             <dd>Module for dealing with I/O functionality.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a></dt>
+            <dd>Module for linear algebra operations.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_plot.html" class="m-doc">Plot</a></dt>
+            <dd>Module for visualization tools.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a></dt>
+            <dd>Module for defining quadrature formulae.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a></dt>
-            <dd>Module for solving variational problems constructed with the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module.</dd>
+            <dd>Module for linear algebra systems.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a></dt>
             <dd>Module containing various utilities and classes for writing tests.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a></dt>
@@ -86,7 +106,75 @@
             <dt>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a></dt>
             <dd>Module containing general purpose and language support utility classes.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a></dt>
-            <dd>Module for writing variational problems in C++.</dd>
+            <dd>Module which provides the necessary tools for constructing variational problems.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt id="a6a6dae14f7d180ab0de188f4feba6e60">
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              using <a href="#a6a6dae14f7d180ab0de188f4feba6e60" class="m-doc-self">Array</a> = Eigen::ArrayX&lt;<a href="namespace_rodin.html#a618f5f98eaa9b4906269b4fe9461ea95" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Standard array type.</dd>
+            <dt id="a3b5d284c6fb7166b753c5664773266cc">
+              using <a href="#a3b5d284c6fb7166b753c5664773266cc" class="m-doc-self">IndexArray</a> = <a href="namespace_rodin.html#a6a6dae14f7d180ab0de188f4feba6e60" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+            </dt>
+            <dd>Standard array of indices.</dd>
+            <dt id="a1dc165bbe1d2390cd0a21524320cd3eb">
+              using <a href="#a1dc165bbe1d2390cd0a21524320cd3eb" class="m-doc-self">Integer</a> = int
+            </dt>
+            <dd>Standard type for representing integer values.</dd>
+            <dt id="a717a190167959b837148d927a5d380ba">
+              using <a href="#a717a190167959b837148d927a5d380ba" class="m-doc-self">Boolean</a> = bool
+            </dt>
+            <dd>Standard type for representing boolean values.</dd>
+            <dt id="a8e3779455205500f06002645c670f038">
+              using <a href="#a8e3779455205500f06002645c670f038" class="m-doc-self">Float</a> = double
+            </dt>
+            <dd>Standard type for representing floating-point values.</dd>
+            <dt id="a618f5f98eaa9b4906269b4fe9461ea95">
+              using <a href="#a618f5f98eaa9b4906269b4fe9461ea95" class="m-doc-self">Scalar</a> = <a href="namespace_rodin.html#a8e3779455205500f06002645c670f038" class="m-doc">Float</a>
+            </dt>
+            <dd>Standard type for representing scalar values.</dd>
+            <dt id="a68df7958495e405a2df133a40d640251">
+              using <a href="#a68df7958495e405a2df133a40d640251" class="m-doc-self">Index</a> = std::size_t
+            </dt>
+            <dd>Standard type for representing indices.</dd>
+            <dt id="aaa7028d8cff093953627586709836fcb">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#aaa7028d8cff093953627586709836fcb" class="m-doc-self">FlatSet</a> = boost::container::flat_set&lt;T&gt;
+            </dt>
+            <dd>Standard flat set type.</dd>
+            <dt id="ad4ab17db1cb81a9e71fd86d9474255be">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#ad4ab17db1cb81a9e71fd86d9474255be" class="m-doc-self">UnorderedSet</a> = boost::unordered_set&lt;T&gt;
+            </dt>
+            <dd>Standard unordered set type.</dd>
+            <dt id="aa4e2542497b9d770faa236c58e485129">
+              <div class="m-doc-template">template&lt;class K, class T&gt;</div>
+              using <a href="#aa4e2542497b9d770faa236c58e485129" class="m-doc-self">Map</a> = boost::container::map&lt;K, T&gt;
+            </dt>
+            <dd>Standard ordered map type.</dd>
+            <dt id="a5f130bd8b1c58b36b367761092cb5d58">
+              <div class="m-doc-template">template&lt;class ... Params&gt;</div>
+              using <a href="#a5f130bd8b1c58b36b367761092cb5d58" class="m-doc-self">UnorderedMap</a> = boost::unordered_map&lt;Params...&gt;
+            </dt>
+            <dd>Standard unordered map type.</dd>
+            <dt id="ac254f6b6b70bc4d0f93b9bd717356963">
+              <div class="m-doc-template">template&lt;class K, class T&gt;</div>
+              using <a href="#ac254f6b6b70bc4d0f93b9bd717356963" class="m-doc-self">FlatMap</a> = boost::container::flat_map&lt;K, T&gt;
+            </dt>
+            <dd>Standard flat map type.</dd>
+            <dt id="ad2973bbf1f33a52a394e09f8a0ed4293">
+              using <a href="#ad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc-self">IndexSet</a> = <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+            </dt>
+            <dd>Standard set of indices.</dd>
+            <dt id="a6c5e391ad8021755d9d9f9d5755539cb">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#a6c5e391ad8021755d9d9f9d5755539cb" class="m-doc-self">IndexMap</a> = <a href="namespace_rodin.html#ac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, T&gt;
+            </dt>
+            <dd>Standard map of indices.</dd>
           </dl>
         </section>
       </div>

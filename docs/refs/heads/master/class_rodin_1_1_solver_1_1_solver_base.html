@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin::Solver::SolverBase class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -55,7 +66,7 @@
           <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>SolverBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for solving variational problems represented by a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a> instance.</p>
+        <p>Base class for solving linear algebra systems.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -80,10 +91,10 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a08036e177d0a5a9e8f09db3c86d2ad4b">
-              <span class="m-doc-wrap-bumper">void <a href="#a08036e177d0a5a9e8f09db3c86d2ad4b" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
+            <dt id="a4f29f98b20227d39598133963521b78c">
+              <span class="m-doc-wrap-bumper">void <a href="#a4f29f98b20227d39598133963521b78c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">OperatorType&amp; A,
               VectorType&amp; X,
-              VectorType&amp; B) const <span class="m-label m-flat m-warning">pure virtual</span></span>
+              VectorType&amp; B) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the specified <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>.</dd>
           </dl>

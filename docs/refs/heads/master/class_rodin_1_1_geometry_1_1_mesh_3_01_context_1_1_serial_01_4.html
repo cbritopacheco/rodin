@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::Mesh&lt;Context::Serial&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -64,6 +75,8 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -83,10 +96,35 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
+              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Rodin::External::MMG::Mesh</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> class which has support for <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> functionalities.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">SubMesh&lt;Context::Serial&gt;</a>
+              class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">SubMesh&lt;Context::Serial&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4_1_1_builder.html" class="m-doc">Builder</a>
+            </dt>
+            <dd>Class used to build <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Serial&gt;</a> instances.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt id="afc944058bac44bc823cebb5e79cb5e68">
+              <span class="m-doc-wrap-bumper">static auto <a href="#afc944058bac44bc823cebb5e79cb5e68" class="m-doc-self">UniformGrid</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g,
+              size_t h,
+              size_t w) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></span>
+            </dt>
+            <dd>Generates a uniform grid for a given geometry.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -96,23 +134,58 @@
               <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Constructs an empty mesh with no elements.</dd>
-            <dt id="ae742cf54ce51fc6aaaa0fc6fbd16a638">
-              <span class="m-doc-wrap-bumper"><a href="#ae742cf54ce51fc6aaaa0fc6fbd16a638" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
-            </dt>
-            <dd>Move constructs the mesh from another mesh.</dd>
             <dt id="a41e370009465e8495509f5063ff4b656">
               <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other)</span>
             </dt>
             <dd>Performs a copy of another mesh.</dd>
+            <dt id="ae742cf54ce51fc6aaaa0fc6fbd16a638">
+              <span class="m-doc-wrap-bumper"><a href="#ae742cf54ce51fc6aaaa0fc6fbd16a638" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructs the mesh from another mesh.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ac3462215a38fbd687febccc809ef1776">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac3462215a38fbd687febccc809ef1776" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a0d3626df50b3182819a2dba3433f8327">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d3626df50b3182819a2dba3433f8327" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assigns the mesh from another mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae2051f6fbb9289e6a8b11d43732d8c76" class="m-doc">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;FunctionDerived&gt;&amp; u) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            </dt>
+            <dd>Displaces the mesh nodes by the displacement <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+<title>
+$ u $
+</title>
+<defs>
+<path id='eq1-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-117'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a935f4ff6332a5a505800874a4bd40f5c" class="m-doc">skin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Skins the mesh to obtain its boundary mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5d06c4c9253274985322f5cd807ae643" class="m-doc">trim</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Trims the elements with the given attribute.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8f8f3ff1c32b46310e2e072da3ec4a0c" class="m-doc">trim</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Trims the elements with the given attribute.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a71339523fd7ef81f58cd98ecdac52f65" class="m-doc">keep</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Keeps the elements with the given attribute.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a092e0e9511e90f61c217ab243a217e58" class="m-doc">keep</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Trims the elements with the given attributes.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1962e48a45f98d10c944aa494d129cc2" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
@@ -125,21 +198,13 @@
             </dt>
             <dd>Saves a mesh to file in the given format.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a935f4ff6332a5a505800874a4bd40f5c" class="m-doc">skin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Skins the mesh to obtain its boundary mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad31551aa36fc2b7d0d33a632d5b43507" class="m-doc">trim</a>(</span><span class="m-doc-wrap">Attribute attr) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Trims the elements with the given material reference.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a62e6ec8d6d4d003ac9fff8d7335881c7" class="m-doc">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;Attribute&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Trims the elements with the given material references.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#acd63496fbf1f2d60dddc6aa7d11c733b" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Indicates whether the mesh is a submesh or not.</dd>
+            <dt id="ace457505a220adf5976c5832c65ea6ba">
+              <span class="m-doc-wrap-bumper">auto <a href="#ace457505a220adf5976c5832c65ea6ba" class="m-doc-self">isBoundary</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> faceIdx) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Determines whether a face of the mesh is on the boundary.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -148,10 +213,358 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension of the ambient space.</dd>
+            <dt id="af8e64b0cfd9a6495807a4845683be103">
+              <span class="m-doc-wrap-bumper">auto <a href="#af8e64b0cfd9a6495807a4845683be103" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_connectivity.html" class="m-doc">MeshConnectivity</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a reference to the connectivity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab3c947038a4e5faefb53596de6dbfc78" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the labels of the domain elements in the mesh.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae2051f6fbb9289e6a8b11d43732d8c76"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+                template&lt;class FunctionDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2051f6fbb9289e6a8b11d43732d8c76" class="m-doc-self">displace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;FunctionDerived&gt;&amp; u)</span></span>
+            </h3>
+            <p>Displaces the mesh nodes by the displacement <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+<title>
+$ u $
+</title>
+<defs>
+<path id='eq1-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-117'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Displacement at each node</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Given a vector valued function <svg class="m-math" style="width: 0.801em; height: 0.888em; vertical-align: -0.000em;" viewBox="-.189566 -8.521371 7.691923 8.521371">
+<title>
+$ \vec{u} $
+</title>
+<defs>
+<path id='eq2-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq2-g0-126' d='M6.396015-7.137235C6.252553-7.005729 5.810212-6.587298 5.810212-6.419925C5.810212-6.300374 5.917808-6.192777 6.03736-6.192777C6.144956-6.192777 6.192777-6.264508 6.276463-6.38406C6.563387-6.742715 6.886177-6.969863 7.161146-7.12528C7.280697-7.197011 7.364384-7.232877 7.364384-7.364384C7.364384-7.47198 7.268742-7.531756 7.197011-7.591532C6.862267-7.81868 6.77858-8.141469 6.742715-8.284932C6.706849-8.380573 6.670984-8.524035 6.503611-8.524035C6.43188-8.524035 6.288418-8.476214 6.288418-8.296887C6.288418-8.18929 6.360149-7.902366 6.587298-7.579577H2.570361C2.367123-7.579577 2.163885-7.579577 2.163885-7.352428C2.163885-7.137235 2.379078-7.137235 2.570361-7.137235H6.396015Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='-.189566' y='0' xlink:href='#eq2-g0-126'/>
+<use x='0' y='0' xlink:href='#eq2-g0-117'/>
+</g>
+</svg>, the method will perform the displacement</p><div class="m-math"><svg style="width: 7.160em; height: 1.245em;" viewBox="159.902395 -11.955168 68.738192 11.955168">
+<title>
+\[ x \mapsto x + \vec{u}(x) \]
+</title>
+<defs>
+<path id='eq3-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq3-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g2-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq3-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq3-g0-55' d='M1.135741-2.749689C1.207472-2.749689 1.470486-2.749689 1.470486-2.988792S1.207472-3.227895 1.135741-3.227895V-4.794022C1.135741-4.985305 1.135741-5.212453 .896638-5.212453S.657534-4.985305 .657534-4.794022V-1.183562C.657534-.992279 .657534-.765131 .896638-.765131S1.135741-.992279 1.135741-1.183562V-2.749689Z'/>
+<path id='eq3-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq3-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq3-g1-126' d='M6.396015-7.137235C6.252553-7.005729 5.810212-6.587298 5.810212-6.419925C5.810212-6.300374 5.917808-6.192777 6.03736-6.192777C6.144956-6.192777 6.192777-6.264508 6.276463-6.38406C6.563387-6.742715 6.886177-6.969863 7.161146-7.12528C7.280697-7.197011 7.364384-7.232877 7.364384-7.364384C7.364384-7.47198 7.268742-7.531756 7.197011-7.591532C6.862267-7.81868 6.77858-8.141469 6.742715-8.284932C6.706849-8.380573 6.670984-8.524035 6.503611-8.524035C6.43188-8.524035 6.288418-8.476214 6.288418-8.296887C6.288418-8.18929 6.360149-7.902366 6.587298-7.579577H2.570361C2.367123-7.579577 2.163885-7.579577 2.163885-7.352428C2.163885-7.137235 2.379078-7.137235 2.570361-7.137235H6.396015Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='159.902395' y='-2.988792' xlink:href='#eq3-g1-120'/>
+<use x='169.875312' y='-2.988792' xlink:href='#eq3-g0-55'/>
+<use x='169.875312' y='-2.988792' xlink:href='#eq3-g0-33'/>
+<use x='185.151344' y='-2.988792' xlink:href='#eq3-g1-120'/>
+<use x='194.460094' y='-2.988792' xlink:href='#eq3-g2-43'/>
+<use x='206.031843' y='-2.988792' xlink:href='#eq3-g1-126'/>
+<use x='206.221409' y='-2.988792' xlink:href='#eq3-g1-117'/>
+<use x='212.883849' y='-2.988792' xlink:href='#eq3-g2-40'/>
+<use x='217.436175' y='-2.988792' xlink:href='#eq3-g1-120'/>
+<use x='224.088262' y='-2.988792' xlink:href='#eq3-g2-41'/>
+</g>
+</svg></div><p>at each node <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<title>
+$ x $
+</title>
+<defs>
+<path id='eq4-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-120'/>
+</g>
+</svg> of the mesh.</p><aside class="m-note m-info"><h4>Note</h4><p>The vector dimension of <svg class="m-math" style="width: 0.801em; height: 0.888em; vertical-align: -0.000em;" viewBox="-.189566 -8.521371 7.691923 8.521371">
+<title>
+$ \vec{u} $
+</title>
+<defs>
+<path id='eq5-g0-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq5-g0-126' d='M6.396015-7.137235C6.252553-7.005729 5.810212-6.587298 5.810212-6.419925C5.810212-6.300374 5.917808-6.192777 6.03736-6.192777C6.144956-6.192777 6.192777-6.264508 6.276463-6.38406C6.563387-6.742715 6.886177-6.969863 7.161146-7.12528C7.280697-7.197011 7.364384-7.232877 7.364384-7.364384C7.364384-7.47198 7.268742-7.531756 7.197011-7.591532C6.862267-7.81868 6.77858-8.141469 6.742715-8.284932C6.706849-8.380573 6.670984-8.524035 6.503611-8.524035C6.43188-8.524035 6.288418-8.476214 6.288418-8.296887C6.288418-8.18929 6.360149-7.902366 6.587298-7.579577H2.570361C2.367123-7.579577 2.163885-7.579577 2.163885-7.352428C2.163885-7.137235 2.379078-7.137235 2.570361-7.137235H6.396015Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='-.189566' y='0' xlink:href='#eq5-g0-126'/>
+<use x='0' y='0' xlink:href='#eq5-g0-117'/>
+</g>
+</svg> must be equal to the space dimension.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a935f4ff6332a5a505800874a4bd40f5c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a935f4ff6332a5a505800874a4bd40f5c" class="m-doc-self">skin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Skins the mesh to obtain its boundary mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the boundary region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This function &quot;skins&quot; the mesh to return the boundary as a new <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object. The resulting mesh will be embedded in the original space dimension.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
+<title>
+$ 1 \leq d \leq D - 2 $
+</title>
+<defs>
+<path id='eq6-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq6-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq6-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq6-g0-20' d='M8.069738-7.10137C8.201245-7.161146 8.296887-7.220922 8.296887-7.364384C8.296887-7.49589 8.201245-7.603487 8.057783-7.603487C7.998007-7.603487 7.890411-7.555666 7.84259-7.531756L1.231382-4.411457C1.028144-4.315816 .992279-4.23213 .992279-4.136488C.992279-4.028892 1.06401-3.945205 1.231382-3.873474L7.84259-.765131C7.998007-.681445 8.021918-.681445 8.057783-.681445C8.18929-.681445 8.296887-.789041 8.296887-.920548C8.296887-1.028144 8.249066-1.099875 8.045828-1.195517L1.793275-4.136488L8.069738-7.10137ZM7.878456 1.637858C8.081694 1.637858 8.296887 1.637858 8.296887 1.398755S8.045828 1.159651 7.866501 1.159651H1.422665C1.243337 1.159651 .992279 1.159651 .992279 1.398755S1.207472 1.637858 1.41071 1.637858H7.878456Z'/>
+<path id='eq6-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+<path id='eq6-g2-50' d='M5.260274-2.008468H4.99726C4.961395-1.80523 4.865753-1.147696 4.746202-.956413C4.662516-.848817 3.981071-.848817 3.622416-.848817H1.41071C1.733499-1.123786 2.462765-1.888917 2.773599-2.175841C4.590785-3.849564 5.260274-4.471233 5.260274-5.654795C5.260274-7.029639 4.172354-7.950187 2.785554-7.950187S.585803-6.766625 .585803-5.738481C.585803-5.128767 1.111831-5.128767 1.147696-5.128767C1.398755-5.128767 1.709589-5.308095 1.709589-5.69066C1.709589-6.025405 1.482441-6.252553 1.147696-6.252553C1.0401-6.252553 1.016189-6.252553 .980324-6.240598C1.207472-7.053549 1.853051-7.603487 2.630137-7.603487C3.646326-7.603487 4.267995-6.75467 4.267995-5.654795C4.267995-4.638605 3.682192-3.753923 3.000747-2.988792L.585803-.286924V0H4.94944L5.260274-2.008468Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g2-49'/>
+<use x='9.17382' y='0' xlink:href='#eq6-g0-20'/>
+<use x='21.793146' y='0' xlink:href='#eq6-g1-100'/>
+<use x='31.196668' y='0' xlink:href='#eq6-g0-20'/>
+<use x='43.815995' y='0' xlink:href='#eq6-g1-68'/>
+<use x='56.517133' y='0' xlink:href='#eq6-g0-0'/>
+<use x='68.472294' y='0' xlink:href='#eq6-g2-50'/>
+</g>
+</svg> are included if the connectivity <svg class="m-math" style="width: 7.458em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 71.599487 11.955168">
+<title>
+$ (D - 1) \longrightarrow d $
+</title>
+<defs>
+<path id='eq7-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq7-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq7-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq7-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq7-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq7-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq7-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g2-40'/>
+<use x='4.552326' y='0' xlink:href='#eq7-g1-68'/>
+<use x='17.253464' y='0' xlink:href='#eq7-g0-0'/>
+<use x='29.208625' y='0' xlink:href='#eq7-g2-49'/>
+<use x='35.061615' y='0' xlink:href='#eq7-g2-41'/>
+<use x='42.93477' y='0' xlink:href='#eq7-g0-0'/>
+<use x='50.240762' y='0' xlink:href='#eq7-g0-33'/>
+<use x='65.516794' y='0' xlink:href='#eq7-g1-100'/>
+</g>
+</svg> is already computed in the mesh.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5d06c4c9253274985322f5cd807ae643"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d06c4c9253274985322f5cd807ae643" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Trims the elements with the given attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute to trim</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> of the remaining region mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call trim(const std::FlatSet&lt;Attribute&gt;&amp;) with only one attribute.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8f8f3ff1c32b46310e2e072da3ec4a0c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f8f3ff1c32b46310e2e072da3ec4a0c" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Trims the elements with the given attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attrs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attributes to trim</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This function will trim discard all the elements that have an attribute in the given set of attributes.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
+<title>
+$ 1 \leq d \leq D - 1 $
+</title>
+<defs>
+<path id='eq8-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq8-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq8-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq8-g0-20' d='M8.069738-7.10137C8.201245-7.161146 8.296887-7.220922 8.296887-7.364384C8.296887-7.49589 8.201245-7.603487 8.057783-7.603487C7.998007-7.603487 7.890411-7.555666 7.84259-7.531756L1.231382-4.411457C1.028144-4.315816 .992279-4.23213 .992279-4.136488C.992279-4.028892 1.06401-3.945205 1.231382-3.873474L7.84259-.765131C7.998007-.681445 8.021918-.681445 8.057783-.681445C8.18929-.681445 8.296887-.789041 8.296887-.920548C8.296887-1.028144 8.249066-1.099875 8.045828-1.195517L1.793275-4.136488L8.069738-7.10137ZM7.878456 1.637858C8.081694 1.637858 8.296887 1.637858 8.296887 1.398755S8.045828 1.159651 7.866501 1.159651H1.422665C1.243337 1.159651 .992279 1.159651 .992279 1.398755S1.207472 1.637858 1.41071 1.637858H7.878456Z'/>
+<path id='eq8-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g2-49'/>
+<use x='9.17382' y='0' xlink:href='#eq8-g0-20'/>
+<use x='21.793146' y='0' xlink:href='#eq8-g1-100'/>
+<use x='31.196668' y='0' xlink:href='#eq8-g0-20'/>
+<use x='43.815995' y='0' xlink:href='#eq8-g1-68'/>
+<use x='56.517133' y='0' xlink:href='#eq8-g0-0'/>
+<use x='68.472294' y='0' xlink:href='#eq8-g2-49'/>
+</g>
+</svg> are included if the connectivity <svg class="m-math" style="width: 4.378em; height: 0.969em; vertical-align: -0.104em;" viewBox="0 -8.302191 42.030021 9.298463">
+<title>
+$ D \longrightarrow d $
+</title>
+<defs>
+<path id='eq9-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq9-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq9-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq9-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g1-68'/>
+<use x='13.365304' y='0' xlink:href='#eq9-g0-0'/>
+<use x='20.671296' y='0' xlink:href='#eq9-g0-33'/>
+<use x='35.947328' y='0' xlink:href='#eq9-g1-100'/>
+</g>
+</svg> is already computed in the mesh.</p>
+          </div></section>
+          <section class="m-doc-details" id="a71339523fd7ef81f58cd98ecdac52f65"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71339523fd7ef81f58cd98ecdac52f65" class="m-doc-self">keep</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Keeps the elements with the given attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute to keep</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> of the remaining region mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call keep(const std::FlatSet&lt;Attribute&gt;&amp;) with only one attribute.</p>
+          </div></section>
+          <section class="m-doc-details" id="a092e0e9511e90f61c217ab243a217e58"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a092e0e9511e90f61c217ab243a217e58" class="m-doc-self">keep</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Trims the elements with the given attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attrs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attributes to trim</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This function will trim keep only the elements that have an attribute in the given set of attributes.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
+<title>
+$ 1 \leq d \leq D - 1 $
+</title>
+<defs>
+<path id='eq10-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq10-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq10-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq10-g0-20' d='M8.069738-7.10137C8.201245-7.161146 8.296887-7.220922 8.296887-7.364384C8.296887-7.49589 8.201245-7.603487 8.057783-7.603487C7.998007-7.603487 7.890411-7.555666 7.84259-7.531756L1.231382-4.411457C1.028144-4.315816 .992279-4.23213 .992279-4.136488C.992279-4.028892 1.06401-3.945205 1.231382-3.873474L7.84259-.765131C7.998007-.681445 8.021918-.681445 8.057783-.681445C8.18929-.681445 8.296887-.789041 8.296887-.920548C8.296887-1.028144 8.249066-1.099875 8.045828-1.195517L1.793275-4.136488L8.069738-7.10137ZM7.878456 1.637858C8.081694 1.637858 8.296887 1.637858 8.296887 1.398755S8.045828 1.159651 7.866501 1.159651H1.422665C1.243337 1.159651 .992279 1.159651 .992279 1.398755S1.207472 1.637858 1.41071 1.637858H7.878456Z'/>
+<path id='eq10-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g2-49'/>
+<use x='9.17382' y='0' xlink:href='#eq10-g0-20'/>
+<use x='21.793146' y='0' xlink:href='#eq10-g1-100'/>
+<use x='31.196668' y='0' xlink:href='#eq10-g0-20'/>
+<use x='43.815995' y='0' xlink:href='#eq10-g1-68'/>
+<use x='56.517133' y='0' xlink:href='#eq10-g0-0'/>
+<use x='68.472294' y='0' xlink:href='#eq10-g2-49'/>
+</g>
+</svg> are included if the connectivity <svg class="m-math" style="width: 4.378em; height: 0.969em; vertical-align: -0.104em;" viewBox="0 -8.302191 42.030021 9.298463">
+<title>
+$ D \longrightarrow d $
+</title>
+<defs>
+<path id='eq11-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq11-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq11-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq11-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g1-68'/>
+<use x='13.365304' y='0' xlink:href='#eq11-g0-0'/>
+<use x='20.671296' y='0' xlink:href='#eq11-g0-33'/>
+<use x='35.947328' y='0' xlink:href='#eq11-g1-100'/>
+</g>
+</svg> is already computed in the mesh.</p>
+          </div></section>
           <section class="m-doc-details" id="a1962e48a45f98d10c944aa494d129cc2"><div>
             <h3>
               <div class="m-doc-template">
@@ -219,78 +632,6 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a935f4ff6332a5a505800874a4bd40f5c"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a935f4ff6332a5a505800874a4bd40f5c" class="m-doc-self">skin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
-            </h3>
-            <p>Skins the mesh to obtain its boundary mesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the boundary region of the mesh</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This function will &quot;skin&quot; the mesh to return the mesh boundary as a new <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object. The new mesh will be embedded in the original space dimension.</p>
-          </div></section>
-          <section class="m-doc-details" id="ad31551aa36fc2b7d0d33a632d5b43507"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad31551aa36fc2b7d0d33a632d5b43507" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">Attribute attr) <span class="m-label m-warning">virtual</span></span></span>
-            </h3>
-            <p>Trims the elements with the given material reference.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute to trim</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Convenience function to call <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html#a62e6ec8d6d4d003ac9fff8d7335881c7" class="m-doc">trim(const std::<wbr />set&lt;Attribute&gt;&amp;)</a> with only one attribute.</p>
-          </div></section>
-          <section class="m-doc-details" id="a62e6ec8d6d4d003ac9fff8d7335881c7"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a62e6ec8d6d4d003ac9fff8d7335881c7" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">const std::set&lt;Attribute&gt;&amp; attrs) <span class="m-label m-warning">virtual</span></span></span>
-            </h3>
-            <p>Trims the elements with the given material references.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">attrs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attributes to trim</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object to the remaining region of the mesh</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This function will trim the current mesh and return a Submesh object containing the elements which were not trimmed from the original mesh.</p>
-          </div></section>
           <section class="m-doc-details" id="acd63496fbf1f2d60dddc6aa7d11c733b"><div>
             <h3>
               <div class="m-doc-template">
@@ -348,6 +689,24 @@
               </tfoot>
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_serial_01_4.html#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension() const</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab3c947038a4e5faefb53596de6dbfc78"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3c947038a4e5faefb53596de6dbfc78" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the labels of the domain elements in the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Set of all the attributes in the mesh object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>getBoundaryAttributes() const</p></aside>
           </div></section>
         </section>
       </div>

@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -27,12 +29,21 @@
             <li>
               <a href="pages.html">Pages</a>
               <ol>
-                <li><a href="examples-index.html">Examples and Tutorials</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
+                <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
             <li><a href="namespaces.html" id="m-navbar-current">Namespaces</a></li>
-            <li><a href="modules.html">Modules</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="4">
             <li><a href="annotated.html">Classes</a></li>
@@ -56,20 +67,24 @@
           <li class="m-doc-collapsible">
             <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> <span class="m-doc">The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</span>
             <ul class="m-doc">
+              <li>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> <span class="m-doc">Module for serial, multi-threaded, distributed, and/or parallel computation.</span></li>
               <li class="m-doc-collapsible">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_external.html" class="m-doc">External</a> <span class="m-doc">Third-party library integrations with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> <span class="m-doc"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing formal expressions in C++.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing high level abstract expressions.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> <span class="m-doc">Module for dealing with geometries.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> <span class="m-doc">Module for dealing with I/O functionality.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Module for solving variational problems constructed with the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a> <span class="m-doc">Module for linear algebra operations.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_plot.html" class="m-doc">Plot</a> <span class="m-doc">Module for visualization tools.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> <span class="m-doc">Module for defining quadrature formulae.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Module for linear algebra systems.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> <span class="m-doc">Module containing various utilities and classes for writing tests.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a> <span class="m-doc">Module containing metaprogramming facilities.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> <span class="m-doc">Module containing general purpose and language support utility classes.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module for writing variational problems in C++.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module which provides the necessary tools for constructing variational problems.</span></li>
             </ul>
           </li>
         </ul>
