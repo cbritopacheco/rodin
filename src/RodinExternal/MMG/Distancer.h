@@ -144,7 +144,7 @@ namespace Rodin::External::MMG
      {
        if (box != m_fes.get().getMesh())
        {
-         Alert::Exception()
+         Alert::MemberFunctionException(*this, __func__)
            << "Mesh must be the same one as that of the finite element space."
            << Alert::Raise;
        }
@@ -202,7 +202,7 @@ namespace Rodin::External::MMG
        }
        ScalarGridFunction res(m_fes.get());
        if (retcode != 0)
-         Alert::Exception() << "ISCD::Mshdist invocation failed." << Alert::Raise;
+         Alert::MemberFunctionException(*this, __func__) << "ISCD::Mshdist invocation failed." << Alert::Raise;
        else
          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
        return res;
@@ -256,7 +256,7 @@ namespace Rodin::External::MMG
 
        Variational::GridFunction res(m_fes.get());
        if (retcode != 0)
-         Alert::Exception() << "ISCD::Mshdist invocation failed." << Alert::Raise;
+         Alert::MemberFunctionException(*this, __func__) << "ISCD::Mshdist invocation failed." << Alert::Raise;
        else
          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
        return res;

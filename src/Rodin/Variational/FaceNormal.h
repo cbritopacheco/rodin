@@ -3,6 +3,7 @@
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
+#include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
@@ -20,54 +21,99 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit on a face.
        */
-      FaceNormal(const Geometry::MeshBase& surface)
-        : m_dimension(surface.getSpaceDimension())
+      FaceNormal(const Geometry::MeshBase& mesh)
+        : m_sdim(mesh.getSpaceDimension())
       {
         assert(m_dimension > 0);
       }
 
       FaceNormal(const FaceNormal& other)
         : Parent(other),
-          m_dimension(other.m_dimension)
+          m_sdim(other.m_sdim)
       {}
 
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
-          m_dimension(std::move(other.m_dimension))
+          m_sdim(std::move(other.m_sdim))
       {}
 
       inline
       constexpr
       size_t getDimension() const
       {
-        return m_dimension;
+        return m_sdim;
       }
 
-      Math::Vector getValue(const Geometry::Point& p) const
+      inline
+      Math::SpatialVector getValue(const Geometry::Point& p) const
+      {
+        Math::SpatialVector res;
+        getValue(res, p);
+        return res;
+      }
+
+      void getValue(Math::SpatialVector& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
+        const auto& d = polytope.getDimension();
+        const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
+        assert(d == mesh.getDimension() - 1);
+        assert(mesh.isBoundary(i));
         const auto& jacobian = p.getJacobian();
-        assert(polytope.getDimension() == mesh.getDimension() - 1);
-        Math::Vector value(m_dimension);
+        res.resize(m_sdim);
         if (jacobian.rows() == 2)
         {
-          value(0) =  jacobian(1, 0);
-          value(1) = -jacobian(0, 0);
+          res << jacobian(1, 0), -jacobian(0, 0);
         }
         else if (jacobian.rows() == 3)
         {
-          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+          res <<
+            jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
+            jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+            jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
         }
         else
         {
           assert(false);
-          value.setConstant(NAN);
-          return value;
+          res.setConstant(NAN);
         }
-        return value.normalized();
+
+        const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
+        assert(incidence.size() == 1 || incidence.size() == 2);
+        const auto& traceDomain = getTraceDomain();
+        if (traceDomain.size() == 0)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No trace domain provided: "
+            << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+            << ". FaceNormal at an interface with no trace domain is undefined."
+            << Alert::Raise;
+        }
+        else
+        {
+          for (const Index i : incidence)
+          {
+            auto pit = mesh.getPolytope(d + 1, i);
+            if (traceDomain.contains(pit->getAttribute()))
+            {
+              for (auto vit = pit->getVertex(); vit; ++vit)
+              {
+                const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
+                if (res.dot(v) > 0)
+                {
+                  res *= -1;
+                  break;
+                }
+              }
+              res.normalize();
+              return;
+            }
+          }
+
+          UndeterminedTraceDomainException(
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
+        }
       }
 
       inline
@@ -92,7 +138,7 @@ namespace Rodin::Variational
       }
 
     private:
-      const size_t m_dimension;
+      const size_t m_sdim;
   };
 }
 

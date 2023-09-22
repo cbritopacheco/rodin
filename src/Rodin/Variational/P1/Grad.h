@@ -7,9 +7,10 @@
 #ifndef RODIN_VARIATIONAL_P1_GRADIENT_H
 #define RODIN_VARIATIONAL_P1_GRADIENT_H
 
-#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Grad.h"
+
+#include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "GridFunction.h"
 
@@ -128,13 +129,8 @@ namespace Rodin::Variational
                 }
               }
 
-              Alert::MemberFunctionException(*this, __func__)
-                << "Could not determine the trace polytope for the interface "
-                << Alert::Notation::Polytope(d, i)
-                << " with the provided trace domain "
-                << Alert::Notation::Set(traceDomain.begin(), traceDomain.end())
-                << '.'
-                << Alert::Raise;
+              UndeterminedTraceDomainException(
+                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
             }
             return;
           }

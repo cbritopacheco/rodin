@@ -24,8 +24,6 @@ namespace Rodin::Variational
   void
   BilinearForm<TrialFES, TestFES, Context::Serial, Math::SparseMatrix>::assemble()
   {
-     assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
-           &getTestFunction().getFiniteElementSpace().getMesh());
      const auto& trialFES = getTrialFunction().getFiniteElementSpace();
      const auto& testFES = getTestFunction().getFiniteElementSpace();
      const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
@@ -36,8 +34,6 @@ namespace Rodin::Variational
   void
   BilinearForm<TrialFES, TestFES, Context::Serial, std::vector<Eigen::Triplet<Scalar>>>::assemble()
   {
-     assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
-           &getTestFunction().getFiniteElementSpace().getMesh());
      const auto& trialFES = getTrialFunction().getFiniteElementSpace();
      const auto& testFES = getTestFunction().getFiniteElementSpace();
      const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();

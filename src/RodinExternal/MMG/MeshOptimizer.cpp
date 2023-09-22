@@ -13,9 +13,9 @@ namespace Rodin::External::MMG
     assert(mesh->np > 0 && mesh->nt > 0);
     MMG5_pSol sol = nullptr;
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
-       Alert::Exception() << "Could not allocate MMG5_Sol." << Alert::Raise);
+       Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
     if (!MMG2D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-      Alert::Exception() << "Could not set solution size." << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
     MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_optim, 1);
     const ReturnCode rc = MMG2D_mmg2dlib(mesh, sol);
     if (sol->m)
@@ -29,9 +29,9 @@ namespace Rodin::External::MMG
     assert(mesh->np > 0 && mesh->ne > 0);
     MMG5_pSol sol = nullptr;
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
-       Alert::Exception() << "Could not allocate MMG5_Sol." << Alert::Raise);
+       Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
     if (!MMG3D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-      Alert::Exception() << "Could not set solution size." << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
     MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_optim, 1);
     const ReturnCode rc = MMG3D_mmg3dlib(mesh, sol);
     if (sol->m)
@@ -45,9 +45,9 @@ namespace Rodin::External::MMG
     assert(mesh->np > 0 && mesh->nt > 0);
     MMG5_pSol sol = nullptr;
     MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
-       Alert::Exception() << "Could not allocate MMG5_Sol." << Alert::Raise);
+       Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
     if (!MMGS_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-      Alert::Exception() << "Could not set solution size." << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
     MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_optim, 1);
     const ReturnCode rc = MMGS_mmgslib(mesh, sol);
     if (sol->m)
