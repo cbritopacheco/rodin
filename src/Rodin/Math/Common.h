@@ -10,6 +10,8 @@
 #include <cmath>
 #include <type_traits>
 
+#include "Rodin/Types.h"
+
 namespace Rodin::Math
 {
   /**
@@ -24,7 +26,23 @@ namespace Rodin::Math
   std::enable_if_t<!std::is_void_v<decltype(std::abs(std::declval<T>()))>, T>
   abs(const T& x)
   {
-   return std::abs(x);
+    return std::abs(x);
+  }
+
+  template <class Base, class Exponent>
+  constexpr
+  inline
+  auto pow2(const Base& base)
+  {
+    return base * base;
+  }
+
+  template <class Base, class Exponent>
+  constexpr
+  inline
+  auto pow(const Base& base, const Exponent& exponent)
+  {
+    return std::pow(base, exponent);
   }
 
   /**
@@ -39,7 +57,7 @@ namespace Rodin::Math
   std::enable_if_t<!std::is_void_v<decltype(std::sqrt(std::declval<T>()))>, T>
   sqrt(const T& x)
   {
-   return std::sqrt(x);
+    return std::sqrt(x);
   }
 
   /**
@@ -54,7 +72,7 @@ namespace Rodin::Math
   std::enable_if_t<!std::is_void_v<decltype(std::isnan(std::declval<T>()))>, bool>
   isNaN(const T& x)
   {
-   return std::isnan(x);
+    return std::isnan(x);
   }
 
   /**
@@ -69,7 +87,7 @@ namespace Rodin::Math
   std::enable_if_t<!std::is_void_v<decltype(std::isinf(std::declval<T>()))>, bool>
   isInf(const T& x)
   {
-   return std::isinf(x);
+    return std::isinf(x);
   }
 
   template <class T>
@@ -78,7 +96,7 @@ namespace Rodin::Math
   std::enable_if_t<!std::is_void_v<decltype(std::cos(std::declval<T>()))>, bool>
   cos(const T& x)
   {
-   return std::cos(x);
+    return std::cos(x);
   }
 
   template <class T>

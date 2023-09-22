@@ -1,3 +1,5 @@
+#include <thread>
+#include <queue>
 #include <Rodin/Math.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -14,6 +16,61 @@ constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
   "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
 
+class ThreadPool {
+public:
+    ThreadPool(size_t numThreads) : stop(false) {
+        for (size_t i = 0; i < numThreads; ++i) {
+            workers.emplace_back([this] {
+                while (true) {
+                    std::function<void()> task;
+
+                    {
+                        std::unique_lock<std::mutex> lock(queueMutex);
+                        condition.wait(lock, [this] { return stop || !tasks.empty(); });
+
+                        if (stop && tasks.empty()) {
+                            return;
+                        }
+
+                        task = std::move(tasks.front());
+                        tasks.pop();
+                    }
+
+                    task();
+                }
+            });
+        }
+    }
+
+    template <typename Func>
+    void enqueue(Func func) {
+        {
+            std::unique_lock<std::mutex> lock(queueMutex);
+            tasks.emplace(func);
+        }
+        condition.notify_one();
+    }
+
+    ~ThreadPool() {
+        {
+            std::unique_lock<std::mutex> lock(queueMutex);
+            stop = true;
+        }
+        condition.notify_all();
+        for (std::thread &worker : workers) {
+            worker.join();
+        }
+    }
+
+private:
+    std::vector<std::thread> workers;
+    std::queue<std::function<void()>> tasks;
+
+    std::mutex queueMutex;
+    std::condition_variable condition;
+    bool stop;
+};
+
 struct Experiment
 {
   const double azimuth;
@@ -24,6 +81,8 @@ struct Experiment
 };
 
 std::vector<Experiment> experiments = {};
+
+void run(size_t expId, const std::vector<Experiment>& experiments);
 
 double phi(double t, const Point& p, const double azimuth);
 
@@ -70,17 +129,20 @@ int main(int argc, char** argv)
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 1.0, M_PI / 2 - 0.1, 0.01});
 
-  if (argc == 1)
-    Alert::Exception() << "Experiment id not specified." << Alert::Raise;
+  const size_t hwc = std::thread::hardware_concurrency();
+  const size_t n = hwc - 2;
+  ThreadPool threadPool(n);
+  for (size_t i = 0; i < experiments.size(); i++)
+    threadPool.enqueue([i]{ run(i, experiments); });
 
-  const size_t experimentId = std::atoi(argv[1]);
+  return 0;
+}
 
-  if (experimentId <= 0 || experimentId > experiments.size())
-    std::exit(EXIT_FAILURE);
+void run(size_t experimentId, const std::vector<Experiment>& experiments)
+{
+  Experiment experiment = experiments[experimentId];
 
-  Experiment experiment = experiments[experimentId - 1];
-
-  const bool physical = false;
+  const bool physical = true;
   double dt = NAN;
   if (physical)
     dt = experiment.c * experiment.hmax;
@@ -93,7 +155,7 @@ int main(int argc, char** argv)
 
   std::string filename;
   if (physical)
-    filename = "L2ErrorPhysical_" + std::to_string(experimentId) + ".csv";
+    filename = "physical/L2ErrorPhysical_" + std::to_string(experimentId) + ".csv";
   else
     filename = "L2Error_" + std::to_string(experimentId) + ".csv";
 
@@ -104,8 +166,8 @@ int main(int argc, char** argv)
   while (true)
   {
     // Build finite element space on the mesh
-    H1 vh(th);
-    H1 uh(th, th.getSpaceDimension());
+    P1 vh(th);
+    P1 uh(th, th.getSpaceDimension());
 
     // Distance the subdomain
     GridFunction dist(vh);
@@ -120,12 +182,25 @@ int main(int argc, char** argv)
                                .distance(th);
 
       // Compute gradient of signed distance function
-      Grad gd(dist);
       GridFunction conormal(uh);
+      auto gd = Grad(dist);
       conormal = gd / Frobenius(gd);
 
       // Advect
-      MMG::Advect(dist, conormal).step(std::min(dt, experiment.T - t));
+      try
+      {
+        MMG::Advect(dist, conormal).step(std::min(dt, experiment.T - t));
+      }
+      catch (Alert::Exception& e)
+      {
+        Alert::Warning()
+          << "Advection failed for experiment " << experimentId
+          << Alert::NewLine
+          << "Retrying..."
+          << Alert::Raise;
+        continue;
+      }
+
       t += std::min(dt, experiment.T - t);
     }
 
@@ -135,6 +210,7 @@ int main(int argc, char** argv)
     // Compute L2 error
     GridFunction diff(vh);
     diff = Pow(dist - phit, 2);
+    diff.setWeights();
     double error = Integral(diff).compute();
     fout << t << "," << error << '\n' << std::flush;
 
@@ -144,7 +220,12 @@ int main(int argc, char** argv)
                                     .setHausdorff(experiment.hausd)
                                     .discretize(dist);
 
-    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+    MMG::Optimizer().setAngleDetection(false)
+                   .setHMax(experiment.hmax)
+                   .setHausdorff(experiment.hausd)
+                   .optimize(th);
+
+    // th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
 
     if (t + std::numeric_limits<double>::epsilon() > experiment.T)
       break;
@@ -152,7 +233,6 @@ int main(int argc, char** argv)
     // Alert::Info() << "l2: " << error << '\n' << Alert::Raise;
     i++;
   }
-  return 0;
 }
 
 double phi(double t, const Point& p, const double azimuth)

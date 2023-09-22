@@ -4,7 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifdef RODIN_USE_OPENMP
 
 #ifndef RODIN_ASSEMBLY_OPENMP_H
 #define RODIN_ASSEMBLY_OPENMP_H
@@ -12,10 +11,9 @@
 #include <variant>
 #include <ostream>
 
-#include <mfem.hpp>
-
 #include "AssemblyBase.h"
 
+#ifdef RODIN_USE_OPENMP
 namespace Rodin::Variational::Assembly
 {
   template <>
@@ -45,6 +43,5 @@ namespace Rodin::Variational::Assembly
   };
 }
 
-#endif
-
+#endif // #ifdef RODIN_USE_OPENMP
 #endif

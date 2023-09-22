@@ -334,7 +334,7 @@ OPTIMIZE_OUTPUT_SLICE  = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      =
+EXTENSION_MAPPING      = in=C
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -853,7 +853,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  =  @CMAKE_SOURCE_DIR@/src/Rodin \
+INPUT                  =  @CMAKE_SOURCE_DIR@/src/ \
+                          @CMAKE_SOURCE_DIR@/src/Rodin \
                           @CMAKE_SOURCE_DIR@/src/RodinExternal \
                           @CMAKE_SOURCE_DIR@/doc/
 
@@ -2310,7 +2311,7 @@ HIDE_UNDOC_RELATIONS   = YES
 # set to NO
 # The default value is: NO.
 
-HAVE_DOT               = NO
+HAVE_DOT               = YES
 
 # The DOT_NUM_THREADS specifies the number of dot invocations doxygen is allowed
 # to run in parallel. When set to 0 doxygen will base this on the number of
@@ -2330,14 +2331,14 @@ DOT_NUM_THREADS        = 0
 # The default value is: Helvetica.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_FONTNAME           = Helvetica
+DOT_FONTNAME           = Source Sans Pro
 
 # The DOT_FONTSIZE tag can be used to set the size (in points) of the font of
 # dot graphs.
 # Minimum value: 4, maximum value: 24, default value: 10.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_FONTSIZE           = 10
+DOT_FONTSIZE           = 16
 
 # By default doxygen will tell dot to use the default font as specified with
 # DOT_FONTNAME. If you specify a different font using DOT_FONTNAME you can set

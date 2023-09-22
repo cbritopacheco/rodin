@@ -54,7 +54,7 @@ namespace Rodin::Variational
        * @brief Gets the attributes of the elements being integrated.
        */
       inline
-      const std::set<Geometry::Attribute>& getAttributes() const
+      const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_attrs;
       }
@@ -69,7 +69,7 @@ namespace Rodin::Variational
       inline
       LinearFormIntegratorBase& over(Geometry::Attribute attr)
       {
-        return over(std::set<Geometry::Attribute>{attr});
+        return over(FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -80,7 +80,7 @@ namespace Rodin::Variational
        * take place.
        */
       inline
-      LinearFormIntegratorBase& over(const std::set<Geometry::Attribute>& attrs)
+      LinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
       {
         assert(attrs.size() > 0);
         m_attrs = attrs;
@@ -94,19 +94,32 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
+      inline
+      const Math::Vector getVector() const
+      {
+        return m_vector;
+      }
+
+      inline
+      Math::Vector& getVector()
+      {
+        return m_vector;
+      }
+
       /**
        * @brief Performs the assembly of the element vector for the given
        * element.
        */
       virtual
-      Math::Vector getVector(const Geometry::Simplex& element) const = 0;
+      void assemble(const Geometry::Polytope& element) = 0;
 
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
 
     private:
       std::reference_wrapper<const FormLanguage::Base> m_v;
-      std::set<Geometry::Attribute> m_attrs;
+      FlatSet<Geometry::Attribute> m_attrs;
+      Math::Vector m_vector;
   };
 }
 

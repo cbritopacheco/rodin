@@ -44,10 +44,8 @@ for r in expranges:
     spline = make_interp_spline(meshsizes, error[r[0] - 1:r[1]])
     x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
     y = abs(spline(x))
-    plt.plot(x, y, c=cm.RdYlBu_r(expranges[r]))
+    plt.plot(x, y, label='$c = %.1f $' % expranges[r], c=cm.RdYlBu_r(expranges[r]))
     # plt.plot(meshsizes, error[r[0] - 1:r[1]], c=cm.RdYlBu_r(expranges[r]))
-    if (r == (289, 320)):
-        break
 
 cmap = plt.get_cmap('RdYlBu_r', 10)
 sm = plt.cm.ScalarMappable(cmap=cmap)
@@ -55,11 +53,11 @@ test = np.mean(error.reshape((10, 32)), axis=0)
 spline = make_interp_spline(meshsizes, test)
 x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
 y = abs(spline(x))
-cb = plt.colorbar(sm, ticks=np.linspace(0, 1, 10))
-cb.ax.set_ylabel('$c$')
-plt.plot(x, y, 'k--', linewidth=2,
-    label='$\mathbb{E}[\mathcal{E}(t)]$')
-plt.title('$ \delta t = c h $')
+# cb = plt.colorbar(sm, ticks=np.linspace(0, 1, 10))
+# cb.ax.set_ylabel('$c$')
+# plt.plot(x, y, 'k--', linewidth=2,
+#     label='$\mathbb{E}[\mathcal{E}(t)]$')
+plt.title("$ \\Delta t = c h $")
 plt.ylabel('$\mathcal{E}(T)$', fontsize=14)
 plt.xlabel('$h$', fontsize=14)
 plt.legend(loc='upper left')

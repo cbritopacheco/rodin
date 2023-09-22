@@ -1,14 +1,16 @@
 #ifndef RODIN_VARIATIONAL_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 #define RODIN_VARIATIONAL_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 
-#include "Rodin/Variational/MFEM.h"
+#include "Rodin/QF/QFGG.h"
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES, class MuDerived, class LambdaDerived>
-  class LinearElasticityIntegrator final : public BilinearFormIntegratorBase
+  class LinearElasticityIntegrator final
+    : public BilinearFormIntegratorBase
   {
     public:
       using Parent = BilinearFormIntegratorBase;
@@ -16,7 +18,8 @@ namespace Rodin::Variational
       using Lambda = FunctionBase<LambdaDerived>;
 
       LinearElasticityIntegrator(
-          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v, const Lambda& lambda, const Mu& mu)
+          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v,
+          const Lambda& lambda, const Mu& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
           m_fes(u.getFiniteElementSpace())
@@ -41,18 +44,7 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      Math::Matrix getMatrix(const Geometry::Simplex& simplex) const override
-      {
-        const auto& fe = getFiniteElementSpace().getFiniteElement(simplex);
-        const auto& trans = simplex.getTransformation();
-        Math::Matrix res(fe.getDOFs(), fe.getDOFs());
-        mfem::DenseMatrix tmp(res.data(), res.rows(), res.cols());
-        Internal::MFEMScalarCoefficient mu(simplex.getMesh(), getMu());
-        Internal::MFEMScalarCoefficient lambda(simplex.getMesh(), getLambda());
-        mfem::ElasticityIntegrator bfi(lambda, mu);
-        bfi.AssembleElementMatrix(fe.getHandle(), trans.getHandle(), tmp);
-        return res;
-      }
+      void assemble(const Geometry::Polytope& polytope) override;
 
       inline
       constexpr

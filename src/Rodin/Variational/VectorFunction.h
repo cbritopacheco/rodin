@@ -11,8 +11,6 @@
 #include <optional>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"
@@ -108,11 +106,35 @@ namespace Rodin::Variational
       }
 
       inline
+      const Derived& getDerived() const
+      {
+        return static_cast<const Derived&>(*this);
+      }
+
+      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
+
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const = delete;
 
       /**
        * @brief Gets the dimension of the vector object.
@@ -179,13 +201,20 @@ namespace Rodin::Variational
       {}
 
       inline
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        Math::FixedSizeVector<1 + sizeof...(Values)> value;
+        Math::FixedSizeVector<1 + sizeof...(Values)> res;
         Utility::ForIndex<1 + sizeof...(Values)>(
-            [&](auto i){ value(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
-        return value;
+            [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
+        return res;
+      }
+
+      inline
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        res.resize(1 + sizeof...(Values));
+        Utility::ForIndex<1 + sizeof...(Values)>(
+            [&](auto i){ res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p); });
       }
 
       inline
@@ -211,8 +240,59 @@ namespace Rodin::Variational
     private:
       std::tuple<ScalarFunction<V>, ScalarFunction<Values>...> m_fs;
   };
+
   template <class V, class ... Values>
   VectorFunction(V, Values...) -> VectorFunction<V, Values...>;
+
+  template <class F>
+  class VectorFunction<F> final : public VectorFunctionBase<VectorFunction<F>>
+  {
+    static_assert(std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>);
+
+    public:
+      using Parent = VectorFunctionBase<VectorFunction<F>>;
+
+      VectorFunction(size_t vdim, F f)
+        : m_vdim(vdim), m_f(f)
+      {}
+
+      VectorFunction(const VectorFunction& other)
+        : Parent(other),
+          m_vdim(other.m_vdim),
+          m_f(other.m_f)
+      {}
+
+      VectorFunction(VectorFunction&& other)
+        : Parent(std::move(other)),
+          m_vdim(std::move(other.m_vdim)),
+          m_f(std::move(other.m_f))
+      {}
+
+      inline
+      constexpr
+      VectorFunction& traceOf(Geometry::Attribute)
+      {
+        return *this;
+      }
+
+      inline
+      Math::Vector getValue(const Geometry::Point& v) const
+      {
+        return m_f(v);
+      }
+
+      inline VectorFunction* copy() const noexcept override
+      {
+        return new VectorFunction(*this);
+      }
+
+    private:
+      const size_t m_vdim;
+      const F m_f;
+  };
+
+  template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Math::Vector, F, const Geometry::Point&>>>
+  VectorFunction(size_t, F) -> VectorFunction<F>;
 }
 
 #endif

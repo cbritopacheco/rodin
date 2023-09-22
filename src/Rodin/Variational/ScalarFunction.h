@@ -13,9 +13,7 @@
 #include <optional>
 #include <type_traits>
 
-#include <mfem.hpp>
-
-#include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/Polytope.h"
 
 #include "ForwardDecls.h"
 
@@ -65,11 +63,25 @@ namespace Rodin::Variational
       }
 
       inline
+      const Derived& getDerived() const
+      {
+        return static_cast<const Derived&>(*this);
+      }
+
+      inline
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
+
+      inline
+      constexpr
+      void getValue(Math::Vector&, const Geometry::Point&) const = delete;
+
+      inline
+      constexpr
+      void getValue(Math::Matrix&, const Geometry::Point&) const = delete;
 
       inline
       constexpr
@@ -310,6 +322,13 @@ namespace Rodin::Variational
 
   template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Scalar, F, const Geometry::Point&>>>
   ScalarFunction(F) -> ScalarFunction<F>;
+
+  namespace P
+  {
+    static ScalarFunction x([](const Geometry::Point& p) { return p.x(); });
+    static ScalarFunction y([](const Geometry::Point& p) { return p.y(); });
+    static ScalarFunction z([](const Geometry::Point& p) { return p.z(); });
+  }
 }
 
 #endif

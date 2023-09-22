@@ -8,39 +8,51 @@
 
 namespace Rodin::External::MMG
 {
-  int MeshOptimizer::optimizeMMG2D(MMG5_pMesh mesh)
+  int Optimizer::optimizeMMG2D(MMG5_pMesh mesh)
   {
-   assert(mesh->np > 0 && mesh->nt > 0);
-   MMG5_pSol sol = nullptr;
-   MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
-      Alert::Exception("Could not allocate MMG5_Sol.").raise());
-   if (!MMG2D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-    Alert::Exception("Could not set solution size.").raise();
-   MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_optim, 1);
-   return MMG2D_mmg2dlib(mesh, sol);
+    assert(mesh->np > 0 && mesh->nt > 0);
+    MMG5_pSol sol = nullptr;
+    MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
+       Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
+    if (!MMG2D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
+      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
+    MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_optim, 1);
+    const ReturnCode rc = MMG2D_mmg2dlib(mesh, sol);
+    if (sol->m)
+      MMG5_DEL_MEM(mesh, sol->m);
+    MMG5_SAFE_FREE(sol);
+    return rc;
   }
 
-  int MeshOptimizer::optimizeMMG3D(MMG5_pMesh mesh)
+  int Optimizer::optimizeMMG3D(MMG5_pMesh mesh)
   {
-   assert(mesh->np > 0 && mesh->ne > 0);
-   MMG5_pSol sol = nullptr;
-   MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
-      Alert::Exception("Could not allocate MMG5_Sol.").raise());
-   if (!MMG3D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-    Alert::Exception("Could not set solution size.").raise();
-   MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_optim, 1);
-   return MMG3D_mmg3dlib(mesh, sol);
+    assert(mesh->np > 0 && mesh->ne > 0);
+    MMG5_pSol sol = nullptr;
+    MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
+       Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
+    if (!MMG3D_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
+      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
+    MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_optim, 1);
+    const ReturnCode rc = MMG3D_mmg3dlib(mesh, sol);
+    if (sol->m)
+      MMG5_DEL_MEM(mesh, sol->m);
+    MMG5_SAFE_FREE(sol);
+    return rc;
   }
 
-  int MeshOptimizer::optimizeMMGS(MMG5_pMesh mesh)
+  int Optimizer::optimizeMMGS(MMG5_pMesh mesh)
   {
-   assert(mesh->np > 0 && mesh->nt > 0);
-   MMG5_pSol sol = nullptr;
-   MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
-      Alert::Exception("Could not allocate MMG5_Sol.").raise());
-   if (!MMGS_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
-    Alert::Exception("Could not set solution size.").raise();
-   MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_optim, 1);
-   return MMGS_mmgslib(mesh, sol);
+    assert(mesh->np > 0 && mesh->nt > 0);
+    MMG5_pSol sol = nullptr;
+    MMG5_SAFE_CALLOC(sol, 1, MMG5_Sol,
+       Alert::MemberFunctionException(*this, __func__) << "Could not allocate MMG5_Sol." << Alert::Raise);
+    if (!MMGS_Set_solSize(mesh, sol, MMG5_Vertex, 0, MMG5_Scalar))
+      Alert::MemberFunctionException(*this, __func__) << "Could not set solution size." << Alert::Raise;
+    MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_optim, 1);
+    const ReturnCode rc = MMGS_mmgslib(mesh, sol);
+    if (sol->m)
+      MMG5_DEL_MEM(mesh, sol->m);
+    MMG5_SAFE_FREE(sol);
+    return rc;
   }
 }

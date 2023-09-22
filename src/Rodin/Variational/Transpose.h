@@ -30,6 +30,9 @@ namespace Rodin::Variational
       using Operand = FunctionBase<NestedDerived>;
       using Parent = FunctionBase<Transpose<Operand>>;
 
+      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
+      static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
+
       /**
        * @brief Constructs the Transpose matrix of the given matrix.
        */
@@ -69,9 +72,23 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
-        static_assert(std::is_same_v<OperandRange, Math::Vector> || std::is_same_v<OperandRange, Math::Matrix>);
         return this->object(getOperand().getValue(p)).transpose();
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& out, const Geometry::Point& p) const
+      {
+        out = getOperand().getValue(p);
+        out.transposeInPlace();
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& out, const Geometry::Point& p) const
+      {
+        out = getOperand().getValue(p);
+        out.transposeInPlace();
       }
 
       inline Transpose* copy() const noexcept override
@@ -132,7 +149,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& simplex) const
+      size_t getDOFs(const Geometry::Polytope& simplex) const
       {
         return getOperand().getDOFs(simplex);
       }

@@ -7,6 +7,7 @@
 #ifndef RODIN_FORMLANGUAGE_BASE_H
 #define RODIN_FORMLANGUAGE_BASE_H
 
+#include <atomic>
 #include <deque>
 #include <memory>
 #include <cassert>
@@ -27,9 +28,11 @@ namespace Rodin::FormLanguage
    */
   class Base
   {
-    static size_t s_id;
+    static thread_local size_t s_id;
 
     public:
+      using UUID = size_t;
+
       /**
        * @brief Constructor.
        */
@@ -66,7 +69,7 @@ namespace Rodin::FormLanguage
        * @brief Gets the unique identifier associated to the instance.
        */
       inline
-      const size_t& getUUID() const
+      const UUID& getUUID() const
       {
         return m_uuid;
       }

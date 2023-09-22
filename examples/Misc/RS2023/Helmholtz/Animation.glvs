@@ -1,0 +1,26 @@
+# Visualization window geometry
+window 0 0 600 400
+
+# Initial solution
+mesh Q.mesh Perturbed_0000.gf
+
+# Setup the GLVis scene. Executed after pressing the space bar.
+{
+  keys R
+  zoom 1.5
+}
+
+# Take multiple screenshots. Executed after pressing the space bar.
+{
+   solution quad.vtk quad-vec.gf screenshot quad-vec.00.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.01.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.02.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.03.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.04.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.05.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.06.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.07.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.08.png
+   solution quad.vtk quad-vec.gf screenshot quad-vec.09.png
+# solution quad.vtk quad-vec.gf screenshot quad-vec.10.png
+}

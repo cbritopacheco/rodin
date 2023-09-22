@@ -7,10 +7,19 @@
 #ifndef RODIN_ALERT_H
 #define RODIN_ALERT_H
 
-namespace Rodin::Alert {}
-
 #include "Alert/Exception.h"
+#include "Alert/Success.h"
 #include "Alert/Warning.h"
 #include "Alert/Info.h"
+
+#include "Alert/Text.h"
+#include "Alert/Color.h"
+#include "Alert/Reset.h"
+#include "Alert/Stylize.h"
+#include "Alert/Notation.h"
+#include "Alert/Identifier.h"
+#include "Alert/ClassException.h"
+#include "Alert/NamespacedException.h"
+#include "Alert/MemberFunctionException.h"
 
 #endif

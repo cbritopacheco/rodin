@@ -1,0 +1,9 @@
+/**
+  @page examples-pdes-index Variational methods and weak formulations
+  @brief Showcases the usage of the Rodin::Variational module
+
+  - @subpage examples-pdes-poisson
+  - @subpage examples-pdes-elasticity
+  - @subpage examples-pdes-surface_meshes
+
+  */

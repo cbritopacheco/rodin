@@ -1,6 +1,6 @@
 /**
-  @page examples-mmg-index Examples utilizing MMG
-  @brief Showcases the usage of the Rodin::External::MMG integration with Rodin
+  @page examples-mmg-index Working with MMG
+  @brief Showcases the usage of the Rodin::External::MMG module
 
   - @subpage examples-mmg-simple_io
   - @subpage examples-mmg-mesh_optimization

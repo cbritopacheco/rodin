@@ -43,7 +43,7 @@ int main(int, char**)
 
   Scalar avgElementVolume = 0;
   for (size_t i = 0; i < topography.getElementCount(); i++)
-    avgElementVolume += topography.getElement(i)->getVolume();
+    avgElementVolume += topography.getElement(i)->getMeasure();
   avgElementVolume /= topography.getElementCount();
 
   Scalar maxElevation =
@@ -69,12 +69,12 @@ int main(int, char**)
       return maxElevation * std::pow(e, flatness);
     };
 
-  H1 vh(topography, topography.getSpaceDimension());
+  P1 vh(topography, topography.getSpaceDimension());
   GridFunction displacement(vh);
   displacement = VectorFunction{0, 0, elevation};
   topography.displace(displacement);
 
-  H1 sh(topography);
+  P1 sh(topography);
   GridFunction h(sh);
   h = [](const Point& p) { return p.z(); };
 

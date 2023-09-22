@@ -13,12 +13,16 @@ namespace Rodin::External::MMG
 
   class Mesh;
 
+  class Adapt;
+
+  class Optimizer;
+
   template <class T>
   class Distancer;
 
-  class Advect;
-
   class ISCDProcess;
+
+  class Advect;
 
   class ImplicitDomainMesher;
 }

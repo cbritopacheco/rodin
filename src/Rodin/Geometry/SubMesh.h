@@ -18,6 +18,32 @@
 namespace Rodin::Geometry
 {
   /**
+   * @defgroup SubMeshSpecializations SubMesh Template Specializations
+   * @brief Template specializations of the SubMesh class.
+   * @see SubMesh
+   */
+
+  class SubMeshBase
+  {
+    public:
+      virtual Point inclusion(const Point& p) const = 0;
+
+      virtual Point restriction(const Point& p) const = 0;
+
+      /**
+       * @returns Reference to the parent Mesh object
+       */
+      virtual const MeshBase& getParent() const = 0;
+
+      /**
+       * @brief Gets the map of polytope indices from the SubMesh to the parent
+       * Mesh.
+       */
+      virtual const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const = 0;
+  };
+
+  /**
+   * @ingroup SubMeshSpecializations
    * @brief A SubMesh object represents a subregion of a Mesh object.
    *
    * A SubMesh object contains a reference to the parent Mesh object. It also
@@ -30,37 +56,52 @@ namespace Rodin::Geometry
    * if (mesh.isSubMesh())
    * {
    *   // Cast is well defined
-   *   auto& submesh = static_cast<SubMesh&>(mesh);
+   *   auto& submesh = static_cast<SubMesh<Context::Serial>&>(mesh);
+   * }
+   * @endcode
+   *
+   * Alternatively, you can use the asSubMesh() to access the SubMeshBase
+   * interface:
+   * @code{.cpp}
+   * if (mesh.isSubMesh())
+   * {
+   *   // Cast is well defined
+   *   auto& submesh = mesh.asSubMesh();
    * }
    * @endcode
    *
    */
   template <>
-  class SubMesh<Context::Serial> : public Mesh<Context::Serial>
+  class SubMesh<Context::Serial> final : public SubMeshBase, public Mesh<Context::Serial>
   {
     public:
-      class Builder : public BuilderBase
+      using Parent = Mesh<Context::Serial>;
+
+      /**
+       * @brief Class used to build SubMesh<Context::Serial> instances.
+       */
+      class Builder
       {
         public:
-          Builder();
+          Builder() = default;
 
-          Builder& setReference(
-              Mesh<Context::Serial>::Builder&& build, SubMesh<Context::Serial>& mesh);
+          Builder& initialize(const Mesh<Context::Serial>& parent);
 
-          Builder& include(size_t dim, std::set<Index> indices);
+          Builder& include(size_t d, Index parentIdx);
 
-          void finalize() override;
+          Builder& include(size_t d, const IndexSet& indices);
+
+          SubMesh finalize();
 
         private:
-          std::optional<std::reference_wrapper<SubMesh<Context::Serial>>> m_ref;
-
-          std::optional<Mesh<Context::Serial>::Builder> m_mbuild;
+          std::optional<std::reference_wrapper<const Mesh<Context::Serial>>> m_parent;
+          Mesh<Context::Serial>::Builder m_build;
           std::vector<Index> m_sidx;
-
           std::vector<boost::bimap<Index, Index>> m_s2ps;
       };
 
-      SubMesh(const MeshBase& parent);
+      explicit
+      SubMesh(std::reference_wrapper<const Mesh<Context::Serial>> parent);
 
       SubMesh(const SubMesh& other);
 
@@ -70,11 +111,18 @@ namespace Rodin::Geometry
 
       SubMesh& operator=(SubMesh&& other)
       {
-        MeshBase::operator=(std::move(other));
-        m_parent = std::move(other.m_parent);
-        m_s2ps = std::move(other.m_s2ps);
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_parent = std::move(other.m_parent);
+          m_s2ps = std::move(other.m_s2ps);
+        }
         return *this;
       }
+
+      Point inclusion(const Point& p) const override;
+
+      Point restriction(const Point& p) const override;
 
       bool isSubMesh() const override
       {
@@ -84,23 +132,20 @@ namespace Rodin::Geometry
       /**
        * @returns Reference to the parent Mesh object
        */
-      const MeshBase& getParent() const;
+      const Mesh<Context::Serial>& getParent() const override;
 
-      const boost::bimap<Index, Index>& getSimplexMap(size_t d) const
+      /**
+       * @brief Gets the map of polytope indices from the SubMesh to the parent
+       * Mesh.
+       */
+      inline
+      const boost::bimap<Index, Index>& getPolytopeMap(size_t d) const override
       {
         return m_s2ps.at(d);
       }
 
-      // [[deprecated]]
-      const boost::bimap<Index, Index>& getElementMap() const
-      {
-        return m_s2ps.at(getDimension());
-      }
-
-      SubMesh<Context::Serial>::Builder initialize(size_t dim, size_t sdim);
-
     private:
-      std::reference_wrapper<const MeshBase> m_parent;
+      std::reference_wrapper<const Mesh<Context::Serial>> m_parent;
       std::vector<boost::bimap<Index, Index>> m_s2ps;
   };
 }

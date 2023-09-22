@@ -19,6 +19,19 @@
 #include "ShapeFunction.h"
 #include "ScalarFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<
+    Variational::Dot<
+      Variational::FunctionBase<LHSDerived>,
+      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -139,7 +152,9 @@ namespace Rodin::Variational
   {
     public:
       using LHS = FunctionBase<LHSDerived>;
+
       using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
+
       using Parent = ShapeFunctionBase<Dot<LHS, RHS>, FES, Space>;
 
       constexpr
@@ -193,7 +208,7 @@ namespace Rodin::Variational
       }
 
       inline
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }
@@ -207,7 +222,7 @@ namespace Rodin::Variational
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
         const auto& lhs = this->object(getLHS().getValue(p));
-        const auto& rhs = this->object(getRHS().getTensorBasis(p));
+        const auto rhs = getRHS().getTensorBasis(p);
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           return lhs * rhs;
@@ -307,43 +322,43 @@ namespace Rodin::Variational
        * where @f$ n @f$ is the number of trial degrees of freedom, and @f$ m
        * @f$ is the number of test degrees of freedom.
        */
-      inline
-      Math::Matrix getMatrix(const Geometry::Point& p) const
+      void assemble(const Geometry::Point& p)
       {
         assert(getLHS().getRangeShape() == getRHS().getRangeShape());
         using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
         using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
         static_assert(std::is_same_v<LHSRange, RHSRange>);
-        const auto& trial = this->object(getLHS().getTensorBasis(p));
-        const auto& test = this->object(getRHS().getTensorBasis(p));
-        Math::Matrix res(test.getDOFs(), trial.getDOFs());
+        const auto& trial = getLHS().getTensorBasis(p);
+        const auto& test = getRHS().getTensorBasis(p);
+        m_matrix.resize(test.getDOFs(), trial.getDOFs());
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = test(i) * trial(j);
-          return res;
+              m_matrix(i, j) = test(i) * trial(j);
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = test(i).dot(trial(j));
-          return res;
+              m_matrix(i, j) = test(i).dot(trial(j));
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
           for (size_t i = 0; i < test.getDOFs(); i++)
             for (size_t j = 0; j < trial.getDOFs(); j++)
-              res(i, j) = (test(i).array() * trial(j).array()).rowwise().sum().colwise().sum().value();
-          return res;
+              m_matrix(i, j) = (test(i).array() * trial(j).array()).rowwise().sum().colwise().sum().value();
         }
         else
         {
           assert(false);
-          res.setConstant(NAN);
-          return res;
+          m_matrix.setConstant(NAN);
         }
+      }
+
+      const Math::Matrix& getMatrix() const
+      {
+        return m_matrix;
       }
 
       inline Dot* copy() const noexcept final override
@@ -354,476 +369,14 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHS> m_trial;
       std::unique_ptr<RHS> m_test;
+
+      Math::Matrix m_matrix;
   };
 
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&,
       const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
   -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
-
-  // /* ||-- OPTIMIZATIONS -----------------------------------------------------
-  //  * Dot<FunctionBase, ShapeFunctionBase<Space>>
-  //  * ---------------------------------------------------------------------->>
-  //  */
-
-  // /**
-  //  * @ingroup DotSpecializations
-  //  * @f[
-  //  *   f \cdot u
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or vector valued).
-  //  */
-  // template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  // class Dot<FunctionBase<LHSDerived>, ShapeFunction<RHSDerived, FES, Space>> final
-  //   : public Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<ShapeFunction<RHSDerived, FES, Space>, Space>>
-  // {
-  //   public:
-  //     using LHS = FunctionBase<LHSDerived>;
-  //     using RHS = ShapeFunction<RHSDerived, FES, Space>;
-  //     using Parent = Dot<FunctionBase<LHS>, ShapeFunctionBase<RHS, Space>>;
-
-  //     constexpr
-  //     Dot(const LHS& f, const RHS& u)
-  //       : Parent(f, u)
-  //     {}
-
-  //     constexpr
-  //     Dot(const Dot& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Dot(Dot&& other)
-  //       : Parent(other)
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     RHS& getRHS()
-  //     {
-  //       return static_cast<RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const LHS& getLHS() const
-  //     {
-  //       return static_cast<const LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const RHS& getRHS() const
-  //     {
-  //       return static_cast<const RHS&>(Parent::getRHS());
-  //     }
-  // };
-
-  // template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  // Dot(const FunctionBase<LHSDerived>&, const ShapeFunction<RHSDerived, FES, Space>&)
-  //   -> Dot<FunctionBase<LHSDerived>, ShapeFunction<RHSDerived, FES, Space>>;
-
-  /* <<-- OPTIMIZATIONS -----------------------------------------------------
-   * Dot<FunctionBase, ShapeFunctionBase<TestSpace>>
-   * ----------------------------------------------------------------------||
-   */
-
-  // /* ||-- OPTIMIZATIONS -----------------------------------------------------
-  //  * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  //  * ---------------------------------------------------------------------->>
-  //  */
-
-  // /**
-  //  * @ingroup DotSpecializations
-  //  *
-  //  * @f[
-  //  *   (f u) \cdot v
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or vector valued).
-  //  */
-  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
-  // class Dot<
-  //         Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>,
-  //         ShapeFunction<RHSDerived, FES, TestSpace>> final
-  //   : public Dot<
-  //         ShapeFunctionBase<Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>, TrialSpace>,
-  //         ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>, TestSpace>>
-  // {
-  //   public:
-  //     using LHS = Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>;
-  //     using RHS = ShapeFunction<RHSDerived, FES, TestSpace>;
-  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
-
-  //     constexpr
-  //     Dot(const LHS& fu, const RHS& v)
-  //       : Parent(fu, v)
-  //     {}
-
-  //     constexpr
-  //     Dot(const Dot& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Dot(Dot&& other)
-  //       : Parent(other)
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     LHS& getLHS()
-  //     {
-  //       return static_cast<LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RHS& getRHS()
-  //     {
-  //       return static_cast<RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const LHS& getLHS() const
-  //     {
-  //       return static_cast<const LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const RHS& getRHS() const
-  //     {
-  //       return static_cast<const RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     Dot* copy() const noexcept
-  //     override
-  //     {
-  //       return new Dot(*this);
-  //     }
-  // };
-  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
-  // Dot(const Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>&,
-  //     const ShapeFunctionBase<RHSDerived, TestSpace>&)
-  //   -> Dot<
-  //       Mult<FunctionBase<LHSDerived1>, ShapeFunction<LHSDerived2, FES, TrialSpace>>,
-  //       ShapeFunction<RHSDerived, FES, TestSpace>>;
-
-  // /**
-  //  * @ingroup DotSpecializations
-  //  *
-  //  * @f[
-  //  *   (f \nabla u) \cdot \nabla v
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or matrix valued).
-  //  */
-  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
-  // class Dot<
-  //       Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
-  //       Grad<ShapeFunction<RHSDerived, FES, TestSpace>>> final
-  //   : public Dot<
-  //       ShapeFunctionBase<Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>, TrialSpace>,
-  //       ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
-  // {
-  //   public:
-  //     using LHS = Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>;
-  //     using RHS = Grad<ShapeFunction<RHSDerived, FES, TestSpace>>;
-  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
-
-  //     constexpr
-  //     Dot(const LHS& fgu, const RHS& gv)
-  //       : Parent(fgu, gv)
-  //     {}
-
-  //     constexpr
-  //     Dot(const Dot& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Dot(Dot&& other)
-  //       : Parent(other)
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     LHS& getLHS()
-  //     {
-  //       return static_cast<LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RHS& getRHS()
-  //     {
-  //       return static_cast<RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const LHS& getLHS() const
-  //     {
-  //       return static_cast<const LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const RHS& getRHS() const
-  //     {
-  //       return static_cast<const RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     Dot* copy() const noexcept
-  //     override
-  //     {
-  //       return new Dot(*this);
-  //     }
-  // };
-  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
-  // Dot(const Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>&,
-  //     const Grad<ShapeFunction<RHSDerived, FES, TestSpace>>&)
-  //   -> Dot<
-  //       Mult<FunctionBase<LHSDerived1>, Grad<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
-  //       Grad<ShapeFunction<RHSDerived, FES, TestSpace>>>;
-
-  // /**
-  //  * @ingroup DotSpecializations
-  //  *
-  //  * Represents the following expression:
-  //  * @f[
-  //  *   \nabla u \cdot \nabla v
-  //  * @f]
-  //  */
-  // template <class LHSDerived, class RHSDerived, class FES>
-  // class Dot<
-  //     Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>,
-  //     Grad<ShapeFunction<RHSDerived, FES, TestSpace>>> final
-  //   : public Dot<
-  //       ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>, TrialSpace>,
-  //       ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
-  // {
-  //   public:
-  //     using LHS = Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>;
-  //     using RHS = Grad<ShapeFunction<RHSDerived, FES, TestSpace>>;
-  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
-
-  //     constexpr
-  //     Dot(const LHS& nu, const RHS& nv)
-  //       : Parent(nu, nv)
-  //     {}
-
-  //     constexpr
-  //     Dot(const Dot& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Dot(Dot&& other)
-  //       : Parent(std::move(other))
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     LHS& getLHS()
-  //     {
-  //       return static_cast<LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RHS& getRHS()
-  //     {
-  //       return static_cast<RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const LHS& getLHS() const
-  //     {
-  //       return static_cast<const LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const RHS& getRHS() const
-  //     {
-  //       return static_cast<const RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     Dot* copy() const noexcept
-  //     override
-  //     {
-  //       return new Dot(*this);
-  //     }
-  // };
-  // template <class LHSDerived, class RHSDerived, class FES>
-  // Dot(const Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>&, const Grad<ShapeFunction<RHSDerived, FES, TestSpace>>&)
-  //   -> Dot<Grad<ShapeFunction<LHSDerived, FES, TrialSpace>>, Grad<ShapeFunction<RHSDerived, FES, TestSpace>>>;
-
-  // /**
-  //  * @ingroup DotSpecializations
-  //  *
-  //  * Represents the following expression:
-  //  * @f[
-  //  *   \mathbf{J} u \cdot \mathbf{J} v
-  //  * @f]
-  //  */
-  // template <class LHSDerived, class RHSDerived, class FES>
-  // class Dot<
-  //     Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>,
-  //     Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>> final
-  //   : public Dot<
-  //       ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>, TrialSpace>,
-  //       ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
-  // {
-  //   public:
-  //     using LHS = Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>;
-  //     using RHS = Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>;
-  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
-
-  //     constexpr
-  //     Dot(const LHS& nu, const RHS& nv)
-  //       : Parent(nu, nv)
-  //     {}
-
-  //     constexpr
-  //     Dot(const Dot& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Dot(Dot&& other)
-  //       : Parent(std::move(other))
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     LHS& getLHS()
-  //     {
-  //       return static_cast<LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RHS& getRHS()
-  //     {
-  //       return static_cast<RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const LHS& getLHS() const
-  //     {
-  //       return static_cast<const LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const RHS& getRHS() const
-  //     {
-  //       return static_cast<const RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     Dot* copy() const noexcept
-  //     override
-  //     {
-  //       return new Dot(*this);
-  //     }
-  // };
-  // template <class LHSDerived, class RHSDerived, class FES>
-  // Dot(const Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>&,
-  //     const Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>&)
-  //   -> Dot<
-  //       Jacobian<ShapeFunction<LHSDerived, FES, TrialSpace>>,
-  //       Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>>;
-
-  // /**
-  //  * @ingroup DotSpecializations
-  //  *
-  //  * @f[
-  //  *   (f \mathbf{J} u) \cdot \mathbf{J} v
-  //  * @f]
-  //  * where @f$ f @f$ is a function (scalar or matrix valued).
-  //  */
-  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
-  // class Dot<
-  //     Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
-  //     Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>> final
-  //   : public Dot<
-  //       ShapeFunctionBase<Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>, TrialSpace>,
-  //       ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>, TestSpace>>
-  // {
-  //   public:
-  //     using LHS = Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>;
-  //     using RHS = Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>;
-  //     using Parent = Dot<ShapeFunctionBase<LHS, TrialSpace>, ShapeFunctionBase<RHS, TestSpace>>;
-
-  //     constexpr
-  //     Dot(const LHS& fgu, const RHS& gv)
-  //       : Parent(fgu, gv)
-  //     {}
-
-  //     constexpr
-  //     Dot(const Dot& other)
-  //       : Parent(other)
-  //     {}
-
-  //     constexpr
-  //     Dot(Dot&& other)
-  //       : Parent(other)
-  //     {}
-
-  //     inline
-  //     constexpr
-  //     LHS& getLHS()
-  //     {
-  //       return static_cast<LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     RHS& getRHS()
-  //     {
-  //       return static_cast<RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const LHS& getLHS() const
-  //     {
-  //       return static_cast<const LHS&>(Parent::getLHS());
-  //     }
-
-  //     inline
-  //     constexpr
-  //     const RHS& getRHS() const
-  //     {
-  //       return static_cast<const RHS&>(Parent::getRHS());
-  //     }
-
-  //     inline
-  //     Dot* copy() const noexcept
-  //     override
-  //     {
-  //       return new Dot(*this);
-  //     }
-  // };
-  // template <class LHSDerived1, class LHSDerived2, class RHSDerived, class FES>
-  // Dot(const Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>&,
-  //     const Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>&)
-  //   -> Dot<
-  //       Mult<FunctionBase<LHSDerived1>, Jacobian<ShapeFunction<LHSDerived2, FES, TrialSpace>>>,
-  //       Jacobian<ShapeFunction<RHSDerived, FES, TestSpace>>>;
-
-  // /* <<-- OPTIMIZATIONS -----------------------------------------------------
-  //  * Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>
-  //  * ----------------------------------------------------------------------||
-  //  */
 }
 
 #endif

@@ -7,30 +7,18 @@
 #ifndef RODIN_MATH_SPARSEMATRIX_H
 #define RODIN_MATH_SPARSEMATRIX_H
 
-#include <Eigen/Core>
 #include <Eigen/Sparse>
+
+#include "Rodin/Types.h"
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Math
 {
-  class SparseMatrix : public Eigen::SparseMatrix<double>
-  {
-   public:
-    using Parent = Eigen::SparseMatrix<double>;
-
-    SparseMatrix() = default;
-
-    template <typename OtherDerived>
-    SparseMatrix(const Eigen::MatrixBase<OtherDerived>& other)
-      : Parent(other)
-    {}
-
-    template <typename OtherDerived>
-    SparseMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-    {
-       this->Parent::operator=(other);
-       return *this;
-    }
-  };
+  /**
+   * @brief Sparse matrix type
+   */
+  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
 }
 
 #endif

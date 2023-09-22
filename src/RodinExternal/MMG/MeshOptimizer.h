@@ -7,8 +7,8 @@
 #ifndef RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
 #define RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
 
+#include "ForwardDecls.h"
 #include "Mesh.h"
-
 #include "MMG5.h"
 
 namespace Rodin::External::MMG
@@ -16,10 +16,10 @@ namespace Rodin::External::MMG
   /**
    * @brief Improves the mesh quality, mantaining the mean edge lenghts of the mesh.
    */
-  class MeshOptimizer : public MMG5
+  class Optimizer : public MMG5
   {
     public:
-      MeshOptimizer() = default;
+      Optimizer() = default;
 
       /**
        * @brief Performs the optimization of the mesh.
@@ -65,31 +65,31 @@ namespace Rodin::External::MMG
         destroyMesh(mmgMesh);
       }
 
-      MeshOptimizer& setAngleDetection(bool b = true)
+      Optimizer& setAngleDetection(bool b = true)
       {
         MMG5::setAngleDetection(b);
         return *this;
       }
 
-      MeshOptimizer& setHMin(double hmin)
+      Optimizer& setHMin(double hmin)
       {
         MMG5::setHMin(hmin);
         return *this;
       }
 
-      MeshOptimizer& setHMax(double hmax)
+      Optimizer& setHMax(double hmax)
       {
         MMG5::setHMax(hmax);
         return *this;
       }
 
-      MeshOptimizer& setHausdorff(double hausd)
+      Optimizer& setHausdorff(double hausd)
       {
         MMG5::setHausdorff(hausd);
         return *this;
       }
 
-      MeshOptimizer& setGradation(double hgrad)
+      Optimizer& setGradation(double hgrad)
       {
         MMG5::setGradation(hgrad);
         return *this;

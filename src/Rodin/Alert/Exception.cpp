@@ -6,23 +6,38 @@
  */
 #include <iostream>
 
-#include <rang.hpp>
+#include "Rodin/Configure.h"
 
 #include "Exception.h"
 
 namespace Rodin::Alert
 {
-  Exception::Exception(const std::string& what)
-    : Alert(what)
+  Exception::Exception()
+    : Exception(std::cerr)
   {}
+
+  Exception::Exception(std::ostream& os)
+    : Parent(os, ExceptionPrefix())
+  {}
+
+  Exception::Exception(const Exception& other)
+    : std::exception(other),
+      Parent(other)
+  {}
+
+  Exception::Exception(Exception&& other)
+    : std::exception(std::move(other)),
+      Parent(std::move(other))
+  {}
+
+  const char* Exception::what() const noexcept
+  {
+    return Parent::what();
+  }
 
   void Exception::raise() const
   {
-    // std::cerr << rang::fg::red
-    //        << "Error: "
-    //        << rang::fg::reset
-    //        << what()
-    //        << std::endl;
+    Parent::raise();
     throw *this;
   }
 }

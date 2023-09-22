@@ -1,0 +1,2 @@
+namespace Rodin::Math
+{}

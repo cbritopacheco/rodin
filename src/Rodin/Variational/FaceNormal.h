@@ -2,7 +2,8 @@
 #define RODIN_VARIATIONAL_FACENORMAL_H
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/SimplexTransformation.h"
+#include "Rodin/Geometry/PolytopeTransformation.h"
+#include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
@@ -20,81 +21,98 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the outward unit on a face.
        */
-      FaceNormal(const Geometry::MeshBase& surface)
-        : m_dimension(surface.getSpaceDimension())
+      FaceNormal(const Geometry::MeshBase& mesh)
+        : m_sdim(mesh.getSpaceDimension())
       {
-        assert(m_dimension > 0);
+        assert(m_sdim > 0);
       }
 
       FaceNormal(const FaceNormal& other)
         : Parent(other),
-          m_dimension(other.m_dimension)
+          m_sdim(other.m_sdim)
       {}
 
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
-          m_dimension(std::move(other.m_dimension))
+          m_sdim(std::move(other.m_sdim))
       {}
 
       inline
       constexpr
       size_t getDimension() const
       {
-        return m_dimension;
+        return m_sdim;
       }
 
-      Math::Vector getValue(const Geometry::Point& p) const
+      inline
+      Math::SpatialVector getValue(const Geometry::Point& p) const
       {
-        assert(p.getSimplex().getDimension() == p.getSimplex().getMesh().getSpaceDimension() - 1);
-        const auto& simplex = p.getSimplex();
-        const auto& mesh = simplex.getMesh();
-        const auto& jacobian = p.getJacobian();
+        Math::SpatialVector res;
+        getValue(res, p);
+        return res;
+      }
 
-        Math::Vector value(m_dimension);
+      void getValue(Math::SpatialVector& res, const Geometry::Point& p) const
+      {
+        const auto& polytope = p.getPolytope();
+        const auto& d = polytope.getDimension();
+        const auto& i = polytope.getIndex();
+        const auto& mesh = polytope.getMesh();
+        assert(d == mesh.getDimension() - 1);
+        assert(mesh.isBoundary(i));
+        const auto& jacobian = p.getJacobian();
+        res.resize(m_sdim);
         if (jacobian.rows() == 2)
         {
-          value(0) =  jacobian(1, 0);
-          value(1) = -jacobian(0, 0);
+          res << jacobian(1, 0), -jacobian(0, 0);
         }
         else if (jacobian.rows() == 3)
         {
-          value(0) = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-          value(1) = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-          value(2) = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+          res <<
+            jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
+            jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+            jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
         }
         else
         {
           assert(false);
-          value.setConstant(NAN);
-          return value;
+          res.setConstant(NAN);
         }
 
-        // Or we are on a face of a d-mesh in d-space
-        if (mesh.isBoundary(simplex.getIndex()))
+        const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
+        assert(incidence.size() == 1 || incidence.size() == 2);
+        const auto& traceDomain = getTraceDomain();
+        if (traceDomain.size() == 0)
         {
-          return value.normalized();
+          Alert::MemberFunctionException(*this, __func__)
+            << "No trace domain provided: "
+            << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+            << ". FaceNormal at an interface with no trace domain is undefined."
+            << Alert::Raise;
         }
         else
         {
-          int el1 = -1;
-          int el2 = -1;
-          const auto& meshHandle = simplex.getMesh().getHandle();
-          meshHandle.GetFaceElements(simplex.getIndex(), &el1, &el2);
-          if (el1 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el1)))
+          for (const Index i : incidence)
           {
-            return value.normalized();
+            auto pit = mesh.getPolytope(d + 1, i);
+            if (traceDomain.contains(pit->getAttribute()))
+            {
+              for (auto vit = pit->getVertex(); vit; ++vit)
+              {
+                const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
+                if (res.dot(v) > 0)
+                {
+                  res *= -1;
+                  break;
+                }
+              }
+              res.normalize();
+              return;
+            }
           }
-          else if (el2 >= 0 && getTraceDomain().count(meshHandle.GetAttribute(el2)))
-          {
-            value = -1.0 * value;
-            return value.normalized();
-          }
-          else
-          {
-            assert(false);
-            value.setConstant(NAN);
-            return value;
-          }
+
+          UndeterminedTraceDomainException(
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
         }
       }
 
@@ -108,7 +126,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      FaceNormal& traceOf(const std::set<Geometry::Attribute>& attrs)
+      FaceNormal& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
         return *this;
@@ -120,7 +138,7 @@ namespace Rodin::Variational
       }
 
     private:
-      const size_t m_dimension;
+      const size_t m_sdim;
   };
 }
 

@@ -5,7 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <iostream>
-#include <rang.hpp>
 
 #include "Rodin/Configure.h"
 
@@ -13,20 +12,20 @@
 
 namespace Rodin::Alert
 {
-  Warning::Warning(const std::string& what)
-    : Alert(what)
+  Warning::Warning()
+    : Warning(std::cerr)
   {}
 
-  void Warning::raise() const noexcept
-  {
-#ifdef RODIN_SILENCE_WARNINGS
-#else
-    std::cerr << rang::fg::yellow
-           << "Warning: "
-           << rang::fg::reset
-           << what()
-           << std::endl;
-#endif
-  }
+  Warning::Warning(std::ostream& os)
+    : Parent(os, WarningPrefix())
+  {}
+
+  Warning::Warning(const Warning& other)
+    : Parent(other)
+  {}
+
+  Warning::Warning(Warning&& other)
+    : Parent(std::move(other))
+  {}
 }
 

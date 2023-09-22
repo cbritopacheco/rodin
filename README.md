@@ -1,6 +1,6 @@
 # Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
 
-Rodin is a lightweight and modular shape optimization framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems. 
+Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
@@ -12,8 +12,8 @@ Any contributors are warmly encouraged and any help or comments are always appre
 
 | Branch      |  Matrix  | Tests | Code Coverage | Benchmarks | Documentation |
 |:-----------:|:--------:|:-----:|:-------------:|:----------:|:-------------:|
-| master      | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Amaster) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Amaster) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/master/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/master)  | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/benchmarks/refs/heads/master/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg)](https://cbritopacheco.github.io/rodin/) |
-| develop     | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Adevelop) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/develop/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/develop) | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/benchmarks/refs/heads/develop/) | |
+| master      | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Amaster) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=master)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Amaster) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/master/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/master)  | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/benchmarks/refs/heads/master/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg?branch=master)](https://cbritopacheco.github.io/rodin/docs/refs/heads/master) |
+| develop     | [![Build](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Build.yml?query=branch%3Adevelop) | [![Tests](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml/badge.svg?branch=develop)](https://github.com/cbritopacheco/rodin/actions/workflows/Tests.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/cbritopacheco/rodin/branch/develop/graph/badge.svg?token=gwEZOnQje1)](https://app.codecov.io/gh/cbritopacheco/rodin/tree/develop) | [![Benchmarks](https://github.com/cbritopacheco/rodin/actions/workflows/Benchmarks.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/benchmarks/refs/heads/develop/) | [![Documentation](https://github.com/cbritopacheco/rodin/actions/workflows/Documentation.yml/badge.svg?branch=develop)](https://cbritopacheco.github.io/rodin/docs/refs/heads/develop) |
 
 ## Table of Contents
 
@@ -68,11 +68,13 @@ using namespace Rodin::Variational;
 const Geometry::Attribute Gamma = 1;
 int main(int, char**)
 {
-  Mesh Omega; Omega.load("../resources/mfem/poisson-example.mesh");
-  H1 Vh(Omega);
-  TrialFunction u(Vh); TestFunction  v(Vh);
+  Mesh Omega;
+  Omega = Omega.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh.getConnectivity().compute(1, 2);
+  P1 Vh(Omega);
+  TrialFunction u(Vh); TestFunction v(Vh);
   ScalarFunction f(1.0); ScalarFunction g(0.0);
-  Solver::UMFPack solver;
+  Solver::SparseLU solver;
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
@@ -96,11 +98,11 @@ int main(int, char**)
 
 - Optimizing the mesh:
   ```c++
-  MMG::MeshOptimizer().setHMax(hmax) // maximal edge size
-                      .setHMin(hmin) // minimal edge size
-                      .setGradation(hgrad) // ratio between two edges
-                      .setHausdorff(hausd) // curvature refinement
-                      .optimize(Omega);
+  MMG::Optimizer().setHMax(hmax) // maximal edge size
+                  .setHMin(hmin) // minimal edge size
+                  .setGradation(hgrad) // ratio between two edges
+                  .setHausdorff(hausd) // curvature refinement
+                  .optimize(Omega);
   ```
 
 ## Roadmap
@@ -113,8 +115,6 @@ List of features and modules that are in the works:
 
 - [CMake 3.16.0+](https://cmake.org/)
 - [Boost 1.65+](https://www.boost.org/)
-- [SuiteSparse](https://people.engr.tamu.edu/davis/suitesparse.html)
-- [METIS](https://github.com/KarypisLab/METIS)
 
 Any of these should be available for quick install from your standard package
 manager.

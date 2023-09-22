@@ -1,6 +1,14 @@
 if (RODIN_BUILD_EXAMPLES)
+  rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
   if (${CMAKE_BUILD_TYPE} MATCHES Release)
-    # No new flags to add
+    rodin_add_compile_options(
+      LANG CXX
+      OPTIONS
+      -O3
+      -march=native
+      -fvectorize
+      -fslp-vectorize
+      -ffp-contract=fast)
   elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
     rodin_add_compile_options(
       LANG CXX
@@ -12,20 +20,19 @@ if (RODIN_BUILD_EXAMPLES)
   endif()
 
   add_subdirectory(IO)
+  if (RODIN_WITH_PLOT)
+    add_subdirectory(Plot)
+  endif()
+  add_subdirectory(Alert)
   add_subdirectory(Geometry)
   add_subdirectory(Variational)
+
+  add_subdirectory(PDEs)
   add_subdirectory(ShapeOptimization)
   # add_subdirectory(DensityOptimization)
   # add_subdirectory(SurfaceOptimization)
   add_subdirectory(SurfaceEvolution)
+  add_subdirectory(Misc)
 
   add_subdirectory(MMG)
-
-  # if (RODIN_USE_MPI)
-  #   add_subdirectory(Parallel)
-  # endif()
-
-  if (RODIN_WITH_PLOT)
-    add_subdirectory(Plot)
-  endif()
 endif()

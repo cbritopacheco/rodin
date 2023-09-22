@@ -20,19 +20,25 @@
 
 namespace Rodin::Variational
 {
-   template <class TrialFES, class TestFES>
-   void
-   BilinearForm<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix>::assemble()
-   {
-      assert(&getTrialFunction().getFiniteElementSpace().getMesh() ==
-            &getTestFunction().getFiniteElementSpace().getMesh());
-      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      const auto& testFes = getTestFunction().getFiniteElementSpace();
-      const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
-      m_operator.reset(
-            new OperatorType(
-               getAssembly().execute({mesh, trialFes, testFes, getIntegrators()})));
-   }
+  template <class TrialFES, class TestFES>
+  void
+  BilinearForm<TrialFES, TestFES, Context::Serial, Math::SparseMatrix>::assemble()
+  {
+     const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+     const auto& testFES = getTestFunction().getFiniteElementSpace();
+     const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
+     m_operator = getAssembly().execute({mesh, trialFES, testFES, getIntegrators()});
+  }
+
+  template <class TrialFES, class TestFES>
+  void
+  BilinearForm<TrialFES, TestFES, Context::Serial, std::vector<Eigen::Triplet<Scalar>>>::assemble()
+  {
+     const auto& trialFES = getTrialFunction().getFiniteElementSpace();
+     const auto& testFES = getTestFunction().getFiniteElementSpace();
+     const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
+     m_operator = getAssembly().execute({mesh, trialFES, testFES, getIntegrators()});
+  }
 }
 
 #endif

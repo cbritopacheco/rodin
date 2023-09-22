@@ -15,6 +15,8 @@ using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+using FES = VectorP1<Context::Serial>;
+
 // Define boundary attributes
 static constexpr Geometry::Attribute Gamma0 = 1; // Traction free boundary
 static constexpr Geometry::Attribute GammaD = 2; // Homogenous Dirichlet boundary
@@ -25,15 +27,15 @@ static constexpr Scalar mu    = 0.3846;
 static constexpr Scalar lambda = 0.5769;
 
 // Optimization parameters
-static constexpr size_t maxIt = 40;
-static constexpr Scalar eps  = 1e-6;
+static constexpr size_t maxIt = 50;
 static constexpr Scalar hmax  = 0.1;
+static constexpr Scalar hmin  = 0.1 * hmax;
 static constexpr Scalar ell  = 5.0;
 static constexpr Scalar alpha = 4 * hmax;
 
 
 // Compliance
-inline Scalar compliance(const GridFunction<H1<Math::Vector, Context::Serial>>& w)
+inline Scalar compliance(const GridFunction<FES>& w)
 {
   auto& vh = w.getFiniteElementSpace();
   TrialFunction u(vh);
@@ -46,26 +48,28 @@ inline Scalar compliance(const GridFunction<H1<Math::Vector, Context::Serial>>& 
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/simple-cantilever2d-example.mesh";
+  const char* meshFile = "../resources/examples/ShapeOptimization/SimpleCantilever2D.mfem.mesh";
 
   // Load mesh
   MMG::Mesh Omega;
   Omega.load(meshFile);
   Omega.save("Omega0.mesh");
+
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-  // UMFPack
-  Solver::UMFPack solver;
+  //Utilize SparseLU for solver
+  Solver::SparseLU solver;
 
   // Optimization loop
-  std::vector<double> obj;
   for (size_t i = 0; i < maxIt; i++)
   {
+    Omega.getConnectivity().compute(1, 2);
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     // Finite element spaces
     int d = 2;
-    H1 vh(Omega, d);
+    P1 sh(Omega);
+    P1 vh(Omega, d);
 
     // Pull-down force
     VectorFunction f{0, -1};
@@ -74,7 +78,8 @@ int main(int, char**)
     TrialFunction u(vh);
     TestFunction  v(vh);
     Problem elasticity(u, v);
-    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+    elasticity = Integral(lambda * Div(u), Div(v))
+               + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);
@@ -92,19 +97,20 @@ int main(int, char**)
             - BoundaryIntegral(Dot(Ae, e) - ell, Dot(BoundaryNormal(Omega), w)).over(Gamma0)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
     hilbert.solve(solver);
+    const auto& dJ = g.getSolution();
 
     // Update objective
-    obj.push_back(compliance(u.getSolution()) + ell * Omega.getVolume());
-
-    Alert::Info() << "   | Objective: " << obj[i] << Alert::Raise;
+    const Scalar objective = compliance(u.getSolution()) + ell * Omega.getVolume();
+    Alert::Info() << "   | Objective: " << objective << Alert::Raise;
 
     // Make the displacement
-    Scalar dt = Omega.getMaximumDisplacement(g.getSolution());
-    g.getSolution() *= hmax * dt;
+    GridFunction norm(sh);
+    norm = Frobenius(dJ);
+    g.getSolution() *= hmin / norm.max();
     Omega.displace(g.getSolution());
 
     // Refine the mesh using MMG
-    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+    MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(Omega);
 
     // Save mesh
     Omega.save("Omega.mesh");

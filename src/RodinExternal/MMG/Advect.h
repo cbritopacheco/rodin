@@ -16,6 +16,7 @@
 #include "Common.h"
 #include "ForwardDecls.h"
 #include "ISCDProcess.h"
+#include "GridFunction.h"
 
 namespace Rodin::External::MMG
 {
@@ -37,8 +38,8 @@ namespace Rodin::External::MMG
   class Advect
   {
     public:
-      using LevelSetFunction = Variational::GridFunction<Variational::H1<Scalar, Context::Serial>>;
-      using VectorField = Variational::GridFunction<Variational::H1<Math::Vector, Context::Serial>>;
+      using LevelSetFunction = ScalarGridFunction;
+      using VectorField = VectorGridFunction;
 
       /**
        * @brief Constructs an Advect object
@@ -53,7 +54,6 @@ namespace Rodin::External::MMG
           m_disp(disp),
           m_advect(getISCDAdvectExecutable())
     {
-      assert(ls.getFiniteElementSpace().getVectorDimension() == 1);
       assert(
           disp.getFiniteElementSpace().getVectorDimension()
           == ls.getFiniteElementSpace().getMesh().getSpaceDimension());
@@ -95,6 +95,7 @@ namespace Rodin::External::MMG
 
         auto outp = m_advect.tmpnam(".sol", "RodinMMG");
 
+        m_advect.logOutput();
         int retcode = 1;
         if (mesh.isSurface())
         {
@@ -135,13 +136,20 @@ namespace Rodin::External::MMG
           }
           else
           {
-            Alert::Exception() << "Invalid dimension" << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__) << "Invalid dimension" << Alert::Raise;
           }
         }
 
         if (retcode != 0)
-          Alert::Exception(
-              "MMG::Advect: ISCD::Advection invocation failed.").raise();
+        {
+          assert(m_advect.getOutputLog().has_value());
+          auto* rdbuf = m_advect.getOutputLog()->rdbuf();
+          Alert::MemberFunctionException(*this, __func__)
+            << "MMG::Advect: ISCD::Advection failed."
+            << Alert::NewLine
+            << rdbuf
+            << Alert::Raise;
+        }
 
         m_ls.get().load(outp, IO::FileFormat::MEDIT);
 

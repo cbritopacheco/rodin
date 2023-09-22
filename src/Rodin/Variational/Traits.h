@@ -210,22 +210,6 @@ namespace Rodin::FormLanguage
                                     IsMatrixRange<ValueType>::Value>
                                     ::Type;
   };
-
-  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
-  {
-    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
-    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
-
-    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
-  };
-
-  template <class Derived>
-  struct Traits<Variational::FunctionBase<Derived>>
-  {
-    using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
-    using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
-  };
 }
 
 #endif

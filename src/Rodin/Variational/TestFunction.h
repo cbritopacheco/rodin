@@ -2,8 +2,17 @@
 #define RODIN_VARIATIONAL_TESTFUNCTION_H
 
 #include "Component.h"
-#include "GridFunction.h"
 #include "ShapeFunction.h"
+
+namespace Rodin::FormLanguage
+{
+  template <class FESType>
+  struct Traits<Variational::TestFunction<FESType>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = Variational::TestSpace;
+  };
+}
 
 namespace Rodin::Variational
 {
@@ -13,6 +22,9 @@ namespace Rodin::Variational
   {
     public:
       using FES = FESType;
+
+      static constexpr ShapeFunctionSpaceType Space = TestSpace;
+
       using Parent = ShapeFunction<TestFunction<FESType>, FESType, TestSpace>;
 
       constexpr

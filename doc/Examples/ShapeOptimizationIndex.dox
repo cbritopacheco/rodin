@@ -1,6 +1,6 @@
 /**
   @page examples-shapeoptimization-index Shape optimization examples
-  @brief Showcases the usage of Rodin in shape optimization applications
+  @brief Implementation of shape optimization algorithms
 
   - @subpage examples-shapeoptimization-simple_cantilever
   - @subpage examples-shapeoptimization-levelset_cantilever
