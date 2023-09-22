@@ -68,11 +68,13 @@ using namespace Rodin::Variational;
 const Geometry::Attribute Gamma = 1;
 int main(int, char**)
 {
-  Mesh Omega; Omega.load("../resources/mfem/poisson-example.mesh");
-  H1 Vh(Omega);
-  TrialFunction u(Vh); TestFunction  v(Vh);
+  Mesh Omega;
+  Omega = Omega.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh.getConnectivity().compute(1, 2);
+  P1 Vh(Omega);
+  TrialFunction u(Vh); TestFunction v(Vh);
   ScalarFunction f(1.0); ScalarFunction g(0.0);
-  Solver::UMFPack solver;
+  Solver::SparseLU solver;
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
