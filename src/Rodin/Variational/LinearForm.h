@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
 #include "TestFunction.h"
@@ -208,8 +209,16 @@ namespace Rodin::Variational
       Scalar operator()(const GridFunction<FES>& u) const
       {
         const auto& weights = u.getWeights();
+        if (!weights.has_value())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "GridFunction weights have not been calculated. "
+            << "Call" << Alert::Identifier::Function("setWeights()")
+            << " on the GridFunction object."
+            << Alert::Raise;
+        }
         assert(weights.has_value());
-        return getVector().dot(*weights);
+        return getVector().dot(weights.value());
       }
 
       void assemble() override;

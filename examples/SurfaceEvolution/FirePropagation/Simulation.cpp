@@ -226,7 +226,7 @@ class Environment
 
       std::cout << "dist\n";
       m_fireDist =
-        MMG::Distance(m_sfes).setInteriorDomain(Terrain::Burnt)
+        MMG::Distancer(m_sfes).setInteriorDomain(Terrain::Burnt)
                               .distance(m_topography);
 
       std::cout << "flame\n";
@@ -444,6 +444,7 @@ int main()
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - start;
     info << " | cpu: " << std::setw(4) << diff.count() << "s";
+    info << Alert::NewLine << topography.getElementCount();
     info.raise();
     t += dt;
   }

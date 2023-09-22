@@ -95,6 +95,7 @@ namespace Rodin::External::MMG
 
         auto outp = m_advect.tmpnam(".sol", "RodinMMG");
 
+        m_advect.logOutput();
         int retcode = 1;
         if (mesh.isSurface())
         {
@@ -140,7 +141,15 @@ namespace Rodin::External::MMG
         }
 
         if (retcode != 0)
-          Alert::Exception() << "MMG::Advect: ISCD::Advection invocation failed." << Alert::Raise;
+        {
+          assert(m_advect.getOutputLog().has_value());
+          auto* rdbuf = m_advect.getOutputLog()->rdbuf();
+          Alert::Exception()
+            << "MMG::Advect: ISCD::Advection failed."
+            << Alert::NewLine
+            << rdbuf
+            << Alert::Raise;
+        }
 
         m_ls.get().load(outp, IO::FileFormat::MEDIT);
 

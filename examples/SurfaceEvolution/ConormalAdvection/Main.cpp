@@ -11,8 +11,8 @@ using namespace Rodin::Variational;
 using namespace Rodin::External;
 
 constexpr Scalar T = M_PI / 2 - 0.1;
-constexpr Scalar dt = 0.01;
-constexpr Scalar hmax = 0.05;
+constexpr Scalar dt = 1;
+constexpr Scalar hmax = 1;
 constexpr Scalar hmin = 0.1 * hmax;
 constexpr size_t maxIt = 100;
 constexpr Geometry::Attribute sphereCap = 3;
@@ -43,7 +43,7 @@ int main()
 
     // Distance the subdomain
     GridFunction dist(vh);
-    dist = MMG::Distance(vh).setInteriorDomain(sphereCap)
+    dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
                              .distance(th);
 
     // Compute gradient of signed distance function

@@ -88,7 +88,7 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
-        if (d == meshDim - 1)
+        if (d == meshDim - 1) // Evaluating on a face
         {
           const auto& conn = mesh.getConnectivity();
           const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
@@ -111,14 +111,35 @@ namespace Rodin::Variational
             {
               Alert::MemberFunctionException(*this, __func__)
                 << "No trace domain provided: "
-                << Alert::Notation::Predicate(false, "getTraceDomain().size() == 0")
+                << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
                 << ". Grad at an interface with no trace domain is undefined."
+                << Alert::Raise;
+            }
+            else
+            {
+              for (auto& idx : inc)
+              {
+                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+                if (traceDomain.count(tracePolytope->getAttribute()))
+                {
+                  const Geometry::Point np(*tracePolytope, rc, pc);
+                  interpolate(out, np);
+                  return;
+                }
+              }
+
+              Alert::MemberFunctionException(*this, __func__)
+                << "Could not determine the trace polytope for the interface "
+                << Alert::Notation::Polytope(d, i)
+                << " with the provided trace domain "
+                << Alert::Notation::Set(traceDomain.begin(), traceDomain.end())
+                << '.'
                 << Alert::Raise;
             }
             return;
           }
         }
-        else
+        else // Evaluating on a cell
         {
           assert(d == mesh.getDimension());
           const auto& gf = this->getOperand();

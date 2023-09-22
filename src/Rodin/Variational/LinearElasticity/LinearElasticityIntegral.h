@@ -44,35 +44,7 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      void assemble(const Geometry::Polytope& polytope) override
-      {
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
-        const auto& trans = polytope.getTransformation();
-        const auto& fe = m_fes.get().getFiniteElement(d, idx);
-        const size_t n = fe.getCount();
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
-        const size_t order = 2 * n + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
-        auto& res = getMatrix();
-        res = Math::Matrix::Zero(n, n);
-        for (size_t i = 0; i < qf.getSize(); i++)
-        {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
-          for (size_t local = 0; local < fe.getCount(); local++)
-          {
-            const auto basis = fe.getJacobian(local);
-            const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-            const auto jacobian = p.getJacobianInverse().transpose() * basis(rc);
-            const auto divergence = jacobian.diagonal();
-
-            res.noalias() += p.getDistortion() * getLambda().getValue(p) * divergence * divergence.transpose();
-            assert(false);
-            // res += 0.5 * getMu().getValue(p) * jacobian * jacobian.transpose();
-
-          }
-        }
-      }
+      void assemble(const Geometry::Polytope& polytope) override;
 
       inline
       constexpr

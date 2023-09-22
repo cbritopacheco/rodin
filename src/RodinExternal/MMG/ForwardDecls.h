@@ -18,7 +18,7 @@ namespace Rodin::External::MMG
   class Optimize;
 
   template <class T>
-  class Distance;
+  class Distancer;
 
   class ISCDProcess;
 

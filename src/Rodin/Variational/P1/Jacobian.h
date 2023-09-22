@@ -35,11 +35,12 @@ namespace Rodin::Variational
    */
   template <class ... Ps>
   class Jacobian<GridFunction<P1<Math::Vector, Ps...>>> final
-    : public MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>
+    : public JacobianBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>, GridFunction<P1<Math::Vector, Ps...>>>
   {
     public:
       using Operand = GridFunction<P1<Math::Vector, Ps...>>;
-      using Parent = MatrixFunctionBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>>;
+      using Parent =
+        JacobianBase<Jacobian<GridFunction<P1<Math::Vector, Ps...>>>, Operand>;
 
       /**
        * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
@@ -47,84 +48,99 @@ namespace Rodin::Variational
        * @param[in] u Grid function to be differentiated
        */
       Jacobian(const Operand& u)
-        :  m_u(u)
+        :  Parent(u)
       {}
 
       Jacobian(const Jacobian& other)
-        : Parent(other),
-          m_u(other.m_u)
+        : Parent(other)
       {}
 
       Jacobian(Jacobian&& other)
-        : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+        : Parent(std::move(other))
       {}
 
-      inline
-      constexpr
-      size_t getRows() const
-      {
-        return m_u.get().getFiniteElementSpace().getVectorDimension();
-      }
-
-      inline
-      constexpr
-      size_t getColumns() const
-      {
-        return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
-      }
-
-      Math::Matrix getValue(const Geometry::Point& p) const
+      void interpolate(Math::Matrix& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
         const auto& i = polytope.getIndex();
-        const auto& gf = m_u.get();
-        const auto& fes = gf.getFiniteElementSpace();
-        const auto& vdim = fes.getVectorDimension();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
-        Math::Matrix jacobian(vdim, d);
-        Math::Matrix res(vdim, d);
-        res.setZero();
-        for (size_t local = 0; local < fe.getCount(); local++)
+        const auto& mesh = polytope.getMesh();
+        const size_t meshDim = mesh.getDimension();
+        if (d == meshDim - 1) // Evaluating on a face
         {
-          fe.getJacobian(local)(jacobian, rc);
-          res += gf.getValue(fes.getGlobalIndex({d, i}, local)).coeff(local % vdim) * jacobian;
+          const auto& conn = mesh.getConnectivity();
+          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& rc = p.getPhysicalCoordinates();
+          const auto& pc = p.getPhysicalCoordinates();
+          assert(inc.size() == 1 || inc.size() == 2);
+          if (inc.size() == 1)
+          {
+            const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
+            const Geometry::Point np(*tracePolytope, rc, pc);
+            interpolate(out, np);
+            return;
+          }
+          else
+          {
+            assert(inc.size() == 2);
+            const auto& traceDomain = this->getTraceDomain();
+            assert(traceDomain.size() > 0);
+            if (traceDomain.size() == 0)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No trace domain provided: "
+                << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+                << ". Grad at an interface with no trace domain is undefined."
+                << Alert::Raise;
+            }
+            else
+            {
+              for (auto& idx : inc)
+              {
+                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+                if (traceDomain.count(tracePolytope->getAttribute()))
+                {
+                  const Geometry::Point np(*tracePolytope, rc, pc);
+                  interpolate(out, np);
+                  return;
+                }
+              }
+
+              Alert::MemberFunctionException(*this, __func__)
+                << "Could not determine the trace polytope for the interface "
+                << Alert::Notation::Polytope(d, i)
+                << " with the provided trace domain "
+                << Alert::Notation::Set(traceDomain.begin(), traceDomain.end())
+                << '.'
+                << Alert::Raise;
+            }
+            return;
+          }
         }
-        return this->object(std::move(res)) * p.getJacobianInverse();
-      }
-
-      inline
-      constexpr
-      const Operand& getOperand() const
-      {
-        return m_u.get();
-      }
-
-      inline
-      constexpr
-      Jacobian& traceOf(Geometry::Attribute attr)
-      {
-        Parent::traceOf(attr);
-        return *this;
-      }
-
-      inline
-      constexpr
-      Jacobian& traceOf(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        Parent::traceOf(attrs);
-        return *this;
+        else // Evaluating on a cell
+        {
+          assert(d == mesh.getDimension());
+          const auto& gf = this->getOperand();
+          const auto& fes = gf.getFiniteElementSpace();
+          const auto& vdim = fes.getVectorDimension();
+          const auto& fe = fes.getFiniteElement(d, i);
+          const auto& rc = p.getReferenceCoordinates();
+          Math::Matrix jacobian(vdim, d);
+          Math::Matrix res(vdim, d);
+          res.setZero();
+          for (size_t local = 0; local < fe.getCount(); local++)
+          {
+            fe.getJacobian(local)(jacobian, rc);
+            res += gf.getValue(fes.getGlobalIndex({d, i}, local)).coeff(local % vdim) * jacobian;
+          }
+          out = res * p.getJacobianInverse();
+        }
       }
 
       inline Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
       }
-
-    private:
-      std::reference_wrapper<const Operand> m_u;
   };
 
   /**

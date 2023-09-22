@@ -12,6 +12,8 @@
 
   - @subpage guides-polytopes
 
+  - @subpage guides-connectivity
+
   @subsection guides-finite-elements-index Finite elements
 
   @subsection guides-variational-index Weak formulations and variational problems

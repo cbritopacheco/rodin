@@ -233,8 +233,27 @@ namespace Rodin::Variational
       constexpr
       Scalar operator()(const GridFunction<TrialFES>& u, const GridFunction<TestFES>& v) const
       {
-        assert(false);
-        return 0;
+        const auto& trialWeights = u.getWeights();
+        const auto& testWeights = v.getWeights();
+        if (!trialWeights.has_value())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Trial GridFunction weights have not been calculated. "
+            << "Call" << Alert::Identifier::Function("setWeights()")
+            << " on the GridFunction object."
+            << Alert::Raise;
+        }
+        assert(trialWeights.has_value());
+        if (!testWeights.has_value())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Test GridFunction weights have not been calculated. "
+            << "Call" << Alert::Identifier::Function("setWeights()")
+            << " on the GridFunction object."
+            << Alert::Raise;
+        }
+        assert(testWeights.has_value());
+        return (getOperator() * testWeights.value()).dot(trialWeights.value());
       }
 
       void assemble() override;

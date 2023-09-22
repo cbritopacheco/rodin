@@ -62,8 +62,22 @@ namespace Rodin::Alert
       ss << "[" << pred <<  "] = " << (v ? "true" : "false");
       return ss.str();
     }
-  }
 
+    template <class Iterator>
+    NotationT Set(Iterator first, Iterator last)
+    {
+      std::stringstream ss;
+      ss << "{ ";
+      for (Iterator it = first; it != last; ++it)
+      {
+        ss << *it;
+        if (std::next(it) != last)
+            ss << ", ";
+      }
+      ss << " }";
+      return ss.str();
+    }
+  }
 }
 
 #endif

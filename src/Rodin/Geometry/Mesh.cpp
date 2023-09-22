@@ -171,13 +171,16 @@ namespace Rodin::Geometry
     return build.finalize();
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::displace(const
-      Variational::GridFunction<Variational::P1<Math::Vector,
-      Context::Serial, Geometry::Mesh<Context::Serial>>>& u)
+  Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
+      const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
   {
-    assert(u.getFiniteElementSpace().getVectorDimension() == getSpaceDimension());
-    m_vertices += u.getData();
-    flush();
+    const size_t D = getDimension();
+    for (auto it = getFace(); it; ++it)
+    {
+      assert(it->getDimension() == D - 1);
+      const auto& inc = getConnectivity().getIncidence({ D - 1, D }, it->getIndex());
+      assert(inc.size() == 2);
+    }
     return *this;
   }
 
@@ -358,6 +361,11 @@ namespace Rodin::Geometry
       if (isBoundary(i))
         indices.push_back(i);
     }
+    if (indices.size() == 0)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Mesh has empty boundary." << Alert::Raise;
+    }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
@@ -405,7 +413,6 @@ namespace Rodin::Geometry
   {
     const size_t D = getDimension();
     const auto& conn = getConnectivity();
-    assert(conn.getIncidence(D - 1, D).size());
     if (conn.getIncidence(D - 1, D).size() == 0)
     {
       Alert::MemberFunctionException(*this, __func__)
@@ -413,6 +420,7 @@ namespace Rodin::Geometry
         << " has not been computed and is required to use this function."
         << Alert::Raise;
     }
+    assert(conn.getIncidence(D - 1, D).size());
     const auto& incidence = conn.getIncidence({D - 1, D}, faceIdx);
     assert(incidence.size() > 0);
     return incidence.size() == 1;
