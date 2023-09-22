@@ -10,7 +10,6 @@
 #include <cassert>
 #include <set>
 #include <utility>
-#include <mfem.hpp>
 
 #include "Rodin/FormLanguage/Base.h"
 
@@ -23,7 +22,7 @@
 #include "TrialFunction.h"
 #include "FiniteElement.h"
 #include "MatrixFunction.h"
-#include "GaussianQuadrature.h"
+#include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -55,20 +54,27 @@ namespace Rodin::Variational
   class Integral<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
-    : public GaussianQuadrature<Dot<
+    : public QuadratureRule<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
+      /// Type of the left operand of the dot product
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+
+      /// Type of the right operand of the dot product
       using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      /// Type of the integrand
       using Integrand = Dot<LHS, RHS>;
-      using Parent = GaussianQuadrature<Integrand>;
+
+      /// Parent class
+      using Parent = QuadratureRule<Integrand>;
 
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs an instance representing the following integral:
+       * Constructs an object representing the following integral:
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]
@@ -83,8 +89,7 @@ namespace Rodin::Variational
       /**
        * @brief Integral of the dot product of trial and test operators
        *
-       * Constructs the following object representing the following
-       * integral:
+       * Constructs the object representing the following integral:
        * @f[
        *   \int_\Omega A(u) : B(v) \ dx
        * @f]
@@ -137,11 +142,12 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class FES>
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public GaussianQuadrature<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
+    : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
-      using Parent = GaussianQuadrature<Integrand>;
+
+      using Parent = QuadratureRule<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
@@ -177,7 +183,7 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class RHSDerived, class FES>
   Integral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
-    -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
+    -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>>>;
 
   /**
    * @ingroup IntegralSpecializations
@@ -187,7 +193,10 @@ namespace Rodin::Variational
   class Integral<GridFunction<FES>> final : public FormLanguage::Base
   {
     public:
+      /// Type of integrand
       using Integrand = GridFunction<FES>;
+
+      /// Parent class
       using Parent = FormLanguage::Base;
 
       /**
@@ -196,46 +205,77 @@ namespace Rodin::Variational
       Integral(const Integrand& u)
         : m_u(u),
           m_v(u.getFiniteElementSpace()),
-          m_one(u.getFiniteElementSpace()),
-          m_lf(m_v),
-          m_assembled(false)
+          m_lf(m_v)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-        m_one = 1.0;
-        auto integrand = Dot(m_u.get(), m_v);
-        m_lf.from(
-            Integral<ShapeFunctionBase<decltype(integrand), FES, TestSpace>>(
-              std::move(integrand)));
       }
 
       Integral(const Integral& other)
         : Parent(other),
           m_u(other.m_u),
           m_v(other.m_u.get().getFiniteElementSpace()),
-          m_one(other.m_u.get().getFiniteElementSpace()),
-          m_lf(m_v),
-          m_assembled(false)
+          m_lf(m_v)
       {}
 
       Integral(Integral&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_v(std::move(other.m_v)),
-          m_one(std::move(other.m_one)),
-          m_lf(std::move(other.m_lf)),
-          m_assembled(std::move(other.m_assembled))
+          m_lf(std::move(other.m_lf))
       {}
 
       /**
-       * @brief Integrates the expression and returns the value
+       * @brief Integrates the expression and returns the value.
+       *
+       * Compute the value of the integral, caches it and returns it.
+       *
        * @returns Value of integral
        */
       inline
       Scalar compute()
       {
-        m_lf.assemble();
-        m_assembled = true;
-        return m_lf(m_one);
+        auto lfi = Variational::Integral(m_v);
+        if (m_attrs.size() > 0)
+          lfi.over(m_attrs);
+        m_lf.from(lfi).assemble();
+        return m_value.emplace(m_lf(m_u));
+      }
+
+      /**
+       * @brief Returns the value of the integral, computing it if necessary.
+       *
+       * If compute() has been called before, returns the value of the cached
+       * value. Otherwise, it will call compute() and return the newly computed
+       * value.
+       *
+       * @returns Value of integral
+       */
+      inline
+      operator Scalar()
+      {
+        if (!m_value.has_value())
+          return compute();
+        else
+          return m_value.value();
+      }
+
+      inline
+      Integral& over(Geometry::Attribute attr)
+      {
+        return over(FlatSet<Geometry::Attribute>{attr});
+      }
+
+      inline
+      Integral& over(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        m_attrs = attrs;
+        return *this;
+      }
+
+      inline
+      const std::optional<Scalar>& getValue() const
+      {
+        return m_value;
       }
 
       inline Integral* copy() const noexcept override
@@ -246,10 +286,11 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const GridFunction<FES>>   m_u;
       TestFunction<FES>                                 m_v;
-      GridFunction<FES>                                 m_one;
 
-      LinearForm<FES, Context::Serial, mfem::Vector>    m_lf;
-      bool m_assembled;
+      FlatSet<Geometry::Attribute> m_attrs;
+      LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
+
+      std::optional<Scalar> m_value;
   };
 
   template <class FES>

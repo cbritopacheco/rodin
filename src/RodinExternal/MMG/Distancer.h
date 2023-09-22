@@ -13,13 +13,12 @@
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/H1.h"
-#include "Rodin/Variational/GridFunction.h"
 
 #include "MMG5.h"
 #include "Common.h"
 #include "ForwardDecls.h"
 #include "ISCDProcess.h"
+#include "GridFunction.h"
 
 namespace Rodin::External::MMG
 {
@@ -43,14 +42,14 @@ namespace Rodin::External::MMG
   * @f]
   */
   template <>
-  class Distancer<Variational::H1<Scalar, Context::Serial>>
+  class Distancer<ScalarGridFunction::FES>
   {
     public:
      /**
       * @brief Creates a Distancer2D object with default values.
       * @param[in] fes Finite element space for the distance function
       */
-     Distancer(const Variational::H1<Scalar, Context::Serial>& fes)
+     Distancer(const ScalarGridFunction::FES& fes)
        : m_fes(fes),
          m_scale(true),
          m_distTheBoundary(false),
@@ -69,9 +68,9 @@ namespace Rodin::External::MMG
       *
       * @see distance(Mesh&) const
       */
-     Distancer& setInteriorDomain(const MaterialReference& ref)
+     Distancer& setInteriorDomain(const Geometry::Attribute& ref)
      {
-       return setInteriorDomain(std::set<MaterialReference>{ref});
+       return setInteriorDomain(FlatSet<Geometry::Attribute>{ref});
      }
 
      /**
@@ -85,7 +84,7 @@ namespace Rodin::External::MMG
       *
       * @see distance(Mesh&) const
       */
-     Distancer& setInteriorDomain(const std::set<MaterialReference>& refs)
+     Distancer& setInteriorDomain(const FlatSet<Geometry::Attribute>& refs)
      {
        m_interiorDomains = refs;
        return *this;
@@ -141,12 +140,11 @@ namespace Rodin::External::MMG
       * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
       * @returns Signed distance function representing @f$ \Omega @f$.
       */
-     Variational::GridFunction<Variational::H1<Scalar, Context::Serial>> distance(
-        const Geometry::Mesh<Context::Serial>& box)
+     ScalarGridFunction distance(const Geometry::Mesh<Context::Serial>& box)
      {
-       if (&box != &m_fes.get().getMesh())
+       if (box != m_fes.get().getMesh())
        {
-         Alert::Exception()
+         Alert::MemberFunctionException(*this, __func__)
            << "Mesh must be the same one as that of the finite element space."
            << Alert::Raise;
        }
@@ -162,7 +160,7 @@ namespace Rodin::External::MMG
          if (m_interiorDomains->size() > 0)
          {
            paramf << "InteriorDomains\n"
-                  << m_interiorDomains->size() << "\n\n";
+             << m_interiorDomains->size() << "\n\n";
            for (const auto& ref : *m_interiorDomains)
              paramf << ref << "\n";
          }
@@ -172,13 +170,13 @@ namespace Rodin::External::MMG
        if (box.isSurface())
        {
          retcode = m_mshdist.run(
-            boxp.string(),
-            "-dom",
-            "-surf",
-            "-fmm",
-            "-ncpu", m_ncpu,
-            "-v 0"
-            );
+             boxp.string(),
+             "-dom",
+             "-surf",
+             "-fmm",
+             "-ncpu", m_ncpu,
+             "-v 0"
+             );
        }
        else
        {
@@ -190,7 +188,7 @@ namespace Rodin::External::MMG
                "-fmm",
                "-ncpu", m_ncpu,
                "-v 0"
-              );
+               );
          }
          else
          {
@@ -202,9 +200,9 @@ namespace Rodin::External::MMG
                );
          }
        }
-       Variational::GridFunction res(m_fes.get());
+       ScalarGridFunction res(m_fes.get());
        if (retcode != 0)
-         Alert::Exception("ISCD::Mshdist invocation failed.").raise();
+         Alert::MemberFunctionException(*this, __func__) << "ISCD::Mshdist invocation failed." << Alert::Raise;
        else
          res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
        return res;
@@ -225,7 +223,7 @@ namespace Rodin::External::MMG
       * @note The contour mesh is allowed to contain a volume part, in which
       * case only the edge (S) or triangle (3D) information will be retained.
       */
-     Variational::GridFunction<Variational::H1<Scalar, Context::Serial>> distance(
+     ScalarGridFunction distance(
          const Geometry::Mesh<Context::Serial>& box,
          const Geometry::Mesh<Context::Serial>& contour)
      {
@@ -238,29 +236,29 @@ namespace Rodin::External::MMG
        int retcode = 1;
        if (box.isSurface())
        {
-        retcode = m_mshdist.run(
-           boxp.string(), contourp.string(),
-           "-surf",
-           m_scale ? "" : "-noscale",
-           "-ncpu", m_ncpu,
-           "-v 0"
-           );
+         retcode = m_mshdist.run(
+             boxp.string(), contourp.string(),
+             "-surf",
+             m_scale ? "" : "-noscale",
+             "-ncpu", m_ncpu,
+             "-v 0"
+             );
        }
        else
        {
-        retcode = m_mshdist.run(
-           boxp.string(), contourp.string(),
-           m_distTheBoundary ? "-surf" : "",
-           m_scale ? "" : "-noscale",
-           "-ncpu", m_ncpu,
-           "-v 0");
+         retcode = m_mshdist.run(
+             boxp.string(), contourp.string(),
+             m_distTheBoundary ? "-surf" : "",
+             m_scale ? "" : "-noscale",
+             "-ncpu", m_ncpu,
+             "-v 0");
        }
 
        Variational::GridFunction res(m_fes.get());
        if (retcode != 0)
-        Alert::Exception("ISCD::Mshdist invocation failed.").raise();
+         Alert::MemberFunctionException(*this, __func__) << "ISCD::Mshdist invocation failed." << Alert::Raise;
        else
-        res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
+         res.load(boxp.replace_extension(".sol"), IO::FileFormat::MEDIT);
        return res;
      }
 
@@ -271,16 +269,15 @@ namespace Rodin::External::MMG
      }
 
     private:
-     std::reference_wrapper<const Variational::H1<Scalar, Context::Serial>> m_fes;
+     std::reference_wrapper<const ScalarGridFunction::FES> m_fes;
      bool m_scale;
      bool m_distTheBoundary;
      unsigned int m_ncpu;
      ISCDProcess m_mshdist;
-     std::optional<std::set<MaterialReference>> m_interiorDomains;
+     std::optional<FlatSet<Geometry::Attribute>> m_interiorDomains;
   };
 
-  Distancer(const Variational::H1<Scalar, Context::Serial>&)
-    -> Distancer<Variational::H1<Scalar, Context::Serial>>;
+  Distancer(const ScalarGridFunction::FES&) -> Distancer<ScalarGridFunction::FES>;
 
   // /**
   //  * @brief Distancer specialization for redistancing a level set function.

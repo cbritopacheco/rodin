@@ -8,22 +8,37 @@
 #include <Rodin/Alert.h>
 
 using namespace Rodin;
-using namespace Geometry;
+using namespace Rodin::Geometry;
+
+static constexpr Attribute trimAttribute = 2;
 
 int main(int, char**)
 {
-  const char* filename = "../resources/mfem/ccl-2d-example.mesh";
+  size_t n = 6;
   Mesh mesh;
-  mesh.load(filename);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 2);
+  for (auto it = mesh.getElement(); !it.end(); ++it)
+  {
+    for (auto vit = it->getVertex(); !vit.end(); ++vit)
+    {
+      const auto v = *vit;
+      if (2 <= v.x() && v.x() <= 3 && 2 <= v.y() && v.y() <= 3)
+      {
+        mesh.setAttribute({ it->getDimension(), it->getIndex() }, trimAttribute);
+        break;
+      }
+    }
+  }
 
-  Alert::Info() << "Extracting mesh..." << Alert::Raise;
+  for (auto it = mesh.getFace(); !it.end(); ++it)
+    mesh.setAttribute({ it->getDimension(), it->getIndex() }, it->getIndex() + 1);
 
-  // auto trimmed =
-  //  mesh.extract(
-  //    mesh.where([] (const Element& el) { return el.getAttribute() == 1; }));
+  auto trimmed = mesh.trim(trimAttribute);
+  auto skin = mesh.skin();
 
-  // Alert::Info() << "Saved mesh to trimmed.mesh" << Alert::Raise;
-
-  // trimmed.save("trimmed.mesh");
+  skin.save("Skin.mesh", IO::FileFormat::MEDIT);
+  trimmed.save("Trimmed.mesh", IO::FileFormat::MEDIT);
 }
 

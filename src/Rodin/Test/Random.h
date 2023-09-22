@@ -7,6 +7,7 @@
 #ifndef RODIN_TEST_RANDOM_H
 #define RODIN_TEST_RANDOM_H
 
+#include "Random/RandomFloat.h"
 #include "Random/RandomInteger.h"
 
 #endif

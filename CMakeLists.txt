@@ -10,19 +10,28 @@ endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 project(Rodin LANGUAGES CXX C)
 
 # ---- Options ---------------------------------------------------------------
-option(RODIN_BUILD_SRC          "Build the Rodin source code"           ON)
-option(RODIN_BUILD_EXAMPLES     "Build the Rodin examples"              ON)
-option(RODIN_BUILD_UNIT_TESTS   "Build Rodin unit tests"                OFF)
-option(RODIN_BUILD_BENCHMARKS   "Build Rodin benchmarks"                OFF)
-option(RODIN_BUILD_DOC          "Build the Rodin documentation"         OFF)
-option(RODIN_USE_MPI            "Use Rodin with MPI support"            OFF)
-option(RODIN_USE_OPENMP         "Use Rodin with OpenMP support"         OFF)
-option(RODIN_USE_SUITESPARSE    "Use Rodin with SuiteSparse support"    ON)
-option(RODIN_USE_MCSS           "Build documentation with m.css"        OFF)
-option(RODIN_WITH_PLOT          "Build the Rodin::Plot module"          OFF)
-option(RODIN_WITH_PY            "Build Python bindings"                 OFF)
-option(RODIN_SILENCE_WARNINGS   "Silence warnings outputted by Rodin"   OFF)
-option(RODIN_CODE_COVERAGE      "Compile with code coverage flags"      OFF)
+option(RODIN_BUILD_SRC              "Build the Rodin source code"               ON)
+option(RODIN_BUILD_EXAMPLES         "Build the Rodin examples"                  ON)
+option(RODIN_BUILD_UNIT_TESTS       "Build Rodin unit tests"                    OFF)
+option(RODIN_BUILD_BENCHMARKS       "Build Rodin benchmarks"                    OFF)
+option(RODIN_BUILD_DOC              "Build the Rodin documentation"             OFF)
+option(RODIN_WITH_PLOT              "Build the Rodin::Plot module"              OFF)
+option(RODIN_WITH_PY                "Build Python bindings"                     OFF)
+option(RODIN_USE_MCSS               "Build documentation with m.css"            OFF)
+option(RODIN_USE_MPI                "Use Rodin with MPI support"                OFF)
+option(RODIN_USE_OPENMP             "Use Rodin with OpenMP support"             OFF)
+option(RODIN_USE_UMFPACK            "Use Rodin with UMFPACK support"            OFF)
+option(RODIN_USE_PASTIX             "Use Rodin with PaStiX support"             OFF)
+option(RODIN_USE_KLU                "Use Rodin with KLU support"                OFF)
+option(RODIN_USE_SUPERLU            "Use Rodin with SuperLU support"            OFF)
+option(RODIN_USE_SPQR               "Use Rodin with SPQR support"               OFF)
+option(RODIN_USE_PARDISO            "Use Rodin with Pardiso support"            OFF)
+option(RODIN_USE_APPLE_ACCELERATE   "Use Rodin with Apple Accelerate support"   OFF)
+option(RODIN_SILENCE_WARNINGS       "Silence warnings outputted by Rodin"       OFF)
+option(RODIN_SILENCE_EXCEPTIONS     "Silence exceptions thrown by Rodin"        ON)
+option(RODIN_CODE_COVERAGE          "Compile with code coverage flags"          OFF)
+option(RODIN_LTO                    "Compile with link time optimization"       OFF)
+option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
@@ -50,13 +59,19 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 
 # ---- Set compile options for all the submodules ----------------------------
+rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
+
 if (${CMAKE_BUILD_TYPE} MATCHES Release)
   rodin_add_compile_options(
     LANG CXX C
     OPTIONS
     -w
     -O3
-    -march=native)
+    -DNDEBUG
+    -march=native
+    -fvectorize
+    -fslp-vectorize
+    -ffp-contract=fast)
 elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
   rodin_add_compile_options(
     LANG CXX C
@@ -68,6 +83,10 @@ else()
   message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
 endif()
 
+if (RODIN_LTO)
+  rodin_add_compile_options(LANG CXX C OPTIONS -flto)
+endif()
+
 if (RODIN_CODE_COVERAGE)
   include(CodeCoverage)
   append_coverage_compiler_flags()
@@ -75,30 +94,8 @@ if (RODIN_CODE_COVERAGE)
 endif()
 
 if (RODIN_BUILD_SRC)
-  set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
+  # set(MFEM_THREAD_SAFE ON CACHE BOOL TRUE FORCE)
   # ---- Find and build dependencies -----------------------------------------
-  if (RODIN_USE_SUITESPARSE)
-    set(MFEM_USE_SUITESPARSE ON CACHE BOOL TRUE FORCE)
-  endif()
-
-  if (RODIN_USE_MPI)
-    set(MFEM_USE_MPI ON CACHE BOOL TRUE FORCE)
-    find_package(MPI REQUIRED)
-  endif()
-
-  if (RODIN_USE_OPENMP)
-    find_package(OpenMP REQUIRED)
-    set(MFEM_USE_OPENMP ON CACHE BOOL TRUE FORCE)
-  endif()
-
-  # ---- MFEM ----
-  message (STATUS "Configuring mfem...")
-  set(BUILD_DOC OFF CACHE BOOL "" FORCE)
-  add_subdirectory(third-party/mfem EXCLUDE_FROM_ALL)
-  find_package(MFEM
-    REQUIRED PATHS "${PROJECT_BINARY_DIR}/third-party/mfem"
-    NO_DEFAULT_PATH)
-
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
@@ -175,9 +172,10 @@ if (RODIN_BUILD_SRC)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
-
     if (RODIN_BUILD_BENCHMARKS)
-      # set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
+      if (RODIN_LTO)
+        set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
+      endif()
       set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
       set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
       add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
@@ -205,4 +203,8 @@ if (RODIN_BUILD_DOC)
   add_subdirectory(doc)
 endif()
 
-# feature_summary(INCLUDE_QUIET_PACKAGES WHAT ALL)
+if (RODIN_FEATURE_SUMMARY)
+  message(STATUS "Rodin feature summary:")
+  include(FeatureSummary)
+  feature_summary(INCLUDE_QUIET_PACKAGES WHAT ALL)
+endif()

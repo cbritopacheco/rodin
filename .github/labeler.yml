@@ -4,6 +4,12 @@ docs:
 examples:
 - any: ['examples/**/*']
 
+benchmarks:
+- any: ['tests/benchmarks/**/*']
+
+unit-tests:
+- any: ['tests/unit/**/*']
+
 cmake:
 - any: ['cmake/**/*']
 
@@ -22,11 +28,23 @@ solver:
 utility:
 - any: ['src/Rodin/Utility/**/*']
 
-core:
-- any: ['src/Rodin/Core/**/*']
+context:
+- any: ['src/Rodin/Context/**/*']
+
+form-language:
+- any: ['src/Rodin/FormLanguage/**/*']
+
+math:
+- any: ['src/Rodin/Math/**/*']
+
+io:
+- any: ['src/Rodin/IO/**/*']
 
 alerts:
 - any: ['src/Rodin/Alert/**/*']
+
+qf:
+- any: ['src/Rodin/QF/**/*']
 
 plot:
 - any: ['src/Rodin/Plot/**/*']

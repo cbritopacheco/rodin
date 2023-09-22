@@ -11,13 +11,11 @@
 #include <variant>
 #include <type_traits>
 
-#include <mfem.hpp>
-
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 
 #include "Rodin/Geometry/Mesh.h"
-#include "Rodin/Geometry/Simplex.h"
+#include "Rodin/Geometry/Polytope.h"
 
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/Traits.h"
@@ -28,13 +26,57 @@
 #include "RangeType.h"
 #include "RangeShape.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class Derived>
+  struct Traits<Variational::FunctionBase<Derived>>
+  {
+    using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+    using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
+  };
+}
+
 namespace Rodin::Variational
 {
+  namespace Internal
+  {
+    template <typename T, class ... Args>
+    struct HasGetValueMethod
+    {
+      template<typename U, typename = decltype(std::declval<U>().getValue(std::declval<Args>()...))>
+      static std::true_type Test(int);
+
+      template<typename U>
+      static std::false_type Test(...);
+
+      using Type = decltype(Test<T>(0));
+      static constexpr bool Value = Type::value;
+    };
+
+    template <typename T, typename... Args>
+    struct HasGetValueMethod<T, Args&...>
+    {
+      template <typename U, typename = decltype(std::declval<U>().myMethodRef(std::declval<Args&>()...))>
+      static std::true_type Test(int);
+
+      template <typename U>
+      static std::false_type Test(...);
+
+      using Type = decltype(Test<T>(0));
+      static constexpr bool Value = Type::value;
+    };
+  }
+
+  /**
+   * @brief Base class for functions defined on a mesh.
+   */
   template <class Derived>
   class FunctionBase : public FormLanguage::Base
   {
     public:
       using Parent = FormLanguage::Base;
+
+      using TraceDomain = FlatSet<Geometry::Attribute>;
 
       FunctionBase() = default;
 
@@ -68,7 +110,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const std::set<Geometry::Attribute>& getTraceDomain() const
+      const TraceDomain& getTraceDomain() const
       {
         return m_traceDomain;
       }
@@ -119,6 +161,9 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Evaluates the function on a Point belonging to the mesh.
+       */
       inline
       constexpr
       auto getValue(const Geometry::Point& p) const
@@ -126,9 +171,38 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Vector&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        if constexpr (Internal::HasGetValueMethod<Derived, Math::Matrix&>::Value)
+        {
+          return static_cast<const Derived&>(*this).getValue(res, p);
+        }
+        else
+        {
+          res = getValue(p);
+        }
+      }
+
       /**
-       * @brief Evaluates the function on a vertex of the mesh.
-       * @param[in] v Vertex belonging to the mesh
+       * @brief Evaluates the function on a Point belonging to the mesh.
+       *
+       * This calls the function get getValue(const Geometry::Point&).
        */
       inline
       constexpr
@@ -141,7 +215,7 @@ namespace Rodin::Variational
        * @brief Sets an attribute which will be interpreted as the domain to
        * trace.
        *
-       * Convenience function to call traceOf(std::set<int>) with only one
+       * Convenience function to call traceOf(FlatSet<int>) with only one
        * attribute.
        *
        * @returns Reference to self (for method chaining)
@@ -150,13 +224,13 @@ namespace Rodin::Variational
       constexpr
       FunctionBase& traceOf(Geometry::Attribute attr)
       {
-        m_traceDomain = std::set<Geometry::Attribute>{attr};
+        m_traceDomain = FlatSet<Geometry::Attribute>{attr};
         return *this;
       }
 
       inline
       constexpr
-      FunctionBase& traceOf(const std::set<Geometry::Attribute>& attr)
+      FunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         m_traceDomain = attr;
         return *this;
@@ -168,7 +242,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::set<Geometry::Attribute> m_traceDomain;
+      FlatSet<Geometry::Attribute> m_traceDomain;
   };
 }
 

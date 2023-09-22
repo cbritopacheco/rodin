@@ -14,10 +14,8 @@
 
 #include "Variational/ForwardDecls.h"
 
-#include "Variational/H1.h"
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
-#include "Variational/FiniteElementCollection.h"
 
 #include "Variational/TrialFunction.h"
 #include "Variational/TestFunction.h"
@@ -28,6 +26,7 @@
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
 
+#include "Variational/Abs.h"
 #include "Variational/Dot.h"
 #include "Variational/Pow.h"
 #include "Variational/Sum.h"
@@ -35,7 +34,6 @@
 #include "Variational/Minus.h"
 #include "Variational/Division.h"
 #include "Variational/UnaryMinus.h"
-#include "Variational/Composition.h"
 
 #include "Variational/GT.h"
 #include "Variational/LT.h"
@@ -61,6 +59,7 @@
 #include "Variational/Max.h"
 #include "Variational/Min.h"
 
+#include "Variational/Sine.h"
 #include "Variational/Cosine.h"
 #include "Variational/Tangent.h"
 
@@ -77,5 +76,8 @@
 #include "Variational/BooleanFunction.h"
 
 #include "Variational/DirichletBC.h"
+#include "Variational/PeriodicBC.h"
+
+#include "Variational/P1.h"
 
 #endif

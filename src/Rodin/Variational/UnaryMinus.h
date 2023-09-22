@@ -17,6 +17,16 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class NestedDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -35,6 +45,7 @@ namespace Rodin::Variational
     public:
       using Operand = FunctionBase<NestedDerived>;
       using Parent = FunctionBase<UnaryMinus<Operand>>;
+      using OperandRange = typename FormLanguage::Traits<Operand>::RangeType;
 
       constexpr
       UnaryMinus(const Operand& op)
@@ -74,6 +85,24 @@ namespace Rodin::Variational
         return -1 * this->object(getOperand().getValue(p));
       }
 
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsVectorRange<OperandRange>::Value);
+        getOperand().getValue(res, p);
+        res *= -1;
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsMatrixRange<OperandRange>::Value);
+        getOperand().getValue(res, p);
+        res *= -1;
+      }
+
       inline UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
@@ -94,11 +123,14 @@ namespace Rodin::Variational
     return UnaryMinus(op);
   }
 
-  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  class UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>> final
-    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
+  template <class NestedDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>> final
+    : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FESType, SpaceType>>>
   {
     public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using Operand = ShapeFunctionBase<NestedDerived, FES, Space>;
       using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
@@ -143,7 +175,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -182,7 +214,7 @@ namespace Rodin::Variational
   }
 
   template <>
-  class UnaryMinus<LinearFormIntegratorBase> : public LinearFormIntegratorBase
+  class UnaryMinus<LinearFormIntegratorBase> final : public LinearFormIntegratorBase
   {
     public:
       using Parent = LinearFormIntegratorBase;
@@ -196,7 +228,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      Math::Vector getVector(const Geometry::Simplex& element) const override;
+      void assemble(const Geometry::Polytope& element) override;
 
       UnaryMinus* copy() const noexcept override
       {
@@ -222,7 +254,7 @@ namespace Rodin::Variational
 
       Region getRegion() const override;
 
-      Math::Matrix getMatrix(const Geometry::Simplex& element) const override;
+      void assemble(const Geometry::Polytope& element) override;
 
       UnaryMinus* copy() const noexcept override
       {

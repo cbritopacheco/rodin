@@ -19,7 +19,7 @@ namespace Rodin::Variational
    */
 
   /**
-   * @ingroup DivSpecializations
+   * @ingroup DivisionSpecializations
    * @brief Division of a FunctionBase by a FunctionBase.
    */
   template <class LHSDerived, class RHSDerived>
@@ -30,6 +30,7 @@ namespace Rodin::Variational
       using Parent = FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
       using LHS = FunctionBase<LHSDerived>;
       using RHS = FunctionBase<RHSDerived>;
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
       using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
       static_assert(FormLanguage::IsScalarRange<RHSRange>::Value);
@@ -85,6 +86,24 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
+        getLHS().getValue(res, p);
+        res /= getRHS().getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValueByReference(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
+        getLHS().getValue(res, p);
+        res /= getRHS().getValue(p);
       }
 
       inline

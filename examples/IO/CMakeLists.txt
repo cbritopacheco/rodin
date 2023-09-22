@@ -1,10 +1,6 @@
-add_executable(Gmsh Gmsh.cpp)
-target_link_libraries(Gmsh
+add_executable(RodinIOMFEM MFEM.cpp)
+target_link_libraries(RodinIOMFEM
   PUBLIC
-  Rodin::Geometry)
-
-add_executable(Medit Medit.cpp)
-target_link_libraries(Medit
-  PUBLIC
-  Rodin::Geometry)
+  Rodin::IO
+  Rodin::Variational)
 

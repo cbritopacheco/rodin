@@ -1,112 +1,194 @@
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
-#include <vector>
-#include <utility>
+#include "ForwardDecls.h"
 
-#include "Rodin/Math.h"
-#include "Rodin/Geometry.h"
+#include "Rodin/QF/QFGG.h"
 
-#include "MFEM.h"
+#include "Dot.h"
+#include "ShapeFunction.h"
+#include "LinearFormIntegrator.h"
+#include "BilinearFormIntegrator.h"
 
 namespace Rodin::Variational
 {
-  class QuadratureRule
+  /**
+   * @defgroup QuadratureRuleSpecializations QuadratureRule Template Specializations
+   * @brief Template specializations of the QuadratureRule class.
+   *
+   * @see QuadratureRule
+   */
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Approximation of the integral of the the dot product between a
+   * trial shape function and a test shape function.
+   *
+   * Represents the quadrature rule approximation of an integral:
+   * @f[
+   *  \int_{\mathcal{R}_h} \mathrm{Integrand} \ dx \approx \sum_{i = 1}^{n}
+   *  w_i \ \mathrm{Integrand} (x_i)
+   * @f]
+   * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
+   * @f$, the quadrature point @f$ x_i @f$ has an associated weight @f$ w_i @f$
+   * and @f$ \mathrm{Integrand}(x_i) @f$ is the value of the integrand at the
+   * quadrature point.
+   */
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class QuadratureRule<
+    Dot<
+      ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+        : public BilinearFormIntegratorBase
   {
-    using Key = std::pair<Geometry::Type, size_t>;
-    static std::map<Key, QuadratureRule> s_rules;
-
-    struct ValueType
-    {
-      Scalar weight;
-      Math::Vector point;
-    };
-
     public:
+      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
 
-      static const QuadratureRule& get(Geometry::Type geometry, size_t order)
-      {
-        Key key{geometry, order};
-        auto search = s_rules.lower_bound(key);
-        if (search != s_rules.end() && !(s_rules.key_comp()(key, search->first)))
-        {
-          // key already exists
-          return search->second;
-        }
-        else
-        {
-          size_t dim;
-          switch (geometry)
-          {
-            case Geometry::Type::Point:
-            {
-              dim = 0;
-              break;
-            }
-            case Geometry::Type::Segment:
-            {
-              dim = 1;
-              break;
-            }
-            case Geometry::Type::Square:
-            case Geometry::Type::Triangle:
-            {
-              dim = 2;
-              break;
-            }
-            case Geometry::Type::Cube:
-            case Geometry::Type::Prism:
-            case Geometry::Type::Pyramid:
-            case Geometry::Type::Tetrahedron:
-            {
-              dim = 3;
-              break;
-            }
-          }
-          const mfem::IntegrationRule& ir = mfem::IntRules.Get(static_cast<int>(geometry), order);
-          auto it = s_rules.insert(search, {key, QuadratureRule(ir, dim)});
-          return it->second;
-        }
-      }
+      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
-      QuadratureRule(const mfem::IntegrationRule& ir, size_t dim)
-      {
-        m_points.reserve(ir.GetNPoints());
-        for (int i = 0; i < ir.GetNPoints(); i++)
-        {
-          const mfem::IntegrationPoint& ip = ir.IntPoint(i);
-          m_points.push_back(ValueType{ip.weight, Internal::ip2vec(ip, dim)});
-        }
-      }
+      using Integrand = Dot<LHS, RHS>;
 
-      QuadratureRule(const QuadratureRule&) = default;
+      using Parent = BilinearFormIntegratorBase;
 
-      QuadratureRule(QuadratureRule&&) = default;
+      QuadratureRule(const LHS& lhs, const RHS& rhs)
+        : QuadratureRule(Dot(lhs, rhs))
+      {}
+
+      QuadratureRule(const Integrand& prod)
+        : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
+          m_prod(prod.copy())
+      {}
+
+      QuadratureRule(const QuadratureRule& other)
+        : BilinearFormIntegratorBase(other),
+          m_prod(other.m_prod->copy()),
+          m_mat(other.m_mat)
+      {}
+
+      QuadratureRule(QuadratureRule&& other)
+        : BilinearFormIntegratorBase(std::move(other)),
+          m_prod(std::move(other.m_prod)),
+          m_mat(std::move(other.m_mat))
+      {}
 
       inline
-      size_t size() const
+      constexpr
+      const Integrand& getIntegrand() const
       {
-        return m_points.size();
+        assert(m_prod);
+        return *m_prod;
       }
 
-      inline
-      Scalar getWeight(size_t i) const
+      void assemble(const Geometry::Polytope& polytope) final override
       {
-        assert(i < m_points.size());
-        return m_points[i].weight;
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        auto& integrand = *m_prod;
+        const auto& trial = integrand.getLHS();
+        const auto& test = integrand.getRHS();
+        const auto& trans = polytope.getTransformation();
+        const auto& trialfes = trial.getFiniteElementSpace();
+        const auto& testfes = test.getFiniteElementSpace();
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
+        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
+        const size_t order = trialfe.getCount() + testfe.getCount() + vc;
+        const QF::QFGG qf(order, polytope.getGeometry());
+        auto& res = getMatrix();
+        res.resize(test.getDOFs(polytope), trial.getDOFs(polytope));
+        res.setZero();
+        for (size_t i = 0; i < qf.getSize(); i++)
+        {
+          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          integrand.assemble(p);
+          res.noalias() += qf.getWeight(i) * p.getDistortion() * integrand.getMatrix();
+        }
       }
 
-      inline
-      const Math::Vector& getPoint(size_t i) const
-      {
-        assert(i < m_points.size());
-        return m_points[i].point;
-      }
+      virtual Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::vector<ValueType> m_points;
+      std::unique_ptr<Integrand> m_prod;
+
+      Math::Matrix m_mat;
+  };
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Approximation of the integral of a test shape function.
+   */
+  template <class NestedDerived, class FES>
+  class QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
+    : public LinearFormIntegratorBase
+  {
+    public:
+      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+      using Parent = LinearFormIntegratorBase;
+
+      template <class LHSDerived, class RHSDerived>
+      constexpr
+      QuadratureRule(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+        : QuadratureRule(Dot(lhs, rhs))
+      {}
+
+      constexpr
+      QuadratureRule(const Integrand& integrand)
+        : Parent(integrand.getLeaf()),
+          m_integrand(integrand.copy())
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy())
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand))
+      {}
+
+      inline
+      constexpr
+      const Integrand& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      void assemble(const Geometry::Polytope& polytope) final override
+      {
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& trans = polytope.getTransformation();
+        const auto& integrand = getIntegrand();
+        const auto& fes = integrand.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
+        assert(integrand.getRangeType() == RangeType::Scalar);
+        const size_t order = fe.getCount() + vc;
+        const QF::QFGG qf(order, polytope.getGeometry());
+        auto& res = getVector();
+        res = Math::Vector::Zero(integrand.getDOFs(polytope));
+        for (size_t i = 0; i < qf.getSize(); i++)
+        {
+          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          auto basis = integrand.getTensorBasis(p);
+          for (size_t local = 0; local < basis.getDOFs(); local++)
+            res.coeffRef(local) += qf.getWeight(i) * p.getDistortion() * basis(local);
+        }
+      }
+
+      virtual Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<Integrand> m_integrand;
   };
 }
 
 #endif
-

@@ -57,4 +57,20 @@ namespace Rodin::Variational
     res.m_essBdr.add(dbcs);
     return res;
   }
+
+  ProblemBody operator+(
+      const ProblemBody& pb, const PeriodicBCBase& pbc)
+  {
+    ProblemBody res(pb);
+    res.m_periodicBdr.add(pbc);
+    return res;
+  }
+
+  ProblemBody operator+(
+      const ProblemBody& pb, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  {
+    ProblemBody res(pb);
+    res.m_periodicBdr.add(pbcs);
+    return res;
+  }
 }

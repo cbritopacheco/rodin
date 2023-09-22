@@ -13,6 +13,9 @@ namespace Rodin::Variational::FormLanguage
 
   template <class T>
   class List;
+
+  template <class ... Args>
+  struct Traits;
 }
 
 #endif

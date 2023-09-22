@@ -19,18 +19,16 @@ using namespace Rodin::Variational;
 
 namespace RodinBenchmark
 {
-  struct Poisson : public benchmark::Fixture
+  struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {
     public:
       static constexpr const Geometry::Attribute dirichletAttr = 1;
-      static constexpr const char* filename = "mfem/StarSquare.mfem.mesh";
 
       void SetUp(const benchmark::State&)
       {
-        meshfile = boost::filesystem::path(RODIN_RESOURCES_DIR);
-        meshfile.append(filename);
-        mesh.load(meshfile);
-        vhPtr.reset(new H1<Scalar, Context::Serial>(mesh));
+        mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+        mesh.getConnectivity().compute(1, 2);
+        vhPtr.reset(new P1<Scalar, Context::Serial>(mesh));
       }
 
       void TearDown(const benchmark::State&)
@@ -38,10 +36,10 @@ namespace RodinBenchmark
 
       boost::filesystem::path meshfile;
       Mesh<Context::Serial> mesh;
-      std::unique_ptr<H1<Scalar, Context::Serial>> vhPtr;
+      std::unique_ptr<P1<Scalar, Context::Serial>> vhPtr;
   };
 
-  BENCHMARK_F(Poisson, Assembly_ConstantCoefficient_ConstantSource)
+  BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
   (benchmark::State& st)
   {
     assert(vhPtr);

@@ -7,49 +7,51 @@
 #ifndef RODIN_ALERT_EXCEPTION_H
 #define RODIN_ALERT_EXCEPTION_H
 
+#define RODIN_ALERT_EXCEPTION_PREFIX "Error"
+
 #include <exception>
 
-#include "Alert.h"
+#include "Message.h"
 
 namespace Rodin::Alert
 {
+  class ExceptionPrefix : public MessagePrefix<RedT>
+  {
+    public:
+      using Parent = MessagePrefix<RedT>;
+
+      ExceptionPrefix()
+        : Parent(RODIN_ALERT_EXCEPTION_PREFIX)
+      {}
+  };
+
   /**
    * @brief Derived Alert class representing an exception.
    *
    * Represents an alert which, when raised, will terminate the program after
    * outputting a message with the reason why.
    */
-  class Exception : public std::exception, public Alert
+  class Exception : public std::exception, public Message<ExceptionPrefix>
   {
     public:
+      using Parent = Message<ExceptionPrefix>;
+
       /**
        * @brief Constructs an Exception with an empty message.
        */
-      Exception() = default;
+      Exception();
+
+      Exception(std::ostream& os);
 
       /**
-       * @brief Constructs an Exception with the given message.
-       * @param[in] what Description or reason for the Exception being raised.
+       * @brief Copy constructor.
        */
-      Exception(const std::string& what);
+      Exception(const Exception& other);
 
       /**
-       * @brief Copies the Exception message.
+       * @brief Move constructor.
        */
-      Exception(const Exception& other)
-        :  std::exception(other),
-          Alert(other)
-      {}
-
-      Exception(Exception&& other)
-        :  std::exception(std::move(other)),
-          Alert(std::move(other))
-      {}
-
-      const char* what() const noexcept override
-      {
-        return Alert::what();
-      }
+      Exception(Exception&& other);
 
       /**
        * @brief Raises the exception to the user.
@@ -58,6 +60,8 @@ namespace Rodin::Alert
        * std::abort.
        */
       virtual void raise() const override;
+
+      const char* what() const noexcept override;
   };
 }
 

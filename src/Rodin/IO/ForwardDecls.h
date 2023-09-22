@@ -42,7 +42,28 @@ namespace Rodin::IO
   template <FileFormat fmt, class FES>
   class GridFunctionPrinter;
 
-  std::ostream& operator<<(std::ostream& os, FileFormat fmt);
+  inline
+  constexpr
+  const char* toCharString(FileFormat fmt)
+  {
+    switch (fmt)
+    {
+      case FileFormat::MFEM:
+        return "MFEM";
+      case FileFormat::GMSH:
+        return "GMSH";
+      case FileFormat::MEDIT:
+        return "MEDIT";
+    }
+    return nullptr;
+  }
+
+  inline
+  std::ostream& operator<<(std::ostream& os, FileFormat fmt)
+  {
+    os << toCharString(fmt);
+    return os;
+  }
 }
 
 #endif

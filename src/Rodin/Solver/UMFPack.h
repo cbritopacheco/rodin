@@ -7,17 +7,21 @@
 #ifndef RODIN_SOLVER_UMFPACK_H
 #define RODIN_SOLVER_UMFPACK_H
 
+#ifdef RODIN_USE_UMFPACK
+
 #include <optional>
 #include <functional>
 
-#include <mfem.hpp>
+#include "Rodin/Configure.h"
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
 #include "Solver.h"
 
 namespace Rodin::Solver
 {
-  UMFPack() -> UMFPack<mfem::SparseMatrix, mfem::Vector>;
+  UMFPack() -> UMFPack<Math::SparseMatrix, Math::Vector>;
 
   /**
    * @defgroup UMFPackSpecializations UMFPack Template Specializations
@@ -27,44 +31,31 @@ namespace Rodin::Solver
 
   /**
    * @ingroup UMFPackSpecializations
-   * @brief UMFPack for use with `mfem::SparseMatrix` and `mfem::Vector`.
+   * @brief UMFPack for use with `Math::SparseMatrix` and `Math::Vector`.
    */
   template <>
-  class UMFPack<mfem::SparseMatrix, mfem::Vector>
-    : public SolverBase<mfem::SparseMatrix, mfem::Vector>
+  class UMFPack<Math::SparseMatrix, Math::Vector>
+    : public SolverBase<Math::SparseMatrix, Math::Vector>
   {
     public:
-      using OperatorType = mfem::SparseMatrix;
-      using VectorType = mfem::Vector;
+      using OperatorType = Math::SparseMatrix;
+      using VectorType = Math::Vector;
 
       /**
        * @brief Constructs the UMFPack object with default parameters.
        */
-      UMFPack()
-        : m_useLongInts(false)
-      {}
+      UMFPack() = default;
 
       ~UMFPack() = default;
 
-      UMFPack& useLongInts(bool v = true)
+      void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
-        m_useLongInts = v;
-        return *this;
+        assert(false);
       }
-
-      void solve(OperatorType& A, VectorType& x, VectorType& b) const override
-      {
-        mfem::UMFPackSolver umfpack(m_useLongInts);
-        umfpack.Control[UMFPACK_ORDERING] = UMFPACK_ORDERING_METIS;
-        umfpack.SetOperator(A);
-        umfpack.Mult(b, x);
-      }
-
-    private:
-      bool m_useLongInts;
   };
 }
 
+#endif // #ifdef RODIN_USE_UMFPACK
 #endif
 
 

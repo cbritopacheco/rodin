@@ -10,6 +10,7 @@
 #include <chrono>
 
 #include "Rodin/Utility.h"
+
 #include "Assembly/Native.h"
 
 #include "GridFunction.h"
@@ -20,100 +21,296 @@
 
 namespace Rodin::Variational
 {
-   // ------------------------------------------------------------------------
-   // ---- Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // ---- Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  // ------------------------------------------------------------------------
 
-   template <class TrialFES, class TestFES>
-   constexpr
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
-      :  m_trialFunction(u),
-         m_testFunction(v),
-         m_linearForm(v),
-         m_bilinearForm(u, v)
-   {}
+  template <class TrialFES, class TestFES>
+  constexpr
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
+     :  m_trialFunction(u),
+        m_testFunction(v),
+        m_linearForm(v),
+        m_bilinearForm(u, v),
+        m_assembled(false)
+  {}
 
-   template <class TrialFES, class TestFES>
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>&
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   ::operator=(ProblemBody&& rhs)
-   {
-      Parent::operator=(std::move(rhs));
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator=(const ProblemBody& rhs)
+  {
+    for (auto& bfi : rhs.getBFIs())
+      m_bilinearForm.add(bfi);
 
-      for (auto& bfi : getProblemBody().getBFIs())
-         getBilinearForm().add(bfi);
+    for (auto& lfi : rhs.getLFIs())
+      m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
 
-      for (auto& lfi : getProblemBody().getLFIs())
-         getLinearForm().add(UnaryMinus(lfi)); // Negate every linear form
+    m_dbcs = rhs.getDBCs();
+    m_pbcs = rhs.getPBCs();
 
-      return *this;
-   }
+    return *this;
+  }
 
-   template <class TrialFES, class TestFES>
-   void
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>::assemble()
-   {
-      // Assemble both sides
-      getLinearForm().assemble();
-      getBilinearForm().assemble();
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::imposeDirichletBCs()
+  {
+    const auto& trial = getTrialFunction();
+    const auto& trialFES = trial.getFiniteElementSpace();
 
-      // Emplace data
-      getTrialFunction().emplace();
-      getTestFunction().emplace();
+    const auto& test = getTestFunction();
+    const auto& testFES = test.getFiniteElementSpace();
 
-      // Project values onto the essential boundary and compute essential dofs
-      for (const auto& dbc : getProblemBody().getDBCs())
+    if (trialFES == testFES)
+    {
+      Scalar* const valuePtr = m_stiffness.valuePtr();
+      Math::SparseMatrix::StorageIndex* const outerPtr = m_stiffness.outerIndexPtr();
+      Math::SparseMatrix::StorageIndex* const innerPtr = m_stiffness.innerIndexPtr();
+
+      for (auto& dbc : m_dbcs)
       {
-         dbc.project();
-         m_trialEssTrueDofList.Append(dbc.getDOFs());
+        dbc.assemble();
+        const auto& dofs = dbc.getDOFs();
+
+        // Move essential degrees of freedom in the LHS to the RHS
+        for (const auto& kv : dofs)
+        {
+           const Index& global = kv.first;
+           const auto& dof = kv.second;
+           for (Math::SparseMatrix::InnerIterator it(m_stiffness, global); it; ++it)
+              m_mass.coeffRef(it.row()) -= it.value() * dof;
+        }
+
+        for (const auto& [global, dof] : dofs)
+        {
+          // Impose essential degrees of freedom on RHS
+          m_mass.coeffRef(global) = dof;
+
+          // Impose essential degrees of freedom on LHS
+          for (auto i = outerPtr[global]; i < outerPtr[global + 1]; ++i)
+          {
+            assert(innerPtr[i] >= 0);
+            // Assumes CSC format
+            const Index row = innerPtr[i];
+            valuePtr[i] = Scalar(row == global);
+            if (row != global)
+            {
+              for (auto k = outerPtr[row]; 1; k++)
+              {
+                if (static_cast<Index>(innerPtr[k]) == global)
+                {
+                   valuePtr[k] = 0.0;
+                   break;
+                }
+              }
+            }
+          }
+        }
       }
+    }
+    else
+    {
+      assert(false); // Not handled yet
+    }
 
-      m_trialEssTrueDofList.Sort();
-      m_trialEssTrueDofList.Unique();
+    return *this;
+  }
 
-      const auto& trialFes = getTrialFunction().getFiniteElementSpace();
-      const auto& testFes = getTestFunction().getFiniteElementSpace();
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::imposePeriodicBCs()
+  {
+    const auto& trial = getTrialFunction();
+    const auto& trialFES = trial.getFiniteElementSpace();
 
-      if constexpr (std::is_same_v<TrialFES, TestFES>)
+    const auto& test = getTestFunction();
+    const auto& testFES = test.getFiniteElementSpace();
+
+    if (trialFES == testFES)
+    {
+      for (auto& pbc : m_pbcs)
       {
-         assert(&trialFes == &testFes);
+        pbc.assemble();
+        const auto& dofs = pbc.getDOFs();
 
-         // Form linear system
-         m_stiffnessOp.Swap(getBilinearForm().getOperator());
-         m_tmp.reset(new mfem::BilinearForm(&trialFes.getHandle()));
-         m_tmp->Assemble();
-         m_tmp->SpMat().Swap(m_stiffnessOp);
-         m_tmp->FormLinearSystem(
-                    m_trialEssTrueDofList,
-                    getTrialFunction().getSolution().getHandle(),
-                    getLinearForm().getVector(),
-                    m_stiffnessOp, m_guess, m_massVector);
-         m_tmp->SpMat().Swap(m_stiffnessOp);
+        std::deque<Index> q;
+        IndexSet dependents;
+        dependents.reserve(dofs.size());
+        for (const auto& [k, v] : dofs)
+          dependents.insert(v.first.begin(), v.first.end());
+
+        for (auto it = dofs.begin(); it != dofs.end(); ++it)
+        {
+          const Index k = it->first;
+          if (!dependents.contains(k))
+            q.push_front(k);
+        }
+
+        // Perform breadth-first traversal
+        while (q.size() > 0)
+        {
+          const Index parent = q.back();
+          assert(m_stiffness.rows() >= 0);
+          assert(m_stiffness.cols() >= 0);
+          assert(parent < static_cast<size_t>(m_stiffness.rows()));
+          assert(parent < static_cast<size_t>(m_stiffness.cols()));
+          q.pop_back();
+
+          auto find = dofs.find(parent);
+          if (find == dofs.end())
+            continue;
+
+          const auto& [children, coeffs] = find->second;
+          assert(children.size() > 0);
+
+          for (const auto& child : children)
+            q.push_front(child);
+
+          assert(children.size() == coeffs.size());
+          const size_t count = children.size();
+
+          // Eliminate the parent column, adding it to the child columns
+          for (size_t i = 0; i < count; i++)
+          {
+            const Scalar coeff = coeffs.coeff(i);
+            const Index child = children.coeff(i);
+            m_stiffness.col(child) += coeff * m_stiffness.col(parent);
+          }
+
+          // Assumes CSC format
+          for (Math::SparseMatrix::InnerIterator it(m_stiffness, parent); it; ++it)
+            it.valueRef() = 0;
+
+          // Eliminate the parent row, adding it to the child rows
+          IndexMap<Scalar> parentLookup;
+          std::vector<IndexMap<Scalar>> childrenLookup(children.size());
+          for (size_t col = 0; col < static_cast<size_t>(m_stiffness.cols()); col++)
+          {
+            bool parentFound = false;
+            size_t childrenFound = 0;
+            for (Math::SparseMatrix::InnerIterator it(m_stiffness, col); it; ++it)
+            {
+              if (parentFound && childrenFound == count)
+              {
+                break;
+              }
+              else
+              {
+                const Index row = it.row();
+                if (row == parent)
+                {
+                  parentLookup[col] = it.value();
+                  it.valueRef() = 0;
+                  parentFound = true;
+                }
+                else
+                {
+                  for (size_t i = 0; i < count; i++)
+                  {
+                    const Index child = children.coeff(i);
+                    if (row == child)
+                    {
+                      childrenLookup[i][col] = it.value();
+                      childrenFound += 1;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          for (const auto& [col, value] : parentLookup)
+          {
+            for (size_t i = 0; i < count; i++)
+            {
+              const Scalar coeff = coeffs.coeff(i);
+              childrenLookup[i][col] += coeff * value;
+            }
+          }
+
+          for (size_t i = 0; i < count; i++)
+          {
+            const Index child = children.coeff(i);
+            for (const auto& [col, value] : childrenLookup[i])
+              m_stiffness.coeffRef(child, col) = value;
+          }
+
+          // Eliminate the parent entry, adding it to the child entries
+          for (size_t i = 0; i < count; i++)
+          {
+            const Scalar coeff = coeffs.coeff(i);
+            const Index child = children.coeff(i);
+            m_mass.coeffRef(child) += coeff * m_mass.coeff(parent);
+          }
+          m_mass.coeffRef(parent) = 0;
+        }
+
+        for (const auto& [parent, node] : dofs)
+        {
+          m_stiffness.coeffRef(parent, parent) = 1.0;
+          const auto& [children, coeffs] = node;
+          assert(children.size() >= 0);
+          for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
+          {
+            const Scalar coeff = coeffs.coeff(i);
+            const Index child = children.coeff(i);
+            m_stiffness.coeffRef(parent, child) = -coeff;
+          }
+        }
       }
-      else
-      {
-         assert(false); // Not supported yet
-      }
-   }
+    }
+    else
+    {
+      assert(false); // Not handled yet
+    }
 
-   template <class TrialFES, class TestFES>
-   void
-   Problem<TrialFES, TestFES, Context::Serial, mfem::SparseMatrix, mfem::Vector>
-   ::solve(const Solver::SolverBase<OperatorType, VectorType>& solver)
-   {
-      // Assemble the system
-      assemble();
+    return *this;
+  }
 
-      // Solve the system Ax = b
-      solver.solve(getStiffnessOperator(), m_guess, getMassVector());
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::assemble()
+  {
+    auto& trial = getTrialFunction();
 
-      // Recover solution
-      m_tmp->RecoverFEMSolution(
-            m_guess,
-            getLinearForm().getVector(),
-            getTrialFunction().getSolution().getHandle());
-   }
+    // Emplace data
+    trial.emplace();
+
+    // Assemble both sides
+    m_linearForm.assemble();
+    m_mass = std::move(m_linearForm.getVector());
+
+    m_bilinearForm.assemble();
+    m_stiffness = std::move(m_bilinearForm.getOperator());
+
+    // Impose Dirichlet boundary conditions
+    imposeDirichletBCs();
+
+    // Impose periodic boundary conditions
+    imposePeriodicBCs();
+
+    m_assembled = true;
+
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  void
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
+  {
+     // Assemble the system
+     if (!m_assembled)
+        assemble();
+
+     // Solve the system AX = B
+     solver.solve(m_stiffness, m_guess, m_mass);
+
+     // Recover solution
+     getTrialFunction().getSolution().setWeights(std::move(m_guess));
+  }
 }
 
 #endif

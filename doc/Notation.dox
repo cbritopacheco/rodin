@@ -1,0 +1,8 @@
+/**
+  @page notation-index Notation
+  @brief Explanation of the notation used throughout the documentation.
+
+  - @f$ \mathcal{T}_h @f$ represents the discrete mesh.
+
+  */
+

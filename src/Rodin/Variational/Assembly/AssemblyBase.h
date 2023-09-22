@@ -7,45 +7,42 @@
 #ifndef RODIN_VARIATIONAL_ASSEMBLY_H
 #define RODIN_VARIATIONAL_ASSEMBLY_H
 
-#include <variant>
-#include <ostream>
-
-#include <mfem.hpp>
-
-#include "Rodin/Geometry/Simplex.h"
 #include "Rodin/FormLanguage/List.h"
 
+#include "Rodin/Math.h"
+
 #include "Rodin/Variational/FiniteElementSpace.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
 namespace Rodin::Variational::Assembly
 {
+  struct BilinearAssemblyInput
+  {
+    const Geometry::MeshBase& mesh;
+    const FiniteElementSpaceBase& trialFES;
+    const FiniteElementSpaceBase& testFES;
+    FormLanguage::List<BilinearFormIntegratorBase>& bfis;
+  };
+
   template <class OperatorType>
   class AssemblyBase<BilinearFormBase<OperatorType>>
     : public FormLanguage::Base
   {
     public:
-      struct Input
-      {
-        const Geometry::MeshBase& mesh;
-        const FiniteElementSpaceBase& trialFES;
-        const FiniteElementSpaceBase& testFES;
-        const FormLanguage::List<BilinearFormIntegratorBase>& bfis;
-      };
-
       AssemblyBase() = default;
 
       AssemblyBase(const AssemblyBase&) = default;
 
       AssemblyBase(AssemblyBase&&) = default;
 
-      virtual OperatorType execute(const Input& data) const = 0;
+      virtual OperatorType execute(const BilinearAssemblyInput& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class OperatorType>
-  class AssemblyBase<LinearFormBase<OperatorType>>
+  template <class VectorType>
+  class AssemblyBase<LinearFormBase<VectorType>>
     : public FormLanguage::Base
   {
     public:
@@ -53,7 +50,7 @@ namespace Rodin::Variational::Assembly
       {
         const Geometry::MeshBase& mesh;
         const FiniteElementSpaceBase& fes;
-        const FormLanguage::List<LinearFormIntegratorBase>& lfis;
+        FormLanguage::List<LinearFormIntegratorBase>& lfis;
       };
 
       AssemblyBase() = default;
@@ -62,7 +59,7 @@ namespace Rodin::Variational::Assembly
 
       AssemblyBase(AssemblyBase&&) = default;
 
-      virtual OperatorType execute(const Input& data) const = 0;
+      virtual VectorType execute(const Input& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };

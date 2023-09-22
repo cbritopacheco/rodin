@@ -7,55 +7,134 @@
 #ifndef RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 #define RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 
-#include "Rodin/Variational/MFEM.h"
-#include "Rodin/Variational/ForwardDecls.h"
+#include <Eigen/QR>
 
-#include "SimplexTransformation.h"
+#include "Rodin/Geometry/Polytope.h"
+
+#include "PolytopeTransformation.h"
+
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry
 {
   /**
-   * @brief Represents a transformation between the reference space to the
-   * physical space of a simplex.
+   * @brief Polytope isoparametric transformation.
    */
-  class IsoparametricTransformation final : public SimplexTransformation
+  template <class FE>
+  class IsoparametricTransformation final : public PolytopeTransformation
   {
+    static_assert(std::is_same_v<typename FE::RangeType, Scalar>,
+        "Type of finite element must be scalar valued.");
+
     public:
-      IsoparametricTransformation(mfem::IsoparametricTransformation* trans)
-        : m_handle(trans)
-      {}
+      using Parent = PolytopeTransformation;
+      using Parent::transform;
+      using Parent::jacobian;
+      using Parent::inverse;
 
-      // inline
-      // Math::Vector transform(const Math::Vector& rc) const final override
-      // {
-      //   const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
-      //   Math::Vector shape(m_handle->GetFE()->GetDof());
-      //   mfem::Vector tmp(shape.data(), shape.size());
-      //   m_handle->GetFE()->CalcShape(ip, tmp);
-      //   return m_pm * shape;
-      // }
+      IsoparametricTransformation(Math::SpatialMatrix&& pm, FE&& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(std::move(pm)),
+          m_fe(std::move(fe))
+      {
+        assert(m_pm.cols() >= 0);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
 
-      // inline
-      // Math::Matrix jacobian(const Math::Vector& rc) const final override
-      // {
-      //   const mfem::IntegrationPoint ip = Variational::Internal::vec2ip(rc);
-      //   Math::Matrix dshape(m_handle->GetFE()->GetDof(), m_handle->GetFE()->GetDim());
-      //   mfem::DenseMatrix tmp;
-      //   tmp.UseExternalData(dshape.data(), dshape.rows(), dshape.cols());
-      //   m_handle->GetFE()->CalcDShape(ip, tmp);
-      //   return m_pm * dshape;
-      // }
+      /**
+       * pm : sdim x dof
+       */
+      IsoparametricTransformation(const Math::SpatialMatrix& pm, const FE& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(pm),
+          m_fe(fe)
+      {
+        assert(m_pm.cols() >= 0);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      IsoparametricTransformation(Math::SpatialMatrix&& pm, const FE& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(std::move(pm)),
+          m_fe(fe)
+      {
+        assert(m_pm.cols() >= 0);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      IsoparametricTransformation(const Math::SpatialMatrix& pm, FE&& fe)
+        : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
+          m_pm(pm),
+          m_fe(std::move(fe))
+      {
+        assert(m_pm.cols() >= 0);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      IsoparametricTransformation(const IsoparametricTransformation& other)
+        : Parent(other),
+          m_fe(other.m_fe),
+          m_pm(other.m_pm)
+      {
+        assert(m_pm.cols() >= 0);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      IsoparametricTransformation(IsoparametricTransformation&& other)
+        : Parent(std::move(other)),
+          m_fe(std::move(other.m_fe)),
+          m_pm(std::move(other.m_pm))
+      {
+        assert(m_pm.cols() >= 0);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
 
       inline
-      mfem::IsoparametricTransformation& getHandle() const final override
+      void transform(const Math::SpatialVector& rc, Math::SpatialVector& pc) const override
       {
-        return *m_handle;
+        const size_t pdim = getPhysicalDimension();
+        assert(rc.size() >= 0);
+        assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
+        pc.resize(pdim);
+        pc.setZero();
+        for (size_t local = 0; local < m_fe.getCount(); local++)
+        {
+          assert(pc.size() == m_pm.col(local).size());
+          pc.noalias() += m_pm.col(local) * m_fe.getBasis(local)(rc);
+        }
+      }
+
+      inline
+      void jacobian(const Math::SpatialVector& rc, Math::SpatialMatrix& res) const override
+      {
+        const size_t rdim = getReferenceDimension();
+        assert(rc.size() >= 0);
+        assert(static_cast<size_t>(rc.size()) == rdim);
+        const size_t pdim = getPhysicalDimension();
+        res.resize(pdim, rdim);
+        res.setZero();
+        Math::SpatialVector gradient;
+        for (size_t local = 0; local < m_fe.getCount(); local++)
+        {
+          m_fe.getGradient(local)(gradient, rc);
+          for (size_t i = 0; i < rdim; i++)
+          {
+            assert(res.col(i).size() == m_pm.col(local).size());
+            res.col(i).noalias() += m_pm.col(local) * gradient.coeff(i);
+          }
+        }
+      }
+
+
+      inline
+      const Math::SpatialMatrix& getPointMatrix() const
+      {
+        return m_pm;
       }
 
     private:
-      std::unique_ptr<mfem::IsoparametricTransformation> m_handle;
-      // Eigen::Map<Math::Matrix> m_pm;
+      Math::SpatialMatrix m_pm;
+      FE m_fe;
   };
 }
 

@@ -14,11 +14,9 @@ set(RodinVariational_HEADERS
   ShapeFunction.h
   TrialFunction.h
   TestFunction.h
-  H1.h
   IdentityMatrix.h
   Integral.h
   Sum.h
-  MFEM.h
   UnaryMinus.h
   Mult.h
   Jacobian.h
@@ -73,12 +71,10 @@ set(RodinVariational_SRCS
   LinearForm.hpp
   Problem.hpp
   ProblemBody.cpp
-  MFEM.cpp
   Minus.cpp
   Function.cpp
   RangeShape.cpp
   RangeType.cpp
-  Composition.cpp
   Max.cpp
   Min.cpp
   GEQ.cpp
@@ -91,6 +87,10 @@ set(RodinVariational_SRCS
   Tangent.cpp
   Assembly/AssemblyBase.cpp
   Assembly/Native.cpp
+  P0/P0.cpp
+  P0/P0Element.cpp
+  P1/P1.cpp
+  P1/P1Element.cpp
   )
 
 add_library(RodinVariational
@@ -108,8 +108,7 @@ target_include_directories(RodinVariational
 
 target_link_libraries(RodinVariational
   PUBLIC
-  mfem
-  PUBLIC
+  Rodin::QF
   Rodin::IO
   Rodin::Alert
   Rodin::Utility

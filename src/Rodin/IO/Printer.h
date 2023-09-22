@@ -13,6 +13,12 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @defgroup PrinterSpecializations Printer Template Specializations
+   * @brief Template specializations of the Printer class.
+   * @see Printer
+   */
+
   template <class T>
   class Printer
   {

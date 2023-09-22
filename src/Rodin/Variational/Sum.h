@@ -14,6 +14,19 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
+  struct Traits<
+    Variational::Sum<
+      Variational::ShapeFunctionBase<LHSDerived, FESType, SpaceType>,
+      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
+  {
+    using FES = FESType;
+    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -107,6 +120,24 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) + this->object(getRHS().getValue(p));
       }
 
+      inline
+      constexpr
+      void getValue(Math::Vector& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsVectorRange<LHSRange>::Value);
+        getLHS().getValue(res, p);
+        res += getRHS().getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Matrix& res, const Geometry::Point& p) const
+      {
+        static_assert(FormLanguage::IsMatrixRange<LHSRange>::Value);
+        getLHS().getValue(res, p);
+        res += getRHS().getValue(p);
+      }
+
       inline Sum* copy() const noexcept override
       {
         return new Sum(*this);
@@ -151,11 +182,14 @@ namespace Rodin::Variational
   /**
    * @ingroup SumSpecializations
    */
-  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>> final
-    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
+  template <class LHSDerived, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
+  class Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>> final
+    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FESType, SpaceType>, ShapeFunctionBase<RHSDerived, FESType, SpaceType>>>
   {
     public:
+      using FES = FESType;
+      static constexpr ShapeFunctionSpaceType Space = SpaceType;
+
       using LHS = ShapeFunctionBase<LHSDerived, FES, Space>;
       using RHS = ShapeFunctionBase<RHSDerived, FES, Space>;
       using Parent = ShapeFunctionBase<Sum<LHS, RHS>, FES, Space>;
@@ -218,7 +252,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      size_t getDOFs(const Geometry::Simplex& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
         assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
         return getLHS().getDOFs(element);

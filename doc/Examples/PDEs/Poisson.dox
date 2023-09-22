@@ -1,0 +1,189 @@
+/**
+  @page examples-pdes-poisson Solving the Poisson equation
+  @brief Resolution of the Poisson equation using Rodin
+
+  @image html Poisson.png width=410px
+
+  @m_keywords{Poisson}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-pdes-poisson-intro Introduction
+
+  To introduce the Rodin::Variational module it is important to start from a
+  type of "Hello World!" example. In this context, the Poisson equation fits
+  exactly our purpose. Hence, in this example we will seek to solve:
+  @f[
+  \left\{
+    \begin{aligned}
+      - \Delta u &= f && \mathrm{in} \ \Omega \\
+      u &= g && \mathrm{on} \ \Gamma
+    \end{aligned}
+   \right.
+  @f]
+  where @f$ \Omega @f$ is a domain with boundary @f$ \Gamma := \partial \Omega
+  @f$. To make matters easier we will set @f$ f = 1 @f$ and @f$ g = 0 @f$.
+
+  In general, when solving an equation like this we usually utilize its
+  variational formulation. Multiplying by a test function @f$ v @f$ and
+  integrating by parts we may write the variational formulation
+  @f[
+  \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
+  \forall v \in H^1_0(\Omega), \quad
+     \int_{\Omega} \lambda \nabla u \cdot \nabla v \ dx = \int_{\Omega} f v
+     \ dx
+  @f]
+  Obtaining the variational (or weak) formulation of a partial differential
+  equation is a very standard procedure in the
+  [Finite Element Method](https://en.wikipedia.org/wiki/Finite_element_method)
+  literature. Hence we won't go into specifics. Rather, we deem it best to show
+  how to implement said weak formulation and solve it.
+
+  @section examples-pdes-poisson-preamble Includes and Namespaces
+
+  In order to start using Rodin we first need to include the relevant parts
+  which will aid us in the resolution of our equation. If you are familiar with
+  finite elements then you will know that in particular we will need three main
+components:
+  - A mesh approximating our domain @f$ \Omega @f$.
+  - A solver object that allows us to solve the problem
+  - A way to specify the problem
+
+  Hence we import the required modules in Rodin:
+
+  @code{.cpp}
+    #include "Rodin/Mesh.h"
+    #include "Rodin/Solver.h"
+    #include "Rodin/Variational.h"
+
+    using namespace Rodin;
+    using namespace Rodin::Variational;
+  @endcode
+
+  The first part includes the following modules:
+
+  - Rodin::Mesh
+  - Rodin::Solver
+  - Rodin::Variational
+
+  While the second part will simply introduce all the objects inside the
+  Rodin and Rodin::Variational namespaces to the global scope, so we don't have
+  to write their namespace again.
+
+  @section examples-pdes-poisson-impl Implementing the solution
+
+  Next we would like to write the code which actually solves the equation. For
+  our purposes we will write it inside the `main` function like so:
+
+  @code{.cpp}
+    int main()
+    {
+      // Code solving the equation
+    }
+  @endcode
+
+  One of the first things you usually do is to keep track of the segment of the
+  boundary where we impose the boundary conditions. In this case, we have
+  homogenous Dirichlet boundary conditions on the boundary elements with
+  attribute equal to `1`. Additionally, we load the mesh from some file given
+  its filename:
+
+  @code{.cpp}
+    int Gamma = 1;
+    Mesh Omega = Mesh::load(filename);
+  @endcode
+
+  With the mesh loaded, we can build our finite element space @f$ V_h @f$ and
+  create some functions belonging to it. For our purposes, we need that our
+  space contain functions belonging to the @f$ H^1 (\Omega) @f$ collection of
+  functions. This is achieved by the following line of code:
+
+  @code{.cpp}
+    H1 Vh(Omega);
+  @endcode
+
+  After creating this space, we construct trial and test functions @f$ u @f$
+  and @f$ v @f$ which will be used to define our variational problem:
+
+  @code{.cpp}
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+  @endcode
+
+  Hence we can start implementing the weak formulation associated to the
+  Poisson equation. In general, Rodin expects that you specify the weak
+  formulation by moving all terms to the left hand side of the equation. In
+  symbols, this would look like:
+  @f[
+  \text{Find } u \in H^1_0(\Omega) \text{ s.t. }
+  \forall v \in H^1_0(\Omega), \quad
+     a(u, v) - b(v) = 0 \ ,
+  @f]
+  where @f$ a(u, v) @f$ and @f$ b(v) @f$ are our respective bilinear and linear
+  forms. The left hand side is then used to define the variational problem which we
+  want to solve. In the code this is achieved by the following declarations:
+
+  @code{.cpp}
+    auto f = ScalarFunction(1.0);
+    auto g = ScalarFunction(0.0);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, g).on(Gamma);
+  @endcode
+  In this case the `Integral(Grad(u), Grad(v))`
+  object represents the bilinear term
+  @f[
+    \int_\Omega \nabla u \cdot \nabla v \ dx \ ,
+  @f]
+  while the `Integral(f, v)`
+  object represents the linear term
+  @f[
+    \int_\Omega f v \ dx .
+  @f]
+  Lastly, the line `DirichletBC(u, g).on(Gamma)` specifies that the solution
+  will satisfy the Dirichlet condition:
+  @f[
+    u = g \quad \text{on} \quad \Gamma .
+  @f]
+
+  With the problem defined, we now need to solve the underlying linear system
+  given by the associated stiffness matrix.
+  There are many different types of solvers in Rodin but for this example we
+  will utilize the @ref Rodin::Solver::CG "Conjugate Gradient (CG)" solver, as
+  shown in the following code snippet:
+
+  @code{.cpp}
+    Solver::CG().setMaxIterations(200)
+                .setRelativeTolerance(1e-12)
+                .printIterations(true)
+                .solve(poisson);
+  @endcode
+
+  This piece of code creates a CG object in place, while setting some
+  parameters, and finally calling the @ref Rodin::Solver::CG.solve() "solve()"
+  method on the problem.
+
+  Ultimately, with the problem solved, we will want to visualize our solution.
+  We can do this by saving both the solution and mesh objects to file, and then
+  using [GLVis](https://glvis.org/) to view the results.
+
+  @code{.cpp}
+    u.getGridFunction().save("u.gf");
+    Omega.save("Omega.mesh");
+  @endcode
+
+  To visualize the results, we can call GLVis from the command line:
+
+  @code{.bash}
+    glvis -m Omega.mesh -g u.gf
+  @endcode
+
+  The full source code may be found below:
+  -   @ref PDEs/Poisson.cpp "Poisson.cpp"
+
+  @example PDEs/Poisson.cpp @m_examplenavigation{examples-pdes-poisson,PDEs/} @m_footernavigation
+  */

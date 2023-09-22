@@ -107,5 +107,9 @@
   - https://www.boost.org/users/license.html
   @endparblock
 
+  @section References
+
+  See the @link citelist full reference list @endlink  to the scientific papers which have been
+  used or provide sources of inspiration for the library.
 */
 

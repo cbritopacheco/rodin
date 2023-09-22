@@ -7,7 +7,6 @@
 #include <boost/range/adaptor/indexed.hpp>
 
 #include "Rodin/Alert.h"
-#include "Rodin/Variational/GridFunction.h"
 #include "Rodin/IO/MeshLoader.h"
 
 #include "Mesh.h"
@@ -16,15 +15,20 @@
 
 namespace Rodin::External::MMG
 {
-  MMG5_pMesh MMG5::createMesh(int version, int dim, std::optional<int> spaceDim)
+  MMG5::MMG5()
+    : m_ridgeDetection(true)
+  {}
+
+  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, std::optional<size_t> spaceDim)
   {
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
-        Alert::Exception("Failed to allocate memory for the mesh").raise());
-
+      Alert::Exception() << "Failed to allocate memory for the mesh." << Alert::Raise);
+    assert(dim > 0);
     if (!spaceDim)
       spaceDim = dim;
-    bool isSurface = (*spaceDim - 1) == dim;
+    assert(spaceDim > 0);
+    const bool isSurface = (*spaceDim - 1) == dim;
     assert(isSurface || (dim == *spaceDim));
     if (isSurface)
     {
@@ -43,19 +47,20 @@ namespace Rodin::External::MMG
     }
     else
     {
-      Alert::Exception("Unhandled case").raise();
+      Alert::Exception() << "Unhandled case." << Alert::Raise;
       return nullptr;
     }
     res->np = 0;
+    res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
     res->ver = version;
     res->dim = *spaceDim;
-    res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
     res->info.imprim = getMMGVerbosityLevel();
     return res;
   }
 
-  bool MMG5::isSurfaceMesh(MMG5_pMesh mesh)
+  bool MMG5::isSurfaceMesh(const MMG5_pMesh mesh)
   {
+    assert(mesh->dim >= 2);
     switch (mesh->dim)
     {
       case 2:
@@ -270,13 +275,14 @@ namespace Rodin::External::MMG
     std::strcpy(dst->nameout, src->nameout);
   }
 
-  MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, int vdim)
+  MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, size_t vdim)
   {
+    assert(mesh);
     if (vdim < 1 || vdim > 3)
       return nullptr;
     MMG5_pSol res = nullptr;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Sol,
-        Alert::Exception("Failed to allocate memory for MMG5_pSol").raise());
+      Alert::Exception() << "Failed to allocate memory for MMG5_pSol." << Alert::Raise);
     res->ver  = mesh->ver;
     res->size = vdim;
     if (vdim == 1)
@@ -291,8 +297,8 @@ namespace Rodin::External::MMG
     {
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
-      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->np + 1), double,
-          Alert::Exception("Failed to allocate memory for MMG5_pSol->m").raise());
+      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), double,
+        Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
     }
     else
     {
@@ -305,7 +311,6 @@ namespace Rodin::External::MMG
   {
     bool isSurface = src.isSurface();
     assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
-
     MMG5_pMesh res = createMesh(
       s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
 
@@ -314,173 +319,187 @@ namespace Rodin::External::MMG
     res->nti = 0;
     res->xp  = 0;
 
-    res->np = src.getHandle().GetNV();
+    res->np = src.getVertexCount();
 
     if (isSurface) // Use MMGS
     {
       res->nt = src.getElementCount();
-      res->na = src.getHandle().GetNBE();
+      res->na = src.getFaceCount();
 
       MMGS_Set_commonFunc();
       if (!MMGS_zaldy(res))
-        Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
+        Alert::Exception() << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
 
       // Copy points
-      for (int i = 1; i <= res->np; i++)
+      for (auto it = src.getVertex(); !it.end(); ++it)
       {
-        const double* coords = src.getHandle().GetVertex(i - 1);
-        std::copy(coords, coords + 3, res->point[i].c);
+        const auto& vertex = *it;
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+        const Index i = vertex.getIndex() + 1;
+        const auto& coords = vertex.getCoordinates();
+        std::copy(coords.begin(), coords.end(), res->point[i].c);
+        res->point[i].ref = vertex.getAttribute();
       }
 
       // Copy edges
-      for (int i = 1; i <= res->na; i++)
+      for (auto it = src.getFace(); !it.end(); ++it)
       {
-        mfem::Array<int> vertices;
-        src.getHandle().GetBdrElementVertices(i - 1, vertices);
+        const auto& face = *it;
+        assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
+        const Index i = face.getIndex() + 1;
+        const auto& vertices = face.getVertices();
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
-        res->edge[i].ref = src.getHandle().GetBdrAttribute(i - 1);
+        res->edge[i].ref = face.getAttribute();
       }
 
       // Copy triangles
-      for (int i = 1; i <= res->nt; i++)
+      for (auto it = src.getElement(); !it.end(); ++it)
       {
+        const auto& cell = *it;
+        const Index i = cell.getIndex() + 1;
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
         MMG5_pTria pt = &res->tria[i];
-        mfem::Array<int> vertices;
-        src.getHandle().GetElementVertices(i - 1, vertices);
-        for (int j = 0; j < 3; j++)
-         pt->v[j] = vertices[j] + 1;
-
-        pt->ref = src.getHandle().GetAttribute(i - 1);
-        // for (int j = 0; j < 3; j++)
-        //   res->point[pt->v[j]].tag &= ~MG_NUL;
+        const auto& vertices = cell.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+        pt->ref = cell.getAttribute();
       }
     }
     else if (src.getDimension() == 2) // Use MMG2D
     {
-      res->nt = src.getHandle().GetNE();
-      res->na = src.getHandle().GetNBE();
+      res->nt = src.getElementCount();
+      res->na = src.getFaceCount();
 
       MMG2D_Set_commonFunc();
       if (!MMG2D_zaldy(res))
-        Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
+        Alert::Exception() << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
 
       // Copy points
-      for (int i = 1; i <= res->np; i++)
+      for (auto it = src.getVertex(); !it.end(); ++it)
       {
-        const double* coords = src.getHandle().GetVertex(i - 1);
-        std::copy(coords, coords + 3, res->point[i].c);
+        const auto& vertex = *it;
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+        const Index i = vertex.getIndex() + 1;
+        const auto& coords = vertex.getCoordinates();
+        std::copy(coords.begin(), coords.end(), res->point[i].c);
+        res->point[i].ref = vertex.getAttribute();
+        res->point[i].tag = MG_NOTAG;
       }
 
       // Copy edges
-      for (int i = 1; i <= res->na; i++)
+      for (auto it = src.getFace(); !it.end(); ++it)
       {
-        mfem::Array<int> vertices;
-        src.getHandle().GetBdrElementVertices(i - 1, vertices);
+        const auto& face = *it;
+        assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
+        const Index i = face.getIndex() + 1;
+        const auto& vertices = face.getVertices();
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
-        res->edge[i].ref = src.getHandle().GetBdrAttribute(i - 1);
-        res->edge[i].tag |= MG_REF + MG_BDY;
+        res->edge[i].ref = face.getAttribute();
+        res->edge[i].tag = MG_NOTAG;
       }
 
-      // Copy triangles
-      int reorientedCount = 0;
-      for (int i = 1; i <= res->nt; i++)
+      // Copy triangles with correct orientation
+      for (auto it = src.getElement(); !it.end(); ++it)
       {
+        const auto& cell = *it;
+        const Index i = cell.getIndex() + 1;
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
         MMG5_pTria pt = &res->tria[i];
-        mfem::Array<int> vertices;
-        src.getHandle().GetElementVertices(i - 1, vertices);
-        for (int j = 0; j < 3; j++)
-          pt->v[j] = vertices[j] + 1;
-
-        pt->ref = src.getHandle().GetAttribute(i - 1);
-        for (int j = 0; j < 3; j++)
-        {
-          // res->point[pt->v[j]].tag &= ~MG_NUL;
-          pt->edg[j] = 0;
-        }
-
-        // Check orientation
-        double orientation = MMG2D_quickarea(
+        const auto& vertices = cell.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+        pt->ref = cell.getAttribute();
+        pt->edg[0] = 0;
+        pt->edg[1] = 0;
+        pt->edg[2] = 0;
+        auto orientation = MMG2D_quickarea(
             res->point[pt->v[0]].c,
             res->point[pt->v[1]].c,
             res->point[pt->v[2]].c);
-
         if(orientation < 0)
         {
-          int tmp = pt->v[2];
+          auto tmp = pt->v[2];
           pt->v[2] = pt->v[1];
           pt->v[1] = tmp;
-          reorientedCount++;
-          Alert::Warning()
-           << "Element reoriented: " << i << Alert::Raise;
         }
-       }
-       if (reorientedCount > 0)
-       {
-        Alert::Warning()
-          << "Number of elements reoriented: " << std::to_string(reorientedCount)
-          << Alert::Raise;
-       }
+      }
     }
     else if (src.getDimension() == 3) // Use MMG3D
     {
-      res->ne = src.getHandle().GetNE();
-      res->nt = src.getHandle().GetNBE();
+      constexpr size_t edgeDim = 1;
+      res->ne = src.getElementCount();
+      res->na = src.getCount(edgeDim);
+      res->nt = src.getFaceCount();
 
       MMG3D_Set_commonFunc();
       if (!MMG3D_zaldy(res))
-        Alert::Exception("Memory allocation for MMG5_pMesh failed.").raise();
+        Alert::Exception() << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
 
       // Copy points
-      for (int i = 1; i <= res->np; i++)
+      for (auto it = src.getVertex(); !it.end(); ++it)
       {
-        const double* coords = src.getHandle().GetVertex(i - 1);
-        std::copy(coords, coords + 3, res->point[i].c);
+        const auto& vertex = *it;
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+        const Index i = vertex.getIndex() + 1;
+        const auto& coords = vertex.getCoordinates();
+        std::copy(coords.begin(), coords.end(), res->point[i].c);
+        res->point[i].ref = vertex.getAttribute();
+      }
+
+      // Copy edges
+      for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
+      {
+        const auto& segment = *it;
+        assert(segment.getGeometry() == Geometry::Polytope::Type::Segment);
+        const Index i = segment.getIndex() + 1;
+        const auto& vertices = segment.getVertices();
+        res->edge[i].a = vertices[0] + 1;
+        res->edge[i].b = vertices[1] + 1;
+        res->edge[i].ref = segment.getAttribute();
       }
 
       // Copy triangles
-      for (int i = 1; i <= res->nt; i++)
+      for (auto it = src.getFace(); !it.end(); ++it)
       {
+        const auto& face = *it;
+        const Index i = face.getIndex() + 1;
+        assert(face.getGeometry() == Geometry::Polytope::Type::Triangle);
         MMG5_pTria pt = &res->tria[i];
-        mfem::Array<int> vertices;
-        src.getHandle().GetBdrElementVertices(i - 1, vertices);
-        for (int j = 0; j < 3; j++)
-         pt->v[j] = vertices[j] + 1;
-        pt->ref = src.getHandle().GetBdrAttribute(i - 1);
+        const auto& vertices = face.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+        pt->ref = face.getAttribute();
       }
 
-      // Copy tetrahedra
-      int reorientedCount = 0;
-      for (int i = 1; i <= res->ne; i++)
+      // Copy tetrahedra with correct orientation
+      for (auto it = src.getElement(); !it.end(); ++it)
       {
+        const auto& cell = *it;
+        const Index i = cell.getIndex() + 1;
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Tetrahedron);
         MMG5_pTetra pt = &res->tetra[i];
-        mfem::Array<int> vertices;
-        src.getHandle().GetElementVertices(i - 1, vertices);
-        for (int j = 0; j < 4; j++)
-          pt->v[j] = vertices[j] + 1;
-
-        pt->ref = src.getHandle().GetAttribute(i - 1);
-
+        const auto& vertices = cell.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+        pt->v[3] = vertices[3] + 1;
+        pt->ref = cell.getAttribute();
         if (MMG5_orvol(res->point, pt->v) < 0.0)
         {
-          reorientedCount++;
-          int aux = pt->v[2];
+          auto tmp = pt->v[2];
           pt->v[2] = pt->v[3];
-          pt->v[3] = aux;
-          Alert::Warning() << "Element reoriented: " << i << Alert::Raise;
-        }
-        if (reorientedCount > 0)
-        {
-          Alert::Warning()
-           << "Number of elements reoriented: " << std::to_string(reorientedCount)
-           << Alert::Raise;
+          pt->v[3] = tmp;
         }
       }
     }
     else
     {
-      Alert::Exception("Unhandled case.").raise();
+      Alert::Exception() << "Unhandled case." << Alert::Raise;
       return nullptr;
     }
 
@@ -492,42 +511,12 @@ namespace Rodin::External::MMG
       res->point[c + 1].tag |= MG_CRN;
     }
 
-    // Tag edges
-    if (src.getDimension() == 2)
+    // Tag ridges
+    for (const auto& r : src.getRidges())
     {
-      for (const auto& r : src.getRidges())
-      {
-        assert(r >= 0);
-        assert(r <= res->na);
-        res->edge[r + 1].tag |= MG_GEO;
-      }
-    }
-    else if (src.getDimension() == 3)
-    {
-      res->na = src.getEdges().size();
-
-      assert(!res->edge);
-      MMG5_SAFE_CALLOC(res->edge, res->na + 1, MMG5_Edge,
-          Alert::Exception("Failed to allocate memory for MMG5_pEdge->edge").raise());
-
-      for (const auto& e : src.getEdges() | boost::adaptors::indexed(1))
-      {
-        res->edge[e.index()].a = e.value().endpoints.first + 1;
-        res->edge[e.index()].b = e.value().endpoints.second + 1;
-        res->edge[e.index()].ref = e.value().ref;
-        res->edge[e.index()].tag = MG_NOTAG;
-      }
-
-      for (const auto& r : src.getRidges())
-      {
-        assert(r >= 0);
-        assert(r <= res->na);
-        res->edge[r + 1].tag |= MG_GEO;
-      }
-    }
-    else
-    {
-      assert(false);
+      assert(r >= 0);
+      assert(r <= res->na);
+      res->edge[r + 1].tag |= MG_GEO;
     }
 
     return res;
@@ -535,144 +524,108 @@ namespace Rodin::External::MMG
 
   MMG::Mesh MMG5::meshToRodin(const MMG5_pMesh src)
   {
-    bool isSurface = isSurfaceMesh(src);
-    MMG::Mesh dst;
-
-    switch (src->dim) // Switch over space dimension
+    assert(src);
+    MMG::Mesh::Builder build;
+    const size_t sdim = src->dim;
+    assert(sdim > 0);
+    build.initialize(sdim).reserve(0, src->np).nodes(src->np);
+    switch (sdim) // Switch over space dimension
     {
+      case 1:
+      {
+        for (int i = 1; i <= src->np; i++)
+        {
+          build.vertex({ src->point[i].c[0] });
+          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          if (src->point[i].tag & MG_CRN)
+            build.corner(i - 1);
+        }
+        break;
+      }
       case 2:
       {
-        assert(!isSurface); // Surface embedded in 2D space not handled yet
-        auto build = dst.initialize(src->dim, src->dim);
-        // Add points
         for (int i = 1; i <= src->np; i++)
         {
           build.vertex({ src->point[i].c[0], src->point[i].c[1] });
+          build.attribute({ 0, i - 1 }, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
-            dst.corner(i - 1);
+            build.corner(i - 1);
         }
-        // Add elements
-        for (int i = 1; i <= src->nt; i++)
-        {
-          build.element(
-              Geometry::Type::Triangle,
-              { static_cast<size_t>(src->tria[i].v[0] - 1),
-                static_cast<size_t>(src->tria[i].v[1] - 1),
-                static_cast<size_t>(src->tria[i].v[2] - 1) },
-              src->tria[i].ref);
-        }
-        // Add boundary
-        for (int i = 1; i <= src->na; i++)
-        {
-          build.face(
-              Geometry::Type::Segment,
-              { static_cast<size_t>(src->edge[i].a - 1),
-                static_cast<size_t>(src->edge[i].b - 1) },
-              src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
-        }
-        build.finalize();
         break;
       }
       case 3:
       {
-        if (isSurface)
+        for (int i = 1; i <= src->np; i++)
         {
-          auto build = dst.initialize(src->dim - 1, src->dim);
-          // Add points
-          for (int i = 1; i <= src->np; i++)
-          {
-            build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
-            if (src->point[i].tag & MG_CRN)
-              dst.corner(i - 1);
-          }
-
-          // Add elements
-          for (int i = 1; i <= src->nt; i++)
-          {
-            build.element(
-                Geometry::Type::Triangle,
-                { static_cast<size_t>(src->tria[i].v[0] - 1),
-                  static_cast<size_t>(src->tria[i].v[1] - 1),
-                  static_cast<size_t>(src->tria[i].v[2] - 1) },
-                src->tria[i].ref);
-          }
-
-          // Add boundary
-          for (int i = 1; i <= src->na; i++)
-          {
-            build.face(
-                Geometry::Type::Segment,
-                { static_cast<size_t>(src->edge[i].a - 1),
-                  static_cast<size_t>(src->edge[i].b - 1) },
-                src->edge[i].ref == 0 ? 128 : src->edge[i].ref);
-            if (src->edge[i].tag & MG_GEO)
-              dst.ridge(i - 1);
-          }
-          build.finalize();
-        }
-        else
-        {
-          auto build = dst.initialize(src->dim, src->dim);
-          // Add points
-          for (int i = 1; i <= src->np; i++)
-          {
-            build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
-            if (src->point[i].tag & MG_CRN)
-              dst.corner(i - 1);
-          }
-
-          // Add edges
-          for (int i = 1; i <= src->na; i++)
-          {
-            dst.edge({ src->edge[i].a - 1, src->edge[i].b - 1 },
-                (src->edge[i].ref == 0 ? 128 : src->edge[i].ref));
-            if (src->edge[i].tag & MG_GEO)
-              dst.ridge(i - 1);
-          }
-
-          for (int i = 1; i <= src->nt; i++)
-          {
-            build.face(
-              Geometry::Type::Triangle,
-              { static_cast<size_t>(src->tria[i].v[0] - 1),
-                static_cast<size_t>(src->tria[i].v[1] - 1),
-                static_cast<size_t>(src->tria[i].v[2] - 1) },
-              src->tria[i].ref);
-          }
-
-          for (int i = 1; i <= src->ne; i++)
-          {
-            build.element(
-              Geometry::Type::Tetrahedron,
-              { static_cast<size_t>(src->tetra[i].v[0] - 1),
-                static_cast<size_t>(src->tetra[i].v[1] - 1),
-                static_cast<size_t>(src->tetra[i].v[2] - 1),
-                static_cast<size_t>(src->tetra[i].v[3] - 1) },
-                src->tetra[i].ref);
-          }
-          build.finalize();
+          build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
+          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          if (src->point[i].tag & MG_CRN)
+            build.corner(i - 1);
         }
         break;
       }
       default:
       {
-        Alert::Exception("Unhandled case").raise();
+        Alert::Exception() << "Space dimension greater than 3 not supported." << Alert::Raise;
+        break;
       }
     }
-    return dst;
+    // Add edges
+    build.reserve(1, src->na);
+    for (int i = 1; i <= src->na; i++)
+    {
+      assert(src->edge[i].a >= 1);
+      assert(src->edge[i].b >= 1);
+      build.polytope(Geometry::Polytope::Type::Segment,
+          { static_cast<size_t>(src->edge[i].a - 1),
+            static_cast<size_t>(src->edge[i].b - 1) });
+      build.attribute({ 1, i - 1 }, src->edge[i].ref );
+      if (src->edge[i].tag & MG_GEO)
+        build.ridge(i - 1);
+    }
+    // Add triangles
+    build.reserve(2, src->nt);
+    for (int i = 1; i <= src->nt; i++)
+    {
+      assert(src->tria[i].v[0] >= 1);
+      assert(src->tria[i].v[1] >= 1);
+      assert(src->tria[i].v[2] >= 1);
+      build.polytope(Geometry::Polytope::Type::Triangle,
+          { static_cast<size_t>(src->tria[i].v[0] - 1),
+            static_cast<size_t>(src->tria[i].v[1] - 1),
+            static_cast<size_t>(src->tria[i].v[2] - 1) });
+      build.attribute({ 2, i - 1 }, src->tria[i].ref );
+    }
+    // Add tetrahedra
+    build.reserve(3, src->ne);
+    for (int i = 1; i <= src->ne; i++)
+    {
+      assert(src->tetra[i].v[0] >= 1);
+      assert(src->tetra[i].v[1] >= 1);
+      assert(src->tetra[i].v[2] >= 1);
+      assert(src->tetra[i].v[3] >= 1);
+      build.polytope(Geometry::Polytope::Type::Tetrahedron,
+          { static_cast<size_t>(src->tetra[i].v[0] - 1),
+            static_cast<size_t>(src->tetra[i].v[1] - 1),
+            static_cast<size_t>(src->tetra[i].v[2] - 1),
+            static_cast<size_t>(src->tetra[i].v[3] - 1) });
+      build.attribute({ 3, i - 1 }, src->tetra[i].ref );
+    }
+    return build.finalize();
   }
 
   void MMG5::copySolution(const MMG5_pSol src, MMG5_pSol dst)
   {
+    assert(src);
+    assert(dst);
+
     // Copy all non-pointer fields
     *dst = *src;
 
     if (dst->np)
     {
-      // So (dst->size + 1) * (dst->np + 1) seems to work for most
-      // applications
-      MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->np + 1), double,
-          Alert::Exception("Failed to allocate memory for the MMG5_pSol->m").raise());
+      MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), double,
+        Alert::Exception() << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
       std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
     }
     else
@@ -684,7 +637,7 @@ namespace Rodin::External::MMG
     {
       auto nameInLength = std::strlen(src->namein);
       MMG5_SAFE_CALLOC(dst->namein, nameInLength, char,
-          Alert::Exception("Failed to allocate memory for the MMG5_pSol->namein").raise());
+          Alert::Exception() << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
       std::memcpy(dst->namein, src->namein, nameInLength + 1);
     }
     else
@@ -696,7 +649,7 @@ namespace Rodin::External::MMG
     {
       auto nameOutLength = std::strlen(src->nameout);
       MMG5_SAFE_CALLOC(dst->nameout, nameOutLength, char,
-          Alert::Exception("Failed to allocate memory for the MMG5_pSol->nameout").raise());
+          Alert::Exception() << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
       std::memcpy(dst->nameout, src->nameout, nameOutLength + 1);
     }
     else
@@ -707,6 +660,8 @@ namespace Rodin::External::MMG
 
   void MMG5::swapSolution(MMG5_pSol a, MMG5_pSol b)
   {
+    assert(a);
+    assert(b);
     std::swap(a->dim, b->dim);
     std::swap(a->entities, b->entities);
     std::swap(a->m, b->m);
@@ -739,6 +694,7 @@ namespace Rodin::External::MMG
 
   void MMG5::destroyMesh(MMG5_pMesh mesh)
   {
+    assert(mesh);
     if (isSurfaceMesh(mesh))
     {
       MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
@@ -759,6 +715,7 @@ namespace Rodin::External::MMG
 
   MMG5& MMG5::setParameters(MMG5_pMesh mesh)
   {
+    assert(mesh);
     bool isSurface = isSurfaceMesh(mesh);
     switch(mesh->dim)
     {
@@ -842,8 +799,11 @@ namespace Rodin::External::MMG
               mesh, nullptr, MMG3D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
         }
         break;
-        default:
-          Alert::Exception("Unhandled case").raise();
+      }
+      default:
+      {
+        Alert::Exception() << "Unhandled case." << Alert::Raise;
+        break;
       }
     }
     return *this;
