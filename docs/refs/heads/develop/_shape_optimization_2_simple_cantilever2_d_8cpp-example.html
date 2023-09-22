@@ -181,7 +181,7 @@
 <span class="w">    </span><span class="n">Omega</span><span class="p">.</span><span class="n">displace</span><span class="p">(</span><span class="n">g</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
 
 <span class="w">    </span><span class="c1">// Refine the mesh using MMG</span>
-<span class="w">    </span><span class="n">MMG</span><span class="o">::</span><span class="n">Optimize</span><span class="p">().</span><span class="n">setHMax</span><span class="p">(</span><span class="n">hmax</span><span class="p">).</span><span class="n">setHMin</span><span class="p">(</span><span class="n">hmin</span><span class="p">).</span><span class="n">optimize</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span>
+<span class="w">    </span><span class="n">MMG</span><span class="o">::</span><span class="n">Optimizer</span><span class="p">().</span><span class="n">setHMax</span><span class="p">(</span><span class="n">hmax</span><span class="p">).</span><span class="n">setHMin</span><span class="p">(</span><span class="n">hmin</span><span class="p">).</span><span class="n">optimize</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// Save mesh</span>
 <span class="w">    </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span>
