@@ -1,3 +1,5 @@
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ImplicitDomainMesher.h"
 
 namespace Rodin::External::MMG
@@ -75,8 +77,9 @@ namespace Rodin::External::MMG
               {
                 if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_NoSplit, ref, ref))
                 {
-                  Alert::Exception() << "Could not set the multi-material reference lookup."
-                                     << Alert::Raise;
+                  Alert::MemberFunctionException(*this, __func__)
+                    << "Could not set the multi-material reference lookup."
+                    << Alert::Raise;
                 }
               },
               [&](const Split& s)
@@ -84,8 +87,9 @@ namespace Rodin::External::MMG
                 if (!MMG2D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_Split,
                       s.interior, s.exterior))
                 {
-                  Alert::Exception() << "Could not set the multi-material reference lookup."
-                                     << Alert::Raise;
+                  Alert::MemberFunctionException(*this, __func__)
+                    << "Could not set the multi-material reference lookup."
+                    << Alert::Raise;
                 }
               }
           }, split);
@@ -96,7 +100,7 @@ namespace Rodin::External::MMG
       MMG2D_Set_iparameter(mesh, sol, MMG2D_IPARAM_isoref, *m_isoref);
     if (m_meshTheSurface)
     {
-      Alert::Exception()
+      Alert::MemberFunctionException(*this, __func__)
         << "Meshing the surface for a 2D mesh is not supported."
         << Alert::Raise;
     }
@@ -139,8 +143,9 @@ namespace Rodin::External::MMG
             {
               if (!MMG3D_Set_multiMat(mesh, sol, ref, MMG5_MMAT_NoSplit, ref, ref))
               {
-                Alert::Exception() << "Could not set the multi-material reference lookup."
-                                   << Alert::Raise;
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Could not set the multi-material reference lookup."
+                  << Alert::Raise;
               }
             },
             [&](const Split& s)
@@ -148,8 +153,9 @@ namespace Rodin::External::MMG
               if (!MMG3D_Set_multiMat(
                     mesh, sol, ref, MMG5_MMAT_Split, s.interior, s.exterior))
               {
-                Alert::Exception() << "Could not set the multi-material reference lookup."
-                                   << Alert::Raise;
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Could not set the multi-material reference lookup."
+                  << Alert::Raise;
               }
             }
           }, split);
@@ -177,12 +183,16 @@ namespace Rodin::External::MMG
     if (m_isoref)
       MMGS_Set_iparameter(mesh, sol, MMGS_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
-      Alert::Exception() << "Material splitting is not supported for surfaces." << Alert::Raise;
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Material splitting is not supported for surfaces." << Alert::Raise;
+    }
 
     if (m_meshTheSurface)
     {
-      Alert::Exception() << "Meshing the surface for a surface mesh is not supported."
-                         << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__)
+        << "Meshing the surface for a surface mesh is not supported."
+        << Alert::Raise;
     }
     else
     {
@@ -265,7 +275,8 @@ namespace Rodin::External::MMG
       size_t newna = ids.size();
       MMG5_pEdge edges = nullptr;
       MMG5_SAFE_MALLOC(edges, newna + 1, MMG5_Edge,
-          Alert::Exception() << "Failed to reallocate edge memory." << Alert::Raise);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to reallocate edge memory." << Alert::Raise);
       for (int i = 1; i <= newna; i++)
         edges[i] = mesh->edge[ids[i - 1]];
       MMG5_SAFE_FREE(mesh->edge);
@@ -285,7 +296,8 @@ namespace Rodin::External::MMG
       size_t newnt = ids.size();
       MMG5_pTria triangles = nullptr;
       MMG5_SAFE_MALLOC(triangles, newnt + 1, MMG5_Tria,
-          Alert::Exception() << "Failed to reallocate triangles." << Alert::Raise);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to reallocate triangles." << Alert::Raise);
       for (int i = 1; i <= newnt; i++)
         triangles[i] = mesh->tria[ids[i - 1]];
       MMG5_SAFE_FREE(mesh->tria);
@@ -309,12 +321,13 @@ namespace Rodin::External::MMG
           dynamic_cast<const MMG::Mesh&>(ls.getFiniteElementSpace().getMesh()));
     } catch (std::bad_cast&)
     {
-      Alert::Exception() << "Mesh must be of type MMG::Mesh." << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__)
+        << "Mesh must be of type MMG::Mesh." << Alert::Raise;
     }
 
     // Erase boundary elements which have the isoref
-    // if (m_isoref)
-    //  deleteBoundaryRef(mesh, *m_isoref);
+    if (m_isoref)
+      deleteBoundaryRef(mmgMesh, *m_isoref);
 
     MMG5_pSol sol = createSolution(mmgMesh, ls.getFiniteElementSpace().getVectorDimension());
     copySolution(ls, sol);
@@ -364,8 +377,9 @@ namespace Rodin::External::MMG
 
     if (retcode != MMG5_SUCCESS)
     {
-      Alert::Exception() << "Failed to discretize the implicit domain."
-                         << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to discretize the implicit domain."
+        << Alert::Raise;
     }
 
     auto rodinMesh = meshToRodin(mmgMesh);

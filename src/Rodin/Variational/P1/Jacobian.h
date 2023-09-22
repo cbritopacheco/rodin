@@ -9,6 +9,7 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Jacobian.h"
+#include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "P1Element.h"
 #include "Rodin/Geometry/IsoparametricTransformation.h"
@@ -105,14 +106,8 @@ namespace Rodin::Variational
                   return;
                 }
               }
-
-              Alert::MemberFunctionException(*this, __func__)
-                << "Could not determine the trace polytope for the interface "
-                << Alert::Notation::Polytope(d, i)
-                << " with the provided trace domain "
-                << Alert::Notation::Set(traceDomain.begin(), traceDomain.end())
-                << '.'
-                << Alert::Raise;
+              UndeterminedTraceDomainException(
+                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
             }
             return;
           }

@@ -136,7 +136,7 @@ namespace Rodin::External::MMG
           }
           else
           {
-            Alert::Exception() << "Invalid dimension" << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__) << "Invalid dimension" << Alert::Raise;
           }
         }
 
@@ -144,7 +144,7 @@ namespace Rodin::External::MMG
         {
           assert(m_advect.getOutputLog().has_value());
           auto* rdbuf = m_advect.getOutputLog()->rdbuf();
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "MMG::Advect: ISCD::Advection failed."
             << Alert::NewLine
             << rdbuf

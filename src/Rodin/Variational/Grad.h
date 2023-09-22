@@ -78,21 +78,29 @@ namespace Rodin::Variational
         const auto& gf = m_u.get();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
-        if (polytopeMesh.isSubMesh())
+        if (polytope.getMesh() == fes.getMesh())
         {
-          const auto& submesh = polytopeMesh.asSubMesh();
-          assert(submesh.getParent() == fes.getMesh());
-          interpolate(out, submesh.inclusion(p));
-        }
-        else if (fesMesh.isSubMesh())
-        {
-          const auto& submesh = fesMesh.asSubMesh();
-          assert(submesh.getParent() == polytopeMesh);
-          interpolate(out, submesh.restriction(p));
+          interpolate(out, p);
         }
         else
         {
-          interpolate(out, p);
+          if (polytopeMesh.isSubMesh())
+          {
+            const auto& submesh = polytopeMesh.asSubMesh();
+            assert(submesh.getParent() == fes.getMesh());
+            interpolate(out, submesh.inclusion(p));
+          }
+          else if (fesMesh.isSubMesh())
+          {
+            const auto& submesh = fesMesh.asSubMesh();
+            assert(submesh.getParent() == polytopeMesh);
+            interpolate(out, submesh.restriction(p));
+          }
+          else
+          {
+            assert(false);
+            out.setConstant(NAN);
+          }
         }
         return out;
       }
