@@ -469,13 +469,6 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /**
-       * @internal
-       */
-      Mesh& displace(const
-          Variational::GridFunction<Variational::P1<Math::Vector,
-          Context::Serial, Geometry::Mesh<Context::Serial>>>& u);
-
       const PolytopeIndexed<Attribute>& getAttributeIndex() const
       {
         return m_attributeIndex;
@@ -559,6 +552,8 @@ namespace Rodin::Geometry
       * not in the given set.
       */
       virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
+
+      virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap);
 
       SubMeshBase& asSubMesh() override;
 

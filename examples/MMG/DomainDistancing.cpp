@@ -20,40 +20,50 @@ static constexpr Scalar radius = 0.1;
 
 int main(int, char**)
 {
-  const size_t n = 16;
+  // const size_t n = 16;
+  // MMG::Mesh mesh;
+  // mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
+  // mesh.scale(1. / (n - 1));
+
+  // P1 fes(mesh);
+  // MMG::ScalarGridFunction gf(fes);
+  // gf = [](const Geometry::Point& p)
+  //      {
+  //        return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
+  //      };
+
+  // gf.save("LevelSet.gf");
+  // mesh.save("Domain.mesh");
+
+  // MMG::Mesh implicit = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
+  //                                                 .setHMax(hmax)
+  //                                                 .discretize(gf);
+  // P1 miaow(implicit);
+
+  // implicit.save("Discretized.mesh", IO::FileFormat::MEDIT);
+
+  // auto dist = MMG::Distance(miaow).setInteriorDomain(interior).distance(implicit);
+
+  // dist.save("Discretized.sol", IO::FileFormat::MEDIT);
+
+  // MMG::Mesh implicit2 = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
+  //                                                  .split(exterior, { interior, exterior })
+  //                                                  .setHMax(hmax)
+  //                                                  .discretize(dist);
+
+  // MMG::Optimize().setHMin(0.05).setHMax(hmax).optimize(implicit2);
+
+  // implicit2.save("Discretized2.mesh", IO::FileFormat::MEDIT);
+
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
-  mesh.scale(1. / (n - 1));
-
+  mesh.load("degu.mesh", IO::FileFormat::MEDIT);
+  mesh.save("implicit.mesh", IO::FileFormat::MFEM);
   P1 fes(mesh);
-  MMG::ScalarGridFunction gf(fes);
-  gf = [](const Geometry::Point& p)
-       {
-         return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
-       };
+  // MMG::ScalarGridFunction gf(fes);
 
-  gf.save("LevelSet.gf");
-  mesh.save("Domain.mesh");
+  auto dist = MMG::Distancer(fes).distance(mesh);
+  dist.save("implicit.gf");
 
-  MMG::Mesh implicit = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
-                                                  .setHMax(hmax)
-                                                  .discretize(gf);
-  P1 miaow(implicit);
-
-  implicit.save("Discretized.mesh", IO::FileFormat::MEDIT);
-
-  auto dist = MMG::Distance(miaow).setInteriorDomain(interior).distance(implicit);
-
-  dist.save("Discretized.sol", IO::FileFormat::MEDIT);
-
-  MMG::Mesh implicit2 = MMG::ImplicitDomainMesher().split(material, { interior, exterior })
-                                                   .split(exterior, { interior, exterior })
-                                                   .setHMax(hmax)
-                                                   .discretize(dist);
-
-  MMG::Optimize().setHMin(0.05).setHMax(hmax).optimize(implicit2);
-
-  implicit2.save("Discretized2.mesh", IO::FileFormat::MEDIT);
 
   return 0;
 }
