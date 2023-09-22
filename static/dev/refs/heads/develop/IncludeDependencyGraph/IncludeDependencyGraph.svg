@@ -792,7 +792,7 @@
 <g id="node72" class="node">
 <title>Rodin/Geometry/PolytopeIterator.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="10172" cy="-1152" rx="72" ry="72"/>
-<text text-anchor="middle" x="10172" y="-1150.7" font-family="Times,serif" font-size="6.00">Rodin/Geometry/PolytopeIterator.h</text>
+<text text-anchor="middle" x="10172" y="-1150.4" font-family="Times,serif" font-size="7.00">Rodin/Geometry/PolytopeIterator.h</text>
 </g>
 <!-- Rodin/Geometry/Mesh.h&#45;&gt;Rodin/Geometry/PolytopeIterator.h -->
 <g id="edge105" class="edge">
@@ -924,7 +924,7 @@
 <g id="node44" class="node">
 <title>Rodin/Geometry/IsoparametricTransformation.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="10810" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="10810" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Geometry/IsoparametricTransformation.h</text>
+<text text-anchor="middle" x="10810" y="-1330.7" font-family="Times,serif" font-size="6.00">Rodin/Geometry/IsoparametricTransformation.h</text>
 </g>
 <!-- Rodin/Geometry.h&#45;&gt;Rodin/Geometry/IsoparametricTransformation.h -->
 <g id="edge62" class="edge">
@@ -4463,14 +4463,14 @@
 <!-- Rodin/Plot.h -->
 <g id="node166" class="node">
 <title>Rodin/Plot.h</title>
-<ellipse fill="#e6f598" stroke="black" cx="631" cy="-4212" rx="108" ry="108"/>
-<text text-anchor="middle" x="631" y="-4208.5" font-family="Times,serif" font-size="15.00">Rodin/Plot.h</text>
+<ellipse fill="#abdda4" stroke="black" cx="631" cy="-4212" rx="108" ry="108"/>
+<text text-anchor="middle" x="631" y="-4208.3" font-family="Times,serif" font-size="14.00">Rodin/Plot.h</text>
 </g>
 <!-- Rodin/Plot/Plot.h -->
 <g id="node167" class="node">
 <title>Rodin/Plot/Plot.h</title>
-<ellipse fill="#e6f598" stroke="black" cx="631" cy="-3816" rx="108" ry="108"/>
-<text text-anchor="middle" x="631" y="-3812.5" font-family="Times,serif" font-size="15.00">Rodin/Plot/Plot.h</text>
+<ellipse fill="#abdda4" stroke="black" cx="631" cy="-3816" rx="108" ry="108"/>
+<text text-anchor="middle" x="631" y="-3812.3" font-family="Times,serif" font-size="14.00">Rodin/Plot/Plot.h</text>
 </g>
 <!-- Rodin/Plot.h&#45;&gt;Rodin/Plot/Plot.h -->
 <g id="edge412" class="edge">
@@ -4517,8 +4517,8 @@
 <!-- Rodin/Plot/Artist/Figure.h -->
 <g id="node171" class="node">
 <title>Rodin/Plot/Artist/Figure.h</title>
-<ellipse fill="#e6f598" stroke="black" cx="1206" cy="-3456" rx="108" ry="108"/>
-<text text-anchor="middle" x="1206" y="-3452.5" font-family="Times,serif" font-size="15.00">Rodin/Plot/Artist/Figure.h</text>
+<ellipse fill="#abdda4" stroke="black" cx="1206" cy="-3456" rx="108" ry="108"/>
+<text text-anchor="middle" x="1206" y="-3452.3" font-family="Times,serif" font-size="14.00">Rodin/Plot/Artist/Figure.h</text>
 </g>
 <!-- Rodin/Plot/Plot.h&#45;&gt;Rodin/Plot/Artist/Figure.h -->
 <g id="edge416" class="edge">
@@ -4613,8 +4613,8 @@
 <!-- Rodin/Plot/Artist/Figure.hpp -->
 <g id="node191" class="node">
 <title>Rodin/Plot/Artist/Figure.hpp</title>
-<ellipse fill="#e6f598" stroke="black" cx="1380" cy="-3132" rx="108" ry="108"/>
-<text text-anchor="middle" x="1380" y="-3128.5" font-family="Times,serif" font-size="15.00">Rodin/Plot/Artist/Figure.hpp</text>
+<ellipse fill="#abdda4" stroke="black" cx="1380" cy="-3132" rx="108" ry="108"/>
+<text text-anchor="middle" x="1380" y="-3128.3" font-family="Times,serif" font-size="14.00">Rodin/Plot/Artist/Figure.hpp</text>
 </g>
 <!-- Rodin/Plot/Artist/Figure.h&#45;&gt;Rodin/Plot/Artist/Figure.hpp -->
 <g id="edge455" class="edge">
@@ -4805,8 +4805,8 @@
 <!-- Rodin/Plot/Artist/Axes/Axes2D.h -->
 <g id="node210" class="node">
 <title>Rodin/Plot/Artist/Axes/Axes2D.h</title>
-<ellipse fill="#e6f598" stroke="black" cx="1541" cy="-2808" rx="108" ry="108"/>
-<text text-anchor="middle" x="1541" y="-2804.5" font-family="Times,serif" font-size="15.00">Rodin/Plot/Artist/Axes/Axes2D.h</text>
+<ellipse fill="#abdda4" stroke="black" cx="1541" cy="-2808" rx="108" ry="108"/>
+<text text-anchor="middle" x="1541" y="-2804.3" font-family="Times,serif" font-size="14.00">Rodin/Plot/Artist/Axes/Axes2D.h</text>
 </g>
 <!-- Rodin/Plot/Artist/Figure.hpp&#45;&gt;Rodin/Plot/Artist/Axes/Axes2D.h -->
 <g id="edge490" class="edge">
@@ -5040,7 +5040,7 @@
 <g id="node220" class="node">
 <title>Rodin/Plot/Geometry/Point2D.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="2434" cy="-2160" rx="72" ry="72"/>
-<text text-anchor="middle" x="2434" y="-2158.1" font-family="Times,serif" font-size="8.00">Rodin/Plot/Geometry/Point2D.h</text>
+<text text-anchor="middle" x="2434" y="-2157.8" font-family="Times,serif" font-size="9.00">Rodin/Plot/Geometry/Point2D.h</text>
 </g>
 <!-- Rodin/Plot/Geometry/Rectangle.hpp&#45;&gt;Rodin/Plot/Geometry/Point2D.h -->
 <g id="edge525" class="edge">
@@ -5099,8 +5099,8 @@
 <!-- Rodin/Plot/Artist/Axes/Axes2D.hpp -->
 <g id="node211" class="node">
 <title>Rodin/Plot/Artist/Axes/Axes2D.hpp</title>
-<ellipse fill="#e6f598" stroke="black" cx="1789" cy="-2484" rx="108" ry="108"/>
-<text text-anchor="middle" x="1789" y="-2480.5" font-family="Times,serif" font-size="15.00">Rodin/Plot/Artist/Axes/Axes2D.hpp</text>
+<ellipse fill="#abdda4" stroke="black" cx="1789" cy="-2484" rx="108" ry="108"/>
+<text text-anchor="middle" x="1789" y="-2480.3" font-family="Times,serif" font-size="14.00">Rodin/Plot/Artist/Axes/Axes2D.hpp</text>
 </g>
 <!-- Rodin/Plot/Artist/Axes/Axes2D.h&#45;&gt;Rodin/Plot/Artist/Axes/Axes2D.hpp -->
 <g id="edge495" class="edge">
@@ -5196,7 +5196,7 @@
 <g id="node217" class="node">
 <title>Rodin/Plot/Geometry/LineSegment2D.hpp</title>
 <ellipse fill="#66c2a5" stroke="black" cx="2434" cy="-2484" rx="72" ry="72"/>
-<text text-anchor="middle" x="2434" y="-2482.1" font-family="Times,serif" font-size="8.00">Rodin/Plot/Geometry/LineSegment2D.hpp</text>
+<text text-anchor="middle" x="2434" y="-2481.8" font-family="Times,serif" font-size="9.00">Rodin/Plot/Geometry/LineSegment2D.hpp</text>
 </g>
 <!-- Rodin/Plot/Geometry/LineSegment2D.h&#45;&gt;Rodin/Plot/Geometry/LineSegment2D.hpp -->
 <g id="edge505" class="edge">
@@ -5232,7 +5232,7 @@
 <g id="node219" class="node">
 <title>Rodin/Plot/Geometry/Circle.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="2396" cy="-1152" rx="72" ry="72"/>
-<text text-anchor="middle" x="2396" y="-1150.1" font-family="Times,serif" font-size="8.00">Rodin/Plot/Geometry/Circle.h</text>
+<text text-anchor="middle" x="2396" y="-1149.8" font-family="Times,serif" font-size="9.00">Rodin/Plot/Geometry/Circle.h</text>
 </g>
 <!-- Rodin/Plot/Geometry/LineSegment2D.hpp&#45;&gt;Rodin/Plot/Geometry/Circle.h -->
 <g id="edge509" class="edge">
