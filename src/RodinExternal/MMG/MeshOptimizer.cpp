@@ -8,7 +8,7 @@
 
 namespace Rodin::External::MMG
 {
-  int Optimize::optimizeMMG2D(MMG5_pMesh mesh)
+  int Optimizer::optimizeMMG2D(MMG5_pMesh mesh)
   {
     assert(mesh->np > 0 && mesh->nt > 0);
     MMG5_pSol sol = nullptr;
@@ -24,7 +24,7 @@ namespace Rodin::External::MMG
     return rc;
   }
 
-  int Optimize::optimizeMMG3D(MMG5_pMesh mesh)
+  int Optimizer::optimizeMMG3D(MMG5_pMesh mesh)
   {
     assert(mesh->np > 0 && mesh->ne > 0);
     MMG5_pSol sol = nullptr;
@@ -40,7 +40,7 @@ namespace Rodin::External::MMG
     return rc;
   }
 
-  int Optimize::optimizeMMGS(MMG5_pMesh mesh)
+  int Optimizer::optimizeMMGS(MMG5_pMesh mesh)
   {
     assert(mesh->np > 0 && mesh->nt > 0);
     MMG5_pSol sol = nullptr;

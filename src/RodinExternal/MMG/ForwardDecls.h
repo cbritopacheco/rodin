@@ -15,7 +15,7 @@ namespace Rodin::External::MMG
 
   class Adapt;
 
-  class Optimize;
+  class Optimizer;
 
   template <class T>
   class Distancer;

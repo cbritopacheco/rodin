@@ -77,7 +77,7 @@ int main(int, char**)
   mesh.save("Q.medit.mesh", IO::FileFormat::MEDIT);
   mesh.save("Q.mfem.mesh", IO::FileFormat::MFEM);
 
-  MMG::Optimize().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
+  MMG::Optimizer().setAngleDetection(false).setHMin(hmin).setHMax(hmax).optimize(mesh);
 
   // // Refine mesh
   // {

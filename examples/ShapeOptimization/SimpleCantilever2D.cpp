@@ -110,7 +110,7 @@ int main(int, char**)
     Omega.displace(g.getSolution());
 
     // Refine the mesh using MMG
-    MMG::Optimize().setHMax(hmax).setHMin(hmin).optimize(Omega);
+    MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(Omega);
 
     // Save mesh
     Omega.save("Omega.mesh");

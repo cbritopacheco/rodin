@@ -248,7 +248,7 @@ class Environment
                                                 .discretize(m_fireDist);
 
       std::cout << "mmgoptim\n";
-      MMG::Optimize().setAngleDetection(false)
+      MMG::Optimizer().setAngleDetection(false)
                           .setHausdorff(hausdorff)
                           .setHMin(hmin)
                           .setHMax(hmax)
@@ -331,7 +331,7 @@ int main()
       topography.setCorner(it->getIndex());
   }
 
-  MMG::Optimize().setAngleDetection(false)
+  MMG::Optimizer().setAngleDetection(false)
                       .setHausdorff(hausdorff)
                       .setHMin(hmin)
                       .setHMax(hmax)
