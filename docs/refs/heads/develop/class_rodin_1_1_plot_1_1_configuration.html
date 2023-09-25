@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Plot namespace | Rodin</title>
+  <title>Rodin::Plot::Configuration class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -63,50 +63,70 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Plot <span class="m-thin">namespace</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_plot.html">Plot</a>::<wbr/></span>Configuration <span class="m-thin">class</span>
         </h1>
-        <p>Module for visualization tools.</p>
+        <p>Represents the configuration parameters to use for plotting.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_plot_1_1_configuration.html" class="m-doc">Configuration</a>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad8424087fae04c22c46d5075cc9e0ace" class="m-doc">setSampleCount</a>(</span><span class="m-doc-wrap">int sampleCount) -&gt; <a href="class_rodin_1_1_plot_1_1_configuration.html" class="m-doc">Configuration</a>&amp;</span>
             </dt>
-            <dd>Represents the configuration parameters to use for plotting.</dd>
+            <dd></dd>
             <dt>
-              class <a href="class_rodin_1_1_plot_1_1_plot.html" class="m-doc">Plot</a>
-            </dt>
-            <dd>Contains the plotting functionalities.</dd>
-          </dl>
-        </section>
-        <section id="typedef-members">
-          <h2><a href="#typedef-members">Typedefs</a></h2>
-          <dl class="m-doc">
-            <dt>
-              using <a href="#ac0af8cc3193dbe131c932c4907db5a59" class="m-doc">FigureId</a> = decltype(SDL_GetWindowID(std::declval&lt;SDL_Window*&gt;()))
+              <span class="m-doc-wrap-bumper">auto <a href="#a19d3730cbd0390772a4c923af7ce103d" class="m-doc">getSampleCount</a>(</span><span class="m-doc-wrap">) const -&gt; int</span>
             </dt>
             <dd></dd>
           </dl>
         </section>
         <section>
-          <h2>Typedef documentation</h2>
-          <section class="m-doc-details" id="ac0af8cc3193dbe131c932c4907db5a59"><div>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ad8424087fae04c22c46d5075cc9e0ace"><div>
             <h3>
-              using Rodin::<wbr />Plot::<wbr /><a href="#ac0af8cc3193dbe131c932c4907db5a59" class="m-doc-self">FigureId</a> = decltype(SDL_GetWindowID(std::declval&lt;SDL_Window*&gt;()))
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_plot_1_1_configuration.html" class="m-doc">Configuration</a>&amp; Rodin::<wbr />Plot::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8424087fae04c22c46d5075cc9e0ace" class="m-doc-self">setSampleCount</a>(</span><span class="m-doc-wrap">int sampleCount)</span></span>
             </h3>
-<p>Represents the unique identifier of an <a href="class_rodin_1_1_plot_1_1_artist_1_1_figure.html" class="m-doc">Artist::<wbr />Figure</a> instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">sampleCount</td>
+                  <td>Number of samples to use.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Sets the sample count to be used when rendering anti-aliased objects.</p>
+          </div></section>
+          <section class="m-doc-details" id="a19d3730cbd0390772a4c923af7ce103d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />Plot::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19d3730cbd0390772a4c923af7ce103d" class="m-doc-self">getSampleCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of samples used when rendering anti-aliased objects.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
