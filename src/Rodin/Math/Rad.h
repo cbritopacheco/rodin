@@ -6,6 +6,9 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Represents an angle in radians.
+   */
   class Rad : public Unit<Rad, Scalar>
   {
     public:

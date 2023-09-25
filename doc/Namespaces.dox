@@ -35,6 +35,16 @@
  */
 
 /**
+  @dir Rodin/Geometry/Euclidean
+  @brief Namespace @ref Rodin::Geometry::Euclidean
+ */
+
+/**
+  @namespace Rodin::Geometry::Euclidean
+  @brief Module for dealing with Euclidean geometries.
+ */
+
+/**
   @dir Rodin/IO
   @brief Namespace @ref Rodin::IO
  */
@@ -107,7 +117,7 @@
 
 /**
   @namespace Rodin::Math
-  @brief Module for linear algebra operations.
+  @brief Module for general mathematical operations.
  */
 
 
@@ -175,5 +185,10 @@
   optimization of the mesh, to implicit domain meshing. It provides many C++
   wrappers to execute the functionality of the [Mmg
   Platform](https://www.mmgtools.org/).
+ */
+
+/**
+  @namespace Rodin::External::MFEM
+  @brief MFEM integration with Rodin
  */
 
