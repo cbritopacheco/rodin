@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Plot::Geometry::Line2D class | Rodin</title>
+  <title>Rodin::Geometry::Euclidean::Line2D class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,7 +64,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class T&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_plot.html">Plot</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_plot_1_1_geometry.html">Geometry</a>::<wbr/></span>Line2D <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a>::<wbr/></span>Line2D <span class="m-thin">class</span>
         </h1>
         <nav class="m-block m-default">
           <h3>Contents</h3>
@@ -143,8 +143,8 @@ $ (x, y) $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6fe1763fe851cd6b3ed8208db517d700" class="m-doc">Line2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p,
-              const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; q) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a6fe1763fe851cd6b3ed8208db517d700" class="m-doc">Line2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; q) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
           </dl>
@@ -157,7 +157,7 @@ $ (x, y) $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae41719ef9246f4769eda5e04e6da498f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae41719ef9246f4769eda5e04e6da498f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
             <dt>
@@ -177,19 +177,19 @@ $ (x, y) $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1899534555afad888ef9f5c4b7e49b75" class="m-doc">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const -&gt; std::optional&lt;<a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1899534555afad888ef9f5c4b7e49b75" class="m-doc">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const -&gt; std::optional&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad321f53cb2df6dabfc5045c2e7996e81" class="m-doc">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const -&gt; std::variant&lt;std::nullopt_t, <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, std::pair&lt;<a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad321f53cb2df6dabfc5045c2e7996e81" class="m-doc">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const -&gt; std::variant&lt;std::nullopt_t, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, std::pair&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adf76ac5f14fd992266e03251a2428c90" class="m-doc">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const -&gt; std::optional&lt;<a href="class_rodin_1_1_plot_1_1_geometry_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf76ac5f14fd992266e03251a2428c90" class="m-doc">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const -&gt; std::optional&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a38f587aa4aff0c8f3d1c24f541218bfe" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38f587aa4aff0c8f3d1c24f541218bfe" class="m-doc">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
           </dl>
@@ -201,7 +201,7 @@ $ (x, y) $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a222880dbfe0ab6e170ca272417c74ebf" class="m-doc-self">Line2D</a>(</span><span class="m-doc-wrap">T a,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a222880dbfe0ab6e170ca272417c74ebf" class="m-doc-self">Line2D</a>(</span><span class="m-doc-wrap">T a,
               T b,
               T c) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
@@ -261,8 +261,8 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6fe1763fe851cd6b3ed8208db517d700" class="m-doc-self">Line2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p,
-              const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; q) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6fe1763fe851cd6b3ed8208db517d700" class="m-doc-self">Line2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; q) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -286,7 +286,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::optional&lt;T&gt; Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1eef462d826444015630c92c41ea316f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">T x) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">std::optional&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1eef462d826444015630c92c41ea316f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">T x) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -367,7 +367,7 @@ $ k $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae41719ef9246f4769eda5e04e6da498f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae41719ef9246f4769eda5e04e6da498f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -376,7 +376,7 @@ $ k $
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Point to evaluate</td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> to evaluate</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -452,7 +452,7 @@ $ (x, y) $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58071c18e0129943d28f143c0fd90bf1" class="m-doc-self">a</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58071c18e0129943d28f143c0fd90bf1" class="m-doc-self">a</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -478,7 +478,7 @@ $ a $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af13cbd608ee02b88588d7cc84a6fa00a" class="m-doc-self">b</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af13cbd608ee02b88588d7cc84a6fa00a" class="m-doc-self">b</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -504,7 +504,7 @@ $ b $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a660c5f5221a473a498279ae75393a579" class="m-doc-self">c</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a660c5f5221a473a498279ae75393a579" class="m-doc-self">c</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -530,7 +530,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::optional&lt;T&gt; Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13b1c4ef9de1f4380e3cfa4fee56812f" class="m-doc-self">slope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">std::optional&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13b1c4ef9de1f4380e3cfa4fee56812f" class="m-doc-self">slope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -554,7 +554,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1899534555afad888ef9f5c4b7e49b75" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1899534555afad888ef9f5c4b7e49b75" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -699,7 +699,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::variant&lt;std::nullopt_t, <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, std::pair&lt;<a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, <a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt;&gt; Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad321f53cb2df6dabfc5045c2e7996e81" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">std::variant&lt;std::nullopt_t, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, std::pair&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad321f53cb2df6dabfc5045c2e7996e81" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -708,7 +708,7 @@ $ c $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_plot_1_1_geometry_1_1_circle.html" class="m-doc">Circle</a> considered</td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a> considered</td>
                 </tr>
               </tbody>
               <thead>
@@ -740,7 +740,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="class_rodin_1_1_plot_1_1_geometry_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf76ac5f14fd992266e03251a2428c90" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf76ac5f14fd992266e03251a2428c90" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -766,14 +766,14 @@ $ c $
                 </tr>
               </tbody>
             </table>
-<p>Computes the line segment where the start and end points are the points closest to each other in the line and circle, respectively.</p><aside class="m-note m-info"><h4>Note</h4><p>This is equivalent to the result of <code>point.connect(line).reverse();</code></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_plot_1_1_geometry_1_1_point2_d.html#ad60df3217d4d76c1f89b0dab9dbd68c1" class="m-doc">Point2D&lt;T&gt;::<wbr />connect()</a></p></aside>
+<p>Computes the line segment where the start and end points are the points closest to each other in the line and circle, respectively.</p><aside class="m-note m-info"><h4>Note</h4><p>This is equivalent to the result of <code>point.connect(line).reverse();</code></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html#a02a555aa1da0331fc20079b59e6fc32c" class="m-doc">Point2D&lt;T&gt;::<wbr />connect()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a38f587aa4aff0c8f3d1c24f541218bfe"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Plot::<wbr />Geometry::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38f587aa4aff0c8f3d1c24f541218bfe" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_plot_1_1_geometry_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Line2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38f587aa4aff0c8f3d1c24f541218bfe" class="m-doc-self">distance</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
