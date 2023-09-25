@@ -56,15 +56,15 @@ namespace Rodin::Plot::Artist::Axes
       */
       virtual Backend::Renderer::Object2D& getObject2D() override;
 
-   private:
-    // Renderer objects
-    Backend::Renderer::Scene2D   m_scene;
-    Backend::Renderer::Camera2D  m_camera;
+    private:
+      // Renderer objects
+      Backend::Renderer::Scene2D   m_scene;
+      Backend::Renderer::Camera2D  m_camera;
 
-    Backend::Renderer::DrawableGroup2D    m_drawables;
+      Backend::Renderer::DrawableGroup2D    m_drawables;
 
-    // XLimits m_xlim;
-    // YLimits m_ylim;
+      // XLimits m_xlim;
+      // YLimits m_ylim;
   };
 }
 
