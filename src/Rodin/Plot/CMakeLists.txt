@@ -50,7 +50,7 @@ set(RodinPlot_SRCS
 add_library(RodinPlot ${RodinPlot_SRCS} ${RodinPlot_HEADERS} )
 add_library(Rodin::Plot ALIAS RodinPlot)
 
-target_include_directories(RodinVariational
+target_include_directories(RodinPlot
   INTERFACE
   $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
   )
@@ -58,8 +58,8 @@ target_include_directories(RodinVariational
 # ---- Link targets ----------------------------------------------------------
 target_link_libraries(RodinPlot
   PUBLIC
-  Eigen3::Eigen
   Rodin::Rodin
+  Eigen3::Eigen
   Corrade::Main
   Magnum::GL
   Magnum::Magnum
@@ -67,5 +67,6 @@ target_link_libraries(RodinPlot
   Magnum::Primitives
   Magnum::SceneGraph
   Magnum::Application
+  MagnumIntegration::Eigen
   )
 

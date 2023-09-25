@@ -4,17 +4,16 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CORE_GEOMETRY_CIRCLE_H
-#define RODIN_CORE_GEOMETRY_CIRCLE_H
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_CIRCLE_H
+#define RODIN_GEOMETRY_EUCLIDEAN_CIRCLE_H
 
 #include <variant>
 
-#include <Magnum/Math/Angle.h>
-
+#include "Rodin/Math/Rad.h"
 #include "ForwardDecls.h"
 #include "Base.h"
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   /**
   * \f[
@@ -22,7 +21,7 @@ namespace Rodin::Plot::Geometry
   * \f]
   */
   template <class T>
-  class Circle : public Base<T, Circle<T>>
+  class Circle : public Base<Circle<T>, T>
   {
    public:
     constexpr
@@ -52,7 +51,7 @@ namespace Rodin::Plot::Geometry
      */
     inline
     constexpr
-    Point2D<T> operator()(const Magnum::Math::Rad<T>& angle) const;
+    Point2D<T> operator()(const Math::Rad& angle) const;
 
     /**
      * @returns The radius of the circle.
@@ -86,11 +85,11 @@ namespace Rodin::Plot::Geometry
 
     inline
     constexpr
-    Line2D<T> tangent(const Magnum::Math::Rad<T>& angle);
+    Line2D<T> tangent(const Math::Rad& angle);
 
-   private:
-    Point2D<T>   m_center;
-    T         m_radius;
+    private:
+      Point2D<T>    m_center;
+      T             m_radius;
   };
 }
 

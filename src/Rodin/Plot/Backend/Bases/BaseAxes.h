@@ -12,67 +12,69 @@
 
 #include <Magnum/Array.h>
 
+#include "Rodin/Types.h"
 #include "Rodin/Plot/ForwardDecls.h"
 #include "Rodin/Plot/Backend/Event.h"
-#include "Rodin/Plot/Geometry/Rectangle.h"
+#include "Rodin/Geometry/Euclidean/Rectangle.h"
 
 namespace Rodin::Plot::Backend::Bases
 {
   class BaseAxes
   {
-   public:
-    struct XLimits
-    {
-      float left, right;
-    };
+    public:
+      struct XLimits
+      {
+        Float left, right;
+      };
 
-    struct YLimits
-    {
-      float bottom, top;
-    };
+      struct YLimits
+      {
+        Float bottom, top;
+      };
 
-    BaseAxes(
-       Artist::Figure& fig,
-       Magnum::Math::Vector2<int> bottomLeft,
-       Magnum::Math::Vector2<int> size,
-       bool frameEnabled);
+      BaseAxes(
+          Artist::Figure& fig,
+          const Magnum::Math::Vector2<Integer>& bottomLeft,
+          const Magnum::Math::Vector2<Integer>& size,
+          Boolean frameEnabled);
 
-    virtual ~BaseAxes() = default;
+      virtual ~BaseAxes() = default;
 
-    virtual void drawContent() = 0;
+      virtual void drawContent() = 0;
 
-    Magnum::Math::Vector2<int> getSize() const;
+      const Magnum::Math::Vector2<Integer>& getSize() const;
 
-    Magnum::Math::Vector2<int> getBottomLeft() const;
+      const Magnum::Math::Vector2<Integer>& getBottomLeft() const;
 
-    Artist::Figure& getFigure();
-    const Artist::Figure& getFigure() const;
+      Artist::Figure& getFigure();
+      const Artist::Figure& getFigure() const;
 
-    bool isFrameEnabled() const;
+      bool isFrameEnabled() const;
 
-    BaseAxes& enableFrame(bool v);
+      BaseAxes& enableFrame(Boolean v);
 
-    XLimits getXLimits() const;
+      XLimits getXLimits() const;
 
-    YLimits getYLimits() const;
+      YLimits getYLimits() const;
 
-    BaseAxes& setXLimits(const XLimits& xlim);
-    BaseAxes& setYLimits(const YLimits& ylim);
+      BaseAxes& setXLimits(const XLimits& xlim);
+      BaseAxes& setYLimits(const YLimits& ylim);
 
-    Geometry::Rectangle<int> getBoundingBox() const;
+      Geometry::Euclidean::Rectangle<Integer> getBoundingBox() const;
 
-    virtual void handle(const Backend::Event::MouseMotionEvent& e) = 0;
-    virtual void handle(const Backend::Event::MouseButtonEvent& e) = 0;
-    virtual void handle(const Backend::Event::MouseWheelEvent& e) = 0;
-   private:
-    Artist::Figure&     m_figure;
+      virtual void handle(const Backend::Event::MouseMotionEvent& e) = 0;
+      virtual void handle(const Backend::Event::MouseButtonEvent& e) = 0;
+      virtual void handle(const Backend::Event::MouseWheelEvent& e) = 0;
 
-    Magnum::Math::Vector2<int> m_bottomLeft;
-    Magnum::Math::Vector2<int> m_size;
+    private:
+      Artist::Figure&     m_figure;
 
-    bool       m_frameEnabled;
-    XLimits     m_xlim;
-    YLimits     m_ylim;
+      Magnum::Math::Vector2<Integer> m_bottomLeft;
+      Magnum::Math::Vector2<Integer> m_size;
+
+      Boolean     m_frameEnabled;
+      XLimits     m_xlim;
+      YLimits     m_ylim;
   };
 }
 

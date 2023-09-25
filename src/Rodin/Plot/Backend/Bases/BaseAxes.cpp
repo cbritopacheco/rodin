@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <cassert>
+#include <Magnum/EigenIntegration/Integration.h>
 
 #include "Rodin/Plot/Artist/Figure.h"
 
@@ -14,43 +15,43 @@ namespace Rodin::Plot::Backend::Bases
 {
   BaseAxes::BaseAxes(
     Artist::Figure& figure,
-    Magnum::Math::Vector2<int> bottomLeft,
-    Magnum::Math::Vector2<int> size,
-    bool frameEnabled)
-   : m_figure(figure),
-    m_bottomLeft(bottomLeft),
-    m_size(size),
-    m_frameEnabled(frameEnabled)
+    const Magnum::Math::Vector2<Integer>& bottomLeft,
+    const Magnum::Math::Vector2<Integer>& size,
+    Boolean frameEnabled)
+    : m_figure(figure),
+      m_bottomLeft(bottomLeft),
+      m_size(size),
+      m_frameEnabled(frameEnabled)
   {}
 
-  Magnum::Math::Vector2<int> BaseAxes::getBottomLeft() const
+  const Magnum::Math::Vector2<Integer>& BaseAxes::getBottomLeft() const
   {
-   return m_bottomLeft;
+    return m_bottomLeft;
   }
 
-  Magnum::Math::Vector2<int> BaseAxes::getSize() const
+  const Magnum::Math::Vector2<Integer>& BaseAxes::getSize() const
   {
-   return m_size;
+    return m_size;
   }
 
   Artist::Figure& BaseAxes::getFigure()
   {
-   return m_figure;
+    return m_figure;
   }
 
   const Artist::Figure& BaseAxes::getFigure() const
   {
-   return m_figure;
+    return m_figure;
   }
 
-  bool BaseAxes::isFrameEnabled() const
+  Boolean BaseAxes::isFrameEnabled() const
   {
-   return m_frameEnabled;
+    return m_frameEnabled;
   }
 
   BaseAxes::XLimits BaseAxes::getXLimits() const
   {
-   return m_xlim;
+    return m_xlim;
   }
 
   BaseAxes::YLimits BaseAxes::getYLimits() const
@@ -58,7 +59,7 @@ namespace Rodin::Plot::Backend::Bases
    return m_ylim;
   }
 
-  BaseAxes& BaseAxes::enableFrame(bool v)
+  BaseAxes& BaseAxes::enableFrame(Boolean v)
   {
    m_frameEnabled = v;
    return *this;
@@ -66,25 +67,22 @@ namespace Rodin::Plot::Backend::Bases
 
   BaseAxes& BaseAxes::setXLimits(const XLimits& xlim)
   {
-   assert(xlim.left < xlim.right);
-   m_xlim = xlim;
-   return *this;
+    assert(xlim.left < xlim.right);
+    m_xlim = xlim;
+    return *this;
   }
 
   BaseAxes& BaseAxes::setYLimits(const YLimits& ylim)
   {
-   assert(ylim.bottom < ylim.top);
-   m_ylim = ylim;
-   return *this;
+    assert(ylim.bottom < ylim.top);
+    m_ylim = ylim;
+    return *this;
   }
 
-  Geometry::Rectangle<int> BaseAxes::getBoundingBox() const
+  Geometry::Euclidean::Rectangle<Integer> BaseAxes::getBoundingBox() const
   {
-   return Geometry::Rectangle<int>(
-      getBottomLeft(),
-      {
-       getBottomLeft().x() + getSize().x(),
-       getBottomLeft().y() + getSize().y()
-      });
+    return Geometry::Euclidean::Rectangle<Integer>(
+        { getBottomLeft().x(), getBottomLeft().y() },
+        { getBottomLeft().x() + getSize().x(), getBottomLeft().y() + getSize().y() });
   }
 }

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CORE_GEOMETRY_LINE2D_H
-#define RODIN_CORE_GEOMETRY_LINE2D_H
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_LINE2D_H
+#define RODIN_GEOMETRY_EUCLIDEAN_LINE2D_H
 
 #include <variant>
 #include <optional>
@@ -13,7 +13,7 @@
 #include "ForwardDecls.h"
 #include "Base.h"
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   /**
   * Represents a two-dimensional line in general form.
@@ -24,7 +24,7 @@ namespace Rodin::Plot::Geometry
   * \f]
   */
   template <class T>
-  class Line2D : public Base<T, Line2D<T>>
+  class Line2D : public Base<Line2D<T>, T>
   {
    public:
     /**

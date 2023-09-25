@@ -32,7 +32,17 @@ namespace Rodin::Math
   using Vector8 = FixedSizeVector<8>;
   using Vector16 = FixedSizeVector<16>;
   using Vector32 = FixedSizeVector<32>;
+  using Vector64 = FixedSizeVector<64>;
   using Vector128 = FixedSizeVector<128>;
+
+  using Vector2i = Eigen::Vector<Integer, 2>;
+  using Vector3i = Eigen::Vector<Integer, 3>;
+  using Vector4i = Eigen::Vector<Integer, 4>;
+  using Vector8i = Eigen::Vector<Integer, 8>;
+  using Vector16i = Eigen::Vector<Integer, 16>;
+  using Vector32i = Eigen::Vector<Integer, 32>;
+  using Vector64i = Eigen::Vector<Integer, 64>;
+  using Vector128i = Eigen::Vector<Integer, 128>;
 }
 
 #endif
