@@ -5,6 +5,9 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Base class for units.
+   */
   template <class Derived, class T>
   class Unit
   {
