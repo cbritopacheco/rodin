@@ -21,116 +21,115 @@
 
 namespace Rodin::Plot::Artist
 {
-  class Figure :  public Backend::Bases::BaseFigure,
-            public Backend::Bases::BaseTopLevelArtist2D
+  class Figure : public Backend::Bases::BaseFigure, public Backend::Bases::BaseTopLevelArtist2D
   {
-   struct AxesWrapper
-   {
-    std::unique_ptr<Backend::Bases::BaseAxes> axes;
-    std::reference_wrapper<Backend::Renderer::Drawables::Frame> frame;
-   };
+    struct AxesWrapper
+    {
+      std::unique_ptr<Backend::Bases::BaseAxes> axes;
+      std::reference_wrapper<Backend::Renderer::Drawables::Frame> frame;
+    };
 
-   public:
-    using Backend::Bases::BaseFigure::handle;
+    public:
+      using Backend::Bases::BaseFigure::handle;
 
-    /**
-     * Constructs a Figure object with a window size of 800x600 pixels.
-     * @param pltRef Plot reference
-     */
-    Figure(Plot& pltRef);
+      /**
+       * Constructs a Figure object with a window size of 800x600 pixels.
+       * @param pltRef Plot reference
+       */
+      Figure(Plot& pltRef);
 
-    /**
-     * Constructs a Figure object.
-     * @param pltRef Plot reference
-     * @param width Width in pixels of the window
-     * @param Height Height in pixels of the window
-     */
-    Figure(Plot& pltRef, int width, int height);
+      /**
+       * Constructs a Figure object.
+       * @param pltRef Plot reference
+       * @param width Width in pixels of the window
+       * @param Height Height in pixels of the window
+       */
+      Figure(Plot& pltRef, int width, int height);
 
-    /**
-     * Constructs a Figure object.
-     * @param pltRef Plot reference.
-     * @param width Width in pixels of the window.
-     * @param Height Height in pixels of the window.
-     * @param title Title of the window.
-     */
-    Figure(Plot& pltRef, int width, int height, const std::string& title);
+      /**
+       * Constructs a Figure object.
+       * @param pltRef Plot reference.
+       * @param width Width in pixels of the window.
+       * @param Height Height in pixels of the window.
+       * @param title Title of the window.
+       */
+      Figure(Plot& pltRef, int width, int height, const std::string& title);
 
-    ~Figure() = default;
+      ~Figure() = default;
 
-    /**
-     * Add an axes to the figure.
-     * @tparam AxesT Type of the Axes which will be added. Default is
-     *  Rodin::Plot::Axes2D.
-     * @tparam Args Arguments to forward to the AxesT constructor.
-     * @returns A reference to the added Axes.
-     * @warning The returned reference will be invalidated once the figure
-     * object is destroyed.
-     */
-    template <class AxesT = Axes::Axes2D, class ... Args>
-    AxesT& addAxes(Args&&... args);
+      /**
+       * Add an axes to the figure.
+       * @tparam AxesT Type of the Axes which will be added. Default is
+       *  Rodin::Plot::Axes2D.
+       * @tparam Args Arguments to forward to the AxesT constructor.
+       * @returns A reference to the added Axes.
+       * @warning The returned reference will be invalidated once the figure
+       * object is destroyed.
+       */
+      template <class AxesT = Axes::Axes2D, class ... Args>
+        AxesT& addAxes(Args&&... args);
 
-    /**
-     * Add an axes to the figure.
-     * @tparam AxesT Type of the Axes which will be added. Default is
-     *  Rodin::Plot::Axes2D.
-     * @warning The returned reference will be invalidated once the figure
-     * object is destroyed.
-     */
-    template <class AxesT = Axes::Axes2D>
-    AxesT& addAxes();
+      /**
+       * Add an axes to the figure.
+       * @tparam AxesT Type of the Axes which will be added. Default is
+       *  Rodin::Plot::Axes2D.
+       * @warning The returned reference will be invalidated once the figure
+       * object is destroyed.
+       */
+      template <class AxesT = Axes::Axes2D>
+        AxesT& addAxes();
 
-    /**
-     * Draws the figure's axes to its frame buffer.
-     */
-    void drawContent() override;
+      /**
+       * Draws the figure's axes to its frame buffer.
+       */
+      void drawContent() override;
 
-    /**
-     * Clears the figure's frame buffer.
-     */
-    void clear();
+      /**
+       * Clears the figure's frame buffer.
+       */
+      void clear();
 
-    void handle(const Backend::Event::MouseMotionEvent& e) override;
-    void handle(const Backend::Event::MouseButtonEvent& e) override;
-    void handle(const Backend::Event::MouseWheelEvent& e) override;
+      void handle(const Backend::Event::MouseMotionEvent& e) override;
+      void handle(const Backend::Event::MouseButtonEvent& e) override;
+      void handle(const Backend::Event::MouseWheelEvent& e) override;
 
-    Plot& getPlot();
+      Plot& getPlot();
 
-    /**
-     * Returns the owning Plot reference.
-     */
-    const Plot& getPlot() const;
+      /**
+       * Returns the owning Plot reference.
+       */
+      const Plot& getPlot() const;
 
-    virtual Backend::Renderer::DrawableGroup2D& getDrawableGroup() override;
-    virtual const Backend::Renderer::DrawableGroup2D& getDrawableGroup() const override;
+      virtual Backend::Renderer::DrawableGroup2D& getDrawableGroup() override;
+      virtual const Backend::Renderer::DrawableGroup2D& getDrawableGroup() const override;
 
-    /**
-     * Returns the 2D object handle.
-     */
-    Backend::Renderer::Object2D& getObject2D() override;
+      /**
+       * Returns the 2D object handle.
+       */
+      Backend::Renderer::Object2D& getObject2D() override;
 
-    /**
-     * Indicates if the figure's contents require re-drawing.
-     * @retval true If requires redrawing
-     * @retval false If does not require redraw
-     */
-    bool redraw() const;
+      /**
+       * Indicates if the figure's contents require re-drawing.
+       * @retval true If requires redrawing
+       * @retval false If does not require redraw
+       */
+      bool redraw() const;
 
-   private:
-    static unsigned int s_figureCount;
+    private:
+      static unsigned int s_figureCount;
 
-    // General references
-    Plot&                          m_pltRef;
+      // General references
+      Plot&                          m_pltRef;
 
-    // Renderer objects
-    Backend::Renderer::Scene2D            m_scene;
-    Backend::Renderer::Camera2D           m_camera;
-    Backend::Renderer::DrawableGroup2D      m_drawables;
+      // Renderer objects
+      Backend::Renderer::Scene2D            m_scene;
+      Backend::Renderer::Camera2D           m_camera;
+      Backend::Renderer::DrawableGroup2D      m_drawables;
 
-    // Managed objects
-    std::vector<AxesWrapper>       m_axes;
+      // Managed objects
+      std::vector<AxesWrapper>       m_axes;
 
-    bool m_redraw;
+      bool m_redraw;
   };
 }
 

@@ -9,25 +9,28 @@
 
 namespace Rodin::Plot
 {
+  /**
+   * @brief Represents the configuration parameters to use for plotting.
+   */
   class Configuration
   {
-   public:
-    Configuration();
+    public:
+      Configuration();
 
-    /**
-     * Sets the sample count to be used when rendering anti-aliased objects.
-     * @param sampleCount Number of samples to use.
-     * @returns Reference to self for method chaining.
-     */
-    Configuration& setSampleCount(int sampleCount);
+      /**
+       * Sets the sample count to be used when rendering anti-aliased objects.
+       * @param sampleCount Number of samples to use.
+       * @returns Reference to self for method chaining.
+       */
+      Configuration& setSampleCount(int sampleCount);
 
-    /**
-     * @returns Number of samples used when rendering anti-aliased objects.
-     */
-    int getSampleCount() const;
+      /**
+       * @returns Number of samples used when rendering anti-aliased objects.
+       */
+      int getSampleCount() const;
 
-   private:
-    int m_sampleCount;
+    private:
+      int m_sampleCount;
   };
 }
 

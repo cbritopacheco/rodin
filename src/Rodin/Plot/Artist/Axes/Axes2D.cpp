@@ -28,13 +28,13 @@ namespace Rodin::Plot::Artist::Axes
   void Axes2D::drawContent()
   {
     m_camera.setProjectionMatrix(
-       Magnum::Math::Matrix3<Float>::projection({
-         getXLimits().right - getXLimits().left,
-         getYLimits().top - getYLimits().bottom }));
+        Magnum::Math::Matrix3<Float>::projection({
+          getXLimits().right - getXLimits().left,
+          getYLimits().top - getYLimits().bottom }));
     m_camera.getObject2D().setTransformation(
-       Magnum::Math::Matrix3<Float>::translation({
-         (getXLimits().right + getXLimits().left) / Float(2),
-         (getYLimits().top + getYLimits().bottom) / Float(2) }));
+        Magnum::Math::Matrix3<Float>::translation({
+          (getXLimits().right + getXLimits().left) / Float(2),
+          (getYLimits().top + getYLimits().bottom) / Float(2) }));
     m_camera.draw(getDrawableGroup());
   }
 
@@ -47,7 +47,7 @@ namespace Rodin::Plot::Artist::Axes
       auto axesSize = getSize();
 
       Float dx = e.getMotionX() * (xlim.right - xlim.left) / axesSize.x(),
-          dy = e.getMotionY() * (ylim.top - ylim.bottom) / axesSize.y();
+            dy = e.getMotionY() * (ylim.top - ylim.bottom) / axesSize.y();
 
       xlim.left   -= dx;
       xlim.right  -= dx;
@@ -83,16 +83,16 @@ namespace Rodin::Plot::Artist::Axes
 
   Backend::Renderer::Object2D& Axes2D::getObject2D()
   {
-   return m_scene;
+    return m_scene;
   }
 
   Backend::Renderer::DrawableGroup2D& Axes2D::getDrawableGroup()
   {
-   return m_drawables;
+    return m_drawables;
   }
 
   const Backend::Renderer::DrawableGroup2D& Axes2D::getDrawableGroup() const
   {
-   return m_drawables;
+    return m_drawables;
   }
 }
