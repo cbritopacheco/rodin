@@ -1,5 +1,5 @@
-#ifndef RODIN_CORE_GEOMETRY_SEGMENT2D_IPP
-#define RODIN_CORE_GEOMETRY_SEGMENT2D_IPP
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_SEGMENT2D_IPP
+#define RODIN_GEOMETRY_EUCLIDEAN_SEGMENT2D_IPP
 
 #include <Eigen/Core>
 
@@ -8,7 +8,7 @@
 
 #include "LineSegment2D.h"
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
 
   template <class T>
@@ -39,7 +39,7 @@ namespace Rodin::Plot::Geometry
   template <class T>
   inline
   constexpr
-  Magnum::Math::Vector2<T> LineSegment2D<T>::direction() const
+  Eigen::Vector2<T> LineSegment2D<T>::direction() const
   {
     return (m_end - m_start).normalized();
   }

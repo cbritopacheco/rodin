@@ -1,5 +1,5 @@
-#ifndef RODIN_CORE_GEOMETRY_POINT2D_IPP
-#define RODIN_CORE_GEOMETRY_POINT2D_IPP
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_POINT2D_IPP
+#define RODIN_GEOMETRY_EUCLIDEAN_POINT2D_IPP
 
 #include "Line2D.h"
 #include "Circle.h"
@@ -7,7 +7,7 @@
 
 #include "Point2D.h"
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   template <class T>
   inline

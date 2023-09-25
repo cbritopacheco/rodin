@@ -123,17 +123,17 @@ namespace Rodin::Plot::Artist
 
   void Figure::handle(const Backend::Event::MouseWheelEvent& e)
   {
-   m_redraw = true;
-   auto mousePos = getPlot().getMousePosition();
-   for (auto it = m_axes.rbegin(); it != m_axes.rend(); it++)
-   {
-    auto& ax = *it;
-    if (ax.axes->getBoundingBox().contains(mousePos))
+    m_redraw = true;
+    auto mousePos = getPlot().getMousePosition();
+    for (auto it = m_axes.rbegin(); it != m_axes.rend(); it++)
     {
-      ax.axes->handle(e);
-      return;
+      auto& ax = *it;
+      if (ax.axes->getBoundingBox().contains(mousePos.x(), mousePos.y()))
+      {
+        ax.axes->handle(e);
+        return;
+      }
     }
-   }
   }
 
   void Figure::clear()
