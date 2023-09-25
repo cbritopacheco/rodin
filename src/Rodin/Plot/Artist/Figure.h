@@ -21,6 +21,9 @@
 
 namespace Rodin::Plot::Artist
 {
+  /**
+   * @brief Represents a figure plot.
+   */
   class Figure : public Backend::Bases::BaseFigure, public Backend::Bases::BaseTopLevelArtist2D
   {
     struct AxesWrapper

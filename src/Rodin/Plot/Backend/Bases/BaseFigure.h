@@ -19,60 +19,63 @@
 
 namespace Rodin::Plot::Backend::Bases
 {
+  /**
+   * @brief Base class for figures.
+   */
   class BaseFigure
   {
-   public:
-    BaseFigure(const BaseFigure&) = delete;
-    void operator=(const BaseFigure&) = delete;
+    public:
+      BaseFigure(const BaseFigure&) = delete;
+      void operator=(const BaseFigure&) = delete;
 
-    BaseFigure(const SDL_GLContext& glContext, const std::string& title,
-       int width, int height);
+      BaseFigure(const SDL_GLContext& glContext, const std::string& title,
+          int width, int height);
 
-    BaseFigure(BaseFigure&& other);
+      BaseFigure(BaseFigure&& other);
 
-    virtual ~BaseFigure();
+      virtual ~BaseFigure();
 
-    void swapBuffers();
+      void swapBuffers();
 
-    void raise();
+      void raise();
 
-    FigureId getId() const;
+      FigureId getId() const;
 
-    bool isVisible() const;
+      bool isVisible() const;
 
-    std::string getTitle() const;
+      std::string getTitle() const;
 
-    BaseFigure& setVisible(bool isVisible);
+      BaseFigure& setVisible(bool isVisible);
 
-    BaseFigure& setTitle(const std::string& title);
+      BaseFigure& setTitle(const std::string& title);
 
-    bool makeCurrent();
+      bool makeCurrent();
 
-    WindowHandle getWindowHandle();
+      WindowHandle getWindowHandle();
 
-    ConstWindowHandle getWindowHandle() const;
+      ConstWindowHandle getWindowHandle() const;
 
-    Magnum::Math::Vector2<int> getWindowSize() const;
+      Magnum::Math::Vector2<int> getWindowSize() const;
 
-    Magnum::Math::Vector2<float> getDPIScaling() const;
+      Magnum::Math::Vector2<float> getDPIScaling() const;
 
-    Magnum::Math::Vector2<int> getFrameBufferSize() const;
+      Magnum::Math::Vector2<int> getFrameBufferSize() const;
 
-    virtual void drawContent() = 0;
+      virtual void drawContent() = 0;
 
-    virtual void handle(const Backend::Event::MouseMotionEvent&) = 0;
-    virtual void handle(const Backend::Event::MouseButtonEvent&) = 0;
-    virtual void handle(const Backend::Event::MouseWheelEvent&) = 0;
+      virtual void handle(const Backend::Event::MouseMotionEvent&) = 0;
+      virtual void handle(const Backend::Event::MouseButtonEvent&) = 0;
+      virtual void handle(const Backend::Event::MouseWheelEvent&) = 0;
 
-   private:
-    const SDL_GLContext&   m_glContext;
-    WindowHandle        m_window;
+    private:
+      const SDL_GLContext&   m_glContext;
+      WindowHandle        m_window;
 
-    FigureId    m_id;
-    std::string  m_title;
-    int        m_width,
-              m_height;
-    bool       m_isVisible;
+      FigureId    m_id;
+      std::string  m_title;
+      int        m_width,
+                 m_height;
+      bool       m_isVisible;
 
   };
 }
