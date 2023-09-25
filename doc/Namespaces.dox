@@ -65,6 +65,107 @@
  */
 
 /**
+  @dir Rodin/Plot/Artist
+  @brief Namespace @ref Rodin::Plot::Artist
+ */
+
+/**
+  @namespace Rodin::Plot::Artist
+  @brief Module for Rodin::Plot artists.
+ */
+
+/**
+  @dir Rodin/Plot/Artist/Axes
+  @brief Namespace @ref Rodin::Plot::Artist::Axes
+ */
+
+/**
+  @namespace Rodin::Plot::Artist::Axes
+  @brief Contains artist functionality for Axes.
+ */
+
+/**
+  @dir Rodin/Plot/Artist/Axis
+  @brief Namespace @ref Rodin::Plot::Artist::Axis
+ */
+
+/**
+  @namespace Rodin::Plot::Artist::Axis
+  @brief Contains artist functionality for Axis.
+ */
+
+/**
+  @dir Rodin/Plot/Artist/Lines
+  @brief Namespace @ref Rodin::Plot::Artist::Lines
+ */
+
+/**
+  @namespace Rodin::Plot::Artist::Lines
+  @brief Contains artist functionality for Lines.
+ */
+
+/**
+  @dir Rodin/Plot/Backend
+  @brief Namespace @ref Rodin::Plot::Backend
+ */
+
+/**
+  @namespace Rodin::Plot::Backend
+  @brief Module for the Rodin::Plot backend.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Bases
+  @brief Namespace @ref Rodin::Plot::Backend::Bases
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Bases
+  @brief Contains base backend functionality.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Renderer
+  @brief Namespace @ref Rodin::Plot::Backend::Event
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Renderer
+  @brief Contains backend renderer functionality.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Renderer/Drawables
+  @brief Namespace @ref Rodin::Plot::Backend::Renderer::Drawables
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Renderer::Drawables
+  @brief Contains backend renderer for drawables.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Event
+  @brief Namespace @ref Rodin::Plot::Backend::Event
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Event
+  @brief Contains backend event functionality.
+ */
+
+/**
+  @dir Rodin/Plot/GUI
+  @brief Namespace @ref Rodin::Plot::GUI
+ */
+
+/**
+  @namespace Rodin::Plot::GUI
+  @brief Contains GUI functionality.
+ */
+
+
+/**
   @dir Rodin/Variational
   @brief Namespace @ref Rodin::Variational
  */

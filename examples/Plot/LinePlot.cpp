@@ -1,6 +1,6 @@
 /**
  * @file LinePlot.cpp
- * Demonstrates a very simple use of the Feather::Plot API by plotting a sine
+ * Demonstrates a very simple use of the Rodin::Plot API by plotting a sine
  * curve.
  */
 #include <Rodin/Plot.h>
