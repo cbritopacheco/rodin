@@ -12,12 +12,15 @@
 
 namespace Rodin::Plot::Backend::Renderer
 {
+  /**
+   * @brief Represents a camera in 2D.
+   */
   class Camera2D : public Bases::BaseCamera2D
   {
-   public:
-    Camera2D(Object2D& scene)
-      : Bases::BaseCamera2D(scene)
-    {}
+    public:
+      Camera2D(Object2D& scene)
+        : Bases::BaseCamera2D(scene)
+      {}
   };
 }
 

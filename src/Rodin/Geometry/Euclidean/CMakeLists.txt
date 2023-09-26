@@ -1,4 +1,4 @@
-set(RodinCoreGeometry_HEADERS
+set(RodinGeometryEuclidean_HEADERS
   Base.h
   Circle.h
   Concepts.h
@@ -8,7 +8,7 @@ set(RodinCoreGeometry_HEADERS
   Point2D.h
   Rectangle.h)
 
-set(RodinCoreGeometry_SRCS
+set(RodinGeometryEuclidean_SRCS
   Circle.hpp
   Line2D.hpp
   LineSegment2D.hpp
@@ -18,24 +18,21 @@ set(RodinCoreGeometry_SRCS
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)
   list(
-    TRANSFORM RodinCoreGeometry_SRCS
+    TRANSFORM RodinGeometryEuclidean_SRCS
     PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/"
     )
   list(
-    TRANSFORM RodinCoreGeometry_HEADERS
+    TRANSFORM RodinGeometryEuclidean_HEADERS
     PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/"
     )
 endif()
 
-add_library(RodinCoreGeometry INTERFACE)
+add_library(RodinGeometryEuclidean INTERFACE)
 add_library(Rodin::Core::Geometry ALIAS RodinCore)
-target_sources(RodinCoreGeometry
+target_sources(RodinGeometryEuclidean
   INTERFACE
-  ${RodinCoreGeometry_SRCS}
-  ${RodinCoreGeometry_HEADERS})
+  ${RodinGeometryEuclidean_SRCS}
+  ${RodinGeometryEuclidean_HEADERS})
 
 # ---- Link targets ----------------------------------------------------------
-target_link_libraries(RodinCoreGeometry
-  PUBLIC
-  Rodin::Core
-  Eigen3::Eigen)
+target_link_libraries(RodinGeometryEuclidean PUBLIC Eigen3::Eigen)

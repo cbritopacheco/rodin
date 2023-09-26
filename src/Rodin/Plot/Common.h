@@ -14,41 +14,42 @@
 namespace Rodin::Plot
 {
   /**
-  * Represents the unique identifier of an Artist::Figure instance.
-  */
-  using FigureId       = decltype(SDL_GetWindowID(std::declval<SDL_Window*>()));
+   * Represents the unique identifier of an Artist::Figure instance.
+   */
+  using FigureId = decltype(SDL_GetWindowID(std::declval<SDL_Window*>()));
 
-  using WindowHandle    = SDL_Window*;
+  using WindowHandle = SDL_Window*;
+
   using ConstWindowHandle = const SDL_Window*;
 
   enum LineStyle
   {
-   Solid,
-   Dashed,
-   DashDotted,
-   Dotted
+    Solid,
+    Dashed,
+    DashDotted,
+    Dotted
   };
 
   class DashTuple
   {
-   public:
-   DashTuple(int offset, std::vector<int> sequence)
-    : m_offset(offset), m_sequence(sequence)
-   {}
+    public:
+      DashTuple(int offset, std::vector<int> sequence)
+        : m_offset(offset), m_sequence(sequence)
+      {}
 
-   const std::vector<int>& getSequence() const
-   {
-    return m_sequence;
-   }
+      const std::vector<int>& getSequence() const
+      {
+        return m_sequence;
+      }
 
-   int getOffset()
-   {
-    return m_offset;
-   }
+      int getOffset()
+      {
+        return m_offset;
+      }
 
-   private:
-    int m_offset;
-    std::vector<int> m_sequence;
+    private:
+      int m_offset;
+      std::vector<int> m_sequence;
   };
 }
 

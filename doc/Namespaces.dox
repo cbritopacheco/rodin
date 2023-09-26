@@ -35,6 +35,16 @@
  */
 
 /**
+  @dir Rodin/Geometry/Euclidean
+  @brief Namespace @ref Rodin::Geometry::Euclidean
+ */
+
+/**
+  @namespace Rodin::Geometry::Euclidean
+  @brief Module for dealing with Euclidean geometries.
+ */
+
+/**
   @dir Rodin/IO
   @brief Namespace @ref Rodin::IO
  */
@@ -53,6 +63,107 @@
   @namespace Rodin::Plot
   @brief Module for visualization tools.
  */
+
+/**
+  @dir Rodin/Plot/Artist
+  @brief Namespace @ref Rodin::Plot::Artist
+ */
+
+/**
+  @namespace Rodin::Plot::Artist
+  @brief Module for Rodin::Plot artists.
+ */
+
+/**
+  @dir Rodin/Plot/Artist/Axes
+  @brief Namespace @ref Rodin::Plot::Artist::Axes
+ */
+
+/**
+  @namespace Rodin::Plot::Artist::Axes
+  @brief Contains artist functionality for Axes.
+ */
+
+/**
+  @dir Rodin/Plot/Artist/Axis
+  @brief Namespace @ref Rodin::Plot::Artist::Axis
+ */
+
+/**
+  @namespace Rodin::Plot::Artist::Axis
+  @brief Contains artist functionality for Axis.
+ */
+
+/**
+  @dir Rodin/Plot/Artist/Lines
+  @brief Namespace @ref Rodin::Plot::Artist::Lines
+ */
+
+/**
+  @namespace Rodin::Plot::Artist::Lines
+  @brief Contains artist functionality for Lines.
+ */
+
+/**
+  @dir Rodin/Plot/Backend
+  @brief Namespace @ref Rodin::Plot::Backend
+ */
+
+/**
+  @namespace Rodin::Plot::Backend
+  @brief Module for the Rodin::Plot backend.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Bases
+  @brief Namespace @ref Rodin::Plot::Backend::Bases
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Bases
+  @brief Contains base backend functionality.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Renderer
+  @brief Namespace @ref Rodin::Plot::Backend::Event
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Renderer
+  @brief Contains backend renderer functionality.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Renderer/Drawables
+  @brief Namespace @ref Rodin::Plot::Backend::Renderer::Drawables
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Renderer::Drawables
+  @brief Contains backend renderer for drawables.
+ */
+
+/**
+  @dir Rodin/Plot/Backend/Event
+  @brief Namespace @ref Rodin::Plot::Backend::Event
+ */
+
+/**
+  @namespace Rodin::Plot::Backend::Event
+  @brief Contains backend event functionality.
+ */
+
+/**
+  @dir Rodin/Plot/GUI
+  @brief Namespace @ref Rodin::Plot::GUI
+ */
+
+/**
+  @namespace Rodin::Plot::GUI
+  @brief Contains GUI functionality.
+ */
+
 
 /**
   @dir Rodin/Variational
@@ -107,7 +218,7 @@
 
 /**
   @namespace Rodin::Math
-  @brief Module for linear algebra operations.
+  @brief Module for general mathematical operations.
  */
 
 
@@ -175,5 +286,10 @@
   optimization of the mesh, to implicit domain meshing. It provides many C++
   wrappers to execute the functionality of the [Mmg
   Platform](https://www.mmgtools.org/).
+ */
+
+/**
+  @namespace Rodin::External::MFEM
+  @brief MFEM integration with Rodin
  */
 

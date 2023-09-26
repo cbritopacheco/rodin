@@ -16,37 +16,41 @@
 
 namespace Rodin::Plot::Backend::Bases
 {
+  /**
+   * @brief Base class for artists in 2D.
+   */
   class BaseArtist2D
   {
-   public:
-    BaseArtist2D() = default;
-    BaseArtist2D(BaseArtist2D& parent);
+    public:
+      BaseArtist2D() = default;
 
-    virtual ~BaseArtist2D() = default;
+      BaseArtist2D(BaseArtist2D& parent);
 
-    template <class Drawable, class ... Args>
-    Drawable& draw(Args&& ... args);
+      virtual ~BaseArtist2D() = default;
 
-    template <class Artist, class ... Args>
-    Artist& addArtist(Args&&... args);
+      template <class Drawable, class ... Args>
+      Drawable& draw(Args&& ... args);
 
-    BaseArtist2D& setParent(BaseArtist2D& parent);
-    Backend::Bases::BaseArtist2D& getParent();
-    const Backend::Bases::BaseArtist2D& getParent() const;
+      template <class Artist, class ... Args>
+      Artist& addArtist(Args&&... args);
 
-    virtual bool isTopLevel() const;
-    BaseTopLevelArtist2D& getTopLevelArtist();
-    const BaseTopLevelArtist2D& getTopLevelArtist() const;
+      BaseArtist2D& setParent(BaseArtist2D& parent);
+      Backend::Bases::BaseArtist2D& getParent();
+      const Backend::Bases::BaseArtist2D& getParent() const;
 
-    virtual Renderer::Object2D& getObject2D() = 0;
+      virtual bool isTopLevel() const;
+      BaseTopLevelArtist2D& getTopLevelArtist();
+      const BaseTopLevelArtist2D& getTopLevelArtist() const;
 
-   private:
-    Renderer::DrawableGroup2D& getTopLevelDrawableGroup();
-    const Renderer::DrawableGroup2D& getTopLevelDrawableGroup() const;
+      virtual Renderer::Object2D& getObject2D() = 0;
 
-    std::optional<std::reference_wrapper<BaseArtist2D>> m_parent;
-    std::vector<std::unique_ptr<BaseArtist2D>> m_artists;
-    std::vector<BaseDrawable2D*> m_drawables;
+    private:
+      Renderer::DrawableGroup2D& getTopLevelDrawableGroup();
+      const Renderer::DrawableGroup2D& getTopLevelDrawableGroup() const;
+
+      std::optional<std::reference_wrapper<BaseArtist2D>> m_parent;
+      std::vector<std::unique_ptr<BaseArtist2D>> m_artists;
+      std::vector<BaseDrawable2D*> m_drawables;
   };
 }
 

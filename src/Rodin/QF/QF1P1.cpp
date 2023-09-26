@@ -19,6 +19,6 @@ namespace Rodin::QF
     { Geometry::Polytope::Type::Segment, Math::Vector{{1}} },
     { Geometry::Polytope::Type::Triangle, Math::Vector{{0.5}} },
     { Geometry::Polytope::Type::Quadrilateral, Math::Vector{{1}} },
-    { Geometry::Polytope::Type::Tetrahedron, Math::Vector{{1.0 / (6 * std::sqrt(2))}} }
+    { Geometry::Polytope::Type::Tetrahedron, Math::Vector{{Scalar(1.0 / (6 * std::sqrt(2)))}} }
   };
 }

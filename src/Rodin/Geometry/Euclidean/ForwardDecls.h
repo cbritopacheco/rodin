@@ -1,7 +1,7 @@
-#ifndef RODIN_CORE_GEOMETRY_FORWARDDECLS_H
-#define RODIN_CORE_GEOMETRY_FORWARDDECLS_H
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_FORWARDDECLS_H
+#define RODIN_GEOMETRY_EUCLIDEAN_FORWARDDECLS_H
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   template <class T, class Derived>
   class Base;
