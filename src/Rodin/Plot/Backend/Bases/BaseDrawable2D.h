@@ -13,27 +13,30 @@
 
 namespace Rodin::Plot::Backend::Bases
 {
+  /**
+   * @brief Base class for drawables.
+   */
   class BaseDrawable2D : public Magnum::SceneGraph::Drawable2D
   {
-   public:
-    BaseDrawable2D(
-       Renderer::Object2D& object, Renderer::DrawableGroup2D* group)
-    : Magnum::SceneGraph::Drawable2D{object, group},
-      m_object(object)
-   {}
+    public:
+      BaseDrawable2D(
+          Renderer::Object2D& object, Renderer::DrawableGroup2D* group)
+        : Magnum::SceneGraph::Drawable2D{object, group},
+          m_object(object)
+      {}
 
-   Renderer::Object2D& getObject2D()
-   {
-    return m_object;
-   }
+      Renderer::Object2D& getObject2D()
+      {
+        return m_object;
+      }
 
-   const Renderer::Object2D& getObject2D() const
-   {
-    return m_object;
-   }
+      const Renderer::Object2D& getObject2D() const
+      {
+        return m_object;
+      }
 
-   private:
-    Renderer::Object2D& m_object;
+    private:
+      Renderer::Object2D& m_object;
   };
 }
 

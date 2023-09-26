@@ -1,9 +1,7 @@
-#ifndef RODIN_CORE_GEOMETRY_CIRCLE_IPP
-#define RODIN_CORE_GEOMETRY_CIRCLE_IPP
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_CIRCLE_IPP
+#define RODIN_GEOMETRY_EUCLIDEAN_CIRCLE_IPP
 
 #include <cmath>
-
-#include <Magnum/Math/Angle.h>
 
 #include "Point2D.h"
 #include "Line2D.h"
@@ -11,14 +9,14 @@
 
 #include "Circle.h"
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   template <class T>
   constexpr
   Circle<T>::Circle(const Point2D<T>& center, const T& radius)
     : m_center(center), m_radius(radius)
   {
-    assert(radius > T{0});
+    assert(radius > T(0));
   }
 
   template <class T>
@@ -33,11 +31,11 @@ namespace Rodin::Plot::Geometry
   template <class T>
   inline
   constexpr
-  Point2D<T> Circle<T>::operator()(const Magnum::Math::Rad<T>& angle) const
+  Point2D<T> Circle<T>::operator()(const Math::Rad& angle) const
   {
     return
       m_center + m_radius * Point2D<T>(
-          std::cos(static_cast<T>(angle)), std::sin(static_cast<T>(angle)));
+          std::cos(static_cast<Scalar>(angle)), std::sin(static_cast<Scalar>(angle)));
   }
 
   template <class T>
@@ -77,7 +75,7 @@ namespace Rodin::Plot::Geometry
   template <class T>
   inline
   constexpr
-  Line2D<T> Circle<T>::tangent(const Magnum::Math::Rad<T>& angle)
+  Line2D<T> Circle<T>::tangent(const Math::Rad& angle)
   {
     auto p = operator()(angle);
     return Line2D<T>(

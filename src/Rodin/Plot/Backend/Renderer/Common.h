@@ -15,14 +15,19 @@
 namespace Rodin::Plot::Backend::Renderer
 {
   using Object3D =
-   Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
+
   using Scene3D =
-   Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
+    Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
+
   using Object2D =
-   Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation2D>;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation2D>;
+
   using Scene2D =
-   Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation2D>;
+    Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation2D>;
+
   using DrawableGroup2D = Magnum::SceneGraph::DrawableGroup2D;
+
   using DrawableGroup3D = Magnum::SceneGraph::DrawableGroup3D;
 }
 

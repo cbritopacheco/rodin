@@ -21,11 +21,14 @@ namespace Rodin
   /// Standard type for representing boolean values.
   using Boolean = bool;
 
-  /// Standard type for representing floating-point values.
-  using Float = double;
+  /// Standard type for representing (32 bit) floating-point values.
+  using Float = float;
+
+  /// Standard type for representing double precision (64 bit) floating-point values.
+  using Double = double;
 
   /// Standard type for representing scalar values.
-  using Scalar = Float;
+  using Scalar = Double;
 
   /// Standard type for representing indices.
   using Index = std::size_t;

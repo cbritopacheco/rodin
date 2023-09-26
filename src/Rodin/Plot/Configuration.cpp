@@ -10,17 +10,17 @@ namespace Rodin::Plot
 {
   Configuration::Configuration()
   {
-   setSampleCount(8);
+    setSampleCount(8);
   }
 
   Configuration& Configuration::setSampleCount(int sampleCount)
   {
-   m_sampleCount = sampleCount;
-   return *this;
+    m_sampleCount = sampleCount;
+    return *this;
   }
 
   int Configuration::getSampleCount() const
   {
-   return m_sampleCount;
+    return m_sampleCount;
   }
 }

@@ -4,13 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CORE_GEOMETRY_CONCEPTS_H
-#define RODIN_CORE_GEOMETRY_CONCEPTS_H
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_CONCEPTS_H
+#define RODIN_GEOMETRY_EUCLIDEAN_CONCEPTS_H
 
 #include <utility>
 #include <type_traits>
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   template<class T, class OtherGeometry, class = void>
   struct has_intersect_method : std::false_type{};

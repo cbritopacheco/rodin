@@ -4,20 +4,18 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CORE_GEOMETRY_SEGMENT2D_H
-#define RODIN_CORE_GEOMETRY_SEGMENT2D_H
+#ifndef RODIN_GEOMETRY_EUCLIDEAN_SEGMENT2D_H
+#define RODIN_GEOMETRY_EUCLIDEAN_SEGMENT2D_H
 
 #include <optional>
-
-#include <Magnum/Math/Vector2.h>
 
 #include "ForwardDecls.h"
 #include "Base.h"
 
-namespace Rodin::Plot::Geometry
+namespace Rodin::Geometry::Euclidean
 {
   template <class T>
-  class LineSegment2D : public Base<T, LineSegment2D<T>>
+  class LineSegment2D : public Base<LineSegment2D<T>, T>
   {
    public:
     constexpr
@@ -48,7 +46,7 @@ namespace Rodin::Plot::Geometry
      */
     inline
     constexpr
-    Magnum::Math::Vector2<T> direction() const;
+    Eigen::Vector2<T> direction() const;
 
     inline
     constexpr
