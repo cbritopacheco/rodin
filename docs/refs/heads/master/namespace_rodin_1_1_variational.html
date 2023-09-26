@@ -218,6 +218,16 @@ $ \mathbf{A} $
             </dt>
             <dd>Represents a Dirichlet boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Derived, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>
+            </dt>
+            <dd>Base class for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> classes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">DivBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
+            </dt>
+            <dd>Divergence of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_division_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_functi0e71a7f47bde9c6a93b56954fff5d00b.html" class="m-doc">Division&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
             </dt>
@@ -376,7 +386,7 @@ $ H^1(\Omega)^d $
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
             </dt>
-            <dd>Abstract base class for objects representing scalar functions.</dd>
+            <dd>Base class for scalar-valued functions defined on a mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ... Values&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>
@@ -386,7 +396,7 @@ $ H^1(\Omega)^d $
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
             </dt>
-            <dd>Abstract base class for objects representing vector functions.</dd>
+            <dd>Base class for vector-valued functions defined on a mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ... Values&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>
@@ -396,7 +406,7 @@ $ H^1(\Omega)^d $
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
             </dt>
-            <dd>Base class for objects representing matrix functions.</dd>
+            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_boolean_function.html" class="m-doc">BooleanFunction</a>
@@ -602,6 +612,11 @@ $ u $
             </dt>
             <dd>Represents a variational problem.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Derived, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>
+            </dt>
+            <dd>Base class for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> classes.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">GradBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
             </dt>
@@ -626,10 +641,15 @@ $ u $
             </dt>
             <dd>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Derived, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>
+            </dt>
+            <dd>Base class for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> classes.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Derived, class FESType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_jacobian_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">JacobianBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a>
             </dt>
-            <dd>Jacobianient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_context_1_1_serial_00_01_math_1_1_vector_01_4.html" class="m-doc">LinearForm&lt;FES, Context::Serial, Math::Vector&gt;</a>
@@ -796,7 +816,12 @@ $ u $
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_scalar_01_4.html" class="m-doc">ScalarFunction&lt;Scalar&gt;</a>
             </dt>
-            <dd>Represents a <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a> of arithmetic type <code>Number</code>.</dd>
+            <dd>Represents a constant scalar function with type Scalar.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_integer_01_4.html" class="m-doc">ScalarFunction&lt;Integer&gt;</a>
+            </dt>
+            <dd>Represents a constant scalar function with type Integer.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class F&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_scalar_function_3_01_f_01_4.html" class="m-doc">ScalarFunction&lt;F&gt;</a>
