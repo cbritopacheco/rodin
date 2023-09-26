@@ -35,34 +35,22 @@ set(RodinExternalMMG_SRCS
   )
 
 # ---- Set compile options for all the submodules ----------------------------
-if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  # No new flags to add
-elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-  rodin_add_compile_options(
-    LANG C CXX
-    OPTIONS
-    -g
-    -O0
-    -fPIC
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Wno-sign-compare
-    -Wno-old-style-cast
-    -Wno-cast-function-type
-    -Wno-unused-variable
-    -Wno-unused-function
-    -Wno-unused-parameter
-    -Wno-double-promotion
-    -Wno-missing-prototypes
-    -Wno-missing-declarations
-    -Wno-zero-as-null-pointer-constant
-    -Wno-error=c++11-narrowing
-    -Wno-error=extra
-    -Wno-error=pedantic)
-else()
-  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
-endif()
+rodin_add_compile_options(
+  LANG C CXX
+  OPTIONS
+  -Wno-sign-compare
+  -Wno-old-style-cast
+  -Wno-cast-function-type
+  -Wno-unused-variable
+  -Wno-unused-function
+  -Wno-unused-parameter
+  -Wno-double-promotion
+  -Wno-missing-prototypes
+  -Wno-missing-declarations
+  -Wno-zero-as-null-pointer-constant
+  -Wno-error=c++11-narrowing
+  -Wno-error=extra
+  -Wno-error=pedantic)
 
 add_library(RodinExternalMMG
   ${RodinExternalMMG_HEADERS} ${RodinExternalMMG_SRCS})
