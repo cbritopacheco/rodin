@@ -226,7 +226,7 @@ namespace Rodin::Variational
   class Function;
 
   /**
-   * @brief Abstract base class for objects representing scalar functions.
+   * @brief Base class for scalar-valued functions defined on a mesh.
    */
   template <class Derived>
   class ScalarFunctionBase;
@@ -241,7 +241,7 @@ namespace Rodin::Variational
   class ScalarFunction;
 
   /**
-   * @brief Abstract base class for objects representing vector functions.
+   * @brief Base class for vector-valued functions defined on a mesh.
    *
    * @note Vectors are zero indexed. This means that the 0-index corresponds
    * to the 1st entry of the vector.
@@ -259,7 +259,7 @@ namespace Rodin::Variational
   class VectorFunction;
 
   /**
-   * @brief Base class for objects representing matrix functions.
+   * @brief Base class for matrix-valued functions defined on a mesh.
    */
   template <class Derived>
   class MatrixFunctionBase;

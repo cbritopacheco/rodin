@@ -10,39 +10,7 @@ set(Rodin_HEADERS
   )
 
 # ---- Set compile options for all the submodules ----------------------------
-if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(
-    LANG CXX
-    OPTIONS
-    -msse2
-    -fvectorize
-    -fslp-vectorize
-    -ffp-contract=fast
-    -fcolor-diagnostics)
-elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-  rodin_add_compile_options(
-    LANG CXX
-    OPTIONS
-    -g
-    -O0
-    -fPIC
-    -Wall
-    -Werror
-    -Wextra
-    -Wpedantic
-    -Wno-old-style-cast
-    -Wno-cast-function-type
-    -Wno-unused-parameter
-    -Wno-zero-as-null-pointer-constant
-    -Wno-error=extra
-    -Wno-error=pedantic
-    -Wno-error=sign-compare
-    -Wno-error=cast-function-type
-    -Wno-error=deprecated-declarations
-    -Wno-error=zero-as-null-pointer-constant)
-else()
-  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
-endif()
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-unused-parameter)
 
 add_library(Rodin INTERFACE)
 add_library(Rodin::Rodin ALIAS Rodin)
