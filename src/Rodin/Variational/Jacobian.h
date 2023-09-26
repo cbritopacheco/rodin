@@ -22,12 +22,15 @@ namespace Rodin::Variational
    * @see Jacobian
    */
 
+  /**
+   * @brief Base class for Jacobian classes.
+   */
   template <class Derived, class Operand>
   class JacobianBase;
 
   /**
    * @ingroup JacobianSpecializations
-   * @brief Jacobianient of a P1 GridFunction
+   * @brief Jacobian of a P1 GridFunction
    */
   template <class Derived, class FESType>
   class JacobianBase<Derived, GridFunction<FESType>>
@@ -42,7 +45,7 @@ namespace Rodin::Variational
       using Parent = MatrixFunctionBase<JacobianBase<Derived, Operand>>;
 
       /**
-       * @brief Constructs the Jacobianient of an @f$ \mathbb{P}^1 @f$ function
+       * @brief Constructs the Jacobianient of a @f$ \mathbb{P}_1 @f$ function
        * @f$ u @f$.
        * @param[in] u P1 GridFunction
        */
@@ -129,6 +132,9 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
+      /**
+       * @brief Interpolation function to be overriden in Derived type.
+       */
       inline
       constexpr
       auto interpolate(Math::Matrix& out, const Geometry::Point& p) const
@@ -136,6 +142,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /**
+       * @brief Copy function to be overriden in Derived type.
+       */
       inline
       JacobianBase* copy() const noexcept override
       {

@@ -152,10 +152,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup ScalarFunctionSpecializations
-   * @brief Represents a ScalarFunction of arithmetic type `Number`.
-   *
-   * @tparam Number Arithmetic type
-   * @see [std::is_arithmetic](https://en.cppreference.com/w/cpp/types/is_arithmetic)
+   * @brief Represents a constant scalar function with type Scalar.
    */
   template <>
   class ScalarFunction<Scalar> final
@@ -165,8 +162,8 @@ namespace Rodin::Variational
       using Parent = ScalarFunctionBase<ScalarFunction<Scalar>>;
 
       /**
-       * @brief Constructs a ScalarFunction from an arithmetic value.
-       * @param[in] x Arithmetic value
+       * @brief Constructs a ScalarFunction from a constant scalar value.
+       * @param[in] x Constant scalar value
        */
       ScalarFunction(Scalar x)
         : m_x(x)
@@ -214,6 +211,10 @@ namespace Rodin::Variational
 
   ScalarFunction(Scalar) -> ScalarFunction<Scalar>;
 
+  /**
+   * @ingroup ScalarFunctionSpecializations
+   * @brief Represents a constant scalar function with type Integer.
+   */
   template <>
   class ScalarFunction<Integer> final
     : public ScalarFunctionBase<ScalarFunction<Integer>>
@@ -222,8 +223,8 @@ namespace Rodin::Variational
       using Parent = ScalarFunctionBase<ScalarFunction<Integer>>;
 
       /**
-       * @brief Constructs a ScalarFunction from an arithmetic value.
-       * @param[in] x Arithmetic value
+       * @brief Constructs a ScalarFunction from an integer value.
+       * @param[in] x Constant integer value
        */
       ScalarFunction(Integer x)
         : m_x(x)
