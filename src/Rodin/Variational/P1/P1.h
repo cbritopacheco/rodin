@@ -359,6 +359,4 @@ namespace Rodin::Variational
   }
 }
 
-
-
 #endif

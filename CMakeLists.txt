@@ -56,32 +56,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
-rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
-
 # ---- Set compile options for all the submodules ----------------------------
+rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
-
-if (${CMAKE_BUILD_TYPE} MATCHES Release)
-  rodin_add_compile_options(
-    LANG CXX C
-    OPTIONS
-    -w
-    -O3
-    -DNDEBUG
-    -march=native
-    -fvectorize
-    -fslp-vectorize
-    -ffp-contract=fast)
-elseif (${CMAKE_BUILD_TYPE} MATCHES Debug)
-  rodin_add_compile_options(
-    LANG CXX C
-    OPTIONS
-    -g
-    -O0
-    -fPIC)
-else()
-  message(FATAL_ERROR "Unrecognized build: ${CMAKE_BUILD_TYPE}")
-endif()
 
 if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)

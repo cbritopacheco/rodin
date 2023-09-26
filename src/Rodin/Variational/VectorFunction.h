@@ -27,6 +27,9 @@ namespace Rodin::Variational
    * @see VectorFunction
    */
 
+  /**
+   * @brief Base class for vector-valued functions defined on a mesh.
+   */
   template <class Derived>
   class VectorFunctionBase : public FunctionBase<VectorFunctionBase<Derived>>
   {

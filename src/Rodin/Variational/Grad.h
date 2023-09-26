@@ -16,6 +16,15 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @defgroup GradSpecializations Grad Template Specializations
+   * @brief Template specializations of the Grad class.
+   * @see Grad
+   */
+
+  /**
+   * @brief Base class for Grad classes.
+   */
   template <class Derived, class Operand>
   class GradBase;
 
@@ -36,8 +45,8 @@ namespace Rodin::Variational
       using Parent = VectorFunctionBase<GradBase<Derived, Operand>>;
 
       /**
-       * @brief Constructs the gradient of an @f$ \mathbb{P}^1 @f$ function
-       * @f$ u @f$.
+       * @brief Constructs the gradient of a @f$ \mathbb{P}_1 @f$ function @f$
+       * u @f$.
        * @param[in] u P1 GridFunction
        */
       GradBase(const Operand& u)
@@ -118,6 +127,9 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
+      /**
+       * @brief Interpolation function to be overriden in Derived type.
+       */
       inline
       constexpr
       auto interpolate(Math::Vector& out, const Geometry::Point& p) const
@@ -125,6 +137,9 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /**
+       * @brief Copy function to be overriden in Derived type.
+       */
       inline
       GradBase* copy() const noexcept override
       {
