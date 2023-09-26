@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::P0Element&lt;Scalar&gt; class | Rodin</title>
+  <title>Rodin::Plot::Backend::Renderer namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -63,90 +63,36 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0Element&lt;Scalar&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_plot.html">Plot</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_plot_1_1_backend.html">Backend</a>::<wbr/></span>Renderer <span class="m-thin">namespace</span>
         </h1>
-        <p>Degree 0 scalar Lagrange element.</p>
+        <p>Contains backend renderer functionality.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P0Element&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Base class for finite elements.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_renderer_1_1_drawables.html" class="m-doc">Drawables</a></dt>
+            <dd>Contains backend renderer for drawables.</dd>
           </dl>
         </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_scalar_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>
+              class <a href="class_rodin_1_1_plot_1_1_backend_1_1_renderer_1_1_camera2_d.html" class="m-doc">Camera2D</a>
             </dt>
-            <dd>Represents a basis function of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_scalar_01_4_1_1_gradient_function.html" class="m-doc">GradientFunction</a>
-            </dt>
-            <dd>Represents a gradient basis function of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_scalar_01_4_1_1_linear_form.html" class="m-doc">LinearForm</a>
-            </dt>
-            <dd>Represents a linear form of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</dd>
-            <dt id="a11b7b226e2d1e612eedb07595d699304">
-              using <a href="#a11b7b226e2d1e612eedb07595d699304" class="m-doc-self">RangeType</a> = <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>
-            </dt>
-            <dd>Type of range.</dd>
-            <dt id="a56cb5e6d4026f5bc17a08fc18ee9c454">
-              using <a href="#a56cb5e6d4026f5bc17a08fc18ee9c454" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;&gt;
-            </dt>
-            <dd>Parent class.</dd>
+            <dd>Represents a camera in 2D.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
-            </dt>
-            <dd>Gets the number of degrees of freedom in the finite element.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a636b1ea8f7b2b1920d81e6046be03eda"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P0Element&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-            <p>Gets the number of degrees of freedom in the finite element.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Number of degrees of freedom</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>
