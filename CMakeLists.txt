@@ -56,6 +56,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 
+# ---- Define install paths --------------------------------------------------
+set(RODIN_INSTALL_BINARY_PATH bin)
+set(RODIN_INSTALL_SHARE_PATH share)
+set(RODIN_INSTALL_LIBRARY_PATH lib)
+set(RODIN_INSTALL_INCLUDE_PATH include)
+
 # ---- Set compile options for all the submodules ----------------------------
 rodin_add_compile_options(LANG CXX OPTIONS -fvisibility=hidden)
 rodin_add_compile_options(LANG CXX C OPTIONS -fcolor-diagnostics)
@@ -185,3 +191,12 @@ if (RODIN_FEATURE_SUMMARY)
   include(FeatureSummary)
   feature_summary(INCLUDE_QUIET_PACKAGES WHAT ALL)
 endif()
+
+rodin_get_files_in_dir(RODIN_RESOURCES PATH ${RODIN_RESOURCES_DIR} GLOB_RECURSE EXCLUDE HIDDEN)
+set(RODIN_RELATIVE_RESOURCES "")
+foreach(RESOURCE_PATH ${RODIN_RESOURCES})
+  rodin_get_relpath(RELATIVE_PATH PATH ${RESOURCE_PATH} DIRECTORY ${PROJECT_SOURCE_DIR})
+  list(APPEND RODIN_RELATIVE_RESOURCES ${RELATIVE_PATH})
+endforeach()
+rodin_install_files(FILES ${RODIN_RELATIVE_RESOURCES} DESTINATION ${RODIN_INSTALL_SHARE_PATH})
+
