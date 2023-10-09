@@ -7,6 +7,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/QF/QFGM.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;

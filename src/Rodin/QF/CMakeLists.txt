@@ -1,6 +1,11 @@
-set(RodinQF_HEADERS )
+set(RodinQF_HEADERS
+  QFGG.h
+  QFGM.h
+  QF1P1.h
+  )
 
 set(RodinQF_SRCS
+  QFGG.cpp
   QFGM.cpp
   QF1P1.cpp)
 
