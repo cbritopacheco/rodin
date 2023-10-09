@@ -7,7 +7,10 @@
 #ifndef RODIN_VARIATIONAL_QF_QFGM_H
 #define RODIN_VARIATIONAL_QF_QFGM_H
 
-#define RODIN_QFGM_MAX_ORDER 32
+#define RODIN_QFGM_MAX_S 8
+#define RODIN_QFGM_MAX_ORDER 2 * RODIN_QFGM_MAX_S + 1
+
+#include <boost/multi_array.hpp>
 
 #include "QuadratureFormula.h"
 
@@ -21,36 +24,47 @@ namespace Rodin::QF
    */
   class QFGM : public QuadratureFormulaBase
   {
-    static std::vector<std::array<Math::Vector, RODIN_QFGM_MAX_ORDER>> initializeWeights();
-    static std::vector<std::array<Math::Matrix, RODIN_QFGM_MAX_ORDER>> initializePoints();
-
     public:
       /// Parent class
       using Parent = QuadratureFormulaBase;
 
       constexpr
-      QFGM(size_t order, Geometry::Polytope::Type geom)
-        : Parent(geom),
-          m_degree((order + 1) / 2)
-      {
-        assert(order < RODIN_QFGM_MAX_ORDER);
-        assert(Geometry::Polytope::isSimplex(geom));
-      }
+      QFGM(size_t s, Geometry::Polytope::Type geom);
 
       constexpr
       QFGM(const QFGM& other)
         : Parent(other),
-          m_degree(other.m_degree)
+          m_s(other.m_s),
+          m_n(other.m_n),
+          m_order(other.m_order)
       {}
 
       constexpr
       QFGM(QFGM&& other)
         : Parent(std::move(other)),
-          m_degree(std::move(other.m_degree))
+          m_s(std::move(other.m_s)),
+          m_n(std::move(other.m_n)),
+          m_order(std::move(other.m_order))
       {}
 
+      size_t getSize() const override;
+
+      Scalar getWeight(size_t i) const override;
+
+      const Math::SpatialVector& getPoint(size_t i) const override;
+
+      static boost::multi_array<size_t, 2> initSizes();
+      static boost::multi_array<Math::Vector, 2> initWeights();
+      static boost::multi_array<std::vector<Math::SpatialVector>, 2> initPoints();
     private:
-      const size_t m_degree;
+
+      static boost::multi_array<size_t, 2> s_sizes;
+      static boost::multi_array<Math::Vector, 2> s_weights;
+      static boost::multi_array<std::vector<Math::SpatialVector>, 2> s_points;
+
+      const size_t m_s;
+      const size_t m_n;
+      const size_t m_order;
   };
 }
 

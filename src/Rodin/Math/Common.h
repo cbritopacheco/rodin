@@ -10,6 +10,8 @@
 #include <cmath>
 #include <type_traits>
 
+#include <boost/multi_array.hpp>
+
 #include "Rodin/Types.h"
 
 namespace Rodin::Math
@@ -114,6 +116,49 @@ namespace Rodin::Math
   T sgn(const T& x)
   {
     return (T(0) < x) - (x < T(0));
+  }
+
+  template <class T>
+  constexpr
+  inline
+  T binom(const T& n, const T& k)
+  {
+    assert(T(0) <= n);
+    assert(T(0) <= k);
+    assert(k <= n);
+    T res(1);
+    for (T i = 0; i < std::min(k, n - k); ++i)
+    {
+      res *= (n - i);
+      res /= (i + T(1));
+    }
+    return res;
+  }
+
+  template <class T>
+  constexpr
+  inline
+  T factorial(const T& n)
+  {
+    assert(T(0) <= n);
+    T res(1);
+    for (T i = T(2); i <= n; ++i)
+      res *= i;
+    return res;
+  }
+
+  template <class T>
+  constexpr
+  inline
+  T permutation(const T& n, const T& k)
+  {
+    assert(T(0) <= n);
+    assert(T(0) <= k);
+    assert(k <= n);
+    T res(1);
+    for (T i = 0; i < k; i++)
+        res *= (n - i);
+    return res;
   }
 }
 
