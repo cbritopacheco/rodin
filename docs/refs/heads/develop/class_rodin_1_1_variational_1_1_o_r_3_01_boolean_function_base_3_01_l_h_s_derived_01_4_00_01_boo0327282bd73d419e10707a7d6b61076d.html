@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::TestFunction class | Rodin</title>
+  <title>Rodin::Variational::OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -63,10 +63,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FESType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>TestFunction <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Represents a function which belongs to a test space.</p>
+        <p>Logical <a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a> operator between two instances of <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -83,29 +83,29 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction&lt;TestFunction&lt;FESType&gt;, FESType, TestSpace&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase&lt;OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dd>Base class for objects representing boolean functions.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e76d060ad2b14c59b73c857b0ea7325" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ce54d048bdbf60e1a4a0ac47f77ebfd" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0e76d060ad2b14c59b73c857b0ea7325"><div>
+          <section class="m-doc-details" id="a1ce54d048bdbf60e1a4a0ac47f77ebfd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FESType&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>* Rodin::<wbr />Variational::<wbr />TestFunction&lt;FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e76d060ad2b14c59b73c857b0ea7325" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>* Rodin::<wbr />Variational::<wbr />OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ce54d048bdbf60e1a4a0ac47f77ebfd" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Geometry::PointBase class | Rodin</title>
+  <title>Rodin::Geometry::Point class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -63,20 +63,17 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PointBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Point <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Base class for spatial points on a discrete mesh.</p>
+        <p>Represents a spatial point on a discrete mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#rodin-geometry-point-thread_safety">Thread safety</a></li>
+            <li><a href="#ase_1rodin-geometry-point-thread_safety">Thread safety</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
               </ul>
             </li>
           </ul>
@@ -206,270 +203,15 @@ $ K $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-75'/>
 </g>
-</svg>.</p><section id="rodin-geometry-point-thread_safety"><h2><a href="#rodin-geometry-point-thread_safety">Thread safety</a></h2><p>This class is not thread safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a></p></aside></section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
+</svg>.</p><section id="ase_1rodin-geometry-point-thread_safety"><h2><a href="#ase_1rodin-geometry-point-thread_safety">Thread safety</a></h2><p>This class is not thread safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a></p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> <span class="m-label m-flat m-warning">final</span>
+              class <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>
             </dt>
-            <dd>Represents a spatial point on a discrete mesh.</dd>
+            <dd>Base class for spatial points on a discrete mesh.</dd>
           </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> { </span><span class="m-doc-wrap"><a href="#a3fdcca54d3ca6d8a8316dfa027239759a63d5049791d9d79d86e9a108b0a999ca" class="m-doc">Reference</a>,
-              <a href="#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Physical</a> }</span>
-            </dt>
-            <dd>Denotes the type of coordinates.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="ae3b9805e4e4f3dc353c82cc1efac2ee4">
-              <span class="m-doc-wrap-bumper"><a href="#ae3b9805e4e4f3dc353c82cc1efac2ee4" class="m-doc-self">PointBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="abb60e3638545cd362becc4186a457f72">
-              <span class="m-doc-wrap-bumper"><a href="#abb60e3638545cd362becc4186a457f72" class="m-doc-self">PointBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac38f5f57c32771d1461008d3622aa137" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const -&gt; size_t</span>
-            </dt>
-            <dd>Gets the space dimension of the physical coordinates.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0f4257cdcb2697ff6200faaaa32a663d" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
-            </dt>
-            <dd>Gets the i-th physical coordinate.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7364521431499ebf93896e23860630b" class="m-doc">x</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
-            </dt>
-            <dd>Gets the <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
-<title>
-$ x $
-</title>
-<defs>
-<path id='eq9-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
-</defs>
-<g id='eq9-page1'>
-<use x='0' y='0' xlink:href='#eq9-g0-120'/>
-</g>
-</svg> coordinate.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8c102200e9580b11fee8e72709cd132c" class="m-doc">y</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
-            </dt>
-            <dd>Gets the <svg class="m-math" style="width: 0.639em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.136656 7.47198">
-<title>
-$ y $
-</title>
-<defs>
-<path id='eq11-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
-</defs>
-<g id='eq11-page1'>
-<use x='0' y='0' xlink:href='#eq11-g0-121'/>
-</g>
-</svg> coordinate.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa08733a93c75707d6a86c1302463d328" class="m-doc">z</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
-            </dt>
-            <dd>Gets the <svg class="m-math" style="width: 0.622em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.970618 5.147373">
-<title>
-$ z $
-</title>
-<defs>
-<path id='eq13-g0-122' d='M1.518306-.968369C2.032379-1.554172 2.450809-1.924782 3.048568-2.462765C3.765878-3.084433 4.076712-3.383313 4.244085-3.56264C5.080946-4.387547 5.499377-5.080946 5.499377-5.176588S5.403736-5.272229 5.379826-5.272229C5.296139-5.272229 5.272229-5.224408 5.212453-5.140722C4.913574-4.62665 4.62665-4.375592 4.315816-4.375592C4.064757-4.375592 3.93325-4.483188 3.706102-4.770112C3.455044-5.068991 3.251806-5.272229 2.905106-5.272229C2.032379-5.272229 1.506351-4.184309 1.506351-3.93325C1.506351-3.897385 1.518306-3.825654 1.625903-3.825654C1.721544-3.825654 1.733499-3.873474 1.769365-3.957161C1.972603-4.435367 2.546451-4.519054 2.773599-4.519054C3.024658-4.519054 3.263761-4.435367 3.514819-4.327771C3.969116-4.136488 4.160399-4.136488 4.27995-4.136488C4.363636-4.136488 4.411457-4.136488 4.471233-4.148443C4.076712-3.682192 3.431133-3.108344 2.893151-2.618182L1.685679-1.506351C.956413-.765131 .514072-.059776 .514072 .02391C.514072 .095641 .573848 .119552 .645579 .119552S.729265 .107597 .812951-.035866C1.004234-.334745 1.3868-.777086 1.829141-.777086C2.080199-.777086 2.199751-.6934 2.438854-.394521C2.666002-.131507 2.86924 .119552 3.251806 .119552C4.423412 .119552 5.092902-1.398755 5.092902-1.673724C5.092902-1.721544 5.080946-1.793275 4.961395-1.793275C4.865753-1.793275 4.853798-1.745455 4.817933-1.625903C4.554919-.920548 3.849564-.633624 3.383313-.633624C3.132254-.633624 2.893151-.71731 2.642092-.824907C2.163885-1.016189 2.032379-1.016189 1.876961-1.016189C1.75741-1.016189 1.625903-1.016189 1.518306-.968369Z'/>
-</defs>
-<g id='eq13-page1'>
-<use x='0' y='0' xlink:href='#eq13-g0-122'/>
-</g>
-</svg> coordinate.</dd>
-            <dt id="a665c72bcce6234267d2b00abdf87ab40">
-              <span class="m-doc-wrap-bumper">auto <a href="#a665c72bcce6234267d2b00abdf87ab40" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>&amp; p) const -&gt; bool</span>
-            </dt>
-            <dd>Lexicographical comparison.</dd>
-            <dt id="a3e4eb1e46e6b62a81369dc29fc9cefe8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e4eb1e46e6b62a81369dc29fc9cefe8" class="m-doc-self">getJacobian</a>(</span><span class="m-doc-wrap">) const -&gt; const Math::SpatialMatrix&amp; <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Computes the Jacobian matrix of the transformation at the point.</dd>
-            <dt id="adf38d67d34d8537944f5e135ee8eb6bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#adf38d67d34d8537944f5e135ee8eb6bb" class="m-doc-self">getJacobianInverse</a>(</span><span class="m-doc-wrap">) const -&gt; const Math::SpatialMatrix&amp;</span>
-            </dt>
-            <dd>Computes the inverse of the Jacobian matrix of the transformation at the point.</dd>
-            <dt id="a55617c6135646e8c342c1198e6a69320">
-              <span class="m-doc-wrap-bumper">auto <a href="#a55617c6135646e8c342c1198e6a69320" class="m-doc-self">getDistortion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
-            </dt>
-            <dd>Computes the distortion of space of the transformation at the point.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="a3fdcca54d3ca6d8a8316dfa027239759"><div>
-            <h3>
-              enum class Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /><a href="#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc-self">Coordinates</a>
-            </h3>
-            <p>Denotes the type of coordinates.</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#a3fdcca54d3ca6d8a8316dfa027239759a63d5049791d9d79d86e9a108b0a999ca" class="m-doc-self" id="a3fdcca54d3ca6d8a8316dfa027239759a63d5049791d9d79d86e9a108b0a999ca">Reference</a></td>
-                  <td>
-                  <p>Reference coordinates.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc-self" id="a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9">Physical</a></td>
-                  <td>
-                  <p>Physical coordinates.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ac38f5f57c32771d1461008d3622aa137"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac38f5f57c32771d1461008d3622aa137" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const</span></span>
-            </h3>
-            <p>Gets the space dimension of the physical coordinates.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Dimension of the physical coordinates.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a0f4257cdcb2697ff6200faaaa32a663d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f4257cdcb2697ff6200faaaa32a663d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
-              <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const</span></span>
-            </h3>
-            <p>Gets the i-th physical coordinate.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Physical i-th coordinate.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="ab7364521431499ebf93896e23860630b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7364521431499ebf93896e23860630b" class="m-doc-self">x</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const</span></span>
-            </h3>
-            <p>Gets the <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
-<title>
-$ x $
-</title>
-<defs>
-<path id='eq9-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
-</defs>
-<g id='eq9-page1'>
-<use x='0' y='0' xlink:href='#eq9-g0-120'/>
-</g>
-</svg> coordinate.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td><svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
-<title>
-$ x $
-</title>
-<defs>
-<path id='eq10-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
-</defs>
-<g id='eq10-page1'>
-<use x='0' y='0' xlink:href='#eq10-g0-120'/>
-</g>
-</svg> coordinate of the point.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a8c102200e9580b11fee8e72709cd132c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c102200e9580b11fee8e72709cd132c" class="m-doc-self">y</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const</span></span>
-            </h3>
-            <p>Gets the <svg class="m-math" style="width: 0.639em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.136656 7.47198">
-<title>
-$ y $
-</title>
-<defs>
-<path id='eq11-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
-</defs>
-<g id='eq11-page1'>
-<use x='0' y='0' xlink:href='#eq11-g0-121'/>
-</g>
-</svg> coordinate.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td><svg class="m-math" style="width: 0.639em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.136656 7.47198">
-<title>
-$ y $
-</title>
-<defs>
-<path id='eq12-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
-</defs>
-<g id='eq12-page1'>
-<use x='0' y='0' xlink:href='#eq12-g0-121'/>
-</g>
-</svg> coordinate of the point.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="aa08733a93c75707d6a86c1302463d328"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa08733a93c75707d6a86c1302463d328" class="m-doc-self">z</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759" class="m-doc">Coordinates</a> coords = <a href="class_rodin_1_1_geometry_1_1_point_base.html#a3fdcca54d3ca6d8a8316dfa027239759ace898d62ed9ca7653a01fe0c781e97e9" class="m-doc">Coordinates::<wbr />Physical</a>) const</span></span>
-            </h3>
-            <p>Gets the <svg class="m-math" style="width: 0.622em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.970618 5.147373">
-<title>
-$ z $
-</title>
-<defs>
-<path id='eq13-g0-122' d='M1.518306-.968369C2.032379-1.554172 2.450809-1.924782 3.048568-2.462765C3.765878-3.084433 4.076712-3.383313 4.244085-3.56264C5.080946-4.387547 5.499377-5.080946 5.499377-5.176588S5.403736-5.272229 5.379826-5.272229C5.296139-5.272229 5.272229-5.224408 5.212453-5.140722C4.913574-4.62665 4.62665-4.375592 4.315816-4.375592C4.064757-4.375592 3.93325-4.483188 3.706102-4.770112C3.455044-5.068991 3.251806-5.272229 2.905106-5.272229C2.032379-5.272229 1.506351-4.184309 1.506351-3.93325C1.506351-3.897385 1.518306-3.825654 1.625903-3.825654C1.721544-3.825654 1.733499-3.873474 1.769365-3.957161C1.972603-4.435367 2.546451-4.519054 2.773599-4.519054C3.024658-4.519054 3.263761-4.435367 3.514819-4.327771C3.969116-4.136488 4.160399-4.136488 4.27995-4.136488C4.363636-4.136488 4.411457-4.136488 4.471233-4.148443C4.076712-3.682192 3.431133-3.108344 2.893151-2.618182L1.685679-1.506351C.956413-.765131 .514072-.059776 .514072 .02391C.514072 .095641 .573848 .119552 .645579 .119552S.729265 .107597 .812951-.035866C1.004234-.334745 1.3868-.777086 1.829141-.777086C2.080199-.777086 2.199751-.6934 2.438854-.394521C2.666002-.131507 2.86924 .119552 3.251806 .119552C4.423412 .119552 5.092902-1.398755 5.092902-1.673724C5.092902-1.721544 5.080946-1.793275 4.961395-1.793275C4.865753-1.793275 4.853798-1.745455 4.817933-1.625903C4.554919-.920548 3.849564-.633624 3.383313-.633624C3.132254-.633624 2.893151-.71731 2.642092-.824907C2.163885-1.016189 2.032379-1.016189 1.876961-1.016189C1.75741-1.016189 1.625903-1.016189 1.518306-.968369Z'/>
-</defs>
-<g id='eq13-page1'>
-<use x='0' y='0' xlink:href='#eq13-g0-122'/>
-</g>
-</svg> coordinate.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td><svg class="m-math" style="width: 0.622em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.970618 5.147373">
-<title>
-$ z $
-</title>
-<defs>
-<path id='eq14-g0-122' d='M1.518306-.968369C2.032379-1.554172 2.450809-1.924782 3.048568-2.462765C3.765878-3.084433 4.076712-3.383313 4.244085-3.56264C5.080946-4.387547 5.499377-5.080946 5.499377-5.176588S5.403736-5.272229 5.379826-5.272229C5.296139-5.272229 5.272229-5.224408 5.212453-5.140722C4.913574-4.62665 4.62665-4.375592 4.315816-4.375592C4.064757-4.375592 3.93325-4.483188 3.706102-4.770112C3.455044-5.068991 3.251806-5.272229 2.905106-5.272229C2.032379-5.272229 1.506351-4.184309 1.506351-3.93325C1.506351-3.897385 1.518306-3.825654 1.625903-3.825654C1.721544-3.825654 1.733499-3.873474 1.769365-3.957161C1.972603-4.435367 2.546451-4.519054 2.773599-4.519054C3.024658-4.519054 3.263761-4.435367 3.514819-4.327771C3.969116-4.136488 4.160399-4.136488 4.27995-4.136488C4.363636-4.136488 4.411457-4.136488 4.471233-4.148443C4.076712-3.682192 3.431133-3.108344 2.893151-2.618182L1.685679-1.506351C.956413-.765131 .514072-.059776 .514072 .02391C.514072 .095641 .573848 .119552 .645579 .119552S.729265 .107597 .812951-.035866C1.004234-.334745 1.3868-.777086 1.829141-.777086C2.080199-.777086 2.199751-.6934 2.438854-.394521C2.666002-.131507 2.86924 .119552 3.251806 .119552C4.423412 .119552 5.092902-1.398755 5.092902-1.673724C5.092902-1.721544 5.080946-1.793275 4.961395-1.793275C4.865753-1.793275 4.853798-1.745455 4.817933-1.625903C4.554919-.920548 3.849564-.633624 3.383313-.633624C3.132254-.633624 2.893151-.71731 2.642092-.824907C2.163885-1.016189 2.032379-1.016189 1.876961-1.016189C1.75741-1.016189 1.625903-1.016189 1.518306-.968369Z'/>
-</defs>
-<g id='eq14-page1'>
-<use x='0' y='0' xlink:href='#eq14-g0-122'/>
-</g>
-</svg> coordinate of the point.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

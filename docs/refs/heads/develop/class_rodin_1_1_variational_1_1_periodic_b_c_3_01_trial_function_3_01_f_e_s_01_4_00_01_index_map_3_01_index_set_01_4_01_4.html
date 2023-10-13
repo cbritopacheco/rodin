@@ -142,7 +142,32 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a9e615320ad86e186833cada988923bbb" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const DOFs&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the global degree of freedom map.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a79e6e2f8a306eb1f7b17289bcbbfa0fa" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a79e6e2f8a306eb1f7b17289bcbbfa0fa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>* Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79e6e2f8a306eb1f7b17289bcbbfa0fa" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
         </section>
       </div>
     </div>

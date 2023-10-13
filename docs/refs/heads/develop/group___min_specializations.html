@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::TestFunction class | Rodin</title>
+  <title>Min Template Specializations module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -63,61 +63,29 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FESType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>TestFunction <span class="m-thin">class</span>
-        </h1>
-        <p>Represents a function which belongs to a test space.</p>
+          Min Template Specializations <span class="m-thin">module</span></h1>
+        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a> class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a></p></aside>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction&lt;TestFunction&lt;FESType&gt;, FESType, TestSpace&gt;</a>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_min_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html" class="m-doc">Rodin::Variational::Min&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dd>Represents the minimum between two arguments.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e76d060ad2b14c59b73c857b0ea7325" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0e76d060ad2b14c59b73c857b0ea7325"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FESType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>* Rodin::<wbr />Variational::<wbr />TestFunction&lt;FESType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e76d060ad2b14c59b73c857b0ea7325" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>

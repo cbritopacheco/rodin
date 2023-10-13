@@ -86,7 +86,7 @@
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html" class="m-doc">FiniteElementSpaceBase</a>
             </dt>
-            <dd>Abstract base class for finite element spaces.</dd>
+            <dd>Base class for finite element spaces.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -256,7 +256,7 @@ $ S $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-83'/>
 </g>
-</svg>.</p><p>The callable type T must be a function on the mesh, i.e. the call operator must have the following signature:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="p">);</span></pre>
+</svg>.</p><p>The callable type T must be a function on the mesh, i.e. the call operator must have the following signature:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
         </section>
       </div>

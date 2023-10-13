@@ -212,6 +212,10 @@ $ \Gamma_D \subset \mathcal{B}_h $
               <span class="m-doc-wrap-bumper">auto <a href="#a9e615320ad86e186833cada988923bbb" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const DOFs&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the global degree of freedom map.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a186ba38103c8e91eea8192102d2af558" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
@@ -325,6 +329,24 @@ $ \Gamma_D \subset \mathcal{B}_h $
 <use x='217.455325' y='-.996264' xlink:href='#eq4-g1-68'/>
 </g>
 </svg></div><p>is also required.</p>
+          </div></section>
+          <section class="m-doc-details" id="a186ba38103c8e91eea8192102d2af558"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class ValueDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>* Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;&lt;FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a186ba38103c8e91eea8192102d2af558" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>

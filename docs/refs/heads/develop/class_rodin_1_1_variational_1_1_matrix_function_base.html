@@ -100,6 +100,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a01e0b68eda4ec49299cfb39378dd271b" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of columns in the matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac7287264e1f61f064849bff565bc617f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
@@ -137,6 +141,24 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ac7287264e1f61f064849bff565bc617f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>* Rodin::<wbr />Variational::<wbr />MatrixFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7287264e1f61f064849bff565bc617f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>

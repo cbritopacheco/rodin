@@ -129,16 +129,6 @@
             </dt>
             <dd>Base class for objects representing boolean functions.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for objects representing boolean functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for objects representing boolean functions.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;class StrictType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a>
             </dt>
@@ -292,8 +282,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a7c12ae701519a9531c37053cb041cbb0" class="m-doc">getTraceDomain</a>(</span><span class="m-doc-wrap">) const -&gt; const TraceDomain&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</dd>
-            <dt id="af5f065ebe0b3b1c58b0c2402a50fc9e3">
-              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the function on a Point belonging to the mesh.</dd>
             <dt>
@@ -304,6 +294,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af1a914a923db2925b98e71f0cc061ae4" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets an attribute which will be interpreted as the domain to trace.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1251ba153ae42897e444efd48f11f7a0" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
@@ -317,6 +311,16 @@
             </h3>
             <p>Gets the set of attributes which will be interpreted as the domains to &quot;trace&quot;.</p>
 <p>The domains to trace are interpreted as the domains where there shall be a continuous extension from values to the interior boundaries. If the trace domain is empty, then this has the semantic value that it has not been specified yet.</p>
+          </div></section>
+          <section class="m-doc-details" id="af5f065ebe0b3b1c58b0c2402a50fc9e3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />FunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function on a Point belonging to the mesh.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
             <h3>
@@ -345,6 +349,24 @@
               </tfoot>
             </table>
 <p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1251ba153ae42897e444efd48f11f7a0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* Rodin::<wbr />Variational::<wbr />FunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1251ba153ae42897e444efd48f11f7a0" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>

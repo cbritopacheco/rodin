@@ -172,6 +172,10 @@ $ u $
               <span class="m-doc-wrap-bumper">auto <a href="#a5ca94360b579c7d2c3e501aba1dc497b" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the test function argument associated to this linear form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ff0f12631f71943b38dbec87955850f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
@@ -249,6 +253,24 @@ $ L(u) $
             </h3>
             <p>Assembles the linear form.</p>
 <p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_context_1_1_serial_00_01_math_1_1_vector_01_4.html#ac503d89e47b0d10069d77fa944cd1d6a" class="m-doc">getVector()</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2ff0f12631f71943b38dbec87955850f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Serial, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ff0f12631f71943b38dbec87955850f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>

@@ -72,6 +72,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#enum-members">Enums</a></li>
                 <li><a href="#typedef-members">Typedefs</a></li>
@@ -162,6 +163,13 @@ $ \mathbf{A} $
 <use x='0' y='0' xlink:href='#eq3-g0-65'/>
 </g>
 </svg> represents the stiffness operator.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin_1_1_variational_1_1_f.html" class="m-doc">F</a></dt>
+            <dd>Contains built-in functions.</dd>
+          </dl>
+        </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -243,6 +251,11 @@ $ \mathbf{A} $
             </dt>
             <dd>Represents the dot product of trial and test operators.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_e_q_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html" class="m-doc">EQ&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
+            </dt>
+            <dd>Logical <a href="class_rodin_1_1_variational_1_1_e_q.html" class="m-doc">EQ</a> operator between two instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>.</dd>
+            <dt>
               class <a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a>
             </dt>
             <dd>Outward unit normal on a face.</dd>
@@ -254,12 +267,22 @@ $ \mathbf{A} $
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html" class="m-doc">FiniteElementSpaceBase</a>
             </dt>
-            <dd>Abstract base class for finite element spaces.</dd>
+            <dd>Base class for finite element spaces.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>
             </dt>
             <dd>Represernts a finite element space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_mapping_base.html" class="m-doc">FiniteElementSpaceMappingBase</a>
+            </dt>
+            <dd>Base class for mappings taking functions defined on mesh elements to reference elements.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_inverse_mapping_base.html" class="m-doc">FiniteElementSpaceInverseMappingBase</a>
+            </dt>
+            <dd>Base class for inverse mappings taking functions defined on to reference elements.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class VectorType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>
@@ -657,14 +680,9 @@ $ u $
             <dd>Represents a linear form defined over some finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_max_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html" class="m-doc">Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
-            </dt>
-            <dd>Represents the maximum between two arguments.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_min_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html" class="m-doc">Min&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
             </dt>
-            <dd>Represents the Minimum between two arguments.</dd>
+            <dd>Represents the minimum between two arguments.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_mult_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_b45dfa684acd6c98f4bca34defe95a5f6.html" class="m-doc">Mult&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
@@ -684,6 +702,11 @@ $ u $
               class <a href="class_rodin_1_1_variational_1_1_normal.html" class="m-doc">Normal</a>
             </dt>
             <dd>Outward unit normal.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_o_r_3_01_boolean_function_base_3_01_l_h_s_derived_01_4_00_01_boo0327282bd73d419e10707a7d6b61076d.html" class="m-doc">OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;</a>
+            </dt>
+            <dd>Logical <a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a> operator between two instances of <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>
@@ -792,7 +815,7 @@ $ u $
               <div class="m-doc-template">template&lt;class BaseDerived, class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html" class="m-doc">Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;</a>
             </dt>
-            <dd>Represent the power function.</dd>
+            <dd>Represents the power function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_1_seri31e0bee48d76a3ad9673ca5d93701694.html" class="m-doc">Problem&lt;TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector&gt;</a>
@@ -906,6 +929,11 @@ $ u $
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt id="a15c6540a38442208218f05d9eae7c223">
+              <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15c6540a38442208218f05d9eae7c223" class="m-doc-self">cos</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; f) -&gt; auto</span>
+            </dt>
+            <dd>Helper function to construct objects of type <a href="class_rodin_1_1_variational_1_1_cos.html" class="m-doc">Cos</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a7c73d46611e258580d0e31ddf4e4ff22" class="m-doc">Dx</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) -&gt; auto</span>
@@ -955,6 +983,11 @@ $ \partial_z u $
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&amp;) -&gt; DirichletBC&lt; TrialFunction&lt; FES &gt;, FunctionBase&lt; FunctionDerived &gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>.</dd>
+            <dt id="a6372b230881604c78d94d049b4bc0ce6">
+              <div class="m-doc-template">template&lt;class StrictType&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a6372b230881604c78d94d049b4bc0ce6" class="m-doc-self">LazyEvaluator</a>(</span><span class="m-doc-wrap">const StrictType&amp;) -&gt; LazyEvaluator&lt; StrictType &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga743944d1a3b7b7a5a73e34d338e34575" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;Ts...&gt;&gt;&amp;) -&gt; Grad&lt; GridFunction&lt; P1&lt; Ts... &gt;&gt;&gt;</span>
@@ -971,6 +1004,47 @@ $ \partial_z u $
               const <a href="namespace_rodin.html#a6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="namespace_rodin.html#ad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;) -&gt; PeriodicBC&lt; TrialFunction&lt; FES &gt;, IndexMap&lt; IndexSet &gt;&gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>.</dd>
+            <dt id="aa3afbf281b6d5a02f3bf849b88b54961">
+              <div class="m-doc-template">template&lt;class LHSType, class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#aa3afbf281b6d5a02f3bf849b88b54961" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap">const LHSType&amp;,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp;) -&gt; Potential&lt; LHSType, FunctionBase&lt; RHSDerived &gt;&gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>.</dd>
+            <dt id="a23b2a1d39008c162c4a637916c2d1af3">
+              <div class="m-doc-template">template&lt;class LHSType, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a23b2a1d39008c162c4a637916c2d1af3" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap">const LHSType&amp;,
+              const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, FESType, SpaceType&gt;, FESType, SpaceType&gt;&amp;) -&gt; Potential&lt; LHSType, ShapeFunctionBase&lt; ShapeFunction&lt; RHSDerived, FESType, SpaceType &gt;, FESType, SpaceType &gt;&gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>.</dd>
+            <dt id="a4d3970d3c2f9d66703d9891dde4454b9">
+              <div class="m-doc-template">template&lt;class BaseDerived, class Number&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a4d3970d3c2f9d66703d9891dde4454b9" class="m-doc-self">Pow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;&amp;,
+              Number) -&gt; Pow&lt; FunctionBase&lt; BaseDerived &gt;, Number &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>.</dd>
+            <dt id="ae90d15166b476ef1ed1c2d22828d8754">
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ae90d15166b476ef1ed1c2d22828d8754" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;&amp;) -&gt; ScalarFunction&lt; FunctionBase&lt; Derived &gt;&gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
+            <dt id="a1f98777d8f6dabea3a5373405c7cca40">
+              <span class="m-doc-wrap-bumper"><a href="#a1f98777d8f6dabea3a5373405c7cca40" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>) -&gt; ScalarFunction&lt; Scalar &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
+            <dt id="a889896af835521c5ccf6c24f0f0e35f0">
+              <span class="m-doc-wrap-bumper"><a href="#a889896af835521c5ccf6c24f0f0e35f0" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a1dc165bbe1d2390cd0a21524320cd3eb" class="m-doc">Integer</a>) -&gt; ScalarFunction&lt; Integer &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
+            <dt id="a753711ae25c8156ce98450199fbc2d8e">
+              <div class="m-doc-template">template&lt;class F, typename = std::enable_if_t&lt;std::is_invocable_r_v&lt;Scalar, F, const Geometry::Point&amp;&gt;&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a753711ae25c8156ce98450199fbc2d8e" class="m-doc-self">ScalarFunction</a>(</span><span class="m-doc-wrap">F) -&gt; ScalarFunction&lt; F &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_scalar_function.html" class="m-doc">ScalarFunction</a>.</dd>
+            <dt id="ad59dbb39436b0dc6a518c00d4e0f78d7">
+              <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad59dbb39436b0dc6a518c00d4e0f78d7" class="m-doc-self">sin</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; f) -&gt; auto</span>
+            </dt>
+            <dd>Helper function to construct objects of type <a href="class_rodin_1_1_variational_1_1_sin.html" class="m-doc">Sin</a>.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -984,6 +1058,21 @@ $ \partial_z u $
               static auto <a href="#a79b8eca5417aa8fe5ada65adfd95d688" class="m-doc-self">TestSpace</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Shorthand variable for <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">ShapeFunctionSpaceType::<wbr />Test</a>.</dd>
+            <dt id="a66f4bcf97a130fd2d8f4a79272d91949">
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+               <a href="#a66f4bcf97a130fd2d8f4a79272d91949" class="m-doc-self">GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_g_e_q.html" class="m-doc">GEQ</a>.</dd>
+            <dt id="ab59b2ea05105752573dcd50e81be3c31">
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+               <a href="#ab59b2ea05105752573dcd50e81be3c31" class="m-doc-self">GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_g_t.html" class="m-doc">GT</a>.</dd>
+            <dt id="a0aef371a8fde0b84d945e319dfdfa858">
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+               <a href="#a0aef371a8fde0b84d945e319dfdfa858" class="m-doc-self">LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_l_t.html" class="m-doc">LT</a>.</dd>
           </dl>
         </section>
         <section>

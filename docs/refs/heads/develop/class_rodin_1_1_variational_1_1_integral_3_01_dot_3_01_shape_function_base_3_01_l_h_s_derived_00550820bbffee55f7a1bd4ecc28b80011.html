@@ -76,6 +76,7 @@
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
@@ -224,6 +225,15 @@ $ V_h $
             <dd><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> of the dot product of trial and test operators.</dd>
           </dl>
         </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d3e4eebdf72f4f00e0f1f326243e6a4" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ab5927126551341101f283d9cd3008f2b"><div>
@@ -368,6 +378,24 @@ $ B(v) $
 <use x='232.667878' y='-10.793007' xlink:href='#eq8-g1-120'/>
 </g>
 </svg></div>
+          </div></section>
+          <section class="m-doc-details" id="a2d3e4eebdf72f4f00e0f1f326243e6a4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2d3e4eebdf72f4f00e0f1f326243e6a4" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>
