@@ -19,6 +19,9 @@ namespace Rodin::Variational
    * @see LEQ
    */
 
+  /**
+   * @ingroup LEQSpecializations
+   */
   template <class LHSDerived, class RHSDerived>
   class LEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
     : public BooleanFunctionBase<LEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
@@ -29,13 +32,13 @@ namespace Rodin::Variational
       using RHS = FunctionBase<RHSDerived>;
 
       LEQ(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       LEQ(const LEQ& other)
         : Parent(other),
-          m_lhs(other.m_lhs),
-          m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       LEQ(LEQ&& other)
@@ -48,19 +51,31 @@ namespace Rodin::Variational
       constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
-        return Scalar(m_lhs.getValue(p)) <= Scalar(m_rhs.getValue(p));
+        return getLHS().getValue(p) <= getRHS().getValue(p);
       }
 
       inline
-      LEQ* copy() const noexcept
-      override
+      const auto& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      const auto& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      inline LEQ* copy() const noexcept override
       {
         return new LEQ(*this);
       }
 
     private:
-      LHS m_lhs;
-      RHS m_rhs;
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>

@@ -70,6 +70,9 @@ namespace Rodin::Variational
       std::reference_wrapper<const StrictType> m_ref;
   };
 
+  /**
+   * @brief CTAD for LazyEvaluator.
+   */
   template <class StrictType>
   LazyEvaluator(const StrictType&) -> LazyEvaluator<StrictType>;
 }

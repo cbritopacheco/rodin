@@ -1007,7 +1007,8 @@ namespace Rodin::Variational
     class OpenMP;
   }
 
-  class ShapeComputator;
+  template <class Kernel, class Operand>
+  class Potential;
 }
 
 #endif

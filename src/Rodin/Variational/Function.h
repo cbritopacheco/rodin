@@ -163,6 +163,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
+       * @note CRTP function to be overriden in Derived class.
        */
       inline
       constexpr

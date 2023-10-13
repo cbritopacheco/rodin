@@ -16,7 +16,14 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represents the Minimum between two arguments.
+   * @defgroup MinSpecializations Min Template Specializations
+   * @brief Template specializations of the Min class.
+   * @see Min
+   */
+
+  /**
+   * @ingroup MinSpecializations
+   * @brief Represents the minimum between two arguments.
    */
   template <class LHSDerived, class RHSDerived>
   class Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
@@ -54,7 +61,12 @@ namespace Rodin::Variational
       constexpr
       Scalar getValue(const Geometry::Point& p) const
       {
-        return std::min(Scalar(m_lhs.getValue(p)), Scalar(m_rhs.getValue(p).scalar()));
+        const auto lhs = getLHS().getValue(p);
+        const auto rhs = getRHS().getValue(p);
+        if (lhs < rhs)
+          return lhs;
+        else
+          return rhs;
       }
 
       inline
@@ -69,6 +81,11 @@ namespace Rodin::Variational
       {
         assert(m_rhs);
         return *m_rhs;
+      }
+
+      virtual Min* copy() const noexcept override
+      {
+        return new Min(*this);
       }
 
     private:
@@ -91,13 +108,13 @@ namespace Rodin::Variational
 
       constexpr
       Min(const LHS& a, const RHS& b)
-        : m_lhs(a), m_rhs(b)
+        : m_lhs(a.copy()), m_rhs(b)
       {}
 
       constexpr
       Min(const Min& other)
         : Parent(other),
-          m_lhs(other.m_lhs), m_rhs(other.m_rhs)
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs)
       {}
 
       constexpr
@@ -118,7 +135,12 @@ namespace Rodin::Variational
       constexpr
       Scalar getValue(const Geometry::Point& p) const
       {
-        return std::min(Scalar(m_lhs.getValue(p)), m_rhs);
+        const auto lhs = getLHS().getValue(p);
+        const auto& rhs = getRHS();
+        if (lhs < rhs)
+          return lhs;
+        else
+          return rhs;
       }
 
       inline
@@ -132,6 +154,11 @@ namespace Rodin::Variational
       const auto& getRHS() const
       {
         return m_rhs;
+      }
+
+      virtual Min* copy() const noexcept override
+      {
+        return new Min(*this);
       }
 
     private:
@@ -165,6 +192,11 @@ namespace Rodin::Variational
       Min(Min&& other)
         : Parent(std::move(other))
       {}
+
+      virtual Min* copy() const noexcept override
+      {
+        return new Min(*this);
+      }
   };
 
   template <class NestedDerived>

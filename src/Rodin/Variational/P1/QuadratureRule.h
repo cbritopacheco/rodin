@@ -448,7 +448,7 @@ namespace Rodin::Variational
 
       using LHS = FunctionBase<LHSDerived>;
 
-      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>>;
+      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>, FES, TestSpace>;
 
       using Integrand = ShapeFunctionBase<Dot<LHS, RHS>>;
 

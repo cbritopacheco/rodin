@@ -27,7 +27,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup PowSpecializations
-   * @brief Represent the power function.
+   * @brief Represents the power function.
    *
    * This class represents the function @f$ f : \mathbb{R} \rightarrow
    * \mathbb{R} @f$ defined by the exponentiation of a base value @f$ x \in
@@ -101,6 +101,9 @@ namespace Rodin::Variational
       const Exponent m_p;
   };
 
+  /**
+   * @brief CTAD for Pow.
+   */
   template <class BaseDerived, class Number>
   Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
 

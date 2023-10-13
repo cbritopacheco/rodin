@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_QF_QFGG_H
 #define RODIN_VARIATIONAL_QF_QFGG_H
 
+#define RODIN_VARIATIONAL_QF_QFGG_DEFAULT_ORDER 1
+
 #include "QuadratureFormula.h"
 
 #include "QF1P1.h"
@@ -23,6 +25,11 @@ namespace Rodin::QF
     public:
       /// Parent class
       using Parent = QuadratureFormulaBase;
+
+      constexpr
+      QFGG(Geometry::Polytope::Type g)
+        : QFGG(RODIN_VARIATIONAL_QF_QFGG_DEFAULT_ORDER, g)
+      {}
 
       constexpr
       QFGG(size_t order, Geometry::Polytope::Type g)
