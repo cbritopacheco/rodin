@@ -288,7 +288,7 @@ namespace Rodin::Geometry
   };
 
   /**
-   * @brief Abstract class for spatial points on a discrete mesh.
+   * @brief Base class for spatial points on a discrete mesh.
    *
    * This class represents the tuple @f$ (x, r, p) @f$
    * such that:
@@ -381,6 +381,12 @@ namespace Rodin::Geometry
         return NAN;
       }
 
+      inline
+      const auto& asVector() const
+      {
+        return getPhysicalCoordinates();
+      }
+
       /**
        * @brief Gets the @f$ x @f$ coordinate.
        * @returns @f$ x @f$ coordinate of the point.
@@ -462,6 +468,25 @@ namespace Rodin::Geometry
       mutable std::optional<const Scalar>              m_distortion;
   };
 
+  /**
+   * @brief Represents a spatial point on a discrete mesh.
+   *
+   * This class represents the tuple @f$ (x, r, p) @f$
+   * such that:
+   * @f[
+   *  p = x(r)
+   * @f]
+   * for a polytope @f$ \tau \in \mathcal{T}_h @f$ belonging to the mesh @f$
+   * \mathcal{T}_h @f$. Here, @f$ p \in \tau @f$ denotes the physical
+   * coordinates of the point, while @f$ x : K \rightarrow \tau @f$ represents
+   * the transformation taking reference coordinates @f$ r \in K @f$, for a
+   * reference geometry @f$ K @f$.
+   *
+   * @section rodin-geometry-point-thread_safety Thread safety
+   * This class is not thread safe.
+   *
+   * @see PolytopeTransformation
+   */
   class Point final : public PointBase
   {
     enum class RCStorage

@@ -19,6 +19,86 @@ namespace Rodin::Variational
    * @see QuadratureRule
    */
 
+  template <class FunctionDerived>
+  class QuadratureRule<FunctionBase<FunctionDerived>> final
+    : public FormLanguage::Base
+  {
+    public:
+      using Parent = FormLanguage::Base;
+
+      using Integrand = FunctionBase<FunctionDerived>;
+
+      QuadratureRule(
+          std::reference_wrapper<const Geometry::Polytope> polytope, const Integrand& f)
+        : m_polytope(polytope),
+          m_integrand(f.copy()),
+          m_qfgg(polytope.get().getGeometry()),
+          m_qf(m_qfgg)
+      {}
+
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_polytope(other.m_polytope.get()),
+          m_integrand(other.m_integrand->copy()),
+          m_qfgg(other.m_qfgg),
+          m_qf(other.m_qf)
+      {}
+
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_polytope(std::move(other.m_polytope)),
+          m_integrand(std::move(other.m_integrand)),
+          m_qfgg(std::move(other.m_qfgg)),
+          m_qf(std::move(other.m_qf))
+      {}
+
+
+      Scalar compute()
+      {
+        auto& res = m_value.emplace(0);
+        const auto& qf = m_qf.get();
+        const auto& f = getIntegrand();
+        const auto& polytope = m_polytope.get();
+        const auto& trans = polytope.getTransformation();
+        for (size_t i = 0; i < qf.getSize(); i++)
+        {
+          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          res += qf.getWeight(i) * p.getDistortion() * f(p);
+        }
+        return res;
+      }
+
+      inline
+      const std::optional<Scalar>& getValue() const
+      {
+        return m_value;
+      }
+
+      const Integrand& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const QF::QuadratureFormulaBase& getQuadratureFormula() const
+      {
+        return m_qf.get();
+      }
+
+      QuadratureRule& setQuadratureFormula(const QF::QuadratureFormulaBase& qf)
+      {
+        m_qf = qf;
+        return *this;
+      }
+
+    private:
+      std::reference_wrapper<const Geometry::Polytope> m_polytope;
+      std::unique_ptr<Integrand> m_integrand;
+      const QF::QFGG m_qfgg;
+      std::reference_wrapper<const QF::QuadratureFormulaBase> m_qf;
+      std::optional<Scalar> m_value;
+  };
+
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Approximation of the integral of the the dot product between a

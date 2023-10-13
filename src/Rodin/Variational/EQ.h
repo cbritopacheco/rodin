@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_AND_H
-#define RODIN_VARIATIONAL_AND_H
+#ifndef RODIN_VARIATIONAL_EQ_H
+#define RODIN_VARIATIONAL_EQ_H
 
 #include "ForwardDecls.h"
 #include "GridFunction.h"
@@ -14,34 +14,34 @@
 namespace Rodin::Variational
 {
   /**
-   * @defgroup ANDSpecializations AND Template Specializations
-   * @brief Template specializations of the AND class.
-   * @see AND
+   * @defgroup EQSpecializations EQ Template Specializations
+   * @brief Template specializations of the EQ class.
+   * @see EQ
    */
 
   /**
-   * @ingroup ANDSpecializations
-   * @brief Logical AND operator between two instances of BooleanFunctionBase
+   * @ingroup EQSpecializations
+   * @brief Logical EQ operator between two instances of FunctionBase
    */
   template <class LHSDerived, class RHSDerived>
-  class AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>> final
-    : public BooleanFunctionBase<AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>>
+  class EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
+    : public FunctionBase<EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
-      using LHS = BooleanFunctionBase<LHSDerived>;
-      using RHS = BooleanFunctionBase<RHSDerived>;
-      using Parent = BooleanFunctionBase<AND<LHS, RHS>>;
+      using LHS = FunctionBase<LHSDerived>;
+      using RHS = FunctionBase<RHSDerived>;
+      using Parent = FunctionBase<EQ<LHS, RHS>>;
 
-      AND(const LHS& lhs, const RHS& rhs)
+      EQ(const LHS& lhs, const RHS& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      AND(const AND& other)
+      EQ(const EQ& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      AND(AND&& other)
+      EQ(EQ&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
@@ -65,12 +65,12 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return getLHS().getValue(p) && getRHS().getValue(p);
+        return getLHS().getValue(p) == getRHS().getValue(p);
       }
 
-      inline AND* copy() const noexcept final override
+      inline EQ* copy() const noexcept final override
       {
-        return new AND(*this);
+        return new EQ(*this);
       }
 
     private:
@@ -79,34 +79,34 @@ namespace Rodin::Variational
   };
 
   template <class LHSDerived, class RHSDerived>
-  AND(const BooleanFunctionBase<LHSDerived>&, const BooleanFunctionBase<RHSDerived>&)
-    -> AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;
+  EQ(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+    -> EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
   inline
   constexpr
   auto
-  operator&&(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  operator==(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return AND(lhs, rhs);
+    return EQ(lhs, rhs);
   }
 
   template <class RHSDerived>
   inline
   constexpr
   auto
-  operator&&(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  operator==(Boolean lhs, const FunctionBase<RHSDerived>& rhs)
   {
-    return AND(BooleanFunction(lhs), rhs);
+    return EQ(BooleanFunction(lhs), rhs);
   }
 
   template <class LHSDerived>
   inline
   constexpr
   auto
-  operator&&(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
+  operator==(const FunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
-    return AND(lhs, BooleanFunction(rhs));
+    return EQ(lhs, BooleanFunction(rhs));
   }
 }
 

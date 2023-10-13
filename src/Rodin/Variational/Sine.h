@@ -78,6 +78,9 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Sin(const FunctionBase<NestedDerived>&) -> Sin<FunctionBase<NestedDerived>>;
 
+  /**
+   * @brief Helper function to construct objects of type Sin.
+   */
   template <class NestedDerived>
   auto sin(const FunctionBase<NestedDerived>& f)
   {

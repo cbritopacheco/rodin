@@ -16,7 +16,13 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represents the maximum between two arguments.
+   * @defgroup MaxSpecializations Max Template Specializations
+   * @brief Template specializations of the Max class.
+   * @see Max
+   */
+
+  /**
+   * @ingroup MaxSpecializations
    */
   template <class LHSDerived, class RHSDerived>
   class Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
@@ -54,7 +60,12 @@ namespace Rodin::Variational
       constexpr
       Scalar getValue(const Geometry::Point& p) const
       {
-        return std::max(Scalar(m_lhs.getValue(p)), Scalar(m_rhs.getValue(p).scalar()));
+        const auto lhs = getLHS().getValue(p);
+        const auto rhs = getRHS().getValue(p);
+        if (lhs < rhs)
+          return rhs;
+        else
+          return lhs;
       }
 
       inline
@@ -71,6 +82,11 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      virtual Max* copy() const noexcept override
+      {
+        return new Max(*this);
+      }
+
     private:
       std::unique_ptr<LHS> m_lhs;
       std::unique_ptr<RHS> m_rhs;
@@ -80,6 +96,9 @@ namespace Rodin::Variational
   Max(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
+  /**
+   * @ingroup MaxSpecializations
+   */
   template <class NestedDerived>
   class Max<FunctionBase<NestedDerived>, Scalar>
     : public ScalarFunctionBase<Max<FunctionBase<NestedDerived>, Scalar>>
@@ -118,7 +137,12 @@ namespace Rodin::Variational
       constexpr
       Scalar getValue(const Geometry::Point& p) const
       {
-        return std::max(Scalar(getLHS().getValue(p)), getRHS());
+        const auto lhs = getLHS().getValue(p);
+        const auto& rhs = getRHS();
+        if (lhs < rhs)
+          return rhs;
+        else
+          return lhs;
       }
 
       inline
@@ -132,6 +156,11 @@ namespace Rodin::Variational
       const auto& getRHS() const
       {
         return m_rhs;
+      }
+
+      virtual Max* copy() const noexcept override
+      {
+        return new Max(*this);
       }
 
     private:
@@ -165,6 +194,11 @@ namespace Rodin::Variational
       Max(Max&& other)
         : Parent(std::move(other))
       {}
+
+      virtual Max* copy() const noexcept override
+      {
+        return new Max(*this);
+      }
   };
 
   template <class NestedDerived>
