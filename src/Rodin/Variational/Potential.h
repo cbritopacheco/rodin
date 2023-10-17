@@ -191,8 +191,8 @@ namespace Rodin::Variational
               const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                res += qf.getWeight(i) * p.getDistortion() * kernel(p, y) * operand(y);
+                const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
               }
             }
             return res;
@@ -221,8 +221,8 @@ namespace Rodin::Variational
               const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                res += qf.getWeight(i) * p.getDistortion() * kernel(p, y) * operand(y);
+                const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
               }
             }
             return res;
@@ -254,6 +254,12 @@ namespace Rodin::Variational
       {
         m_qf.emplace(qf);
         return *this;
+      }
+
+      inline
+      const auto& getQuadratureFormula() const
+      {
+        return m_qf;
       }
 
     private:
@@ -421,9 +427,9 @@ namespace Rodin::Variational
               {
                 for (size_t local = 0; local < fe.getCount(); local++)
                 {
-                  Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                  const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
                   const auto psi = fes.getInverseMapping(polytope, fe.getBasis(local));
-                  res += qf.getWeight(i) * p.getDistortion() * kernel(p, y) * psi(y);
+                  res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psi(y);
                 }
               }
             }

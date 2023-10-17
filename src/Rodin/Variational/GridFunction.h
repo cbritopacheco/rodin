@@ -16,6 +16,7 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
+#include "Rodin/QF/QFGG.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MFEM.h"

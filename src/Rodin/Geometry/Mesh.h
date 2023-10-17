@@ -31,6 +31,25 @@
 
 namespace Rodin::Geometry
 {
+  class CCL
+  {
+    public:
+      using Component = FlatSet<Index>;
+
+      CCL(std::deque<Component>&& dq)
+        : m_components(std::move(dq))
+      {}
+
+      inline
+      const std::deque<Component>& getComponents() const
+      {
+        return m_components;
+      }
+
+    private:
+      std::deque<Component> m_components;
+  };
+
   /**
   * @brief Abstract base class for Mesh objects.
   */
@@ -52,6 +71,14 @@ namespace Rodin::Geometry
       {
         return this != &other;
       }
+
+      inline
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p) const
+      {
+        return ccl(p, getDimension());
+      }
+
+      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const;
 
       virtual MeshBase& scale(Scalar c) = 0;
 
@@ -206,7 +233,7 @@ namespace Rodin::Geometry
 
       virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
-      virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const = 0;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const = 0;
 
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const = 0;
@@ -225,6 +252,10 @@ namespace Rodin::Geometry
       virtual const MeshConnectivity& getConnectivity() const = 0;
 
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
+
+      virtual MeshBase& setVertexCoordinates(Index idx, Scalar, size_t i) = 0;
+
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::Vector& coords) = 0;
 
       virtual SubMeshBase& asSubMesh() = 0;
 
@@ -637,6 +668,10 @@ namespace Rodin::Geometry
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
+
+      virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
+
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::Vector& coords) override;
 
     private:
       static const GeometryIndexed<Math::Matrix> s_vertices;

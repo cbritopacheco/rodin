@@ -199,6 +199,20 @@ namespace Rodin::Geometry
   }
 #endif
 
+  Mesh<Context::Serial>&
+  Mesh<Context::Serial>::setVertexCoordinates(Index idx, const Math::Vector& coords)
+  {
+    m_vertices.col(idx) = coords;
+    return *this;
+  }
+
+  Mesh<Context::Serial>&
+  Mesh<Context::Serial>::setVertexCoordinates(Index idx, Scalar xi, size_t i)
+  {
+    m_vertices.col(idx).coeffRef(i) = xi;
+    return *this;
+  }
+
   Eigen::Map<const Math::SpatialVector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
@@ -304,43 +318,42 @@ namespace Rodin::Geometry
     return totalVolume;
   }
 
-  // std::deque<std::set<int>> MeshBase::ccl(
-  //     std::function<bool(const Element&, const Element&)> p) const
-  // {
-  //   std::set<int> visited;
-  //   std::deque<int> searchQueue;
-  //   std::deque<std::set<int>> res;
+  CCL MeshBase::ccl(
+      std::function<bool(const Polytope&, const Polytope&)> p, size_t d) const
+  {
+    FlatSet<Index> visited;
+    std::deque<Index> searchQueue;
+    std::deque<FlatSet<Index>> res;
 
-  //   // Perform the labelling
-  //   assert(false);
-  //   // for (int i = 0; i < count<Element>(); i++)
-  //   // {
-  //   //   if (!visited.count(i))
-  //   //   {
-  //   //     res.push_back({});
-  //   //     searchQueue.push_back(i);
-  //   //     while (searchQueue.size() > 0)
-  //   //     {
-  //   //       int el = searchQueue.back();
-  //   //       searchQueue.pop_back();
-  //   //       auto result = visited.insert(el);
-  //   //       bool inserted = result.second;
-  //   //       if (inserted)
-  //   //       {
-  //   //         res.back().insert(el);
-  //   //         for (int n : get<Element>(el).adjacent())
-  //   //         {
-  //   //           if (p(get<Element>(el), get<Element>(n)))
-  //   //           {
-  //   //             searchQueue.push_back(n);
-  //   //           }
-  //   //         }
-  //   //       }
-  //   //     }
-  //   //   }
-  //   // }
-  //   return res;
-  // }
+    // Perform the labelling
+    for (auto it = getPolytope(d); it; ++it)
+    {
+      const Index i = it->getIndex();
+      if (!visited.count(i))
+      {
+        res.push_back({});
+        searchQueue.push_back(i);
+        while (searchQueue.size() > 0)
+        {
+          const Index idx = searchQueue.back();
+          auto el = getPolytope(d, idx);
+          searchQueue.pop_back();
+          auto result = visited.insert(idx);
+          const Boolean inserted = result.second;
+          if (inserted)
+          {
+            res.back().insert(idx);
+            for (auto adj = el->getAdjacent(); adj; ++adj)
+            {
+              if (p(*el, *adj))
+                searchQueue.push_back(adj->getIndex());
+            }
+          }
+        }
+      }
+    }
+    return res;
+  }
 
   size_t Mesh<Context::Serial>::getCount(size_t dimension) const
   {
