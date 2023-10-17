@@ -1,5 +1,6 @@
 add_executable(P1Potential P1Potential.cpp)
-target_link_libraries(P1Potential PUBLIC Rodin::Variational)
+target_link_libraries(P1Potential
+  PUBLIC Rodin::Variational Rodin::External::MMG)
 
 add_executable(P1GridFunctionIO P1GridFunctionIO.cpp)
 target_link_libraries(P1GridFunctionIO PUBLIC Rodin::Variational)

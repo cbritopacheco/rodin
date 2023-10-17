@@ -144,7 +144,7 @@ namespace Rodin::Geometry
 
       IteratorIndexGenerator(const IteratorIndexGenerator& other)
         : IndexGeneratorBase(other),
-          m_it(other.m_it), m_end(std::move(other.m_end))
+          m_it(other.m_it), m_end(other.m_end)
       {}
 
       bool end() const override

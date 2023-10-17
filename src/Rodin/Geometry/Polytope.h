@@ -177,8 +177,6 @@ namespace Rodin::Geometry
 
       PolytopeIterator getAdjacent() const;
 
-      PolytopeIterator getIncident() const;
-
       Type getGeometry() const;
 
     private:
@@ -378,6 +376,7 @@ namespace Rodin::Geometry
             return getReferenceCoordinates()(i);
           }
         }
+        assert(false);
         return NAN;
       }
 
