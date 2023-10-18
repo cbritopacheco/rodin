@@ -30,6 +30,12 @@ namespace Rodin::External::MMG
     if (fmt == IO::FileFormat::MEDIT)
     {
       std::ofstream os(filename.c_str());
+      if (!os)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Failed to open " << filename << " for writing."
+          << Alert::Raise;
+      }
       os.precision(precison);
       MMG::MeshPrinter printer(*this);
       printer.print(os);
@@ -46,17 +52,14 @@ namespace Rodin::External::MMG
     if (fmt == IO::FileFormat::MEDIT)
     {
       std::ifstream in(filename.c_str());
-      if (in)
+      if (!in)
       {
-        MMG::MeshLoader loader(*this);
-        loader.load(in);
-      }
-      else
-      {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "Failed to open " << filename << " for reading."
           << Alert::Raise;
       }
+      MMG::MeshLoader loader(*this);
+      loader.load(in);
     }
     else
     {
