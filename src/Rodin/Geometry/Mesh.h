@@ -29,6 +29,44 @@
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Requires the precondition that the Mesh object have the specified
+ * connectivity computed.
+ *
+ * Throws an exception if the current mesh instance does not have the
+ * connectivity
+ * @f[
+ *  d \longrightarrow d', \quad 0 \leq d, d' \leq D
+ * @f]
+ * computed, where @f$ D @f$ is the topological dimension of the mesh.
+ */
+#define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp) \
+  if (this->getConnectivity().getIncidence(d, dp).size() == 0) \
+  { \
+    Rodin::Alert::MemberFunctionException(*this, __func__) \
+      << Rodin::Alert::Notation::Incidence(d, dp) \
+      << " has not been computed and is required to use this function." \
+      << Rodin::Alert::Raise; \
+  }
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Requires the precondition that the Mesh object be a SubMesh.
+ *
+ * Throws an exception if the current Mesh object is not a SubMesh, i.e.
+ * `this->isSubMesh()` evaluates to `false`.
+ */
+#define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH() \
+  if (!this->isSubMesh()) \
+  { \
+    Rodin::Alert::MemberFunctionException(*this, __func__) \
+      << "This instance of Mesh is not a SubMesh " \
+      << Rodin::Alert::Notation::Predicate(false, "isSubMesh()") \
+      << ". Downcasting to SubMesh is ill-defined." \
+      << Rodin::Alert::Raise; \
+  }
+
 namespace Rodin::Geometry
 {
   class CCL

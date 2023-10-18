@@ -162,6 +162,7 @@ namespace Rodin::Geometry
         build.include(D, i);
         for (size_t d = 1; d <= D - 1; d++)
         {
+          RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D, d);
           const auto& inc = getConnectivity().getIncidence(D, d);
           if (inc.size() > 0)
             build.include(d, inc.at(i));
@@ -175,6 +176,7 @@ namespace Rodin::Geometry
       const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
   {
     const size_t D = getDimension();
+    RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
     for (auto it = getFace(); it; ++it)
     {
       assert(it->getDimension() == D - 1);
@@ -425,14 +427,8 @@ namespace Rodin::Geometry
   bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
   {
     const size_t D = getDimension();
+    RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
     const auto& conn = getConnectivity();
-    if (conn.getIncidence(D - 1, D).size() == 0)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << Alert::Notation::Incidence(D - 1, D)
-        << " has not been computed and is required to use this function."
-        << Alert::Raise;
-    }
     assert(conn.getIncidence(D - 1, D).size());
     const auto& incidence = conn.getIncidence({D - 1, D}, faceIdx);
     assert(incidence.size() > 0);
@@ -465,26 +461,14 @@ namespace Rodin::Geometry
   SubMeshBase& Mesh<Context::Serial>::asSubMesh()
   {
     assert(isSubMesh());
-    if (!isSubMesh())
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "This instance of Mesh is not a SubMesh (isSubMesh() == false). "
-        << "Downcasting to SubMesh is ill-defined."
-        << Alert::Raise;
-    }
+    RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
     return static_cast<SubMesh<Context::Serial>&>(*this);
   }
 
   const SubMeshBase& Mesh<Context::Serial>::asSubMesh() const
   {
     assert(isSubMesh());
-    if (!isSubMesh())
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "This instance of Mesh is not a SubMesh (isSubMesh() == false). "
-        << "Downcasting to SubMesh is ill-defined."
-        << Alert::Raise;
-    }
+    RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
     return static_cast<const SubMesh<Context::Serial>&>(*this);
   }
 
