@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::QF::QFGG class | Rodin</title>
+  <title>Quadrature formulae module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -38,6 +38,7 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
+                <li><a href="group___rodin_quadrature.html" id="m-navbar-current">Quadrature formulae</a></li>
                 <li><a href="group___finite_elements.html">Supported finite elements</a></li>
                 <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
@@ -63,59 +64,32 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_q_f.html">QF</a>::<wbr/></span>QFGG <span class="m-thin">class</span>
-        </h1>
-        <p>Quadrature on a polytope with any of Rodin&#x27;s supported geometries.</p>
+          Quadrature formulae <span class="m-thin">module</span></h1>
+        <p>Quadrature formulae utilized by <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p>Polytope::Geometry</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a></p></aside>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>
+              class <a href="class_rodin_1_1_q_f_1_1_generic_polytope_quadrature.html" class="m-doc">Rodin::QF::GenericPolytopeQuadrature</a>
             </dt>
-            <dd>Abstract base class for quadrature formulas.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a21e2442cc835c73699062acd28ce6f72">
-              using <a href="#a21e2442cc835c73699062acd28ce6f72" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>
-            </dt>
-            <dd>Parent class.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
+            <dd>Quadrature on a polytope with any of Rodin&#x27;s supported geometries.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a404e459d5246bbc51ced07d844e3a430" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const Math::SpatialVector&amp; <span class="m-label m-flat m-warning">override</span></span>
+              class <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html" class="m-doc">Rodin::QF::GrundmannMoller</a>
             </dt>
-            <dd>Returns a reference to a vector containing the coordinates in reference space.</dd>
+            <dd>Grundmann-Möller Simplex Quadrature.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a404e459d5246bbc51ced07d844e3a430"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">const Math::SpatialVector&amp; Rodin::<wbr />QF::<wbr />QFGG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a404e459d5246bbc51ced07d844e3a430" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Returns a reference to a vector containing the coordinates in reference space.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>The reference must be valid throughout the whole lifetime of the program.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>
