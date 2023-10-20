@@ -11,25 +11,39 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+using namespace Rodin::Math::Constants;
 
 int main(int, char**)
 {
   constexpr size_t n = 16;
-  const size_t vdim = 2;
-
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.scale(1.0 / (n - 1));
-  mesh.getConnectivity().compute(1, 2);
+  mesh.save("Square.mesh");
 
-  mesh.displace(VectorFunction{ 0, 0.2 * sin(2 * M_PI * F::x) });
-
-  P1 fes(mesh, vdim);
+  P1 fes(mesh);
   GridFunction gf(fes);
-  gf.projectOnBoundary(BoundaryNormal(mesh));
+  const auto f = cos(2 * pi() * F::x + pi() / 2) * sin(2 * pi() * F::y);
+  const auto g = sin(2 * pi() * F::x) * sin(2 * pi() * F::y);
 
-  mesh.save("Normal.mesh");
-  gf.save("Normal.gf");
+  gf = f > g;
+
+  gf.save("GT.gf");
+
+  gf = f < g;
+
+  gf.save("LT.gf");
+
+  gf = (f > g) || (f < g);
+
+  gf.save("OR.gf");
+
+  gf = (f > g) && (f < g);
+
+  gf.save("AND.gf");
+
+  return 0;
 }
+
 
 

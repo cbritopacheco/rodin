@@ -42,7 +42,10 @@ namespace Rodin::IO
       if (version)
         m_version = *version;
       else
-        Alert::Exception() << "Failed to parse version number of mesh." << Alert::Raise;
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Failed to parse version number of mesh." << Alert::Raise;
+      }
     }
   }
 
@@ -59,7 +62,10 @@ namespace Rodin::IO
       if (dimension)
         m_spaceDimension = *dimension;
       else
-        Alert::Exception() << "Failed to parse dimension of mesh." << Alert::Raise;
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Failed to parse dimension of mesh." << Alert::Raise;
+      }
     }
   }
 
@@ -90,8 +96,9 @@ namespace Rodin::IO
 
       if (!count)
       {
-        Alert::Exception() << "Failed to determine number of "
-                           << std::quoted(*kw) << "." << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "Failed to determine number of "
+          << std::quoted(*kw) << "." << Alert::Raise;
       }
 
       m_pos[*entity] = is.tellg();
@@ -108,10 +115,11 @@ namespace Rodin::IO
             auto data = MEDIT::ParseVertex(m_spaceDimension)(line.begin(), line.end());
             if (!data)
             {
-              Alert::Exception() << "Failed to parse Vertex on line "
-                                 << std::to_string(m_currentLineNumber)
-                                 << "."
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Vertex on line "
+                << std::to_string(m_currentLineNumber)
+                << "."
+                << Alert::Raise;
             }
             m_build.vertex(std::move(data->vertex));
             if (data->attribute != RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
@@ -128,10 +136,11 @@ namespace Rodin::IO
             auto data = MEDIT::ParseEntity(2)(line.begin(), line.end());
             if (!data)
             {
-              Alert::Exception() << "Failed to parse Edge on line "
-                                 << std::to_string(m_currentLineNumber)
-                                 << "."
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Edge on line "
+                << std::to_string(m_currentLineNumber)
+                << "."
+                << Alert::Raise;
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Segment, std::move(data->vertices));
@@ -149,10 +158,11 @@ namespace Rodin::IO
             auto data = MEDIT::ParseEntity(3)(line.begin(), line.end());
             if (!data)
             {
-              Alert::Exception() << "Failed to parse Triangle on line "
-                                 << std::to_string(m_currentLineNumber)
-                                 << "."
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Triangle on line "
+                << std::to_string(m_currentLineNumber)
+                << "."
+                << Alert::Raise;
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Triangle, std::move(data->vertices));
@@ -170,10 +180,11 @@ namespace Rodin::IO
             auto data = MEDIT::ParseEntity(4)(line.begin(), line.end());
             if (!data)
             {
-              Alert::Exception() << "Failed to parse Tetrahedron on line "
-                                 << std::to_string(m_currentLineNumber)
-                                 << "."
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Tetrahedron on line "
+                << std::to_string(m_currentLineNumber)
+                << "."
+                << Alert::Raise;
             }
             data->vertices -= 1;
             m_build.polytope(Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices));

@@ -20,6 +20,7 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "ForwardDecls.h"
 
@@ -160,7 +161,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto x() const
+      const Derived& x() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 1);
@@ -169,7 +170,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto y() const
+      const Derived& y() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 2);
@@ -178,7 +179,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      auto z() const
+      const Derived& z() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 3);
@@ -709,12 +710,18 @@ namespace Rodin::Variational
         return m_weights;
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       inline
       Derived& setWeights()
       {
         return static_cast<Derived&>(*this).setWeights();
       }
 
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
       template <class Vector>
       inline
       Derived& setWeights(Vector&& weights)
@@ -806,6 +813,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Interpolates the GridFunction at the given point.
+       * @note CRTP function to be overriden in Derived class.
        */
       inline
       constexpr
@@ -817,6 +825,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Interpolates the GridFunction at the given point.
+       * @note CRTP function to be overriden in Derived class.
        */
       inline
       constexpr

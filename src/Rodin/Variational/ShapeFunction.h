@@ -21,9 +21,11 @@ namespace Rodin::FormLanguage
 
     static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
 
-    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+    using ResultType =
+      typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
-    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+    using RangeType =
+      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
 
   };
 
@@ -31,8 +33,7 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunction<Derived, FESType, SpaceType>>
   {
     using FES = FESType;
-
-    static constexpr Variational::ShapeFunctionSpaceType Space = SpaceType;
+    static constexpr const Variational::ShapeFunctionSpaceType Space = SpaceType;
   };
 }
 
@@ -89,11 +90,21 @@ namespace Rodin::Variational
       {}
 
       inline
+      Derived& getDerived()
+      {
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
       const Derived& getDerived() const
       {
         return static_cast<const Derived&>(*this);
       }
 
+      /**
+       * @brief Indicates whether the shape function is part of a %Trial or %Test
+       * function expression.
+       */
       inline
       constexpr
       ShapeFunctionSpaceType getSpaceType() const
@@ -101,6 +112,10 @@ namespace Rodin::Variational
         return Space;
       }
 
+      /**
+       * @brief Gets the shape of the range space.
+       * @note CRTP function to be overriden in the Derived class.
+       */
       inline
       constexpr
       RangeShape getRangeShape() const
@@ -147,6 +162,10 @@ namespace Rodin::Variational
         return Transpose(*this);
       }
 
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @note CRTP function to be overriden in the Derived class.
+       */
       inline
       constexpr
       const auto& getLeaf() const
@@ -154,6 +173,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
+      /**
+       * @brief Gets the number of degrees of freedom for the given polytope.
+       * @param[in] polytope Polytope
+       * @note CRTP function to be overriden in the Derived class.
+       */
       inline
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
@@ -164,6 +188,8 @@ namespace Rodin::Variational
       /**
        * @brief Gets an expression which yields the shape function basis at the
        * given point.
+       * @param[in] p Point where the shape function basis will be calculated
+       * @note CRTP function to be overriden in the Derived class.
        */
       inline
       constexpr
@@ -183,9 +209,13 @@ namespace Rodin::Variational
       constexpr
       auto operator()(Args&&... args) const
       {
-        return getTensorBasis(std::forward<Args>(args)...);
+        return this->getTensorBasis(std::forward<Args>(args)...);
       }
 
+      /**
+       * @brief Gets the finite element space to which the shape function
+       * belongs to.
+       */
       inline
       constexpr
       const FES& getFiniteElementSpace() const
@@ -207,14 +237,15 @@ namespace Rodin::Variational
   * @brief ShapeFunction
   */
   template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
-  class ShapeFunction : public ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>>
+  class ShapeFunction
+    : public ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>
   {
     public:
       using FES = FESType;
 
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>>;
+      using Parent = ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>;
 
       ShapeFunction() = delete;
 

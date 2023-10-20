@@ -35,6 +35,7 @@
 #include "Variational/Division.h"
 #include "Variational/UnaryMinus.h"
 
+#include "Variational/EQ.h"
 #include "Variational/GT.h"
 #include "Variational/LT.h"
 #include "Variational/GEQ.h"
@@ -79,5 +80,6 @@
 #include "Variational/PeriodicBC.h"
 
 #include "Variational/P1.h"
+#include "Variational/Potential.h"
 
 #endif

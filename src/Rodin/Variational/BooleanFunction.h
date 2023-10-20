@@ -40,6 +40,49 @@ namespace Rodin::Variational
 
       inline
       constexpr
+      BooleanFunctionBase& traceOf(Geometry::Attribute attr)
+      {
+        Parent::traceOf(attr);
+        return *this;
+      }
+
+      inline
+      constexpr
+      BooleanFunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        Parent::traceOf(attrs);
+        return *this;
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      inline
+      const Derived& getDerived() const
+      {
+        return static_cast<const Derived&>(*this);
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      inline
+      constexpr
+      Boolean getValue(const Geometry::Point& p) const
+      {
+        return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      inline
+      constexpr
+      void getValue(Math::Vector&, const Geometry::Point&) const = delete;
+
+      inline
+      constexpr
+      void getValue(Math::Matrix&, const Geometry::Point&) const = delete;
+
+      inline
+      constexpr
       RangeShape getRangeShape() const
       {
         return { 1, 1 };
@@ -63,12 +106,12 @@ namespace Rodin::Variational
       {}
 
       BooleanFunction(const BooleanFunction& other)
-        : BooleanFunctionBase(other),
+        : Parent(other),
           m_v(other.m_v)
       {}
 
       BooleanFunction(BooleanFunction&& other)
-        : BooleanFunctionBase(std::move(other)),
+        : Parent(std::move(other)),
           m_v(other.m_v)
       {}
 
@@ -87,6 +130,7 @@ namespace Rodin::Variational
     private:
       const Boolean m_v;
   };
+
   BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 

@@ -1,7 +1,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 #define RODIN_VARIATIONAL_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 
-#include "Rodin/QF/QFGG.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"

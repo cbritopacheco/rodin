@@ -66,14 +66,20 @@ namespace Rodin::Geometry
 
   PolytopeIterator Polytope::getAdjacent() const
   {
-    assert(false);
-    return PolytopeIterator(0, getMesh(), EmptyIndexGenerator());
-  }
-
-  PolytopeIterator Polytope::getIncident() const
-  {
-    assert(false);
-    return PolytopeIterator(0, getMesh(), EmptyIndexGenerator());
+    const size_t d = getDimension();
+    const auto& mesh = m_mesh.get();
+    const auto& conn = mesh.getConnectivity();
+    const auto& inc = conn.getIncidence(d, d);
+    if (inc.size() == 0)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << Alert::Notation::Incidence(d, d)
+        << " has not been computed and is required to use this function."
+        << Alert::Raise;
+    }
+    const auto& adj = inc.at(getIndex());
+    return PolytopeIterator(
+        d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));
   }
 
   const PolytopeTransformation& Polytope::getTransformation() const

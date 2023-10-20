@@ -19,7 +19,7 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Abstract base class for finite element spaces.
+   * @brief Base class for finite element spaces.
    */
   class FiniteElementSpaceBase
   {
@@ -117,11 +117,90 @@ namespace Rodin::Variational
        *  auto operator()(const Geometry::Point&);
        * @endcode
        *
+       * @note CRTP function to be overriden in Derived class.
        */
       template <class T>
       auto getMapping(const std::pair<size_t, Index>& p, const T& v) const
       {
         return static_cast<const Derived&>(*this).getMapping(p, v);
+      }
+  };
+
+  /**
+   * @brief Base class for mappings taking functions defined on mesh elements
+   * to reference elements.
+   *
+   * For all @f$ \tau \in \mathcal{T}_h @f$ the mapping
+   * @f[
+   *  \psi : V(\tau) \rightarrow V(K)
+   * @f]
+   * takes functions defined on the physical Banach space @f$ V(\tau) @f$ to
+   * the reference Banach space @f$ V(K) @f$. Here @f$ \tau = x(K) @f$ is the
+   * physical element, @f$ K @f$ is the reference element, and @f$ x : K
+   * \rightarrow \tau @f$ is the
+   * polytope transformation.
+   *
+   * @see FiniteElementSpaceInverseMappingBase
+   */
+  template <class Derived>
+  class FiniteElementSpaceMappingBase
+  {
+    public:
+      /**
+       * @brief Evaluates the mapped function on the reference coordinates.
+       *
+       * For the given function @f$ v \in V(\tau) @f$, performs the following
+       * evaluation:
+       * @f[
+       *  \psi(v)(r)
+       * @f]
+       * on the reference coordinates @f$ r \in K @f$.
+       *
+       * @note CRTP function to be overriden in Derived class.
+       */
+      inline
+      auto operator()(const Math::SpatialVector& r) const
+      {
+        return static_cast<const Derived&>(*this).operator()(r);
+      }
+  };
+
+  /**
+   * @brief Base class for inverse mappings taking functions defined on 
+   * to reference elements.
+   *
+   * For all @f$ \tau \in \mathcal{T}_h @f$ the inverse mapping
+   * @f[
+   *  \psi^{-1} : V(K) \rightarrow V(\tau)
+   * @f]
+   * takes functions defined on the reference Banach space @f$ V(K) @f$ to the
+   * physical Banach space @f$ V(K) @f$. Here @f$ \tau = x(K) @f$ is the
+   * physical element, @f$ K @f$ is the reference element, and @f$ x : K
+   * \rightarrow \tau @f$ is the
+   * polytope transformation.
+   *
+   * @see FiniteElementSpaceMappingBase
+   */
+  template <class Derived>
+  class FiniteElementSpaceInverseMappingBase
+  {
+    public:
+      /**
+       * @brief Evaluates the mapped function on the physical coordinates.
+       *
+       * For the given function @f$ v \in V(K) @f$, performs the following
+       * evaluation:
+       * @f[
+       *  \psi^{-1}(v)(p)
+       * @f]
+       * on the physical coordinates @f$ p \in \tau @f$.
+       *
+       * @note CRTP function to be overriden in Derived class.
+       */
+      inline
+      auto operator()(const Geometry::Point& pc) const
+      {
+        return static_cast<const Derived&>(*this).operator()(pc);
       }
   };
 }
