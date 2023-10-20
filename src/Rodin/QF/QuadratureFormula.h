@@ -10,6 +10,12 @@
 namespace Rodin::QF
 {
   /**
+   * @defgroup RodinQuadrature Quadrature formulae
+   * @brief Quadrature formulae utilized by Rodin
+   * @see QuadratureFormulaBase
+   */
+
+  /**
    * @brief Abstract base class for quadrature formulas.
    */
   class QuadratureFormulaBase
@@ -19,6 +25,13 @@ namespace Rodin::QF
       QuadratureFormulaBase(Geometry::Polytope::Type g)
         : m_geometry(g)
       {}
+
+      constexpr
+      QuadratureFormulaBase(const QuadratureFormulaBase& other)
+        : m_geometry(other.m_geometry)
+      {}
+
+      virtual ~QuadratureFormulaBase() = default;
 
       inline
       constexpr
@@ -39,6 +52,8 @@ namespace Rodin::QF
        * program.
        */
       virtual const Math::SpatialVector& getPoint(size_t i) const = 0;
+
+      virtual QuadratureFormulaBase* copy() const noexcept = 0;
 
     private:
       Geometry::Polytope::Type m_geometry;

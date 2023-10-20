@@ -16,11 +16,11 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Alert.h"
-#include "Rodin/QF/QFGG.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "ForwardDecls.h"
 

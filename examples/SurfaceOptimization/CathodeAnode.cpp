@@ -55,10 +55,10 @@ ShapeGradient getShapeGradient(
 
   TrialFunction g(vecFes);
   Problem hilbert(g, v);
-  // hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
-  //      + Integral(g, v)
-  //      + Integral(tgv * g, v).over(GammaN)
-  //      - BoundaryIntegral(expr * cn, v).over(SigmaD);
+  hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+          + Integral(g, v)
+          + Integral(tgv * g, v).over(GammaN)
+          - BoundaryIntegral(expr * cn, v).over(SigmaD);
   hilbert.solve(solver);
 
   return g.getSolution();
@@ -70,12 +70,11 @@ int main(int, char**)
   const char* meshFile = "../resources/mmg/dirichlet-region-example.mesh";
 
   // Load and build finite element spaces on the volumetric domain
-  MMG::Mesh Omega;
-  Omega.load(meshFile, IO::FileFormat::MEDIT);
-  Omega.asSubMesh();
+  MMG::Mesh mesh;
+  mesh.load(meshFile, IO::FileFormat::MEDIT);
 
   auto J = [&](const ScalarGridFunction& u)
   {
-    return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
+    return Integral(u).compute() + ell * mesh.getPerimeter(GammaD);
   };
 }

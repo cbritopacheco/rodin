@@ -855,6 +855,7 @@ namespace Rodin::Variational
    * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
    * @f$.
    * @see QuadratureRuleSpecializations
+   * @see RodinQuadrature
    */
   template <class Integrand>
   class QuadratureRule;
