@@ -3,7 +3,7 @@
 
 #include "ForwardDecls.h"
 
-#include "Rodin/QF/QFGG.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "Dot.h"
 #include "ShapeFunction.h"
@@ -17,6 +17,7 @@ namespace Rodin::Variational
    * @brief Template specializations of the QuadratureRule class.
    *
    * @see QuadratureRule
+   * @see RodinQuadrature
    */
 
   template <class FunctionDerived>
@@ -94,7 +95,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const Geometry::Polytope> m_polytope;
       std::unique_ptr<Integrand> m_integrand;
-      const QF::QFGG m_qfgg;
+      const QF::GenericPolytopeQuadrature m_qfgg;
       std::reference_wrapper<const QF::QuadratureFormulaBase> m_qf;
       std::optional<Scalar> m_value;
   };
@@ -173,7 +174,7 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(d, idx);
         const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         const size_t order = trialfe.getCount() + testfe.getCount() + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
+        const QF::GenericPolytopeQuadrature qf(order, polytope.getGeometry());
         auto& res = getMatrix();
         res.resize(test.getDOFs(polytope), trial.getDOFs(polytope));
         res.setZero();
@@ -250,7 +251,7 @@ namespace Rodin::Variational
         const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         assert(integrand.getRangeType() == RangeType::Scalar);
         const size_t order = fe.getCount() + vc;
-        const QF::QFGG qf(order, polytope.getGeometry());
+        const QF::GenericPolytopeQuadrature qf(order, polytope.getGeometry());
         auto& res = getVector();
         res = Math::Vector::Zero(integrand.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)

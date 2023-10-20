@@ -217,7 +217,7 @@ namespace Rodin::Variational
             for (auto it = mesh.getElement(); it; ++it)
             {
               const auto& polytope = *it;
-              const QF::QFGG qf(polytope.getGeometry());
+              const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
               const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
@@ -421,7 +421,7 @@ namespace Rodin::Variational
             for (auto it = mesh.getElement(); it; ++it)
             {
               const auto& polytope = *it;
-              const QF::QFGG qf(polytope.getGeometry());
+              const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
               const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {

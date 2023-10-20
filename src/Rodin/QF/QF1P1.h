@@ -6,6 +6,9 @@
 
 namespace Rodin::QF
 {
+  /**
+   * @ingroup RodinQuadrature
+   */
   class QF1P1 final : public QuadratureFormulaBase
   {
     public:
@@ -32,6 +35,12 @@ namespace Rodin::QF
       Scalar getWeight(size_t i) const override
       {
         return s_weights[getGeometry()].coeff(i);
+      }
+
+      inline
+      QF1P1* copy() const noexcept override
+      {
+        return new QF1P1(*this);
       }
 
     private:
