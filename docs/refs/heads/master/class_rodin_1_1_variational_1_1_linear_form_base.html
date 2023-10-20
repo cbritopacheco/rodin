@@ -38,6 +38,7 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
                 <li><a href="group___finite_elements.html">Supported finite elements</a></li>
                 <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
@@ -126,6 +127,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a64fa430dc89a2c082bd9ac8d603da4d2" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the test function argument associated to this linear form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba542269ae62d46e38681b2d80bbaa9b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
@@ -191,6 +196,24 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="aba542269ae62d46e38681b2d80bbaa9b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class VectorType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>* Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba542269ae62d46e38681b2d80bbaa9b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>

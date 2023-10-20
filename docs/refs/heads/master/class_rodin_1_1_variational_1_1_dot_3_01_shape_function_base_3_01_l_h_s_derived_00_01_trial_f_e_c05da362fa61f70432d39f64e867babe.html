@@ -38,6 +38,7 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
                 <li><a href="group___finite_elements.html">Supported finite elements</a></li>
                 <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
@@ -120,6 +121,10 @@
               <span class="m-doc-wrap-bumper">void <a href="#aad61efa33f3dfa52834619b5d225aa74" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span>
             </dt>
             <dd>Gets the element matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac1b0af870bcbcfb5df9d34c08d4319ad" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
@@ -195,6 +200,24 @@ $ m $
 <use x='0' y='0' xlink:href='#eq6-g0-109'/>
 </g>
 </svg> is the number of test degrees of freedom.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac1b0af870bcbcfb5df9d34c08d4319ad"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1b0af870bcbcfb5df9d34c08d4319ad" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>

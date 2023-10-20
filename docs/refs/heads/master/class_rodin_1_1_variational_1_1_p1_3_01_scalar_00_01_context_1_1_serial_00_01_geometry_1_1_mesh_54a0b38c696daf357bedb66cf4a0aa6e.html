@@ -38,6 +38,7 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
                 <li><a href="group___finite_elements.html">Supported finite elements</a></li>
                 <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
@@ -153,6 +154,16 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_context_1_1_serial_00_01_geometry_1_1_mesh_6c370add326d447f63bd139b0b18a9f3.html" class="m-doc">InverseMapping</a>
+            </dt>
+            <dd>Inverse mapping for the scalar <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_context_1_1_serial_00_01_geometry_1_1_mesh_572cb68e4f9f4a4711aaaf7319e6a7e0.html" class="m-doc">Mapping</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_context_1_1_serial_00_01_geometry_1_1_mesh_572cb68e4f9f4a4711aaaf7319e6a7e0.html" class="m-doc">Mapping</a> for the scalar <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</dd>
             <dt id="a564efa9c662dbcd9b8b50763033d07a2">
               using <a href="#a564efa9c662dbcd9b8b50763033d07a2" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt;
             </dt>
@@ -222,6 +233,12 @@ $ i $
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Returns the mapping of the function from the physical element to the reference element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CallableType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a31ecf869ce108652a0809a0a717bac35" class="m-doc">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              const CallableType&amp; v) const -&gt; auto</span>
+            </dt>
+            <dd>Returns the inverse mapping of the function from the physical element to the reference element.</dd>
           </dl>
         </section>
         <section>
@@ -349,8 +366,8 @@ $ (d, i) $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">idx</td>
-                  <td></td>
+                  <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index of the element in the mesh</td>
                 </tr>
                 <tr>
                   <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -447,6 +464,32 @@ $ R $
 <use x='0' y='0' xlink:href='#eq9-g0-82'/>
 </g>
 </svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a31ecf869ce108652a0809a0a717bac35"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Scalar, Context::<wbr />Serial, Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31ecf869ce108652a0809a0a717bac35" class="m-doc-self">getInverseMapping</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              const CallableType&amp; v) const</span></span>
+            </h3>
+            <p>Returns the inverse mapping of the function from the physical element to the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Index of the element in the mesh.</td>
+                </tr>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Callable type</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
       </div>

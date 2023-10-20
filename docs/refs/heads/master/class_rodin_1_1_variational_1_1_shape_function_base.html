@@ -38,6 +38,7 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
+                <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
                 <li><a href="group___finite_elements.html">Supported finite elements</a></li>
                 <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
@@ -107,8 +108,24 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a35f1f20b2826ace7527909b619cbc9fa">
-              <span class="m-doc-wrap-bumper">auto <a href="#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc-self">getTensorBasis</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a90de35c4d5a1039c7ba9b1cd513c472b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a90de35c4d5a1039c7ba9b1cd513c472b" class="m-doc-self">getSpaceType</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Indicates whether the shape function is part of a Trial or Test function expression.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8fb057d4d8104eb530ca8ebf7506360e" class="m-doc">getRangeShape</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_range_shape.html" class="m-doc">RangeShape</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the shape of the range space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c366ab456d22168fafcd9170850dd21" class="m-doc">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the operand in the shape function expression.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the number of degrees of freedom for the given polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc">getTensorBasis</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets an expression which yields the shape function basis at the given point.</dd>
             <dt>
@@ -116,10 +133,80 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a86b3f2feaa6730900f76484cf10397f8" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Call operator to get an expression which yields the shape function basis at the given point.</dd>
+            <dt id="accd13a7bbefc339197dc3be32025b13f">
+              <span class="m-doc-wrap-bumper">auto <a href="#accd13a7bbefc339197dc3be32025b13f" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const FES&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the finite element space to which the shape function belongs to.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab30b4537f0c6967919c0811f5c83e212" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a8fb057d4d8104eb530ca8ebf7506360e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_range_shape.html" class="m-doc">RangeShape</a> Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fb057d4d8104eb530ca8ebf7506360e" class="m-doc-self">getRangeShape</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the shape of the range space.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6c366ab456d22168fafcd9170850dd21"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c366ab456d22168fafcd9170850dd21" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the operand in the shape function expression.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a41b3cd864cb7e194caa422ca3b66070f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41b3cd864cb7e194caa422ca3b66070f" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the number of degrees of freedom for the given polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Polytope</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a35f1f20b2826ace7527909b619cbc9fa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc-self">getTensorBasis</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets an expression which yields the shape function basis at the given point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point where the shape function basis will be calculated</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a86b3f2feaa6730900f76484cf10397f8"><div>
             <h3>
               <div class="m-doc-template">
@@ -130,6 +217,24 @@
             </h3>
             <p>Call operator to get an expression which yields the shape function basis at the given point.</p>
 <p>Synonym to <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a35f1f20b2826ace7527909b619cbc9fa" class="m-doc">getTensorBasis()</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab30b4537f0c6967919c0811f5c83e212"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>* Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab30b4537f0c6967919c0811f5c83e212" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copies the object and returns a non-owning pointer to the copied object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Non-owning pointer to the copied object.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
         </section>
       </div>
