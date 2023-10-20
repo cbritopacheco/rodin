@@ -204,7 +204,6 @@ namespace Rodin::External::MMG
        */
       MMG5();
 
-    protected:
       MMG5& setAngleDetection(bool b = true)
       {
         m_ridgeDetection = b;

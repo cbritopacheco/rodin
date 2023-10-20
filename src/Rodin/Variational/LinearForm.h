@@ -213,7 +213,7 @@ namespace Rodin::Variational
         {
           Alert::MemberFunctionException(*this, __func__)
             << "GridFunction weights have not been calculated. "
-            << "Call" << Alert::Identifier::Function("setWeights()")
+            << "Call " << Alert::Identifier::Function("setWeights()")
             << " on the GridFunction object."
             << Alert::Raise;
         }

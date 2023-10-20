@@ -99,6 +99,18 @@ namespace Rodin::Variational
         return *this;
       }
 
+      inline
+      Derived& getDerived()
+      {
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
+      const Derived& getDerived() const
+      {
+        return static_cast<const Derived&>(*this);
+      }
+
       /**
        * @brief Gets the set of attributes which will be interpreted as the
        * domains to "trace".
@@ -163,6 +175,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
+       * @note CRTP function to be overriden in Derived class.
        */
       inline
       constexpr

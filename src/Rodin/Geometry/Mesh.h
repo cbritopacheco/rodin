@@ -29,8 +29,65 @@
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Requires the precondition that the Mesh object have the specified
+ * connectivity computed.
+ *
+ * Throws an exception if the current mesh instance does not have the
+ * connectivity
+ * @f[
+ *  d \longrightarrow d', \quad 0 \leq d, d' \leq D
+ * @f]
+ * computed, where @f$ D @f$ is the topological dimension of the mesh.
+ */
+#define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp) \
+  if (this->getConnectivity().getIncidence(d, dp).size() == 0) \
+  { \
+    Rodin::Alert::MemberFunctionException(*this, __func__) \
+      << Rodin::Alert::Notation::Incidence(d, dp) \
+      << " has not been computed and is required to use this function." \
+      << Rodin::Alert::Raise; \
+  }
+
+/**
+ * @ingroup RodinDirectives
+ * @brief Requires the precondition that the Mesh object be a SubMesh.
+ *
+ * Throws an exception if the current Mesh object is not a SubMesh, i.e.
+ * `this->isSubMesh()` evaluates to `false`.
+ */
+#define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH() \
+  if (!this->isSubMesh()) \
+  { \
+    Rodin::Alert::MemberFunctionException(*this, __func__) \
+      << "This instance of Mesh is not a SubMesh " \
+      << Rodin::Alert::Notation::Predicate(false, "isSubMesh()") \
+      << ". Downcasting to SubMesh is ill-defined." \
+      << Rodin::Alert::Raise; \
+  }
+
 namespace Rodin::Geometry
 {
+  class CCL
+  {
+    public:
+      using Component = FlatSet<Index>;
+
+      CCL(std::deque<Component>&& dq)
+        : m_components(std::move(dq))
+      {}
+
+      inline
+      const std::deque<Component>& getComponents() const
+      {
+        return m_components;
+      }
+
+    private:
+      std::deque<Component> m_components;
+  };
+
   /**
   * @brief Abstract base class for Mesh objects.
   */
@@ -52,6 +109,14 @@ namespace Rodin::Geometry
       {
         return this != &other;
       }
+
+      inline
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p) const
+      {
+        return ccl(p, getDimension());
+      }
+
+      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const;
 
       virtual MeshBase& scale(Scalar c) = 0;
 
@@ -206,7 +271,7 @@ namespace Rodin::Geometry
 
       virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
-      virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const = 0;
+      virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const = 0;
 
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const = 0;
@@ -225,6 +290,10 @@ namespace Rodin::Geometry
       virtual const MeshConnectivity& getConnectivity() const = 0;
 
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
+
+      virtual MeshBase& setVertexCoordinates(Index idx, Scalar, size_t i) = 0;
+
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::Vector& coords) = 0;
 
       virtual SubMeshBase& asSubMesh() = 0;
 
@@ -637,6 +706,10 @@ namespace Rodin::Geometry
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
+
+      virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
+
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::Vector& coords) override;
 
     private:
       static const GeometryIndexed<Math::Matrix> s_vertices;

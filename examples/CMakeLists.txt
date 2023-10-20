@@ -9,10 +9,11 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(Geometry)
   add_subdirectory(Variational)
 
+  add_subdirectory(QF)
   add_subdirectory(PDEs)
   add_subdirectory(ShapeOptimization)
-  # add_subdirectory(DensityOptimization)
-  # add_subdirectory(SurfaceOptimization)
+  add_subdirectory(DensityOptimization)
+  add_subdirectory(SurfaceOptimization)
   add_subdirectory(SurfaceEvolution)
   add_subdirectory(Misc)
 

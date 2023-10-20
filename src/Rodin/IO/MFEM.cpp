@@ -16,7 +16,10 @@ namespace Rodin::IO
     auto line = skipEmptyLinesAndComments(is);
     auto header = MFEM::ParseMeshHeader()(line.begin(), line.end());
     if (!header)
-      Alert::Exception() << "Failed to determine MFEM mesh type and version." << Alert::Raise;
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to determine MFEM mesh type and version." << Alert::Raise;
+    }
     m_header = *header;
   }
 
@@ -26,16 +29,17 @@ namespace Rodin::IO
     auto kw = MFEM::ParseKeyword()(line.begin(), line.end());
     if (!kw && *kw != MFEM::Keyword::dimension)
     {
-      Alert::Exception() << "Expected "
-                         << std::quoted(toCharString(MFEM::Keyword::dimension))
-                         << " on line " << m_currentLineNumber << "."
-                         << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__)
+         << "Expected "
+         << std::quoted(toCharString(MFEM::Keyword::dimension))
+         << " on line " << m_currentLineNumber << "."
+         << Alert::Raise;
     }
     line = skipEmptyLinesAndComments(is);
     auto dimension = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
     if (!dimension)
     {
-      Alert::Exception() << "Failed to determine mesh dimension on line "
+      Alert::MemberFunctionException(*this, __func__) << "Failed to determine mesh dimension on line "
                          << m_currentLineNumber << "."
                          << Alert::Raise;
     }
@@ -59,16 +63,18 @@ namespace Rodin::IO
       auto kw = MFEM::ParseKeyword()(line.begin(), line.end());
       if (!kw)
       {
-        Alert::Exception() << "Expected keyword on line "
-                           << m_currentLineNumber
-                           << "." << line << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "Expected keyword on line "
+          << m_currentLineNumber
+          << "." << line << Alert::Raise;
       }
       auto keyword = MFEM::toKeyword(kw->c_str());
       if (!keyword)
       {
-        Alert::Exception() << "Unrecognized keyword " << std::quoted(*kw)
-                           << " on line " << m_currentLineNumber << "."
-                           << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "Unrecognized keyword " << std::quoted(*kw)
+          << " on line " << m_currentLineNumber << "."
+          << Alert::Raise;
       }
 
       switch (*keyword)
@@ -79,9 +85,10 @@ namespace Rodin::IO
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (!count)
           {
-            Alert::Exception() << "Failed to determine " << std::quoted(*kw)
-                               << " count on line " << m_currentLineNumber << "."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to determine " << std::quoted(*kw)
+              << " count on line " << m_currentLineNumber << "."
+              << Alert::Raise;
           }
           attrs.reserve(m_dimension - 1, *count);
           for (size_t i = 0; i < *count; i++)
@@ -90,9 +97,10 @@ namespace Rodin::IO
             auto g = MFEM::ParseGeometry()(line.begin(), line.end());
             if (!g)
             {
-              Alert::Exception() << "Failed to parse geometry on line "
-                                 << m_currentLineNumber << "."
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse geometry on line "
+                << m_currentLineNumber << "."
+                << Alert::Raise;
             }
             connectivity.polytope(g->geometry, std::move(g->vertices));
             attrs.track({ m_dimension - 1, i }, g->attribute);
@@ -105,9 +113,10 @@ namespace Rodin::IO
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (!count)
           {
-            Alert::Exception() << "Failed to determine " << std::quoted(*kw)
-                               << " count on line " << m_currentLineNumber << "."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to determine " << std::quoted(*kw)
+              << " count on line " << m_currentLineNumber << "."
+              << Alert::Raise;
           }
           attrs.reserve(m_dimension, *count);
           for (size_t i = 0; i < *count; i++)
@@ -116,9 +125,10 @@ namespace Rodin::IO
             auto g = MFEM::ParseGeometry()(line.begin(), line.end());
             if (!g)
             {
-              Alert::Exception() << "Failed to parse geometry on line "
-                                 << m_currentLineNumber << "."
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse geometry on line "
+                << m_currentLineNumber << "."
+                << Alert::Raise;
             }
             connectivity.polytope(g->geometry, std::move(g->vertices));
             attrs.track({ m_dimension, i }, g->attribute);
@@ -131,9 +141,10 @@ namespace Rodin::IO
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (!count)
           {
-            Alert::Exception() << "Failed to determine " << std::quoted(*kw)
-                               << " count on line " << m_currentLineNumber << "."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to determine " << std::quoted(*kw)
+              << " count on line " << m_currentLineNumber << "."
+              << Alert::Raise;
           }
           connectivity.nodes(*count);
           getline(is, line);
@@ -148,8 +159,9 @@ namespace Rodin::IO
               auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
               if (!x)
               {
-                Alert::Exception() << "Failed to parse vertex on line " << m_currentLineNumber
-                                   << Alert::Raise;
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Failed to parse vertex on line " << m_currentLineNumber
+                  << Alert::Raise;
               }
               m_build.vertex(std::move(*x));
             }
@@ -161,8 +173,9 @@ namespace Rodin::IO
             auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
             if (!x)
             {
-              Alert::Exception() << "Failed to parse vertex on line " << m_currentLineNumber
-                                 << Alert::Raise;
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse vertex on line " << m_currentLineNumber
+                << Alert::Raise;
             }
             m_build.vertex(std::move(*x));
             for (size_t i = 1; i < *count; i++)
@@ -170,8 +183,9 @@ namespace Rodin::IO
               auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
               if (!x)
               {
-                Alert::Exception() << "Failed to parse vertex on line " << m_currentLineNumber
-                                   << Alert::Raise;
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Failed to parse vertex on line " << m_currentLineNumber
+                  << Alert::Raise;
               }
               m_build.vertex(std::move(*x));
             }
@@ -180,9 +194,10 @@ namespace Rodin::IO
         }
         default:
         {
-          Alert::Exception() << "Unexpected keyword " << std::quoted(*kw)
-                             << " on line " << m_currentLineNumber << "."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Unexpected keyword " << std::quoted(*kw)
+            << " on line " << m_currentLineNumber << "."
+            << Alert::Raise;
         }
       }
     }
@@ -244,9 +259,10 @@ namespace Rodin::IO
       auto g = MFEM::getGeometry(it->getGeometry());
       if (!g)
       {
-        Alert::Exception() << "MFEM format does not support geometry: "
-                           << it->getGeometry() << "."
-                           << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "MFEM format does not support geometry: "
+          << it->getGeometry() << "."
+          << Alert::Raise;
       }
       os << it->getAttribute() << ' ' << *g << ' ';
 
@@ -263,9 +279,10 @@ namespace Rodin::IO
       auto g = MFEM::getGeometry(it->getGeometry());
       if (!g)
       {
-        Alert::Exception() << "MFEM format does not support geometry: "
-                           << it->getGeometry() << "."
-                           << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "MFEM format does not support geometry: "
+          << it->getGeometry() << "."
+          << Alert::Raise;
       }
       os << it->getAttribute() << ' ' << *g << ' ';
 

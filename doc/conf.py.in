@@ -18,9 +18,10 @@ LINKS_NAVBAR1 = [
         ('Notation', 'notation-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [
+        ('Quadrature formulae', 'group___rodin_quadrature'),
         ('Supported finite elements', 'group___finite_elements'),
         ('CTADs', 'group___rodin_c_t_a_d'),
-        ('Preprocessor directives', 'group___rodin_directives')
+        ('Preprocessor directives', 'group___rodin_directives'),
     ]),
     ("Namespaces", 'namespaces', []),
 ]

@@ -27,6 +27,15 @@ namespace Rodin::Alert
       return text;
     }
 
+    template <class T>
+    inline
+    NotationT Print(const T& out)
+    {
+      std::stringstream ss;
+      ss << out;
+      return ss.str();
+    }
+
     inline
     NotationT Incidence(size_t d, size_t dp)
     {

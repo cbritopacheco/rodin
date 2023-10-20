@@ -19,6 +19,10 @@ namespace Rodin::Variational
    * @see OR
    */
 
+  /**
+   * @ingroup ORSpecializations
+   * @brief Logical OR operator between two instances of BooleanFunctionBase
+   */
   template <class LHSDerived, class RHSDerived>
   class OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>> final
     : public BooleanFunctionBase<OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>>
@@ -30,7 +34,7 @@ namespace Rodin::Variational
 
       constexpr
       OR(const LHS& lhs, const RHS& rhs)
-        : m_lhs(lhs), m_rhs(rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
@@ -48,22 +52,34 @@ namespace Rodin::Variational
       {}
 
       inline
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      const auto& getLHS() const
       {
-        return Boolean(m_lhs.getValue(p)) || Boolean(m_rhs.getValue(p));
+        assert(m_lhs);
+        return *m_lhs;
       }
 
       inline
-      OR* copy() const noexcept
-      override
+      const auto& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      inline
+      constexpr
+      auto getValue(const Geometry::Point& p) const
+      {
+        return getLHS().getValue(p) || getRHS().getValue(p);
+      }
+
+      inline OR* copy() const noexcept final override
       {
         return new OR(*this);
       }
 
     private:
-      LHS m_lhs;
-      RHS m_rhs;
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
   };
 
   template <class LHSDerived, class RHSDerived>
@@ -74,7 +90,7 @@ namespace Rodin::Variational
   inline
   constexpr
   auto
-  operator&&(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  operator||(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
   {
     return OR(lhs, rhs);
   }
@@ -83,7 +99,7 @@ namespace Rodin::Variational
   inline
   constexpr
   auto
-  operator&&(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  operator||(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
   {
     return OR(BooleanFunction(lhs), rhs);
   }
@@ -92,7 +108,7 @@ namespace Rodin::Variational
   inline
   constexpr
   auto
-  operator&&(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
+  operator||(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return OR(lhs, BooleanFunction(rhs));
   }

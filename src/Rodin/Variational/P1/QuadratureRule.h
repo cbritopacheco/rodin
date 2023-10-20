@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 
 #include "Rodin/Variational/QuadratureRule.h"
+#include "Rodin/QF/QF1P1.h"
 
 #include "P1.h"
 #include "P1Element.h"
@@ -448,7 +449,7 @@ namespace Rodin::Variational
 
       using LHS = FunctionBase<LHSDerived>;
 
-      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>>;
+      using RHS = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, TestSpace>, FES, TestSpace>;
 
       using Integrand = ShapeFunctionBase<Dot<LHS, RHS>>;
 

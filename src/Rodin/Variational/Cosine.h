@@ -78,6 +78,9 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
 
+  /**
+   * @brief Helper function to construct objects of type Cos.
+   */
   template <class NestedDerived>
   auto cos(const FunctionBase<NestedDerived>& f)
   {

@@ -1,8 +1,14 @@
-set(RodinQF_HEADERS )
+set(RodinQF_HEADERS
+  QF1P1.h
+  GrundmannMoller.h
+  GenericPolytopeQuadrature.h
+  )
 
 set(RodinQF_SRCS
-  QFGM.cpp
-  QF1P1.cpp)
+  QF1P1.cpp
+  GrundmannMoller.cpp
+  GenericPolytopeQuadrature.cpp
+  )
 
 add_library(RodinQF
   ${RodinQF_SRCS} ${RodinQF_HEADERS})

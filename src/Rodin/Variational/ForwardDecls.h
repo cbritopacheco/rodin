@@ -850,13 +850,12 @@ namespace Rodin::Variational
    *
    * Represents the quadrature rule approximation of an integral:
    * @f[
-   *  \int_{\mathcal{R}_h} \mathrm{Integrand} \ dx \approx \sum_{i = 0}^{n - 1}
-   *  w_i \ \mathrm{Integrand} (x_i)
+   *  \int_{\mathcal{R}_h} \mathrm{Integrand}
    * @f]
    * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
-   * @f$, the quadrature point @f$ x_i @f$ has an associated weight @f$ w_i @f$
-   * and @f$ \mathrm{Integrand}(x_i) @f$ is the value of the integrand at the
-   * quadrature point.
+   * @f$.
+   * @see QuadratureRuleSpecializations
+   * @see RodinQuadrature
    */
   template <class Integrand>
   class QuadratureRule;
@@ -1009,7 +1008,8 @@ namespace Rodin::Variational
     class OpenMP;
   }
 
-  class ShapeComputator;
+  template <class Kernel, class Operand>
+  class Potential;
 }
 
 #endif
