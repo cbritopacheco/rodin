@@ -10,6 +10,7 @@
 #include <RodinExternal/MMG.h>
 
 using namespace Rodin;
+using namespace Rodin::Solver;
 using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
@@ -36,45 +37,59 @@ using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
-template <class Derived, class Solver>
-ShapeGradient getShapeGradient(
-  const VectorFES& vecFes, const ScalarGridFunction& dist,
-  const FunctionBase<Derived>& expr, Solver& solver)
-{
-  TrialFunction d(vecFes);
-  TestFunction  v(vecFes);
-
-  Problem conormal(d, v);
-  conormal = Integral(alpha * Jacobian(d), Jacobian(v))
-        + Integral(d, v)
-        - FaceIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
-  conormal.solve(solver);
-
-  const auto& cnd = d.getSolution();
-  const auto cn = cnd / Frobenius(cnd);
-
-  TrialFunction g(vecFes);
-  Problem hilbert(g, v);
-  hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
-          + Integral(g, v)
-          + Integral(tgv * g, v).over(GammaN)
-          - BoundaryIntegral(expr * cn, v).over(SigmaD);
-  hilbert.solve(solver);
-
-  return g.getSolution();
-}
-
-
+// template <class Derived, class Solver>
+// ShapeGradient getShapeGradient(
+//   const VectorFES& vecFes,
+//   const ScalarGridFunction& dist,
+//   const FunctionBase<Derived>& expr, Solver& solver)
+// {
+//   TrialFunction d(vecFes);
+//   TestFunction  v(vecFes);
+//   Problem conormal(d, v);
+//   conormal = Integral(alpha * Jacobian(d), Jacobian(v))
+//            + Integral(d, v)
+//            - FaceIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
+//   conormal.solve(solver);
+//   const auto& cnd = d.getSolution();
+//   const auto cn = cnd / Frobenius(cnd);
+//   TrialFunction g(vecFes);
+//   Problem hilbert(g, v);
+//   hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+//           + Integral(g, v)
+//           + Integral(tgv * g, v).over(GammaN)
+//           - BoundaryIntegral(expr * cn, v).over(SigmaD);
+//   hilbert.solve(solver);
+//   return g.getSolution();
+// }
+// 
+// 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mmg/dirichlet-region-example.mesh";
-
   // Load and build finite element spaces on the volumetric domain
   MMG::Mesh mesh;
-  mesh.load(meshFile, IO::FileFormat::MEDIT);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh.getConnectivity().compute(1, 2);
+  mesh.save("u.mesh");
 
   auto J = [&](const ScalarGridFunction& u)
   {
     return Integral(u).compute() + ell * mesh.getPerimeter(GammaD);
   };
+
+  P1 vh(mesh);
+  SparseLU solver;
+
+  // State equation
+  ScalarFunction f = 1;
+  ScalarFunction g = -1;
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+  Problem state(u, v);
+  state = Integral(Grad(u), Grad(v))
+        - Integral(f, v)
+        // - BoundaryIntegral(g, v).over(GammaN)
+        + DirichletBC(u, ScalarFunction(0.0));
+  state.solve(solver);
+
+  u.getSolution().save("u.gf");
 }
