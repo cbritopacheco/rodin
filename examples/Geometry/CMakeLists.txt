@@ -1,3 +1,8 @@
+add_executable(Trace Trace.cpp)
+target_link_libraries(Trace
+  PUBLIC
+  Rodin::Geometry)
+
 add_executable(Volume Volume.cpp)
 target_link_libraries(Volume
   PUBLIC

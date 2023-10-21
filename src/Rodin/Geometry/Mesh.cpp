@@ -129,6 +129,7 @@ namespace Rodin::Geometry
   SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
   {
     const size_t D = getDimension();
+    RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
     SubMesh<Context::Serial>::Builder build;
     build.initialize(*this);
     for (auto it = getBoundary(); !it.end(); ++it)
@@ -173,15 +174,29 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
-      const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
+      const Map<std::pair<Attribute, Attribute>, Attribute>& interface)
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
+    const auto& conn = getConnectivity();
     for (auto it = getFace(); it; ++it)
     {
       assert(it->getDimension() == D - 1);
-      const auto& inc = getConnectivity().getIncidence({ D - 1, D }, it->getIndex());
+      const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
       assert(inc.size() == 2);
+      auto el1 = getElement(*inc.begin());
+      auto el2 = getElement(*std::next(inc.begin()));
+      auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
+      if (find != interface.end())
+      {
+        setAttribute({ D - 1, it->getIndex() }, find->second);
+      }
+      else
+      {
+        find = interface.find({ el2->getAttribute(), el1->getAttribute() });
+        if (find != interface.end())
+          setAttribute({ D - 1, it->getIndex() }, find->second);
+      }
     }
     return *this;
   }
