@@ -29,16 +29,16 @@ int main(int, char**)
   mesh.displace(VectorFunction{-1, -1});
 
   auto it = mesh.getElement();
-  for (auto it = mesh.getVertex(); it; ++it)
-  {
-    const auto& coords = it->getCoordinates();
-    const Scalar x = coords.x();
-    const Scalar y = coords.y();
-    const Scalar u = x * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
-    const Scalar v = y * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
-    mesh.setVertexCoordinates(it->getIndex(), u, 0);
-    mesh.setVertexCoordinates(it->getIndex(), v, 1);
-  }
+  // for (auto it = mesh.getVertex(); it; ++it)
+  // {
+  //   const auto& coords = it->getCoordinates();
+  //   const Scalar x = coords.x();
+  //   const Scalar y = coords.y();
+  //   const Scalar u = x * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
+  //   const Scalar v = y * sqrt(x * x + y * y - x * x * y * y) / sqrt(x * x + y * y);
+  //   mesh.setVertexCoordinates(it->getIndex(), u, 0);
+  //   mesh.setVertexCoordinates(it->getIndex(), v, 1);
+  // }
   MMG::Optimizer().setHMax(0.04).setHMin(0.002).optimize(mesh);
 
   for (const Index& i : mesh.getRidges())

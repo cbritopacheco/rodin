@@ -47,7 +47,7 @@ namespace Rodin::Variational
    * @f]
    * this class represents the integral of their dot product:
    * @f[
-   *   \int_{\mathcal{T}_h} A(u) : B(v) \ dx
+   *   \int_{\mathcal{T}_h} A(u) : B(v) \ dx \ .
    * @f]
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -137,7 +137,7 @@ namespace Rodin::Variational
    * @f]
    * this class will represent its integral
    * @f[
-   *   \int_\Omega A(v) \ dx \ .
+   *   \int_{\mathcal{T}_h} A(v) \ dx \ .
    * @f]
    */
   template <class NestedDerived, class FES>

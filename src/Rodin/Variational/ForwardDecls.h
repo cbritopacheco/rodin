@@ -885,6 +885,29 @@ namespace Rodin::Variational
   template <class Integrand>
   class Integral;
 
+  /**
+   * @brief Represents expressions of the integral operator on the faces of
+   * a mesh.
+   * @tparam Integrand Type of the integrand
+   *
+   * Represents the integral operator with a templated integrand type:
+   * @f[
+   *   \int_{\mathcal{F}_h} \mathrm{Integrand}
+   * @f]
+   * on the faces @f$ \mathcal{F}_h @f$ of a triangulation @f$
+   * \mathcal{T}_h @f$ a domain @f$ \Omega @f$.
+   * Then the boundary integral is just the sum of integrals over each face of
+   * the mesh:
+   * @f[
+   *   \int_{\mathcal{F}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{F}_h}
+   *   \int_F \mathrm{Integrand} \ .
+   * @f]
+   *
+   * @note For an overview of all the possible specializations of the
+   * FaceIntegral class, please see @ref FaceIntegralSpecializations.
+   *
+   * @see FaceIntegralSpecializations
+   */
   template <class Integrand>
   class FaceIntegral;
 

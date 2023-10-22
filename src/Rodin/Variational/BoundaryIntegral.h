@@ -25,6 +25,20 @@ namespace Rodin::Variational
    * @see BoundaryIntegral
    */
 
+  /**
+   * @ingroup BoundaryIntegralSpecializations
+   * @brief Integration of the dot product of a trial and test operators.
+   *
+   * Given two operators defined over trial and test spaces @f$ U_h
+   * @f$ and @f$ V_h @f$,
+   * @f[
+   *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
+   * @f]
+   * this class represents the integral of their dot product:
+   * @f[
+   *   \int_{\mathcal{B}_h} A(u) : B(v) \ d\sigma(x) \ .
+   * @f]
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class BoundaryIntegral<Dot<
           ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
@@ -74,6 +88,19 @@ namespace Rodin::Variational
   BoundaryIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /**
+   * @ingroup BoundaryIntegralSpecializations
+   * @brief Integration of a test operator.
+   *
+   * Given an operator defined over a test space @f$ V_h @f$
+   * @f[
+   *   A : V_h \rightarrow \mathbb{R},
+   * @f]
+   * this class will represent its integral
+   * @f[
+   *   \int_{\mathcal{B}_h} A(v) \ d\sigma(x) \ .
+   * @f]
+   */
   template <class NestedDerived, class FES>
   class BoundaryIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
