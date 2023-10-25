@@ -65,11 +65,14 @@ using ShapeGradient = VectorGridFunction;
 // 
 int main(int, char**)
 {
+  const char* meshFile = "../resources/examples/Geometry/Skinning.mesh";
+
   // Load and build finite element spaces on the volumetric domain
   MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
-  mesh.getConnectivity().compute(1, 2);
-  mesh.save("u.mesh");
+  mesh.load(meshFile);
+  // MMG::Optimizer().setHMax(1).setHMin(0.1).optimize(mesh);
+  //mesh.save("u.mesh");
+  mesh.getConnectivity().compute(2, 3);
 
   auto J = [&](const ScalarGridFunction& u)
   {
@@ -77,7 +80,7 @@ int main(int, char**)
   };
 
   P1 vh(mesh);
-  SparseLU solver;
+  CG solver;
 
   // State equation
   ScalarFunction f = 1;
@@ -87,8 +90,8 @@ int main(int, char**)
   Problem state(u, v);
   state = Integral(Grad(u), Grad(v))
         - Integral(f, v)
-        // - BoundaryIntegral(g, v).over(GammaN)
-        + DirichletBC(u, ScalarFunction(0.0));
+        - BoundaryIntegral(g, v).over(GammaN)
+        + DirichletBC(u, ScalarFunction(0.0)).on(GammaD);
   state.solve(solver);
 
   u.getSolution().save("u.gf");

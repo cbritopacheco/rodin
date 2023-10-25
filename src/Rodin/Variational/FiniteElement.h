@@ -76,6 +76,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
+       * @note CRTP method to be overriden in Derived class.
        */
       inline
       constexpr
@@ -94,6 +95,9 @@ namespace Rodin::Variational
         return getNodes().col(i);
       }
 
+      /**
+       * @note CRTP method to be overriden in Derived class.
+       */
       inline
       constexpr
       const Math::Matrix& getNodes() const
@@ -103,6 +107,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the i-th basis function of the finite element.
+       * @note CRTP method to be overriden in Derived class.
        */
       inline
       constexpr
@@ -113,12 +118,20 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the i-th linear function on the finite element.
+       * @note CRTP method to be overriden in Derived class.
        */
       inline
       constexpr
       const auto& getLinearForm(size_t i) const
       {
         return static_cast<const Derived&>(*this).getLinearForm(i);
+      }
+
+      inline
+      constexpr
+      size_t getOrder() const
+      {
+        return static_cast<const Derived&>(*this).getOrder();
       }
 
     private:

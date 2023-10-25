@@ -47,6 +47,10 @@ namespace Rodin::Variational
   template <class Range, class Context, class Mesh>
   class P0;
 
+  /**
+   * @ingroup GridFunctionSpecializations
+   * @brief GridFunction on the P0 finite element space.
+   */
   template <class ... Ts>
   class GridFunction<P0<Ts...>>;
 

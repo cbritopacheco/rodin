@@ -239,6 +239,22 @@ namespace Rodin::Variational
         return s_gradient[getGeometry()][i];
       }
 
+      inline
+      size_t getOrder() const
+      {
+        switch (getGeometry())
+        {
+          case Geometry::Polytope::Type::Point:
+            return 0;
+          case Geometry::Polytope::Type::Segment:
+          case Geometry::Polytope::Type::Triangle:
+          case Geometry::Polytope::Type::Tetrahedron:
+            return 1;
+          case Geometry::Polytope::Type::Quadrilateral:
+            return 2;
+        }
+      }
+
     private:
       static const Geometry::GeometryIndexed<Math::Matrix> s_nodes;
       static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
@@ -450,6 +466,22 @@ namespace Rodin::Variational
       {
         assert(i < getCount());
         return s_jacobian[m_vdim][getGeometry()][i];
+      }
+
+      inline
+      size_t getOrder() const
+      {
+        switch (getGeometry())
+        {
+          case Geometry::Polytope::Type::Point:
+            return 0;
+          case Geometry::Polytope::Type::Segment:
+          case Geometry::Polytope::Type::Triangle:
+          case Geometry::Polytope::Type::Tetrahedron:
+            return 1;
+          case Geometry::Polytope::Type::Quadrilateral:
+            return 2;
+        }
       }
 
     private:

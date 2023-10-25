@@ -20,6 +20,9 @@ namespace Rodin::Variational
    * @see RodinQuadrature
    */
 
+  /**
+   * @brief Quadrature rule on polytope for any function defined on the mesh.
+   */
   template <class FunctionDerived>
   class QuadratureRule<FunctionBase<FunctionDerived>> final
     : public FormLanguage::Base
@@ -101,6 +104,162 @@ namespace Rodin::Variational
   };
 
   /**
+   * @ingroup IntegralSpecializations
+   * @brief Integration of a GridFunction object.
+   */
+  template <class FES>
+  class QuadratureRule<GridFunction<FES>> : public Integrator
+  {
+    public:
+      /// Type of integrand
+      using Integrand = GridFunction<FES>;
+
+      /// Parent class
+      using Parent = Integrator;
+
+      /**
+       * @brief Constructs the integral object from the given integrand.
+       */
+      QuadratureRule(const Integrand& u)
+        : m_u(u),
+          m_v(u.getFiniteElementSpace()),
+          m_lf(m_v)
+      {
+        assert(u.getFiniteElementSpace().getVectorDimension() == 1);
+      }
+
+      /**
+       * @brief Copy constructor.
+       */
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_v(other.m_u.get().getFiniteElementSpace()),
+          m_lf(m_v)
+      {}
+
+      /**
+       * @brief Move constructor.
+       */
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_v(std::move(other.m_v)),
+          m_lf(std::move(other.m_lf))
+      {}
+
+      /**
+       * @brief Integrates the expression and returns the value.
+       *
+       * Compute the value of the integral, caches it and returns it.
+       *
+       * @returns Value of integral
+       */
+      inline
+      Scalar compute()
+      {
+        switch (getRegion())
+        {
+          case Region::Domain:
+          {
+            auto lfi = Variational::Integral(m_v);
+            if (m_attrs.size() > 0)
+              lfi.over(m_attrs);
+            m_lf.from(lfi).assemble();
+            return m_value.emplace(m_lf(m_u));
+          }
+          default:
+          {
+            assert(false); // Not implemented
+            return NAN;
+          }
+          // case Region::Boundary:
+          // {
+          //   auto lfi = Variational::BoundaryIntegral(m_v);
+          //   if (m_attrs.size() > 0)
+          //     lfi.over(m_attrs);
+          //   m_lf.from(lfi).assemble();
+          //   return m_value.emplace(m_lf(m_u));
+          // }
+          // case Region::Faces:
+          // {
+          //   auto lfi = Variational::FaceIntegral(m_v);
+          //   if (m_attrs.size() > 0)
+          //     lfi.over(m_attrs);
+          //   m_lf.from(lfi).assemble();
+          //   return m_value.emplace(m_lf(m_u));
+          // }
+          // case Region::Interface:
+          // {
+          //   auto lfi = Variational::InterfaceIntegral(m_v);
+          //   if (m_attrs.size() > 0)
+          //     lfi.over(m_attrs);
+          //   m_lf.from(lfi).assemble();
+          //   return m_value.emplace(m_lf(m_u));
+          // }
+        }
+        assert(false);
+        return NAN;
+      }
+
+      /**
+       * @brief Returns the value of the integral, computing it if necessary.
+       *
+       * If compute() has been called before, returns the value of the cached
+       * value. Otherwise, it will call compute() and return the newly computed
+       * value.
+       *
+       * @returns Value of integral
+       */
+      inline
+      operator Scalar()
+      {
+        if (!m_value.has_value())
+          return compute();
+        else
+          return m_value.value();
+      }
+
+      inline
+      QuadratureRule& over(Geometry::Attribute attr)
+      {
+        return over(FlatSet<Geometry::Attribute>{attr});
+      }
+
+      inline
+      QuadratureRule& over(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        m_attrs = attrs;
+        return *this;
+      }
+
+      inline
+      const std::optional<Scalar>& getValue() const
+      {
+        return m_value;
+      }
+
+      inline
+      Type getType() const override
+      {
+        return Integrator::Type::Linear;
+      }
+
+      virtual Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::reference_wrapper<const GridFunction<FES>>   m_u;
+      TestFunction<FES>                                 m_v;
+
+      FlatSet<Geometry::Attribute> m_attrs;
+      LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
+
+      std::optional<Scalar> m_value;
+  };
+
+  /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Approximation of the integral of the the dot product between a
    * trial shape function and a test shape function.
@@ -172,8 +331,7 @@ namespace Rodin::Variational
         const auto& testfes = test.getFiniteElementSpace();
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
-        const size_t order = trialfe.getCount() + testfe.getCount() + vc;
+        const size_t order = std::max(trialfe.getOrder(), testfe.getOrder());
         const QF::GenericPolytopeQuadrature qf(order, polytope.getGeometry());
         auto& res = getMatrix();
         res.resize(test.getDOFs(polytope), trial.getDOFs(polytope));
@@ -248,9 +406,8 @@ namespace Rodin::Variational
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
-        const size_t vc = Geometry::Polytope::getVertexCount(polytope.getGeometry());
         assert(integrand.getRangeType() == RangeType::Scalar);
-        const size_t order = fe.getCount() + vc;
+        const size_t order = fe.getOrder();
         const QF::GenericPolytopeQuadrature qf(order, polytope.getGeometry());
         auto& res = getVector();
         res = Math::Vector::Zero(integrand.getDOFs(polytope));

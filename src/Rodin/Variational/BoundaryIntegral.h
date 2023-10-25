@@ -111,7 +111,9 @@ namespace Rodin::Variational
 
       template <class LHSDerived, class RHSDerived>
       constexpr
-      BoundaryIntegral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+      BoundaryIntegral(
+          const FunctionBase<LHSDerived>& lhs,
+          const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : BoundaryIntegral(Dot(lhs, rhs))
       {}
 
@@ -146,8 +148,13 @@ namespace Rodin::Variational
     -> BoundaryIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
   template <class LHSDerived, class RHSDerived, class FES>
-  BoundaryIntegral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
-    -> BoundaryIntegral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
+  BoundaryIntegral(
+      const FunctionBase<LHSDerived>&,
+      const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
+    -> BoundaryIntegral<
+        ShapeFunctionBase<Dot<
+          FunctionBase<LHSDerived>,
+          ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
 }
 
 #endif

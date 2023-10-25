@@ -22,4 +22,6 @@
 #include "Alert/NamespacedException.h"
 #include "Alert/MemberFunctionException.h"
 
+#include "Alert/MemberFunctionWarning.h"
+
 #endif

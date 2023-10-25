@@ -131,6 +131,17 @@ namespace Rodin::Geometry
       virtual void flush() = 0;
 
       /**
+       * @brief Indicates if the mesh is empty or not.
+       *
+       * An empty mesh is defined as a mesh with no vertices.
+       */
+      inline
+      bool isEmpty() const
+      {
+        return getVertexCount() == 0;
+      }
+
+      /**
        * @brief Indicates whether the mesh is a surface or not.
        *
        * A mesh is considered a surface mesh if has codimension of 1, meaning
