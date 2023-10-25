@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Integral&lt;GridFunction&lt;FES&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::QuadratureRule&lt;GridFunction&lt;FES&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,7 +65,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Integral&lt;GridFunction&lt;FES&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>QuadratureRule&lt;GridFunction&lt;FES&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</p>
         <nav class="m-block m-default">
@@ -74,7 +74,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -82,12 +82,12 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">QuadratureRule&lt;GridFunction&lt;FES&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">Integral&lt;GridFunction&lt;FES&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
           </dl>
@@ -99,8 +99,8 @@
               using <a href="#aafab5f57c9a6c3a1e07d5dfa81f55190" class="m-doc-self">Integrand</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;
             </dt>
             <dd>Type of integrand.</dd>
-            <dt id="ab2529dae81ffc33a1ad5725a42d85a10">
-              using <a href="#ab2529dae81ffc33a1ad5725a42d85a10" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&lt;<a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#aafab5f57c9a6c3a1e07d5dfa81f55190" class="m-doc">Integrand</a>&gt;
+            <dt id="a7c03f13cf0d83f880c52331108498d99">
+              using <a href="#a7c03f13cf0d83f880c52331108498d99" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -108,29 +108,81 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a36173ed77949828101383d8921092cd6">
-              <span class="m-doc-wrap-bumper"><a href="#a36173ed77949828101383d8921092cd6" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#aafab5f57c9a6c3a1e07d5dfa81f55190" class="m-doc">Integrand</a>&amp; u)</span>
+            <dt id="a7941dda1b6bba2b6646127b28e1ba794">
+              <span class="m-doc-wrap-bumper"><a href="#a7941dda1b6bba2b6646127b28e1ba794" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#aafab5f57c9a6c3a1e07d5dfa81f55190" class="m-doc">Integrand</a>&amp; u)</span>
             </dt>
-            <dd>Constructs the integral object.</dd>
+            <dd>Constructs the integral object from the given integrand.</dd>
+            <dt id="a52e4d5082ffb29cb85f65b361289fd32">
+              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a93b375d25b4866b567393c99eb40e7a2">
+              <span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a272bd7c5451358a16dc432a233dc229d" class="m-doc">operator Scalar</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Returns the value of the integral, computing it if necessary.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2d3e4eebdf72f4f00e0f1f326243e6a4" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute</a>(</span><span class="m-doc-wrap">) -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
+            </dt>
+            <dd>Integrates the expression and returns the value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab08a44a51867591cb80af1610ac53c34" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a2d3e4eebdf72f4f00e0f1f326243e6a4"><div>
+          <section class="m-doc-details" id="a272bd7c5451358a16dc432a233dc229d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* Rodin::<wbr />Variational::<wbr />Integral&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2d3e4eebdf72f4f00e0f1f326243e6a4" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a272bd7c5451358a16dc432a233dc229d" class="m-doc-self">operator Scalar</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns the value of the integral, computing it if necessary.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value of integral</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>If <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute()</a> has been called before, returns the value of the cached value. Otherwise, it will call <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_grid_function_3_01_f_e_s_01_4_01_4.html#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc">compute()</a> and return the newly computed value.</p>
+          </div></section>
+          <section class="m-doc-details" id="ade9205e5f61b0d6df0e31bab6ae6b362"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade9205e5f61b0d6df0e31bab6ae6b362" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Integrates the expression and returns the value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value of integral</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Compute the value of the integral, caches it and returns it.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab08a44a51867591cb80af1610ac53c34"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab08a44a51867591cb80af1610ac53c34" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">
