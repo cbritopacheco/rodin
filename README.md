@@ -37,9 +37,9 @@ make -j4
 
 ## Features
 
-### Embedded DSL for FEM modelling
+### Embedded FormLanguage for FEM modelling
 
-Rodin comes with a native C++17 domain specific language (DSL) for assembling
+Rodin comes with a native C++17 form language for assembling
 and solving variational formulations.
 
 For example, given a domain $\Omega$ with boundary $\Gamma := \partial \Omega$, the Poisson problem:
@@ -71,18 +71,39 @@ int main(int, char**)
   Mesh Omega;
   Omega = Omega.UniformGrid(Polytope::Type::Triangle, 16, 16);
   mesh.getConnectivity().compute(1, 2);
+
   P1 Vh(Omega);
-  TrialFunction u(Vh); TestFunction v(Vh);
-  ScalarFunction f(1.0); ScalarFunction g(0.0);
+
+  TrialFunction u(Vh);
+  TestFunction v(Vh);
+
+  ScalarFunction f(1.0);
+  ScalarFunction g(0.0);
+
   Solver::SparseLU solver;
+
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, g).on(Gamma);
   poisson.solve(solver);
+
   return 0;
 }
 ```
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="doc/README/Poisson.png" alt="Poisson.png" style="width:50%;">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      Solution of the Poisson equation.
+    </td>
+  </tr>
+</table>
 
 ## Third-Party integrations
 
