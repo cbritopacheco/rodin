@@ -14,7 +14,7 @@
  * @see Rodin::QF::GrundmannMoller
  * @see RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER
  */
-#define RODIN_QF_GRUNDMANNMOLLER_MAX_S 8
+#define RODIN_QF_GRUNDMANNMOLLER_MAX_S 16
 
 /**
  * @ingroup RodinDirectives

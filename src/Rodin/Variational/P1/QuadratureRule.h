@@ -3,6 +3,7 @@
 
 #include "Rodin/Variational/QuadratureRule.h"
 #include "Rodin/QF/QF1P1.h"
+#include "Rodin/QF/GrundmannMoller.h"
 
 #include "P1.h"
 #include "P1Element.h"
@@ -112,7 +113,7 @@ namespace Rodin::Variational
           {
             for (size_t k = 0; k < qf.getSize(); k++)
             {
-              Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
+              const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
               const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
               const Scalar c = coeff.getValue(p);
               for (size_t i = 0; i < dofs; i++)
@@ -259,7 +260,7 @@ namespace Rodin::Variational
         m_pgradient.resize(dofs);
         for (size_t k = 0; k < qf.getSize(); k++)
         {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
+          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
           const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
           const auto jacInvT = p.getJacobianInverse().transpose();
           for (size_t local = 0; local < dofs; local++)
@@ -387,7 +388,7 @@ namespace Rodin::Variational
         m_pgradient.resize(dofs);
         for (size_t k = 0; k < qf.getSize(); k++)
         {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
+          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
           const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
           const auto jacInvT = p.getJacobianInverse().transpose();
           for (size_t local = 0; local < dofs; local++)
@@ -618,7 +619,8 @@ namespace Rodin::Variational
         for (size_t k = 0; k < qf.getSize(); k++)
         {
           Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
+          const Math::Vector& rc =
+            p.getCoordinates(Geometry::Point::Coordinates::Reference);
           for (size_t local = 0; local < dofs; local++)
             res.coeffRef(local) += qf.getWeight(k) * p.getDistortion() * fe.getBasis(local)(rc);
         }

@@ -50,7 +50,7 @@ namespace Rodin::Geometry
         Array<Index> vertices;
       };
 
-      MeshConnectivity() = default;
+      MeshConnectivity();
 
       MeshConnectivity(const MeshConnectivity&) = default;
 
