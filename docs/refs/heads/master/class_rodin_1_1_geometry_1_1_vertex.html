@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Supported finite elements module | Rodin</title>
+  <title>Rodin::Geometry::Vertex class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -39,7 +39,7 @@
               <a href="modules.html">Modules</a>
               <ol>
                 <li><a href="group___rodin_quadrature.html">Quadrature formulae</a></li>
-                <li><a href="group___finite_elements.html" id="m-navbar-current">Supported finite elements</a></li>
+                <li><a href="group___finite_elements.html">Supported finite elements</a></li>
                 <li><a href="group___rodin_c_t_a_d.html">Template deduction guides</a></li>
                 <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
               </ol>
@@ -64,42 +64,49 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          Supported finite elements <span class="m-thin">module</span></h1>
-        <p>List of finite elements already implemented.</p>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Vertex <span class="m-thin">class</span>
+        </h1>
+        <p>Represents a vertex of the mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_scalar_01_4.html" class="m-doc">Rodin::Variational::P0Element&lt;Scalar&gt;</a>
+              class <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>
             </dt>
-            <dd>Degree 1 scalar Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_01_4.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::Vector&gt;</a>
+            <dd>Base class for all geometric elements of the mesh.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ae434abb0da8501a6a24f1191a7858175">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae434abb0da8501a6a24f1191a7858175" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
-            <dd>Degree 1 vector Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_scalar_01_4.html" class="m-doc">Rodin::Variational::P1Element&lt;Scalar&gt;</a>
+            <dd>Acess the 1st-coordinate of the vertex.</dd>
+            <dt id="af362b963f3eef1e42800cd1c408d2ebb">
+              <span class="m-doc-wrap-bumper">auto <a href="#af362b963f3eef1e42800cd1c408d2ebb" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
-            <dd>Degree 1 scalar Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_vector_01_4.html" class="m-doc">Rodin::Variational::P1Element&lt;Math::Vector&gt;</a>
+            <dd>Acess the 2nd-coordinate of the vertex.</dd>
+            <dt id="a5332aab1baf57168306cda51292141c0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5332aab1baf57168306cda51292141c0" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
-            <dd>Degree 1 vector Lagrange element.</dd>
+            <dd>Acess the 3rd-coordinate of the vertex.</dd>
+            <dt id="a490092afa60b417db490c82195461153">
+              <span class="m-doc-wrap-bumper">auto <a href="#a490092afa60b417db490c82195461153" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
+            </dt>
+            <dd>Acess the ith-coordinate of the vertex.</dd>
           </dl>
         </section>
       </div>

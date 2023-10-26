@@ -98,19 +98,6 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">static void <a href="#a0954c0dbf0d744cf8d3be5641173c185" class="m-doc">copyMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src,
-              MMG5_pMesh dst)</span>
-            </dt>
-            <dd>Copies source mesh to a destination mesh.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a378ed49847c971e53116e33195f3a42c" class="m-doc">isSurfaceMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh mesh) -&gt; bool</span>
-            </dt>
-            <dd>Determines if a mesh is surface or not.</dd>
-            <dt id="ace378ab18c0540a5fa18b2d8a311d1d9">
-              <span class="m-doc-wrap-bumper">static void <a href="#ace378ab18c0540a5fa18b2d8a311d1d9" class="m-doc-self">destroyMesh</a>(</span><span class="m-doc-wrap">MMG5_pMesh)</span>
-            </dt>
-            <dd>Destroys the mesh object and frees the allocated memory.</dd>
             <dt id="ae4490088b2935d6cf25c557c4ffd83f7">
               <span class="m-doc-wrap-bumper">static auto <a href="#ae4490088b2935d6cf25c557c4ffd83f7" class="m-doc-self">rodinToMesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; src) -&gt; MMG5_pMesh</span>
             </dt>
@@ -119,32 +106,6 @@
               <span class="m-doc-wrap-bumper">static auto <a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc-self">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
             <dd>Converts an MMG5_pMesh object to a <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> object.</dd>
-            <dt id="a06cb29d3f77dc8acda9887609000476b">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a06cb29d3f77dc8acda9887609000476b" class="m-doc-self">createSolution</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh,
-              size_t vdim) -&gt; MMG5_pSol</span>
-            </dt>
-            <dd>Constructs a solution and allocates space for it.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Range&gt;</div>
-              <span class="m-doc-wrap-bumper">static void <a href="#a36251842eb23f4ecc46dc1d1114ce55f" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap">const MMG5_pSol src,
-              <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; dst)</span>
-            </dt>
-            <dd>Copies the solution from MMG5_pSol object to an <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a> object.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Range&gt;</div>
-              <span class="m-doc-wrap-bumper">static void <a href="#a4aa91925305a7555c662ae9a5197469e" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; src,
-              MMG5_pSol dst)</span>
-            </dt>
-            <dd>Copies the solution from <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a> object to an MMG5_pSol object.</dd>
-            <dt id="adc10b88a081a86571f71c3ee0433c791">
-              <span class="m-doc-wrap-bumper">static void <a href="#adc10b88a081a86571f71c3ee0433c791" class="m-doc-self">swapSolution</a>(</span><span class="m-doc-wrap">MMG5_pSol a,
-              MMG5_pSol b)</span>
-            </dt>
-            <dd>Swaps the data between two instances of type MMG5_pSol.</dd>
-            <dt id="aba26af6c43d3b4638aa99e6e65ded72c">
-              <span class="m-doc-wrap-bumper">static void <a href="#aba26af6c43d3b4638aa99e6e65ded72c" class="m-doc-self">destroySolution</a>(</span><span class="m-doc-wrap">MMG5_pSol sol)</span>
-            </dt>
-            <dd>Destroys and frees the allocated memory for a MMG5_pSol object.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -179,73 +140,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a0954c0dbf0d744cf8d3be5641173c185"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0954c0dbf0d744cf8d3be5641173c185" class="m-doc-self">copyMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src,
-              MMG5_pMesh dst)</span></span>
-            </h3>
-            <p>Copies source mesh to a destination mesh.</p>
-<p>This method performs the necessary memory allocations when copying the data.</p>
-          </div></section>
-          <section class="m-doc-details" id="a378ed49847c971e53116e33195f3a42c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">static bool Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a378ed49847c971e53116e33195f3a42c" class="m-doc-self">isSurfaceMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh mesh)</span></span>
-            </h3>
-            <p>Determines if a mesh is surface or not.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a36251842eb23f4ecc46dc1d1114ce55f"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Range&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36251842eb23f4ecc46dc1d1114ce55f" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap">const MMG5_pSol src,
-              <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; dst)</span></span>
-            </h3>
-            <p>Copies the solution from MMG5_pSol object to an <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a> object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Range</td>
-                  <td>type of value</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a4aa91925305a7555c662ae9a5197469e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Range&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4aa91925305a7555c662ae9a5197469e" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; src,
-              MMG5_pSol dst)</span></span>
-            </h3>
-            <p>Copies the solution from <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a9fd827bfb4fd8dddc7e80b190f7cb82c" class="m-doc">MMG::<wbr />GridFunction</a> object to an MMG5_pSol object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Range</td>
-                  <td>type of value</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="aede8ded1b33f33e80cf109512756becf"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aede8ded1b33f33e80cf109512756becf" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
