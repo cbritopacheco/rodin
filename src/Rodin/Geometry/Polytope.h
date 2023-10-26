@@ -240,6 +240,9 @@ namespace Rodin::Geometry
       bool isInterface() const;
   };
 
+  /**
+   * @brief Represents a vertex of the mesh.
+   */
   class Vertex : public Polytope
   {
     public:
@@ -251,24 +254,36 @@ namespace Rodin::Geometry
         : Polytope(other)
       {}
 
+      /**
+       * @brief Acess the 1st-coordinate of the vertex.
+       */
       inline
       Scalar x() const
       {
         return operator()(0);
       }
 
+      /**
+       * @brief Acess the 2nd-coordinate of the vertex.
+       */
       inline
       Scalar y() const
       {
         return operator()(1);
       }
 
+      /**
+       * @brief Acess the 3rd-coordinate of the vertex.
+       */
       inline
       Scalar z() const
       {
         return operator()(2);
       }
 
+      /**
+       * @brief Acess the ith-coordinate of the vertex.
+       */
       inline
       Scalar operator()(size_t i) const
       {
