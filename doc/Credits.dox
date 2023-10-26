@@ -6,19 +6,37 @@
 
   @section credits-index-3rd-party Third-party Software
 
-  @subsection credits-index-mfem MFEM
+  @subsection credits-index-boost Boost
 
-
-    MFEM is a modular parallel C++ library for finite element methods. Its goal
-    is to enable high-performance scalable finite element discretization
-    research and application development on a wide variety of platforms,
-    ranging from laptops to supercomputers. It is licensed under the
-    [BSD-3-Clause License](https://github.com/mfem/mfem/blob/master/LICENSE).
+  Boost libraries are intended to be widely useful, and usable across a broad
+  spectrum of applications. The libraries are licensed under the [Boost
+  Software License](https://www.boost.org/users/license.html), which is the
+  same license Rodin utilizes.
 
   @par Links
   @parblock
-  - https://mfem.org/
-  - https://glvis.org/
+  - https://www.boost.org/
+  - https://www.boost.org/users/license.html
+  @endparblock
+
+  @subsection credits-index-eigen Eigen
+
+  Eigens is C++ template library for linear algebra. Eigen provides a wide
+  range of mathematical operations, data structures, and algorithms for
+  performing linear algebra operations efficiently and with a syntax that
+  resembles mathematical notation. It is especially useful for tasks such as
+  matrix and vector operations, solving linear systems, eigenvalue problems,
+  and more. Eigen is
+  [Free Software](https://www.gnu.org/philosophy/free-sw.html).
+  Starting from the 3.1.1 version, it is licensed under the
+  [MPL2](https://www.mozilla.org/en-US/MPL/2.0/),
+  which is a simple weak copyleft license. Common questions about the MPL2 are
+  answered in the official [MPL2 FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
+
+  @par Links
+  @parblock
+  - https://eigen.tuxfamily.org/
+  - https://eigen.tuxfamily.org/index.php?title=Main_Page#License
   @endparblock
 
   @subsection credits-index-mmg MMG
@@ -32,6 +50,21 @@
   @par Links
   @parblock
   - https://www.mmgtools.org/
+  @endparblock
+
+  @subsection credits-index-mfem MFEM
+
+
+    MFEM is a modular parallel C++ library for finite element methods. Its goal
+    is to enable high-performance scalable finite element discretization
+    research and application development on a wide variety of platforms,
+    ranging from laptops to supercomputers. It is licensed under the
+    [BSD-3-Clause License](https://github.com/mfem/mfem/blob/master/LICENSE).
+
+  @par Links
+  @parblock
+  - https://mfem.org/
+  - https://glvis.org/
   @endparblock
 
   @subsection credits-index-iscd ISCD Toolbox
@@ -92,19 +125,6 @@
   @par Links
   @parblock
   - https://people.engr.tamu.edu/davis/suitesparse.html
-  @endparblock
-
-  @subsection credits-index-boost Boost
-
-  Boost libraries are intended to be widely useful, and usable across a broad
-  spectrum of applications. The libraries are licensed under the [Boost
-  Software License](https://www.boost.org/users/license.html), which is the
-  same license Rodin utilizes.
-
-  @par Links
-  @parblock
-  - https://www.boost.org/
-  - https://www.boost.org/users/license.html
   @endparblock
 
   @section References
