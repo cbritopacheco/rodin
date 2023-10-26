@@ -18,7 +18,7 @@ int main(int argc, char** argv)
   const char* meshFile = "../resources/examples/PDEs/Elasticity.mfem.mesh";
 
   // Define boundary attributes
-  int Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
+  Attribute Gamma = 1, GammaD = 2, GammaN = 3, Gamma0 = 4;
 
   // Load mesh
   Mesh mesh;
@@ -41,7 +41,9 @@ int main(int argc, char** argv)
 
   Problem elasticity(u, v);
   elasticity = Integral(lambda * Div(u), Div(v))
-             + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
+             + Integral(
+                 mu * (Jacobian(u) + Jacobian(u).T()),
+                 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 

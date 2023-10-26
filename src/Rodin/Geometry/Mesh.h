@@ -89,6 +89,13 @@ namespace Rodin::Geometry
   };
 
   /**
+   * @defgroup MeshTypes Mesh Types and Template Specializations
+   * @brief Different types of mesh and template specializations of the Mesh
+   * class.
+   * @see Mesh
+   */
+
+  /**
   * @brief Abstract base class for Mesh objects.
   */
   class MeshBase
@@ -129,6 +136,17 @@ namespace Rodin::Geometry
         IO::FileFormat fmt = IO::FileFormat::MFEM, size_t precison = 16) const = 0;
 
       virtual void flush() = 0;
+
+      /**
+       * @brief Indicates if the mesh is empty or not.
+       *
+       * An empty mesh is defined as a mesh with no vertices.
+       */
+      inline
+      bool isEmpty() const
+      {
+        return getVertexCount() == 0;
+      }
 
       /**
        * @brief Indicates whether the mesh is a surface or not.
@@ -257,43 +275,123 @@ namespace Rodin::Geometry
        */
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const = 0;
 
+      /**
+       * @brief Gets a FaceIterator for the boundary faces.
+       */
       virtual FaceIterator getBoundary() const = 0;
 
+      /**
+       * @brief Gets a FaceIterator for the interface faces.
+       */
       virtual FaceIterator getInterface() const = 0;
 
-      virtual size_t getCount(size_t dim) const = 0;
+      /**
+       * @brief Gets the count of polytope of the given dimension.
+       * @param[in] dimension Polytope dimension
+       */
+      virtual size_t getCount(size_t dimension) const = 0;
 
+      /**
+       * @brief Gets the count of polytope of the given type.
+       * @param[in] dim Polytope type
+       */
       virtual size_t getCount(Polytope::Type g) const = 0;
 
+      /**
+       * @brief Gets an ElementIterator to the cells of the mesh.
+       */
       virtual ElementIterator getElement(Index idx = 0) const = 0;
 
+      /**
+       * @brief Gets a FaceIterator to the faces of the mesh.
+       */
       virtual FaceIterator getFace(Index idx = 0) const = 0;
 
+      /**
+       * @brief Gets a VertexIterator to the vertices of the mesh.
+       */
       virtual VertexIterator getVertex(Index idx = 0) const = 0;
 
+      /**
+       * @brief Gets a PolytopeIterator to the polytopes of the given dimension
+       * of the mesh.
+       * @param[in] dimension Polytope dimension
+       */
       virtual PolytopeIterator getPolytope(size_t dimension, Index idx = 0) const = 0;
 
+      /**
+       * @brief Gets the PolytopeTransformation associated to the @f$ (d, i)
+       * @f$-polytope.
+       * @param[in] d Polytope dimension
+       * @param[in] idx Polytope index
+       */
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const = 0;
 
+      /**
+       * Gets the geometry type of the @f$ (d, i) @f$-polytope.
+       * @param[in] d Polytope dimension
+       * @param[in] idx Polytope index
+       */
       virtual Polytope::Type getGeometry(size_t dimension, Index idx) const = 0;
 
+      /**
+       * Gets the attribute of the @f$ (d, i) @f$-polytope.
+       * @param[in] d Polytope dimension
+       * @param[in] idx Polytope index
+       */
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
-      virtual MeshBase& setAttribute(const std::pair<size_t, Index>&, Attribute attr) = 0;
+      /**
+       * Sets the attribute of the @f$ (d, i) @f$-polytope.
+       * @param[in] p Pair indicating polytope dimension and index
+       * @param[in] attr Attribute of polytope
+       */
+      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) = 0;
 
       /**
-       * @brief Gets a reference to the connectivity.
+       * @brief Gets a reference to the mesh connectivity.
        */
       virtual MeshConnectivity& getConnectivity() = 0;
 
+      /**
+       * @brief Gets a constant reference to the mesh connectivity.
+       */
       virtual const MeshConnectivity& getConnectivity() const = 0;
 
+      /**
+       * @brief Gets the space coordinates of the vertex at the given index.
+       * @param[in] idx Vertex index
+       */
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const = 0;
 
-      virtual MeshBase& setVertexCoordinates(Index idx, Scalar, size_t i) = 0;
+      /**
+       * @brief Sets the space coordinate of the vertex at the given index for
+       * the given coordinate index.
+       * @param[in] idx Vertex index
+       * @param[in] s New coordinate
+       * @param[in] i Coordinate index
+       *
+       * For example, the following code sets the coordinates of the 0-vertex
+       * to @f$ (0, 5, 10) @f$ in a mesh embedded in three dimensional space.
+       *
+       * @code{.cpp}
+       *   Mesh mesh;
+       *   // Add vertices...
+       *   mesh.setVertexCoordinates(0, 0.0, 0);
+       *   mesh.setVertexCoordinates(0, 5.0, 1);
+       *   mesh.setVertexCoordinates(0, 10.0, 2);
+       * @endcode
+       */
+      virtual MeshBase& setVertexCoordinates(Index idx, Scalar s, size_t i) = 0;
 
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::Vector& coords) = 0;
+      /**
+       * @brief Sets the space coordinate of the vertex at the given index for
+       * the given coordinate index.
+       * @param[in] idx Vertex index
+       * @param[in] coords New coordinates
+       */
+      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) = 0;
 
       virtual SubMeshBase& asSubMesh() = 0;
 
@@ -310,9 +408,11 @@ namespace Rodin::Geometry
   using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
 
   /**
-  * @brief Represents the subdivision of some domain into faces of (possibly)
-  * different geometries.
-  */
+   *
+   * @ingroup MeshTypes
+   * @brief Represents the subdivision of some domain into faces of (possibly)
+   * different geometries.
+   */
   template <>
   class Mesh<Context::Serial> : public MeshBase
   {
@@ -709,7 +809,7 @@ namespace Rodin::Geometry
 
       virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::Vector& coords) override;
+      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) override;
 
     private:
       static const GeometryIndexed<Math::Matrix> s_vertices;

@@ -23,7 +23,7 @@ namespace Rodin::External::MMG
   {
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
-      Alert::Exception() << "Failed to allocate memory for the mesh." << Alert::Raise);
+      MMG5Exception(__func__) << "Failed to allocate memory for the mesh." << Alert::Raise);
     assert(dim > 0);
     if (!spaceDim)
       spaceDim = dim;
@@ -47,7 +47,7 @@ namespace Rodin::External::MMG
     }
     else
     {
-      Alert::Exception() << "Unhandled case." << Alert::Raise;
+      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
       return nullptr;
     }
     res->np = 0;
@@ -282,7 +282,7 @@ namespace Rodin::External::MMG
       return nullptr;
     MMG5_pSol res = nullptr;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Sol,
-      Alert::Exception() << "Failed to allocate memory for MMG5_pSol." << Alert::Raise);
+      MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol." << Alert::Raise);
     res->ver  = mesh->ver;
     res->size = vdim;
     if (vdim == 1)
@@ -298,7 +298,7 @@ namespace Rodin::External::MMG
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
       MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), double,
-        Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
+        MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
     }
     else
     {
@@ -328,7 +328,7 @@ namespace Rodin::External::MMG
 
       MMGS_Set_commonFunc();
       if (!MMGS_zaldy(res))
-        Alert::Exception() << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
 
       // Copy points
       for (auto it = src.getVertex(); !it.end(); ++it)
@@ -374,7 +374,7 @@ namespace Rodin::External::MMG
 
       MMG2D_Set_commonFunc();
       if (!MMG2D_zaldy(res))
-        Alert::Exception() << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
 
       // Copy points
       for (auto it = src.getVertex(); !it.end(); ++it)
@@ -437,7 +437,7 @@ namespace Rodin::External::MMG
 
       MMG3D_Set_commonFunc();
       if (!MMG3D_zaldy(res))
-        Alert::Exception() << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
 
       // Copy points
       for (auto it = src.getVertex(); !it.end(); ++it)
@@ -499,7 +499,7 @@ namespace Rodin::External::MMG
     }
     else
     {
-      Alert::Exception() << "Unhandled case." << Alert::Raise;
+      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
       return nullptr;
     }
 
@@ -566,7 +566,7 @@ namespace Rodin::External::MMG
       }
       default:
       {
-        Alert::Exception() << "Space dimension greater than 3 not supported." << Alert::Raise;
+        MMG5Exception(__func__) << "Space dimension greater than 3 not supported." << Alert::Raise;
         break;
       }
     }
@@ -625,7 +625,7 @@ namespace Rodin::External::MMG
     if (dst->np)
     {
       MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), double,
-        Alert::Exception() << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
+        MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
       std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
     }
     else
@@ -637,7 +637,7 @@ namespace Rodin::External::MMG
     {
       auto nameInLength = std::strlen(src->namein);
       MMG5_SAFE_CALLOC(dst->namein, nameInLength, char,
-          Alert::Exception() << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
+          MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
       std::memcpy(dst->namein, src->namein, nameInLength + 1);
     }
     else
@@ -649,7 +649,7 @@ namespace Rodin::External::MMG
     {
       auto nameOutLength = std::strlen(src->nameout);
       MMG5_SAFE_CALLOC(dst->nameout, nameOutLength, char,
-          Alert::Exception() << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
+          MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
       std::memcpy(dst->nameout, src->nameout, nameOutLength + 1);
     }
     else
@@ -802,7 +802,7 @@ namespace Rodin::External::MMG
       }
       default:
       {
-        Alert::Exception() << "Unhandled case." << Alert::Raise;
+        MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
         break;
       }
     }

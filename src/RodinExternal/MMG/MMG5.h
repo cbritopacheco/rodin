@@ -21,6 +21,18 @@
 
 namespace Rodin::External::MMG
 {
+  template <class FuncName>
+  class MMG5Exception : public Alert::Exception
+  {
+    public:
+      MMG5Exception(const FuncName& funcName)
+      {
+        const auto& className = boost::typeindex::type_id_with_cvr<MMG5>().pretty_name();
+        *this << "In " << Alert::Identifier::Function(funcName)
+              << " of class " << Alert::Identifier::Class(className) << ": ";
+      }
+  };
+
   /// Type of return code used by the MMG functions.
   using ReturnCode = int;
 
@@ -35,9 +47,13 @@ namespace Rodin::External::MMG
       static constexpr int s_meshVersionFormatted = 2;
 
       // ---- Mesh methods ---------------------------------------------------
+      /**
+       * @internal
+       */
       static MMG5_pMesh createMesh(size_t version, size_t dim, std::optional<size_t> spaceDim = {});
 
       /**
+       * @internal
        * @brief Copies source mesh to a destination mesh.
        *
        * This method performs the necessary memory allocations when copying the
@@ -46,12 +62,14 @@ namespace Rodin::External::MMG
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 
       /**
+       * @internal
        * @brief Determines if a mesh is surface or not.
        * @param[in] mesh Mesh.
        */
       static bool isSurfaceMesh(const MMG5_pMesh mesh);
 
       /**
+       * @internal
        * @brief Destroys the mesh object and frees the allocated memory.
        */
       static void destroyMesh(MMG5_pMesh);
@@ -69,13 +87,18 @@ namespace Rodin::External::MMG
       // ---- Solution methods -----------------------------------------------
 
       /**
+       * @internal
        * @brief Constructs a solution and allocates space for it.
        */
       static MMG5_pSol createSolution(MMG5_pMesh mesh, size_t vdim);
 
+      /**
+       * @internal
+       */
       static void copySolution(const MMG5_pSol src, MMG5_pSol dst);
 
       /**
+       * @internal
        * @brief Copies the solution from MMG5_pSol object to an MMG::GridFunction object.
        * @tparam Range type of value
        */
@@ -114,6 +137,7 @@ namespace Rodin::External::MMG
       }
 
       /**
+       * @internal
        * @brief Copies the solution from MMG::GridFunction object to an MMG5_pSol object.
        * @tparam Range type of value
        */
@@ -190,11 +214,13 @@ namespace Rodin::External::MMG
       }
 
       /**
+       * @internal
        * @brief Swaps the data between two instances of type MMG5_pSol.
        */
       static void swapSolution(MMG5_pSol a, MMG5_pSol b);
 
       /**
+       * @internal
        * @brief Destroys and frees the allocated memory for a MMG5_pSol object.
        */
       static void destroySolution(MMG5_pSol sol);

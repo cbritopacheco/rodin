@@ -190,112 +190,47 @@ namespace Rodin::Variational
    * @brief Integration of a GridFunction object.
    */
   template <class FES>
-  class Integral<GridFunction<FES>> final : public FormLanguage::Base
+  class Integral<GridFunction<FES>> final
+    : public QuadratureRule<GridFunction<FES>>
   {
     public:
       /// Type of integrand
       using Integrand = GridFunction<FES>;
 
       /// Parent class
-      using Parent = FormLanguage::Base;
+      using Parent = QuadratureRule<Integrand>;
 
       /**
        * @brief Constructs the integral object
        */
       Integral(const Integrand& u)
-        : m_u(u),
-          m_v(u.getFiniteElementSpace()),
-          m_lf(m_v)
+        : Parent(u)
       {
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
       }
 
       Integral(const Integral& other)
-        : Parent(other),
-          m_u(other.m_u),
-          m_v(other.m_u.get().getFiniteElementSpace()),
-          m_lf(m_v)
+        : Parent(other)
       {}
 
       Integral(Integral&& other)
-        : Parent(std::move(other)),
-          m_u(std::move(other.m_u)),
-          m_v(std::move(other.m_v)),
-          m_lf(std::move(other.m_lf))
+        : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Integrates the expression and returns the value.
-       *
-       * Compute the value of the integral, caches it and returns it.
-       *
-       * @returns Value of integral
-       */
       inline
-      Scalar compute()
+      Integrator::Region getRegion() const override
       {
-        auto lfi = Variational::Integral(m_v);
-        if (m_attrs.size() > 0)
-          lfi.over(m_attrs);
-        m_lf.from(lfi).assemble();
-        return m_value.emplace(m_lf(m_u));
-      }
-
-      /**
-       * @brief Returns the value of the integral, computing it if necessary.
-       *
-       * If compute() has been called before, returns the value of the cached
-       * value. Otherwise, it will call compute() and return the newly computed
-       * value.
-       *
-       * @returns Value of integral
-       */
-      inline
-      operator Scalar()
-      {
-        if (!m_value.has_value())
-          return compute();
-        else
-          return m_value.value();
-      }
-
-      inline
-      Integral& over(Geometry::Attribute attr)
-      {
-        return over(FlatSet<Geometry::Attribute>{attr});
-      }
-
-      inline
-      Integral& over(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        m_attrs = attrs;
-        return *this;
-      }
-
-      inline
-      const std::optional<Scalar>& getValue() const
-      {
-        return m_value;
+        return Integrator::Region::Domain;
       }
 
       inline Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
-
-    private:
-      std::reference_wrapper<const GridFunction<FES>>   m_u;
-      TestFunction<FES>                                 m_v;
-
-      FlatSet<Geometry::Attribute> m_attrs;
-      LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
-
-      std::optional<Scalar> m_value;
   };
 
   template <class FES>
   Integral(const GridFunction<FES>&) -> Integral<GridFunction<FES>>;
-
 }
 
 #endif

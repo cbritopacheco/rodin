@@ -23,7 +23,7 @@ namespace Rodin::Math
   using Matrix = Eigen::MatrixX<Scalar>;
 
   using SpatialMatrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
-        RODIN_MAXIMAL_SPACE_DIMENSION, RODIN_MAXIMAL_SPACE_DIMENSION>;
+        RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
 
   using PointMatrix =
     Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
