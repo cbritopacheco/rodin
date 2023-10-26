@@ -253,6 +253,8 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Quadrilateral:
             return 2;
         }
+        assert(false);
+        return 0;
       }
 
     private:
@@ -482,6 +484,8 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Quadrilateral:
             return 2;
         }
+        assert(false);
+        return 0;
       }
 
     private:
