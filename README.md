@@ -37,7 +37,9 @@ make -j4
 
 ## Features
 
-### Embedded FormLanguage for FEM modelling
+### Full high level mesh access and functionalities
+
+### Embedded form language for FEM modelling
 
 Rodin comes with a native C++17 form language for assembling
 and solving variational formulations.
@@ -104,6 +106,23 @@ int main(int, char**)
     </td>
   </tr>
 </table>
+
+### Direct integration with Eigen solvers
+
+### Support for different finite elements
+
+### Support for different mesh and solution file formats
+
+- MFEM
+- MEDIT
+
+### Different quadrature formulae
+
+See here for the full list. For a few well known examples:
+
+- Grundmann-Moeller
+
+### SubMesh support
 
 ## Third-Party integrations
 
