@@ -7,6 +7,8 @@
 #ifndef RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
 #define RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
 
+#include "Rodin/Alert/MemberFunctionWarning.h"
+
 #include "ForwardDecls.h"
 #include "Mesh.h"
 #include "MMG5.h"
@@ -19,6 +21,9 @@ namespace Rodin::External::MMG
   class Optimizer : public MMG5
   {
     public:
+      /**
+       * @brief Default constructor.
+       */
       Optimizer() = default;
 
       /**
@@ -30,6 +35,14 @@ namespace Rodin::External::MMG
        */
       void optimize(MMG::Mesh& mesh)
       {
+        if (mesh.isEmpty())
+        {
+          Alert::MemberFunctionWarning(*this, __func__)
+            << "The MMG::Mesh object is empty. No action performed."
+            << Alert::Raise;
+          return;
+        }
+
         MMG5_pMesh mmgMesh = rodinToMesh(mesh);
 
         MMG5::setParameters(mmgMesh);
@@ -56,7 +69,7 @@ namespace Rodin::External::MMG
 
         if (retcode != MMG5_SUCCESS)
         {
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Failed to optimize the mesh."
             << Alert::Raise;
         }

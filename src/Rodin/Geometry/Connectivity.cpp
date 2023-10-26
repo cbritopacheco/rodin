@@ -8,11 +8,15 @@
 
 namespace Rodin::Geometry
 {
+  MeshConnectivity::MeshConnectivity()
+  {
+    m_count.resize(1, 0);
+  }
+
   MeshConnectivity& MeshConnectivity::initialize(size_t maximalDimension)
   {
     m_maximalDimension = maximalDimension;
 
-    assert(m_count.size() == 0);
     m_count.resize(maximalDimension + 1, 0);
 
     assert(m_connectivity.size() == 0);

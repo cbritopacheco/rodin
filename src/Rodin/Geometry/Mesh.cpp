@@ -217,7 +217,7 @@ namespace Rodin::Geometry
 #endif
 
   Mesh<Context::Serial>&
-  Mesh<Context::Serial>::setVertexCoordinates(Index idx, const Math::Vector& coords)
+  Mesh<Context::Serial>::setVertexCoordinates(Index idx, const Math::SpatialVector& coords)
   {
     m_vertices.col(idx) = coords;
     return *this;

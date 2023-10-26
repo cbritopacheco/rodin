@@ -24,12 +24,14 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Segment:
       {
-        m_qf = std::make_unique<GrundmannMoller>(order, g);
+        const size_t i = (m_order / 2) * 2 + 1;
+        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
         break;
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        m_qf = std::make_unique<GrundmannMoller>(order, g);
+        const size_t i = (m_order / 2) * 2 + 1;
+        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
         break;
       }
       case Geometry::Polytope::Type::Quadrilateral:
@@ -39,7 +41,8 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        m_qf = std::make_unique<GrundmannMoller>(order, g);
+        const size_t i = (m_order / 2) * 2 + 1;
+        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
         break;
       }
     }
