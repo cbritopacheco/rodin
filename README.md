@@ -37,8 +37,6 @@ make -j4
 
 ## Features
 
-### Full high level mesh access and functionalities
-
 ### Embedded form language for FEM modelling
 
 Rodin comes with a native C++17 form language for assembling
@@ -64,10 +62,13 @@ which can be quickly implemented via the following lines of code:
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
 const Geometry::Attribute Gamma = 1;
+
 int main(int, char**)
 {
   Mesh Omega;
@@ -107,6 +108,80 @@ int main(int, char**)
   </tr>
 </table>
 
+### Full high level mesh access and functionalities
+
+#### Cell, Face, Vertex Iterators
+
+The API offers full support for iteration over _all_ polytopes of the mesh of some given dimension:
+
+```c++
+Mesh mesh;
+mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16); // 2D Mesh
+
+for (auto it = mesh.getElement(); it; ++it)
+{
+ // Access information about the cell
+}
+
+for (auto it = mesh.getFace(); it; ++it)
+{
+ // Access information about the face
+}
+
+for (auto it = mesh.getVertex(); it; ++it)
+{
+ // Access information about the vertex
+}
+
+for (auto it = mesh.getPolytope(1); it; ++it)
+{
+ // Access information about the face (face dimension in 2D is equal to 1)
+}
+
+
+```
+
+#### Full connectivity computation
+
+Rodin is able to compute any connectivity information on the mesh. For example, the following computes
+the adjacency information from faces to cells:
+
+```c++
+Mesh mesh;
+mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16); // 2D Mesh
+
+mesh.getConnectivity().compute(1, 2);
+```
+
+In general, this means that given a face, we are able to obtain the incident (neighboring) cells.
+
+However, one can also compute any connectivity information on different dimensions.
+For example, for a mesh $\mathcal{T}_h \subset \mathbb{R}^d$, $d = 2$ of topological dimension $d$, we have:
+
+```c++
+// Compute connectivity between vertices and faces
+// i.e. Given a vertex, give me the incident edges
+mesh.getConnectivity().compute(0, 1);
+
+// Compute connectivity between faces and cells
+// i.e. Given a vertex, give me the incident cells
+mesh.getConnectivity().compute(0, 2); 
+
+// Compute connectivity between faces
+// i.e. Given a face, give me the adjacent faces
+mesh.getConnectivity().compute(1, 1);
+
+// Compute connectivity between cells
+// i.e. Given a cell, give me the adjacent cells
+mesh.getConnectivity().compute(2, 2);
+
+// Compute connectivity between cells and faces
+// i.e. Given a cell, give me the adjacent faces
+mesh.getConnectivity().compute(2, 1);
+
+// Etc.
+```
+
 ### Direct integration with Eigen solvers
 
 ### Support for different finite elements
@@ -118,9 +193,11 @@ int main(int, char**)
 
 ### Different quadrature formulae
 
-See here for the full list. For a few well known examples:
+Rodin supports different kinds of quadrature.
 
 - Grundmann-Moeller
+
+[See here for the full list](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html).
 
 ### SubMesh support
 
