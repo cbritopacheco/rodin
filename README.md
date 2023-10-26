@@ -37,6 +37,13 @@ make -j4
 
 ## Features
 
+### Detailed documentation
+
+Rodin comes with documentation that is built automatically on each merge, hence it's always up to date.
+
+[The documentation can be found here](https://cbritopacheco.github.io/rodin/).
+
+
 ### Embedded form language for FEM modelling
 
 Rodin comes with a native C++17 form language for assembling
