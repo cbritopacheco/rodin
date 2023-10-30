@@ -161,6 +161,15 @@ namespace Rodin::Geometry
     return m_index[d].right.at(idx);
   }
 
+  MeshConnectivity& MeshConnectivity::setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc)
+  {
+    const auto& [d, dp] = p;
+    assert(d < m_connectivity.size());
+    assert(dp < m_connectivity[d].size());
+    m_connectivity[d][dp] = std::move(inc);
+    return *this;
+  }
+
   MeshConnectivity& MeshConnectivity::compute(size_t d, size_t dp)
   {
     const size_t D = getMeshDimension();
@@ -258,7 +267,7 @@ namespace Rodin::Geometry
         assert(k < m_connectivity[dpp][dp].size());
         for (Index j : m_connectivity[dpp][dp][k])
         {
-          assert(i < m_connectivity[dp][0].size());
+          assert(i < m_connectivity[d][0].size());
           assert(j < m_connectivity[dp][0].size());
           const auto& d0i = m_connectivity[d][0][i];
           const auto& d0j = m_connectivity[dp][0][j];

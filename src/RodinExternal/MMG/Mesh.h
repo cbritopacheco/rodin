@@ -117,7 +117,7 @@ namespace Rodin::External::MMG
       }
 
       inline
-      MMG::Mesh::Builder build() const
+      MMG::Mesh::Builder Build() const
       {
         return MMG::Mesh::Builder();
       }
