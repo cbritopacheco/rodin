@@ -98,6 +98,7 @@ namespace Rodin::Geometry
           Mesh<Context::Serial>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<boost::bimap<Index, Index>> m_s2ps;
+          size_t m_dimension;
       };
 
       explicit

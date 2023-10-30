@@ -129,7 +129,8 @@ namespace Rodin::Variational
       constexpr
       Scalar max() const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Scalar>,
+            "GridFunction must be Scalar value to use max()");
         return m_data.maxCoeff();
       }
 
@@ -148,7 +149,8 @@ namespace Rodin::Variational
       constexpr
       Scalar min() const
       {
-        static_assert(std::is_same_v<RangeType, Scalar>);
+        static_assert(std::is_same_v<RangeType, Scalar>,
+            "GridFunction must be Scalar value to use min()");
         return m_data.minCoeff();
       }
 

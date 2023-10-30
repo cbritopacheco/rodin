@@ -110,10 +110,13 @@ namespace Rodin::Variational
   {
     public:
       using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+
       using Parent = QuadratureRule<Integrand>;
 
       template <class LHSDerived, class RHSDerived>
-      FaceIntegral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+      FaceIntegral(
+          const FunctionBase<LHSDerived>& lhs,
+          const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : FaceIntegral(Dot(lhs, rhs))
       {}
 

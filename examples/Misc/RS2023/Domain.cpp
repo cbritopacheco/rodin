@@ -27,7 +27,7 @@ int main(int, char**)
 {
   // Build a mesh
   MMG::Mesh mesh;
-  mesh = mesh.build().initialize(2)
+  mesh = mesh.Build().initialize(2)
                      .nodes(5)
                      .vertex({ 0, 0 })
                      .vertex({ 1, 0 })

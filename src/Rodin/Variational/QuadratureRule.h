@@ -66,7 +66,7 @@ namespace Rodin::Variational
         const auto& trans = polytope.getTransformation();
         for (size_t i = 0; i < qf.getSize(); i++)
         {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
           res += qf.getWeight(i) * p.getDistortion() * f(p);
         }
         return res;
@@ -338,7 +338,7 @@ namespace Rodin::Variational
         res.setZero();
         for (size_t i = 0; i < qf.getSize(); i++)
         {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
           integrand.assemble(p);
           res.noalias() += qf.getWeight(i) * p.getDistortion() * integrand.getMatrix();
         }
@@ -413,7 +413,7 @@ namespace Rodin::Variational
         res = Math::Vector::Zero(integrand.getDOFs(polytope));
         for (size_t i = 0; i < qf.getSize(); i++)
         {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
+          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(i)));
           auto basis = integrand.getTensorBasis(p);
           for (size_t local = 0; local < basis.getDOFs(); local++)
             res.coeffRef(local) += qf.getWeight(i) * p.getDistortion() * basis(local);

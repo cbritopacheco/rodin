@@ -235,18 +235,18 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      FunctionBase& traceOf(Geometry::Attribute attr)
+      Derived& traceOf(Geometry::Attribute attr)
       {
         m_traceDomain = FlatSet<Geometry::Attribute>{attr};
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       inline
       constexpr
-      FunctionBase& traceOf(const FlatSet<Geometry::Attribute>& attr)
+      Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         m_traceDomain = attr;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       virtual FunctionBase* copy() const noexcept override

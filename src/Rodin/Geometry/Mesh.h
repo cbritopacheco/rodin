@@ -551,6 +551,18 @@ namespace Rodin::Geometry
 
           Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
+          inline
+          MeshConnectivity& getConnectivity()
+          {
+            return m_connectivity;
+          }
+
+          inline
+          const MeshConnectivity& getConnectivity() const
+          {
+            return m_connectivity;
+          }
+
         private:
           size_t m_sdim;
           size_t m_nodes;
@@ -563,6 +575,15 @@ namespace Rodin::Geometry
 
           std::vector<FlatSet<Attribute>> m_attributes;
       };
+
+      /**
+       * @brief Generates a Builder instance to build an arbitrary mesh.
+       */
+      inline
+      static Builder Build()
+      {
+        return Builder();
+      }
 
       /**
        * @brief Generates a uniform grid for a given geometry.
@@ -603,12 +624,6 @@ namespace Rodin::Geometry
       * @brief Move assigns the mesh from another mesh.
       */
       Mesh& operator=(Mesh&&) = default;
-
-      inline
-      Builder build() const
-      {
-        return Builder();
-      }
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.

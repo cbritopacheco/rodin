@@ -19,7 +19,7 @@ static constexpr Geometry::Attribute Gamma = 6;
 static constexpr Geometry::Attribute GammaD = 3;
 static constexpr Geometry::Attribute GammaN = 2;
 
-static constexpr Geometry::Attribute SigmaD = 1;
+static constexpr Geometry::Attribute SigmaD = 3;
 static constexpr Geometry::Attribute SigmaN = 2;
 
 static constexpr size_t maxIt = 250;
@@ -30,8 +30,8 @@ static constexpr double epsilon = 0.01;
 static constexpr double ell = 0.05;
 static constexpr double tgv = std::numeric_limits<double>::max();
 
-using ScalarFES = H1<Scalar, Context::Serial>;
-using VectorFES = H1<Math::Vector, Context::Serial>;
+using ScalarFES = P1<Scalar, Context::Serial>;
+using VectorFES = P1<Math::Vector, Context::Serial>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
@@ -44,10 +44,13 @@ ShapeGradient getShapeGradient(
   TrialFunction d(vecFes);
   TestFunction  v(vecFes);
 
+  auto gdist = Grad(dist);
+  gdist.traceOf(GammaD);
+
   Problem conormal(d, v);
   conormal = Integral(alpha * Jacobian(d), Jacobian(v))
-        + Integral(d, v)
-        - FaceIntegral(Grad(dist).traceOf(GammaD), v).over(SigmaD);
+           + Integral(d, v)
+           - FaceIntegral(gdist, v).over(SigmaD);
   conormal.solve(solver);
 
   const auto& cnd = d.getSolution();
@@ -55,10 +58,10 @@ ShapeGradient getShapeGradient(
 
   TrialFunction g(vecFes);
   Problem hilbert(g, v);
-  // hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
-  //      + Integral(g, v)
-  //      + Integral(tgv * g, v).over(GammaN)
-  //      - BoundaryIntegral(expr * cn, v).over(SigmaD);
+  hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+          + Integral(g, v)
+          + Integral(tgv * g, v).over(GammaN)
+          - FaceIntegral(expr * cn, v).over(SigmaD);
   hilbert.solve(solver);
 
   return g.getSolution();
@@ -66,11 +69,13 @@ ShapeGradient getShapeGradient(
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mmg/dirichlet-region-example.mesh";
+  const char* meshFile =
+    "u.mesh";
 
   // Load and build finite element spaces on the volumetric domain
   MMG::Mesh Omega;
-  Omega.load(meshFile, IO::FileFormat::MEDIT);
+  Omega.load(meshFile);
+  //MMG::Optimizer().setHMin(0.1).optimize(Omega);
 
   auto J = [&](const ScalarGridFunction& u)
   {
@@ -84,12 +89,13 @@ int main(int, char**)
 
     // Skin the mesh, computing the borders of the new regions
     Alert::Info() << "   | Skinning mesh." << Alert::Raise;
+    Omega.getConnectivity().compute(2, 3);
+    Omega.getConnectivity().compute(1, 2);
     auto dOmega = Omega.skin();
-    dOmega.save("skinned.mesh");
-    std::cout << "miaow" << std::endl;
-    std::exit(1);
-    assert(false);
-    // dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
+    dOmega.getConnectivity().compute(1, 2);
+    dOmega.save("miaow.mesh", IO::FileFormat::MEDIT);
+    dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
+    // dOmega.save("miaow.mesh", IO::FileFormat::MEDIT);
 
     // Build finite element spaces
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
@@ -101,11 +107,9 @@ int main(int, char**)
 
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
     auto dist = MMG::Distancer(dsfes).setInteriorDomain(GammaD)
-                                         .distance(dOmega);
+                                     .distance(dOmega);
 
     Solver::CG solver;
-    mfem::GSSmoother smoother;
-    solver.setPreconditioner(smoother);
 
     auto h = [](double r)
     {
@@ -147,7 +151,7 @@ int main(int, char**)
 
     double objective = J(u.getSolution());
     Alert::Info() << "   | Objective: " << objective
-             << Alert::Raise;
+                  << Alert::Raise;
     fObj << objective << "\n";
     fObj.flush();
 
@@ -162,8 +166,9 @@ int main(int, char**)
 
     // Advect the distance function with the gradient
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
-    double gInf = std::max(grad.max(), -grad.min());
-    double dt = 2 * hmax / gInf;
+    GridFunction norm(sfes);
+    norm = Frobenius(grad);
+    double dt = 2 * hmax / norm.max();
     MMG::Advect(dist, grad).surface().step(dt);
 
     // // Topological optimization
@@ -218,7 +223,7 @@ int main(int, char**)
                                       .discretize(dist);
 
    Alert::Info() << "   | Optimizing the domain." << Alert::Raise;
-   MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
+   MMG::Optimizer().setHMax(hmax).optimize(Omega);
 
    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);

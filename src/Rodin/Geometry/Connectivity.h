@@ -106,6 +106,8 @@ namespace Rodin::Geometry
 
       const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
 
+      MeshConnectivity& setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc);
+
       /**
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and
        * for each such entity the vertices of that entity.

@@ -59,7 +59,7 @@ namespace Rodin::Geometry
     {
       build.attribute({ d, it->get_left() }, parent.getAttribute(d, parentIdx));
     }
-
+    m_dimension = std::max(m_dimension, d);
     return *this;
   }
 
@@ -76,9 +76,40 @@ namespace Rodin::Geometry
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
     const size_t nodes = m_sidx[0];
+    // Build the mesh object.
     m_build.nodes(nodes);
     for (auto it = m_s2ps[0].left.begin(); it != m_s2ps[0].left.end(); ++it)
       m_build.vertex(parent.getVertexCoordinates(it->get_right()));
+    auto& conn = m_build.getConnectivity();
+    // Build the connectivity for the submesh from the parent mesh.
+    for (size_t d = 0; d < m_s2ps.size(); d++)
+    {
+      for (size_t dp = 0; dp < m_s2ps.size(); dp++)
+      {
+        if (d == m_dimension && dp == 0)
+          continue;
+        const auto& pInc = parent.getConnectivity().getIncidence(d, dp);
+        if (pInc.size() > 0)
+        {
+          Incidence cInc(m_s2ps[d].size());
+          for (auto it = m_s2ps[d].left.begin(); it != m_s2ps[d].left.end(); ++it)
+          {
+            const Index cIdx = it->get_left();
+            const Index pIdx = it->get_right();
+            cInc[cIdx].reserve(pInc[pIdx].size());
+            for (const Index p : pInc[pIdx])
+            {
+              auto find = m_s2ps[dp].right.find(p);
+              if (find != m_s2ps[dp].right.end())
+                cInc[cIdx].insert_unique(find->get_left());
+            }
+          }
+          // Manually set the incidence
+          conn.setIncidence({ d, dp }, std::move(cInc));
+        }
+      }
+    }
+    // Finalize construction
     SubMesh res(parent);
     res.Parent::operator=(m_build.finalize());
     res.m_s2ps = std::move(m_s2ps);
