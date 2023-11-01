@@ -91,8 +91,8 @@ namespace Rodin::Variational
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)
           {
-            const auto& rc = p.getReferenceCoordinates();
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
+            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;

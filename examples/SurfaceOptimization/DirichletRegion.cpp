@@ -24,11 +24,14 @@ static constexpr Geometry::Attribute SigmaN = 2;
 
 static constexpr size_t maxIt = 250;
 
-static constexpr double hmax = 0.05;
-static constexpr double alpha = 0.6;
-static constexpr double epsilon = 0.01;
-static constexpr double ell = 0.05;
-static constexpr double tgv = std::numeric_limits<double>::max();
+static constexpr Scalar hmax = 0.04;
+static constexpr Scalar hmin = 0.1 * hmax;
+static constexpr Scalar hausd = 0.25 * hmin;
+static constexpr Scalar alpha = 2.0;
+static constexpr Scalar epsilon = hmin;
+static constexpr Scalar ell = 0.01;
+static constexpr Scalar radius = 1.1 * hmax;
+static constexpr Scalar tgv = std::numeric_limits<float>::max();
 
 using ScalarFES = P1<Scalar, Context::Serial>;
 using VectorFES = P1<Math::Vector, Context::Serial>;
@@ -69,13 +72,13 @@ ShapeGradient getShapeGradient(
 
 int main(int, char**)
 {
-  const char* meshFile =
-    "u.mesh";
+  const char* meshFile = "cool.mesh";
+  //const char* meshFile = "Omega.mesh";
 
   // Load and build finite element spaces on the volumetric domain
   MMG::Mesh Omega;
-  Omega.load(meshFile);
-  //MMG::Optimizer().setHMin(0.1).optimize(Omega);
+  Omega.load(meshFile, IO::FileFormat::MEDIT);
+  // MMG::Optimizer().setHMin(0.1).optimize(Omega);
 
   auto J = [&](const ScalarGridFunction& u)
   {
@@ -92,10 +95,8 @@ int main(int, char**)
     Omega.getConnectivity().compute(2, 3);
     Omega.getConnectivity().compute(1, 2);
     auto dOmega = Omega.skin();
-    dOmega.getConnectivity().compute(1, 2);
-    dOmega.save("miaow.mesh", IO::FileFormat::MEDIT);
     dOmega.trace({{{GammaD, Gamma}, SigmaD}, {{GammaN, Gamma}, SigmaN}});
-    // dOmega.save("miaow.mesh", IO::FileFormat::MEDIT);
+    dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
 
     // Build finite element spaces
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
@@ -109,9 +110,9 @@ int main(int, char**)
     auto dist = MMG::Distancer(dsfes).setInteriorDomain(GammaD)
                                      .distance(dOmega);
 
-    Solver::CG solver;
+    Solver::CG cg;
 
-    auto h = [](double r)
+    auto h = [](Scalar r)
     {
       if (r < -1.0)
         return 1.0;
@@ -133,100 +134,100 @@ int main(int, char**)
     TestFunction  v(sfes);
     Problem state(u, v);
     state = Integral(Grad(u), Grad(v))
-          + BoundaryIntegral(he * u, v).over({Gamma, GammaD})
+          + FaceIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v)
-          - BoundaryIntegral(g, v).over(GammaN);
-    state.solve(solver);
+          - FaceIntegral(g, v).over(GammaN);
+    state.solve(cg);
+    u.getSolution().save("u.gf");
+    Omega.save("u.mesh");
 
     // Adjoint equation
-    auto dj = -u.getSolution() / Omega.getVolume();
+    auto dj = -1.0 / Omega.getVolume();
     Alert::Info() << "   | Solving adjoint equation." << Alert::Raise;
     TrialFunction p(sfes);
     TestFunction  q(sfes);
     Problem adjoint(p, q);
     adjoint = Integral(Grad(p), Grad(q))
             + BoundaryIntegral(he * p, q).over({Gamma, GammaD})
-            - Integral(dj, q);
-    adjoint.solve(solver);
+            - Integral(dj * q);
+    adjoint.solve(cg);
+    p.getSolution().save("p.gf");
 
-    double objective = J(u.getSolution());
+    const Scalar objective = J(u.getSolution());
     Alert::Info() << "   | Objective: " << objective
                   << Alert::Raise;
     fObj << objective << "\n";
     fObj.flush();
 
-    u.getSolution().save("u.gf");
-    Omega.save("u.mesh");
-
     // Compute the shape gradient
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
-    auto grad = getShapeGradient(dvfes, dist, hadamard, solver);
+    auto grad = getShapeGradient(dvfes, dist, hadamard, cg);
     grad *= -1.0;
+    grad.save("grad.gf");
+    dOmega.save("grad.mesh");
 
     // Advect the distance function with the gradient
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
-    GridFunction norm(sfes);
+
+    GridFunction norm(dsfes);
     norm = Frobenius(grad);
-    double dt = 2 * hmax / norm.max();
+
+    const Scalar dt = 2 * hmax / norm.max();
     MMG::Advect(dist, grad).surface().step(dt);
 
-    // // Topological optimization
-    // if (i % topoPeriod == 0)
-    // {
-    //   Alert::Info() << "   | Computing topological sensitivity." << Alert::Raise;
+    // Topological optimization
+    Alert::Info() << "   | Computing topological sensitivity." << Alert::Raise;
 
-    //   // Compute the topological sensitivity
-    //   GridFunction topo(sfes);
-    //   topo = M_PI * u.getSolution() * p.getSolution();
+    // Compute the topological sensitivity
+    GridFunction topo(sfes);
+    topo = M_PI * u.getSolution() * p.getSolution();
 
-    //   // Geodesic distance
-    //   auto gd = [&](const Point& x, const Point& c)
-    //          {
-    //           return std::acos((x(0) * c(0) + x(1) * c(1) + x(2) * c(2)));
-    //          };
+    Scalar tc = std::numeric_limits<Scalar>::min();
+    std::optional<Point> c;
+    for (auto it = Omega.getVertex(); !it.end(); ++it)
+    {
+      const Point p(*it, it->getTransformation(),
+          Polytope::getVertices(Polytope::Type::Point).col(0), it->getCoordinates());
+      const Scalar tp = topo(p);
+      if (tp < tc)
+      {
+        tc = tp;
+        c.emplace(std::move(p));
+      }
+    }
 
-    //   // double tmin = topo.min();
-    //   // double tmax = topo.max();
-    //   // if (tmin < 0)
-    //   // {
-    //   //   // auto cs = topo.where(topo < tmin * (1 - 0.001) + (tmax - tmin) * 0.001);
-    //   //   if (cs.size() > 0)
-    //   //   {
-    //   //    Alert::Info() << "   | " << cs.size() << " possible hole centers." << Alert::Raise;
-    //   //    auto it = std::min_element(cs.begin(), cs.end(),
-    //   //       [&](const Point& lhs, const Point& rhs) -> bool
-    //   //       {
-    //   //        return topo(lhs).scalar() < topo(rhs).scalar();
-    //   //       });
+    auto holes =
+      [&](const Point& v)
+      {
+        Scalar d = dist(v);
+        const Scalar dd = (v - c.value()).norm() - radius;
+        d = std::min(d, dd);
+        return d;
+      };
+    dist = holes;
 
-    //   //    auto holes = ScalarFunction(
-    //   //       [&](const Point& v) -> double
-    //   //       {
-    //   //        double d = dist(v);
-    //   //        double dd = gd(v, *it) - radius;
-    //   //        d = std::min(d, dd);
-    //   //        return d;
-    //   //       });
-    //   //    dist = holes;
-    //   //   }
-    //   // }
-    // }
+    // Mesh only the surface part
+    GridFunction workaround(sfes);
+    workaround.projectOnBoundary(dist);
+    workaround.getFiniteElementSpace().getMesh().save("workaround.mesh", IO::FileFormat::MEDIT);
 
-   // Mesh only the surface part
-   Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-   Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
-                                      .split(GammaD, {GammaD, Gamma})
-                                      .split(Gamma, {GammaD, Gamma})
-                                      .setHMax(hmax)
-                                      .surface()
-                                      .discretize(dist);
+    Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+    Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
+                                       .split(GammaD, {GammaD, Gamma})
+                                       .split(Gamma, {GammaD, Gamma})
+                                       .setHMax(hmax)
+                                       .setHMin(hmin)
+                                       .setAngleDetection(false)
+                                       .surface()
+                                       .discretize(workaround);
 
-   Alert::Info() << "   | Optimizing the domain." << Alert::Raise;
-   MMG::Optimizer().setHMax(hmax).optimize(Omega);
+    Alert::Info() << "   | Optimizing the domain." << Alert::Raise;
+    MMG::Optimizer().setHMax(hmax).setHMin(hmin)
+      .setAngleDetection(false).optimize(Omega);
 
-   dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
-   Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
+    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
   return 0;

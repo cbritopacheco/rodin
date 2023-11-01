@@ -315,15 +315,7 @@ namespace Rodin::External::MMG
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
     MMG5_pMesh mmgMesh = nullptr;
-    try
-    {
-      mmgMesh = rodinToMesh(
-          dynamic_cast<const MMG::Mesh&>(ls.getFiniteElementSpace().getMesh()));
-    } catch (std::bad_cast&)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "Mesh must be of type MMG::Mesh." << Alert::Raise;
-    }
+    mmgMesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
 
     // Erase boundary elements which have the isoref
     if (m_isoref)
@@ -390,14 +382,19 @@ namespace Rodin::External::MMG
     if (!isSurface)
     {
       const size_t meshDim = rodinMesh.getDimension();
-      for (auto it = rodinMesh.getElement(); !it.end(); ++it)
+      size_t d;
+      if (m_meshTheSurface)
+        d = meshDim - 1;
+      else
+        d = meshDim;
+      for (auto it = rodinMesh.getPolytope(d); !it.end(); ++it)
       {
-        const auto& cell = *it;
-        const Index idx = cell.getIndex();
-        const Geometry::Attribute attr = cell.getAttribute();
+        const auto& polytope = *it;
+        const Index idx = polytope.getIndex();
+        const Geometry::Attribute attr = polytope.getAttribute();
         auto attrIt = m_g2om.find(attr);
         if (attrIt != m_g2om.end())
-          rodinMesh.setAttribute({ meshDim, idx }, attrIt->second);
+          rodinMesh.setAttribute({ d, idx }, attrIt->second);
         else
           assert(std::holds_alternative<NoSplitT>(m_split.at(attr)));
       }

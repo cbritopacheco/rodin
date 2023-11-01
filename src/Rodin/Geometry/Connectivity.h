@@ -126,6 +126,8 @@ namespace Rodin::Geometry
 
       void local(std::vector<SubPolytope>& out, size_t dim, Index i);
 
+      MeshConnectivity& clear(size_t d, size_t dp);
+
     private:
       size_t m_maximalDimension;
 

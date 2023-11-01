@@ -456,4 +456,13 @@ namespace Rodin::Geometry
     assert(false); // We should not reach here. There is an unhandled case.
     out = {};
   }
+
+  MeshConnectivity& MeshConnectivity::clear(size_t d, size_t dp)
+  {
+    assert(d < m_connectivity.size());
+    assert(dp < m_connectivity[d].size());
+    m_dirty[d][dp] = true;
+    m_connectivity[d][dp].clear();
+    return *this;
+  }
 }

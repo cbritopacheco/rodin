@@ -266,7 +266,7 @@ namespace Rodin::Geometry
       {
         Variational::ScalarP1Element fe(Polytope::Type::Point);
         const size_t sdim = getSpaceDimension();
-        Math::SpatialMatrix pm(sdim, 1);
+        Math::PointMatrix pm(sdim, 1);
         pm.col(0) = getVertexCoordinates(idx);
         auto trans =
           std::unique_ptr<PolytopeTransformation>(
@@ -279,7 +279,7 @@ namespace Rodin::Geometry
         auto g = getGeometry(dimension, idx);
         const size_t sdim = getSpaceDimension();
         const size_t n = Polytope::getVertexCount(g);
-        Math::SpatialMatrix pm(sdim, n);
+        Math::PointMatrix pm(sdim, n);
         const auto& polytope = getConnectivity().getPolytope(dimension, idx);
         assert(n == static_cast<size_t>(polytope.size()));
         for (const auto& v : polytope | boost::adaptors::indexed())

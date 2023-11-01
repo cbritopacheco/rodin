@@ -77,9 +77,25 @@ namespace Rodin::External::MMG
       };
 
       /**
+       * @brief Generates a Builder instance to build an MMG::Mesh object.
+       */
+      inline
+      static MMG::Mesh::Builder Build()
+      {
+        return MMG::Mesh::Builder();
+      }
+
+      /**
       * @brief Constructs an empty mesh with no elements.
       */
       Mesh() = default;
+
+      /**
+       * @brief Move constructs a Mesh to an MMG::Mesh.
+       */
+      Mesh(Parent&& other)
+        : Parent(std::move(other))
+      {}
 
       /**
        * @brief Copy constructor.
@@ -114,12 +130,6 @@ namespace Rodin::External::MMG
       {
         Parent::operator=(std::move(other));
         return *this;
-      }
-
-      inline
-      MMG::Mesh::Builder Build() const
-      {
-        return MMG::Mesh::Builder();
       }
 
       /**
