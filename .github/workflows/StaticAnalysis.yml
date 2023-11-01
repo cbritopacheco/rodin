@@ -29,6 +29,10 @@ jobs:
         with:
           python-version: 3.x
           cache: 'pip'
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          python3-distutils
       - run: pip install -r dev/Requirements.txt
       - name: Execute script
         run: |
