@@ -84,9 +84,9 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::Matrix getValue(const Geometry::Point& p) const
+      Math::SpatialMatrix getValue(const Geometry::Point& p) const
       {
-        Math::Matrix out;
+        Math::SpatialMatrix out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -120,7 +120,7 @@ namespace Rodin::Variational
       }
 
       inline
-      void getValue(Math::Matrix& out, const Geometry::Point& p) const
+      void getValue(Math::SpatialMatrix& out, const Geometry::Point& p) const
       {
         interpolate(out, p);
       }
@@ -137,7 +137,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      auto interpolate(Math::Matrix& out, const Geometry::Point& p) const
+      auto interpolate(Math::SpatialMatrix& out, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).interpolate(out, p);
       }

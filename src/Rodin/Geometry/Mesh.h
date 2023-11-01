@@ -567,7 +567,7 @@ namespace Rodin::Geometry
           size_t m_sdim;
           size_t m_nodes;
 
-          Math::Matrix m_vertices;
+          Math::PointMatrix m_vertices;
           MeshConnectivity m_connectivity;
 
           AttributeIndex m_attributeIndex;
@@ -577,7 +577,7 @@ namespace Rodin::Geometry
       };
 
       /**
-       * @brief Generates a Builder instance to build an arbitrary mesh.
+       * @brief Generates a Builder instance to build a Mesh object.
        */
       inline
       static Builder Build()
@@ -664,7 +664,7 @@ namespace Rodin::Geometry
       }
 
       inline
-      const Math::Matrix& getVertices() const
+      const Math::PointMatrix& getVertices() const
       {
         return m_vertices;
       }
@@ -831,7 +831,7 @@ namespace Rodin::Geometry
 
       size_t m_sdim;
 
-      Math::Matrix m_vertices;
+      Math::PointMatrix m_vertices;
       MeshConnectivity m_connectivity;
 
       PolytopeIndexed<Geometry::Attribute> m_attributeIndex;

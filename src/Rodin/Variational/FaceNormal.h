@@ -59,7 +59,6 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         assert(d == mesh.getDimension() - 1);
-        assert(mesh.isBoundary(i));
         const auto& jacobian = p.getJacobian();
         res.resize(m_sdim);
         if (jacobian.rows() == 2)

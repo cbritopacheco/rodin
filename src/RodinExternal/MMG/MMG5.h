@@ -77,7 +77,7 @@ namespace Rodin::External::MMG
       /**
        * @brief Converts an MMG::Mesh object to a MMG5_pMesh object.
        */
-      static MMG5_pMesh rodinToMesh(const MMG::Mesh& src);
+      static MMG5_pMesh rodinToMesh(const Rodin::Geometry::SerialMesh& src);
 
       /**
        * @brief Converts an MMG5_pMesh object to a MMG::Mesh object.

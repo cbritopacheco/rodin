@@ -37,6 +37,11 @@ int main(int, char**)
           + DirichletBC(u, g);
   poisson.assemble();
 
+  for (auto it = mesh.getBoundary(); it; ++it)
+  {
+    mesh.setAttribute({ it->getDimension(), it->getIndex() }, 2);
+  }
+
   // Solve the problem
   Solver::SparseLU solver;
   poisson.solve(solver);
