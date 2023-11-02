@@ -32,7 +32,7 @@ namespace Rodin::Geometry
       using Parent::jacobian;
       using Parent::inverse;
 
-      IsoparametricTransformation(Math::SpatialMatrix&& pm, FE&& fe)
+      IsoparametricTransformation(Math::PointMatrix&& pm, FE&& fe)
         : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(std::move(fe))
@@ -44,7 +44,7 @@ namespace Rodin::Geometry
       /**
        * pm : sdim x dof
        */
-      IsoparametricTransformation(const Math::SpatialMatrix& pm, const FE& fe)
+      IsoparametricTransformation(const Math::PointMatrix& pm, const FE& fe)
         : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
           m_pm(pm),
           m_fe(fe)
@@ -53,7 +53,7 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      IsoparametricTransformation(Math::SpatialMatrix&& pm, const FE& fe)
+      IsoparametricTransformation(Math::PointMatrix&& pm, const FE& fe)
         : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(fe)
@@ -62,7 +62,7 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      IsoparametricTransformation(const Math::SpatialMatrix& pm, FE&& fe)
+      IsoparametricTransformation(const Math::PointMatrix& pm, FE&& fe)
         : Parent(Polytope::getGeometryDimension(fe.getGeometry()), pm.rows()),
           m_pm(pm),
           m_fe(std::move(fe))
@@ -127,13 +127,13 @@ namespace Rodin::Geometry
 
 
       inline
-      const Math::SpatialMatrix& getPointMatrix() const
+      const Math::PointMatrix& getPointMatrix() const
       {
         return m_pm;
       }
 
     private:
-      Math::SpatialMatrix m_pm;
+      Math::PointMatrix m_pm;
       FE m_fe;
   };
 }

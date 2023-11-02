@@ -22,12 +22,21 @@ namespace Rodin::Math
    */
   using Matrix = Eigen::MatrixX<Scalar>;
 
+  /**
+   * @brief Spatial matrix
+   */
   using SpatialMatrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
-        RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
+        RODIN_MAXIMAL_SPACE_DIMENSION, RODIN_MAXIMAL_SPACE_DIMENSION>;
 
+  /**
+   * @brief Point matrix
+   */
   using PointMatrix =
     Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
 
+  /**
+   * @brief Represents a fixed size matrix
+   */
   template <size_t Rows, size_t Cols>
   using FixedSizeMatrix = Eigen::Matrix<Scalar, Rows, Cols>;
 }

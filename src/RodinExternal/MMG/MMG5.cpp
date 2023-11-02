@@ -307,7 +307,7 @@ namespace Rodin::External::MMG
     return res;
   }
 
-  MMG5_pMesh MMG5::rodinToMesh(const MMG::Mesh& src)
+  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::SerialMesh& src)
   {
     bool isSurface = src.isSurface();
     assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
@@ -503,20 +503,24 @@ namespace Rodin::External::MMG
       return nullptr;
     }
 
-    // Tag corners
-    for (const auto& c : src.getCorners())
+    const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
+    if (ptr)
     {
-      assert(c >= 0);
-      assert(c <= res->np);
-      res->point[c + 1].tag |= MG_CRN;
-    }
+      // Tag corners
+      for (const auto& c : ptr->getCorners())
+      {
+        assert(c >= 0);
+        assert(c <= res->np);
+        res->point[c + 1].tag |= MG_CRN;
+      }
 
-    // Tag ridges
-    for (const auto& r : src.getRidges())
-    {
-      assert(r >= 0);
-      assert(r <= res->na);
-      res->edge[r + 1].tag |= MG_GEO;
+      // Tag ridges
+      for (const auto& r : ptr->getRidges())
+      {
+        assert(r >= 0);
+        assert(r <= res->na);
+        res->edge[r + 1].tag |= MG_GEO;
+      }
     }
 
     return res;

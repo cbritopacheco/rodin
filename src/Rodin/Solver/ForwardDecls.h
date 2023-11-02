@@ -9,11 +9,35 @@
 
 namespace Rodin::Solver
 {
+  /**
+   * @brief Abstract base class for linear algebra solvers.
+   * @tparam OperatorType Type of operator for the left hand side
+   * @tparam VectorType Type of vector for the right hand side
+   *
+   * Represents an object which can solve sysystems of the type:
+   * @f[
+   *  Ax = b \: ,
+   * @f]
+   * where @f$ A @f$ has type @f$ \text{OperatorType} @f$, the solution @f$ x @f$
+   * has type @f$ \text{VectorType} @f$, and the right hand side @f$ b @f$ has
+   * type @f$ \text{VectorType} @f$.
+   */
   template <class OperatorType, class VectorType>
   class SolverBase;
 
   /**
+   * @brief Wrapper class for any Eigen sparse solver.
+   * @tparam OperatorType Type of operator for the left hand side
+   * @tparam VectorType Type of vector for the right hand side
+   * @see EigenSolverSpecializations
+   */
+  template <class EigenSolverType, class OperatorType, class VectorType>
+  class EigenSolver;
+
+  /**
    * @brief Conjugate gradient solver for self-adjoint problems.
+   * @tparam OperatorType Type of operator for the left hand side
+   * @tparam VectorType Type of vector for the right hand side
    * @see CGSpecializations
    */
   template <class OperatorType, class VectorType>
@@ -21,6 +45,8 @@ namespace Rodin::Solver
 
   /**
    * @brief Direct sparse LLT Cholesky factorizations
+   * @tparam OperatorType Type of operator for the left hand side
+   * @tparam VectorType Type of vector for the right hand side
    * @see SimplicialLLTSpecializations
    */
   template <class OperatorType, class VectorType>
@@ -28,6 +54,8 @@ namespace Rodin::Solver
 
   /**
    * @brief Direct sparse LDLT Cholesky factorizations without square root
+   * @tparam OperatorType Type of operator for the left hand side
+   * @tparam VectorType Type of vector for the right hand side
    * @see SimplicialLDLTSpecializations
    */
   template <class OperatorType, class VectorType>
@@ -35,6 +63,8 @@ namespace Rodin::Solver
 
   /**
    * @brief Sparse supernodal LU factorization for general matrices.
+   * @tparam OperatorType Type of operator for the left hand side
+   * @tparam VectorType Type of vector for the right hand side
    * @see SparseLUSpecializations
    */
   template <class OperatorType, class VectorType>
