@@ -9,7 +9,7 @@
 
 #include <optional>
 #include <functional>
-#include<Eigen/SparseCholesky>
+#include <Eigen/SparseCholesky>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"

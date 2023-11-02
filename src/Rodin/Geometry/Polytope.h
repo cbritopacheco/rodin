@@ -616,6 +616,20 @@ namespace Rodin::Geometry
     }
     return os;
   }
+
+  inline
+  auto
+  operator+(const Geometry::Point& p, const Geometry::Point& q)
+  {
+    return p.asVector() + q.asVector();
+  }
+
+  inline
+  auto
+  operator-(const Geometry::Point& p, const Geometry::Point& q)
+  {
+    return p.asVector() - q.asVector();
+  }
 }
 
 #endif

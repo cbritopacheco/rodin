@@ -60,7 +60,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Matrix& out, const Geometry::Point& p) const
+      void interpolate(Math::SpatialMatrix& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -71,13 +71,13 @@ namespace Rodin::Variational
         {
           const auto& conn = mesh.getConnectivity();
           const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
-          const auto& rc = p.getPhysicalCoordinates();
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-            const Geometry::Point np(*tracePolytope, rc, pc);
+            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+            const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(out, np);
             return;
           }
@@ -101,7 +101,8 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  const Geometry::Point np(*tracePolytope, rc, pc);
+                  const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(out, np);
                   return;
                 }
@@ -120,8 +121,8 @@ namespace Rodin::Variational
           const auto& vdim = fes.getVectorDimension();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::Matrix jacobian(vdim, d);
-          Math::Matrix res(vdim, d);
+          Math::SpatialMatrix jacobian(vdim, d);
+          Math::SpatialMatrix res(vdim, d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {

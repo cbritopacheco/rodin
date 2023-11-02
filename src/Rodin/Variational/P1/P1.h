@@ -297,7 +297,7 @@ namespace Rodin::Variational
    */
   template <>
   class P1<Math::Vector, Context::Serial, Geometry::Mesh<Context::Serial>> final
-    : public FiniteElementSpaceBase
+    : public FiniteElementSpace<P1<Math::Vector, Context::Serial, Geometry::Mesh<Context::Serial>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;

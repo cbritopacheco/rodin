@@ -526,7 +526,7 @@ namespace Rodin::Geometry
 
   Point::Point(Point&& other)
     : PointBase(std::move(other)),
-      m_rcStorage(other.m_rcStorage),
+      m_rcStorage(std::move(other.m_rcStorage)),
       m_rc(std::move(other.m_rc))
   {}
 

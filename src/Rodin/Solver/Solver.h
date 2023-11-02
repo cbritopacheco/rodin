@@ -13,9 +13,6 @@
 
 namespace Rodin::Solver
 {
-  /**
-   * @brief Base class for solving linear algebra systems.
-   */
   template <class OperatorType, class VectorType>
   class SolverBase
   {
@@ -26,10 +23,22 @@ namespace Rodin::Solver
       virtual ~SolverBase() = default;
 
       /**
-       * @brief Solves the specified Variational::Problem.
-       * @param[in,out] problem Variational problem to solve.
+       * @brief Solves the linear algebra system.
+       *
+       * Solves the following system:
+       * @f[
+       *  Ax = b ,
+       * @f]
+       * where @f$ A @f$ has type @f$ \text{OperatorType} @f$, the solution @f$
+       * x @f$ has type @f$ \text{VectorType} @f$, and the right hand side @f$
+       * b @f$ has type @f$ \text{VectorType} @f$.
+       *
+       * @param[in,out] A Left hand side operator
+       * @param[in,out] x Input for the initial guess, and output for the
+       * solution
+       * @param[in,out] b Right hand side vector
        */
-      virtual void solve(OperatorType& A, VectorType& X, VectorType& B) = 0;
+      virtual void solve(OperatorType& A, VectorType& x, VectorType& b) = 0;
   };
 }
 

@@ -384,14 +384,14 @@ namespace Rodin::Variational
           constexpr
           JacobianFunction& operator=(JacobianFunction&&) = default;
 
-          Math::Matrix operator()(const Math::SpatialVector& rc) const
+          Math::SpatialMatrix operator()(const Math::SpatialVector& rc) const
           {
-            Math::Matrix res;
+            Math::SpatialMatrix res;
             operator()(res, rc);
             return res;
           }
 
-          void operator()(Math::Matrix& out, const Math::SpatialVector& rc) const;
+          void operator()(Math::SpatialMatrix& out, const Math::SpatialVector& rc) const;
 
         private:
           size_t m_vdim;

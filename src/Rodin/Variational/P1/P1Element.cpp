@@ -625,9 +625,9 @@ namespace Rodin::Variational
     out.setConstant(NAN);
   }
 
-  void VectorP1Element::JacobianFunction::operator()(Math::Matrix& out, const Math::SpatialVector& rc) const
+  void VectorP1Element::JacobianFunction::operator()(Math::SpatialMatrix& out, const Math::SpatialVector& rc) const
   {
-    out = Math::Matrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
+    out = Math::SpatialMatrix::Zero(m_vdim, Geometry::Polytope::getGeometryDimension(m_g));
     const size_t i = m_i % m_vdim;
     const size_t k = m_i / m_vdim;
     assert(k < Geometry::Polytope::getVertexCount(m_g));
