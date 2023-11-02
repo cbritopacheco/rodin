@@ -88,10 +88,15 @@
             </dt>
             <dd>Conjugate gradient solver for self-adjoint problems, for use with <a href="namespace_rodin_1_1_math.html#ad5753e9793c61f3620f2def51b01d816" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class EigenSolverType, class Operator, class Vector&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_eigen_solver.html" class="m-doc">EigenSolver</a>
+            </dt>
+            <dd>Wrapper class for any Eigen sparse solver.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase</a>
             </dt>
-            <dd>Base class for solving linear algebra systems.</dd>
+            <dd>Abstract base class for linear algebra solvers.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>
@@ -151,6 +156,11 @@
               <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#ga385886806bb92473f964e8b62c62e4ae" class="m-doc">CG</a>(</span><span class="m-doc-wrap">) -&gt; CG&lt; Math::SparseMatrix, Math::Vector &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenSolverType&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#gae124f51500c5946ba88281a3834db371" class="m-doc">EigenSolver</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;EigenSolverType&gt;) -&gt; EigenSolver&lt; EigenSolverType, Math::SparseMatrix, Math::Vector &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_solver_1_1_eigen_solver.html" class="m-doc">EigenSolver</a>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="group___rodin_c_t_a_d.html#gabd9f856ad6154e5bfac8c445217c1d37" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap">) -&gt; LeastSquaresCG&lt; Math::SparseMatrix, Math::Vector &gt;</span>
             </dt>
