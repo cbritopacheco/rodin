@@ -25,8 +25,8 @@ static constexpr Geometry::Attribute SigmaN = 2;
 static constexpr size_t maxIt = 1000;
 
 static constexpr Scalar epsilon = 0.001;
-static constexpr Scalar ell = 1.0;
-static constexpr Scalar radius = 0.05;
+static constexpr Scalar ell = 1;
+static constexpr Scalar radius = 0.02;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
 
 using ScalarFES = P1<Scalar, Context::Serial>;
@@ -47,7 +47,7 @@ ShapeGradient getShapeGradient(
   gdist.traceOf(GammaD);
 
   Problem conormal(d, v);
-  conormal = Integral(alpha * Jacobian(d), Jacobian(v))
+  conormal = Integral(alpha * alpha * Jacobian(d), Jacobian(v))
            + Integral(d, v)
            - FaceIntegral(gdist, v).over(SigmaD);
   conormal.solve(solver);
@@ -57,7 +57,7 @@ ShapeGradient getShapeGradient(
 
   TrialFunction g(vecFes);
   Problem hilbert(g, v);
-  hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
+  hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(v))
           + Integral(g, v)
           // + Integral(tgv * g, v).over(GammaN)
           - FaceIntegral(expr * cn, v).over(SigmaD);
@@ -94,12 +94,39 @@ void rmc(MeshBase& mesh)
 
 int main(int, char**)
 {
-  const char* meshFile = "cool.mesh";
+  const char* meshFile = "linkrods.mesh";
   //const char* meshFile = "Omega.mesh";
 
   // Load and build finite element spaces on the volumetric domain
   MMG::Mesh Omega;
   Omega.load(meshFile, IO::FileFormat::MEDIT);
+
+  {
+    P1 vh(Omega);
+    GridFunction dist(vh);
+    dist = [&](const Point& p)
+      {
+        Math::Vector c1(3);
+        c1(0) = 4.3 - p.x();
+        c1(1) = 3.8 - p.y();
+        c1(2) = 1.0 - p.z();
+        double dd = c1.norm() - 0.1;
+        return dd;
+      };
+
+    Omega = MMG::ImplicitDomainMesher().noSplit(GammaN)
+                                       .setAngleDetection(false)
+                                       .split(GammaD, {GammaD, Gamma})
+                                       .split(Gamma, {GammaD, Gamma})
+                                       .setHMax(0.05)
+                                       .setHMin(0.005)
+                                       .setHausdorff(0.005)
+                                       .setGradation(1.2)
+                                       .surface()
+                                       .discretize(dist);
+  }
+
+  Omega.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   auto J = [&](const ScalarGridFunction& u)
   {
@@ -107,12 +134,12 @@ int main(int, char**)
   };
 
   std::ofstream fObj("obj.txt");
-  Scalar hmax = 0.07;
-  Scalar dc = 2;
+  Scalar hmax = 0.05 ;
+  Scalar dc = 3;
   size_t i = 0;
   while (i < maxIt)
   {
-    Scalar hmin = 0.01;
+    Scalar hmin = 0.005;
     Scalar hausd = 0.005;
     Scalar hgrad = 1.2;
 
@@ -121,8 +148,14 @@ int main(int, char**)
                   << Alert::Raise;
 
     Alert::Info() << "   | Optimizing the domain." << Alert::Raise;
-    MMG::Optimizer().setHMax(hmax).setHMin(hmin).setHausdorff(hausd)
-      .setAngleDetection(false).setGradation(hgrad).optimize(Omega);
+    MMG::Optimizer().setHMax(hmax)
+                    .setHMin(hmin)
+                    .setGradation(hgrad)
+                    .setHausdorff(hausd)
+                    .setAngleDetection(false)
+                    .optimize(Omega);
+
+    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
 
     // Skin the mesh, computing the borders of the new regions
     Alert::Info() << "   | Skinning mesh." << Alert::Raise;
@@ -249,6 +282,8 @@ int main(int, char**)
     // Mesh only the surface part
     GridFunction workaround(sfes);
     workaround.projectOnBoundary(dist);
+    Omega.save("dist.mesh", IO::FileFormat::MEDIT);
+    workaround.save("dist.sol", IO::FileFormat::MEDIT);
 
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     try
@@ -272,7 +307,6 @@ int main(int, char**)
       continue;
     }
 
-    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
     dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
     dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
     i++;
