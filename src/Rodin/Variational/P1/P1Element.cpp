@@ -323,7 +323,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return r.x() - r.y() - r.z() + 1;
+            return - r.x() - r.y() - r.z() + 1;
           }
           case 1:
           {

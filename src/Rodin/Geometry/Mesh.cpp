@@ -270,7 +270,7 @@ namespace Rodin::Geometry
         pm.col(0) = getVertexCoordinates(idx);
         auto trans =
           std::unique_ptr<PolytopeTransformation>(
-              new IsoparametricTransformation(pm, std::move(fe)));
+              new IsoparametricTransformation(std::move(pm), std::move(fe)));
         auto p = m_transformationIndex.insert(it, { dimension, idx }, std::move(trans));
         return *p->second;
       }
@@ -336,9 +336,12 @@ namespace Rodin::Geometry
   }
 
   CCL MeshBase::ccl(
-      std::function<bool(const Polytope&, const Polytope&)> p, size_t d) const
+      std::function<bool(const Polytope&, const Polytope&)> p,
+      size_t d,
+      const FlatSet<Attribute>& attrs) const
   {
     FlatSet<Index> visited;
+    visited.reserve(getCount(d));
     std::deque<Index> searchQueue;
     std::deque<FlatSet<Index>> res;
 
@@ -349,7 +352,8 @@ namespace Rodin::Geometry
       if (!visited.count(i))
       {
         res.push_back({});
-        searchQueue.push_back(i);
+        if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+          searchQueue.push_back(i);
         while (searchQueue.size() > 0)
         {
           const Index idx = searchQueue.back();
@@ -363,7 +367,10 @@ namespace Rodin::Geometry
             for (auto adj = el->getAdjacent(); adj; ++adj)
             {
               if (p(*el, *adj))
-                searchQueue.push_back(adj->getIndex());
+              {
+                if (attrs.size() == 0 || attrs.count(adj->getAttribute()))
+                  searchQueue.push_back(adj->getIndex());
+              }
             }
           }
         }

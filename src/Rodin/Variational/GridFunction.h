@@ -96,19 +96,22 @@ namespace Rodin::Variational
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(*this),
           m_fes(other.m_fes),
-          m_data(other.m_data)
+          m_data(other.m_data),
+          m_weights(other.m_weights)
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(*this),
           m_fes(std::move(other.m_fes)),
-          m_data(std::move(other.m_data))
+          m_data(std::move(other.m_data)),
+          m_weights(std::move(other.m_weights))
       {}
 
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
         m_fes = std::move(other.m_fes);
         m_data = std::move(other.m_data);
+        m_weights = std::move(other.m_weights);
         return *this;
       }
 

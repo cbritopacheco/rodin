@@ -30,7 +30,7 @@ namespace Rodin::Variational
     const size_t vn = mesh.getVertexCount();
     assert(m_vdim < RODIN_P1_MAX_VECTOR_DIMENSION);
     m_dofs.resize(mesh.getDimension() + 1);
-    for (size_t d = 1; d < mesh.getDimension() + 1; d++)
+    for (size_t d = 0; d <= mesh.getDimension(); d++)
     {
       const size_t n = mesh.getConnectivity().getCount(d);
       m_dofs[d].reserve(n);
