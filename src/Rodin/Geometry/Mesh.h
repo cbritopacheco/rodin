@@ -84,6 +84,42 @@ namespace Rodin::Geometry
         return m_components;
       }
 
+      inline
+      auto begin()
+      {
+        return m_components.begin();
+      }
+
+      inline
+      auto end()
+      {
+        return m_components.end();
+      }
+
+      inline
+      auto begin() const
+      {
+        return m_components.begin();
+      }
+
+      inline
+      auto end() const
+      {
+        return m_components.end();
+      }
+
+      inline
+      auto cbegin() const
+      {
+        return m_components.cbegin();
+      }
+
+      inline
+      auto cend() const
+      {
+        return m_components.cend();
+      }
+
     private:
       std::deque<Component> m_components;
   };
@@ -123,7 +159,22 @@ namespace Rodin::Geometry
         return ccl(p, getDimension());
       }
 
-      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const;
+      inline
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const
+      {
+        return ccl(p, d, FlatSet<Attribute>{});
+      }
+
+      inline
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
+          size_t d, Attribute attr) const
+      {
+        return ccl(p, d, FlatSet<Attribute>{ attr });
+      }
+
+      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
+          size_t d,
+          const FlatSet<Attribute>& attrs) const;
 
       virtual MeshBase& scale(Scalar c) = 0;
 
