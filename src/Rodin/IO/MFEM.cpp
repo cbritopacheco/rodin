@@ -253,8 +253,8 @@ namespace Rodin::IO
   void MeshPrinter<FileFormat::MFEM, Context::Serial>::printMesh(std::ostream &os)
   {
     const auto& mesh = getObject();
-    os << MFEM::Keyword::elements << '\n' << mesh.getElementCount() << '\n';
-    for (auto it = mesh.getElement(); !it.end(); ++it)
+    os << MFEM::Keyword::elements << '\n' << mesh.getCellCount() << '\n';
+    for (auto it = mesh.getCell(); !it.end(); ++it)
     {
       auto g = MFEM::getGeometry(it->getGeometry());
       if (!g)

@@ -39,7 +39,7 @@ namespace Rodin::Geometry
 
   class PolytopeIterator;
 
-  class ElementIterator;
+  class CellIterator;
 
   class FaceIterator;
 

@@ -100,7 +100,7 @@ namespace Rodin::Variational
        */
       inline
       constexpr
-      const Math::Matrix& getNodes() const
+      const Math::PointMatrix& getNodes() const
       {
         return static_cast<const Derived&>(*this).getNodes();
       }

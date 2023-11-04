@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_P0_P0_H
 #define RODIN_VARIATIONAL_P0_P0_H
 
+#include <boost/multi_array.hpp>
+
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
@@ -18,6 +20,27 @@
 #include "ForwardDecls.h"
 #include "P0Element.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class ContextType, class MeshType>
+  struct Traits<Variational::P0<Scalar, ContextType, MeshType>>
+  {
+    using RangeType = Scalar;
+    using Context = ContextType;
+    using Mesh = MeshType;
+    using Element = Variational::ScalarP0Element;
+  };
+
+  template <class ContextType, class MeshType>
+  struct Traits<Variational::P0<Math::Vector, ContextType, MeshType>>
+  {
+    using RangeType = Math::Vector;
+    using Context = ContextType;
+    using Mesh = MeshType;
+    using Element = Variational::VectorP0Element;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -28,6 +51,236 @@ namespace Rodin::Variational
 
   template <class Range, class Context, class Mesh = Geometry::Mesh<Context>>
   class P0;
+
+  /**
+   * @ingroup P0Specializations
+   * @brief Scalar valued Lagrange finite element space
+   *
+   * Represents the finite element space composed of scalar valued continuous,
+   * piecewise linear functions:
+   * @f[
+   *  \mathbb{P}_1 (\mathcal{T}_h) = \{ v \in C^0(\mathcal{T}_h) : v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
+   * @f]
+   *
+   * This class is scalar valued, i.e. evaluations of the function are of
+   * Rodin::Scalar type.
+   */
+  template <>
+  class P0<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>> final
+    : public FiniteElementSpace<P0<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>>
+  {
+    using KeyLeft = std::tuple<size_t, Index, Index>;
+    using KeyRight = Index;
+    using IndexMap = FlatMap<Index, Index>;
+
+    public:
+      /// Type of mesh on which the finite element space is built
+      using MeshType = Geometry::Mesh<Context::Serial>;
+
+      /// Range type of value
+      using RangeType = Scalar;
+
+      /// Represents the Context of the P0 space
+      using Context = Context::Serial;
+
+      //// Type of finite element
+      using Element = P0Element<RangeType>;
+
+      /// Parent class
+      using Parent = FiniteElementSpace<P0<Scalar, Context, Geometry::Mesh<Context>>>;
+
+      /**
+       * @brief Mapping for the scalar P0 space.
+       */
+      template <class FunctionDerived>
+      class Mapping : public FiniteElementSpaceMappingBase<Mapping<FunctionDerived>>
+      {
+        public:
+          using Function = FunctionBase<FunctionDerived>;
+
+          Mapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v)
+            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+          {}
+
+          Mapping(const Mapping&) = default;
+
+          inline
+          auto operator()(const Math::SpatialVector& r) const
+          {
+            const Geometry::Point p(m_polytope, m_trans.get(), r);
+            return getFunction()(p);
+          }
+
+          inline
+          constexpr
+          const Function& getFunction() const
+          {
+            assert(m_v);
+            return *m_v;
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
+          std::unique_ptr<Function> m_v;
+      };
+
+      /**
+       * @brief Inverse mapping for the scalar P0 space.
+       */
+      template <class CallableType>
+      class InverseMapping : public FiniteElementSpaceInverseMappingBase<InverseMapping<CallableType>>
+      {
+        public:
+          using Function = CallableType;
+
+          /**
+           * @param[in] polytope Reference to polytope on the mesh.
+           * @param[in] v Reference to the function defined on the reference
+           * space.
+           */
+          InverseMapping(const Geometry::Polytope& polytope, const CallableType& v)
+            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+          {}
+
+          InverseMapping(const InverseMapping&) = default;
+
+          inline
+          auto operator()(const Geometry::Point& p) const
+          {
+            return getFunction()(p.getReferenceCoordinates());
+          }
+
+          inline
+          constexpr
+          const Function& getFunction() const
+          {
+            return m_v.get();
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
+          std::reference_wrapper<Function> m_v;
+      };
+
+      P0(const Geometry::Mesh<Context>& mesh);
+
+      P0(const P0& other)
+        : Parent(other),
+          m_mesh(other.m_mesh)
+      {}
+
+      P0(P0&& other)
+        : Parent(std::move(other)),
+          m_mesh(other.m_mesh)
+      {}
+
+      P0& operator=(P0&& other) = default;
+
+      inline
+      const ScalarP0Element& getFiniteElement(size_t d, Index i) const
+      {
+        return s_elements[getMesh().getGeometry(d, i)];
+      }
+
+      inline
+      size_t getSize() const override
+      {
+        return m_mesh.get().getCellCount();
+      }
+
+      inline
+      size_t getVectorDimension() const override
+      {
+        return 1;
+      }
+
+      inline
+      const Geometry::Mesh<Context>& getMesh() const override
+      {
+        return m_mesh.get();
+      }
+
+      inline
+      const IndexArray& getDOFs(size_t d, Index i) const override
+      {
+        return getMesh().getConnectivity().getPolytope(d, i);
+      }
+
+      inline
+      Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
+      {
+        const auto [d, i] = idx;
+        const auto& p = getMesh().getConnectivity().getPolytope(d, i);
+        assert(local < static_cast<size_t>(p.size()));
+        return p(local);
+      }
+
+      /**
+       * @brief Returns the mapping of the function from the physical element
+       * to the reference element.
+       * @param[in] idx Index of the element in the mesh
+       * @param[in] v Function defined on an element of the mesh
+       *
+       * For all @f$ \tau \in \mathcal{T}_h @f$ in the mesh, the finite
+       * element space is generated by the bijective mapping:
+       * @f[
+       *  \psi_\tau : \mathbb{P}_1(\tau) \rightarrow \mathbb{P}_1(R)
+       * @f]
+       * taking a function @f$ v \in V(\tau) @f$ from the global element @f$
+       * \tau @f$ element @f$ R @f$.
+       */
+      template <class FunctionDerived>
+      inline
+      auto getMapping(const std::pair<size_t, Index>& idx, const FunctionBase<FunctionDerived>& v) const
+      {
+        const auto [d, i] = idx;
+        const auto& mesh = getMesh();
+        return Mapping(*mesh.getPolytope(d, i), v);
+      }
+
+      template <class FunctionDerived>
+      inline
+      auto getMapping(const Geometry::Polytope& polytope, const FunctionBase<FunctionDerived>& v) const
+      {
+        return Mapping(polytope, v);
+      }
+
+      /**
+       * @brief Returns the inverse mapping of the function from the physical
+       * element to the reference element.
+       * @param[in] idx Index of the element in the mesh.
+       * @param[in] v Callable type
+       */
+      template <class CallableType>
+      inline
+      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      {
+        const auto [d, i] = idx;
+        const auto& mesh = getMesh();
+        return InverseMapping(*mesh.getPolytope(d, i), v);
+      }
+
+      template <class CallableType>
+      inline
+      auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
+      {
+        return InverseMapping(polytope, v);
+      }
+
+    private:
+      static const Geometry::GeometryIndexed<ScalarP0Element> s_elements;
+
+      std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
+  };
+
+  template <class Context>
+  P0(const Geometry::Mesh<Context>&) -> P0<Scalar, Context, Geometry::Mesh<Context>>;
+
+  /// Alias for a scalar valued P0 finite element space
+  template <class Context>
+  using ScalarP0 = P0<Scalar, Context, Geometry::Mesh<Context>>;
 }
 
 #endif

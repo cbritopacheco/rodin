@@ -184,7 +184,7 @@ namespace Rodin::Variational
           if constexpr (std::is_same_v<RHSRange, Scalar>)
           {
             Scalar res = 0;
-            for (auto it = mesh.getElement(); it; ++it)
+            for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
               const auto& qf = m_qf.value()(polytope);
@@ -214,7 +214,7 @@ namespace Rodin::Variational
           if constexpr (std::is_same_v<RHSRange, Scalar>)
           {
             Scalar res = 0;
-            for (auto it = mesh.getElement(); it; ++it)
+            for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
               const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
@@ -418,7 +418,7 @@ namespace Rodin::Variational
           if constexpr (std::is_same_v<RangeType, Scalar>)
           {
             Scalar res = 0;
-            for (auto it = mesh.getElement(); it; ++it)
+            for (auto it = mesh.getCell(); it; ++it)
             {
               const auto& polytope = *it;
               const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());

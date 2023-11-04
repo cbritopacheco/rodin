@@ -416,7 +416,7 @@ namespace Rodin::Variational
 
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          for (auto it = mesh.getElement(); !it.end(); ++it)
+          for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
             if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
@@ -436,7 +436,7 @@ namespace Rodin::Variational
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
           Math::Vector value;
-          for (auto it = mesh.getElement(); !it.end(); ++it)
+          for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
             if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
