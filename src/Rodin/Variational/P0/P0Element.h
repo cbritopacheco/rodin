@@ -82,9 +82,7 @@ namespace Rodin::Variational
           constexpr
           LinearForm(Geometry::Polytope::Type g)
             : m_g(g)
-          {
-            assert(i < Geometry::Polytope::getVertexCount(g));
-          }
+          {}
 
           constexpr
           LinearForm(const LinearForm&) = default;
