@@ -21,7 +21,7 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.scale(1.0 / (n - 1.0));
   mesh.getConnectivity().compute(1, 2);
-  for (auto it = mesh.getElement(); it; ++it)
+  for (auto it = mesh.getCell(); it; ++it)
   {
     bool b = true;
     for (auto vit = it->getVertex(); vit; ++vit)

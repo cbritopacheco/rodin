@@ -119,25 +119,25 @@ namespace Rodin::Variational
     }
   };
 
-  const Geometry::GeometryIndexed<Math::Matrix> ScalarP1Element::s_nodes =
+  const Geometry::GeometryIndexed<Math::PointMatrix> ScalarP1Element::s_nodes =
   {
     { Geometry::Polytope::Type::Point,
-      Math::Matrix{{0}} },
+      Math::PointMatrix{{0}} },
     { Geometry::Polytope::Type::Segment,
-      Math::Matrix{{0, 1}} },
+      Math::PointMatrix{{0, 1}} },
     { Geometry::Polytope::Type::Triangle,
-      Math::Matrix{{0, 1, 0},
-                   {0, 0, 1}} },
+      Math::PointMatrix{{0, 1, 0},
+                        {0, 0, 1}} },
     { Geometry::Polytope::Type::Quadrilateral,
-      Math::Matrix{{0, 1, 0, 1},
-                   {0, 0, 1, 1}} },
+      Math::PointMatrix{{0, 1, 0, 1},
+                        {0, 0, 1, 1}} },
     { Geometry::Polytope::Type::Tetrahedron,
-      Math::Matrix{{0, 1, 0, 0},
-                   {0, 0, 1, 0},
-                   {0, 0, 0, 1}} },
+      Math::PointMatrix{{0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}} },
   };
 
-  const std::array<Geometry::GeometryIndexed<Math::Matrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
+  const std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
   VectorP1Element::s_nodes = Internal::initVectorP1Nodes();
 
   const std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION>
@@ -151,10 +151,10 @@ namespace Rodin::Variational
 
   namespace Internal
   {
-    std::array<Geometry::GeometryIndexed<Math::Matrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
+    std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
     initVectorP1Nodes()
     {
-      std::array<Geometry::GeometryIndexed<Math::Matrix>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
+      std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION> res;
       for (size_t vdim = 1; vdim < RODIN_P1_MAX_VECTOR_DIMENSION; vdim++)
       {
         for (auto g : Geometry::Polytope::Types)
@@ -163,7 +163,7 @@ namespace Rodin::Variational
           {
             case Geometry::Polytope::Type::Point:
             {
-              res[vdim][g] = Math::Matrix::Zero(1, vdim);
+              res[vdim][g] = Math::PointMatrix::Zero(1, vdim);
               break;
             }
             default:

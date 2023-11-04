@@ -323,7 +323,7 @@ namespace Rodin::External::MMG
 
     if (isSurface) // Use MMGS
     {
-      res->nt = src.getElementCount();
+      res->nt = src.getCellCount();
       res->na = src.getFaceCount();
 
       MMGS_Set_commonFunc();
@@ -354,7 +354,7 @@ namespace Rodin::External::MMG
       }
 
       // Copy triangles
-      for (auto it = src.getElement(); !it.end(); ++it)
+      for (auto it = src.getCell(); !it.end(); ++it)
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;
@@ -369,7 +369,7 @@ namespace Rodin::External::MMG
     }
     else if (src.getDimension() == 2) // Use MMG2D
     {
-      res->nt = src.getElementCount();
+      res->nt = src.getCellCount();
       res->na = src.getFaceCount();
 
       MMG2D_Set_commonFunc();
@@ -402,7 +402,7 @@ namespace Rodin::External::MMG
       }
 
       // Copy triangles with correct orientation
-      for (auto it = src.getElement(); !it.end(); ++it)
+      for (auto it = src.getCell(); !it.end(); ++it)
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;
@@ -431,7 +431,7 @@ namespace Rodin::External::MMG
     else if (src.getDimension() == 3) // Use MMG3D
     {
       constexpr size_t edgeDim = 1;
-      res->ne = src.getElementCount();
+      res->ne = src.getCellCount();
       res->na = src.getCount(edgeDim);
       res->nt = src.getFaceCount();
 
@@ -477,7 +477,7 @@ namespace Rodin::External::MMG
       }
 
       // Copy tetrahedra with correct orientation
-      for (auto it = src.getElement(); !it.end(); ++it)
+      for (auto it = src.getCell(); !it.end(); ++it)
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;

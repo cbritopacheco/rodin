@@ -59,7 +59,7 @@ namespace Rodin::Variational
    * Represents the finite element space composed of scalar valued continuous,
    * piecewise linear functions:
    * @f[
-   *  \mathbb{P}_1 (\mathcal{T}_h) = \{ v \in C^0(\mathcal{T}_h) \mid v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
+   *  \mathbb{P}_1 (\mathcal{T}_h) = \{ v \in C^0(\mathcal{T}_h) : v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
    * @f]
    *
    * This class is scalar valued, i.e. evaluations of the function are of
@@ -329,7 +329,7 @@ namespace Rodin::Variational
           Mapping(const Mapping&) = default;
 
           inline
-          auto operator()(const Math::Vector& r) const
+          auto operator()(const Math::SpatialVector& r) const
           {
             const Geometry::Point p(m_polytope, m_trans.get(), r);
             return getFunction()(p);
