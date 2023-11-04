@@ -224,7 +224,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       const auto& getLinearForm(size_t i) const
       {
         assert(i < getCount());
@@ -232,7 +231,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       const auto& getBasis(size_t i) const
       {
         assert(i < getCount());
@@ -240,7 +238,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       const auto& getGradient(size_t i) const
       {
         assert(i < getCount());
@@ -472,7 +469,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       const auto& getLinearForm(size_t i) const
       {
         assert(i < getCount());
@@ -480,7 +476,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       const auto& getBasis(size_t i) const
       {
         assert(i < getCount());
@@ -488,7 +483,6 @@ namespace Rodin::Variational
       }
 
       inline
-      constexpr
       const auto& getJacobian(size_t i) const
       {
         assert(i < getCount());
