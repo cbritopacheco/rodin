@@ -138,7 +138,7 @@
             <dt id="a2a23c7c0c4e0da252b7bc0e13b6f81d8">
               <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Constructs an empty mesh with no elements.</dd>
+            <dd>Constructs an empty mesh with no cells.</dd>
             <dt id="a41e370009465e8495509f5063ff4b656">
               <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other)</span>
             </dt>
@@ -178,19 +178,19 @@ $ u $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5d06c4c9253274985322f5cd807ae643" class="m-doc">trim</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
-            <dd>Trims the elements with the given attribute.</dd>
+            <dd>Trims the cells with the given attribute.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8f8f3ff1c32b46310e2e072da3ec4a0c" class="m-doc">trim</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
-            <dd>Trims the elements with the given attribute.</dd>
+            <dd>Trims the cells with the given attribute.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a71339523fd7ef81f58cd98ecdac52f65" class="m-doc">keep</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
-            <dd>Keeps the elements with the given attribute.</dd>
+            <dd>Keeps the cells with the given attribute.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a092e0e9511e90f61c217ab243a217e58" class="m-doc">keep</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
-            <dd>Trims the elements with the given attributes.</dd>
+            <dd>Trims the cells with the given attributes.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1962e48a45f98d10c944aa494d129cc2" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
@@ -223,10 +223,10 @@ $ u $
               <span class="m-doc-wrap-bumper">auto <a href="#aa05fff103c9d811467a9a2a1a3e06a9e" class="m-doc-self">getInterface</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets a <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> for the interface faces.</dd>
-            <dt id="a47472097883ee2abbd71f6f1b70e1d7a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a47472097883ee2abbd71f6f1b70e1d7a" class="m-doc-self">getElement</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_element_iterator.html" class="m-doc">ElementIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt id="a7dfea86006b329505c75b31504014223">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7dfea86006b329505c75b31504014223" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets an <a href="class_rodin_1_1_geometry_1_1_element_iterator.html" class="m-doc">ElementIterator</a> to the cells of the mesh.</dd>
+            <dd>Gets an <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> to the cells of the mesh.</dd>
             <dt id="a4c508eaff351ad770e8ea135f8746860">
               <span class="m-doc-wrap-bumper">auto <a href="#a4c508eaff351ad770e8ea135f8746860" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -251,7 +251,7 @@ $ u $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets the dimension of the elements.</dd>
+            <dd>Gets the dimension of the cells.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -304,7 +304,7 @@ $ (d, i) $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab3c947038a4e5faefb53596de6dbfc78" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets the labels of the domain elements in the mesh.</dd>
+            <dd>Gets the labels of the domain cells in the mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af84dd42abe1b1181823c5fc4e6dc232f" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
               <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> s,
@@ -487,7 +487,7 @@ $ (D - 1) \longrightarrow d $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d06c4c9253274985322f5cd807ae643" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
-            <p>Trims the elements with the given attribute.</p>
+            <p>Trims the cells with the given attribute.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -514,7 +514,7 @@ $ (D - 1) \longrightarrow d $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f8f3ff1c32b46310e2e072da3ec4a0c" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
-            <p>Trims the elements with the given attribute.</p>
+            <p>Trims the cells with the given attribute.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -532,7 +532,7 @@ $ (D - 1) \longrightarrow d $
                 </tr>
               </tfoot>
             </table>
-<p>This function will trim discard all the elements that have an attribute in the given set of attributes.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
+<p>This function will trim discard all the cells that have an attribute in the given set of attributes.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
 <title>
 $ 1 \leq d \leq D - 1 $
 </title>
@@ -577,7 +577,7 @@ $ D \longrightarrow d $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71339523fd7ef81f58cd98ecdac52f65" class="m-doc-self">keep</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
-            <p>Keeps the elements with the given attribute.</p>
+            <p>Keeps the cells with the given attribute.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -604,7 +604,7 @@ $ D \longrightarrow d $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_serial.html" class="m-doc">Context::<wbr />Serial</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a092e0e9511e90f61c217ab243a217e58" class="m-doc-self">keep</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attrs) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
-            <p>Trims the elements with the given attributes.</p>
+            <p>Trims the cells with the given attributes.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -622,7 +622,7 @@ $ D \longrightarrow d $
                 </tr>
               </tfoot>
             </table>
-<p>This function will trim keep only the elements that have an attribute in the given set of attributes.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
+<p>This function will trim keep only the cells that have an attribute in the given set of attributes.</p><p>The lower dimensional polytopes of dimension <svg class="m-math" style="width: 7.742em; height: 1.034em; vertical-align: -0.170em;" viewBox="0 -8.302191 74.325284 9.927748">
 <title>
 $ 1 \leq d \leq D - 1 $
 </title>
@@ -844,12 +844,12 @@ $ (d, i) $
               </div>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Gets the dimension of the elements.</p>
+            <p>Gets the dimension of the cells.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Dimension of the elements.</td>
+                  <td>Dimension of the cells.</td>
                 </tr>
               </tfoot>
             </table>
@@ -1014,7 +1014,7 @@ $ (d, i) $
               </div>
               <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Serial&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3c947038a4e5faefb53596de6dbfc78" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Gets the labels of the domain elements in the mesh.</p>
+            <p>Gets the labels of the domain cells in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
