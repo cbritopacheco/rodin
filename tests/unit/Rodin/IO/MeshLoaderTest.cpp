@@ -48,7 +48,7 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
 
   d = 2;
   EXPECT_EQ(mesh.getCount(d), 2);
-  EXPECT_EQ(mesh.getCount(d), mesh.getElementCount());
+  EXPECT_EQ(mesh.getCount(d), mesh.getCellCount());
   EXPECT_EQ(mesh.getAttribute(d, 0), 1);
   EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 }
@@ -83,7 +83,7 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
 
   d = 2;
   EXPECT_EQ(mesh.getCount(d), 2);
-  EXPECT_EQ(mesh.getCount(d), mesh.getElementCount());
+  EXPECT_EQ(mesh.getCount(d), mesh.getCellCount());
   EXPECT_EQ(mesh.getAttribute(d, 0), 1);
   EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 }
