@@ -173,10 +173,9 @@ namespace Rodin::Variational
           }
 
           inline
-          constexpr
           void operator()(Math::SpatialVector& out, const Math::SpatialVector& r) const
           {
-            assert(r.size() == Geometry::Polytope::getGeometryDimension(m_g));
+            assert(static_cast<size_t>(r.size()) == Geometry::Polytope::getGeometryDimension(m_g));
             out.resize(Geometry::Polytope::getGeometryDimension(m_g));
             out.setZero();
           }
