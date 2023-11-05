@@ -106,7 +106,7 @@ namespace Rodin::Variational
         const size_t d = fesMesh.getDimension();
         assert(d == polytope.getDimension());
         const Index i = polytope.getIndex();
-        assert(fes.getFiniteElement(d, i).getCount() == 0);
+        assert(fes.getFiniteElement(d, i).getCount() == 1);
         return getValue({d, i}, 0);
       }
 
