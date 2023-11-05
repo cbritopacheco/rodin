@@ -53,7 +53,7 @@ namespace Rodin::Variational::Assembly
       {
         case Integrator::Region::Domain:
         {
-          for (auto it = input.mesh.getElement(); !it.end(); ++it)
+          for (auto it = input.mesh.getCell(); !it.end(); ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
@@ -142,7 +142,7 @@ namespace Rodin::Variational::Assembly
       {
         case Integrator::Region::Domain:
         {
-          for (auto it = input.mesh.getElement(); !it.end(); ++it)
+          for (auto it = input.mesh.getCell(); !it.end(); ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {

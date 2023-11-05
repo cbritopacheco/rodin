@@ -81,18 +81,18 @@ namespace Rodin::Geometry
       mutable std::unique_ptr<Polytope> m_polytope;
   };
 
-  class ElementIterator
+  class CellIterator
   {
     public:
-      ElementIterator() = default;
+      CellIterator() = default;
 
-      ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
+      CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      ElementIterator(const ElementIterator&) = delete;
+      CellIterator(const CellIterator&) = delete;
 
-      ElementIterator(ElementIterator&& other) = default;
+      CellIterator(CellIterator&& other) = default;
 
-      ElementIterator& operator=(ElementIterator&&) = default;
+      CellIterator& operator=(CellIterator&&) = default;
 
       inline
       operator bool() const
@@ -102,7 +102,7 @@ namespace Rodin::Geometry
 
       bool end() const;
 
-      ElementIterator& operator++();
+      CellIterator& operator++();
 
       Element& operator*() const noexcept;
 

@@ -35,7 +35,7 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
     .finalize();
 
   EXPECT_EQ(mesh.getVertexCount(), 4);
-  EXPECT_EQ(mesh.getElementCount(), 2);
+  EXPECT_EQ(mesh.getCellCount(), 2);
 }
 
 TEST(Rodin_Geometry_Mesh, 2D_Square_Boundary)
@@ -56,7 +56,7 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Boundary)
     .finalize();
 
   EXPECT_EQ(mesh.getVertexCount(), 4);
-  EXPECT_EQ(mesh.getElementCount(), 2);
+  EXPECT_EQ(mesh.getCellCount(), 2);
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
@@ -89,7 +89,7 @@ TEST(Rodin_Geometry_Mesh, 2D_Square_Interface)
     .finalize();
 
   EXPECT_EQ(mesh.getVertexCount(), 4);
-  EXPECT_EQ(mesh.getElementCount(), 2);
+  EXPECT_EQ(mesh.getCellCount(), 2);
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 

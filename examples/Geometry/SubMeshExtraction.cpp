@@ -19,7 +19,7 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 2);
-  for (auto it = mesh.getElement(); !it.end(); ++it)
+  for (auto it = mesh.getCell(); !it.end(); ++it)
   {
     for (auto vit = it->getVertex(); !vit.end(); ++vit)
     {

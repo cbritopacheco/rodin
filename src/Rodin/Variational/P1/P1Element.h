@@ -114,16 +114,20 @@ namespace Rodin::Variational
         public:
           using ReturnType = Scalar;
 
+          constexpr
           BasisFunction(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {
             assert(i < Geometry::Polytope::getVertexCount(g));
           }
 
+          constexpr
           BasisFunction(const BasisFunction&) = default;
 
+          constexpr
           BasisFunction& operator=(const BasisFunction&) = default;
 
+          constexpr
           BasisFunction& operator=(BasisFunction&&) = default;
 
           Scalar operator()(const Math::SpatialVector& r) const;
@@ -206,6 +210,7 @@ namespace Rodin::Variational
        * @returns Number of degrees of freedom
        */
       inline
+      constexpr
       size_t getCount() const
       {
         return Geometry::Polytope::getVertexCount(getGeometry());
@@ -213,7 +218,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Math::Matrix& getNodes() const
+      const Math::PointMatrix& getNodes() const
       {
         return s_nodes[getGeometry()];
       }
@@ -240,6 +245,7 @@ namespace Rodin::Variational
       }
 
       inline
+      constexpr
       size_t getOrder() const
       {
         switch (getGeometry())
@@ -258,7 +264,7 @@ namespace Rodin::Variational
       }
 
     private:
-      static const Geometry::GeometryIndexed<Math::Matrix> s_nodes;
+      static const Geometry::GeometryIndexed<Math::PointMatrix> s_nodes;
       static const Geometry::GeometryIndexed<std::vector<LinearForm>> s_ls;
       static const Geometry::GeometryIndexed<std::vector<BasisFunction>> s_basis;
       static const Geometry::GeometryIndexed<std::vector<GradientFunction>> s_gradient;
@@ -286,7 +292,10 @@ namespace Rodin::Variational
       class LinearForm
       {
         public:
-          LinearForm() = default;
+          constexpr
+          LinearForm()
+            : m_vdim(0), m_i(0), m_g(Geometry::Polytope::Type::Point)
+          {}
 
           constexpr
           LinearForm(size_t vdim, size_t i, Geometry::Polytope::Type g)
@@ -324,7 +333,10 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          BasisFunction() = default;
+          constexpr
+          BasisFunction()
+            : m_vdim(0), m_i(0), m_g(Geometry::Polytope::Type::Point)
+          {}
 
           constexpr
           BasisFunction(size_t vdim, size_t i, Geometry::Polytope::Type g)
@@ -363,7 +375,10 @@ namespace Rodin::Variational
       class JacobianFunction
       {
         public:
-          JacobianFunction() = default;
+          constexpr
+          JacobianFunction()
+            : m_vdim(0), m_i(0), m_g(Geometry::Polytope::Type::Point)
+          {}
 
           constexpr
           JacobianFunction(size_t vdim, size_t i, Geometry::Polytope::Type g)
@@ -401,16 +416,19 @@ namespace Rodin::Variational
 
       P1Element() = default;
 
+      constexpr
       P1Element(size_t vdim, Geometry::Polytope::Type geometry)
         : Parent(geometry),
           m_vdim(vdim)
       {}
 
+      constexpr
       P1Element(const P1Element& other)
         : Parent(other),
           m_vdim(other.m_vdim)
       {}
 
+      constexpr
       P1Element(P1Element&& other)
         : Parent(std::move(other)),
           m_vdim(other.m_vdim)
@@ -444,7 +462,8 @@ namespace Rodin::Variational
       }
 
       inline
-      const Math::Matrix& getNodes() const
+      constexpr
+      const Math::PointMatrix& getNodes() const
       {
         return s_nodes[m_vdim][getGeometry()];
       }
@@ -471,6 +490,7 @@ namespace Rodin::Variational
       }
 
       inline
+      constexpr
       size_t getOrder() const
       {
         switch (getGeometry())
@@ -490,7 +510,7 @@ namespace Rodin::Variational
 
     private:
       static const
-      std::array<Geometry::GeometryIndexed<Math::Matrix>, RODIN_P1_MAX_VECTOR_DIMENSION> s_nodes;
+      std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION> s_nodes;
 
       static const
       std::array<Geometry::GeometryIndexed<std::vector<LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> s_ls;
@@ -506,7 +526,7 @@ namespace Rodin::Variational
 
   namespace Internal
   {
-    std::array<Geometry::GeometryIndexed<Math::Matrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
+    std::array<Geometry::GeometryIndexed<Math::PointMatrix>, RODIN_P1_MAX_VECTOR_DIMENSION>
     initVectorP1Nodes();
 
     std::array<Geometry::GeometryIndexed<std::vector<VectorP1Element::LinearForm>>, RODIN_P1_MAX_VECTOR_DIMENSION> initVectorP1LinearForms();

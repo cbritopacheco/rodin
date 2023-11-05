@@ -54,23 +54,23 @@ namespace Rodin::Geometry
   }
 
   // ---- ElementIterator ---------------------------------------------------
-  ElementIterator::ElementIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
+  CellIterator::CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
     : m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
   {}
 
-  bool ElementIterator::end() const
+  bool CellIterator::end() const
   {
     return getIndexGenerator().end();
   }
 
-  ElementIterator& ElementIterator::operator++()
+  CellIterator& CellIterator::operator++()
   {
     ++getIndexGenerator();
     m_dirty = true;
     return *this;
   }
 
-  Element& ElementIterator::operator*() const noexcept
+  Element& CellIterator::operator*() const noexcept
   {
     if (!m_polytope || m_dirty)
       m_polytope.reset(generate());
@@ -78,7 +78,7 @@ namespace Rodin::Geometry
     return *m_polytope;
   }
 
-  Element* ElementIterator::operator->() const noexcept
+  Element* CellIterator::operator->() const noexcept
   {
     if (!m_polytope || m_dirty)
       m_polytope.reset(generate());
@@ -86,12 +86,12 @@ namespace Rodin::Geometry
     return m_polytope.get();
   }
 
-  size_t ElementIterator::getDimension() const
+  size_t CellIterator::getDimension() const
   {
     return getMesh().getDimension();
   }
 
-  Element* ElementIterator::generate() const
+  Element* CellIterator::generate() const
   {
     if (end()) return nullptr;
     const auto& gen = getIndexGenerator();
