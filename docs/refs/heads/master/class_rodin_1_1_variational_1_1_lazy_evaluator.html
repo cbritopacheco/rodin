@@ -67,7 +67,7 @@
           <div class="m-doc-template">template&lt;class StrictType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LazyEvaluator <span class="m-thin">class</span>
         </h1>
-        <p>Represents the lazy evaluation of a function.</p>
+        <p>Represents the lazy evaluation of a mesh function.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -82,6 +82,7 @@
             </li>
           </ul>
         </nav>
+<p>The main objective of this class is to wrap the reference of a data-full object into a light object which permits evaluation. This way one is able to call the <code><a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html#a3fa031e0275c54903d8bae2b0e2e827d" class="m-doc">copy()</a></code> method without actually copying the underlying data.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -100,6 +101,11 @@
               class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>
             </dt>
             <dd>Base class for grid function objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FESType = typename <a href="struct_rodin_1_1_variational_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>
+            </dt>
+            <dd>Base class for grid function objects.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -108,7 +114,23 @@
             <dt id="aa1bf649a410c7b286527b5009bb2d626">
               <span class="m-doc-wrap-bumper"><a href="#aa1bf649a410c7b286527b5009bb2d626" class="m-doc-self">LazyEvaluator</a>(</span><span class="m-doc-wrap">StrictType&amp;&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
-            <dd>R-values are not allowed.</dd>
+            <dd>R-Values are not allowed.</dd>
+            <dt id="a9eccb8efa566f184aad21cef2aed3ff0">
+              <span class="m-doc-wrap-bumper"><a href="#a9eccb8efa566f184aad21cef2aed3ff0" class="m-doc-self">LazyEvaluator</a>(</span><span class="m-doc-wrap">const StrictType&amp; ref) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Prevent implicit copies.</dd>
+            <dt id="ae09f9ef188fd16c65ae6491fd84585d4">
+              <span class="m-doc-wrap-bumper"><a href="#ae09f9ef188fd16c65ae6491fd84585d4" class="m-doc-self">LazyEvaluator</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const StrictType&gt; ref) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs the <a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a> object from a constant reference the data-full object.</dd>
+            <dt id="a3e4041ff65849ec0fe590dd3b47f254f">
+              <span class="m-doc-wrap-bumper"><a href="#a3e4041ff65849ec0fe590dd3b47f254f" class="m-doc-self">LazyEvaluator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ada61de548735cf857bfd4968a86c049b">
+              <span class="m-doc-wrap-bumper"><a href="#ada61de548735cf857bfd4968a86c049b" class="m-doc-self">LazyEvaluator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">

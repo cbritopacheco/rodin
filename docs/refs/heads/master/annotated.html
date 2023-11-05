@@ -117,8 +117,10 @@
                       <li>class <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a> <span class="m-doc"></span></li>
                     </ul>
                   </li>
-                  <li>class <a href="class_rodin_1_1_geometry_1_1_element.html" class="m-doc">Element</a> <span class="m-doc">Class for representing elements of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a> <span class="m-doc">Class for representing polytopes of the highest dimension in the mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-doc">Represents an iterator over a set of cells of a mesh.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> <span class="m-doc">Class for representing elements of codimension 1 in the mesh, i.e. triangles in 3D or lines in 2D.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-doc">Represents an iterator over a set of faces of a mesh.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> Identity transformation.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">IsoparametricTransformation</a> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> isoparametric transformation.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation_3_01_variational_1_1_scalar_p1_element_01_4.html" class="m-doc">IsoparametricTransformation&lt;Variational::ScalarP1Element&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> isoparametric transformation.</span></li>
@@ -134,6 +136,7 @@
                   <li>class <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Represents a spatial point on a discrete mesh.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a> <span class="m-doc">Base class for spatial points on a discrete mesh.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> <span class="m-doc">Base class for all geometric elements of the mesh.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> <span class="m-doc">Represents an iterator over a set of polytopes of a mesh.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a> <span class="m-doc">Represents the transformation function of a simplex, taking reference coordinates to physical coordinates.</span></li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> <span class="m-doc">Represents a subset of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</span></li>
                   <li class="m-doc-collapsible collapsed">
@@ -143,6 +146,7 @@
                     </ul>
                   </li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> <span class="m-doc">Represents a vertex of the mesh.</span></li>
+                  <li>class <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> <span class="m-doc">Represents an iterator over a set of vertices of a mesh.</span></li>
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
@@ -306,6 +310,7 @@
                   <li>class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a> <span class="m-doc">Base class for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> classes.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_derived_00_01_grid_function_3_01_f_e_s_type_01_4_01_4.html" class="m-doc">GradBase&lt;Derived, GridFunction&lt;FESType&gt;&gt;</a> <span class="m-doc">Gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> <span class="m-doc">Represents a grid function belonging to some finite element space.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p0_3_01_range_00_01_context_00_01_mesh_01_4_01_4.html" class="m-doc">GridFunction&lt;P0&lt;Range, Context, Mesh&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc"><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_p1_3_01_range_00_01_context_00_01_mesh_01_4_01_4.html" class="m-doc">GridFunction&lt;P1&lt;Range, Context, Mesh&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc"><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a> <span class="m-doc">Base class for grid function objects.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_g_t.html" class="m-doc">GT</a> <span class="m-doc"></span></li>
@@ -374,7 +379,7 @@
         <use x='82.848004' y='0' xlink:href='#eq3-g4-41'/>
         </g>
         </svg> broken Sobolev space.</span></li>
-                  <li>class <a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a> <span class="m-doc">Represents the lazy evaluation of a function.</span></li>
+                  <li>class <a href="class_rodin_1_1_variational_1_1_lazy_evaluator.html" class="m-doc">LazyEvaluator</a> <span class="m-doc">Represents the lazy evaluation of a mesh function.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_l_e_q.html" class="m-doc">LEQ</a> <span class="m-doc"></span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a> <span class="m-doc">Represents a linear form on some finite element space.</span></li>
                   <li>class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_context_1_1_serial_00_01_math_1_1_vector_01_4.html" class="m-doc">LinearForm&lt;FES, Context::Serial, Math::Vector&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Represents a linear form defined over some finite element space.</span></li>
