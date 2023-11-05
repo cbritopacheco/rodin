@@ -76,10 +76,12 @@
 #include "Variational/MatrixFunction.h"
 #include "Variational/BooleanFunction.h"
 
+#include "Variational/P0.h"
+#include "Variational/P1.h"
+
 #include "Variational/DirichletBC.h"
 #include "Variational/PeriodicBC.h"
 
-#include "Variational/P1.h"
 #include "Variational/Potential.h"
 
 #endif
