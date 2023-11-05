@@ -490,7 +490,7 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<Variational::P0<Range, Context::Serial, Args...>>
   {
     public:
-      using FES = Variational::P1<Range, Context::Serial, Args...>;
+      using FES = Variational::P0<Range, Context::Serial, Args...>;
 
       GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
         : GridFunctionPrinterBase<FES>(gf)

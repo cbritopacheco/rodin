@@ -513,7 +513,7 @@ namespace Rodin::Geometry
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const Math::SpatialVector> rc,
           const Math::SpatialVector& pc)
-        : Point(polytope, polytope.get().getTransformation(), rc, pc)
+        : Point(polytope, std::cref(polytope.get().getTransformation()), rc, pc)
       {}
 
       explicit

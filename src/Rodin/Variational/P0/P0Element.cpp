@@ -9,11 +9,15 @@ namespace Rodin::Variational
     { Geometry::Polytope::Type::Segment,
       Math::PointMatrix{{0.5}} },
     { Geometry::Polytope::Type::Triangle,
-      Math::PointMatrix{{Scalar(1) / Scalar(3), Scalar(1) / Scalar(3)}} },
+      Math::PointMatrix{{ Scalar(1) / Scalar(3) },
+                        { Scalar(1) / Scalar(3) }}},
     { Geometry::Polytope::Type::Quadrilateral,
-      Math::PointMatrix{{0.5, 0.5}} },
+      Math::PointMatrix{{ 0.5 },
+                        { 0.5 }} },
     { Geometry::Polytope::Type::Tetrahedron,
-      Math::PointMatrix{{Scalar(1) / Scalar(3), Scalar(1) / Scalar(3), Scalar(1) / Scalar(3)}} }
+      Math::PointMatrix{{ 0.25 },
+                        { 0.25 },
+                        { 0.25 }} }
   };
 
   const Geometry::GeometryIndexed<ScalarP0Element::BasisFunction>

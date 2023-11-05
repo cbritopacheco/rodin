@@ -91,7 +91,7 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<RangeType, Scalar> || std::is_same_v<RangeType, Math::Vector>);
 
       GridFunctionBase(const FES& fes)
-        : Parent(*this),
+        : Parent(std::cref(*this)),
           m_fes(fes),
           m_data(fes.getVectorDimension(), fes.getSize())
       {
@@ -99,14 +99,14 @@ namespace Rodin::Variational
       }
 
       GridFunctionBase(const GridFunctionBase& other)
-        : Parent(*this),
+        : Parent(std::cref(*this)),
           m_fes(other.m_fes),
           m_data(other.m_data),
           m_weights(other.m_weights)
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
-        : Parent(*this),
+        : Parent(std::cref(*this)),
           m_fes(std::move(other.m_fes)),
           m_data(std::move(other.m_data)),
           m_weights(std::move(other.m_weights))

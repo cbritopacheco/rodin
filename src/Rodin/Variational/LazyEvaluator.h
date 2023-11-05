@@ -22,6 +22,16 @@ namespace Rodin::Variational
       using Parent = FunctionBase<LazyEvaluator<StrictType>>;
 
       /**
+       * @brief R-Values are not allowed.
+       */
+      LazyEvaluator(StrictType&&) = delete;
+
+      /**
+       * @brief Prevent implicit copies.
+       */
+      LazyEvaluator(const StrictType& ref) = delete;
+
+      /**
        * @brief Constructs the LazyEvaluator object from a constant reference
        * the data-full object.
        */
@@ -32,13 +42,9 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief R-values are not allowed.
-       */
-      LazyEvaluator(StrictType&&) = delete;
-
-      /**
        * @brief Copy constructor.
        */
+      constexpr
       LazyEvaluator(const LazyEvaluator& other)
         : Parent(other),
           m_ref(other.m_ref)
@@ -47,6 +53,7 @@ namespace Rodin::Variational
       /**
        * @brief Move constructor.
        */
+      constexpr
       LazyEvaluator(LazyEvaluator&& other)
         : Parent(std::move(other)),
           m_ref(std::move(other.m_ref))
@@ -83,7 +90,7 @@ namespace Rodin::Variational
    * @brief CTAD for LazyEvaluator.
    */
   template <class StrictType>
-  LazyEvaluator(const StrictType&) -> LazyEvaluator<StrictType>;
+  LazyEvaluator(std::reference_wrapper<const StrictType>) -> LazyEvaluator<StrictType>;
 }
 
 #endif

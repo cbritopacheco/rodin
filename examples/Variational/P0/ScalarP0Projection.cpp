@@ -20,7 +20,7 @@ int main(int, char**)
   P0 fes(mesh);
   GridFunction gf(fes);
 
-  gf = [](const Geometry::Point& p) { return p.x() * p.x() +  p.y() * p.y(); };
+  gf = [](const Point& p) { return p.x() * p.x() +  p.y() * p.y(); };
 
   mesh.save("Projection.mesh");
   gf.save("Projection.gf");
