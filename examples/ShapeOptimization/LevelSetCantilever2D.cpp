@@ -73,7 +73,6 @@ int main(int, char**)
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
-    trimmed.getConnectivity().compute(1, 2);
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = 2;
