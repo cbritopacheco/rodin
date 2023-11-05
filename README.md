@@ -118,7 +118,7 @@ The API offers full support for iteration over _all_ polytopes of the mesh of so
 Mesh mesh;
 mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16); // 2D Mesh
 
-for (auto it = mesh.getElement(); it; ++it)
+for (auto it = mesh.getCell(); it; ++it)
 {
  // Access information about the cell
 }
