@@ -139,13 +139,14 @@ namespace Rodin::Variational
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const Geometry::Polytope& polytope, const CallableType& v)
-            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+          InverseMapping(const CallableType& v)
+            : m_v(v.copy())
           {}
 
           InverseMapping(const InverseMapping&) = default;
 
           inline
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
@@ -159,12 +160,17 @@ namespace Rodin::Variational
           }
 
         private:
-          Geometry::Polytope m_polytope;
-          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
           std::reference_wrapper<Function> m_v;
       };
 
-      P0(const Geometry::Mesh<Context>& mesh);
+      P0(const Geometry::Mesh<Context>& mesh)
+        : m_mesh(mesh)
+      {
+        const size_t n = mesh.getCellCount();
+        m_dofs.reserve(n);
+        for (size_t i = 0; i < n; ++i)
+          m_dofs.push_back(IndexArray{{i}});
+      }
 
       P0(const P0& other)
         : Parent(other),
@@ -205,16 +211,16 @@ namespace Rodin::Variational
       inline
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return getMesh().getConnectivity().getPolytope(d, i);
+        assert(d == getMesh().getDimension());
+        return m_dofs.at(i);
       }
 
       inline
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
-        const auto& p = getMesh().getConnectivity().getPolytope(d, i);
-        assert(local < static_cast<size_t>(p.size()));
-        return p(local);
+        assert(d == getMesh().getDimension());
+        return i;
       }
 
       /**
@@ -257,21 +263,20 @@ namespace Rodin::Variational
       inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        const auto [d, i] = idx;
-        const auto& mesh = getMesh();
-        return InverseMapping(*mesh.getPolytope(d, i), v);
+        return InverseMapping(v);
       }
 
       template <class CallableType>
       inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
-        return InverseMapping(polytope, v);
+        return InverseMapping(v);
       }
 
     private:
       static const Geometry::GeometryIndexed<ScalarP0Element> s_elements;
 
+      std::vector<IndexArray> m_dofs;
       std::reference_wrapper<const Geometry::Mesh<Context>> m_mesh;
   };
 

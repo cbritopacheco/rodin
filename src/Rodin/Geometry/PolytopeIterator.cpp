@@ -70,7 +70,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Element& CellIterator::operator*() const noexcept
+  Cell& CellIterator::operator*() const noexcept
   {
     if (!m_polytope || m_dirty)
       m_polytope.reset(generate());
@@ -78,7 +78,7 @@ namespace Rodin::Geometry
     return *m_polytope;
   }
 
-  Element* CellIterator::operator->() const noexcept
+  Cell* CellIterator::operator->() const noexcept
   {
     if (!m_polytope || m_dirty)
       m_polytope.reset(generate());
@@ -91,13 +91,13 @@ namespace Rodin::Geometry
     return getMesh().getDimension();
   }
 
-  Element* CellIterator::generate() const
+  Cell* CellIterator::generate() const
   {
     if (end()) return nullptr;
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
     const auto& mesh = getMesh();
-    return new Element(index, mesh);
+    return new Cell(index, mesh);
   }
 
   // ---- FaceIterator ------------------------------------------------------

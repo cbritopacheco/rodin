@@ -29,7 +29,7 @@ namespace Rodin::Geometry
 
   class Polytope;
 
-  class Element;
+  class Cell;
 
   class Face;
 
