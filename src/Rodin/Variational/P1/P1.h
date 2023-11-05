@@ -139,13 +139,14 @@ namespace Rodin::Variational
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const Geometry::Polytope& polytope, const CallableType& v)
-            : m_polytope(polytope), m_trans(m_polytope.getTransformation()), m_v(v.copy())
+          InverseMapping(const CallableType& v)
+            : m_v(v.copy())
           {}
 
           InverseMapping(const InverseMapping&) = default;
 
           inline
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
@@ -159,8 +160,6 @@ namespace Rodin::Variational
           }
 
         private:
-          Geometry::Polytope m_polytope;
-          std::reference_wrapper<const Geometry::PolytopeTransformation> m_trans;
           std::reference_wrapper<Function> m_v;
       };
 
@@ -257,16 +256,14 @@ namespace Rodin::Variational
       inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        const auto [d, i] = idx;
-        const auto& mesh = getMesh();
-        return InverseMapping(*mesh.getPolytope(d, i), v);
+        return InverseMapping(v);
       }
 
       template <class CallableType>
       inline
       auto getInverseMapping(const Geometry::Polytope& polytope, const CallableType& v) const
       {
-        return InverseMapping(polytope, v);
+        return InverseMapping(v);
       }
 
     private:

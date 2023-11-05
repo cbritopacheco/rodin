@@ -27,25 +27,25 @@ namespace Rodin::IO
     const auto get_vdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
     const auto get_ordering = [&](auto& ctx) { header.ordering = static_cast<MFEM::Ordering>(_attr(ctx)); };
 
-    std::string line = skipEmptyLinesAndComments(is);
+    std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto it = line.begin();
     const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
     const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
     assert(it == line.end() && rfes);
 
-    line = skipEmptyLinesAndComments(is);
+    line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     it = line.begin();
     const auto pfec = boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
     bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
     assert(it == line.end() && rfec);
 
-    line = skipEmptyLinesAndComments(is);
+    line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     it = line.begin();
     const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
     bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
     assert(it == line.end() && rvdim);
 
-    line = skipEmptyLinesAndComments(is);
+    line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     it = line.begin();
     const auto pordering = boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
     bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
@@ -57,7 +57,7 @@ namespace Rodin::IO
     auto& data = gf.getData();
     if (data.size() > 0)
     {
-      line = skipEmptyLinesAndComments(is);
+      line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
       data.coeffRef(0) = std::stod(line);
       assert(data.size() >= 0);
       for (size_t i = 1; i < static_cast<size_t>(data.size()); i++)
@@ -66,29 +66,6 @@ namespace Rodin::IO
         data.transposeInPlace();
     }
     gf.setWeights();
-  }
-
-  template <class Range>
-  std::istream& GridFunctionLoader<FileFormat::MFEM,
-        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
-  ::getline(std::istream& is, std::string& line)
-  {
-    m_currentLineNumber++;
-    return std::getline(is, line);
-  }
-
-  template <class Range>
-  std::string GridFunctionLoader<FileFormat::MFEM,
-        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
-  ::skipEmptyLinesAndComments(std::istream& is)
-  {
-    std::string line;
-    while (getline(is, line))
-    {
-      if (!MFEM::ParseEmptyLineOrComment()(line.begin(), line.end()))
-        break;
-    }
-    return line;
   }
 }
 

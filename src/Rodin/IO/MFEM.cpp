@@ -7,13 +7,31 @@
 #include "MFEM.h"
 
 namespace Rodin::IO::MFEM
-{}
+{
+  std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber)
+  {
+    currentLineNumber++;
+    return std::getline(is, line);
+  }
+
+  std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber)
+  {
+    std::string line;
+    while (getline(is, line))
+    {
+      if (!MFEM::ParseEmptyLineOrComment()(line.begin(), line.end()))
+        break;
+      currentLineNumber++;
+    }
+    return line;
+  }
+}
 
 namespace Rodin::IO
 {
   void MeshLoader<FileFormat::MFEM, Context::Serial>::readHeader(std::istream& is)
   {
-    auto line = skipEmptyLinesAndComments(is);
+    auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto header = MFEM::ParseMeshHeader()(line.begin(), line.end());
     if (!header)
     {
@@ -25,7 +43,7 @@ namespace Rodin::IO
 
   void MeshLoader<FileFormat::MFEM, Context::Serial>::readDimension(std::istream& is)
   {
-    auto line = skipEmptyLinesAndComments(is);
+    auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto kw = MFEM::ParseKeyword()(line.begin(), line.end());
     if (!kw && *kw != MFEM::Keyword::dimension)
     {
@@ -35,7 +53,7 @@ namespace Rodin::IO
          << " on line " << m_currentLineNumber << "."
          << Alert::Raise;
     }
-    line = skipEmptyLinesAndComments(is);
+    line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto dimension = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
     if (!dimension)
     {
@@ -55,7 +73,7 @@ namespace Rodin::IO
     attrs.initialize(m_dimension);
 
     std::string line;
-    while (getline(is, line))
+    while (MFEM::getline(is, line, m_currentLineNumber))
     {
       if (MFEM::ParseEmptyLineOrComment()(line.begin(), line.end()))
         continue;
@@ -81,7 +99,7 @@ namespace Rodin::IO
       {
         case MFEM::Keyword::boundary:
         {
-          getline(is, line);
+          MFEM::getline(is, line, m_currentLineNumber);
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (!count)
           {
@@ -93,7 +111,7 @@ namespace Rodin::IO
           attrs.reserve(m_dimension - 1, *count);
           for (size_t i = 0; i < *count; i++)
           {
-            getline(is, line);
+            MFEM::getline(is, line, m_currentLineNumber);
             auto g = MFEM::ParseGeometry()(line.begin(), line.end());
             if (!g)
             {
@@ -109,7 +127,7 @@ namespace Rodin::IO
         }
         case MFEM::Keyword::elements:
         {
-          getline(is, line);
+          MFEM::getline(is, line, m_currentLineNumber);
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (!count)
           {
@@ -121,7 +139,7 @@ namespace Rodin::IO
           attrs.reserve(m_dimension, *count);
           for (size_t i = 0; i < *count; i++)
           {
-            getline(is, line);
+            MFEM::getline(is, line, m_currentLineNumber);
             auto g = MFEM::ParseGeometry()(line.begin(), line.end());
             if (!g)
             {
@@ -137,7 +155,7 @@ namespace Rodin::IO
         }
         case MFEM::Keyword::vertices:
         {
-          getline(is, line);
+          MFEM::getline(is, line, m_currentLineNumber);
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (!count)
           {
@@ -147,7 +165,7 @@ namespace Rodin::IO
               << Alert::Raise;
           }
           connectivity.nodes(*count);
-          getline(is, line);
+          MFEM::getline(is, line, m_currentLineNumber);
           auto vdim = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
           if (vdim)
           {
@@ -155,7 +173,7 @@ namespace Rodin::IO
             m_build.initialize(m_spaceDimension).nodes(*count);
             for (size_t i = 0; i < *count; i++)
             {
-              getline(is, line);
+              MFEM::getline(is, line, m_currentLineNumber);
               auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
               if (!x)
               {
@@ -203,25 +221,6 @@ namespace Rodin::IO
     }
     m_build.setConnectivity(std::move(connectivity));
     m_build.setAttributeIndex(std::move(attrs));
-  }
-
-  std::string
-  MeshLoader<FileFormat::MFEM, Context::Serial>::skipEmptyLinesAndComments(std::istream& is)
-  {
-    std::string line;
-    while (getline(is, line))
-    {
-      if (!MFEM::ParseEmptyLineOrComment()(line.begin(), line.end()))
-        break;
-    }
-    return line;
-  }
-
-  std::istream&
-  MeshLoader<FileFormat::MFEM, Context::Serial>::getline(std::istream& is, std::string& line)
-  {
-    m_currentLineNumber++;
-    return std::getline(is, line);
   }
 
   void MeshLoader<IO::FileFormat::MFEM, Context::Serial>::load(std::istream &is)
