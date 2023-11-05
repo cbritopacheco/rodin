@@ -15,29 +15,45 @@
 
 namespace Rodin::Variational
 {
-  /**
-   * @brief Represents the lazy evaluation of a function.
-   */
   template <class StrictType>
   class LazyEvaluator : public FunctionBase<LazyEvaluator<StrictType>>
   {
     public:
       using Parent = FunctionBase<LazyEvaluator<StrictType>>;
 
-      LazyEvaluator(const StrictType& ref)
+      /**
+       * @brief R-Values are not allowed.
+       */
+      LazyEvaluator(StrictType&&) = delete;
+
+      /**
+       * @brief Prevent implicit copies.
+       */
+      LazyEvaluator(const StrictType& ref) = delete;
+
+      /**
+       * @brief Constructs the LazyEvaluator object from a constant reference
+       * the data-full object.
+       */
+      explicit
+      constexpr
+      LazyEvaluator(std::reference_wrapper<const StrictType> ref)
         : m_ref(ref)
       {}
 
       /**
-       * @brief R-values are not allowed.
+       * @brief Copy constructor.
        */
-      LazyEvaluator(StrictType&&) = delete;
-
+      constexpr
       LazyEvaluator(const LazyEvaluator& other)
         : Parent(other),
           m_ref(other.m_ref)
       {}
 
+      /**
+       * @brief Move constructor.
+       */
+      constexpr
       LazyEvaluator(LazyEvaluator&& other)
         : Parent(std::move(other)),
           m_ref(std::move(other.m_ref))
@@ -74,7 +90,7 @@ namespace Rodin::Variational
    * @brief CTAD for LazyEvaluator.
    */
   template <class StrictType>
-  LazyEvaluator(const StrictType&) -> LazyEvaluator<StrictType>;
+  LazyEvaluator(std::reference_wrapper<const StrictType>) -> LazyEvaluator<StrictType>;
 }
 
 #endif

@@ -190,25 +190,21 @@ namespace Rodin::Geometry
   bool operator<(const Polytope& lhs, const Polytope& rhs);
 
   /**
-   * @brief Class for representing elements of the highest dimension in the
+   * @brief Class for representing polytopes of the highest dimension in the
    * mesh, i.e. tetrahedra in 3D, triangles in 2D or lines in 1D.
-   *
-   * This class is designed so that modifications cannot be made to the
-   * element. If one wishes to modify the element then one must use
-   * ElementView.
    */
-  class Element : public Polytope
+  class Cell : public Polytope
   {
     public:
       using Parent = Polytope;
 
-      Element(Index index, const MeshBase& mesh);
+      Cell(Index index, const MeshBase& mesh);
 
-      Element(const Element& other)
+      Cell(const Cell& other)
         : Polytope(other)
       {}
 
-      Element(Element&& other)
+      Cell(Cell&& other)
         :  Polytope(std::move(other))
       {}
   };
@@ -517,7 +513,7 @@ namespace Rodin::Geometry
           std::reference_wrapper<const Polytope> polytope,
           std::reference_wrapper<const Math::SpatialVector> rc,
           const Math::SpatialVector& pc)
-        : Point(polytope, polytope.get().getTransformation(), rc, pc)
+        : Point(polytope, std::cref(polytope.get().getTransformation()), rc, pc)
       {}
 
       explicit

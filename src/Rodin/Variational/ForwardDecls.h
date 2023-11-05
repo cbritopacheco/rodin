@@ -131,6 +131,13 @@ namespace Rodin::Variational
   template <class Range, class Context>
   class H1;
 
+  /**
+   * @brief Represents the lazy evaluation of a mesh function.
+   *
+   * The main objective of this class is to wrap the reference of a data-full
+   * object into a light object which permits evaluation. This way one is able
+   * to call the `copy()` method without actually copying the underlying data.
+   */
   template <class StrictType>
   class LazyEvaluator;
 
@@ -144,12 +151,26 @@ namespace Rodin::Variational
    * @brief Represents a grid function belonging to some finite element space.
    * @tparam FES Type of finite element space
    *
-   * Represents a function @f$ u \in \text{FES} @f$ where FES is some discrete
-   * finite element space.
+   * A GridFunction object represents a function whose values are known at the
+   * "grid points". These grid points are the node coordinates of the global
+   * degrees of freedom in the finite element space.
+   *
+   * @section gridfunction-interpolation Interpolation
+   *
+   * In general, the GridFunction class represents the global interpolation
+   * operator on the @f$ \mathcal{T}_h @f$-based family of finite elements
+   * @f$ \{ K, P_K, \Sigma_K  \}_{K \in \mathcal{T}_h } @f$. More precisely, it
+   * defines the global interpolation operator @f$ \mathcal{I}_h :
+   * D(\mathcal{I}_h) \rightarrow V_h @f$, where:
+   * @f[
+   *  D(\mathcal{I}_h) := \{ v \in V(\mathcal{T}_h) : \forall K \in
+   *  \mathcal{T}_h, \: v|_K \in V(K) \} \: .
+   * @f]
    *
    * @note For an overview of all the possible specializations of the
    * GridFunction class, please see @ref GridFunctionSpecializations.
    *
+   * @see GridFunctionBase
    * @see GridFunctionSpecializations
    */
   template <class FES>

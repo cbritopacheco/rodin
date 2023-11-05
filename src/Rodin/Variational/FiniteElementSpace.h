@@ -75,7 +75,9 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the global index for the local degree of freedom on the
-       * polytope.
+       * @f$ (d, i) @f$-polytope.
+       * @param[in] idx Pair representing the @f$ (d, i) @f$-polytope.
+       * @param[in] local Local degree of freedom index.
        */
       virtual Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const
       {

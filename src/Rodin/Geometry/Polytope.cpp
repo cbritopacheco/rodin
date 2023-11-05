@@ -159,7 +159,7 @@ namespace Rodin::Geometry
   }
 
   // ---- Element -----------------------------------------------------------
-  Element::Element(Index index, const MeshBase& mesh)
+  Cell::Cell(Index index, const MeshBase& mesh)
     : Polytope(mesh.getDimension(), index, mesh)
   {}
 

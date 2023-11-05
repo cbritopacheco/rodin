@@ -17,6 +17,9 @@
 
 namespace Rodin::Geometry
 {
+  /**
+   * @brief Represents an iterator over a set of polytopes of a mesh.
+   */
   class PolytopeIterator
   {
     public:
@@ -81,6 +84,9 @@ namespace Rodin::Geometry
       mutable std::unique_ptr<Polytope> m_polytope;
   };
 
+  /**
+   * @brief Represents an iterator over a set of cells of a mesh.
+   */
   class CellIterator
   {
     public:
@@ -104,9 +110,9 @@ namespace Rodin::Geometry
 
       CellIterator& operator++();
 
-      Element& operator*() const noexcept;
+      Cell& operator*() const noexcept;
 
-      Element* operator->() const noexcept;
+      Cell* operator->() const noexcept;
 
       size_t getDimension() const;
 
@@ -125,7 +131,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      Element* generate() const;
+      Cell* generate() const;
 
       IndexGeneratorBase& getIndexGenerator()
       {
@@ -136,9 +142,12 @@ namespace Rodin::Geometry
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<Element> m_polytope;
+      mutable std::unique_ptr<Cell> m_polytope;
   };
 
+  /**
+   * @brief Represents an iterator over a set of faces of a mesh.
+   */
   class FaceIterator
   {
     public:
@@ -197,6 +206,9 @@ namespace Rodin::Geometry
       mutable std::unique_ptr<Face> m_polytope;
   };
 
+  /**
+   * @brief Represents an iterator over a set of vertices of a mesh.
+   */
   class VertexIterator
   {
     public:

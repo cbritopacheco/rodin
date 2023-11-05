@@ -23,8 +23,24 @@
 #include "GridFunctionLoader.h"
 #include "GridFunctionPrinter.h"
 
+#include "Rodin/Variational/P0/P0.h"
+#include "Rodin/Variational/P1/P1.h"
+
 namespace Rodin::IO::MFEM
 {
+  /**
+   * @internal
+   */
+  std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber);
+
+  /**
+   * @internal
+   */
+  std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber);
+
+  /**
+   * @internal
+   */
   enum MeshType
   {
     LEGACY,
@@ -32,6 +48,9 @@ namespace Rodin::IO::MFEM
     NURBS
   };
 
+  /**
+   * @internal
+   */
   enum GeometryType
   {
     POINT       = 0,
@@ -438,11 +457,9 @@ namespace Rodin::IO
 
       void load(std::istream& is) override;
 
-      std::istream& getline(std::istream& is, std::string& line);
       void readHeader(std::istream& is);
       void readDimension(std::istream& is);
       void readMesh(std::istream& is);
-      std::string skipEmptyLinesAndComments(std::istream& is);
 
     private:
       size_t m_dimension;
@@ -468,6 +485,34 @@ namespace Rodin::IO
       void printMesh(std::ostream& os);
   };
 
+  template <class Range, class ... Args>
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Context::Serial, Args...>>
+    : public GridFunctionPrinterBase<Variational::P0<Range, Context::Serial, Args...>>
+  {
+    public:
+      using FES = Variational::P0<Range, Context::Serial, Args...>;
+
+      GridFunctionPrinter(const Variational::GridFunction<FES>& gf)
+        : GridFunctionPrinterBase<FES>(gf)
+      {}
+
+      void print(std::ostream& os) override
+      {
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        os << "FiniteElementSpace\n"
+           << "FiniteElementCollection: " << "L2_" << fes.getMesh().getDimension() << "D_P0\n"
+           << "VDim: " << fes.getVectorDimension() << '\n'
+           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "\n\n";
+        const auto& matrix = gf.getData();
+        const Scalar* data = matrix.data();
+        assert(matrix.size() >= 0);
+        for (size_t i = 0; i < static_cast<size_t>(matrix.size()); i++)
+          os << data[i] << '\n';
+      }
+  };
+
   template <class Range>
   class GridFunctionLoader<FileFormat::MFEM,
         Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
@@ -482,9 +527,6 @@ namespace Rodin::IO
       {}
 
       void load(std::istream& is) override;
-
-      std::istream& getline(std::istream& is, std::string& line);
-      std::string skipEmptyLinesAndComments(std::istream& is);
 
     private:
       size_t m_dimension;

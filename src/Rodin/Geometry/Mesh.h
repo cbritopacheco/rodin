@@ -520,7 +520,7 @@ namespace Rodin::Geometry
           /**
            * @brief Adds vertex with coordinates given by the fixed size array.
            *
-           * This method requires nodes(size_t) to be called beforehand.
+           * @note This method requires nodes(size_t) to be called beforehand.
            */
           template <size_t Size>
           inline
@@ -534,28 +534,28 @@ namespace Rodin::Geometry
           /**
            * @brief Adds vertex with coordinates given by the initializer list.
            *
-           * This method requires nodes(size_t) to be called beforehand.
+           * @note This method requires nodes(size_t) to be called beforehand.
            */
           Builder& vertex(std::initializer_list<Scalar> l);
 
           /**
            * @brief Adds vertex with coordinates given by the array pointer.
            *
-           * This method requires nodes(size_t) to be called beforehand.
+           * @note This method requires nodes(size_t) to be called beforehand.
            */
           Builder& vertex(const Scalar* data);
 
           /**
            * @brief Adds vertex with coordinates given by the mapped memory.
            *
-           * This method requires nodes(size_t) to be called beforehand.
+           * @note This method requires nodes(size_t) to be called beforehand.
            */
           Builder& vertex(const Eigen::Map<const Math::Vector>& x);
 
           /**
            * @brief Adds vertex with coordinates given by the vector.
            *
-           * This method requires nodes(size_t) to be called beforehand.
+           * @note This method requires nodes(size_t) to be called beforehand.
            */
           Builder& vertex(Math::Vector&& x);
 
