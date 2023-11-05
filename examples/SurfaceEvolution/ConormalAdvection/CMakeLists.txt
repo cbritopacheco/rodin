@@ -15,3 +15,12 @@ target_link_libraries(Test
   Rodin::Variational
   Rodin::External::MMG
   )
+
+add_executable(Plane Plane.cpp)
+target_link_libraries(Plane
+  PUBLIC
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::External::MMG
+  )

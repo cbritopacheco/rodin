@@ -17,7 +17,7 @@ constexpr Scalar hmin = 0.1 * hmax;
 constexpr size_t maxIt = 100;
 constexpr Geometry::Attribute sphereCap = 3;
 constexpr char meshFile[] =
-  "/Users/carlos/Projects/rodin/resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
+  "../resources/examples/SurfaceEvolution/ConormalAdvection/SphereCap.medit.mesh";
 
 int main()
 {

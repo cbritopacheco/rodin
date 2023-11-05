@@ -427,6 +427,12 @@ namespace Rodin::Geometry
         return operator()(2, coords);
       }
 
+      inline
+      Scalar norm() const
+      {
+        return asVector().norm();
+      }
+
       /**
        * @brief Lexicographical comparison.
        */
@@ -625,6 +631,52 @@ namespace Rodin::Geometry
   operator-(const Geometry::Point& p, const Geometry::Point& q)
   {
     return p.asVector() - q.asVector();
+  }
+
+  template <class EigenDerived>
+  inline
+  auto
+  operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
+  {
+    return p.asVector() + q;
+  }
+
+  template <class EigenDerived>
+  inline
+  auto
+  operator+(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
+  {
+    return p + q.asVector();
+  }
+
+  template <class EigenDerived>
+  inline
+  auto
+  operator-(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
+  {
+    return p.asVector() - q;
+  }
+
+  template <class EigenDerived>
+  inline
+  auto
+  operator-(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
+  {
+    return p - q.asVector();
+  }
+
+  inline
+  auto
+  operator*(Scalar s, const Geometry::Point& p)
+  {
+    return s * p.asVector();
+  }
+
+  inline
+  auto
+  operator*(const Geometry::Point& p, Scalar s)
+  {
+    return p.asVector() * s;
   }
 }
 

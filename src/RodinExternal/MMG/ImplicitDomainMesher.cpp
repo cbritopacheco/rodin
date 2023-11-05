@@ -317,9 +317,9 @@ namespace Rodin::External::MMG
     MMG5_pMesh mmgMesh = nullptr;
     mmgMesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
 
-    // Erase boundary elements which have the isoref
-    if (m_isoref)
-      deleteBoundaryRef(mmgMesh, *m_isoref);
+    // // Erase boundary elements which have the isoref
+    // if (m_isoref)
+    //   deleteBoundaryRef(mmgMesh, *m_isoref);
 
     MMG5_pSol sol = createSolution(mmgMesh, ls.getFiniteElementSpace().getVectorDimension());
     copySolution(ls, sol);
