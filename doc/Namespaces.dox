@@ -192,6 +192,47 @@
  */
 
 /**
+  @dir Rodin/Models
+  @brief Namespace @ref Rodin::Models
+ */
+
+/**
+  @namespace Rodin::Models
+  @brief Module which provides implementation of various variational models.
+ */
+
+/**
+  @dir Rodin/Models/Distance
+  @brief Namespace @ref Rodin::Models::Distance
+ */
+
+/**
+  @namespace Rodin::Models::Distance
+  @brief Module which provides models for computation of the distance function.
+ */
+
+/**
+  @dir Rodin/Models/ShapeOptimization
+  @brief Namespace @ref Rodin::Models::ShapeOptimization
+ */
+
+/**
+  @namespace Rodin::Models::ShapeOptimization
+  @brief Module which provides models and tools for geometrical shape optimization.
+ */
+
+/**
+  @dir Rodin/Models/Advection
+  @brief Namespace @ref Rodin::Models::Advection
+ */
+
+/**
+  @namespace Rodin::Models::Advection
+  @brief Module which provides models for the resolution of unsteady advection
+  equations.
+ */
+
+/**
   @dir Rodin/QF
   @brief Namespace @ref Rodin::QF
  */
