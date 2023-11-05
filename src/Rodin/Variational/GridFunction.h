@@ -55,6 +55,11 @@ namespace Rodin::Variational
   /**
    * @brief Abstract base class for GridFunction objects.
    *
+   * This class contains the common routines for the behaviour of a
+   * GridFunction object. It provides a common interface for the manipulation
+   * of its data and weights, as well as projection utilities and convenience
+   * functions.
+   *
    * @section gridfunction-data-layout Data layout
    *
    * The data of the GridFunctionBase object can be accessed via a call to @ref
@@ -361,12 +366,24 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Projects a scalar valued function on the region of the mesh
+       * with the given attribute.
+       * @param[in] fn Scalar valued function
+       * @param[in] attr Attribute
+       */
       inline
       auto& project(std::function<Scalar(const Geometry::Point&)> fn, Geometry::Attribute attr)
       {
         return project(fn, FlatSet<Geometry::Attribute>{attr});
       }
 
+      /**
+       * @brief Projects a scalar valued function on the region of the mesh
+       * with the given attributes.
+       * @param[in] fn Scalar valued function
+       * @param[in] attrs Set of attributes
+       */
       inline
       auto& project(std::function<Scalar(const Geometry::Point&)> fn, const FlatSet<Geometry::Attribute>& attrs = {})
       {
@@ -716,6 +733,7 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Computes the weights from the data.
        * @note CRTP function to be overriden in Derived class.
        */
       inline
@@ -725,6 +743,8 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Sets the weights in the GridFunction object and computes the
+       * values at all the degrees of freedom.
        * @note CRTP function to be overriden in Derived class.
        */
       template <class Vector>
@@ -734,6 +754,10 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).setWeights(std::forward<Vector>(weights));
       }
 
+      /**
+       * @brief Sets the weights and data in the GridFunction object. No
+       * computation is performed.
+       */
       template <class Vector, class Matrix>
       inline
       Derived& setWeightsAndData(Vector&& weights, Matrix&& data)
@@ -750,6 +774,10 @@ namespace Rodin::Variational
         return { getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
+      /**
+       * @brief Gets the value of the GridFunction at the global degree of
+       * freedom index.
+       */
       inline
       auto getValue(Index global) const
       {
