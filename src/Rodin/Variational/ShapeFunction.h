@@ -283,7 +283,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      GridFunction<FES>& getSolution()
+      auto& getSolution()
       {
         assert(m_gf);
         return *m_gf;
@@ -291,7 +291,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const GridFunction<FES>& getSolution() const
+      const auto& getSolution() const
       {
         assert(m_gf);
         return *m_gf;

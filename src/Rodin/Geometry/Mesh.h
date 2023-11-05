@@ -84,6 +84,42 @@ namespace Rodin::Geometry
         return m_components;
       }
 
+      inline
+      auto begin()
+      {
+        return m_components.begin();
+      }
+
+      inline
+      auto end()
+      {
+        return m_components.end();
+      }
+
+      inline
+      auto begin() const
+      {
+        return m_components.begin();
+      }
+
+      inline
+      auto end() const
+      {
+        return m_components.end();
+      }
+
+      inline
+      auto cbegin() const
+      {
+        return m_components.cbegin();
+      }
+
+      inline
+      auto cend() const
+      {
+        return m_components.cend();
+      }
+
     private:
       std::deque<Component> m_components;
   };
@@ -123,7 +159,22 @@ namespace Rodin::Geometry
         return ccl(p, getDimension());
       }
 
-      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const;
+      inline
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p, size_t d) const
+      {
+        return ccl(p, d, FlatSet<Attribute>{});
+      }
+
+      inline
+      CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
+          size_t d, Attribute attr) const
+      {
+        return ccl(p, d, FlatSet<Attribute>{ attr });
+      }
+
+      virtual CCL ccl(std::function<Boolean(const Polytope&, const Polytope&)> p,
+          size_t d,
+          const FlatSet<Attribute>& attrs) const;
 
       virtual MeshBase& scale(Scalar c) = 0;
 
@@ -184,8 +235,8 @@ namespace Rodin::Geometry
       virtual bool isBoundary(Index faceIdx) const = 0;
 
       /**
-       * @brief Gets the dimension of the elements.
-       * @returns Dimension of the elements.
+       * @brief Gets the dimension of the cells.
+       * @returns Dimension of the cells.
        * @see getSpaceDimension() const
        */
       virtual size_t getDimension() const = 0;
@@ -216,10 +267,10 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the number of elements in the mesh.
+       * @brief Gets the number of cells in the mesh.
        */
       inline
-      size_t getElementCount() const
+      size_t getCellCount() const
       {
         return getCount(getDimension());
       }
@@ -231,21 +282,21 @@ namespace Rodin::Geometry
       }
 
       inline
-      Attribute getElementAttribute(Index index) const
+      Attribute getCellAttribute(Index index) const
       {
         return getAttribute(getDimension(), index);
       }
 
       /**
        * @brief Gets the total volume of the mesh.
-       * @returns Sum of all element volumes.
+       * @returns Sum of all cell volumes.
        */
       Scalar getVolume();
 
       /**
-       * @brief Gets the sum of the volumes of the elements given by the
+       * @brief Gets the sum of the volumes of the cells given by the
        * specified attribute.
-       * @param[in] attr Attribute of elements
+       * @param[in] attr Attribute of cells
        * @returns Sum of element volumes with given attribute
        * @note If the element attribute does not exist then this function
        * will return 0 as the volume.
@@ -259,9 +310,9 @@ namespace Rodin::Geometry
       Scalar getPerimeter();
 
       /**
-       * @brief Gets the sum of the perimeters of the elements given by the
+       * @brief Gets the sum of the perimeters of the cells given by the
        * specified attribute.
-       * @param[in] attr Attribute of elements
+       * @param[in] attr Attribute of cells
        * @returns Sum of element perimeters with given attribute
        * @note If the element attribute does not exist then this function
        * will return 0 as the perimeter.
@@ -269,7 +320,7 @@ namespace Rodin::Geometry
       Scalar getPerimeter(Attribute attr);
 
       /**
-       * @brief Gets the labels of the domain elements in the mesh.
+       * @brief Gets the labels of the domain cells in the mesh.
        * @returns Set of all the attributes in the mesh object.
        * @see getBoundaryAttributes() const
        */
@@ -298,9 +349,9 @@ namespace Rodin::Geometry
       virtual size_t getCount(Polytope::Type g) const = 0;
 
       /**
-       * @brief Gets an ElementIterator to the cells of the mesh.
+       * @brief Gets an CellIterator to the cells of the mesh.
        */
-      virtual ElementIterator getElement(Index idx = 0) const = 0;
+      virtual CellIterator getCell(Index idx = 0) const = 0;
 
       /**
        * @brief Gets a FaceIterator to the faces of the mesh.
@@ -398,7 +449,7 @@ namespace Rodin::Geometry
       virtual const SubMeshBase& asSubMesh() const = 0;
   };
 
-  /// Index containing the indices of boundary elements.
+  /// Index containing the indices of boundary cells.
   using BoundaryIndex = IndexSet;
 
   /// Index containing the attribute numbers of the polytopes.
@@ -591,7 +642,7 @@ namespace Rodin::Geometry
       static Mesh UniformGrid(Polytope::Type g, size_t h, size_t w);
 
       /**
-      * @brief Constructs an empty mesh with no elements.
+      * @brief Constructs an empty mesh with no cells.
       */
       Mesh()
         : m_sdim(0)
@@ -684,7 +735,7 @@ namespace Rodin::Geometry
       virtual SubMesh<Context::Serial> skin() const;
 
       /**
-      * @brief Trims the elements with the given attribute.
+      * @brief Trims the cells with the given attribute.
       * @param[in] attr Attribute to trim
       * @returns SubMesh of the remaining region mesh
       *
@@ -694,24 +745,24 @@ namespace Rodin::Geometry
       virtual SubMesh<Context::Serial> trim(Attribute attr) const;
 
       /**
-      * @brief Trims the elements with the given attribute.
+      * @brief Trims the cells with the given attribute.
       * @param[in] attrs Attributes to trim
       * @returns SubMesh object to the remaining region of the mesh
       *
-      * This function will trim discard all the elements that have an attribute
+      * This function will trim discard all the cells that have an attribute
       * in the given set of attributes.
       *
       * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
       * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
       * already computed in the mesh.
       *
-      * @returns A SubMesh object consisting of elements that have attributes
+      * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
       virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs) const;
 
       /**
-      * @brief Keeps the elements with the given attribute.
+      * @brief Keeps the cells with the given attribute.
       * @param[in] attr Attribute to keep
       * @returns SubMesh of the remaining region mesh
       *
@@ -721,18 +772,18 @@ namespace Rodin::Geometry
       virtual SubMesh<Context::Serial> keep(Attribute attr) const;
 
       /**
-      * @brief Trims the elements with the given attributes.
+      * @brief Trims the cells with the given attributes.
       * @param[in] attrs Attributes to trim
       * @returns SubMesh object to the remaining region of the mesh
       *
-      * This function will trim keep only the elements that have an attribute
+      * This function will trim keep only the cells that have an attribute
       * in the given set of attributes.
       *
       * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
       * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
       * already computed in the mesh.
       *
-      * @returns A SubMesh object consisting of elements that have attributes
+      * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
       virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
@@ -775,7 +826,7 @@ namespace Rodin::Geometry
 
       virtual FaceIterator getInterface() const override;
 
-      virtual ElementIterator getElement(Index idx = 0) const override;
+      virtual CellIterator getCell(Index idx = 0) const override;
 
       virtual FaceIterator getFace(Index idx = 0) const override;
 

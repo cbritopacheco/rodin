@@ -96,19 +96,22 @@ namespace Rodin::Variational
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(*this),
           m_fes(other.m_fes),
-          m_data(other.m_data)
+          m_data(other.m_data),
+          m_weights(other.m_weights)
       {}
 
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(*this),
           m_fes(std::move(other.m_fes)),
-          m_data(std::move(other.m_data))
+          m_data(std::move(other.m_data)),
+          m_weights(std::move(other.m_weights))
       {}
 
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
         m_fes = std::move(other.m_fes);
         m_data = std::move(other.m_data);
+        m_weights = std::move(other.m_weights);
         return *this;
       }
 
@@ -413,7 +416,7 @@ namespace Rodin::Variational
 
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
-          for (auto it = mesh.getElement(); !it.end(); ++it)
+          for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
             if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))
@@ -433,7 +436,7 @@ namespace Rodin::Variational
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
           Math::Vector value;
-          for (auto it = mesh.getElement(); !it.end(); ++it)
+          for (auto it = mesh.getCell(); !it.end(); ++it)
           {
             const auto& polytope = *it;
             if (attrs.size() == 0 || attrs.count(polytope.getAttribute()))

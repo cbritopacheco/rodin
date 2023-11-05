@@ -110,7 +110,7 @@ namespace Rodin::Geometry
     const size_t D = getDimension();
     SubMesh<Context::Serial>::Builder build;
     build.initialize(*this);
-    for (Index i = 0; i < getElementCount(); i++)
+    for (Index i = 0; i < getCellCount(); i++)
     {
       if (attrs.count(getAttribute(D, i)))
       {
@@ -156,7 +156,7 @@ namespace Rodin::Geometry
     const size_t D = getDimension();
     SubMesh<Context::Serial>::Builder build;
     build.initialize(*this);
-    for (Index i = 0; i < getElementCount(); i++)
+    for (Index i = 0; i < getCellCount(); i++)
     {
       if (!attrs.count(getAttribute(D, i)))
       {
@@ -184,8 +184,8 @@ namespace Rodin::Geometry
       assert(it->getDimension() == D - 1);
       const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
       assert(inc.size() == 2);
-      auto el1 = getElement(*inc.begin());
-      auto el2 = getElement(*std::next(inc.begin()));
+      auto el1 = getCell(*inc.begin());
+      auto el2 = getCell(*std::next(inc.begin()));
       auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
       if (find != interface.end())
       {
@@ -270,7 +270,7 @@ namespace Rodin::Geometry
         pm.col(0) = getVertexCoordinates(idx);
         auto trans =
           std::unique_ptr<PolytopeTransformation>(
-              new IsoparametricTransformation(pm, std::move(fe)));
+              new IsoparametricTransformation(std::move(pm), std::move(fe)));
         auto p = m_transformationIndex.insert(it, { dimension, idx }, std::move(trans));
         return *p->second;
       }
@@ -300,7 +300,7 @@ namespace Rodin::Geometry
   Scalar MeshBase::getVolume()
   {
     Scalar totalVolume = 0;
-    for (auto it = getElement(); !it.end(); ++it)
+    for (auto it = getCell(); !it.end(); ++it)
       totalVolume += it->getMeasure();
     return totalVolume;
   }
@@ -308,7 +308,7 @@ namespace Rodin::Geometry
   Scalar MeshBase::getVolume(Attribute attr)
   {
     Scalar totalVolume = 0;
-    for (auto it = getElement(); !it.end(); ++it)
+    for (auto it = getCell(); !it.end(); ++it)
     {
       if (it->getAttribute() == attr)
         totalVolume += it->getMeasure();
@@ -336,9 +336,12 @@ namespace Rodin::Geometry
   }
 
   CCL MeshBase::ccl(
-      std::function<bool(const Polytope&, const Polytope&)> p, size_t d) const
+      std::function<bool(const Polytope&, const Polytope&)> p,
+      size_t d,
+      const FlatSet<Attribute>& attrs) const
   {
     FlatSet<Index> visited;
+    visited.reserve(getCount(d));
     std::deque<Index> searchQueue;
     std::deque<FlatSet<Index>> res;
 
@@ -349,7 +352,8 @@ namespace Rodin::Geometry
       if (!visited.count(i))
       {
         res.push_back({});
-        searchQueue.push_back(i);
+        if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+          searchQueue.push_back(i);
         while (searchQueue.size() > 0)
         {
           const Index idx = searchQueue.back();
@@ -363,7 +367,10 @@ namespace Rodin::Geometry
             for (auto adj = el->getAdjacent(); adj; ++adj)
             {
               if (p(*el, *adj))
-                searchQueue.push_back(adj->getIndex());
+              {
+                if (attrs.size() == 0 || attrs.count(adj->getAttribute()))
+                  searchQueue.push_back(adj->getIndex());
+              }
             }
           }
         }
@@ -411,9 +418,9 @@ namespace Rodin::Geometry
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
-  ElementIterator Mesh<Context::Serial>::getElement(Index idx) const
+  CellIterator Mesh<Context::Serial>::getCell(Index idx) const
   {
-    return ElementIterator(*this, BoundedIndexGenerator(idx, getElementCount()));
+    return CellIterator(*this, BoundedIndexGenerator(idx, getCellCount()));
   }
 
   FaceIterator Mesh<Context::Serial>::getFace(Index idx) const

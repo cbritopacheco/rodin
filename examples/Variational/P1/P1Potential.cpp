@@ -28,7 +28,7 @@ int main(int, char**)
   mesh.scale(2. / (n - 1));
   mesh.displace(VectorFunction{-1, -1});
 
-  auto it = mesh.getElement();
+  auto it = mesh.getCell();
   // for (auto it = mesh.getVertex(); it; ++it)
   // {
   //   const auto& coords = it->getCoordinates();

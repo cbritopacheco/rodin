@@ -42,9 +42,9 @@ int main(int, char**)
   auto noise = [&](Scalar x, Scalar y) { return gen.GetNoise(x, y) / 2.0 + 0.5; };
 
   Scalar avgElementVolume = 0;
-  for (size_t i = 0; i < topography.getElementCount(); i++)
-    avgElementVolume += topography.getElement(i)->getMeasure();
-  avgElementVolume /= topography.getElementCount();
+  for (size_t i = 0; i < topography.getCellCount(); i++)
+    avgElementVolume += topography.getCell(i)->getMeasure();
+  avgElementVolume /= topography.getCellCount();
 
   Scalar maxElevation =
     std::max_element(octaves.begin(), octaves.end(),

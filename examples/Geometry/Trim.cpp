@@ -22,7 +22,7 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, n, n);
 
   // We're gonna trim the center of the mesh.
-  for (auto it = mesh.getElement(); !it.end(); ++it)
+  for (auto it = mesh.getCell(); !it.end(); ++it)
   {
     for (auto vit = it->getVertex(); !vit.end(); ++vit)
     {

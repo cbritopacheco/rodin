@@ -28,14 +28,14 @@ namespace Rodin::Variational
 
   /**
    * @brief Degree 0 Lagrange finite element space
-   * @tparam Range Range value type
+   * @tparam Range Range value type. Either Rodin::Scalar or Math::Vector.
    * @tparam Context Context type
    * @tparam Args Additional arguments
    *
    * Represents the finite element space composed of discontinuous, piecewise
    * constant functions:
    * @f[
-   *  \mathbb{P}_0 (\mathcal{T}_h)^d = \{ v : \mathcal{T}_h \rightarrow \mathbb{R}^d \mid v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \} \ ,
+   *  \mathbb{P}_0 (\mathcal{T}_h)^d = \{ v : \mathcal{T}_h \rightarrow \mathbb{R}^d : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \} \ ,
    * @f]
    * for a given vector dimension @f$ d \in \mathbb{N} @f$.
    *

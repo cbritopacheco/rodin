@@ -444,7 +444,7 @@ int main()
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - start;
     info << " | cpu: " << std::setw(4) << diff.count() << "s";
-    info << Alert::NewLine << topography.getElementCount();
+    info << Alert::NewLine << topography.getCellCount();
     info.raise();
     t += dt;
   }
