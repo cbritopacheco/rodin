@@ -745,14 +745,14 @@ $ u $
             <dd>Degree 0 Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_scalar_01_4.html" class="m-doc">P0Element&lt;Scalar&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_context_1_1_serial_00_01_geometry_1_1_mesh_fb47d7a4be313687320782a73e5aada2.html" class="m-doc">P0&lt;Scalar, Context::Serial, Geometry::Mesh&lt;Context::Serial&gt;&gt;</a>
             </dt>
-            <dd>Degree 1 scalar Lagrange element.</dd>
+            <dd>Scalar valued Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_01_4.html" class="m-doc">P0Element&lt;Math::Vector&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_scalar_01_4.html" class="m-doc">P0Element&lt;Scalar&gt;</a>
             </dt>
-            <dd>Degree 1 vector Lagrange element.</dd>
+            <dd>Degree 0 scalar Lagrange element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
@@ -952,7 +952,12 @@ $ u $
             <dt id="a5b3ef88bbceab38dc8149aea19d69279">
               using <a href="#a5b3ef88bbceab38dc8149aea19d69279" class="m-doc-self">VectorP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>&gt;
             </dt>
-            <dd>Alias for <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_01_4.html" class="m-doc">P0Element&lt;Math::<wbr />Vector&gt;</a></dd>
+            <dd>Alias for P0Element&lt;Math::Vector&gt;</dd>
+            <dt id="a1c967163186c468126c52483afe80ef4">
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              using <a href="#a1c967163186c468126c52483afe80ef4" class="m-doc-self">ScalarP0</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>, Context, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Context&gt;&gt;
+            </dt>
+            <dd>Alias for a scalar valued <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> finite element space.</dd>
             <dt id="a523cb928db9ae5555166131277b56aed">
               using <a href="#a523cb928db9ae5555166131277b56aed" class="m-doc-self">ScalarP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a>&gt;
             </dt>

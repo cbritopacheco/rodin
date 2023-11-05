@@ -111,7 +111,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Gets the dimension of the elements.</dd>
+            <dd>Gets the dimension of the cells.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aed7007d20f3a38dba19ef8fd566abb46" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -124,10 +124,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aa26e370d99a09c33f3f759c4bc52800e" class="m-doc-self">getFaceCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Gets the number of faces in the mesh.</dd>
-            <dt id="a0d44452290d295f77030e3f6aa5e0b23">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d44452290d295f77030e3f6aa5e0b23" class="m-doc-self">getElementCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt id="a3275fb6c3d9c1b19129046c40d555972">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3275fb6c3d9c1b19129046c40d555972" class="m-doc-self">getCellCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
-            <dd>Gets the number of elements in the mesh.</dd>
+            <dd>Gets the number of cells in the mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a510f358baac59f36cb4af6c196aa8c85" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">) -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
@@ -135,7 +135,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afe1e65801cd84e28bcb28b686eba3fdd" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
-            <dd>Gets the sum of the volumes of the elements given by the specified attribute.</dd>
+            <dd>Gets the sum of the volumes of the cells given by the specified attribute.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1acc4a3d1ff79aa630f9aaee6470f819" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">) -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
@@ -143,11 +143,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab41e08ec2a204d2aceb4c7f4c1bc3880" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) -&gt; <a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a></span>
             </dt>
-            <dd>Gets the sum of the perimeters of the elements given by the specified attribute.</dd>
+            <dd>Gets the sum of the perimeters of the cells given by the specified attribute.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a341a7c82c85bfdce40b958d56971e347" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Gets the labels of the domain elements in the mesh.</dd>
+            <dd>Gets the labels of the domain cells in the mesh.</dd>
             <dt id="ab95d4c2eb2f1fe32ea874dd6cc496e84">
               <span class="m-doc-wrap-bumper">auto <a href="#ab95d4c2eb2f1fe32ea874dd6cc496e84" class="m-doc-self">getBoundary</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -164,10 +164,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a880767b98276469d1b8776f68ecde624" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the count of polytope of the given type.</dd>
-            <dt id="a3899af7b716eceefb47ffbbefd43f0d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3899af7b716eceefb47ffbbefd43f0d3" class="m-doc-self">getElement</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_element_iterator.html" class="m-doc">ElementIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a81d514db9e1216649cba746d424362c5">
+              <span class="m-doc-wrap-bumper">auto <a href="#a81d514db9e1216649cba746d424362c5" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Gets an <a href="class_rodin_1_1_geometry_1_1_element_iterator.html" class="m-doc">ElementIterator</a> to the cells of the mesh.</dd>
+            <dd>Gets an <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> to the cells of the mesh.</dd>
             <dt id="a625c80f5f5aeed76d3810ba92712c836">
               <span class="m-doc-wrap-bumper">auto <a href="#a625c80f5f5aeed76d3810ba92712c836" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx = 0) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -291,12 +291,12 @@ $ (d, i) $
             <h3>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-            <p>Gets the dimension of the elements.</p>
+            <p>Gets the dimension of the cells.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Dimension of the elements.</td>
+                  <td>Dimension of the cells.</td>
                 </tr>
               </tfoot>
             </table>
@@ -326,7 +326,7 @@ $ (d, i) $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Sum of all element volumes.</td>
+                  <td>Sum of all cell volumes.</td>
                 </tr>
               </tfoot>
             </table>
@@ -335,7 +335,7 @@ $ (d, i) $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe1e65801cd84e28bcb28b686eba3fdd" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr)</span></span>
             </h3>
-            <p>Gets the sum of the volumes of the elements given by the specified attribute.</p>
+            <p>Gets the sum of the volumes of the cells given by the specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -343,7 +343,7 @@ $ (d, i) $
               <tbody>
                 <tr>
                   <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute of elements</td>
+                  <td>Attribute of cells</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -373,7 +373,7 @@ $ (d, i) $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab41e08ec2a204d2aceb4c7f4c1bc3880" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr)</span></span>
             </h3>
-            <p>Gets the sum of the perimeters of the elements given by the specified attribute.</p>
+            <p>Gets the sum of the perimeters of the cells given by the specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -381,7 +381,7 @@ $ (d, i) $
               <tbody>
                 <tr>
                   <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute of elements</td>
+                  <td>Attribute of cells</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -397,7 +397,7 @@ $ (d, i) $
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a341a7c82c85bfdce40b958d56971e347" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-            <p>Gets the labels of the domain elements in the mesh.</p>
+            <p>Gets the labels of the domain cells in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
