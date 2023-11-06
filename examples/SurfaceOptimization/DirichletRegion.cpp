@@ -8,6 +8,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
+#include <Rodin/Models/Distance/SignedPoisson.h>
 
 using namespace Rodin;
 using namespace Rodin::External;

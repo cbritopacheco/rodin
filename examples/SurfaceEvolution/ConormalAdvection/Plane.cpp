@@ -129,12 +129,11 @@ int main(int argc, char** argv)
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 1.0, M_PI / 2 - 0.1, 0.01});
 
-  // const size_t hwc = std::thread::hardware_concurrency();
-  // const size_t n = hwc - 2;
-  // ThreadPool threadPool(n);
-  // for (size_t i = 0; i < experiments.size(); i++)
-  //   threadPool.enqueue([i]{ run(i, experiments); });
-  run(0, experiments);
+  const size_t hwc = std::thread::hardware_concurrency();
+  const size_t n = hwc - 2;
+  ThreadPool threadPool(n);
+  for (size_t i = 0; i < experiments.size(); i++)
+    threadPool.enqueue([i]{ run(i, experiments); });
 
   return 0;
 }
@@ -155,7 +154,6 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
   th.load(meshFile);
   th.scale(1. / 5e4);
   th.displace(VectorFunction{-0.5, -0.5, 0});
-  th.save("miaow.mesh");
 
   {
     P1 vh(th);
@@ -163,14 +161,13 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
     dist =
       [&](const Point& p)
       {
-        const Scalar d = p.norm() - 0.1;
+        const Scalar d = p.norm() - experiment.azimuth;
         return d;
       };
     th = MMG::ImplicitDomainMesher().setAngleDetection(true)
-                                    .setHMax(0.05)
-                                    .setHausdorff(0.05)
+                                    .setHMax(experiment.hmax)
+                                    .setHausdorff(experiment.hausd)
                                     .discretize(dist);
-    th.save("implicit.mesh", IO::FileFormat::MEDIT);
   }
 
   std::string filename;
@@ -186,7 +183,6 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
   size_t i = 0;
   while (true)
   {
-    std::cout << "i : " << i << std::endl;
     // Build finite element space on the mesh
     P1 vh(th);
     P1 uh(th, th.getSpaceDimension());
@@ -230,7 +226,6 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
     // th.save("diff.mesh");
     double error = Integral(diff).compute();
     fout << t << "," << error << '\n' << std::flush;
-    std::cout << error << std::endl;
 
     // Generate mesh to subdomain
     th = MMG::ImplicitDomainMesher().setAngleDetection(false)
@@ -243,7 +238,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
                    .setHausdorff(experiment.hausd)
                    .optimize(th);
 
-    th.save("meshes/Plane.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+    // th.save("meshes/Plane.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
     if (t + std::numeric_limits<double>::epsilon() > experiment.T)
       break;
