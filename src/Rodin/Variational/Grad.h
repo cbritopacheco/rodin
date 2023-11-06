@@ -79,9 +79,9 @@ namespace Rodin::Variational
       }
 
       inline
-      Math::Vector getValue(const Geometry::Point& p) const
+      Math::SpatialVector getValue(const Geometry::Point& p) const
       {
-        Math::Vector out;
+        Math::SpatialVector out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = m_u.get();
@@ -117,6 +117,14 @@ namespace Rodin::Variational
       inline
       void getValue(Math::Vector& out, const Geometry::Point& p) const
       {
+        Math::SpatialVector tmp;
+        interpolate(tmp, p);
+        out = std::move(tmp);
+      }
+
+      inline
+      void getValue(Math::SpatialVector& out, const Geometry::Point& p) const
+      {
         interpolate(out, p);
       }
 
@@ -133,6 +141,18 @@ namespace Rodin::Variational
       inline
       constexpr
       auto interpolate(Math::Vector& out, const Geometry::Point& p) const
+      {
+        Math::SpatialVector tmp;
+        interpolate(tmp, p);
+        out = std::move(tmp);
+      }
+
+      /**
+       * @brief Interpolation function to be overriden in Derived type.
+       */
+      inline
+      constexpr
+      auto interpolate(Math::SpatialVector& out, const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).interpolate(out, p);
       }

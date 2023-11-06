@@ -78,6 +78,13 @@ namespace Rodin::Variational
 
       void interpolate(Math::Vector& out, const Geometry::Point& p) const
       {
+        Math::SpatialVector tmp;
+        interpolate(tmp, p);
+        out = std::move(tmp);
+      }
+
+      void interpolate(Math::SpatialVector& out, const Geometry::Point& p) const
+      {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
         const auto& i = polytope.getIndex();
