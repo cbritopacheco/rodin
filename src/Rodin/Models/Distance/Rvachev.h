@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MODELS_DISTANCE_SPALDINGTUCKER_H
-#define RODIN_MODELS_DISTANCE_SPALDINGTUCKER_H
+#ifndef RODIN_MODELS_DISTANCE_RVACHEV_H
+#define RODIN_MODELS_DISTANCE_RVACHEV_H
 
 #include <utility>
 
@@ -15,10 +15,10 @@
 namespace Rodin::Models::Distance
 {
   /**
-   * @brief Spalding-Tucker normalization for a level set function.
-   * @cite belyaev2015variational @cite spalding1994calculation, @cite tucker1998assessment.
+   * @brief Rvachev normalization for a level set function.
+   * @cite rvachev1974methods @cite rvachev2001transfinite
    */
-  class SpaldingTucker
+  class Rvachev
   {
     public:
       template <class FES>
@@ -32,8 +32,7 @@ namespace Rodin::Models::Distance
             const Scalar u = gf(p);
             Variational::Grad grad(gf);
             grad.getValue(gu, p);
-            const Scalar norm = gu.norm();
-            return (2 * u) / (norm + Math::sqrt(norm * norm + 2 * Math::abs(u)));
+            return u / Math::sqrt(u * u + gu.squaredNorm());
           };
         return dist;
       }
@@ -41,4 +40,5 @@ namespace Rodin::Models::Distance
 }
 
 #endif
+
 
