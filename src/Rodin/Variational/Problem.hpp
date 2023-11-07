@@ -55,6 +55,60 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator+=(const BilinearFormIntegratorBase& rhs)
+  {
+    m_bilinearForm.add(rhs);
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator-=(const BilinearFormIntegratorBase& rhs)
+  {
+    m_bilinearForm.add(UnaryMinus(rhs));
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator+=(const LinearFormIntegratorBase& rhs)
+  {
+    m_linearForm.add(rhs);
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator-=(const LinearFormIntegratorBase& rhs)
+  {
+    m_linearForm.add(UnaryMinus(rhs));
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator+=(const DirichletBCBase& rhs)
+  {
+    m_dbcs.add(rhs);
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  ::operator+=(const PeriodicBCBase& rhs)
+  {
+    m_pbcs.add(rhs);
+    return *this;
+  }
+
+  template <class TrialFES, class TestFES>
+  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::imposeDirichletBCs()
   {
     const auto& trial = getTrialFunction();

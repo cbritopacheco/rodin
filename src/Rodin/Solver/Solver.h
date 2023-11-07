@@ -8,13 +8,15 @@
 #define RODIN_SOLVER_SOLVER_H
 
 #include "Rodin/Configure.h"
+#include "Rodin/Copyable.h"
+#include "Rodin/Math.h"
 
 #include "ForwardDecls.h"
 
 namespace Rodin::Solver
 {
   template <class OperatorType, class VectorType>
-  class SolverBase
+  class SolverBase : public Copyable
   {
     public:
       /**
@@ -40,6 +42,12 @@ namespace Rodin::Solver
        */
       virtual void solve(OperatorType& A, VectorType& x, VectorType& b) = 0;
   };
+
+  class SparseSolver : public SolverBase<Math::SparseMatrix, Math::Vector>
+  {};
+
+  class DenseSolver : public SolverBase<Math::Matrix, Math::Vector>
+  {};
 }
 
 #endif

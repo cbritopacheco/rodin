@@ -6,29 +6,34 @@
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
+#include "ForwardDecls.h"
+
 namespace Rodin::Variational
 {
-  template <class TrialFES, class TestFES, class MuDerived, class LambdaDerived>
+  template <class FESType, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator final
     : public BilinearFormIntegratorBase
   {
     public:
+      using FES = FESType;
       using Parent = BilinearFormIntegratorBase;
       using Mu = FunctionBase<MuDerived>;
       using Lambda = FunctionBase<LambdaDerived>;
 
+    private:
+        using MuRange = typename FormLanguage::Traits<Mu>::RangeType;
+        using LambdaRange = typename FormLanguage::Traits<Lambda>::RangeType;
+        static_assert(std::is_same_v<MuRange, Scalar>);
+        static_assert(std::is_same_v<LambdaRange, Scalar>);
+
+    public:
       LinearElasticityIntegrator(
-          const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v,
+          const TrialFunction<FES>& u, const TestFunction<FES>& v,
           const Lambda& lambda, const Mu& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()), m_mu(mu.copy()),
           m_fes(u.getFiniteElementSpace())
       {
-        using MuRange = typename FormLanguage::Traits<Mu>::RangeType;
-        using LambdaRange = typename FormLanguage::Traits<Lambda>::RangeType;
-        static_assert(std::is_same_v<TrialFES, TestFES>);
-        static_assert(std::is_same_v<MuRange, Scalar>);
-        static_assert(std::is_same_v<LambdaRange, Scalar>);
         assert(u.getFiniteElementSpace() == v.getFiniteElementSpace());
       }
 
@@ -44,7 +49,68 @@ namespace Rodin::Variational
           m_fes(std::move(other.m_fes))
       {}
 
-      void assemble(const Geometry::Polytope& polytope) override;
+      void assemble(const Geometry::Polytope& polytope) override
+      {
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& trans = polytope.getTransformation();
+        const auto& fe = m_fes.get().getFiniteElement(d, idx);
+        const size_t dofs = fe.getCount();
+        const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
+        auto& res = getMatrix();
+        res = Math::Matrix::Zero(dofs, dofs);
+        m_rjac.resize(dofs);
+        m_pjac.resize(dofs);
+        m_psym.resize(dofs);
+        m_pdiv.resize(dofs);
+        for (size_t k = 0; k < qf.getSize(); k++)
+        {
+          const auto& rc = qf.getPoint(k);
+          const Scalar w = qf.getWeight(k);
+          const Geometry::Point p(polytope, trans, std::cref(rc));
+          const Scalar distortion = p.getDistortion();
+          const Scalar mu = getMu().getValue(p);
+          const Scalar lambda = getLambda().getValue(p);
+          for (size_t local = 0; local < dofs; local++)
+          {
+            fe.getJacobian(local)(m_rjac[local], rc);
+            m_pjac[local] = m_rjac[local] * p.getJacobianInverse();
+            m_psym[local] = m_pjac[local] + m_pjac[local].transpose();
+            m_pdiv[local] = m_pjac[local].trace();
+          }
+          for (size_t i = 0; i < dofs; i++)
+          {
+            const Scalar lhs = lambda * m_pdiv[i];
+            const Scalar rhs = m_pdiv[i];
+            res(i, i) += w * distortion * lhs * rhs;
+          }
+          for (size_t i = 0; i < dofs; i++)
+          {
+            const auto lhs = mu * m_psym[i];
+            const auto rhs = 0.5 * m_psym[i];
+            res(i, i) += w * distortion * (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
+          }
+          for (size_t i = 0; i < dofs; i++)
+          {
+            const Scalar lhs = lambda * m_pdiv[i];
+            for (size_t j = 0; j < i; j++)
+            {
+              const Scalar rhs = m_pdiv[j];
+              res(i, j) += w * distortion * lhs * rhs;
+            }
+          }
+          for (size_t i = 0; i < dofs; i++)
+          {
+            const auto lhs = mu * m_psym[i];
+            for (size_t j = 0; j < i; j++)
+            {
+              const auto rhs = 0.5 * m_psym[j];
+              res(i, j) += w * distortion * (lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
+            }
+          }
+        }
+        res.template triangularView<Eigen::Upper>() = res.transpose();
+      }
 
       inline
       constexpr
@@ -64,7 +130,7 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const TrialFES& getFiniteElementSpace() const
+      const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
@@ -82,20 +148,25 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<Lambda> m_lambda;
       std::unique_ptr<Mu> m_mu;
-      std::reference_wrapper<const TrialFES> m_fes;
+      std::reference_wrapper<const FES> m_fes;
+
+      std::vector<Math::SpatialMatrix> m_rjac;
+      std::vector<Math::SpatialMatrix> m_pjac;
+      std::vector<Math::SpatialMatrix> m_psym;
+      Math::Vector m_pdiv;
   };
 
-  template <class TrialFES, class TestFES, class LambdaDerived, class MuDerived>
+  template <class FES, class LambdaDerived, class MuDerived>
   LinearElasticityIntegrator(
-      const TrialFunction<TrialFES>&, const TestFunction<TestFES>&,
+      const TrialFunction<FES>&, const TestFunction<FES>&,
       const FunctionBase<LambdaDerived>&, const FunctionBase<MuDerived>&)
-    -> LinearElasticityIntegrator<TrialFES, TestFES, LambdaDerived, MuDerived>;
+    -> LinearElasticityIntegrator<FES, LambdaDerived, MuDerived>;
 
-  template <class TrialFES, class TestFES>
+  template <class FES>
   class LinearElasticityIntegral final
   {
     public:
-      LinearElasticityIntegral(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
+      LinearElasticityIntegral(const TrialFunction<FES>& u, const TestFunction<FES>& v)
         : m_u(u), m_v(v)
       {}
 
@@ -109,7 +180,7 @@ namespace Rodin::Variational
             ScalarFunction<L>(lambda), ScalarFunction<M>(mu));
       }
 
-      template <class MuDerived, class LambdaDerived>
+      template <class LambdaDerived, class MuDerived>
       inline
       constexpr
       auto
@@ -119,13 +190,13 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
-      std::reference_wrapper<const TestFunction<TestFES>>   m_v;
+      std::reference_wrapper<const TrialFunction<FES>> m_u;
+      std::reference_wrapper<const TestFunction<FES>>  m_v;
   };
 
-  template <class TrialFES, class TestFES>
-  LinearElasticityIntegral(const TrialFunction<TrialFES>&, const TestFunction<TestFES>&)
-    -> LinearElasticityIntegral<TrialFES, TestFES>;
+  template <class FES>
+  LinearElasticityIntegral(const TrialFunction<FES>&, const TestFunction<FES>&)
+    -> LinearElasticityIntegral<FES>;
 }
 
 #endif

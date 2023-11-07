@@ -212,13 +212,14 @@
  */
 
 /**
-  @dir Rodin/Models/ShapeOptimization
-  @brief Namespace @ref Rodin::Models::ShapeOptimization
+  @dir Rodin/Models/Hilbert
+  @brief Namespace @ref Rodin::Models::Hilbert
  */
 
 /**
-  @namespace Rodin::Models::ShapeOptimization
-  @brief Module which provides models and tools for geometrical shape optimization.
+  @namespace Rodin::Models::Hilbert
+  @brief Module which provides models and tools for the Hilbertian
+  extension-regularization procedure.
  */
 
 /**

@@ -41,6 +41,7 @@ for filename in glob.glob('%s*%s' % (prefix, suffix)):
         error[expid - 1] = float(split[1])
 
 for r in expranges:
+    print(r)
     spline = make_interp_spline(meshsizes, error[r[0] - 1:r[1]])
     x = np.linspace(meshsizes.min(), meshsizes.max(), 500)
     y = abs(spline(x))

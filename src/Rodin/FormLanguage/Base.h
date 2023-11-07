@@ -15,6 +15,7 @@
 #include <typeinfo>
 
 #include "Rodin/Types.h"
+#include "Rodin/Copyable.h"
 #include "Rodin/Utility/DependentFalse.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -26,7 +27,7 @@ namespace Rodin::FormLanguage
   /**
    * @brief Base class for all classes which are part of Rodin's FormLanguage.
    */
-  class Base
+  class Base : public Copyable
   {
     static thread_local size_t s_id;
 
@@ -122,7 +123,7 @@ namespace Rodin::FormLanguage
        * @note CRTP function to be overriden in the Derived class.
        *
        */
-      virtual Base* copy() const noexcept = 0;
+      virtual Base* copy() const noexcept override = 0;
 
     private:
       const size_t m_uuid;

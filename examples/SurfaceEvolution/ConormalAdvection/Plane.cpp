@@ -189,30 +189,36 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
 
     // Distance the subdomain
     GridFunction dist(vh);
-    dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
-                             .distance(th);
-    dist.save("dist.gf");
-    th.save("dist.mesh");
-
-    // Compute gradient of signed distance function
-    GridFunction conormal(uh);
-    auto gd = Grad(dist);
-    conormal = gd / Frobenius(gd);
-    conormal.save("conormal.sol", IO::FileFormat::MEDIT);
-
-    // Advect
-    try
+    if (i == 0)
     {
-      MMG::Advect(dist, conormal).step(std::min(dt, experiment.T - t));
+      dist = [&](const Point& p) { return phi(0, p, experiment.azimuth); };
     }
-    catch (Alert::Exception& e)
+    else
     {
-      Alert::Warning()
-        << "Advection failed for experiment " << experimentId
-        << Alert::NewLine
-        << "Retrying..."
-        << Alert::Raise;
-      continue;
+      dist = MMG::Distancer(vh).setInteriorDomain(sphereCap)
+                               .distance(th);
+
+      // Compute gradient of signed distance function
+      GridFunction conormal(uh);
+      auto gd = Grad(dist);
+      conormal = gd / Frobenius(gd);
+
+      // Advect
+      try
+      {
+        MMG::Advect(dist, conormal).step(std::min(dt, experiment.T - t));
+      }
+      catch (Alert::Exception& e)
+      {
+        Alert::Warning()
+          << "Advection failed for experiment " << experimentId
+          << Alert::NewLine
+          << "Retrying..."
+          << Alert::Raise;
+        continue;
+      }
+
+      t += std::min(dt, experiment.T - t);
     }
 
     auto phit = ScalarFunction(
@@ -243,14 +249,13 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
     if (t + std::numeric_limits<double>::epsilon() > experiment.T)
       break;
 
-    t += std::min(dt, experiment.T - t);
     i++;
   }
 }
 
 double phi(double t, const Point& p, const double azimuth)
 {
-  return p.norm() - t - azimuth;
+  return p.norm() - (t + azimuth);
   // const double x = p.x();
   // const double y = p.y();
   // const double z = p.z();
