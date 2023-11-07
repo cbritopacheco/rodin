@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "Rodin/Math.h"
+#include "Rodin/Copyable.h"
 #include "Rodin/Geometry.h"
 
 namespace Rodin::QF
@@ -18,7 +19,7 @@ namespace Rodin::QF
   /**
    * @brief Abstract base class for quadrature formulas.
    */
-  class QuadratureFormulaBase
+  class QuadratureFormulaBase : public Copyable
   {
     public:
       constexpr
@@ -53,7 +54,7 @@ namespace Rodin::QF
        */
       virtual const Math::SpatialVector& getPoint(size_t i) const = 0;
 
-      virtual QuadratureFormulaBase* copy() const noexcept = 0;
+      virtual QuadratureFormulaBase* copy() const noexcept override = 0;
 
     private:
       Geometry::Polytope::Type m_geometry;

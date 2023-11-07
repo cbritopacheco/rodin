@@ -50,9 +50,18 @@ namespace Rodin::Solver
        */
       SimplicialLDLT() = default;
 
+      SimplicialLDLT(const SimplicialLDLT& other)
+      {}
+
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         x = m_solver.compute(A).solve(b);
+      }
+
+      inline
+      SimplicialLDLT* copy() const noexcept override
+      {
+        return new SimplicialLDLT(*this);
       }
 
     private:

@@ -2,6 +2,7 @@
 #define RODIN_VARIATIONAL_QF_QF1P1_H
 
 #include "Rodin/Geometry/GeometryIndexed.h"
+
 #include "QuadratureFormula.h"
 
 namespace Rodin::QF
@@ -22,19 +23,21 @@ namespace Rodin::QF
       inline
       size_t getSize() const override
       {
-        return s_weights[getGeometry()].size();
+        return 1;
       }
 
       inline
       const Math::SpatialVector& getPoint(size_t i) const override
       {
-        return s_points[getGeometry()][i];
+        assert(i == 0);
+        return s_points[getGeometry()];
       }
 
       inline
       Scalar getWeight(size_t i) const override
       {
-        return s_weights[getGeometry()].coeff(i);
+        assert(i == 0);
+        return s_weights[getGeometry()];
       }
 
       inline
@@ -44,8 +47,8 @@ namespace Rodin::QF
       }
 
     private:
-      static const Geometry::GeometryIndexed<std::vector<Math::SpatialVector>> s_points;
-      static const Geometry::GeometryIndexed<Math::Vector> s_weights;
+      static const Geometry::GeometryIndexed<Math::SpatialVector> s_points;
+      static const Geometry::GeometryIndexed<Scalar> s_weights;
   };
 }
 

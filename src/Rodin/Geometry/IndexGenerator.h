@@ -11,8 +11,10 @@
 #include <memory>
 #include <utility>
 
-#include "ForwardDecls.h"
+#include "Rodin/Copyable.h"
+#include "Rodin/Moveable.h"
 
+#include "ForwardDecls.h"
 #include "Polytope.h"
 #include "Types.h"
 
@@ -24,15 +26,15 @@ namespace Rodin
 
 namespace Rodin::Geometry
 {
-  class IndexGeneratorBase
+  class IndexGeneratorBase : public Copyable, public Moveable
   {
     public:
       virtual ~IndexGeneratorBase() = default;
       virtual bool end() const = 0;
       virtual IndexGeneratorBase& operator++() = 0;
       virtual Index operator*() const noexcept = 0;
-      virtual IndexGeneratorBase* copy() & noexcept = 0;
-      virtual IndexGeneratorBase* move() && noexcept = 0;
+      virtual IndexGeneratorBase* copy() const noexcept override = 0;
+      virtual IndexGeneratorBase* move() noexcept override = 0;
   };
 
   class EmptyIndexGenerator final : public IndexGeneratorBase
@@ -65,12 +67,12 @@ namespace Rodin::Geometry
         return 0;
       }
 
-      EmptyIndexGenerator* copy() & noexcept override
+      EmptyIndexGenerator* copy() const noexcept override
       {
         return new EmptyIndexGenerator(*this);
       }
 
-      EmptyIndexGenerator* move() && noexcept override
+      EmptyIndexGenerator* move() noexcept override
       {
         return new EmptyIndexGenerator(std::move(*this));
       }
@@ -113,12 +115,12 @@ namespace Rodin::Geometry
         return m_curr;
       }
 
-      BoundedIndexGenerator* copy() & noexcept override
+      BoundedIndexGenerator* copy() const noexcept override
       {
         return new BoundedIndexGenerator(*this);
       }
 
-      BoundedIndexGenerator* move() && noexcept override
+      BoundedIndexGenerator* move() noexcept override
       {
         return new BoundedIndexGenerator(std::move(*this));
       }
@@ -164,12 +166,12 @@ namespace Rodin::Geometry
         return *m_it;
       }
 
-      IteratorIndexGenerator* copy() & noexcept override
+      IteratorIndexGenerator* copy() const noexcept override
       {
         return new IteratorIndexGenerator(*this);
       }
 
-      IteratorIndexGenerator* move() && noexcept override
+      IteratorIndexGenerator* move() noexcept override
       {
         return new IteratorIndexGenerator(std::move(*this));
       }
@@ -216,12 +218,12 @@ namespace Rodin::Geometry
         return *m_it;
       }
 
-      VectorIndexGenerator* copy() & noexcept override
+      VectorIndexGenerator* copy() const noexcept override
       {
         return new VectorIndexGenerator(*this);
       }
 
-      VectorIndexGenerator* move() && noexcept override
+      VectorIndexGenerator* move() noexcept override
       {
         return new VectorIndexGenerator(std::move(*this));
       }
@@ -273,12 +275,12 @@ namespace Rodin::Geometry
         return *m_it;
       }
 
-      SetIndexGenerator* copy() & noexcept override
+      SetIndexGenerator* copy() const noexcept override
       {
         return new SetIndexGenerator(*this);
       }
 
-      SetIndexGenerator* move() && noexcept override
+      SetIndexGenerator* move() noexcept override
       {
         return new SetIndexGenerator(std::move(*this));
       }

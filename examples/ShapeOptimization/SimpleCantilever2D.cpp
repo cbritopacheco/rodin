@@ -41,8 +41,7 @@ inline Scalar compliance(const GridFunction<FES>& w)
   TrialFunction u(vh);
   TestFunction  v(vh);
   BilinearForm  bf(u, v);
-  bf = Integral(lambda * Div(u), Div(v))
-     + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+  bf = LinearElasticityIntegral(u, v)(lambda, mu);
   return bf(w, w);
 };
 
@@ -78,8 +77,7 @@ int main(int, char**)
     TrialFunction u(vh);
     TestFunction  v(vh);
     Problem elasticity(u, v);
-    elasticity = Integral(lambda * Div(u), Div(v))
-               + Integral(mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
+    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);

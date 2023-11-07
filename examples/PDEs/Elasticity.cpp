@@ -42,8 +42,7 @@ int main(int argc, char** argv)
   Problem elasticity(u, v);
   elasticity = Integral(lambda * Div(u), Div(v))
              + Integral(
-                 mu * (Jacobian(u) + Jacobian(u).T()),
-                 0.5 * (Jacobian(v) + Jacobian(v).T()))
+                 mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()))
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
