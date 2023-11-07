@@ -89,16 +89,15 @@ namespace Rodin::Variational
         const size_t dofs = fe.getCount();
         assert(integrand.getRangeType() == RangeType::Scalar);
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const Geometry::Point p(polytope, trans, std::cref(rc));
+        const Scalar distortion = p.getDistortion();
         auto& res = getVector();
         res = Math::Vector::Zero(dofs);
-        for (size_t k = 0; k < qf.getSize(); k++)
-        {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc =
-            p.getCoordinates(Geometry::Point::Coordinates::Reference);
-          for (size_t local = 0; local < dofs; local++)
-            res.coeffRef(local) += qf.getWeight(k) * p.getDistortion() * fe.getBasis(local)(rc);
-        }
+        for (size_t local = 0; local < dofs; local++)
+          res.coeffRef(local) += w * distortion * fe.getBasis(local)(rc);
       }
 
       virtual Region getRegion() const override = 0;
@@ -210,34 +209,34 @@ namespace Rodin::Variational
         const size_t dofs = fe.getCount();
         assert(integrand.getRangeType() == RangeType::Scalar);
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const Geometry::Point p(polytope, trans, std::cref(rc));
+        const Scalar distortion = p.getDistortion();
         auto& res = getVector();
         res = Math::Vector::Zero(dofs);
-        for (size_t k = 0; k < qf.getSize(); k++)
+        if constexpr (std::is_same_v<Scalar, LHSRange>)
         {
-          Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-          if constexpr (std::is_same_v<Scalar, LHSRange>)
-          {
-            for (size_t local = 0; local < dofs; local++)
-              res.coeffRef(local) += qf.getWeight(k) * p.getDistortion() * f(p) * fe.getBasis(local)(rc);
-          }
-          else if constexpr (std::is_same_v<Math::Vector, LHSRange>)
-          {
-            for (size_t local = 0; local < dofs; local++)
-              res.coeffRef(local) += qf.getWeight(k) * p.getDistortion() * f(p).dot(fe.getBasis(local)(rc));
-          }
-          else if constexpr (std::is_same_v<Math::Matrix, LHSRange>)
-          {
-            for (size_t local = 0; local < dofs; local++)
-              res.coeffRef(local) +=
-                qf.getWeight(k) * p.getDistortion() * (f(p).array() * fe.getBasis(local)(rc).array()).rowwise().sum().colwise().sum().value();
-          }
-          else
-          {
-            assert(false);
-            res.setConstant(NAN);
-            return;
-          }
+          for (size_t local = 0; local < dofs; local++)
+            res.coeffRef(local) += w * distortion * f(p) * fe.getBasis(local)(rc);
+        }
+        else if constexpr (std::is_same_v<Math::Vector, LHSRange>)
+        {
+          for (size_t local = 0; local < dofs; local++)
+            res.coeffRef(local) += w * distortion * f(p).dot(fe.getBasis(local)(rc));
+        }
+        else if constexpr (std::is_same_v<Math::Matrix, LHSRange>)
+        {
+          for (size_t local = 0; local < dofs; local++)
+            res.coeffRef(local) +=
+              w * distortion * (f(p).array() * fe.getBasis(local)(rc).array()).rowwise().sum().colwise().sum().value();
+        }
+        else
+        {
+          assert(false);
+          res.setConstant(NAN);
+          return;
         }
       }
 
@@ -374,6 +373,9 @@ namespace Rodin::Variational
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t dofs = fe.getCount();
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
         if constexpr (std::is_same_v<CoefficientRange, Scalar>)
@@ -381,20 +383,17 @@ namespace Rodin::Variational
           static_assert(std::is_same_v<MultiplicandRange, RHSRange>);
           if constexpr (std::is_same_v<MultiplicandRange, Scalar>)
           {
-            for (size_t k = 0; k < qf.getSize(); k++)
+            const Geometry::Point p(polytope, trans, std::cref(rc));
+            const Scalar distortion = p.getDistortion();
+            const Scalar c = coeff.getValue(p);
+            for (size_t i = 0; i < dofs; i++)
             {
-              const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-              const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-              const Scalar c = coeff.getValue(p);
-              for (size_t i = 0; i < dofs; i++)
-              {
-                const Scalar basis = fe.getBasis(i)(rc);
-                res(i, i) += qf.getWeight(k) * p.getDistortion() * c * basis * basis;
-              }
-              for (size_t i = 0; i < dofs; i++)
-                for (size_t j = 0; j < i; j++)
-                  res(i, j) += qf.getWeight(k) * p.getDistortion() * c * fe.getBasis(i)(rc) * fe.getBasis(j)(rc);
+              const Scalar basis = fe.getBasis(i)(rc);
+              res(i, i) += w * distortion * c * basis * basis;
             }
+            for (size_t i = 0; i < dofs; i++)
+              for (size_t j = 0; j < i; j++)
+                res(i, j) += w * distortion * c * fe.getBasis(i)(rc) * fe.getBasis(j)(rc);
             res.template triangularView<Eigen::Upper>() = res.transpose();
           }
           else
@@ -532,22 +531,22 @@ namespace Rodin::Variational
         const size_t dofs = fe.getCount();
         assert(dofs == trial.getDOFs(polytope));
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const Geometry::Point p(polytope, trans, std::cref(rc));
+        const Scalar distortion = p.getDistortion();
+        const auto jacInvT = p.getJacobianInverse().transpose();
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
         m_pgradient.resize(dofs);
-        for (size_t k = 0; k < qf.getSize(); k++)
-        {
-          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-          const auto jacInvT = p.getJacobianInverse().transpose();
-          for (size_t local = 0; local < dofs; local++)
-            m_pgradient[local] = jacInvT * fe.getGradient(local)(rc);
-          for (size_t i = 0; i < dofs; i++)
-            res(i, i) += qf.getWeight(k) * p.getDistortion() * m_pgradient[i].squaredNorm();
-          for (size_t i = 0; i < dofs; i++)
-            for (size_t j = 0; j < i; j++)
-              res(i, j) += qf.getWeight(k) * p.getDistortion() * m_pgradient[i].dot(m_pgradient[j]);
-        }
+        for (size_t local = 0; local < dofs; local++)
+          m_pgradient[local] = jacInvT * fe.getGradient(local)(rc);
+        for (size_t i = 0; i < dofs; i++)
+          res(i, i) += w * distortion * m_pgradient[i].squaredNorm();
+        for (size_t i = 0; i < dofs; i++)
+          for (size_t j = 0; j < i; j++)
+            res(i, j) += w * distortion * m_pgradient[i].dot(m_pgradient[j]);
         res.template triangularView<Eigen::Upper>() = res.transpose();
       }
 
@@ -676,27 +675,27 @@ namespace Rodin::Variational
         const size_t dofs = fe.getCount();
         assert(dofs == trial.getDOFs(polytope));
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const Geometry::Point p(polytope, trans, std::cref(rc));
+        const Scalar distortion = p.getDistortion();
+        const auto jacInvT = p.getJacobianInverse().transpose();
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
         m_rgradient.resize(dofs);
         m_pgradient.resize(dofs);
-        for (size_t k = 0; k < qf.getSize(); k++)
+        for (size_t local = 0; local < dofs; local++)
         {
-          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-          const auto jacInvT = p.getJacobianInverse().transpose();
-          for (size_t local = 0; local < dofs; local++)
-          {
-            fe.getGradient(local)(m_rgradient[local], rc);
-            m_pgradient[local] = jacInvT * m_rgradient[local];
-          }
-          const auto fv = f.getValue(p);
-          for (size_t i = 0; i < dofs; i++)
-            res(i, i) += qf.getWeight(k) * p.getDistortion() * (fv * m_pgradient[i]).dot(m_pgradient[i]);
-          for (size_t i = 0; i < dofs; i++)
-            for (size_t j = 0; j < i; j++)
-              res(i, j) += qf.getWeight(k) * p.getDistortion() * (fv * m_pgradient[i]).dot(m_pgradient[j]);
+          fe.getGradient(local)(m_rgradient[local], rc);
+          m_pgradient[local] = jacInvT * m_rgradient[local];
         }
+        const auto fv = f.getValue(p);
+        for (size_t i = 0; i < dofs; i++)
+          res(i, i) += w * distortion * (fv * m_pgradient[i]).dot(m_pgradient[i]);
+        for (size_t i = 0; i < dofs; i++)
+          for (size_t j = 0; j < i; j++)
+            res(i, j) += w * distortion * (fv * m_pgradient[i]).dot(m_pgradient[j]);
         res.template triangularView<Eigen::Upper>() = res.transpose();
       }
 
@@ -825,21 +824,21 @@ namespace Rodin::Variational
         const size_t dofs = fe.getCount();
         assert(dofs == trial.getDOFs(polytope));
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const Geometry::Point p(polytope, trans, std::cref(rc));
+        const Scalar distortion = p.getDistortion();
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
         m_pjac.resize(dofs);
-        for (size_t k = 0; k < qf.getSize(); k++)
-        {
-          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-          for (size_t local = 0; local < dofs; local++)
-            m_pjac[local] = fe.getJacobian(local)(rc) * p.getJacobianInverse();
-          for (size_t i = 0; i < dofs; i++)
-            res(i, i) += qf.getWeight(k) * p.getDistortion() * m_pjac[i].squaredNorm();
-          for (size_t i = 0; i < dofs; i++)
-            for (size_t j = 0; j < i; j++)
-              res(i, j) += qf.getWeight(k) * p.getDistortion() * m_pjac[i].dot(m_pjac[j]);
-        }
+        for (size_t local = 0; local < dofs; local++)
+          m_pjac[local] = fe.getJacobian(local)(rc) * p.getJacobianInverse();
+        for (size_t i = 0; i < dofs; i++)
+          res(i, i) += w * distortion * m_pjac[i].squaredNorm();
+        for (size_t i = 0; i < dofs; i++)
+          for (size_t j = 0; j < i; j++)
+            res(i, j) += w * distortion * m_pjac[i].dot(m_pjac[j]);
         res.template triangularView<Eigen::Upper>() = res.transpose();
       }
 
@@ -979,36 +978,36 @@ namespace Rodin::Variational
         const size_t dofs = fe.getCount();
         assert(dofs == trial.getDOFs(polytope));
         const QF::QF1P1 qf(polytope.getGeometry());
+        assert(qf.getSize() == 1);
+        const Scalar w = qf.getWeight(0);
+        const auto& rc = qf.getPoint(0);
+        const Geometry::Point p(polytope, trans, std::cref(rc));
+        const Scalar distortion = p.getDistortion();
         auto& res = getMatrix();
         res = Math::Matrix::Zero(dofs, dofs);
         m_rjac.resize(dofs);
         m_pjac.resize(dofs);
-        for (size_t k = 0; k < qf.getSize(); k++)
+        for (size_t local = 0; local < dofs; local++)
         {
-          const Geometry::Point p(polytope, trans, std::ref(qf.getPoint(k)));
-          const Math::Vector& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
-          for (size_t local = 0; local < dofs; local++)
+          fe.getJacobian(local)(m_rjac[local], rc);
+          m_pjac[local] = m_rjac[local] * p.getJacobianInverse();
+        }
+        const auto fv = f.getValue(p);
+        for (size_t i = 0; i < dofs; i++)
+        {
+          const auto lhs = fv * m_pjac[i];
+          const auto rhs = m_pjac[i];
+          res(i, i) += w * distortion * (
+              lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
+        }
+        for (size_t i = 0; i < dofs; i++)
+        {
+          const auto lhs = fv * m_pjac[i];
+          for (size_t j = 0; j < i; j++)
           {
-            fe.getJacobian(local)(m_rjac[local], rc);
-            m_pjac[local] = m_rjac[local] * p.getJacobianInverse();
-          }
-          const auto fv = f.getValue(p);
-          for (size_t i = 0; i < dofs; i++)
-          {
-            const auto lhs = fv * m_pjac[i];
-            const auto rhs = m_pjac[i];
-            res(i, i) += qf.getWeight(k) * p.getDistortion() * (
+            const auto rhs = m_pjac[j];
+            res(i, j) += w * distortion * (
                 lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
-          }
-          for (size_t i = 0; i < dofs; i++)
-          {
-            const auto lhs = fv * m_pjac[i];
-            for (size_t j = 0; j < i; j++)
-            {
-              const auto rhs = m_pjac[j];
-              res(i, j) += qf.getWeight(k) * p.getDistortion() * (
-                  lhs.array() * rhs.array()).rowwise().sum().colwise().sum().value();
-            }
           }
         }
         res.template triangularView<Eigen::Upper>() = res.transpose();
@@ -1020,6 +1019,7 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
+
       std::vector<Math::SpatialMatrix> m_rjac;
       std::vector<Math::SpatialMatrix> m_pjac;
   };

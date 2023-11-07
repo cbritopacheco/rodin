@@ -52,6 +52,9 @@ namespace Rodin::Solver
        */
       LeastSquaresCG() = default;
 
+      LeastSquaresCG(const LeastSquaresCG& other)
+      {}
+
       ~LeastSquaresCG() = default;
 
       LeastSquaresCG& setTolerance(double tol)
@@ -69,6 +72,12 @@ namespace Rodin::Solver
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         x = m_solver.compute(A).solve(b);
+      }
+
+      inline
+      LeastSquaresCG* copy() const noexcept override
+      {
+        return new LeastSquaresCG(*this);
       }
 
     private:

@@ -50,10 +50,19 @@ namespace Rodin::Solver
        */
       SparseQR() = default;
 
+      SparseQR(const SparseQR& other)
+      {}
+
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         m_solver.compute(A);
         x = m_solver.solve(b);
+      }
+
+      inline
+      SparseQR* copy() const noexcept override
+      {
+        return new SparseQR(*this);
       }
 
     private:

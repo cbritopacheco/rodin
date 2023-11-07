@@ -60,7 +60,7 @@ ShapeGradient getShapeGradient(
   Problem hilbert(g, v);
   hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(v))
           + Integral(g, v)
-          // + Integral(tgv * g, v).over(GammaN)
+          + Integral(tgv * g, v).over(GammaN)
           - FaceIntegral(expr * cn, v).over(SigmaD);
   hilbert.solve(solver);
   return g.getSolution();

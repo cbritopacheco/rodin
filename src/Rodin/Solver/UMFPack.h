@@ -46,11 +46,20 @@ namespace Rodin::Solver
        */
       UMFPack() = default;
 
+      UMFPack(const UMFPack& other)
+      {}
+
       ~UMFPack() = default;
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         assert(false);
+      }
+
+      inline
+      UMFPack* copy() const noexcept override
+      {
+        return new UMFPack(*this);
       }
   };
 }

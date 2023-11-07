@@ -52,6 +52,9 @@ namespace Rodin::Solver
        */
       CG() = default;
 
+      CG(const CG& other)
+      {}
+
       ~CG() = default;
 
       CG& setTolerance(double tol)
@@ -69,6 +72,12 @@ namespace Rodin::Solver
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         x = m_solver.compute(A).solve(b);
+      }
+
+      inline
+      CG* copy() const noexcept override
+      {
+        return new CG(*this);
       }
 
     private:

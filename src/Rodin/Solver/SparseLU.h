@@ -50,10 +50,19 @@ namespace Rodin::Solver
        */
       SparseLU() = default;
 
+      SparseLU(const SparseLU& other)
+      {}
+
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         m_solver.compute(A);
         x = m_solver.solve(b);
+      }
+
+      inline
+      SparseLU* copy() const noexcept override
+      {
+        return new SparseLU(*this);
       }
 
     private:
