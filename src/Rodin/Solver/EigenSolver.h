@@ -47,6 +47,8 @@ namespace Rodin::Solver
         : m_solver(solver)
       {}
 
+      EigenSolver(const EigenSolver&) = default;
+
       ~EigenSolver() = default;
 
       /**
@@ -83,6 +85,12 @@ namespace Rodin::Solver
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
         x = getSolver().compute(A).solve(b);
+      }
+
+      inline
+      EigenSolver* copy() const noexcept override
+      {
+        return new EigenSolver(*this);
       }
 
     private:

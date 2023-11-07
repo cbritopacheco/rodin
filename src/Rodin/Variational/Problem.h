@@ -155,9 +155,33 @@ namespace Rodin::Variational
         return m_testFunction.get();
       }
 
+      constexpr
+      const PeriodicBoundary& getPeriodicBoundary() const
+      {
+        return m_pbcs;
+      }
+
+      constexpr
+      const EssentialBoundary& getEssentialBoundary() const
+      {
+        return m_dbcs;
+      }
+
       Problem& imposePeriodicBCs();
 
       Problem& imposeDirichletBCs();
+
+      Problem& operator+=(const BilinearFormIntegratorBase& lfi);
+
+      Problem& operator-=(const BilinearFormIntegratorBase& lfi);
+
+      Problem& operator+=(const LinearFormIntegratorBase& lfi);
+
+      Problem& operator-=(const LinearFormIntegratorBase& lfi);
+
+      Problem& operator+=(const DirichletBCBase& dbc);
+
+      Problem& operator+=(const PeriodicBCBase& pbc);
 
       Problem& assemble() override;
 
