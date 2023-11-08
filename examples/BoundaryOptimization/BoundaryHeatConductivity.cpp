@@ -200,6 +200,8 @@ int main(int, char**)
     GridFunction conormal(dvfes);
     conormal = Grad(dist);
     conormal.stableNormalize();
+    conormal.save("cnd.gf");
+    dOmega.save("cnd.mesh");
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
     auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
@@ -207,10 +209,11 @@ int main(int, char**)
     TestFunction  w(dsfes);
     Problem hilbert(theta, w);
     hilbert = Integral(dc * dc * Grad(theta), Grad(w))
-            + Integral(g, v)
-            + Integral(tgv * g, v).over(GammaN)
-            - FaceIntegral(hadamard, v).over(SigmaD);
+            + Integral(theta, w)
+            + Integral(tgv * g, w).over(GammaN)
+            - FaceIntegral(hadamard, w).over(SigmaD);
     hilbert.solve(cg);
+    theta.getSolution().save("theta.gf");
     GridFunction grad(dvfes);
     grad = theta.getSolution() * conormal;
     grad *= -1.0;
@@ -218,7 +221,6 @@ int main(int, char**)
     norm = Frobenius(grad);
     grad /= norm.max();
     grad.save("grad.gf");
-    dOmega.save("grad.mesh");
 
     Alert::Info() << "Advecting the distance function." << Alert::Raise;
     MMG::Advect(dist, grad).step(dt);
@@ -259,8 +261,6 @@ int main(int, char**)
         dist = holes;
       }
     }
-    dist.save("dist.gf");
-    dOmega.save("dist.mesh");
 
     Alert::Info() << "Meshing the domain..." << Alert::Raise;
     GridFunction workaround(sfes);
@@ -277,12 +277,12 @@ int main(int, char**)
                                          .setAngleDetection(false)
                                          .surface()
                                          .discretize(workaround);
-      hmax = hmax > 0.07 ? 0.07 : hmax * 1.1;
+      hmax = 1.1 * hmax > 0.06 ? 0.06 : hmax * 1.1;
     }
     catch (Alert::Exception& e)
     {
       Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
-      hmax = hmax < 0.05 ? 0.05 : hmax * 0.8;
+      hmax = 0.8 * hmax < 0.05 ? 0.05 : hmax * 0.8;
       continue;
     }
 
