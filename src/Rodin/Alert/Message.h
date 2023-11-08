@@ -46,8 +46,14 @@ namespace Rodin::Alert
     public:
       using Parent = Text<Foreground>;
 
-      MessagePrefix(const std::string& prefix, const Foreground& fg = Foreground())
-        : Parent(prefix, fg)
+      MessagePrefix(const Foreground& fg, const std::string& prefix)
+        : Parent(fg, prefix)
+      {
+        this->setBold();
+      }
+
+      MessagePrefix(const std::string& prefix)
+        : Parent(prefix)
       {
         this->setBold();
       }
