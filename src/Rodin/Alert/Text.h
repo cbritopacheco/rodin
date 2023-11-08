@@ -87,16 +87,28 @@ namespace Rodin::Alert
 
       using Background = B;
 
+      Text(const char* text)
+        : Text(std::string(text))
+      {}
+
+      Text(const Foreground& fg, const char* text)
+        : Text(fg, std::string(text))
+      {}
+
+      Text(const Foreground& fg, const Background& bg, const char* text)
+        : Text(fg, bg, std::string(text))
+      {}
+
       Text(const std::string& text)
         : m_string(text)
       {}
 
-      Text(const std::string& text, const Foreground& fg)
-        : m_string(text), m_fg(fg)
+      Text(const Foreground& fg, const std::string& text)
+        : m_fg(fg), m_string(text)
       {}
 
-      Text(const std::string& text, const Foreground& fg, const Background& bg)
-        : m_string(text), m_fg(fg), m_bg(bg)
+      Text(const Foreground& fg, const Background& bg, const std::string& text)
+        : m_fg(fg), m_bg(bg), m_string(text)
       {}
 
       constexpr
@@ -183,9 +195,9 @@ namespace Rodin::Alert
       }
 
     private:
-      std::string m_string;
       Foreground m_fg;
       Background m_bg;
+      std::string m_string;
       FlatSet<Attribute> m_attributes;
   };
 

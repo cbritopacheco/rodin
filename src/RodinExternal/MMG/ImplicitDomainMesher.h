@@ -51,13 +51,13 @@ namespace Rodin::External::MMG
        *
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setLevelSet(double ls);
+      ImplicitDomainMesher& setLevelSet(Scalar ls);
 
       /**
        * @brief Specifies the removal of small parasitic components.
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setRMC(double rmc = 1e-5);
+      ImplicitDomainMesher& setRMC(Scalar rmc = 1e-5);
 
       ImplicitDomainMesher& setBaseReferences(Geometry::Attribute ref)
       {
@@ -121,25 +121,25 @@ namespace Rodin::External::MMG
         return *this;
       }
 
-      ImplicitDomainMesher& setHMin(double hmin)
+      ImplicitDomainMesher& setHMin(Scalar hmin)
       {
         MMG5::setHMin(hmin);
         return *this;
       }
 
-      ImplicitDomainMesher& setHMax(double hmax)
+      ImplicitDomainMesher& setHMax(Scalar hmax)
       {
         MMG5::setHMax(hmax);
         return *this;
       }
 
-      ImplicitDomainMesher& setHausdorff(double hausd)
+      ImplicitDomainMesher& setHausdorff(Scalar hausd)
       {
         MMG5::setHausdorff(hausd);
         return *this;
       }
 
-      ImplicitDomainMesher& setGradation(double hgrad)
+      ImplicitDomainMesher& setGradation(Scalar hgrad)
       {
         MMG5::setGradation(hgrad);
         return *this;
@@ -159,10 +159,10 @@ namespace Rodin::External::MMG
 
       void deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref);
 
-      double m_ls;
+      Scalar m_ls;
       SplitMap m_split;
       bool m_meshTheSurface;
-      std::optional<double> m_rmc;
+      std::optional<Scalar> m_rmc;
       FlatSet<Geometry::Attribute> m_lsBaseReferences;
       std::optional<Geometry::Attribute> m_isoref;
 
