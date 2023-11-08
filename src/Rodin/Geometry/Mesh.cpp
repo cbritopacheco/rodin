@@ -351,9 +351,11 @@ namespace Rodin::Geometry
       const Index i = it->getIndex();
       if (!visited.count(i))
       {
-        res.push_back({});
         if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+        {
+          res.push_back({});
           searchQueue.push_back(i);
+        }
         while (searchQueue.size() > 0)
         {
           const Index idx = searchQueue.back();
