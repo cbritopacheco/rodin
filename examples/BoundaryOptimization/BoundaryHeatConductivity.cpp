@@ -27,7 +27,7 @@ static constexpr Geometry::Attribute SigmaN = 2;
 static constexpr size_t maxIt = 1000;
 
 static constexpr Scalar epsilon = 0.001;
-static constexpr Scalar ell = 1;
+static constexpr Scalar ell = 5;
 static constexpr Scalar radius = 0.02;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
 
@@ -38,7 +38,7 @@ using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;
 
 inline
-void rmc(MeshBase& mesh)
+size_t rmc(MeshBase& mesh)
 {
   const size_t per = mesh.getPerimeter();
   const size_t D = mesh.getDimension();
@@ -47,6 +47,7 @@ void rmc(MeshBase& mesh)
       {
         return p1.getAttribute() == p2.getAttribute();
       }, D - 1, GammaD);
+  size_t ccs = ccl.getCount();
 
   for (const auto& cc : ccl)
   {
@@ -60,8 +61,10 @@ void rmc(MeshBase& mesh)
         if (mesh.getFace(i)->getAttribute() == GammaD)
           mesh.setAttribute({ D - 1, i }, Gamma);
       }
+      ccs--;
     }
   }
+  return ccs;
 }
 
 int main(int, char**)
@@ -70,6 +73,9 @@ int main(int, char**)
   //const char* meshFile = "Omega.mesh";
 
   // Load and build finite element spaces on the volumetric domain
+  Scalar dc = 1;
+  Scalar hmax = 0.05;
+  size_t regionCount;
   MMG::Mesh Omega;
   Omega.load(meshFile, IO::FileFormat::MEDIT);
 
@@ -90,9 +96,9 @@ int main(int, char**)
                                        .setAngleDetection(false)
                                        .split(GammaD, {GammaD, Gamma})
                                        .split(Gamma, {GammaD, Gamma})
-                                       .setHMax(0.05)
-                                       .setHMin(0.005)
-                                       .setHausdorff(0.005)
+                                       .setHMax(hmax)
+                                       .setHMin(hmax / 5.0)
+                                       .setHausdorff(hmax / 10.0)
                                        .setGradation(1.2)
                                        .surface()
                                        .discretize(dist);
@@ -104,9 +110,8 @@ int main(int, char**)
   };
 
   std::ofstream fObj("obj.txt");
-  Scalar hmax = 0.05 ;
-  Scalar dc = 3;
   size_t i = 0;
+  size_t prevRegionCount = 0;
   while (i < maxIt)
   {
     const Scalar hmin = hmax / 5.0;
@@ -122,13 +127,22 @@ int main(int, char**)
                   << "HGrad:     " << Alert::Notation(hgrad)    << Alert::NewLine
                   << "dt:        " << Alert::Notation(dt)       << Alert::Raise;
 
-    Alert::Info() << "Optimizing the domain..." << Alert::Raise;
-    MMG::Optimizer().setHMax(hmax)
-                    .setHMin(hmin)
-                    .setGradation(hgrad)
-                    .setHausdorff(hausd)
-                    .setAngleDetection(false)
-                    .optimize(Omega);
+    try
+    {
+      Alert::Info() << "Optimizing the domain..." << Alert::Raise;
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      .setGradation(hgrad)
+                      .setHausdorff(hausd)
+                      .setAngleDetection(false)
+                      .optimize(Omega);
+    }
+    catch (Alert::Exception& e)
+    {
+      Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
+      hmax = 0.9 * hmax < 0.02 ? 0.02 : hmax * 0.9;
+      continue;
+    }
 
     Alert::Info() << "Computing required connectivity..." << Alert::Raise;
     Omega.getConnectivity().compute(2, 3);
@@ -136,7 +150,11 @@ int main(int, char**)
     Omega.getConnectivity().compute(1, 2);
 
     Alert::Info() << "RMC..." << Alert::Raise;
-    rmc(Omega);
+    prevRegionCount = regionCount;
+    regionCount = rmc(Omega);
+
+    Alert::Info() << "Found " << Alert::Notation(regionCount) << " regions."
+      << Alert::Raise;
 
     Alert::Info() << "Skinning mesh..." << Alert::Raise;
     auto dOmega = Omega.skin();
@@ -200,11 +218,9 @@ int main(int, char**)
     GridFunction conormal(dvfes);
     conormal = Grad(dist);
     conormal.stableNormalize();
-    conormal.save("cnd.gf");
-    dOmega.save("cnd.mesh");
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
-    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
+    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell * Div(conormal).traceOf(GammaD);
     TrialFunction theta(dsfes);
     TestFunction  w(dsfes);
     Problem hilbert(theta, w);
@@ -213,19 +229,20 @@ int main(int, char**)
             + Integral(tgv * g, w).over(GammaN)
             - FaceIntegral(hadamard, w).over(SigmaD);
     hilbert.solve(cg);
-    theta.getSolution().save("theta.gf");
     GridFunction grad(dvfes);
     grad = theta.getSolution() * conormal;
     grad *= -1.0;
     GridFunction norm(dsfes);
     norm = Frobenius(grad);
     grad /= norm.max();
+
     grad.save("grad.gf");
+    dOmega.save("grad.mesh");
 
     Alert::Info() << "Advecting the distance function." << Alert::Raise;
     MMG::Advect(dist, grad).step(dt);
 
-    if (true)
+    if (i < 70)
     {
       Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
       GridFunction topo(dsfes);
@@ -277,12 +294,12 @@ int main(int, char**)
                                          .setAngleDetection(false)
                                          .surface()
                                          .discretize(workaround);
-      hmax = 1.1 * hmax > 0.06 ? 0.06 : hmax * 1.1;
+      hmax = 1.1 * hmax > 0.05 ? 0.05 : hmax * 1.1;
     }
     catch (Alert::Exception& e)
     {
       Alert::Warning() << "Meshing failed. Trying with new parameters." << Alert::Raise;
-      hmax = 0.8 * hmax < 0.05 ? 0.05 : hmax * 0.8;
+      hmax = 0.9 * hmax < 0.02 ? 0.02 : hmax * 0.9;
       continue;
     }
 

@@ -28,6 +28,137 @@ namespace Rodin::Variational
 {
   /**
    * @ingroup DivSpecializations
+   * @brief Divient of a P1 GridFunction
+   */
+  template <class Context, class Mesh>
+  class Div<GridFunction<P1<Math::Vector, Context, Mesh>>> final
+    : public DivBase<Div<GridFunction<P1<Math::Vector, Context, Mesh>>>, GridFunction<P1<Math::Vector, Context, Mesh>>>
+  {
+    public:
+      using FES = P1<Math::Vector, Context, Mesh>;
+
+      /// Operand type
+      using Operand = GridFunction<FES>;
+
+      /// Parent class
+      using Parent = DivBase<Div<Operand>, Operand>;
+
+      /**
+       * @brief Constructs the Divient of an @f$ \mathbb{P}^1 @f$ function
+       * @f$ u @f$.
+       * @param[in] u P1 GridFunction
+       */
+      Div(const Operand& u)
+        : Parent(u)
+      {}
+
+      /**
+       * @brief Copy constructor
+       */
+      Div(const Div& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructor
+       */
+      Div(Div&& other)
+        : Parent(std::move(other))
+      {}
+
+      void interpolate(Math::Vector& out, const Geometry::Point& p) const
+      {
+        Math::SpatialVector tmp;
+        interpolate(tmp, p);
+        out = std::move(tmp);
+      }
+
+      void interpolate(Scalar& out, const Geometry::Point& p) const
+      {
+        const auto& polytope = p.getPolytope();
+        const auto& d = polytope.getDimension();
+        const auto& i = polytope.getIndex();
+        const auto& mesh = polytope.getMesh();
+        const size_t meshDim = mesh.getDimension();
+        if (d == meshDim - 1) // Evaluating on a face
+        {
+          const auto& conn = mesh.getConnectivity();
+          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& pc = p.getPhysicalCoordinates();
+          assert(inc.size() == 1 || inc.size() == 2);
+          if (inc.size() == 1)
+          {
+            const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
+            const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+            const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+            interpolate(out, np);
+            return;
+          }
+          else
+          {
+            assert(inc.size() == 2);
+            const auto& traceDomain = this->getTraceDomain();
+            assert(traceDomain.size() > 0);
+            if (traceDomain.size() == 0)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No trace domain provided: "
+                << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+                << ". Div at an interface with no trace domain is undefined."
+                << Alert::Raise;
+            }
+            else
+            {
+              for (auto& idx : inc)
+              {
+                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+                if (traceDomain.count(tracePolytope->getAttribute()))
+                {
+                  const Math::SpatialVector rc = tracePolytope->getTransformation().inverse(pc);
+                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+                  interpolate(out, np);
+                  return;
+                }
+              }
+              UndeterminedTraceDomainException(
+                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
+            }
+            return;
+          }
+        }
+        else // Evaluating on a cell
+        {
+          assert(d == mesh.getDimension());
+          const auto& gf = this->getOperand();
+          const auto& fes = gf.getFiniteElementSpace();
+          const auto& vdim = fes.getVectorDimension();
+          const auto& fe = fes.getFiniteElement(d, i);
+          const auto& rc = p.getReferenceCoordinates();
+          Math::SpatialMatrix jacobian(vdim, d);
+          out = 0;
+          for (size_t local = 0; local < fe.getCount(); local++)
+          {
+            fe.getJacobian(local)(jacobian, rc);
+            out += gf.getValue(fes.getGlobalIndex({d, i}, local)).coeff(local % vdim) * (jacobian * p.getJacobianInverse()).trace();
+          }
+        }
+      }
+
+      inline Div* copy() const noexcept override
+      {
+        return new Div(*this);
+      }
+  };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for Div of a P1 GridFunction
+   */
+  template <class ... Ts>
+  Div(const GridFunction<P1<Ts...>>&) -> Div<GridFunction<P1<Ts...>>>;
+
+  /**
+   * @ingroup DivSpecializations
    */
   template <class NestedDerived, ShapeFunctionSpaceType SpaceType, class ... Ts>
   class Div<ShapeFunction<NestedDerived, P1<Math::Vector, Ts...>, SpaceType>> final
