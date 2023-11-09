@@ -10,13 +10,13 @@ namespace Rodin::External::MMG
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setLevelSet(double ls)
+  ImplicitDomainMesher& ImplicitDomainMesher::setLevelSet(Scalar ls)
   {
     m_ls = ls;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setRMC(double rmc)
+  ImplicitDomainMesher& ImplicitDomainMesher::setRMC(Scalar rmc)
   {
     m_rmc = rmc;
     return *this;
@@ -129,7 +129,7 @@ namespace Rodin::External::MMG
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isoref, *m_isoref);
     if (getSplitMap().size() > 0)
     {
-      mesh->memMax *= 2.0; // Double allowed memory because of bug
+      mesh->memMax *= 2.0; // Scalar allowed memory because of bug
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_numberOfMat, m_uniqueSplit.size());
       for (const auto& v : m_uniqueSplit)
       {

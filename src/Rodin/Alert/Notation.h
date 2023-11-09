@@ -7,86 +7,110 @@ namespace Rodin::Alert
 {
   using NotationForeground = MagentaT;
 
-  class NotationT : public Text<NotationForeground>
+  class Notation : public Text<NotationForeground>
   {
     public:
       using Parent = Text<NotationForeground>;
 
-      NotationT(const std::string& text)
+      static const Notation Arrow;
+
+      Notation(const std::string& text)
         : Parent(text)
       {}
-  };
 
-  namespace Notation
-  {
-    static const NotationT Arrow("---->");
+      Notation(const char* out)
+        : Parent(std::string(out))
+      {}
 
-    inline
-    NotationT Text(const std::string& text)
-    {
-      return text;
-    }
+      template <class T>
+      Notation(const T& out)
+        : Parent(std::to_string(out))
+      {}
 
-    template <class T>
-    inline
-    NotationT Print(const T& out)
-    {
-      std::stringstream ss;
-      ss << out;
-      return ss.str();
-    }
+      Notation(const Notation& other)
+        : Parent(other)
+      {}
 
-    inline
-    NotationT Incidence(size_t d, size_t dp)
-    {
-      std::stringstream ss;
-      ss << "Incidence(" << d << " " << Arrow << " " << dp << ")";
-      return ss.str();
-    }
+      Notation(Notation&& other)
+        : Parent(std::move(other))
+      {}
 
-    inline
-    NotationT Polytope(size_t d, Index index)
-    {
-      std::stringstream ss;
-      ss << "Polytope(" << d << ", " << index << ")";
-      return ss.str();
-    }
-
-    inline
-    NotationT True()
-    {
-      return NotationT("true");
-    }
-
-    inline
-    NotationT False()
-    {
-      return NotationT("false");
-    }
-
-    inline
-    NotationT Predicate(bool v, const std::string& pred)
-    {
-      std::stringstream ss;
-      ss << "[" << pred <<  "] = " << (v ? "true" : "false");
-      return ss.str();
-    }
-
-    template <class Iterator>
-    NotationT Set(Iterator first, Iterator last)
-    {
-      std::stringstream ss;
-      ss << "{ ";
-      for (Iterator it = first; it != last; ++it)
+      inline
+      static Notation Text(const std::string& text)
       {
-        ss << *it;
-        if (std::next(it) != last)
-            ss << ", ";
+        return text;
       }
-      ss << " }";
-      return ss.str();
+
+      template <class T>
+      inline
+      static Notation Number(const T& out)
+      {
+        static_assert(std::is_arithmetic_v<T>);
+        std::stringstream ss;
+        ss << out;
+        return ss.str();
+      }
+
+      template <class T>
+      inline
+      static Notation Print(const T& out)
+      {
+        std::stringstream ss;
+        ss << out;
+        return ss.str();
+      }
+
+      inline
+      static Notation Incidence(size_t d, size_t dp)
+      {
+        std::stringstream ss;
+        ss << "Incidence(" << d << " " << Arrow << " " << dp << ")";
+        return ss.str();
+      }
+
+      inline
+      static Notation Polytope(size_t d, Index index)
+      {
+        std::stringstream ss;
+        ss << "Polytope(" << d << ", " << index << ")";
+        return ss.str();
+      }
+
+      inline
+      static Notation True()
+      {
+        return Notation("true");
+      }
+
+      inline
+      static Notation False()
+      {
+        return Notation("false");
+      }
+
+      inline
+      static Notation Predicate(bool v, const std::string& pred)
+      {
+        std::stringstream ss;
+        ss << "[" << pred <<  "] = " << (v ? "true" : "false");
+        return ss.str();
+      }
+
+      template <class Iterator>
+      static Notation Set(Iterator first, Iterator last)
+      {
+        std::stringstream ss;
+        ss << "{ ";
+        for (Iterator it = first; it != last; ++it)
+        {
+          ss << *it;
+          if (std::next(it) != last)
+              ss << ", ";
+        }
+        ss << " }";
+        return ss.str();
     }
-  }
+  };
 }
 
 #endif
