@@ -141,6 +141,12 @@ namespace Rodin::Geometry
         return m_components.cend();
       }
 
+      inline
+      size_t getCount() const
+      {
+        return m_components.size();
+      }
+
     private:
       std::deque<Component> m_components;
   };

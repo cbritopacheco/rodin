@@ -138,7 +138,7 @@ namespace Rodin::Variational
       Scalar max() const
       {
         static_assert(std::is_same_v<RangeType, Scalar>,
-            "GridFunction must be Scalar value to use max()");
+            "GridFunction must be scalar valued to use max()");
         return m_data.maxCoeff();
       }
 
@@ -158,8 +158,28 @@ namespace Rodin::Variational
       Scalar min() const
       {
         static_assert(std::is_same_v<RangeType, Scalar>,
-            "GridFunction must be Scalar value to use min()");
+            "GridFunction must be scalar valued to use min()");
         return m_data.minCoeff();
+      }
+
+      inline
+      Derived& normalize()
+      {
+        static_assert(std::is_same_v<RangeType, Math::Vector>,
+            "GridFunction must be vector valued to use normalize()");
+        for (size_t i = 0; i < getSize(); i++)
+          getData().col(i).normalize();
+        return static_cast<Derived&>(*this);
+      }
+
+      inline
+      Derived& stableNormalize()
+      {
+        static_assert(std::is_same_v<RangeType, Math::Vector>,
+            "GridFunction must be vector valued to use stableNormalize()");
+        for (size_t i = 0; i < getSize(); i++)
+          getData().col(i).stableNormalize();
+        return static_cast<Derived&>(*this);
       }
 
       inline
@@ -171,29 +191,29 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const Derived& x() const
+      auto x() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 1);
-        return static_cast<const Derived&>(*this);
+        return static_cast<const Derived&>(*this).x();
       }
 
       inline
       constexpr
-      const Derived& y() const
+      auto y() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 2);
-        return static_cast<const Derived&>(*this);
+        return static_cast<const Derived&>(*this).y();
       }
 
       inline
       constexpr
-      const Derived& z() const
+      auto z() const
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>);
         assert(getFiniteElementSpace().getVectorDimension() >= 3);
-        return static_cast<const Derived&>(*this);
+        return static_cast<const Derived&>(*this).z();
       }
 
       inline

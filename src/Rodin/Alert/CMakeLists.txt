@@ -15,7 +15,8 @@ set(RodinAlert_SRCS
   Exception.cpp
   Warning.cpp
   Info.cpp
-  Success.cpp)
+  Success.cpp
+  Notation.cpp)
 
 add_library(RodinAlert ${RodinAlert_SRCS} ${RodinAlert_HEADERS})
 add_library(Rodin::Alert ALIAS RodinAlert)
