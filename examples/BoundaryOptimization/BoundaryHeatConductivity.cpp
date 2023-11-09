@@ -24,7 +24,7 @@ static constexpr Geometry::Attribute GammaN = 2;
 static constexpr Geometry::Attribute SigmaD = 3;
 static constexpr Geometry::Attribute SigmaN = 2;
 
-static constexpr size_t maxIt = 1000;
+static constexpr size_t maxIt = 10000;
 
 static constexpr Scalar epsilon = 0.001;
 static constexpr Scalar ell = 5;
@@ -109,7 +109,7 @@ int main(int, char**)
     return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
 
-  std::ofstream fObj("obj.txt");
+  std::ofstream fObj("obj4.txt");
   size_t i = 0;
   size_t prevRegionCount = 0;
   while (i < maxIt)
@@ -220,7 +220,7 @@ int main(int, char**)
     conormal.stableNormalize();
 
     Alert::Info() << "Computing shape gradient..." << Alert::Raise;
-    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell * Div(conormal).traceOf(GammaD);
+    auto hadamard = 1. / (epsilon * epsilon) * u.getSolution() * p.getSolution() + ell;
     TrialFunction theta(dsfes);
     TestFunction  w(dsfes);
     Problem hilbert(theta, w);
@@ -236,13 +236,10 @@ int main(int, char**)
     norm = Frobenius(grad);
     grad /= norm.max();
 
-    grad.save("grad.gf");
-    dOmega.save("grad.mesh");
-
     Alert::Info() << "Advecting the distance function." << Alert::Raise;
     MMG::Advect(dist, grad).step(dt);
 
-    if (i < 70)
+    if (true)
     {
       Alert::Info() << "Computing topological sensitivity..." << Alert::Raise;
       GridFunction topo(dsfes);
@@ -304,9 +301,9 @@ int main(int, char**)
     }
 
     Alert::Info() << "Saving files..." << Alert::Raise;
-    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
-    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
-    dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
+    Omega.save("Omega4.mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out4/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out4/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
 
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
     i++;
