@@ -97,6 +97,15 @@ namespace Rodin::Variational
       using Parent = FiniteElementSpaceBase;
 
       /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      inline
+      const auto& getFiniteElement(size_t d, Index i) const
+      {
+        return static_cast<const Derived&>(*this).getFiniteElement(d, i);
+      }
+
+      /**
        * @brief Returns the mapping of the function from the physical element
        * to the reference element.
        * @tparam T Callable type
@@ -125,6 +134,16 @@ namespace Rodin::Variational
       auto getMapping(const std::pair<size_t, Index>& p, const T& v) const
       {
         return static_cast<const Derived&>(*this).getMapping(p, v);
+      }
+
+      /**
+       * @note CRTP function to be overriden in Derived class.
+       */
+      template <class CallableType>
+      inline
+      auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      {
+        return static_cast<const Derived&>(*this).geInversetMapping(idx, v);
       }
   };
 

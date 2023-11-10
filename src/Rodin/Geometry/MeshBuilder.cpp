@@ -125,7 +125,6 @@ namespace Rodin::Geometry
     res.m_connectivity = std::move(m_connectivity);
     res.m_attributeIndex = std::move(m_attributeIndex);
     res.m_transformationIndex = std::move(m_transformationIndex);
-
     return res;
   }
 

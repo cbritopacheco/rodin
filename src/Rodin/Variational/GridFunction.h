@@ -138,8 +138,17 @@ namespace Rodin::Variational
       Scalar max() const
       {
         static_assert(std::is_same_v<RangeType, Scalar>,
-            "GridFunction must be scalar valued to use max()");
+            "GridFunction must be scalar valued.");
         return m_data.maxCoeff();
+      }
+
+      inline
+      constexpr
+      Scalar max(Index& idx) const
+      {
+        static_assert(std::is_same_v<RangeType, Scalar>,
+            "GridFunction must be scalar valued.");
+        return m_data.maxCoeff(&idx);
       }
 
       /**
@@ -158,15 +167,46 @@ namespace Rodin::Variational
       Scalar min() const
       {
         static_assert(std::is_same_v<RangeType, Scalar>,
-            "GridFunction must be scalar valued to use min()");
+            "GridFunction must be scalar valued.");
         return m_data.minCoeff();
+      }
+
+      inline
+      constexpr
+      Scalar min(Index& idx) const
+      {
+        static_assert(std::is_same_v<RangeType, Scalar>,
+            "GridFunction must be scalar valued.");
+        return m_data.minCoeff(&idx);
+      }
+
+      inline
+      constexpr
+      Index argmax() const
+      {
+        static_assert(std::is_same_v<RangeType, Scalar>,
+            "GridFunction must be scalar valued.");
+        Index idx = 0;
+        m_data.maxCoeff(&idx);
+        return idx;
+      }
+
+      inline
+      constexpr
+      Index argmin() const
+      {
+        static_assert(std::is_same_v<RangeType, Scalar>,
+            "GridFunction must be scalar valued.");
+        Index idx = 0;
+        m_data.minCoeff(&idx);
+        return idx;
       }
 
       inline
       Derived& normalize()
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>,
-            "GridFunction must be vector valued to use normalize()");
+            "GridFunction must be vector valued.");
         for (size_t i = 0; i < getSize(); i++)
           getData().col(i).normalize();
         return static_cast<Derived&>(*this);
@@ -176,7 +216,7 @@ namespace Rodin::Variational
       Derived& stableNormalize()
       {
         static_assert(std::is_same_v<RangeType, Math::Vector>,
-            "GridFunction must be vector valued to use stableNormalize()");
+            "GridFunction must be vector valued.");
         for (size_t i = 0; i < getSize(); i++)
           getData().col(i).stableNormalize();
         return static_cast<Derived&>(*this);
@@ -794,6 +834,47 @@ namespace Rodin::Variational
         return { getFiniteElementSpace().getVectorDimension(), 1 };
       }
 
+      template <class Value>
+      inline
+      Derived& setValue(const std::pair<size_t, Index>& p, size_t local, Value&& v)
+      {
+        return setValue(getFiniteElementSpace().getGlobalIndex(p, local), std::forward<Value>(v));
+      }
+
+      template <class Value>
+      inline
+      Derived& setValue(Index global, Value&& v)
+      {
+        if constexpr (std::is_same_v<RangeType, Scalar>)
+        {
+          assert(m_data.size() >= 0);
+          assert(global < static_cast<size_t>(m_data.size()));
+          m_data.coeffRef(global) = std::forward<Value>(v);
+        }
+        else if constexpr (std::is_same_v<RangeType, Math::Vector>)
+        {
+          assert(m_data.cols() >= 0);
+          assert(global < static_cast<size_t>(m_data.cols()));
+          m_data.col(global) = std::forward<Value>(v);
+        }
+        else
+        {
+          assert(false);
+        }
+        return static_cast<Derived&>(*this);
+      }
+
+      /**
+       * @brief Gets the value at the given polytope on the local degree of
+       * freedom.
+       */
+      inline
+      auto getValue(const std::pair<size_t, Index>& p, size_t local) const
+      {
+        return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
+      }
+
+
       /**
        * @brief Gets the value of the GridFunction at the global degree of
        * freedom index.
@@ -805,7 +886,7 @@ namespace Rodin::Variational
         {
           assert(m_data.size() >= 0);
           assert(global < static_cast<size_t>(m_data.size()));
-          return m_data(global);
+          return m_data.coeff(global);
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
@@ -818,16 +899,6 @@ namespace Rodin::Variational
           assert(false);
           return void();
         }
-      }
-
-      /**
-       * @brief Gets the value at the given polytope on the local degree of
-       * freedom.
-       */
-      inline
-      auto getValue(const std::pair<size_t, Index>& p, size_t local) const
-      {
-        return getValue(getFiniteElementSpace().getGlobalIndex(p, local));
       }
 
       /**
