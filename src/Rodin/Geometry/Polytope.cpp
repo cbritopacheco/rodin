@@ -1,5 +1,7 @@
 #include <Eigen/Cholesky>
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/Variational/QuadratureRule.h"
 
 #include "Mesh.h"
@@ -9,20 +11,20 @@
 
 namespace Rodin::Geometry
 {
-  const GeometryIndexed<Math::Matrix> Polytope::s_vertices =
+  const GeometryIndexed<Math::SpatialMatrix> Polytope::s_vertices =
   {
     { Polytope::Type::Point,
-      Math::Matrix{{0}} },
+      Math::SpatialMatrix{{0}} },
     { Polytope::Type::Segment,
-      Math::Matrix{{0, 1}} },
+      Math::SpatialMatrix{{0, 1}} },
     { Polytope::Type::Triangle,
-      Math::Matrix{{0, 1, 0},
+      Math::SpatialMatrix{{0, 1, 0},
                    {0, 0, 1}} },
     { Polytope::Type::Quadrilateral,
-      Math::Matrix{{0, 1, 0, 1},
+      Math::SpatialMatrix{{0, 1, 0, 1},
                    {0, 0, 1, 1}} },
     { Polytope::Type::Tetrahedron,
-      Math::Matrix{{0, 1, 0, 0},
+      Math::SpatialMatrix{{0, 1, 0, 0},
                    {0, 0, 1, 0},
                    {0, 0, 0, 1}} },
   };
@@ -54,7 +56,7 @@ namespace Rodin::Geometry
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
-  const Math::Matrix& Polytope::getVertices(Polytope::Type g)
+  const Math::SpatialMatrix& Polytope::getVertices(Polytope::Type g)
   {
     return s_vertices[g];
   }
@@ -226,6 +228,28 @@ namespace Rodin::Geometry
     return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
   }
 
+  PointBase::PointBase(const PointBase& other)
+    : m_polytopeStorage(other.m_polytopeStorage),
+      m_polytope(other.m_polytope),
+      m_trans(other.m_trans),
+      m_pc(other.m_pc),
+      m_jacobian(other.m_jacobian),
+      m_jacobianInverse(other.m_jacobianInverse),
+      m_jacobianDeterminant(other.m_jacobianDeterminant),
+      m_distortion(other.m_distortion)
+  {}
+
+  PointBase::PointBase(PointBase&& other)
+    : m_polytopeStorage(std::move(other.m_polytopeStorage)),
+      m_polytope(std::move(other.m_polytope)),
+      m_trans(std::move(other.m_trans)),
+      m_pc(std::move(other.m_pc)),
+      m_jacobian(std::move(other.m_jacobian)),
+      m_jacobianInverse(std::move(other.m_jacobianInverse)),
+      m_jacobianDeterminant(std::move(other.m_jacobianDeterminant)),
+      m_distortion(std::move(other.m_distortion))
+  {}
+
   const Polytope& PointBase::getPolytope() const
   {
     if (m_polytopeStorage == PolytopeStorage::Value)
@@ -255,7 +279,9 @@ namespace Rodin::Geometry
   const Math::SpatialVector& PointBase::getPhysicalCoordinates() const
   {
     if (!m_pc.has_value())
+    {
       return m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
+    }
     assert(m_pc.has_value());
     return m_pc.value();
   }
@@ -263,7 +289,9 @@ namespace Rodin::Geometry
   const Math::SpatialMatrix& PointBase::getJacobian() const
   {
     if (!m_jacobian.has_value())
+    {
       return m_jacobian.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
+    }
     assert(m_jacobian.has_value());
     return m_jacobian.value();
   }
@@ -278,12 +306,11 @@ namespace Rodin::Geometry
       assert(rdim <= sdim);
       if (rdim == sdim)
       {
-        return m_jacobianInverse.emplace(getJacobian().inverse());
         switch (rdim)
         {
           case 1:
           {
-            Math::Matrix inv(1, 1);
+            Math::SpatialMatrix inv(1, 1);
             inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
             m_jacobianDeterminant.emplace(getJacobian().coeff(0, 0));
             return m_jacobianInverse.emplace(std::move(inv));
@@ -298,7 +325,7 @@ namespace Rodin::Geometry
             const Scalar det = a * d - b * c;
             assert(det != 0);
             m_jacobianDeterminant.emplace(det);
-            Math::Matrix inv(2, 2);
+            Math::SpatialMatrix inv(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
             inv.coeffRef(1, 0) = -c / det;
@@ -330,9 +357,8 @@ namespace Rodin::Geometry
 
             const Scalar det = a * A + b * B + c * C;
             m_jacobianDeterminant.emplace(det);
-
             assert(det != 0);
-            Math::Matrix inv(3, 3);
+            Math::SpatialMatrix inv(3, 3);
             inv.coeffRef(0, 0) = A / det;
             inv.coeffRef(0, 1) = D / det;
             inv.coeffRef(0, 2) = G / det;

@@ -12,6 +12,8 @@
 #include <array>
 #include <optional>
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
@@ -52,7 +54,7 @@ namespace Rodin::Geometry
         Type::Tetrahedron
       };
 
-      static const Math::Matrix& getVertices(Polytope::Type g);
+      static const Math::SpatialMatrix& getVertices(Polytope::Type g);
 
       inline
       constexpr
@@ -180,7 +182,7 @@ namespace Rodin::Geometry
       Type getGeometry() const;
 
     private:
-      static const GeometryIndexed<Math::Matrix> s_vertices;
+      static const GeometryIndexed<Math::SpatialMatrix> s_vertices;
 
       const size_t m_dimension;
       const Index m_index;
@@ -356,12 +358,12 @@ namespace Rodin::Geometry
       /**
        * @brief Copy constructor.
        */
-      PointBase(const PointBase&) = default;
+      PointBase(const PointBase& other);
 
       /**
        * @brief Move constructor.
        */
-      PointBase(PointBase&&) = default;
+      PointBase(PointBase&& other);
 
       /**
        * @brief Gets the space dimension of the physical coordinates.

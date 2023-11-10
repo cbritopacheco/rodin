@@ -27,7 +27,7 @@ static constexpr Geometry::Attribute SigmaN = 2;
 static constexpr size_t maxIt = 10000;
 
 static constexpr Scalar epsilon = 0.001;
-static constexpr Scalar ell = 5;
+static constexpr Scalar ell = 1;
 static constexpr Scalar radius = 0.02;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
 
