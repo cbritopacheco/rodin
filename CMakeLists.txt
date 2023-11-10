@@ -32,6 +32,7 @@ option(RODIN_SILENCE_EXCEPTIONS     "Silence exceptions thrown by Rodin"        
 option(RODIN_CODE_COVERAGE          "Compile with code coverage flags"          OFF)
 option(RODIN_LTO                    "Compile with link time optimization"       OFF)
 option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
+option(RODIN_THREAD_SAFE            "Enforces thread-safety."                   FALSE)
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
