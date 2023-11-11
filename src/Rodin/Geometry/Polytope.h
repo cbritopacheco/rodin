@@ -17,6 +17,7 @@
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Threads/Mutable.h"
 
 #include "ForwardDecls.h"
 
@@ -54,7 +55,7 @@ namespace Rodin::Geometry
         Type::Tetrahedron
       };
 
-      static const Math::SpatialMatrix& getVertices(Polytope::Type g);
+      static const Math::PointMatrix& getVertices(Polytope::Type g);
 
       inline
       constexpr
@@ -182,7 +183,7 @@ namespace Rodin::Geometry
       Type getGeometry() const;
 
     private:
-      static const GeometryIndexed<Math::SpatialMatrix> s_vertices;
+      static const GeometryIndexed<Math::PointMatrix> s_vertices;
 
       const size_t m_dimension;
       const Index m_index;
@@ -479,11 +480,11 @@ namespace Rodin::Geometry
       std::variant<const Polytope, std::reference_wrapper<const Polytope>> m_polytope;
       std::reference_wrapper<const PolytopeTransformation> m_trans;
 
-      mutable std::optional<const Math::SpatialVector> m_pc;
-      mutable std::optional<const Math::SpatialMatrix> m_jacobian;
-      mutable std::optional<const Math::SpatialMatrix> m_jacobianInverse;
-      mutable std::optional<const Scalar>              m_jacobianDeterminant;
-      mutable std::optional<const Scalar>              m_distortion;
+      mutable Threads::Mutable<std::optional<const Math::SpatialVector>> m_pc;
+      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix>> m_jacobian;
+      mutable Threads::Mutable<std::optional<const Math::SpatialMatrix>> m_jacobianInverse;
+      mutable Threads::Mutable<std::optional<const Scalar>>              m_jacobianDeterminant;
+      mutable Threads::Mutable<std::optional<const Scalar>>              m_distortion;
   };
 
   /**
