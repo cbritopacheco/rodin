@@ -442,7 +442,8 @@ namespace Rodin::Variational
 
   /**
    * @ingroup QuadratureRuleSpecializations
-   * @brief Integration of the isotropic Dot product of two instances of the P1 Grad of ShapeFunction.
+   * @brief Integration of the isotropic Dot product of two instances of the P1
+   * Grad of ShapeFunction.
    *
    * This class represents the CTAD for the expression:
    * @f[

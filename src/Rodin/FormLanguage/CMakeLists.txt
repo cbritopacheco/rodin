@@ -12,3 +12,5 @@ add_library(Rodin::FormLanguage ALIAS RodinFormLanguage)
 target_include_directories(RodinFormLanguage
   PUBLIC $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
+target_link_libraries(RodinFormLanguage PUBLIC Rodin::Threads)
+

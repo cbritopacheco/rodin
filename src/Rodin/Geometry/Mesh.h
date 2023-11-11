@@ -16,6 +16,7 @@
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
 #include "Rodin/Configure.h"
+#include "Rodin/Threads/Mutable.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Utility/IsSpecialization.h"
 #include "Rodin/Variational/Traits.h"
@@ -732,7 +733,11 @@ namespace Rodin::Geometry
 
       virtual void flush() override
       {
-        m_transformationIndex.clear();
+        m_transformationIndex.write(
+            [](auto& obj)
+            {
+              obj.clear();
+            });
       }
 
       /**
@@ -850,7 +855,7 @@ namespace Rodin::Geometry
 
       const TransformationIndex& getTransformationIndex() const
       {
-        return m_transformationIndex;
+        return m_transformationIndex.read();
       }
 
       inline
@@ -931,7 +936,7 @@ namespace Rodin::Geometry
       MeshConnectivity m_connectivity;
 
       AttributeIndex m_attributeIndex;
-      mutable TransformationIndex m_transformationIndex;
+      mutable Threads::Mutable<TransformationIndex> m_transformationIndex;
 
       std::vector<FlatSet<Attribute>> m_attributes;
   };

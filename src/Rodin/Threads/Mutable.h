@@ -35,6 +35,62 @@ namespace Rodin::Threads
         : m_resource(other.m_resource)
       {}
 
+      constexpr
+      Mutable& operator=(const Resource& resource)
+      {
+#ifdef RODIN_THREAD_SAFE
+        lock();
+        m_resource = resource;
+        unlock();
+#endif
+        return *this;
+      }
+
+      constexpr
+      Mutable& operator=(Resource&& resource)
+      {
+#ifdef RODIN_THREAD_SAFE
+        lock();
+        m_resource = std::move(resource);
+        unlock();
+#else
+        m_resource = std::move(resource);
+#endif
+
+        return *this;
+      }
+
+      constexpr
+      Mutable& operator=(const Mutable& other)
+      {
+        if (this != &other)
+        {
+#ifdef RODIN_THREAD_SAFE
+          lock();
+          m_resource = other.m_resource;
+          unlock();
+#else
+          m_resource = other.m_resource;
+#endif
+        }
+        return *this;
+      }
+
+      constexpr
+      Mutable& operator=(Mutable&& other)
+      {
+#ifdef RODIN_THREAD_SAFE
+        lock();
+        other.lock();
+        m_resource = std::move(other.m_resource);
+        other.unlock();
+        unlock();
+#else
+        m_resource = std::move(other.m_resource);
+#endif
+        return *this;
+      }
+
       inline
       constexpr
       const Resource& read() const
@@ -58,25 +114,27 @@ namespace Rodin::Threads
         return *this;
       }
 
+#ifdef RODIN_THREAD_SAFE
     protected:
       inline
       constexpr
-      Mutable& lock()
+      void lock()
       {
         m_lock.lock();
-        return *this;
       }
 
       inline
       constexpr
-      Mutable& unlock()
+      void unlock()
       {
         m_lock.unlock();
-        return *this;
       }
+#endif
 
     private:
+#ifdef RODIN_THREAD_SAFE
       Lock m_lock;
+#endif
       Resource m_resource;
   };
 }
