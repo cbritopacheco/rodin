@@ -27,20 +27,42 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Polytope& PolytopeIterator::operator*() const noexcept
+  const Polytope& PolytopeIterator::operator*() const noexcept
   {
-    if (!m_polytope || m_dirty)
-      m_polytope.reset(generate());
-    m_dirty = false;
-    return *m_polytope;
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      Polytope* polytope = generate();
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return *(m_polytope.read());
   }
 
-  Polytope* PolytopeIterator::operator->() const noexcept
+  const Polytope* PolytopeIterator::operator->() const noexcept
   {
-    if (!m_polytope || m_dirty)
-      m_polytope.reset(generate());
-    m_dirty = false;
-    return m_polytope.get();
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      Polytope* polytope = generate();
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return m_polytope.read().get();
   }
 
   Polytope* PolytopeIterator::generate() const
@@ -53,7 +75,18 @@ namespace Rodin::Geometry
     return new Polytope(dimension, index, mesh);
   }
 
-  // ---- ElementIterator ---------------------------------------------------
+  Polytope* PolytopeIterator::release()
+  {
+    Polytope* polytope = nullptr;
+    m_polytope.write(
+        [&](auto& obj)
+        {
+          polytope = obj.release();
+        });
+    return polytope;
+  }
+
+  // ---- CellIterator -------------------------------------------------------
   CellIterator::CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
     : m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
   {}
@@ -70,20 +103,42 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Cell& CellIterator::operator*() const noexcept
+  const Cell& CellIterator::operator*() const noexcept
   {
-    if (!m_polytope || m_dirty)
-      m_polytope.reset(generate());
-    m_dirty = false;
-    return *m_polytope;
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      Cell* polytope = generate();
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return *(m_polytope.read());
   }
 
-  Cell* CellIterator::operator->() const noexcept
+  const Cell* CellIterator::operator->() const noexcept
   {
-    if (!m_polytope || m_dirty)
-      m_polytope.reset(generate());
-    m_dirty = false;
-    return m_polytope.get();
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      Cell* polytope = generate();
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return m_polytope.read().get();
   }
 
   size_t CellIterator::getDimension() const
@@ -100,7 +155,18 @@ namespace Rodin::Geometry
     return new Cell(index, mesh);
   }
 
-  // ---- FaceIterator ------------------------------------------------------
+  Cell* CellIterator::release()
+  {
+    Cell* polytope = nullptr;
+    m_polytope.write(
+        [&](auto& obj)
+        {
+          polytope = obj.release();
+        });
+    return polytope;
+  }
+
+  // ---- FaceIterator -------------------------------------------------------
   FaceIterator::FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
     : m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
   {}
@@ -117,20 +183,42 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Face& FaceIterator::operator*() const noexcept
+  const Face& FaceIterator::operator*() const noexcept
   {
-    if (!m_polytope || m_dirty)
-      m_polytope.reset(generate());
-    m_dirty = false;
-    return *m_polytope;
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      Face* polytope = generate();
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return *(m_polytope.read());
   }
 
-  Face* FaceIterator::operator->() const noexcept
+  const Face* FaceIterator::operator->() const noexcept
   {
-    if (!m_polytope || m_dirty)
-      m_polytope.reset(generate());
-    m_dirty = false;
-    return m_polytope.get();
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      Face* polytope = generate();
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return m_polytope.read().get();
   }
 
   size_t FaceIterator::getDimension() const
@@ -147,7 +235,18 @@ namespace Rodin::Geometry
     return new Face(index, mesh);
   }
 
-  // ---- VertexIterator ------------------------------------------------------
+  Face* FaceIterator::release()
+  {
+    Face* polytope = nullptr;
+    m_polytope.write(
+        [&](auto& obj)
+        {
+          polytope = obj.release();
+        });
+    return polytope;
+  }
+
+  // ---- VertexIterator -----------------------------------------------------
   VertexIterator::VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen)
     : m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
   {}
@@ -164,20 +263,42 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Vertex& VertexIterator::operator*() const noexcept
+  const Vertex& VertexIterator::operator*() const noexcept
   {
-    if (!m_vertex || m_dirty)
-      m_vertex.reset(generate());
-    m_dirty = false;
-    return *m_vertex;
+    if (!m_vertex.read() || m_dirty.read())
+    {
+      Vertex* polytope = generate();
+      m_vertex.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return *(m_vertex.read());
   }
 
-  Vertex* VertexIterator::operator->() const noexcept
+  const Vertex* VertexIterator::operator->() const noexcept
   {
-    if (!m_vertex || m_dirty)
-      m_vertex.reset(generate());
-    m_dirty = false;
-    return m_vertex.get();
+    if (!m_vertex.read() || m_dirty.read())
+    {
+      Vertex* polytope = generate();
+      m_vertex.write(
+          [&](auto& obj)
+          {
+            obj.reset(polytope);
+          });
+    }
+    m_dirty.write(
+        [](auto& obj)
+        {
+          obj = false;
+        });
+    return m_vertex.read().get();
   }
 
   constexpr size_t VertexIterator::getDimension() const
@@ -192,5 +313,16 @@ namespace Rodin::Geometry
     const auto& index = *gen;
     const auto& mesh = getMesh();
     return new Vertex(index, mesh);
+  }
+
+  Vertex* VertexIterator::release()
+  {
+    Vertex* polytope = nullptr;
+    m_vertex.write(
+        [&](auto& obj)
+        {
+          polytope = obj.release();
+        });
+    return polytope;
   }
 }

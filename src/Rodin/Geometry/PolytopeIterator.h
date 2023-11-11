@@ -10,6 +10,8 @@
 #include <memory>
 #include <utility>
 
+#include "Rodin/Threads/Unsafe.h"
+
 #include "ForwardDecls.h"
 
 #include "Polytope.h"
@@ -19,6 +21,10 @@ namespace Rodin::Geometry
 {
   /**
    * @brief Represents an iterator over a set of polytopes of a mesh.
+   *
+   * @warning The PolytopeIterator class is not thread safe, i.e. only one
+   * thread should have access to one particular instance of the iterator at a
+   * time.
    */
   class PolytopeIterator
   {
@@ -43,9 +49,11 @@ namespace Rodin::Geometry
 
       PolytopeIterator& operator++();
 
-      Polytope& operator*() const noexcept;
+      const Polytope& operator*() const noexcept;
 
-      Polytope* operator->() const noexcept;
+      const Polytope* operator->() const noexcept;
+
+      Polytope* release();
 
       inline
       constexpr
@@ -80,12 +88,15 @@ namespace Rodin::Geometry
       size_t m_dimension;
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable bool m_dirty;
-      mutable std::unique_ptr<Polytope> m_polytope;
+      mutable Threads::Unsafe<bool> m_dirty;
+      mutable Threads::Unsafe<std::unique_ptr<Polytope>> m_polytope;
   };
 
   /**
    * @brief Represents an iterator over a set of cells of a mesh.
+   *
+   * @warning The CellIterator class is not thread safe, i.e. only one thread
+   * should have access to one particular instance of the iterator at a time.
    */
   class CellIterator
   {
@@ -108,11 +119,13 @@ namespace Rodin::Geometry
 
       bool end() const;
 
+      Cell* release();
+
       CellIterator& operator++();
 
-      Cell& operator*() const noexcept;
+      const Cell& operator*() const noexcept;
 
-      Cell* operator->() const noexcept;
+      const Cell* operator->() const noexcept;
 
       size_t getDimension() const;
 
@@ -141,12 +154,15 @@ namespace Rodin::Geometry
 
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable bool m_dirty;
-      mutable std::unique_ptr<Cell> m_polytope;
+      mutable Threads::Unsafe<bool> m_dirty;
+      mutable Threads::Unsafe<std::unique_ptr<Cell>> m_polytope;
   };
 
   /**
    * @brief Represents an iterator over a set of faces of a mesh.
+   *
+   * @warning The FaceIterator class is not thread safe, i.e. only one thread
+   * should have access to one particular instance of the iterator at a time.
    */
   class FaceIterator
   {
@@ -169,11 +185,13 @@ namespace Rodin::Geometry
 
       bool end() const;
 
+      Face* release();
+
       FaceIterator& operator++();
 
-      Face& operator*() const noexcept;
+      const Face& operator*() const noexcept;
 
-      Face* operator->() const noexcept;
+      const Face* operator->() const noexcept;
 
       size_t getDimension() const;
 
@@ -202,12 +220,15 @@ namespace Rodin::Geometry
 
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable bool m_dirty;
-      mutable std::unique_ptr<Face> m_polytope;
+      mutable Threads::Unsafe<bool> m_dirty;
+      mutable Threads::Unsafe<std::unique_ptr<Face>> m_polytope;
   };
 
   /**
    * @brief Represents an iterator over a set of vertices of a mesh.
+   *
+   * @warning The VertexIterator class is not thread safe, i.e. only one thread
+   * should have access to one particular instance of the iterator at a time.
    */
   class VertexIterator
   {
@@ -230,11 +251,13 @@ namespace Rodin::Geometry
 
       bool end() const;
 
+      Vertex* release();
+
       VertexIterator& operator++();
 
-      Vertex& operator*() const noexcept;
+      const Vertex& operator*() const noexcept;
 
-      Vertex* operator->() const noexcept;
+      const Vertex* operator->() const noexcept;
 
       constexpr size_t getDimension() const;
 
@@ -263,8 +286,8 @@ namespace Rodin::Geometry
 
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable bool m_dirty;
-      mutable std::unique_ptr<Vertex> m_vertex;
+      mutable Threads::Unsafe<bool> m_dirty;
+      mutable Threads::Unsafe<std::unique_ptr<Vertex>> m_vertex;
   };
 }
 

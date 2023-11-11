@@ -5,18 +5,18 @@ Distributed under the Boost Software License, Version 1.0.
          https://www.boost.org/LICENSE_1_0.txt)
 ]]
 set(RodinAlert_HEADERS
-  Message.h
-  Exception.h
-  Warning.h
   Info.h
-  Success.h)
+  Message.h
+  Warning.h
+  Success.h
+  Exception.h)
 
 set(RodinAlert_SRCS
-  Exception.cpp
-  Warning.cpp
   Info.cpp
+  Warning.cpp
   Success.cpp
-  Notation.cpp)
+  Notation.cpp
+  Exception.cpp)
 
 add_library(RodinAlert ${RodinAlert_SRCS} ${RodinAlert_HEADERS})
 add_library(Rodin::Alert ALIAS RodinAlert)

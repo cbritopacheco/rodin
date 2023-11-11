@@ -287,7 +287,11 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>& Mesh<Context::Serial>::setPolytopeTransformation(
       const std::pair<size_t, Index> p, std::unique_ptr<PolytopeTransformation> trans)
   {
-    m_transformationIndex.track(p, std::move(trans));
+    m_transformationIndex.write(
+        [&](auto& obj)
+        {
+          obj.track(p, std::move(trans));
+        });
     return *this;
   }
 
@@ -323,18 +327,25 @@ namespace Rodin::Geometry
   const PolytopeTransformation&
   Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
-    auto it = m_transformationIndex.find(dimension, idx);
-    if (it != m_transformationIndex.end(dimension))
+    auto it = m_transformationIndex.read().find(dimension, idx);
+    if (it != m_transformationIndex.read().end(dimension))
     {
-      assert(m_transformationIndex.at(dimension, idx));
+      assert(m_transformationIndex.read().at(dimension, idx));
       return *it->second;
     }
     else
     {
       PolytopeTransformation* trans = getDefaultPolytopeTransformation(dimension, idx);
-      auto p = m_transformationIndex.insert(
-          it, { dimension, idx }, std::unique_ptr<PolytopeTransformation>(trans));
-      return *p->second;
+      std::optional<std::reference_wrapper<const PolytopeTransformation>> res;
+      m_transformationIndex.write(
+          [&](auto& obj)
+          {
+            auto p = obj.insert(
+                it, { dimension, idx }, std::unique_ptr<PolytopeTransformation>(trans));
+            res = *p->second;
+          });
+      assert(res.has_value());
+      return res.value();
     }
   }
 

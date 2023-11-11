@@ -114,8 +114,8 @@ namespace Rodin::Alert
        */
       const char* what() const noexcept
       {
-        m_what = m_ss.str();
-        return m_what.c_str();
+        s_what = m_ss.str();
+        return s_what.c_str();
       }
 
       /**
@@ -175,13 +175,17 @@ namespace Rodin::Alert
       }
 
     private:
+      static thread_local std::string s_what;
+
       std::reference_wrapper<std::ostream> m_os;
       Prefix m_prefix;
       std::stringstream m_ss;
       std::stringstream m_styled;
       bool m_newline;
-      mutable std::string m_what;
   };
+
+  template <class Prefix>
+  thread_local std::string Message<Prefix>::s_what;
 }
 
 #endif
