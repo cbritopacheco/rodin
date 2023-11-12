@@ -110,9 +110,12 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::reserve(size_t d, size_t count)
   {
-    m_connectivity.reserve(d, count);
-    m_attributeIndex.reserve(d, count);
-    m_transformationIndex[d].write([&](auto& obj){ obj.reserve(count); });
+    if (count > 0)
+    {
+      m_connectivity.reserve(d, count);
+      m_attributeIndex.reserve(d, count);
+      m_transformationIndex[d].write([&](auto& obj){ obj.reserve(count); });
+    }
     return *this;
   }
 
