@@ -477,7 +477,7 @@ namespace Rodin::Geometry
       virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) = 0;
 
       virtual MeshBase& setPolytopeTransformation(
-          const std::pair<size_t, Index> p, std::unique_ptr<PolytopeTransformation> trans) = 0;
+          const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
   };
 
   /// Index containing the indices of boundary cells.
@@ -487,7 +487,8 @@ namespace Rodin::Geometry
   using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
 
   /// Index containing the transformations of the polytopes.
-  using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
+  using TransformationIndex =
+    std::vector<Threads::Mutable<std::vector<PolytopeTransformation*>>>;
 
   /**
    *
@@ -696,6 +697,8 @@ namespace Rodin::Geometry
       */
       Mesh(Mesh&& other);
 
+      virtual ~Mesh();
+
       Mesh& operator=(const Mesh& other) = delete;
 
       /**
@@ -733,11 +736,8 @@ namespace Rodin::Geometry
 
       virtual void flush() override
       {
-        m_transformationIndex.write(
-            [](auto& obj)
-            {
-              obj.clear();
-            });
+        for (auto& mt : m_transformationIndex)
+          mt.write([](auto& obj) { obj.clear(); });
       }
 
       /**
@@ -855,7 +855,7 @@ namespace Rodin::Geometry
 
       const TransformationIndex& getTransformationIndex() const
       {
-        return m_transformationIndex.read();
+        return m_transformationIndex;
       }
 
       inline
@@ -918,8 +918,7 @@ namespace Rodin::Geometry
       virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
-          const std::pair<size_t, Index> p,
-          std::unique_ptr<PolytopeTransformation> trans) override;
+          const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
 
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
@@ -936,7 +935,7 @@ namespace Rodin::Geometry
       MeshConnectivity m_connectivity;
 
       AttributeIndex m_attributeIndex;
-      mutable Threads::Mutable<TransformationIndex> m_transformationIndex;
+      mutable TransformationIndex m_transformationIndex;
 
       std::vector<FlatSet<Attribute>> m_attributes;
   };

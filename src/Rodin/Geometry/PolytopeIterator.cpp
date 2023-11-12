@@ -77,13 +77,20 @@ namespace Rodin::Geometry
 
   Polytope* PolytopeIterator::release()
   {
-    Polytope* polytope = nullptr;
-    m_polytope.write(
-        [&](auto& obj)
-        {
-          polytope = obj.release();
-        });
-    return polytope;
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      return generate();
+    }
+    else
+    {
+      Polytope* polytope = nullptr;
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            polytope = obj.release();
+          });
+      return polytope;
+    }
   }
 
   // ---- CellIterator -------------------------------------------------------
@@ -157,13 +164,20 @@ namespace Rodin::Geometry
 
   Cell* CellIterator::release()
   {
-    Cell* polytope = nullptr;
-    m_polytope.write(
-        [&](auto& obj)
-        {
-          polytope = obj.release();
-        });
-    return polytope;
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      return generate();
+    }
+    else
+    {
+      Cell* polytope = nullptr;
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            polytope = obj.release();
+          });
+      return polytope;
+    }
   }
 
   // ---- FaceIterator -------------------------------------------------------
@@ -237,13 +251,20 @@ namespace Rodin::Geometry
 
   Face* FaceIterator::release()
   {
-    Face* polytope = nullptr;
-    m_polytope.write(
-        [&](auto& obj)
-        {
-          polytope = obj.release();
-        });
-    return polytope;
+    if (!m_polytope.read() || m_dirty.read())
+    {
+      return generate();
+    }
+    else
+    {
+      Face* polytope = nullptr;
+      m_polytope.write(
+          [&](auto& obj)
+          {
+            polytope = obj.release();
+          });
+      return polytope;
+    }
   }
 
   // ---- VertexIterator -----------------------------------------------------
@@ -317,12 +338,19 @@ namespace Rodin::Geometry
 
   Vertex* VertexIterator::release()
   {
-    Vertex* polytope = nullptr;
-    m_vertex.write(
-        [&](auto& obj)
-        {
-          polytope = obj.release();
-        });
-    return polytope;
+    if (!m_vertex.read() || m_dirty.read())
+    {
+      return generate();
+    }
+    else
+    {
+      Vertex* polytope = nullptr;
+      m_vertex.write(
+          [&](auto& obj)
+          {
+            polytope = obj.release();
+          });
+      return polytope;
+    }
   }
 }
