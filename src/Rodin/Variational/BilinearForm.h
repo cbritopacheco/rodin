@@ -7,9 +7,10 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
+#include "Rodin/Assembly/ForwardDecls.h"
+#include "Rodin/Assembly/Multithreaded.h"
 
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
@@ -29,11 +30,16 @@ namespace Rodin::Variational
   {
     public:
       using SerialAssembly = Assembly::Serial<BilinearFormBase>;
+      using MultithreadedAssembly = Assembly::Multithreaded<BilinearFormBase>;
       using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
 
       BilinearFormBase()
       {
+#ifdef RODIN_THREAD_SAFE
+        m_assembly.reset(new MultithreadedAssembly);
+#else
         m_assembly.reset(new SerialAssembly);
+#endif
       }
 
       BilinearFormBase(const BilinearFormBase& other)

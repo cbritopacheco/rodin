@@ -9,6 +9,7 @@
 
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Assembly/ForwardDecls.h"
+#include "Rodin/Assembly/Multithreaded.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
@@ -22,10 +23,16 @@ namespace Rodin::Variational
   {
     public:
       using SerialAssembly = Assembly::Serial<LinearFormBase>;
+      using MultithreadedAssembly = Assembly::Multithreaded<LinearFormBase>;
+      using OpenMPAssembly = Assembly::OpenMP<LinearFormBase>;
 
       LinearFormBase()
       {
+#ifdef RODIN_THREAD_SAFE
+        m_assembly.reset(new MultithreadedAssembly);
+#else
         m_assembly.reset(new SerialAssembly);
+#endif
       }
 
       LinearFormBase(const LinearFormBase& other)

@@ -48,7 +48,7 @@ namespace Rodin::Assembly
   ::execute(const BilinearAssemblyInput& input) const
   {
     std::vector<Eigen::Triplet<Scalar>> res;
-    // res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
+    res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
     for (auto& bfi : input.bfis)
     {
       const auto& attrs = bfi.getAttributes();

@@ -6,7 +6,7 @@ set(RodinAssembly_HEADERS
 set(RodinAssembly_SRCS
   AssemblyBase.cpp
   Serial.cpp
-  Multithreaded.h)
+  Multithreaded.cpp)
 
 add_library(RodinAssembly
   ${RodinAssembly_SRCS} ${RodinAssembly_HEADERS})
@@ -24,6 +24,7 @@ target_include_directories(RodinAssembly
 
 target_link_libraries(RodinAssembly
   PUBLIC
+  Threads::Threads
   Rodin::Utility
   Rodin::FormLanguage
   Rodin::Variational)

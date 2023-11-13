@@ -4,11 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_Multithreaded_H
-#define RODIN_ASSEMBLY_Multithreaded_H
+#ifndef RODIN_ASSEMBLY_MULTITHREADED_H
+#define RODIN_ASSEMBLY_MULTITHREADED_H
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
+
+#include "Rodin/Threads/Mutex.h"
 
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
@@ -31,15 +33,13 @@ namespace Rodin::Assembly
         AssemblyBase<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>;
       using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
-      Multithreaded() = default;
+      Multithreaded();
 
-      Multithreaded(const Multithreaded& other)
-        : Parent(other)
-      {}
+      Multithreaded(size_t threadCount);
 
-      Multithreaded(Multithreaded&& other)
-        : Parent(std::move(other))
-      {}
+      Multithreaded(const Multithreaded& other);
+
+      Multithreaded(Multithreaded&& other);
 
       /**
        * @brief Executes the assembly and returns the linear operator
@@ -51,6 +51,13 @@ namespace Rodin::Assembly
       {
         return new Multithreaded(*this);
       }
+
+    private:
+      static thread_local std::vector<Eigen::Triplet<Scalar>> tl_triplets;
+      static thread_local std::unique_ptr<Variational::BilinearFormIntegratorBase> tl_bfi;
+
+      const size_t m_threadCount;
+      mutable Threads::Mutex m_mutex;
   };
 
   /**
@@ -65,15 +72,13 @@ namespace Rodin::Assembly
       using Parent = AssemblyBase<Variational::BilinearFormBase<Math::SparseMatrix>>;
       using OperatorType = Math::SparseMatrix;
 
-      Multithreaded() = default;
+      Multithreaded();
 
-      Multithreaded(const Multithreaded& other)
-        : Parent(other)
-      {}
+      Multithreaded(size_t threadCount);
 
-      Multithreaded(Multithreaded&& other)
-        : Parent(std::move(other))
-      {}
+      Multithreaded(const Multithreaded& other);
+
+      Multithreaded(Multithreaded&& other);
 
       /**
        * @brief Executes the assembly and returns the linear operator
@@ -85,6 +90,9 @@ namespace Rodin::Assembly
       {
         return new Multithreaded(*this);
       }
+
+    private:
+      const size_t m_threadCount;
   };
 
   /**
@@ -102,15 +110,13 @@ namespace Rodin::Assembly
       using Parent = AssemblyBase<Variational::LinearFormBase<Math::Vector>>;
       using VectorType = Math::Vector;
 
-      Multithreaded() = default;
+      Multithreaded();
 
-      Multithreaded(const Multithreaded& other)
-        : Parent(other)
-      {}
+      Multithreaded(size_t threadCount);
 
-      Multithreaded(Multithreaded&& other)
-        : Parent(std::move(other))
-      {}
+      Multithreaded(const Multithreaded& other);
+
+      Multithreaded(Multithreaded&& other);
 
       /**
        * @brief Executes the assembly and returns the vector associated to the
@@ -122,6 +128,13 @@ namespace Rodin::Assembly
       {
         return new Multithreaded(*this);
       }
+
+    private:
+      static thread_local VectorType tl_res;
+      static thread_local std::unique_ptr<Variational::LinearFormIntegratorBase> tl_lfi;
+
+      const size_t m_threadCount;
+      mutable Threads::Mutex m_mutex;
   };
 }
 
