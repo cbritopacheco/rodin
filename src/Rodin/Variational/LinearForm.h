@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
@@ -20,11 +21,11 @@ namespace Rodin::Variational
   class LinearFormBase : public FormLanguage::Base
   {
     public:
-      using NativeAssembly = Assembly::Native<LinearFormBase>;
+      using SerialAssembly = Assembly::Serial<LinearFormBase>;
 
       LinearFormBase()
       {
-        m_assembly.reset(new NativeAssembly);
+        m_assembly.reset(new SerialAssembly);
       }
 
       LinearFormBase(const LinearFormBase& other)

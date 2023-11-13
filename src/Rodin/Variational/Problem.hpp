@@ -11,7 +11,7 @@
 
 #include "Rodin/Utility.h"
 
-#include "Assembly/Native.h"
+#include "Rodin/Assembly/Serial.h"
 
 #include "GridFunction.h"
 #include "DirichletBC.h"
