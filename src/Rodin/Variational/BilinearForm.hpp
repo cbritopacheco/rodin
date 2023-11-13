@@ -10,6 +10,7 @@
 #include <cassert>
 
 #include "Rodin/Alert.h"
+#include "Rodin/Assembly/AssemblyBase.h"
 
 #include "BilinearForm.h"
 #include "BilinearFormIntegrator.h"
