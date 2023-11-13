@@ -11,8 +11,6 @@
 
 #include "Rodin/Alert.h"
 
-#include "Assembly/AssemblyBase.h"
-
 #include "BilinearForm.h"
 #include "BilinearFormIntegrator.h"
 #include "FiniteElementSpace.h"

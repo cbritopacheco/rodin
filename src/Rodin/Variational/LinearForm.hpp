@@ -9,8 +9,6 @@
 
 #include "Rodin/Alert.h"
 
-#include "Assembly/AssemblyBase.h"
-
 #include "LinearForm.h"
 #include "LinearFormIntegrator.h"
 #include "FiniteElementSpace.h"

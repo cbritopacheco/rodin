@@ -35,6 +35,17 @@
  */
 
 /**
+  @dir Rodin/Assembly
+  @brief Namespace @ref Rodin::Assembly
+ */
+
+/**
+  @namespace Rodin::Assembly
+  @brief Module for performing the assembly of linear algebra objects from
+  variational expressions.
+ */
+
+/**
   @dir Rodin/Geometry/Euclidean
   @brief Namespace @ref Rodin::Geometry::Euclidean
  */

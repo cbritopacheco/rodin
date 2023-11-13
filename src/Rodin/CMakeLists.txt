@@ -31,6 +31,7 @@ add_subdirectory(Solver)
 add_subdirectory(Utility)
 add_subdirectory(Threads)
 add_subdirectory(Geometry)
+add_subdirectory(Assembly)
 add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
 

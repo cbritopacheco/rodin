@@ -7,8 +7,7 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-
+#include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -29,12 +28,12 @@ namespace Rodin::Variational
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using NativeAssembly = Assembly::Native<BilinearFormBase>;
+      using SerialAssembly = Assembly::Serial<BilinearFormBase>;
       using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
 
       BilinearFormBase()
       {
-        m_assembly.reset(new NativeAssembly);
+        m_assembly.reset(new SerialAssembly);
       }
 
       BilinearFormBase(const BilinearFormBase& other)
