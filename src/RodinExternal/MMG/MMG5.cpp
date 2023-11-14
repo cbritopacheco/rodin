@@ -432,7 +432,7 @@ namespace Rodin::External::MMG
     {
       constexpr size_t edgeDim = 1;
       res->ne = src.getCellCount();
-      res->na = src.getCount(edgeDim);
+      res->na = src.getPolytopeCount(edgeDim);
       res->nt = src.getFaceCount();
 
       MMG3D_Set_commonFunc();

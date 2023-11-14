@@ -8,7 +8,7 @@
 #define RODIN_FORMLANGUAGE_BASE_H
 
 #include <atomic>
-#include <deque>
+#include <vector>
 #include <memory>
 #include <cassert>
 #include <variant>
@@ -16,6 +16,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
+#include "Rodin/Threads/Unsafe.h"
 #include "Rodin/Utility/DependentFalse.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -26,10 +27,14 @@ namespace Rodin::FormLanguage
 {
   /**
    * @brief Base class for all classes which are part of Rodin's FormLanguage.
+   *
+   * @warning The FormLanguage::Base class is not thread safe, i.e. only one
+   * thread should have access to the methods of the FormLanguage object at a
+   * time.
    */
   class Base : public Copyable
   {
-    static thread_local size_t s_id;
+    using ObjectTable = std::vector<std::shared_ptr<const void>>;
 
     public:
       using UUID = size_t;
@@ -39,7 +44,13 @@ namespace Rodin::FormLanguage
        */
       Base()
         : m_uuid(s_id++)
-      {}
+      {
+        m_objs.write(
+            [](auto& obj)
+            {
+              obj.reserve(8);
+            });
+      }
 
       /**
        * @brief Copy constructor.
@@ -93,7 +104,7 @@ namespace Rodin::FormLanguage
       {
         using R = typename std::remove_reference_t<T>;
         const R* res = new R(std::forward<T>(obj));
-        m_objs.emplace_back(res);
+        m_objs.write([&](auto& obj){ obj.emplace_back(res); });;
         return *res;
       }
 
@@ -109,11 +120,11 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Destructs the objects stored inside this instance.
+       * @brief Destructs the objects stored.
        */
       void clear()
       {
-        m_objs.clear();
+        m_objs.write([](auto& obj){ obj.clear(); });
       }
 
       /**
@@ -126,8 +137,10 @@ namespace Rodin::FormLanguage
       virtual Base* copy() const noexcept override = 0;
 
     private:
+      thread_local static UUID s_id;
+
       const size_t m_uuid;
-      mutable std::deque<std::shared_ptr<const void>> m_objs;
+      mutable Threads::Unsafe<std::vector<std::shared_ptr<const void>>> m_objs;
   };
 }
 

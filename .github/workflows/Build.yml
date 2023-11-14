@@ -21,6 +21,7 @@ jobs:
         os: [ubuntu-20.04, ubuntu-22.04]
         compiler: [gcc-8, clang-7]
         build_type: ['Release', 'Debug']
+        thread_safe: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -50,6 +51,7 @@ jobs:
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
+          -DRODIN_BUILD_THREAD_SAFE=${{ matrix.thread_safe }}
       - name: Build
         run: cmake --build ${{github.workspace}}/build
   MacOS:
@@ -58,6 +60,7 @@ jobs:
       matrix:
         os: [macos-11, macos-12]
         build_type: ['Release', 'Debug']
+        thread_safe: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -90,6 +93,7 @@ jobs:
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
+          -DRODIN_BUILD_THREAD_SAFE=${{ matrix.thread_safe }}
       - name: Build
         run: cmake --build ${{github.workspace}}/build
 

@@ -41,8 +41,6 @@ set(RodinVariational_HEADERS
   OR.h
   AND.h
   Tangent.h
-  Assembly/AssemblyBase.h
-  Assembly/Native.h
   LinearElasticity/LinearElasticityIntegral.h
   )
 
@@ -85,8 +83,6 @@ set(RodinVariational_SRCS
   QuadratureRule.cpp
   AND.cpp
   Tangent.cpp
-  Assembly/AssemblyBase.cpp
-  Assembly/Native.cpp
   P0/P0.cpp
   P0/P0Element.cpp
   P1/P1.cpp
@@ -96,11 +92,6 @@ set(RodinVariational_SRCS
 add_library(RodinVariational
   ${RodinVariational_SRCS} ${RodinVariational_HEADERS})
 add_library(Rodin::Variational ALIAS RodinVariational)
-
-if (RODIN_USE_OPENMP)
-  target_sources(RodinVariational PUBLIC Assembly/OpenMP.h Assembly/OpenMP.cpp)
-  target_link_libraries(RodinVariational PUBLIC OpenMP::OpenMP_CXX)
-endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinVariational
@@ -113,4 +104,5 @@ target_link_libraries(RodinVariational
   Rodin::Alert
   Rodin::Utility
   Rodin::Geometry
+  Rodin::Assembly
   Rodin::FormLanguage)

@@ -8,8 +8,7 @@
 #define RODIN_VARIATIONAL_LINEARFORM_HPP
 
 #include "Rodin/Alert.h"
-
-#include "Assembly/AssemblyBase.h"
+#include "Rodin/Assembly/AssemblyBase.h"
 
 #include "LinearForm.h"
 #include "LinearFormIntegrator.h"

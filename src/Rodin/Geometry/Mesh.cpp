@@ -29,6 +29,48 @@ namespace Rodin::Geometry
   }
 
   // ---- Mesh<Context::Serial> ----------------------------------------------
+  Mesh<Context::Serial>::Mesh(const Mesh& other)
+    : m_sdim(other.m_sdim),
+      m_vertices(other.m_vertices),
+      m_connectivity(other.m_connectivity),
+      m_attributeIndex(other.m_attributeIndex),
+      m_attributes(other.m_attributes)
+  {}
+
+  Mesh<Context::Serial>::Mesh(Mesh&& other)
+    : m_sdim(std::move(other.m_sdim)),
+      m_vertices(std::move(other.m_vertices)),
+      m_connectivity(std::move(other.m_connectivity)),
+      m_attributeIndex(std::move(other.m_attributeIndex)),
+      m_transformationIndex(std::move(other.m_transformationIndex)),
+      m_attributes(std::move(other.m_attributes))
+  {}
+
+  Mesh<Context::Serial>& Mesh<Context::Serial>::operator=(Mesh&& other)
+  {
+    Parent::operator=(std::move(other));
+    m_sdim = std::move(other.m_sdim);
+    m_vertices = std::move(other.m_vertices);
+    m_connectivity = std::move(other.m_connectivity);
+    m_attributeIndex = std::move(other.m_attributeIndex);
+    m_transformationIndex = std::move(other.m_transformationIndex);
+    m_attributes = std::move(other.m_attributes);
+    return *this;
+  }
+
+  Mesh<Context::Serial>::~Mesh()
+  {
+    for (auto& mt : m_transformationIndex)
+    {
+      mt.write(
+          [](auto& obj)
+          {
+            for (PolytopeTransformation* ptr : obj)
+              delete ptr;
+          });
+    }
+  }
+
   Mesh<Context::Serial>&
   Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
@@ -174,28 +216,31 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
-      const Map<std::pair<Attribute, Attribute>, Attribute>& interface)
+      const Map<std::pair<Attribute, Attribute>, Attribute>& interface, const FlatSet<Attribute>& attrs)
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
     const auto& conn = getConnectivity();
     for (auto it = getFace(); it; ++it)
     {
-      assert(it->getDimension() == D - 1);
-      const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
-      assert(inc.size() == 2);
-      auto el1 = getCell(*inc.begin());
-      auto el2 = getCell(*std::next(inc.begin()));
-      auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
-      if (find != interface.end())
+      if (attrs.size() == 0 || attrs.count(it->getAttribute()))
       {
-        setAttribute({ D - 1, it->getIndex() }, find->second);
-      }
-      else
-      {
-        find = interface.find({ el2->getAttribute(), el1->getAttribute() });
+        assert(it->getDimension() == D - 1);
+        const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
+        assert(inc.size() == 2);
+        auto el1 = getCell(*inc.begin());
+        auto el2 = getCell(*std::next(inc.begin()));
+        auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
         if (find != interface.end())
+        {
           setAttribute({ D - 1, it->getIndex() }, find->second);
+        }
+        else
+        {
+          find = interface.find({ el2->getAttribute(), el1->getAttribute() });
+          if (find != interface.end())
+            setAttribute({ D - 1, it->getIndex() }, find->second);
+        }
       }
     }
     return *this;
@@ -251,49 +296,64 @@ namespace Rodin::Geometry
     return m_sdim;
   }
 
-  const PolytopeTransformation&
-  Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
+  Mesh<Context::Serial>& Mesh<Context::Serial>::setPolytopeTransformation(
+      const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
-    auto it = m_transformationIndex.find(dimension, idx);
-    if (it != m_transformationIndex.end(dimension))
+    m_transformationIndex[p.first].write([&](auto& obj) { obj[p.second] = trans; });
+    return *this;
+  }
+
+  PolytopeTransformation*
+  Mesh<Context::Serial>::getDefaultPolytopeTransformation(size_t dimension, Index idx) const
+  {
+    if (dimension == 0)
     {
-      assert(m_transformationIndex.at(dimension, idx));
-      return *it->second;
+      Variational::ScalarP1Element fe(Polytope::Type::Point);
+      const size_t sdim = getSpaceDimension();
+      Math::PointMatrix pm(sdim, 1);
+      pm.col(0) = getVertexCoordinates(idx);
+      return new IsoparametricTransformation(std::move(pm), std::move(fe));
     }
     else
     {
-      if (dimension == 0)
+      auto g = getGeometry(dimension, idx);
+      const size_t sdim = getSpaceDimension();
+      const size_t n = Polytope::getVertexCount(g);
+      Math::PointMatrix pm(sdim, n);
+      const auto& polytope = getConnectivity().getPolytope(dimension, idx);
+      assert(n == static_cast<size_t>(polytope.size()));
+      for (const auto& v : polytope | boost::adaptors::indexed())
       {
-        Variational::ScalarP1Element fe(Polytope::Type::Point);
-        const size_t sdim = getSpaceDimension();
-        Math::PointMatrix pm(sdim, 1);
-        pm.col(0) = getVertexCoordinates(idx);
-        auto trans =
-          std::unique_ptr<PolytopeTransformation>(
-              new IsoparametricTransformation(std::move(pm), std::move(fe)));
-        auto p = m_transformationIndex.insert(it, { dimension, idx }, std::move(trans));
-        return *p->second;
+        assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
+        pm.col(v.index()) = getVertexCoordinates(v.value());
       }
-      else
-      {
-        auto g = getGeometry(dimension, idx);
-        const size_t sdim = getSpaceDimension();
-        const size_t n = Polytope::getVertexCount(g);
-        Math::PointMatrix pm(sdim, n);
-        const auto& polytope = getConnectivity().getPolytope(dimension, idx);
-        assert(n == static_cast<size_t>(polytope.size()));
-        for (const auto& v : polytope | boost::adaptors::indexed())
-        {
-          assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
-          pm.col(v.index()) = getVertexCoordinates(v.value());
-        }
-        Variational::ScalarP1Element fe(g);
-        auto trans =
-          std::unique_ptr<PolytopeTransformation>(
-              new IsoparametricTransformation(std::move(pm), std::move(fe)));
-        auto p = m_transformationIndex.insert(it, { dimension, idx }, std::move(trans));
-        return *p->second;
-      }
+      Variational::ScalarP1Element fe(g);
+      return new IsoparametricTransformation(std::move(pm), std::move(fe));
+    }
+  }
+
+  const PolytopeTransformation&
+  Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
+  {
+    assert(dimension < m_transformationIndex.size());
+    if (m_transformationIndex[dimension].read().size() == 0)
+    {
+      m_transformationIndex[dimension].write(
+          [&](auto& obj) { obj.resize(getPolytopeCount(dimension), nullptr); });
+    }
+    assert(0 < m_transformationIndex[dimension].read().size());
+    assert(idx < m_transformationIndex[dimension].read().size());
+    const auto& transPtr = m_transformationIndex[dimension].read()[idx];
+    if (transPtr)
+    {
+      return *transPtr;
+    }
+    else
+    {
+      PolytopeTransformation* trans = getDefaultPolytopeTransformation(dimension, idx);
+      m_transformationIndex[dimension].write(
+          [&](auto& obj) { obj[idx] = trans; });
+      return *trans;
     }
   }
 
@@ -341,7 +401,7 @@ namespace Rodin::Geometry
       const FlatSet<Attribute>& attrs) const
   {
     FlatSet<Index> visited;
-    visited.reserve(getCount(d));
+    visited.reserve(getPolytopeCount(d));
     std::deque<Index> searchQueue;
     std::deque<FlatSet<Index>> res;
 
@@ -381,12 +441,12 @@ namespace Rodin::Geometry
     return res;
   }
 
-  size_t Mesh<Context::Serial>::getCount(size_t dimension) const
+  size_t Mesh<Context::Serial>::getPolytopeCount(size_t dimension) const
   {
     return m_connectivity.getCount(dimension);
   }
 
-  size_t Mesh<Context::Serial>::getCount(Polytope::Type g) const
+  size_t Mesh<Context::Serial>::getPolytopeCount(Polytope::Type g) const
   {
     return m_connectivity.getCount(g);
   }
@@ -437,7 +497,7 @@ namespace Rodin::Geometry
 
   PolytopeIterator Mesh<Context::Serial>::getPolytope(size_t dimension, Index idx) const
   {
-    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(idx, getCount(dimension)));
+    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(idx, getPolytopeCount(dimension)));
   }
 
   bool Mesh<Context::Serial>::isInterface(Index faceIdx) const

@@ -4,19 +4,20 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_NATIVE_H
-#define RODIN_ASSEMBLY_NATIVE_H
+#ifndef RODIN_ASSEMBLY_SERIAL_H
+#define RODIN_ASSEMBLY_SERIAL_H
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
+#include "ForwardDecls.h"
 #include "AssemblyBase.h"
 
-namespace Rodin::Variational::Assembly
+namespace Rodin::Assembly
 {
   template <>
-  class Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
-    : public AssemblyBase<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+  class Serial<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+    : public AssemblyBase<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   {
     /**
      * @internal
@@ -26,16 +27,17 @@ namespace Rodin::Variational::Assembly
         const IndexArray& rows, const IndexArray& cols);
 
     public:
-      using Parent = AssemblyBase<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>;
+      using Parent =
+        AssemblyBase<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>;
       using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
-      Native() = default;
+      Serial() = default;
 
-      Native(const Native& other)
+      Serial(const Serial& other)
         : Parent(other)
       {}
 
-      Native(Native&& other)
+      Serial(Serial&& other)
         : Parent(std::move(other))
       {}
 
@@ -45,31 +47,31 @@ namespace Rodin::Variational::Assembly
        */
       OperatorType execute(const BilinearAssemblyInput& input) const override;
 
-      Native* copy() const noexcept override
+      Serial* copy() const noexcept override
       {
-        return new Native(*this);
+        return new Serial(*this);
       }
   };
 
   /**
-   * @brief Native assembly of the Math::SparseMatrix associated to a
+   * @brief Serial assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
   template <>
-  class Native<BilinearFormBase<Math::SparseMatrix>>
-    : public AssemblyBase<BilinearFormBase<Math::SparseMatrix>>
+  class Serial<Variational::BilinearFormBase<Math::SparseMatrix>>
+    : public AssemblyBase<Variational::BilinearFormBase<Math::SparseMatrix>>
   {
     public:
-      using Parent = AssemblyBase<BilinearFormBase<Math::SparseMatrix>>;
+      using Parent = AssemblyBase<Variational::BilinearFormBase<Math::SparseMatrix>>;
       using OperatorType = Math::SparseMatrix;
 
-      Native() = default;
+      Serial() = default;
 
-      Native(const Native& other)
+      Serial(const Serial& other)
         : Parent(other)
       {}
 
-      Native(Native&& other)
+      Serial(Serial&& other)
         : Parent(std::move(other))
       {}
 
@@ -79,34 +81,34 @@ namespace Rodin::Variational::Assembly
        */
       OperatorType execute(const BilinearAssemblyInput& input) const override;
 
-      Native* copy() const noexcept override
+      Serial* copy() const noexcept override
       {
-        return new Native(*this);
+        return new Serial(*this);
       }
   };
 
   /**
-   * @brief %Native assembly of the Math::Vector associated to a LinearFormBase
+   * @brief %Serial assembly of the Math::Vector associated to a LinearFormBase
    * object.
    */
   template <>
-  class Native<LinearFormBase<Math::Vector>>
-    : public AssemblyBase<LinearFormBase<Math::Vector>>
+  class Serial<Variational::LinearFormBase<Math::Vector>>
+    : public AssemblyBase<Variational::LinearFormBase<Math::Vector>>
   {
 
     static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s);
 
     public:
-      using Parent = AssemblyBase<LinearFormBase<Math::Vector>>;
+      using Parent = AssemblyBase<Variational::LinearFormBase<Math::Vector>>;
       using VectorType = Math::Vector;
 
-      Native() = default;
+      Serial() = default;
 
-      Native(const Native& other)
+      Serial(const Serial& other)
         : Parent(other)
       {}
 
-      Native(Native&& other)
+      Serial(Serial&& other)
         : Parent(std::move(other))
       {}
 
@@ -116,9 +118,9 @@ namespace Rodin::Variational::Assembly
        */
       VectorType execute(const Input& input) const override;
 
-      Native* copy() const noexcept override
+      Serial* copy() const noexcept override
       {
-        return new Native(*this);
+        return new Serial(*this);
       }
   };
 }

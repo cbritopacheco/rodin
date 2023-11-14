@@ -7,7 +7,11 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/FormLanguage/List.h"
+#include "Rodin/Assembly/ForwardDecls.h"
+#include "Rodin/Assembly/Multithreaded.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
@@ -20,20 +24,26 @@ namespace Rodin::Variational
   class LinearFormBase : public FormLanguage::Base
   {
     public:
-      using NativeAssembly = Assembly::Native<LinearFormBase>;
+      using SerialAssembly = Assembly::Serial<LinearFormBase>;
+      using MultithreadedAssembly = Assembly::Multithreaded<LinearFormBase>;
+      using OpenMPAssembly = Assembly::OpenMP<LinearFormBase>;
 
       LinearFormBase()
       {
-        m_assembly.reset(new NativeAssembly);
+#ifdef RODIN_THREAD_SAFE
+        m_assembly.reset(new MultithreadedAssembly);
+#else
+        m_assembly.reset(new SerialAssembly);
+#endif
       }
 
       LinearFormBase(const LinearFormBase& other)
-        :  FormLanguage::Base(other),
+        : FormLanguage::Base(other),
           m_lfis(other.m_lfis)
       {}
 
       LinearFormBase(LinearFormBase&& other)
-        :  FormLanguage::Base(std::move(other)),
+        : FormLanguage::Base(std::move(other)),
           m_lfis(std::move(other.m_lfis))
       {}
 
