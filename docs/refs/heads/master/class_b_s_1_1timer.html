@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Models::Distance namespace | Rodin</title>
+  <title>BS::timer class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -64,44 +64,54 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models.html">Models</a>::<wbr/></span>Distance <span class="m-thin">namespace</span>
+          <span class="m-breadcrumb"><a href="namespace_b_s.html">BS</a>::<wbr/></span>timer <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_b_s__thread__pool_8hpp.html">&lt;Rodin/Assembly/BS_thread_pool.hpp&gt;</a></div>
         </h1>
-        <p>Module which provides models for computation of the distance function.</p>
+        <p>A helper class to measure execution time for benchmarking purposes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_models_1_1_distance_1_1_f_m_m.html" class="m-doc">FMM</a>
+            <dt id="a60de64d75454385b23995437f1d72669">
+              <span class="m-doc-wrap-bumper">void <a href="#a60de64d75454385b23995437f1d72669" class="m-doc-self">start</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd><a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the distance function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a>
+            <dd>Start (or restart) measuring time.</dd>
+            <dt id="a8c528baf37154d347366083f0f816846">
+              <span class="m-doc-wrap-bumper">void <a href="#a8c528baf37154d347366083f0f816846" class="m-doc-self">stop</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd><a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the distance function.</dd>
+            <dd>Stop measuring time and store the elapsed time since <a href="class_b_s_1_1timer.html#a60de64d75454385b23995437f1d72669" class="m-doc">start()</a>.</dd>
             <dt>
-              class <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a>
+              <span class="m-doc-wrap-bumper">auto <a href="#a826b33fc79a882aca546f594fb47ba3b" class="m-doc">ms</a>(</span><span class="m-doc-wrap">) const -&gt; std::chrono::milliseconds::rep</span>
             </dt>
-            <dd><a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> normalization for a level set function. <a href="citelist.html#CITEREF_rvachev1974methods" class="m-doc">[8]</a> <a href="citelist.html#CITEREF_rvachev2001transfinite" class="m-doc">[7]</a>.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_models_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_models_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the signed distance function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_models_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a>
-            </dt>
-            <dd>Spalding-Tucker normalization for a level set function. <a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[9]</a>, <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[10]</a>.</dd>
+            <dd>Get the number of milliseconds that have elapsed between <a href="class_b_s_1_1timer.html#a60de64d75454385b23995437f1d72669" class="m-doc">start()</a> and <a href="class_b_s_1_1timer.html#a8c528baf37154d347366083f0f816846" class="m-doc">stop()</a>.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a826b33fc79a882aca546f594fb47ba3b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::chrono::milliseconds::rep BS::<wbr />timer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a826b33fc79a882aca546f594fb47ba3b" class="m-doc-self">ms</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Get the number of milliseconds that have elapsed between <a href="class_b_s_1_1timer.html#a60de64d75454385b23995437f1d72669" class="m-doc">start()</a> and <a href="class_b_s_1_1timer.html#a8c528baf37154d347366083f0f816846" class="m-doc">stop()</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of milliseconds.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
