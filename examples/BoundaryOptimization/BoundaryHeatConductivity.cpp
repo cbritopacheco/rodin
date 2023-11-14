@@ -109,7 +109,7 @@ int main(int, char**)
     return Integral(u).compute() + ell * Omega.getPerimeter(GammaD);
   };
 
-  std::ofstream fObj("obj4.txt");
+  std::ofstream fObj("obj.txt");
   size_t i = 0;
   size_t prevRegionCount = 0;
   while (i < maxIt)
@@ -197,6 +197,8 @@ int main(int, char**)
           + FaceIntegral(he * u, v).over({Gamma, GammaD})
           - Integral(f, v);
     state.solve(cg);
+    u.getSolution().save("u.gf");
+    Omega.save("miaow.mesh");
 
     auto dj = -1.0 / Omega.getVolume();
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
@@ -301,9 +303,9 @@ int main(int, char**)
     }
 
     Alert::Info() << "Saving files..." << Alert::Raise;
-    Omega.save("Omega4.mesh", IO::FileFormat::MEDIT);
-    dOmega.save("out4/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
-    dOmega.save("out4/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
+    Omega.save("Omega.mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out/dOmega." + std::to_string(i) +  ".mesh", IO::FileFormat::MEDIT);
+    dOmega.save("out/dOmega.mfem." + std::to_string(i) +  ".mesh", IO::FileFormat::MFEM);
 
     Alert::Success() << "Completed Iteration: " << i << '\n' << Alert::Raise;
     i++;

@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Assembly/ForwardDecls.h"
@@ -49,7 +51,7 @@ namespace Rodin::Variational
       {}
 
       BilinearFormBase(BilinearFormBase&& other)
-        :  FormLanguage::Base(std::move(other)),
+        : FormLanguage::Base(std::move(other)),
           m_assembly(std::move(other.m_assembly)),
           m_bfis(std::move(other.m_bfis))
       {}

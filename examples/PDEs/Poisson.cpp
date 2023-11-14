@@ -19,7 +19,7 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 32, 32);
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
@@ -36,11 +36,6 @@ int main(int, char**)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, g);
-
-  auto t0 = std::chrono::high_resolution_clock::now();
-  poisson.assemble();
-  auto t1 = std::chrono::high_resolution_clock::now();
-  std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << std::endl;
 
   // Solve the problem
   Solver::SparseLU solver;
