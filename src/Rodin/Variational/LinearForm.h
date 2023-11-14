@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORM_H
 #define RODIN_VARIATIONAL_LINEARFORM_H
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Assembly/Multithreaded.h"
@@ -36,12 +38,12 @@ namespace Rodin::Variational
       }
 
       LinearFormBase(const LinearFormBase& other)
-        :  FormLanguage::Base(other),
+        : FormLanguage::Base(other),
           m_lfis(other.m_lfis)
       {}
 
       LinearFormBase(LinearFormBase&& other)
-        :  FormLanguage::Base(std::move(other)),
+        : FormLanguage::Base(std::move(other)),
           m_lfis(std::move(other.m_lfis))
       {}
 

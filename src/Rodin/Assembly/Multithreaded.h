@@ -57,6 +57,7 @@ namespace Rodin::Assembly
       static thread_local std::unique_ptr<Variational::BilinearFormIntegratorBase> tl_bfi;
 
       const size_t m_threadCount;
+
       mutable Threads::Mutex m_mutex;
   };
 

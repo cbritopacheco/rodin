@@ -108,9 +108,10 @@ namespace Rodin::Assembly
   ::execute(const BilinearAssemblyInput& input) const
   {
     using TripletVector = std::vector<Eigen::Triplet<Scalar>>;
-    BS::thread_pool threadPool(m_threadCount);
     TripletVector res;
+    res.clear();
     res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
+    BS::thread_pool threadPool(m_threadCount);
     for (auto& bfi : input.bfis)
     {
       const auto& attrs = bfi.getAttributes();
@@ -137,11 +138,14 @@ namespace Rodin::Assembly
                 }
               }
               m_mutex.lock();
-              res.insert(res.end(), tl_triplets.begin(), tl_triplets.end());
+              res.insert(res.end(),
+                  std::make_move_iterator(tl_triplets.begin()),
+                  std::make_move_iterator(tl_triplets.end()));
               m_mutex.unlock();
               tl_triplets.clear();
             };
           threadPool.push_loop(0, input.mesh.getCellCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
         case Variational::Integrator::Region::Faces:
@@ -165,11 +169,14 @@ namespace Rodin::Assembly
                 }
               }
               m_mutex.lock();
-              res.insert(res.end(), tl_triplets.begin(), tl_triplets.end());
+              res.insert(res.end(),
+                  std::make_move_iterator(tl_triplets.begin()),
+                  std::make_move_iterator(tl_triplets.end()));
               m_mutex.unlock();
               tl_triplets.clear();
             };
           threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
         case Variational::Integrator::Region::Boundary:
@@ -196,11 +203,14 @@ namespace Rodin::Assembly
                 }
               }
               m_mutex.lock();
-              res.insert(res.end(), tl_triplets.begin(), tl_triplets.end());
+              res.insert(res.end(),
+                  std::make_move_iterator(tl_triplets.begin()),
+                  std::make_move_iterator(tl_triplets.end()));
               m_mutex.unlock();
               tl_triplets.clear();
             };
           threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
         case Variational::Integrator::Region::Interface:
@@ -227,11 +237,14 @@ namespace Rodin::Assembly
                 }
               }
               m_mutex.lock();
-              res.insert(res.end(), tl_triplets.begin(), tl_triplets.end());
+              res.insert(res.end(),
+                  std::make_move_iterator(tl_triplets.begin()),
+                  std::make_move_iterator(tl_triplets.end()));
               m_mutex.unlock();
               tl_triplets.clear();
             };
           threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
       }
@@ -317,6 +330,7 @@ namespace Rodin::Assembly
               m_mutex.unlock();
             };
           threadPool.push_loop(0, input.mesh.getCellCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
         case Variational::Integrator::Region::Faces:
@@ -343,6 +357,7 @@ namespace Rodin::Assembly
               m_mutex.unlock();
             };
           threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
         case Variational::Integrator::Region::Boundary:
@@ -372,6 +387,7 @@ namespace Rodin::Assembly
               m_mutex.unlock();
             };
           threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
         case Variational::Integrator::Region::Interface:
@@ -401,6 +417,7 @@ namespace Rodin::Assembly
               m_mutex.unlock();
             };
           threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
+          threadPool.wait_for_tasks();
           break;
         }
       }
