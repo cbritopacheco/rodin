@@ -7,10 +7,12 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORM_H
 #define RODIN_VARIATIONAL_BILINEARFORM_H
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include "Rodin/Configure.h"
 
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
+#include "Rodin/Assembly/ForwardDecls.h"
+#include "Rodin/Assembly/Multithreaded.h"
 
 #include "ForwardDecls.h"
 #include "TrialFunction.h"
@@ -29,12 +31,17 @@ namespace Rodin::Variational
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using NativeAssembly = Assembly::Native<BilinearFormBase>;
+      using SerialAssembly = Assembly::Serial<BilinearFormBase>;
+      using MultithreadedAssembly = Assembly::Multithreaded<BilinearFormBase>;
       using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
 
       BilinearFormBase()
       {
-        m_assembly.reset(new NativeAssembly);
+#ifdef RODIN_THREAD_SAFE
+        m_assembly.reset(new MultithreadedAssembly);
+#else
+        m_assembly.reset(new SerialAssembly);
+#endif
       }
 
       BilinearFormBase(const BilinearFormBase& other)
@@ -44,7 +51,7 @@ namespace Rodin::Variational
       {}
 
       BilinearFormBase(BilinearFormBase&& other)
-        :  FormLanguage::Base(std::move(other)),
+        : FormLanguage::Base(std::move(other)),
           m_assembly(std::move(other.m_assembly)),
           m_bfis(std::move(other.m_bfis))
       {}

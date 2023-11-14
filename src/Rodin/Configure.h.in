@@ -123,6 +123,8 @@
  */
 #cmakedefine RODIN_THIRD_PARTY_DIR "@RODIN_THIRD_PARTY_DIR@"
 
+#cmakedefine RODIN_THREAD_SAFE
+
 /**
  * @ingroup RodinDirectives
  * @brief Indicates the maximal space dimension.

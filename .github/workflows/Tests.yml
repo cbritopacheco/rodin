@@ -21,6 +21,7 @@ jobs:
         os: [ubuntu-latest]
         compiler: [gcc-8]
         build_type: ['Debug']
+        thread_safe: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -54,6 +55,7 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
           -DRODIN_CODE_COVERAGE=ON
+          -DRODIN_THREAD_SAFE=${{ matrix.thread_safe }}
       - name: Build
         run: cmake --build ${{github.workspace}}/build
       - name: Run tests

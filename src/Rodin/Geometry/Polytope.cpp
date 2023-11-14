@@ -1,5 +1,7 @@
 #include <Eigen/Cholesky>
 
+#include "Rodin/Configure.h"
+
 #include "Rodin/Variational/QuadratureRule.h"
 
 #include "Mesh.h"
@@ -9,22 +11,22 @@
 
 namespace Rodin::Geometry
 {
-  const GeometryIndexed<Math::Matrix> Polytope::s_vertices =
+  const GeometryIndexed<Math::PointMatrix> Polytope::s_vertices =
   {
     { Polytope::Type::Point,
-      Math::Matrix{{0}} },
+      Math::PointMatrix{{0}} },
     { Polytope::Type::Segment,
-      Math::Matrix{{0, 1}} },
+      Math::PointMatrix{{0, 1}} },
     { Polytope::Type::Triangle,
-      Math::Matrix{{0, 1, 0},
-                   {0, 0, 1}} },
+      Math::PointMatrix{{0, 1, 0},
+                        {0, 0, 1}} },
     { Polytope::Type::Quadrilateral,
-      Math::Matrix{{0, 1, 0, 1},
-                   {0, 0, 1, 1}} },
+      Math::PointMatrix{{0, 1, 0, 1},
+                        {0, 0, 1, 1}} },
     { Polytope::Type::Tetrahedron,
-      Math::Matrix{{0, 1, 0, 0},
-                   {0, 0, 1, 0},
-                   {0, 0, 0, 1}} },
+      Math::PointMatrix{{0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}} },
   };
 
   bool operator<(const Polytope& lhs, const Polytope& rhs)
@@ -54,7 +56,7 @@ namespace Rodin::Geometry
         getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
-  const Math::Matrix& Polytope::getVertices(Polytope::Type g)
+  const Math::PointMatrix& Polytope::getVertices(Polytope::Type g)
   {
     return s_vertices[g];
   }
@@ -226,6 +228,28 @@ namespace Rodin::Geometry
     return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
   }
 
+  PointBase::PointBase(const PointBase& other)
+    : m_polytopeStorage(other.m_polytopeStorage),
+      m_polytope(other.m_polytope),
+      m_trans(other.m_trans),
+      m_pc(other.m_pc),
+      m_jacobian(other.m_jacobian),
+      m_jacobianInverse(other.m_jacobianInverse),
+      m_jacobianDeterminant(other.m_jacobianDeterminant),
+      m_distortion(other.m_distortion)
+  {}
+
+  PointBase::PointBase(PointBase&& other)
+    : m_polytopeStorage(std::move(other.m_polytopeStorage)),
+      m_polytope(std::move(other.m_polytope)),
+      m_trans(std::move(other.m_trans)),
+      m_pc(std::move(other.m_pc)),
+      m_jacobian(std::move(other.m_jacobian)),
+      m_jacobianInverse(std::move(other.m_jacobianInverse)),
+      m_jacobianDeterminant(std::move(other.m_jacobianDeterminant)),
+      m_distortion(std::move(other.m_distortion))
+  {}
+
   const Polytope& PointBase::getPolytope() const
   {
     if (m_polytopeStorage == PolytopeStorage::Value)
@@ -254,23 +278,35 @@ namespace Rodin::Geometry
 
   const Math::SpatialVector& PointBase::getPhysicalCoordinates() const
   {
-    if (!m_pc.has_value())
-      return m_pc.emplace(m_trans.get().transform(getReferenceCoordinates()));
-    assert(m_pc.has_value());
-    return m_pc.value();
+    if (!m_pc.read().has_value())
+    {
+      m_pc.write(
+          [&](auto& obj)
+          {
+            obj.emplace(m_trans.get().transform(getReferenceCoordinates()));
+          });
+    }
+    assert(m_pc.read().has_value());
+    return m_pc.read().value();
   }
 
   const Math::SpatialMatrix& PointBase::getJacobian() const
   {
-    if (!m_jacobian.has_value())
-      return m_jacobian.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
-    assert(m_jacobian.has_value());
-    return m_jacobian.value();
+    if (!m_jacobian.read().has_value())
+    {
+      m_jacobian.write(
+          [&](auto& obj)
+          {
+            obj.emplace(m_trans.get().jacobian(getReferenceCoordinates()));
+          });
+    }
+    assert(m_jacobian.read().has_value());
+    return m_jacobian.read().value();
   }
 
   const Math::SpatialMatrix& PointBase::getJacobianInverse() const
   {
-    if (!m_jacobianInverse.has_value())
+    if (!m_jacobianInverse.read().has_value())
     {
       const auto& polytope = getPolytope();
       const size_t rdim = Polytope::getGeometryDimension(polytope.getGeometry());
@@ -278,15 +314,25 @@ namespace Rodin::Geometry
       assert(rdim <= sdim);
       if (rdim == sdim)
       {
-        return m_jacobianInverse.emplace(getJacobian().inverse());
         switch (rdim)
         {
           case 1:
           {
-            Math::Matrix inv(1, 1);
+            Math::SpatialMatrix inv(1, 1);
             inv.coeffRef(0, 0) = 1 / getJacobian().coeff(0, 0);
-            m_jacobianDeterminant.emplace(getJacobian().coeff(0, 0));
-            return m_jacobianInverse.emplace(std::move(inv));
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(getJacobian().coeff(0, 0));
+                });
+            assert(m_jacobianDeterminant.read().has_value());
+            m_jacobianInverse.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(std::move(inv));
+                });
+            assert(m_jacobianInverse.read().has_value());
+            return m_jacobianInverse.read().value();
           }
           case 2:
           {
@@ -297,13 +343,24 @@ namespace Rodin::Geometry
             const Scalar d = jac.coeff(1, 1);
             const Scalar det = a * d - b * c;
             assert(det != 0);
-            m_jacobianDeterminant.emplace(det);
-            Math::Matrix inv(2, 2);
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(det);
+                });
+            assert(m_jacobianDeterminant.read().has_value());
+            Math::SpatialMatrix inv(2, 2);
             inv.coeffRef(0, 0) = d / det;
             inv.coeffRef(0, 1) = -b / det;
             inv.coeffRef(1, 0) = -c / det;
             inv.coeffRef(1, 1) = a / det;
-            return m_jacobianInverse.emplace(std::move(inv));
+            m_jacobianInverse.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(std::move(inv));
+                });
+            assert(m_jacobianInverse.read().has_value());
+            return m_jacobianInverse.read().value();
           }
           case 3:
           {
@@ -317,7 +374,6 @@ namespace Rodin::Geometry
             const Scalar g = jac.coeff(2, 0);
             const Scalar h = jac.coeff(2, 1);
             const Scalar i = jac.coeff(2, 2);
-
             const Scalar A = e * i - f * h;
             const Scalar B = -(d * i - f * g);
             const Scalar C = d * h - e * g;
@@ -329,10 +385,14 @@ namespace Rodin::Geometry
             const Scalar I = a * e - b * d;
 
             const Scalar det = a * A + b * B + c * C;
-            m_jacobianDeterminant.emplace(det);
-
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(det);
+                });
+            assert(m_jacobianDeterminant.read().has_value());
             assert(det != 0);
-            Math::Matrix inv(3, 3);
+            Math::SpatialMatrix inv(3, 3);
             inv.coeffRef(0, 0) = A / det;
             inv.coeffRef(0, 1) = D / det;
             inv.coeffRef(0, 2) = G / det;
@@ -342,27 +402,44 @@ namespace Rodin::Geometry
             inv.coeffRef(2, 0) = C / det;
             inv.coeffRef(2, 1) = F / det;
             inv.coeffRef(2, 2) = I / det;
-            return m_jacobianInverse.emplace(std::move(inv));
+            m_jacobianInverse.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(std::move(inv));
+                });
+            assert(m_jacobianInverse.read().has_value());
+            return m_jacobianInverse.read().value();
           }
           default:
           {
-            return m_jacobianInverse.emplace(getJacobian().inverse());
+            m_jacobianInverse.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(getJacobian().inverse());
+                });
+            assert(m_jacobianInverse.read().has_value());
+            return m_jacobianInverse.read().value();
           }
         }
       }
       else
       {
-        const auto& jac = getJacobian();
-        return m_jacobianInverse.emplace(jac.completeOrthogonalDecomposition().pseudoInverse());
+        m_jacobianInverse.write(
+            [&](auto& obj)
+            {
+              obj.emplace(getJacobian().completeOrthogonalDecomposition().pseudoInverse());
+            });
+        assert(m_jacobianInverse.read().has_value());
+        return m_jacobianInverse.read().value();
       }
     }
-    assert(m_jacobianInverse.has_value());
-    return m_jacobianInverse.value();
+    assert(m_jacobianInverse.read().has_value());
+    return m_jacobianInverse.read().value();
   }
 
   Scalar PointBase::getJacobianDeterminant() const
   {
-    if (!m_jacobianDeterminant.has_value())
+    if (!m_jacobianDeterminant.read().has_value())
     {
       const auto& jac = getJacobian();
       const auto rows = jac.rows();
@@ -373,7 +450,13 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            return m_jacobianDeterminant.emplace(jac.coeff(0, 0));
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(jac.coeff(0, 0));
+                });
+            assert(m_jacobianDeterminant.read().has_value());
+            return m_jacobianDeterminant.read().value();
           }
           case 2:
           {
@@ -381,7 +464,13 @@ namespace Rodin::Geometry
             const Scalar b = jac.coeff(0, 1);
             const Scalar c = jac.coeff(1, 0);
             const Scalar d = jac.coeff(1, 1);
-            return m_jacobianDeterminant.emplace(a * d - b * c);
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(a * d - b * c);
+                });
+            assert(m_jacobianDeterminant.read().has_value());
+            return m_jacobianDeterminant.read().value();
           }
           case 3:
           {
@@ -397,48 +486,84 @@ namespace Rodin::Geometry
             const Scalar A = e * i - f * h;
             const Scalar B = -(d * i - f * g);
             const Scalar C = d * h - e * g;
-            return m_jacobianDeterminant.emplace(a * A + b * B + c * C);
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(a * A + b * B + c * C);
+                });
+            assert(m_jacobianDeterminant.read().has_value());
+            return m_jacobianDeterminant.read().value();
           }
           default:
           {
-            return m_jacobianDeterminant.emplace(jac.determinant());
+            m_jacobianDeterminant.write(
+                [&](auto& obj)
+                {
+                  obj.emplace(jac.determinant());
+                });
+            assert(m_jacobianDeterminant.read().has_value());
+            return m_jacobianDeterminant.read().value();
           }
         }
       }
       else
       {
-        return m_jacobianDeterminant.emplace(Math::sqrt((jac.transpose() * jac).determinant()));
+        m_jacobianDeterminant.write(
+            [&](auto& obj)
+            {
+              obj.emplace(Math::sqrt((jac.transpose() * jac).determinant()));
+            });
+        assert(m_jacobianDeterminant.read().has_value());
+        return m_jacobianDeterminant.read().value();
       }
     }
-    assert(m_jacobianDeterminant.has_value());
-    return m_jacobianDeterminant.value();
+    assert(m_jacobianDeterminant.read().has_value());
+    return m_jacobianDeterminant.read().value();
   }
 
   Scalar PointBase::getDistortion() const
   {
-    if (!m_distortion.has_value())
+    if (!m_distortion.read().has_value())
     {
       const auto& jac = getJacobian();
       const auto rows = jac.rows();
       const auto cols = jac.cols();
       if (rows == cols)
       {
-        return m_distortion.emplace(getJacobianDeterminant());
+        m_distortion.write(
+            [&](auto& obj)
+            {
+              obj.emplace(getJacobianDeterminant());
+            });
+        assert(m_distortion.read().has_value());
+        return m_distortion.read().value();
       }
       else
       {
         if (jac.rows() == 2 && jac.cols() == 1)
         {
-          return m_distortion.emplace(Math::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
+          m_distortion.write(
+              [&](auto& obj)
+              {
+                obj.emplace(Math::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
+              });
+          assert(m_distortion.read().has_value());
+          return m_distortion.read().value();
         }
         else
         {
-          return m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+          m_distortion.write(
+              [&](auto& obj)
+              {
+                obj.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
+              });
+          assert(m_distortion.read().has_value());
+          return m_distortion.read().value();
         }
       }
     }
-    assert(m_distortion.has_value());
-    return m_distortion.value();
+    assert(m_distortion.read().has_value());
+    return m_distortion.read().value();
   }
 
   size_t PointBase::getDimension(Coordinates coords) const

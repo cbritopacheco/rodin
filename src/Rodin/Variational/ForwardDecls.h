@@ -1040,18 +1040,6 @@ namespace Rodin::Variational
   template <class ... Parameters>
   class Problem;
 
-  namespace Assembly
-  {
-    template <class Operand>
-    class AssemblyBase;
-
-    template <class Operand>
-    class Native;
-
-    template <class Operand>
-    class OpenMP;
-  }
-
   template <class Kernel, class Operand>
   class Potential;
 }

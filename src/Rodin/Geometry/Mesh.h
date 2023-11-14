@@ -15,6 +15,8 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
+#include "Rodin/Configure.h"
+#include "Rodin/Threads/Mutable.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Utility/IsSpecialization.h"
 #include "Rodin/Variational/Traits.h"
@@ -261,6 +263,10 @@ namespace Rodin::Geometry
        */
       virtual bool isBoundary(Index faceIdx) const = 0;
 
+      virtual SubMeshBase& asSubMesh() = 0;
+
+      virtual const SubMeshBase& asSubMesh() const = 0;
+
       /**
        * @brief Gets the dimension of the cells.
        * @returns Dimension of the cells.
@@ -281,7 +287,7 @@ namespace Rodin::Geometry
       inline
       size_t getVertexCount() const
       {
-        return getCount(0);
+        return getPolytopeCount(0);
       }
 
       /**
@@ -290,7 +296,7 @@ namespace Rodin::Geometry
       inline
       size_t getFaceCount() const
       {
-        return getCount(getDimension() - 1);
+        return getPolytopeCount(getDimension() - 1);
       }
 
       /**
@@ -299,7 +305,7 @@ namespace Rodin::Geometry
       inline
       size_t getCellCount() const
       {
-        return getCount(getDimension());
+        return getPolytopeCount(getDimension());
       }
 
       inline
@@ -367,13 +373,13 @@ namespace Rodin::Geometry
        * @brief Gets the count of polytope of the given dimension.
        * @param[in] dimension Polytope dimension
        */
-      virtual size_t getCount(size_t dimension) const = 0;
+      virtual size_t getPolytopeCount(size_t dimension) const = 0;
 
       /**
        * @brief Gets the count of polytope of the given type.
        * @param[in] dim Polytope type
        */
-      virtual size_t getCount(Polytope::Type g) const = 0;
+      virtual size_t getPolytopeCount(Polytope::Type g) const = 0;
 
       /**
        * @brief Gets an CellIterator to the cells of the mesh.
@@ -403,8 +409,7 @@ namespace Rodin::Geometry
        * @param[in] d Polytope dimension
        * @param[in] idx Polytope index
        */
-      virtual const PolytopeTransformation& getPolytopeTransformation(
-          size_t dimension, Index idx) const = 0;
+      virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index idx) const = 0;
 
       /**
        * Gets the geometry type of the @f$ (d, i) @f$-polytope.
@@ -471,9 +476,8 @@ namespace Rodin::Geometry
        */
       virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) = 0;
 
-      virtual SubMeshBase& asSubMesh() = 0;
-
-      virtual const SubMeshBase& asSubMesh() const = 0;
+      virtual MeshBase& setPolytopeTransformation(
+          const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
   };
 
   /// Index containing the indices of boundary cells.
@@ -483,7 +487,8 @@ namespace Rodin::Geometry
   using AttributeIndex = PolytopeIndexed<Geometry::Attribute>;
 
   /// Index containing the transformations of the polytopes.
-  using TransformationIndex = PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>;
+  using TransformationIndex =
+    std::vector<Threads::Mutable<std::vector<PolytopeTransformation*>>>;
 
   /**
    *
@@ -495,6 +500,8 @@ namespace Rodin::Geometry
   class Mesh<Context::Serial> : public MeshBase
   {
     public:
+      using Parent = MeshBase;
+
       /**
        * @brief Class used to build Mesh<Context::Serial> instances.
        */
@@ -683,25 +690,21 @@ namespace Rodin::Geometry
       /**
       * @brief Performs a copy of another mesh.
       */
-      Mesh(const Mesh& other)
-        : m_sdim(other.m_sdim),
-          m_vertices(other.m_vertices),
-          m_connectivity(other.m_connectivity),
-          m_attributeIndex(other.m_attributeIndex),
-          m_attributes(other.m_attributes)
-      {}
+      Mesh(const Mesh& other);
 
       /**
       * @brief Move constructs the mesh from another mesh.
       */
-      Mesh(Mesh&& other) = default;
+      Mesh(Mesh&& other);
+
+      virtual ~Mesh();
 
       Mesh& operator=(const Mesh& other) = delete;
 
       /**
       * @brief Move assigns the mesh from another mesh.
       */
-      Mesh& operator=(Mesh&&) = default;
+      Mesh& operator=(Mesh&&);
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -731,20 +734,10 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      const PolytopeIndexed<Attribute>& getAttributeIndex() const
+      virtual void flush() override
       {
-        return m_attributeIndex;
-      }
-
-      const PolytopeIndexed<std::unique_ptr<PolytopeTransformation>>& getTransformationIndex() const
-      {
-        return m_transformationIndex;
-      }
-
-      inline
-      const Math::PointMatrix& getVertices() const
-      {
-        return m_vertices;
+        for (auto& mt : m_transformationIndex)
+          mt.write([](auto& obj) { obj.clear(); });
       }
 
       /**
@@ -815,7 +808,19 @@ namespace Rodin::Geometry
       */
       virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
 
-      virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap);
+      inline
+      Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
+      {
+        return trace(tmap, FlatSet<Attribute>{});
+      }
+
+      inline
+      Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
+      {
+        return trace(tmap, FlatSet<Attribute>{ attr });
+      }
+
+      virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       SubMeshBase& asSubMesh() override;
 
@@ -843,11 +848,25 @@ namespace Rodin::Geometry
 
       virtual Mesh& scale(Scalar c) override;
 
-      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
+      const AttributeIndex& getAttributeIndex() const
+      {
+        return m_attributeIndex;
+      }
 
-      virtual size_t getCount(size_t dim) const override;
+      const TransformationIndex& getTransformationIndex() const
+      {
+        return m_transformationIndex;
+      }
 
-      virtual size_t getCount(Polytope::Type g) const override;
+      inline
+      const Math::PointMatrix& getVertices() const
+      {
+        return m_vertices;
+      }
+
+      virtual size_t getPolytopeCount(size_t dim) const override;
+
+      virtual size_t getPolytopeCount(Polytope::Type g) const override;
 
       virtual FaceIterator getBoundary() const override;
 
@@ -874,9 +893,6 @@ namespace Rodin::Geometry
 
       virtual size_t getSpaceDimension() const override;
 
-      virtual const PolytopeTransformation& getPolytopeTransformation(
-          size_t dimension, Index idx) const override;
-
       virtual Polytope::Type getGeometry(size_t dimension, Index idx) const override;
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
@@ -891,18 +907,24 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual void flush() override
-      {
-        m_transformationIndex.clear();
-      }
-
       virtual Eigen::Map<const Math::SpatialVector> getVertexCoordinates(Index idx) const override;
 
       virtual const FlatSet<Attribute>& getAttributes(size_t d) const override;
 
+      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
+
       virtual Mesh& setVertexCoordinates(Index idx, Scalar xi, size_t i) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialVector& coords) override;
+
+      virtual Mesh& setPolytopeTransformation(
+          const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
+
+      virtual const PolytopeTransformation& getPolytopeTransformation(
+          size_t dimension, Index idx) const override;
+
+    protected:
+      PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
     private:
       static const GeometryIndexed<Math::Matrix> s_vertices;
@@ -912,8 +934,8 @@ namespace Rodin::Geometry
       Math::PointMatrix m_vertices;
       MeshConnectivity m_connectivity;
 
-      PolytopeIndexed<Geometry::Attribute> m_attributeIndex;
-      mutable PolytopeIndexed<std::unique_ptr<PolytopeTransformation>> m_transformationIndex;
+      AttributeIndex m_attributeIndex;
+      mutable TransformationIndex m_transformationIndex;
 
       std::vector<FlatSet<Attribute>> m_attributes;
   };

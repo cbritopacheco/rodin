@@ -1,10 +1,12 @@
-set(RodinVariational_HEADERS
+set(RodinAssembly_HEADERS
   AssemblyBase.h
-  Native.h)
+  Serial.h
+  Multithreaded.h)
 
-set(RodinVariational_SRCS
+set(RodinAssembly_SRCS
   AssemblyBase.cpp
-  Native.cpp)
+  Serial.cpp
+  Multithreaded.cpp)
 
 add_library(RodinAssembly
   ${RodinAssembly_SRCS} ${RodinAssembly_HEADERS})
@@ -18,16 +20,11 @@ endif()
 
 # ---- Link targets ----------------------------------------------------------
 target_include_directories(RodinAssembly
-  INTERFACE
-  $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
-  PUBLIC
-  ${MFEM_INCLUDE_DIRS})
+  INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_link_libraries(RodinAssembly
   PUBLIC
-  Rodin::IO
-  Rodin::Alert
+  Threads::Threads
   Rodin::Utility
-  Rodin::Geometry
   Rodin::FormLanguage
   Rodin::Variational)

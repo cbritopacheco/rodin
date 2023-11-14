@@ -7,6 +7,7 @@
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <chrono>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -18,7 +19,7 @@ int main(int, char**)
 {
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 32, 32);
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
@@ -35,12 +36,6 @@ int main(int, char**)
   poisson = Integral(Grad(u), Grad(v))
           - Integral(f, v)
           + DirichletBC(u, g);
-  poisson.assemble();
-
-  for (auto it = mesh.getBoundary(); it; ++it)
-  {
-    mesh.setAttribute({ it->getDimension(), it->getIndex() }, 2);
-  }
 
   // Solve the problem
   Solver::SparseLU solver;

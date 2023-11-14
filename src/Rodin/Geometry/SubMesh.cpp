@@ -35,8 +35,10 @@ namespace Rodin::Geometry
     const size_t d = polytope.getDimension();
     const Index i = polytope.getIndex();
     const Index pi = getPolytopeMap(d).left.at(i);
+    auto it = parent.getPolytope(d, pi);
+    std::unique_ptr<Polytope> parentPolytope(it.release());
     return Point(
-        std::move(*parent.getPolytope(d, pi)),
+        std::move(*parentPolytope),
         parent.getPolytopeTransformation(d, pi),
         std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
   }
@@ -58,8 +60,10 @@ namespace Rodin::Geometry
         << Alert::Raise;
     }
     const Index ci = find->get_left();
+    auto it = child.getPolytope(d, ci);
+    std::unique_ptr<Polytope> childPolytope(it.release());
     return Point(
-        std::move(*child.getPolytope(d, ci)),
+        std::move(*childPolytope),
         child.getPolytopeTransformation(d, ci),
         std::cref(p.getReferenceCoordinates()), p.getPhysicalCoordinates());
   }

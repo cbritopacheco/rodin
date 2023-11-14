@@ -4,29 +4,29 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_ASSEMBLY_H
-#define RODIN_VARIATIONAL_ASSEMBLY_H
+#ifndef RODIN_ASSEMBLY_ASSEMBLYBASE_H
+#define RODIN_ASSEMBLY_ASSEMBLYBASE_H
 
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Math.h"
 
-#include "Rodin/Variational/FiniteElementSpace.h"
-#include "Rodin/Variational/LinearFormIntegrator.h"
-#include "Rodin/Variational/BilinearFormIntegrator.h"
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Variational/ForwardDecls.h"
+#include "ForwardDecls.h"
 
-namespace Rodin::Variational::Assembly
+namespace Rodin::Assembly
 {
   struct BilinearAssemblyInput
   {
     const Geometry::MeshBase& mesh;
-    const FiniteElementSpaceBase& trialFES;
-    const FiniteElementSpaceBase& testFES;
-    FormLanguage::List<BilinearFormIntegratorBase>& bfis;
+    const Variational::FiniteElementSpaceBase& trialFES;
+    const Variational::FiniteElementSpaceBase& testFES;
+    FormLanguage::List<Variational::BilinearFormIntegratorBase>& bfis;
   };
 
   template <class OperatorType>
-  class AssemblyBase<BilinearFormBase<OperatorType>>
+  class AssemblyBase<Variational::BilinearFormBase<OperatorType>>
     : public FormLanguage::Base
   {
     public:
@@ -42,15 +42,15 @@ namespace Rodin::Variational::Assembly
   };
 
   template <class VectorType>
-  class AssemblyBase<LinearFormBase<VectorType>>
+  class AssemblyBase<Variational::LinearFormBase<VectorType>>
     : public FormLanguage::Base
   {
     public:
       struct Input
       {
         const Geometry::MeshBase& mesh;
-        const FiniteElementSpaceBase& fes;
-        FormLanguage::List<LinearFormIntegratorBase>& lfis;
+        const Variational::FiniteElementSpaceBase& fes;
+        FormLanguage::List<Variational::LinearFormIntegratorBase>& lfis;
       };
 
       AssemblyBase() = default;

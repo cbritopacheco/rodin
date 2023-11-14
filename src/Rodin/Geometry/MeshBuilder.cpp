@@ -22,8 +22,8 @@ namespace Rodin::Geometry
 
     // Set indexes
     m_attributeIndex.initialize(m_sdim + 1);
-    m_transformationIndex.initialize(m_sdim + 1);
 
+    m_transformationIndex.resize(sdim + 1);
     return *this;
   }
 
@@ -110,9 +110,12 @@ namespace Rodin::Geometry
   Mesh<Context::Serial>::Builder&
   Mesh<Context::Serial>::Builder::reserve(size_t d, size_t count)
   {
-    m_connectivity.reserve(d, count);
-    m_attributeIndex.reserve(d, count);
-    m_transformationIndex.reserve(d, count);
+    if (count > 0)
+    {
+      m_connectivity.reserve(d, count);
+      m_attributeIndex.reserve(d, count);
+      m_transformationIndex[d].write([&](auto& obj){ obj.reserve(count); });
+    }
     return *this;
   }
 
@@ -125,7 +128,6 @@ namespace Rodin::Geometry
     res.m_connectivity = std::move(m_connectivity);
     res.m_attributeIndex = std::move(m_attributeIndex);
     res.m_transformationIndex = std::move(m_transformationIndex);
-
     return res;
   }
 

@@ -34,21 +34,21 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
   EXPECT_EQ(mesh.getSpaceDimension(), sdim);
 
   size_t d = 0;
-  EXPECT_EQ(mesh.getCount(d), 4);
-  EXPECT_EQ(mesh.getCount(d), mesh.getVertexCount());
+  EXPECT_EQ(mesh.getPolytopeCount(d), 4);
+  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
   EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
   EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
   EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
   EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
 
   d = 1;
-  EXPECT_EQ(mesh.getCount(d), 5);
+  EXPECT_EQ(mesh.getPolytopeCount(d), 5);
   EXPECT_EQ(mesh.getAttribute(d, 0), 1);
   EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 
   d = 2;
-  EXPECT_EQ(mesh.getCount(d), 2);
-  EXPECT_EQ(mesh.getCount(d), mesh.getCellCount());
+  EXPECT_EQ(mesh.getPolytopeCount(d), 2);
+  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getCellCount());
   EXPECT_EQ(mesh.getAttribute(d, 0), 1);
   EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 }
@@ -67,8 +67,8 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
   loader.load(in);
 
   size_t d = 0;
-  EXPECT_EQ(mesh.getCount(d), 4);
-  EXPECT_EQ(mesh.getCount(d), mesh.getVertexCount());
+  EXPECT_EQ(mesh.getPolytopeCount(d), 4);
+  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
 
   // MFEM format does not support vertex attributes
   EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
@@ -77,13 +77,13 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
   EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
 
   d = 1;
-  EXPECT_EQ(mesh.getCount(d), 5);
+  EXPECT_EQ(mesh.getPolytopeCount(d), 5);
   EXPECT_EQ(mesh.getAttribute(d, 0), 1);
   EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 
   d = 2;
-  EXPECT_EQ(mesh.getCount(d), 2);
-  EXPECT_EQ(mesh.getCount(d), mesh.getCellCount());
+  EXPECT_EQ(mesh.getPolytopeCount(d), 2);
+  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getCellCount());
   EXPECT_EQ(mesh.getAttribute(d, 0), 1);
   EXPECT_EQ(mesh.getAttribute(d, 1), 2);
 }
@@ -108,8 +108,8 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_StarSquare)
   EXPECT_EQ(mesh.getSpaceDimension(), sdim);
 
   size_t d = 0;
-  EXPECT_EQ(mesh.getCount(d), vcount);
-  EXPECT_EQ(mesh.getCount(d), mesh.getVertexCount());
+  EXPECT_EQ(mesh.getPolytopeCount(d), vcount);
+  EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
 
   for (size_t i = 0; i < vcount; i++)
     EXPECT_EQ(mesh.getAttribute(d, i), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);

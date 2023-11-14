@@ -8,21 +8,23 @@
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
-#include "Native.h"
+#include "Serial.h"
 
-namespace Rodin::Variational::Assembly
+namespace Rodin::Assembly
 {
-  Math::SparseMatrix Native<BilinearFormBase<Math::SparseMatrix>>
+  Math::SparseMatrix
+  Serial<Variational::BilinearFormBase<Math::SparseMatrix>>
   ::execute(const BilinearAssemblyInput& input) const
   {
-    Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>> assembly;
+    Serial<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>> assembly;
     const auto triplets = assembly.execute(input);
     OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
     res.setFromTriplets(triplets.begin(), triplets.end());
     return res;
   }
 
-  void Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+  void
+  Serial<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   ::add(std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
       const IndexArray& rows, const IndexArray& cols)
   {
@@ -41,17 +43,18 @@ namespace Rodin::Variational::Assembly
     }
   }
 
-  std::vector<Eigen::Triplet<Scalar>> Native<BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
+  std::vector<Eigen::Triplet<Scalar>>
+  Serial<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   ::execute(const BilinearAssemblyInput& input) const
   {
     std::vector<Eigen::Triplet<Scalar>> res;
-    // res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
+    res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
     for (auto& bfi : input.bfis)
     {
       const auto& attrs = bfi.getAttributes();
       switch (bfi.getRegion())
       {
-        case Integrator::Region::Domain:
+        case Variational::Integrator::Region::Domain:
         {
           for (auto it = input.mesh.getCell(); !it.end(); ++it)
           {
@@ -67,7 +70,7 @@ namespace Rodin::Variational::Assembly
           }
           break;
         }
-        case Integrator::Region::Faces:
+        case Variational::Integrator::Region::Faces:
         {
           for (auto it = input.mesh.getFace(); !it.end(); ++it)
           {
@@ -83,7 +86,7 @@ namespace Rodin::Variational::Assembly
           }
           break;
         }
-        case Integrator::Region::Boundary:
+        case Variational::Integrator::Region::Boundary:
         {
           for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
           {
@@ -99,7 +102,7 @@ namespace Rodin::Variational::Assembly
           }
           break;
         }
-        case Integrator::Region::Interface:
+        case Variational::Integrator::Region::Interface:
         {
           for (auto it = input.mesh.getInterface(); !it.end(); ++it)
           {
@@ -120,7 +123,8 @@ namespace Rodin::Variational::Assembly
     return res;
   }
 
-  void Native<LinearFormBase<Math::Vector>>
+  void
+  Serial<Variational::LinearFormBase<Math::Vector>>
   ::add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
   {
     assert(in.size() == s.size());
@@ -129,7 +133,8 @@ namespace Rodin::Variational::Assembly
       out.coeffRef(global) += in.coeff(i++);
   }
 
-  Math::Vector Native<LinearFormBase<Math::Vector>>
+  Math::Vector
+  Serial<Variational::LinearFormBase<Math::Vector>>
   ::execute(const Input& input) const
   {
     VectorType res(input.fes.getSize());
@@ -140,7 +145,7 @@ namespace Rodin::Variational::Assembly
       const auto& attrs = lfi.getAttributes();
       switch (lfi.getRegion())
       {
-        case Integrator::Region::Domain:
+        case Variational::Integrator::Region::Domain:
         {
           for (auto it = input.mesh.getCell(); !it.end(); ++it)
           {
@@ -155,7 +160,7 @@ namespace Rodin::Variational::Assembly
           }
           break;
         }
-        case Integrator::Region::Faces:
+        case Variational::Integrator::Region::Faces:
         {
           for (auto it = input.mesh.getFace(); !it.end(); ++it)
           {
@@ -170,7 +175,7 @@ namespace Rodin::Variational::Assembly
           }
           break;
         }
-        case Integrator::Region::Boundary:
+        case Variational::Integrator::Region::Boundary:
         {
           for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
           {
@@ -185,7 +190,7 @@ namespace Rodin::Variational::Assembly
           }
           break;
         }
-        case Integrator::Region::Interface:
+        case Variational::Integrator::Region::Interface:
         {
           for (auto it = input.mesh.getInterface(); !it.end(); ++it)
           {

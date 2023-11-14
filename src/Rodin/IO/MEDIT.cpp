@@ -274,7 +274,7 @@ namespace Rodin::IO
           const size_t d = Geometry::Polytope::getGeometryDimension(g);
           if (d <= mesh.getDimension())
           {
-            os << mesh.getCount(g) << '\n';
+            os << mesh.getPolytopeCount(g) << '\n';
             for (auto it = mesh.getPolytope(d); !it.end(); ++it)
             {
               if (it->getGeometry() == g)
