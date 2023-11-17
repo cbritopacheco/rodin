@@ -16,7 +16,15 @@
 
   @subsection examples-index-pdes Solving PDEs
 
-  - @subpage examples-pdes-index
+  %Rodin can be used to solve partial differential equations of many types. To
+  start solving PDEs with Rodin, we recommend taking a look at the simplest
+  example which is how to solve the Poisson equation.
+
+  | Equation                                        | Link to example |
+  | ----------------------------------------------- | --------------- |
+  | @f$ - \Delta u = f @f$                          | @subpage examples-pdes-poisson |
+  | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @subpage examples-pdes-elasticity |
+  | @f$ - \Delta u + u = f \text{ on } S^2 \subset \mathbb{R}^3 @f$ | @subpage examples-pdes-surface_meshes |
 
   @subsection examples-index-solver Solving linear systems
 

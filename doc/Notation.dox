@@ -2,7 +2,26 @@
   @page notation-index Notation
   @brief Explanation of the notation used throughout the documentation.
 
-  - @f$ \mathcal{T}_h @f$ represents the discrete mesh.
+  Most of the notation follows the same principles as that of
+  @cite guermond2021finiteI.
+
+  @tableofcontents
+
+  ## Notation regarding geometry
+
+  Please see the table below for a description of the symbols used for
+  geometric objects:
+
+| Notation          | Description                                            |
+| ----------------- | ------------------------------------------------------ |
+| @f$ \Omega @f$    | Denotes a domain with Lipschitz domain.                |
+| @f$ \partial \Omega @f$ | Denotes the Lipschitz boundary of the Lipschitz domain @f$ \Omega @f$. |
+| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex which represents the domain @f$ \Omega @f$. |
+| @f$ \mathcal{F}_h @f$ | Represents the faces of the domain @f$ \Omega @f$. |
+| @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the domain @f$ \Omega @f$. |
+| @f$ \mathcal{I}_h @f$ | Represents the interfaces of the domain @f$ \Omega @f$. |
+
+  ## Notation regarding variational methods
 
   */
 
