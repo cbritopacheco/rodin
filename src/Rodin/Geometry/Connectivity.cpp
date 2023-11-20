@@ -62,8 +62,8 @@ namespace Rodin::Geometry
 
   MeshConnectivity& MeshConnectivity::nodes(size_t count)
   {
-    m_count[0] = count;
-    m_gcount[Geometry::Polytope::Type::Point] = count;
+    m_count[0].write() = count;
+    m_gcount[Geometry::Polytope::Type::Point].write() = count;
     for (size_t i = 0; i < count; i++)
     {
       m_index[0].write(
@@ -107,7 +107,7 @@ namespace Rodin::Geometry
           });
       m_count[d].write([](auto& obj){ obj += 1; });
       m_gcount[t].write([](auto& obj){ obj += 1; });
-      m_dirty[d][0] = false;
+      m_dirty[d][0].write() = false;
     }
     return *this;
   }
@@ -145,7 +145,7 @@ namespace Rodin::Geometry
           });
       m_count[d].write([](auto& obj){ obj += 1; });
       m_gcount[t].write([](auto& obj){ obj += 1; });
-      m_dirty[d][0] = false;
+      m_dirty[d][0].write() = false;
     }
     return *this;
   }
@@ -184,7 +184,7 @@ namespace Rodin::Geometry
     const auto& [d, dp] = p;
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
-    assert(idx < m_connectivity[d][dp].size());
+    assert(idx < m_connectivity[d][dp].read().size());
     return m_connectivity[d][dp].read()[idx];
   }
 
@@ -232,7 +232,7 @@ namespace Rodin::Geometry
     const auto& [d, dp] = p;
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
-    m_connectivity[d][dp] = std::move(inc);
+    m_connectivity[d][dp].write() = std::move(inc);
     return *this;
   }
 
@@ -241,28 +241,18 @@ namespace Rodin::Geometry
     const size_t D = getMeshDimension();
     if (d == D && dp == 0)
       return *this;
-    bool dirtyDD;
-    m_dirty[D][D].read([&](const auto& obj){ dirtyDD = obj; });
-    if (dirtyDD)
+    if (m_dirty[D][D].read())
       transpose(0, D).intersection(D, D, 0);
-    assert(!m_dirty[D][D]);
-    bool dirtyDd, dirtyd0;
-    m_dirty[D][D].read([&](const auto& obj){ dirtyDd = obj; });
-    m_dirty[d][0].read([&](const auto& obj){ dirtyd0 = obj; });
-    if (d != D && d != 0 && (dirtyDd || dirtyd0))
+    assert(!m_dirty[D][D].read());
+    if (d != D && d != 0 && (m_dirty[D][d].read() || m_dirty[d][0].read()))
       build(d);
-    assert(!dirtyDd);
-    assert(!dirtyd0 || d == D || d == 0);
-    bool dirtyDdp, dirtydp0;
-    m_dirty[D][dp].read([&](const auto& obj){ dirtyDdp = obj; });
-    m_dirty[dp][0].read([&](const auto& obj){ dirtydp0 = obj; });
-    if (dp != D && dp != 0 && (dirtyDdp || dirtydp0))
+    assert(!m_dirty[D][d].read());
+    assert(!m_dirty[d][0].read() || d == D || d == 0);
+    if (dp != D && dp != 0 && (m_dirty[D][dp].read() || m_dirty[dp][0].read()))
       build(dp);
-    assert(!dirtyDdp);
-    assert(!dirtydp0 || dp == D || dp == 0);
-    bool dirtyddp;
-    m_dirty[d][dp].read([&](const auto& obj){ dirtyddp = obj; });
-    if (dirtyddp)
+    assert(!m_dirty[D][dp].read());
+    assert(!m_dirty[dp][0].read() || dp == D || dp == 0);
+    if (m_dirty[d][dp].read())
     {
       if (d < dp)
       {
@@ -278,7 +268,7 @@ namespace Rodin::Geometry
         compute(d, dpp).compute(dpp, dp).intersection(d, dp, dpp);
       }
     }
-    m_dirty[d][dp] = false;
+    m_dirty[d][dp].write() = false;
     return *this;
   }
 
@@ -287,11 +277,9 @@ namespace Rodin::Geometry
     const size_t D = getMeshDimension();
     assert(d > 0);
     assert(d < D);
-    assert(!m_dirty[D][0]);
-    assert(!m_dirty[D][D]);
-    size_t countD;
-    m_count[D].read([&](auto& obj) { countD = obj; });
-    for (Index i = 0; i < countD; i++)
+    assert(!m_dirty[D][0].read());
+    assert(!m_dirty[D][D].read());
+    for (Index i = 0; i < m_count[D].read(); i++)
     {
       IndexSet s;
       std::vector<SubPolytope> subpolytopes;
@@ -302,7 +290,6 @@ namespace Rodin::Geometry
         auto& vertices = gv.vertices;
         size_t countd;
         m_count[d].read([&](const auto& obj) { countd = obj; });
-
         std::pair<PolytopeIndex::left_const_iterator, bool> insert;
         m_index[d].write([&](auto& obj) { insert = obj.left.insert({ std::move(vertices), countd }); });
         const PolytopeIndex::left_const_iterator it = insert.first;
@@ -332,8 +319,8 @@ namespace Rodin::Geometry
             obj.push_back(std::move(s));
           });
     }
-    m_dirty[D][d] = false;
-    m_dirty[d][0] = false;
+    m_dirty[D][d].write() = false;
+    m_dirty[d][0].write() = false;
     return *this;
   }
 
@@ -343,10 +330,10 @@ namespace Rodin::Geometry
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
     size_t countd;
-    m_count[d].read([&](auto& obj) { countd = obj; });
+    m_count[d].read([&](const auto& obj) { countd = obj; });
     m_connectivity[d][dp].write([&](auto& obj) { obj.resize(countd); });
     size_t countdp;
-    m_count[dp].read([&](auto& obj) { countdp = obj; });
+    m_count[dp].read([&](const auto& obj) { countdp = obj; });
     for (Index j = 0; j < countdp; j++)
     {
       const IndexSet* isj = nullptr;
@@ -354,7 +341,7 @@ namespace Rodin::Geometry
       for (Index i : *isj)
         m_connectivity[d][dp].write([&](auto& obj) { obj[i].insert(j); });
     }
-    m_dirty[d][dp] = false;
+    m_dirty[d][dp].write() = false;
     return *this;
   }
 
@@ -362,22 +349,26 @@ namespace Rodin::Geometry
   {
     assert(d >= dp);
     size_t countd;
-    m_count[d].read([&](auto& obj) { countd = obj; });
+    m_count[d].read([&](const auto& obj) { countd = obj; });
     m_connectivity[d][dp].write([&](auto& obj) { obj.resize(countd); });
     for (Index i = 0; i < countd; i++)
     {
-      assert(i < m_connectivity[d][dpp].size());
+      m_connectivity[d][dpp].read(
+          [&](const auto& obj) { assert(i < obj.size()); });
       const IndexSet* isi = nullptr;
       m_connectivity[d][dpp].read([&](const auto& obj) { isi = &obj[i]; });
       for (Index k : *isi)
       {
-        assert(k < m_connectivity[dpp][dp].size());
+        m_connectivity[dpp][dp].read(
+            [&](const auto& obj) { assert(k < obj.size()); });
         const IndexSet* isk = nullptr;
         m_connectivity[dpp][dp].read([&](const auto& obj) { isk = &obj[k]; });
         for (Index j : *isk)
         {
-          assert(i < m_connectivity[d][0].size());
-          assert(j < m_connectivity[dp][0].size());
+          m_connectivity[d][0].read(
+              [&](const auto& obj) { assert(i < obj.size()); });
+          m_connectivity[dp][0].read(
+              [&](const auto& obj) { assert(j < obj.size()); });
           const IndexSet* isd0i = nullptr;
           m_connectivity[d][0].read([&](const auto& obj) { isd0i = &obj[i]; });
           const IndexSet* isdp0j = nullptr;
@@ -390,7 +381,7 @@ namespace Rodin::Geometry
         }
       }
     }
-    m_dirty[d][dp] = false;
+    m_dirty[d][dp].write() = false;
     return *this;
   }
 
@@ -406,7 +397,7 @@ namespace Rodin::Geometry
       case Polytope::Type::Point:
       {
         assert(dim == 0);
-        assert(p.size()  == 0);
+        assert(p->size()  == 0);
         out.resize(1);
         out[0].geometry = Polytope::Type::Point;
         out[0].vertices.resize(1);
@@ -416,7 +407,7 @@ namespace Rodin::Geometry
       case Polytope::Type::Segment:
       {
         assert(dim <= 1);
-        assert(p.size() == 2);
+        assert(p->size() == 2);
         if (dim == 0)
         {
           out.resize(2);
@@ -443,7 +434,7 @@ namespace Rodin::Geometry
       case Polytope::Type::Triangle:
       {
         assert(dim <= 2);
-        assert(p.size() == 3);
+        assert(p->size() == 3);
         if (dim == 0)
         {
           out.resize(3);
@@ -494,7 +485,7 @@ namespace Rodin::Geometry
       case Polytope::Type::Quadrilateral:
       {
         assert(dim <= 2);
-        assert(p.size() == 4);
+        assert(p->size() == 4);
         if (dim == 0)
         {
           out.resize(4);
@@ -526,7 +517,7 @@ namespace Rodin::Geometry
       case Polytope::Type::Tetrahedron:
       {
         assert(dim <= 3);
-        assert(p.size() == 4);
+        assert(p->size() == 4);
         if (dim == 0)
         {
           out.resize(4);
@@ -574,8 +565,8 @@ namespace Rodin::Geometry
   {
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
-    m_dirty[d][dp] = true;
-    m_connectivity[d][dp].write([](auto& obj){ obj.clear(); });
+    m_dirty[d][dp].write() = true;
+    m_connectivity[d][dp].write().clear();
     return *this;
   }
 }
