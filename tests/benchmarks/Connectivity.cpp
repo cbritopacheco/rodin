@@ -24,19 +24,9 @@ namespace RodinBenchmark
         const size_t D = mesh.getDimension();
         for (auto _ : st)
         {
-          st.ResumeTiming();
           for (size_t d = 0; d <= D; d++)
             for (size_t dp = 0; dp <= D; dp++)
               mesh.getConnectivity().compute(d, dp);
-          st.PauseTiming();
-          for (size_t d = 0; d <= D; d++)
-          {
-            for (size_t dp = 0; dp <= D; dp++)
-            {
-              if (!(d == D && dp == 0))
-                mesh.getConnectivity().clear(d, dp);
-            }
-          }
         }
       }
 
