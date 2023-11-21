@@ -54,28 +54,15 @@ namespace RodinBenchmark
     test(mesh, st);
   }
 
-  BENCHMARK_F(Connectivity, Triangular_64x64)(benchmark::State& st)
+  BENCHMARK_F(Connectivity, Triangular_32x32)(benchmark::State& st)
   {
     auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
     test(mesh, st);
   }
 
-  BENCHMARK_F(Connectivity, Triangular_128x128)(benchmark::State& st)
+  BENCHMARK_F(Connectivity, Triangular_64x64)(benchmark::State& st)
   {
-    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
-    test(mesh, st);
-  }
-
-
-  BENCHMARK_F(Connectivity, Triangular_256x256)(benchmark::State& st)
-  {
-    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 256, 256);
-    test(mesh, st);
-  }
-
-  BENCHMARK_F(Connectivity, Triangular_512x512)(benchmark::State& st)
-  {
-    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 512, 512);
+    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
     test(mesh, st);
   }
 }
