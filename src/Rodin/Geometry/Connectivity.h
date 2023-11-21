@@ -15,7 +15,6 @@
 #include <boost/bimap/unordered_set_of.hpp>
 
 #include "Rodin/Array.h"
-#include "Rodin/Threads/Shared.h"
 
 #include "ForwardDecls.h"
 
@@ -132,12 +131,12 @@ namespace Rodin::Geometry
     private:
       size_t m_maximalDimension;
 
-      std::vector<Threads::Shared<size_t>> m_count;
-      GeometryIndexed<Threads::Shared<size_t>> m_gcount;
-      std::vector<Threads::Shared<PolytopeIndex>> m_index;
-      std::vector<std::vector<Threads::Shared<bool>>> m_dirty;
-      std::vector<Threads::Shared<std::vector<Polytope::Type>>> m_geometry;
-      std::vector<std::vector<Threads::Shared<Incidence>>> m_connectivity;
+      std::vector<size_t> m_count;
+      GeometryIndexed<size_t> m_gcount;
+      std::vector<PolytopeIndex> m_index;
+      std::vector<std::vector<bool>> m_dirty;
+      std::vector<std::vector<Polytope::Type>> m_geometry;
+      std::vector<std::vector<Incidence>> m_connectivity;
 
   };
 }

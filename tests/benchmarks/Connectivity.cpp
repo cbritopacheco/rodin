@@ -1,0 +1,82 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2023.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <benchmark/benchmark.h>
+
+#include <Rodin/Geometry.h>
+#include <Rodin/Configure.h>
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+namespace RodinBenchmark
+{
+  struct Connectivity : public benchmark::Fixture
+  {
+    public:
+      template <class Mesh>
+      void test(Mesh& mesh, benchmark::State& st)
+      {
+        const size_t D = mesh.getDimension();
+        for (auto _ : st)
+        {
+          st.ResumeTiming();
+          for (size_t d = 0; d <= D; d++)
+            for (size_t dp = 0; dp <= D; dp++)
+              mesh.getConnectivity().compute(d, dp);
+          st.PauseTiming();
+          for (size_t d = 0; d <= D; d++)
+          {
+            for (size_t dp = 0; dp <= D; dp++)
+            {
+              if (!(d == D && dp == 0))
+                mesh.getConnectivity().clear(d, dp);
+            }
+          }
+        }
+      }
+
+      void SetUp(const benchmark::State&)
+      {}
+
+      void TearDown(const benchmark::State&)
+      {}
+  };
+
+
+  BENCHMARK_F(Connectivity, Triangular_16x16)(benchmark::State& st)
+  {
+    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+    test(mesh, st);
+  }
+
+  BENCHMARK_F(Connectivity, Triangular_64x64)(benchmark::State& st)
+  {
+    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
+    test(mesh, st);
+  }
+
+  BENCHMARK_F(Connectivity, Triangular_128x128)(benchmark::State& st)
+  {
+    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
+    test(mesh, st);
+  }
+
+
+  BENCHMARK_F(Connectivity, Triangular_256x256)(benchmark::State& st)
+  {
+    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 256, 256);
+    test(mesh, st);
+  }
+
+  BENCHMARK_F(Connectivity, Triangular_512x512)(benchmark::State& st)
+  {
+    auto mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 512, 512);
+    test(mesh, st);
+  }
+}
+
