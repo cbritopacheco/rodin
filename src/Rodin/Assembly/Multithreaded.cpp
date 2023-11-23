@@ -6,8 +6,6 @@
  */
 #include <thread>
 
-#include "BS_thread_pool.hpp"
-
 #include "Rodin/Variational/FiniteElementSpace.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
@@ -23,7 +21,7 @@ namespace Rodin::Assembly
 
   Multithreaded<Variational::BilinearFormBase<Math::SparseMatrix>>
   ::Multithreaded(size_t threadCount)
-    : m_threadCount(threadCount)
+    : m_assembly(threadCount)
   {
     assert(threadCount > 0);
   }
@@ -31,21 +29,20 @@ namespace Rodin::Assembly
   Multithreaded<Variational::BilinearFormBase<Math::SparseMatrix>>
   ::Multithreaded(const Multithreaded& other)
     : Parent(other),
-      m_threadCount(other.m_threadCount)
+      m_assembly(other.m_assembly)
   {}
 
   Multithreaded<Variational::BilinearFormBase<Math::SparseMatrix>>
   ::Multithreaded(Multithreaded&& other)
     : Parent(std::move(other)),
-      m_threadCount(std::move(other.m_threadCount))
+      m_assembly(std::move(other.m_assembly))
   {}
 
   Math::SparseMatrix
   Multithreaded<Variational::BilinearFormBase<Math::SparseMatrix>>
   ::execute(const BilinearAssemblyInput& input) const
   {
-    Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>> assembly(m_threadCount);
-    const auto triplets = assembly.execute(input);
+    const auto triplets = m_assembly.execute(input);
     OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
     res.setFromTriplets(triplets.begin(), triplets.end());
     return res;
@@ -58,7 +55,8 @@ namespace Rodin::Assembly
 
   Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   ::Multithreaded(size_t threadCount)
-    : m_threadCount(threadCount)
+    : m_threadCount(threadCount),
+      m_pool(threadCount)
   {
     assert(threadCount > 0);
   }
@@ -66,13 +64,15 @@ namespace Rodin::Assembly
   Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   ::Multithreaded(const Multithreaded& other)
     : Parent(other),
-      m_threadCount(other.m_threadCount)
+      m_threadCount(other.m_threadCount),
+      m_pool(m_threadCount)
   {}
 
   Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   ::Multithreaded(Multithreaded&& other)
     : Parent(std::move(other)),
-      m_threadCount(std::move(other.m_threadCount))
+      m_threadCount(std::move(other.m_threadCount)),
+      m_pool(m_threadCount)
   {}
 
   void
@@ -111,7 +111,7 @@ namespace Rodin::Assembly
     TripletVector res;
     res.clear();
     res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
-    BS::thread_pool threadPool(m_threadCount);
+    auto& threadPool = m_pool;
     for (auto& bfi : input.bfis)
     {
       const auto& attrs = bfi.getAttributes();
@@ -144,8 +144,8 @@ namespace Rodin::Assembly
               m_mutex.unlock();
               tl_triplets.clear();
             };
-          threadPool.push_loop(0, input.mesh.getCellCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getCellCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
         case Variational::Integrator::Region::Faces:
@@ -175,8 +175,8 @@ namespace Rodin::Assembly
               m_mutex.unlock();
               tl_triplets.clear();
             };
-          threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
         case Variational::Integrator::Region::Boundary:
@@ -209,8 +209,8 @@ namespace Rodin::Assembly
               m_mutex.unlock();
               tl_triplets.clear();
             };
-          threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
         case Variational::Integrator::Region::Interface:
@@ -243,8 +243,8 @@ namespace Rodin::Assembly
               m_mutex.unlock();
               tl_triplets.clear();
             };
-          threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
       }
@@ -267,7 +267,8 @@ namespace Rodin::Assembly
 
   Multithreaded<Variational::LinearFormBase<Math::Vector>>
   ::Multithreaded(size_t threadCount)
-    : m_threadCount(threadCount)
+    : m_threadCount(threadCount),
+      m_pool(threadCount)
   {
     assert(threadCount > 0);
   }
@@ -275,13 +276,15 @@ namespace Rodin::Assembly
   Multithreaded<Variational::LinearFormBase<Math::Vector>>
   ::Multithreaded(const Multithreaded& other)
     : Parent(other),
-      m_threadCount(other.m_threadCount)
+      m_threadCount(other.m_threadCount),
+      m_pool(m_threadCount)
   {}
 
   Multithreaded<Variational::LinearFormBase<Math::Vector>>
   ::Multithreaded(Multithreaded&& other)
     : Parent(std::move(other)),
-      m_threadCount(std::move(other.m_threadCount))
+      m_threadCount(std::move(other.m_threadCount)),
+      m_pool(m_threadCount)
   {}
 
   void
@@ -298,9 +301,9 @@ namespace Rodin::Assembly
   Multithreaded<Variational::LinearFormBase<Math::Vector>>
   ::execute(const Input& input) const
   {
-    BS::thread_pool threadPool(m_threadCount);
     VectorType res(input.fes.getSize());
     res.setZero();
+    auto& threadPool = m_pool;
     for (auto& lfi : input.lfis)
     {
       const auto& attrs = lfi.getAttributes();
@@ -329,8 +332,8 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.push_loop(0, input.mesh.getCellCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getCellCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
         case Variational::Integrator::Region::Faces:
@@ -356,8 +359,8 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
         case Variational::Integrator::Region::Boundary:
@@ -386,8 +389,8 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
         case Variational::Integrator::Region::Interface:
@@ -416,8 +419,8 @@ namespace Rodin::Assembly
               res += tl_res;
               m_mutex.unlock();
             };
-          threadPool.push_loop(0, input.mesh.getFaceCount(), loop);
-          threadPool.wait_for_tasks();
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
           break;
         }
       }

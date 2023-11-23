@@ -37,7 +37,7 @@ namespace Rodin::Variational
 
       BilinearFormBase()
       {
-#ifdef RODIN_THREAD_SAFE
+#ifdef RODIN_MULTITHREADED
         m_assembly.reset(new MultithreadedAssembly);
 #else
         m_assembly.reset(new SerialAssembly);

@@ -125,6 +125,8 @@
 
 #cmakedefine RODIN_THREAD_SAFE
 
+#cmakedefine RODIN_MULTITHREADED
+
 /**
  * @ingroup RodinDirectives
  * @brief Indicates the maximal space dimension.

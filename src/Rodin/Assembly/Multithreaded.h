@@ -10,6 +10,8 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
+#include "Rodin/Threads/ThreadPool.h"
+
 #include "Rodin/Threads/Mutex.h"
 
 #include "ForwardDecls.h"
@@ -57,8 +59,8 @@ namespace Rodin::Assembly
       static thread_local std::unique_ptr<Variational::BilinearFormIntegratorBase> tl_bfi;
 
       const size_t m_threadCount;
-
       mutable Threads::Mutex m_mutex;
+      mutable Threads::ThreadPool m_pool;
   };
 
   /**
@@ -93,7 +95,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      const size_t m_threadCount;
+      Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>> m_assembly;
   };
 
   /**
@@ -136,6 +138,7 @@ namespace Rodin::Assembly
 
       const size_t m_threadCount;
       mutable Threads::Mutex m_mutex;
+      mutable Threads::ThreadPool m_pool;
   };
 }
 

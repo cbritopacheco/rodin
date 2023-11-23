@@ -1,66 +1,48 @@
-#ifndef RODIN_MUTABLE_H
-#define RODIN_MUTABLE_H
+#ifndef RODIN_SHARED_H
+#define RODIN_SHARED_H
+
+#include <shared_mutex>
 
 #include "Rodin/Configure.h"
 
-#include "Mutex.h"
-
 namespace Rodin::Threads
 {
-  template <class Resource, class Lock = Mutex>
-  class Mutable
+  template <class Resource>
+  class Shared
   {
     public:
       constexpr
-      Mutable()
+      Shared()
       {}
 
       constexpr
-      Mutable(const Resource& resource)
+      Shared(const Resource& resource)
         : m_resource(resource)
       {}
 
       constexpr
-      Mutable(Resource&& resource)
+      Shared(Resource&& resource)
         : m_resource(std::move(resource))
       {}
 
       constexpr
-      Mutable(Mutable&& other)
+      Shared(Shared&& other)
         : m_resource(std::move(other.m_resource))
       {}
 
       constexpr
-      Mutable(const Mutable& other)
+      Shared(const Shared& other)
         : m_resource(other.m_resource)
       {}
 
       constexpr
-      Mutable& operator=(const Resource& resource)
-      {
-#ifdef RODIN_THREAD_SAFE
-        lock();
-        m_resource = resource;
-        unlock();
-#endif
-        return *this;
-      }
+      Shared& operator=(const Resource&) = delete;
 
       constexpr
-      Mutable& operator=(Resource&& resource)
-      {
-#ifdef RODIN_THREAD_SAFE
-        lock();
-        m_resource = std::move(resource);
-        unlock();
-#else
-        m_resource = std::move(resource);
-#endif
-        return *this;
-      }
+      Shared& operator=(Resource&&) = delete;
 
       constexpr
-      Mutable& operator=(const Mutable& other)
+      Shared& operator=(const Shared& other)
       {
         if (this != &other)
         {
@@ -76,7 +58,7 @@ namespace Rodin::Threads
       }
 
       constexpr
-      Mutable& operator=(Mutable&& other)
+      Shared& operator=(Shared&& other)
       {
 #ifdef RODIN_THREAD_SAFE
         lock();
@@ -92,6 +74,13 @@ namespace Rodin::Threads
 
       inline
       constexpr
+      Resource& write()
+      {
+        return m_resource;
+      }
+
+      inline
+      constexpr
       const Resource& read() const
       {
         return m_resource;
@@ -100,17 +89,23 @@ namespace Rodin::Threads
       template <class F>
       inline
       constexpr
-      Mutable& read(F&&) const
+      const Shared& read(F&& f) const
       {
         static_assert(std::is_invocable_v<F, const Resource&>);
-        f(m_resource);
+#ifdef RODIN_THREAD_SAFE
+        m_lock.lock_shared();
+        f(static_cast<const Resource&>(m_resource));
+        m_lock.unlock_shared();
+#else
+        f(static_cast<const Resource&>(m_resource));
+#endif
         return *this;
       }
 
       template <class F>
       inline
       constexpr
-      Mutable& write(F&& f)
+      Shared& write(F&& f)
       {
         static_assert(std::is_invocable_v<F, Resource&>);
 #ifdef RODIN_THREAD_SAFE
@@ -142,11 +137,12 @@ namespace Rodin::Threads
 
     private:
 #ifdef RODIN_THREAD_SAFE
-      Lock m_lock;
+      mutable std::shared_mutex m_lock;
 #endif
       Resource m_resource;
   };
 }
 
 #endif
+
 

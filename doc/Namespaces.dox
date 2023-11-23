@@ -46,6 +46,16 @@
  */
 
 /**
+  @dir Rodin/Threads
+  @brief Namespace @ref Rodin::Threads
+ */
+
+/**
+  @namespace Rodin::Threads
+  @brief Module containing various tools for working with threads.
+ */
+
+/**
   @dir Rodin/Geometry/Euclidean
   @brief Namespace @ref Rodin::Geometry::Euclidean
  */

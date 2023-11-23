@@ -33,6 +33,11 @@ option(RODIN_CODE_COVERAGE          "Compile with code coverage flags"          
 option(RODIN_LTO                    "Compile with link time optimization"       OFF)
 option(RODIN_FEATURE_SUMMARY        "Print Rodin feature summary"               ON)
 option(RODIN_THREAD_SAFE            "Enforces thread-safety."                   OFF)
+option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     OFF)
+
+if (RODIN_MULTITHREADED)
+  set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
+endif()
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
