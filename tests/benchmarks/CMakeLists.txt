@@ -3,6 +3,7 @@ set(RodinBenchmarks_SRCS
   Poisson.cpp
   MeshIO.cpp
   UniformGrid.cpp
+  Connectivity.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
