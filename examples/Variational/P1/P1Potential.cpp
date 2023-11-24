@@ -71,7 +71,6 @@ int main(int, char**)
   fn.setWeights();
   Alert::Info() << Integral(fn).compute() << Alert::Raise;
 
-
   return 0;
 }
 

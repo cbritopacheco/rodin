@@ -436,6 +436,31 @@ namespace Rodin::Geometry
         return asVector().norm();
       }
 
+      inline
+      Scalar stableNorm() const
+      {
+        return asVector().stableNorm();
+      }
+
+      inline
+      Scalar blueNorm() const
+      {
+        return asVector().blueNorm();
+      }
+
+      template <size_t p>
+      inline
+      Scalar lpNorm() const
+      {
+        return asVector().lpNorm<p>();
+      }
+
+      inline
+      Scalar squaredNorm() const
+      {
+        return asVector().squaredNorm();
+      }
+
       /**
        * @brief Lexicographical comparison.
        */

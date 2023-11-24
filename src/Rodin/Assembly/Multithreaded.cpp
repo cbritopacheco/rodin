@@ -75,6 +75,14 @@ namespace Rodin::Assembly
       m_pool(m_threadCount)
   {}
 
+  thread_local
+  std::vector<Eigen::Triplet<Scalar>>
+  Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>::tl_triplets;
+
+  thread_local
+  std::unique_ptr<Variational::BilinearFormIntegratorBase>
+  Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>::tl_bfi;
+
   void
   Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
   ::add(std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
@@ -94,14 +102,6 @@ namespace Rodin::Assembly
       }
     }
   }
-
-  thread_local
-  std::vector<Eigen::Triplet<Scalar>>
-  Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>::tl_triplets;
-
-  thread_local
-  std::unique_ptr<Variational::BilinearFormIntegratorBase>
-  Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>::tl_bfi;
 
   std::vector<Eigen::Triplet<Scalar>>
   Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>>
@@ -250,6 +250,191 @@ namespace Rodin::Assembly
       }
     }
     return res;
+  }
+
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+  ::Multithreaded()
+    : Multithreaded(std::thread::hardware_concurrency())
+  {}
+
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+  ::Multithreaded(size_t threadCount)
+    : m_threadCount(threadCount),
+      m_pool(threadCount)
+  {
+    assert(threadCount > 0);
+  }
+
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+  ::Multithreaded(const Multithreaded& other)
+    : Parent(other),
+      m_threadCount(other.m_threadCount),
+      m_pool(m_threadCount)
+  {}
+
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+  ::Multithreaded(Multithreaded&& other)
+    : Parent(std::move(other)),
+      m_threadCount(std::move(other.m_threadCount)),
+      m_pool(m_threadCount)
+  {}
+
+  thread_local
+  Math::Matrix
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>::tl_res;
+
+  thread_local
+  std::unique_ptr<Variational::BilinearFormIntegratorBase>
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>::tl_bfi;
+
+  Math::Matrix
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+  ::execute(const BilinearAssemblyInput& input) const
+  {
+    Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
+    auto& threadPool = m_pool;
+    for (auto& bfi : input.bfis)
+    {
+      const auto& attrs = bfi.getAttributes();
+      switch (bfi.getRegion())
+      {
+        case Variational::Integrator::Region::Domain:
+        {
+          const size_t d = input.mesh.getDimension();
+          auto loop =
+            [&](const Index start, const Index end)
+            {
+              tl_bfi.reset(bfi.copy());
+              tl_res.resize(input.testFES.getSize(), input.trialFES.getSize());
+              tl_res.setZero();
+              for (Index i = start; i < end; ++i)
+              {
+                if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                {
+                  const auto it = input.mesh.getCell(i);
+                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+                  const auto& testDOFs = input.testFES.getDOFs(d, i);
+                  tl_bfi->assemble(*it);
+                  add(tl_res, tl_bfi->getMatrix(), testDOFs, trialDOFs);
+                }
+              }
+              m_mutex.lock();
+              res += tl_res;
+              m_mutex.unlock();
+            };
+          threadPool.pushLoop(0, input.mesh.getCellCount(), loop);
+          threadPool.waitForTasks();
+          break;
+        }
+        case Variational::Integrator::Region::Faces:
+        {
+          const size_t d = input.mesh.getDimension() - 1;
+          auto loop =
+            [&](const Index start, const Index end)
+            {
+              tl_bfi.reset(bfi.copy());
+              tl_res.resize(input.testFES.getSize(), input.trialFES.getSize());
+              tl_res.setZero();
+              for (Index i = start; i < end; ++i)
+              {
+                if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                {
+                  const auto it = input.mesh.getFace(i);
+                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+                  const auto& testDOFs = input.testFES.getDOFs(d, i);
+                  tl_bfi->assemble(*it);
+                  add(tl_res, tl_bfi->getMatrix(), testDOFs, trialDOFs);
+                }
+              }
+              m_mutex.lock();
+              res += tl_res;
+              m_mutex.unlock();
+            };
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
+          break;
+        }
+        case Variational::Integrator::Region::Boundary:
+        {
+          const size_t d = input.mesh.getDimension() - 1;
+          auto loop =
+            [&](const Index start, const Index end)
+            {
+              tl_bfi.reset(bfi.copy());
+              tl_res.resize(input.testFES.getSize(), input.trialFES.getSize());
+              tl_res.setZero();
+              for (Index i = start; i < end; ++i)
+              {
+                if (input.mesh.isBoundary(i))
+                {
+                  if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                  {
+                    const auto it = input.mesh.getFace(i);
+                    const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+                    const auto& testDOFs = input.testFES.getDOFs(d, i);
+                    tl_bfi->assemble(*it);
+                    add(tl_res, tl_bfi->getMatrix(), testDOFs, trialDOFs);
+                  }
+                }
+              }
+              m_mutex.lock();
+              res += tl_res;
+              m_mutex.unlock();
+            };
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
+          break;
+        }
+        case Variational::Integrator::Region::Interface:
+        {
+          const size_t d = input.mesh.getDimension() - 1;
+          auto loop =
+            [&](const Index start, const Index end)
+            {
+              tl_bfi.reset(bfi.copy());
+              tl_res.resize(input.testFES.getSize(), input.trialFES.getSize());
+              tl_res.setZero();
+              for (Index i = start; i < end; ++i)
+              {
+                if (input.mesh.isInterface(i))
+                {
+                  if (attrs.size() == 0 || attrs.count(input.mesh.getAttribute(d, i)))
+                  {
+                    const auto it = input.mesh.getFace(i);
+                    const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+                    const auto& testDOFs = input.testFES.getDOFs(d, i);
+                    tl_bfi->assemble(*it);
+                    add(tl_res, tl_bfi->getMatrix(), testDOFs, trialDOFs);
+                  }
+                }
+              }
+              m_mutex.lock();
+              res += tl_res;
+              m_mutex.unlock();
+            };
+          threadPool.pushLoop(0, input.mesh.getFaceCount(), loop);
+          threadPool.waitForTasks();
+          break;
+        }
+      }
+    }
+    return res;
+  }
+
+  void
+  Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+  ::add(Math::Matrix& out, const Math::Matrix& in,
+      const IndexArray& rows, const IndexArray& cols)
+  {
+    assert(rows.size() >= 0);
+    assert(cols.size() >= 0);
+    assert(in.rows() == rows.size());
+    assert(in.cols() == cols.size());
+    for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
+    {
+      for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
+        out(rows(i), cols(j)) += in(i, j);
+    }
   }
 
   thread_local

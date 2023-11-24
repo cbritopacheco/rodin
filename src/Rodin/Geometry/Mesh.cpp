@@ -463,7 +463,7 @@ namespace Rodin::Geometry
     if (indices.size() == 0)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Mesh has empty boundary." << Alert::Raise;
+        << "Mesh has an empty boundary." << Alert::Raise;
     }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
@@ -476,6 +476,11 @@ namespace Rodin::Geometry
     {
       if (isInterface(i))
         indices.push_back(i);
+    }
+    if (indices.size() == 0)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Mesh has an empty interface." << Alert::Raise;
     }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
@@ -503,7 +508,10 @@ namespace Rodin::Geometry
   bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
   {
     const size_t D = getDimension();
-    const auto& incidence = getConnectivity().getIncidence({D - 1, D}, faceIdx);
+    RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
+    const auto& conn = getConnectivity();
+    assert(conn.getIncidence(D - 1, D).size());
+    const auto& incidence = conn.getIncidence({D - 1, D}, faceIdx);
     assert(incidence.size() > 0);
     return incidence.size() > 1;
   }

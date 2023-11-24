@@ -1040,6 +1040,9 @@ namespace Rodin::Variational
   template <class ... Parameters>
   class Problem;
 
+  template <class ... Parameters>
+  class DenseProblem;
+
   template <class Kernel, class Operand>
   class Potential;
 }
