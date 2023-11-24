@@ -98,6 +98,50 @@ namespace Rodin::Assembly
       Multithreaded<Variational::BilinearFormBase<std::vector<Eigen::Triplet<Scalar>>>> m_assembly;
   };
 
+  template <>
+  class Multithreaded<Variational::BilinearFormBase<Math::Matrix>>
+    : public AssemblyBase<Variational::BilinearFormBase<Math::Matrix>>
+  {
+    /**
+     * @internal
+     */
+    static void add(
+        Math::Matrix& out, const Math::Matrix& in,
+        const IndexArray& rows, const IndexArray& cols);
+
+    public:
+      using Parent =
+        AssemblyBase<Variational::BilinearFormBase<Math::Matrix>>;
+      using OperatorType = Math::Matrix;
+
+      Multithreaded();
+
+      Multithreaded(size_t threadCount);
+
+      Multithreaded(const Multithreaded& other);
+
+      Multithreaded(Multithreaded&& other);
+
+      /**
+       * @brief Executes the assembly and returns the linear operator
+       * associated to the bilinear form.
+       */
+      OperatorType execute(const BilinearAssemblyInput& input) const override;
+
+      Multithreaded* copy() const noexcept override
+      {
+        return new Multithreaded(*this);
+      }
+
+    private:
+      static thread_local Math::Matrix tl_res;
+      static thread_local std::unique_ptr<Variational::BilinearFormIntegratorBase> tl_bfi;
+
+      const size_t m_threadCount;
+      mutable Threads::Mutex m_mutex;
+      mutable Threads::ThreadPool m_pool;
+  };
+
   /**
    * @brief %Multithreaded assembly of the Math::Vector associated to a LinearFormBase
    * object.

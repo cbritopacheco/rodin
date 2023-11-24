@@ -19,24 +19,14 @@
 
 namespace Rodin::Variational
 {
-  template <class TrialFES, class TestFES>
+  template <class TrialFES, class TestFES, class MatrixType>
   void
-  BilinearForm<TrialFES, TestFES, Context::Serial, Math::SparseMatrix>::assemble()
+  BilinearForm<TrialFES, TestFES, Context::Serial, MatrixType>::assemble()
   {
      const auto& trialFES = getTrialFunction().getFiniteElementSpace();
      const auto& testFES = getTestFunction().getFiniteElementSpace();
      const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
-     m_operator = getAssembly().execute({mesh, trialFES, testFES, getIntegrators()});
-  }
-
-  template <class TrialFES, class TestFES>
-  void
-  BilinearForm<TrialFES, TestFES, Context::Serial, std::vector<Eigen::Triplet<Scalar>>>::assemble()
-  {
-     const auto& trialFES = getTrialFunction().getFiniteElementSpace();
-     const auto& testFES = getTestFunction().getFiniteElementSpace();
-     const auto& mesh = getTrialFunction().getFiniteElementSpace().getMesh();
-     m_operator = getAssembly().execute({mesh, trialFES, testFES, getIntegrators()});
+     m_operator = this->getAssembly().execute({mesh, trialFES, testFES, this->getIntegrators()});
   }
 }
 

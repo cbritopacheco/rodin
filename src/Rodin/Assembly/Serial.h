@@ -88,6 +88,44 @@ namespace Rodin::Assembly
   };
 
   /**
+   * @brief Serial assembly of the Math::SparseMatrix associated to a
+   * BilinearFormBase object.
+   */
+  template <>
+  class Serial<Variational::BilinearFormBase<Math::Matrix>>
+    : public AssemblyBase<Variational::BilinearFormBase<Math::Matrix>>
+  {
+    static void add(
+        Math::Matrix& out, const Math::Matrix& in,
+        const IndexArray& rows, const IndexArray& cols);
+
+    public:
+      using Parent = AssemblyBase<Variational::BilinearFormBase<Math::Matrix>>;
+      using OperatorType = Math::Matrix;
+
+      Serial() = default;
+
+      Serial(const Serial& other)
+        : Parent(other)
+      {}
+
+      Serial(Serial&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Executes the assembly and returns the linear operator
+       * associated to the bilinear form.
+       */
+      OperatorType execute(const BilinearAssemblyInput& input) const override;
+
+      Serial* copy() const noexcept override
+      {
+        return new Serial(*this);
+      }
+  };
+
+  /**
    * @brief %Serial assembly of the Math::Vector associated to a LinearFormBase
    * object.
    */

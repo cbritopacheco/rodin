@@ -124,6 +124,102 @@ namespace Rodin::Assembly
   }
 
   void
+  Serial<Variational::BilinearFormBase<Math::Matrix>>
+  ::add(Math::Matrix& out, const Math::Matrix& in,
+      const IndexArray& rows, const IndexArray& cols)
+  {
+    assert(rows.size() >= 0);
+    assert(cols.size() >= 0);
+    assert(in.rows() == rows.size());
+    assert(in.cols() == cols.size());
+    for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
+    {
+      for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
+        out(rows(i), cols(j)) += in(i, j);
+    }
+  }
+
+  Math::Matrix
+  Serial<Variational::BilinearFormBase<Math::Matrix>>
+  ::execute(const BilinearAssemblyInput& input) const
+  {
+    Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());;
+    res.setZero();
+    for (auto& bfi : input.bfis)
+    {
+      const auto& attrs = bfi.getAttributes();
+      switch (bfi.getRegion())
+      {
+        case Variational::Integrator::Region::Domain:
+        {
+          for (auto it = input.mesh.getCell(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
+          break;
+        }
+        case Variational::Integrator::Region::Faces:
+        {
+          for (auto it = input.mesh.getFace(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
+          break;
+        }
+        case Variational::Integrator::Region::Boundary:
+        {
+          for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
+          break;
+        }
+        case Variational::Integrator::Region::Interface:
+        {
+          for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+          {
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+            {
+              const size_t d = it->getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+            }
+          }
+          break;
+        }
+      }
+    }
+    return res;
+  }
+
+  void
   Serial<Variational::LinearFormBase<Math::Vector>>
   ::add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
   {

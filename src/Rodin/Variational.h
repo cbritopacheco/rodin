@@ -70,6 +70,7 @@
 #include "Variational/FaceIntegral.h"
 #include "Variational/BoundaryIntegral.h"
 #include "Variational/Problem.h"
+#include "Variational/DenseProblem.h"
 
 #include "Variational/ScalarFunction.h"
 #include "Variational/VectorFunction.h"
@@ -83,5 +84,7 @@
 #include "Variational/PeriodicBC.h"
 
 #include "Variational/Potential.h"
+
+#include "Variational/F.h"
 
 #endif
