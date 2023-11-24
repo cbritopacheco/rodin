@@ -143,7 +143,7 @@ namespace Rodin::Variational
       inline
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        return static_cast<const Derived&>(*this).geInversetMapping(idx, v);
+        return static_cast<const Derived&>(*this).geInverseMapping(idx, v);
       }
   };
 

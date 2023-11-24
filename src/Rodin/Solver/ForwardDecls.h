@@ -62,6 +62,12 @@ namespace Rodin::Solver
   class SimplicialLDLT;
 
   /**
+   * @brief Robust Cholesky decomposition of a dense matrix with pivoting.
+   */
+  template <class OperatorType, class VectorType>
+  class LDLT;
+
+  /**
    * @brief Sparse supernodal LU factorization for general matrices.
    * @tparam OperatorType Type of operator for the left hand side
    * @tparam VectorType Type of vector for the right hand side

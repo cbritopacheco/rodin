@@ -315,16 +315,21 @@ namespace Rodin::Variational
         const Index i = p.getPolytope().getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getCoordinates(Geometry::Point::Coordinates::Reference);
         if constexpr (std::is_same_v<RangeType, Scalar>)
         {
           return TensorBasis(fe.getCount(),
-              [&](size_t local) { return fe.getBasis(local)(rc); });
+              [&](size_t local)
+              {
+                return fes.getInverseMapping({ d, i }, fe.getBasis(local))(p);
+              });
         }
         else if constexpr (std::is_same_v<RangeType, Math::Vector>)
         {
           return TensorBasis(fe.getCount(),
-              [&](size_t local) { return this->object(fe.getBasis(local)(rc)); });
+              [&](size_t local)
+              {
+                return this->object(fes.getInverseMapping({ d, i }, fe.getBasis(local))(p));
+              });
         }
         else
         {

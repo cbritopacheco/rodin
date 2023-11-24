@@ -9,6 +9,8 @@
 
 #include "Solver/Solver.h"
 
+#include "Solver/LDLT.h"
+
 // Built-in direct solvers
 #include "Solver/SparseLU.h"
 #include "Solver/SparseQR.h"

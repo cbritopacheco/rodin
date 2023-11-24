@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_SIMPLICIALLDLT_H
-#define RODIN_SOLVER_SIMPLICIALLDLT_H
+#ifndef RODIN_SOLVER_LDLT_H
+#define RODIN_SOLVER_LDLT_H
 
 #include <Eigen/SparseCholesky>
 
@@ -19,38 +19,38 @@ namespace Rodin::Solver
 {
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD for SimplicialLDLT
+   * @brief CTAD for LDLT
    */
-  SimplicialLDLT() -> SimplicialLDLT<Math::SparseMatrix, Math::Vector>;
+  LDLT() -> LDLT<Math::Matrix, Math::Vector>;
 
   /**
-   * @defgroup SimplicialLDLTSpecializations SimplicialLDLT Template Specializations
-   * @brief Template specializations of the SimplicialLDLT class.
-   * @see SimplicialLDLT
+   * @defgroup LDLTSpecializations LDLT Template Specializations
+   * @brief Template specializations of the LDLT class.
+   * @see LDLT
    */
 
   /**
-   * @ingroup SimplicialLDLTSpecializations
+   * @ingroup LDLTSpecializations
    * @brief A direct sparse LDLT Cholesky factorizations without square root
    * for use with Math::SparseMatrix and Math::Vector.
    */
   template <>
-  class SimplicialLDLT<Math::SparseMatrix, Math::Vector> final
-    : public SolverBase<Math::SparseMatrix, Math::Vector>
+  class LDLT<Math::Matrix, Math::Vector> final
+    : public SolverBase<Math::Matrix, Math::Vector>
   {
     public:
       /// Type of linear operator
-      using OperatorType = Math::SparseMatrix;
+      using OperatorType = Math::Matrix;
 
       /// Type of vector
       using VectorType = Math::Vector;
 
       /**
-       * @brief Constructs the SimplicialLDLT object with default parameters.
+       * @brief Constructs the LDLT object with default parameters.
        */
-      SimplicialLDLT() = default;
+      LDLT() = default;
 
-      SimplicialLDLT(const SimplicialLDLT& other)
+      LDLT(const LDLT& other)
       {}
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
@@ -59,17 +59,18 @@ namespace Rodin::Solver
       }
 
       inline
-      SimplicialLDLT* copy() const noexcept override
+      LDLT* copy() const noexcept override
       {
-        return new SimplicialLDLT(*this);
+        return new LDLT(*this);
       }
 
     private:
-      Eigen::SimplicialLDLT<Math::SparseMatrix> m_solver;
+      Eigen::LDLT<Math::Matrix> m_solver;
   };
 
 }
 
 #endif
+
 
 
