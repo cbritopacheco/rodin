@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solver::SimplicialLDLT&lt;Math::SparseMatrix, Math::Vector&gt; class | Rodin</title>
+  <title>Rodin::Solver::LDLT&lt;Math::Matrix, Math::Vector&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,7 +65,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>SimplicialLDLT&lt;Math::SparseMatrix, Math::Vector&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>LDLT&lt;Math::Matrix, Math::Vector&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>A direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#ad5753e9793c61f3620f2def51b01d816" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>.</p>
         <nav class="m-block m-default">
@@ -87,7 +87,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Math::SparseMatrix, Math::Vector&gt;</a>
+              class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase&lt;Math::Matrix, Math::Vector&gt;</a>
             </dt>
             <dd>Abstract base class for linear algebra solvers.</dd>
           </dl>
@@ -95,8 +95,8 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="ab44f2fe4f8d08b69cc8d68126cf5c120">
-              using <a href="#ab44f2fe4f8d08b69cc8d68126cf5c120" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#ad5753e9793c61f3620f2def51b01d816" class="m-doc">Math::<wbr />SparseMatrix</a>
+            <dt id="a51cac6e3f235afd7706f481ce4592935">
+              using <a href="#a51cac6e3f235afd7706f481ce4592935" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#ae0ef49e0b0fe8eb8fb5fa62cf553d27e" class="m-doc">Math::<wbr />Matrix</a>
             </dt>
             <dd>Type of linear operator.</dd>
             <dt id="a64fb5e4844e76ec0de06afdcefaf2379">
@@ -108,19 +108,19 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aa82f10772cb7b831c2821c3004293f7f">
-              <span class="m-doc-wrap-bumper"><a href="#aa82f10772cb7b831c2821c3004293f7f" class="m-doc-self">SimplicialLDLT</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a245b45fdb8b9017127e1aaa5e98b55d4">
+              <span class="m-doc-wrap-bumper"><a href="#a245b45fdb8b9017127e1aaa5e98b55d4" class="m-doc-self">LDLT</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a> object with default parameters.</dd>
+            <dd>Constructs the <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> object with default parameters.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_00_01_math_1_1_vector_01_4.html#ab44f2fe4f8d08b69cc8d68126cf5c120" class="m-doc">OperatorType</a>&amp; A,
-              <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; x,
-              <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_00_01_math_1_1_vector_01_4.html#a51cac6e3f235afd7706f481ce4592935" class="m-doc">OperatorType</a>&amp; A,
+              <a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; x,
+              <a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the linear algebra system.</dd>
           </dl>
@@ -132,9 +132,9 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SimplicialLDLT&lt;Math::<wbr />SparseMatrix, Math::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_00_01_math_1_1_vector_01_4.html#ab44f2fe4f8d08b69cc8d68126cf5c120" class="m-doc">OperatorType</a>&amp; A,
-              <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; x,
-              <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_sparse_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LDLT&lt;Math::<wbr />Matrix, Math::<wbr />Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5342e2f2fd2ce06a1602148b2cf0d97b" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_00_01_math_1_1_vector_01_4.html#a51cac6e3f235afd7706f481ce4592935" class="m-doc">OperatorType</a>&amp; A,
+              <a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; x,
+              <a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_matrix_00_01_math_1_1_vector_01_4.html#a64fb5e4844e76ec0de06afdcefaf2379" class="m-doc">VectorType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the linear algebra system.</p>
             <table class="m-table m-fullwidth m-flat">
