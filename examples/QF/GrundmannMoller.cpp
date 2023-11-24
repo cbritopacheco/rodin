@@ -29,7 +29,7 @@ int main(int, char**)
   //   std::cout << "Point:\n" << qf1p1.getPoint(i) << std::endl;
   // }
 
-  QF::GrundmannMoller qf5(16, Polytope::Type::Triangle);
+  QF::GrundmannMoller qf5(1, Polytope::Type::Triangle);
   std::cout << qf5.getSize() << std::endl;
   std::cout << qf5.getOrder() << std::endl;
   for (size_t i = 0; i < qf5.getSize(); i++)

@@ -335,45 +335,6 @@ namespace Rodin::Variational
    */
   template <class F, typename = std::enable_if_t<std::is_invocable_r_v<Scalar, F, const Geometry::Point&>>>
   ScalarFunction(F) -> ScalarFunction<F>;
-
-  /**
-   * @brief Contains built-in functions.
-   */
-  namespace F
-  {
-    /**
-     * @brief Represents the first coordinate of the point.
-     *
-     * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
-     * defined by:
-     * @f[
-     *   f(x_1, \cdots, x_d) = x_1 \: .
-     * @f]
-     */
-    static ScalarFunction x([](const Geometry::Point& p) { return p.x(); });
-
-    /**
-     * @brief Represents the first coordinate of the point.
-     *
-     * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
-     * defined by:
-     * @f[
-     *   f(x_1, \cdots, x_d) = x_2 \: .
-     * @f]
-     */
-    static ScalarFunction y([](const Geometry::Point& p) { return p.y(); });
-
-    /**
-     * @brief Represents the first coordinate of the point.
-     *
-     * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
-     * defined by:
-     * @f[
-     *   f(x_1, \cdots, x_d) = x_3 \: .
-     * @f]
-     */
-    static ScalarFunction z([](const Geometry::Point& p) { return p.z(); });
-  }
 }
 
 #endif

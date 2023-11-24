@@ -354,8 +354,7 @@ namespace Rodin::Variational
       inline
       const Kernel& getKernel() const
       {
-        assert(m_kernel);
-        return *m_kernel;
+        return m_kernel;
       }
 
       inline
@@ -368,7 +367,7 @@ namespace Rodin::Variational
       constexpr
       const auto& getLeaf() const
       {
-        return getOperand();
+        return getOperand().getLeaf();
       }
 
       inline
@@ -403,37 +402,60 @@ namespace Rodin::Variational
       auto getTensorBasis(const Geometry::Point& p) const
       {
         using RangeType = typename FES::RangeType;
-        const size_t d = p.getPolytope().getDimension();
-        const Index i = p.getPolytope().getIndex();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
         const auto& fes = this->getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, i);
+        const size_t order = fe.getOrder();
         const auto& kernel = getKernel();
-        const auto& mesh = p.getPolytope().getMesh();
+        const auto& trans = polytope.getTransformation();
         if (m_qf.has_value())
         {
-          assert(false);
+          if constexpr (std::is_same_v<RangeType, Scalar>)
+          {
+            const auto& qf = m_qf.value()(polytope);
+            return TensorBasis(fe.getCount(),
+                [&](size_t local) -> Scalar
+                {
+                  const auto& phi = fe.getBasis(local);
+                  const auto psiInv = fes.getInverseMapping(polytope, phi);
+                  Scalar res = 0;
+                  for (size_t i = 0; i < qf.getSize(); i++)
+                  {
+                    const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                    res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psiInv(y);
+                    assert(std::isfinite(res));
+                  }
+                  return res;
+                });
+          }
+          else
+          {
+            assert(false);
+            return void();
+          }
         }
         else
         {
           if constexpr (std::is_same_v<RangeType, Scalar>)
           {
-            Scalar res = 0;
-            for (auto it = mesh.getCell(); it; ++it)
-            {
-              const auto& polytope = *it;
-              const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
-              const auto& trans = polytope.getTransformation();
-              for (size_t i = 0; i < qf.getSize(); i++)
-              {
-                for (size_t local = 0; local < fe.getCount(); local++)
+            return TensorBasis(fe.getCount(),
+                [&](size_t local) -> Scalar
                 {
-                  const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                  const auto psi = fes.getInverseMapping(polytope, fe.getBasis(local));
-                  res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psi(y);
-                }
-              }
-            }
-            return res;
+                  const auto& phi = fe.getBasis(local);
+                  const auto psiInv = fes.getInverseMapping(polytope, phi);
+                  const QF::GenericPolytopeQuadrature qf(order + 4, polytope.getGeometry());
+                  Scalar res = 0;
+                  for (size_t i = 0; i < qf.getSize(); i++)
+                  {
+                    const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                    const Scalar k = kernel(p, y);
+                    if (std::isfinite(k))
+                      res += qf.getWeight(i) * p.getDistortion() * k * psiInv(p);
+                  }
+                  return res;
+                });
           }
           else if constexpr (std::is_same_v<RangeType, Math::Vector>)
           {
