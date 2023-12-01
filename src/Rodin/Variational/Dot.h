@@ -313,7 +313,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the element matrix.
+       * @brief Gets the element matrix at a point.
        *
        * Computes the @f$ m \times n @f$ element matrix @f$ M @f$ defined by:
        * @f[

@@ -425,7 +425,6 @@ namespace Rodin::Variational
                   {
                     const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
                     res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psiInv(y);
-                    assert(std::isfinite(res));
                   }
                   return res;
                 });
@@ -445,14 +444,12 @@ namespace Rodin::Variational
                 {
                   const auto& phi = fe.getBasis(local);
                   const auto psiInv = fes.getInverseMapping(polytope, phi);
-                  const QF::GenericPolytopeQuadrature qf(order + 4, polytope.getGeometry());
+                  const QF::GenericPolytopeQuadrature qf(order + 1, polytope.getGeometry());
                   Scalar res = 0;
                   for (size_t i = 0; i < qf.getSize(); i++)
                   {
                     const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                    const Scalar k = kernel(p, y);
-                    if (std::isfinite(k))
-                      res += qf.getWeight(i) * p.getDistortion() * k * psiInv(p);
+                    res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psiInv(y);
                   }
                   return res;
                 });

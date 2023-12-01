@@ -69,6 +69,7 @@
 #include "Variational/Integral.h"
 #include "Variational/FaceIntegral.h"
 #include "Variational/BoundaryIntegral.h"
+#include "Variational/InterfaceIntegral.h"
 #include "Variational/Problem.h"
 #include "Variational/DenseProblem.h"
 

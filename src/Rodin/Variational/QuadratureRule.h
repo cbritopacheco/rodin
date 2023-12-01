@@ -169,35 +169,30 @@ namespace Rodin::Variational
             m_lf.from(lfi).assemble();
             return m_value.emplace(m_lf(m_u));
           }
-          default:
+          case Region::Boundary:
           {
-            assert(false); // Not implemented
-            return NAN;
+            auto lfi = Variational::BoundaryIntegral(m_v);
+            if (m_attrs.size() > 0)
+              lfi.over(m_attrs);
+            m_lf.from(lfi).assemble();
+            return m_value.emplace(m_lf(m_u));
           }
-          // case Region::Boundary:
-          // {
-          //   auto lfi = Variational::BoundaryIntegral(m_v);
-          //   if (m_attrs.size() > 0)
-          //     lfi.over(m_attrs);
-          //   m_lf.from(lfi).assemble();
-          //   return m_value.emplace(m_lf(m_u));
-          // }
-          // case Region::Faces:
-          // {
-          //   auto lfi = Variational::FaceIntegral(m_v);
-          //   if (m_attrs.size() > 0)
-          //     lfi.over(m_attrs);
-          //   m_lf.from(lfi).assemble();
-          //   return m_value.emplace(m_lf(m_u));
-          // }
-          // case Region::Interface:
-          // {
-          //   auto lfi = Variational::InterfaceIntegral(m_v);
-          //   if (m_attrs.size() > 0)
-          //     lfi.over(m_attrs);
-          //   m_lf.from(lfi).assemble();
-          //   return m_value.emplace(m_lf(m_u));
-          // }
+          case Region::Faces:
+          {
+            auto lfi = Variational::FaceIntegral(m_v);
+            if (m_attrs.size() > 0)
+              lfi.over(m_attrs);
+            m_lf.from(lfi).assemble();
+            return m_value.emplace(m_lf(m_u));
+          }
+          case Region::Interface:
+          {
+            auto lfi = Variational::InterfaceIntegral(m_v);
+            if (m_attrs.size() > 0)
+              lfi.over(m_attrs);
+            m_lf.from(lfi).assemble();
+            return m_value.emplace(m_lf(m_u));
+          }
         }
         assert(false);
         return NAN;
@@ -428,6 +423,72 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
+  };
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class QuadratureRule<
+    Dot<
+      ShapeFunctionBase<
+        Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+        : public BilinearFormIntegratorBase
+  {
+    public:
+      using Kernel = KernelType;
+
+      using LHS =
+        ShapeFunctionBase<
+          Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>>;
+
+      using RHS =
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using Integrand = Dot<LHS, RHS>;
+
+      using Parent = BilinearFormIntegratorBase;
+
+      QuadratureRule(const LHS& lhs, const RHS& rhs)
+        : QuadratureRule(Dot(lhs, rhs))
+      {}
+
+      QuadratureRule(const Integrand& prod)
+        : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
+          m_prod(prod.copy())
+      {}
+
+      QuadratureRule(const QuadratureRule& other)
+        : BilinearFormIntegratorBase(other),
+          m_prod(other.m_prod->copy()),
+          m_mat(other.m_mat)
+      {}
+
+      QuadratureRule(QuadratureRule&& other)
+        : BilinearFormIntegratorBase(std::move(other)),
+          m_prod(std::move(other.m_prod)),
+          m_mat(std::move(other.m_mat))
+      {}
+
+      inline
+      constexpr
+      const Integrand& getIntegrand() const
+      {
+        assert(m_prod);
+        return *m_prod;
+      }
+
+      void assemble(const Geometry::Polytope& polytope) final override
+      {
+        Alert::Exception() << "miaow" << Alert::Raise;
+      }
+
+      virtual Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<Integrand> m_prod;
+
+      Math::Matrix m_mat;
   };
 }
 

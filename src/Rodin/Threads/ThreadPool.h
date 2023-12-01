@@ -1,7 +1,10 @@
 #ifndef RODIN_THREADPOOL_H
 #define RODIN_THREADPOOL_H
 
-#include "BS_thread_pool.hpp"
+#include <thread>
+#include <BS_thread_pool.hpp>
+
+#define RODIN_THREADPOOL_GLOBALTHREADPOOL_CONCURRENCY std::thread::hardware_concurrency()
 
 namespace Rodin::Threads
 {
@@ -26,6 +29,10 @@ namespace Rodin::Threads
     private:
       BS::thread_pool m_pool;
   };
+
+#ifdef RODIN_MULTITHREADED
+  static ThreadPool globalThreadPool(RODIN_THREADPOOL_GLOBALTHREADPOOL_CONCURRENCY);
+#endif
 }
 
 #endif
