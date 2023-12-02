@@ -9,5 +9,6 @@ target_include_directories(RodinThreads
   INTERFACE $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_link_libraries(RodinThreads INTERFACE Rodin::Alert)
+target_link_libraries(RodinThreads INTERFACE BS_thread_pool)
 
 
