@@ -88,6 +88,7 @@ if (RODIN_BUILD_SRC)
   # ---- PThreads ----
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
+  add_subdirectory(third-party/BS_thread_pool)
 
   # ---- Boost ----
   # set(Boost_USE_STATIC_LIBS        OFF)

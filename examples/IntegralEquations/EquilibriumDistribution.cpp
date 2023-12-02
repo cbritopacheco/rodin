@@ -15,7 +15,7 @@ using namespace Rodin::Variational;
 inline
 Scalar K(const Point& x, const Point& y)
 {
-  return 1. / (4 * M_PI * ((x.asVector() - y.asVector()).stableNorm()));
+  return 1. / (4 * M_PI * (x - y).norm());
 }
 
 inline
@@ -28,27 +28,31 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh.load("D1.mesh");
+  // mesh.save("miaow.medit.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(1, 2);
 
   P1 fes(mesh);
 
   TrialFunction u(fes);
   TestFunction  v(fes);
-  Problem eq(u, v);
+  DenseProblem eq(u, v);
   eq = Integral(Potential(K, u), v)
-     - Integral(v)
-     + DirichletBC(u, ScalarFunction(0));
+     - Integral(v);
 
-  Solver::SparseLU solver;
+  std::cout << "assemblage\n";
+  eq.assemble();
+
+  std::cout << "resolution\n";
+  Solver::LDLT solver;
   eq.solve(solver);
 
   u.getSolution().save("u.gf");
   mesh.save("u.mesh");
 
-  GridFunction phi(fes);
-  phi = [](const Point& p) { return 4. / (M_PI * std::sqrt(1 - p.squaredNorm())); };
-  phi.projectOnBoundary(ScalarFunction(0));
-  phi.save("phi.gf");
+  // GridFunction phi(fes);
+  // phi = [](const Point& p) { return 4. / (M_PI * std::sqrt(1 - p.squaredNorm())); };
+  // phi.projectOnBoundary(ScalarFunction(0));
+  // phi.save("phi.gf");
 
   return 0;
 }

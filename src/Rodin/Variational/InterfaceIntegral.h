@@ -13,18 +13,8 @@
 
 #include "Rodin/FormLanguage/Base.h"
 
-#include "Dot.h"
-#include "LinearForm.h"
 #include "ForwardDecls.h"
-#include "GridFunction.h"
-#include "Function.h"
-#include "TestFunction.h"
-#include "TrialFunction.h"
-#include "MatrixFunction.h"
-#include "LinearFormIntegrator.h"
-#include "BilinearFormIntegrator.h"
-
-#include "Utility.h"
+#include "QuadratureRule.h"
 
 namespace Rodin::Variational
 {
@@ -37,7 +27,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup InterfaceIntegralSpecializations
-   * @brief Interface integration of the dot product of a trial and test operators.
+   * @brief Integration of the dot product of a trial and test operators.
    *
    * Given two operators defined over trial and test spaces @f$ U_h
    * @f$ and @f$ V_h @f$,
@@ -46,43 +36,126 @@ namespace Rodin::Variational
    * @f]
    * this class represents the integral of their dot product:
    * @f[
-   *   \int_{\mathcal{I}_h} A(u) : B(v) \ dx
+   *   \int_{\mathcal{F}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]
-   * over the interface @f$ \mathcal{I}_h @f$ of the triangulation @f$
-   * \mathcal{T}_h @f$.
    */
-  // template <>
-  // class InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-  //   : public Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>
-  // {
-  //   public:
-  //     using Parent   = Integral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
-  //     using Integrand = Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>;
-  //     using Parent::Parent;
-  //     Region getRegion() const override { return Region::Interface; }
-  //     InterfaceIntegral* copy() const noexcept override { return new InterfaceIntegral(*this); }
-  // };
-  // InterfaceIntegral(const ShapeFunctionBase<TrialSpace>&, const ShapeFunctionBase<TestSpace>&)
-  //   -> InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
-  // InterfaceIntegral(const Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>&)
-  //   -> InterfaceIntegral<Dot<ShapeFunctionBase<TrialSpace>, ShapeFunctionBase<TestSpace>>>;
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class InterfaceIntegral<Dot<
+          ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
+    : public QuadratureRule<Dot<
+          ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+  {
+    public:
+      using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using Integrand = Dot<LHS, RHS>;
+      using Parent = QuadratureRule<Integrand>;
 
-  // template <>
-  // class FaceIntegral<ShapeFunctionBase<TestSpace>> : public Integral<ShapeFunctionBase<TestSpace>>
-  // {
-  //   public:
-  //     using Parent   = Integral<ShapeFunctionBase<TestSpace>>;
-  //     using Integrand = ShapeFunctionBase<TestSpace>;
-  //     using Parent::Parent;
-  //     Region getRegion() const override { return Region::Faces; }
-  //     FaceIntegral* copy() const noexcept override { return new FaceIntegral(*this); }
-  // };
-  // FaceIntegral(const FunctionBase&, const ShapeFunctionBase<TestSpace>&)
-  //   -> FaceIntegral<ShapeFunctionBase<TestSpace>>;
-  // FaceIntegral(const ShapeFunctionBase<TestSpace>&)
-  //   -> FaceIntegral<ShapeFunctionBase<TestSpace>>;
+      InterfaceIntegral(const LHS& lhs, const RHS& rhs)
+        : InterfaceIntegral(Dot(lhs, rhs))
+      {}
+
+      InterfaceIntegral(const Integrand& prod)
+        : Parent(prod)
+      {}
+
+      InterfaceIntegral(const InterfaceIntegral& other)
+        : Parent(other)
+      {}
+
+      InterfaceIntegral(InterfaceIntegral&& other)
+        : Parent(std::move(other))
+      {}
+
+      inline Integrator::Region getRegion() const override
+      {
+        return Integrator::Region::Interface;
+      }
+
+      inline InterfaceIntegral* copy() const noexcept override
+      {
+        return new InterfaceIntegral(*this);
+      }
+  };
+
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  InterfaceIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
+    -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+
+  template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  InterfaceIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
+    -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+
+  /**
+   * @ingroup InterfaceIntegralSpecializations
+   * @brief Integration of a test operator.
+   *
+   * Given an operator defined over a test space @f$ V_h @f$
+   * @f[
+   *   A : V_h \rightarrow \mathbb{R},
+   * @f]
+   * this class will represent its integral
+   * @f[
+   *   \int_{\mathcal{F}_h} A(v) \ d\sigma(x) \ .
+   * @f]
+   */
+  template <class NestedDerived, class FES>
+  class InterfaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
+    : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
+  {
+    public:
+      using Integrand = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
+      using Parent = QuadratureRule<Integrand>;
+
+      template <class LHSDerived, class RHSDerived>
+      constexpr
+      InterfaceIntegral(
+          const FunctionBase<LHSDerived>& lhs,
+          const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+        : InterfaceIntegral(Dot(lhs, rhs))
+      {}
+
+      constexpr
+      InterfaceIntegral(const Integrand& integrand)
+        : Parent(integrand)
+      {}
+
+      constexpr
+      InterfaceIntegral(const InterfaceIntegral& other)
+        : Parent(other)
+      {}
+
+      constexpr
+      InterfaceIntegral(InterfaceIntegral&& other)
+        : Parent(std::move(other))
+      {}
+
+      inline Integrator::Region getRegion() const override
+      {
+        return Integrator::Region::Interface;
+      }
+
+      inline InterfaceIntegral* copy() const noexcept override
+      {
+        return new InterfaceIntegral(*this);
+      }
+  };
+
+  template <class NestedDerived, class FES>
+  InterfaceIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
+    -> InterfaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
+
+  template <class LHSDerived, class RHSDerived, class FES>
+  InterfaceIntegral(
+      const FunctionBase<LHSDerived>&,
+      const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
+    -> InterfaceIntegral<
+        ShapeFunctionBase<Dot<
+          FunctionBase<LHSDerived>,
+          ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
 }
 
 #endif
-
 
