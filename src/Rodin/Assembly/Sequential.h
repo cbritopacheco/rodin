@@ -318,15 +318,22 @@ namespace Rodin::Assembly
    * @brief %Sequential assembly of the Math::Vector associated to a LinearFormBase
    * object.
    */
-  template <>
-  class Sequential<Variational::LinearFormBase<Math::Vector>>
-    : public AssemblyBase<Variational::LinearFormBase<Math::Vector>>
+  template <class FES>
+  class Sequential<Variational::LinearForm<FES, Math::Vector>>
+    : public AssemblyBase<Variational::LinearForm<FES, Math::Vector>>
   {
 
-    static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s);
+    static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
+    {
+      assert(in.size() == s.size());
+      size_t i = 0;
+      for (const auto& global : s)
+        out.coeffRef(global) += in.coeff(i++);
+    }
 
     public:
-      using Parent = AssemblyBase<Variational::LinearFormBase<Math::Vector>>;
+      using Parent = AssemblyBase<Variational::LinearForm<FES, Math::Vector>>;
+      using Input = typename Parent::Input;
       using VectorType = Math::Vector;
 
       Sequential() = default;
@@ -343,7 +350,80 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
        */
-      VectorType execute(const Input& input) const override;
+      VectorType execute(const Input& input) const override
+      {
+        VectorType res(input.fes.getSize());
+        res.setZero();
+        for (auto& lfi : input.lfis)
+        {
+          const auto& attrs = lfi.getAttributes();
+          switch (lfi.getRegion())
+          {
+            case Variational::Integrator::Region::Domain:
+            {
+              for (auto it = input.mesh.getCell(); !it.end(); ++it)
+              {
+                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+                {
+                  const size_t d = it->getDimension();
+                  const size_t i = it->getIndex();
+                  const auto& dofs = input.fes.getDOFs(d, i);
+                  lfi.assemble(*it);
+                  add(res, lfi.getVector(), dofs);
+                }
+              }
+              break;
+            }
+            case Variational::Integrator::Region::Faces:
+            {
+              for (auto it = input.mesh.getFace(); !it.end(); ++it)
+              {
+                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+                {
+                  const size_t d = it->getDimension();
+                  const size_t i = it->getIndex();
+                  const auto& dofs = input.fes.getDOFs(d, i);
+                  lfi.assemble(*it);
+                  add(res, lfi.getVector(), dofs);
+                }
+              }
+              break;
+            }
+            case Variational::Integrator::Region::Boundary:
+            {
+              for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
+              {
+                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+                {
+                  const size_t d = it->getDimension();
+                  const size_t i = it->getIndex();
+                  const auto& dofs = input.fes.getDOFs(d, i);
+                  lfi.assemble(*it);
+                  add(res, lfi.getVector(), dofs);
+                }
+              }
+              break;
+            }
+            case Variational::Integrator::Region::Interface:
+            {
+              for (auto it = input.mesh.getInterface(); !it.end(); ++it)
+              {
+                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+                {
+                  const size_t d = it->getDimension();
+                  const size_t i = it->getIndex();
+                  const auto& dofs = input.fes.getDOFs(d, i);
+                  lfi.assemble(*it);
+                  add(res, lfi.getVector(), dofs);
+                }
+              }
+              break;
+            }
+          }
+        }
+
+        return res;
+      }
 
       Sequential* copy() const noexcept override
       {

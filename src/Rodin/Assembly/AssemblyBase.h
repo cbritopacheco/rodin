@@ -41,8 +41,8 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class VectorType>
-  class AssemblyBase<Variational::LinearFormBase<VectorType>>
+  template <class FES, class VectorType>
+  class AssemblyBase<Variational::LinearForm<FES, VectorType>>
     : public FormLanguage::Base
   {
     public:

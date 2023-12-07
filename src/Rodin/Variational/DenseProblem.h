@@ -166,7 +166,7 @@ namespace Rodin::Variational
       std::reference_wrapper<TrialFunction<TrialFES>> m_trialFunction;
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
-      LinearForm<TestFES, Context, VectorType> m_linearForm;
+      LinearForm<TestFES, VectorType> m_linearForm;
       BilinearForm<TrialFES, TestFES, Math::Matrix> m_bilinearForm;
 
       FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
