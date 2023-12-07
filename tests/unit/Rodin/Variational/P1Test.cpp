@@ -16,7 +16,7 @@ TEST(Rodin_Variational_Scalar_P1, SanityTest_2D_Square_Build)
   constexpr size_t mdim = 2;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Serial>::Builder()
+    Mesh<Rodin::Context::Sequential>::Builder()
     .initialize(sdim)
     .nodes(4)
     .vertex({0, 0})
@@ -45,7 +45,7 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
   constexpr size_t mdim = 2;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Serial>::Builder()
+    Mesh<Rodin::Context::Sequential>::Builder()
     .initialize(mdim)
     .nodes(4)
     .vertex({0, 0})
@@ -74,7 +74,7 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction_FuzzyTest, TriangularUniformGrid16
 {
   constexpr size_t mdim = 2;
 
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
@@ -91,7 +91,7 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_TriangularUniformGrid16
 {
   constexpr size_t mdim = 2;
 
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
 
   mesh.getConnectivity().compute(mdim - 1, mdim);
 
@@ -109,7 +109,7 @@ TEST(Rodin_Variational_Scalar_P1_GridFunction, FuzzyTest_2D_Square_Project_Linea
   constexpr size_t mdim = 2;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Serial>::Builder()
+    Mesh<Rodin::Context::Sequential>::Builder()
     .initialize(mdim)
     .nodes(4)
     .vertex({0, 0})
@@ -234,7 +234,7 @@ TEST(Rodin_Variational_Vector_P1, SanityTest_2D_Square_Build)
   constexpr size_t vdim = mdim;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Serial>::Builder()
+    Mesh<Rodin::Context::Sequential>::Builder()
     .initialize(sdim)
     .nodes(4)
     .vertex({0, 0})
@@ -261,7 +261,7 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
   constexpr size_t mdim = 2;
 
   Mesh mesh =
-    Mesh<Rodin::Context::Serial>::Builder()
+    Mesh<Rodin::Context::Sequential>::Builder()
     .initialize(mdim)
     .nodes(4)
     .vertex({0, 0})
@@ -385,7 +385,7 @@ TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
 
 TEST(Rodin_Variational_Scalar_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
   P1 fes(mesh);
   TrialFunction u(fes);
 
@@ -394,7 +394,7 @@ TEST(Rodin_Variational_Scalar_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
 
 TEST(Rodin_Variational_Scalar_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
   P1 fes(mesh);
   TrialFunction v(fes);
 
@@ -404,7 +404,7 @@ TEST(Rodin_Variational_Scalar_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
 
 TEST(Rodin_Variational_Scalar_P1_LinearForm, FuzzyTest_UniformGrid_4x4)
 {
-  Mesh mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
+  Mesh mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, 4, 4);
   P1 fes(mesh);
   TestFunction v(fes);
   LinearForm lf(v);

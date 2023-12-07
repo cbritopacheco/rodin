@@ -28,7 +28,7 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
   boost::filesystem::ifstream in(meshfile);
 
   Mesh mesh;
-  MeshLoader<FileFormat::MEDIT, Rodin::Context::Serial> loader(mesh);
+  MeshLoader<FileFormat::MEDIT, Rodin::Context::Sequential> loader(mesh);
   loader.load(in);
 
   EXPECT_EQ(mesh.getSpaceDimension(), sdim);
@@ -63,7 +63,7 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
   boost::filesystem::ifstream in(meshfile);
 
   Mesh mesh;
-  MeshLoader<FileFormat::MFEM, Rodin::Context::Serial> loader(mesh);
+  MeshLoader<FileFormat::MFEM, Rodin::Context::Sequential> loader(mesh);
   loader.load(in);
 
   size_t d = 0;
@@ -102,7 +102,7 @@ TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_StarSquare)
   boost::filesystem::ifstream in(meshfile);
 
   Mesh mesh;
-  MeshLoader<FileFormat::MFEM, Rodin::Context::Serial> loader(mesh);
+  MeshLoader<FileFormat::MFEM, Rodin::Context::Sequential> loader(mesh);
   loader.load(in);
 
   EXPECT_EQ(mesh.getSpaceDimension(), sdim);

@@ -66,8 +66,8 @@ namespace Rodin::Variational
    * Rodin::Scalar type.
    */
   template <>
-  class P1<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>> final
-    : public FiniteElementSpace<P1<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>>
+  class P1<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>> final
+    : public FiniteElementSpace<P1<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -75,13 +75,13 @@ namespace Rodin::Variational
 
     public:
       /// Type of mesh on which the finite element space is built
-      using MeshType = Geometry::Mesh<Context::Serial>;
+      using MeshType = Geometry::Mesh<Context::Sequential>;
 
       /// Range type of value
       using RangeType = Scalar;
 
       /// Represents the Context of the P1 space
-      using Context = Context::Serial;
+      using Context = Context::Sequential;
 
       //// Type of finite element
       using Element = P1Element<RangeType>;
@@ -293,8 +293,8 @@ namespace Rodin::Variational
    * Math::Vector type.
    */
   template <>
-  class P1<Math::Vector, Context::Serial, Geometry::Mesh<Context::Serial>> final
-    : public FiniteElementSpace<P1<Math::Vector, Context::Serial, Geometry::Mesh<Context::Serial>>>
+  class P1<Math::Vector, Context::Sequential, Geometry::Mesh<Context::Sequential>> final
+    : public FiniteElementSpace<P1<Math::Vector, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -305,7 +305,7 @@ namespace Rodin::Variational
       using RangeType = Math::Vector;
 
       /// Context type
-      using Context = Context::Serial;
+      using Context = Context::Sequential;
 
       /// Type of finite element
       using Element = P1Element<RangeType>;

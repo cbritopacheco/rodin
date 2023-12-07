@@ -10,13 +10,13 @@
 
 namespace Rodin::IO
 {
-  std::istream& MeshLoader<FileFormat::MEDIT, Context::Serial>::getline(std::istream& is, std::string& line)
+  std::istream& MeshLoader<FileFormat::MEDIT, Context::Sequential>::getline(std::istream& is, std::string& line)
   {
     m_currentLineNumber++;
     return std::getline(is, line);
   }
 
-  std::string MeshLoader<FileFormat::MEDIT, Context::Serial>::skipEmptyLines(std::istream& is)
+  std::string MeshLoader<FileFormat::MEDIT, Context::Sequential>::skipEmptyLines(std::istream& is)
   {
     std::string line;
     while (getline(is, line))
@@ -27,7 +27,7 @@ namespace Rodin::IO
     return line;
   }
 
-  void MeshLoader<FileFormat::MEDIT, Context::Serial>::readVersion(std::istream& is)
+  void MeshLoader<FileFormat::MEDIT, Context::Sequential>::readVersion(std::istream& is)
   {
     auto line = skipEmptyLines(is);
     std::optional<unsigned int> version = MEDIT::ParseMeshVersionFormatted()(line.begin(), line.end());
@@ -49,7 +49,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::MEDIT, Context::Serial>::readDimension(std::istream& is)
+  void MeshLoader<FileFormat::MEDIT, Context::Sequential>::readDimension(std::istream& is)
   {
     auto line = skipEmptyLines(is);
     std::optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
@@ -69,7 +69,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::MEDIT, Context::Serial>::readEntities(std::istream& is)
+  void MeshLoader<FileFormat::MEDIT, Context::Sequential>::readEntities(std::istream& is)
   {
     std::string line;
     while (getline(is, line))
@@ -200,7 +200,7 @@ namespace Rodin::IO
     }
   }
 
-  void MeshLoader<FileFormat::MEDIT, Context::Serial>::load(std::istream& is)
+  void MeshLoader<FileFormat::MEDIT, Context::Sequential>::load(std::istream& is)
   {
     readVersion(is);
     readDimension(is);
@@ -209,18 +209,18 @@ namespace Rodin::IO
     getObject() = m_build.finalize();
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::printDimension(std::ostream& os)
+  void MeshPrinter<FileFormat::MEDIT, Context::Sequential>::printDimension(std::ostream& os)
   {
     const auto& mesh = getObject();
     os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::printVersion(std::ostream& os)
+  void MeshPrinter<FileFormat::MEDIT, Context::Sequential>::printVersion(std::ostream& os)
   {
     os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::printEntities(std::ostream& os)
+  void MeshPrinter<FileFormat::MEDIT, Context::Sequential>::printEntities(std::ostream& os)
   {
     const auto& mesh = getObject();
 
@@ -296,12 +296,12 @@ namespace Rodin::IO
     }
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::printEnd(std::ostream& os)
+  void MeshPrinter<FileFormat::MEDIT, Context::Sequential>::printEnd(std::ostream& os)
   {
     os << '\n' << IO::MEDIT::Keyword::End;
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Serial>::print(std::ostream& os, bool pEnd)
+  void MeshPrinter<FileFormat::MEDIT, Context::Sequential>::print(std::ostream& os, bool pEnd)
   {
     printVersion(os);
     printDimension(os);

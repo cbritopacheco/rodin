@@ -28,8 +28,8 @@ namespace Rodin::Geometry
     return (getSpaceDimension() - 1 == getDimension());
   }
 
-  // ---- Mesh<Context::Serial> ----------------------------------------------
-  Mesh<Context::Serial>::Mesh(const Mesh& other)
+  // ---- Mesh<Context::Sequential> ----------------------------------------------
+  Mesh<Context::Sequential>::Mesh(const Mesh& other)
     : m_sdim(other.m_sdim),
       m_vertices(other.m_vertices),
       m_connectivity(other.m_connectivity),
@@ -37,7 +37,7 @@ namespace Rodin::Geometry
       m_attributes(other.m_attributes)
   {}
 
-  Mesh<Context::Serial>::Mesh(Mesh&& other)
+  Mesh<Context::Sequential>::Mesh(Mesh&& other)
     : m_sdim(std::move(other.m_sdim)),
       m_vertices(std::move(other.m_vertices)),
       m_connectivity(std::move(other.m_connectivity)),
@@ -46,7 +46,7 @@ namespace Rodin::Geometry
       m_attributes(std::move(other.m_attributes))
   {}
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::operator=(Mesh&& other)
+  Mesh<Context::Sequential>& Mesh<Context::Sequential>::operator=(Mesh&& other)
   {
     Parent::operator=(std::move(other));
     m_sdim = std::move(other.m_sdim);
@@ -58,7 +58,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::~Mesh()
+  Mesh<Context::Sequential>::~Mesh()
   {
     for (auto& mt : m_transformationIndex)
     {
@@ -71,8 +71,8 @@ namespace Rodin::Geometry
     }
   }
 
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
+  Mesh<Context::Sequential>&
+  Mesh<Context::Sequential>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
     std::ifstream input(filename.c_str());
     if (!input)
@@ -85,13 +85,13 @@ namespace Rodin::Geometry
     {
       case IO::FileFormat::MFEM:
       {
-        IO::MeshLoader<IO::FileFormat::MFEM, Context::Serial> loader(*this);
+        IO::MeshLoader<IO::FileFormat::MFEM, Context::Sequential> loader(*this);
         loader.load(input);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
-        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial> loader(*this);
+        IO::MeshLoader<IO::FileFormat::MEDIT, Context::Sequential> loader(*this);
         loader.load(input);
         break;
       }
@@ -106,7 +106,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  void Mesh<Context::Serial>::save(
+  void Mesh<Context::Sequential>::save(
       const boost::filesystem::path& filename,
       IO::FileFormat fmt, size_t precision) const
   {
@@ -122,13 +122,13 @@ namespace Rodin::Geometry
     {
       case IO::FileFormat::MFEM:
       {
-        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Serial> printer(*this);
+        IO::MeshPrinter<IO::FileFormat::MFEM, Context::Sequential> printer(*this);
         printer.print(ofs);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
-        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Serial> printer(*this);
+        IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Sequential> printer(*this);
         printer.print(ofs);
         break;
       }
@@ -142,15 +142,15 @@ namespace Rodin::Geometry
     ofs.close();
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(Attribute attr) const
+  SubMesh<Context::Sequential> Mesh<Context::Sequential>::keep(Attribute attr) const
   {
     return keep(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::keep(const FlatSet<Attribute>& attrs) const
+  SubMesh<Context::Sequential> Mesh<Context::Sequential>::keep(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
-    SubMesh<Context::Serial>::Builder build;
+    SubMesh<Context::Sequential>::Builder build;
     build.initialize(*this);
     for (Index i = 0; i < getCellCount(); i++)
     {
@@ -168,11 +168,11 @@ namespace Rodin::Geometry
     return build.finalize();
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::skin() const
+  SubMesh<Context::Sequential> Mesh<Context::Sequential>::skin() const
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
-    SubMesh<Context::Serial>::Builder build;
+    SubMesh<Context::Sequential>::Builder build;
     build.initialize(*this);
     for (auto it = getBoundary(); !it.end(); ++it)
     {
@@ -188,15 +188,15 @@ namespace Rodin::Geometry
     return build.finalize();
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(Attribute attr) const
+  SubMesh<Context::Sequential> Mesh<Context::Sequential>::trim(Attribute attr) const
   {
     return trim(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Serial> Mesh<Context::Serial>::trim(const FlatSet<Attribute>& attrs) const
+  SubMesh<Context::Sequential> Mesh<Context::Sequential>::trim(const FlatSet<Attribute>& attrs) const
   {
     const size_t D = getDimension();
-    SubMesh<Context::Serial>::Builder build;
+    SubMesh<Context::Sequential>::Builder build;
     build.initialize(*this);
     for (Index i = 0; i < getCellCount(); i++)
     {
@@ -215,7 +215,7 @@ namespace Rodin::Geometry
     return build.finalize();
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::trace(
+  Mesh<Context::Sequential>& Mesh<Context::Sequential>::trace(
       const Map<std::pair<Attribute, Attribute>, Attribute>& interface, const FlatSet<Attribute>& attrs)
   {
     const size_t D = getDimension();
@@ -246,7 +246,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::scale(Scalar c)
+  Mesh<Context::Sequential>& Mesh<Context::Sequential>::scale(Scalar c)
   {
     m_vertices *= c;
     flush();
@@ -255,48 +255,48 @@ namespace Rodin::Geometry
 
 #ifdef RODIN_USE_MPI
   Mesh<Context::MPI>
-  Mesh<Context::Serial>::parallelize(boost::mpi::communicator comm)
+  Mesh<Context::Sequential>::parallelize(boost::mpi::communicator comm)
   {
     return Mesh<Context::MPI>(comm, *this);
   }
 #endif
 
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::setVertexCoordinates(Index idx, const Math::SpatialVector& coords)
+  Mesh<Context::Sequential>&
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector& coords)
   {
     m_vertices.col(idx) = coords;
     return *this;
   }
 
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::setVertexCoordinates(Index idx, Scalar xi, size_t i)
+  Mesh<Context::Sequential>&
+  Mesh<Context::Sequential>::setVertexCoordinates(Index idx, Scalar xi, size_t i)
   {
     m_vertices.col(idx).coeffRef(i) = xi;
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector> Mesh<Context::Serial>::getVertexCoordinates(Index idx) const
+  Eigen::Map<const Math::SpatialVector> Mesh<Context::Sequential>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
     return { getVertices().data() + getSpaceDimension() * idx, size };
   }
 
-  const FlatSet<Attribute>& Mesh<Context::Serial>::getAttributes(size_t d) const
+  const FlatSet<Attribute>& Mesh<Context::Sequential>::getAttributes(size_t d) const
   {
     return m_attributes[d];
   }
 
-  size_t Mesh<Context::Serial>::getDimension() const
+  size_t Mesh<Context::Sequential>::getDimension() const
   {
     return m_connectivity.getMeshDimension();
   }
 
-  size_t Mesh<Context::Serial>::getSpaceDimension() const
+  size_t Mesh<Context::Sequential>::getSpaceDimension() const
   {
     return m_sdim;
   }
 
-  Mesh<Context::Serial>& Mesh<Context::Serial>::setPolytopeTransformation(
+  Mesh<Context::Sequential>& Mesh<Context::Sequential>::setPolytopeTransformation(
       const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
     m_transformationIndex[p.first].write([&](auto& obj) { obj[p.second] = trans; });
@@ -304,7 +304,7 @@ namespace Rodin::Geometry
   }
 
   PolytopeTransformation*
-  Mesh<Context::Serial>::getDefaultPolytopeTransformation(size_t dimension, Index idx) const
+  Mesh<Context::Sequential>::getDefaultPolytopeTransformation(size_t dimension, Index idx) const
   {
     if (dimension == 0)
     {
@@ -333,7 +333,7 @@ namespace Rodin::Geometry
   }
 
   const PolytopeTransformation&
-  Mesh<Context::Serial>::getPolytopeTransformation(size_t dimension, Index idx) const
+  Mesh<Context::Sequential>::getPolytopeTransformation(size_t dimension, Index idx) const
   {
     assert(dimension < m_transformationIndex.size());
     if (m_transformationIndex[dimension].read().size() == 0)
@@ -441,17 +441,17 @@ namespace Rodin::Geometry
     return res;
   }
 
-  size_t Mesh<Context::Serial>::getPolytopeCount(size_t dimension) const
+  size_t Mesh<Context::Sequential>::getPolytopeCount(size_t dimension) const
   {
     return m_connectivity.getCount(dimension);
   }
 
-  size_t Mesh<Context::Serial>::getPolytopeCount(Polytope::Type g) const
+  size_t Mesh<Context::Sequential>::getPolytopeCount(Polytope::Type g) const
   {
     return m_connectivity.getCount(g);
   }
 
-  FaceIterator Mesh<Context::Serial>::getBoundary() const
+  FaceIterator Mesh<Context::Sequential>::getBoundary() const
   {
     std::vector<Index> indices;
     const size_t count = getFaceCount();
@@ -468,7 +468,7 @@ namespace Rodin::Geometry
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
-  FaceIterator Mesh<Context::Serial>::getInterface() const
+  FaceIterator Mesh<Context::Sequential>::getInterface() const
   {
     std::vector<Index> indices;
     const size_t count = getFaceCount();
@@ -485,27 +485,27 @@ namespace Rodin::Geometry
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
-  CellIterator Mesh<Context::Serial>::getCell(Index idx) const
+  CellIterator Mesh<Context::Sequential>::getCell(Index idx) const
   {
     return CellIterator(*this, BoundedIndexGenerator(idx, getCellCount()));
   }
 
-  FaceIterator Mesh<Context::Serial>::getFace(Index idx) const
+  FaceIterator Mesh<Context::Sequential>::getFace(Index idx) const
   {
     return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
   }
 
-  VertexIterator Mesh<Context::Serial>::getVertex(Index idx) const
+  VertexIterator Mesh<Context::Sequential>::getVertex(Index idx) const
   {
     return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
   }
 
-  PolytopeIterator Mesh<Context::Serial>::getPolytope(size_t dimension, Index idx) const
+  PolytopeIterator Mesh<Context::Sequential>::getPolytope(size_t dimension, Index idx) const
   {
     return PolytopeIterator(dimension, *this, BoundedIndexGenerator(idx, getPolytopeCount(dimension)));
   }
 
-  bool Mesh<Context::Serial>::isInterface(Index faceIdx) const
+  bool Mesh<Context::Sequential>::isInterface(Index faceIdx) const
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
@@ -516,7 +516,7 @@ namespace Rodin::Geometry
     return incidence.size() > 1;
   }
 
-  bool Mesh<Context::Serial>::isBoundary(Index faceIdx) const
+  bool Mesh<Context::Sequential>::isBoundary(Index faceIdx) const
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
@@ -527,12 +527,12 @@ namespace Rodin::Geometry
     return incidence.size() == 1;
   }
 
-  Polytope::Type Mesh<Context::Serial>::getGeometry(size_t dimension, Index idx) const
+  Polytope::Type Mesh<Context::Sequential>::getGeometry(size_t dimension, Index idx) const
   {
     return m_connectivity.getGeometry(dimension, idx);
   }
 
-  Attribute Mesh<Context::Serial>::getAttribute(size_t dimension, Index index) const
+  Attribute Mesh<Context::Sequential>::getAttribute(size_t dimension, Index index) const
   {
     auto it = m_attributeIndex.find(dimension, index);
     if (it == m_attributeIndex.end(dimension))
@@ -541,8 +541,8 @@ namespace Rodin::Geometry
       return it->second;
   }
 
-  Mesh<Context::Serial>&
-  Mesh<Context::Serial>::setAttribute(const std::pair<size_t, Index>& p, Attribute attr)
+  Mesh<Context::Sequential>&
+  Mesh<Context::Sequential>::setAttribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
     const auto [dimension, index] = p;
     m_attributeIndex.track(p, attr);
@@ -550,21 +550,21 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  SubMeshBase& Mesh<Context::Serial>::asSubMesh()
+  SubMeshBase& Mesh<Context::Sequential>::asSubMesh()
   {
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
-    return static_cast<SubMesh<Context::Serial>&>(*this);
+    return static_cast<SubMesh<Context::Sequential>&>(*this);
   }
 
-  const SubMeshBase& Mesh<Context::Serial>::asSubMesh() const
+  const SubMeshBase& Mesh<Context::Sequential>::asSubMesh() const
   {
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
-    return static_cast<const SubMesh<Context::Serial>&>(*this);
+    return static_cast<const SubMesh<Context::Sequential>&>(*this);
   }
 
-  Mesh<Context::Serial> Mesh<Context::Serial>::UniformGrid(Polytope::Type g, size_t h, size_t w)
+  Mesh<Context::Sequential> Mesh<Context::Sequential>::UniformGrid(Polytope::Type g, size_t h, size_t w)
   {
     Builder build;
     const size_t dim = Polytope::getGeometryDimension(g);

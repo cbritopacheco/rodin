@@ -172,7 +172,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = BilinearFormBase<MatrixType>;
 
-      using SerialAssembly = Assembly::Serial<BilinearForm>;
+      using SequentialAssembly = Assembly::Sequential<BilinearForm>;
       using MultithreadedAssembly = Assembly::Multithreaded<BilinearForm>;
       using OpenMPAssembly = Assembly::OpenMP<BilinearForm>;
 
@@ -190,7 +190,7 @@ namespace Rodin::Variational
 #ifdef RODIN_MULTITHREADED
         m_assembly.reset(new MultithreadedAssembly);
 #else
-        m_assembly.reset(new SerialAssembly);
+        m_assembly.reset(new SequentialAssembly);
 #endif
       }
 

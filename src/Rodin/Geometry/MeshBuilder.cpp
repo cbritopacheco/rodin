@@ -10,8 +10,8 @@
 
 namespace Rodin::Geometry
 {
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::initialize(size_t sdim)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::initialize(size_t sdim)
   {
     m_sdim = sdim;
 
@@ -27,7 +27,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder& Mesh<Context::Serial>::Builder::nodes(size_t n)
+  Mesh<Context::Sequential>::Builder& Mesh<Context::Sequential>::Builder::nodes(size_t n)
   {
     m_nodes = 0;
     m_vertices.resize(m_sdim, n);
@@ -35,8 +35,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::vertex(std::initializer_list<Scalar> l)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::vertex(std::initializer_list<Scalar> l)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -45,16 +45,16 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::vertex(const Scalar* data)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::vertex(const Scalar* data)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     return vertex(Eigen::Map<const Math::Vector>(data, m_sdim));
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::vertex(const Eigen::Map<const Math::Vector>& x)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::vertex(const Eigen::Map<const Math::Vector>& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -64,8 +64,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::vertex(Math::Vector&& x)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::vertex(Math::Vector&& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -75,8 +75,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::vertex(const Math::Vector& x)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::vertex(const Math::Vector& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
@@ -86,29 +86,29 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::attribute(const std::pair<size_t, Index>& p, Attribute attr)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::attribute(const std::pair<size_t, Index>& p, Attribute attr)
   {
     m_attributeIndex.track(p, attr);
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::polytope(Polytope::Type t, const Array<Index>& vs)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::polytope(Polytope::Type t, const Array<Index>& vs)
   {
     m_connectivity.polytope(t, vs);
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::polytope(Polytope::Type t, Array<Index>&& vs)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::polytope(Polytope::Type t, Array<Index>&& vs)
   {
     m_connectivity.polytope(t, std::move(vs));
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::reserve(size_t d, size_t count)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::reserve(size_t d, size_t count)
   {
     if (count > 0)
     {
@@ -119,7 +119,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Serial> Mesh<Context::Serial>::Builder::finalize()
+  Mesh<Context::Sequential> Mesh<Context::Sequential>::Builder::finalize()
   {
     Mesh res;
     res.m_sdim = m_sdim;
@@ -131,29 +131,29 @@ namespace Rodin::Geometry
     return res;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setConnectivity(MeshConnectivity&& connectivity)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::setConnectivity(MeshConnectivity&& connectivity)
   {
     m_connectivity = std::move(connectivity);
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setVertices(Math::Matrix&& vertices)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::setVertices(Math::Matrix&& vertices)
   {
     m_vertices = std::move(vertices);
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setAttributeIndex(AttributeIndex&& attrs)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::setAttributeIndex(AttributeIndex&& attrs)
   {
     m_attributeIndex = std::move(attrs);
     return *this;
   }
 
-  Mesh<Context::Serial>::Builder&
-  Mesh<Context::Serial>::Builder::setTransformationIndex(TransformationIndex&& transformations)
+  Mesh<Context::Sequential>::Builder&
+  Mesh<Context::Sequential>::Builder::setTransformationIndex(TransformationIndex&& transformations)
   {
     m_transformationIndex = std::move(transformations);
     return *this;

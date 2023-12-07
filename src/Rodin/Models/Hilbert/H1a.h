@@ -121,7 +121,7 @@ namespace Rodin::Models::Hilbert
       std::reference_wrapper<const FES>   m_fes;
       Variational::TrialFunction<FES>     m_trial;
       Variational::TestFunction<FES>      m_test;
-      Variational::Problem<FES, FES, Context::Serial, Math::SparseMatrix, Math::Vector> m_pb;
+      Variational::Problem<FES, FES, Context::Sequential, Math::SparseMatrix, Math::Vector> m_pb;
       Scalar m_alpha;
       Solver::CG<Math::SparseMatrix, Math::Vector> m_cg;
   };

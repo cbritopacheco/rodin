@@ -8,8 +8,8 @@
 
 namespace Rodin::Geometry
 {
-  SubMesh<Context::Serial>::Builder&
-  SubMesh<Context::Serial>::Builder::initialize(const Mesh<Context::Serial>& parent)
+  SubMesh<Context::Sequential>::Builder&
+  SubMesh<Context::Sequential>::Builder::initialize(const Mesh<Context::Sequential>& parent)
   {
     const size_t dim = parent.getDimension();
     const size_t sdim = parent.getSpaceDimension();
@@ -20,8 +20,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  SubMesh<Context::Serial>::Builder&
-  SubMesh<Context::Serial>::Builder::include(size_t d, Index parentIdx)
+  SubMesh<Context::Sequential>::Builder&
+  SubMesh<Context::Sequential>::Builder::include(size_t d, Index parentIdx)
   {
     auto& build = m_build;
     assert(m_parent.has_value());
@@ -63,15 +63,15 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  SubMesh<Context::Serial>::Builder&
-  SubMesh<Context::Serial>::Builder::include(size_t d, const IndexSet& indices)
+  SubMesh<Context::Sequential>::Builder&
+  SubMesh<Context::Sequential>::Builder::include(size_t d, const IndexSet& indices)
   {
     for (const Index parentIdx : indices)
       include(d, parentIdx);
     return *this;
   }
 
-  SubMesh<Context::Serial> SubMesh<Context::Serial>::Builder::finalize()
+  SubMesh<Context::Sequential> SubMesh<Context::Sequential>::Builder::finalize()
   {
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();

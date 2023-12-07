@@ -14,7 +14,7 @@ int main(int, char**)
 {
   constexpr size_t n = 64;
   Mesh mesh;
-  mesh = SerialMesh::UniformGrid(Polytope::Type::Triangle, n, n);
+  mesh = SequentialMesh::UniformGrid(Polytope::Type::Triangle, n, n);
   mesh.save("UniformGrid.mesh");
   return 0;
 }
