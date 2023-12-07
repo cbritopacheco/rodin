@@ -186,7 +186,7 @@ $ \mathbf{A} $
             <dd>Abstract base class for objects of type <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class MatrixType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_trial_f_e_s_00_01_test_f_e_s_00_01_context_1_1_serial_00_01_matrix_type_01_4.html" class="m-doc">BilinearForm&lt;TrialFES, TestFES, Context::Serial, MatrixType&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>
             </dt>
             <dd>Speciallization of <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> for a matrix type.</dd>
             <dt>
@@ -319,11 +319,6 @@ $ \mathbf{A} $
               class <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>
             </dt>
             <dd>Represents a linear form on some finite element space.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class TrialFES, class TestFES, class Context, class OperatorType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>
-            </dt>
-            <dd>Represents a bilinear form on a trial and test space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range, class Context&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a>
@@ -695,11 +690,6 @@ $ u $
             </dt>
             <dd>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_shape_function_base_3_01_potential_3_01_k3a9709d7937f741b04ab1424228d3a74.html" class="m-doc">Integral&lt;Dot&lt;ShapeFunctionBase&lt;Potential&lt;KernelType, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Integration of the <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a> of a Trial <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> and.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_interface_integral_3_01_dot_3_01_shape_function_base_3_01_l_h_s_2c3b347461557ff6443df9328cd7378e.html" class="m-doc">InterfaceIntegral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
             </dt>
@@ -883,6 +873,11 @@ $ u $
             </dt>
             <dd>Represents a Peridodic boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class LHSType, class RHSDerived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_potential_3_01_l_h_s_type_00_01_shape_function_base_3_01_shape_f345523d65781ed09e9a58148f83113d8.html" class="m-doc">Potential&lt;LHSType, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FESType, SpaceType&gt;, FESType, SpaceType&gt;&gt;</a>
+            </dt>
+            <dd></dd>
+            <dt>
               <div class="m-doc-template">template&lt;class BaseDerived, class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_pow_3_01_function_base_3_01_base_derived_01_4_00_01_number_01_4.html" class="m-doc">Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;</a>
             </dt>
@@ -893,7 +888,7 @@ $ u $
             </dt>
             <dd>General class to assemble linear systems with <code><a href="namespace_rodin_1_1_math.html#ad5753e9793c61f3620f2def51b01d816" class="m-doc">Math::<wbr />SparseMatrix</a></code> and <code><a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a></code> types in a serial context.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>
+              class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase</a>
             </dt>
             <dd>Represents the body of a variational problem.</dd>
             <dt>
