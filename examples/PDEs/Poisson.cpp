@@ -32,13 +32,17 @@ int main(int, char**)
   ScalarFunction f = 1.0;
   ScalarFunction g = 0.0;
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
+  BilinearForm<decltype(vh), decltype(vh), Math::Matrix> bf(u, v);
+  // BilinearForm bf(u, v);
+  bf = Integral(Grad(u), Grad(v));
+
+  DenseProblem poisson(u, v);
+  poisson = bf
           - Integral(f, v)
           + DirichletBC(u, g);
 
   // Solve the problem
-  Solver::SparseLU solver;
+  Solver::LDLT solver;
   poisson.solve(solver);
 
   // Save solution

@@ -16,40 +16,33 @@
 
 #include "ForwardDecls.h"
 
+#include "UnaryMinus.h"
 #include "PeriodicBC.h"
 #include "DirichletBC.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
+#include "Potential.h"
 
 namespace Rodin::Variational
 {
   /**
    * @brief Represents the body of a variational problem.
    */
-  class ProblemBody final : public FormLanguage::Base
+  class ProblemBodyBase : public FormLanguage::Base
   {
     public:
       using Parent = FormLanguage::Base;
 
-      ProblemBody() = default;
+      ProblemBodyBase() = default;
 
-      ProblemBody(const BilinearFormIntegratorBase& bfi)
-      {
-        m_bfis.add(bfi);
-      }
-
-      ProblemBody(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
-        : m_bfis(bfis)
-      {}
-
-      ProblemBody(const ProblemBody& other)
+      ProblemBodyBase(const ProblemBodyBase& other)
         : Parent(other),
           m_bfis(other.m_bfis),
           m_lfis(other.m_lfis),
           m_essBdr(other.m_essBdr)
       {}
 
-      ProblemBody(ProblemBody&& other)
+      ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
           m_bfis(std::move(other.m_bfis)),
           m_lfis(std::move(other.m_lfis)),
@@ -57,12 +50,32 @@ namespace Rodin::Variational
       {}
 
       inline
-      ProblemBody& operator=(ProblemBody&& other)
+      ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
         m_bfis = std::move(other.m_bfis);
         m_lfis = std::move(other.m_lfis);
         m_essBdr = std::move(other.m_essBdr);
         return *this;
+      }
+
+      PeriodicBoundary& getPBCs()
+      {
+        return m_periodicBdr;
+      }
+
+      EssentialBoundary& getDBCs()
+      {
+        return m_essBdr;
+      }
+
+      FormLanguage::List<BilinearFormIntegratorBase>& getBFIs()
+      {
+        return m_bfis;
+      }
+
+      FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
+      {
+        return m_lfis;
       }
 
       const PeriodicBoundary& getPBCs() const
@@ -85,42 +98,10 @@ namespace Rodin::Variational
         return m_lfis;
       }
 
-      inline ProblemBody* copy() const noexcept override
+      virtual ProblemBodyBase* copy() const noexcept override
       {
-        return new ProblemBody(*this);
+        return new ProblemBodyBase(*this);
       }
-
-      friend
-      ProblemBody operator+(
-          const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
-
-      friend
-      ProblemBody operator+(
-          const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis);
-
-      friend
-      ProblemBody operator-(
-          const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
-
-      friend
-      ProblemBody operator-(
-          const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis);
-
-      friend
-      ProblemBody operator+(
-          const ProblemBody& pb, const DirichletBCBase& dbc);
-
-      friend
-      ProblemBody operator+(
-          const ProblemBody& pb, const FormLanguage::List<DirichletBCBase>& dbcs);
-
-      friend
-      ProblemBody operator+(
-          const ProblemBody& pb, const PeriodicBCBase& dbc);
-
-      friend
-      ProblemBody operator+(
-          const ProblemBody& pb, const FormLanguage::List<PeriodicBCBase>& dbcs);
 
     private:
       FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
@@ -129,29 +110,443 @@ namespace Rodin::Variational
       PeriodicBoundary  m_periodicBdr;
   };
 
-  ProblemBody operator+(
-      const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
+  template <>
+  class ProblemBody<void, void> : public ProblemBodyBase
+  {
+    public:
+      using Parent = ProblemBodyBase;
 
-  ProblemBody operator+(
-      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis);
+      ProblemBody() = default;
 
-  ProblemBody operator-(
-      const ProblemBody& pb, const LinearFormIntegratorBase& lfi);
+      ProblemBody(const ProblemBody& other)
+        : Parent(other)
+      {}
 
-  ProblemBody operator-(
-      const ProblemBody& pb, const FormLanguage::List<LinearFormIntegratorBase>& lfis);
+      ProblemBody(ProblemBody&& other)
+        : Parent(std::move(other))
+      {}
 
-  ProblemBody operator+(
-      const ProblemBody& pb, const DirichletBCBase& dbc);
+      virtual ProblemBody* copy() const noexcept override
+      {
+        return new ProblemBody(*this);
+      }
+  };
 
-  ProblemBody operator+(
-      const ProblemBody& pb, const FormLanguage::List<DirichletBCBase>& dbcs);
+  template <class OperatorType>
+  class ProblemBody<OperatorType, void> : public ProblemBodyBase
+  {
+    public:
+      using Parent = ProblemBodyBase;
 
-  ProblemBody operator+(
-      const ProblemBody& pb, const PeriodicBCBase& dbc);
+      ProblemBody() = default;
 
-  ProblemBody operator+(
-      const ProblemBody& pb, const FormLanguage::List<PeriodicBCBase>& dbcs);
+      ProblemBody(const ProblemBody& other)
+        : Parent(other),
+          m_bfs(other.m_bfs)
+      {}
+
+      ProblemBody(ProblemBody&& other)
+        : Parent(std::move(other)),
+          m_bfs(std::move(other.m_bfs))
+      {}
+
+      FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs()
+      {
+        return m_bfs;
+      }
+
+      const FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs() const
+      {
+        return m_bfs;
+      }
+
+      virtual ProblemBody* copy() const noexcept override
+      {
+        return new ProblemBody(*this);
+      }
+
+    private:
+      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+  };
+
+  template <class VectorType>
+  class ProblemBody<void, VectorType> : public ProblemBodyBase
+  {
+    public:
+      using Parent = ProblemBodyBase;
+
+      ProblemBody() = default;
+
+      ProblemBody(const ProblemBody& other)
+        : Parent(other),
+          m_lfs(other.m_lfs)
+      {}
+
+      ProblemBody(ProblemBody&& other)
+        : Parent(std::move(other)),
+          m_lfs(std::move(other.m_lfs))
+      {}
+
+      inline
+      FormLanguage::List<LinearFormBase<VectorType>>& getLFs()
+      {
+        return m_lfs;
+      }
+
+      inline
+      const FormLanguage::List<LinearFormBase<VectorType>>& getLFs() const
+      {
+        return m_lfs;
+      }
+
+      virtual ProblemBody* copy() const noexcept override
+      {
+        return new ProblemBody(*this);
+      }
+
+    private:
+      FormLanguage::List<LinearFormBase<VectorType>> m_lfs;
+  };
+
+  template <class OperatorType, class VectorType>
+  class ProblemBody
+    : public ProblemBodyBase
+  {
+    public:
+      using Parent = ProblemBodyBase;
+
+      ProblemBody(const ProblemBody<OperatorType, void>& pbo)
+        : Parent(pbo)
+      {
+        m_bfs.add(pbo.getBFs());
+      }
+
+      ProblemBody(const ProblemBody<void, VectorType>& pbv)
+        : Parent(pbv)
+      {
+        m_lfs.add(pbv.getLFs());
+      }
+
+      ProblemBody(const ProblemBody<void, void>& parent)
+        : Parent(parent)
+      {}
+
+      ProblemBody(const ProblemBody& other)
+        : Parent(other),
+          m_lfs(other.m_lfs),
+          m_bfs(other.m_bfs)
+      {}
+
+      ProblemBody(ProblemBody&& other)
+        : Parent(std::move(other)),
+          m_lfs(std::move(other.m_lfs)),
+          m_bfs(std::move(other.m_bfs))
+      {}
+
+      inline
+      FormLanguage::List<LinearFormBase<VectorType>>& getLFs()
+      {
+        return m_lfs;
+      }
+
+      inline
+      FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs()
+      {
+        return m_bfs;
+      }
+
+      inline
+      const FormLanguage::List<LinearFormBase<VectorType>>& getLFs() const
+      {
+        return m_lfs;
+      }
+
+      inline
+      const FormLanguage::List<BilinearFormBase<OperatorType>>& getBFs() const
+      {
+        return m_bfs;
+      }
+
+      virtual ProblemBody* copy() const noexcept override
+      {
+        return new ProblemBody(*this);
+      }
+
+    private:
+      FormLanguage::List<LinearFormBase<VectorType>> m_lfs;
+      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+  };
+
+  inline
+  ProblemBody<void, void> operator+(
+      const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const LinearFormIntegratorBase& lfi, const BilinearFormIntegratorBase& bfi)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator-(
+      const BilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator-(
+      const LinearFormIntegratorBase& lfi, const BilinearFormIntegratorBase& bfi)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(UnaryMinus(bfi));
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& bfis,
+      const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfis);
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator-(
+      const FormLanguage::List<BilinearFormIntegratorBase>& bfis,
+      const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfis);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const BilinearFormIntegratorBase& bfi, const DirichletBCBase& dbc)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getDBCs().add(dbc);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const BilinearFormIntegratorBase& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getDBCs().add(dbcs);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const BilinearFormIntegratorBase& bfi, const PeriodicBCBase& pbc)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getPBCs().add(pbc);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const BilinearFormIntegratorBase& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfi);
+    res.getPBCs().add(pbcs);
+    return res;
+  }
+
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& bfis, const DirichletBCBase& dbc)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfis);
+    res.getDBCs().add(dbc);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& bfis, const FormLanguage::List<DirichletBCBase>& dbcs)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfis);
+    res.getDBCs().add(dbcs);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& bfis, const PeriodicBCBase& pbc)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfis);
+    res.getPBCs().add(pbc);
+    return res;
+  }
+
+  inline
+  ProblemBody<void, void> operator+(
+      const FormLanguage::List<BilinearFormIntegratorBase>& bfis, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  {
+    ProblemBody<void, void> res;
+    res.getBFIs().add(bfis);
+    res.getPBCs().add(pbcs);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb,
+      const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getLFIs().add(lfi);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb,
+      const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getLFIs().add(lfis);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator-(
+      const ProblemBody<OperatorType, VectorType>& pb,
+      const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator-(
+      const ProblemBody<OperatorType, VectorType>& pb,
+      const FormLanguage::List<LinearFormIntegratorBase>& lfis)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getLFIs().add(UnaryMinus(lfis));
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb, const DirichletBCBase& dbc)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getDBCs().add(dbc);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb, const FormLanguage::List<DirichletBCBase>& dbcs)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getEssentialBoundary().add(dbcs);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb, const PeriodicBCBase& pbc)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getPBCs().add(pbc);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb,
+      const BilinearFormBase<OperatorType>& bf)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getBFs().add(bf);
+    return res;
+  }
+
+  template <class OperatorType, class VectorType>
+  ProblemBody<OperatorType, VectorType> operator+(
+      const ProblemBody<OperatorType, VectorType>& pb, const FormLanguage::List<PeriodicBCBase>& pbcs)
+  {
+    ProblemBody<OperatorType, VectorType> res(pb);
+    res.getPBCs().add(pbcs);
+    return res;
+  }
+
+  template <class OperatorType>
+  ProblemBody<OperatorType, void> operator+(
+      const BilinearFormIntegratorBase& bfi, const BilinearFormBase<OperatorType>& bf)
+  {
+    ProblemBody<OperatorType, void> res;
+    res.getBFIs().add(bfi);
+    res.getBFs().add(bf);
+    return res;
+  }
+
+  template <class OperatorType>
+  ProblemBody<OperatorType, void> operator-(
+      const BilinearFormBase<OperatorType>& bf, const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<OperatorType, void> res;
+    res.getBFs().add(bf);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
+
+  template <class OperatorType>
+  ProblemBody<OperatorType, void> operator-(
+      const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs,
+      const LinearFormIntegratorBase& lfi)
+  {
+    ProblemBody<OperatorType, void> res;
+    res.getBFs().add(bfs);
+    res.getLFIs().add(UnaryMinus(lfi));
+    return res;
+  }
+
+  template <class OperatorType>
+  ProblemBody<OperatorType, void> operator+(
+      const BilinearFormIntegratorBase& bfi,
+      const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs)
+  {
+    ProblemBody<OperatorType, void> res;
+    res.getBFIs().add(bfi);
+    res.getBFs().add(bfs);
+    return res;
+  }
 }
 
 #endif

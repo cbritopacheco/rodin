@@ -76,7 +76,7 @@ namespace Rodin::Variational
    *
    * @see BilinearFormSpecializations
    */
-  template <class TrialFES, class TestFES, class Context, class OperatorType>
+  template <class TrialFES, class TestFES, class OperatorType>
   class BilinearForm;
 
   /**
@@ -1020,6 +1020,7 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
+  template <class OperatorType, class VectorType>
   class ProblemBody;
 
   /**

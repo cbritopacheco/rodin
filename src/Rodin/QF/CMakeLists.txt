@@ -1,11 +1,13 @@
 set(RodinQF_HEADERS
   QF1P1.h
+  GaussLegendre.h
   GrundmannMoller.h
   GenericPolytopeQuadrature.h
   )
 
 set(RodinQF_SRCS
   QF1P1.cpp
+  GaussLegendre.cpp
   GrundmannMoller.cpp
   GenericPolytopeQuadrature.cpp
   )

@@ -31,28 +31,16 @@ namespace Rodin::Variational
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using SerialAssembly = Assembly::Serial<BilinearFormBase>;
-      using MultithreadedAssembly = Assembly::Multithreaded<BilinearFormBase>;
-      using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
-
       BilinearFormBase()
-      {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SerialAssembly);
-#endif
-      }
+      {}
 
       BilinearFormBase(const BilinearFormBase& other)
         : FormLanguage::Base(other),
-          m_assembly(other.m_assembly->copy()),
           m_bfis(other.m_bfis)
       {}
 
       BilinearFormBase(BilinearFormBase&& other)
         : FormLanguage::Base(std::move(other)),
-          m_assembly(std::move(other.m_assembly)),
           m_bfis(std::move(other.m_bfis))
       {}
 
@@ -66,18 +54,6 @@ namespace Rodin::Variational
       const FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators() const
       {
         return m_bfis;
-      }
-
-      BilinearFormBase& setAssembly(const Assembly::AssemblyBase<BilinearFormBase>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
-      const Assembly::AssemblyBase<BilinearFormBase>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
       }
 
       /**
@@ -169,7 +145,6 @@ namespace Rodin::Variational
       virtual BilinearFormBase* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<Assembly::AssemblyBase<BilinearFormBase>> m_assembly;
       FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
   };
 
@@ -183,24 +158,23 @@ namespace Rodin::Variational
    * space, and @f$ m @f$ represents the size of the test space.
    */
   template <class TrialFES, class TestFES, class MatrixType>
-  class BilinearForm<TrialFES, TestFES, Context::Serial, MatrixType> final
+  class BilinearForm final
     : public BilinearFormBase<MatrixType>
   {
     static_assert(
         std::is_same_v<TrialFES, TestFES>,
         "Different trial and test spaces are currently not supported.");
 
-    static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
-
     public:
-      /// Context of BilinearForm
-      using Context = typename TrialFES::Context;
-
       /// Type of operator associated to the bilinear form
       using OperatorType = MatrixType;
 
       /// Parent class
       using Parent = BilinearFormBase<MatrixType>;
+
+      using SerialAssembly = Assembly::Serial<BilinearForm>;
+      using MultithreadedAssembly = Assembly::Multithreaded<BilinearForm>;
+      using OpenMPAssembly = Assembly::OpenMP<BilinearForm>;
 
       /**
        * @brief Constructs a BilinearForm from a TrialFunction and
@@ -212,18 +186,26 @@ namespace Rodin::Variational
       constexpr
       BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         :  m_u(u), m_v(v)
-      {}
+      {
+#ifdef RODIN_MULTITHREADED
+        m_assembly.reset(new MultithreadedAssembly);
+#else
+        m_assembly.reset(new SerialAssembly);
+#endif
+      }
 
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
-          m_u(other.m_u), m_v(other.m_v)
+          m_u(other.m_u), m_v(other.m_v),
+          m_assembly(other.m_assembly->copy())
       {}
 
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_assembly(std::move(other.m_assembly)),
           m_operator(std::move(other.m_operator))
       {}
 
@@ -295,7 +277,7 @@ namespace Rodin::Variational
        * @brief Gets the reference to sparse matrix.
        * @returns Reference to the associated sparse matrix.
        */
-      virtual OperatorType& getOperator() override
+      OperatorType& getOperator() override
       {
         return m_operator;
       }
@@ -305,12 +287,24 @@ namespace Rodin::Variational
        * to the bilinear form.
        * @returns Constant reference to the associated sparse matrix.
        */
-      virtual const OperatorType& getOperator() const override
+      const OperatorType& getOperator() const override
       {
         return m_operator;
       }
 
-      virtual BilinearForm* copy() const noexcept override
+      BilinearForm& setAssembly(const Assembly::AssemblyBase<BilinearForm>& assembly)
+      {
+        m_assembly.reset(assembly.copy());
+        return *this;
+      }
+
+      const Assembly::AssemblyBase<BilinearForm>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
+      inline BilinearForm* copy() const noexcept override
       {
         return new BilinearForm(*this);
       }
@@ -318,13 +312,13 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
       std::reference_wrapper<const TestFunction<TestFES>>   m_v;
+      std::unique_ptr<Assembly::AssemblyBase<BilinearForm>> m_assembly;
       OperatorType m_operator;
   };
 
   template <class TrialFES, class TestFES>
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> BilinearForm<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix>;
-
+    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix>;
 }
 
 #include "BilinearForm.hpp"

@@ -52,7 +52,7 @@ namespace Rodin::Variational
 
       ProblemBase(const ProblemBase& other) = default;
 
-      virtual ProblemBase& operator=(const ProblemBody& rhs) = 0;
+      virtual ProblemBase& operator=(const ProblemBody<OperatorType, VectorType>& rhs) = 0;
 
       virtual void solve(Solver::SolverBase<OperatorType, VectorType>& solver) = 0;
 
@@ -187,7 +187,7 @@ namespace Rodin::Variational
 
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
-      Problem& operator=(const ProblemBody& rhs) override;
+      Problem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override;
 
       virtual VectorType& getMassVector() override
       {
@@ -220,7 +220,10 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
       LinearForm<TestFES, Context, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, Context, Math::SparseMatrix> m_bilinearForm;
+      BilinearForm<TrialFES, TestFES, Math::SparseMatrix> m_bilinearForm;
+
+      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+
       EssentialBoundary m_dbcs;
       PeriodicBoundary  m_pbcs;
 

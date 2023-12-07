@@ -14,6 +14,9 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
+#include "LinearFormIntegrator.h"
+#include "BilinearFormIntegrator.h"
+
 namespace Rodin::FormLanguage
 {
   template <class LHSDerived, class RHSDerived, class FESType, Variational::ShapeFunctionSpaceType SpaceType>
@@ -296,6 +299,18 @@ namespace Rodin::Variational
             const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Sum(lhs, rhs);
+  }
+
+  template <class OperatorType>
+  FormLanguage::List<BilinearFormBase<OperatorType>>
+  operator+(
+      const BilinearFormBase<OperatorType>& lhs,
+      const BilinearFormBase<OperatorType>& rhs)
+  {
+    FormLanguage::List<BilinearFormBase<OperatorType>> res;
+    res.add(lhs);
+    res.add(rhs);
+    return res;
   }
 
   FormLanguage::List<BilinearFormIntegratorBase>

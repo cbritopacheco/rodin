@@ -39,13 +39,15 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
   Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
-  ::operator=(const ProblemBody& rhs)
+  ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
   {
     for (auto& bfi : rhs.getBFIs())
       m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())
       m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
+
+    m_bfs = rhs.getBFs();
 
     m_dbcs = rhs.getDBCs();
     m_pbcs = rhs.getPBCs();
@@ -338,6 +340,12 @@ namespace Rodin::Variational
 
     m_bilinearForm.assemble();
     m_stiffness = std::move(m_bilinearForm.getOperator());
+
+    for (auto& bf : m_bfs)
+    {
+      bf.assemble();
+      m_stiffness += bf.getOperator();
+    }
 
     // Impose Dirichlet boundary conditions
     imposeDirichletBCs();
