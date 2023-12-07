@@ -12,15 +12,25 @@ using namespace Rodin::Geometry;
 
 int main(int, char**)
 {
-  QF::GrundmannMoller qf(1, Polytope::Type::Triangle);
-  std::cout << "Order: " << qf.getOrder() << std::endl;
-  std::cout << "Size: " << qf.getSize() << std::endl;
-  for (size_t i = 0; i < qf.getSize(); i++)
+  QF::GrundmannMoller qfe(1, Polytope::Type::Segment);
+  std::cout << "Order: " << qfe.getOrder() << std::endl;
+  std::cout << "Size: " << qfe.getSize() << std::endl;
+  for (size_t i = 0; i < qfe.getSize(); i++)
   {
     std::cout << "Weight:\n";
-    std::cout << qf.getWeight(i) << std::endl;
-    std::cout << "Point:\n" << qf.getPoint(i) << std::endl;
+    std::cout << qfe.getWeight(i) << std::endl;
+    std::cout << "Point:\n" << qfe.getPoint(i) << std::endl;
   }
+
+  // QF::GrundmannMoller qf(1, Polytope::Type::Triangle);
+  // std::cout << "Order: " << qf.getOrder() << std::endl;
+  // std::cout << "Size: " << qf.getSize() << std::endl;
+  // for (size_t i = 0; i < qf.getSize(); i++)
+  // {
+  //   std::cout << "Weight:\n";
+  //   std::cout << qf.getWeight(i) << std::endl;
+  //   std::cout << "Point:\n" << qf.getPoint(i) << std::endl;
+  // }
 
   return 0;
 }

@@ -190,6 +190,16 @@ namespace Rodin::Geometry
       std::reference_wrapper<const MeshBase> m_mesh;
   };
 
+  inline
+  bool operator==(const Polytope& lhs, const Polytope& rhs)
+  {
+    bool res = true;
+    res = res && (&lhs.getMesh() == &rhs.getMesh());
+    res = res && (lhs.getDimension() == rhs.getDimension());
+    res = res && (lhs.getIndex() == rhs.getIndex());
+    return res;
+  }
+
   bool operator<(const Polytope& lhs, const Polytope& rhs);
 
   /**

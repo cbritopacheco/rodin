@@ -134,7 +134,7 @@ namespace Rodin::Variational
 
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
-      DenseProblem& operator=(const ProblemBody& rhs) override;
+      DenseProblem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override;
 
       virtual VectorType& getMassVector() override
       {
@@ -167,7 +167,10 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
       LinearForm<TestFES, Context, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, Context, Math::Matrix> m_bilinearForm;
+      BilinearForm<TrialFES, TestFES, Math::Matrix> m_bilinearForm;
+
+      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+
       EssentialBoundary m_dbcs;
       PeriodicBoundary  m_pbcs;
 
