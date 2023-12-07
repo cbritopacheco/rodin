@@ -15,7 +15,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Context::Serial>;
+using FES = VectorP1<Context::Sequential>;
 
 // Define interior and exterior for level set discretization
 static constexpr Attribute Interior = 1, Exterior = 2;

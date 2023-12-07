@@ -250,7 +250,7 @@ namespace Rodin::Variational
       TestFunction<FES>                                 m_v;
 
       FlatSet<Geometry::Attribute> m_attrs;
-      LinearForm<FES, Context::Serial, Math::Vector>    m_lf;
+      LinearForm<FES, Context::Sequential, Math::Vector>    m_lf;
 
       std::optional<Scalar> m_value;
   };

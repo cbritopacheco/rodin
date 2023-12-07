@@ -98,14 +98,14 @@ namespace Rodin::Variational
    * and `Math::Vector` types in a serial context.
    */
   template <class TrialFES, class TestFES>
-  class Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  class Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
     : public ProblemBase<Math::SparseMatrix, Math::Vector>
   {
-      static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
-      static_assert(std::is_same_v<typename TestFES::Context, Context::Serial>);
+      static_assert(std::is_same_v<typename TrialFES::Context, Context::Sequential>);
+      static_assert(std::is_same_v<typename TestFES::Context, Context::Sequential>);
 
     public:
-      using Context = Context::Serial;
+      using Context = Context::Sequential;
       using OperatorType = Math::SparseMatrix;
       using VectorType = Math::Vector;
       using Parent = ProblemBase<Math::SparseMatrix, Math::Vector>;

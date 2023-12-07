@@ -9,7 +9,7 @@ using namespace Rodin::Variational;
 int main(int, char** argv)
 {
   Mesh mesh =
-    Mesh<Rodin::Context::Serial>::Builder()
+    Mesh<Rodin::Context::Sequential>::Builder()
     .initialize(2)
     .nodes(4)
     .vertex({0, 0})

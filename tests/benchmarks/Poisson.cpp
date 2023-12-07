@@ -28,15 +28,15 @@ namespace RodinBenchmark
       {
         mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
         mesh.getConnectivity().compute(1, 2);
-        vhPtr.reset(new P1<Scalar, Context::Serial>(mesh));
+        vhPtr.reset(new P1<Scalar, Context::Sequential>(mesh));
       }
 
       void TearDown(const benchmark::State&)
       {}
 
       boost::filesystem::path meshfile;
-      Mesh<Context::Serial> mesh;
-      std::unique_ptr<P1<Scalar, Context::Serial>> vhPtr;
+      Mesh<Context::Sequential> mesh;
+      std::unique_ptr<P1<Scalar, Context::Sequential>> vhPtr;
   };
 
   BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)

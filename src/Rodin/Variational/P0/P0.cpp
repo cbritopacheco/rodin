@@ -9,7 +9,7 @@
 namespace Rodin::Variational
 {
   const Geometry::GeometryIndexed<ScalarP0Element>
-  P0<Scalar, Context::Serial, Geometry::Mesh<Context::Serial>>::s_elements =
+  P0<Scalar, Context::Sequential, Geometry::Mesh<Context::Sequential>>::s_elements =
   {
     { Geometry::Polytope::Type::Point, ScalarP0Element(Geometry::Polytope::Type::Point) },
     { Geometry::Polytope::Type::Segment, ScalarP0Element(Geometry::Polytope::Type::Segment) },

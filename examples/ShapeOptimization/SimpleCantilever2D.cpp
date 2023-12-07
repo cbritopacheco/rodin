@@ -15,7 +15,7 @@ using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Context::Serial>;
+using FES = VectorP1<Context::Sequential>;
 
 // Define boundary attributes
 static constexpr Geometry::Attribute Gamma0 = 1; // Traction free boundary

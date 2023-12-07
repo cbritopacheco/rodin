@@ -8,12 +8,12 @@
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 
-#include "Serial.h"
+#include "Sequential.h"
 
 namespace Rodin::Assembly
 {
   void
-  Serial<Variational::LinearFormBase<Math::Vector>>
+  Sequential<Variational::LinearFormBase<Math::Vector>>
   ::add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
   {
     assert(in.size() == s.size());
@@ -23,7 +23,7 @@ namespace Rodin::Assembly
   }
 
   Math::Vector
-  Serial<Variational::LinearFormBase<Math::Vector>>
+  Sequential<Variational::LinearFormBase<Math::Vector>>
   ::execute(const Input& input) const
   {
     VectorType res(input.fes.getSize());

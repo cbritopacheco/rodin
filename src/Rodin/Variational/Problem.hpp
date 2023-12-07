@@ -11,7 +11,7 @@
 
 #include "Rodin/Utility.h"
 
-#include "Rodin/Assembly/Serial.h"
+#include "Rodin/Assembly/Sequential.h"
 
 #include "GridFunction.h"
 #include "DirichletBC.h"
@@ -22,12 +22,12 @@
 namespace Rodin::Variational
 {
   // ------------------------------------------------------------------------
-  // ---- Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  // ---- Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   // ------------------------------------------------------------------------
 
   template <class TrialFES, class TestFES>
   constexpr
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::Problem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
      :  m_trialFunction(u),
         m_testFunction(v),
@@ -37,8 +37,8 @@ namespace Rodin::Variational
   {}
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
   {
     for (auto& bfi : rhs.getBFIs())
@@ -56,8 +56,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const BilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(rhs);
@@ -65,8 +65,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator-=(const BilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(UnaryMinus(rhs));
@@ -74,8 +74,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(rhs);
@@ -83,8 +83,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator-=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(UnaryMinus(rhs));
@@ -92,8 +92,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const DirichletBCBase& rhs)
   {
     m_dbcs.add(rhs);
@@ -101,8 +101,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator+=(const PeriodicBCBase& rhs)
   {
     m_pbcs.add(rhs);
@@ -110,8 +110,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::imposeDirichletBCs()
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>::imposeDirichletBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -175,8 +175,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::imposePeriodicBCs()
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>::imposePeriodicBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -326,8 +326,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>&
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>::assemble()
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>::assemble()
   {
     auto& trial = getTrialFunction();
 
@@ -360,7 +360,7 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   void
-  Problem<TrialFES, TestFES, Context::Serial, Math::SparseMatrix, Math::Vector>
+  Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
   {
      // Assemble the system

@@ -1,11 +1,11 @@
 set(RodinAssembly_HEADERS
   AssemblyBase.h
-  Serial.h
+  Sequential.h
   Multithreaded.h)
 
 set(RodinAssembly_SRCS
   AssemblyBase.cpp
-  Serial.cpp
+  Sequential.cpp
   Multithreaded.cpp)
 
 add_library(RodinAssembly

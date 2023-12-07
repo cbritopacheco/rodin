@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_SERIAL_H
-#define RODIN_ASSEMBLY_SERIAL_H
+#ifndef RODIN_ASSEMBLY_Sequential_H
+#define RODIN_ASSEMBLY_Sequential_H
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -17,7 +17,7 @@
 namespace Rodin::Assembly
 {
   template <class TrialFES, class TestFES>
-  class Serial<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+  class Sequential<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
     : public AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
   {
     /**
@@ -48,13 +48,13 @@ namespace Rodin::Assembly
       using Input = typename Parent::Input;
       using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
-      Serial() = default;
+      Sequential() = default;
 
-      Serial(const Serial& other)
+      Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      Serial(Serial&& other)
+      Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
@@ -140,18 +140,18 @@ namespace Rodin::Assembly
         return res;
       }
 
-      Serial* copy() const noexcept override
+      Sequential* copy() const noexcept override
       {
-        return new Serial(*this);
+        return new Sequential(*this);
       }
   };
 
   /**
-   * @brief Serial assembly of the Math::SparseMatrix associated to a
+   * @brief Sequential assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
-  class Serial<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+  class Sequential<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
     : public AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
   {
     public:
@@ -159,13 +159,13 @@ namespace Rodin::Assembly
       using Input = typename Parent::Input;
       using OperatorType = Math::SparseMatrix;
 
-      Serial() = default;
+      Sequential() = default;
 
-      Serial(const Serial& other)
+      Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      Serial(Serial&& other)
+      Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
@@ -175,25 +175,25 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        Serial<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
+        Sequential<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
         const auto triplets = assembly.execute({ input.mesh, input.trialFES, input.testFES, input.bfis });
         OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
       }
 
-      Serial* copy() const noexcept override
+      Sequential* copy() const noexcept override
       {
-        return new Serial(*this);
+        return new Sequential(*this);
       }
   };
 
   /**
-   * @brief Serial assembly of the Math::SparseMatrix associated to a
+   * @brief Sequential assembly of the Math::SparseMatrix associated to a
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
-  class Serial<Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+  class Sequential<Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
     : public AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
   {
     static void add(
@@ -216,13 +216,13 @@ namespace Rodin::Assembly
       using Input = typename Parent::Input;
       using OperatorType = Math::Matrix;
 
-      Serial() = default;
+      Sequential() = default;
 
-      Serial(const Serial& other)
+      Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      Serial(Serial&& other)
+      Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
@@ -308,18 +308,18 @@ namespace Rodin::Assembly
         return res;
       }
 
-      Serial* copy() const noexcept override
+      Sequential* copy() const noexcept override
       {
-        return new Serial(*this);
+        return new Sequential(*this);
       }
   };
 
   /**
-   * @brief %Serial assembly of the Math::Vector associated to a LinearFormBase
+   * @brief %Sequential assembly of the Math::Vector associated to a LinearFormBase
    * object.
    */
   template <>
-  class Serial<Variational::LinearFormBase<Math::Vector>>
+  class Sequential<Variational::LinearFormBase<Math::Vector>>
     : public AssemblyBase<Variational::LinearFormBase<Math::Vector>>
   {
 
@@ -329,13 +329,13 @@ namespace Rodin::Assembly
       using Parent = AssemblyBase<Variational::LinearFormBase<Math::Vector>>;
       using VectorType = Math::Vector;
 
-      Serial() = default;
+      Sequential() = default;
 
-      Serial(const Serial& other)
+      Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      Serial(Serial&& other)
+      Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
@@ -345,9 +345,9 @@ namespace Rodin::Assembly
        */
       VectorType execute(const Input& input) const override;
 
-      Serial* copy() const noexcept override
+      Sequential* copy() const noexcept override
       {
-        return new Serial(*this);
+        return new Sequential(*this);
       }
   };
 }

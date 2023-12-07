@@ -41,7 +41,7 @@ namespace Rodin::IO
       }
 
     private:
-      std::reference_wrapper<Geometry::Mesh<Context::Serial>> m_mesh;
+      std::reference_wrapper<Geometry::Mesh<Context::Sequential>> m_mesh;
   };
 }
 

@@ -13,7 +13,7 @@ namespace Rodin::IO
 {
   template <class Range>
   void GridFunctionLoader<FileFormat::MFEM,
-        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
+        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
   ::load(std::istream& is)
   {
     using boost::spirit::x3::space;

@@ -24,7 +24,7 @@ namespace Rodin::Variational
   class LinearFormBase : public FormLanguage::Base
   {
     public:
-      using SerialAssembly = Assembly::Serial<LinearFormBase>;
+      using SequentialAssembly = Assembly::Sequential<LinearFormBase>;
       using MultithreadedAssembly = Assembly::Multithreaded<LinearFormBase>;
       using OpenMPAssembly = Assembly::OpenMP<LinearFormBase>;
 
@@ -33,7 +33,7 @@ namespace Rodin::Variational
 #ifdef RODIN_MULTITHREADED
         m_assembly.reset(new MultithreadedAssembly);
 #else
-        m_assembly.reset(new SerialAssembly);
+        m_assembly.reset(new SequentialAssembly);
 #endif
       }
 
@@ -175,10 +175,10 @@ namespace Rodin::Variational
    * LinearFormIntegratorBase instances.
    */
   template <class FES>
-  class LinearForm<FES, Context::Serial, Math::Vector> final
+  class LinearForm<FES, Context::Sequential, Math::Vector> final
     : public LinearFormBase<Math::Vector>
   {
-    static_assert(std::is_same_v<typename FES::Context, Context::Serial>);
+    static_assert(std::is_same_v<typename FES::Context, Context::Sequential>);
 
     public:
       using Context = typename FES::Context;

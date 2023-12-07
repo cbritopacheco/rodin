@@ -20,17 +20,17 @@ namespace Rodin::IO
   class MeshPrinterBase : public IO::Printer<Rodin::Geometry::Mesh<Trait>>
   {
     public:
-      MeshPrinterBase(const Geometry::Mesh<Context::Serial>& mesh)
+      MeshPrinterBase(const Geometry::Mesh<Context::Sequential>& mesh)
         : m_mesh(mesh)
       {}
 
-      const Rodin::Geometry::Mesh<Context::Serial>& getObject() const override
+      const Rodin::Geometry::Mesh<Context::Sequential>& getObject() const override
       {
         return m_mesh;
       }
 
     private:
-      const Rodin::Geometry::Mesh<Context::Serial>& m_mesh;
+      const Rodin::Geometry::Mesh<Context::Sequential>& m_mesh;
   };
 }
 
