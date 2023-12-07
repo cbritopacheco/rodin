@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::LinearForm&lt;FES, Context::Sequential, Math::Vector&gt; class | Rodin</title>
+  <title>Rodin::Variational::LinearForm&lt;FES, Math::Vector&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,7 +65,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FES, Context::Sequential, Math::Vector&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FES, Math::Vector&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Represents a linear form defined over some finite element space.</p>
         <nav class="m-block m-default">
@@ -174,6 +174,14 @@ $ u $
             </dt>
             <dd>Gets the test function argument associated to this linear form.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a96a39625aa4c4c9dbcc10e5e7d13cd0d" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4912827fb025ac222e4c14b7b9ca69b1" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2ff0f12631f71943b38dbec87955850f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
@@ -186,7 +194,7 @@ $ u $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Sequential, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10a8e0a5f69530c7cf868ed6b9d73b5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a8ce0d3c5bbc6aeb19bbd1cd65aaadde3" class="m-doc">Scalar</a> Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10a8e0a5f69530c7cf868ed6b9d73b5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES&gt;&amp; u) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the linear form at the function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -250,17 +258,69 @@ $ L(u) $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Sequential, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the linear form.</p>
-<p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_context_1_1_sequential_00_01_math_1_1_vector_01_4.html#ac503d89e47b0d10069d77fa944cd1d6a" class="m-doc">getVector()</a></p></aside>
+<p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_math_1_1_vector_01_4.html#ac503d89e47b0d10069d77fa944cd1d6a" class="m-doc">getVector()</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a96a39625aa4c4c9dbcc10e5e7d13cd0d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96a39625aa4c4c9dbcc10e5e7d13cd0d" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> which will be used to build the linear form.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4912827fb025ac222e4c14b7b9ca69b1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4912827fb025ac222e4c14b7b9ca69b1" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> which will be used to build the linear form.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a2ff0f12631f71943b38dbec87955850f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Context::<wbr />Sequential, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ff0f12631f71943b38dbec87955850f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>* Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ff0f12631f71943b38dbec87955850f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">

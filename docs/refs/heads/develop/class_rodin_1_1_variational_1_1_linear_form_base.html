@@ -115,14 +115,6 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab50bd6a100d99aa61056b993f049efef" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const VectorType&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a96a39625aa4c4c9dbcc10e5e7d13cd0d" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4912827fb025ac222e4c14b7b9ca69b1" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</dd>
             <dt id="a64fa430dc89a2c082bd9ac8d603da4d2">
               <span class="m-doc-wrap-bumper">auto <a href="#a64fa430dc89a2c082bd9ac8d603da4d2" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -144,58 +136,6 @@
             </h3>
             <p>Assembles the linear form.</p>
 <p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_linear_form_base.html#a786a316661c285f049fa3ba6f75a8d7a" class="m-doc">getVector()</a></p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a96a39625aa4c4c9dbcc10e5e7d13cd0d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class VectorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96a39625aa4c4c9dbcc10e5e7d13cd0d" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">virtual</span></span></span>
-            </h3>
-            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> which will be used to build the linear form.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to this (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a4912827fb025ac222e4c14b7b9ca69b1"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class VectorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;VectorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4912827fb025ac222e4c14b7b9ca69b1" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; lfi) <span class="m-label m-warning">virtual</span></span></span>
-            </h3>
-            <p>Builds the linear form the given <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a> instance.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> which will be used to build the linear form.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to this (for method chaining)</td>
-                </tr>
-              </tfoot>
-            </table>
           </div></section>
           <section class="m-doc-details" id="aba542269ae62d46e38681b2d80bbaa9b"><div>
             <h3>
