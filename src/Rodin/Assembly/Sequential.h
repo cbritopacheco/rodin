@@ -204,11 +204,7 @@ namespace Rodin::Assembly
       assert(cols.size() >= 0);
       assert(in.rows() == rows.size());
       assert(in.cols() == cols.size());
-      for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
-      {
-        for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
-          out(rows(i), cols(j)) += in(i, j);
-      }
+      out(rows, cols).noalias() += in;
     }
 
     public:
@@ -326,9 +322,7 @@ namespace Rodin::Assembly
     static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
     {
       assert(in.size() == s.size());
-      size_t i = 0;
-      for (const auto& global : s)
-        out.coeffRef(global) += in.coeff(i++);
+      out(s).noalias() += in;
     }
 
     public:

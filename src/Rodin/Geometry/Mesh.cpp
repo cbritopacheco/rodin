@@ -205,7 +205,6 @@ namespace Rodin::Geometry
         build.include(D, i);
         for (size_t d = 1; d <= D - 1; d++)
         {
-          RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D, d);
           const auto& inc = getConnectivity().getIncidence(D, d);
           if (inc.size() > 0)
             build.include(d, inc.at(i));
