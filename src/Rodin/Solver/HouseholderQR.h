@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_HouseholderQR_H
-#define RODIN_SOLVER_HouseholderQR_H
+#ifndef RODIN_SOLVER_HOUSEHOLDERQR_H
+#define RODIN_SOLVER_HOUSEHOLDERQR_H
 
 #include <Eigen/Dense>
 

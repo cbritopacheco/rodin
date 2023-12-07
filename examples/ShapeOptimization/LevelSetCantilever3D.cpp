@@ -68,9 +68,10 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  Eigen::ConjugateGradient<Math::SparseMatrix> ecg;
-  Solver::EigenSolver<
-    Eigen::ConjugateGradient<Math::SparseMatrix>, Math::SparseMatrix, Math::Vector> solver(ecg);
+  // Eigen::ConjugateGradient<Math::SparseMatrix> ecg;
+  // Solver::EigenSolver<
+  //   Eigen::ConjugateGradient<Math::SparseMatrix>, Math::SparseMatrix, Math::Vector> solver(ecg);
+  Solver::CG solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -153,8 +154,6 @@ int main(int, char**)
                                     .split(Exterior, {Interior, Exterior})
                                     .setRMC(1e-6)
                                     .setHMax(hmax)
-                                    .setHMin(hmin)
-                                    .setHausdorff(hausd)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)

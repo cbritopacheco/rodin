@@ -93,11 +93,6 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);
 
-    GridFunction woof(vhInt);
-    woof.projectOnBoundary(BoundaryNormal(trimmed), Gamma);
-    woof.save("woof.gf");
-    trimmed.save("woof.mesh");
-
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
     jac.traceOf(Interior);
@@ -105,11 +100,6 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = FaceNormal(th);
     n.traceOf(Interior);
-
-    GridFunction miaow(vh);
-    miaow.projectOnFaces(n, Gamma); miaow.save("miaow.gf");
-    th.save("miaow.mesh");
-    std::exit(1);
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
