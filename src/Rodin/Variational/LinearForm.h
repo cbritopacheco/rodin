@@ -10,8 +10,10 @@
 #include "Rodin/Configure.h"
 
 #include "Rodin/FormLanguage/List.h"
+
 #include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Assembly/Multithreaded.h"
+
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
@@ -24,52 +26,15 @@ namespace Rodin::Variational
   class LinearFormBase : public FormLanguage::Base
   {
     public:
-      using SequentialAssembly = Assembly::Sequential<LinearFormBase>;
-      using MultithreadedAssembly = Assembly::Multithreaded<LinearFormBase>;
-      using OpenMPAssembly = Assembly::OpenMP<LinearFormBase>;
-
-      LinearFormBase()
-      {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SequentialAssembly);
-#endif
-      }
+      LinearFormBase() = default;
 
       LinearFormBase(const LinearFormBase& other)
-        : FormLanguage::Base(other),
-          m_lfis(other.m_lfis)
+        : FormLanguage::Base(other)
       {}
 
       LinearFormBase(LinearFormBase&& other)
-        : FormLanguage::Base(std::move(other)),
-          m_lfis(std::move(other.m_lfis))
+        : FormLanguage::Base(std::move(other))
       {}
-
-      constexpr
-      FormLanguage::List<LinearFormIntegratorBase>& getIntegrators()
-      {
-        return m_lfis;
-      }
-
-      constexpr
-      const FormLanguage::List<LinearFormIntegratorBase>& getIntegrators() const
-      {
-        return m_lfis;
-      }
-
-      LinearFormBase& setAssembly(const Assembly::AssemblyBase<LinearFormBase>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
-      const Assembly::AssemblyBase<LinearFormBase>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
 
       /**
        * @brief Assembles the linear form.
@@ -93,6 +58,150 @@ namespace Rodin::Variational
        */
       virtual const VectorType& getVector() const = 0;
 
+      /**
+       * @brief Gets the test function argument associated to this linear
+       * form.
+       */
+      virtual const FormLanguage::Base& getTestFunction() const = 0;
+
+      virtual LinearFormBase* copy() const noexcept override = 0;
+  };
+
+  /**
+   * @brief Represents a linear form defined over some finite element space
+   *
+   * An object of type LinearForm represents a linear map
+   * @f[
+   * \begin{aligned}
+   *   L : V &\rightarrow \mathbb{R}\\
+   *      v &\mapsto L(v)
+   * \end{aligned}
+   * @f]
+   * where @f$ V @f$ is a finite element space.
+   *
+   * A linear form can be specified by from one or more
+   * LinearFormIntegratorBase instances.
+   */
+  template <class FES>
+  class LinearForm<FES, Math::Vector> final
+    : public LinearFormBase<Math::Vector>
+  {
+    public:
+      using Context = typename FES::Context;
+      using VectorType = Math::Vector;
+      using Parent = LinearFormBase<VectorType>;
+
+      using SequentialAssembly = Assembly::Sequential<LinearForm>;
+      using MultithreadedAssembly = Assembly::Multithreaded<LinearForm>;
+      using OpenMPAssembly = Assembly::OpenMP<LinearForm>;
+
+      /**
+       * @brief Constructs a linear form defined on some finite element
+       * space
+       * @param[in] fes Reference to the finite element space
+       */
+      constexpr
+      LinearForm(const TestFunction<FES>& v)
+        : m_v(v)
+      {
+#ifdef RODIN_MULTITHREADED
+        m_assembly.reset(new MultithreadedAssembly);
+#else
+        m_assembly.reset(new SequentialAssembly);
+#endif
+      }
+
+      constexpr
+      LinearForm(const LinearForm& other)
+        : Parent(other),
+          m_v(other.m_v),
+          m_assembly(other.m_assembly->copy()),
+          m_lfis(other.m_lfis)
+      {}
+
+      constexpr
+      LinearForm(LinearForm&& other)
+        : Parent(std::move(other)),
+          m_v(std::move(other.m_v)),
+          m_assembly(std::move(other.m_assembly)),
+          m_lfis(std::move(other.m_lfis))
+      {}
+
+      /**
+       * @brief Evaluates the linear form at the function @f$ u @f$.
+       *
+       * Given a grid function @f$ u @f$, this function will compute the
+       * action of the linear mapping @f$ L(u) @f$.
+       *
+       * @returns The value which the linear form takes at @f$ u @f$.
+       */
+      constexpr
+      Scalar operator()(const GridFunction<FES>& u) const
+      {
+        const auto& weights = u.getWeights();
+        if (!weights.has_value())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "GridFunction weights have not been calculated. "
+            << "Call " << Alert::Identifier::Function("setWeights()")
+            << " on the GridFunction object."
+            << Alert::Raise;
+        }
+        assert(weights.has_value());
+        return getVector().dot(weights.value());
+      }
+
+      constexpr
+      FormLanguage::List<LinearFormIntegratorBase>& getIntegrators()
+      {
+        return m_lfis;
+      }
+
+      constexpr
+      const FormLanguage::List<LinearFormIntegratorBase>& getIntegrators() const
+      {
+        return m_lfis;
+      }
+
+      LinearFormBase& setAssembly(const Assembly::AssemblyBase<LinearForm>& assembly)
+      {
+        m_assembly.reset(assembly.copy());
+        return *this;
+      }
+
+      const Assembly::AssemblyBase<LinearForm>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
+      void assemble() override;
+
+      /**
+       * @brief Gets the reference to the (local) associated vector
+       * to the LinearForm.
+       */
+      inline
+      VectorType& getVector() override
+      {
+        return m_vector;
+      }
+
+      /**
+       * @brief Gets the reference to the (local) associated vector
+       * to the LinearForm.
+       */
+      inline
+      const VectorType& getVector() const override
+      {
+        return m_vector;
+      }
+
+      inline
+      const TestFunction<FES>& getTestFunction() const override
+      {
+        return m_v.get();
+      }
       /**
        * @brief Builds the linear form the given LinearFormIntegratorBase
        * instance
@@ -146,133 +255,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @brief Gets the test function argument associated to this linear
-       * form.
-       */
-      virtual const FormLanguage::Base& getTestFunction() const = 0;
-
-      virtual LinearFormBase* copy() const noexcept override = 0;
-
-    private:
-      std::unique_ptr<Assembly::AssemblyBase<LinearFormBase>> m_assembly;
-      FormLanguage::List<LinearFormIntegratorBase> m_lfis;
-  };
-
-  /**
-   * @brief Represents a linear form defined over some finite element space
-   *
-   * An object of type LinearForm represents a linear map
-   * @f[
-   * \begin{aligned}
-   *   L : V &\rightarrow \mathbb{R}\\
-   *      v &\mapsto L(v)
-   * \end{aligned}
-   * @f]
-   * where @f$ V @f$ is a finite element space.
-   *
-   * A linear form can be specified by from one or more
-   * LinearFormIntegratorBase instances.
-   */
-  template <class FES>
-  class LinearForm<FES, Context::Sequential, Math::Vector> final
-    : public LinearFormBase<Math::Vector>
-  {
-    static_assert(std::is_same_v<typename FES::Context, Context::Sequential>);
-
-    public:
-      using Context = typename FES::Context;
-      using VectorType = Math::Vector;
-      using Parent = LinearFormBase<VectorType>;
-
-      /**
-       * @brief Constructs a linear form defined on some finite element
-       * space
-       * @param[in] fes Reference to the finite element space
-       */
-      constexpr
-      LinearForm(const TestFunction<FES>& v)
-        : m_v(v)
-      {}
-
-      constexpr
-      LinearForm(const LinearForm& other)
-        : Parent(other),
-          m_v(other.m_v)
-      {}
-
-      constexpr
-      LinearForm(LinearForm&& other)
-        : Parent(std::move(other)),
-          m_v(std::move(other.m_v))
-      {}
-
-      /**
-       * @brief Evaluates the linear form at the function @f$ u @f$.
-       *
-       * Given a grid function @f$ u @f$, this function will compute the
-       * action of the linear mapping @f$ L(u) @f$.
-       *
-       * @returns The value which the linear form takes at @f$ u @f$.
-       */
-      constexpr
-      Scalar operator()(const GridFunction<FES>& u) const
-      {
-        const auto& weights = u.getWeights();
-        if (!weights.has_value())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "GridFunction weights have not been calculated. "
-            << "Call " << Alert::Identifier::Function("setWeights()")
-            << " on the GridFunction object."
-            << Alert::Raise;
-        }
-        assert(weights.has_value());
-        return getVector().dot(weights.value());
-      }
-
-      void assemble() override;
-
-      /**
-       * @brief Gets the reference to the (local) associated vector
-       * to the LinearForm.
-       */
-      inline
-      VectorType& getVector() override
-      {
-        return m_vector;
-      }
-
-      /**
-       * @brief Gets the reference to the (local) associated vector
-       * to the LinearForm.
-       */
-      inline
-      const VectorType& getVector() const override
-      {
-        return m_vector;
-      }
-
-      inline
-      const TestFunction<FES>& getTestFunction() const override
-      {
-        return m_v.get();
-      }
-
-      LinearForm& operator=(
-        const LinearFormIntegratorBase& lfi) override
-      {
-        from(lfi).assemble();
-        return *this;
-      }
-
-      LinearForm& operator=(
-        const FormLanguage::List<LinearFormIntegratorBase>& lfis) override
-      {
-        from(lfis).assemble();
-        return *this;
-      }
-
       LinearForm* copy() const noexcept override
       {
         return new LinearForm(*this);
@@ -280,10 +262,12 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
+      std::unique_ptr<Assembly::AssemblyBase<LinearForm>> m_assembly;
+      FormLanguage::List<LinearFormIntegratorBase> m_lfis;
       VectorType m_vector;
   };
   template <class FES>
-  LinearForm(TestFunction<FES>&) -> LinearForm<FES, typename FES::Context, Math::Vector>;
+  LinearForm(TestFunction<FES>&) -> LinearForm<FES, Math::Vector>;
 }
 
 #include "LinearForm.hpp"

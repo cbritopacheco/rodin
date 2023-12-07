@@ -34,7 +34,7 @@ namespace Rodin::Variational
    * Represents a linear form @f$ \ell : V_h \rightarrow \mathbb{R} @f$ on a given
    * finite element space @f$ V_h @f$.
    */
-  template <class FES, class Context, class VectorType>
+  template <class FES, class VectorType>
   class LinearForm;
 
   class Integrator;

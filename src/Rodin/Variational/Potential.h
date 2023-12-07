@@ -717,38 +717,6 @@ namespace Rodin::Variational
         return getIntegrand().getRHS().getLeaf();
       }
 
-      Integral& from(const BilinearFormIntegratorBase& bfi) override
-      {
-        return *this;
-      }
-
-      Integral& from(
-          const FormLanguage::List<BilinearFormIntegratorBase>& bfi) override
-      {
-        return *this;
-      }
-
-      Integral& operator=(const BilinearFormIntegratorBase& bfi) override
-      {
-        return *this;
-      }
-
-      Integral& operator=(
-          const FormLanguage::List<BilinearFormIntegratorBase>& bfis) override
-      {
-        return *this;
-      }
-
-      Integral& add(const BilinearFormIntegratorBase& bfi) override
-      {
-        return *this;
-      }
-
-      Integral& add(const FormLanguage::List<BilinearFormIntegratorBase>& bfis) override
-      {
-        return *this;
-      }
-
       inline Integral* copy() const noexcept override
       {
         return new Integral(*this);
