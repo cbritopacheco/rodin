@@ -93,6 +93,11 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);
 
+    GridFunction woof(vhInt);
+    woof.projectOnBoundary(BoundaryNormal(trimmed), Gamma);
+    woof.save("woof.gf");
+    trimmed.save("woof.mesh");
+
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
     jac.traceOf(Interior);
@@ -101,6 +106,11 @@ int main(int, char**)
     auto n = FaceNormal(th);
     n.traceOf(Interior);
 
+    GridFunction miaow(vh);
+    miaow.projectOnFaces(n, Gamma); miaow.save("miaow.gf");
+    th.save("miaow.mesh");
+    std::exit(1);
+
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
     TestFunction  w(vh);
@@ -108,7 +118,7 @@ int main(int, char**)
     hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
+            + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     hilbert.solve(solver);
     const auto& dJ = g.getSolution();
 
@@ -136,7 +146,7 @@ int main(int, char**)
 
     th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
                                     .split(Exterior, {Interior, Exterior})
-                                    .setRMC(1e-3)
+                                    .setRMC(1e-6)
                                     .setHMax(hmax)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)

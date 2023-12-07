@@ -215,6 +215,11 @@ namespace Rodin::Variational
     public:
       using Parent = ProblemBodyBase;
 
+      ProblemBody(const BilinearFormIntegratorBase& bfi)
+      {
+        getBFIs().add(bfi);
+      }
+
       ProblemBody(const ProblemBody<OperatorType, void>& pbo)
         : Parent(pbo)
       {
@@ -276,6 +281,9 @@ namespace Rodin::Variational
       FormLanguage::List<LinearFormBase<VectorType>> m_lfs;
       FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
   };
+
+  ProblemBody(const BilinearFormIntegratorBase&)
+    -> ProblemBody<void, void>;
 
   inline
   ProblemBody<void, void> operator+(
