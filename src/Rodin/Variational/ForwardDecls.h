@@ -34,7 +34,7 @@ namespace Rodin::Variational
    * Represents a linear form @f$ \ell : V_h \rightarrow \mathbb{R} @f$ on a given
    * finite element space @f$ V_h @f$.
    */
-  template <class FES, class Context, class VectorType>
+  template <class FES, class VectorType>
   class LinearForm;
 
   class Integrator;
@@ -76,7 +76,7 @@ namespace Rodin::Variational
    *
    * @see BilinearFormSpecializations
    */
-  template <class TrialFES, class TestFES, class Context, class OperatorType>
+  template <class TrialFES, class TestFES, class OperatorType>
   class BilinearForm;
 
   /**
@@ -1020,6 +1020,7 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
+  template <class OperatorType, class VectorType>
   class ProblemBody;
 
   /**

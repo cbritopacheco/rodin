@@ -497,13 +497,13 @@ namespace Rodin::Geometry
    * different geometries.
    */
   template <>
-  class Mesh<Context::Serial> : public MeshBase
+  class Mesh<Context::Sequential> : public MeshBase
   {
     public:
       using Parent = MeshBase;
 
       /**
-       * @brief Class used to build Mesh<Context::Serial> instances.
+       * @brief Class used to build Mesh<Context::Sequential> instances.
        */
       class Builder
       {
@@ -624,7 +624,7 @@ namespace Rodin::Geometry
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
           /**
-           * @brief Finalizes construction of the Mesh<Context::Serial> object.
+           * @brief Finalizes construction of the Mesh<Context::Sequential> object.
            */
           Mesh finalize();
 
@@ -752,7 +752,7 @@ namespace Rodin::Geometry
       * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
       * is already computed in the mesh.
       */
-      virtual SubMesh<Context::Serial> skin() const;
+      virtual SubMesh<Context::Sequential> skin() const;
 
       /**
       * @brief Trims the cells with the given attribute.
@@ -762,7 +762,7 @@ namespace Rodin::Geometry
       * Convenience function to call trim(const std::FlatSet<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Serial> trim(Attribute attr) const;
+      virtual SubMesh<Context::Sequential> trim(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attribute.
@@ -779,7 +779,7 @@ namespace Rodin::Geometry
       * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
-      virtual SubMesh<Context::Serial> trim(const FlatSet<Attribute>& attrs) const;
+      virtual SubMesh<Context::Sequential> trim(const FlatSet<Attribute>& attrs) const;
 
       /**
       * @brief Keeps the cells with the given attribute.
@@ -789,7 +789,7 @@ namespace Rodin::Geometry
       * Convenience function to call keep(const std::FlatSet<Attribute>&) with
       * only one attribute.
       */
-      virtual SubMesh<Context::Serial> keep(Attribute attr) const;
+      virtual SubMesh<Context::Sequential> keep(Attribute attr) const;
 
       /**
       * @brief Trims the cells with the given attributes.
@@ -806,7 +806,7 @@ namespace Rodin::Geometry
       * @returns A SubMesh object consisting of cells that have attributes
       * not in the given set.
       */
-      virtual SubMesh<Context::Serial> keep(const FlatSet<Attribute>& attrs) const;
+      virtual SubMesh<Context::Sequential> keep(const FlatSet<Attribute>& attrs) const;
 
       inline
       Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
@@ -940,8 +940,8 @@ namespace Rodin::Geometry
       std::vector<FlatSet<Attribute>> m_attributes;
   };
 
-  /// Type alias for Mesh<Context::Serial>
-  using SerialMesh = Mesh<Context::Serial>;
+  /// Type alias for Mesh<Context::Sequential>
+  using SequentialMesh = Mesh<Context::Sequential>;
 }
 
 #include "Mesh.hpp"

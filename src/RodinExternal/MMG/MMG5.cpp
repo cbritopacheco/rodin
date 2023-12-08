@@ -307,7 +307,7 @@ namespace Rodin::External::MMG
     return res;
   }
 
-  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::SerialMesh& src)
+  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::SequentialMesh& src)
   {
     bool isSurface = src.isSurface();
     assert(isSurface || (src.getSpaceDimension() == src.getDimension()));

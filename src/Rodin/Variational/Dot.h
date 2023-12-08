@@ -377,6 +377,73 @@ namespace Rodin::Variational
   Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&,
       const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
   -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class Dot<
+      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>
+        : public FormLanguage::Base
+  {
+    public:
+      using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+
+      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using Parent = FormLanguage::Base;
+
+      constexpr
+      Dot(const LHS& lhs, const RHS& rhs)
+        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      {
+        assert(lhs.getRangeShape() == rhs.getRangeShape());
+      }
+
+      constexpr
+      Dot(const Dot& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+      {}
+
+      constexpr
+      Dot(Dot&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+      {}
+
+      inline
+      constexpr
+      const LHS& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      inline
+      constexpr
+      const RHS& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      inline
+      Dot* copy() const noexcept final override
+      {
+        return new Dot(*this);
+      }
+
+    private:
+      std::unique_ptr<LHS> m_lhs;
+      std::unique_ptr<RHS> m_rhs;
+  };
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  Dot(const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
+      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
+  -> Dot<
+      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
+
 }
 
 #endif

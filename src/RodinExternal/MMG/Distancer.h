@@ -140,7 +140,7 @@ namespace Rodin::External::MMG
          * @param[in] box Bounding box @f$ D @f$ containing @f$ \Omega @f$.
          * @returns Signed distance function representing @f$ \Omega @f$.
          */
-        ScalarGridFunction distance(const Geometry::Mesh<Context::Serial>& box)
+        ScalarGridFunction distance(const Geometry::Mesh<Context::Sequential>& box)
         {
           if (box != m_fes.get().getMesh())
           {
@@ -225,8 +225,8 @@ namespace Rodin::External::MMG
          * case only the edge (S) or triangle (3D) information will be retained.
          */
         ScalarGridFunction distance(
-            const Geometry::Mesh<Context::Serial>& box,
-            const Geometry::Mesh<Context::Serial>& contour)
+            const Geometry::Mesh<Context::Sequential>& box,
+            const Geometry::Mesh<Context::Sequential>& contour)
         {
           auto boxp = m_mshdist.tmpnam(".mesh", "RodinMMG");
           box.save(boxp);
@@ -303,7 +303,7 @@ namespace Rodin::External::MMG
   //    *
   //    * @param[in,out] sol Level set function
   //    */
-  //    void redistance(Variational::GridFunction<Variational::H1<Context::Serial>>& sol)
+  //    void redistance(Variational::GridFunction<Variational::H1<Context::Sequential>>& sol)
   //    {
   //     auto meshp = m_mshdist.tmpnam(".mesh", "RodinMMG");
   //     sol.getFiniteElementSpace().getMesh().save(meshp, IO::FileFormat::MEDIT);

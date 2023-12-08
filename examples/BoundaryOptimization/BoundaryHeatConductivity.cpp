@@ -31,8 +31,8 @@ static constexpr Scalar ell = 1;
 static constexpr Scalar radius = 0.02;
 static constexpr Scalar tgv = std::numeric_limits<float>::max();
 
-using ScalarFES = P1<Scalar, Context::Serial>;
-using VectorFES = P1<Math::Vector, Context::Serial>;
+using ScalarFES = P1<Scalar, Context::Sequential>;
+using VectorFES = P1<Math::Vector, Context::Sequential>;
 using ScalarGridFunction = GridFunction<ScalarFES>;
 using VectorGridFunction = GridFunction<VectorFES>;
 using ShapeGradient = VectorGridFunction;

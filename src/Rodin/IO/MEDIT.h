@@ -503,21 +503,21 @@ namespace Rodin::IO
 {
   /**
    * @ingroup MeshLoaderSpecializations
-   * @brief Specialization for loading Serial meshes in the MEDIT file format.
+   * @brief Specialization for loading Sequential meshes in the MEDIT file format.
    *
    * The MEDIT file format specification can be found by visiting
    * <a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">this
    * link</a>.
    */
   template <>
-  class MeshLoader<IO::FileFormat::MEDIT, Context::Serial>
-    : public MeshLoaderBase<Context::Serial>
+  class MeshLoader<IO::FileFormat::MEDIT, Context::Sequential>
+    : public MeshLoaderBase<Context::Sequential>
   {
     public:
-      using Object = Rodin::Geometry::Mesh<Context::Serial>;
+      using Object = Rodin::Geometry::Mesh<Context::Sequential>;
 
       MeshLoader(Object& mesh)
-        : MeshLoaderBase<Context::Serial>(mesh),
+        : MeshLoaderBase<Context::Sequential>(mesh),
           m_currentLineNumber(0)
       {}
 
@@ -550,7 +550,7 @@ namespace Rodin::IO
       }
 
     private:
-      Rodin::Geometry::Mesh<Rodin::Context::Serial>::Builder m_build;
+      Rodin::Geometry::Mesh<Rodin::Context::Sequential>::Builder m_build;
 
       size_t m_version;
       size_t m_spaceDimension;
@@ -561,11 +561,11 @@ namespace Rodin::IO
   };
 
   template <>
-  class MeshPrinter<FileFormat::MEDIT, Context::Serial>
-    : public MeshPrinterBase<Context::Serial>
+  class MeshPrinter<FileFormat::MEDIT, Context::Sequential>
+    : public MeshPrinterBase<Context::Sequential>
   {
     public:
-      MeshPrinter(const Rodin::Geometry::Mesh<Context::Serial>& mesh)
+      MeshPrinter(const Rodin::Geometry::Mesh<Context::Sequential>& mesh)
         : MeshPrinterBase(mesh)
       {}
 
@@ -584,13 +584,13 @@ namespace Rodin::IO
 
   template <class Range>
   class GridFunctionLoader<FileFormat::MEDIT,
-        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
+        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
     : public GridFunctionLoaderBase<
-        Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>>
+        Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>>
   {
     public:
       /// Type of finite element space
-      using FES = Variational::P1<Range, Context::Serial, Geometry::Mesh<Context::Serial>>;
+      using FES = Variational::P1<Range, Context::Sequential, Geometry::Mesh<Context::Sequential>>;
 
       GridFunctionLoader(Variational::GridFunction<FES>& gf)
         : GridFunctionLoaderBase<FES>(gf),

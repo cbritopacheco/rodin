@@ -7,7 +7,7 @@ namespace Rodin::Assembly
   class AssemblyBase;
 
   template <class Operand>
-  class Serial;
+  class Sequential;
 
   template <class Operand>
   class Multithreaded;

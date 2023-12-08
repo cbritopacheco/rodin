@@ -17,32 +17,32 @@
 
 namespace Rodin::Assembly
 {
-  struct BilinearAssemblyInput
-  {
-    const Geometry::MeshBase& mesh;
-    const Variational::FiniteElementSpaceBase& trialFES;
-    const Variational::FiniteElementSpaceBase& testFES;
-    FormLanguage::List<Variational::BilinearFormIntegratorBase>& bfis;
-  };
-
-  template <class OperatorType>
-  class AssemblyBase<Variational::BilinearFormBase<OperatorType>>
+  template <class TrialFES, class TestFES, class OperatorType>
+  class AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
+      struct Input
+      {
+        const Geometry::MeshBase& mesh;
+        const TrialFES& trialFES;
+        const TestFES& testFES;
+        FormLanguage::List<Variational::BilinearFormIntegratorBase>& bfis;
+      };
+
       AssemblyBase() = default;
 
       AssemblyBase(const AssemblyBase&) = default;
 
       AssemblyBase(AssemblyBase&&) = default;
 
-      virtual OperatorType execute(const BilinearAssemblyInput& data) const = 0;
+      virtual OperatorType execute(const Input& data) const = 0;
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class VectorType>
-  class AssemblyBase<Variational::LinearFormBase<VectorType>>
+  template <class FES, class VectorType>
+  class AssemblyBase<Variational::LinearForm<FES, VectorType>>
     : public FormLanguage::Base
   {
     public:

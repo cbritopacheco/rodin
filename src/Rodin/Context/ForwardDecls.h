@@ -9,7 +9,7 @@
 
 namespace Rodin::Context
 {
-  struct Serial;
+  struct Sequential;
   struct MPI;
 }
 

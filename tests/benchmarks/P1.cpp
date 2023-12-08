@@ -23,7 +23,7 @@ namespace RodinBenchmark
     public:
       void SetUp(const benchmark::State&)
       {
-        square2d = Mesh<Rodin::Context::Serial>::Builder()
+        square2d = Mesh<Rodin::Context::Sequential>::Builder()
         .initialize(2)
         .nodes(4)
         .vertex({0, 0})
@@ -35,29 +35,29 @@ namespace RodinBenchmark
         .finalize();
 
         uniformTriangularMesh16 =
-          SerialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 16, 16);
 
         uniformTriangularMesh32 =
-          SerialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
 
         uniformTriangularMesh32 =
-          SerialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 32, 32);
 
         uniformTriangularMesh64 =
-          SerialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 64, 64);
 
         uniformTriangularMesh128 =
-          SerialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
+          SequentialMesh::UniformGrid(Polytope::Type::Triangle, 128, 128);
       }
 
       void TearDown(const benchmark::State&)
       {}
 
-      SerialMesh square2d;
-      SerialMesh uniformTriangularMesh16;
-      SerialMesh uniformTriangularMesh32;
-      SerialMesh uniformTriangularMesh64;
-      SerialMesh uniformTriangularMesh128;
+      SequentialMesh square2d;
+      SequentialMesh uniformTriangularMesh16;
+      SequentialMesh uniformTriangularMesh32;
+      SequentialMesh uniformTriangularMesh64;
+      SequentialMesh uniformTriangularMesh128;
   };
 
   BENCHMARK_F(P1Benchmark, UniformTriangular16_Build)

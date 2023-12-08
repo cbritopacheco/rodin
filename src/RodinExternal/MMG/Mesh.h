@@ -14,11 +14,11 @@ namespace Rodin::External::MMG
   /**
    * @brief Mesh class which has support for MMG functionalities.
    */
-  class Mesh : public Geometry::Mesh<Context::Serial>
+  class Mesh : public Geometry::Mesh<Context::Sequential>
   {
     public:
       /// Parent class
-      using Parent = Geometry::Mesh<Context::Serial>;
+      using Parent = Geometry::Mesh<Context::Sequential>;
 
       /// Index of corners in the mesh
       using CornerIndex = IndexSet;

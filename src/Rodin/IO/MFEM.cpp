@@ -29,7 +29,7 @@ namespace Rodin::IO::MFEM
 
 namespace Rodin::IO
 {
-  void MeshLoader<FileFormat::MFEM, Context::Serial>::readHeader(std::istream& is)
+  void MeshLoader<FileFormat::MFEM, Context::Sequential>::readHeader(std::istream& is)
   {
     auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto header = MFEM::ParseMeshHeader()(line.begin(), line.end());
@@ -41,7 +41,7 @@ namespace Rodin::IO
     m_header = *header;
   }
 
-  void MeshLoader<FileFormat::MFEM, Context::Serial>::readDimension(std::istream& is)
+  void MeshLoader<FileFormat::MFEM, Context::Sequential>::readDimension(std::istream& is)
   {
     auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto kw = MFEM::ParseKeyword()(line.begin(), line.end());
@@ -64,7 +64,7 @@ namespace Rodin::IO
     m_dimension = *dimension;
   }
 
-  void MeshLoader<FileFormat::MFEM, Context::Serial>::readMesh(std::istream& is)
+  void MeshLoader<FileFormat::MFEM, Context::Sequential>::readMesh(std::istream& is)
   {
     Geometry::MeshConnectivity connectivity;
     connectivity.initialize(m_dimension);
@@ -223,7 +223,7 @@ namespace Rodin::IO
     m_build.setAttributeIndex(std::move(attrs));
   }
 
-  void MeshLoader<IO::FileFormat::MFEM, Context::Serial>::load(std::istream &is)
+  void MeshLoader<IO::FileFormat::MFEM, Context::Sequential>::load(std::istream &is)
   {
     readHeader(is);
     readDimension(is);
@@ -231,25 +231,25 @@ namespace Rodin::IO
     getObject() = m_build.finalize();
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Serial>::print(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Sequential>::print(std::ostream &os)
   {
     printHeader(os);
     printDimension(os);
     printMesh(os);
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Serial>::printHeader(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Sequential>::printHeader(std::ostream &os)
   {
     os << "MFEM mesh v1.0\n\n";
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Serial>::printDimension(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Sequential>::printDimension(std::ostream &os)
   {
     const auto& mesh = getObject();
     os << "dimension\n" << mesh.getDimension() << "\n\n";
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Serial>::printMesh(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Sequential>::printMesh(std::ostream &os)
   {
     const auto& mesh = getObject();
     os << MFEM::Keyword::elements << '\n' << mesh.getCellCount() << '\n';

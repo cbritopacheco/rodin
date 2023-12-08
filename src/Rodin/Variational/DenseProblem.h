@@ -45,14 +45,14 @@ namespace Rodin::Variational
    * and `Math::Vector` types in a serial context.
    */
   template <class TrialFES, class TestFES>
-  class DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  class DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
     : public ProblemBase<Math::Matrix, Math::Vector>
   {
-      static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
-      static_assert(std::is_same_v<typename TestFES::Context, Context::Serial>);
+      static_assert(std::is_same_v<typename TrialFES::Context, Context::Sequential>);
+      static_assert(std::is_same_v<typename TestFES::Context, Context::Sequential>);
 
     public:
-      using Context = Context::Serial;
+      using Context = Context::Sequential;
       using OperatorType = Math::Matrix;
       using VectorType = Math::Vector;
       using Parent = ProblemBase<Math::Matrix, Math::Vector>;
@@ -134,7 +134,7 @@ namespace Rodin::Variational
 
       void solve(Solver::SolverBase<OperatorType, VectorType>& solver) override;
 
-      DenseProblem& operator=(const ProblemBody& rhs) override;
+      DenseProblem& operator=(const ProblemBody<OperatorType, VectorType>& rhs) override;
 
       virtual VectorType& getMassVector() override
       {
@@ -166,8 +166,11 @@ namespace Rodin::Variational
       std::reference_wrapper<TrialFunction<TrialFES>> m_trialFunction;
       std::reference_wrapper<TestFunction<TestFES>>   m_testFunction;
 
-      LinearForm<TestFES, Context, VectorType> m_linearForm;
-      BilinearForm<TrialFES, TestFES, Context, Math::Matrix> m_bilinearForm;
+      LinearForm<TestFES, VectorType> m_linearForm;
+      BilinearForm<TrialFES, TestFES, Math::Matrix> m_bilinearForm;
+
+      FormLanguage::List<BilinearFormBase<OperatorType>> m_bfs;
+
       EssentialBoundary m_dbcs;
       PeriodicBoundary  m_pbcs;
 
