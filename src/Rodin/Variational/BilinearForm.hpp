@@ -21,7 +21,7 @@ namespace Rodin::Variational
 {
   template <class TrialFES, class TestFES, class MatrixType>
   void
-  BilinearForm<TrialFES, TestFES, Context::Serial, MatrixType>::assemble()
+  BilinearForm<TrialFES, TestFES, MatrixType>::assemble()
   {
      const auto& trialFES = getTrialFunction().getFiniteElementSpace();
      const auto& testFES = getTestFunction().getFiniteElementSpace();

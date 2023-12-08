@@ -25,7 +25,7 @@ static const Scalar hausdorff = 20;
 class Environment
 {
   public:
-    using Context = Context::Serial;
+    using Context = Context::Sequential;
     using ScalarFES = P1<Scalar, Context>;
     using VectorFES = P1<Math::Vector, Context>;
 

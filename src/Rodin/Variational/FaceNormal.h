@@ -96,15 +96,17 @@ namespace Rodin::Variational
             auto pit = mesh.getPolytope(d + 1, i);
             if (traceDomain.contains(pit->getAttribute()))
             {
+              Integer ori = -1;
               for (auto vit = pit->getVertex(); vit; ++vit)
               {
-                const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-                if (res.dot(v) > 0)
+                const auto v = vit->getCoordinates() - p.getPhysicalCoordinates();
+                if (res.dot(v) < 0)
                 {
-                  res *= -1;
+                  ori *= -1;
                   break;
                 }
               }
+              res *= ori;
               res.normalize();
               return;
             }

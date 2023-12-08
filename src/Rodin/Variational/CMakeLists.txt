@@ -68,7 +68,6 @@ set(RodinVariational_SRCS
   Dot.cpp
   LinearForm.hpp
   Problem.hpp
-  ProblemBody.cpp
   Minus.cpp
   Function.cpp
   RangeShape.cpp
@@ -79,6 +78,7 @@ set(RodinVariational_SRCS
   LEQ.cpp
   GT.cpp
   LT.cpp
+  ProblemBody.cpp
   OR.cpp
   QuadratureRule.cpp
   AND.cpp

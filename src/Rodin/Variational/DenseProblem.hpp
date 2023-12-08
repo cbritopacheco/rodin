@@ -11,7 +11,7 @@
 
 #include "Rodin/Utility.h"
 
-#include "Rodin/Assembly/Serial.h"
+#include "Rodin/Assembly/Sequential.h"
 
 #include "GridFunction.h"
 #include "DirichletBC.h"
@@ -22,12 +22,12 @@
 namespace Rodin::Variational
 {
   // ------------------------------------------------------------------------
-  // ---- DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  // ---- DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   // ------------------------------------------------------------------------
 
   template <class TrialFES, class TestFES>
   constexpr
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::DenseProblem(TrialFunction<TrialFES>& u, TestFunction<TestFES>& v)
      :  m_trialFunction(u),
         m_testFunction(v),
@@ -37,15 +37,17 @@ namespace Rodin::Variational
   {}
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
-  ::operator=(const ProblemBody& rhs)
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
+  ::operator=(const ProblemBody<Math::Matrix, Math::Vector>& rhs)
   {
     for (auto& bfi : rhs.getBFIs())
       m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())
       m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
+
+    m_bfs = rhs.getBFs();
 
     m_dbcs = rhs.getDBCs();
     m_pbcs = rhs.getPBCs();
@@ -54,8 +56,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator+=(const BilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(rhs);
@@ -63,8 +65,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator-=(const BilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(UnaryMinus(rhs));
@@ -72,8 +74,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator+=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(rhs);
@@ -81,8 +83,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator-=(const LinearFormIntegratorBase& rhs)
   {
     m_linearForm.add(UnaryMinus(rhs));
@@ -90,8 +92,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator+=(const DirichletBCBase& rhs)
   {
     m_dbcs.add(rhs);
@@ -99,8 +101,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator+=(const PeriodicBCBase& rhs)
   {
     m_pbcs.add(rhs);
@@ -108,8 +110,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>::imposeDirichletBCs()
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>::imposeDirichletBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -153,8 +155,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>::imposePeriodicBCs()
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>::imposePeriodicBCs()
   {
     const auto& trial = getTrialFunction();
     const auto& trialFES = trial.getFiniteElementSpace();
@@ -302,8 +304,8 @@ namespace Rodin::Variational
   }
 
   template <class TrialFES, class TestFES>
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>&
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>::assemble()
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>::assemble()
   {
     auto& trial = getTrialFunction();
 
@@ -316,6 +318,12 @@ namespace Rodin::Variational
 
     m_bilinearForm.assemble();
     m_stiffness = std::move(m_bilinearForm.getOperator());
+
+    for (auto& bf : m_bfs)
+    {
+      bf.assemble();
+      m_stiffness += bf.getOperator();
+    }
 
     // Impose Dirichlet boundary conditions
     imposeDirichletBCs();
@@ -330,7 +338,7 @@ namespace Rodin::Variational
 
   template <class TrialFES, class TestFES>
   void
-  DenseProblem<TrialFES, TestFES, Context::Serial, Math::Matrix, Math::Vector>
+  DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::solve(Solver::SolverBase<OperatorType, VectorType>& solver)
   {
      // Assemble the system

@@ -15,7 +15,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::External;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Context::Serial>;
+using FES = VectorP1<Context::Sequential>;
 
 // Define interior and exterior for level set discretization
 static constexpr Attribute Interior = 1, Exterior = 2;
@@ -108,7 +108,7 @@ int main(int, char**)
     hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
+            + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     hilbert.solve(solver);
     const auto& dJ = g.getSolution();
 
@@ -136,7 +136,7 @@ int main(int, char**)
 
     th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
                                     .split(Exterior, {Interior, Exterior})
-                                    .setRMC(1e-3)
+                                    .setRMC(1e-6)
                                     .setHMax(hmax)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)

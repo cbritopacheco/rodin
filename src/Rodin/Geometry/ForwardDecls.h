@@ -53,7 +53,7 @@ namespace Rodin::Geometry
    * A Mesh object represents a polyhedral complex @f$ \mathcal{T}_h @f$ is a
    * set containing finitely many convex polyhedra.
    */
-  template <class ContextType = Context::Serial>
+  template <class ContextType = Context::Sequential>
   class Mesh;
 
   class SubMeshBase;
@@ -83,7 +83,7 @@ namespace Rodin::Geometry
   class SubMesh;
 
   template <>
-  class SubMesh<Context::Serial>;
+  class SubMesh<Context::Sequential>;
 
   template <class Context>
   class SubMeshBuilder;

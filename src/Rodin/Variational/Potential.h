@@ -13,9 +13,11 @@
 
 #include "ForwardDecls.h"
 #include "Mult.h"
+#include "Dot.h"
 #include "Function.h"
 #include "Integral.h"
 #include "ShapeFunction.h"
+#include "BilinearForm.h"
 
 namespace Rodin::FormLanguage
 {
@@ -218,10 +220,11 @@ namespace Rodin::Variational
             {
               const auto& polytope = *it;
               const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
+
               const auto& trans = polytope.getTransformation();
               for (size_t i = 0; i < qf.getSize(); i++)
               {
-                const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
+                const Geometry::Point y(polytope, trans, std::cref(qf.getPoint(i)));
                 res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
               }
             }
@@ -278,16 +281,24 @@ namespace Rodin::Variational
 
   /**
    * @ingroup PotentialSpecializations
+   *
+   * Represents the expression:
+   * @f[
+   *  (K u)(x) = \sum_{\tau \in \mathcal{T}_h} (K_\tau u)(x)
+   *  = \sum_{\tau \in \mathcal{T}_h} \sum^{n(\tau)}_{\ell = 1} w_{\tau, \ell}
+   *  (K_\tau \phi_{\tau, \ell})(x), \quad w_{\tau, \ell} \in \mathbb{R}
+   *  @f]
+   *  where:
+   *  @f[
+   *    (K_\tau \phi_{\tau, \ell})(x) := \ \mathrm{p.v.} \int_{\tau} k(x, y) \phi_{\tau, \ell}(y) \ dy
+   *  @f]
+   *  are the basis functions.
    */
   template <class LHSType, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
   class Potential<
     LHSType,
     ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>> final
-    : public
-      ShapeFunctionBase<
-        Potential<
-          LHSType,
-          ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>, FESType, SpaceType>
+    : public LinearFormBase<Math::Vector>
   {
     public:
       using FES = FESType;
@@ -301,7 +312,7 @@ namespace Rodin::Variational
 
       using Operand = RHS;
 
-      using Parent = ShapeFunctionBase<Potential<LHS, RHS>, FES, Space>;
+      using Parent = LinearFormBase<Math::Vector>;
 
       using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
@@ -325,8 +336,7 @@ namespace Rodin::Variational
           (std::is_same_v<LHSRange, Math::Matrix> || std::is_same_v<RHSRange, Math::Vector>));
 
       Potential(const Kernel& kernel, const Operand& u)
-        : Parent(u.getFiniteElementSpace()),
-          m_kernel(kernel), m_u(u)
+        : m_kernel(kernel), m_u(u)
       {}
 
       Potential(const Potential& other)
@@ -399,86 +409,31 @@ namespace Rodin::Variational
       }
 
       inline
-      auto getTensorBasis(const Geometry::Point& p) const
-      {
-        using RangeType = typename FES::RangeType;
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t order = fe.getOrder();
-        const auto& kernel = getKernel();
-        const auto& trans = polytope.getTransformation();
-        if (m_qf.has_value())
-        {
-          if constexpr (std::is_same_v<RangeType, Scalar>)
-          {
-            const auto& qf = m_qf.value()(polytope);
-            return TensorBasis(fe.getCount(),
-                [&](size_t local) -> Scalar
-                {
-                  const auto& phi = fe.getBasis(local);
-                  const auto psiInv = fes.getInverseMapping(polytope, phi);
-                  Scalar res = 0;
-                  for (size_t i = 0; i < qf.getSize(); i++)
-                  {
-                    const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                    res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psiInv(y);
-                  }
-                  return res;
-                });
-          }
-          else
-          {
-            assert(false);
-            return void();
-          }
-        }
-        else
-        {
-          if constexpr (std::is_same_v<RangeType, Scalar>)
-          {
-            return TensorBasis(fe.getCount(),
-                [&](size_t local) -> Scalar
-                {
-                  const auto& phi = fe.getBasis(local);
-                  const auto psiInv = fes.getInverseMapping(polytope, phi);
-                  const QF::GenericPolytopeQuadrature qf(order + 1, polytope.getGeometry());
-                  Scalar res = 0;
-                  for (size_t i = 0; i < qf.getSize(); i++)
-                  {
-                    const Geometry::Point y(polytope, trans, std::ref(qf.getPoint(i)));
-                    res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * psiInv(y);
-                  }
-                  return res;
-                });
-          }
-          else if constexpr (std::is_same_v<RangeType, Math::Vector>)
-          {
-            assert(false);
-            return void();
-          }
-          else
-          {
-            assert(false);
-            return void();
-          }
-        }
-      }
-
-      inline
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      Potential& setQuadratureFormula(
-          const std::function<const QF::QuadratureFormulaBase&(const Geometry::Polytope&)>& qf)
+      void assemble() final override
       {
-        m_qf.emplace(qf);
-        return *this;
+        assert(false);
+      }
+
+      Math::Vector& getVector() override
+      {
+        return m_vec;
+      }
+
+      const Math::Vector& getVector() const override
+      {
+        return m_vec;
+      }
+
+      inline
+      const Operand& getTestFunction() const override
+      {
+        return getOperand();
       }
 
       inline Potential* copy() const noexcept override
@@ -489,8 +444,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<Kernel> m_kernel;
       std::reference_wrapper<const Operand> m_u;
-      std::optional<
-        std::function<const QF::QuadratureFormulaBase&(const Geometry::Polytope&)>> m_qf;
+      Math::Vector m_vec;
   };
 
   /**
@@ -499,6 +453,297 @@ namespace Rodin::Variational
   template <class LHSType, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
   Potential(const LHSType&, const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>&)
     -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class Integral<
+    Dot<
+      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+        : public BilinearFormBase<Math::Matrix>
+  {
+    public:
+      static void add(
+          Math::Matrix& out, const Math::Matrix& in,
+          const IndexArray& rows, const IndexArray& cols)
+      {
+        assert(rows.size() >= 0);
+        assert(cols.size() >= 0);
+        assert(in.rows() == rows.size());
+        assert(in.cols() == cols.size());
+        for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
+        {
+          for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
+            out(rows(i), cols(j)) += in(i, j);
+        }
+      }
+
+      using Kernel = KernelType;
+
+      using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+
+      using RHS =
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+
+      using Integrand = Dot<LHS, RHS>;
+
+      using Parent = BilinearFormBase<Math::Matrix>;
+
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
+
+      Integral(const LHS& lhs, const RHS& rhs)
+        : Integral(Dot(lhs, rhs))
+      {}
+
+      Integral(const Integrand& prod)
+        : m_integrand(prod.copy())
+      {}
+
+      Integral(const Integral& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy())
+      {}
+
+      Integral(Integral&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand))
+      {}
+
+      inline
+      constexpr
+      const Integrand& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      void assemble() final override
+      {
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+        const auto& mesh = trialfes.getMesh();
+        const auto& kernel = lhs.getKernel();
+        auto& res = m_mat;
+        res.resize(testfes.getSize(), trialfes.getSize());
+        res.setZero();
+        if constexpr (std::is_same_v<LHSRange, Scalar>)
+        {
+          for (auto itt = mesh.getCell(); itt; ++itt)
+          {
+            const auto& t = *itt;
+            for (auto itau = mesh.getCell(); itau; ++itau)
+            {
+              const auto& tau = *itau;
+              integrate(res, t, tau);
+            }
+          }
+        }
+        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
+        {
+          assert(false);
+        }
+        else
+        {
+          assert(false);
+        }
+      }
+
+      virtual void integrate(Math::Matrix& out, const Geometry::Polytope& trgeom, const Geometry::Polytope& tegeom)
+      {
+        const auto& tau = trgeom;
+        const auto& t = tegeom;
+        const auto& tautrans = tau.getTransformation();
+        const auto& ttrans = t.getTransformation();
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+        const auto& testfe = testfes.getFiniteElement(t.getDimension(), t.getIndex());
+        const auto& trialfe = trialfes.getFiniteElement(tau.getDimension(), tau.getIndex());
+        const auto& kernel = lhs.getKernel();
+        if (t == tau)
+        {
+          switch (t.getGeometry())
+          {
+            case Geometry::Polytope::Type::Point:
+            case Geometry::Polytope::Type::Segment:
+            case Geometry::Polytope::Type::Tetrahedron:
+            {
+              assert(false);
+              break;
+            }
+            case Geometry::Polytope::Type::Quadrilateral:
+            {
+              assert(false);
+              break;
+            }
+            case Geometry::Polytope::Type::Triangle:
+            {
+              const size_t order = std::max(trialfe.getOrder(), testfe.getOrder());
+              const QF::GenericPolytopeQuadrature qf(order, Geometry::Polytope::Type::Segment);
+              Math::SpatialVector rx1(2), rz1(2),
+                                  rx2(2), rz2(2),
+                                  rx3(2), rz3(2),
+                                  rx4(2), rz4(2),
+                                  rx5(2), rz5(2),
+                                  rx6(2), rz6(2);
+              for (size_t i = 0; i < qf.getSize(); i++)
+              {
+                const Scalar xi = 1 - qf.getPoint(i).value();
+                for (size_t j = 0; j < qf.getSize(); j++)
+                {
+                  const Scalar eta1 = qf.getPoint(j).value();
+                  for (size_t h = 0; h < qf.getSize(); h++)
+                  {
+                    const Scalar eta2 = qf.getPoint(h).value();
+                    rx1 << xi, xi * (1 - eta1 + eta1 * eta2);
+                    rz2 << xi, xi * (1 - eta1 + eta1 * eta2);
+                    rz3 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
+                    rx4 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
+                    rz5 << xi, xi * eta1 * (1 - eta2);
+                    rx6 << xi, xi * eta1 * (1 - eta2);
+                    const Geometry::Point x1(t, ttrans, std::cref(rx1));
+                    const Geometry::Point z2(t, ttrans, std::cref(rz2));
+                    const Geometry::Point z3(t, ttrans, std::cref(rz3));
+                    const Geometry::Point x4(t, ttrans, std::cref(rx4));
+                    const Geometry::Point z5(t, ttrans, std::cref(rz5));
+                    const Geometry::Point x6(t, ttrans, std::cref(rx6));
+                    const Scalar d = xi * xi * xi * eta1 * eta1 * eta2;
+                    for (size_t k = 0; k < qf.getSize(); k++)
+                    {
+                      const Scalar w = qf.getWeight(i) * qf.getWeight(j) * qf.getWeight(h) * qf.getWeight(k);
+                      const Scalar eta3 = qf.getPoint(k).value();
+                      rz1 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
+                      rx2 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
+                      rx3 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
+                      rz4 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
+                      rx5 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+                      rz6 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+                      const Geometry::Point z1(t, ttrans, std::cref(rz1));
+                      const Geometry::Point x2(t, ttrans, std::cref(rx2));
+                      const Geometry::Point x3(t, ttrans, std::cref(rx3));
+                      const Geometry::Point z4(t, ttrans, std::cref(rz4));
+                      const Geometry::Point x5(t, ttrans, std::cref(rx5));
+                      const Geometry::Point z6(t, ttrans, std::cref(rz6));
+                      const Scalar s1 = kernel(x1, z1) * x1.getDistortion() * z1.getDistortion();
+                      const Scalar s2 = kernel(x2, z2) * x2.getDistortion() * z2.getDistortion();
+                      const Scalar s3 = kernel(x3, z3) * x3.getDistortion() * z3.getDistortion();
+                      const Scalar s4 = kernel(x4, z4) * x4.getDistortion() * z4.getDistortion();
+                      const Scalar s5 = kernel(x5, z5) * x5.getDistortion() * z5.getDistortion();
+                      const Scalar s6 = kernel(x6, z6) * x6.getDistortion() * z6.getDistortion();
+                      for (size_t l = 0; l < testfe.getCount(); l++)
+                      {
+                        const auto& teb = testfe.getBasis(l);
+                        const Index teglobal = testfes.getGlobalIndex({ t.getDimension(), t.getIndex() }, l);
+                        for (size_t m = 0; m < trialfe.getCount(); m++)
+                        {
+                          const auto& trb = trialfe.getBasis(m);
+                          const Index trglobal = trialfes.getGlobalIndex({ tau.getDimension(), tau.getIndex() }, m);
+                          out(teglobal, trglobal) += d * w * s1 * trb(rx1) * teb(rz1);
+                          assert(std::isfinite(s1));
+                          out(teglobal, trglobal) += d * w * s2 * trb(rx2) * teb(rz2);
+                          assert(std::isfinite(s2));
+                          out(teglobal, trglobal) += d * w * s3 * trb(rx3) * teb(rz3);
+                          assert(std::isfinite(s3));
+                          out(teglobal, trglobal) += d * w * s4 * trb(rx4) * teb(rz4);
+                          assert(std::isfinite(s4));
+                          out(teglobal, trglobal) += d * w * s5 * trb(rx5) * teb(rz5);
+                          assert(std::isfinite(s5));
+                          out(teglobal, trglobal) += d * w * s6 * trb(rx6) * teb(rz6);
+                          assert(std::isfinite(s6));
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              break;
+            }
+          }
+        }
+        else
+        {
+          const QF::GenericPolytopeQuadrature qftr(trialfe.getOrder(), tau.getGeometry());
+          const QF::GenericPolytopeQuadrature qfte(testfe.getOrder(), t.getGeometry());
+          for (size_t i = 0; i < qfte.getSize(); i++)
+          {
+            const Geometry::Point x(t, ttrans, std::cref(qfte.getPoint(i)));
+            for (size_t j = 0; j < qftr.getSize(); j++)
+            {
+              const Geometry::Point y(tau, tautrans, std::cref(qftr.getPoint(j)));
+              const Scalar d = x.getDistortion() * y.getDistortion();
+              const Scalar kxy = kernel(x, y);
+              const Scalar w = qfte.getWeight(i) * qftr.getWeight(j);
+              for (size_t l = 0; l < testfe.getCount(); l++)
+              {
+                const auto& teb = testfe.getBasis(l);
+                const Index teglobal = testfes.getGlobalIndex({ t.getDimension(), t.getIndex() }, l);
+                for (size_t m = 0; m < trialfe.getCount(); m++)
+                {
+                  const auto& trb = trialfe.getBasis(m);
+                  const Index trglobal = testfes.getGlobalIndex({ tau.getDimension(), tau.getIndex() }, m);
+                  out(teglobal, trglobal) += w * d * kxy * teb(qfte.getPoint(i)) * trb(qftr.getPoint(j));
+                }
+              }
+            }
+          }
+        }
+      }
+
+      Math::Matrix& getOperator() override
+      {
+        return m_mat;
+      }
+
+      const Math::Matrix& getOperator() const override
+      {
+        return m_mat;
+      }
+
+      const TrialFunction<TrialFES>& getTrialFunction() const override
+      {
+        return getIntegrand().getLHS().getLeaf();
+      }
+
+      const TestFunction<TestFES>& getTestFunction() const override
+      {
+        return getIntegrand().getRHS().getLeaf();
+      }
+
+      inline Integral* copy() const noexcept override
+      {
+        return new Integral(*this);
+      }
+
+    private:
+      std::unique_ptr<Integrand> m_integrand;
+      Math::Matrix m_mat;
+  };
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  Integral(const
+      Dot<
+        Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
+    -> Integral<
+          Dot<
+            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  Integral(const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
+        const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
+    -> Integral<
+          Dot<
+            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 }
 
 #endif

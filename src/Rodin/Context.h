@@ -7,7 +7,7 @@
 #ifndef RODIN_CONTEXT_H
 #define RODIN_CONTEXT_H
 
-#include "Context/Serial.h"
+#include "Context/Sequential.h"
 #include "Context/MPI.h"
 
 #endif

@@ -13,10 +13,10 @@
 
 namespace Rodin::External::MMG
 {
-  class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial>
+  class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Sequential>
   {
    public:
-     using Parent = IO::MeshLoader<IO::FileFormat::MEDIT, Context::Serial>;
+     using Parent = IO::MeshLoader<IO::FileFormat::MEDIT, Context::Sequential>;
 
      MeshLoader(MMG::Mesh& mesh)
        : Parent(mesh),

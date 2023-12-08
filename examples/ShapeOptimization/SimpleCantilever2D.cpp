@@ -15,7 +15,7 @@ using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-using FES = VectorP1<Context::Serial>;
+using FES = VectorP1<Context::Sequential>;
 
 // Define boundary attributes
 static constexpr Geometry::Attribute Gamma0 = 1; // Traction free boundary
@@ -81,6 +81,8 @@ int main(int, char**)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);
+    Omega.save("u.mesh");
+    u.getSolution().save("u.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
@@ -96,6 +98,9 @@ int main(int, char**)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
     hilbert.solve(solver);
     const auto& dJ = g.getSolution();
+    Omega.save("g.mesh");
+    g.getSolution().save("g.gf");
+    std::cout << hilbert.getStiffnessOperator().nonZeros() << std::endl;
 
     // Update objective
     const Scalar objective = compliance(u.getSolution()) + ell * Omega.getVolume();

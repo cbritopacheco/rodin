@@ -11,6 +11,7 @@
 
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/SparseMatrix.h"
+
 #include "Rodin/Assembly/ForwardDecls.h"
 #include "Rodin/Assembly/Multithreaded.h"
 
@@ -31,54 +32,16 @@ namespace Rodin::Variational
   class BilinearFormBase : public FormLanguage::Base
   {
     public:
-      using SerialAssembly = Assembly::Serial<BilinearFormBase>;
-      using MultithreadedAssembly = Assembly::Multithreaded<BilinearFormBase>;
-      using OpenMPAssembly = Assembly::OpenMP<BilinearFormBase>;
-
       BilinearFormBase()
-      {
-#ifdef RODIN_MULTITHREADED
-        m_assembly.reset(new MultithreadedAssembly);
-#else
-        m_assembly.reset(new SerialAssembly);
-#endif
-      }
+      {}
 
       BilinearFormBase(const BilinearFormBase& other)
-        : FormLanguage::Base(other),
-          m_assembly(other.m_assembly->copy()),
-          m_bfis(other.m_bfis)
+        : FormLanguage::Base(other)
       {}
 
       BilinearFormBase(BilinearFormBase&& other)
-        : FormLanguage::Base(std::move(other)),
-          m_assembly(std::move(other.m_assembly)),
-          m_bfis(std::move(other.m_bfis))
+        : FormLanguage::Base(std::move(other))
       {}
-
-      constexpr
-      FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators()
-      {
-        return m_bfis;
-      }
-
-      constexpr
-      const FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators() const
-      {
-        return m_bfis;
-      }
-
-      BilinearFormBase& setAssembly(const Assembly::AssemblyBase<BilinearFormBase>& assembly)
-      {
-        m_assembly.reset(assembly.copy());
-        return *this;
-      }
-
-      const Assembly::AssemblyBase<BilinearFormBase>& getAssembly() const
-      {
-        assert(m_assembly);
-        return *m_assembly;
-      }
 
       /**
        * @brief Assembles the bilinear form.
@@ -102,59 +65,6 @@ namespace Rodin::Variational
       virtual const OperatorType& getOperator() const = 0;
 
       /**
-       * @brief Builds the bilinear form the given bilinear integrator
-       * @param[in] bfi Bilinear integrator which will be used to
-       * build the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      virtual BilinearFormBase& from(const BilinearFormIntegratorBase& bfi)
-      {
-        m_bfis.clear();
-        add(bfi).assemble();
-        return *this;
-      }
-
-      virtual BilinearFormBase& from(
-          const FormLanguage::List<BilinearFormIntegratorBase>& bfi)
-      {
-        m_bfis.clear();
-        add(bfi).assemble();
-        return *this;
-      }
-
-      virtual BilinearFormBase& operator=(const BilinearFormIntegratorBase& bfi)
-      {
-        from(bfi).assemble();
-        return *this;
-      }
-
-      /**
-       * @todo
-       */
-      virtual BilinearFormBase& operator=(
-          const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
-      {
-        from(bfis).assemble();
-        return *this;
-      }
-
-      /**
-       * @brief Adds a bilinear integrator to the bilinear form.
-       * @returns Reference to this (for method chaining)
-       */
-      virtual BilinearFormBase& add(const BilinearFormIntegratorBase& bfi)
-      {
-        m_bfis.add(bfi);
-        return *this;
-      }
-
-      virtual BilinearFormBase& add(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
-      {
-        m_bfis.add(bfis);
-        return *this;
-      }
-
-      /**
        * @brief Gets the reference to the associated TrialFunction object.
        * @returns Reference to this (for method chaining)
        */
@@ -167,10 +77,6 @@ namespace Rodin::Variational
       virtual const FormLanguage::Base& getTestFunction() const = 0;
 
       virtual BilinearFormBase* copy() const noexcept override = 0;
-
-    private:
-      std::unique_ptr<Assembly::AssemblyBase<BilinearFormBase>> m_assembly;
-      FormLanguage::List<BilinearFormIntegratorBase> m_bfis;
   };
 
   /**
@@ -183,24 +89,23 @@ namespace Rodin::Variational
    * space, and @f$ m @f$ represents the size of the test space.
    */
   template <class TrialFES, class TestFES, class MatrixType>
-  class BilinearForm<TrialFES, TestFES, Context::Serial, MatrixType> final
+  class BilinearForm final
     : public BilinearFormBase<MatrixType>
   {
     static_assert(
         std::is_same_v<TrialFES, TestFES>,
         "Different trial and test spaces are currently not supported.");
 
-    static_assert(std::is_same_v<typename TrialFES::Context, Context::Serial>);
-
     public:
-      /// Context of BilinearForm
-      using Context = typename TrialFES::Context;
-
       /// Type of operator associated to the bilinear form
       using OperatorType = MatrixType;
 
       /// Parent class
       using Parent = BilinearFormBase<MatrixType>;
+
+      using SequentialAssembly = Assembly::Sequential<BilinearForm>;
+      using MultithreadedAssembly = Assembly::Multithreaded<BilinearForm>;
+      using OpenMPAssembly = Assembly::OpenMP<BilinearForm>;
 
       /**
        * @brief Constructs a BilinearForm from a TrialFunction and
@@ -212,19 +117,29 @@ namespace Rodin::Variational
       constexpr
       BilinearForm(const TrialFunction<TrialFES>& u, const TestFunction<TestFES>& v)
         :  m_u(u), m_v(v)
-      {}
+      {
+#ifdef RODIN_MULTITHREADED
+        m_assembly.reset(new MultithreadedAssembly);
+#else
+        m_assembly.reset(new SequentialAssembly);
+#endif
+      }
 
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
-          m_u(other.m_u), m_v(other.m_v)
+          m_u(other.m_u), m_v(other.m_v),
+          m_assembly(other.m_assembly->copy()),
+          m_bfis(other.m_bfis)
       {}
 
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_operator(std::move(other.m_operator))
+          m_assembly(std::move(other.m_assembly)),
+          m_operator(std::move(other.m_operator)),
+          m_bfis(std::move(other.m_bfis))
       {}
 
       /**
@@ -275,7 +190,7 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
-      BilinearForm& operator=(const BilinearFormIntegratorBase& bfi) override
+      BilinearForm& operator=(const BilinearFormIntegratorBase& bfi)
       {
         this->from(bfi).assemble();
         return *this;
@@ -285,17 +200,29 @@ namespace Rodin::Variational
        * @todo
        */
       BilinearForm& operator=(
-          const FormLanguage::List<BilinearFormIntegratorBase>& bfis) override
+          const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
       {
         this->from(bfis).assemble();
         return *this;
+      }
+
+      constexpr
+      FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators()
+      {
+        return m_bfis;
+      }
+
+      constexpr
+      const FormLanguage::List<BilinearFormIntegratorBase>& getIntegrators() const
+      {
+        return m_bfis;
       }
 
       /**
        * @brief Gets the reference to sparse matrix.
        * @returns Reference to the associated sparse matrix.
        */
-      virtual OperatorType& getOperator() override
+      OperatorType& getOperator() override
       {
         return m_operator;
       }
@@ -305,12 +232,61 @@ namespace Rodin::Variational
        * to the bilinear form.
        * @returns Constant reference to the associated sparse matrix.
        */
-      virtual const OperatorType& getOperator() const override
+      const OperatorType& getOperator() const override
       {
         return m_operator;
       }
 
-      virtual BilinearForm* copy() const noexcept override
+      BilinearForm& setAssembly(const Assembly::AssemblyBase<BilinearForm>& assembly)
+      {
+        m_assembly.reset(assembly.copy());
+        return *this;
+      }
+
+      const Assembly::AssemblyBase<BilinearForm>& getAssembly() const
+      {
+        assert(m_assembly);
+        return *m_assembly;
+      }
+
+      /**
+       * @brief Builds the bilinear form the given bilinear integrator
+       * @param[in] bfi Bilinear integrator which will be used to
+       * build the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      virtual BilinearForm& from(const BilinearFormIntegratorBase& bfi)
+      {
+        m_bfis.clear();
+        add(bfi).assemble();
+        return *this;
+      }
+
+      virtual BilinearForm& from(
+          const FormLanguage::List<BilinearFormIntegratorBase>& bfi)
+      {
+        m_bfis.clear();
+        add(bfi).assemble();
+        return *this;
+      }
+
+      /**
+       * @brief Adds a bilinear integrator to the bilinear form.
+       * @returns Reference to this (for method chaining)
+       */
+      virtual BilinearForm& add(const BilinearFormIntegratorBase& bfi)
+      {
+        m_bfis.add(bfi);
+        return *this;
+      }
+
+      virtual BilinearForm& add(const FormLanguage::List<BilinearFormIntegratorBase>& bfis)
+      {
+        m_bfis.add(bfis);
+        return *this;
+      }
+
+      inline BilinearForm* copy() const noexcept override
       {
         return new BilinearForm(*this);
       }
@@ -318,13 +294,14 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
       std::reference_wrapper<const TestFunction<TestFES>>   m_v;
+      std::unique_ptr<Assembly::AssemblyBase<BilinearForm>> m_assembly;
+      FormLanguage::List<BilinearFormIntegratorBase>        m_bfis;
       OperatorType m_operator;
   };
 
   template <class TrialFES, class TestFES>
   BilinearForm(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> BilinearForm<TrialFES, TestFES, typename TrialFES::Context, Math::SparseMatrix>;
-
+    -> BilinearForm<TrialFES, TestFES, Math::SparseMatrix>;
 }
 
 #include "BilinearForm.hpp"

@@ -56,7 +56,7 @@ namespace Rodin::Geometry
    * if (mesh.isSubMesh())
    * {
    *   // Cast is well defined
-   *   auto& submesh = static_cast<SubMesh<Context::Serial>&>(mesh);
+   *   auto& submesh = static_cast<SubMesh<Context::Sequential>&>(mesh);
    * }
    * @endcode
    *
@@ -72,20 +72,20 @@ namespace Rodin::Geometry
    *
    */
   template <>
-  class SubMesh<Context::Serial> final : public SubMeshBase, public Mesh<Context::Serial>
+  class SubMesh<Context::Sequential> final : public SubMeshBase, public Mesh<Context::Sequential>
   {
     public:
-      using Parent = Mesh<Context::Serial>;
+      using Parent = Mesh<Context::Sequential>;
 
       /**
-       * @brief Class used to build SubMesh<Context::Serial> instances.
+       * @brief Class used to build SubMesh<Context::Sequential> instances.
        */
       class Builder
       {
         public:
           Builder() = default;
 
-          Builder& initialize(const Mesh<Context::Serial>& parent);
+          Builder& initialize(const Mesh<Context::Sequential>& parent);
 
           Builder& include(size_t d, Index parentIdx);
 
@@ -94,15 +94,15 @@ namespace Rodin::Geometry
           SubMesh finalize();
 
         private:
-          std::optional<std::reference_wrapper<const Mesh<Context::Serial>>> m_parent;
-          Mesh<Context::Serial>::Builder m_build;
+          std::optional<std::reference_wrapper<const Mesh<Context::Sequential>>> m_parent;
+          Mesh<Context::Sequential>::Builder m_build;
           std::vector<Index> m_sidx;
           std::vector<boost::bimap<Index, Index>> m_s2ps;
           size_t m_dimension;
       };
 
       explicit
-      SubMesh(std::reference_wrapper<const Mesh<Context::Serial>> parent);
+      SubMesh(std::reference_wrapper<const Mesh<Context::Sequential>> parent);
 
       SubMesh(const SubMesh& other);
 
@@ -133,7 +133,7 @@ namespace Rodin::Geometry
       /**
        * @returns Reference to the parent Mesh object
        */
-      const Mesh<Context::Serial>& getParent() const override;
+      const Mesh<Context::Sequential>& getParent() const override;
 
       /**
        * @brief Gets the map of polytope indices from the SubMesh to the parent
@@ -146,7 +146,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      std::reference_wrapper<const Mesh<Context::Serial>> m_parent;
+      std::reference_wrapper<const Mesh<Context::Sequential>> m_parent;
       std::vector<boost::bimap<Index, Index>> m_s2ps;
   };
 }

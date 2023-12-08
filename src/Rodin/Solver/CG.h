@@ -85,6 +85,55 @@ namespace Rodin::Solver
         Math::SparseMatrix, Eigen::Lower | Eigen::Upper, Eigen::IdentityPreconditioner> m_solver;
   };
 
+  template <>
+  class CG<Math::Matrix, Math::Vector> final
+    : public SolverBase<Math::Matrix, Math::Vector>
+  {
+    public:
+      /// Type of linear operator
+      using OperatorType = Math::Matrix;
+
+      /// Type of vector
+      using VectorType = Math::Vector;
+
+      /**
+       * @brief Constructs the CG object with default parameters.
+       */
+      CG() = default;
+
+      CG(const CG& other)
+      {}
+
+      ~CG() = default;
+
+      CG& setTolerance(double tol)
+      {
+        m_solver.setTolerance(tol);
+        return *this;
+      }
+
+      CG& setMaxIterations(size_t maxIt)
+      {
+        m_solver.setMaxIterations(maxIt);
+        return *this;
+      }
+
+      void solve(OperatorType& A, VectorType& x, VectorType& b) override
+      {
+        x = m_solver.compute(A).solve(b);
+      }
+
+      inline
+      CG* copy() const noexcept override
+      {
+        return new CG(*this);
+      }
+
+    private:
+      Eigen::ConjugateGradient<
+        Math::Matrix, Eigen::Lower | Eigen::Upper, Eigen::IdentityPreconditioner> m_solver;
+  };
+
 }
 
 #endif
