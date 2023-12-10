@@ -4,23 +4,24 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CONTEXT_MPI_H
-#define RODIN_CONTEXT_MPI_H
-
-#include "Rodin/Configure.h"
+#ifndef RODIN_GEOMETRY_MPI_MESH_H
+#define RODIN_GEOMETRY_MPI_MESH_H
 
 #ifdef RODIN_USE_MPI
 
-#include <boost/mpi.hpp>
+#include "Rodin/Configure.h"
 
-namespace Rodin::Context
+#include "Rodin/Context/MPI.h"
+
+namespace Rodin::Geometry
 {
-  class MPI
+  using MPIMesh = Mesh<Context::MPI>;
+
+  template <>
+  class Mesh<Context::MPI>
   {
-    boost::mpi::communicator comm;
   };
 }
 
 #endif
 #endif
-
