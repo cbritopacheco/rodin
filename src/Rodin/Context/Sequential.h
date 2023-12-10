@@ -10,9 +10,9 @@
 namespace Rodin::Context
 {
   /**
-   * @brief Represents the native single-threaded serialized context.
+   * @brief Represents the native single-threaded sequential context.
    */
-  struct Sequential {};
+  class Sequential {};
 }
 
 #endif

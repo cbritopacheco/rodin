@@ -18,6 +18,7 @@
 #include "Rodin/Configure.h"
 #include "Rodin/Threads/Mutable.h"
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/Context/Sequential.h"
 #include "Rodin/Utility/IsSpecialization.h"
 #include "Rodin/Variational/Traits.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -480,6 +481,9 @@ namespace Rodin::Geometry
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
   };
 
+  /// Type alias for Mesh<Context::Sequential>
+  using SequentialMesh = Mesh<Context::Sequential>;
+
   /// Index containing the indices of boundary cells.
   using BoundaryIndex = IndexSet;
 
@@ -939,9 +943,6 @@ namespace Rodin::Geometry
 
       std::vector<FlatSet<Attribute>> m_attributes;
   };
-
-  /// Type alias for Mesh<Context::Sequential>
-  using SequentialMesh = Mesh<Context::Sequential>;
 }
 
 #include "Mesh.hpp"

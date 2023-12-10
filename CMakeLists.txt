@@ -37,6 +37,7 @@ option(RODIN_MULTITHREADED          "Utilizes multithreading capabalities."     
 
 if (RODIN_MULTITHREADED)
   set(RODIN_THREAD_SAFE ON CACHE BOOL "" FORCE)
+  set(Boost_USE_MULTITHREADED ON)
 endif()
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
@@ -95,9 +96,8 @@ if (RODIN_BUILD_SRC)
   # set(Boost_USE_STATIC_RUNTIME     OFF)
 
   if (RODIN_USE_MPI)
-    set(Boost_USE_MULTITHREADED ON)
+    find_package(MPI REQUIRED)
     find_package(Boost 1.65 REQUIRED COMPONENTS mpi serialization)
-    include_directories(${Boost_INCLUDE_DIRS})
   endif()
 
   find_package(Boost 1.65 REQUIRED
