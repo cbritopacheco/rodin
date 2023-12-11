@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_SparseQR_H
-#define RODIN_SOLVER_SparseQR_H
+#ifndef RODIN_SOLVER_SPARSEQR_H
+#define RODIN_SOLVER_SPARSEQR_H
 
 #include <Eigen/SparseQR>
 
@@ -31,7 +31,8 @@ namespace Rodin::Solver
 
   /**
    * @ingroup SparseQRSpecializations
-   * @brief Sparse left-looking QR factorization with numerical column pivoting for use with Math::SparseMatrix and
+   * @brief Sparse left-looking QR factorization with numerical column pivoting
+   * for use with Math::SparseMatrix and
    * Math::Vector.
    */
   template <>
