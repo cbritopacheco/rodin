@@ -47,6 +47,9 @@ namespace Rodin::Geometry
 
   class MeshBase;
 
+  template <class ContextType>
+  class Connectivity;
+
   /**
    * @brief Represents a polyhedral complex.
    *

@@ -15,6 +15,7 @@
 #include <boost/bimap/unordered_set_of.hpp>
 
 #include "Rodin/Array.h"
+#include "Rodin/Context/Sequential.h"
 
 #include "ForwardDecls.h"
 
@@ -24,6 +25,20 @@
 
 namespace Rodin::Geometry
 {
+  class ConnectivityBase
+  {
+    public:
+      virtual Polytope::Type getGeometry(size_t d, Index idx) const = 0;
+      virtual const Array<Index>& getPolytope(size_t d, Index idx) const = 0;
+      virtual size_t getCount(size_t dim) const = 0;
+      virtual size_t getCount(Polytope::Type g) const = 0;
+      virtual size_t getMeshDimension() const = 0;
+      virtual const Incidence& getIncidence(size_t d, size_t dp) const = 0;
+      virtual const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
+  };
+
+  using SequentialConnectivity = Connectivity<Context::Sequential>;
+
   /**
    * @brief Represents the set of incidence relations of a Mesh.
    *
@@ -35,7 +50,8 @@ namespace Rodin::Geometry
    * based on @cite logg2009efficient.
    *
    */
-  class MeshConnectivity
+  template <>
+  class Connectivity<Context::Sequential> final : public ConnectivityBase
   {
     public:
       using PolytopeIndex =
@@ -50,29 +66,31 @@ namespace Rodin::Geometry
         Array<Index> vertices;
       };
 
-      MeshConnectivity();
+      Connectivity();
 
-      MeshConnectivity(const MeshConnectivity&) = default;
+      Connectivity(const Connectivity&) = default;
 
-      MeshConnectivity(MeshConnectivity&&) = default;
+      Connectivity(Connectivity&&) = default;
 
-      MeshConnectivity& operator=(const MeshConnectivity&) = default;
+      Connectivity& operator=(const Connectivity&) = default;
 
-      MeshConnectivity& operator=(MeshConnectivity&&) = default;
+      Connectivity& operator=(Connectivity&&) = default;
 
-      MeshConnectivity& initialize(size_t maximalDimension);
+      Connectivity& initialize(size_t maximalDimension);
 
       /**
        * @brief Sets the number of nodes (vertices) in the mesh.
        */
-      MeshConnectivity& nodes(size_t count);
+      Connectivity& nodes(size_t count);
+
+      Connectivity& clear(size_t d, size_t dp);
 
       /**
        * @brief Reserves space for the polytopes of the given dimension.
        */
-      MeshConnectivity& reserve(size_t d, size_t count);
+      Connectivity& reserve(size_t d, size_t count);
 
-      MeshConnectivity& polytope(
+      Connectivity& polytope(
           Geometry::Polytope::Type t, std::initializer_list<Index> p)
       {
         Array<Index> arr(p.size());
@@ -80,33 +98,11 @@ namespace Rodin::Geometry
         return polytope(t, std::move(arr));
       }
 
-      MeshConnectivity& polytope(
+      Connectivity& polytope(
           Geometry::Polytope::Type t, const Array<Index>& polytope);
 
-      MeshConnectivity& polytope(
+      Connectivity& polytope(
           Geometry::Polytope::Type t, Array<Index>&& polytope);
-
-      MeshConnectivity& compute(size_t d, size_t dp);
-
-      size_t getCount(size_t dim) const;
-
-      size_t getCount(Polytope::Type g) const;
-
-      size_t getMeshDimension() const;
-
-      const PolytopeIndex& getIndexMap(size_t dim) const;
-
-      const std::optional<Index> getIndex(size_t dim, const IndexArray& key) const;
-
-      Polytope::Type getGeometry(size_t d, Index idx) const;
-
-      const Array<Index>& getPolytope(size_t d, Index idx) const;
-
-      const Incidence& getIncidence(size_t d, size_t dp) const;
-
-      const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const;
-
-      MeshConnectivity& setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc);
 
       /**
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and
@@ -118,19 +114,38 @@ namespace Rodin::Geometry
        * @f]
        * from @f$ D \longrightarrow 0 @f$ and @f$ D \longrightarrow D @f$.
        */
-      MeshConnectivity& build(size_t d);
+      Connectivity& build(size_t d);
 
-      MeshConnectivity& transpose(size_t d, size_t dp);
+      Connectivity& compute(size_t d, size_t dp);
 
-      MeshConnectivity& intersection(size_t d, size_t dp, size_t dpp);
+      Connectivity& transpose(size_t d, size_t dp);
+
+      Connectivity& intersection(size_t d, size_t dp, size_t dpp);
 
       void local(std::vector<SubPolytope>& out, size_t dim, Index i);
 
-      MeshConnectivity& clear(size_t d, size_t dp);
+      const PolytopeIndex& getIndexMap(size_t dim) const;
+
+      const std::optional<Index> getIndex(size_t dim, const IndexArray& key) const;
+
+      Connectivity& setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc);
+
+      size_t getCount(size_t dim) const override;
+
+      size_t getCount(Polytope::Type g) const override;
+
+      size_t getMeshDimension() const override;
+
+      Polytope::Type getGeometry(size_t d, Index idx) const override;
+
+      const Array<Index>& getPolytope(size_t d, Index idx) const override;
+
+      const Incidence& getIncidence(size_t d, size_t dp) const override;
+
+      const IndexSet& getIncidence(const std::pair<size_t, size_t> p, Index idx) const override;
 
     private:
       size_t m_maximalDimension;
-
       std::vector<size_t> m_count;
       GeometryIndexed<size_t> m_gcount;
       std::vector<PolytopeIndex> m_index;
