@@ -436,12 +436,12 @@ namespace Rodin::Geometry
       /**
        * @brief Gets a reference to the mesh connectivity.
        */
-      virtual MeshConnectivity& getConnectivity() = 0;
+      virtual ConnectivityBase& getConnectivity() = 0;
 
       /**
        * @brief Gets a constant reference to the mesh connectivity.
        */
-      virtual const MeshConnectivity& getConnectivity() const = 0;
+      virtual const ConnectivityBase& getConnectivity() const = 0;
 
       /**
        * @brief Gets the space coordinates of the vertex at the given index.
@@ -634,20 +634,20 @@ namespace Rodin::Geometry
 
           Builder& setVertices(Math::Matrix&& connectivity);
 
-          Builder& setConnectivity(MeshConnectivity&& connectivity);
+          Builder& setConnectivity(Connectivity<Context::Sequential>&& connectivity);
 
           Builder& setAttributeIndex(AttributeIndex&& connectivity);
 
           Builder& setTransformationIndex(TransformationIndex&& connectivity);
 
           inline
-          MeshConnectivity& getConnectivity()
+          Connectivity<Context::Sequential>& getConnectivity()
           {
             return m_connectivity;
           }
 
           inline
-          const MeshConnectivity& getConnectivity() const
+          const Connectivity<Context::Sequential>& getConnectivity() const
           {
             return m_connectivity;
           }
@@ -657,7 +657,7 @@ namespace Rodin::Geometry
           size_t m_nodes;
 
           Math::PointMatrix m_vertices;
-          MeshConnectivity m_connectivity;
+          Connectivity<Context::Sequential> m_connectivity;
 
           AttributeIndex m_attributeIndex;
           TransformationIndex m_transformationIndex;
@@ -901,12 +901,12 @@ namespace Rodin::Geometry
 
       virtual Attribute getAttribute(size_t dimension, Index index) const override;
 
-      virtual MeshConnectivity& getConnectivity() override
+      virtual Connectivity<Context::Sequential>& getConnectivity() override
       {
         return m_connectivity;
       }
 
-      virtual const MeshConnectivity& getConnectivity() const override
+      virtual const Connectivity<Context::Sequential>& getConnectivity() const override
       {
         return m_connectivity;
       }
@@ -934,7 +934,7 @@ namespace Rodin::Geometry
       size_t m_sdim;
 
       Math::PointMatrix m_vertices;
-      MeshConnectivity m_connectivity;
+      Connectivity<Context::Sequential> m_connectivity;
 
       AttributeIndex m_attributeIndex;
       mutable TransformationIndex m_transformationIndex;

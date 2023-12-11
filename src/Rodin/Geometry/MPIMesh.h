@@ -10,16 +10,32 @@
 #ifdef RODIN_USE_MPI
 
 #include "Rodin/Configure.h"
-
 #include "Rodin/Context/MPI.h"
+
+#include "Mesh.h"
 
 namespace Rodin::Geometry
 {
   using MPIMesh = Mesh<Context::MPI>;
 
   template <>
-  class Mesh<Context::MPI>
+  class Mesh<Context::MPI> : public MeshBase
   {
+    public:
+      class Fragment : public Mesh<Context::Sequential>
+      {
+        public:
+          using Parent = Mesh<Context::Sequential>;
+          using Parent::Parent;
+      };
+
+      const Fragment& getFragment(Index i) const
+      {
+        return m_fragments[i];
+      }
+
+    private:
+      std::vector<Fragment> m_fragments;
   };
 }
 
