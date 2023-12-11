@@ -55,6 +55,8 @@ namespace Rodin::Geometry
    *
    * A Mesh object represents a polyhedral complex @f$ \mathcal{T}_h @f$ is a
    * set containing finitely many convex polyhedra.
+   *
+   * @see MeshTypes
    */
   template <class ContextType = Context::Sequential>
   class Mesh;

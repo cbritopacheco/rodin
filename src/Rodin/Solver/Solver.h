@@ -31,9 +31,9 @@ namespace Rodin::Solver
        * @f[
        *  Ax = b ,
        * @f]
-       * where @f$ A @f$ has type @f$ \text{OperatorType} @f$, the solution @f$
-       * x @f$ has type @f$ \text{VectorType} @f$, and the right hand side @f$
-       * b @f$ has type @f$ \text{VectorType} @f$.
+       * where @f$ A @f$ has type @f$ \text{OperatorType} @f$, the solution
+       * @f$ x @f$ has type @f$ \text{VectorType} @f$, and the right hand side
+       * @f$ b @f$ has type @f$ \text{VectorType} @f$.
        *
        * @param[in,out] A Left hand side operator
        * @param[in,out] x Input for the initial guess, and output for the

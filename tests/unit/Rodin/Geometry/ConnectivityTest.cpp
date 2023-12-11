@@ -10,7 +10,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
   constexpr const size_t meshDim = 2;
   constexpr const size_t nodes = 3;
 
-  MeshConnectivity connectivity;
+  Connectivity<Context::Sequential> connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Type::Triangle, {0, 1, 2});
@@ -61,7 +61,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_4Nodes_Triangles)
   constexpr const size_t meshDim = 2;
   constexpr const size_t nodes = 4;
 
-  MeshConnectivity connectivity;
+  Connectivity<Context::Sequential> connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Type::Triangle, {0, 1, 2})
@@ -107,7 +107,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Triangles)
   constexpr const size_t meshDim = 2;
   constexpr const size_t nodes = 5;
 
-  MeshConnectivity connectivity;
+  Connectivity<Context::Sequential> connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Type::Triangle, {0, 1, 2})
@@ -157,7 +157,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Mixed)
   const size_t meshDim = 2;
   constexpr const size_t nodes = 5;
 
-  MeshConnectivity connectivity;
+  Connectivity<Context::Sequential> connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Type::Triangle, {0, 1, 4})
@@ -182,7 +182,7 @@ TEST(Rodin_Geometry_Connectivity, SanityTest2D_9Nodes_Mixed)
   constexpr const size_t meshDim = 2;
   constexpr const size_t nodes = 9;
 
-  MeshConnectivity connectivity;
+  Connectivity<Context::Sequential> connectivity;
   connectivity.initialize(meshDim)
               .nodes(nodes)
               .polytope(Polytope::Type::Triangle, {0, 1, 4})
