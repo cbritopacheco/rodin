@@ -931,8 +931,6 @@ namespace Rodin::Geometry
       PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
     private:
-      static const GeometryIndexed<Math::Matrix> s_vertices;
-
       size_t m_sdim;
 
       Math::PointMatrix m_vertices;
