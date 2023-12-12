@@ -18,7 +18,7 @@
 namespace Rodin::Assembly
 {
   template <class TrialFES, class TestFES, class OperatorType>
-  class AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
+  class AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
@@ -42,7 +42,7 @@ namespace Rodin::Assembly
   };
 
   template <class FES, class VectorType>
-  class AssemblyBase<Variational::LinearForm<FES, VectorType>>
+  class AssemblyBase<VectorType, Variational::LinearForm<FES, VectorType>>
     : public FormLanguage::Base
   {
     public:
@@ -63,6 +63,31 @@ namespace Rodin::Assembly
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
+
+  // template <class OperatorType>
+  // class AssemblyBase<
+  //   OperatorType,
+  //   Integral<
+  //     Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+  //         ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>>
+  // {
+  //   public:
+  //     struct Input
+  //     {
+  //       const Geometry::MeshBase& mesh;
+  //       const Variational::FiniteElementSpaceBase& fes;
+  //     };
+
+  //     AssemblyBase() = default;
+
+  //     AssemblyBase(const AssemblyBase&) = default;
+
+  //     AssemblyBase(AssemblyBase&&) = default;
+
+  //     virtual  execute(const Input& data) const = 0;
+
+  //     virtual AssemblyBase* copy() const noexcept = 0;
+  // };
 }
 
 #endif
