@@ -4,18 +4,16 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CONTEXT_SEQUENTIAL_H
-#define RODIN_CONTEXT_SEQUENTIAL_H
+#ifndef RODIN_CONTEXT_BASE_H
+#define RODIN_CONTEXT_BASE_H
 
-#include "Base.h"
+#include "Rodin/Configure.h"
 
 namespace Rodin::Context
 {
-  /**
-   * @brief Represents the native single-threaded sequential context.
-   */
-  class Sequential : public Base
-  {};
+  class Base
+  {
+  };
 }
 
 #endif

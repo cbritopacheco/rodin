@@ -35,6 +35,7 @@ add_subdirectory(Geometry)
 add_subdirectory(Assembly)
 add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
+add_subdirectory(Serialization)
 
 if (RODIN_WITH_PLOT)
   add_subdirectory(Plot)

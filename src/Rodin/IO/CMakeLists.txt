@@ -19,7 +19,7 @@ add_library(Rodin::IO ALIAS RodinIO)
 
 target_link_libraries(RodinIO
   PUBLIC
-  Boost::filesystem
   Rodin::Alert
   Rodin::Geometry
-  Rodin::Variational)
+  Rodin::Variational
+  Boost::filesystem)

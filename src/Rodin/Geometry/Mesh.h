@@ -479,6 +479,8 @@ namespace Rodin::Geometry
 
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
+
+      virtual const Context::Base& getContext() const = 0;
   };
 
   /// Type alias for Mesh<Context::Sequential>
@@ -868,6 +870,12 @@ namespace Rodin::Geometry
         return m_vertices;
       }
 
+      inline
+      const Context::Sequential& getContext() const override
+      {
+        return m_context;
+      }
+
       virtual size_t getPolytopeCount(size_t dim) const override;
 
       virtual size_t getPolytopeCount(Polytope::Type g) const override;
@@ -940,6 +948,8 @@ namespace Rodin::Geometry
       mutable TransformationIndex m_transformationIndex;
 
       std::vector<FlatSet<Attribute>> m_attributes;
+
+      Context::Sequential m_context;
   };
 }
 
