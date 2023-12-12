@@ -29,6 +29,8 @@ namespace Rodin::Geometry
           using Parent::Parent;
       };
 
+      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index fragmentId);
+
       const Fragment& getFragment(Index i) const
       {
         return m_fragments[i];

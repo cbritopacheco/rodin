@@ -25,14 +25,6 @@ target_link_libraries(RodinGeometry
   Rodin::IO
   Rodin::Math
   Rodin::Alert
+  Rodin::Context
   Rodin::Variational
   Boost::filesystem)
-
-if (RODIN_USE_MPI)
-  target_link_libraries(RodinGeometry
-    PUBLIC
-    Boost::mpi
-    Boost::serialization
-    MPI::MPI_CXX)
-endif()
-

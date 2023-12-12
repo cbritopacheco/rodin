@@ -528,7 +528,6 @@ namespace Rodin::Variational
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& mesh = trialfes.getMesh();
-        const auto& kernel = lhs.getKernel();
         auto& res = m_mat;
         res.resize(testfes.getSize(), trialfes.getSize());
         res.setZero();
