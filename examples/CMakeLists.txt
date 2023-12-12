@@ -6,6 +6,7 @@ if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(Plot)
   endif()
   add_subdirectory(Alert)
+  add_subdirectory(Context)
   add_subdirectory(Geometry)
   add_subdirectory(Variational)
 
