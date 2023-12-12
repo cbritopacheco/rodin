@@ -103,9 +103,8 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = BilinearFormBase<MatrixType>;
 
-      using SequentialAssembly = Assembly::Sequential<BilinearForm>;
-      using MultithreadedAssembly = Assembly::Multithreaded<BilinearForm>;
-      using OpenMPAssembly = Assembly::OpenMP<BilinearForm>;
+      using SequentialAssembly = Assembly::Sequential<OperatorType, BilinearForm>;
+      using MultithreadedAssembly = Assembly::Multithreaded<OperatorType, BilinearForm>;
 
       /**
        * @brief Constructs a BilinearForm from a TrialFunction and
@@ -243,7 +242,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const Assembly::AssemblyBase<BilinearForm>& getAssembly() const
+      const Assembly::AssemblyBase<OperatorType, BilinearForm>& getAssembly() const
       {
         assert(m_assembly);
         return *m_assembly;
@@ -294,7 +293,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const TrialFunction<TrialFES>> m_u;
       std::reference_wrapper<const TestFunction<TestFES>>   m_v;
-      std::unique_ptr<Assembly::AssemblyBase<BilinearForm>> m_assembly;
+      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearForm>> m_assembly;
       FormLanguage::List<BilinearFormIntegratorBase>        m_bfis;
       OperatorType m_operator;
   };

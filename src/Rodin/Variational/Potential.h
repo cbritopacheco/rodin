@@ -462,21 +462,6 @@ namespace Rodin::Variational
         : public BilinearFormBase<Math::Matrix>
   {
     public:
-      static void add(
-          Math::Matrix& out, const Math::Matrix& in,
-          const IndexArray& rows, const IndexArray& cols)
-      {
-        assert(rows.size() >= 0);
-        assert(cols.size() >= 0);
-        assert(in.rows() == rows.size());
-        assert(in.cols() == cols.size());
-        for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
-        {
-          for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
-            out(rows(i), cols(j)) += in(i, j);
-        }
-      }
-
       using Kernel = KernelType;
 
       using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
@@ -528,9 +513,10 @@ namespace Rodin::Variational
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& mesh = trialfes.getMesh();
-        auto& res = m_mat;
+        auto& res = m_operator;
         res.resize(testfes.getSize(), trialfes.getSize());
         res.setZero();
+        Math::Matrix mat;
         if constexpr (std::is_same_v<LHSRange, Scalar>)
         {
           for (auto itt = mesh.getCell(); itt; ++itt)
@@ -539,8 +525,9 @@ namespace Rodin::Variational
             for (auto itau = mesh.getCell(); itau; ++itau)
             {
               const auto& tau = *itau;
-              integrate(res, t, tau);
+              integrate(mat, t, tau);
             }
+
           }
         }
         else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
@@ -553,7 +540,8 @@ namespace Rodin::Variational
         }
       }
 
-      virtual void integrate(Math::Matrix& out, const Geometry::Polytope& trgeom, const Geometry::Polytope& tegeom)
+      virtual void integrate(
+          Math::Matrix& out, const Geometry::Polytope& trgeom, const Geometry::Polytope& tegeom)
       {
         const auto& tau = trgeom;
         const auto& t = tegeom;
@@ -567,6 +555,7 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(t.getDimension(), t.getIndex());
         const auto& trialfe = trialfes.getFiniteElement(tau.getDimension(), tau.getIndex());
         const auto& kernel = lhs.getKernel();
+        out.resize(testfe.getDOFs(tegeom), trialfe.getDOFs(trgeom));
         if (t == tau)
         {
           switch (t.getGeometry())
@@ -640,22 +629,20 @@ namespace Rodin::Variational
                       for (size_t l = 0; l < testfe.getCount(); l++)
                       {
                         const auto& teb = testfe.getBasis(l);
-                        const Index teglobal = testfes.getGlobalIndex({ t.getDimension(), t.getIndex() }, l);
                         for (size_t m = 0; m < trialfe.getCount(); m++)
                         {
                           const auto& trb = trialfe.getBasis(m);
-                          const Index trglobal = trialfes.getGlobalIndex({ tau.getDimension(), tau.getIndex() }, m);
-                          out(teglobal, trglobal) += d * w * s1 * trb(rx1) * teb(rz1);
+                          out(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
                           assert(std::isfinite(s1));
-                          out(teglobal, trglobal) += d * w * s2 * trb(rx2) * teb(rz2);
+                          out(l, m) += d * w * s2 * trb(rx2) * teb(rz2);
                           assert(std::isfinite(s2));
-                          out(teglobal, trglobal) += d * w * s3 * trb(rx3) * teb(rz3);
+                          out(l, m) += d * w * s3 * trb(rx3) * teb(rz3);
                           assert(std::isfinite(s3));
-                          out(teglobal, trglobal) += d * w * s4 * trb(rx4) * teb(rz4);
+                          out(l, m) += d * w * s4 * trb(rx4) * teb(rz4);
                           assert(std::isfinite(s4));
-                          out(teglobal, trglobal) += d * w * s5 * trb(rx5) * teb(rz5);
+                          out(l, m) += d * w * s5 * trb(rx5) * teb(rz5);
                           assert(std::isfinite(s5));
-                          out(teglobal, trglobal) += d * w * s6 * trb(rx6) * teb(rz6);
+                          out(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
                           assert(std::isfinite(s6));
                         }
                       }
@@ -683,12 +670,10 @@ namespace Rodin::Variational
               for (size_t l = 0; l < testfe.getCount(); l++)
               {
                 const auto& teb = testfe.getBasis(l);
-                const Index teglobal = testfes.getGlobalIndex({ t.getDimension(), t.getIndex() }, l);
                 for (size_t m = 0; m < trialfe.getCount(); m++)
                 {
                   const auto& trb = trialfe.getBasis(m);
-                  const Index trglobal = testfes.getGlobalIndex({ tau.getDimension(), tau.getIndex() }, m);
-                  out(teglobal, trglobal) += w * d * kxy * teb(qfte.getPoint(i)) * trb(qftr.getPoint(j));
+                  out(l, m) += w * d * kxy * teb(qfte.getPoint(i)) * trb(qftr.getPoint(j));
                 }
               }
             }
@@ -698,12 +683,12 @@ namespace Rodin::Variational
 
       Math::Matrix& getOperator() override
       {
-        return m_mat;
+        return m_operator;
       }
 
       const Math::Matrix& getOperator() const override
       {
-        return m_mat;
+        return m_operator;
       }
 
       const TrialFunction<TrialFES>& getTrialFunction() const override
@@ -723,7 +708,7 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      Math::Matrix m_mat;
+      Math::Matrix m_operator;
   };
 
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
