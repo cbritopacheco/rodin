@@ -9,6 +9,8 @@
 
 #include "Base.h"
 
+#ifdef RODIN_USE_MPI
+
 #include <mpi.h>
 #include <boost/mpi.hpp>
 
@@ -22,5 +24,6 @@ namespace Rodin::Context
   };
 }
 
+#endif
 #endif
 
