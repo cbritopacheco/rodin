@@ -12,5 +12,6 @@ if (RODIN_USE_MPI)
   add_executable(BoostMPIBroadcast BoostMPIBroadcast.cpp)
   target_link_libraries(BoostMPIBroadcast
     PUBLIC
+    Rodin::IO
     Rodin::Context)
 endif()

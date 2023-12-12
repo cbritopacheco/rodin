@@ -7,7 +7,7 @@
 #ifndef RODIN_CONTEXT_MPI_H
 #define RODIN_CONTEXT_MPI_H
 
-#include "Rodin/Configure.h"
+#include "Base.h"
 
 #ifdef RODIN_USE_MPI
 
@@ -16,9 +16,11 @@
 
 namespace Rodin::Context
 {
-  class MPI
+  class MPI : public Base
   {
-    boost::mpi::communicator comm;
+
+    private:
+      boost::mpi::communicator comm;
   };
 }
 
