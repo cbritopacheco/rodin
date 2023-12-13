@@ -60,7 +60,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  Solver::UMFPack solver;
+  // Solver::UMFPack solver;
 
   // Optimization loop
   std::vector<double> obj;
