@@ -41,7 +41,7 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
   {
-    for (auto& bfi : rhs.getBFIs())
+    for (auto& bfi : rhs.getLocalBFIs())
       m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())
