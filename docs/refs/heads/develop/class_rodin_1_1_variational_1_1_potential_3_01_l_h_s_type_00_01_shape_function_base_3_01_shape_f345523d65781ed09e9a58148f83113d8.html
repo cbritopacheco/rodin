@@ -73,7 +73,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -228,35 +227,13 @@
 <use x='286.186038' y='-10.793007' xlink:href='#eq2-g2-121'/>
 </g>
 </svg></div><p>are the basis functions.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class VectorType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase&lt;Math::Vector&gt;</a>
-            </dt>
-            <dd>Base class for linear form objects.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a9914d0003941a16d861a00e8ff8d0dbc" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">final</span></span>
+            <dt id="a57adb876761810e81f2133c2bc37bf1d">
+              <span class="m-doc-wrap-bumper">void <a href="#a57adb876761810e81f2133c2bc37bf1d" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; element) <span class="m-label m-flat m-warning">final</span></span>
             </dt>
-            <dd>Assembles the linear form.</dd>
-            <dt id="a9a0b1e8a2f94ac955805117d97eeb212">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9a0b1e8a2f94ac955805117d97eeb212" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
-            <dt id="a6b3d4dacf394acc8dd06b331e6c8053c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6b3d4dacf394acc8dd06b331e6c8053c" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin_1_1_math.html#a78f873273d7f8e273fcc4840d14bbc1b" class="m-doc">Math::<wbr />Vector</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the reference to the (local) associated vector to the <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>.</dd>
-            <dt id="a77e3bc5bf6308a9f38d36221694b954a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a77e3bc5bf6308a9f38d36221694b954a" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Operand</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the test function argument associated to this linear form.</dd>
+            <dd>Performs the assembly of the element vector for the given element.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aecaf7b33a9496059c2db079e5409007e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -265,16 +242,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9914d0003941a16d861a00e8ff8d0dbc"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class LHSType, class RHSDerived, class FESType, <a href="namespace_rodin_1_1_variational.html#a6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Potential&lt;LHSType, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FESType, SpaceType&gt;, FESType, SpaceType&gt;&gt;&lt;LHSType, RHSDerived, FESType, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9914d0003941a16d861a00e8ff8d0dbc" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">final</span></span></span>
-            </h3>
-            <p>Assembles the linear form.</p>
-<p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_potential_3_01_l_h_s_type_00_01_shape_function_base_3_01_shape_f345523d65781ed09e9a58148f83113d8.html#a9a0b1e8a2f94ac955805117d97eeb212" class="m-doc">getVector()</a></p></aside>
-          </div></section>
           <section class="m-doc-details" id="aecaf7b33a9496059c2db079e5409007e"><div>
             <h3>
               <div class="m-doc-template">

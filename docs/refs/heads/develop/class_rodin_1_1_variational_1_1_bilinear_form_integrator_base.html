@@ -64,6 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearFormIntegratorBase <span class="m-thin">class</span>
         </h1>
         <p>Abstract base class for bilinear form integrators.</p>
@@ -73,7 +74,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -81,42 +81,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides the base functionality for bilinear form integrator objects.</p>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class Context&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_grad_3_01d05bda2c02c4bb8ee1fdb39b908deab8.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Integration of the isotropic <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class Context&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_jacobian_3f4771999288f2ff3089d3e4355c8885.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Integration of the isotropic <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> inner product two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Approximation of the integral of the the dot product between a trial shape function and a test shape function.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class Context&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_0137dd1250166c80f03fc5839c6584c737.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_0157e08f2daef43190f918f4ec5313a602.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;LHSFunctionDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;, P1&lt;Scalar, Context&gt;, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a> product of two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Context&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_01076d8cea1be560c4e6ba66e06fe150c7.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;LHSFunctionDerived&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;Math::Vector, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Math::Vector, Context&gt;, TrialSpace&gt;&gt;, P1&lt;Math::Vector, Context&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;Math::Vector, Context&gt;, TestSpace&gt;&gt;, P1&lt;Math::Vector, Context&gt;, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> inner product two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-          </dl>
-        </section>
+<p>Base class for bilinear form integrators.</p><p>This class provides the base functionality for bilinear form integrator objects.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -171,11 +136,11 @@
             </dt>
             <dd>Gets the attributes of the elements being integrated.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a04dbd0220c197cc9b970eb176e02e609" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a67956de9da46f413b3e74a1d655196e6" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; Derived&amp;</span>
             </dt>
             <dd>Specifies the material reference over which to integrate.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa3c87e0e350dad63f2f5d128fad139e5" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abe5a6b9d1ea51bc8cae33c2b1ad40982" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; Derived&amp;</span>
             </dt>
             <dd>Specifies the material references over which to integrate.</dd>
             <dt id="a9aa0b9db49913ce5d4e2537b8396b931">
@@ -191,10 +156,6 @@
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a99e26a9d28b76c8f6438a086b63c1017" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Performs the assembly of the element matrix for the given element.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a80dd40f9547fd036556e3e42f7d1426b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copies the object and returns a non-owning pointer to the copied object.</dd>
@@ -202,9 +163,12 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a04dbd0220c197cc9b970eb176e02e609"><div>
+          <section class="m-doc-details" id="a67956de9da46f413b3e74a1d655196e6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04dbd0220c197cc9b970eb176e02e609" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67956de9da46f413b3e74a1d655196e6" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
             </h3>
             <p>Specifies the material reference over which to integrate.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -217,9 +181,12 @@
             </table>
 <p>Specifies the material reference over which the integration should take place.</p>
           </div></section>
-          <section class="m-doc-details" id="aa3c87e0e350dad63f2f5d128fad139e5"><div>
+          <section class="m-doc-details" id="abe5a6b9d1ea51bc8cae33c2b1ad40982"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa3c87e0e350dad63f2f5d128fad139e5" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abe5a6b9d1ea51bc8cae33c2b1ad40982" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#aaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
             </h3>
             <p>Specifies the material references over which to integrate.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -234,7 +201,10 @@
           </div></section>
           <section class="m-doc-details" id="a8f85c7700294f44b378350ac4b996f1c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#ae0ef49e0b0fe8eb8fb5fa62cf553d27e" class="m-doc">Math::<wbr />Matrix</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f85c7700294f44b378350ac4b996f1c" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#ae0ef49e0b0fe8eb8fb5fa62cf553d27e" class="m-doc">Math::<wbr />Matrix</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f85c7700294f44b378350ac4b996f1c" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -279,16 +249,12 @@ $ m $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a99e26a9d28b76c8f6438a086b63c1017"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99e26a9d28b76c8f6438a086b63c1017" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Performs the assembly of the element matrix for the given element.</p>
-<p>Assembles the stiffness matrix of the given element.</p>
-          </div></section>
           <section class="m-doc-details" id="a80dd40f9547fd036556e3e42f7d1426b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80dd40f9547fd036556e3e42f7d1426b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80dd40f9547fd036556e3e42f7d1426b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Copies the object and returns a non-owning pointer to the copied object.</p>
             <table class="m-table m-fullwidth m-flat">
