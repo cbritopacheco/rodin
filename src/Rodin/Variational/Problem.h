@@ -171,9 +171,9 @@ namespace Rodin::Variational
 
       Problem& imposeDirichletBCs();
 
-      Problem& operator+=(const BilinearFormIntegratorBase& lfi);
+      Problem& operator+=(const LocalBilinearFormIntegratorBase& lfi);
 
-      Problem& operator-=(const BilinearFormIntegratorBase& lfi);
+      Problem& operator-=(const LocalBilinearFormIntegratorBase& lfi);
 
       Problem& operator+=(const LinearFormIntegratorBase& lfi);
 

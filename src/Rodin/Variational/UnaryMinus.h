@@ -243,10 +243,10 @@ namespace Rodin::Variational
   UnaryMinus<LinearFormIntegratorBase> operator-(const LinearFormIntegratorBase& lfi);
 
   template <>
-  class UnaryMinus<BilinearFormIntegratorBase> : public BilinearFormIntegratorBase
+  class UnaryMinus<LocalBilinearFormIntegratorBase> : public LocalBilinearFormIntegratorBase
   {
     public:
-      UnaryMinus(const BilinearFormIntegratorBase& op);
+      UnaryMinus(const LocalBilinearFormIntegratorBase& op);
 
       UnaryMinus(const UnaryMinus& other);
 
@@ -262,11 +262,11 @@ namespace Rodin::Variational
       }
 
     private:
-      std::unique_ptr<BilinearFormIntegratorBase> m_op;
+      std::unique_ptr<LocalBilinearFormIntegratorBase> m_op;
   };
-  UnaryMinus(const BilinearFormIntegratorBase&) -> UnaryMinus<BilinearFormIntegratorBase>;
+  UnaryMinus(const LocalBilinearFormIntegratorBase&) -> UnaryMinus<LocalBilinearFormIntegratorBase>;
 
-  UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op);
+  UnaryMinus<LocalBilinearFormIntegratorBase> operator-(const LocalBilinearFormIntegratorBase& op);
 
   template <>
   class UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>
@@ -299,22 +299,22 @@ namespace Rodin::Variational
   operator-(const FormLanguage::List<LinearFormIntegratorBase>& op);
 
   template <>
-  class UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
-    : public FormLanguage::List<BilinearFormIntegratorBase>
+  class UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>
+    : public FormLanguage::List<LocalBilinearFormIntegratorBase>
   {
     public:
-      UnaryMinus(const FormLanguage::List<BilinearFormIntegratorBase>& op)
+      UnaryMinus(const FormLanguage::List<LocalBilinearFormIntegratorBase>& op)
       {
         for (const auto& p : op)
-          add(UnaryMinus<BilinearFormIntegratorBase>(p));
+          add(UnaryMinus<LocalBilinearFormIntegratorBase>(p));
       }
 
       UnaryMinus(const UnaryMinus& other)
-        : FormLanguage::List<BilinearFormIntegratorBase>(other)
+        : FormLanguage::List<LocalBilinearFormIntegratorBase>(other)
       {}
 
       UnaryMinus(UnaryMinus&& other)
-        : FormLanguage::List<BilinearFormIntegratorBase>(std::move(other))
+        : FormLanguage::List<LocalBilinearFormIntegratorBase>(std::move(other))
       {}
 
       UnaryMinus* copy() const noexcept override
@@ -323,11 +323,11 @@ namespace Rodin::Variational
       }
   };
 
-  UnaryMinus(const FormLanguage::List<BilinearFormIntegratorBase>&)
-    -> UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>;
+  UnaryMinus(const FormLanguage::List<LocalBilinearFormIntegratorBase>&)
+    -> UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>;
 
-  UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
-  operator-(const FormLanguage::List<BilinearFormIntegratorBase>& op);
+  UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>
+  operator-(const FormLanguage::List<LocalBilinearFormIntegratorBase>& op);
 }
 
 #endif

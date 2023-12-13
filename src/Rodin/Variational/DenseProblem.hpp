@@ -58,7 +58,7 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
   DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
-  ::operator+=(const BilinearFormIntegratorBase& rhs)
+  ::operator+=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(rhs);
     return *this;
@@ -67,7 +67,7 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>&
   DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
-  ::operator-=(const BilinearFormIntegratorBase& rhs)
+  ::operator-=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(UnaryMinus(rhs));
     return *this;

@@ -118,9 +118,9 @@ namespace Rodin::Variational
 
       DenseProblem& imposeDirichletBCs();
 
-      DenseProblem& operator+=(const BilinearFormIntegratorBase& lfi);
+      DenseProblem& operator+=(const LocalBilinearFormIntegratorBase& lfi);
 
-      DenseProblem& operator-=(const BilinearFormIntegratorBase& lfi);
+      DenseProblem& operator-=(const LocalBilinearFormIntegratorBase& lfi);
 
       DenseProblem& operator+=(const LinearFormIntegratorBase& lfi);
 

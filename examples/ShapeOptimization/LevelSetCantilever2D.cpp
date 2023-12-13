@@ -31,9 +31,9 @@ static constexpr double lambda = 0.5769;
 static constexpr size_t maxIt = 300;
 static constexpr double hmax = 0.05;
 static constexpr double hmin = 0.1 * hmax;
-static constexpr double hausd = hmin;
+static constexpr double hausd = 0.5 * hmin;
 static constexpr double ell = 0.4;
-static constexpr double alpha = 4 * hmax * hmax;
+static constexpr double alpha = hmax;
 
 // Compliance
 inline Scalar compliance(const GridFunction<FES>& w)
@@ -60,7 +60,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  Solver::SparseLU solver;
+  Solver::UMFPack solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -105,12 +105,15 @@ int main(int, char**)
     TrialFunction g(vh);
     TestFunction  w(vh);
     Problem hilbert(g, w);
-    hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
+    hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     hilbert.solve(solver);
-    const auto& dJ = g.getSolution();
+    auto& dJ = g.getSolution();
+
+    g.getSolution().save("g.gf");
+    th.save("g.mesh");
 
     // Update objective
     double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);
@@ -128,7 +131,8 @@ int main(int, char**)
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
     GridFunction norm(sh);
     norm = Frobenius(dJ);
-    const Scalar dt = 2 * hmax / norm.max();
+    dJ /= norm.max();
+    const Scalar dt = 4 * hmax;
     MMG::Advect(dist, dJ).step(dt);
 
     // Recover the implicit domain
@@ -138,6 +142,8 @@ int main(int, char**)
                                     .split(Exterior, {Interior, Exterior})
                                     .setRMC(1e-6)
                                     .setHMax(hmax)
+                                    .setHMin(hmin)
+                                    .setHausdorff(hausd)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)

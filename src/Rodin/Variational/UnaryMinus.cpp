@@ -46,28 +46,28 @@ namespace Rodin::Variational
   }
 
   // ---- BilinearFormIntegratorBase ----------------------------------------
-  UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const BilinearFormIntegratorBase& op)
-    :  BilinearFormIntegratorBase(op),
+  UnaryMinus<LocalBilinearFormIntegratorBase>::UnaryMinus(const LocalBilinearFormIntegratorBase& op)
+    :  LocalBilinearFormIntegratorBase(op),
       m_op(op.copy())
   {}
 
-  UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
-    :  BilinearFormIntegratorBase(other),
+  UnaryMinus<LocalBilinearFormIntegratorBase>::UnaryMinus(const UnaryMinus& other)
+    :  LocalBilinearFormIntegratorBase(other),
       m_op(other.m_op->copy())
   {}
 
-  UnaryMinus<BilinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
-    : BilinearFormIntegratorBase(std::move(other)),
+  UnaryMinus<LocalBilinearFormIntegratorBase>::UnaryMinus(UnaryMinus&& other)
+    : LocalBilinearFormIntegratorBase(std::move(other)),
       m_op(std::move(other.m_op))
   {}
 
   Integrator::Region
-  UnaryMinus<BilinearFormIntegratorBase>::getRegion() const
+  UnaryMinus<LocalBilinearFormIntegratorBase>::getRegion() const
   {
     return m_op->getRegion();
   }
 
-  void UnaryMinus<BilinearFormIntegratorBase>::assemble(const Geometry::Polytope& element)
+  void UnaryMinus<LocalBilinearFormIntegratorBase>::assemble(const Geometry::Polytope& element)
   {
     m_op->assemble(element);
     auto& res = getMatrix();
@@ -75,15 +75,15 @@ namespace Rodin::Variational
     res *= -1.0;
   }
 
-  UnaryMinus<BilinearFormIntegratorBase> operator-(const BilinearFormIntegratorBase& op)
+  UnaryMinus<LocalBilinearFormIntegratorBase> operator-(const LocalBilinearFormIntegratorBase& op)
   {
     return UnaryMinus(op);
   }
 
-  UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>
-  operator-(const FormLanguage::List<BilinearFormIntegratorBase>& op)
+  UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>
+  operator-(const FormLanguage::List<LocalBilinearFormIntegratorBase>& op)
   {
-    return UnaryMinus<FormLanguage::List<BilinearFormIntegratorBase>>(op);
+    return UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase>>(op);
   }
 
   UnaryMinus<FormLanguage::List<LinearFormIntegratorBase>>

@@ -35,7 +35,7 @@ static double hmax = 0.2;
 static double hmin = 0.1 * hmax;
 static double hausd = 0.5 * hmin;
 static size_t hmaxIt = maxIt / 2;
-static double alpha = 4 * hmax;
+static double alpha = 4 * (hmax - hmin) * (hmax - hmin);
 
 using FES = VectorP1<Context::Sequential>;
 

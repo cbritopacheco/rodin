@@ -275,7 +275,7 @@ namespace Rodin::Variational
     Dot<
       ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-        : public BilinearFormIntegratorBase
+        : public LocalBilinearFormIntegratorBase
   {
     public:
       using LHS = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
@@ -284,24 +284,24 @@ namespace Rodin::Variational
 
       using Integrand = Dot<LHS, RHS>;
 
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
 
       QuadratureRule(const LHS& lhs, const RHS& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
       QuadratureRule(const Integrand& prod)
-        : BilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
+        : LocalBilinearFormIntegratorBase(prod.getLHS().getLeaf(), prod.getRHS().getLeaf()),
           m_prod(prod.copy())
       {}
 
       QuadratureRule(const QuadratureRule& other)
-        : BilinearFormIntegratorBase(other),
+        : LocalBilinearFormIntegratorBase(other),
           m_prod(other.m_prod->copy())
       {}
 
       QuadratureRule(QuadratureRule&& other)
-        : BilinearFormIntegratorBase(std::move(other)),
+        : LocalBilinearFormIntegratorBase(std::move(other)),
           m_prod(std::move(other.m_prod))
       {}
 
