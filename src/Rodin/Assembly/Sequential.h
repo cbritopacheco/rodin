@@ -407,33 +407,6 @@ namespace Rodin::Assembly
         return new Sequential(*this);
       }
   };
-
-  // template <class FES>
-  // class Sequential<
-  //   Integral<
-  //     Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-  //         ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>>
-  //   : public AssemblyBase<Variational::LinearForm<FES, Math::Vector>>
-  // {
-  //   public:
-  //     using Parent =
-  //       AssemblyBase<
-  //         Integral<
-  //           Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-  //               ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>>;
-
-  //     using Input = typename Parent::Input;
-
-  //     using OperatorType = Math::Matrix;
-
-  //     OperatorType execute(const Input& input) const override;
-
-  //     Sequential* copy() const noexcept override
-  //     {
-  //       return new Sequential(*this);
-  //     }
-  // };
-
 }
 
 #endif

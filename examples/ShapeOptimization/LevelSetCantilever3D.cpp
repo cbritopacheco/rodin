@@ -31,11 +31,13 @@ static constexpr double eps = 1e-12;
 static constexpr double hgrad = 1.6;
 static constexpr double ell = 0.1;
 static double elementStep = 0.5;
-static double hmax = 0.2;
+static double hmax = 0.1;
 static double hmin = 0.1 * hmax;
 static double hausd = 0.5 * hmin;
 static size_t hmaxIt = maxIt / 2;
-static double alpha = 4 * (hmax - hmin) * (hmax - hmin);
+const Scalar k = 4;
+const Scalar dt = k * (hmax - hmin);
+static double alpha = dt;
 
 using FES = VectorP1<Context::Sequential>;
 
@@ -68,11 +70,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  // Eigen::ConjugateGradient<Math::SparseMatrix> ecg;
-  // Solver::EigenSolver<
-  //   Eigen::ConjugateGradient<Math::SparseMatrix>, Math::SparseMatrix, Math::Vector> solver(ecg);
-  Solver::CG solver;
-  solver.setMaxIterations(200);
+  Solver::UMFPack solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -84,7 +82,7 @@ int main(int, char**)
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
-    trimmed.save("trimmed.mesh", IO::FileFormat::MEDIT);
+    trimmed.save("Omega.mesh");
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = th.getSpaceDimension();
@@ -122,7 +120,7 @@ int main(int, char**)
     TrialFunction g(vh);
     TestFunction  w(vh);
     Problem hilbert(g, w);
-    hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
+    hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
@@ -142,10 +140,7 @@ int main(int, char**)
     GridFunction norm(sh);
     norm = Frobenius(dJ);
     dJ /= norm.max();
-    th.save("dJ.mesh");
-    dJ.save("dJ.gf");
-    const Scalar k = hmin;
-    const Scalar dt = k;
+
     MMG::Advect(dist, dJ).step(dt);
 
     // Recover the implicit domain
@@ -167,8 +162,6 @@ int main(int, char**)
                     .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
-
-    th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

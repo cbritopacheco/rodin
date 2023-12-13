@@ -37,14 +37,16 @@ namespace Rodin::Variational
 
       ProblemBodyBase(const ProblemBodyBase& other)
         : Parent(other),
-          m_bfis(other.m_bfis),
+          m_lbfis(other.m_lbfis),
+          m_gbfis(other.m_gbfis),
           m_lfis(other.m_lfis),
           m_essBdr(other.m_essBdr)
       {}
 
       ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
-          m_bfis(std::move(other.m_bfis)),
+          m_lbfis(std::move(other.m_lbfis)),
+          m_gbfis(std::move(other.m_gbfis)),
           m_lfis(std::move(other.m_lfis)),
           m_essBdr(std::move(other.m_essBdr))
       {}
@@ -52,7 +54,8 @@ namespace Rodin::Variational
       inline
       ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
-        m_bfis = std::move(other.m_bfis);
+        m_lbfis = std::move(other.m_lbfis);
+        m_gbfis = std::move(other.m_gbfis);
         m_lfis = std::move(other.m_lfis);
         m_essBdr = std::move(other.m_essBdr);
         return *this;
@@ -70,7 +73,7 @@ namespace Rodin::Variational
 
       FormLanguage::List<LocalBilinearFormIntegratorBase>& getBFIs()
       {
-        return m_bfis;
+        return m_lbfis;
       }
 
       FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
@@ -88,9 +91,14 @@ namespace Rodin::Variational
         return m_essBdr;
       }
 
-      const FormLanguage::List<LocalBilinearFormIntegratorBase>& getBFIs() const
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& getLocalBFIs() const
       {
-        return m_bfis;
+        return m_lbfis;
+      }
+
+      const FormLanguage::List<GlobalBilinearFormIntegratorBase>& getGlobalBFIs() const
+      {
+        return m_gbfis;
       }
 
       const FormLanguage::List<LinearFormIntegratorBase>& getLFIs() const
@@ -104,7 +112,8 @@ namespace Rodin::Variational
       }
 
     private:
-      FormLanguage::List<LocalBilinearFormIntegratorBase> m_bfis;
+      FormLanguage::List<LocalBilinearFormIntegratorBase> m_lbfis;
+      FormLanguage::List<GlobalBilinearFormIntegratorBase> m_gbfis;
       FormLanguage::List<LinearFormIntegratorBase> m_lfis;
       EssentialBoundary m_essBdr;
       PeriodicBoundary  m_periodicBdr;
@@ -217,7 +226,12 @@ namespace Rodin::Variational
 
       ProblemBody(const LocalBilinearFormIntegratorBase& bfi)
       {
-        getBFIs().add(bfi);
+        getLocalBFIs().add(bfi);
+      }
+
+      ProblemBody(const GlobalBilinearFormIntegratorBase& bfi)
+      {
+        getGlobalBFIs().add(bfi);
       }
 
       ProblemBody(const ProblemBody<OperatorType, void>& pbo)

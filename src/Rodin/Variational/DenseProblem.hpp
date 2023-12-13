@@ -41,7 +41,7 @@ namespace Rodin::Variational
   DenseProblem<TrialFES, TestFES, Context::Sequential, Math::Matrix, Math::Vector>
   ::operator=(const ProblemBody<Math::Matrix, Math::Vector>& rhs)
   {
-    for (auto& bfi : rhs.getBFIs())
+    for (auto& bfi : rhs.getLocalBFIs())
       m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())

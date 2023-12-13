@@ -33,7 +33,8 @@ static constexpr double hmax = 0.05;
 static constexpr double hmin = 0.1 * hmax;
 static constexpr double hausd = 0.5 * hmin;
 static constexpr double ell = 0.4;
-static constexpr double alpha = hmax;
+const constexpr Scalar dt = 4 * (hmax - hmin);
+static constexpr double alpha = dt;
 
 // Compliance
 inline Scalar compliance(const GridFunction<FES>& w)
@@ -60,7 +61,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  // Solver::UMFPack solver;
+  Solver::UMFPack solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -68,10 +69,12 @@ int main(int, char**)
   for (size_t i = 0; i < maxIt; i++)
   {
     th.getConnectivity().compute(1, 2);
+
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
+    trimmed.save("Omega.mesh");
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = 2;
@@ -112,9 +115,6 @@ int main(int, char**)
     hilbert.solve(solver);
     auto& dJ = g.getSolution();
 
-    g.getSolution().save("g.gf");
-    th.save("g.mesh");
-
     // Update objective
     double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);
     obj.push_back(objective);
@@ -132,7 +132,7 @@ int main(int, char**)
     GridFunction norm(sh);
     norm = Frobenius(dJ);
     dJ /= norm.max();
-    const Scalar dt = 4 * hmax;
+
     MMG::Advect(dist, dJ).step(dt);
 
     // Recover the implicit domain
@@ -154,8 +154,6 @@ int main(int, char**)
                     .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
-
-    th.save("Omega.mesh");
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
