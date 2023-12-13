@@ -22,8 +22,8 @@ namespace Rodin::Variational
     public:
       using Parent = Integrator;
 
-      template <class FES>
-      LinearFormIntegratorBase(const TestFunction<FES>& v)
+      template <class Derived, class FES, ShapeFunctionSpaceType Space>
+      LinearFormIntegratorBase(const ShapeFunction<Derived, FES, Space>& v)
         : m_v(v)
       {}
 

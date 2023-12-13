@@ -225,7 +225,7 @@ namespace Rodin::Assembly
 
     private:
       static thread_local std::vector<Eigen::Triplet<Scalar>> tl_triplets;
-      static thread_local std::unique_ptr<Variational::BilinearFormIntegratorBase> tl_bfi;
+      static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_bfi;
 
       const size_t m_threadCount;
       mutable Threads::Mutex m_mutex;
@@ -241,7 +241,7 @@ namespace Rodin::Assembly
 
   template <class TrialFES, class TestFES>
   thread_local
-  std::unique_ptr<Variational::BilinearFormIntegratorBase>
+  std::unique_ptr<Variational::LocalBilinearFormIntegratorBase>
   Multithreaded<
     std::vector<Eigen::Triplet<Scalar>>,
     Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>::tl_bfi;
@@ -493,7 +493,7 @@ namespace Rodin::Assembly
 
     private:
       static thread_local Math::Matrix tl_res;
-      static thread_local std::unique_ptr<Variational::BilinearFormIntegratorBase> tl_bfi;
+      static thread_local std::unique_ptr<Variational::LocalBilinearFormIntegratorBase> tl_bfi;
 
       const size_t m_threadCount;
       mutable Threads::Mutex m_mutex;
@@ -507,7 +507,7 @@ namespace Rodin::Assembly
 
    template <class TrialFES, class TestFES>
    thread_local
-   std::unique_ptr<Variational::BilinearFormIntegratorBase>
+   std::unique_ptr<Variational::LocalBilinearFormIntegratorBase>
    Multithreaded<Math::Matrix, Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>::tl_bfi;
 
   /**

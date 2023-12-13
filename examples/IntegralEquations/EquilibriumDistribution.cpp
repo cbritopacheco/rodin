@@ -39,10 +39,10 @@ int main(int, char**)
   TestFunction  v(fes);
 
   DenseProblem eq(u, v);
-  eq = Integral(0.00001 * Grad(u), Grad(v))
-     + Integral(Potential(K, u), v)
-     - Integral(v)
-     ;
+  // eq = Integral(0.00001 * Grad(u), Grad(v))
+  //    + Integral(Potential(K, u), v)
+  //    - Integral(v)
+  //    ;
 
   std::cout << "assemblage\n";
   eq.assemble();

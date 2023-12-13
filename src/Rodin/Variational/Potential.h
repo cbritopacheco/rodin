@@ -17,7 +17,8 @@
 #include "Function.h"
 #include "Integral.h"
 #include "ShapeFunction.h"
-#include "BilinearForm.h"
+#include "QuadratureRule.h"
+#include "LinearFormIntegrator.h"
 
 namespace Rodin::FormLanguage
 {
@@ -298,7 +299,7 @@ namespace Rodin::Variational
   class Potential<
     LHSType,
     ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>> final
-    : public LinearFormBase<Math::Vector>
+    : public LinearFormIntegratorBase
   {
     public:
       using FES = FESType;
@@ -312,7 +313,7 @@ namespace Rodin::Variational
 
       using Operand = RHS;
 
-      using Parent = LinearFormBase<Math::Vector>;
+      using Parent = LinearFormIntegratorBase;
 
       using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
 
@@ -336,7 +337,8 @@ namespace Rodin::Variational
           (std::is_same_v<LHSRange, Math::Matrix> || std::is_same_v<RHSRange, Math::Vector>));
 
       Potential(const Kernel& kernel, const Operand& u)
-        : m_kernel(kernel), m_u(u)
+        : Parent(u.getLeaf()),
+          m_kernel(kernel), m_u(u)
       {}
 
       Potential(const Potential& other)
@@ -348,18 +350,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
       {}
-
-      inline
-      const LHS& getLHS() const
-      {
-        return getKernel();
-      }
-
-      inline
-      const RHS& getRHS() const
-      {
-        return getOperand();
-      }
 
       inline
       const Kernel& getKernel() const
@@ -375,13 +365,6 @@ namespace Rodin::Variational
 
       inline
       constexpr
-      const auto& getLeaf() const
-      {
-        return getOperand().getLeaf();
-      }
-
-      inline
-      constexpr
       RangeShape getRangeShape() const
       {
         if constexpr (std::is_same_v<LHSRange, Scalar>)
@@ -392,7 +375,7 @@ namespace Rodin::Variational
         else if constexpr (std::is_same_v<LHSRange, Math::Matrix>)
         {
           static_assert(std::is_same_v<RHSRange, Math::Vector>);
-          return getRHS().getRangeShape()[0];
+          return { getOperand().getRangeShape()[0], 1};
         }
         else
         {
@@ -401,39 +384,14 @@ namespace Rodin::Variational
         }
       }
 
-      inline
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
-      {
-        return getRHS().getDOFs(element);
-      }
-
-      inline
-      constexpr
-      const auto& getFiniteElementSpace() const
-      {
-        return getOperand().getFiniteElementSpace();
-      }
-
-      void assemble() final override
+      void assemble(const Geometry::Polytope& polytope) final override
       {
         assert(false);
       }
 
-      Math::Vector& getVector() override
+      Region getRegion() const override
       {
-        return m_vec;
-      }
-
-      const Math::Vector& getVector() const override
-      {
-        return m_vec;
-      }
-
-      inline
-      const Operand& getTestFunction() const override
-      {
-        return getOperand();
+        return Region::Domain;
       }
 
       inline Potential* copy() const noexcept override
@@ -455,19 +413,18 @@ namespace Rodin::Variational
     -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
 
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Integral<
+  class QuadratureRule<
     Dot<
       Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-        : public BilinearFormBase<Math::Matrix>
+        : public GlobalBilinearFormIntegratorBase
   {
     public:
       using Kernel = KernelType;
 
       using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
-      using RHS =
-        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
       using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
 
@@ -475,24 +432,27 @@ namespace Rodin::Variational
 
       using Integrand = Dot<LHS, RHS>;
 
-      using Parent = BilinearFormBase<Math::Matrix>;
+      using Parent = GlobalBilinearFormIntegratorBase;
 
-      static_assert(std::is_same_v<LHSRange, RHSRange>);
-
-      Integral(const LHS& lhs, const RHS& rhs)
-        : Integral(Dot(lhs, rhs))
+      constexpr
+      QuadratureRule(const LHS& lhs, const RHS& rhs)
+        : QuadratureRule(Dot(lhs, rhs))
       {}
 
-      Integral(const Integrand& prod)
-        : m_integrand(prod.copy())
+      constexpr
+      QuadratureRule(const Integrand& integrand)
+        : Parent(integrand.getLHS().getOperand().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy())
       {}
 
-      Integral(const Integral& other)
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
-      Integral(Integral&& other)
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
@@ -505,57 +465,20 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      void assemble() final override
+      void assemble(const Geometry::Polytope& tau, const Geometry::Polytope& t) final override
       {
-        const auto& integrand = getIntegrand();
-        const auto& lhs = integrand.getLHS();
-        const auto& rhs = integrand.getRHS();
-        const auto& trialfes = lhs.getFiniteElementSpace();
-        const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& mesh = trialfes.getMesh();
-        auto& res = m_operator;
-        res.resize(testfes.getSize(), trialfes.getSize());
-        res.setZero();
-        Math::Matrix mat;
-        if constexpr (std::is_same_v<LHSRange, Scalar>)
-        {
-          for (auto itt = mesh.getCell(); itt; ++itt)
-          {
-            const auto& t = *itt;
-            for (auto itau = mesh.getCell(); itau; ++itau)
-            {
-              const auto& tau = *itau;
-              integrate(mat, t, tau);
-            }
-
-          }
-        }
-        else if constexpr (std::is_same_v<LHSRange, Math::Vector>)
-        {
-          assert(false);
-        }
-        else
-        {
-          assert(false);
-        }
-      }
-
-      virtual void integrate(
-          Math::Matrix& out, const Geometry::Polytope& trgeom, const Geometry::Polytope& tegeom)
-      {
-        const auto& tau = trgeom;
-        const auto& t = tegeom;
         const auto& tautrans = tau.getTransformation();
         const auto& ttrans = t.getTransformation();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& trialfes = lhs.getOperand().getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& testfe = testfes.getFiniteElement(t.getDimension(), t.getIndex());
         const auto& trialfe = trialfes.getFiniteElement(tau.getDimension(), tau.getIndex());
         const auto& kernel = lhs.getKernel();
-        out.resize(testfe.getDOFs(tegeom), trialfe.getDOFs(trgeom));
+        auto& res = getMatrix();
+        res.resize(testfe.getCount(), trialfe.getCount());
         if (t == tau)
         {
           switch (t.getGeometry())
@@ -632,17 +555,17 @@ namespace Rodin::Variational
                         for (size_t m = 0; m < trialfe.getCount(); m++)
                         {
                           const auto& trb = trialfe.getBasis(m);
-                          out(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
+                          res(l, m) += d * w * s1 * trb(rx1) * teb(rz1);
                           assert(std::isfinite(s1));
-                          out(l, m) += d * w * s2 * trb(rx2) * teb(rz2);
+                          res(l, m) += d * w * s2 * trb(rx2) * teb(rz2);
                           assert(std::isfinite(s2));
-                          out(l, m) += d * w * s3 * trb(rx3) * teb(rz3);
+                          res(l, m) += d * w * s3 * trb(rx3) * teb(rz3);
                           assert(std::isfinite(s3));
-                          out(l, m) += d * w * s4 * trb(rx4) * teb(rz4);
+                          res(l, m) += d * w * s4 * trb(rx4) * teb(rz4);
                           assert(std::isfinite(s4));
-                          out(l, m) += d * w * s5 * trb(rx5) * teb(rz5);
+                          res(l, m) += d * w * s5 * trb(rx5) * teb(rz5);
                           assert(std::isfinite(s5));
-                          out(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
+                          res(l, m) += d * w * s6 * trb(rx6) * teb(rz6);
                           assert(std::isfinite(s6));
                         }
                       }
@@ -673,7 +596,7 @@ namespace Rodin::Variational
                 for (size_t m = 0; m < trialfe.getCount(); m++)
                 {
                   const auto& trb = trialfe.getBasis(m);
-                  out(l, m) += w * d * kxy * teb(qfte.getPoint(i)) * trb(qftr.getPoint(j));
+                  res(l, m) += w * d * kxy * teb(qfte.getPoint(i)) * trb(qftr.getPoint(j));
                 }
               }
             }
@@ -681,34 +604,72 @@ namespace Rodin::Variational
         }
       }
 
-      Math::Matrix& getOperator() override
-      {
-        return m_operator;
-      }
+      virtual Region getRegion() const override = 0;
 
-      const Math::Matrix& getOperator() const override
-      {
-        return m_operator;
-      }
-
-      const TrialFunction<TrialFES>& getTrialFunction() const override
-      {
-        return getIntegrand().getLHS().getLeaf();
-      }
-
-      const TestFunction<TestFES>& getTestFunction() const override
-      {
-        return getIntegrand().getRHS().getLeaf();
-      }
-
-      inline Integral* copy() const noexcept override
-      {
-        return new Integral(*this);
-      }
+      virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
       std::unique_ptr<Integrand> m_integrand;
-      Math::Matrix m_operator;
+  };
+
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  class Integral<
+    Dot<
+      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
+    : public QuadratureRule<
+        Dot<
+          Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+  {
+    public:
+      using Kernel = KernelType;
+
+      using LHS = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+
+      using RHS = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
+      using LHSRange = typename FormLanguage::Traits<LHS>::RangeType;
+
+      using RHSRange = typename FormLanguage::Traits<RHS>::RangeType;
+
+      using Integrand = Dot<LHS, RHS>;
+
+      using Parent =
+        QuadratureRule<
+          Dot<
+            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+
+      static_assert(std::is_same_v<LHSRange, RHSRange>);
+
+      Integral(const LHS& lhs, const RHS& rhs)
+        : Integral(Dot(lhs, rhs))
+      {}
+
+      Integral(const Integrand& integrand)
+        : Parent(integrand)
+      {}
+
+      Integral(const Integral& other)
+        : Parent(other)
+      {}
+
+      Integral(Integral&& other)
+        : Parent(std::move(other))
+      {}
+
+      inline
+      Integrator::Region getRegion() const override
+      {
+        return Integrator::Region::Domain;
+      }
+
+      inline
+      Integral* copy() const noexcept override
+      {
+        return new Integral(*this);
+      }
   };
 
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>

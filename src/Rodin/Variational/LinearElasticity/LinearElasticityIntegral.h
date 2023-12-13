@@ -12,11 +12,11 @@ namespace Rodin::Variational
 {
   template <class FESType, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator final
-    : public BilinearFormIntegratorBase
+    : public LocalBilinearFormIntegratorBase
   {
     public:
       using FES = FESType;
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
       using Mu = FunctionBase<MuDerived>;
       using Lambda = FunctionBase<LambdaDerived>;
 

@@ -298,10 +298,10 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>,
           P1<Scalar, Context>, TestSpace>>>
-    : public BilinearFormIntegratorBase
+    : public LocalBilinearFormIntegratorBase
   {
     public:
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
 
       using FES = P1<Scalar, Context>;
 
@@ -337,7 +337,7 @@ namespace Rodin::Variational
 
       constexpr
       QuadratureRule(const Integrand& integrand)
-        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+        : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 
@@ -473,10 +473,10 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>,
           P1<Scalar, Context>, TestSpace>>>
-    : public BilinearFormIntegratorBase
+    : public LocalBilinearFormIntegratorBase
   {
     public:
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
 
       using FES = P1<Scalar, Context>;
 
@@ -492,7 +492,7 @@ namespace Rodin::Variational
 
       constexpr
       QuadratureRule(const Integrand& integrand)
-        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+        : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 
@@ -613,10 +613,10 @@ namespace Rodin::Variational
     ShapeFunctionBase<
       Grad<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>,
     P1<Scalar, Context>, TestSpace>>>
-    : public BilinearFormIntegratorBase
+    : public LocalBilinearFormIntegratorBase
   {
     public:
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
 
       using FES = P1<Scalar, Context>;
 
@@ -635,7 +635,7 @@ namespace Rodin::Variational
 
       constexpr
       QuadratureRule(const Integrand& integrand)
-        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+        : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 
@@ -766,10 +766,10 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         Jacobian<ShapeFunction<RHSDerived, P1<Scalar, Context>, TestSpace>>,
           P1<Scalar, Context>, TestSpace>>>
-    : public BilinearFormIntegratorBase
+    : public LocalBilinearFormIntegratorBase
   {
     public:
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
 
       using FES = P1<Scalar, Context>;
 
@@ -785,7 +785,7 @@ namespace Rodin::Variational
 
       constexpr
       QuadratureRule(const Integrand& integrand)
-        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+        : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 
@@ -908,11 +908,11 @@ namespace Rodin::Variational
     ShapeFunctionBase<
       Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector, Context>, TestSpace>>,
     P1<Math::Vector, Context>, TestSpace>>>
-    : public BilinearFormIntegratorBase
+    : public LocalBilinearFormIntegratorBase
   {
     public:
       /// Parent class
-      using Parent = BilinearFormIntegratorBase;
+      using Parent = LocalBilinearFormIntegratorBase;
 
       /// Type of finite element space
       using FES = P1<Math::Vector, Context>;
@@ -935,7 +935,7 @@ namespace Rodin::Variational
 
       constexpr
       QuadratureRule(const Integrand& integrand)
-        : BilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+        : LocalBilinearFormIntegratorBase(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 

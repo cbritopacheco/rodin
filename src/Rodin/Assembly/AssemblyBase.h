@@ -27,7 +27,7 @@ namespace Rodin::Assembly
         const Geometry::MeshBase& mesh;
         const TrialFES& trialFES;
         const TestFES& testFES;
-        FormLanguage::List<Variational::BilinearFormIntegratorBase>& bfis;
+        FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& bfis;
       };
 
       AssemblyBase() = default;

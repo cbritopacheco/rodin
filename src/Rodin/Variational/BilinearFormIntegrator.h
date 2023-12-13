@@ -18,6 +18,7 @@ namespace Rodin::Variational
    * This class provides the base functionality for bilinear form integrator
    * objects.
    */
+  template <class Derived>
   class BilinearFormIntegratorBase : public Integrator
   {
     public:
@@ -91,7 +92,7 @@ namespace Rodin::Variational
        * take place.
        */
       inline
-      BilinearFormIntegratorBase& over(Geometry::Attribute attr)
+      Derived& over(Geometry::Attribute attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
@@ -104,16 +105,15 @@ namespace Rodin::Variational
        * take place.
        */
       inline
-      BilinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
+      Derived& over(const FlatSet<Geometry::Attribute>& attrs)
       {
         assert(attrs.size() > 0);
         m_attrs = attrs;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       inline
-      Integrator::Type getType() const
-      final override
+      Integrator::Type getType() const final override
       {
         return Integrator::Type::Bilinear;
       }
@@ -153,6 +153,23 @@ namespace Rodin::Variational
         return m_matrix;
       }
 
+      virtual
+      BilinearFormIntegratorBase* copy() const noexcept override = 0;
+
+    private:
+      std::reference_wrapper<const FormLanguage::Base> m_u;
+      std::reference_wrapper<const FormLanguage::Base> m_v;
+      FlatSet<Geometry::Attribute> m_attrs;
+      Math::Matrix m_matrix;
+  };
+
+  class LocalBilinearFormIntegratorBase
+    : public BilinearFormIntegratorBase<LocalBilinearFormIntegratorBase>
+  {
+    public:
+      using Parent = BilinearFormIntegratorBase<LocalBilinearFormIntegratorBase>;
+      using Parent::Parent;
+
       /**
        * @brief Performs the assembly of the element matrix for the given
        * element.
@@ -164,13 +181,22 @@ namespace Rodin::Variational
       void assemble(const Geometry::Polytope& polytope) = 0;
 
       virtual
-      BilinearFormIntegratorBase* copy() const noexcept override = 0;
+      LocalBilinearFormIntegratorBase* copy() const noexcept override = 0;
+  };
 
-    private:
-      std::reference_wrapper<const FormLanguage::Base> m_u;
-      std::reference_wrapper<const FormLanguage::Base> m_v;
-      FlatSet<Geometry::Attribute> m_attrs;
-      Math::Matrix m_matrix;
+  class GlobalBilinearFormIntegratorBase
+    : public BilinearFormIntegratorBase<GlobalBilinearFormIntegratorBase>
+  {
+    public:
+      /// Parent class
+      using Parent = BilinearFormIntegratorBase;
+      using Parent::Parent;
+
+      virtual
+      void assemble(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
+
+      virtual
+      GlobalBilinearFormIntegratorBase* copy() const noexcept override = 0;
   };
 }
 

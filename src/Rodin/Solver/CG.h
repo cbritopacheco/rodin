@@ -136,7 +136,7 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::Matrix, Eigen::Lower | Eigen::Upper, Eigen::IdentityPreconditioner> m_solver;
+        Math::Matrix, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
 }
