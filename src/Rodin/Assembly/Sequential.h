@@ -51,7 +51,7 @@ namespace Rodin::Assembly
       {
         std::vector<Eigen::Triplet<Scalar>> res;
         res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
-        for (auto& bfi : input.bfis)
+        for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
@@ -170,7 +170,11 @@ namespace Rodin::Assembly
         Sequential<
           std::vector<Eigen::Triplet<Scalar>>,
           Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
-        const auto triplets = assembly.execute({ input.mesh, input.trialFES, input.testFES, input.bfis });
+        const auto triplets =
+          assembly.execute({
+            input.mesh,
+            input.trialFES, input.testFES,
+            input.lbfis, input.lbfis });
         OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
@@ -220,7 +224,9 @@ namespace Rodin::Assembly
       {
         Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());;
         res.setZero();
-        for (auto& bfi : input.bfis)
+
+        // Integrate local BFIs
+        for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
@@ -291,6 +297,16 @@ namespace Rodin::Assembly
             }
           }
         }
+
+        // // Integrate global BFIs
+        // for (auto& bfi : input.gbfis)
+        // {
+        //   const auto& attrs = bfi.getAttributes();
+        //   switch (bfi.getTestRegion())
+        //   {
+        //   }
+        // }
+
         return res;
       }
 
@@ -398,7 +414,6 @@ namespace Rodin::Assembly
             }
           }
         }
-
         return res;
       }
 

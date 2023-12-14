@@ -78,7 +78,7 @@ namespace Rodin::Assembly
         res.clear();
         res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
         auto& threadPool = m_pool;
-        for (auto& bfi : input.bfis)
+        for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
@@ -293,7 +293,12 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        const auto triplets = m_assembly.execute({ input.mesh, input.trialFES, input.testFES, input.bfis });
+        const auto triplets =
+          m_assembly.execute({
+              input.mesh,
+              input.trialFES, input.testFES,
+              input.lbfis, input.gbfis
+              });
         OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
@@ -358,7 +363,7 @@ namespace Rodin::Assembly
         Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
         res.setZero();
         auto& threadPool = m_pool;
-        for (auto& bfi : input.bfis)
+        for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
