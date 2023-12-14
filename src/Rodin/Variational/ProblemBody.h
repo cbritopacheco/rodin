@@ -71,9 +71,14 @@ namespace Rodin::Variational
         return m_essBdr;
       }
 
-      FormLanguage::List<LocalBilinearFormIntegratorBase>& getBFIs()
+      FormLanguage::List<LocalBilinearFormIntegratorBase>& getLocalBFIs()
       {
         return m_lbfis;
+      }
+
+      FormLanguage::List<GlobalBilinearFormIntegratorBase>& getGlobalBFIs()
+      {
+        return m_gbfis;
       }
 
       FormLanguage::List<LinearFormIntegratorBase>& getLFIs()
@@ -304,7 +309,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getLFIs().add(lfi);
     return res;
   }
@@ -314,7 +319,7 @@ namespace Rodin::Variational
       const LinearFormIntegratorBase& lfi, const LocalBilinearFormIntegratorBase& bfi)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getLFIs().add(lfi);
     return res;
   }
@@ -324,7 +329,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const LinearFormIntegratorBase& lfi)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
@@ -334,7 +339,7 @@ namespace Rodin::Variational
       const LinearFormIntegratorBase& lfi, const LocalBilinearFormIntegratorBase& bfi)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(UnaryMinus(bfi));
+    res.getLocalBFIs().add(UnaryMinus(bfi));
     res.getLFIs().add(lfi);
     return res;
   }
@@ -345,7 +350,7 @@ namespace Rodin::Variational
       const LinearFormIntegratorBase& lfi)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfis);
+    res.getLocalBFIs().add(bfis);
     res.getLFIs().add(lfi);
     return res;
   }
@@ -356,7 +361,7 @@ namespace Rodin::Variational
       const LinearFormIntegratorBase& lfi)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfis);
+    res.getLocalBFIs().add(bfis);
     res.getLFIs().add(UnaryMinus(lfi));
     return res;
   }
@@ -366,7 +371,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const DirichletBCBase& dbc)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getDBCs().add(dbc);
     return res;
   }
@@ -376,7 +381,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const FormLanguage::List<DirichletBCBase>& dbcs)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getDBCs().add(dbcs);
     return res;
   }
@@ -386,7 +391,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const PeriodicBCBase& pbc)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getPBCs().add(pbc);
     return res;
   }
@@ -396,7 +401,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getPBCs().add(pbcs);
     return res;
   }
@@ -407,7 +412,7 @@ namespace Rodin::Variational
       const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const DirichletBCBase& dbc)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfis);
+    res.getLocalBFIs().add(bfis);
     res.getDBCs().add(dbc);
     return res;
   }
@@ -417,7 +422,7 @@ namespace Rodin::Variational
       const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const FormLanguage::List<DirichletBCBase>& dbcs)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfis);
+    res.getLocalBFIs().add(bfis);
     res.getDBCs().add(dbcs);
     return res;
   }
@@ -427,7 +432,7 @@ namespace Rodin::Variational
       const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const PeriodicBCBase& pbc)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfis);
+    res.getLocalBFIs().add(bfis);
     res.getPBCs().add(pbc);
     return res;
   }
@@ -437,7 +442,7 @@ namespace Rodin::Variational
       const FormLanguage::List<LocalBilinearFormIntegratorBase>& bfis, const FormLanguage::List<PeriodicBCBase>& pbcs)
   {
     ProblemBody<void, void> res;
-    res.getBFIs().add(bfis);
+    res.getLocalBFIs().add(bfis);
     res.getPBCs().add(pbcs);
     return res;
   }
@@ -533,7 +538,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase& bfi, const BilinearFormBase<OperatorType>& bf)
   {
     ProblemBody<OperatorType, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getBFs().add(bf);
     return res;
   }
@@ -565,7 +570,7 @@ namespace Rodin::Variational
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs)
   {
     ProblemBody<OperatorType, void> res;
-    res.getBFIs().add(bfi);
+    res.getLocalBFIs().add(bfi);
     res.getBFs().add(bfs);
     return res;
   }
