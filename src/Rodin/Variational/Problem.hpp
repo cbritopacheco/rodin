@@ -43,6 +43,8 @@ namespace Rodin::Variational
   {
     for (auto& bfi : rhs.getLocalBFIs())
       m_bilinearForm.add(bfi);
+    for (auto& bfi : rhs.getGlobalBFIs())
+      m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())
       m_linearForm.add(UnaryMinus(lfi)); // Negate every linear form
