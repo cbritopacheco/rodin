@@ -174,7 +174,7 @@ namespace Rodin::Assembly
           assembly.execute({
             input.mesh,
             input.trialFES, input.testFES,
-            input.lbfis, input.lbfis });
+            input.lbfis, input.gbfis });
         OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
