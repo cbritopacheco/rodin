@@ -241,7 +241,7 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
-      virtual Region getRegion() const override = 0;
+      virtual Region getRegion() const = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 

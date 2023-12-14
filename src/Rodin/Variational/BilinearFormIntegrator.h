@@ -57,7 +57,6 @@ namespace Rodin::Variational
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
-          m_attrs(other.m_attrs),
           m_matrix(other.m_matrix)
       {}
 
@@ -67,50 +66,11 @@ namespace Rodin::Variational
       BilinearFormIntegratorBase(BilinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs)),
           m_matrix(std::move(other.m_matrix))
       {}
 
       virtual
       ~BilinearFormIntegratorBase() = default;
-
-      /**
-       * @brief Gets the attributes of the elements being integrated.
-       */
-      inline
-      const FlatSet<Geometry::Attribute>& getAttributes() const
-      {
-        return m_attrs;
-      }
-
-
-      /**
-       * @brief Specifies the material reference over which to integrate.
-       * @returns Reference to self (for method chaining)
-       *
-       * Specifies the material reference over which the integration should
-       * take place.
-       */
-      inline
-      Derived& over(Geometry::Attribute attr)
-      {
-        return over(FlatSet<Geometry::Attribute>{attr});
-      }
-
-      /**
-       * @brief Specifies the material references over which to integrate.
-       * @returns Reference to self (for method chaining)
-       *
-       * Specifies the material references over which the integration should
-       * take place.
-       */
-      inline
-      Derived& over(const FlatSet<Geometry::Attribute>& attrs)
-      {
-        assert(attrs.size() > 0);
-        m_attrs = attrs;
-        return static_cast<Derived&>(*this);
-      }
 
       inline
       Integrator::Type getType() const final override
@@ -159,7 +119,6 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const FormLanguage::Base> m_u;
       std::reference_wrapper<const FormLanguage::Base> m_v;
-      FlatSet<Geometry::Attribute> m_attrs;
       Math::Matrix m_matrix;
   };
 
@@ -171,6 +130,59 @@ namespace Rodin::Variational
       using Parent::Parent;
 
       /**
+       * @brief Copy constructor.
+       */
+      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase& other)
+        : Parent(other),
+          m_attrs(other.m_attrs)
+      {}
+
+      /**
+       * @brief Move constructor.
+       */
+      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase&& other)
+        : Parent(std::move(other)),
+          m_attrs(std::move(other.m_attrs))
+      {}
+
+      /**
+       * @brief Gets the attributes of the elements being integrated.
+       */
+      inline
+      const FlatSet<Geometry::Attribute>& getAttributes() const
+      {
+        return m_attrs;
+      }
+
+      /**
+       * @brief Specifies the material reference over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material reference over which the integration should
+       * take place.
+       */
+      inline
+      LocalBilinearFormIntegratorBase& over(Geometry::Attribute attr)
+      {
+        return over(FlatSet<Geometry::Attribute>{attr});
+      }
+
+      /**
+       * @brief Specifies the material references over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material references over which the integration should
+       * take place.
+       */
+      inline
+      LocalBilinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
+      {
+        assert(attrs.size() > 0);
+        m_attrs = attrs;
+        return *this;
+      }
+
+      /**
        * @brief Performs the assembly of the element matrix for the given
        * element.
        *
@@ -180,8 +192,13 @@ namespace Rodin::Variational
       virtual
       void assemble(const Geometry::Polytope& polytope) = 0;
 
+      virtual Region getRegion() const = 0;
+
       virtual
       LocalBilinearFormIntegratorBase* copy() const noexcept override = 0;
+
+    private:
+      FlatSet<Geometry::Attribute> m_attrs;
   };
 
   class GlobalBilinearFormIntegratorBase
@@ -192,11 +209,67 @@ namespace Rodin::Variational
       using Parent = BilinearFormIntegratorBase;
       using Parent::Parent;
 
+      /**
+       * @brief Gets the attributes of the elements being integrated.
+       */
+      inline
+      const FlatSet<Geometry::Attribute>& getTrialAttributes() const
+      {
+        return m_trialAttrs;
+      }
+
+      /**
+       * @brief Gets the attributes of the elements being integrated.
+       */
+      inline
+      const FlatSet<Geometry::Attribute>& getTestAttributes() const
+      {
+        return m_testAttrs;
+      }
+
+      /**
+       * @brief Specifies the material reference over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material reference over which the integration should
+       * take place.
+       */
+      inline
+      GlobalBilinearFormIntegratorBase& setTrialAttributes(
+          const FlatSet<Geometry::Attribute>& attrs)
+      {
+        m_trialAttrs = attrs;
+        return *this;
+      }
+
+      /**
+       * @brief Specifies the material reference over which to integrate.
+       * @returns Reference to self (for method chaining)
+       *
+       * Specifies the material reference over which the integration should
+       * take place.
+       */
+      inline
+      GlobalBilinearFormIntegratorBase& setTestAttributes(
+          const FlatSet<Geometry::Attribute>& attrs)
+      {
+        m_testAttrs = attrs;
+        return *this;
+      }
+
       virtual
       void assemble(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
+      virtual Region getTrialRegion() const = 0;
+
+      virtual Region getTestRegion() const = 0;
+
       virtual
       GlobalBilinearFormIntegratorBase* copy() const noexcept override = 0;
+
+    private:
+      FlatSet<Geometry::Attribute> m_trialAttrs;
+      FlatSet<Geometry::Attribute> m_testAttrs;
   };
 }
 

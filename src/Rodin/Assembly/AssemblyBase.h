@@ -27,7 +27,8 @@ namespace Rodin::Assembly
         const Geometry::MeshBase& mesh;
         const TrialFES& trialFES;
         const TestFES& testFES;
-        FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& bfis;
+        FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& lbfis;
+        FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& gbfis;
       };
 
       AssemblyBase() = default;
@@ -63,31 +64,6 @@ namespace Rodin::Assembly
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
-
-  // template <class OperatorType>
-  // class AssemblyBase<
-  //   OperatorType,
-  //   Integral<
-  //     Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-  //         ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>>
-  // {
-  //   public:
-  //     struct Input
-  //     {
-  //       const Geometry::MeshBase& mesh;
-  //       const Variational::FiniteElementSpaceBase& fes;
-  //     };
-
-  //     AssemblyBase() = default;
-
-  //     AssemblyBase(const AssemblyBase&) = default;
-
-  //     AssemblyBase(AssemblyBase&&) = default;
-
-  //     virtual  execute(const Input& data) const = 0;
-
-  //     virtual AssemblyBase* copy() const noexcept = 0;
-  // };
 }
 
 #endif

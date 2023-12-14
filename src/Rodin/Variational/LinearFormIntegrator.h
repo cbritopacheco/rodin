@@ -116,6 +116,8 @@ namespace Rodin::Variational
       virtual
       LinearFormIntegratorBase* copy() const noexcept override = 0;
 
+      virtual Region getRegion() const = 0;
+
     private:
       std::reference_wrapper<const FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;

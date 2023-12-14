@@ -402,7 +402,6 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<Kernel> m_kernel;
       std::reference_wrapper<const Operand> m_u;
-      Math::Vector m_vec;
   };
 
   /**
@@ -604,7 +603,13 @@ namespace Rodin::Variational
         }
       }
 
-      virtual Region getRegion() const override = 0;
+      inline
+      Region getTrialRegion() const override
+      {
+        return getIntegrand().getLHS().getRegion();
+      }
+
+      virtual Region getTestRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -660,7 +665,7 @@ namespace Rodin::Variational
       {}
 
       inline
-      Integrator::Region getRegion() const override
+      Integrator::Region getTestRegion() const override
       {
         return Integrator::Region::Domain;
       }

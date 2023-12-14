@@ -7,6 +7,11 @@
 #ifndef RODIN_ASSEMBLY_KERNELS_H
 #define RODIN_ASSEMBLY_KERNELS_H
 
+#include "Rodin/Math.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Variational/LinearFormIntegrator.h"
+#include "Rodin/Variational/BilinearFormIntegrator.h"
+
 namespace Rodin::Assembly::Kernels
 {
   inline
