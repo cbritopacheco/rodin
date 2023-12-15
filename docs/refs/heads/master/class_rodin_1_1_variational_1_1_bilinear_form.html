@@ -281,7 +281,11 @@ $ v $
             </dt>
             <dd>Gets the reference to the associated <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23266c1de2a3da2b5efed99d93e9e496" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&gt;&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5aba0e85c381d1d9a34043d729a233a5" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&gt;&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11add859fc87b4cca30eb10ec782e0e0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&gt;&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
             </dt>
             <dd></dd>
             <dt>
@@ -293,11 +297,19 @@ $ v $
             </dt>
             <dd>Gets the reference to the (local) associated sparse matrix to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af2390a6c938af6d427f083a9c40a09c7" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6df198c015532096cafc1cb3a3eefab5" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Builds the bilinear form the given bilinear integrator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a82b77f22e2a2e5295989707cd582958c" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed9baa4b971e92e347d6a2d9960fe84e" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Adds a bilinear integrator to the bilinear form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aae291706487e7acbbc76093d6ad8acb9" class="m-doc">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Builds the bilinear form the given bilinear integrator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e7092e9f76cb76615f2b5abe71582ae" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Adds a bilinear integrator to the bilinear form.</dd>
             <dt>
@@ -494,14 +506,23 @@ $ a(u, v) $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a23266c1de2a3da2b5efed99d93e9e496"><div>
+          <section class="m-doc-details" id="a5aba0e85c381d1d9a34043d729a233a5"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES, class MatrixType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23266c1de2a3da2b5efed99d93e9e496" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&gt;&amp; bfis)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5aba0e85c381d1d9a34043d729a233a5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&gt;&amp; bfis)</span></span>
             </h3>
 <aside class="m-note m-dim"><h4><a href="todo.html#_todo000001" class="m-doc">Todo</a></h4></aside>
+          </div></section>
+          <section class="m-doc-details" id="a11add859fc87b4cca30eb10ec782e0e0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES, class MatrixType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11add859fc87b4cca30eb10ec782e0e0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&gt;&amp; bfis)</span></span>
+            </h3>
+<aside class="m-note m-dim"><h4><a href="todo.html#_todo000002" class="m-doc">Todo</a></h4></aside>
           </div></section>
           <section class="m-doc-details" id="aa201d771b5dfc9a714c1510b4fa17770"><div>
             <h3>
@@ -537,12 +558,12 @@ $ a(u, v) $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="af2390a6c938af6d427f083a9c40a09c7"><div>
+          <section class="m-doc-details" id="a6df198c015532096cafc1cb3a3eefab5"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES, class MatrixType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2390a6c938af6d427f083a9c40a09c7" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6df198c015532096cafc1cb3a3eefab5" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Builds the bilinear form the given bilinear integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -563,12 +584,55 @@ $ a(u, v) $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a82b77f22e2a2e5295989707cd582958c"><div>
+          <section class="m-doc-details" id="aed9baa4b971e92e347d6a2d9960fe84e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES, class MatrixType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82b77f22e2a2e5295989707cd582958c" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed9baa4b971e92e347d6a2d9960fe84e" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Adds a bilinear integrator to the bilinear form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aae291706487e7acbbc76093d6ad8acb9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES, class MatrixType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae291706487e7acbbc76093d6ad8acb9" class="m-doc-self">from</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Builds the bilinear form the given bilinear integrator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">bfi&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Bilinear integrator which will be used to build the bilinear form.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7e7092e9f76cb76615f2b5abe71582ae"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFES, class TestFES, class MatrixType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;TrialFES, TestFES, MatrixType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e7092e9f76cb76615f2b5abe71582ae" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&amp; bfi) <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">

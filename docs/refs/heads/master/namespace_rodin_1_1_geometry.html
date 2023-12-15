@@ -91,7 +91,8 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_connectivity.html" class="m-doc">MeshConnectivity</a>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_sequential_01_4.html" class="m-doc">Connectivity&lt;Context::Sequential&gt;</a>
             </dt>
             <dd>Represents the set of incidence relations of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>.</dd>
             <dt>
@@ -100,7 +101,7 @@
             </dt>
             <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> isoparametric transformation.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ContextType = <a href="struct_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class ContextType = <a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>
             </dt>
             <dd>Represents a polyhedral complex.</dd>
@@ -171,16 +172,15 @@
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_sequential_01_4.html" class="m-doc">SubMesh&lt;Context::Sequential&gt;</a>
             </dt>
             <dd>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> object represents a subregion of a <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> object.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation_3_01_variational_1_1_scalar_p1_element_01_4.html" class="m-doc">IsoparametricTransformation&lt;Variational::ScalarP1Element&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> isoparametric transformation.</dd>
           </dl>
         </section>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
+            <dt id="aeac358ccc236d98b1ec3ad646c0ba280">
+              using <a href="#aeac358ccc236d98b1ec3ad646c0ba280" class="m-doc-self">SequentialMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;
+            </dt>
+            <dd>Type alias for <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Sequential&gt;</a></dd>
             <dt id="a58c1090400d06e654469abe6500b2078">
               using <a href="#a58c1090400d06e654469abe6500b2078" class="m-doc-self">BoundaryIndex</a> = <a href="namespace_rodin.html#ad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
             </dt>
@@ -193,10 +193,6 @@
               using <a href="#a900be74d28509a30e364affd4e1b1356" class="m-doc-self">TransformationIndex</a> = std::vector&lt;<a href="class_rodin_1_1_threads_1_1_mutable.html" class="m-doc">Threads::<wbr />Mutable</a>&lt;std::vector&lt;<a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>*&gt;&gt;&gt;
             </dt>
             <dd>Index containing the transformations of the polytopes.</dd>
-            <dt id="aeac358ccc236d98b1ec3ad646c0ba280">
-              using <a href="#aeac358ccc236d98b1ec3ad646c0ba280" class="m-doc-self">SequentialMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="struct_rodin_1_1_context_1_1_sequential.html" class="m-doc">Context::<wbr />Sequential</a>&gt;
-            </dt>
-            <dd>Type alias for <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_sequential_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Sequential&gt;</a></dd>
             <dt id="aad3269c6d75ba79d0d3bde699227ea90">
               using <a href="#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc-self">Attribute</a> = std::size_t
             </dt>
