@@ -7,12 +7,15 @@
 #ifndef RODIN_CONTEXT_SEQUENTIAL_H
 #define RODIN_CONTEXT_SEQUENTIAL_H
 
+#include "Base.h"
+
 namespace Rodin::Context
 {
   /**
-   * @brief Represents the native single-threaded serialized context.
+   * @brief Represents the native single-threaded sequential context.
    */
-  struct Sequential {};
+  class Sequential : public Base
+  {};
 }
 
 #endif

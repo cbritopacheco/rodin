@@ -4,18 +4,24 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifdef RODIN_USE_MPI
 #ifndef RODIN_CONTEXT_MPI_H
 #define RODIN_CONTEXT_MPI_H
 
+#include "Base.h"
+
+#ifdef RODIN_USE_MPI
+
+#include <mpi.h>
 #include <boost/mpi.hpp>
 
 namespace Rodin::Context
 {
-  struct MPI
+  class MPI : public Base
   {
-    boost::mpi::communicator comm;
-  }
+
+    private:
+      boost::mpi::communicator comm;
+  };
 }
 
 #endif

@@ -66,7 +66,7 @@ namespace Rodin::IO
 
   void MeshLoader<FileFormat::MFEM, Context::Sequential>::readMesh(std::istream& is)
   {
-    Geometry::MeshConnectivity connectivity;
+    Geometry::Connectivity<Context::Sequential> connectivity;
     connectivity.initialize(m_dimension);
 
     Geometry::PolytopeIndexed<Geometry::Attribute> attrs;

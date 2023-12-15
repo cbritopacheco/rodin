@@ -12,6 +12,8 @@
 #include <optional>
 #include <functional>
 
+#include <Eigen/UmfPackSupport>
+
 #include "Rodin/Configure.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -53,7 +55,8 @@ namespace Rodin::Solver
 
       void solve(OperatorType& A, VectorType& x, VectorType& b) override
       {
-        assert(false);
+        m_solver.compute(A);
+        x = m_solver.solve(b);
       }
 
       inline
@@ -61,6 +64,9 @@ namespace Rodin::Solver
       {
         return new UMFPack(*this);
       }
+
+    private:
+      Eigen::UmfPackLU<Math::SparseMatrix> m_solver;
   };
 }
 

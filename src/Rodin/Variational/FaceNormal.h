@@ -99,7 +99,7 @@ namespace Rodin::Variational
               Integer ori = -1;
               for (auto vit = pit->getVertex(); vit; ++vit)
               {
-                const auto v = vit->getCoordinates() - p.getPhysicalCoordinates();
+                const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
                 if (res.dot(v) < 0)
                 {
                   ori *= -1;

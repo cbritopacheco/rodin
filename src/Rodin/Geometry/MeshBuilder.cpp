@@ -132,7 +132,8 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Sequential>::Builder&
-  Mesh<Context::Sequential>::Builder::setConnectivity(MeshConnectivity&& connectivity)
+  Mesh<Context::Sequential>::Builder::setConnectivity(
+      Connectivity<Context::Sequential>&& connectivity)
   {
     m_connectivity = std::move(connectivity);
     return *this;

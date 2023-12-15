@@ -8,12 +8,13 @@
 
 namespace Rodin::Geometry
 {
-  MeshConnectivity::MeshConnectivity()
+  Connectivity<Context::Sequential>::Connectivity()
   {
     m_count.resize(1, 0);
   }
 
-  MeshConnectivity& MeshConnectivity::initialize(size_t maximalDimension)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::initialize(size_t maximalDimension)
   {
     m_maximalDimension = maximalDimension;
 
@@ -38,7 +39,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity& MeshConnectivity::reserve(size_t d, size_t count)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::reserve(size_t d, size_t count)
   {
     assert(d < m_connectivity.size());
     m_index[d].left.rehash(count); m_index[d].right.rehash(count);
@@ -47,7 +49,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity& MeshConnectivity::nodes(size_t count)
+  Connectivity<Context::Sequential>& Connectivity<Context::Sequential>::nodes(size_t count)
   {
     m_count[0] = count;
     m_gcount[Geometry::Polytope::Type::Point] = count;
@@ -59,8 +61,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity&
-  MeshConnectivity::polytope(Polytope::Type t, const Array<Index>& in)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::polytope(Polytope::Type t, const Array<Index>& in)
   {
     assert(in.size() > 0);
     const size_t d = Polytope::getGeometryDimension(t);
@@ -78,8 +80,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity&
-  MeshConnectivity::polytope(Polytope::Type t, Array<Index>&& in)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::polytope(Polytope::Type t, Array<Index>&& in)
   {
     assert(in.size() > 0);
     const size_t d = Polytope::getGeometryDimension(t);
@@ -97,12 +99,14 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  const MeshConnectivity::PolytopeIndex& MeshConnectivity::getIndexMap(size_t dim) const
+  const Connectivity<Context::Sequential>::PolytopeIndex&
+  Connectivity<Context::Sequential>::getIndexMap(size_t dim) const
   {
     return m_index[dim];
   }
 
-  const std::optional<Index> MeshConnectivity::getIndex(size_t dim, const IndexArray& key) const
+  const std::optional<Index>
+  Connectivity<Context::Sequential>::getIndex(size_t dim, const IndexArray& key) const
   {
     auto it = m_index[dim].left.find(key);
     if (it == m_index[dim].left.end())
@@ -111,14 +115,14 @@ namespace Rodin::Geometry
       return it->second;
   }
 
-  const Incidence& MeshConnectivity::getIncidence(size_t d, size_t dp) const
+  const Incidence& Connectivity<Context::Sequential>::getIncidence(size_t d, size_t dp) const
   {
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
     return m_connectivity[d][dp];
   }
 
-  const IndexSet& MeshConnectivity::getIncidence(
+  const IndexSet& Connectivity<Context::Sequential>::getIncidence(
       const std::pair<size_t, size_t> p, Index idx) const
   {
     const auto& [d, dp] = p;
@@ -128,17 +132,17 @@ namespace Rodin::Geometry
     return m_connectivity[d][dp][idx];
   }
 
-  size_t MeshConnectivity::getCount(size_t dim) const
+  size_t Connectivity<Context::Sequential>::getCount(size_t dim) const
   {
     return m_count[dim];
   }
 
-  size_t MeshConnectivity::getCount(Polytope::Type g) const
+  size_t Connectivity<Context::Sequential>::getCount(Polytope::Type g) const
   {
     return m_gcount[g];
   }
 
-  size_t MeshConnectivity::getMeshDimension() const
+  size_t Connectivity<Context::Sequential>::getMeshDimension() const
   {
     for (int i = m_count.size() - 1; i >= 0; i--)
     {
@@ -148,7 +152,7 @@ namespace Rodin::Geometry
     return 0;
   }
 
-  Polytope::Type MeshConnectivity::getGeometry(size_t d, Index idx) const
+  Polytope::Type Connectivity<Context::Sequential>::getGeometry(size_t d, Index idx) const
   {
     if (d == 0)
       return Polytope::Type::Point;
@@ -156,12 +160,13 @@ namespace Rodin::Geometry
       return m_geometry[d][idx];
   }
 
-  const Array<Index>& MeshConnectivity::getPolytope(size_t d, Index idx) const
+  const Array<Index>& Connectivity<Context::Sequential>::getPolytope(size_t d, Index idx) const
   {
     return m_index[d].right.at(idx);
   }
 
-  MeshConnectivity& MeshConnectivity::setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc)
   {
     const auto& [d, dp] = p;
     assert(d < m_connectivity.size());
@@ -170,7 +175,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity& MeshConnectivity::compute(size_t d, size_t dp)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::compute(size_t d, size_t dp)
   {
     const size_t D = getMeshDimension();
     if (d == D && dp == 0)
@@ -206,7 +212,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity& MeshConnectivity::build(size_t d)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::build(size_t d)
   {
     const size_t D = getMeshDimension();
     assert(d > 0);
@@ -240,7 +247,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity& MeshConnectivity::transpose(size_t d, size_t dp)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::transpose(size_t d, size_t dp)
   {
     assert(d < dp);
     assert(d < m_connectivity.size());
@@ -255,7 +263,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MeshConnectivity& MeshConnectivity::intersection(size_t d, size_t dp, size_t dpp)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::intersection(size_t d, size_t dp, size_t dpp)
   {
     assert(d >= dp);
     m_connectivity[d][dp].resize(m_count[d]);
@@ -283,7 +292,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  void MeshConnectivity::local(std::vector<MeshConnectivity::SubPolytope>& out, size_t dim, Index i)
+  void Connectivity<Context::Sequential>::local(
+      std::vector<Connectivity<Context::Sequential>::SubPolytope>& out, size_t dim, Index i)
   {
     const size_t D = getMeshDimension();
 
@@ -457,7 +467,8 @@ namespace Rodin::Geometry
     out = {};
   }
 
-  MeshConnectivity& MeshConnectivity::clear(size_t d, size_t dp)
+  Connectivity<Context::Sequential>&
+  Connectivity<Context::Sequential>::clear(size_t d, size_t dp)
   {
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());

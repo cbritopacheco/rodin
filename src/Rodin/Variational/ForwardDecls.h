@@ -82,7 +82,12 @@ namespace Rodin::Variational
   /**
    * @brief Base class for bilinear form integrators.
    */
+  template <class Derived>
   class BilinearFormIntegratorBase;
+
+  class LocalBilinearFormIntegratorBase;
+
+  class GlobalBilinearFormIntegratorBase;
 
   template <class Derived>
   class FiniteElementBase;

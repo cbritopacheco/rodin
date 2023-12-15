@@ -2,45 +2,45 @@
 
 namespace Rodin::Variational
 {
-  FormLanguage::List<BilinearFormIntegratorBase>
+  FormLanguage::List<LocalBilinearFormIntegratorBase>
   operator-(
-      const BilinearFormIntegratorBase& lhs,
-      const BilinearFormIntegratorBase& rhs)
+      const LocalBilinearFormIntegratorBase& lhs,
+      const LocalBilinearFormIntegratorBase& rhs)
   {
-    FormLanguage::List<BilinearFormIntegratorBase> res;
+    FormLanguage::List<LocalBilinearFormIntegratorBase> res;
     res.add(lhs);
     res.add(UnaryMinus(rhs));
     return res;
   }
 
-  FormLanguage::List<BilinearFormIntegratorBase>
+  FormLanguage::List<LocalBilinearFormIntegratorBase>
   operator-(
-      const BilinearFormIntegratorBase& lhs,
-      const FormLanguage::List<BilinearFormIntegratorBase>& rhs)
+      const LocalBilinearFormIntegratorBase& lhs,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& rhs)
   {
-    FormLanguage::List<BilinearFormIntegratorBase> res;
+    FormLanguage::List<LocalBilinearFormIntegratorBase> res;
     res.add(lhs);
     res.add(UnaryMinus(rhs));
     return res;
   }
 
-  FormLanguage::List<BilinearFormIntegratorBase>
+  FormLanguage::List<LocalBilinearFormIntegratorBase>
   operator-(
-      const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
-      const BilinearFormIntegratorBase& rhs)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lhs,
+      const LocalBilinearFormIntegratorBase& rhs)
   {
-    FormLanguage::List<BilinearFormIntegratorBase> res;
+    FormLanguage::List<LocalBilinearFormIntegratorBase> res;
     res.add(lhs);
     res.add(UnaryMinus(rhs));
     return res;
   }
 
-  FormLanguage::List<BilinearFormIntegratorBase>
+  FormLanguage::List<LocalBilinearFormIntegratorBase>
   operator-(
-      const FormLanguage::List<BilinearFormIntegratorBase>& lhs,
-      const FormLanguage::List<BilinearFormIntegratorBase>& rhs)
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& lhs,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase>& rhs)
   {
-    FormLanguage::List<BilinearFormIntegratorBase> res;
+    FormLanguage::List<LocalBilinearFormIntegratorBase> res;
     res.add(lhs);
     res.add(UnaryMinus(rhs));
     return res;

@@ -29,13 +29,15 @@ static constexpr double lambda = 0.5769;
 static constexpr size_t maxIt = 300;
 static constexpr double eps = 1e-12;
 static constexpr double hgrad = 1.6;
-static constexpr double ell = 0.2;
+static constexpr double ell = 0.1;
 static double elementStep = 0.5;
-static double hausd = 0.01;
-static double hmax = 0.2;
+static double hmax = 0.1;
 static double hmin = 0.1 * hmax;
+static double hausd = 0.5 * hmin;
 static size_t hmaxIt = maxIt / 2;
-static double alpha = 4 * hmax;
+const Scalar k = 4;
+const Scalar dt = k * (hmax - hmin);
+static double alpha = dt;
 
 using FES = VectorP1<Context::Sequential>;
 
@@ -68,10 +70,7 @@ int main(int, char**)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
   // Solver
-  // Eigen::ConjugateGradient<Math::SparseMatrix> ecg;
-  // Solver::EigenSolver<
-  //   Eigen::ConjugateGradient<Math::SparseMatrix>, Math::SparseMatrix, Math::Vector> solver(ecg);
-  Solver::CG solver;
+  Solver::SparseLU solver;
 
   // Optimization loop
   std::vector<double> obj;
@@ -83,12 +82,16 @@ int main(int, char**)
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
-    trimmed.save("trimmed.mesh");
+    trimmed.save("Omega.mesh");
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = th.getSpaceDimension();
     P1 sh(th);
     P1 vh(th, d);
+
+    Alert::Info() << "   | Distancing domain." << Alert::Raise;
+    auto dist = MMG::Distancer(sh).setInteriorDomain(Interior)
+                                  .distance(th);
 
     P1 shInt(trimmed);
     P1 vhInt(trimmed, d);
@@ -117,11 +120,12 @@ int main(int, char**)
     TrialFunction g(vh);
     TestFunction  w(vh);
     Problem hilbert(g, w);
-    hilbert = Integral(alpha * Jacobian(g), Jacobian(w))
+    hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     hilbert.solve(solver);
+
     auto& dJ = g.getSolution();
 
     // Update objective
@@ -130,21 +134,13 @@ int main(int, char**)
     fObj << objective << "\n";
     fObj.flush();
     Alert::Info() << "   | Objective: " << obj.back() << Alert::Raise;
-    Alert::Info() << "   | Distancing domain." << Alert::Raise;
-
-    P1 dh(th);
-    auto dist = MMG::Distancer(dh).setInteriorDomain(Interior)
-                                  .distance(th);
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
     GridFunction norm(sh);
     norm = Frobenius(dJ);
     dJ /= norm.max();
-    th.save("dJ.mesh");
-    dJ.save("dJ.gf");
-    const Scalar k = 0.5 * (hmax + hmin);
-    const Scalar dt = 2 * k;
+
     MMG::Advect(dist, dJ).step(dt);
 
     // Recover the implicit domain
@@ -152,8 +148,10 @@ int main(int, char**)
 
     th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
                                     .split(Exterior, {Interior, Exterior})
-                                    .setRMC(1e-6)
+                                    .setRMC(1e-5)
                                     .setHMax(hmax)
+                                    .setHMin(hmin)
+                                    .setHausdorff(hausd)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)
@@ -164,8 +162,6 @@ int main(int, char**)
                     .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
-
-    th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

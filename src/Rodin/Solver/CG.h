@@ -82,9 +82,14 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::SparseMatrix, Eigen::Lower | Eigen::Upper, Eigen::IdentityPreconditioner> m_solver;
+        Math::SparseMatrix, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
+  /**
+   * @ingroup CGSpecializations
+   * @brief Conjugate gradient solver for self-adjoint problems, for use with
+   * Math::Matrix and Math::Vector.
+   */
   template <>
   class CG<Math::Matrix, Math::Vector> final
     : public SolverBase<Math::Matrix, Math::Vector>
@@ -131,7 +136,7 @@ namespace Rodin::Solver
 
     private:
       Eigen::ConjugateGradient<
-        Math::Matrix, Eigen::Lower | Eigen::Upper, Eigen::IdentityPreconditioner> m_solver;
+        Math::Matrix, Eigen::Lower | Eigen::Upper> m_solver;
   };
 
 }

@@ -18,7 +18,7 @@
 namespace Rodin::Assembly
 {
   template <class TrialFES, class TestFES, class OperatorType>
-  class AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
+  class AssemblyBase<OperatorType, Variational::BilinearForm<TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
@@ -27,7 +27,8 @@ namespace Rodin::Assembly
         const Geometry::MeshBase& mesh;
         const TrialFES& trialFES;
         const TestFES& testFES;
-        FormLanguage::List<Variational::BilinearFormIntegratorBase>& bfis;
+        FormLanguage::List<Variational::LocalBilinearFormIntegratorBase>& lbfis;
+        FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase>& gbfis;
       };
 
       AssemblyBase() = default;
@@ -42,7 +43,7 @@ namespace Rodin::Assembly
   };
 
   template <class FES, class VectorType>
-  class AssemblyBase<Variational::LinearForm<FES, VectorType>>
+  class AssemblyBase<VectorType, Variational::LinearForm<FES, VectorType>>
     : public FormLanguage::Base
   {
     public:

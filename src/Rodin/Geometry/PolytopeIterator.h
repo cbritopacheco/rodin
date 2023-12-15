@@ -19,25 +19,21 @@
 
 namespace Rodin::Geometry
 {
-  /**
-   * @brief Represents an iterator over a set of polytopes of a mesh.
-   *
-   * @warning The PolytopeIterator class is not thread safe, i.e. only one
-   * thread should have access to one particular instance of the iterator at a
-   * time.
-   */
-  class PolytopeIterator
+  template <class T, class Derived>
+  class PolytopeIteratorBase
   {
     public:
-      PolytopeIterator() = default;
+      PolytopeIteratorBase() = default;
 
-      PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
+      PolytopeIteratorBase(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen)
+        : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
+      {}
 
-      PolytopeIterator(const PolytopeIterator&) = delete;
+      PolytopeIteratorBase(const PolytopeIterator&) = delete;
 
-      PolytopeIterator(PolytopeIterator&&) = default;
+      PolytopeIteratorBase(PolytopeIteratorBase&&) = default;
 
-      PolytopeIterator& operator=(PolytopeIterator&&) = default;
+      PolytopeIteratorBase& operator=(PolytopeIteratorBase&&) = default;
 
       inline
       operator bool() const
@@ -45,15 +41,74 @@ namespace Rodin::Geometry
         return !end();
       }
 
-      bool end() const;
+      inline
+      bool end() const
+      {
+        return getIndexGenerator().end();
+      }
 
-      PolytopeIterator& operator++();
+      Derived& operator++()
+      {
+        ++getIndexGenerator();
+        m_dirty = true;
+        return static_cast<Derived&>(*this);
+      }
 
-      const Polytope& operator*() const noexcept;
+      const T& operator*() const noexcept
+      {
+        if (!m_polytope.read() || m_dirty.read())
+        {
+          T* polytope = generate();
+          m_polytope.write(
+              [&](auto& obj)
+              {
+                obj.reset(polytope);
+              });
+        }
+        m_dirty.write(
+            [](auto& obj)
+            {
+              obj = false;
+            });
+        return *(m_polytope.read());
+      }
 
-      const Polytope* operator->() const noexcept;
+      const T* operator->() const noexcept
+      {
+        if (!m_polytope.read() || m_dirty.read())
+        {
+          T* polytope = generate();
+          m_polytope.write(
+              [&](auto& obj)
+              {
+                obj.reset(polytope);
+              });
+        }
+        m_dirty.write(
+            [](auto& obj)
+            {
+              obj = false;
+            });
+        return m_polytope.read().get();
+      }
 
-      Polytope* release();
+      T* release()
+      {
+        if (!m_polytope.read() || m_dirty.read())
+        {
+          return generate();
+        }
+        else
+        {
+          T* polytope = nullptr;
+          m_polytope.write(
+              [&](auto& obj)
+              {
+                polytope = obj.release();
+              });
+          return polytope;
+        }
+      }
 
       inline
       constexpr
@@ -76,8 +131,7 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
-    private:
-      Polytope* generate() const;
+      virtual T* generate() const = 0;
 
       IndexGeneratorBase& getIndexGenerator()
       {
@@ -85,11 +139,37 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
+    private:
       size_t m_dimension;
       std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable Threads::Unsafe<bool> m_dirty;
-      mutable Threads::Unsafe<std::unique_ptr<Polytope>> m_polytope;
+      mutable Threads::Unsafe<std::unique_ptr<T>> m_polytope;
+  };
+
+  /**
+   * @brief Represents an iterator over a set of polytopes of a mesh.
+   *
+   * @warning The PolytopeIterator class is not thread safe, i.e. only one
+   * thread should have access to one particular instance of the iterator at a
+   * time.
+   */
+  class PolytopeIterator : public PolytopeIteratorBase<Polytope, PolytopeIterator>
+  {
+    public:
+      using Parent = PolytopeIteratorBase<Polytope, PolytopeIterator>;
+
+      PolytopeIterator() = default;
+
+      PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
+
+      PolytopeIterator(const PolytopeIterator&) = delete;
+
+      PolytopeIterator(PolytopeIterator&& other) = default;
+
+      PolytopeIterator& operator=(PolytopeIterator&&) = default;
+
+      Polytope* generate() const override;
   };
 
   /**
@@ -98,9 +178,11 @@ namespace Rodin::Geometry
    * @warning The CellIterator class is not thread safe, i.e. only one thread
    * should have access to one particular instance of the iterator at a time.
    */
-  class CellIterator
+  class CellIterator : public PolytopeIteratorBase<Cell, CellIterator>
   {
     public:
+      using Parent = PolytopeIteratorBase<Cell, CellIterator>;
+
       CellIterator() = default;
 
       CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
@@ -111,51 +193,7 @@ namespace Rodin::Geometry
 
       CellIterator& operator=(CellIterator&&) = default;
 
-      inline
-      operator bool() const
-      {
-        return !end();
-      }
-
-      bool end() const;
-
-      Cell* release();
-
-      CellIterator& operator++();
-
-      const Cell& operator*() const noexcept;
-
-      const Cell* operator->() const noexcept;
-
-      size_t getDimension() const;
-
-      inline
-      const MeshBase& getMesh() const
-      {
-        assert(m_mesh);
-        return m_mesh->get();
-      }
-
-      inline
-      const IndexGeneratorBase& getIndexGenerator() const
-      {
-        assert(m_gen);
-        return *m_gen;
-      }
-
-    private:
-      Cell* generate() const;
-
-      IndexGeneratorBase& getIndexGenerator()
-      {
-        assert(m_gen);
-        return *m_gen;
-      }
-
-      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
-      std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable Threads::Unsafe<bool> m_dirty;
-      mutable Threads::Unsafe<std::unique_ptr<Cell>> m_polytope;
+      Cell* generate() const override;
   };
 
   /**
@@ -164,9 +202,11 @@ namespace Rodin::Geometry
    * @warning The FaceIterator class is not thread safe, i.e. only one thread
    * should have access to one particular instance of the iterator at a time.
    */
-  class FaceIterator
+  class FaceIterator : public PolytopeIteratorBase<Face, FaceIterator>
   {
     public:
+      using Parent = PolytopeIteratorBase<Face, FaceIterator>;
+
       FaceIterator() = default;
 
       FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
@@ -177,51 +217,7 @@ namespace Rodin::Geometry
 
       FaceIterator& operator=(FaceIterator&&) = default;
 
-      inline
-      operator bool() const
-      {
-        return !end();
-      }
-
-      bool end() const;
-
-      Face* release();
-
-      FaceIterator& operator++();
-
-      const Face& operator*() const noexcept;
-
-      const Face* operator->() const noexcept;
-
-      size_t getDimension() const;
-
-      inline
-      const MeshBase& getMesh() const
-      {
-        assert(m_mesh);
-        return m_mesh->get();
-      }
-
-      inline
-      const IndexGeneratorBase& getIndexGenerator() const
-      {
-        assert(m_gen);
-        return *m_gen;
-      }
-
-    private:
-      Face* generate() const;
-
-      IndexGeneratorBase& getIndexGenerator()
-      {
-        assert(m_gen);
-        return *m_gen;
-      }
-
-      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
-      std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable Threads::Unsafe<bool> m_dirty;
-      mutable Threads::Unsafe<std::unique_ptr<Face>> m_polytope;
+      Face* generate() const override;
   };
 
   /**
@@ -230,9 +226,11 @@ namespace Rodin::Geometry
    * @warning The VertexIterator class is not thread safe, i.e. only one thread
    * should have access to one particular instance of the iterator at a time.
    */
-  class VertexIterator
+  class VertexIterator : public PolytopeIteratorBase<Vertex, VertexIterator>
   {
     public:
+      using Parent = PolytopeIteratorBase<Vertex, VertexIterator>;
+
       VertexIterator() = default;
 
       VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
@@ -243,51 +241,7 @@ namespace Rodin::Geometry
 
       VertexIterator& operator=(VertexIterator&&) = default;
 
-      inline
-      operator bool() const
-      {
-        return !end();
-      }
-
-      bool end() const;
-
-      Vertex* release();
-
-      VertexIterator& operator++();
-
-      const Vertex& operator*() const noexcept;
-
-      const Vertex* operator->() const noexcept;
-
-      constexpr size_t getDimension() const;
-
-      inline
-      const MeshBase& getMesh() const
-      {
-        assert(m_mesh);
-        return m_mesh->get();
-      }
-
-      inline
-      const IndexGeneratorBase& getIndexGenerator() const
-      {
-        assert(m_gen);
-        return *m_gen;
-      }
-
-    private:
-      Vertex* generate() const;
-
-      IndexGeneratorBase& getIndexGenerator()
-      {
-        assert(m_gen);
-        return *m_gen;
-      }
-
-      std::optional<std::reference_wrapper<const MeshBase>> m_mesh;
-      std::unique_ptr<IndexGeneratorBase> m_gen;
-      mutable Threads::Unsafe<bool> m_dirty;
-      mutable Threads::Unsafe<std::unique_ptr<Vertex>> m_vertex;
+      Vertex* generate() const override;
   };
 }
 

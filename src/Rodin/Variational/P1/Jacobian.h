@@ -108,7 +108,7 @@ namespace Rodin::Variational
                 }
               }
               UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
+                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
             }
             return;
           }
