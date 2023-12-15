@@ -149,7 +149,7 @@
 <span class="w">    </span><span class="n">trimmed</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;   | Building finite element spaces.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">th</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">();</span>
 <span class="w">    </span><span class="n">P1</span><span class="w"> </span><span class="n">sh</span><span class="p">(</span><span class="n">th</span><span class="p">);</span>
 <span class="w">    </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">th</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span>
 
