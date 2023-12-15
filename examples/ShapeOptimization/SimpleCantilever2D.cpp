@@ -100,7 +100,6 @@ int main(int, char**)
     const auto& dJ = g.getSolution();
     Omega.save("g.mesh");
     g.getSolution().save("g.gf");
-    std::cout << hilbert.getStiffnessOperator().nonZeros() << std::endl;
 
     // Update objective
     const Scalar objective = compliance(u.getSolution()) + ell * Omega.getVolume();
