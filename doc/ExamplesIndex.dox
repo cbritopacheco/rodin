@@ -22,9 +22,9 @@
 
   | Equation                                        | Link to example |
   | ----------------------------------------------- | --------------- |
-  | @f$ - \Delta u = f @f$                          | @subpage examples-pdes-poisson |
-  | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @subpage examples-pdes-elasticity |
-  | @f$ - \Delta u + u = f \text{ on } S^2 \subset \mathbb{R}^3 @f$ | @subpage examples-pdes-surface_meshes |
+  | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
+  | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
+  | @f$ - \Delta u + u = f \text{ on } S^2 \subset \mathbb{R}^3 @f$ | @ref examples-pdes-surface_meshes |
 
   @subsection examples-index-solver Solving linear systems
 
