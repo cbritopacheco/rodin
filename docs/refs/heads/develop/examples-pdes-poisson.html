@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Examples and tutorials &raquo; Solving the Poisson equation | Rodin</title>
+  <title>Partial differential equations &raquo; Solving the Poisson equation | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -65,7 +65,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
+          <span class="m-breadcrumb"><a href="examples-pdes-index.html">Partial differential equations</a> &raquo;</span>
           Solving the Poisson equation
         </h1>
         <p>Resolution of the Poisson equation using <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
@@ -513,9 +513,9 @@ $ b(v) $
 </svg></div><p>With the problem defined, we now need to solve the underlying linear system given by the associated stiffness matrix. There are many different types of solvers in <a href="namespace_rodin.html" class="m-doc">Rodin</a> but for this example we will utilize the <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Conjugate Gradient (CG)</a> solver, as shown in the following code snippet:</p><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">().</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="n">printIterations</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
-<span class="w">            </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">poisson</span><span class="p">);</span></pre><p>This piece of code creates a CG object in place, while setting some parameters, and finally calling the solve() method on the problem.</p><p>Ultimately, with the problem solved, we will want to visualize our solution. We can do this by saving both the solution and mesh objects to file, and then using <a href="https://glvis.org/">GLVis</a> to view the results.</p><pre class="m-code"><span class="n">u</span><span class="p">.</span><span class="n">getGridFunction</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">poisson</span><span class="p">);</span></pre><p>This piece of code creates a CG object in place, while setting some parameters, and finally calling the solve method on the problem.</p><p>Ultimately, with the problem solved, we will want to visualize our solution. We can do this by saving both the solution and mesh objects to file, and then using <a href="https://glvis.org/">GLVis</a> to view the results.</p><pre class="m-code"><span class="n">u</span><span class="p">.</span><span class="n">getGridFunction</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">);</span>
 <span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">);</span></pre><p>To visualize the results, we can call GLVis from the command line:</p><pre class="m-code">glvis<span class="w"> </span>-m<span class="w"> </span>Omega.mesh<span class="w"> </span>-g<span class="w"> </span>u.gf</pre><p>The full source code may be found below:</p><ul><li><a href="_p_d_es_2_poisson_8cpp-example.html" class="m-doc">Poisson.cpp</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="examples-index.html" class="m-doc">Examples and tutorials</a> | <a href="examples-pdes-elasticity.html" class="m-doc">Solving the elasticity equation &raquo;</a></div>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-pdes-index.html" class="m-doc">Partial differential equations</a> | <a href="examples-pdes-elasticity.html" class="m-doc">Solving the elasticity equation &raquo;</a></div>
       </div>
     </div>
   </div>
