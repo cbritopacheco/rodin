@@ -77,7 +77,7 @@ int main(int, char**)
     trimmed.save("Omega.mesh");
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
-    const size_t d = 2;
+    const size_t d = th.getSpaceDimension();
     P1 sh(th);
     P1 vh(th, d);
 

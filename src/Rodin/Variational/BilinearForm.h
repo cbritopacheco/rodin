@@ -13,7 +13,6 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
-#include "Rodin/Assembly/Multithreaded.h"
 
 #include "ForwardDecls.h"
 #include "TrialFunction.h"

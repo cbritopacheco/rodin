@@ -66,7 +66,7 @@ int main(int, char**)
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     // Finite element spaces
-    int d = 2;
+    int d = Omega.getSpaceDimension();
     P1 sh(Omega);
     P1 vh(Omega, d);
 
@@ -81,8 +81,6 @@ int main(int, char**)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     elasticity.solve(solver);
-    Omega.save("u.mesh");
-    u.getSolution().save("u.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
@@ -98,8 +96,6 @@ int main(int, char**)
             + DirichletBC(g, VectorFunction{0, 0}).on({GammaD, GammaN});
     hilbert.solve(solver);
     const auto& dJ = g.getSolution();
-    Omega.save("g.mesh");
-    g.getSolution().save("g.gf");
 
     // Update objective
     const Scalar objective = compliance(u.getSolution()) + ell * Omega.getVolume();

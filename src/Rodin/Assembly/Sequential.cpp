@@ -4,45 +4,41 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Variational/FiniteElementSpace.h"
-#include "Rodin/Variational/LinearFormIntegrator.h"
-#include "Rodin/Variational/BilinearFormIntegrator.h"
-
 #include "Sequential.h"
 
-namespace Rodin::Assembly
+namespace Rodin::Assembly::Internal
 {
-  namespace Internal
+  SequentialIteration::SequentialIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region region)
+    : m_mesh(mesh), m_region(region)
+  {}
+
+  Geometry::PolytopeIterator SequentialIteration::getIterator() const
   {
-    Geometry::PolytopeIterator getRegionIterator(
-        const Geometry::MeshBase& mesh, Variational::Integrator::Region region)
+    Geometry::PolytopeIterator it;
+    switch (m_region)
     {
-      Geometry::PolytopeIterator it;
-      switch (region)
+      case Variational::Integrator::Region::Cells:
       {
-        case Variational::Integrator::Region::Cells:
-        {
-          it = mesh.getCell();
-          break;
-        }
-        case Variational::Integrator::Region::Faces:
-        {
-          it = mesh.getFace();
-          break;
-        }
-        case Variational::Integrator::Region::Boundary:
-        {
-          it = mesh.getBoundary();
-          break;
-        }
-        case Variational::Integrator::Region::Interface:
-        {
-          it = mesh.getInterface();
-          break;
-        }
+        it = m_mesh.get().getCell();
+        break;
       }
-      return it;
+      case Variational::Integrator::Region::Faces:
+      {
+        it = m_mesh.get().getFace();
+        break;
+      }
+      case Variational::Integrator::Region::Boundary:
+      {
+        it = m_mesh.get().getBoundary();
+        break;
+      }
+      case Variational::Integrator::Region::Interface:
+      {
+        it = m_mesh.get().getInterface();
+        break;
+      }
     }
+    return it;
   }
 }
 

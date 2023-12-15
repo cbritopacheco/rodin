@@ -15,14 +15,23 @@
 #include "AssemblyBase.h"
 #include "Kernels.h"
 
+namespace Rodin::Assembly::Internal
+{
+  class SequentialIteration
+  {
+    public:
+      SequentialIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region);
+
+      Geometry::PolytopeIterator getIterator() const;
+
+    private:
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      Variational::Integrator::Region m_region;
+  };
+}
+
 namespace Rodin::Assembly
 {
-  namespace Internal
-  {
-    Geometry::PolytopeIterator getRegionIterator(
-        const Geometry::MeshBase& mesh, Variational::Integrator::Region region);
-  }
-
   template <class TrialFES, class TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<Scalar>>,
@@ -60,7 +69,8 @@ namespace Rodin::Assembly
         for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
-          for (auto it = Internal::getRegionIterator(input.mesh, bfi.getRegion()); it; ++it)
+          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
@@ -77,13 +87,15 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          for (auto trIt = Internal::getRegionIterator(input.mesh, bfi.getTrialRegion()); trIt; ++trIt)
+          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
-            if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
+            if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              for (auto teIt = Internal::getRegionIterator(input.mesh, bfi.getTestRegion()); teIt; ++teIt)
+              Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
+              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
-                if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
+                if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
                   const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
                   const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
@@ -194,12 +206,13 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());;
+        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
         res.setZero();
         for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
-          for (auto it = Internal::getRegionIterator(input.mesh, bfi.getRegion()); it; ++it)
+          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
@@ -216,16 +229,18 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
-          for (auto teIt = Internal::getRegionIterator(input.mesh, bfi.getTestRegion()); teIt; ++teIt)
+          Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
+          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
             if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
-              for (auto trIt = Internal::getRegionIterator(input.mesh, bfi.getTrialRegion()); trIt; ++trIt)
+              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
                 if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
                   const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
+                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
                   bfi.assemble(*trIt, *teIt);
                   Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
@@ -276,7 +291,8 @@ namespace Rodin::Assembly
         for (auto& lfi : input.lfis)
         {
           const auto& attrs = lfi.getAttributes();
-          for (auto it = Internal::getRegionIterator(input.mesh, lfi.getRegion()); it; ++it)
+          Internal::SequentialIteration seq(input.mesh, lfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
           {
             if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
