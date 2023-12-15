@@ -19,28 +19,10 @@ Scalar K(const Point& x, const Point& y)
 }
 
 inline
-Scalar one(const Point& x, const Point& y)
-{
-  return 1;
-}
-// inline
-// Scalar K(const Point& x, const Point& y)
-// {
-//   const Scalar n = (x - y).norm();
-//   return 1. / (4 * M_PI * (n * n * n));
-// }
-
-inline
-Scalar Ke(const Point& x, const Point& y)
-{
-  return 1. / (4 * M_PI * ((x - y).norm()));
-}
-
-inline
 Scalar exact(const Point& x)
 {
-  if (abs(1 - x.squaredNorm()) < 0.001)
-    return 4. / (M_PI * std::sqrt(abs(0.001)));
+  if (abs(1 - x.squaredNorm()) < 0.00001)
+    return 4. / (M_PI * std::sqrt(abs(0.00001)));
   else
     return 4. / (M_PI * std::sqrt(abs(1 - x.squaredNorm())));
 }
@@ -57,10 +39,11 @@ int main(int, char**)
   TestFunction  v(fes);
 
   DenseProblem eq(u, v);
-  eq = Integral(0.00001 * Grad(u), Grad(v))
-     + Integral(Potential(K, u), v)
-     - Integral(v)
-     ;
+  auto sf = Integral(Potential(K, u), v);
+  // eq = Integral(0.00001 * Grad(u), Grad(v))
+  //    + Integral(Potential(K, u), v)
+  //    - Integral(v)
+  //    ;
 
   std::cout << "assemblage\n";
   eq.assemble();

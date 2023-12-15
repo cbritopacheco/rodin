@@ -10,6 +10,8 @@
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
+#include "ForwardDecls.h"
+
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
 
@@ -251,14 +253,6 @@ namespace Rodin::Geometry
     flush();
     return *this;
   }
-
-#ifdef RODIN_USE_MPI
-  Mesh<Context::MPI>
-  Mesh<Context::Sequential>::parallelize(boost::mpi::communicator comm)
-  {
-    return Mesh<Context::MPI>(comm, *this);
-  }
-#endif
 
   Mesh<Context::Sequential>&
   Mesh<Context::Sequential>::setVertexCoordinates(Index idx, const Math::SpatialVector& coords)

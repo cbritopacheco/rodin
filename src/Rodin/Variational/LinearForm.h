@@ -91,9 +91,8 @@ namespace Rodin::Variational
       using VectorType = Math::Vector;
       using Parent = LinearFormBase<VectorType>;
 
-      using SequentialAssembly = Assembly::Sequential<LinearForm>;
-      using MultithreadedAssembly = Assembly::Multithreaded<LinearForm>;
-      using OpenMPAssembly = Assembly::OpenMP<LinearForm>;
+      using SequentialAssembly = Assembly::Sequential<VectorType, LinearForm>;
+      using MultithreadedAssembly = Assembly::Multithreaded<VectorType, LinearForm>;
 
       /**
        * @brief Constructs a linear form defined on some finite element
@@ -169,7 +168,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const Assembly::AssemblyBase<LinearForm>& getAssembly() const
+      const Assembly::AssemblyBase<VectorType, LinearForm>& getAssembly() const
       {
         assert(m_assembly);
         return *m_assembly;
@@ -262,7 +261,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const TestFunction<FES>> m_v;
-      std::unique_ptr<Assembly::AssemblyBase<LinearForm>> m_assembly;
+      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearForm>> m_assembly;
       FormLanguage::List<LinearFormIntegratorBase> m_lfis;
       VectorType m_vector;
   };

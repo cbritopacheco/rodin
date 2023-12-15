@@ -47,8 +47,6 @@ namespace Rodin::Variational
 
       virtual Type getType() const = 0;
 
-      virtual Region getRegion() const = 0;
-
       virtual Integrator* copy() const noexcept override = 0;
   };
 }

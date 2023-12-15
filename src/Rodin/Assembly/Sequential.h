@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_Sequential_H
-#define RODIN_ASSEMBLY_Sequential_H
+#ifndef RODIN_ASSEMBLY_SEQUENTIAL_H
+#define RODIN_ASSEMBLY_SEQUENTIAL_H
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -13,38 +13,23 @@
 
 #include "ForwardDecls.h"
 #include "AssemblyBase.h"
+#include "Kernels.h"
 
 namespace Rodin::Assembly
 {
   template <class TrialFES, class TestFES>
-  class Sequential<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
-    : public AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+  class Sequential<
+    std::vector<Eigen::Triplet<Scalar>>,
+    Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
+    : public AssemblyBase<
+        std::vector<Eigen::Triplet<Scalar>>,
+        Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>
   {
-    /**
-     * @internal
-     */
-    static void add(
-        std::vector<Eigen::Triplet<Scalar>>& out, const Math::Matrix& in,
-        const IndexArray& rows, const IndexArray& cols)
-    {
-      assert(rows.size() >= 0);
-      assert(cols.size() >= 0);
-      assert(in.rows() == rows.size());
-      assert(in.cols() == cols.size());
-      for (size_t i = 0; i < static_cast<size_t>(rows.size()); i++)
-      {
-        for (size_t j = 0; j < static_cast<size_t>(cols.size()); j++)
-        {
-          const Scalar s = in(i, j);
-          if (s != Scalar(0))
-            out.emplace_back(rows(i), cols(j), s);
-        }
-      }
-    }
-
     public:
       using Parent =
-        AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>;
+        AssemblyBase<
+          std::vector<Eigen::Triplet<Scalar>>,
+          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>>;
       using Input = typename Parent::Input;
       using OperatorType = std::vector<Eigen::Triplet<Scalar>>;
 
@@ -66,7 +51,7 @@ namespace Rodin::Assembly
       {
         std::vector<Eigen::Triplet<Scalar>> res;
         res.reserve(input.testFES.getSize() * std::log(input.trialFES.getSize()));
-        for (auto& bfi : input.bfis)
+        for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
@@ -82,7 +67,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -98,7 +83,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -114,7 +99,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -130,7 +115,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -151,11 +136,18 @@ namespace Rodin::Assembly
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
-  class Sequential<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
-    : public AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+  class Sequential<
+    Math::SparseMatrix,
+    Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
+    : public AssemblyBase<
+        Math::SparseMatrix,
+        Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>
   {
     public:
-      using Parent = AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>;
+      using Parent =
+        AssemblyBase<
+          Math::SparseMatrix,
+          Variational::BilinearForm<TrialFES, TestFES, Math::SparseMatrix>>;
       using Input = typename Parent::Input;
       using OperatorType = Math::SparseMatrix;
 
@@ -175,8 +167,14 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        Sequential<Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
-        const auto triplets = assembly.execute({ input.mesh, input.trialFES, input.testFES, input.bfis });
+        Sequential<
+          std::vector<Eigen::Triplet<Scalar>>,
+          Variational::BilinearForm<TrialFES, TestFES, std::vector<Eigen::Triplet<Scalar>>>> assembly;
+        const auto triplets =
+          assembly.execute({
+            input.mesh,
+            input.trialFES, input.testFES,
+            input.lbfis, input.gbfis });
         OperatorType res(input.testFES.getSize(), input.trialFES.getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
         return res;
@@ -193,22 +191,18 @@ namespace Rodin::Assembly
    * BilinearFormBase object.
    */
   template <class TrialFES, class TestFES>
-  class Sequential<Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
-    : public AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+  class Sequential<
+    Math::Matrix,
+    Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
+    : public AssemblyBase<
+        Math::Matrix,
+        Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>
   {
-    static void add(
-        Math::Matrix& out, const Math::Matrix& in,
-        const IndexArray& rows, const IndexArray& cols)
-    {
-      assert(rows.size() >= 0);
-      assert(cols.size() >= 0);
-      assert(in.rows() == rows.size());
-      assert(in.cols() == cols.size());
-      out(rows, cols).noalias() += in;
-    }
-
     public:
-      using Parent = AssemblyBase<Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>;
+      using Parent =
+        AssemblyBase<
+          Math::Matrix,
+          Variational::BilinearForm<TrialFES, TestFES, Math::Matrix>>;
       using Input = typename Parent::Input;
       using OperatorType = Math::Matrix;
 
@@ -230,7 +224,9 @@ namespace Rodin::Assembly
       {
         Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());;
         res.setZero();
-        for (auto& bfi : input.bfis)
+
+        // Integrate local BFIs
+        for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
           switch (bfi.getRegion())
@@ -246,7 +242,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -262,7 +258,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -278,7 +274,7 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
@@ -294,13 +290,23 @@ namespace Rodin::Assembly
                   const auto& trialDOFs = input.trialFES.getDOFs(d, i);
                   const auto& testDOFs = input.testFES.getDOFs(d, i);
                   bfi.assemble(*it);
-                  add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
               break;
             }
           }
         }
+
+        // // Integrate global BFIs
+        // for (auto& bfi : input.gbfis)
+        // {
+        //   const auto& attrs = bfi.getAttributes();
+        //   switch (bfi.getTestRegion())
+        //   {
+        //   }
+        // }
+
         return res;
       }
 
@@ -315,18 +321,11 @@ namespace Rodin::Assembly
    * object.
    */
   template <class FES>
-  class Sequential<Variational::LinearForm<FES, Math::Vector>>
-    : public AssemblyBase<Variational::LinearForm<FES, Math::Vector>>
+  class Sequential<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
+    : public AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>
   {
-
-    static void add(Math::Vector& out, const Math::Vector& in, const IndexArray& s)
-    {
-      assert(in.size() == s.size());
-      out(s).noalias() += in;
-    }
-
     public:
-      using Parent = AssemblyBase<Variational::LinearForm<FES, Math::Vector>>;
+      using Parent = AssemblyBase<Math::Vector, Variational::LinearForm<FES, Math::Vector>>;
       using Input = typename Parent::Input;
       using VectorType = Math::Vector;
 
@@ -363,7 +362,7 @@ namespace Rodin::Assembly
                   const size_t i = it->getIndex();
                   const auto& dofs = input.fes.getDOFs(d, i);
                   lfi.assemble(*it);
-                  add(res, lfi.getVector(), dofs);
+                  Kernels::add(res, lfi.getVector(), dofs);
                 }
               }
               break;
@@ -378,7 +377,7 @@ namespace Rodin::Assembly
                   const size_t i = it->getIndex();
                   const auto& dofs = input.fes.getDOFs(d, i);
                   lfi.assemble(*it);
-                  add(res, lfi.getVector(), dofs);
+                  Kernels::add(res, lfi.getVector(), dofs);
                 }
               }
               break;
@@ -393,7 +392,7 @@ namespace Rodin::Assembly
                   const size_t i = it->getIndex();
                   const auto& dofs = input.fes.getDOFs(d, i);
                   lfi.assemble(*it);
-                  add(res, lfi.getVector(), dofs);
+                  Kernels::add(res, lfi.getVector(), dofs);
                 }
               }
               break;
@@ -408,14 +407,13 @@ namespace Rodin::Assembly
                   const size_t i = it->getIndex();
                   const auto& dofs = input.fes.getDOFs(d, i);
                   lfi.assemble(*it);
-                  add(res, lfi.getVector(), dofs);
+                  Kernels::add(res, lfi.getVector(), dofs);
                 }
               }
               break;
             }
           }
         }
-
         return res;
       }
 

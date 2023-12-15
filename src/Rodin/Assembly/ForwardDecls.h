@@ -3,13 +3,13 @@
 
 namespace Rodin::Assembly
 {
-  template <class Operand>
+  template <class LinearAlgebraType, class ... Args>
   class AssemblyBase;
 
-  template <class Operand>
+  template <class LinearAlgebraType, class Operand>
   class Sequential;
 
-  template <class Operand>
+  template <class LinearAlgebraType, class Operand>
   class Multithreaded;
 
   template <class Operand>

@@ -41,7 +41,9 @@ namespace Rodin::Variational
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
   ::operator=(const ProblemBody<Math::SparseMatrix, Math::Vector>& rhs)
   {
-    for (auto& bfi : rhs.getBFIs())
+    for (auto& bfi : rhs.getLocalBFIs())
+      m_bilinearForm.add(bfi);
+    for (auto& bfi : rhs.getGlobalBFIs())
       m_bilinearForm.add(bfi);
 
     for (auto& lfi : rhs.getLFIs())
@@ -58,7 +60,7 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
-  ::operator+=(const BilinearFormIntegratorBase& rhs)
+  ::operator+=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(rhs);
     return *this;
@@ -67,7 +69,7 @@ namespace Rodin::Variational
   template <class TrialFES, class TestFES>
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>&
   Problem<TrialFES, TestFES, Context::Sequential, Math::SparseMatrix, Math::Vector>
-  ::operator-=(const BilinearFormIntegratorBase& rhs)
+  ::operator-=(const LocalBilinearFormIntegratorBase& rhs)
   {
     m_bilinearForm.add(UnaryMinus(rhs));
     return *this;

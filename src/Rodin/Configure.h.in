@@ -77,12 +77,12 @@
  * # Utilization
  *
  * @code{cpp}
- * #ifndef RODIN_USE_SUITESPARSE
- * // Code depending on SuiteSparse
+ * #ifndef RODIN_USE_UMFPACK
+ * // Code depending on UMFPACK
  * #endif
  * @endcode
  */
-#cmakedefine RODIN_USE_SUITESPARSE
+#cmakedefine RODIN_USE_UMFPACK
 
 /**
  * @ingroup RodinDirectives
