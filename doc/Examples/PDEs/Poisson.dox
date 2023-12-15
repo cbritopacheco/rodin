@@ -184,5 +184,5 @@ components:
   The full source code may be found below:
   -   @ref PDEs/Poisson.cpp "Poisson.cpp"
 
-  @example PDEs/Poisson.cpp
+  @example PDEs/Poisson.cpp @m_examplenavigation{examples-pdes-poisson,PDEs/} @m_footernavigation
   */
