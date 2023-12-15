@@ -161,7 +161,7 @@ namespace Rodin::Variational
       {
         switch (getRegion())
         {
-          case Region::Domain:
+          case Region::Cells:
           {
             auto lfi = Variational::Integral(m_v);
             if (m_attrs.size() > 0)

@@ -11,19 +11,34 @@ namespace Rodin::Threads
   class ThreadPool
   {
     public:
+      template <class T>
+      using MultiFuture = BS::multi_future<T>;
+
       ThreadPool(size_t numThreads)
         : m_pool(numThreads)
       {}
 
       template <class ... Args>
-      void pushLoop(Args... args)
+      auto submit(Args... args)
       {
-        m_pool.push_loop(std::forward<Args>(args)...);
+        return m_pool.submit(std::forward<Args>(args)...);
+      }
+
+      template <class ... Args>
+      auto pushLoop(Args... args)
+      {
+        return m_pool.push_loop(std::forward<Args>(args)...);
       }
 
       void waitForTasks()
       {
         m_pool.wait_for_tasks();
+      }
+
+      inline
+      auto getThreadCount() const
+      {
+        return m_pool.get_thread_count();
       }
 
     private:

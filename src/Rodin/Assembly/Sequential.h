@@ -15,6 +15,21 @@
 #include "AssemblyBase.h"
 #include "Kernels.h"
 
+namespace Rodin::Assembly::Internal
+{
+  class SequentialIteration
+  {
+    public:
+      SequentialIteration(const Geometry::MeshBase& mesh, Variational::Integrator::Region);
+
+      Geometry::PolytopeIterator getIterator() const;
+
+    private:
+      std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      Variational::Integrator::Region m_region;
+  };
+}
+
 namespace Rodin::Assembly
 {
   template <class TrialFES, class TestFES>
@@ -54,71 +69,40 @@ namespace Rodin::Assembly
         for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
-          switch (bfi.getRegion())
+          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
           {
-            case Variational::Integrator::Region::Domain:
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
-              for (auto it = input.mesh.getCell(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
+              const size_t d = it.getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
             }
-            case Variational::Integrator::Region::Faces:
+          }
+        }
+        for (auto& bfi : input.gbfis)
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
+          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          {
+            if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
             {
-              for (auto it = input.mesh.getFace(); !it.end(); ++it)
+              Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
+              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+                if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
                 {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
+                  const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
+                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                  bfi.assemble(*trIt, *teIt);
                   Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
                 }
               }
-              break;
-            }
-            case Variational::Integrator::Region::Boundary:
-            {
-              for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Interface:
-            {
-              for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
             }
           }
         }
@@ -222,91 +206,48 @@ namespace Rodin::Assembly
        */
       OperatorType execute(const Input& input) const override
       {
-        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());;
+        Math::Matrix res(input.testFES.getSize(), input.trialFES.getSize());
         res.setZero();
-
-        // Integrate local BFIs
         for (auto& bfi : input.lbfis)
         {
           const auto& attrs = bfi.getAttributes();
-          switch (bfi.getRegion())
+          Internal::SequentialIteration seq(input.mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
           {
-            case Variational::Integrator::Region::Domain:
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
-              for (auto it = input.mesh.getCell(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Faces:
-            {
-              for (auto it = input.mesh.getFace(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Boundary:
-            {
-              for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Interface:
-            {
-              for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& trialDOFs = input.trialFES.getDOFs(d, i);
-                  const auto& testDOFs = input.testFES.getDOFs(d, i);
-                  bfi.assemble(*it);
-                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
-                }
-              }
-              break;
+              const size_t d = it.getDimension();
+              const size_t i = it->getIndex();
+              const auto& trialDOFs = input.trialFES.getDOFs(d, i);
+              const auto& testDOFs = input.testFES.getDOFs(d, i);
+              bfi.assemble(*it);
+              Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
             }
           }
         }
-
-        // // Integrate global BFIs
-        // for (auto& bfi : input.gbfis)
-        // {
-        //   const auto& attrs = bfi.getAttributes();
-        //   switch (bfi.getTestRegion())
-        //   {
-        //   }
-        // }
-
+        for (auto& bfi : input.gbfis)
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
+          Internal::SequentialIteration trialseq(input.mesh, bfi.getTrialRegion());
+          Internal::SequentialIteration testseq(input.mesh, bfi.getTestRegion());
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          {
+            if (testAttrs.size() == 0 || testAttrs.count(teIt->getAttribute()))
+            {
+              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+              {
+                if (trialAttrs.size() == 0 || trialAttrs.count(trIt->getAttribute()))
+                {
+                  const auto& trialDOFs = input.trialFES.getDOFs(trIt.getDimension(), trIt->getIndex());
+                  const auto& testDOFs = input.testFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                  bfi.assemble(*trIt, *teIt);
+                  Kernels::add(res, bfi.getMatrix(), testDOFs, trialDOFs);
+                }
+              }
+            }
+          }
+        }
         return res;
       }
 
@@ -350,67 +291,16 @@ namespace Rodin::Assembly
         for (auto& lfi : input.lfis)
         {
           const auto& attrs = lfi.getAttributes();
-          switch (lfi.getRegion())
+          Internal::SequentialIteration seq(input.mesh, lfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
           {
-            case Variational::Integrator::Region::Domain:
+            if (attrs.size() == 0 || attrs.count(it->getAttribute()))
             {
-              for (auto it = input.mesh.getCell(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& dofs = input.fes.getDOFs(d, i);
-                  lfi.assemble(*it);
-                  Kernels::add(res, lfi.getVector(), dofs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Faces:
-            {
-              for (auto it = input.mesh.getFace(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& dofs = input.fes.getDOFs(d, i);
-                  lfi.assemble(*it);
-                  Kernels::add(res, lfi.getVector(), dofs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Boundary:
-            {
-              for (auto it = input.mesh.getBoundary(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& dofs = input.fes.getDOFs(d, i);
-                  lfi.assemble(*it);
-                  Kernels::add(res, lfi.getVector(), dofs);
-                }
-              }
-              break;
-            }
-            case Variational::Integrator::Region::Interface:
-            {
-              for (auto it = input.mesh.getInterface(); !it.end(); ++it)
-              {
-                if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-                {
-                  const size_t d = it->getDimension();
-                  const size_t i = it->getIndex();
-                  const auto& dofs = input.fes.getDOFs(d, i);
-                  lfi.assemble(*it);
-                  Kernels::add(res, lfi.getVector(), dofs);
-                }
-              }
-              break;
+              const size_t d = it.getDimension();
+              const size_t i = it->getIndex();
+              const auto& dofs = input.fes.getDOFs(d, i);
+              lfi.assemble(*it);
+              Kernels::add(res, lfi.getVector(), dofs);
             }
           }
         }

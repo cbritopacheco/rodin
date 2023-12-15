@@ -110,7 +110,7 @@ namespace Rodin::Variational
 
       inline Integrator::Region getRegion() const override
       {
-        return Integrator::Region::Domain;
+        return Integrator::Region::Cells;
       }
 
       inline Integral* copy() const noexcept override
@@ -168,7 +168,7 @@ namespace Rodin::Variational
 
       inline Integrator::Region getRegion() const override
       {
-        return Integrator::Region::Domain;
+        return Integrator::Region::Cells;
       }
 
       inline Integral* copy() const noexcept override
@@ -220,7 +220,7 @@ namespace Rodin::Variational
       inline
       Integrator::Region getRegion() const override
       {
-        return Integrator::Region::Domain;
+        return Integrator::Region::Cells;
       }
 
       inline Integral* copy() const noexcept override

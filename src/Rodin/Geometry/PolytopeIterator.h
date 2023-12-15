@@ -47,6 +47,7 @@ namespace Rodin::Geometry
         return getIndexGenerator().end();
       }
 
+      inline
       Derived& operator++()
       {
         ++getIndexGenerator();
@@ -54,6 +55,7 @@ namespace Rodin::Geometry
         return static_cast<Derived&>(*this);
       }
 
+      inline
       const T& operator*() const noexcept
       {
         if (!m_polytope.read() || m_dirty.read())
@@ -73,6 +75,7 @@ namespace Rodin::Geometry
         return *(m_polytope.read());
       }
 
+      inline
       const T* operator->() const noexcept
       {
         if (!m_polytope.read() || m_dirty.read())
@@ -92,6 +95,7 @@ namespace Rodin::Geometry
         return m_polytope.read().get();
       }
 
+      inline
       T* release()
       {
         if (!m_polytope.read() || m_dirty.read())
@@ -131,13 +135,14 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
-      virtual T* generate() const = 0;
-
+      inline
       IndexGeneratorBase& getIndexGenerator()
       {
         assert(m_gen);
         return *m_gen;
       }
+
+      virtual T* generate() const = 0;
 
     private:
       size_t m_dimension;
@@ -167,7 +172,18 @@ namespace Rodin::Geometry
 
       PolytopeIterator(PolytopeIterator&& other) = default;
 
-      PolytopeIterator& operator=(PolytopeIterator&&) = default;
+      inline
+      PolytopeIterator& operator=(PolytopeIterator&& other)
+      {
+        Parent::operator=(std::move(other));
+        return *this;
+      }
+
+      PolytopeIterator& operator=(CellIterator it);
+
+      PolytopeIterator& operator=(FaceIterator it);
+
+      PolytopeIterator& operator=(VertexIterator it);
 
       Polytope* generate() const override;
   };
